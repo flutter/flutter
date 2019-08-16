@@ -45,9 +45,25 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   // Whether this layer has any changes since its last call to [addToScene].
   //
-  // Initialized to true as a new layer has never called [addToScene].
+  // Initialized to true as a new layer has never called [addToScene], and is
+  // set to false after calling [addToScene]. The value can become true again
+  // if [markNeedsAddToScene] is called, or when [updateSubtreeNeedsAddToScene]
+  // is called on this layer or on an ancestor layer.
   //
-  // The final value is only valid after calling [updateSubtreeNeedsAddToScene].
+  // The values of [_needsAddToScene] in a tree of layers are said to be
+  // _consistent_ if every layer in the tree satisfies the following:
+  //
+  // - If [alwaysNeedsAddToScene] is true, then [_needsAddToScene] is also true.
+  // - If [_needsAddToScene] is true and [parent] is not null, then
+  //   `parent._needsAddToScene` is true.
+  //
+  // Typically, this value is set during the paint phase and during compositing.
+  // During the paint phase render objects create new layers and call
+  // [markNeedsAddToScene] on existing layers, causing this value to become
+  // true. After the paint phase the tree may be in an inconsistent state.
+  // During compositing [ContainerLayer.buildScene] first calls
+  // [updateSubtreeNeedsAddToScene] to bring this tree to a consistent state,
+  // then it calls [addToScene], and finally sets this field to false.
   bool _needsAddToScene = true;
 
   /// Mark that this layer has changed and [addToScene] needs to be called.
@@ -554,9 +570,9 @@ class ContainerLayer extends Layer {
   /// Consider this layer as the root and build a scene (a tree of layers)
   /// in the engine.
   // The reason this method is in the `ContainerLayer` class rather than
-  // `PipelineOwner` or other singleton level is because this method can beused
-  // both to render the whole layer tree (e.g. a normal application frame) as
-  // as to render a subtree (e.g. `OffsetLayer.toImage`).
+  // `PipelineOwner` or other singleton level is because this method can be used
+  // both to render the whole layer tree (e.g. a normal application frame) and
+  // to render a subtree (e.g. `OffsetLayer.toImage`).
   ui.Scene buildScene(ui.SceneBuilder builder) {
     List<PictureLayer> temporaryLayers;
     assert(() {

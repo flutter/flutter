@@ -4,7 +4,7 @@
 
 import 'dart:developer';
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show Scene, SceneBuilder, Window, window;
+import 'dart:ui' as ui show Scene, SceneBuilder, Window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show MouseTrackerAnnotation;
@@ -184,7 +184,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // Layer hit testing is done using device pixels, so we have to convert
     // the logical coordinates of the event location back to device pixels
     // here.
-    return layer.findAll<MouseTrackerAnnotation>(position * ui.window.devicePixelRatio);
+    return layer.findAll<MouseTrackerAnnotation>(position * configuration.devicePixelRatio);
   }
 
   @override
