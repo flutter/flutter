@@ -476,7 +476,7 @@ void fakeData(
       return Function.apply(argsAre, a);
     }
 
-    if (argsAre('git', 'log', '-n', '1', '--pretty=format:%ad', '--date=iso')) {
+    if (listArgsAre(FlutterVersion.gitLog(<String>['-n', '1', '--pretty=format:%ad', '--date=iso']))) {
       return success(localCommitDate.toString());
     } else if (argsAre('git', 'remote')) {
       return success('');
@@ -487,7 +487,8 @@ void fakeData(
         fail('Did not expect server ping');
       }
       return errorOnFetch ? failure(128) : success('');
-    } else if (remoteCommitDate != null && argsAre('git', 'log', '__flutter_version_check__/$channel', '-n', '1', '--pretty=format:%ad', '--date=iso')) {
+    // Careful here!  argsAre accepts 9 arguments and FlutterVersion.gitLog adds 4.
+    } else if (remoteCommitDate != null && listArgsAre(FlutterVersion.gitLog(<String>['__flutter_version_check__/$channel', '-n', '1', '--pretty=format:%ad', '--date=iso']))) {
       return success(remoteCommitDate.toString());
     }
 
@@ -510,12 +511,12 @@ void fakeData(
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(102, 0, 'branch', ''));
   when(pm.runSync(
-    <String>['git', 'log', '-n', '1', '--pretty=format:%H'],
+    FlutterVersion.gitLog(<String>['-n', '1', '--pretty=format:%H']),
     workingDirectory: anyNamed('workingDirectory'),
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(103, 0, '1234abcd', ''));
   when(pm.runSync(
-    <String>['git', 'log', '-n', '1', '--pretty=format:%ar'],
+    FlutterVersion.gitLog(<String>['-n', '1', '--pretty=format:%ar']),
     workingDirectory: anyNamed('workingDirectory'),
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(104, 0, '1 second ago', ''));
