@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
@@ -29,7 +28,7 @@ class PlistParser {
     assert(plistFilePath != null);
     const String executable = '/usr/bin/plutil';
     if (!fs.isFileSync(executable))
-      throw ToolExit('Could not find $executable');
+      throw const FileNotFoundException(executable);
     if (!fs.isFileSync(plistFilePath))
       return const <String, dynamic>{};
 

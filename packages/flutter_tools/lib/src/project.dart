@@ -360,10 +360,15 @@ class IosProject implements XcodeBasedProject {
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
   String get productBundleIdentifier {
-    final String fromPlist = PlistParser.instance.getValueFromFile(
-      hostInfoPlist.path,
-      PlistParser.kCFBundleIdentifierKey,
-    );
+    String fromPlist;
+    try {
+      fromPlist = PlistParser.instance.getValueFromFile(
+        hostInfoPlist.path,
+        PlistParser.kCFBundleIdentifierKey,
+      );
+    } on FileNotFoundException {
+      // iOS tooling not found; likely not running OSX; let [fromPlist] be null
+    }
     if (fromPlist != null && !fromPlist.contains('\$')) {
       // Info.plist has no build variables in product bundle ID.
       return fromPlist;
