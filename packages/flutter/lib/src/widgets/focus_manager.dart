@@ -1108,7 +1108,7 @@ class FocusManager with DiagnosticableTreeMixin {
   /// Remove a previously registered closure from the list of closures that the
   /// [FocusManager] notifies.
   void removeHighlightModeListener(ValueChanged<FocusHighlightMode> listener) {
-    _listeners.remove(listener);
+    _listeners?.remove(listener);
   }
 
   void _notifyHighlightModeListeners() {
