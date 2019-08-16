@@ -8,7 +8,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/commands/build_aot.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/ios/plist_utils.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -102,7 +102,7 @@ void main() {
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
     Logger: () => bufferLogger,
-    PlistUtils: () => mockPlistUtils,
+    PlistParser: () => mockPlistUtils,
   });
 
   testUsingContext('build aot validates and succeeds - same version of Xcode', () async {
@@ -132,7 +132,7 @@ void main() {
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
     Logger: () => bufferLogger,
-    PlistUtils: () => mockPlistUtils,
+    PlistParser: () => mockPlistUtils,
   });
 
   testUsingContext('build aot validates and succeeds when user has newer version of Xcode', () async {
@@ -162,9 +162,9 @@ void main() {
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
     Logger: () => bufferLogger,
-    PlistUtils: () => mockPlistUtils,
+    PlistParser: () => mockPlistUtils,
   });
 }
 
 class MockXcode extends Mock implements Xcode {}
-class MockPlistUtils extends Mock implements PlistUtils {}
+class MockPlistUtils extends Mock implements PlistParser {}

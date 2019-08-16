@@ -2,26 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../convert.dart';
 import '../globals.dart';
 
-class PlistUtils {
-  const PlistUtils();
+class PlistParser {
+  const PlistParser();
 
   static const String kCFBundleIdentifierKey = 'CFBundleIdentifier';
   static const String kCFBundleShortVersionStringKey = 'CFBundleShortVersionString';
   static const String kCFBundleExecutable = 'CFBundleExecutable';
 
-  static PlistUtils get instance => context.get<PlistUtils>() ?? const PlistUtils();
+  static PlistParser get instance => context.get<PlistParser>() ?? const PlistParser();
 
+  /// Parses the plist file located at [plistFilePath] and returns the
+  /// associated map of key/value property list pairs.
+  ///
+  /// If [plistFilePath] points to a non-existent file or a file that's not a
+  /// valid property list file, this will return null.
+  ///
+  /// The [plistFilePath] argument must not be null.
   Map<String, dynamic> parseFile(String plistFilePath) {
     assert(plistFilePath != null);
     const String executable = '/usr/bin/plutil';
     if (!fs.isFileSync(executable))
-      return null;
+      throw ToolExit('Could not find $executable');
     if (!fs.isFileSync(plistFilePath))
       return null;
 
@@ -39,6 +47,15 @@ class PlistUtils {
     }
   }
 
+  /// Parses the Plist file located at [plistFilePath] and returns the value
+  /// that's associated with the specified [key] within the property list.
+  ///
+  /// If [plistFilePath] points to a non-existent file or a file that's not a
+  /// valid property list file, this will return null.
+  ///
+  /// If [key] is not found in the property list, this will return null.
+  ///
+  /// The [plistFilePath] and [key] arguments must not be null.
   String getValueFromFile(String plistFilePath, String key) {
     assert(key != null);
     final Map<String, dynamic> parsed = parseFile(plistFilePath);

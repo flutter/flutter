@@ -19,7 +19,7 @@ import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'fuchsia/application_package.dart';
 import 'globals.dart';
-import 'ios/plist_utils.dart';
+import 'ios/plist_parser.dart';
 import 'linux/application_package.dart';
 import 'macos/application_package.dart';
 import 'project.dart';
@@ -308,9 +308,9 @@ abstract class IOSApp extends ApplicationPackage {
       printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
       return null;
     }
-    final String id = PlistUtils.instance.getValueFromFile(
+    final String id = PlistParser.instance.getValueFromFile(
       plistPath,
-      PlistUtils.kCFBundleIdentifierKey,
+      PlistParser.kCFBundleIdentifierKey,
     );
     if (id == null) {
       printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');

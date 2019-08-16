@@ -17,7 +17,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/fuchsia/application_package.dart';
-import 'package:flutter_tools/src/ios/plist_utils.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -189,7 +189,7 @@ void main() {
   group('PrebuiltIOSApp', () {
     final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      PlistUtils: () => MockPlistUtils(),
+      PlistParser: () => MockPlistUtils(),
       Platform: _kNoColorTerminalPlatform,
       OperatingSystemUtils: () => MockOperatingSystemUtils(),
     };
@@ -586,7 +586,7 @@ const String _aaptDataWithDistNamespace =
 ''';
 
 
-class MockPlistUtils extends Mock implements PlistUtils {
+class MockPlistUtils extends Mock implements PlistParser {
   @override
   String getValueFromFile(String path, String key) {
     final File file = fs.file(path);

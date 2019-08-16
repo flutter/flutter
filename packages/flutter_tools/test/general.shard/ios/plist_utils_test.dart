@@ -7,7 +7,7 @@ import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/ios/plist_utils.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -47,7 +47,7 @@ void main() {
       ProcessManager: () => const LocalProcessManager(),
     };
 
-    const PlistUtils plistUtils = PlistUtils();
+    const PlistParser plistUtils = PlistParser();
 
     group('getValueFromFile', () {
       File file;

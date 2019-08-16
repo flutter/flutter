@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/ios/plist_utils.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
@@ -289,7 +289,7 @@ apply plugin: 'kotlin-android'
       void testWithMocks(String description, Future<void> testMethod()) {
         testUsingContext(description, testMethod, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          PlistUtils: () => mockPlistUtils,
+          PlistParser: () => mockPlistUtils,
           XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
         });
       }
@@ -636,7 +636,7 @@ File androidPluginRegistrant(Directory parent) {
     .childFile('GeneratedPluginRegistrant.java');
 }
 
-class MockPlistUtils extends Mock implements PlistUtils {}
+class MockPlistUtils extends Mock implements PlistParser {}
 
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {
   @override

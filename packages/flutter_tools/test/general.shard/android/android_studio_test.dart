@@ -6,7 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/ios/plist_utils.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -27,7 +27,7 @@ const Map<String, dynamic> macStudioInfoPlist = <String, dynamic>{
   },
 };
 
-class MockPlistUtils extends Mock implements PlistUtils {}
+class MockPlistUtils extends Mock implements PlistParser {}
 
 Platform linuxPlatform() {
   return FakePlatform.fromPlatform(const LocalPlatform())
@@ -88,7 +88,7 @@ void main() {
       // Custom home paths are not supported on macOS nor Windows yet,
       // so we force the platform to fake Linux here.
       Platform: () => macPlatform(),
-      PlistUtils: () => plistUtils,
+      PlistParser: () => plistUtils,
     });
 
     testUsingContext('extracts custom paths for Android Studio downloaded by JetBrainsToolbox on Mac', () {
@@ -117,7 +117,7 @@ void main() {
       // Custom home paths are not supported on macOS nor Windows yet,
       // so we force the platform to fake Linux here.
       Platform: () => macPlatform(),
-      PlistUtils: () => plistUtils,
+      PlistParser: () => plistUtils,
     });
 
   });

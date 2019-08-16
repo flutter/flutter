@@ -10,7 +10,7 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
 import '../globals.dart';
-import '../ios/plist_utils.dart';
+import '../ios/plist_parser.dart';
 
 AndroidStudio get androidStudio => context.get<AndroidStudio>();
 
@@ -42,17 +42,17 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   factory AndroidStudio.fromMacOSBundle(String bundlePath) {
     String studioPath = fs.path.join(bundlePath, 'Contents');
     String plistFile = fs.path.join(studioPath, 'Info.plist');
-    Map<String, dynamic> plistValues = PlistUtils.instance.parseFile(plistFile);
+    Map<String, dynamic> plistValues = PlistParser.instance.parseFile(plistFile);
     // As AndroidStudio managed by JetBrainsToolbox could have a wrapper pointing to the real Android Studio.
     // Check if we've found a JetBrainsToolbox wrapper and deal with it properly.
     final String jetBrainsToolboxAppBundlePath = plistValues['JetBrainsToolboxApp'];
     if (jetBrainsToolboxAppBundlePath != null) {
       studioPath = fs.path.join(jetBrainsToolboxAppBundlePath, 'Contents');
       plistFile = fs.path.join(studioPath, 'Info.plist');
-      plistValues = PlistUtils.instance.parseFile(plistFile);
+      plistValues = PlistParser.instance.parseFile(plistFile);
     }
 
-    final String versionString = plistValues[PlistUtils.kCFBundleShortVersionStringKey];
+    final String versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey];
 
     Version version;
     if (versionString != null)
