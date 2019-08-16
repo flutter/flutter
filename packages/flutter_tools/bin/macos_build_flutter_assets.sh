@@ -73,7 +73,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     assemble                                                                \
     -dTargetPlatform=darwin-x64                                             \
     -dTargetFile="${target_path}"                                           \
-    -dBuildMode=debug                                                       \
+    -dBuildMode="${build_mode}"                                                     \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
-   debug_bundle_flutter_assets
+   release_bundle_flutter_assets

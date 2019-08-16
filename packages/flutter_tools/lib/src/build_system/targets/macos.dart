@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/build.dart';
 import 'package:pool/pool.dart';
 
 import '../../artifacts.dart';
@@ -128,6 +129,65 @@ class UnpackMacOS extends Target {
   }
 }
 
+class ReleaseUnpackMacOS extends Target {
+  const ReleaseUnpackMacOS();
+
+  @override
+  String get name => 'unpack_macos';
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+    Source.pattern('{FLUTTER_ROOT}/bin/cache/artifacts/engine/darwin-x64-release/FlutterMacOS.framework/FlutterMacOS'),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('$_kOutputPrefix/FlutterMacOS'),
+    // Headers
+    Source.pattern('$_kOutputPrefix/Headers/FlutterDartProject.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterEngine.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterViewController.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterBinaryMessenger.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterChannels.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterCodecs.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterMacros.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterPluginMacOS.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterPluginRegistrarMacOS.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterMacOS.h'),
+    // Modules
+    Source.pattern('$_kOutputPrefix/Modules/module.modulemap'),
+    // Resources
+    Source.pattern('$_kOutputPrefix/Resources/icudtl.dat'),
+    Source.pattern('$_kOutputPrefix/Resources/Info.plist'),
+    // Ignore Versions folder for now
+  ];
+
+  @override
+  List<Target> get dependencies => <Target>[];
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async {
+    const String basePath = '/Users/jonahwilliams/Documents/flutter/bin/cache/artifacts/engine/darwin-x64-release/FlutterMacOS.framework';
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final Directory targetDirectory = flutterProject.macos
+      .ephemeralDirectory
+      .childDirectory('FlutterMacOS.framework');
+    if (targetDirectory.existsSync()) {
+      targetDirectory.deleteSync(recursive: true);
+    }
+
+    final ProcessResult result = await processManager
+        .run(<String>['cp', '-R', basePath, targetDirectory.path]);
+    if (result.exitCode != 0) {
+      throw Exception(
+        'Failed to copy framework (exit ${result.exitCode}:\n'
+        '${result.stdout}\n---\n${result.stderr}',
+      );
+    }
+  }
+}
+
 /// Create an App.framework for debug macOS targets.
 ///
 /// This framework needs to exist for the Xcode project to link/bundle,
@@ -170,6 +230,46 @@ static const int Moo = 88;
 
   @override
   List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/App'),
+  ];
+}
+
+class ReleaseMacOSFramework extends Target {
+  const ReleaseMacOSFramework();
+
+  @override
+  String get name => 'release_macos_framework';
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async {
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final int result = await AOTSnapshotter(reportTimings: false).build(
+      bitcode: false,
+      buildMode: BuildMode.release,
+      mainPath: environment.buildDir.childFile('app.dill').path,
+      outputPath: flutterProject.macos.ephemeralDirectory.path,
+      platform: TargetPlatform.darwin_x64,
+      darwinArch: DarwinArch.x86_64,
+      packagesPath: flutterProject.packagesFile.path
+    );
+    if (result != 0) {
+      throw Exception('gen shapshot failed.');
+    }
+  }
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
   ];
 
@@ -274,5 +374,76 @@ class DebugBundleFlutterAssets extends Target {
     Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/kernel_blob.bin'),
     Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/vm_snapshot_data'),
     Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/isolate_snapshot_data'),
+  ];
+}
+
+/// Bundle the flutter assets into the App.framework.
+class ReleaseBundleFlutterAssets extends Target {
+  const ReleaseBundleFlutterAssets();
+
+  @override
+  String get name => 'release_bundle_flutter_assets';
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async {
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final Directory outputDirectory = flutterProject.macos
+        .ephemeralDirectory.childDirectory('App.framework');
+    if (!outputDirectory.existsSync()) {
+      throw Exception('App.framework must exist to bundle assets.');
+    }
+    // Copy assets into asset directory.
+    final Directory assetDirectory = outputDirectory.childDirectory('flutter_assets');
+    // We're not smart enough to only remove assets that are removed. If
+    // anything changes blow away the whole directory.
+    if (assetDirectory.existsSync()) {
+      assetDirectory.deleteSync(recursive: true);
+    }
+    assetDirectory.createSync();
+    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+    final int result = await assetBundle.build(
+      manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
+      packagesPath: environment.projectDir.childFile('.packages').path,
+    );
+    if (result != 0) {
+      throw Exception('Failed to create asset bundle: $result');
+    }
+    // Limit number of open files to avoid running out of file descriptors.
+    try {
+      final Pool pool = Pool(64);
+      await Future.wait<void>(
+        assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+          final PoolResource resource = await pool.request();
+          try {
+            final File file = fs.file(fs.path.join(assetDirectory.path, entry.key));
+            file.parent.createSync(recursive: true);
+            await file.writeAsBytes(await entry.value.contentsAsBytes());
+          } finally {
+            resource.release();
+          }
+        }));
+    } catch (err, st){
+      throw Exception('Failed to copy assets: $st');
+    }
+  }
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    ReleaseMacOSFramework(),
+    ReleaseUnpackMacOS(),
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.behavior(MacOSAssetBehavior())
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.behavior(MacOSAssetBehavior()),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/AssetManifest.json'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/FontManifest.json'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/LICENSE'),
   ];
 }
