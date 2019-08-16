@@ -678,7 +678,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   int _id;
   PlatformViewController _controller;
   bool _platformViewCreated = false;
-  PlatformViewSurface _surface;
+  Widget _surface;
 
   @override
   Widget build(BuildContext context) {
