@@ -2171,6 +2171,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// logical pixels. To get physical pixels, use [applyPaintTransform] from the
   /// [RenderView] to further transform the coordinate.
   Matrix4 getTransformTo(RenderObject ancestor) {
+    final bool ancestorSpecified = ancestor != null;
     assert(attached);
     if (ancestor == null) {
       final AbstractNode rootNode = owner.rootNode;
@@ -2182,6 +2183,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       assert(renderer != null); // Failed to find ancestor in parent chain.
       renderers.add(renderer);
     }
+    if (ancestorSpecified)
+      renderers.add(ancestor);
     final Matrix4 transform = Matrix4.identity();
     for (int index = renderers.length - 1; index > 0; index -= 1) {
       renderers[index].applyPaintTransform(renderers[index - 1], transform);
