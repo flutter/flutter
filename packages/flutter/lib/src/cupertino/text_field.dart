@@ -112,6 +112,22 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
   }
 
   @override
+  void onDoubleTapDown(TapDownDetails details) {
+    // See onSingleTapUp for a description of when events on prefix or suffix
+    // are ignored.
+    if (_shouldIgnore(_state._clearGlobalKey, details.globalPosition, true)) {
+      return;
+    }
+    if (_shouldIgnore(_state._prefixGlobalKey, details.globalPosition, _state.widget.prefixGesturesIgnored)) {
+      return;
+    }
+    if (_shouldIgnore(_state._suffixGlobalKey, details.globalPosition, _state.widget.suffixGesturesIgnored)) {
+      return;
+    }
+    super.onDoubleTapDown(details);
+  }
+
+  @override
   void onDragSelectionEnd(DragEndDetails details) {
     _state._requestKeyboard();
   }
