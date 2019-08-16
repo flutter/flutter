@@ -1116,7 +1116,10 @@ class TerminalHandler {
       lastReceivedCommand = command;
       await _commonTerminalInputHandler(command);
     } catch (error, st) {
-      printError('$error\n$st');
+      // Don't print stack traces for known error types.
+      if (error is! ToolExit) {
+        printError('$error\n$st');
+      }
       await _cleanUp(null);
       rethrow;
     } finally {

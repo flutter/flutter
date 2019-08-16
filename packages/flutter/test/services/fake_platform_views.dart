@@ -17,6 +17,8 @@ class FakePlatformViewController extends PlatformViewController {
     _id = id;
   }
 
+  bool disposed = false;
+
   /// Events that are dispatched;
   List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
 
@@ -32,6 +34,12 @@ class FakePlatformViewController extends PlatformViewController {
 
   void clearTestingVariables() {
     dispatchedPointerEvents.clear();
+    disposed = false;
+  }
+
+  @override
+  void dispose() {
+    disposed = true;
   }
 }
 

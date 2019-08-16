@@ -131,8 +131,8 @@ class IconButton extends StatelessWidget {
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   ///
-  /// The [iconSize], [padding], and [alignment] arguments must not be null (though
-  /// they each have default values).
+  /// The [iconSize], [padding], [autofocus], and [alignment] arguments must not
+  /// be null (though they each have default values).
   ///
   /// The [icon] argument must be specified, and is typically either an [Icon]
   /// or an [ImageIcon].
@@ -150,10 +150,12 @@ class IconButton extends StatelessWidget {
     this.disabledColor,
     @required this.onPressed,
     this.focusNode,
+    this.autofocus = false,
     this.tooltip,
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),
+       assert(autofocus != null),
        assert(icon != null),
        super(key: key);
 
@@ -256,13 +258,11 @@ class IconButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// An optional focus node to use for requesting focus when pressed.
-  ///
-  /// If not supplied, the button will create and host its own [FocusNode].
-  ///
-  /// If supplied, the given focusNode will be _hosted_ by this widget. See
-  /// [FocusNode] for more information on what that implies.
+  /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
 
   /// Text that describes the action that will occur when the button is pressed.
   ///
@@ -312,6 +312,7 @@ class IconButton extends StatelessWidget {
       enabled: onPressed != null,
       child: Focus(
         focusNode: focusNode,
+        autofocus: autofocus,
         child: InkResponse(
           onTap: onPressed,
           child: result,

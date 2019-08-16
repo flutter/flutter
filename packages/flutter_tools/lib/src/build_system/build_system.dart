@@ -485,16 +485,18 @@ class BuildSystem {
     // timestamps to track files, this leads to unecessary rebuilds if they
     // are included. Once all the places that write these files have been
     // tracked down and moved into assemble, these checks should be removable.
+    // We also remove files under .dart_tool, since these are intermediaries
+    // and don't need to be tracked by external systems.
     {
       buildInstance.inputFiles.removeWhere((String path, File file) {
-        return path.contains('pubspec.yaml') ||
-           path.contains('.flutter-plugins') ||
-           path.contains('xcconfig');
+        return path.contains('.flutter-plugins') ||
+                       path.contains('xcconfig') ||
+                     path.contains('.dart_tool');
       });
       buildInstance.outputFiles.removeWhere((String path, File file) {
-        return path.contains('pubspec.yaml') ||
-           path.contains('.flutter-plugins') ||
-           path.contains('xcconfig');
+        return path.contains('.flutter-plugins') ||
+                       path.contains('xcconfig') ||
+                     path.contains('.dart_tool');
       });
     }
     return BuildResult(
@@ -508,6 +510,7 @@ class BuildSystem {
     );
   }
 }
+
 
 /// An active instance of a build.
 class _BuildInstance {

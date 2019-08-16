@@ -153,7 +153,7 @@ ro.build.version.codename=REL
 typedef ProcessFactory = Process Function(List<String> command);
 
 /// A ProcessManager that starts Processes by delegating to a ProcessFactory.
-class MockProcessManager implements ProcessManager {
+class MockProcessManager extends Mock implements ProcessManager {
   ProcessFactory processFactory = (List<String> commands) => MockProcess();
   bool canRunSucceeds = true;
   bool runSucceeds = true;
@@ -180,9 +180,6 @@ class MockProcessManager implements ProcessManager {
     commands = command;
     return Future<Process>.value(processFactory(command));
   }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
 }
 
 /// A process that exits successfully with no output and ignores all input.
