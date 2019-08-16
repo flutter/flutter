@@ -1796,9 +1796,6 @@ class LeaderLayer extends ContainerLayer {
   Offset _lastOffset;
 
   @override
-  S find<S>(Offset regionOffset) => super.find<S>(regionOffset - offset);
-
-  @override
   @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     return super.findAnnotations<S>(result, regionOffset - offset, onlyFirst: onlyFirst);
@@ -2125,6 +2122,8 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// If not provided, offset defaults to [Offset.zero].
   ///
   /// Ignored if [size] is not set.
+  ///
+  /// Unlike [OffsetLayer], [offset] does not affect the layer's children.
   final Offset offset;
 
   /// Whether this layer should prevent layers visually behind it from being

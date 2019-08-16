@@ -7,8 +7,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'rendering_tester.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 void main() {
   test('ContainerLayer.findAll returns all results from its children', () {
@@ -123,10 +122,9 @@ void main() {
     expect(result, <int>[1000]);
   });
 
-  test('OffsetLayer.findAll respects offset (positive)', () {
-    // The target position would have fallen outside of child if not for the
-    // offset.
-    const Offset position = Offset(-5, 5);
+  test('OffsetLayer.findAll respects offset', () {
+    const Offset insidePosition = Offset(-5, 5);
+    const Offset outsidePosition = Offset(5, 5);
 
     final Layer root = _appendAnnotationIfNotOpaque(1000,
       _Layers(
@@ -137,26 +135,257 @@ void main() {
       ).build(),
     );
 
-    final List<int> result = root.findAll<int>(position);
-    expect(result, <int>[1]);
+    expect(root.findAll<int>(insidePosition), <int>[1]);
+    expect(root.findAll<int>(outsidePosition), <int>[1000]);
   });
 
-  test('OffsetLayer.findAll respects offset (negative)', () {
-    // The target position would have fallen inside of child if not for the
-    // offset.
-    const Offset position = Offset(5, 5);
+  test('ClipRectLayer.findAll respects clipRect', () {
+    const Offset insidePosition = Offset(11, 11);
+    const Offset outsidePosition = Offset(19, 19);
 
     final Layer root = _appendAnnotationIfNotOpaque(1000,
       _Layers(
-        OffsetLayer(offset: const Offset(-10, 0)),
+        ClipRectLayer(clipRect: const Offset(10, 10) & const Size(5, 5)),
+        children: <Object>[
+          _TestAnnotatedLayer(
+            1,
+            opaque: true,
+            size: const Size(10, 10),
+            offset: const Offset(10, 10),
+          ),
+        ]
+      ).build(),
+    );
+
+    expect(root.findAll<int>(insidePosition), <int>[1]);
+    expect(root.findAll<int>(outsidePosition), <int>[1000]);
+  });
+
+  test('ClipRRectLayer.findAll respects clipRRect', () {
+    // For a curve of radius 4 centered at (4, 4),
+    // location (1, 1) is outside, while (2, 2) is inside.
+    // Here we shift this RRect by (10, 10).
+    final RRect rrect = RRect.fromRectAndRadius(
+      const Offset(10, 10) & const Size(10, 10),
+      const Radius.circular(4),
+    );
+    const Offset insidePosition = Offset(12, 12);
+    const Offset outsidePosition = Offset(11, 11);
+
+    final Layer root = _appendAnnotationIfNotOpaque(1000,
+      _Layers(
+        ClipRRectLayer(clipRRect: rrect),
+        children: <Object>[
+          _TestAnnotatedLayer(
+            1,
+            opaque: true,
+            size: const Size(10, 10),
+            offset: const Offset(10, 10),
+          ),
+        ]
+      ).build(),
+    );
+
+    expect(root.findAll<int>(insidePosition), <int>[1]);
+    expect(root.findAll<int>(outsidePosition), <int>[1000]);
+  });
+
+  test('ClipPathLayer.findAll respects clipPath', () {
+    // For this triangle, location (1, 1) is inside, while (2, 2) is outside.
+    //         2
+    //    —————
+    //    |  /
+    //    | /
+    // 2  |/
+    final Path originalPath = Path();
+    originalPath.lineTo(2, 0);
+    originalPath.lineTo(0, 2);
+    originalPath.close();
+    // Shift this clip path by (10, 10).
+    final Path path = originalPath.shift(const Offset(10, 10));
+    const Offset insidePosition = Offset(11, 11);
+    const Offset outsidePosition = Offset(12, 12);
+
+    final Layer root = _appendAnnotationIfNotOpaque(1000,
+      _Layers(
+        ClipPathLayer(clipPath: path),
+        children: <Object>[
+          _TestAnnotatedLayer(
+            1,
+            opaque: true,
+            size: const Size(10, 10),
+            offset: const Offset(10, 10),
+          ),
+        ]
+      ).build(),
+    );
+
+    expect(root.findAll<int>(insidePosition), <int>[1]);
+    expect(root.findAll<int>(outsidePosition), <int>[1000]);
+  });
+
+  test('TransformLayer.findAll respects transform', () {
+    // Matrix `transform` enlarges the target by 2x, then shift it by
+    // (10, 10).
+    final Matrix4 transform = Matrix4.diagonal3Values(2, 2, 1)
+      ..setTranslation(Vector3(10, 10, 0));
+    // The original region is Offset(10, 10) & Size(10, 10)
+    // The transformed region is Offset(30, 30) & Size(20, 20)
+    const Offset insidePosition = Offset(40, 40);
+    const Offset outsidePosition = Offset(15, 15);
+
+    final Layer root = _appendAnnotationIfNotOpaque(1000,
+      _Layers(
+        TransformLayer(transform: transform),
+        children: <Object>[
+          _TestAnnotatedLayer(
+            1,
+            opaque: true,
+            size: const Size(10, 10),
+            offset: const Offset(10, 10),
+          ),
+        ]
+      ).build(),
+    );
+
+    expect(root.findAll<int>(insidePosition), <int>[1]);
+    expect(root.findAll<int>(outsidePosition), <int>[1000]);
+  });
+
+  test('TransformLayer.findAll skips when transform is irreversible', () {
+    final Matrix4 transform = Matrix4.diagonal3Values(1, 0, 1);
+
+    final Layer root = _appendAnnotationIfNotOpaque(1000,
+      _Layers(
+        TransformLayer(transform: transform),
+        children: <Object>[
+          _TestAnnotatedLayer(1, opaque: true),
+        ]
+      ).build(),
+    );
+
+    expect(root.findAll<int>(Offset.zero), <int>[1000]);
+  });
+
+  test('PhysicalModelLayer.findAll respects clipPath', () {
+    // For this triangle, location (1, 1) is inside, while (2, 2) is outside.
+    //         2
+    //    —————
+    //    |  /
+    //    | /
+    // 2  |/
+    final Path originalPath = Path();
+    originalPath.lineTo(2, 0);
+    originalPath.lineTo(0, 2);
+    originalPath.close();
+    // Shift this clip path by (10, 10).
+    final Path path = originalPath.shift(const Offset(10, 10));
+    const Offset insidePosition = Offset(11, 11);
+    const Offset outsidePosition = Offset(12, 12);
+
+    final Layer root = _appendAnnotationIfNotOpaque(1000,
+      _Layers(
+        PhysicalModelLayer(
+          clipPath: path,
+          elevation: 10,
+          color: const Color.fromARGB(0, 0, 0, 0),
+          shadowColor: const Color.fromARGB(0, 0, 0, 0),
+        ),
+        children: <Object>[
+          _TestAnnotatedLayer(
+            1,
+            opaque: true,
+            size: const Size(10, 10),
+            offset: const Offset(10, 10),
+          ),
+        ]
+      ).build(),
+    );
+
+    expect(root.findAll<int>(insidePosition), <int>[1]);
+    expect(root.findAll<int>(outsidePosition), <int>[1000]);
+  });
+
+
+  test('LeaderLayer.findAll respects offset', () {
+    const Offset insidePosition = Offset(-5, 5);
+    const Offset outsidePosition = Offset(5, 5);
+
+    final Layer root = _appendAnnotationIfNotOpaque(1000,
+      _Layers(
+        LeaderLayer(
+          link: LayerLink(),
+          offset: const Offset(-10, 0),
+        ),
         children: <Object>[
           _TestAnnotatedLayer(1, opaque: true, size: const Size(10, 10)),
         ]
       ).build(),
     );
 
-    final List<int> result = root.findAll<int>(position);
-    expect(result, <int>[1000]);
+    expect(root.findAll<int>(insidePosition), <int>[1]);
+    expect(root.findAll<int>(outsidePosition), <int>[1000]);
+  });
+
+  test('FollowerLayer.findAll respects parameters', () {
+    final LayerLink link = LayerLink();
+    final LayerLink unusedLink = LayerLink();
+    const Offset limbo = Offset(-1000, -1000);
+
+    final Layer root = _appendAnnotationIfNotOpaque(1000,
+      _Layers(
+        LeaderLayer(link: link, offset: const Offset(10, 10)),
+        children: <Object>[
+          // Follower 1: linked
+          _Layers(
+            FollowerLayer(
+              link: link,
+              linkedOffset: const Offset(100, 100),
+              unlinkedOffset: limbo,
+              showWhenUnlinked: true,
+            ),
+            children: <Object>[
+              _TestAnnotatedLayer(1, opaque: true, size: const Size(10, 10)),
+            ],
+          ),
+          // Follower 2: unlinked, showWhenUnlinked default (true)
+          _Layers(
+            FollowerLayer(
+              link: unusedLink,
+              linkedOffset: limbo,
+              unlinkedOffset: const Offset(200, 200),
+            ),
+            children: <Object>[
+              _TestAnnotatedLayer(2, opaque: true, size: const Size(10, 10)),
+            ],
+          ),
+          // Follower 3: unlinked, showWhenUnlinked false
+          _Layers(
+            FollowerLayer(
+              link: unusedLink,
+              linkedOffset: limbo,
+              unlinkedOffset: const Offset(300, 300),
+              showWhenUnlinked: false,
+            ),
+            children: <Object>[
+              _TestAnnotatedLayer(3, opaque: true, size: const Size(10, 10)),
+            ],
+          ),
+        ]
+      ).build(),
+    );
+
+    // Follower 1
+    expect(root.findAll<int>(const Offset(115, 115)), <int>[1]);
+    expect(root.findAll<int>(const Offset(105, 105)), <int>[1000]);
+    // Follower 2
+    expect(root.findAll<int>(const Offset(215, 215)), <int>[1000]);
+    expect(root.findAll<int>(const Offset(205, 205)), <int>[2]);
+    // Follower 3
+    expect(root.findAll<int>(const Offset(305, 305)), <int>[1000]);
+    expect(root.findAll<int>(const Offset(315, 315)), <int>[1000]);
+
+    expect(root.findAll<int>(const Offset(5, 5)), <int>[1000]);
   });
 
   test('AnnotatedRegionLayer.findAll should append to the list '
@@ -273,7 +502,14 @@ void main() {
           offset: const Offset(90, 90),
         ),
         children: <Object>[
-          _TestAnnotatedLayer(2, opaque: false, size: const Size(110, 110)),
+          _TestAnnotatedLayer(
+            2,
+            opaque: false,
+            // Use this offset to make sure AnnotatedRegionLayer's offset
+            // does not affect its children.
+            offset: const Offset(20, 20),
+            size: const Size(110, 110),
+          ),
         ]
       ).build()
     );
@@ -305,12 +541,13 @@ void main() {
   });
 }
 
-/// Append `value` to the result of [Layer.findAll] of `layer` if and only if
-/// it returns true.
+/// Append `value` to the result of the annotations test of `layer` if and only
+/// if it is opaque at the given location.
 ///
-/// It is a utility function that helps checking the opacity returned by [layer].
-/// Technically it is a [ContainerLayer] that contains `layer` followed by another
-/// layer annotated with `value`.
+/// It is a utility function that helps checking the opacity returned by
+/// [Layer.findAnnotations].
+/// Technically it is a [ContainerLayer] that contains `layer` followed by
+/// another layer annotated with `value`.
 Layer _appendAnnotationIfNotOpaque(int value, Layer layer) {
   return _Layers(
     ContainerLayer(),
