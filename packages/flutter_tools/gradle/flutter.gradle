@@ -630,14 +630,14 @@ class FlutterPlugin implements Plugin<Project> {
             if (p.name == mainModuleName) {
                 p.android.applicationVariants.all { v ->
                     Task packageAssets = project.tasks.findByPath(":flutter:package${v.name.capitalize()}Assets")
-                    if (packageAssets) {
-                        Task copyFlutterAssetsTask = project.tasks.findByPath(":flutter:copyFlutterAssets${v.name.capitalize()}")
-                        if(copyFlutterAssetsTask){
+                    Task copyFlutterAssetsTask = project.tasks.findByPath(":flutter:copyFlutterAssets${v.name.capitalize()}")
+                    if(copyFlutterAssetsTask){
+                        if (packageAssets) {
                             v.mergeAssets?.dependsOn(copyFlutterAssetsTask)
+                        } else {
+                            def processResources = variant.outputs.first().processResources
+                            processResources.dependsOn(copyFlutterAssetsTask)
                         }
-                    } else {
-                        def processResources = variant.outputs.first().processResources
-                        processResources.dependsOn(copyFlutterAssetsTask)
                     }
                 }
             }
