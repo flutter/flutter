@@ -220,29 +220,31 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: UserAccountsDrawerHeader(
-              onDetailsPressed: () { },
-              accountName: const Text('name'),
-              accountEmail: const Text('email'),
+          onDetailsPressed: () {},
+          accountName: const Text('name'),
+          accountEmail: const Text('email'),
         ),
       ),
     ));
 
     Icon iconWidget = tester.firstWidget(find.byType(Icon));
+    // Default icon color is white.
     expect(iconWidget.color, Colors.white);
 
+    const Color arrowColor = Colors.red;
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: UserAccountsDrawerHeader(
           onDetailsPressed: () { },
           accountName: const Text('name'),
           accountEmail: const Text('email'),
-          arrowColor: const Color.fromRGBO(255, 0, 0, 1.0),
+          arrowColor: arrowColor,
         ),
       ),
     ));
 
     iconWidget = tester.firstWidget(find.byType(Icon));
-    expect(iconWidget.color, const Color.fromRGBO(255, 0, 0, 1.0));
+    expect(iconWidget.color, arrowColor);
   });
 
   testWidgets('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
