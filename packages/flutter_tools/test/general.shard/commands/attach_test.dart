@@ -52,15 +52,6 @@ void main() {
         mockLogReader = MockDeviceLogReader();
         portForwarder = MockPortForwarder();
         device = MockAndroidDevice();
-        when(device.getLogReader()).thenAnswer((_) {
-          // Now that the reader is used, start writing messages to it.
-          Timer.run(() {
-            mockLogReader.addLine('Foo');
-            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
-          });
-
-          return mockLogReader;
-        });
         when(device.portForwarder)
           .thenReturn(portForwarder);
         when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
@@ -82,6 +73,14 @@ void main() {
       });
 
       testUsingContext('finds observatory port and forwards', () async {
+        when(device.getLogReader()).thenAnswer((_) {
+          // Now that the reader is used, start writing messages to it.
+          Timer.run(() {
+            mockLogReader.addLine('Foo');
+            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          });
+          return mockLogReader;
+        });
         testDeviceManager.addDevice(device);
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
@@ -102,7 +101,32 @@ void main() {
         Logger: () => logger,
       });
 
+      testUsingContext('Fails with tool exit on bad Observatory uri', () async {
+        when(device.getLogReader()).thenAnswer((_) {
+          // Now that the reader is used, start writing messages to it.
+          Timer.run(() {
+            mockLogReader.addLine('Foo');
+            mockLogReader.addLine('Observatory listening on http:/:/127.0.0.1:$devicePort');
+          });
+          return mockLogReader;
+        });
+        testDeviceManager.addDevice(device);
+        expect(createTestCommandRunner(AttachCommand()).run(<String>['attach']),
+               throwsA(isA<ToolExit>()));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        Logger: () => logger,
+      });
+
       testUsingContext('accepts filesystem parameters', () async {
+        when(device.getLogReader()).thenAnswer((_) {
+          // Now that the reader is used, start writing messages to it.
+          Timer.run(() {
+            mockLogReader.addLine('Foo');
+            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          });
+          return mockLogReader;
+        });
         testDeviceManager.addDevice(device);
 
         const String filesystemScheme = 'foo';
@@ -175,6 +199,14 @@ void main() {
       });
 
       testUsingContext('exits when ipv6 is specified and debug-port is not', () async {
+        when(device.getLogReader()).thenAnswer((_) {
+          // Now that the reader is used, start writing messages to it.
+          Timer.run(() {
+            mockLogReader.addLine('Foo');
+            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          });
+          return mockLogReader;
+        });
         testDeviceManager.addDevice(device);
 
         final AttachCommand command = AttachCommand();
@@ -190,6 +222,14 @@ void main() {
       },);
 
       testUsingContext('exits when observatory-port is specified and debug-port is not', () async {
+        when(device.getLogReader()).thenAnswer((_) {
+          // Now that the reader is used, start writing messages to it.
+          Timer.run(() {
+            mockLogReader.addLine('Foo');
+            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          });
+          return mockLogReader;
+        });
         testDeviceManager.addDevice(device);
 
         final AttachCommand command = AttachCommand();

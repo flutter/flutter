@@ -32,9 +32,8 @@ const List<Target> _kDefaultTargets = <Target>[
   AotElfRelease(),
   AotAssemblyProfile(),
   AotAssemblyRelease(),
-  DebugMacOSApplication(),
-  ProfileMacOSApplication(),
-  ReleaseMacOSApplication(),
+  DebugMacOSFramework(),
+  DebugBundleFlutterAssets(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build

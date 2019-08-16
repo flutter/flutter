@@ -50,7 +50,7 @@ class _FakeGenSnapshot implements GenSnapshot {
   Future<int> run({
     SnapshotType snapshotType,
     String depfilePath,
-    IOSArch iosArch,
+    DarwinArch darwinArch,
     Iterable<String> additionalArgs = const <String>[],
   }) async {
     _callCount += 1;
@@ -191,7 +191,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
-        iosArch: IOSArch.armv7,
+        darwinArch: DarwinArch.armv7,
         bitcode: true,
       );
 
@@ -245,7 +245,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
-        iosArch: IOSArch.armv7,
+        darwinArch: DarwinArch.armv7,
         bitcode: false,
       );
 
@@ -292,7 +292,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
-        iosArch: IOSArch.arm64,
+        darwinArch: DarwinArch.arm64,
         bitcode: false,
       );
 
@@ -328,7 +328,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
-        iosArch: IOSArch.armv7,
+        darwinArch: DarwinArch.armv7,
         bitcode: false,
       );
 
@@ -366,7 +366,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
-        iosArch: IOSArch.arm64,
+        darwinArch: DarwinArch.arm64,
         bitcode: false,
       );
 
