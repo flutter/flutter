@@ -1,4 +1,4 @@
-Signature: 9398906ff80f68bfb79c123ecbe611b2
+Signature: f5a76c0b3e465d07eae5f422d6645b73
 
 UNUSED LICENSES:
 
@@ -8195,6 +8195,7 @@ FILE: ../../../third_party/dart/.gitconfig
 FILE: ../../../third_party/dart/.mailmap
 FILE: ../../../third_party/dart/.style.yapf
 FILE: ../../../third_party/dart/.vpython
+FILE: ../../../third_party/dart/PATENT_GRANT
 FILE: ../../../third_party/dart/client/idea/.idea/.name
 FILE: ../../../third_party/dart/client/idea/.idea/inspectionProfiles/Project_Default.xml
 FILE: ../../../third_party/dart/client/idea/.idea/vcs.xml
