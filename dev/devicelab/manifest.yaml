@@ -150,13 +150,13 @@ tasks:
   tiles_scroll_perf_ios__timeline_summary:
     description: >
       Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone 6.
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   tiles_scroll_perf_iphonexs__timeline_summary:
     description: >
       Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone XS.
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/iphonexs"]
 
   home_scroll_perf__timeline_summary:
@@ -460,7 +460,7 @@ tasks:
   hello_world_ios__compile:
     description: >
       Measures the IPA size of Hello World.
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   microbenchmarks_ios:
