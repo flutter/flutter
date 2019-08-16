@@ -90,7 +90,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Traverse the layer tree and compute if any subtree needs [addToScene].
   ///
-  /// A subtree needs [addToScene] if any of its layer needs [addToScene].
+  /// A subtree needs [addToScene] if any of its layers need [addToScene].
   /// The [ContainerLayer] will override this to respect its children.
   @protected
   @visibleForTesting
