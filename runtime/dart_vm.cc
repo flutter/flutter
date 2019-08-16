@@ -74,6 +74,11 @@ static const char* kDartWriteProtectCodeArgs[] = {
     "--no_write_protect_code",
 };
 
+FML_ALLOW_UNUSED_TYPE
+static const char* kDartDisableIntegerDivisionArgs[] = {
+    "--no_use_integer_division",
+};
+
 static const char* kDartAssertArgs[] = {
     // clang-format off
     "--enable_asserts",
@@ -324,8 +329,16 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
               fml::size(kDartWriteProtectCodeArgs));
 #else
   EnsureDebuggedIOS(settings_);
-#endif
-#endif
+#if TARGET_CPU_ARM
+  // Tell Dart in JIT mode to not use integer division on armv7
+  // Ideally, this would be detected at runtime by Dart.
+  // TODO(dnfield): Remove this code
+  // https://github.com/dart-lang/sdk/issues/24743
+  PushBackAll(&args, kDartDisableIntegerDivisionArgs,
+              fml::size(kDartDisableIntegerDivisionArgs));
+#endif  // TARGET_CPU_ARM
+#endif  // !OS_IOS || TARGET_OS_SIMULATOR
+#endif  // (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
 
   if (enable_asserts) {
     PushBackAll(&args, kDartAssertArgs, fml::size(kDartAssertArgs));
