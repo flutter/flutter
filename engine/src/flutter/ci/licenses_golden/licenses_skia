@@ -1,4 +1,4 @@
-Signature: 7a9d0ac4e5020b144bbacf5be18c20f5
+Signature: 1cf5c0de77532b06d29bd78fbab83b08
 
 UNUSED LICENSES:
 
@@ -5118,7 +5118,6 @@ FILE: ../../../third_party/skia/fuzz/FuzzEncoders.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzPolyUtils.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit_bindings.cpp
 FILE: ../../../third_party/skia/modules/pathkit/pathkit_wasm_bindings.cpp
-FILE: ../../../third_party/skia/src/core/SkPicture_none.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSkSLFPFactoryCache.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCoverageCountingPathRenderer_none.cpp
 ----------------------------------------------------------------------------------------------------
