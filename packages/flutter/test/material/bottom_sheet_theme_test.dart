@@ -133,7 +133,7 @@ void main() {
     expect(material.shape, shape);
   });
 
-  testWidgets('BottomSheet persistentElevation takes priority over elevation - Modal', (WidgetTester tester) async {
+  testWidgets('BottomSheet modalElevation takes priority over elevation - Modal', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
@@ -141,7 +141,7 @@ void main() {
       modalElevation: modalElevation,
     );
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
-    await tester.tap(find.byIcon(Icons.clear));
+    await tester.tap(find.text('Show Modal'));
     await tester.pumpAndSettle();
     final Material material = tester.widget<Material>(
       find.descendant(
@@ -160,7 +160,7 @@ void main() {
       modalElevation: modalElevation,
     );
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
-    await tester.tap(find.byIcon(Icons.check));
+    await tester.tap(find.text('Show Persistent'));
     await tester.pumpAndSettle();
     final Material material = tester.widget<Material>(
       find.descendant(
@@ -177,7 +177,7 @@ void main() {
       modalElevation: modalElevation,
     );
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
-    await tester.tap(find.byIcon(Icons.check));
+    await tester.tap(find.text('Show Persistent'));
     await tester.pumpAndSettle();
     final Material material = tester.widget<Material>(
       find.descendant(
@@ -198,7 +198,7 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
           return Column(
               children: <Widget>[
                 RawMaterialButton(
-                  child: const Icon(Icons.clear),
+                  child: const Text('Show Modal'),
                   onPressed: () {
                     showModalBottomSheet<void>(
                       context: context,
@@ -211,7 +211,7 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
                   },
                 ),
                 RawMaterialButton(
-                  child: const Icon(Icons.check),
+                  child: const Text('Show Persistent'),
                   onPressed: () {
                     showBottomSheet<void>(
                       context: context,

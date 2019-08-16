@@ -45,7 +45,8 @@ class BottomSheetThemeData extends Diagnosticable {
   /// If null, [BottomSheet] defaults to 0.0.
   final double elevation;
 
-  /// Value for [BottomSheet.elevation], if specified.
+  /// Value for [BottomSheet.elevation] when the Bottom sheet is presented as a
+  /// modal bottom sheet.
   ///
   /// If null, [BottomSheet.elevation] defaults to [elevation].
   final double modalElevation;
