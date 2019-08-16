@@ -163,6 +163,23 @@ void main() {
     expect(result.message, contains('Failed'));
   }));
 
+  test('Fails on vmservice RpcError', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+     unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
+      return true;
+    });
+    when(mockVmService.callServiceExtension('hotRestart')).thenThrow(RPCError('', 2, '123'));
+    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+
+    expect(result.code, 1);
+    expect(result.message, contains('Page requires full reload'));
+  }));
+
   test('printHelp without details is spoopy', () => testbed.run(() async {
     residentWebRunner.printHelp(details: false);
     final BufferLogger bufferLogger = logger;
