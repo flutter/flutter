@@ -583,7 +583,7 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 
 /// The parameters used to create a [PlatformViewController].
 ///
-/// See also [CreatePlatformViewController] which uses this object to create a [PlatformViewController].
+/// See also [CreatePlatformViewCallback] which uses this object to create a [PlatformViewController].
 class PlatformViewCreationParams {
 
   const PlatformViewCreationParams._({
@@ -615,7 +615,7 @@ typedef PlatformViewSurfaceFactory = Widget Function(BuildContext context, Platf
 /// params [PlatformViewCreationParams.id] field.
 ///
 /// See also [PlatformViewLink.onCreate].
-typedef CreatePlatformViewController = PlatformViewController Function(PlatformViewCreationParams params);
+typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformViewCreationParams params);
 
 /// Links a platform view with the Flutter framework.
 ///
@@ -631,7 +631,7 @@ typedef CreatePlatformViewController = PlatformViewController Function(PlatformV
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return PlatformViewLink(
-///       createCallback: createFooWebView,
+///       onCreatePlatformView: createFooWebView,
 ///       surfaceFactory: (BuildContext context, PlatformViewController controller) {
 ///        return PlatformViewSurface(
 ///            gestureRecognizers: gestureRecognizers,
@@ -644,13 +644,13 @@ typedef CreatePlatformViewController = PlatformViewController Function(PlatformV
 /// }
 /// ```
 ///
-/// The `surfaceFactory` and the `createPlatformViewController` only take affect when the state of this widget is initialized.
-/// If the widget is rebuilt without losing its state, `surfaceFactory` and `createPlatformViewController` are ignored.
+/// The `surfaceFactory` and the `onCreatePlatformView` only take affect when the state of this widget is initialized.
+/// If the widget is rebuilt without losing its state, `surfaceFactory` and `onCreatePlatformView` are ignored.
 class PlatformViewLink extends StatefulWidget {
 
   /// Construct a [PlatformViewLink] widget.
   ///
-  /// The `surfaceFactory` and the `createPlatformViewController` must not be null.
+  /// The `surfaceFactory` and the `onCreatePlatformView` must not be null.
   ///
   /// See also:
   /// * [PlatformViewSurface] for details on the widget returned by `surfaceFactory`.
@@ -658,16 +658,16 @@ class PlatformViewLink extends StatefulWidget {
   const PlatformViewLink({
     Key key,
     @required PlatformViewSurfaceFactory surfaceFactory,
-    @required CreatePlatformViewController createPlatformViewController,
+    @required CreatePlatformViewCallback onCreatePlatformView,
     }) : assert(surfaceFactory != null),
-                                  assert(createPlatformViewController != null),
+                                  assert(onCreatePlatformView != null),
                                   _surfaceFactory = surfaceFactory,
-                                  _createPlatformViewController = createPlatformViewController,
+                                  _onCreatePlatformView = onCreatePlatformView,
                                   super(key: key);
 
 
   final PlatformViewSurfaceFactory _surfaceFactory;
-  final CreatePlatformViewController _createPlatformViewController;
+  final CreatePlatformViewCallback _onCreatePlatformView;
 
   @override
   State<StatefulWidget> createState() => _PlatformViewLinkState();
@@ -697,7 +697,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 
   void _initialize() {
     _id = platformViewsRegistry.getNextPlatformViewId();
-    _controller = widget._createPlatformViewController(PlatformViewCreationParams._(id:_id, onPlatformViewCreated:_onPlatformViewCreated));
+    _controller = widget._onCreatePlatformView(PlatformViewCreationParams._(id:_id, onPlatformViewCreated:_onPlatformViewCreated));
   }
 
   void _onPlatformViewCreated(int id) {
