@@ -134,9 +134,9 @@ void main() {
   });
 
   testWidgets('BottomSheet persistentElevation takes priority over elevation - Modal', (WidgetTester tester) async {
-    const modalElevation = 5.0;
-    const persistentElevation = 7.0;
-    const bottomSheetTheme = BottomSheetThemeData(
+    const double modalElevation = 5.0;
+    const double persistentElevation = 7.0;
+    const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
       elevation: persistentElevation,
       modalElevation: modalElevation,
     );
@@ -153,9 +153,9 @@ void main() {
   });
 
   testWidgets('BottomSheet modalElevation takes priority over elevation - Persistent', (WidgetTester tester) async {
-    const persistentElevation = 7.0;
-    const modalElevation = 5.0;
-    const bottomSheetTheme = BottomSheetThemeData(
+    const double modalElevation = 5.0;
+    const double persistentElevation = 7.0;
+    const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
       elevation: persistentElevation,
       modalElevation: modalElevation,
     );
@@ -172,8 +172,8 @@ void main() {
   });
 
   testWidgets('BottomSheet modalElevation only sets elevation for modal bottom sheet - Persistent', (WidgetTester tester) async {
-    const modalElevation = 5.0;
-    const bottomSheetTheme = BottomSheetThemeData(
+    const double modalElevation = 5.0;
+    const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
       modalElevation: modalElevation,
     );
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
@@ -196,7 +196,7 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
       body: Builder(
         builder: (BuildContext context) {
           return Column(
-              children: [
+              children: <Widget>[
                 RawMaterialButton(
                   child: const Icon(Icons.clear),
                   onPressed: () {
