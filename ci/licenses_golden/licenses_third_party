@@ -1,4 +1,4 @@
-Signature: de335cab9d59da731bc032657bc1ef17
+Signature: 5b5a454a705815e05a96fcc92b424fbe
 
 UNUSED LICENSES:
 
@@ -8318,8 +8318,6 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/typed_data_aot_test.
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi_dbc_trampoline.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_fingerprints.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_fingerprints.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_arm.cc
