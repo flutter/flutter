@@ -638,7 +638,7 @@ TEST_F(ShellTest, SetResourceCacheSize) {
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
         shell->GetPlatformView()->SetViewportMetrics(
-            {1.0, 400, 200, 0, 0, 0, 0, 0, 0, 0, 0});
+            {1.0, 400, 200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
       });
   PumpOneFrame(shell.get());
 
@@ -658,7 +658,7 @@ TEST_F(ShellTest, SetResourceCacheSize) {
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
         shell->GetPlatformView()->SetViewportMetrics(
-            {1.0, 800, 400, 0, 0, 0, 0, 0, 0, 0, 0});
+            {1.0, 800, 400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
       });
   PumpOneFrame(shell.get());
 
@@ -676,7 +676,7 @@ TEST_F(ShellTest, SetResourceCacheSizeEarly) {
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
         shell->GetPlatformView()->SetViewportMetrics(
-            {1.0, 400, 200, 0, 0, 0, 0, 0, 0, 0, 0});
+            {1.0, 400, 200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
       });
   PumpOneFrame(shell.get());
 
@@ -704,7 +704,7 @@ TEST_F(ShellTest, SetResourceCacheSizeNotifiesDart) {
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
         shell->GetPlatformView()->SetViewportMetrics(
-            {1.0, 400, 200, 0, 0, 0, 0, 0, 0, 0, 0});
+            {1.0, 400, 200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
       });
   PumpOneFrame(shell.get());
 

@@ -5,8 +5,10 @@
 package io.flutter.embedding.android;
 
 import android.annotation.TargetApi;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.LocaleList;
@@ -296,6 +298,10 @@ public class FlutterView extends FrameLayout {
   @Override
   @TargetApi(20)
   @RequiresApi(20)
+  // The annotations to suppress "InlinedApi" and "NewApi" lints prevent lint warnings
+  // caused by usage of Android Q APIs. These calls are safe because they are
+  // guarded.
+  @SuppressLint({"InlinedApi", "NewApi"})
   @NonNull
   public final WindowInsets onApplyWindowInsets(@NonNull WindowInsets insets) {
     WindowInsets newInsets = super.onApplyWindowInsets(insets);
@@ -312,11 +318,21 @@ public class FlutterView extends FrameLayout {
     viewportMetrics.viewInsetBottom = insets.getSystemWindowInsetBottom();
     viewportMetrics.viewInsetLeft = 0;
 
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      Insets systemGestureInsets = insets.getSystemGestureInsets();
+      viewportMetrics.systemGestureInsetTop = systemGestureInsets.top;
+      viewportMetrics.systemGestureInsetRight = systemGestureInsets.right;
+      viewportMetrics.systemGestureInsetBottom = systemGestureInsets.bottom;
+      viewportMetrics.systemGestureInsetLeft = systemGestureInsets.left;
+    }
+
     Log.v(TAG, "Updating window insets (onApplyWindowInsets()):\n"
       + "Status bar insets: Top: " + viewportMetrics.paddingTop
         + ", Left: " + viewportMetrics.paddingLeft + ", Right: " + viewportMetrics.paddingRight + "\n"
       + "Keyboard insets: Bottom: " + viewportMetrics.viewInsetBottom
-        + ", Left: " + viewportMetrics.viewInsetLeft + ", Right: " + viewportMetrics.viewInsetRight);
+        + ", Left: " + viewportMetrics.viewInsetLeft + ", Right: " + viewportMetrics.viewInsetRight
+      + "System Gesture Insets - Left: " + viewportMetrics.systemGestureInsetLeft + ", Top: " + viewportMetrics.systemGestureInsetTop
+        + ", Right: " + viewportMetrics.systemGestureInsetRight + ", Bottom: " + viewportMetrics.viewInsetBottom);
 
     sendViewportMetricsToFlutter();
 

@@ -202,7 +202,9 @@ public class FlutterRenderer implements TextureRegistry {
       + "Padding - L: " + viewportMetrics.paddingLeft + ", T: " + viewportMetrics.paddingTop
         + ", R: " + viewportMetrics.paddingRight + ", B: " + viewportMetrics.paddingBottom + "\n"
       + "Insets - L: " + viewportMetrics.viewInsetLeft + ", T: " + viewportMetrics.viewInsetTop
-        + ", R: " + viewportMetrics.viewInsetRight + ", B: " + viewportMetrics.viewInsetBottom);
+        + ", R: " + viewportMetrics.viewInsetRight + ", B: " + viewportMetrics.viewInsetBottom + "\n"
+      + "System Gesture Insets - L: " + viewportMetrics.systemGestureInsetLeft + ", T: " + viewportMetrics.systemGestureInsetTop
+        + ", R: " + viewportMetrics.systemGestureInsetRight + ", B: " + viewportMetrics.viewInsetBottom);
 
     flutterJNI.setViewportMetrics(
         viewportMetrics.devicePixelRatio,
@@ -215,7 +217,11 @@ public class FlutterRenderer implements TextureRegistry {
         viewportMetrics.viewInsetTop,
         viewportMetrics.viewInsetRight,
         viewportMetrics.viewInsetBottom,
-        viewportMetrics.viewInsetLeft
+        viewportMetrics.viewInsetLeft,
+        viewportMetrics.systemGestureInsetTop,
+        viewportMetrics.systemGestureInsetRight,
+        viewportMetrics.systemGestureInsetBottom,
+        viewportMetrics.systemGestureInsetLeft
     );
   }
 
@@ -346,5 +352,9 @@ public class FlutterRenderer implements TextureRegistry {
     public int viewInsetRight = 0;
     public int viewInsetBottom = 0;
     public int viewInsetLeft = 0;
+    public int systemGestureInsetTop = 0;
+    public int systemGestureInsetRight = 0;
+    public int systemGestureInsetBottom = 0;
+    public int systemGestureInsetLeft = 0;
   }
 }

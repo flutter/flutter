@@ -18,18 +18,24 @@ dynamic _decodeJSON(String message) {
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _updateWindowMetrics(double devicePixelRatio,
-                          double width,
-                          double height,
-                          double depth,
-                          double viewPaddingTop,
-                          double viewPaddingRight,
-                          double viewPaddingBottom,
-                          double viewPaddingLeft,
-                          double viewInsetTop,
-                          double viewInsetRight,
-                          double viewInsetBottom,
-                          double viewInsetLeft) {
+void _updateWindowMetrics(
+  double devicePixelRatio,
+  double width,
+  double height,
+  double depth,
+  double viewPaddingTop,
+  double viewPaddingRight,
+  double viewPaddingBottom,
+  double viewPaddingLeft,
+  double viewInsetTop,
+  double viewInsetRight,
+  double viewInsetBottom,
+  double viewInsetLeft,
+  double systemGestureInsetTop,
+  double systemGestureInsetRight,
+  double systemGestureInsetBottom,
+  double systemGestureInsetLeft,
+) {
   window
     .._devicePixelRatio = devicePixelRatio
     .._physicalSize = Size(width, height)
@@ -48,7 +54,12 @@ void _updateWindowMetrics(double devicePixelRatio,
         top: math.max(0.0, viewPaddingTop - viewInsetTop),
         right: math.max(0.0, viewPaddingRight - viewInsetRight),
         bottom: math.max(0.0, viewPaddingBottom - viewInsetBottom),
-        left: math.max(0.0, viewPaddingLeft - viewInsetLeft));
+        left: math.max(0.0, viewPaddingLeft - viewInsetLeft))
+    .._systemGestureInsets = WindowPadding._(
+        top: math.max(0.0, systemGestureInsetTop),
+        right: math.max(0.0, systemGestureInsetRight),
+        bottom: math.max(0.0, systemGestureInsetBottom),
+        left: math.max(0.0, systemGestureInsetLeft));
   _invoke(window.onMetricsChanged, window._onMetricsChangedZone);
 }
 
