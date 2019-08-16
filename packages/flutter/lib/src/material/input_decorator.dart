@@ -2118,6 +2118,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         child: decoration.prefix,
       );
 
+    // TODO(justinmc): Maybe I could give prefix/suffix GlobalKeys here?
     final Widget suffix = decoration.suffix == null && decoration.suffixText == null ? null :
       _AffixText(
         labelIsFloating: widget._labelShouldWithdraw,
@@ -2383,6 +2384,9 @@ class InputDecoration {
        enabledBorder = null,
        semanticCounterText = null,
        alignLabelWithHint = false;
+
+
+  // TODO(justinmc): Put shouldIgnore here and call it from TextField maybe?
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.

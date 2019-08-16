@@ -87,6 +87,17 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 
   @override
   void onSingleTapUp(TapUpDetails details) {
+    // TODO(justinmc): I need to check if this tap happened on a prefix/suffix.
+    // Unfortunately I can't give the prefix/suffix widgets GlobalKeys here
+    // because they are passed to InputDecoration, unlike in Cupertino.
+    /*
+    if (_shouldIgnore(_state._prefixGlobalKey, details.globalPosition, true)) {//_state.widget.prefixGesturesIgnored)) {
+      return;
+    }
+    if (_shouldIgnoreSuffix(details.globalPosition, true)) {//_state.widget.suffixGesturesIgnored)) {
+      return;
+    }
+    */
     editableText.hideToolbar();
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
