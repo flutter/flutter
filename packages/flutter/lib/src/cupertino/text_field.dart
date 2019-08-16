@@ -160,7 +160,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///    Design UI conventions.
 ///  * [EditableText], which is the raw text editing control at the heart of a
 ///    [TextField].
-///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipes](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller).
 class CupertinoTextField extends StatefulWidget {
   /// Creates an iOS-style text field.
   ///
@@ -178,6 +178,13 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
+  ///
+  /// If specified, the [maxLength] property must be greater than zero.
+  ///
+  /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
+  /// [expands], [maxLengthEnforced], [obscureText], [prefixMode], [readOnly],
+  /// [scrollPadding], [suffixMode], and [textAlign] properties must not be
+  /// null.
   ///
   /// See also:
   ///
@@ -276,9 +283,7 @@ class CupertinoTextField extends StatefulWidget {
   /// If null, this widget will create its own [TextEditingController].
   final TextEditingController controller;
 
-  /// Controls whether this widget has keyboard focus.
-  ///
-  /// If null, this widget will create its own [FocusNode].
+  /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
 
   /// Controls the [BoxDecoration] of the box behind the text input.

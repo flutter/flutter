@@ -145,6 +145,7 @@ class FloatingActionButton extends StatelessWidget {
     this.shape,
     this.clipBehavior = Clip.none,
     this.focusNode,
+    this.autofocus = false,
     this.materialTapTargetSize,
     this.isExtended = false,
   }) : assert(elevation == null || elevation >= 0.0),
@@ -154,15 +155,16 @@ class FloatingActionButton extends StatelessWidget {
        assert(disabledElevation == null || disabledElevation >= 0.0),
        assert(mini != null),
        assert(isExtended != null),
+       assert(autofocus != null),
        _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
        super(key: key);
 
   /// Creates a wider [StadiumBorder]-shaped floating action button with
   /// an optional [icon] and a [label].
   ///
-  /// The [label] and [clipBehavior] arguments must non-null. Additionally,
-  /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
-  /// must be non-negative.
+  /// The [label], [autofocus], and [clipBehavior] arguments must non-null.
+  /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
+  /// (if specified) must be non-negative.
   FloatingActionButton.extended({
     Key key,
     this.tooltip,
@@ -183,6 +185,7 @@ class FloatingActionButton extends StatelessWidget {
     this.materialTapTargetSize,
     this.clipBehavior = Clip.none,
     this.focusNode,
+    this.autofocus = false,
     Widget icon,
     @required Widget label,
   }) : assert(elevation == null || elevation >= 0.0),
@@ -191,6 +194,7 @@ class FloatingActionButton extends StatelessWidget {
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
        assert(isExtended != null),
+       assert(autofocus != null),
        _sizeConstraints = _kExtendedSizeConstraints,
        mini = false,
        child = _ChildOverflowBox(
@@ -372,13 +376,11 @@ class FloatingActionButton extends StatelessWidget {
   /// floating action buttons are scaled and faded in.
   final bool isExtended;
 
-  /// An optional focus node to use for requesting focus when pressed.
-  ///
-  /// If not supplied, the button will create and host its own [FocusNode].
-  ///
-  /// If supplied, the given focusNode will be _hosted_ by this widget. See
-  /// [FocusNode] for more information on what that implies.
+  /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
 
   /// Configures the minimum size of the tap target.
   ///
@@ -463,6 +465,7 @@ class FloatingActionButton extends StatelessWidget {
       shape: shape,
       clipBehavior: clipBehavior ?? Clip.none,
       focusNode: focusNode,
+      autofocus: autofocus,
       child: child,
     );
 
