@@ -133,13 +133,11 @@ void main() {
 
     await tester.pumpWidget(buildFrame(TextDirection.ltr));
 
-    expect(tester.getSize(find.byType(SwitchListTile)), const Size(800.0, 126.0)); // 126 = 56 + 30 + 40
     expect(tester.getTopLeft(find.text('L')).dx, 10.0); // contentPadding.start = 10
     expect(tester.getTopRight(find.byType(Switch)).dx, 780.0); // 800 - contentPadding.end
 
     await tester.pumpWidget(buildFrame(TextDirection.rtl));
 
-    expect(tester.getSize(find.byType(SwitchListTile)), const Size(800.0, 126.0)); // 126 = 56 + 30 + 40
     expect(tester.getTopLeft(find.byType(Switch)).dx, 20.0); // contentPadding.end = 20
     expect(tester.getTopRight(find.text('L')).dx, 790.0); // 800 - contentPadding.start
   });
