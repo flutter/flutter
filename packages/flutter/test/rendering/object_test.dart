@@ -5,13 +5,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_test/src/binding.dart' show TestWidgetsFlutterBinding;
 import 'package:flutter_test/flutter_test.dart';
+
+import 'rendering_tester.dart';
 
 void main() {
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
     // Initialize all bindings because owner.flushSemantics() requires a window
-    TestWidgetsFlutterBinding.ensureInitialized();
+    renderer;
 
     final TestRenderObject renderObject = TestRenderObject();
     int onNeedVisualUpdateCallCount = 0;
@@ -98,6 +99,81 @@ void main() {
       ..nextSibling = RenderOpacity();
     expect(() => data3.detach(), throwsAssertionError);
   });
+
+  test('PaintingContext.pushClipRect reuses the layer', () {
+    _testPaintingContextLayerReuse<ClipRectLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
+      return context.pushClipRect(true, offset, Rect.zero, painter, oldLayer: oldLayer);
+    });
+  });
+
+  test('PaintingContext.pushClipRRect reuses the layer', () {
+    _testPaintingContextLayerReuse<ClipRRectLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
+      return context.pushClipRRect(true, offset, Rect.zero, RRect.fromRectAndRadius(Rect.zero, const Radius.circular(1.0)), painter, oldLayer: oldLayer);
+    });
+  });
+
+  test('PaintingContext.pushClipPath reuses the layer', () {
+    _testPaintingContextLayerReuse<ClipPathLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
+      return context.pushClipPath(true, offset, Rect.zero, Path(), painter, oldLayer: oldLayer);
+    });
+  });
+
+  test('PaintingContext.pushColorFilter reuses the layer', () {
+    _testPaintingContextLayerReuse<ColorFilterLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
+      return context.pushColorFilter(offset, const ColorFilter.mode(Color.fromRGBO(0, 0, 0, 1.0), BlendMode.clear), painter, oldLayer: oldLayer);
+    });
+  });
+
+  test('PaintingContext.pushTransform reuses the layer', () {
+    _testPaintingContextLayerReuse<TransformLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
+      return context.pushTransform(true, offset, Matrix4.identity(), painter, oldLayer: oldLayer);
+    });
+  });
+
+  test('PaintingContext.pushOpacity reuses the layer', () {
+    _testPaintingContextLayerReuse<OpacityLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
+      return context.pushOpacity(offset, 100, painter, oldLayer: oldLayer);
+    });
+  });
+}
+
+// Tests the create-update cycle by pumping two frames. The first frame has no
+// prior layer and forces the painting context to create a new one. The second
+// frame reuses the layer painted on the first frame.
+void _testPaintingContextLayerReuse<L extends Layer>(_LayerTestPaintCallback painter) {
+  final _TestCustomLayerBox box = _TestCustomLayerBox(painter);
+  layout(box, phase: EnginePhase.paint);
+
+  // Force a repaint. Otherwise, pumpFrame is a noop.
+  box.markNeedsPaint();
+  pumpFrame(phase: EnginePhase.paint);
+  expect(box.paintedLayers, hasLength(2));
+  expect(box.paintedLayers[0], isInstanceOf<L>());
+  expect(box.paintedLayers[0], same(box.paintedLayers[1]));
+}
+
+typedef _LayerTestPaintCallback = Layer Function(PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer);
+
+class _TestCustomLayerBox extends RenderBox {
+  _TestCustomLayerBox(this.painter);
+
+  final _LayerTestPaintCallback painter;
+  final List<Layer> paintedLayers = <Layer>[];
+
+  @override
+  bool get isRepaintBoundary => false;
+
+  @override
+  void performLayout() {
+    size = constraints.smallest;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final Layer paintedLayer = painter(super.paint, context, offset, layer);
+    paintedLayers.add(paintedLayer);
+    layer = paintedLayer;
+  }
 }
 
 class TestParentData extends ParentData with ContainerParentDataMixin<RenderBox> { }
