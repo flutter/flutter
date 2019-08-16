@@ -19,9 +19,17 @@ import '../project.dart';
 
 /// A request to the [TestCompiler] for recompilation.
 class _CompilationRequest {
-  _CompilationRequest(this.path, this.result);
+  _CompilationRequest(
+    this.path,
+    this.result, {
+    List<Uri> invalidatedFiles = const <Uri>[],
+  }) {
+    this.invalidatedFiles = <Uri>[Uri.parse(path)];
+    this.invalidatedFiles.addAll(invalidatedFiles);
+  }
   String path;
   Completer<String> result;
+  List<Uri> invalidatedFiles;
 }
 
 /// A frontend_server wrapper for the flutter test runner.
@@ -40,15 +48,18 @@ class TestCompiler {
     this.trackWidgetCreation,
     this.flutterProject,
   ) : testFilePath = getKernelPathForTransformerOptions(
-        fs.path.join(flutterProject.directory.path, getBuildDirectory(), 'testfile.dill'),
-        trackWidgetCreation: trackWidgetCreation,
-      ) {
+          fs.path.join(flutterProject.directory.path, getBuildDirectory(),
+              'testfile.dill'),
+          trackWidgetCreation: trackWidgetCreation,
+        ) {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
-    final Directory outputDillDirectory = fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
+    final Directory outputDillDirectory =
+        fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
     outputDill = outputDillDirectory.childFile('output.dill');
-    printTrace('Compiler will use the following file as its incremental dill file: ${outputDill.path}');
+    printTrace(
+        'Compiler will use the following file as its incremental dill file: ${outputDill.path}');
     printTrace('Listening to compiler controller...');
     compilerController.stream.listen(_onCompilationRequest, onDone: () {
       printTrace('Deleting ${outputDillDirectory.path}...');
@@ -56,21 +67,28 @@ class TestCompiler {
     });
   }
 
-  final StreamController<_CompilationRequest> compilerController = StreamController<_CompilationRequest>();
+  final StreamController<_CompilationRequest> compilerController =
+      StreamController<_CompilationRequest>();
   final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
   final FlutterProject flutterProject;
   final bool trackWidgetCreation;
   final String testFilePath;
-
 
   ResidentCompiler compiler;
   File outputDill;
   // Whether to report compiler messages.
   bool _suppressOutput = false;
 
-  Future<String> compile(String mainDart) {
+  Future<String> compile(
+    String mainDart, {
+    List<Uri> invalidatedFiles = const <Uri>[],
+  }) {
     final Completer<String> completer = Completer<String>();
-    compilerController.add(_CompilationRequest(mainDart, completer));
+    compilerController.add(_CompilationRequest(
+      mainDart,
+      completer,
+      invalidatedFiles: invalidatedFiles,
+    ));
     return completer.future;
   }
 
@@ -134,7 +152,7 @@ class TestCompiler {
       _suppressOutput = false;
       final CompilerOutput compilerOutput = await compiler.recompile(
         request.path,
-        <Uri>[Uri.parse(request.path)],
+        request.invalidatedFiles,
         outputPath: outputDill.path,
       );
       final String outputPath = compilerOutput?.outputFilename;
@@ -148,9 +166,12 @@ class TestCompiler {
         await _shutdown();
       } else {
         final File outputFile = fs.file(outputPath);
-        final File kernelReadyToRun = await outputFile.copy('${request.path}.dill');
+        final File kernelReadyToRun =
+            await outputFile.copy('${request.path}.dill');
         final File testCache = fs.file(testFilePath);
-        if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
+        if (firstCompile ||
+            !testCache.existsSync() ||
+            (testCache.lengthSync() < outputFile.lengthSync())) {
           // The idea is to keep the cache file up-to-date and include as
           // much as possible in an effort to re-use as many packages as
           // possible.
@@ -161,19 +182,23 @@ class TestCompiler {
         compiler.accept();
         compiler.reset();
       }
-      printTrace('Compiling ${request.path} took ${compilerTime.elapsedMilliseconds}ms');
+      printTrace(
+          'Compiling ${request.path} took ${compilerTime.elapsedMilliseconds}ms');
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);
     }
   }
 
-  void _reportCompilerMessage(String message, {bool emphasis, TerminalColor color}) {
+  void _reportCompilerMessage(String message,
+      {bool emphasis, TerminalColor color}) {
     if (_suppressOutput) {
       return;
     }
-    if (message.startsWith('Error: Could not resolve the package \'flutter_test\'')) {
+    if (message
+        .startsWith('Error: Could not resolve the package \'flutter_test\'')) {
       printTrace(message);
-      printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',
+      printError(
+        '\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',
         emphasis: emphasis,
         color: color,
       );

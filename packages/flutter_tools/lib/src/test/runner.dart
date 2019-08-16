@@ -24,9 +24,9 @@ import '../globals.dart';
 import '../project.dart';
 import '../web/compile.dart';
 import 'bootstrap.dart';
-import 'compiler.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
+import 'test_compiler.dart';
 import 'watcher.dart';
 
 /// Runs tests using package:test and the Flutter engine.
@@ -97,7 +97,7 @@ Future<int> runTests(
 
   final Uri projectRootDirectory = fs.currentDirectory.uri;
   final TestCompiler compiler =
-      TestCompiler(trackWidgetCreation, projectRootDirectory);
+      TestCompiler(trackWidgetCreation, flutterProject);
   final InternetAddressType serverType =
       ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
