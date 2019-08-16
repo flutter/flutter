@@ -3431,7 +3431,6 @@ void main() {
   });
 
   testWidgets("Disabled TextField can't be traversed to when disabled.", (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
     final FocusNode focusNode1 = FocusNode(debugLabel: 'TextField 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'TextField 2');
     await tester.pumpWidget(
