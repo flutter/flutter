@@ -59,9 +59,9 @@ void main() {
 
   group('Horizontal Divider', () {
     testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
-          body: const Divider(),
+          body: Divider(),
         ),
       ));
 
@@ -83,8 +83,8 @@ void main() {
       final DividerThemeData dividerTheme = _dividerTheme();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(dividerTheme: dividerTheme),
-        home: Scaffold(
-          body: const Divider(),
+        home: const Scaffold(
+          body: Divider(),
         ),
       ));
 
@@ -112,8 +112,8 @@ void main() {
       final DividerThemeData dividerTheme = _dividerTheme();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(dividerTheme: dividerTheme),
-        home: Scaffold(
-          body: const Divider(
+        home: const Scaffold(
+          body: Divider(
             color: color,
             height: height,
             thickness: thickness,
@@ -140,9 +140,9 @@ void main() {
 
   group('Vertical Divider', () {
     testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
-          body: const VerticalDivider(),
+          body: VerticalDivider(),
         ),
       ));
 
@@ -165,8 +165,8 @@ void main() {
       final DividerThemeData dividerTheme = _dividerTheme();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(dividerTheme: dividerTheme),
-        home: Scaffold(
-          body: const VerticalDivider(),
+        home: const Scaffold(
+          body: VerticalDivider(),
         ),
       ));
 
@@ -195,8 +195,8 @@ void main() {
       final DividerThemeData dividerTheme = _dividerTheme();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(dividerTheme: dividerTheme),
-        home: Scaffold(
-          body: const VerticalDivider(
+        home: const Scaffold(
+          body: VerticalDivider(
             color: color,
             width: width,
             thickness: thickness,
