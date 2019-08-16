@@ -20,6 +20,7 @@ import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
+import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
@@ -185,6 +186,9 @@ class IOSDevice extends Device {
       } on IOSDeviceNotFoundError catch (error) {
         // Unable to find device with given udid. Possibly a network device.
         printTrace('Error getting attached iOS device: $error');
+      } on IOSDeviceNotTrustedError catch (error) {
+        printTrace('Error getting attached iOS device information: $error');
+        UsageEvent('device', 'ios-trust-failure').send();
       }
     }
     return devices;
