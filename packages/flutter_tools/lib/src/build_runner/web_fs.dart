@@ -319,7 +319,23 @@ class BuildDaemonCreator {
         '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
       ],
       logHandler: (ServerLog serverLog) {
-        printTrace(serverLog.message);
+        switch (serverLog.level) {
+          case Level.CONFIG:
+          case Level.FINE:
+          case Level.FINER:
+          case Level.FINEST:
+          case Level.INFO:
+            printTrace(serverLog.message);
+            break;
+          case Level.SEVERE:
+          case Level.SHOUT:
+            printError(
+              serverLog?.error ?? '',
+              stackTrace: serverLog.stackTrace != null
+                  ? StackTrace.fromString(serverLog?.stackTrace)
+                  : null,
+            );
+        }
       },
       buildMode: daemon.BuildMode.Manual,
     );

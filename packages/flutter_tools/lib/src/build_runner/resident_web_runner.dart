@@ -218,6 +218,9 @@ class ResidentWebRunner extends ResidentRunner {
     String reason,
     bool benchmarkMode = false,
   }) async {
+    if (!fullRestart) {
+      return OperationResult(1, 'hot reload not supported on the web.');
+    }
     final Stopwatch timer = Stopwatch()..start();
     final Status status = logger.startProgress(
       'Performing hot restart...',
@@ -232,18 +235,12 @@ class ResidentWebRunner extends ResidentRunner {
       return OperationResult(1, 'Failed to recompile application.');
     }
     if (supportsServiceProtocol) {
-      try {
-        final vmservice.Response reloadResponse = await _vmService.callServiceExtension('hotRestart');
-        printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-        return reloadResponse.type == 'Success'
-            ? OperationResult.ok
-            : OperationResult(1, reloadResponse.toString());
-      } on vmservice.RPCError {
-        await _webFs.hardRefresh();
-        return OperationResult(1, 'Page requires full reload');
-      } finally {
-        status.stop();
-      }
+      final vmservice.Response reloadResponse = await _vmService.callServiceExtension('hotRestart');
+      status.stop();
+      printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+      return reloadResponse.type == 'Success'
+          ? OperationResult.ok
+          : OperationResult(1, reloadResponse.toString());
     }
     // If we're not in hot mode, the only way to restart is to reload the tab.
     await _webFs.hardRefresh();
