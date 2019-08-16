@@ -3,6 +3,7 @@
 *~
 .*.sw?
 .DS_Store
+.ccls-cache
 .classpath
 .cproject
 .dart_tool
@@ -14,6 +15,7 @@
 .project
 .pub
 .pydevproject
+compile_commands.json
 cscope.*
 Session.vim
 tags
