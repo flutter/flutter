@@ -46,7 +46,7 @@ class GenSnapshot {
 
   Future<int> run({
     @required SnapshotType snapshotType,
-    IOSArch iosArch,
+    DarwinArch darwinArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
@@ -59,7 +59,7 @@ class GenSnapshot {
     // iOS has a separate gen_snapshot for armv7 and arm64 in the same,
     // directory. So we need to select the right one.
     if (snapshotType.platform == TargetPlatform.ios) {
-      snapshotterPath += '_' + getNameForIOSArch(iosArch);
+      snapshotterPath += '_' + getNameForDarwinArch(darwinArch);
     }
 
     StringConverter outputFilter;
@@ -89,7 +89,7 @@ class AOTSnapshotter {
     @required String mainPath,
     @required String packagesPath,
     @required String outputPath,
-    IOSArch iosArch,
+    DarwinArch darwinArch,
     List<String> extraGenSnapshotOptions = const <String>[],
     @required bool bitcode,
   }) async {
@@ -103,7 +103,7 @@ class AOTSnapshotter {
       return 1;
     }
     // TODO(cbracken): replace IOSArch with TargetPlatform.ios_{armv7,arm64}.
-    assert(platform != TargetPlatform.ios || iosArch != null);
+    assert(platform != TargetPlatform.ios || darwinArch != null);
 
     final PackageMap packageMap = PackageMap(packagesPath);
     final String packageMapError = packageMap.checkValid();
@@ -130,7 +130,7 @@ class AOTSnapshotter {
     }
 
     final String assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
-    if (platform == TargetPlatform.ios) {
+    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
       // Assembly AOT snapshot.
       outputPaths.add(assembly);
       genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
@@ -143,7 +143,7 @@ class AOTSnapshotter {
       genSnapshotArgs.add('--strip');
     }
 
-    if (platform == TargetPlatform.android_arm || iosArch == IOSArch.armv7) {
+    if (platform == TargetPlatform.android_arm || darwinArch == DarwinArch.armv7) {
       // Use softfp for Android armv7 devices.
       // This is the default for armv7 iOS builds, but harmless to set.
       // TODO(cbracken): eliminate this when we fix https://github.com/flutter/flutter/issues/17489
@@ -168,7 +168,7 @@ class AOTSnapshotter {
         () => genSnapshot.run(
       snapshotType: snapshotType,
       additionalArgs: genSnapshotArgs,
-      iosArch: iosArch,
+      darwinArch: darwinArch,
     ));
     if (genSnapshotExitCode != 0) {
       printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
@@ -197,9 +197,9 @@ class AOTSnapshotter {
 
     // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
-    if (platform == TargetPlatform.ios) {
-      final RunResult result = await _buildIosFramework(
-        iosArch: iosArch,
+    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
+      final RunResult result = await _buildFramework(
+        appleArch: darwinArch,
         assemblyPath: bitcode ? '$assembly.bitcode' : assembly,
         outputPath: outputDir.path,
         bitcode: bitcode,
@@ -210,17 +210,21 @@ class AOTSnapshotter {
     return 0;
   }
 
-  /// Builds an iOS framework at [outputPath]/App.framework from the assembly
+  /// Builds an iOS or macOS framework at [outputPath]/App.framework from the assembly
   /// source at [assemblyPath].
-  Future<RunResult> _buildIosFramework({
-    @required IOSArch iosArch,
+  Future<RunResult> _buildFramework({
+    @required DarwinArch appleArch,
     @required String assemblyPath,
     @required String outputPath,
     @required bool bitcode,
   }) async {
-    final String targetArch = iosArch == IOSArch.armv7 ? 'armv7' : 'arm64';
+    final String targetArch = getNameForDarwinArch(appleArch);
     printStatus('Building App.framework for $targetArch...');
-    final List<String> commonBuildOptions = <String>['-arch', targetArch, '-miphoneos-version-min=8.0'];
+    final List<String> commonBuildOptions = <String>[
+      '-arch', targetArch,
+      if (appleArch == DarwinArch.arm64 || appleArch == DarwinArch.armv7)
+        '-miphoneos-version-min=8.0',
+    ];
 
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
     final RunResult compileResult = await xcode.cc(<String>[
@@ -322,6 +326,7 @@ class AOTSnapshotter {
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,
       TargetPlatform.ios,
+      TargetPlatform.darwin_x64,
     ].contains(platform);
   }
 

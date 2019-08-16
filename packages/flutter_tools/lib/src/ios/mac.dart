@@ -201,7 +201,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   BuildInfo buildInfo,
   String targetOverride,
   bool buildForDevice,
-  IOSArch activeArch,
+  DarwinArch activeArch,
   bool codesign = true,
   bool usesTerminalUi = true,
 }) async {
@@ -317,7 +317,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   if (activeArch != null) {
-    final String activeArchName = getNameForIOSArch(activeArch);
+    final String activeArchName = getNameForDarwinArch(activeArch);
     if (activeArchName != null) {
       buildCommands.add('ONLY_ACTIVE_ARCH=YES');
       buildCommands.add('ARCHS=$activeArchName');
