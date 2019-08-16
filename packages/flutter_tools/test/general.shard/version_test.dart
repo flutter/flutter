@@ -472,6 +472,10 @@ void fakeData(
       return equality.equals(args, expectedArgs);
     }
 
+    bool listArgsAre(List<String> a) {
+      return Function.apply(argsAre, a);
+    }
+
     if (argsAre('git', 'log', '-n', '1', '--pretty=format:%ad', '--date=iso')) {
       return success(localCommitDate.toString());
     } else if (argsAre('git', 'remote')) {
