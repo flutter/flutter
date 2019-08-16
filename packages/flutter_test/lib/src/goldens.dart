@@ -77,13 +77,13 @@ abstract class GoldenFileComparator {
     if (identical(test, master))
       return ComparisonResult(passed: true);
 
-    if (test == null
-      || master == null
-      || test.isEmpty
-      || master.isEmpty) {
+    if (test == null ||
+      master == null ||
+      test.isEmpty ||
+      master.isEmpty) {
       return ComparisonResult(
         passed: false,
-        error: 'Pixel test failed, null image provided.'
+        error: 'Pixel test failed, null image provided.',
       );
     }
 
@@ -96,13 +96,14 @@ abstract class GoldenFileComparator {
     final int width = testImage.width;
     final int height = testImage.height;
 
-    if (width != masterImage.width || height != masterImage.height)
+    if (width != masterImage.width || height != masterImage.height) {
       return ComparisonResult(
         passed: false,
         error: 'Pixel test failed, image sizes do not match.\n'
           'Master Image: ${masterImage.width} X ${masterImage.height}\n'
           'Test Image: ${testImage.width} X ${testImage.height}',
       );
+    }
 
     int pixelDiffCount = 0;
     final int totalPixels = width * height;
