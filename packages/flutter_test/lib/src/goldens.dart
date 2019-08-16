@@ -77,10 +77,7 @@ abstract class GoldenFileComparator {
     if (identical(test, master))
       return ComparisonResult(passed: true);
 
-    if (test == null ||
-      master == null ||
-      test.isEmpty ||
-      master.isEmpty) {
+    if (test == null || master == null || test.isEmpty || master.isEmpty) {
       return ComparisonResult(
         passed: false,
         error: 'Pixel test failed, null image provided.',
