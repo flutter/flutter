@@ -33,7 +33,7 @@ class ContextDependencyCycleException implements Exception {
 /// context will not have any values associated with it.
 ///
 /// This is guaranteed to never return `null`.
-AppContext get context => Zone.current[_Key.key] ?? AppContext._root;
+AppContext get context => Zone.current[_Key.key] as AppContext ?? AppContext._root;
 
 /// A lookup table (mapping types to values) and an implied scope, in which
 /// code is run.
@@ -43,7 +43,7 @@ AppContext get context => Zone.current[_Key.key] ?? AppContext._root;
 /// scope) is created.
 ///
 /// Child contexts are created and run using zones. To read more about how
-/// zones work, see https://www.dartlang.org/articles/libraries/zones.
+/// zones work, see https://api.dart.dev/stable/dart-async/Zone-class.html.
 class AppContext {
   AppContext._(
     this._parent,
@@ -107,6 +107,17 @@ class AppContext {
 
   /// Gets the value associated with the specified [type], or `null` if no
   /// such value has been associated.
+  T get<T>() {
+    dynamic value = _generateIfNecessary(T, _overrides);
+    if (value == null && _parent != null) {
+      value = _parent.get<T>();
+    }
+    return _unboxNull(value ?? _generateIfNecessary(T, _fallbacks)) as T;
+  }
+
+  /// Gets the value associated with the specified [type], or `null` if no
+  /// such value has been associated.
+  @Deprecated('use get<T> instead for type safety.')
   Object operator [](Type type) {
     dynamic value = _generateIfNecessary(type, _overrides);
     if (value == null && _parent != null)
@@ -131,6 +142,7 @@ class AppContext {
     String name,
     Map<Type, Generator> overrides,
     Map<Type, Generator> fallbacks,
+    ZoneSpecification zoneSpecification,
   }) async {
     final AppContext child = AppContext._(
       this,
@@ -141,6 +153,7 @@ class AppContext {
     return await runZoned<Future<V>>(
       () async => await body(),
       zoneValues: <_Key, AppContext>{_Key.key: child},
+      zoneSpecification: zoneSpecification,
     );
   }
 

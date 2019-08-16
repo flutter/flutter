@@ -8,6 +8,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
 void main() {
+  const Offset forcePressOffset = Offset(400.0, 50.0);
+
   testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) async {
     bool didStartDrag = false;
     double updatedDragDelta;
@@ -100,7 +102,7 @@ void main() {
           didStartPan = true;
         },
         onPanUpdate: (DragUpdateDetails details) {
-          panDelta = details.delta;
+          panDelta = panDelta == null ? details.delta : panDelta + details.delta;
         },
         onPanEnd: (DragEndDetails details) {
           didEndPan = true;
@@ -222,8 +224,8 @@ void main() {
     expect(didTap, isFalse);
   });
 
-  testWidgets('cache unchanged callbacks', (WidgetTester tester) async {
-    final GestureTapCallback inputCallback = () {};
+  testWidgets('cache render object', (WidgetTester tester) async {
+    final GestureTapCallback inputCallback = () { };
 
     await tester.pumpWidget(
       Center(
@@ -235,7 +237,6 @@ void main() {
     );
 
     final RenderSemanticsGestureHandler renderObj1 = tester.renderObject(find.byType(GestureDetector));
-    final GestureTapCallback actualCallback1 = renderObj1.onTap;
 
     await tester.pumpWidget(
       Center(
@@ -247,10 +248,8 @@ void main() {
     );
 
     final RenderSemanticsGestureHandler renderObj2 = tester.renderObject(find.byType(GestureDetector));
-    final GestureTapCallback actualCallback2 = renderObj2.onTap;
 
     expect(renderObj1, same(renderObj2));
-    expect(actualCallback1, same(actualCallback2)); // Should be cached.
   });
 
   testWidgets('Tap down occurs after kPressTimeout', (WidgetTester tester) async {
@@ -285,33 +284,32 @@ void main() {
     );
 
     // Pointer is dragged from the center of the 800x100 gesture detector
-    // to a point (400,300) below it. This always causes onTapCancel to be
-    // called; onTap should never be called.
+    // to a point (400,300) below it. This should never call onTap.
     Future<void> dragOut(Duration timeout) async {
       final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
-      // If the timeout is less than kPressTimeout the recognizer will just trigger
-      // the onTapCancel callback. If the timeout is greater than kLongPressTimeout
+      // If the timeout is less than kPressTimeout the recognizer will not
+      // trigger any callbacks. If the timeout is greater than kLongPressTimeout
       // then onTapDown, onLongPress, and onCancel will be called.
       await tester.pump(timeout);
       await gesture.moveTo(const Offset(400.0, 300.0));
       await gesture.up();
     }
 
-    await dragOut(kPressTimeout * 0.5); // generates tapCancel
+    await dragOut(kPressTimeout * 0.5); // generates nothing
     expect(tapDown, 0);
-    expect(tapCancel, 1);
+    expect(tapCancel, 0);
     expect(tap, 0);
     expect(longPress, 0);
 
     await dragOut(kPressTimeout); // generates tapDown, tapCancel
     expect(tapDown, 1);
-    expect(tapCancel, 2);
+    expect(tapCancel, 1);
     expect(tap, 0);
     expect(longPress, 0);
 
     await dragOut(kLongPressTimeout); // generates tapDown, longPress, tapCancel
     expect(tapDown, 2);
-    expect(tapCancel, 3);
+    expect(tapCancel, 2);
     expect(tap, 0);
     expect(longPress, 1);
   });
@@ -367,9 +365,20 @@ void main() {
         ),
       ),
     );
-
-    final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
     const int pointerValue = 1;
+
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0,
+      ),
+    );
+
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
 
     expect(forcePressStart, 0);
@@ -428,9 +437,23 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
     const int pointerValue = 1;
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+    const double maxPressure = 6.0;
+
+    final TestGesture gesture = await tester.createGesture();
+
+    await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: maxPressure,
+        pressureMin: 0.0,
+      ),
+    );
+
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.3, pressureMin: 0, pressureMax: maxPressure));
 
     expect(forcePressStart, 0);
     expect(longPressTimes, 0);
@@ -442,7 +465,7 @@ void main() {
     expect(forcePressStart, 0);
 
     // Failed attempt to trigger the force press.
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.5, pressureMin: 0, pressureMax: maxPressure));
 
     expect(longPressTimes, 1);
     expect(forcePressStart, 0);
@@ -467,8 +490,21 @@ void main() {
       ),
     );
 
-    final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
     const int pointerValue = 1;
+
+    final TestGesture gesture = await tester.createGesture();
+
+    await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0,
+      ),
+    );
+
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
 
     expect(forcePressStart, 0);
@@ -486,4 +522,90 @@ void main() {
     expect(horizontalDragStart, 1);
     expect(forcePressStart, 0);
   });
+
+  group('RawGestureDetectorState\'s debugFillProperties', () {
+    testWidgets('when default', (WidgetTester tester) async {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(RawGestureDetector(
+        key: key,
+      ));
+      key.currentState.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+      expect(description, <String>[
+        'gestures: <none>',
+      ]);
+    });
+
+    testWidgets('should show gestures, custom semantics and behavior', (WidgetTester tester) async {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(RawGestureDetector(
+        key: key,
+        behavior: HitTestBehavior.deferToChild,
+        gestures: <Type, GestureRecognizerFactory>{
+          TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+            () => TapGestureRecognizer(),
+            (TapGestureRecognizer recognizer) {
+              recognizer.onTap = () {};
+            },
+          ),
+          LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+            () => LongPressGestureRecognizer(),
+            (LongPressGestureRecognizer recognizer) {
+              recognizer.onLongPress = () {};
+            },
+          ),
+        },
+        child: Container(),
+        semantics: _EmptySemanticsGestureDelegate(),
+      ));
+      key.currentState.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+      expect(description, <String>[
+        'gestures: tap, long press',
+        'semantics: _EmptySemanticsGestureDelegate()',
+        'behavior: deferToChild',
+      ]);
+    });
+
+    testWidgets('should not show semantics when excludeFromSemantics is true', (WidgetTester tester) async {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(RawGestureDetector(
+        key: key,
+        gestures: const <Type, GestureRecognizerFactory>{},
+        child: Container(),
+        semantics: _EmptySemanticsGestureDelegate(),
+        excludeFromSemantics: true,
+      ));
+      key.currentState.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+      expect(description, <String>[
+        'gestures: <none>',
+        'excludeFromSemantics: true',
+      ]);
+    });
+  });
+}
+
+class _EmptySemanticsGestureDelegate extends SemanticsGestureDelegate {
+  @override
+  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+  }
 }

@@ -1,5 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
+    "$comment": "This should be kept in sync with the validator in packages/flutter_tools/lib/src/flutter_manifest.dart",
     "title": "pubspec.yaml",
     "type": "object",
     "additionalProperties": true,
@@ -47,6 +48,7 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "androidX": { "type": "boolean" },
                         "androidPackage": { "type": "string" },
                         "iosBundleIdentifier": { "type": "string" }
                     }
@@ -57,6 +59,7 @@
                     "properties": {
                         "androidPackage": { "type": "string" },
                         "iosPrefix": { "type": "string" },
+                        "macosPrefix": { "type": "string" },
                         "pluginClass": { "type": "string" }
                     }
                 }

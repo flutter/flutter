@@ -156,7 +156,7 @@ class Typography extends Diagnosticable {
   /// on the overall [ThemeData.brightness], when the current locale's
   /// [MaterialLocalizations.scriptCategory] is [ScriptCategory.englishLike].
   ///
-  /// To look up a localized [TextTheme], use the the overall [Theme], for
+  /// To look up a localized [TextTheme], use the overall [Theme], for
   /// example: `Theme.of(context).textTheme`.
   final TextTheme englishLike;
 
@@ -167,7 +167,7 @@ class Typography extends Diagnosticable {
   /// on the overall [ThemeData.brightness], when the current locale's
   /// [MaterialLocalizations.scriptCategory] is [ScriptCategory.dense].
   ///
-  /// To look up a localized [TextTheme], use the the overall [Theme], for
+  /// To look up a localized [TextTheme], use the overall [Theme], for
   /// example: `Theme.of(context).textTheme`.
   final TextTheme dense;
 
@@ -177,7 +177,7 @@ class Typography extends Diagnosticable {
   /// on the overall [ThemeData.brightness], when the current locale's
   /// [MaterialLocalizations.scriptCategory] is [ScriptCategory.tall].
   ///
-  /// To look up a localized [TextTheme], use the the overall [Theme], for
+  /// To look up a localized [TextTheme], use the overall [Theme], for
   /// example: `Theme.of(context).textTheme`.
   final TextTheme tall;
 

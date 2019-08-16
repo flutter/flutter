@@ -31,6 +31,39 @@ typedef RpcPeerConnectionFunction = Future<json_rpc.Peer> Function(
 /// custom connection function is needed.
 RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 
+/// The JSON RPC 2 spec says that a notification from a client must not respond
+/// to the client. It's possible the client sent a notification as a "ping", but
+/// the service isn't set up yet to respond.
+///
+/// For example, if the client sends a notification message to the server for
+/// 'streamNotify', but the server has not finished loading, it will throw an
+/// exception. Since the message is a notification, the server follows the
+/// specification and does not send a response back, but is left with an
+/// unhandled exception. That exception is safe for us to ignore - the client
+/// is signaling that it will try again later if it doesn't get what it wants
+/// here by sending a notification.
+// This may be ignoring too many exceptions. It would be best to rewrite
+// the client code to not use notifications so that it gets error replies back
+// and can decide what to do from there.
+// TODO(dnfield): https://github.com/flutter/flutter/issues/31813
+bool _ignoreRpcError(dynamic error) {
+  if (error is json_rpc.RpcException) {
+    final json_rpc.RpcException exception = error;
+    return exception.data == null || exception.data['id'] == null;
+  } else if (error is String && error.startsWith('JSON-RPC error -32601')) {
+    return true;
+  }
+  return false;
+}
+
+
+void _unhandledJsonRpcError(dynamic error, dynamic stack) {
+  if (_ignoreRpcError(error)) {
+    return;
+  }
+  _log.fine('Error in internalimplementation of JSON RPC.\n$error\n$stack');
+}
+
 /// Attempts to connect to a Dart VM service.
 ///
 /// Gives up after `timeout` has elapsed.
@@ -45,7 +78,7 @@ Future<json_rpc.Peer> _waitAndConnect(
     json_rpc.Peer peer;
     try {
       socket = await WebSocket.connect(uri.toString()).timeout(timeout);
-      peer = json_rpc.Peer(IOWebSocketChannel(socket).cast())..listen();
+      peer = json_rpc.Peer(IOWebSocketChannel(socket).cast(), onUnhandledError: _unhandledJsonRpcError)..listen();
       return peer;
     } on HttpException catch (e) {
       // This is a fine warning as this most likely means the port is stale.
@@ -128,24 +161,18 @@ class DartVm {
   /// Returns a [List] of [IsolateRef] objects whose name matches `pattern`.
   ///
   /// This is not limited to Isolates running Flutter, but to any Isolate on the
-  /// VM.
-  ///
-  /// `includeNonFlutterIsolates` makes sure to add non-flutter Dart isolates,
-  /// and defaults to `false`.
+  /// VM. Therefore, the [pattern] argument should be written to exclude
+  /// matching unintended isolates.
   Future<List<IsolateRef>> getMainIsolatesByPattern(
     Pattern pattern, {
     Duration timeout = _kRpcTimeout,
-    bool includeNonFlutterIsolates = false,
   }) async {
     final Map<String, dynamic> jsonVmRef =
         await invokeRpc('getVM', timeout: timeout);
     final List<IsolateRef> result = <IsolateRef>[];
     for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
       final String name = jsonIsolate['name'];
-      // `:main()` is included at the end of a flutter isolate, whereas the
-      // name of a dart Isolate is concluded as if the name were a function.
-      if (name.contains(pattern) &&
-          (includeNonFlutterIsolates || name.contains(RegExp(r':main\(\)')))) {
+      if (pattern.matchAsPrefix(name) != null) {
         _log.fine('Found Isolate matching "$pattern": "$name"');
         result.add(IsolateRef._fromJson(jsonIsolate, this));
       }
@@ -164,13 +191,13 @@ class DartVm {
     Duration timeout = _kRpcTimeout,
   }) async {
     final Map<String, dynamic> result = await _peer
-        .sendRequest(function, params ?? <String, dynamic>{})
-        .timeout(timeout, onTimeout: () {
-      throw TimeoutException(
-        'Peer connection timed out during RPC call',
-        timeout,
-      );
-    });
+      .sendRequest(function, params ?? <String, dynamic>{})
+      .timeout(timeout, onTimeout: () {
+        throw TimeoutException(
+          'Peer connection timed out during RPC call',
+          timeout,
+        );
+      });
     return result;
   }
 

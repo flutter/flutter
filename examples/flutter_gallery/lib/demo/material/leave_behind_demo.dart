@@ -13,7 +13,8 @@ enum LeaveBehindDemoAction {
   reset,
   horizontalSwipe,
   leftSwipe,
-  rightSwipe
+  rightSwipe,
+  confirmDismiss,
 }
 
 class LeaveBehindItem implements Comparable<LeaveBehindItem> {
@@ -43,6 +44,7 @@ class LeaveBehindDemo extends StatefulWidget {
 class LeaveBehindDemoState extends State<LeaveBehindDemo> {
   static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   DismissDirection _dismissDirection = DismissDirection.horizontal;
+  bool _confirmDismiss = true;
   List<LeaveBehindItem> leaveBehindItems;
 
   void initListItems() {
@@ -51,7 +53,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         index: index,
         name: 'Item $index Sender',
         subject: 'Subject: $index',
-        body: "[$index] first line of the message's body..."
+        body: "[$index] first line of the message's body...",
       );
     });
   }
@@ -77,6 +79,9 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         case LeaveBehindDemoAction.rightSwipe:
           _dismissDirection = DismissDirection.startToEnd;
           break;
+        case LeaveBehindDemoAction.confirmDismiss:
+          _confirmDismiss = !_confirmDismiss;
+          break;
       }
     });
   }
@@ -96,8 +101,8 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       content: Text('You archived item ${item.index}'),
       action: SnackBarAction(
         label: 'UNDO',
-        onPressed: () { handleUndo(item); }
-      )
+        onPressed: () { handleUndo(item); },
+      ),
     ));
   }
 
@@ -109,8 +114,8 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       content: Text('You deleted item ${item.index}'),
       action: SnackBarAction(
         label: 'UNDO',
-        onPressed: () { handleUndo(item); }
-      )
+        onPressed: () { handleUndo(item); },
+      ),
     ));
   }
 
@@ -125,15 +130,18 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         ),
       );
     } else {
-      body = ListView(
-        children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
-          return _LeaveBehindListItem(
-            item: item,
-            onArchive: _handleArchive,
-            onDelete: _handleDelete,
-            dismissDirection: _dismissDirection,
-          );
-        }).toList()
+      body = Scrollbar(
+        child: ListView(
+          children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
+            return _LeaveBehindListItem(
+              confirmDismiss: _confirmDismiss,
+              item: item,
+              onArchive: _handleArchive,
+              onDelete: _handleDelete,
+              dismissDirection: _dismissDirection,
+            );
+          }).toList(),
+          ),
       );
     }
 
@@ -148,27 +156,32 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
             itemBuilder: (BuildContext context) => <PopupMenuEntry<LeaveBehindDemoAction>>[
               const PopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.reset,
-                child: Text('Reset the list')
+                child: Text('Reset the list'),
               ),
               const PopupMenuDivider(),
               CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.horizontalSwipe,
                 checked: _dismissDirection == DismissDirection.horizontal,
-                child: const Text('Horizontal swipe')
+                child: const Text('Horizontal swipe'),
               ),
               CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.leftSwipe,
                 checked: _dismissDirection == DismissDirection.endToStart,
-                child: const Text('Only swipe left')
+                child: const Text('Only swipe left'),
               ),
               CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.rightSwipe,
                 checked: _dismissDirection == DismissDirection.startToEnd,
-                child: const Text('Only swipe right')
-              )
-            ]
-          )
-        ]
+                child: const Text('Only swipe right'),
+              ),
+              CheckedPopupMenuItem<LeaveBehindDemoAction>(
+                value: LeaveBehindDemoAction.confirmDismiss,
+                checked: _confirmDismiss,
+                child: const Text('Confirm dismiss'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: body,
     );
@@ -182,12 +195,14 @@ class _LeaveBehindListItem extends StatelessWidget {
     @required this.onArchive,
     @required this.onDelete,
     @required this.dismissDirection,
+    @required this.confirmDismiss,
   }) : super(key: key);
 
   final LeaveBehindItem item;
   final DismissDirection dismissDirection;
   final void Function(LeaveBehindItem) onArchive;
   final void Function(LeaveBehindItem) onDelete;
+  final bool confirmDismiss;
 
   void _handleArchive() {
     onArchive(item);
@@ -214,30 +229,70 @@ class _LeaveBehindListItem extends StatelessWidget {
           else
             _handleDelete();
         },
+        confirmDismiss: !confirmDismiss ? null : (DismissDirection dismissDirection) async {
+          switch(dismissDirection) {
+            case DismissDirection.endToStart:
+              return await _showConfirmationDialog(context, 'archive') == true;
+            case DismissDirection.startToEnd:
+              return await _showConfirmationDialog(context, 'delete') == true;
+            case DismissDirection.horizontal:
+            case DismissDirection.vertical:
+            case DismissDirection.up:
+            case DismissDirection.down:
+              assert(false);
+          }
+          return false;
+        },
         background: Container(
           color: theme.primaryColor,
           child: const ListTile(
-            leading: Icon(Icons.delete, color: Colors.white, size: 36.0)
-          )
+            leading: Icon(Icons.delete, color: Colors.white, size: 36.0),
+          ),
         ),
         secondaryBackground: Container(
           color: theme.primaryColor,
           child: const ListTile(
-            trailing: Icon(Icons.archive, color: Colors.white, size: 36.0)
-          )
+            trailing: Icon(Icons.archive, color: Colors.white, size: 36.0),
+          ),
         ),
         child: Container(
           decoration: BoxDecoration(
             color: theme.canvasColor,
-            border: Border(bottom: BorderSide(color: theme.dividerColor))
+            border: Border(bottom: BorderSide(color: theme.dividerColor)),
           ),
           child: ListTile(
             title: Text(item.name),
             subtitle: Text('${item.subject}\n${item.body}'),
-            isThreeLine: true
+            isThreeLine: true,
           ),
         ),
       ),
+    );
+  }
+
+  Future<bool> _showConfirmationDialog(BuildContext context, String action) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Do you want to $action this item?'),
+          actions: <Widget>[
+            FlatButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                Navigator.pop(context, true); // showDialog() returns true
+              },
+            ),
+            FlatButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.pop(context, false); // showDialog() returns false
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

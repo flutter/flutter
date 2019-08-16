@@ -35,7 +35,7 @@ class OffscreenWidgetTree {
     root = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
-      child: app
+      child: app,
     ).attachToRenderTree(buildOwner, root);
     pumpFrame();
   }

@@ -50,6 +50,44 @@ bool debugRepaintRainbowEnabled = false;
 /// Overlay a rotating set of colors when repainting text in checked mode.
 bool debugRepaintTextRainbowEnabled = false;
 
+/// Causes [PhysicalModelLayer]s to paint a red rectangle around themselves if
+/// they are overlapping and painted out of order with regard to their elevation.
+///
+/// Android and iOS will show the last painted layer on top, whereas Fuchsia
+/// will show the layer with the highest elevation on top.
+///
+/// For example, a rectangular elevation at 3.0 that is painted before an
+/// overlapping rectangular elevation at 2.0 would render this way on Android
+/// and iOS (with fake shadows):
+/// ```
+/// ┌───────────────────┐
+/// │                   │
+/// │      3.0          │
+/// │            ┌───────────────────┐
+/// │            │                   │
+/// └────────────│                   │
+///              │        2.0        │
+///              │                   │
+///              └───────────────────┘
+/// ```
+///
+/// But this way on Fuchsia (with real shadows):
+/// ```
+/// ┌───────────────────┐
+/// │                   │
+/// │      3.0          │
+/// │                   │────────────┐
+/// │                   │            │
+/// └───────────────────┘            │
+///              │         2.0       │
+///              │                   │
+///              └───────────────────┘
+/// ```
+///
+/// This check helps developers that want a consistent look and feel detect
+/// where this inconsistency would occur.
+bool debugCheckElevationsEnabled = false;
+
 /// The current color to overlay when repainting a layer.
 ///
 /// This is used by painting debug code that implements
@@ -102,7 +140,7 @@ bool debugCheckIntrinsicSizes = false;
 ///
 /// For details on how to use [dart:developer.Timeline] events in the Dart
 /// Observatory to optimize your app, see:
-/// <https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md>
+/// <https://fuchsia.googlesource.com/topaz/+/master/shell/docs/performance.md>
 ///
 /// See also:
 ///
@@ -205,8 +243,8 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double o
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
 ///
-/// See <https://docs.flutter.io/flutter/rendering/rendering-library.html> for
-/// a complete list.
+/// See [the rendering library](rendering/rendering-library.html) for a complete
+/// list.
 ///
 /// The `debugCheckIntrinsicSizesOverride` argument can be provided to override
 /// the expected value for [debugCheckIntrinsicSizes]. (This exists because the

@@ -102,7 +102,7 @@ void main() {
     expect(log, <String>['badListener', 'listener1', 'listener2']);
     expect(tester.takeException(), isNullThrownError);
     log.clear();
-  });
+  }, skip: isBrowser);
 
   test('ChangeNotifier with mutating listener', () {
     final TestNotifier test = TestNotifier();
@@ -261,7 +261,7 @@ void main() {
 
     final TestNotifier source1 = TestNotifier();
     final TestNotifier source2 = TestNotifier();
-    final VoidCallback fakeListener = () {};
+    final VoidCallback fakeListener = () { };
 
     final Listenable listenableUnderTest = Listenable.merge(<Listenable>[source1, source2]);
     expect(source1.isListenedTo, isFalse);

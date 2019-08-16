@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -112,6 +113,56 @@ void main() {
     expect(followerLayer.debugSubtreeNeedsAddToScene, true);
   });
 
+  test('depthFirstIterateChildren', () {
+    final ContainerLayer a = ContainerLayer();
+    final ContainerLayer b = ContainerLayer();
+    final ContainerLayer c = ContainerLayer();
+    final ContainerLayer d = ContainerLayer();
+    final ContainerLayer e = ContainerLayer();
+    final ContainerLayer f = ContainerLayer();
+    final ContainerLayer g = ContainerLayer();
+
+    final PictureLayer h = PictureLayer(Rect.zero);
+    final PictureLayer i = PictureLayer(Rect.zero);
+    final PictureLayer j = PictureLayer(Rect.zero);
+
+    // The tree is like the following:
+    //        a____
+    //       /     \
+    //      b___    c
+    //     / \  \   |
+    //    d   e  f  g
+    //   / \        |
+    //  h   i       j
+    a.append(b);
+    a.append(c);
+    b.append(d);
+    b.append(e);
+    b.append(f);
+    d.append(h);
+    d.append(i);
+    c.append(g);
+    g.append(j);
+
+    expect(
+      a.depthFirstIterateChildren(),
+      <Layer>[b, d, h, i, e, f, c, g, j],
+    );
+
+    d.remove();
+    //        a____
+    //       /     \
+    //      b___    c
+    //       \  \   |
+    //        e  f  g
+    //              |
+    //              j
+    expect(
+      a.depthFirstIterateChildren(),
+      <Layer>[b, e, f, c, g, j],
+    );
+  });
+
   void checkNeedsAddToScene(Layer layer, void mutateCallback()) {
     layer.debugMarkClean();
     layer.updateSubtreeNeedsAddToScene();
@@ -139,7 +190,7 @@ void main() {
     });
   });
 
-  final Rect unitRect = Rect.fromLTRB(0, 0, 1, 1);
+  const Rect unitRect = Rect.fromLTRB(0, 0, 1, 1);
 
   test('mutating PerformanceOverlayLayer fields triggers needsAddToScene', () {
     final PerformanceOverlayLayer layer = PerformanceOverlayLayer(
@@ -199,8 +250,17 @@ void main() {
     });
   });
 
+  test('mutating ColorFilterLayer fields triggers needsAddToScene', () {
+    final ColorFilterLayer layer = ColorFilterLayer(
+      colorFilter: const ColorFilter.mode(Color(0xFFFF0000), BlendMode.color),
+    );
+    checkNeedsAddToScene(layer, () {
+      layer.colorFilter = const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color);
+    });
+  });
+
   test('mutating ShaderMaskLayer fields triggers needsAddToScene', () {
-    const Gradient gradient = RadialGradient(colors: <Color>[Color(0), Color(1)]);
+    const Gradient gradient = RadialGradient(colors: <Color>[Color(0x00000000), Color(0x00000001)]);
     final Shader shader = gradient.createShader(Rect.zero);
     final ShaderMaskLayer layer = ShaderMaskLayer(shader: shader, maskRect: Rect.zero, blendMode: BlendMode.clear);
     checkNeedsAddToScene(layer, () {
@@ -223,7 +283,7 @@ void main() {
 
   test('mutating PhysicalModelLayer fields triggers needsAddToScene', () {
     final PhysicalModelLayer layer = PhysicalModelLayer(
-        clipPath: Path(), elevation: 0, color: const Color(0), shadowColor: const Color(0));
+        clipPath: Path(), elevation: 0, color: const Color(0x00000000), shadowColor: const Color(0x00000000));
     checkNeedsAddToScene(layer, () {
       final Path newPath = Path();
       newPath.addRect(unitRect);
@@ -233,10 +293,176 @@ void main() {
       layer.elevation = 1;
     });
     checkNeedsAddToScene(layer, () {
-      layer.color = const Color(1);
+      layer.color = const Color(0x00000001);
     });
     checkNeedsAddToScene(layer, () {
-      layer.shadowColor = const Color(1);
+      layer.shadowColor = const Color(0x00000001);
     });
   });
+
+  group('PhysicalModelLayer checks elevations', () {
+    /// Adds the layers to a container where A paints before B.
+    ///
+    /// Expects there to be `expectedErrorCount` errors.  Checking elevations is
+    /// enabled by default.
+    void _testConflicts(
+      PhysicalModelLayer layerA,
+      PhysicalModelLayer layerB, {
+      @required int expectedErrorCount,
+      bool enableCheck = true,
+    }) {
+      assert(expectedErrorCount != null);
+      assert(enableCheck || expectedErrorCount == 0, 'Cannot disable check and expect non-zero error count.');
+      final OffsetLayer container = OffsetLayer();
+      container.append(layerA);
+      container.append(layerB);
+      debugCheckElevationsEnabled = enableCheck;
+      debugDisableShadows = false;
+      int errors = 0;
+      if (enableCheck) {
+        FlutterError.onError = (FlutterErrorDetails details) {
+          errors++;
+        };
+      }
+      container.buildScene(SceneBuilder());
+      expect(errors, expectedErrorCount);
+      debugCheckElevationsEnabled = false;
+    }
+
+    // Tests:
+    //
+    //  ─────────────                    (LayerA, paints first)
+    //      │     ─────────────          (LayerB, paints second)
+    //      │          │
+    // ───────────────────────────
+    test('Overlapping layers at wrong elevation', () {
+      final PhysicalModelLayer layerA = PhysicalModelLayer(
+        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
+        elevation: 3.0,
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
+      );
+      final PhysicalModelLayer layerB =PhysicalModelLayer(
+        clipPath: Path()..addRect(const Rect.fromLTWH(10, 10, 20, 20)),
+        elevation: 2.0,
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
+      );
+      _testConflicts(layerA, layerB, expectedErrorCount: 1);
+    });
+
+    // Tests:
+    //
+    //  ─────────────                    (LayerA, paints first)
+    //      │     ─────────────          (LayerB, paints second)
+    //      │         │
+    // ───────────────────────────
+    //
+    // Causes no error if check is disabled.
+    test('Overlapping layers at wrong elevation, check disabled', () {
+      final PhysicalModelLayer layerA = PhysicalModelLayer(
+        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
+        elevation: 3.0,
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
+      );
+      final PhysicalModelLayer layerB =PhysicalModelLayer(
+        clipPath: Path()..addRect(const Rect.fromLTWH(10, 10, 20, 20)),
+        elevation: 2.0,
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
+      );
+      _testConflicts(layerA, layerB, expectedErrorCount: 0, enableCheck: false);
+    });
+
+    // Tests:
+    //
+    //   ──────────                      (LayerA, paints first)
+    //        │       ───────────        (LayerB, paints second)
+    //        │            │
+    // ────────────────────────────
+    test('Non-overlapping layers at wrong elevation', () {
+      final PhysicalModelLayer layerA = PhysicalModelLayer(
+        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
+        elevation: 3.0,
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
+      );
+      final PhysicalModelLayer layerB =PhysicalModelLayer(
+        clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
+        elevation: 2.0,
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
+      );
+      _testConflicts(layerA, layerB, expectedErrorCount: 0);
+    });
+
+    // Tests:
+    //
+    //     ───────                       (Child of A, paints second)
+    //        │
+    //   ───────────                     (LayerA, paints first)
+    //        │       ────────────       (LayerB, paints third)
+    //        │             │
+    // ────────────────────────────
+    test('Non-overlapping layers at wrong elevation, child at lower elevation', () {
+      final PhysicalModelLayer layerA = PhysicalModelLayer(
+        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
+        elevation: 3.0,
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
+      );
+
+      layerA.append(PhysicalModelLayer(
+        clipPath: Path()..addRect(const Rect.fromLTWH(2, 2, 10, 10)),
+        elevation: 1.0,
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
+      ));
+
+      final PhysicalModelLayer layerB =PhysicalModelLayer(
+        clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
+        elevation: 2.0,
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
+      );
+      _testConflicts(layerA, layerB, expectedErrorCount: 0);
+    });
+
+    // Tests:
+    //
+    //        ───────────                (Child of A, paints second, overflows)
+    //           │    ────────────       (LayerB, paints third)
+    //   ───────────       │             (LayerA, paints first)
+    //         │           │
+    //         │           │
+    // ────────────────────────────
+    //
+    // Which fails because the overflowing child overlaps something that paints
+    // after it at a lower elevation.
+    test('Child overflows parent and overlaps another physical layer', () {
+      final PhysicalModelLayer layerA = PhysicalModelLayer(
+        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
+        elevation: 3.0,
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
+      );
+
+      layerA.append(PhysicalModelLayer(
+        clipPath: Path()..addRect(const Rect.fromLTWH(15, 15, 25, 25)),
+        elevation: 2.0,
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
+      ));
+
+      final PhysicalModelLayer layerB =PhysicalModelLayer(
+        clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
+        elevation: 4.0,
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
+      );
+
+      _testConflicts(layerA, layerB, expectedErrorCount: 1);
+    });
+  }, skip: isBrowser);
 }

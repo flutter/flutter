@@ -96,7 +96,7 @@ class DialogTheme extends Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
-      contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t)
+      contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
     );
   }
 
@@ -120,9 +120,9 @@ class DialogTheme extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor));
+    properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation));
+    properties.add(DoubleProperty('elevation', elevation));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
   }

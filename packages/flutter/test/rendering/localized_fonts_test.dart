@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -51,10 +49,12 @@ void main() {
 
       await expectLater(
         find.byType(RichText),
-        matchesGoldenFile('localized_fonts.rich_text.styled_text_span.png'),
+        matchesGoldenFile(
+          'localized_fonts.rich_text.styled_text_span.png',
+          version: null,
+        ),
       );
     },
-    skip: !Platform.isLinux,
   );
 
   testWidgets(
@@ -103,10 +103,12 @@ void main() {
 
       await expectLater(
         find.byType(Row),
-        matchesGoldenFile('localized_fonts.text_ambient_locale.chars.png'),
+        matchesGoldenFile(
+          'localized_fonts.text_ambient_locale.chars.png',
+          version: null,
+        ),
       );
     },
-    skip: !Platform.isLinux,
   );
 
   testWidgets(
@@ -134,7 +136,7 @@ void main() {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
                         Text(character, style: style, locale: const Locale('ja')),
-	                Text(character, style: style, locale: const Locale('zh')),
+                        Text(character, style: style, locale: const Locale('zh')),
                       ],
                     ),
                   ),
@@ -147,10 +149,12 @@ void main() {
 
       await expectLater(
         find.byType(Row),
-        matchesGoldenFile('localized_fonts.text_explicit_locale.chars.png'),
+        matchesGoldenFile(
+          'localized_fonts.text_explicit_locale.chars.png',
+          version: null,
+        ),
       );
     },
-    skip: !Platform.isLinux,
   );
 
 }

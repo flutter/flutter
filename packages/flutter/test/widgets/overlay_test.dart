@@ -6,8 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('OverflowEntries context contains Overlay',
-      (WidgetTester tester) async {
+  testWidgets('OverflowEntries context contains Overlay', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
     bool didBuild = false;
     await tester.pumpWidget(
@@ -159,5 +158,458 @@ void main() {
         '       additionalConstraints: BoxConstraints(biggest)\n'
       ),
     );
+  });
+
+  testWidgets('insert top', (WidgetTester tester) async {
+    final GlobalKey overlayKey = GlobalKey();
+    final List<String> buildOrder = <String>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                buildOrder.add('Base');
+                return Container();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(buildOrder, <String>['Base']);
+
+    buildOrder.clear();
+    final OverlayState overlay = overlayKey.currentState;
+    overlay.insert(
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add('New');
+          return Container();
+        }
+      ),
+    );
+    await tester.pump();
+
+    expect(buildOrder, <String>['Base', 'New']);
+  });
+
+  testWidgets('insert below', (WidgetTester tester) async {
+    final GlobalKey overlayKey = GlobalKey();
+    OverlayEntry base;
+    final List<String> buildOrder = <String>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            base = OverlayEntry(
+              builder: (BuildContext context) {
+                buildOrder.add('Base');
+                return Container();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(buildOrder, <String>['Base']);
+
+    buildOrder.clear();
+    final OverlayState overlay = overlayKey.currentState;
+    overlay.insert(
+      OverlayEntry(
+          builder: (BuildContext context) {
+            buildOrder.add('New');
+            return Container();
+          }
+      ),
+      below: base,
+    );
+    await tester.pump();
+
+    expect(buildOrder, <String>['New', 'Base']);
+  });
+
+  testWidgets('insert above', (WidgetTester tester) async {
+    final GlobalKey overlayKey = GlobalKey();
+    OverlayEntry base;
+    final List<String> buildOrder = <String>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            base = OverlayEntry(
+              builder: (BuildContext context) {
+                buildOrder.add('Base');
+                return Container();
+              },
+            ),
+            OverlayEntry(
+              builder: (BuildContext context) {
+                buildOrder.add('Top');
+                return Container();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(buildOrder, <String>['Base', 'Top']);
+
+    buildOrder.clear();
+    final OverlayState overlay = overlayKey.currentState;
+    overlay.insert(
+      OverlayEntry(
+          builder: (BuildContext context) {
+            buildOrder.add('New');
+            return Container();
+          }
+      ),
+      above: base,
+    );
+    await tester.pump();
+
+    expect(buildOrder, <String>['Base', 'New', 'Top']);
+  });
+
+  testWidgets('insertAll top', (WidgetTester tester) async {
+    final GlobalKey overlayKey = GlobalKey();
+    final List<String> buildOrder = <String>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                buildOrder.add('Base');
+                return Container();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(buildOrder, <String>['Base']);
+
+    final List<OverlayEntry> entries = <OverlayEntry>[
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add('New1');
+          return Container();
+        },
+      ),
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add('New2');
+          return Container();
+        },
+      ),
+    ];
+
+    buildOrder.clear();
+    final OverlayState overlay = overlayKey.currentState;
+    overlay.insertAll(entries);
+    await tester.pump();
+
+    expect(buildOrder, <String>['Base', 'New1', 'New2']);
+  });
+
+  testWidgets('insertAll below', (WidgetTester tester) async {
+    final GlobalKey overlayKey = GlobalKey();
+    OverlayEntry base;
+    final List<String> buildOrder = <String>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            base = OverlayEntry(
+              builder: (BuildContext context) {
+                buildOrder.add('Base');
+                return Container();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(buildOrder, <String>['Base']);
+
+    final List<OverlayEntry> entries = <OverlayEntry>[
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add('New1');
+          return Container();
+        },
+      ),
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add('New2');
+          return Container();
+        },
+      ),
+    ];
+
+    buildOrder.clear();
+    final OverlayState overlay = overlayKey.currentState;
+    overlay.insertAll(entries, below: base);
+    await tester.pump();
+
+    expect(buildOrder, <String>['New1', 'New2','Base']);
+  });
+
+  testWidgets('insertAll above', (WidgetTester tester) async {
+    final GlobalKey overlayKey = GlobalKey();
+    final List<String> buildOrder = <String>[];
+    OverlayEntry base;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            base = OverlayEntry(
+              builder: (BuildContext context) {
+                buildOrder.add('Base');
+                return Container();
+              },
+            ),
+            OverlayEntry(
+              builder: (BuildContext context) {
+                buildOrder.add('Top');
+                return Container();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(buildOrder, <String>['Base', 'Top']);
+
+    final List<OverlayEntry> entries = <OverlayEntry>[
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add('New1');
+          return Container();
+        },
+      ),
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add('New2');
+          return Container();
+        },
+      ),
+    ];
+
+    buildOrder.clear();
+    final OverlayState overlay = overlayKey.currentState;
+    overlay.insertAll(entries, above: base);
+    await tester.pump();
+
+    expect(buildOrder, <String>['Base', 'New1', 'New2', 'Top']);
+  });
+
+  testWidgets('rearrange', (WidgetTester tester) async {
+    final GlobalKey overlayKey = GlobalKey();
+    final List<int> buildOrder = <int>[];
+    final List<OverlayEntry> initialEntries = <OverlayEntry>[
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(0);
+          return Container();
+        },
+      ),
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(1);
+          return Container();
+        },
+      ),
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(2);
+          return Container();
+        },
+      ),
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(3);
+          return Container();
+        },
+      ),
+    ];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: initialEntries,
+        ),
+      ),
+    );
+
+    expect(buildOrder, <int>[0, 1, 2, 3]);
+
+    final List<OverlayEntry> rearranged = <OverlayEntry>[
+      initialEntries[3],
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(4);
+          return Container();
+        },
+      ),
+      initialEntries[2],
+      // 1 intentionally missing, will end up on top
+      initialEntries[0],
+    ];
+
+    buildOrder.clear();
+    final OverlayState overlay = overlayKey.currentState;
+    overlay.rearrange(rearranged);
+    await tester.pump();
+
+    expect(buildOrder, <int>[3, 4, 2, 0, 1]);
+  });
+
+  testWidgets('rearrange above', (WidgetTester tester) async {
+    final GlobalKey overlayKey = GlobalKey();
+    final List<int> buildOrder = <int>[];
+    final List<OverlayEntry> initialEntries = <OverlayEntry>[
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(0);
+          return Container();
+        },
+      ),
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(1);
+          return Container();
+        },
+      ),
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(2);
+          return Container();
+        },
+      ),
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(3);
+          return Container();
+        },
+      ),
+    ];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: initialEntries,
+        ),
+      ),
+    );
+
+    expect(buildOrder, <int>[0, 1, 2, 3]);
+
+    final List<OverlayEntry> rearranged = <OverlayEntry>[
+      initialEntries[3],
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(4);
+          return Container();
+        },
+      ),
+      initialEntries[2],
+      // 1 intentionally missing
+      initialEntries[0],
+    ];
+
+    buildOrder.clear();
+    final OverlayState overlay = overlayKey.currentState;
+    overlay.rearrange(rearranged, above: initialEntries[2]);
+    await tester.pump();
+
+    expect(buildOrder, <int>[3, 4, 2, 1, 0]);
+  });
+
+  testWidgets('rearrange below', (WidgetTester tester) async {
+    final GlobalKey overlayKey = GlobalKey();
+    final List<int> buildOrder = <int>[];
+    final List<OverlayEntry> initialEntries = <OverlayEntry>[
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(0);
+          return Container();
+        },
+      ),
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(1);
+          return Container();
+        },
+      ),
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(2);
+          return Container();
+        },
+      ),
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(3);
+          return Container();
+        },
+      ),
+    ];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: initialEntries,
+        ),
+      ),
+    );
+
+    expect(buildOrder, <int>[0, 1, 2, 3]);
+
+    final List<OverlayEntry> rearranged = <OverlayEntry>[
+      initialEntries[3],
+      OverlayEntry(
+        builder: (BuildContext context) {
+          buildOrder.add(4);
+          return Container();
+        },
+      ),
+      initialEntries[2],
+      // 1 intentionally missing
+      initialEntries[0],
+    ];
+
+    buildOrder.clear();
+    final OverlayState overlay = overlayKey.currentState;
+    overlay.rearrange(rearranged, below: initialEntries[2]);
+    await tester.pump();
+
+    expect(buildOrder, <int>[3, 4, 1, 2, 0]);
   });
 }

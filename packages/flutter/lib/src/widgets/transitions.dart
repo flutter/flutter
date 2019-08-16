@@ -23,23 +23,105 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// [AnimatedWidget] is most useful for widgets that are otherwise stateless. To
 /// use [AnimatedWidget], simply subclass it and implement the build function.
 ///
+///{@tool sample}
+///
+/// This code defines a widget called `Spinner` that spins a green square
+/// continually. It is built with an [AnimatedWidget].
+///
+/// ```dart
+/// class Spinner extends StatefulWidget {
+///   @override
+///   _SpinnerState createState() => _SpinnerState();
+/// }
+///
+/// class _SpinnerState extends State<Spinner> with TickerProviderStateMixin {
+///   AnimationController _controller;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _controller = AnimationController(
+///       duration: const Duration(seconds: 10),
+///       vsync: this,
+///     )..repeat();
+///   }
+///
+///   @override
+///   void dispose() {
+///     _controller.dispose();
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return SpinningContainer(controller: _controller);
+///   }
+/// }
+///
+/// class SpinningContainer extends AnimatedWidget {
+///   const SpinningContainer({Key key, AnimationController controller})
+///       : super(key: key, listenable: controller);
+///
+///   Animation<double> get _progress => listenable;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Transform.rotate(
+///       angle: _progress.value * 2.0 * math.pi,
+///       child: Container(width: 200.0, height: 200.0, color: Colors.green),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
 /// For more complex case involving additional state, consider using
 /// [AnimatedBuilder].
 ///
-/// See also:
+/// ## Relationship to [ImplicitlyAnimatedWidget]s
 ///
-///  * [AnimatedBuilder], which is useful for more complex use cases.
-///  * [Animation], which is a [Listenable] object that can be used for
-///    [listenable].
-///  * [ChangeNotifier], which is another [Listenable] object that can be used
-///    for [listenable].
+/// [AnimatedWidget]s (and their subclasses) take an explicit [Listenable] as
+/// argument, which is usually an [Animation] derived from an
+/// [AnimationController]. In most cases, the lifecycle of that
+/// [AnimationController] has to be managed manually by the developer.
+/// In contrast to that, [ImplicitlyAnimatedWidget]s (and their subclasses)
+/// automatically manage their own internal [AnimationController] making those
+/// classes easier to use as no external [Animation] has to be provided by the
+/// developer. If you only need to set a target value for the animation and
+/// configure its duration/curve, consider using (a subclass of)
+/// [ImplicitlyAnimatedWidget]s instead of (a subclass of) this class.
+///
+/// ## Common animated widgets
+///
+/// A number of animated widgets ship with the framework. They are usually named
+/// `FooTransition`, where `Foo` is the name of the non-animated
+/// version of that widget. The subclasses of this class should not be confused
+/// with subclasses of [ImplicitlyAnimatedWidget] (see above), which are usually
+/// named `AnimatedFoo`. Commonly used animated widgets include:
+///
+///  * [AnimatedBuilder], which is useful for complex animation use cases and a
+///    notable exception to the naming scheme of [AnimatedWidget] subclasses.
+///  * [AlignTransition], which is an animated version of [Align].
+///  * [DecoratedBoxTransition], which is an animated version of [DecoratedBox].
+///  * [DefaultTextStyleTransition], which is an animated version of
+///    [DefaultTextStyle].
+///  * [PositionedTransition], which is an animated version of [Positioned].
+///  * [RelativePositionedTransition], which is an animated version of
+///    [Positioned].
+///  * [RotationTransition], which animates the rotation of a widget.
+///  * [ScaleTransition], which animates the scale of a widget.
+///  * [SizeTransition], which animates its own size.
+///  * [SlideTransition], which animates the position of a widget relative to
+///    its normal position.
+///  * [FadeTransition], which is an animated version of [Opacity].
+///  * [AnimatedModalBarrier], which is an animated version of [ModalBarrier].
 abstract class AnimatedWidget extends StatefulWidget {
   /// Creates a widget that rebuilds when the given listenable changes.
   ///
   /// The [listenable] argument is required.
   const AnimatedWidget({
     Key key,
-    @required this.listenable
+    @required this.listenable,
   }) : assert(listenable != null),
        super(key: key);
 
@@ -98,7 +180,7 @@ class _AnimatedState extends State<AnimatedWidget> {
 
 /// Animates the position of a widget relative to its normal position.
 ///
-/// The translation is expressed as a [Offset] scaled to the child's size. For
+/// The translation is expressed as an [Offset] scaled to the child's size. For
 /// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
 /// translation of one quarter the width of the child.
 ///
@@ -108,7 +190,7 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// direction, so in right-to-left text, positive x offsets move towards the
 /// left, and in left-to-right text, positive x offsets move towards the right.
 ///
-/// Here's an illustration of the [SlideTransition] widget, with it's [position]
+/// Here's an illustration of the [SlideTransition] widget, with its [position]
 /// animated by a [CurvedAnimation] set to [Curves.elasticIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/slide_transition.mp4}
 ///
@@ -379,7 +461,7 @@ class SizeTransition extends AnimatedWidget {
         heightFactor: axis == Axis.vertical ? math.max(sizeFactor.value, 0.0) : null,
         widthFactor: axis == Axis.horizontal ? math.max(sizeFactor.value, 0.0) : null,
         child: child,
-      )
+      ),
     );
   }
 }
@@ -389,9 +471,17 @@ class SizeTransition extends AnimatedWidget {
 /// For a widget that automatically animates between the sizes of two children,
 /// fading between them, see [AnimatedCrossFade].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=rLwWVbv3xDQ}
+///
 /// Here's an illustration of the [FadeTransition] widget, with it's [opacity]
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/fade_transition.mp4}
+///
+/// See also:
+///
+///  * [Opacity], which does not animate changes in opacity.
+///  * [AnimatedOpacity], which animates changes in opacity without taking an
+///    explicit [Animation] argument.
 class FadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
   ///
@@ -476,6 +566,8 @@ class RelativeRectTween extends Tween<RelativeRect> {
 ///
 /// See also:
 ///
+///  * [AnimatedPositioned], which transitions a child's position without
+///    taking an explicit [Animation] argument.
 ///  * [RelativePositionedTransition], a widget that transitions its child's
 ///    position based on the value of a rectangle relative to a bounding box.
 ///  * [SlideTransition], a widget that animates the position of a widget
@@ -641,6 +733,8 @@ class DecoratedBoxTransition extends AnimatedWidget {
 ///
 /// See also:
 ///
+///  * [AnimatedAlign], which animates changes to the [alignment] without
+///    taking an explicit [Animation] argument.
 ///  * [PositionedTransition], a widget that animates its child from a start
 ///    position to an end position over the lifetime of the animation.
 ///  * [RelativePositionedTransition], a widget that transitions its child's
@@ -696,6 +790,8 @@ class AlignTransition extends AnimatedWidget {
 ///
 /// See also:
 ///
+///  * [AnimatedDefaultTextStyle], which animates changes in text style without
+///    taking an explicit [Animation] argument.
 ///  * [DefaultTextStyle], which also defines a [TextStyle] for its descendants
 ///    but is not animated.
 class DefaultTextStyleTransition extends AnimatedWidget {
@@ -759,6 +855,8 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///
 /// For simple cases without additional state, consider using
 /// [AnimatedWidget].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=N-RiyZlv8v8}
 ///
 /// ## Performance optimizations
 ///

@@ -17,11 +17,6 @@ import 'material_localizations.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
-const double _kActiveFontSize = 14.0;
-const double _kInactiveFontSize = 12.0;
-const double _kTopMargin = 6.0;
-const double _kBottomMargin = 8.0;
-
 /// Defines the layout and behavior of a [BottomNavigationBar].
 ///
 /// See also:
@@ -30,18 +25,16 @@ const double _kBottomMargin = 8.0;
 ///  * [BottomNavigationBarItem]
 ///  * <https://material.io/design/components/bottom-navigation.html#specs>
 enum BottomNavigationBarType {
-  /// The [BottomNavigationBar]'s [BottomNavigationBarItem]s have fixed width, always
-  /// display their text labels, and do not shift when tapped.
+  /// The [BottomNavigationBar]'s [BottomNavigationBarItem]s have fixed width.
   fixed,
 
   /// The location and size of the [BottomNavigationBar] [BottomNavigationBarItem]s
-  /// animate and labels fade in when they are tapped. Only the selected item
-  /// displays its text label.
+  /// animate and labels fade in when they are tapped.
   shifting,
 }
 
-/// A material widget displayed at the bottom of an app for selecting among a
-/// small number of views, typically between three and five.
+/// A material widget that's displayed at the bottom of an app for selecting
+/// among a small number of views, typically between three and five.
 ///
 /// The bottom navigation bar consists of multiple items in the form of
 /// text labels, icons, or both, laid out on top of a piece of material. It
@@ -52,76 +45,89 @@ enum BottomNavigationBarType {
 /// where it is provided as the [Scaffold.bottomNavigationBar] argument.
 ///
 /// The bottom navigation bar's [type] changes how its [items] are displayed.
-/// If not specified it's automatically set to [BottomNavigationBarType.fixed]
-/// when there are less than four items, [BottomNavigationBarType.shifting]
-/// otherwise.
+/// If not specified, then it's automatically set to
+/// [BottomNavigationBarType.fixed] when there are less than four items, and
+/// [BottomNavigationBarType.shifting] otherwise.
 ///
 ///  * [BottomNavigationBarType.fixed], the default when there are less than
-///    four [items]. The selected item is rendered with [fixedColor] if it's
-///    non-null, otherwise the theme's [ThemeData.primaryColor] is used. The
-///    navigation bar's background color is the default [Material] background
+///    four [items]. The selected item is rendered with the
+///    [selectedItemColor] if it's non-null, otherwise the theme's
+///    [ThemeData.primaryColor] is used. If [backgroundColor] is null, The
+///    navigation bar's background color defaults to the [Material] background
 ///    color, [ThemeData.canvasColor] (essentially opaque white).
 ///  * [BottomNavigationBarType.shifting], the default when there are four
-///    or more [items]. All items are rendered in white and the navigation bar's
-///    background color is the same as the
+///    or more [items]. If [selectedItemColor] is null, all items are rendered
+///    in white. The navigation bar's background color is the same as the
 ///    [BottomNavigationBarItem.backgroundColor] of the selected item. In this
 ///    case it's assumed that each item will have a different background color
 ///    and that background color will contrast well with white.
 ///
-/// ## Sample Code
-///
+/// {@tool snippet --template=stateful_widget_material}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
 /// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
-/// widgets and the [currentIndex] is set to index 1. The color of the selected
-/// item is set to  a purple color. A function is called whenever any item is
-/// tapped and the function helps display the appropriate [Text] in the body of
-/// the [Scaffold].
+/// widgets and the [currentIndex] is set to index 0. The selected item is
+/// amber. The `_onItemTapped` function changes the selected item's index
+/// and displays a corresponding message in the center of the [Scaffold].
+///
+/// ![A scaffold with a bottom navigation bar containing three bottom navigation
+/// bar items. The first one is selected.](https://flutter.github.io/assets-for-api-docs/assets/material/bottom_navigation_bar.png)
 ///
 /// ```dart
-/// class MyHomePage extends StatefulWidget {
-///   MyHomePage({Key key}) : super(key: key);
+/// int _selectedIndex = 0;
+/// static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+/// static const List<Widget> _widgetOptions = <Widget>[
+///   Text(
+///     'Index 0: Home',
+///     style: optionStyle,
+///   ),
+///   Text(
+///      'Index 1: Business',
+///      style: optionStyle,
+///   ),
+///   Text(
+///      'Index 2: School',
+///      style: optionStyle,
+///   ),
+/// ];
 ///
-///   @override
-///   _MyHomePageState createState() => _MyHomePageState();
+/// void _onItemTapped(int index) {
+///   setState(() {
+///     _selectedIndex = index;
+///   });
 /// }
 ///
-/// class _MyHomePageState extends State<MyHomePage> {
-///   int _selectedIndex = 1;
-///   final _widgetOptions = [
-///     Text('Index 0: Home'),
-///     Text('Index 1: Business'),
-///     Text('Index 2: School'),
-///   ];
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: Text('BottomNavigationBar Sample'),
-///       ),
-///       body: Center(
-///         child: _widgetOptions.elementAt(_selectedIndex),
-///       ),
-///       bottomNavigationBar: BottomNavigationBar(
-///         items: <BottomNavigationBarItem>[
-///           BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Home')),
-///           BottomNavigationBarItem(icon: Icon(Icons.business), title: Text('Business')),
-///           BottomNavigationBarItem(icon: Icon(Icons.school), title: Text('School')),
-///         ],
-///         currentIndex: _selectedIndex,
-///         fixedColor: Colors.deepPurple,
-///         onTap: _onItemTapped,
-///       ),
-///     );
-///   }
-///
-///   void _onItemTapped(int index) {
-///     setState(() {
-///       _selectedIndex = index;
-///     });
-///   }
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('BottomNavigationBar Sample'),
+///     ),
+///     body: Center(
+///       child: _widgetOptions.elementAt(_selectedIndex),
+///     ),
+///     bottomNavigationBar: BottomNavigationBar(
+///       items: const <BottomNavigationBarItem>[
+///         BottomNavigationBarItem(
+///           icon: Icon(Icons.home),
+///           title: Text('Home'),
+///         ),
+///         BottomNavigationBarItem(
+///           icon: Icon(Icons.business),
+///           title: Text('Business'),
+///         ),
+///         BottomNavigationBarItem(
+///           icon: Icon(Icons.school),
+///           title: Text('School'),
+///         ),
+///       ],
+///       currentIndex: _selectedIndex,
+///       selectedItemColor: Colors.amber[800],
+///       onTap: _onItemTapped,
+///     ),
+///   );
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -129,25 +135,58 @@ enum BottomNavigationBarType {
 ///  * [Scaffold]
 ///  * <https://material.io/design/components/bottom-navigation.html>
 class BottomNavigationBar extends StatefulWidget {
-  /// Creates a bottom navigation bar, typically used in a [Scaffold] where it
-  /// is provided as the [Scaffold.bottomNavigationBar] argument.
+  /// Creates a bottom navigation bar which is typically used as a
+  /// [Scaffold]'s [Scaffold.bottomNavigationBar] argument.
   ///
-  /// The length of [items] must be at least two and each item's icon and title must be not null.
+  /// The length of [items] must be at least two and each item's icon and title
+  /// must not be null.
   ///
   /// If [type] is null then [BottomNavigationBarType.fixed] is used when there
   /// are two or three [items], [BottomNavigationBarType.shifting] otherwise.
   ///
-  /// If [fixedColor] is null then the theme's primary color,
-  /// [ThemeData.primaryColor], is used. However if [BottomNavigationBar.type] is
-  /// [BottomNavigationBarType.shifting] then [fixedColor] is ignored.
+  /// The [iconSize], [selectedFontSize], [unselectedFontSize], and [elevation]
+  /// arguments must be non-null and non-negative.
+  ///
+  /// If [selectedLabelStyle.color] and [unselectedLabelStyle.color] values
+  /// are non-null, they will be used instead of [selectedItemColor] and
+  /// [unselectedItemColor].
+  ///
+  /// If custom [IconThemData]s are used, you must provide both
+  /// [selectedIconTheme] and [unselectedIconTheme], and both
+  /// [IconThemeData.color] and [IconThemeData.size] must be set.
+  ///
+  /// If both [selectedLabelStyle.fontSize] and [selectedFontSize] are set,
+  /// [selectedLabelStyle.fontSize] will be used.
+  ///
+  /// Only one of [selectedItemColor] and [fixedColor] can be specified. The
+  /// former is preferred, [fixedColor] only exists for the sake of
+  /// backwards compatibility.
+  ///
+  /// The [showSelectedLabels] argument must not be non-null.
+  ///
+  /// The [showUnselectedLabels] argument defaults to `true` if [type] is
+  /// [BottomNavigationBarType.fixed] and `false` if [type] is
+  /// [BottomNavigationBarType.shifting].
   BottomNavigationBar({
     Key key,
     @required this.items,
     this.onTap,
     this.currentIndex = 0,
+    this.elevation = 8.0,
     BottomNavigationBarType type,
-    this.fixedColor,
+    Color fixedColor,
+    this.backgroundColor,
     this.iconSize = 24.0,
+    Color selectedItemColor,
+    this.unselectedItemColor,
+    this.selectedIconTheme = const IconThemeData(),
+    this.unselectedIconTheme = const IconThemeData(),
+    this.selectedFontSize = 14.0,
+    this.unselectedFontSize = 12.0,
+    this.selectedLabelStyle,
+    this.unselectedLabelStyle,
+    this.showSelectedLabels = true,
+    bool showUnselectedLabels,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(
@@ -155,41 +194,158 @@ class BottomNavigationBar extends StatefulWidget {
         'Every item must have a non-null title',
        ),
        assert(0 <= currentIndex && currentIndex < items.length),
-       assert(iconSize != null),
-       type = type ?? (items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting),
+       assert(elevation != null && elevation >= 0.0),
+       assert(iconSize != null && iconSize >= 0.0),
+       assert(
+         selectedItemColor == null || fixedColor == null,
+         'Either selectedItemColor or fixedColor can be specified, but not both'
+       ),
+       assert(selectedFontSize != null && selectedFontSize >= 0.0),
+       assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
+       assert(showSelectedLabels != null),
+       type = _type(type, items),
+       selectedItemColor = selectedItemColor ?? fixedColor,
+       showUnselectedLabels = showUnselectedLabels ?? _defaultShowUnselected(_type(type, items)),
        super(key: key);
 
-  /// The interactive items laid out within the bottom navigation bar where each item has an icon and title.
+  /// Defines the appearance of the button items that are arrayed within the
+  /// bottom navigation bar.
   final List<BottomNavigationBarItem> items;
 
-  /// The callback that is called when a item is tapped.
+  /// Called when one of the [items] is tapped.
   ///
-  /// The widget creating the bottom navigation bar needs to keep track of the
-  /// current index and call `setState` to rebuild it with the newly provided
-  /// index.
+  /// The stateful widget that creates the bottom navigation bar needs to keep
+  /// track of the index of the selected [BottomNavigationBarItem] and call
+  /// `setState` to rebuild the bottom navigation bar with the new [currentIndex].
   final ValueChanged<int> onTap;
 
-  /// The index into [items] of the current active item.
+  /// The index into [items] for the current active [BottomNavigationBarItem].
   final int currentIndex;
+
+  /// The z-coordinate of this [BottomNavigationBar].
+  ///
+  /// If null, defaults to `8.0`.
+  ///
+  /// {@macro flutter.material.material.elevation}
+  final double elevation;
 
   /// Defines the layout and behavior of a [BottomNavigationBar].
   ///
-  /// See documentation for [BottomNavigationBarType] for information on the meaning
-  /// of different types.
+  /// See documentation for [BottomNavigationBarType] for information on the
+  /// meaning of different types.
   final BottomNavigationBarType type;
 
-  /// The color of the selected item when bottom navigation bar is
-  /// [BottomNavigationBarType.fixed].
+  /// The value of [selectedItemColor].
   ///
-  /// If [fixedColor] is null then the theme's primary color,
-  /// [ThemeData.primaryColor], is used. However if [BottomNavigationBar.type] is
-  /// [BottomNavigationBarType.shifting] then [fixedColor] is ignored.
-  final Color fixedColor;
+  /// This getter only exists for backwards compatibility, the
+  /// [selectedItemColor] property is preferred.
+  Color get fixedColor => selectedItemColor;
+
+  /// The color of the [BottomNavigationBar] itself.
+  ///
+  /// If [type] is [BottomNavigationBarType.shifting] and the
+  /// [items]s, have [BottomNavigationBarItem.backgroundColor] set, the [item]'s
+  /// backgroundColor will splash and overwrite this color.
+  final Color backgroundColor;
 
   /// The size of all of the [BottomNavigationBarItem] icons.
   ///
   /// See [BottomNavigationBarItem.icon] for more information.
   final double iconSize;
+
+  /// The color of the selected [BottomNavigationBarItem.icon] and
+  /// [BottomNavigationBarItem.label].
+  ///
+  /// If null then the [ThemeData.primaryColor] is used.
+  final Color selectedItemColor;
+
+  /// The color of the unselected [BottomNavigationBarItem.icon] and
+  /// [BottomNavigationBarItem.label]s.
+  ///
+  /// If null then the [TextTheme.caption]'s color is used.
+  final Color unselectedItemColor;
+
+  /// The size, opacity, and color of the icon in the currently selected
+  /// [BottomNavigationBarItem.icon].
+  ///
+  /// If this is not provided, the size will default to [iconSize], the color
+  /// will default to [selectedItemColor].
+  ///
+  /// It this field is provided, it must contain non-null [IconThemeData.size]
+  /// and [IconThemeData.color] properties. Also, if this field is supplied,
+  /// [unselectedIconTheme] must be provided.
+  final IconThemeData selectedIconTheme;
+
+  /// The size, opacity, and color of the icon in the currently unselected
+  /// [BottomNavigationBarItem.icon]s
+  ///
+  /// If this is not provided, the size will default to [iconSize], the color
+  /// will default to [unselectedItemColor].
+  ///
+  /// It this field is provided, it must contain non-null [IconThemeData.size]
+  /// and [IconThemeData.color] properties. Also, if this field is supplied,
+  /// [unselectedIconTheme] must be provided.
+  final IconThemeData unselectedIconTheme;
+
+  /// The [TextStyle] of the [BottomNavigationBarItem] labels when they are
+  /// selected.
+  final TextStyle selectedLabelStyle;
+
+  /// The [TextStyle] of the [BottomNavigationBarItem] labels when they are not
+  /// selected.
+  final TextStyle unselectedLabelStyle;
+
+  /// The font size of the [BottomNavigationBarItem] labels when they are selected.
+  ///
+  /// If [selectedLabelStyle.fontSize] is non-null, it will be used instead of this.
+  ///
+  /// Defaults to `14.0`.
+  final double selectedFontSize;
+
+  /// The font size of the [BottomNavigationBarItem] labels when they are not
+  /// selected.
+  ///
+  /// If [unselectedLabelStyle.fontSize] is non-null, it will be used instead of this.
+  ///
+  /// Defaults to `12.0`.
+  final double unselectedFontSize;
+
+  /// Whether the labels are shown for the selected [BottomNavigationBarItem].
+  final bool showUnselectedLabels;
+
+  /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
+  final bool showSelectedLabels;
+
+  // Used by the [BottomNavigationBar] constructor to set the [type] parameter.
+  //
+  // If type is provided, it is returned. Otherwise,
+  // [BottomNavigationBarType.fixed] is used for 3 or fewer items, and
+  // [BottomNavigationBarType.shifting] is used for 4+ items.
+  static BottomNavigationBarType _type(
+      BottomNavigationBarType type,
+      List<BottomNavigationBarItem> items,
+  ) {
+    if (type != null) {
+      return type;
+    }
+    return items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting;
+  }
+
+  // Used by the [BottomNavigationBar] constructor to set the [showUnselected]
+  // parameter.
+  //
+  // Unselected labels are shown by default for [BottomNavigationBarType.fixed],
+  // and hidden by default for [BottomNavigationBarType.shifting].
+  static bool _defaultShowUnselected(BottomNavigationBarType type) {
+    switch (type) {
+      case BottomNavigationBarType.shifting:
+        return false;
+      case BottomNavigationBarType.fixed:
+        return true;
+    }
+    assert(false);
+    return false;
+  }
 
   @override
   _BottomNavigationBarState createState() => _BottomNavigationBarState();
@@ -207,8 +363,19 @@ class _BottomNavigationTile extends StatelessWidget {
     this.colorTween,
     this.flex,
     this.selected = false,
+    @required this.selectedLabelStyle,
+    @required this.unselectedLabelStyle,
+    @required this.selectedIconTheme,
+    @required this.unselectedIconTheme,
+    this.showSelectedLabels,
+    this.showUnselectedLabels,
     this.indexLabel,
-  }) : assert(selected != null);
+    }) : assert(type != null),
+         assert(item != null),
+         assert(animation != null),
+         assert(selected != null),
+         assert(selectedLabelStyle != null),
+         assert(unselectedLabelStyle != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -218,7 +385,13 @@ class _BottomNavigationTile extends StatelessWidget {
   final ColorTween colorTween;
   final double flex;
   final bool selected;
+  final IconThemeData selectedIconTheme;
+  final IconThemeData unselectedIconTheme;
+  final TextStyle selectedLabelStyle;
+  final TextStyle unselectedLabelStyle;
   final String indexLabel;
+  final bool showSelectedLabels;
+  final bool showUnselectedLabels;
 
   @override
   Widget build(BuildContext context) {
@@ -227,16 +400,72 @@ class _BottomNavigationTile extends StatelessWidget {
     // produce smooth animation. We do this by multiplying the flex value
     // (which is an integer) by a large number.
     int size;
-    Widget label;
+
+    final double selectedFontSize = selectedLabelStyle.fontSize;
+
+    final double selectedIconSize = selectedIconTheme?.size ?? iconSize;
+    final double unselectedIconSize = unselectedIconTheme?.size ?? iconSize;
+    // The amount that the selected icon is bigger than the unselected icons,
+    // (or zero if the selected icon is not bigger than the unselected icons).
+    final double selectedIconDiff = math.max(selectedIconSize - unselectedIconSize, 0);
+    // The amount that the unselected icons are bigger than the selected icon,
+    // (or zero if the unselected icons are not any bigger than the selected icon).
+    final double unselectedIconDiff = math.max(unselectedIconSize - selectedIconSize, 0);
+
+    // Defines the padding for the animating icons + labels.
+    //
+    // The animations go from "Unselected":
+    // =======
+    // |      <-- Padding equal to the text height + 1/2 selectedIconDiff.
+    // |  ☆
+    // | text <-- Invisible text + padding equal to 1/2 selectedIconDiff.
+    // =======
+    //
+    // To "Selected":
+    //
+    // =======
+    // |      <-- Padding equal to 1/2 text height + 1/2 unselectedIconDiff.
+    // |  ☆
+    // | text
+    // |      <-- Padding equal to 1/2 text height + 1/2 unselectedIconDiff.
+    // =======
+    double bottomPadding;
+    double topPadding;
+    if (showSelectedLabels && !showUnselectedLabels) {
+      bottomPadding = Tween<double>(
+        begin: selectedIconDiff / 2.0,
+        end: selectedFontSize / 2.0 - unselectedIconDiff / 2.0,
+      ).evaluate(animation);
+      topPadding = Tween<double>(
+        begin: selectedFontSize + selectedIconDiff / 2.0,
+        end: selectedFontSize / 2.0 - unselectedIconDiff / 2.0,
+      ).evaluate(animation);
+    } else if (!showSelectedLabels && !showUnselectedLabels) {
+      bottomPadding = Tween<double>(
+        begin: selectedIconDiff / 2.0,
+        end: unselectedIconDiff / 2.0,
+      ).evaluate(animation);
+      topPadding = Tween<double>(
+        begin: selectedFontSize + selectedIconDiff / 2.0,
+        end: selectedFontSize + unselectedIconDiff / 2.0,
+      ).evaluate(animation);
+    } else {
+      bottomPadding = Tween<double>(
+        begin: selectedFontSize / 2.0 + selectedIconDiff / 2.0,
+        end: selectedFontSize / 2.0 + unselectedIconDiff / 2.0,
+      ).evaluate(animation);
+      topPadding = Tween<double>(
+        begin: selectedFontSize / 2.0 + selectedIconDiff / 2.0,
+        end: selectedFontSize / 2.0 + unselectedIconDiff / 2.0,
+      ).evaluate(animation);
+    }
 
     switch (type) {
       case BottomNavigationBarType.fixed:
         size = 1;
-        label = _FixedLabel(colorTween: colorTween, animation: animation, item: item);
         break;
       case BottomNavigationBarType.shifting:
         size = (flex * 1000.0).round();
-        label = _ShiftingLabel(animation: animation, item: item);
         break;
     }
 
@@ -244,33 +473,46 @@ class _BottomNavigationTile extends StatelessWidget {
       flex: size,
       child: Semantics(
         container: true,
-        header: true,
         selected: selected,
-        child: Stack(
-          children: <Widget>[
-            InkResponse(
-              onTap: onTap,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  _TileIcon(
-                    type: type,
-                    colorTween: colorTween,
-                    animation: animation,
-                    iconSize: iconSize,
-                    selected: selected,
-                    item: item,
+        child: Focus(
+          child: Stack(
+            children: <Widget>[
+              InkResponse(
+                onTap: onTap,
+                child: Padding(
+                  padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      _TileIcon(
+                        colorTween: colorTween,
+                        animation: animation,
+                        iconSize: iconSize,
+                        selected: selected,
+                        item: item,
+                        selectedIconTheme: selectedIconTheme,
+                        unselectedIconTheme: unselectedIconTheme,
+                      ),
+                      _Label(
+                        colorTween: colorTween,
+                        animation: animation,
+                        item: item,
+                        selectedLabelStyle: selectedLabelStyle,
+                        unselectedLabelStyle: unselectedLabelStyle,
+                        showSelectedLabels: showSelectedLabels,
+                        showUnselectedLabels: showUnselectedLabels,
+                      ),
+                    ],
                   ),
-                  label,
-                ],
+                ),
               ),
-            ),
-            Semantics(
-              label: indexLabel,
-            )
-          ],
+              Semantics(
+                label: indexLabel,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -281,50 +523,44 @@ class _BottomNavigationTile extends StatelessWidget {
 class _TileIcon extends StatelessWidget {
   const _TileIcon({
     Key key,
-    @required this.type,
     @required this.colorTween,
     @required this.animation,
     @required this.iconSize,
     @required this.selected,
     @required this.item,
-  }) : super(key: key);
+    @required this.selectedIconTheme,
+    @required this.unselectedIconTheme,
+  }) : assert(selected != null),
+       assert(item != null),
+       super(key: key);
 
-  final BottomNavigationBarType type;
   final ColorTween colorTween;
   final Animation<double> animation;
   final double iconSize;
   final bool selected;
   final BottomNavigationBarItem item;
+  final IconThemeData selectedIconTheme;
+  final IconThemeData unselectedIconTheme;
 
   @override
   Widget build(BuildContext context) {
-    double tweenStart;
-    Color iconColor;
-    switch (type) {
-      case BottomNavigationBarType.fixed:
-        tweenStart = 8.0;
-        iconColor = colorTween.evaluate(animation);
-        break;
-      case BottomNavigationBarType.shifting:
-        tweenStart = 16.0;
-        iconColor = Colors.white;
-        break;
-    }
+    final Color iconColor = colorTween.evaluate(animation);
+    final IconThemeData defaultIconTheme = IconThemeData(
+      color: iconColor,
+      size: iconSize,
+    );
+    final IconThemeData iconThemeData = IconThemeData.lerp(
+      defaultIconTheme.merge(unselectedIconTheme),
+      defaultIconTheme.merge(selectedIconTheme),
+      animation.value,
+    );
+
     return Align(
       alignment: Alignment.topCenter,
       heightFactor: 1.0,
       child: Container(
-        margin: EdgeInsets.only(
-          top: Tween<double>(
-            begin: tweenStart,
-            end: _kTopMargin,
-          ).evaluate(animation),
-        ),
         child: IconTheme(
-          data: IconThemeData(
-            color: iconColor,
-            size: iconSize,
-          ),
+          data: iconThemeData,
           child: selected ? item.activeIcon : item.icon,
         ),
       ),
@@ -332,89 +568,92 @@ class _TileIcon extends StatelessWidget {
   }
 }
 
-class _FixedLabel extends StatelessWidget {
-  const _FixedLabel({
+class _Label extends StatelessWidget {
+  const _Label({
     Key key,
     @required this.colorTween,
     @required this.animation,
     @required this.item,
-  }) : super(key: key);
+    @required this.selectedLabelStyle,
+    @required this.unselectedLabelStyle,
+    @required this.showSelectedLabels,
+    @required this.showUnselectedLabels,
+  }) : assert(colorTween != null),
+       assert(animation != null),
+       assert(item != null),
+       assert(selectedLabelStyle != null),
+       assert(unselectedLabelStyle != null),
+       assert(showSelectedLabels != null),
+       assert(showUnselectedLabels != null),
+       super(key: key);
 
   final ColorTween colorTween;
   final Animation<double> animation;
   final BottomNavigationBarItem item;
+  final TextStyle selectedLabelStyle;
+  final TextStyle unselectedLabelStyle;
+  final bool showSelectedLabels;
+  final bool showUnselectedLabels;
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      heightFactor: 1.0,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: _kBottomMargin),
-        child: DefaultTextStyle.merge(
-          style: TextStyle(
-            fontSize: _kActiveFontSize,
-            color: colorTween.evaluate(animation),
-          ),
-          // The font size should grow here when active, but because of the way
-          // font rendering works, it doesn't grow smoothly if we just animate
-          // the font size, so we use a transform instead.
-          child: Transform(
-            transform: Matrix4.diagonal3(
-              Vector3.all(
-                Tween<double>(
-                  begin: _kInactiveFontSize / _kActiveFontSize,
-                  end: 1.0,
-                ).evaluate(animation),
-              ),
-            ),
-            alignment: Alignment.bottomCenter,
-            child: item.title,
+    final double selectedFontSize = selectedLabelStyle.fontSize;
+    final double unselectedFontSize = unselectedLabelStyle.fontSize;
+
+    final TextStyle customStyle = TextStyle.lerp(
+      unselectedLabelStyle,
+      selectedLabelStyle,
+      animation.value,
+    );
+    Widget text = DefaultTextStyle.merge(
+      style: customStyle.copyWith(
+        fontSize: selectedFontSize,
+        color: colorTween.evaluate(animation),
+      ),
+      // The font size should grow here when active, but because of the way
+      // font rendering works, it doesn't grow smoothly if we just animate
+      // the font size, so we use a transform instead.
+      child: Transform(
+        transform: Matrix4.diagonal3(
+          Vector3.all(
+            Tween<double>(
+              begin: unselectedFontSize / selectedFontSize,
+              end: 1.0,
+            ).evaluate(animation),
           ),
         ),
+        alignment: Alignment.bottomCenter,
+        child: item.title,
       ),
     );
-  }
-}
 
-class _ShiftingLabel extends StatelessWidget {
-  const _ShiftingLabel({
-    Key key,
-    @required this.animation,
-    @required this.item,
-  }) : super(key: key);
+    if (!showUnselectedLabels && !showSelectedLabels) {
+      // Never show any labels.
+      text = Opacity(
+        alwaysIncludeSemantics: true,
+        opacity: 0.0,
+        child: text,
+      );
+    } else if (!showUnselectedLabels) {
+      // Fade selected labels in.
+      text = FadeTransition(
+        alwaysIncludeSemantics: true,
+        opacity: animation,
+        child: text,
+      );
+    } else if (!showSelectedLabels) {
+      // Fade selected labels out.
+      text = FadeTransition(
+        alwaysIncludeSemantics: true,
+        opacity: Tween<double>(begin: 1.0, end: 0.0).animate(animation),
+        child: text,
+      );
+    }
 
-  final Animation<double> animation;
-  final BottomNavigationBarItem item;
-
-  @override
-  Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.bottomCenter,
       heightFactor: 1.0,
-      child: Container(
-        margin: EdgeInsets.only(
-          bottom: Tween<double>(
-            // In the spec, they just remove the label for inactive items and
-            // specify a 16dp bottom margin. We don't want to actually remove
-            // the label because we want to fade it in and out, so this modifies
-            // the bottom margin to take that into account.
-            begin: 2.0,
-            end: _kBottomMargin,
-          ).evaluate(animation),
-        ),
-        child: FadeTransition(
-          alwaysIncludeSemantics: true,
-          opacity: animation,
-          child: DefaultTextStyle.merge(
-            style: const TextStyle(
-              fontSize: _kActiveFontSize,
-              color: Colors.white,
-            ),
-            child: item.title,
-          ),
-        ),
-      ),
+      child: Container(child: text),
     );
   }
 }
@@ -535,66 +774,75 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     }
   }
 
+  // If the given [TextStyle] has a non-null `fontSize`, it should be used.
+  // Otherwise, the [selectedFontSize] parameter should be used.
+  static TextStyle _effectiveTextStyle(TextStyle textStyle, double fontSize) {
+    textStyle ??= const TextStyle();
+    // Prefer the font size on textStyle if present.
+    return textStyle.fontSize == null ? textStyle.copyWith(fontSize: fontSize) : textStyle;
+  }
+
   List<Widget> _createTiles() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     assert(localizations != null);
-    final List<Widget> children = <Widget>[];
-    switch (widget.type) {
-      case BottomNavigationBarType.fixed:
-        final ThemeData themeData = Theme.of(context);
-        final TextTheme textTheme = themeData.textTheme;
-        Color themeColor;
-        switch (themeData.brightness) {
-          case Brightness.light:
-            themeColor = themeData.primaryColor;
-            break;
-          case Brightness.dark:
-            themeColor = themeData.accentColor;
-            break;
-        }
-        final ColorTween colorTween = ColorTween(
-          begin: textTheme.caption.color,
-          end: widget.fixedColor ?? themeColor,
-        );
-        for (int i = 0; i < widget.items.length; i += 1) {
-          children.add(
-            _BottomNavigationTile(
-              widget.type,
-              widget.items[i],
-              _animations[i],
-              widget.iconSize,
-              onTap: () {
-                if (widget.onTap != null)
-                  widget.onTap(i);
-              },
-              colorTween: colorTween,
-              selected: i == widget.currentIndex,
-              indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
-            ),
-          );
-        }
+
+    final ThemeData themeData = Theme.of(context);
+
+    final TextStyle effectiveSelectedLabelStyle =
+      _effectiveTextStyle(widget.selectedLabelStyle, widget.selectedFontSize);
+    final TextStyle effectiveUnselectedLabelStyle =
+      _effectiveTextStyle(widget.unselectedLabelStyle, widget.unselectedFontSize);
+
+    Color themeColor;
+    switch (themeData.brightness) {
+      case Brightness.light:
+        themeColor = themeData.primaryColor;
         break;
-      case BottomNavigationBarType.shifting:
-        for (int i = 0; i < widget.items.length; i += 1) {
-          children.add(
-            _BottomNavigationTile(
-              widget.type,
-              widget.items[i],
-              _animations[i],
-              widget.iconSize,
-              onTap: () {
-                if (widget.onTap != null)
-                  widget.onTap(i);
-              },
-              flex: _evaluateFlex(_animations[i]),
-              selected: i == widget.currentIndex,
-              indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
-            ),
-          );
-        }
+      case Brightness.dark:
+        themeColor = themeData.accentColor;
         break;
     }
-    return children;
+
+    ColorTween colorTween;
+    switch (widget.type) {
+      case BottomNavigationBarType.fixed:
+        colorTween = ColorTween(
+          begin: widget.unselectedItemColor ?? themeData.textTheme.caption.color,
+          end: widget.selectedItemColor ?? widget.fixedColor ?? themeColor,
+        );
+        break;
+      case BottomNavigationBarType.shifting:
+        colorTween = ColorTween(
+          begin: widget.unselectedItemColor ?? Colors.white,
+          end: widget.selectedItemColor ?? Colors.white,
+        );
+        break;
+    }
+
+    final List<Widget> tiles = <Widget>[];
+    for (int i = 0; i < widget.items.length; i++) {
+      tiles.add(_BottomNavigationTile(
+        widget.type,
+        widget.items[i],
+        _animations[i],
+        widget.iconSize,
+        selectedIconTheme: widget.selectedIconTheme,
+        unselectedIconTheme: widget.unselectedIconTheme,
+        selectedLabelStyle: effectiveSelectedLabelStyle,
+        unselectedLabelStyle: effectiveUnselectedLabelStyle,
+        onTap: () {
+          if (widget.onTap != null)
+            widget.onTap(i);
+        },
+        colorTween: colorTween,
+        flex: _evaluateFlex(_animations[i]),
+        selected: i == widget.currentIndex,
+        showSelectedLabels: widget.showSelectedLabels,
+        showUnselectedLabels: widget.showUnselectedLabels,
+        indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
+      ));
+    }
+    return tiles;
   }
 
   Widget _createContainer(List<Widget> tiles) {
@@ -611,12 +859,14 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasMediaQuery(context));
 
     // Labels apply up to _bottomMargin padding. Remainder is media padding.
-    final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - _kBottomMargin, 0.0);
+    final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - widget.selectedFontSize / 2.0, 0.0);
     Color backgroundColor;
     switch (widget.type) {
       case BottomNavigationBarType.fixed:
+        backgroundColor = widget.backgroundColor;
         break;
       case BottomNavigationBarType.shifting:
         backgroundColor = _backgroundColor;
@@ -625,7 +875,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     return Semantics(
       explicitChildNodes: true,
       child: Material(
-        elevation: 8.0,
+        elevation: widget.elevation,
         color: backgroundColor,
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: kBottomNavigationBarHeight + additionalBottomPadding),

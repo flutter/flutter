@@ -19,41 +19,74 @@ import 'theme.dart';
 /// some text describing a musical, and the other with buttons for buying
 /// tickets or listening to the show.](https://flutter.github.io/assets-for-api-docs/assets/material/card.png)
 ///
-/// {@tool snippet --template=stateless_widget}
+/// {@tool snippet --template=stateless_widget_scaffold}
 ///
 /// This sample shows creation of a [Card] widget that shows album information
 /// and two actions.
 ///
 /// ```dart
-/// Center(
-///   child: Card(
-///     child: Column(
-///       mainAxisSize: MainAxisSize.min,
-///       children: <Widget>[
-///         const ListTile(
-///           leading: Icon(Icons.album),
-///           title: Text('The Enchanted Nightingale'),
-///           subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
-///         ),
-///         ButtonTheme.bar( // make buttons use the appropriate styles for cards
-///           child: ButtonBar(
-///             children: <Widget>[
-///               FlatButton(
-///                 child: const Text('BUY TICKETS'),
-///                 onPressed: () { /* ... */ },
-///               ),
-///               FlatButton(
-///                 child: const Text('LISTEN'),
-///                 onPressed: () { /* ... */ },
-///               ),
-///             ],
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Card(
+///       child: Column(
+///         mainAxisSize: MainAxisSize.min,
+///         children: <Widget>[
+///           const ListTile(
+///             leading: Icon(Icons.album),
+///             title: Text('The Enchanted Nightingale'),
+///             subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
 ///           ),
-///         ),
-///       ],
+///           ButtonTheme.bar( // make buttons use the appropriate styles for cards
+///             child: ButtonBar(
+///               children: <Widget>[
+///                 FlatButton(
+///                   child: const Text('BUY TICKETS'),
+///                   onPressed: () { /* ... */ },
+///                 ),
+///                 FlatButton(
+///                   child: const Text('LISTEN'),
+///                   onPressed: () { /* ... */ },
+///                 ),
+///               ],
+///             ),
+///           ),
+///         ],
+///       ),
 ///     ),
-///   ),
-/// )
+///   );
+/// }
 /// ```
+/// {@end-tool}
+///
+/// Sometimes the primary action area of a card is the card itself. Cards can be
+/// one large touch target that shows a detail screen when tapped.
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows creation of a [Card] widget that can be tapped. When
+/// tapped this [Card]'s [InkWell] displays an "ink splash" that fills the
+/// entire card.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Card(
+///       child: InkWell(
+///         splashColor: Colors.blue.withAlpha(30),
+///         onTap: () {
+///           print('Card tapped.');
+///         },
+///         child: Container(
+///           width: 300,
+///           height: 100,
+///           child: Text('A card that can be tapped'),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+///
 /// {@end-tool}
 ///
 /// See also:

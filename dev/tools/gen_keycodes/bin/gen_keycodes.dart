@@ -38,6 +38,11 @@ Future<String> getAndroidScanCodes() async {
   return utf8.decode(base64.decode(await http.read(scanCodesUri)));
 }
 
+Future<String> getGlfwKeyCodes() async {
+  final Uri keyCodesUri = Uri.parse('https://raw.githubusercontent.com/glfw/glfw/master/include/GLFW/glfw3.h');
+  return await http.read(keyCodesUri);
+}
+
 Future<void> main(List<String> rawArguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
@@ -46,6 +51,12 @@ Future<void> main(List<String> rawArguments) async {
     help: 'The path to where the Chromium HID code mapping file should be '
         'read. If --chromium-hid-codes is not specified, the input will be read '
         'from the correct file in the Chromium repository.',
+  );
+  argParser.addOption(
+    'supplemental-hid-codes',
+    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'supplemental_hid_codes.inc'),
+    help: "The path to where the supplemental HID codes that don't appear in the "
+        'Chromium map should be read.',
   );
   argParser.addOption(
     'android-keycodes',
@@ -66,6 +77,19 @@ Future<void> main(List<String> rawArguments) async {
     defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'key_name_to_android_name.json'),
     help: 'The path to where the Android keycode to DomKey mapping is.',
   );
+  argParser.addOption(
+    'glfw-keycodes',
+    defaultsTo: null,
+    help: 'The path to where the GLFW keycodes header file should be read. '
+        'If --glfw-keycodes is not specified, the input will be read from the '
+        'correct file in the GLFW github repository.',
+  );
+    argParser.addOption(
+    'glfw-domkey',
+    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'key_name_to_glfw_name.json'),
+    help: 'The path to where the GLFW keycode to DomKey mapping is.',
+  );
+
   argParser.addOption(
     'data',
     defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'key_data.json'),
@@ -122,6 +146,9 @@ Future<void> main(List<String> rawArguments) async {
       hidCodes = File(parsedArguments['chromium-hid-codes']).readAsStringSync();
     }
 
+    final String supplementalHidCodes = File(parsedArguments['supplemental-hid-codes']).readAsStringSync();
+    hidCodes = '$hidCodes\n$supplementalHidCodes';
+
     String androidKeyCodes;
     if (parsedArguments['android-keycodes'] == null) {
       androidKeyCodes = await getAndroidKeyCodes();
@@ -136,8 +163,17 @@ Future<void> main(List<String> rawArguments) async {
       androidScanCodes = File(parsedArguments['android-scancodes']).readAsStringSync();
     }
 
+    String glfwKeyCodes;
+    if (parsedArguments['glfw-keycodes'] == null) {
+      glfwKeyCodes = await getGlfwKeyCodes();
+    } else {
+      glfwKeyCodes = File(parsedArguments['glfw-keycodes']).readAsStringSync();
+    }
+
+    final String glfwToDomKey = File(parsedArguments['glfw-domkey']).readAsStringSync();
     final String androidToDomKey = File(parsedArguments['android-domkey']).readAsStringSync();
-    data = KeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey);
+
+    data = KeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey);
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     File(parsedArguments['data']).writeAsStringSync(encoder.convert(data.toJson()));

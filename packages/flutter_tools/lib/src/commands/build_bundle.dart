@@ -4,22 +4,22 @@
 
 import 'dart:async';
 
-import 'package:args/command_runner.dart';
-
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../features.dart';
+import '../project.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
-  BuildBundleCommand({bool verboseHelp = false}) {
+  BuildBundleCommand({bool verboseHelp = false, this.bundleBuilder}) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
-    addDynamicModeFlags(verboseHelp: verboseHelp);
-    addDynamicBaselineFlags(verboseHelp: verboseHelp);
     argParser
       ..addFlag('precompiled', negatable: false)
       // This option is still referenced by the iOS build scripts. We should
@@ -30,11 +30,16 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64', 'ios']
-      )
-      ..addFlag('track-widget-creation',
-        hide: !verboseHelp,
-        help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
+        allowed: const <String>[
+          'android-arm',
+          'android-arm64',
+          'android-x86',
+          'android-x64',
+          'ios',
+          'darwin-x64',
+          'linux-x64',
+          'windows-x64',
+        ],
       )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
@@ -50,7 +55,12 @@ class BuildBundleCommand extends BuildSubCommand {
               'in the application\'s LICENSE file.',
         defaultsTo: false);
     usesPubOption();
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
+
+    bundleBuilder ??= BundleBuilder();
   }
+
+  BundleBuilder bundleBuilder;
 
   @override
   final String name = 'bundle';
@@ -64,24 +74,49 @@ class BuildBundleCommand extends BuildSubCommand {
       ' iOS runtimes.';
 
   @override
+  Future<Map<CustomDimensions, String>> get usageValues async {
+    final String projectDir = fs.file(targetFile).parent.parent.path;
+    final FlutterProject futterProject = FlutterProject.fromPath(projectDir);
+    if (futterProject == null) {
+      return const <CustomDimensions, String>{};
+    }
+    return <CustomDimensions, String>{
+      CustomDimensions.commandBuildBundleTargetPlatform: argResults['target-platform'],
+      CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}'
+    };
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final String targetPlatform = argResults['target-platform'];
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
-    if (platform == null)
+    if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
+    }
+    // Check for target platforms that are only allowed via feature flags.
+    switch (platform) {
+      case TargetPlatform.darwin_x64:
+        if (!featureFlags.isMacOSEnabled) {
+          throwToolExit('macOS is not a supported target platform.');
+        }
+        break;
+      case TargetPlatform.windows_x64:
+        if (!featureFlags.isWindowsEnabled) {
+          throwToolExit('Windows is not a supported target platform.');
+        }
+        break;
+      case TargetPlatform.linux_x64:
+        if (!featureFlags.isLinuxEnabled) {
+          throwToolExit('Linux is not a supported target platform.');
+        }
+        break;
+      default:
+        break;
+    }
 
     final BuildMode buildMode = getBuildMode();
 
-    int buildNumber;
-    try {
-      buildNumber = argResults['build-number'] != null
-          ? int.parse(argResults['build-number']) : null;
-    } catch (e) {
-      throw UsageException(
-          '--build-number (${argResults['build-number']}) must be an int.', null);
-    }
-
-    await build(
+    await bundleBuilder.build(
       platform: platform,
       buildMode: buildMode,
       mainPath: targetFile,
@@ -92,10 +127,6 @@ class BuildBundleCommand extends BuildSubCommand {
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
-      compilationTraceFilePath: argResults['compilation-trace-file'],
-      createPatch: argResults['patch'],
-      buildNumber: buildNumber,
-      baselineDir: argResults['baseline-dir'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],

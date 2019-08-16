@@ -19,35 +19,175 @@ Widget wrap({ Widget child }) {
 }
 
 void main() {
-  testWidgets('CheckboxListTile control test', (WidgetTester tester) async {
-    final List<dynamic> log = <dynamic>[];
-    await tester.pumpWidget(wrap(
-      child: CheckboxListTile(
-        value: true,
-        onChanged: (bool value) { log.add(value); },
-        title: const Text('Hello'),
-      ),
-    ));
-    await tester.tap(find.text('Hello'));
-    log.add('-');
-    await tester.tap(find.byType(Checkbox));
-    expect(log, equals(<dynamic>[false, '-', false]));
+  testWidgets('RadioListTile should initialize according to groupValue', (WidgetTester tester) async {
+    final List<int> values = <int>[0, 1, 2];
+    int selectedValue;
+    // Constructor parameters are required for [RadioListTile], but they are
+    // irrelevant when searching with [find.byType].
+    final Type radioListTileType = const RadioListTile<int>(
+      value: 0,
+      groupValue: 0,
+      onChanged: null,
+    ).runtimeType;
+
+    List<RadioListTile<int>> generatedRadioListTiles;
+    List<RadioListTile<int>> findTiles() => find
+      .byType(radioListTileType)
+      .evaluate()
+      .map<RadioListTile<int>>((Element element) => element.widget)
+      .toList();
+
+    Widget buildFrame() {
+      return wrap(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: ListView.builder(
+                itemCount: values.length,
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
+                  onChanged: (int value) {
+                    setState(() { selectedValue = value; });
+                  },
+                  value: values[index],
+                  groupValue: selectedValue,
+                  title: Text(values[index].toString()),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    generatedRadioListTiles = findTiles();
+
+    expect(generatedRadioListTiles[0].checked, equals(false));
+    expect(generatedRadioListTiles[1].checked, equals(false));
+    expect(generatedRadioListTiles[2].checked, equals(false));
+
+    selectedValue = 1;
+
+    await tester.pumpWidget(buildFrame());
+    generatedRadioListTiles = findTiles();
+
+    expect(generatedRadioListTiles[0].checked, equals(false));
+    expect(generatedRadioListTiles[1].checked, equals(true));
+    expect(generatedRadioListTiles[2].checked, equals(false));
   });
 
-  testWidgets('RadioListTile control test', (WidgetTester tester) async {
+  testWidgets('RadioListTile control tests', (WidgetTester tester) async {
+    final List<int> values = <int>[0, 1, 2];
+    int selectedValue;
+    // Constructor parameters are required for [Radio], but they are irrelevant
+    // when searching with [find.byType].
+    final Type radioType = const Radio<int>(
+      value: 0,
+      groupValue: 0,
+      onChanged: null,
+    ).runtimeType;
     final List<dynamic> log = <dynamic>[];
-    await tester.pumpWidget(wrap(
-      child: RadioListTile<bool>(
-        value: true,
-        groupValue: false,
-        onChanged: (bool value) { log.add(value); },
-        title: const Text('Hello'),
-      ),
-    ));
-    await tester.tap(find.text('Hello'));
+
+    Widget buildFrame() {
+      return wrap(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: ListView.builder(
+                itemCount: values.length,
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
+                  onChanged: (int value) {
+                    log.add(value);
+                    setState(() { selectedValue = value; });
+                  },
+                  value: values[index],
+                  groupValue: selectedValue,
+                  title: Text(values[index].toString()),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    // Tests for tapping between [Radio] and [ListTile]
+    await tester.pumpWidget(buildFrame());
+    await tester.tap(find.text('1'));
     log.add('-');
-    await tester.tap(find.byType(const Radio<bool>(value: false, groupValue: false, onChanged: null).runtimeType));
-    expect(log, equals(<dynamic>[true, '-', true]));
+    await tester.tap(find.byType(radioType).at(2));
+    expect(log, equals(<dynamic>[1, '-', 2]));
+    log.add('-');
+    await tester.tap(find.text('1'));
+
+    log.clear();
+    selectedValue = null;
+
+    // Tests for tapping across [Radio]s exclusively
+    await tester.pumpWidget(buildFrame());
+    await tester.tap(find.byType(radioType).at(1));
+    log.add('-');
+    await tester.tap(find.byType(radioType).at(2));
+    expect(log, equals(<dynamic>[1, '-', 2]));
+
+    log.clear();
+    selectedValue = null;
+
+    // Tests for tapping across [ListTile]s exclusively
+    await tester.pumpWidget(buildFrame());
+    await tester.tap(find.text('1'));
+    log.add('-');
+    await tester.tap(find.text('2'));
+    expect(log, equals(<dynamic>[1, '-', 2]));
+  });
+
+  testWidgets('Selected RadioListTile should not trigger onChanged', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/30311
+    final List<int> values = <int>[0, 1, 2];
+    int selectedValue;
+    // Constructor parameters are required for [Radio], but they are irrelevant
+    // when searching with [find.byType].
+    final Type radioType = const Radio<int>(
+      value: 0,
+      groupValue: 0,
+      onChanged: null,
+    ).runtimeType;
+    final List<dynamic> log = <dynamic>[];
+
+    Widget buildFrame() {
+      return wrap(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: ListView.builder(
+                itemCount: values.length,
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
+                  onChanged: (int value) {
+                    log.add(value);
+                    setState(() { selectedValue = value; });
+                  },
+                  value: values[index],
+                  groupValue: selectedValue,
+                  title: Text(values[index].toString()),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.tap(find.text('0'));
+    await tester.pump();
+    expect(log, equals(<int>[0]));
+
+    await tester.tap(find.text('0'));
+    expect(log, equals(<int>[0]));
+
+    await tester.tap(find.byType(radioType).at(0));
+    await tester.pump();
+    expect(log, equals(<int>[0]));
   });
 
   testWidgets('SwitchListTile control test', (WidgetTester tester) async {
@@ -98,33 +238,33 @@ void main() {
       children: <TestSemantics>[
         TestSemantics.rootChild(
           id: 1,
-          rect: Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: null,
           flags: <SemanticsFlag>[
             SemanticsFlag.hasToggledState,
             SemanticsFlag.isToggled,
             SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled
+            SemanticsFlag.isEnabled,
           ],
           actions: SemanticsAction.tap.index,
           label: 'aaa\nAAA',
         ),
         TestSemantics.rootChild(
           id: 3,
-          rect: Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: Matrix4.translationValues(0.0, 56.0, 0.0),
           flags: <SemanticsFlag>[
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.isChecked,
             SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled
+            SemanticsFlag.isEnabled,
           ],
           actions: SemanticsAction.tap.index,
           label: 'bbb\nBBB',
         ),
         TestSemantics.rootChild(
           id: 5,
-          rect: Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: Matrix4.translationValues(0.0, 112.0, 0.0),
           flags: <SemanticsFlag>[
             SemanticsFlag.hasCheckedState,

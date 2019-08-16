@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import 'asset_bundle.dart';
-import 'platform_messages.dart';
+import 'binary_messenger.dart';
 
-/// Listens for platform messages and directs them to [BinaryMessages].
+/// Listens for platform messages and directs them to the [defaultBinaryMessenger].
 ///
 /// The [ServicesBinding] also registers a [LicenseEntryCollector] that exposes
 /// the licenses found in the `LICENSE` file stored at the root of the asset
@@ -21,7 +21,7 @@ mixin ServicesBinding on BindingBase {
     super.initInstances();
     _instance = this;
     window
-      ..onPlatformMessage = BinaryMessages.handlePlatformMessage;
+      ..onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     initLicenses();
   }
 
@@ -78,7 +78,7 @@ mixin ServicesBinding on BindingBase {
       if (split >= 0) {
         result.add(LicenseEntryWithLineBreaks(
           license.substring(0, split).split('\n'),
-          license.substring(split + 2)
+          license.substring(split + 2),
         ));
       } else {
         result.add(LicenseEntryWithLineBreaks(const <String>[], license));

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../base/version.dart';
@@ -16,7 +17,7 @@ import '../runner/flutter_command.dart';
 import '../version.dart';
 
 class VersionCommand extends FlutterCommand {
-  VersionCommand(): super() {
+  VersionCommand() : super() {
     argParser.addFlag('force',
       abbr: 'f',
       help: 'Force switch to older Flutter versions that do not include a version command',
@@ -34,10 +35,19 @@ class VersionCommand extends FlutterCommand {
   Version minSupportedVersion = Version.parse('1.2.1');
 
   Future<List<String>> getTags() async {
-    final RunResult runResult = await runCheckedAsync(
-      <String>['git', 'tag', '-l', 'v*'],
-      workingDirectory: Cache.flutterRoot
-    );
+    RunResult runResult;
+    try {
+      runResult = await runCheckedAsync(
+        <String>['git', 'tag', '-l', 'v*', '--sort=-creatordate'],
+        workingDirectory: Cache.flutterRoot,
+      );
+    } on ProcessException catch (error) {
+      throwToolExit(
+        'Unable to get the tags. '
+        'This might be due to git not being installed or an internal error'
+        '\nError: $error.'
+      );
+    }
     return runResult.toString().split('\n');
   }
 
@@ -71,7 +81,7 @@ class VersionCommand extends FlutterCommand {
     try {
       await runCheckedAsync(
         <String>['git', 'checkout', 'v$version'],
-        workingDirectory: Cache.flutterRoot
+        workingDirectory: Cache.flutterRoot,
       );
     } catch (e) {
       throwToolExit('Unable to checkout version branch for version $version.');
@@ -107,7 +117,7 @@ class VersionCommand extends FlutterCommand {
         context: PubContext.pubUpgrade,
         directory: projectRoot,
         upgrade: true,
-        checkLastModified: false
+        checkLastModified: false,
       );
     }
 

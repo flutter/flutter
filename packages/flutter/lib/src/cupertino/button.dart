@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'constants.dart';
 import 'theme.dart';
 
 const Color _kDisabledBackground = Color(0xFFA9A9A9);
@@ -28,16 +29,18 @@ const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
 class CupertinoButton extends StatefulWidget {
   /// Creates an iOS-style button.
   const CupertinoButton({
+    Key key,
     @required this.child,
     this.padding,
     this.color,
     this.disabledColor,
-    this.minSize = 44.0,
+    this.minSize = kMinInteractiveDimensionCupertino,
     this.pressedOpacity = 0.1,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     @required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-       _filled = false;
+       _filled = false,
+       super(key: key);
 
   /// Creates an iOS-style button with a filled background.
   ///
@@ -46,16 +49,18 @@ class CupertinoButton extends StatefulWidget {
   /// To specify a custom background color, use the [color] argument of the
   /// default constructor.
   const CupertinoButton.filled({
+    Key key,
     @required this.child,
     this.padding,
     this.disabledColor,
-    this.minSize = 44.0,
+    this.minSize = kMinInteractiveDimensionCupertino,
     this.pressedOpacity = 0.1,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     @required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        color = null,
-       _filled = true;
+       _filled = true,
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -90,12 +95,8 @@ class CupertinoButton extends StatefulWidget {
 
   /// Minimum size of the button.
   ///
-  /// Defaults to 44.0 which the iOS Human Interface Guideline recommends as the
-  /// minimum tappable area
-  ///
-  /// See also:
-  ///
-  ///  * <https://developer.apple.com/ios/human-interface-guidelines/visual-design/adaptivity-and-layout/>
+  /// Defaults to kMinInteractiveDimensionCupertino which the iOS Human
+  /// Interface Guidelines recommends as the minimum tappable area.
   final double minSize;
 
   /// The opacity that the button will fade to when it is pressed.
@@ -109,11 +110,6 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// Defaults to round corners of 8 logical pixels.
   final BorderRadius borderRadius;
-
-  /// The shape of the button.
-  ///
-  /// Defaults to a super ellipse with
-//  final ShapeBorder shape;
 
   final bool _filled;
 

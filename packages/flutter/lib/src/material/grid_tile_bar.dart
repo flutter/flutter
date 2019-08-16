@@ -28,7 +28,7 @@ class GridTileBar extends StatelessWidget {
     this.leading,
     this.title,
     this.subtitle,
-    this.trailing
+    this.trailing,
   }) : super(key: key);
 
   /// The color to paint behind the child widgets.
@@ -75,7 +75,7 @@ class GridTileBar extends StatelessWidget {
     final ThemeData darkTheme = ThemeData(
       brightness: Brightness.dark,
       accentColor: theme.accentColor,
-      accentColorBrightness: theme.accentColorBrightness
+      accentColorBrightness: theme.accentColorBrightness,
     );
     if (title != null && subtitle != null) {
       children.add(
@@ -88,16 +88,16 @@ class GridTileBar extends StatelessWidget {
                 style: darkTheme.textTheme.subhead,
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
-                child: title
+                child: title,
               ),
               DefaultTextStyle(
                 style: darkTheme.textTheme.caption,
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
-                child: subtitle
-              )
-            ]
-          )
+                child: subtitle,
+              ),
+            ],
+          ),
         )
       );
     } else if (title != null || subtitle != null) {
@@ -107,8 +107,8 @@ class GridTileBar extends StatelessWidget {
             style: darkTheme.textTheme.subhead,
             softWrap: false,
             overflow: TextOverflow.ellipsis,
-            child: title ?? subtitle
-          )
+            child: title ?? subtitle,
+          ),
         )
       );
     }
@@ -126,10 +126,10 @@ class GridTileBar extends StatelessWidget {
           data: const IconThemeData(color: Colors.white),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: children
-          )
-        )
-      )
+            children: children,
+          ),
+        ),
+      ),
     );
   }
 }

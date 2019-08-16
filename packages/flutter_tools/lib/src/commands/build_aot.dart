@@ -4,20 +4,25 @@
 
 import 'dart:async';
 
+import '../artifacts.dart';
 import '../base/build.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../ios/ios_workflow.dart';
+import '../macos/xcode.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
-class BuildAotCommand extends BuildSubCommand {
-  BuildAotCommand() {
+class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmentArtifacts {
+  BuildAotCommand({bool verboseHelp = false}) {
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();
@@ -25,13 +30,13 @@ class BuildAotCommand extends BuildSubCommand {
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'ios']
+        allowed: <String>['android-arm', 'android-arm64', 'ios'],
       )
       ..addFlag('quiet', defaultsTo: false)
-      ..addFlag('build-shared-library',
+      ..addFlag('report-timings',
         negatable: false,
         defaultsTo: false,
-        help: 'Compile to a *.so file (requires NDK when building for Android).'
+        help: 'Report timing information about build steps in machine readable form,',
       )
       ..addMultiOption('ios-arch',
         splitCommas: true,
@@ -46,7 +51,16 @@ class BuildAotCommand extends BuildSubCommand {
       ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
         splitCommas: true,
         hide: true,
+      )
+      ..addFlag('bitcode',
+        defaultsTo: false,
+        help: 'Build the AOT bundle with bitcode. Requires a compatible bitcode engine.',
+        hide: true,
       );
+    // --track-widget-creation is exposed as a flag here to deal with build
+    // invalidation issues, but it is ignored -- there are no plans to support
+    // it for AOT mode.
+    usesTrackWidgetCreation(hasEffect: false, verboseHelp: verboseHelp);
   }
 
   @override
@@ -62,20 +76,29 @@ class BuildAotCommand extends BuildSubCommand {
     if (platform == null)
       throwToolExit('Unknown platform: $targetPlatform');
 
+    final bool bitcode = argResults['bitcode'];
     final BuildMode buildMode = getBuildMode();
+
+    if (bitcode) {
+      if (platform != TargetPlatform.ios) {
+        throwToolExit('Bitcode is only supported on iOS (TargetPlatform is $targetPlatform).');
+      }
+      await validateBitcode();
+    }
 
     Status status;
     if (!argResults['quiet']) {
       final String typeName = artifacts.getEngineType(platform, buildMode);
       status = logger.startProgress(
         'Building AOT snapshot in ${getFriendlyModeName(getBuildMode())} mode ($typeName)...',
-        timeout: kSlowOperation,
+        timeout: timeoutConfiguration.slowOperation,
       );
     }
     final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
+    final bool reportTimings = argResults['report-timings'];
     try {
       String mainPath = findMainDartFile(targetFile);
-      final AOTSnapshotter snapshotter = AOTSnapshotter();
+      final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: reportTimings);
 
       // Compile to kernel.
       mainPath = await snapshotter.compileKernel(
@@ -110,8 +133,8 @@ class BuildAotCommand extends BuildSubCommand {
             mainPath: mainPath,
             packagesPath: PackageMap.globalPackagesPath,
             outputPath: outputPath,
-            buildSharedLibrary: false,
             extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
+            bitcode: bitcode,
           ).then<int>((int buildExitCode) {
             return buildExitCode;
           });
@@ -121,10 +144,20 @@ class BuildAotCommand extends BuildSubCommand {
         if ((await Future.wait<int>(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
           final Iterable<String> dylibs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
           fs.directory(fs.path.join(outputPath, 'App.framework'))..createSync();
-          await runCheckedAsync(<String>['lipo']
-            ..addAll(dylibs)
-            ..addAll(<String>['-create', '-output', fs.path.join(outputPath, 'App.framework', 'App')]),
-          );
+          await runCheckedAsync(<String>[
+            'lipo',
+            ...dylibs,
+            '-create',
+            '-output', fs.path.join(outputPath, 'App.framework', 'App'),
+          ]);
+          final Iterable<String> dSYMs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework.dSYM.noindex'));
+          fs.directory(fs.path.join(outputPath, 'App.framework.dSYM.noindex', 'Contents', 'Resources', 'DWARF'))..createSync(recursive: true);
+          await runCheckedAsync(<String>[
+            'lipo',
+            '-create',
+            '-output', fs.path.join(outputPath, 'App.framework.dSYM.noindex', 'Contents', 'Resources', 'DWARF', 'App'),
+            ...dSYMs.map((String path) => fs.path.join(path, 'Contents', 'Resources', 'DWARF', 'App'))
+          ]);
         } else {
           status?.cancel();
           exitCodes.forEach((IOSArch iosArch, Future<int> exitCodeFuture) async {
@@ -140,8 +173,8 @@ class BuildAotCommand extends BuildSubCommand {
           mainPath: mainPath,
           packagesPath: PackageMap.globalPackagesPath,
           outputPath: outputPath,
-          buildSharedLibrary: argResults['build-shared-library'],
           extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
+          bitcode: false,
         );
         if (snapshotExitCode != 0) {
           status?.cancel();
@@ -167,4 +200,61 @@ class BuildAotCommand extends BuildSubCommand {
     }
     return null;
   }
+}
+
+Future<void> validateBitcode() async {
+  final Artifacts artifacts = Artifacts.instance;
+  if (artifacts is! LocalEngineArtifacts) {
+    throwToolExit('Bitcode is only supported with a local engine built with --bitcode.');
+  }
+  final String flutterFrameworkPath = artifacts.getArtifactPath(Artifact.flutterFramework);
+  if (!fs.isDirectorySync(flutterFrameworkPath)) {
+    throwToolExit('Flutter.framework not found at $flutterFrameworkPath');
+  }
+  final Xcode xcode = context.get<Xcode>();
+
+  // Check for bitcode in Flutter binary.
+  final RunResult otoolResult = await xcode.otool(<String>[
+    '-l', fs.path.join(flutterFrameworkPath, 'Flutter'),
+  ]);
+  if (!otoolResult.stdout.contains('__LLVM')) {
+    throwToolExit('The Flutter.framework at $flutterFrameworkPath does not contain bitcode.');
+  }
+  final RunResult clangResult = await xcode.clang(<String>['--version']);
+  final String clangVersion = clangResult.stdout.split('\n').first;
+  final String engineClangVersion = iosWorkflow.getPlistValueFromFile(
+    fs.path.join(flutterFrameworkPath, 'Info.plist'),
+    'ClangVersion',
+  );
+  final Version engineClangSemVer = _parseVersionFromClang(engineClangVersion);
+  final Version clangSemVer = _parseVersionFromClang(clangVersion);
+  if (engineClangSemVer > clangSemVer) {
+    throwToolExit(
+      'The Flutter.framework at $flutterFrameworkPath was built '
+      'with "${engineClangVersion ?? 'unknown'}", but the current version '
+      'of clang is "$clangVersion". This will result in failures when trying to'
+      'archive an IPA. To resolve this issue, update your version of Xcode to '
+      'at least $engineClangSemVer.',
+    );
+  }
+}
+
+Version _parseVersionFromClang(String clangVersion) {
+  const String prefix = 'Apple LLVM version ';
+  void _invalid() {
+    throwToolExit('Unable to parse Clang version from "$clangVersion". '
+                  'Expected a string like "$prefix #.#.# (clang-####.#.##.#)".');
+  }
+  if (clangVersion == null || clangVersion.length <= prefix.length || !clangVersion.startsWith(prefix)) {
+    _invalid();
+  }
+  final int lastSpace = clangVersion.lastIndexOf(' ');
+  if (lastSpace == -1) {
+    _invalid();
+  }
+  final Version version = Version.parse(clangVersion.substring(prefix.length, lastSpace));
+  if (version == null) {
+    _invalid();
+  }
+  return version;
 }

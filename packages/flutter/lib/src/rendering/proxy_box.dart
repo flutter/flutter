@@ -110,7 +110,7 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return child?.hitTest(result, position: position) ?? false;
   }
 
@@ -148,14 +148,14 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
   /// By default, the [behavior] is [HitTestBehavior.deferToChild].
   RenderProxyBoxWithHitTestBehavior({
     this.behavior = HitTestBehavior.deferToChild,
-    RenderBox child
+    RenderBox child,
   }) : super(child);
 
   /// How to behave during hit testing.
   HitTestBehavior behavior;
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     bool hitTarget = false;
     if (size.contains(position)) {
       hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
@@ -305,7 +305,7 @@ class RenderLimitedBox extends RenderProxyBox {
   RenderLimitedBox({
     RenderBox child,
     double maxWidth = double.infinity,
-    double maxHeight = double.infinity
+    double maxHeight = double.infinity,
   }) : assert(maxWidth != null && maxWidth >= 0.0),
        assert(maxHeight != null && maxHeight >= 0.0),
        _maxWidth = maxWidth,
@@ -339,7 +339,7 @@ class RenderLimitedBox extends RenderProxyBox {
       minWidth: constraints.minWidth,
       maxWidth: constraints.hasBoundedWidth ? constraints.maxWidth : constraints.constrainWidth(maxWidth),
       minHeight: constraints.minHeight,
-      maxHeight: constraints.hasBoundedHeight ? constraints.maxHeight : constraints.constrainHeight(maxHeight)
+      maxHeight: constraints.hasBoundedHeight ? constraints.maxHeight : constraints.constrainHeight(maxHeight),
     );
   }
 
@@ -548,7 +548,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   RenderIntrinsicWidth({
     double stepWidth,
     double stepHeight,
-    RenderBox child
+    RenderBox child,
   }) : assert(stepWidth == null || stepWidth > 0.0),
        assert(stepHeight == null || stepHeight > 0.0),
        _stepWidth = stepWidth,
@@ -665,7 +665,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
 class RenderIntrinsicHeight extends RenderProxyBox {
   /// Creates a render object that sizes itself to its child's intrinsic height.
   RenderIntrinsicHeight({
-    RenderBox child
+    RenderBox child,
   }) : super(child);
 
   @override
@@ -879,7 +879,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
     super.attach(owner);
     _opacity.addListener(_updateOpacity);
     _updateOpacity(); // in case it changed while we weren't listening
- }
+  }
 
   @override
   void detach() {
@@ -1152,9 +1152,10 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
     CustomClipper<T> clipper,
-    this.clipBehavior = Clip.antiAlias,
-  }) : _clipper = clipper,
-       assert(clipBehavior != null),
+    Clip clipBehavior = Clip.antiAlias,
+  }) : assert(clipBehavior != null),
+       _clipper = clipper,
+       _clipBehavior = clipBehavior,
        super(child);
 
   /// If non-null, determines which clip to use on the child.
@@ -1181,7 +1182,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   void attach(PipelineOwner owner) {
     super.attach(owner);
     _clipper?._reclip?.addListener(_markNeedsClip);
- }
+  }
 
   @override
   void detach() {
@@ -1198,7 +1199,14 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   T get _defaultClip;
   T _clip;
 
-  final Clip clipBehavior;
+  Clip get clipBehavior => _clipBehavior;
+  set clipBehavior(Clip value) {
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+    }
+  }
+  Clip _clipBehavior;
 
   @override
   void performLayout() {
@@ -1270,7 +1278,7 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   Rect get _defaultClip => Offset.zero & size;
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1346,7 +1354,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   RRect get _defaultClip => _borderRadius.toRRect(Offset.zero & size);
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1411,7 +1419,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   Rect get _defaultClip => Offset.zero & size;
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     _updateClip();
     assert(_clip != null);
     final Offset center = _clip.center;
@@ -1476,7 +1484,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1571,12 +1579,8 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     markNeedsPaint();
   }
 
-  static final Paint _transparentPaint = Paint()..color = const Color(0x00000000);
-
-  // On Fuchsia, the system compositor is responsible for drawing shadows
-  // for physical model layers with non-zero elevation.
   @override
-  bool get alwaysNeedsCompositing => _elevation != 0.0 && defaultTargetPlatform == TargetPlatform.fuchsia;
+  bool get alwaysNeedsCompositing => true;
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
@@ -1588,8 +1592,8 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(DoubleProperty('elevation', elevation));
-    description.add(DiagnosticsProperty<Color>('color', color));
-    description.add(DiagnosticsProperty<Color>('shadowColor', color));
+    description.add(ColorProperty('color', color));
+    description.add(ColorProperty('shadowColor', color));
   }
 }
 
@@ -1673,7 +1677,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1706,37 +1710,18 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         }
         return true;
       }());
-      if (needsCompositing) {
-        final PhysicalModelLayer physicalModel = PhysicalModelLayer(
-          clipPath: offsetRRectAsPath,
-          clipBehavior: clipBehavior,
-          elevation: paintShadows ? elevation : 0.0,
-          color: color,
-          shadowColor: shadowColor,
-        );
-        context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
-      } else {
-        final Canvas canvas = context.canvas;
-        if (elevation != 0.0 && paintShadows) {
-          // The drawShadow call doesn't add the region of the shadow to the
-          // picture's bounds, so we draw a hardcoded amount of extra space to
-          // account for the maximum potential area of the shadow.
-          // TODO(jsimmons): remove this when Skia does it for us.
-          canvas.drawRect(
-            offsetBounds.inflate(20.0),
-            _RenderPhysicalModelBase._transparentPaint,
-          );
-          canvas.drawShadow(
-            offsetRRectAsPath,
-            shadowColor,
-            elevation,
-            color.alpha != 0xFF,
-          );
-        }
-        canvas.drawRRect(offsetRRect, Paint()..color = color);
-        context.clipRRectAndPaint(offsetRRect, clipBehavior, offsetBounds, () => super.paint(context, offset));
-        assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
-      }
+      final PhysicalModelLayer physicalModel = PhysicalModelLayer(
+        clipPath: offsetRRectAsPath,
+        clipBehavior: clipBehavior,
+        elevation: paintShadows ? elevation : 0.0,
+        color: color,
+        shadowColor: shadowColor,
+      );
+      assert(() {
+        physicalModel.debugCreator = debugCreator;
+        return true;
+      }());
+      context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
     }
   }
 
@@ -1787,7 +1772,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1819,37 +1804,18 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
         }
         return true;
       }());
-      if (needsCompositing) {
-        final PhysicalModelLayer physicalModel = PhysicalModelLayer(
-          clipPath: offsetPath,
-          clipBehavior: clipBehavior,
-          elevation: paintShadows ? elevation : 0.0,
-          color: color,
-          shadowColor: shadowColor,
-        );
-        context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
-      } else {
-        final Canvas canvas = context.canvas;
-        if (elevation != 0.0 && paintShadows) {
-          // The drawShadow call doesn't add the region of the shadow to the
-          // picture's bounds, so we draw a hardcoded amount of extra space to
-          // account for the maximum potential area of the shadow.
-          // TODO(jsimmons): remove this when Skia does it for us.
-          canvas.drawRect(
-            offsetBounds.inflate(20.0),
-            _RenderPhysicalModelBase._transparentPaint,
-          );
-          canvas.drawShadow(
-            offsetPath,
-            shadowColor,
-            elevation,
-            color.alpha != 0xFF,
-          );
-        }
-        canvas.drawPath(offsetPath, Paint()..color = color..style = PaintingStyle.fill);
-        context.clipPathAndPaint(offsetPath, clipBehavior, offsetBounds, () => super.paint(context, offset));
-        assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
-      }
+      final PhysicalModelLayer physicalModel = PhysicalModelLayer(
+        clipPath: offsetPath,
+        clipBehavior: clipBehavior,
+        elevation: paintShadows ? elevation : 0.0,
+        color: color,
+        shadowColor: shadowColor,
+      );
+      assert(() {
+        physicalModel.debugCreator = debugCreator;
+        return true;
+      }());
+      context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
     }
   }
 
@@ -2011,7 +1977,7 @@ class RenderTransform extends RenderProxyBox {
     AlignmentGeometry alignment,
     TextDirection textDirection,
     this.transformHitTests = true,
-    RenderBox child
+    RenderBox child,
   }) : assert(transform != null),
        super(child) {
     this.transform = transform;
@@ -2120,14 +2086,14 @@ class RenderTransform extends RenderProxyBox {
   }
 
   /// Concatenates a translation by (x, y, z) into the transform.
-  void translate(double x, [double y = 0.0, double z = 0.0]) {
+  void translate(double x, [ double y = 0.0, double z = 0.0 ]) {
     _transform.translate(x, y, z);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a scale into the transform.
-  void scale(double x, [double y, double z]) {
+  void scale(double x, [ double y, double z ]) {
     _transform.scale(x, y, z);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
@@ -2154,7 +2120,7 @@ class RenderTransform extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     // RenderTransform objects don't check if they are
     // themselves hit, because it's confusing to think about
     // how the untransformed size and the child's transformed
@@ -2163,17 +2129,15 @@ class RenderTransform extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
-    if (transformHitTests) {
-      final Matrix4 inverse = Matrix4.tryInvert(_effectiveTransform);
-      if (inverse == null) {
-        // We cannot invert the effective transform. That means the child
-        // doesn't appear on screen and cannot be hit.
-        return false;
-      }
-      position = MatrixUtils.transformPoint(inverse, position);
-    }
-    return super.hitTestChildren(result, position: position);
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+    assert(!transformHitTests || _effectiveTransform != null);
+    return result.addWithPaintTransform(
+      transform: transformHitTests ? _effectiveTransform : null,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
+      },
+    );
   }
 
   @override
@@ -2316,9 +2280,11 @@ class RenderFittedBox extends RenderProxyBox {
       final Rect sourceRect = _resolvedAlignment.inscribe(sizes.source, Offset.zero & childSize);
       final Rect destinationRect = _resolvedAlignment.inscribe(sizes.destination, Offset.zero & size);
       _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.height;
+      assert(scaleX.isFinite && scaleY.isFinite);
       _transform = Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
         ..scale(scaleX, scaleY, 1.0)
         ..translate(-sourceRect.left, -sourceRect.top);
+      assert(_transform.storage.every((double value) => value.isFinite));
     }
   }
 
@@ -2332,7 +2298,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (size.isEmpty)
+    if (size.isEmpty || child.size.isEmpty)
       return;
     _updatePaintData();
     if (child != null) {
@@ -2344,23 +2310,22 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
-    if (size.isEmpty)
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+    if (size.isEmpty || child?.size?.isEmpty == true)
       return false;
     _updatePaintData();
-    final Matrix4 inverse = Matrix4.tryInvert(_transform);
-    if (inverse == null) {
-      // We cannot invert the effective transform. That means the child
-      // doesn't appear on screen and cannot be hit.
-      return false;
-    }
-    position = MatrixUtils.transformPoint(inverse, position);
-    return super.hitTestChildren(result, position: position);
+    return result.addWithPaintTransform(
+      transform: _transform,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
+      },
+    );
   }
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    if (size.isEmpty) {
+    if (size.isEmpty || child.size.isEmpty) {
       transform.setZero();
     } else {
       _updatePaintData();
@@ -2393,7 +2358,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
   RenderFractionalTranslation({
     @required Offset translation,
     this.transformHitTests = true,
-    RenderBox child
+    RenderBox child,
   }) : assert(translation != null),
        _translation = translation,
        super(child);
@@ -2413,7 +2378,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     // RenderFractionalTranslation objects don't check if they are
     // themselves hit, because it's confusing to think about
     // how the untransformed size and the child's transformed
@@ -2430,15 +2395,17 @@ class RenderFractionalTranslation extends RenderProxyBox {
   bool transformHitTests;
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     assert(!debugNeedsLayout);
-    if (transformHitTests) {
-      position = Offset(
-        position.dx - translation.dx * size.width,
-        position.dy - translation.dy * size.height,
-      );
-    }
-    return super.hitTestChildren(result, position: position);
+    return result.addWithPaintOffset(
+      offset: transformHitTests
+          ? Offset(translation.dx * size.width, translation.dy * size.height)
+          : null,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
+      },
+    );
   }
 
   @override
@@ -2488,15 +2455,23 @@ typedef PointerUpEventListener = void Function(PointerUpEvent event);
 /// Used by [Listener] and [RenderPointerListener].
 typedef PointerCancelEventListener = void Function(PointerCancelEvent event);
 
-/// Calls callbacks in response to pointer events.
+/// Signature for listening to [PointerSignalEvent] events.
+///
+/// Used by [Listener] and [RenderPointerListener].
+typedef PointerSignalEventListener = void Function(PointerSignalEvent event);
+
+/// Calls callbacks in response to common pointer events.
+///
+/// It responds to events that can construct gestures, such as when the
+/// pointer is pressed, moved, then released or canceled.
+///
+/// It does not respond to events that are exclusive to mouse, such as when the
+/// mouse enters, exits or hovers a region without pressing any buttons. For
+/// these events, use [RenderMouseRegion].
 ///
 /// If it has a child, defers to the child for sizing behavior.
 ///
 /// If it does not have a child, grows to fit the parent-provided constraints.
-///
-/// The [onPointerEnter], [onPointerHover], and [onPointerExit] events are only
-/// relevant to and fired by pointers that can hover (e.g. mouse pointers, but
-/// not most touch pointers).
 class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a render object that forwards pointer events to callbacks.
   ///
@@ -2504,25 +2479,12 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   RenderPointerListener({
     this.onPointerDown,
     this.onPointerMove,
-    PointerEnterEventListener onPointerEnter,
-    PointerHoverEventListener onPointerHover,
-    PointerExitEventListener onPointerExit,
     this.onPointerUp,
     this.onPointerCancel,
+    this.onPointerSignal,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
     RenderBox child,
-  })  : _onPointerEnter = onPointerEnter,
-        _onPointerHover = onPointerHover,
-        _onPointerExit = onPointerExit,
-        super(behavior: behavior, child: child) {
-    if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
-      _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onPointerEnter,
-        onHover: _onPointerHover,
-        onExit: _onPointerExit,
-      );
-    }
-  }
+  }) : super(behavior: behavior, child: child);
 
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
@@ -2532,45 +2494,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Called when a pointer that triggered an [onPointerDown] changes position.
   PointerMoveEventListener onPointerMove;
 
-  /// Called when a hovering pointer enters the region for this widget.
-  ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer enters
-  /// the region defined by this widget.
-  PointerEnterEventListener get onPointerEnter => _onPointerEnter;
-  set onPointerEnter(PointerEnterEventListener value) {
-    if (_onPointerEnter != value) {
-      _onPointerEnter = value;
-      _updateAnnotations();
-    }
-  }
-  PointerEnterEventListener _onPointerEnter;
-
-  /// Called when a pointer that has not triggered an [onPointerDown] changes
-  /// position.
-  ///
-  /// Typically only triggered for mouse pointers.
-  PointerHoverEventListener get onPointerHover => _onPointerHover;
-  set onPointerHover(PointerHoverEventListener value) {
-    if (_onPointerHover != value) {
-      _onPointerHover = value;
-      _updateAnnotations();
-    }
-  }
-  PointerHoverEventListener _onPointerHover;
-
-  /// Called when a hovering pointer leaves the region for this widget.
-  ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer leaves
-  /// the region defined by this widget.
-  PointerExitEventListener get onPointerExit => _onPointerExit;
-  set onPointerExit(PointerExitEventListener value) {
-    if (_onPointerExit != value) {
-      _onPointerExit = value;
-      _updateAnnotations();
-    }
-  }
-  PointerExitEventListener _onPointerExit;
-
   /// Called when a pointer that triggered an [onPointerDown] is no longer in
   /// contact with the screen.
   PointerUpEventListener onPointerUp;
@@ -2579,55 +2502,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// no longer directed towards this receiver.
   PointerCancelEventListener onPointerCancel;
 
-  // Object used for annotation of the layer used for hover hit detection.
-  MouseTrackerAnnotation _hoverAnnotation;
-
-  void _updateAnnotations() {
-    if (_hoverAnnotation != null && attached) {
-      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
-    }
-    if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
-      _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onPointerEnter,
-        onHover: _onPointerHover,
-        onExit: _onPointerExit,
-      );
-      if (attached) {
-        RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
-      }
-    } else {
-      _hoverAnnotation = null;
-    }
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    if (_hoverAnnotation != null) {
-      RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
-    }
-  }
-
-  @override
-  void detach() {
-    if (_hoverAnnotation != null) {
-      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
-    }
-    super.detach();
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (_hoverAnnotation != null) {
-      final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
-        _hoverAnnotation,
-        size: size,
-        offset: offset,
-      );
-      context.pushLayer(layer, super.paint, offset);
-    }
-    super.paint(context, offset);
-  }
+  /// Called when a pointer signal occurs over this object.
+  PointerSignalEventListener onPointerSignal;
 
   @override
   void performResize() {
@@ -2637,8 +2513,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    // The onPointerEnter, onPointerHover, and onPointerExit events are are
-    // triggered from within the MouseTracker, not here.
     if (onPointerDown != null && event is PointerDownEvent)
       return onPointerDown(event);
     if (onPointerMove != null && event is PointerMoveEvent)
@@ -2647,6 +2521,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       return onPointerUp(event);
     if (onPointerCancel != null && event is PointerCancelEvent)
       return onPointerCancel(event);
+    if (onPointerSignal != null && event is PointerSignalEvent)
+      return onPointerSignal(event);
   }
 
   @override
@@ -2657,16 +2533,205 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       listeners.add('down');
     if (onPointerMove != null)
       listeners.add('move');
-    if (onPointerEnter != null)
-      listeners.add('enter');
-    if (onPointerHover != null)
-      listeners.add('hover');
-    if (onPointerExit != null)
-      listeners.add('exit');
     if (onPointerUp != null)
       listeners.add('up');
     if (onPointerCancel != null)
       listeners.add('cancel');
+    if (onPointerSignal != null)
+      listeners.add('signal');
+    if (listeners.isEmpty)
+      listeners.add('<none>');
+    properties.add(IterableProperty<String>('listeners', listeners));
+    // TODO(jacobr): add raw listeners to the diagnostics data.
+  }
+}
+
+/// Calls callbacks in response to pointer events that are exclusive to mice.
+///
+/// Simply put, it responds to events that are related to hovering,
+/// i.e. when the mouse enters, exits or hovers a region without pressing.
+///
+/// It does not respond to common events that construct gestures, such as when
+/// the pointer is pressed, moved, then released or canceled. For these events,
+/// use [RenderPointerListener].
+///
+/// If it has a child, it defers to the child for sizing behavior.
+///
+/// If it does not have a child, it grows to fit the parent-provided constraints.
+class RenderMouseRegion extends RenderProxyBox {
+  /// Creates a render object that forwards pointer events to callbacks.
+  RenderMouseRegion({
+    PointerEnterEventListener onEnter,
+    PointerHoverEventListener onHover,
+    PointerExitEventListener onExit,
+    RenderBox child,
+  }) : _onEnter = onEnter,
+       _onHover = onHover,
+       _onExit = onExit,
+       _annotationIsActive = false,
+       super(child) {
+    _hoverAnnotation = MouseTrackerAnnotation(
+      onEnter: _handleEnter,
+      onHover: _handleHover,
+      onExit: _handleExit,
+    );
+  }
+
+  /// Called when a hovering pointer enters the region for this widget.
+  ///
+  /// If this is a mouse pointer, this will fire when the mouse pointer enters
+  /// the region defined by this widget.
+  PointerEnterEventListener get onEnter => _onEnter;
+  set onEnter(PointerEnterEventListener value) {
+    if (_onEnter != value) {
+      _onEnter = value;
+      _updateAnnotations();
+    }
+  }
+  PointerEnterEventListener _onEnter;
+  void _handleEnter(PointerEnterEvent event) {
+    if (_onEnter != null)
+      _onEnter(event);
+  }
+
+  /// Called when a pointer that has not triggered an [onPointerDown] changes
+  /// position.
+  ///
+  /// Typically only triggered for mouse pointers.
+  PointerHoverEventListener get onHover => _onHover;
+  set onHover(PointerHoverEventListener value) {
+    if (_onHover != value) {
+      _onHover = value;
+      _updateAnnotations();
+    }
+  }
+  PointerHoverEventListener _onHover;
+  void _handleHover(PointerHoverEvent event) {
+    if (_onHover != null)
+      _onHover(event);
+  }
+
+  /// Called when a hovering pointer leaves the region for this widget.
+  ///
+  /// If this is a mouse pointer, this will fire when the mouse pointer leaves
+  /// the region defined by this widget.
+  PointerExitEventListener get onExit => _onExit;
+  set onExit(PointerExitEventListener value) {
+    if (_onExit != value) {
+      _onExit = value;
+      _updateAnnotations();
+    }
+  }
+  PointerExitEventListener _onExit;
+  void _handleExit(PointerExitEvent event) {
+    if (_onExit != null)
+      _onExit(event);
+  }
+
+  // Object used for annotation of the layer used for hover hit detection.
+  MouseTrackerAnnotation _hoverAnnotation;
+
+  /// Object used for annotation of the layer used for hover hit detection.
+  ///
+  /// This is only public to allow for testing of Listener widgets. Do not call
+  /// in other contexts.
+  @visibleForTesting
+  MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
+
+  void _updateAnnotations() {
+    final bool annotationWasActive = _annotationIsActive;
+    final bool annotationWillBeActive = (
+        _onEnter != null ||
+        _onHover != null ||
+        _onExit != null
+      ) &&
+      RendererBinding.instance.mouseTracker.mouseIsConnected;
+    if (annotationWasActive != annotationWillBeActive) {
+      markNeedsPaint();
+      markNeedsCompositingBitsUpdate();
+      if (annotationWillBeActive) {
+        RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+      } else {
+        RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+      }
+      _annotationIsActive = annotationWillBeActive;
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    // Add a listener to listen for changes in mouseIsConnected.
+    RendererBinding.instance.mouseTracker.addListener(_updateAnnotations);
+    _updateAnnotations();
+  }
+
+  /// Attaches the annotation for this render object, if any.
+  ///
+  /// This is called by the [MouseRegion]'s [Element] to tell this
+  /// [RenderMouseRegion] that it has transitioned from "inactive"
+  /// state to "active". We call it here so that
+  /// [MouseTrackerAnnotation.onEnter] isn't called during the build step for
+  /// the widget that provided the callback, and [State.setState] can safely be
+  /// called within that callback.
+  void postActivate() {
+    if (_annotationIsActive)
+      RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+  }
+
+  /// Detaches the annotation for this render object, if any.
+  ///
+  /// This is called by the [MouseRegion]'s [Element] to tell this
+  /// [RenderMouseRegion] that it will shortly be transitioned from "active"
+  /// state to "inactive". We call it here so that
+  /// [MouseTrackerAnnotation.onExit] isn't called during the build step for the
+  /// widget that provided the callback, and [State.setState] can safely be
+  /// called within that callback.
+  void preDeactivate() {
+    if (_annotationIsActive)
+      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+  }
+
+  @override
+  void detach() {
+    RendererBinding.instance.mouseTracker.removeListener(_updateAnnotations);
+    super.detach();
+  }
+
+  bool _annotationIsActive;
+
+  @override
+  bool get needsCompositing => super.needsCompositing || _annotationIsActive;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_annotationIsActive) {
+      final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
+        _hoverAnnotation,
+        size: size,
+        offset: offset,
+      );
+      context.pushLayer(layer, super.paint, offset);
+    } else {
+      super.paint(context, offset);
+    }
+  }
+
+  @override
+  void performResize() {
+    size = constraints.biggest;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    final List<String> listeners = <String>[];
+    if (onEnter != null)
+      listeners.add('enter');
+    if (onHover != null)
+      listeners.add('hover');
+    if (onExit != null)
+      listeners.add('exit');
     if (listeners.isEmpty)
       listeners.add('<none>');
     properties.add(IterableProperty<String>('listeners', listeners));
@@ -2765,7 +2830,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   ///  * [OffsetLayer.toImage] for a similar API at the layer level.
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
-  Future<ui.Image> toImage({double pixelRatio = 1.0}) {
+  Future<ui.Image> toImage({ double pixelRatio = 1.0 }) {
     assert(!debugNeedsPaint);
     return layer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
@@ -2883,7 +2948,7 @@ class RenderIgnorePointer extends RenderProxyBox {
   RenderIgnorePointer({
     RenderBox child,
     bool ignoring = true,
-    bool ignoringSemantics
+    bool ignoringSemantics,
   }) : _ignoring = ignoring,
        _ignoringSemantics = ignoringSemantics,
        super(child) {
@@ -2921,11 +2986,11 @@ class RenderIgnorePointer extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? ignoring : ignoringSemantics;
+  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? ignoring;
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
-    return ignoring ? false : super.hitTest(result, position: position);
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
+    return !ignoring && super.hitTest(result, position: position);
   }
 
   // TODO(ianh): figure out a way to still include labels and flags in
@@ -2958,7 +3023,7 @@ class RenderOffstage extends RenderProxyBox {
   /// Creates an offstage render object.
   RenderOffstage({
     bool offstage = true,
-    RenderBox child
+    RenderBox child,
   }) : assert(offstage != null),
        _offstage = offstage,
        super(child);
@@ -3034,7 +3099,7 @@ class RenderOffstage extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     return !offstage && super.hitTest(result, position: position);
   }
 
@@ -3127,10 +3192,10 @@ class RenderAbsorbPointer extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? absorbing : ignoringSemantics;
+  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? absorbing;
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     return absorbing
         ? size.contains(position)
         : super.hitTest(result, position: position);
@@ -3169,7 +3234,7 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
   RenderMetaData({
     this.metaData,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
-    RenderBox child
+    RenderBox child,
   }) : super(behavior: behavior, child: child);
 
   /// Opaque meta data ignored by the render tree
@@ -3194,7 +3259,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     GestureLongPressCallback onLongPress,
     GestureDragUpdateCallback onHorizontalDragUpdate,
     GestureDragUpdateCallback onVerticalDragUpdate,
-    this.scrollFactor = 0.8
+    this.scrollFactor = 0.8,
   }) : assert(scrollFactor != null),
        _onTap = onTap,
        _onLongPress = onLongPress,
@@ -3382,9 +3447,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool button,
     bool header,
     bool textField,
+    bool readOnly,
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
+    bool multiline,
     bool scopesRoute,
     bool namesRoute,
     bool hidden,
@@ -3429,9 +3496,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _button = button,
        _header = header,
        _textField = textField,
+       _readOnly = readOnly,
        _focused = focused,
        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _obscured = obscured,
+       _multiline = multiline,
        _scopesRoute = scopesRoute,
        _namesRoute = namesRoute,
        _liveRegion = liveRegion,
@@ -3506,7 +3575,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// Whether decendants of this [RenderObject] should have their semantic
+  /// Whether descendants of this [RenderObject] should have their semantic
   /// information ignored.
   ///
   /// When this flag is set to true, all child semantics nodes are ignored.
@@ -3585,6 +3654,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// If non-null, sets the [SemanticsNode.isReadOnly] semantic to the given value.
+  bool get readOnly => _readOnly;
+  bool _readOnly;
+  set readOnly(bool value) {
+    if (readOnly == value)
+      return;
+    _readOnly = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// If non-null, sets the [SemanticsNode.isFocused] semantic to the given value.
   bool get focused => _focused;
   bool _focused;
@@ -3614,6 +3693,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (obscured == value)
       return;
     _obscured = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isMultiline] semantic to the given
+  /// value.
+  bool get multiline => _multiline;
+  bool _multiline;
+  set multiline(bool value) {
+    if (multiline == value)
+      return;
+    _multiline = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4167,7 +4257,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// See also:
   ///
-  ///  * [CustomSemanticsAction], for an explaination of custom actions.
+  ///  * [CustomSemanticsAction], for an explanation of custom actions.
   Map<CustomSemanticsAction, VoidCallback> get customSemanticsActions => _customSemanticsActions;
   Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions;
   set customSemanticsActions(Map<CustomSemanticsAction, VoidCallback> value) {
@@ -4208,12 +4298,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isHeader = header;
     if (textField != null)
       config.isTextField = textField;
+    if (readOnly != null)
+      config.isReadOnly = readOnly;
     if (focused != null)
       config.isFocused = focused;
     if (inMutuallyExclusiveGroup != null)
       config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup;
     if (obscured != null)
       config.isObscured = obscured;
+    if (multiline != null)
+      config.isMultiline = multiline;
     if (hidden != null)
       config.isHidden = hidden;
     if (image != null)
@@ -4580,7 +4674,7 @@ class RenderLeaderLayer extends RenderProxyBox {
 ///
 /// Hit testing on descendants of this render object will only work if the
 /// target position is within the box that this render object's parent considers
-/// to be hitable.
+/// to be hittable.
 ///
 /// See also:
 ///
@@ -4670,7 +4764,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     // RenderFollowerLayer objects don't check if they are
     // themselves hit, because it's confusing to think about
     // how the untransformed size and the child's transformed
@@ -4679,15 +4773,14 @@ class RenderFollowerLayer extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
-    final Matrix4 inverse = Matrix4.tryInvert(getCurrentTransform());
-    if (inverse == null) {
-      // We cannot invert the effective transform. That means the child
-      // doesn't appear on screen and cannot be hit.
-      return false;
-    }
-    position = MatrixUtils.transformPoint(inverse, position);
-    return super.hitTestChildren(result, position: position);
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+    return result.addWithPaintTransform(
+      transform: getCurrentTransform(),
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
+      },
+    );
   }
 
   @override
@@ -4703,7 +4796,7 @@ class RenderFollowerLayer extends RenderProxyBox {
       _layer,
       super.paint,
       Offset.zero,
-      childPaintBounds: Rect.fromLTRB(
+      childPaintBounds: const Rect.fromLTRB(
         // We don't know where we'll end up, so we have no idea what our cull rect should be.
         double.negativeInfinity,
         double.negativeInfinity,

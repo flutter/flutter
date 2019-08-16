@@ -73,15 +73,93 @@ void main() {
     );
 
     await tester.tap(find.byKey(switchKey));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(log, hasLength(1));
     expect(log.single, isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
     debugDefaultTargetPlatformOverride = null;
   });
 
-  testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
+  testWidgets('Using other widgets that rebuild the switch will not cause vibrations', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final Key switchKey = UniqueKey();
+    final Key switchKey2 = UniqueKey();
     bool value = false;
+    bool value2 = false;
+    final List<MethodCall> log = <MethodCall>[];
+
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: Column(
+                children: <Widget>[
+                  CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                  CupertinoSwitch(
+                    key: switchKey2,
+                    value: value2,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value2 = newValue;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    await tester.pump();
+
+    expect(log, hasLength(1));
+    expect(log[0], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+
+    await tester.tap(find.byKey(switchKey2));
+    await tester.pump();
+
+    expect(log, hasLength(2));
+    expect(log[1], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+
+    await tester.tap(find.byKey(switchKey));
+    await tester.pump();
+
+    expect(log, hasLength(3));
+    expect(log[2], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+
+    await tester.tap(find.byKey(switchKey2));
+    await tester.pump();
+
+    expect(log, hasLength(4));
+    expect(log[3], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('Haptic vibration triggers on drag', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    bool value = false;
+    final List<MethodCall> log = <MethodCall>[];
+
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
 
     await tester.pumpWidget(
       Directionality(
@@ -104,23 +182,108 @@ void main() {
       ),
     );
 
-    expect(value, isFalse);
-
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
-
-    expect(value, isFalse);
-
     await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    expect(value, isTrue);
+    await tester.pump();
+
+    expect(log, hasLength(1));
+    expect(log[0], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('No haptic vibration triggers from a programmatic value change', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final Key switchKey = UniqueKey();
+    bool value = false;
+
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: Column(
+                children: <Widget>[
+                  CupertinoButton(
+                    child: const Text('Button'),
+                    onPressed: () {
+                      setState(() {
+                        value = !value;
+                      });
+                    },
+                  ),
+                  CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(value, isFalse);
+
+    await tester.tap(find.byType(CupertinoButton));
+    expect(value, isTrue);
+    await tester.pump();
+
+    expect(log, hasLength(0));
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
+    bool value = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: CupertinoSwitch(
+                value: value,
+                onChanged: (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(value, isFalse);
+
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-48.0, 0.0));
+
+    expect(value, isFalse);
+
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(48.0, 0.0));
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(48.0, 0.0));
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-48.0, 0.0));
 
     expect(value, isFalse);
   });
@@ -250,6 +413,163 @@ void main() {
     await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
 
     expect(value, isFalse);
+  });
+
+  testWidgets('Switch is translucent when disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: null,
+          ),
+        )
+      ),
+    );
+
+    expect(find.byType(Opacity), findsOneWidget);
+    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.5);
+  });
+
+  testWidgets('Switch is opaque when enabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: (bool newValue) {},
+          ),
+        )
+      ),
+    );
+
+    expect(find.byType(Opacity), findsOneWidget);
+    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 1.0);
+  });
+
+  testWidgets('Switch turns translucent after becoming disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: (bool newValue) {},
+          ),
+        )
+      ),
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: null,
+          ),
+        )
+      ),
+    );
+
+    expect(find.byType(Opacity), findsOneWidget);
+    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.5);
+  });
+
+    testWidgets('Switch turns opaque after becoming enabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: null,
+          ),
+        )
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: (bool newValue) {},
+          ),
+        )
+      ),
+    );
+
+    expect(find.byType(Opacity), findsOneWidget);
+    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 1.0);
+  });
+
+  testWidgets('Switch renders correctly before, during, and after being tapped', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: RepaintBoundary(
+                child: CupertinoSwitch(
+                  key: switchKey,
+                  value: value,
+                  dragStartBehavior: DragStartBehavior.down,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                )
+              )
+            );
+          },
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile(
+        'switch.tap.off.png',
+        version: 0,
+      ),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    // Kick off animation, then advance to intermediate frame.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile(
+        'switch.tap.turningOn.png',
+        version: 0,
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile(
+        'switch.tap.on.png',
+        version: 0,
+      ),
+    );
   });
 
 }

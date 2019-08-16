@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeData theme}) {
+MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { ThemeData theme }) {
   return MaterialApp(
     theme: theme,
     home: Material(
@@ -24,11 +22,11 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeD
                             return RepaintBoundary(key: _painterKey, child: dialog);
                           },
                         );
-                      }
-                  )
+                      },
+                  ),
               );
             }
-        )
+        ),
     ),
   );
 }
@@ -51,7 +49,7 @@ void main() {
       elevation: 8.0,
       shape: null,
       titleTextStyle: TextStyle(color: Color(0xffffffff)),
-      contentTextStyle: TextStyle(color: Color(0xff000000))
+      contentTextStyle: TextStyle(color: Color(0xff000000)),
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
@@ -132,10 +130,12 @@ void main() {
 
     await expectLater(
       find.byKey(_painterKey),
-      matchesGoldenFile('dialog_theme.dialog_with_custom_border.png'),
-      skip: !Platform.isLinux,
+      matchesGoldenFile(
+        'dialog_theme.dialog_with_custom_border.png',
+        version: null,
+      ),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Custom Title Text Style - Constructor Param', (WidgetTester tester) async {
     const String titleText = 'Title';

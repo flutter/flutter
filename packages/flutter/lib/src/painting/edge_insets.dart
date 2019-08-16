@@ -349,7 +349,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
     this.left = 0.0,
     this.top = 0.0,
     this.right = 0.0,
-    this.bottom = 0.0
+    this.bottom = 0.0,
   });
 
   /// Creates insets with symmetrical vertical and horizontal offsets.
@@ -588,7 +588,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
     double top,
     double right,
     double bottom,
-}) {
+  }) {
     return EdgeInsets.only(
       left: left ?? this.left,
       top: top ?? this.top,
@@ -627,7 +627,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
     this.start = 0.0,
     this.top = 0.0,
     this.end = 0.0,
-    this.bottom = 0.0
+    this.bottom = 0.0,
   });
 
   /// An [EdgeInsetsDirectional] with zero offsets in each direction.

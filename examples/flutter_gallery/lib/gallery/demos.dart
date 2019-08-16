@@ -8,9 +8,13 @@ import '../demo/all.dart';
 import 'icons.dart';
 
 class GalleryDemoCategory {
-  const GalleryDemoCategory._({ this.name, this.icon });
-  @required final String name;
-  @required final IconData icon;
+  const GalleryDemoCategory._({
+    @required this.name,
+    @required this.icon,
+  });
+
+  final String name;
+  final IconData icon;
 
   @override
   bool operator ==(dynamic other) {
@@ -96,6 +100,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => const ShrineDemo(),
     ),
     GalleryDemo(
+      title: 'Fortnightly',
+      subtitle: 'Newspaper typography app',
+      icon: GalleryIcons.custom_typography,
+      category: _kDemos,
+      routeName: FortnightlyDemo.routeName,
+      buildRoute: (BuildContext context) => FortnightlyDemo(),
+    ),
+    GalleryDemo(
       title: 'Contact profile',
       subtitle: 'Address book entry with a flexible appbar',
       icon: GalleryIcons.account_box,
@@ -110,6 +122,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kDemos,
       routeName: AnimationDemo.routeName,
       buildRoute: (BuildContext context) => const AnimationDemo(),
+    ),
+    GalleryDemo(
+      title: '2D Transformations',
+      subtitle: 'Pan, Zoom, Rotate',
+      icon: GalleryIcons.grid_on,
+      category: _kDemos,
+      routeName: TransformationsDemo.routeName,
+      buildRoute: (BuildContext context) => const TransformationsDemo(),
     ),
 
     // Style
@@ -138,6 +158,15 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kMaterialComponents,
       routeName: BackdropDemo.routeName,
       buildRoute: (BuildContext context) => BackdropDemo(),
+    ),
+    GalleryDemo(
+      title: 'Banner',
+      subtitle: 'Displaying a banner within a list',
+      icon: GalleryIcons.lists_leave_behind,
+      category: _kMaterialComponents,
+      routeName: BannerDemo.routeName,
+      documentationUrl: 'https://api.flutter.dev/flutter/material/MaterialBanner-class.html',
+      buildRoute: (BuildContext context) => const BannerDemo(),
     ),
     GalleryDemo(
       title: 'Bottom app bar',

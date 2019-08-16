@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
@@ -11,10 +10,42 @@ import '../rendering/rendering_tester.dart';
 
 List<int> selectedTabs;
 
+class MockCupertinoTabController extends CupertinoTabController {
+  MockCupertinoTabController({ int initialIndex }): super(initialIndex: initialIndex);
+
+  bool isDisposed = false;
+  int numOfListeners = 0;
+
+  @override
+  void addListener(VoidCallback listener) {
+    numOfListeners++;
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    numOfListeners--;
+    super.removeListener(listener);
+  }
+
+  @override
+  void dispose() {
+    isDisposed = true;
+    super.dispose();
+  }
+}
+
 void main() {
   setUp(() {
     selectedTabs = <int>[];
   });
+
+  BottomNavigationBarItem tabGenerator(int index) {
+    return BottomNavigationBarItem(
+      icon: const ImageIcon(TestImageProvider(24, 24)),
+      title: Text('Tab ${index + 1}'),
+    );
+  }
 
   testWidgets('Tab switching', (WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
@@ -28,14 +59,14 @@ void main() {
               child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); }
-              )
+              ),
             );
           },
         ),
       ),
     );
 
-    expect(tabsPainted, <int>[0]);
+    expect(tabsPainted, const <int>[0]);
     RichText tab1 = tester.widget(find.descendant(
       of: find.text('Tab 1'),
       matching: find.byType(RichText),
@@ -50,7 +81,7 @@ void main() {
     await tester.tap(find.text('Tab 2'));
     await tester.pump();
 
-    expect(tabsPainted, <int>[0, 1]);
+    expect(tabsPainted, const <int>[0, 1]);
     tab1 = tester.widget(find.descendant(
       of: find.text('Tab 1'),
       matching: find.byType(RichText),
@@ -65,9 +96,9 @@ void main() {
     await tester.tap(find.text('Tab 1'));
     await tester.pump();
 
-    expect(tabsPainted, <int>[0, 1, 0]);
+    expect(tabsPainted, const <int>[0, 1, 0]);
     // CupertinoTabBar's onTap callbacks are passed on.
-    expect(selectedTabs, <int>[1, 0]);
+    expect(selectedTabs, const <int>[1, 0]);
   });
 
   testWidgets('Tabs are lazy built and moved offstage when inactive', (WidgetTester tester) async {
@@ -85,7 +116,7 @@ void main() {
       ),
     );
 
-    expect(tabsBuilt, <int>[0]);
+    expect(tabsBuilt, const <int>[0]);
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2'), findsNothing);
 
@@ -93,34 +124,35 @@ void main() {
     await tester.pump();
 
     // Both tabs are built but only one is onstage.
-    expect(tabsBuilt, <int>[0, 0, 1]);
+    expect(tabsBuilt, const <int>[0, 0, 1]);
     expect(find.text('Page 1', skipOffstage: false), isOffstage);
     expect(find.text('Page 2'), findsOneWidget);
 
     await tester.tap(find.text('Tab 1'));
     await tester.pump();
 
-    expect(tabsBuilt, <int>[0, 0, 1, 0, 1]);
+    expect(tabsBuilt, const <int>[0, 0, 1, 0, 1]);
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2', skipOffstage: false), isOffstage);
   });
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
     // 2 nodes for 2 tabs
-    final List<FocusNode> focusNodes = <FocusNode>[FocusNode(), FocusNode()];
+    final List<FocusNode> focusNodes = <FocusNode>[
+      FocusNode(debugLabel: 'Node 1'),
+      FocusNode(debugLabel: 'Node 2'),
+    ];
 
     await tester.pumpWidget(
       CupertinoApp(
-        home: Material(
-          child: CupertinoTabScaffold(
-            tabBar: _buildTabBar(),
-            tabBuilder: (BuildContext context, int index) {
-              return TextField(
-                focusNode: focusNodes[index],
-                autofocus: true,
-              );
-            },
-          ),
+        home: CupertinoTabScaffold(
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return CupertinoTextField(
+              focusNode: focusNodes[index],
+              autofocus: true,
+            );
+          },
         ),
       ),
     );
@@ -142,33 +174,30 @@ void main() {
 
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = <FocusNode>[
-      FocusNode(), FocusNode(), FocusNode(), FocusNode(),
+      FocusNode(debugLabel: 'Node 1'),
+      FocusNode(debugLabel: 'Node 2'),
+      FocusNode(debugLabel: 'Node 3'),
+      FocusNode(debugLabel: 'Node 4'),
     ];
 
     await tester.pumpWidget(
       CupertinoApp(
-        home: Material(
-          child: CupertinoTabScaffold(
-            tabBar: _buildTabBar(),
-            tabBuilder: (BuildContext context, int index) {
-              return Column(
-                children: <Widget>[
-                  TextField(
-                    focusNode: focusNodes[index * 2],
-                    decoration: const InputDecoration(
-                      hintText: 'TextField 1',
-                    ),
-                  ),
-                  TextField(
-                    focusNode: focusNodes[index * 2 + 1],
-                    decoration: const InputDecoration(
-                      hintText: 'TextField 2',
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
+        home: CupertinoTabScaffold(
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return Column(
+              children: <Widget>[
+                CupertinoTextField(
+                  focusNode: focusNodes[index * 2],
+                  placeholder: 'TextField 1',
+                ),
+                CupertinoTextField(
+                  focusNode: focusNodes[index * 2 + 1],
+                  placeholder: 'TextField 2',
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -178,7 +207,7 @@ void main() {
       isFalse,
     );
 
-    await tester.tap(find.widgetWithText(TextField, 'TextField 2'));
+    await tester.tap(find.widgetWithText(CupertinoTextField, 'TextField 2'));
 
     expect(
       focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
@@ -188,7 +217,7 @@ void main() {
     await tester.tap(find.text('Tab 2'));
     await tester.pump();
 
-    await tester.tap(find.widgetWithText(TextField, 'TextField 1'));
+    await tester.tap(find.widgetWithText(CupertinoTextField, 'TextField 1'));
 
     expect(
       focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
@@ -206,7 +235,45 @@ void main() {
     );
   });
 
-  testWidgets('Programmatic tab switching', (WidgetTester tester) async {
+  testWidgets('Programmatic tab switching by changing the index of an existing controller', (WidgetTester tester) async {
+    final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
+    final List<int> tabsPainted = <int>[];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: _buildTabBar(),
+          controller: controller,
+          tabBuilder: (BuildContext context, int index) {
+            return CustomPaint(
+              child: Text('Page ${index + 1}'),
+              painter: TestCallbackPainter(
+                onPaint: () { tabsPainted.add(index); }
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tabsPainted, const <int>[1]);
+
+    controller.index = 0;
+    await tester.pump();
+
+    expect(tabsPainted, const <int>[1, 0]);
+    // onTap is not called when changing tabs programmatically.
+    expect(selectedTabs, isEmpty);
+
+    // Can still tap out of the programmatically selected tab.
+    await tester.tap(find.text('Tab 2'));
+    await tester.pump();
+
+    expect(tabsPainted, const <int>[1, 0, 1]);
+    expect(selectedTabs, const <int>[1]);
+  });
+
+  testWidgets('Programmatic tab switching by passing in a new controller', (WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
 
     await tester.pumpWidget(
@@ -218,32 +285,33 @@ void main() {
               child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); }
-              )
+              ),
             );
           },
         ),
       ),
     );
 
-    expect(tabsPainted, <int>[0]);
+    expect(tabsPainted, const <int>[0]);
 
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
-          tabBar: _buildTabBar(selectedTab: 1), // Programmatically change the tab now.
+          tabBar: _buildTabBar(),
+          controller: CupertinoTabController(initialIndex: 1), // Programmatically change the tab now.
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
               child: Text('Page ${index + 1}'),
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); }
-              )
+              ),
             );
           },
         ),
       ),
     );
 
-    expect(tabsPainted, <int>[0, 1]);
+    expect(tabsPainted, const <int>[0, 1]);
     // onTap is not called when changing tabs programmatically.
     expect(selectedTabs, isEmpty);
 
@@ -251,8 +319,8 @@ void main() {
     await tester.tap(find.text('Tab 1'));
     await tester.pump();
 
-    expect(tabsPainted, <int>[0, 1, 0]);
-    expect(selectedTabs, <int>[0]);
+    expect(tabsPainted, const <int>[0, 1, 0]);
+    expect(selectedTabs, const <int>[0]);
   });
 
   testWidgets('Tab bar respects themes', (WidgetTester tester) async {
@@ -333,7 +401,7 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder)), Rect.fromLTWH(0, 0, 800, 400));
+    expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
     // Don't generate more media query padding from the translucent bottom
     // tab since the tab is behind the keyboard now.
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
@@ -354,16 +422,58 @@ void main() {
             tabBuilder: (BuildContext context, int index) {
               innerContext = context;
               return const Placeholder();
-            }
+            },
           ),
         ),
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder)), Rect.fromLTWH(0, 0, 800, 600));
+    expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 600));
     // Media query padding shows up in the inner content because it wasn't masked
     // by the view inset.
     expect(MediaQuery.of(innerContext).padding.bottom, 50);
+  });
+
+  testWidgets('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overriden', (WidgetTester tester) async {
+    final Widget child = Directionality(
+      textDirection: TextDirection.ltr,
+      child: CupertinoTabScaffold(
+        resizeToAvoidBottomInset: false,
+        tabBar: _buildTabBar(),
+        tabBuilder: (BuildContext context, int index) {
+          return const Placeholder();
+        },
+      )
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            viewInsets: EdgeInsets.only(bottom: 20.0),
+          ),
+          child: child
+        ),
+      ),
+    );
+
+    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          viewPadding: EdgeInsets.only(bottom: 20),
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: child,
+      ),
+    );
+
+    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+
+    expect(initialPoint, finalPoint);
   });
 
   testWidgets('Tab and page scaffolds do not double stack view insets', (WidgetTester tester) async {
@@ -392,19 +502,12 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder)), Rect.fromLTWH(0, 0, 800, 400));
+    expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
 
-  testWidgets('Deleting tabs after selecting them works', (WidgetTester tester) async {
+  testWidgets('Deleting tabs after selecting them should switch to the last available tab', (WidgetTester tester) async {
     final List<int> tabsBuilt = <int>[];
-
-    BottomNavigationBarItem tabGenerator(int index) {
-      return BottomNavigationBarItem(
-        icon: const ImageIcon(TestImageProvider(24, 24)),
-        title: Text('Tab ${index + 1}'),
-      );
-    }
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -421,23 +524,23 @@ void main() {
       ),
     );
 
-    expect(tabsBuilt, <int>[0]);
+    expect(tabsBuilt, const <int>[0]);
     // selectedTabs list is appended to on onTap callbacks. We didn't tap
     // any tabs yet.
-    expect(selectedTabs, <int>[]);
+    expect(selectedTabs, const <int>[]);
     tabsBuilt.clear();
 
     await tester.tap(find.text('Tab 4'));
     await tester.pump();
 
     // Tabs 1 and 4 are built but only one is onstage.
-    expect(tabsBuilt, <int>[0, 3]);
-    expect(selectedTabs, <int>[3]);
+    expect(tabsBuilt, const <int>[0, 3]);
+    expect(selectedTabs, const <int>[3]);
     expect(find.text('Page 1', skipOffstage: false), isOffstage);
     expect(find.text('Page 4'), findsOneWidget);
     tabsBuilt.clear();
 
-    // Delete 2 tabs.
+    // Delete 2 tabs while Page 4 is still selected.
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -451,13 +554,13 @@ void main() {
             return Text('Different page ${index + 1}');
           },
         ),
-      ),
+      )
     );
 
-    expect(tabsBuilt, <int>[0, 1]);
+    expect(tabsBuilt, const <int>[0, 1]);
     // We didn't tap on any additional tabs to invoke the onTap callback. We
     // just deleted a tab.
-    expect(selectedTabs, <int>[3]);
+    expect(selectedTabs, const <int>[3]);
     // Tab 1 was previously built so it's rebuilt again, albeit offstage.
     expect(find.text('Different page 1', skipOffstage: false), isOffstage);
     // Since all the tabs after tab 2 are deleted, tab 2 is now the last tab and
@@ -470,6 +573,413 @@ void main() {
     expect(find.text('Page 1', skipOffstage: false), findsNothing);
     expect(find.text('Page 2', skipOffstage: false), findsNothing);
     expect(find.text('Page 4', skipOffstage: false), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/33455
+  testWidgets('Adding new tabs does not crash the app', (WidgetTester tester) async {
+    final List<int> tabsPainted = <int>[];
+    final CupertinoTabController controller = CupertinoTabController(initialIndex: 0);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(10, tabGenerator),
+          ),
+          controller: controller,
+          tabBuilder: (BuildContext context, int index) {
+            return CustomPaint(
+              child: Text('Page ${index + 1}'),
+              painter: TestCallbackPainter(
+                onPaint: () { tabsPainted.add(index); }
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tabsPainted, const <int> [0]);
+
+    // Increase the num of tabs to 20.
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(20, tabGenerator),
+          ),
+          controller: controller,
+          tabBuilder: (BuildContext context, int index) {
+            return CustomPaint(
+              child: Text('Page ${index + 1}'),
+              painter: TestCallbackPainter(
+                onPaint: () { tabsPainted.add(index); }
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tabsPainted, const <int> [0, 0]);
+
+    await tester.tap(find.text('Tab 19'));
+    await tester.pump();
+
+    // Tapping the tabs should still work.
+    expect(tabsPainted, const <int>[0, 0, 18]);
+  });
+
+  testWidgets('If a controller is initially provided then the parent stops doing so for rebuilds, '
+              'a new instance of CupertinoTabController should be created and used by the widget, '
+              "while preserving the previous controller's tab index",
+    (WidgetTester tester) async {
+      final List<int> tabsPainted = <int>[];
+      final CupertinoTabController oldController = CupertinoTabController(initialIndex: 0);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(10, tabGenerator),
+            ),
+            controller: oldController,
+            tabBuilder: (BuildContext context, int index) {
+              return CustomPaint(
+                child: Text('Page ${index + 1}'),
+                painter: TestCallbackPainter(
+                  onPaint: () { tabsPainted.add(index); }
+                ),
+              );
+            },
+          ),
+        )
+      );
+
+      expect(tabsPainted, const <int> [0]);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(10, tabGenerator),
+            ),
+            controller: null,
+            tabBuilder:
+            (BuildContext context, int index) {
+              return CustomPaint(
+                child: Text('Page ${index + 1}'),
+                painter: TestCallbackPainter(
+                  onPaint: () { tabsPainted.add(index); }
+                ),
+              );
+            },
+          ),
+        )
+      );
+
+      expect(tabsPainted, const <int> [0, 0]);
+
+      await tester.tap(find.text('Tab 2'));
+      await tester.pump();
+
+      // Tapping the tabs should still work.
+      expect(tabsPainted, const <int>[0, 0, 1]);
+
+      oldController.index = 10;
+      await tester.pump();
+
+      // Changing [index] of the oldController should not work.
+      expect(tabsPainted, const <int> [0, 0, 1]);
+  });
+
+  testWidgets('Do not call dispose on a controller that we do not own'
+              'but do remove from its listeners when done listening to it',
+    (WidgetTester tester) async {
+      final MockCupertinoTabController mockController = MockCupertinoTabController(initialIndex: 0);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
+            ),
+            controller: mockController,
+            tabBuilder: (BuildContext context, int index) => const Placeholder(),
+          ),
+        ),
+      );
+
+      expect(mockController.numOfListeners, 1);
+      expect(mockController.isDisposed, isFalse);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
+            ),
+            controller: null,
+            tabBuilder: (BuildContext context, int index) => const Placeholder(),
+          ),
+        ),
+      );
+
+      expect(mockController.numOfListeners, 0);
+      expect(mockController.isDisposed, isFalse);
+  });
+
+  testWidgets('The owner can dispose the old controller', (WidgetTester tester) async {
+    CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+          ),
+          controller: controller,
+          tabBuilder: (BuildContext context, int index) => const Placeholder()
+        ),
+      ),
+    );
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsOneWidget);
+    expect(find.text('Tab 3'), findsOneWidget);
+
+    controller.dispose();
+    controller = CupertinoTabController(initialIndex: 0);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
+          ),
+          controller: controller,
+          tabBuilder: (BuildContext context, int index) => const Placeholder()
+        ),
+      ),
+    );
+
+    // Should not crash here.
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsOneWidget);
+    expect(find.text('Tab 3'), findsNothing);
+  });
+
+  testWidgets('A controller can control more than one CupertinoTabScaffold,'
+    'removal of listeners does not break the controller',
+    (WidgetTester tester) async {
+      final List<int> tabsPainted0 = <int>[];
+      final List<int> tabsPainted1 = <int>[];
+      MockCupertinoTabController controller = MockCupertinoTabController(initialIndex: 2);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Stack(
+              children: <Widget>[
+                CupertinoTabScaffold(
+                  tabBar: CupertinoTabBar(
+                    items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+                  ),
+                  controller: controller,
+                  tabBuilder: (BuildContext context, int index) {
+                    return CustomPaint(
+                      painter: TestCallbackPainter(
+                        onPaint: () => tabsPainted0.add(index)
+                      ),
+                    );
+                  },
+                ),
+                CupertinoTabScaffold(
+                  tabBar: CupertinoTabBar(
+                    items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+                  ),
+                  controller: controller,
+                  tabBuilder: (BuildContext context, int index) {
+                    return CustomPaint(
+                      painter: TestCallbackPainter(
+                        onPaint: () => tabsPainted1.add(index)
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(tabsPainted0, const <int>[2]);
+      expect(tabsPainted1, const <int>[2]);
+      expect(controller.numOfListeners, 2);
+
+      controller.index = 0;
+      await tester.pump();
+      expect(tabsPainted0, const <int>[2, 0]);
+      expect(tabsPainted1, const <int>[2, 0]);
+
+      controller.index = 1;
+      // Removing one of the tabs works.
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Stack(
+              children: <Widget>[
+                CupertinoTabScaffold(
+                  tabBar: CupertinoTabBar(
+                    items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+                  ),
+                  controller: controller,
+                  tabBuilder: (BuildContext context, int index) {
+                    return CustomPaint(
+                      painter: TestCallbackPainter(
+                        onPaint: () => tabsPainted0.add(index)
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(tabsPainted0, const <int>[2, 0, 1]);
+      expect(tabsPainted1, const <int>[2, 0]);
+      expect(controller.numOfListeners, 1);
+
+      // Replacing controller works.
+      controller = MockCupertinoTabController(initialIndex: 2);
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Stack(
+              children: <Widget>[
+                CupertinoTabScaffold(
+                  tabBar: CupertinoTabBar(
+                    items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+                  ),
+                  controller: controller,
+                  tabBuilder: (BuildContext context, int index) {
+                    return CustomPaint(
+                      painter: TestCallbackPainter(
+                        onPaint: () => tabsPainted0.add(index)
+                      )
+                    );
+                  }
+                ),
+              ]
+            )
+          )
+        )
+      );
+      expect(tabsPainted0, const <int>[2, 0, 1, 2]);
+      expect(tabsPainted1, const <int>[2, 0]);
+      expect(controller.numOfListeners, 1);
+    });
+
+  testWidgets('Assert when current tab index >= number of tabs', (WidgetTester tester) async {
+    final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+
+    try {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
+            ),
+            controller: controller,
+            tabBuilder: (BuildContext context, int index) => Text('Different page ${index + 1}'),
+          ),
+        )
+      );
+    } on AssertionError catch (e) {
+      expect(e.toString(), contains('controller.index < tabBar.items.length'));
+    }
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+          ),
+          controller: controller,
+          tabBuilder: (BuildContext context, int index) => Text('Different page ${index + 1}'),
+        ),
+      )
+    );
+
+    expect(tester.takeException(), null);
+
+    controller.index = 10;
+    await tester.pump();
+
+    final String message = tester.takeException().toString();
+    expect(message, contains('current index ${controller.index}'));
+    expect(message, contains('with 3 tabs'));
+  });
+
+  testWidgets('Current tab index cannot go below zero or be null', (WidgetTester tester) async {
+    void expectAssertionError(VoidCallback callback, String errorMessage) {
+      try {
+        callback();
+      } on AssertionError catch (e) {
+        expect(e.toString(), contains(errorMessage));
+      }
+    }
+
+    expectAssertionError(() => CupertinoTabController(initialIndex: -1), '>= 0');
+    expectAssertionError(() => CupertinoTabController(initialIndex: null), '!= null');
+
+    final CupertinoTabController controller = CupertinoTabController();
+
+    expectAssertionError(() => controller.index = -1, '>= 0');
+    expectAssertionError(() => controller.index = null, '!= null');
+  });
+
+  testWidgets('Does not lose state when focusing on text input', (WidgetTester tester) async {
+    // Regression testing for https://github.com/flutter/flutter/issues/28457.
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          viewInsets:  EdgeInsets.only(bottom: 0),
+        ),
+        child: CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: _buildTabBar(),
+            tabBuilder: (BuildContext context, int index) {
+              return const CupertinoTextField();
+            },
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState editableState = tester.state<EditableTextState>(find.byType(EditableText));
+
+    await tester.enterText(find.byType(CupertinoTextField), "don't lose me");
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          viewInsets:  EdgeInsets.only(bottom: 100),
+        ),
+        child: CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: _buildTabBar(),
+            tabBuilder: (BuildContext context, int index) {
+              return const CupertinoTextField();
+            },
+          ),
+        ),
+      ),
+    );
+
+    // The exact same state instance is still there.
+    expect(tester.state<EditableTextState>(find.byType(EditableText)), editableState);
+    expect(find.text("don't lose me"), findsOneWidget);
   });
 }
 

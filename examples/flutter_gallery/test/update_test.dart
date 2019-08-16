@@ -20,7 +20,7 @@ void main() {
     await tester.pumpWidget(
       const GalleryApp(
         testMode: true,
-        updateUrlFetcher: mockUpdateUrlFetcher
+        updateUrlFetcher: mockUpdateUrlFetcher,
       )
     );
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865

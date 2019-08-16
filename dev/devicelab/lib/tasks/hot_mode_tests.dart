@@ -23,9 +23,8 @@ TaskFunction createHotModeTest() {
     final File benchmarkFile = file(path.join(_editedFlutterGalleryDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
     final List<String> options = <String>[
-      '--hot', '-d', device.deviceId, '--benchmark', '--verbose', '--resident'
+      '--hot', '-d', device.deviceId, '--benchmark', '--verbose', '--resident',
     ];
-    setLocalEngineOptionIfNecessary(options);
     int hotReloadCount = 0;
     Map<String, dynamic> twoReloadsData;
     Map<String, dynamic> freshRestartReloadsData;
@@ -39,8 +38,8 @@ TaskFunction createHotModeTest() {
         {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run']..addAll(options),
-              environment: null
+              flutterCommandArgs('run', options),
+              environment: null,
           );
 
           final Completer<void> stdoutDone = Completer<void>();
@@ -53,11 +52,11 @@ TaskFunction createHotModeTest() {
               if (hotReloadCount == 0) {
                 // Update the file and reload again.
                 final File appDartSource = file(path.join(
-                    _editedFlutterGalleryDir.path, 'lib/gallery/app.dart'
+                    _editedFlutterGalleryDir.path, 'lib/gallery/app.dart',
                 ));
                 appDartSource.writeAsStringSync(
                     appDartSource.readAsStringSync().replaceFirst(
-                        "'Flutter Gallery'", "'Updated Flutter Gallery'"
+                        "'Flutter Gallery'", "'Updated Flutter Gallery'",
                     )
                 );
                 process.stdin.writeln('r');
@@ -93,8 +92,8 @@ TaskFunction createHotModeTest() {
         {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run']..addAll(options),
-              environment: null
+              flutterCommandArgs('run', options),
+              environment: null,
           );
           final Completer<void> stdoutDone = Completer<void>();
           final Completer<void> stderrDone = Completer<void>();
@@ -156,7 +155,7 @@ TaskFunction createHotModeTest() {
         'hotReloadFlutterReassembleMillisecondsAfterChange',
         'hotReloadVMReloadMillisecondsAfterChange',
         'hotReloadInitialDevFSSyncAfterRelaunchMilliseconds',
-      ]
+      ],
     );
   };
 }

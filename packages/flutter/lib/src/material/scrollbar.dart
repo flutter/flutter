@@ -70,7 +70,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     );
     _fadeoutOpacityAnimation = CurvedAnimation(
       parent: _fadeoutAnimationController,
-      curve: Curves.fastOutSlowIn
+      curve: Curves.fastOutSlowIn,
     );
   }
 
@@ -104,10 +104,16 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
         textDirection: _textDirection,
         thickness: _kScrollbarThickness,
         fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
+        padding: MediaQuery.of(context).padding,
       );
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
+    final ScrollMetrics metrics = notification.metrics;
+    if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
+      return false;
+    }
+
     // iOS sub-delegates to the CupertinoScrollbar instead and doesn't handle
     // scroll notifications here.
     if (_currentPlatform != TargetPlatform.iOS

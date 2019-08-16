@@ -19,9 +19,9 @@ void main() {
     ));
     await tester.pumpAndSettle();
     expect(tester.getRect(find.descendant(of: find.byKey(const Key('a')), matching: find.byType(SizedBox))),
-           Rect.fromLTRB(0.0, 0.0, 800.0, 100.0));
+           const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0));
     expect(tester.getRect(find.descendant(of: find.byKey(const Key('b')), matching: find.byType(SizedBox))),
-           Rect.fromLTRB(0.0, 100.0, 800.0, 200.0));
+           const Rect.fromLTRB(0.0, 100.0, 800.0, 200.0));
   });
 
   testWidgets('CustomScrollView.center', (WidgetTester tester) async {
@@ -43,7 +43,7 @@ void main() {
           matching: find.byType(SizedBox, skipOffstage: false),
         ),
       ),
-      Rect.fromLTRB(0.0, -100.0, 800.0, 0.0),
+      const Rect.fromLTRB(0.0, -100.0, 800.0, 0.0),
     );
     expect(
       tester.getRect(
@@ -52,7 +52,7 @@ void main() {
           matching: find.byType(SizedBox),
         ),
       ),
-      Rect.fromLTRB(0.0, 0.0, 800.0, 100.0),
+      const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0),
     );
   });
 
@@ -76,7 +76,7 @@ void main() {
           matching: find.byType(SizedBox),
         ),
       ),
-      Rect.fromLTRB(0.0, 500.0, 800.0, 600.0),
+      const Rect.fromLTRB(0.0, 500.0, 800.0, 600.0),
     );
     expect(
       tester.getRect(
@@ -85,7 +85,7 @@ void main() {
           matching: find.byType(SizedBox, skipOffstage: false),
         ),
       ),
-      Rect.fromLTRB(0.0, 600.0, 800.0, 700.0),
+      const Rect.fromLTRB(0.0, 600.0, 800.0, 700.0),
     );
   });
 }

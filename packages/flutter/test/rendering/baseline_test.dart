@@ -17,8 +17,8 @@ void main() {
       child: parent = RenderBaseline(
         baseline: 0.0,
         baselineType: TextBaseline.alphabetic,
-        child: child = RenderSizedBox(const Size(100.0, 100.0))
-      )
+        child: child = RenderSizedBox(const Size(100.0, 100.0)),
+      ),
     );
     final BoxParentData childParentData = child.parentData;
 

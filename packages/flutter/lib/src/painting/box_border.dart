@@ -196,7 +196,9 @@ abstract class BoxBorder extends ShapeBorder {
   ///
   ///  * [paintBorder], which is used if the border is not uniform.
   @override
-  void paint(Canvas canvas, Rect rect, {
+  void paint(
+    Canvas canvas,
+    Rect rect, {
     TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
@@ -312,6 +314,16 @@ class Border extends BoxBorder {
        assert(bottom != null),
        assert(left != null);
 
+  /// Creates a border whose sides are all the same.
+  ///
+  /// The `side` argument must not be null.
+  const Border.fromBorderSide(BorderSide side)
+      : assert(side != null),
+        top = side,
+        right = side,
+        bottom = side,
+        left = side;
+
   /// A uniform border with all sides the same color and width.
   ///
   /// The sides default to black solid borders, one logical pixel wide.
@@ -321,7 +333,7 @@ class Border extends BoxBorder {
     BorderStyle style = BorderStyle.solid,
   }) {
     final BorderSide side = BorderSide(color: color, width: width, style: style);
-    return Border(top: side, right: side, bottom: side, left: side);
+    return Border.fromBorderSide(side);
   }
 
   /// Creates a [Border] that represents the addition of the two given
@@ -466,7 +478,9 @@ class Border extends BoxBorder {
   ///
   ///  * [paintBorder], which is used if the border is not uniform.
   @override
-  void paint(Canvas canvas, Rect rect, {
+  void paint(
+    Canvas canvas,
+    Rect rect, {
     TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
@@ -759,7 +773,9 @@ class BorderDirectional extends BoxBorder {
   ///
   ///  * [paintBorder], which is used if the border is not uniform.
   @override
-  void paint(Canvas canvas, Rect rect, {
+  void paint(
+    Canvas canvas,
+    Rect rect, {
     TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,

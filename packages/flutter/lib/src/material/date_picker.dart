@@ -45,20 +45,11 @@ enum DatePickerMode {
   year,
 }
 
-const double _kDatePickerHeaderPortraitHeight = 100.0;
-const double _kDatePickerHeaderLandscapeWidth = 168.0;
-
 const Duration _kMonthScrollDuration = Duration(milliseconds: 200);
 const double _kDayPickerRowHeight = 42.0;
 const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
 // Two extra rows: one for the day-of-week header and one for the month header.
 const double _kMaxDayPickerHeight = _kDayPickerRowHeight * (_kMaxDayPickerRowCount + 2);
-
-const double _kMonthPickerPortraitWidth = 330.0;
-const double _kMonthPickerLandscapeWidth = 344.0;
-
-const double _kDialogActionBarHeight = 52.0;
-const double _kDatePickerLandscapeHeight = _kMaxDayPickerHeight + _kDialogActionBarHeight;
 
 // Shows the selected date in large font and toggles between year and day mode
 class _DatePickerHeader extends StatelessWidget {
@@ -100,8 +91,8 @@ class _DatePickerHeader extends StatelessWidget {
         yearColor = mode == DatePickerMode.year ? Colors.white : Colors.white70;
         break;
     }
-    final TextStyle dayStyle = headerTextTheme.display1.copyWith(color: dayColor, height: 1.4);
-    final TextStyle yearStyle = headerTextTheme.subhead.copyWith(color: yearColor, height: 1.4);
+    final TextStyle dayStyle = headerTextTheme.display1.copyWith(color: dayColor);
+    final TextStyle yearStyle = headerTextTheme.subhead.copyWith(color: yearColor);
 
     Color backgroundColor;
     switch (themeData.brightness) {
@@ -113,18 +104,14 @@ class _DatePickerHeader extends StatelessWidget {
         break;
     }
 
-    double width;
-    double height;
     EdgeInsets padding;
     MainAxisAlignment mainAxisAlignment;
     switch (orientation) {
       case Orientation.portrait:
-        height = _kDatePickerHeaderPortraitHeight;
-        padding = const EdgeInsets.symmetric(horizontal: 16.0);
+        padding = const EdgeInsets.all(16.0);
         mainAxisAlignment = MainAxisAlignment.center;
         break;
       case Orientation.landscape:
-        width = _kDatePickerHeaderLandscapeWidth;
         padding = const EdgeInsets.all(8.0);
         mainAxisAlignment = MainAxisAlignment.start;
         break;
@@ -157,8 +144,6 @@ class _DatePickerHeader extends StatelessWidget {
     );
 
     return Container(
-      width: width,
-      height: height,
       padding: padding,
       color: backgroundColor,
       child: Column(
@@ -210,7 +195,8 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
   SliverGridLayout getLayout(SliverConstraints constraints) {
     const int columnCount = DateTime.daysPerWeek;
     final double tileWidth = constraints.crossAxisExtent / columnCount;
-    final double tileHeight = math.min(_kDayPickerRowHeight, constraints.viewportMainAxisExtent / (_kMaxDayPickerRowCount + 1));
+    final double viewTileHeight = constraints.viewportMainAxisExtent / (_kMaxDayPickerRowCount + 1);
+    final double tileHeight = math.max(_kDayPickerRowHeight, viewTileHeight);
     return SliverGridRegularTileLayout(
       crossAxisCount: columnCount,
       mainAxisStride: tileHeight,
@@ -254,7 +240,7 @@ class DayPicker extends StatelessWidget {
     @required this.lastDate,
     @required this.displayedMonth,
     this.selectableDayPredicate,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(selectedDate != null),
        assert(currentDate != null),
        assert(onChanged != null),
@@ -287,7 +273,6 @@ class DayPicker extends StatelessWidget {
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate selectableDayPredicate;
 
-  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag gesture used to scroll a
@@ -299,7 +284,7 @@ class DayPicker extends StatelessWidget {
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
   ///
-  /// By default, the drag start behavior is [DragStartBehavior.down].
+  /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
   /// See also:
   ///
@@ -407,8 +392,9 @@ class DayPicker extends StatelessWidget {
     final int month = displayedMonth.month;
     final int daysInMonth = getDaysInMonth(year, month);
     final int firstDayOffset = _computeFirstDayOffset(year, month, localizations);
-    final List<Widget> labels = <Widget>[];
-    labels.addAll(_getDayHeaders(themeData.textTheme.caption, localizations));
+    final List<Widget> labels = <Widget>[
+      ..._getDayHeaders(themeData.textTheme.caption, localizations),
+    ];
     for (int i = 0; true; i += 1) {
       // 1-based day of month, e.g. 1-31 for January, and 1-29 for February on
       // a leap year.
@@ -432,7 +418,7 @@ class DayPicker extends StatelessWidget {
           itemStyle = themeData.accentTextTheme.body2;
           decoration = BoxDecoration(
             color: themeData.accentColor,
-            shape: BoxShape.circle
+            shape: BoxShape.circle,
           );
         } else if (disabled) {
           itemStyle = themeData.textTheme.body1.copyWith(color: themeData.disabledColor);
@@ -453,6 +439,7 @@ class DayPicker extends StatelessWidget {
               // formatted full date.
               label: '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}',
               selected: isSelectedDay,
+              sortKey: OrdinalSortKey(day.toDouble()),
               child: ExcludeSemantics(
                 child: Text(localizations.formatDecimal(day), style: itemStyle),
               ),
@@ -494,6 +481,7 @@ class DayPicker extends StatelessWidget {
             child: GridView.custom(
               gridDelegate: _kDayPickerGridDelegate,
               childrenDelegate: SliverChildListDelegate(labels, addRepaintBoundaries: false),
+              padding: EdgeInsets.zero,
             ),
           ),
         ],
@@ -528,7 +516,7 @@ class MonthPicker extends StatefulWidget {
     @required this.firstDate,
     @required this.lastDate,
     this.selectableDayPredicate,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(selectedDate != null),
        assert(onChanged != null),
        assert(!firstDate.isAfter(lastDate)),
@@ -574,7 +562,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
 
     // Setup the fade animation for chevrons
     _chevronOpacityController = AnimationController(
-      duration: const Duration(milliseconds: 250), vsync: this
+      duration: const Duration(milliseconds: 250), vsync: this,
     );
     _chevronOpacityAnimation = _chevronOpacityController.drive(_chevronOpacityTween);
   }
@@ -683,7 +671,8 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: _kMonthPickerPortraitWidth,
+      // The month picker just adds month navigation to the day picker, so make
+      // it the same height as the DayPicker
       height: _kMaxDayPickerHeight,
       child: Stack(
         children: <Widget>[
@@ -749,6 +738,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
   @override
   void dispose() {
     _timer?.cancel();
+    _chevronOpacityController?.dispose();
     _dayPickerController?.dispose();
     super.dispose();
   }
@@ -791,7 +781,7 @@ class YearPicker extends StatefulWidget {
     @required this.onChanged,
     @required this.firstDate,
     @required this.lastDate,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(selectedDate != null),
        assert(onChanged != null),
        assert(!firstDate.isAfter(lastDate)),
@@ -995,12 +985,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Widget picker = Flexible(
-      child: SizedBox(
-        height: _kMaxDayPickerHeight,
-        child: _buildPicker(),
-      ),
-    );
+    final Widget picker = _buildPicker();
     final Widget actions = ButtonTheme.bar(
       child: ButtonBar(
         children: <Widget>[
@@ -1015,6 +1000,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         ],
       ),
     );
+
     final Dialog dialog = Dialog(
       child: OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
@@ -1027,44 +1013,35 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           );
           switch (orientation) {
             case Orientation.portrait:
-              return SizedBox(
-                width: _kMonthPickerPortraitWidth,
+              return Container(
+                color: theme.dialogBackgroundColor,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     header,
-                    Container(
-                      color: theme.dialogBackgroundColor,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          picker,
-                          actions,
-                        ],
-                      ),
-                    ),
+                    Flexible(child: picker),
+                    actions,
                   ],
                 ),
               );
             case Orientation.landscape:
-              return SizedBox(
-                height: _kDatePickerLandscapeHeight,
+              return Container(
+                color: theme.dialogBackgroundColor,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    header,
+                    Flexible(child: header),
                     Flexible(
-                      child: Container(
-                        width: _kMonthPickerLandscapeWidth,
-                        color: theme.dialogBackgroundColor,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[picker, actions],
-                        ),
+                      flex: 2, // have the picker take up 2/3 of the dialog width
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Flexible(child: picker),
+                          actions
+                        ],
                       ),
                     ),
                   ],
@@ -1073,7 +1050,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           }
           return null;
         }
-      )
+      ),
     );
 
     return Theme(

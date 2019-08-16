@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'ink_well.dart' show InteractiveInkFeature;
 import 'material.dart';
 
-const Duration _kHighlightFadeDuration = Duration(milliseconds: 200);
+const Duration _kDefaultHighlightFadeDuration = Duration(milliseconds: 200);
 
 /// A visual emphasis on a part of a [Material] receiving user interaction.
 ///
@@ -45,16 +45,18 @@ class InkHighlight extends InteractiveInkFeature {
     ShapeBorder customBorder,
     RectCallback rectCallback,
     VoidCallback onRemoved,
+    Duration fadeDuration = _kDefaultHighlightFadeDuration,
   }) : assert(color != null),
        assert(shape != null),
        assert(textDirection != null),
+       assert(fadeDuration != null),
        _shape = shape,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
        _textDirection = textDirection,
        _rectCallback = rectCallback,
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
-    _alphaController = AnimationController(duration: _kHighlightFadeDuration, vsync: controller.vsync)
+    _alphaController = AnimationController(duration: fadeDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged)
       ..forward();

@@ -12,7 +12,8 @@ const Key avatarA = Key('A');
 const Key avatarC = Key('C');
 const Key avatarD = Key('D');
 
-Future<void> pumpTestWidget(WidgetTester tester, {
+Future<void> pumpTestWidget(
+  WidgetTester tester, {
   bool withName = true,
   bool withEmail = true,
   bool withOnDetailsPressedHandler = true,
@@ -31,7 +32,7 @@ Future<void> pumpTestWidget(WidgetTester tester, {
         child: Material(
           child: Center(
             child: UserAccountsDrawerHeader(
-              onDetailsPressed: withOnDetailsPressedHandler ? () {} : null,
+              onDetailsPressed: withOnDetailsPressedHandler ? () { } : null,
               currentAccountPicture: const ExcludeSemantics(
                 child: CircleAvatar(
                   key: avatarA,
@@ -52,7 +53,7 @@ Future<void> pumpTestWidget(WidgetTester tester, {
                 ),
                 CircleAvatar(
                   child: Text('E'),
-                )
+                ),
               ],
               accountName: withName ? const Text('name') : null,
               accountEmail: withEmail ? const Text('email') : null,
@@ -134,6 +135,42 @@ void main() {
     transformWidget = tester.firstWidget(find.byType(Transform));
 
     // Icon has rotated 180 degrees back to the original position.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/25801.
+  testWidgets('UserAccountsDrawerHeader icon does not rotate after setState', (WidgetTester tester) async {
+    StateSetter testSetState;
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            testSetState = setState;
+            return UserAccountsDrawerHeader(
+              onDetailsPressed: () { },
+              accountName: const Text('name'),
+              accountEmail: const Text('email'),
+            );
+          },
+        ),
+      ),
+    ));
+
+    Transform transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon is right side up.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+
+    testSetState(() { });
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(tester.hasRunningAnimations, isFalse);
+
+    expect(await tester.pumpAndSettle(), 1);
+    transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon has not rotated.
     expect(transformWidget.transform.getRotation()[0], 1.0);
     expect(transformWidget.transform.getRotation()[4], 1.0);
   });
@@ -220,11 +257,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountName')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountName')).dx,
-      lessThan(tester.getCenter(find.byType(Icon)).dx)
+      lessThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -233,11 +270,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      lessThan(tester.getCenter(find.byType(Icon)).dx)
+      lessThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -247,19 +284,19 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      lessThan(tester.getCenter(find.byType(Icon)).dx)
+      lessThan(tester.getCenter(find.byType(Icon)).dx),
     );
     expect(
       tester.getBottomLeft(find.text('accountEmail')).dy,
-      greaterThan(tester.getBottomLeft(find.text('accountName')).dy)
+      greaterThan(tester.getBottomLeft(find.text('accountName')).dy),
     );
     expect(
       tester.getBottomLeft(find.text('accountEmail')).dx,
-      tester.getBottomLeft(find.text('accountName')).dx
+      tester.getBottomLeft(find.text('accountName')).dx,
     );
 
     await tester.pumpWidget(buildFrame(
@@ -279,11 +316,11 @@ void main() {
     ));
     expect(
       tester.getBottomLeft(find.byKey(avatarA)).dx,
-      tester.getBottomLeft(find.text('accountName')).dx
+      tester.getBottomLeft(find.text('accountName')).dx,
     );
     expect(
       tester.getBottomLeft(find.text('accountName')).dy,
-      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy)
+      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy),
     );
   });
 
@@ -331,11 +368,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountName')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountName')).dx,
-      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+      greaterThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -344,11 +381,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+      greaterThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -358,19 +395,19 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+      greaterThan(tester.getCenter(find.byType(Icon)).dx),
     );
     expect(
       tester.getBottomLeft(find.text('accountEmail')).dy,
-      greaterThan(tester.getBottomLeft(find.text('accountName')).dy)
+      greaterThan(tester.getBottomLeft(find.text('accountName')).dy),
     );
     expect(
       tester.getBottomRight(find.text('accountEmail')).dx,
-      tester.getBottomRight(find.text('accountName')).dx
+      tester.getBottomRight(find.text('accountName')).dx,
     );
 
     await tester.pumpWidget(buildFrame(
@@ -390,11 +427,11 @@ void main() {
     ));
     expect(
       tester.getBottomRight(find.byKey(avatarA)).dx,
-      tester.getBottomRight(find.text('accountName')).dx
+      tester.getBottomRight(find.text('accountName')).dx,
     );
     expect(
       tester.getBottomLeft(find.text('accountName')).dy,
-      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy)
+      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy),
     );
   });
 

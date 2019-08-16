@@ -190,7 +190,7 @@ void main() {
     testChildren();
     testHorizontalGeometry();
     testVerticalGeometry(128.0);
-  });
+  }, skip: isBrowser);
 
   testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
     const double leftPadding = 10.0;
@@ -364,7 +364,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
       ),
     );
 
@@ -405,7 +405,7 @@ void main() {
       return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
-          textScaleFactor: 1.0
+          textScaleFactor: 1.0,
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -450,7 +450,7 @@ void main() {
       return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
-          textScaleFactor: 1.0
+          textScaleFactor: 1.0,
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -497,7 +497,7 @@ void main() {
       return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
-          textScaleFactor: 1.0
+          textScaleFactor: 1.0,
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -585,13 +585,13 @@ void main() {
         ),
       ),
     );
-    //                                                                    LEFT                  TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 177.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0,        177.0, 800.0,  48.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 177.0 +  4.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 177.0 + 12.0,  24.0,  24.0));
+    //                                                                          LEFT                  TOP          WIDTH  HEIGHT
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 177.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0,        177.0, 800.0,  48.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 177.0 +  4.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 177.0 + 12.0,  24.0,  24.0));
 
     // NON-DENSE "ONE"-LINE
     await tester.pumpWidget(
@@ -615,13 +615,13 @@ void main() {
       ),
     );
     await tester.pump(const Duration(seconds: 2)); // the text styles are animated when we change dense
-    //                                                                    LEFT                 TOP                   WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 216.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 216.0       , 800.0,  56.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 216.0 +  8.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0,  24.0,  24.0));
+    //                                                                          LEFT                 TOP                   WIDTH  HEIGHT
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 216.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 216.0       , 800.0,  56.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 216.0 +  8.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0,  24.0,  24.0));
 
     // DENSE "TWO"-LINE
     await tester.pumpWidget(
@@ -648,13 +648,13 @@ void main() {
         ),
       ),
     );
-    //                                                                    LEFT                 TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 180.0,        800.0,  64.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 180.0 + 12.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 20.0,  24.0,  24.0));
+    //                                                                          LEFT                 TOP          WIDTH  HEIGHT
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 180.0,        800.0,  64.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 180.0 + 12.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 20.0,  24.0,  24.0));
 
     // NON-DENSE "TWO"-LINE
     await tester.pumpWidget(
@@ -679,13 +679,13 @@ void main() {
         ),
       ),
     );
-    //                                                                    LEFT                 TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 180.0,        800.0,  72.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 180.0 + 16.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 24.0,  24.0,  24.0));
+    //                                                                          LEFT                 TOP          WIDTH  HEIGHT
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 180.0,        800.0,  72.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 180.0 + 16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 24.0,  24.0,  24.0));
 
     // DENSE "THREE"-LINE
     await tester.pumpWidget(
@@ -714,13 +714,13 @@ void main() {
         ),
       ),
     );
-    //                                                                    LEFT                 TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 180.0,        800.0,  76.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 180.0 + 16.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 16.0,  24.0,  24.0));
+    //                                                                          LEFT                 TOP          WIDTH  HEIGHT
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 180.0,        800.0,  76.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 180.0 + 16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 16.0,  24.0,  24.0));
 
     // NON-DENSE THREE-LINE
     await tester.pumpWidget(
@@ -747,13 +747,13 @@ void main() {
         ),
       ),
     );
-    //                                                                    LEFT                 TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 180.0,        800.0,  88.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 180.0 + 16.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 16.0,  24.0,  24.0));
+    //                                                                          LEFT                 TOP          WIDTH  HEIGHT
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 180.0,        800.0,  88.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 180.0 + 16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 16.0,  24.0,  24.0));
 
     // "ONE-LINE" with Small Leading Widget
     await tester.pumpWidget(
@@ -777,12 +777,346 @@ void main() {
       ),
     );
     await tester.pump(const Duration(seconds: 2)); // the text styles are animated when we change dense
-    //                                                                    LEFT                 TOP           WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 216.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(               16.0,         16.0,  24.0,  12.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 216.0       , 800.0,  56.0));
-    expect(tester.getRect(find.byType(Placeholder).at(2)),  Rect.fromLTWH(               16.0, 216.0 + 16.0,  24.0,  12.0));
-    expect(tester.getRect(find.byType(Placeholder).at(3)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0,  24.0,  24.0));
+    //                                                                          LEFT                 TOP           WIDTH  HEIGHT
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 216.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(               16.0,         16.0,  24.0,  12.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 216.0       , 800.0,  56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(2)),  const Rect.fromLTWH(               16.0, 216.0 + 16.0,  24.0,  12.0));
+    expect(tester.getRect(find.byType(Placeholder).at(3)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0,  24.0,  24.0));
+  }, skip: isBrowser);
+
+  testWidgets('ListTile leading icon height does not exceed ListTile height', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/28765
+    const SizedBox oversizedWidget = SizedBox(height: 80.0, width: 24.0, child: Placeholder());
+
+    // Dense One line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('A'),
+                dense: true,
+              ),
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('B'),
+                dense: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,  0.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 48.0, 24.0, 48.0));
+
+    // Non-dense One line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('A'),
+                dense: false,
+              ),
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('B'),
+                dense: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,  0.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 56.0, 24.0, 56.0));
+
+    // Dense Two line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                dense: true,
+              ),
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                dense: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,        8.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 64.0 + 8.0, 24.0, 48.0));
+
+    // Non-dense Two line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                dense: false,
+              ),
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                dense: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,        8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 72.0 + 8.0, 24.0, 56.0));
+
+    // Dense Three line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                isThreeLine:  true,
+                dense: true,
+              ),
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                isThreeLine:  true,
+                dense: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,        16.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 76.0 + 16.0, 24.0, 48.0));
+
+    // Non-dense Three line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                isThreeLine:  true,
+                dense: false,
+              ),
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                isThreeLine:  true,
+                dense: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,        16.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 88.0 + 16.0, 24.0, 56.0));
+  });
+
+  testWidgets('ListTile trailing icon height does not exceed ListTile height', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/28765
+    const SizedBox oversizedWidget = SizedBox(height: 80.0, width: 24.0, child: Placeholder());
+
+    // Dense One line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('A'),
+                dense: true,
+              ),
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('B'),
+                dense: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,    0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 48.0, 24.0, 48.0));
+
+    // Non-dense One line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('A'),
+                dense: false,
+              ),
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('B'),
+                dense: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,  0.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 56.0, 24.0, 56.0));
+
+    // Dense Two line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                dense: true,
+              ),
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                dense: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,        8.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 64.0 + 8.0, 24.0, 48.0));
+
+    // Non-dense Two line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                dense: false,
+              ),
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                dense: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,        8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 72.0 + 8.0, 24.0, 56.0));
+
+    // Dense Three line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                isThreeLine:  true,
+                dense: true,
+              ),
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                isThreeLine:  true,
+                dense: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,        16.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 76.0 + 16.0, 24.0, 48.0));
+
+    // Non-dense Three line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                isThreeLine:  true,
+                dense: false,
+              ),
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                isThreeLine:  true,
+                dense: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,        16.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 88.0 + 16.0, 24.0, 56.0));
   });
 }

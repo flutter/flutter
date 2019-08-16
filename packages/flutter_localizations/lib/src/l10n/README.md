@@ -1,28 +1,30 @@
-# Material Library Localizations
+# Material and Cupertino Libraries Localizations
 
 The `.arb` files in this directory contain localized values (primarily
-strings) used by the material library.  The `localizations.dart` file
-combines all of the localizations into a single Map that is
-linked with the rest of flutter_localizations package.
+strings) used by the Material and Cupertino libraries.  The
+`generated_material_localizations.dart` and
+`generated_cupertino_localizations.dart` files combine all of the
+localizations into a single Map that is linked with the rest of
+flutter_localizations package.
 
 If you're looking for information about internationalizing Flutter
 apps in general, see the
-[Internationalizing Flutter Apps](https://flutter.io/tutorials/internationalization/) tutorial.
+[Internationalizing Flutter Apps](https://flutter.dev/tutorials/internationalization/) tutorial.
 
 
 ### Translations for one locale: .arb files
 
-The Material library uses
+The Material and Cupertino libraries use
 [Application Resource Bundle](https://code.google.com/p/arb/wiki/ApplicationResourceBundleSpecification)
 files, which have a `.arb` extension, to store localized translations
 of messages, format strings, and other values. This format is also
-used by the Dart [intl](https://pub.dartlang.org/packages/intl)
+used by the Dart [intl](https://pub.dev/packages/intl)
 package and it is supported by the
 [Google Translators Toolkit](https://translate.google.com/toolkit).
 
-The material library only depends on a small subset of the ARB format.
-Each .arb file contains a single JSON table that maps from resource
-IDs to localized values.
+The Material and Cupertino libraries only depend on a small subset
+of the ARB format. Each .arb file contains a single JSON table that
+maps from resource IDs to localized values.
 
 Filenames contain the locale that the values have been translated
 for. For example `material_de.arb` contains German translations, and
@@ -36,13 +38,13 @@ an additional file with a regional suffix is present, the regional
 localizations are automatically merged with the language-specific ones.
 
 The JSON table's keys, called resource IDs, are valid Dart variable
-names. They correspond to methods from the `MaterialLocalizations`
-class. For example:
+names. They correspond to methods from the `MaterialLocalizations` or
+`CupertinoLocalizations` classes. For example:
 
 ```dart
 Widget build(BuildContext context) {
-  return new FlatButton(
-    child: new Text(
+  return FlatButton(
+    child: Text(
       MaterialLocalizations.of(context).cancelButtonLabel,
     ),
   );
@@ -59,17 +61,21 @@ generated `localizations.dart` file. The Map is used by the
 MaterialLocalizations class.
 
 
-### material_en.arb Defines all of the resource IDs
+### material_en.arb and cupertino_en.arb Define all of the resource IDs
 
-All of the `.arb` files whose names do not include a regional suffix
-contain translations for the same set of resource IDs as
+All of the `material_*.arb` files whose names do not include a regional
+suffix contain translations for the same set of resource IDs as
 `material_en.arb`.
 
-For each resource ID defined for English in material_en.arb, there is
-an additional resource with an '@' prefix. These '@' resources are not
-used by the material library at run time, they just exist to inform
-translators about how the value will be used, and to inform the code
-generator about what code to write.
+Similarly all of the `cupertino_*.arb` files whose names do not include
+a regional suffix contain translations for the same set of resource IDs
+as `cupertino_en.arb`.
+
+For each resource ID defined for English, there is an additional resource
+with an '@' prefix. These '@' resources are not used by the generated
+Dart code at run time, they just exist to inform translators about how
+the value will be used, and to inform the code generator about what code
+to write.
 
 ```dart
 "cancelButtonLabel": "CANCEL",
@@ -83,8 +89,8 @@ generator about what code to write.
 ### Values with Parameters, Plurals
 
 A few of material translations contain `$variable` tokens. The
-material library replaces these tokens with values at run-time. For
-example:
+Material and Cupertino libraries replace these tokens with values at
+run-time. For example:
 
 ```dart
 "aboutListTileTitle": "About $applicationName",
@@ -97,7 +103,7 @@ method instead of a simple getter:
 MaterialLocalizations.of(context).aboutListTileTitle(yourAppTitle)
 ```
 
-The names of the `$variable` tokens match the names of the
+The names of the `$variable` tokens must match the names of the
 `MaterialLocalizations` method parameters.
 
 
@@ -123,11 +129,15 @@ the "Other" suffix. For example the English translations
 "selectedRowCountTitleOther": "$selectedRowCount items selected",
 ```
 
+When defining new resources that handle pluralizations, the "One" and
+the "Other" forms must, at minimum, always be defined in the source
+English ARB files.
 
-### scriptCategory and timeOfDayFormat
+### scriptCategory and timeOfDayFormat for Material library
 
-The values of these resource IDs are not translations, they're keywords that
-help define an app's text theme and time picker layout respectively.
+In `material_en.arb`, the values of these resource IDs are not
+translations, they're keywords that help define an app's text theme
+and time picker layout respectively.
 
 The value of `timeOfDayFormat` defines how a time picker displayed by
 [showTimePicker()](https://docs.flutter.io/flutter/material/showTimePicker.html)
@@ -145,43 +155,56 @@ section in the Material spec. The Material theme uses the
 [Typography.geometryThemeFor](https://docs.flutter.io/flutter/material/Typography/geometryThemeFor.html).
 
 
-### Generated file localizations.dart: all of the localizations as a Map
+### 'generated_*_localizations.dart': all of the localizations as a Map
 
-If you look at the comment at the top of `localizations.dart` you'll
-see that it was manually generated using a `dev/tools` app called
-`gen_localizations`.
+If you look at the comment at the top of the `generated_material_localizations.dart`
+and `generated_cupertino_localizations.dart` files, you'll
+see that it was manually generated using a `dev/tools/localizations`
+app called `gen_localizations`.
 
 You can see what that script would generate by running this command:
 
 ```dart
-dart dev/tools/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
+dart dev/tools/localizations/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
 ```
 
 The gen_localizations app just combines the contents of all of the
-.arb files into a single `Map` that has entries for each .arb
-file's locale. The `MaterialLocalizations` class implementation uses
-this Map to implement the methods that lookup localized resource
-values.
+.arb files into a single `Map` per library that has entries for each .arb
+file's locale. The `MaterialLocalizations` and `CupertinoLocalizations`
+class implementations use these Maps to implement the methods that lookup localized resource values.
 
 The gen_localizations app must be run by hand after .arb files have
 been updated. The app's first parameter is the path to this directory,
 the second is the file name prefix (the file name less the locale
 suffix) for the .arb files in this directory.
 
-To in-place update the `localizations.dart` file using the default
+To in-place update the generated localizations file using the default
 values, you can just run:
 
 ```dart
-dart dev/tools/gen_localizations.dart --overwrite
+dart dev/tools/localizations/gen_localizations.dart --overwrite
 ```
+
+
+### Special handling for the Kannada (kn) translations
+
+Originally, the cupertino_kn.arb and material_kn.arb files contained unicode
+characters that can cause current versions of Emacs on Linux to crash. There is
+more information here: https://github.com/flutter/flutter/issues/36704.
+
+Rather than risking developers' editor sessions, the strings in these arb files
+(and the code generated for them) have been encoded using the appropriate
+escapes for JSON and Dart. The JSON format arb files were rewritten with
+dev/tools/localization/encode_kn_arb_files.dart. The localizations code
+generator uses generateEncodedString() from dev/tools/localization/localizations_utils.
 
 
 ### Translations Status, Reporting Errors
 
 The translations (the `.arb` files) in this directory are based on the
-English translations in `material_en.arb`. Google contributes
-translations for all the languages supported by this package.
-(Googlers, for more details see <go/flutter-l10n>.)
+English translations in `material_en.arb` and `cupertino_en.arb`.
+Google contributes translations for all the languages supported by
+this package. (Googlers, for more details see <go/flutter-l10n>.)
 
 If you have feedback about the translations please
 [file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new?template=BUG.md).
@@ -189,7 +212,7 @@ If you have feedback about the translations please
 
 ### See Also
 
-The [Internationalizing Flutter Apps](https://flutter.io/tutorials/internationalization/)
+The [Internationalizing Flutter Apps](https://flutter.dev/tutorials/internationalization/)
 tutorial describes how to use the internationalization APIs in an
 ordinary Flutter app.
 
@@ -197,5 +220,5 @@ ordinary Flutter app.
 covers the `.arb` file format used to store localized translations
 of messages, format strings, and other values.
 
-The Dart [intl](https://pub.dartlang.org/packages/intl)
+The Dart [intl](https://pub.dev/packages/intl)
 package supports internationalization.

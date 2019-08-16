@@ -11,6 +11,7 @@
 library services;
 
 export 'src/services/asset_bundle.dart';
+export 'src/services/binary_messenger.dart';
 export 'src/services/binding.dart';
 export 'src/services/clipboard.dart';
 export 'src/services/font_loader.dart';
@@ -23,7 +24,9 @@ export 'src/services/platform_messages.dart';
 export 'src/services/platform_views.dart';
 export 'src/services/raw_keyboard.dart';
 export 'src/services/raw_keyboard_android.dart';
-export 'src/services/raw_keyboard_fuschia.dart';
+export 'src/services/raw_keyboard_fuchsia.dart';
+export 'src/services/raw_keyboard_linux.dart';
+export 'src/services/raw_keyboard_macos.dart';
 export 'src/services/system_channels.dart';
 export 'src/services/system_chrome.dart';
 export 'src/services/system_navigator.dart';

@@ -20,13 +20,27 @@ class DragDownDetails {
   /// Creates details for a [GestureDragDownCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  DragDownDetails({ this.globalPosition = Offset.zero })
-    : assert(globalPosition != null);
+  DragDownDetails({
+    this.globalPosition = Offset.zero,
+    Offset localPosition,
+  }) : assert(globalPosition != null),
+       localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   ///
   /// Defaults to the origin if not specified in the constructor.
+  ///
+  /// See also:
+  ///
+  ///  * [localPosition], which is the [globalPosition] transformed to the
+  ///    coordinate space of the event receiver.
   final Offset globalPosition;
+
+  /// The local position in the coordinate system of the event receiver at
+  /// which the pointer contacted the screen.
+  ///
+  /// Defaults to [globalPosition] if not specified in the constructor.
+  final Offset localPosition;
 
   @override
   String toString() => '$runtimeType($globalPosition)';
@@ -52,8 +66,12 @@ class DragStartDetails {
   /// Creates details for a [GestureDragStartCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  DragStartDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
-    : assert(globalPosition != null);
+  DragStartDetails({
+    this.sourceTimeStamp,
+    this.globalPosition = Offset.zero,
+    Offset localPosition,
+  }) : assert(globalPosition != null),
+       localPosition = localPosition ?? globalPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -64,7 +82,18 @@ class DragStartDetails {
   /// The global position at which the pointer contacted the screen.
   ///
   /// Defaults to the origin if not specified in the constructor.
+  ///
+  /// See also:
+  ///
+  ///  * [localPosition], which is the [globalPosition] transformed to the
+  ///    coordinate space of the event receiver.
   final Offset globalPosition;
+
+  /// The local position in the coordinate system of the event receiver at
+  /// which the pointer contacted the screen.
+  ///
+  /// Defaults to [globalPosition] if not specified in the constructor.
+  final Offset localPosition;
 
   // TODO(ianh): Expose the current position, so that you can have a no-jump
   // drag even when disambiguating (though of course it would lag the finger
@@ -103,11 +132,13 @@ class DragUpdateDetails {
     this.sourceTimeStamp,
     this.delta = Offset.zero,
     this.primaryDelta,
-    @required this.globalPosition
+    @required this.globalPosition,
+    Offset localPosition,
   }) : assert(delta != null),
        assert(primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
-           || (primaryDelta == delta.dy && delta.dx == 0.0));
+           || (primaryDelta == delta.dy && delta.dx == 0.0)),
+       localPosition = localPosition ?? globalPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -115,7 +146,8 @@ class DragUpdateDetails {
   /// Could be null if triggered from proxied events such as accessibility.
   final Duration sourceTimeStamp;
 
-  /// The amount the pointer has moved since the previous update.
+  /// The amount the pointer has moved in the coordinate space of the event
+  /// receiver since the previous update.
   ///
   /// If the [GestureDragUpdateCallback] is for a one-dimensional drag (e.g.,
   /// a horizontal or vertical drag), then this offset contains only the delta
@@ -124,7 +156,8 @@ class DragUpdateDetails {
   /// Defaults to zero if not specified in the constructor.
   final Offset delta;
 
-  /// The amount the pointer has moved along the primary axis since the previous
+  /// The amount the pointer has moved along the primary axis in the coordinate
+  /// space of the event receiver since the previous
   /// update.
   ///
   /// If the [GestureDragUpdateCallback] is for a one-dimensional drag (e.g.,
@@ -137,7 +170,18 @@ class DragUpdateDetails {
   final double primaryDelta;
 
   /// The pointer's global position when it triggered this update.
+  ///
+  /// See also:
+  ///
+  ///  * [localPosition], which is the [globalPosition] transformed to the
+  ///    coordinate space of the event receiver.
   final Offset globalPosition;
+
+  /// The local position in the coordinate system of the event receiver at
+  /// which the pointer contacted the screen.
+  ///
+  /// Defaults to [globalPosition] if not specified in the constructor.
+  final Offset localPosition;
 
   @override
   String toString() => '$runtimeType($delta)';
@@ -147,7 +191,7 @@ class DragUpdateDetails {
 /// has moved again.
 ///
 /// The `details` object provides the position of the touch and the distance it
-/// has travelled since the last update.
+/// has traveled since the last update.
 ///
 /// See [DragGestureRecognizer.onUpdate].
 typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);

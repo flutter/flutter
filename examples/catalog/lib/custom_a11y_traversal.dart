@@ -5,46 +5,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
-/// This example shows a set of widgets for changing data fields arranged in a column
-/// of rows but, in accessibility mode, are traversed in a custom order.
+/// This example shows a set of widgets for changing data fields arranged in a
+/// column of rows but, in accessibility mode, are traversed in a custom order.
 ///
-/// This demonstrates how Flutter's accessibility system describes custom traversal
-/// orders using sort keys.
+/// This demonstrates how Flutter's accessibility system describes custom
+/// traversal orders using sort keys.
 ///
-/// The example app here has three fields that have a title and up/down spinner buttons
-/// above and below. The traversal order should allow the user to focus on each
-/// title, the input field next, the up spinner next, and the down spinner last before
-/// moving to the next input title.
+/// The example app here has three fields that have a title and up/down spinner
+/// buttons above and below. The traversal order should allow the user to focus
+/// on each title, the input field next, the up spinner next, and the down
+/// spinner last before moving to the next input title.
 ///
-/// Users that do not use a screen reader (e.g. TalkBack on Android and VoiceOver on iOS)
-/// will just see a regular app with controls.
+/// Users that do not use a screen reader (e.g. TalkBack on Android and
+/// VoiceOver on iOS) will just see a regular app with controls.
 ///
-/// The example's [RowColumnTraversal] widget sets up two [Semantics] objects that wrap the
-/// given [Widget] child, providing the traversal order they should have in the "row"
-/// direction, and then the traversal order they should have in the "column" direction.
-///
-/// Sort keys, by default, are appended to the sort orders for their parents, but
-/// they can also override those of their parents (by setting
-/// [SemanticsSortOrder.discardParentOrder] to true), and an entire sort order can be
-/// defined with multiple keys, to provide for virtually any ordering.
-///
-/// Keys at the same position in the sort order are compared with each other, and
-/// keys which are of different types, or which have different [SemanticSortKey.name]
-/// values compare as "equal" so that two different types of keys can co-exist at the
-/// same level and not interfere with each other, allowing for sorting in groups.
-/// Keys that evaluate as equal, or when compared with Widgets that don't have
-/// [Semantics], are given the default upper-start-to-lower-end geometric
-/// ordering.
+/// The example's [RowColumnTraversal] widget sets up two [Semantics] objects
+/// that wrap the given [Widget] child, providing the traversal order they
+/// should have in the "row" direction, and then the traversal order they should
+/// have in the "column" direction.
 ///
 /// Since widgets are globally sorted by their sort key, the order does not have
-/// to conform to the widget hierarchy. Indeed, in this example, we traverse vertically
-/// first, but the widget hierarchy is a column of rows.
+/// to conform to the widget hierarchy. Indeed, in this example, we traverse
+/// vertically first, but the widget hierarchy is a column of rows.
 ///
 /// See also:
 ///
 ///  * [Semantics] for an object that annotates widgets with accessibility semantics
 ///    (including traversal order).
-///  * [SemanticSortOrder] for the class that manages the sort order of a semantic node.
 ///  * [SemanticSortKey] for the base class of all semantic sort keys.
 ///  * [OrdinalSortKey] for a concrete sort key that sorts based on the given ordinal.
 class RowColumnTraversal extends StatelessWidget {
@@ -56,24 +43,7 @@ class RowColumnTraversal extends StatelessWidget {
 
   /// Builds a widget hierarchy that wraps [child].
   ///
-  /// This function expresses the sort keys as a hierarchy, but it could just as
-  /// easily have been a flat list:
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return new Semantics(
-  ///     sortOrder: new SemanticsSortOrder(
-  ///       keys: <SemanticsSortKey>[
-  ///         new OrdinalSortKey(columnOrder.toDouble()),
-  ///         new OrdinalSortKey(rowOrder.toDouble())
-  ///       ],
-  ///     ),
-  ///     child: child,
-  ///   );
-  /// }
-  /// ```
-  ///
-  /// The resulting order is the same.
+  /// This function expresses the sort keys as a hierarchy.
   @override
   Widget build(BuildContext context) {
     return Semantics(
@@ -91,14 +61,15 @@ class RowColumnTraversal extends StatelessWidget {
 /// A Button class that wraps an [IconButton] with a [RowColumnTraversal] to
 /// set its traversal order.
 class SpinnerButton extends StatelessWidget {
-  const SpinnerButton(
-      {Key key,
-      this.onPressed,
-      this.icon,
-      this.rowOrder,
-      this.columnOrder,
-      this.field,
-      this.increment}) : super(key: key);
+  const SpinnerButton({
+    Key key,
+    this.onPressed,
+    this.icon,
+    this.rowOrder,
+    this.columnOrder,
+    this.field,
+    this.increment,
+  }) : super(key: key);
 
   final VoidCallback onPressed;
   final IconData icon;

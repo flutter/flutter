@@ -87,6 +87,8 @@ enum DragAnchor {
 /// [childWhenDragging] when one or more drags are underway. Otherwise, this
 /// widget always displays [child].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=QzA4c4QHZCY}
+///
 /// See also:
 ///
 ///  * [DragTarget]
@@ -398,14 +400,14 @@ class _DraggableState<T> extends State<Draggable<T>> {
           widget.onDragEnd(DraggableDetails(
               wasAccepted: wasAccepted,
               velocity: velocity,
-              offset: offset
+              offset: offset,
           ));
         }
         if (wasAccepted && widget.onDragCompleted != null)
           widget.onDragCompleted();
         if (!wasAccepted && widget.onDraggableCanceled != null)
           widget.onDraggableCanceled(velocity, offset);
-      }
+      },
     );
     if (widget.onDragStarted != null)
       widget.onDragStarted();
@@ -420,7 +422,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
     final bool showChild = _activeCount == 0 || widget.childWhenDragging == null;
     return Listener(
       onPointerDown: canDrag ? _routePointer : null,
-      child: showChild ? widget.child : widget.childWhenDragging
+      child: showChild ? widget.child : widget.childWhenDragging,
     );
   }
 }
@@ -441,7 +443,7 @@ class DraggableDetails {
   DraggableDetails({
     this.wasAccepted = false,
     @required this.velocity,
-    @required this.offset
+    @required this.offset,
   }) : assert(velocity != null),
        assert(offset != null);
 
@@ -556,7 +558,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
     return MetaData(
       metaData: this,
       behavior: HitTestBehavior.translucent,
-      child: widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<dynamic>(_rejectedAvatars))
+      child: widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<dynamic>(_rejectedAvatars)),
     );
   }
 }
@@ -650,17 +652,18 @@ class _DragAvatar<T> extends Drag {
     _leaveAllEntered();
 
     // Enter new targets.
-    final _DragTargetState<T> newTarget = targets.firstWhere((_DragTargetState<T> target) {
+    final _DragTargetState<T> newTarget = targets.firstWhere(
+      (_DragTargetState<T> target) {
         _enteredTargets.add(target);
         return target.didEnter(this);
       },
-      orElse: () => null
+      orElse: () => null,
     );
 
     _activeTarget = newTarget;
   }
 
-  Iterable<_DragTargetState<T>> _getDragTargets(List<HitTestEntry> path) sync* {
+  Iterable<_DragTargetState<T>> _getDragTargets(Iterable<HitTestEntry> path) sync* {
     // Look for the RenderBoxes that corresponds to the hit target (the hit target
     // widgets build RenderMetaData boxes for us for this purpose).
     for (HitTestEntry entry in path) {
@@ -678,7 +681,7 @@ class _DragAvatar<T> extends Drag {
     _enteredTargets.clear();
   }
 
-  void finishDrag(_DragEndKind endKind, [Velocity velocity]) {
+  void finishDrag(_DragEndKind endKind, [ Velocity velocity ]) {
     bool wasAccepted = false;
     if (endKind == _DragEndKind.dropped && _activeTarget != null) {
       _activeTarget.didDrop(this);
@@ -703,7 +706,7 @@ class _DragAvatar<T> extends Drag {
       child: IgnorePointer(
         child: feedback,
         ignoringSemantics: ignoringFeedbackSemantics,
-      )
+      ),
     );
   }
 

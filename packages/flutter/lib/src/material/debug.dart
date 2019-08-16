@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'material.dart';
 import 'material_localizations.dart';
+import 'scaffold.dart' show Scaffold;
 
 /// Asserts that the given context has a [Material] ancestor.
 ///
@@ -122,6 +123,39 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
         );
       }
       throw FlutterError(message.toString());
+    }
+    return true;
+  }());
+  return true;
+}
+
+/// Asserts that the given context has a [Scaffold] ancestor.
+///
+/// Used by various widgets to make sure that they are only used in an
+/// appropriate context.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasScaffold(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasScaffold(BuildContext context) {
+  assert(() {
+    if (context.widget is! Scaffold && context.ancestorWidgetOfExactType(Scaffold) == null) {
+      final Element element = context;
+      throw FlutterError(
+          'No Scaffold widget found.\n'
+          '${context.widget.runtimeType} widgets require a Scaffold widget ancestor.\n'
+          'The Specific widget that could not find a Scaffold ancestor was:\n'
+          '  ${context.widget}\n'
+          'The ownership chain for the affected widget is:\n'
+          '  ${element.debugGetCreatorChain(10)}\n'
+          'Typically, the Scaffold widget is introduced by the MaterialApp or '
+          'WidgetsApp widget at the top of your application widget tree.'
+      );
     }
     return true;
   }());

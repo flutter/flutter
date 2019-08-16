@@ -145,7 +145,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return TextSpan(
       text: _fiddleWithText(node.text),
       style: _fiddleWithStyle(node.style),
-      children: _fiddleWithChildren(node.children?.map((TextSpan child) => _fiddleWith(child))?.toList() ?? <TextSpan>[]),
+      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child))?.toList() ?? <InlineSpan>[]),
     );
   }
 
@@ -515,7 +515,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
                     debugPrint(_textSpan.toStringDeep());
                   }
                 });
-              }
+              },
             ),
           ),
         ],
@@ -573,7 +573,7 @@ class _UnderlinesState extends State<Underlines> {
                 ),
                 child: ListBody(
                   children: lines,
-                )
+                ),
               ),
             ),
           ),
@@ -668,7 +668,7 @@ class _FallbackState extends State<Fallback> {
                     child: ListBody(
                       children: lines,
                     ),
-                  )
+                  ),
                 ),
               ),
             ),
@@ -1382,7 +1382,7 @@ String zalgo(math.Random random, int targetLength, { bool includeSpacingCombinin
     0x16F7E, 0x1D165, 0x1D166, 0x1D16D, 0x1D16E, 0x1D16F, 0x1D170,
     0x1D171, 0x1D172,
   ];
-  final Set<int> these = Set<int>();
+  final Set<int> these = <int>{};
   int combiningCount = enclosingCombiningMarks.length + nonspacingCombiningMarks.length;
   if (includeSpacingCombiningMarks)
     combiningCount += spacingCombiningMarks.length;
@@ -1401,8 +1401,7 @@ String zalgo(math.Random random, int targetLength, { bool includeSpacingCombinin
     }
   }
   base ??= String.fromCharCode(randomCharacter(random));
-  final List<int> characters = <int>[];
-  characters.addAll(these);
+  final List<int> characters = these.toList();
   return base + String.fromCharCodes(characters);
 }
 

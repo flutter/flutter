@@ -31,6 +31,13 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
   }
 }
 
+class MockMultiChildRenderObjectWidget extends MultiChildRenderObjectWidget {
+  MockMultiChildRenderObjectWidget({ Key key, List<Widget> children }) : super(key: key, children: children);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => null;
+}
+
 void main() {
   testWidgets('MultiChildRenderObjectElement control test', (WidgetTester tester) async {
 
@@ -138,7 +145,7 @@ void main() {
         children: <Widget>[
           const DecoratedBox(decoration: kBoxDecorationA),
           Container(
-            child: const DecoratedBox(decoration: kBoxDecorationB)
+            child: const DecoratedBox(decoration: kBoxDecorationB),
           ),
           const DecoratedBox(decoration: kBoxDecorationC),
         ],
@@ -344,5 +351,18 @@ void main() {
     );
 
     checkTree(tester, <BoxDecoration>[kBoxDecorationB, kBoxDecorationC]);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/37136.
+  test('provides useful assertion message when one of the children is null', () {
+    bool assertionTriggered = false;
+    try {
+      MockMultiChildRenderObjectWidget(children: const <Widget>[null]);
+    } catch (e) {
+      expect(e.toString(), contains("MockMultiChildRenderObjectWidget's children must not contain any null values,"));
+      assertionTriggered = true;
+    }
+
+    expect(assertionTriggered, isTrue);
   });
 }

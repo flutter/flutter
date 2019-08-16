@@ -38,7 +38,7 @@ void main() {
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: 'test',
             rect: TestSemantics.fullScreen,
-          )
+          ),
         ]
       )
     ));
@@ -117,7 +117,7 @@ void main() {
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: 'test',
             rect: TestSemantics.fullScreen,
-          )
+          ),
         ],
       ),
     ));

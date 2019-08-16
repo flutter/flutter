@@ -241,7 +241,7 @@ void main() {
                 child: ABCModel( // The "inner" model
                   a: 100 + _a,
                   b: 100 + _b,
-                  aspects: Set<String>.of(<String>['a']),
+                  aspects: const <String>{'a'},
                   child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -328,7 +328,7 @@ void main() {
     int _a = 0;
     int _b = 1;
     int _c = 2;
-    Set<String> _innerModelAspects = Set<String>.of(<String>['a']);
+    Set<String> _innerModelAspects = <String>{'a'};
 
     // Same as in abcPage in the "Inner InheritedModel shadows the outer one"
     // test except: the "Add b aspect" changes adds 'b' to the set of
@@ -406,14 +406,14 @@ void main() {
       },
     );
 
-    _innerModelAspects = Set<String>.of(<String>['a']);
+    _innerModelAspects = <String>{'a'};
     await tester.pumpWidget(MaterialApp(home: abcPage));
     expect(find.text('a: 100 [0]'), findsOneWidget); // showA depends on the inner model
     expect(find.text('b: 1 [0]'), findsOneWidget); // showB depends on the outer model
     expect(find.text('c: 2 [0]'), findsOneWidget);
     expect(find.text('a: 100 b: 101 c: null'), findsOneWidget); // inner model's a, b, c
 
-    _innerModelAspects = Set<String>.of(<String>['a', 'b']);
+    _innerModelAspects = <String>{'a', 'b'};
     await tester.tap(find.text('rebuild'));
     await tester.pumpAndSettle();
     expect(find.text('a: 100 [1]'), findsOneWidget); // rebuilt showA still depend on the inner model
@@ -448,7 +448,7 @@ void main() {
     expect(find.text('c: 3 [2]'), findsOneWidget); // rebuilt showC still depends on the outer model
     expect(find.text('a: 101 b: 102 c: null'), findsOneWidget);
 
-    _innerModelAspects = Set<String>.of(<String>['a', 'b', 'c']);
+    _innerModelAspects = <String>{'a', 'b', 'c'};
     await tester.tap(find.text('rebuild'));
     await tester.pumpAndSettle();
     expect(find.text('a: 101 [3]'), findsOneWidget); // rebuilt showA still depend on the inner model
@@ -457,7 +457,7 @@ void main() {
     expect(find.text('a: 101 b: 102 c: null'), findsOneWidget); // inner model's a, b, c
 
     // Now the inner model supports no aspects
-    _innerModelAspects = Set<String>.of(<String>[]);
+    _innerModelAspects = <String>{};
     await tester.tap(find.text('rebuild'));
     await tester.pumpAndSettle();
     expect(find.text('a: 1 [4]'), findsOneWidget); // rebuilt showA now depends on the outer model

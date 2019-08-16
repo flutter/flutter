@@ -21,9 +21,9 @@ void main() {
           maxHeight: 50.0,
           child: Container(
             key: inner
-          )
-        )
-      )
+          ),
+        ),
+      ),
     ));
     final RenderBox box = inner.currentContext.findRenderObject();
     expect(box.localToGlobal(Offset.zero), equals(const Offset(745.0, 565.0)));
@@ -36,7 +36,7 @@ void main() {
       minWidth: 1.0,
       maxWidth: 2.0,
       minHeight: 3.0,
-      maxHeight: 4.0
+      maxHeight: 4.0,
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))

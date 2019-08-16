@@ -431,7 +431,7 @@ void main() {
             separatorBuilder: (BuildContext context, int index) {
               if (index == 0) {
                 return firstSeparator;
-              } else  {
+              } else {
                 return const Divider();
               }
             },

@@ -84,7 +84,7 @@ const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
 
-/// Asserts that the [Finder] locates the a single widget that has at
+/// Asserts that the [Finder] locates a single widget that has at
 /// least one [Offstage] widget ancestor.
 ///
 /// It's important to use a full finder, since by default finders exclude
@@ -101,7 +101,7 @@ Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
 ///  * [isOnstage], the opposite.
 const Matcher isOffstage = _IsOffstage();
 
-/// Asserts that the [Finder] locates the a single widget that has no
+/// Asserts that the [Finder] locates a single widget that has no
 /// [Offstage] widget ancestors.
 ///
 /// See also:
@@ -109,7 +109,7 @@ const Matcher isOffstage = _IsOffstage();
 ///  * [isOffstage], the opposite.
 const Matcher isOnstage = _IsOnstage();
 
-/// Asserts that the [Finder] locates the a single widget that has at
+/// Asserts that the [Finder] locates a single widget that has at
 /// least one [Card] widget ancestor.
 ///
 /// See also:
@@ -117,7 +117,7 @@ const Matcher isOnstage = _IsOnstage();
 ///  * [isNotInCard], the opposite.
 const Matcher isInCard = _IsInCard();
 
-/// Asserts that the [Finder] locates the a single widget that has no
+/// Asserts that the [Finder] locates a single widget that has no
 /// [Card] widget ancestors.
 ///
 /// This is equivalent to `isNot(isInCard)`.
@@ -206,11 +206,14 @@ Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
+/// {@template flutter.flutter_test.moreOrLessEquals.epsilon}
 /// Two values are considered equal if the difference between them is within
-/// 1e-10 of the larger one. This is an arbitrary value which can be adjusted
-/// using the `epsilon` argument. This matcher is intended to compare floating
-/// point numbers that are the result of different sequences of operations, such
-/// that they may have accumulated slightly different errors.
+/// [precisionErrorTolerance] of the larger one. This is an arbitrary value
+/// which can be adjusted using the `epsilon` argument. This matcher is intended
+/// to compare floating point numbers that are the result of different sequences
+/// of operations, such that they may have accumulated slightly different
+/// errors.
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -218,8 +221,38 @@ Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
 ///    required and not named.
 ///  * [inInclusiveRange], which matches if the argument is in a specified
 ///    range.
-Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
+///  * [rectMoreOrLessEquals] and [offsetMoreOrLessEquals], which do something
+///    similar but for [Rect]s and [Offset]s respectively.
+Matcher moreOrLessEquals(double value, { double epsilon = precisionErrorTolerance }) {
   return _MoreOrLessEquals(value, epsilon);
+}
+
+/// Asserts that two [Rect]s are equal, within some tolerated error.
+///
+/// {@macro flutter.flutter_test.moreOrLessEquals.epsilon}
+///
+/// See also:
+///
+///  * [moreOrLessEquals], which is for [double]s.
+///  * [offsetMoreOrLessEquals], which is for [Offset]s.
+///  * [within], which offers a generic version of this functionality that can
+///    be used to match [Rect]s as well as other types.
+Matcher rectMoreOrLessEquals(Rect value, { double epsilon = precisionErrorTolerance }) {
+  return _IsWithinDistance<Rect>(_rectDistance, value, epsilon);
+}
+
+/// Asserts that two [Offset]s are equal, within some tolerated error.
+///
+/// {@macro flutter.flutter_test.moreOrLessEquals.epsilon}
+///
+/// See also:
+///
+///  * [moreOrLessEquals], which is for [double]s.
+///  * [rectMoreOrLessEquals], which is for [Rect]s.
+///  * [within], which offers a generic version of this functionality that can
+///    be used to match [Offset]s as well as other types.
+Matcher offsetMoreOrLessEquals(Offset value, { double epsilon = precisionErrorTolerance }) {
+  return _IsWithinDistance<Offset>(_offsetDistance, value, epsilon);
 }
 
 /// Asserts that two [String]s are equal after normalizing likely hash codes.
@@ -243,7 +276,7 @@ Matcher equalsIgnoringHashCodes(String value) {
 /// method [name] and [arguments].
 ///
 /// Arguments checking implements deep equality for [List] and [Map] types.
-Matcher isMethodCall(String name, {@required dynamic arguments}) {
+Matcher isMethodCall(String name, { @required dynamic arguments }) {
   return _IsMethodCall(name, arguments);
 }
 
@@ -256,17 +289,22 @@ Matcher isMethodCall(String name, {@required dynamic arguments}) {
 /// When using this matcher you typically want to use a rectangle larger than
 /// the area you expect to paint in for [areaToCompare] to catch errors where
 /// the path draws outside the expected area.
-Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int sampleSize = 20})
+Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int sampleSize = 20 })
   => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
 
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
-/// golden image file identified by [key].
+/// golden image file identified by [key], with an optional [version] number.
 ///
 /// For the case of a [Finder], the [Finder] must match exactly one widget and
 /// the rendered image of the first [RepaintBoundary] ancestor of the widget is
 /// treated as the image for the widget.
 ///
 /// [key] may be either a [Uri] or a [String] representation of a URI.
+///
+/// [version] is a number that can be used to differentiate historical golden
+/// files. This parameter is optional. Version numbers are used in golden file
+/// tests for package:flutter. You can learn more about these tests [here]
+/// (https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
 ///
 /// This is an asynchronous matcher, meaning that callers should use
 /// [expectLater] when using this matcher and await the future returned by
@@ -280,6 +318,9 @@ Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int s
 /// await expectLater(imageFuture, matchesGoldenFile('save.png'));
 /// ```
 ///
+/// Golden image files can be created or updated by running `flutter test
+/// --update-goldens` on the test.
+///
 /// See also:
 ///
 ///  * [goldenFileComparator], which acts as the backend for this matcher.
@@ -287,11 +328,11 @@ Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int s
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-AsyncMatcher matchesGoldenFile(dynamic key) {
+AsyncMatcher matchesGoldenFile(dynamic key, {int version}) {
   if (key is Uri) {
-    return _MatchesGoldenFile(key);
+    return _MatchesGoldenFile(key, version);
   } else if (key is String) {
-    return _MatchesGoldenFile.forStringPath(key);
+    return _MatchesGoldenFile.forStringPath(key, version);
   }
   throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
 }
@@ -364,6 +405,7 @@ Matcher matchesSemantics({
   Size size,
   double elevation,
   double thickness,
+  int platformViewId,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -371,11 +413,13 @@ Matcher matchesSemantics({
   bool isButton = false,
   bool isFocused = false,
   bool isTextField = false,
+  bool isReadOnly = false,
   bool hasEnabledState = false,
   bool isEnabled = false,
   bool isInMutuallyExclusiveGroup = false,
   bool isHeader = false,
   bool isObscured = false,
+  bool isMultiline = false,
   bool namesRoute = false,
   bool scopesRoute = false,
   bool isHidden = false,
@@ -422,6 +466,8 @@ Matcher matchesSemantics({
     flags.add(SemanticsFlag.isButton);
   if (isTextField)
     flags.add(SemanticsFlag.isTextField);
+  if (isReadOnly)
+    flags.add(SemanticsFlag.isReadOnly);
   if (isFocused)
     flags.add(SemanticsFlag.isFocused);
   if (hasEnabledState)
@@ -434,6 +480,8 @@ Matcher matchesSemantics({
     flags.add(SemanticsFlag.isHeader);
   if (isObscured)
     flags.add(SemanticsFlag.isObscured);
+  if (isMultiline)
+    flags.add(SemanticsFlag.isMultiline);
   if (namesRoute)
     flags.add(SemanticsFlag.namesRoute);
   if (scopesRoute)
@@ -514,6 +562,7 @@ Matcher matchesSemantics({
     size: size,
     elevation: elevation,
     thickness: thickness,
+    platformViewId: platformViewId,
     customActions: customActions,
     hintOverrides: hintOverrides,
     children: children,
@@ -607,7 +656,7 @@ class _FindsWidgetMatcher extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     final Finder finder = matchState[Finder];
     final int count = finder.evaluate().length;
@@ -732,7 +781,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
   static final Object _mismatchedValueKey = Object();
 
   static String _normalize(String s) {
-    return s.replaceAll(RegExp(r'#[0-9a-f]{5}'), '#00000');
+    return s.replaceAll(RegExp(r'#[0-9a-fA-F]{5}'), '#00000');
   }
 
   @override
@@ -755,7 +804,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     if (matchState.containsKey(_mismatchedValueKey)) {
       final String actualValue = matchState[_mismatchedValueKey];
@@ -888,7 +937,7 @@ class _HasGoodToStringDeep extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     if (matchState.containsKey(_toStringDeepErrorDescriptionKey)) {
       return mismatchDescription.add(
@@ -1002,6 +1051,8 @@ double _sizeDistance(Size a, Size b) {
 ///
 ///  * [moreOrLessEquals], which is similar to this function, but specializes in
 ///    [double]s and has an optional `epsilon` parameter.
+///  * [rectMoreOrLessEquals], which is similar to this function, but
+///    specializes in [Rect]s and has an optional `epsilon` parameter.
 ///  * [closeTo], which specializes in numbers only.
 Matcher within<T>({
   @required num distance,
@@ -1063,7 +1114,8 @@ class _IsWithinDistance<T> extends Matcher {
 }
 
 class _MoreOrLessEquals extends Matcher {
-  const _MoreOrLessEquals(this.value, this.epsilon);
+  const _MoreOrLessEquals(this.value, this.epsilon)
+    : assert(epsilon >= 0);
 
   final double value;
   final double epsilon;
@@ -1080,6 +1132,12 @@ class _MoreOrLessEquals extends Matcher {
 
   @override
   Description describe(Description description) => description.add('$value (±$epsilon)');
+
+  @override
+  Description describeMismatch(Object item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    return super.describeMismatch(item, mismatchDescription, matchState, verbose)
+      ..add('$item is not in the range of $value (±$epsilon).');
+  }
 }
 
 class _IsMethodCall extends Matcher {
@@ -1148,14 +1206,14 @@ const Matcher hasNoImmediateClip = _MatchAnythingExceptClip();
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipRRect] with no clipper set, and border radius equals to
 /// [borderRadius], or an equivalent [RenderClipPath].
-Matcher clipsWithBoundingRRect({@required BorderRadius borderRadius}) {
+Matcher clipsWithBoundingRRect({ @required BorderRadius borderRadius }) {
   return _ClipsWithBoundingRRect(borderRadius: borderRadius);
 }
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipPath] with a [ShapeBorderClipper] that clips to
 /// [shape].
-Matcher clipsWithShapeBorder({@required ShapeBorder shape}) {
+Matcher clipsWithShapeBorder({ @required ShapeBorder shape }) {
   return _ClipsWithShapeBorder(shape: shape);
 }
 
@@ -1213,10 +1271,10 @@ abstract class _FailWithDescriptionMatcher extends Matcher {
 
   @override
   Description describeMismatch(
-      dynamic item,
-      Description mismatchDescription,
-      Map<dynamic, dynamic> matchState,
-      bool verbose
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
   ) {
     return mismatchDescription.add(matchState['failure']);
   }
@@ -1307,18 +1365,20 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
       return false;
 
     if (
-      borderRadius == null
-      && shape == BoxShape.rectangle
-      && !assertRoundedRectangle(shapeClipper, BorderRadius.zero, matchState)
-    )
+      borderRadius == null &&
+      shape == BoxShape.rectangle &&
+      !assertRoundedRectangle(shapeClipper, BorderRadius.zero, matchState)
+    ) {
       return false;
+    }
 
     if (
-      borderRadius == null
-      && shape == BoxShape.circle
-      && !assertCircle(shapeClipper, matchState)
-    )
+      borderRadius == null &&
+      shape == BoxShape.circle &&
+      !assertCircle(shapeClipper, matchState)
+    ) {
       return false;
+    }
 
     if (elevation != null && renderObject.elevation != elevation)
       return failWithDescription(matchState, 'had elevation: ${renderObject.elevation}');
@@ -1327,18 +1387,18 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
   }
 
   bool assertRoundedRectangle(ShapeBorderClipper shapeClipper, BorderRadius borderRadius, Map<dynamic, dynamic> matchState) {
-      if (shapeClipper.shape.runtimeType != RoundedRectangleBorder)
-        return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
-      final RoundedRectangleBorder border = shapeClipper.shape;
-      if (border.borderRadius != borderRadius)
-        return failWithDescription(matchState, 'had borderRadius: ${border.borderRadius}');
-      return true;
+    if (shapeClipper.shape.runtimeType != RoundedRectangleBorder)
+      return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
+    final RoundedRectangleBorder border = shapeClipper.shape;
+    if (border.borderRadius != borderRadius)
+      return failWithDescription(matchState, 'had borderRadius: ${border.borderRadius}');
+    return true;
   }
 
   bool assertCircle(ShapeBorderClipper shapeClipper, Map<dynamic, dynamic> matchState) {
-      if (shapeClipper.shape.runtimeType != CircleBorder)
-        return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
-      return true;
+    if (shapeClipper.shape.runtimeType != CircleBorder)
+      return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
+    return true;
   }
 
   @override
@@ -1505,7 +1565,7 @@ class _CoversSameAreaAs extends Matcher {
       for (int j = 0; j < sampleSize; j += 1) {
         final Offset offset = Offset(
           i * (areaToCompare.width / sampleSize),
-          j * (areaToCompare.height / sampleSize)
+          j * (areaToCompare.height / sampleSize),
         );
 
         if (!_samplePoint(matchState, actualPath, offset))
@@ -1543,7 +1603,7 @@ class _CoversSameAreaAs extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     return mismatchDescription.add(matchState['failure']);
   }
@@ -1604,28 +1664,23 @@ class _MatchesReferenceImage extends AsyncMatcher {
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
       final ui.Image image = await imageFuture;
-      final ByteData bytes = await image.toByteData()
-        .timeout(const Duration(seconds: 10), onTimeout: () => null);
-      if (bytes == null) {
-        return 'Failed to generate an image from engine within the 10,000ms timeout.';
-      }
+      final ByteData bytes = await image.toByteData();
+      if (bytes == null)
+        return 'could not be encoded.';
 
-      final ByteData referenceBytes = await referenceImage.toByteData()
-        .timeout(const Duration(seconds: 10), onTimeout: () => null);
-      if (referenceBytes == null) {
-        return 'Failed to generate an image from engine within the 10,000ms timeout.';
-      }
+      final ByteData referenceBytes = await referenceImage.toByteData();
+      if (referenceBytes == null)
+        return 'could not have its reference image encoded.';
 
-      if (referenceImage.height != image.height || referenceImage.width != image.width) {
+      if (referenceImage.height != image.height || referenceImage.width != image.width)
         return 'does not match as width or height do not match. $image != $referenceImage';
-      }
 
       final int countDifferentPixels = _countDifferentPixels(
         Uint8List.view(bytes.buffer),
         Uint8List.view(referenceBytes.buffer),
       );
       return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
-    }, additionalTime: const Duration(seconds: 21));
+    }, additionalTime: const Duration(minutes: 1));
   }
 
   @override
@@ -1635,11 +1690,12 @@ class _MatchesReferenceImage extends AsyncMatcher {
 }
 
 class _MatchesGoldenFile extends AsyncMatcher {
-  const _MatchesGoldenFile(this.key);
+  const _MatchesGoldenFile(this.key, this.version);
 
-  _MatchesGoldenFile.forStringPath(String path) : key = Uri.parse(path);
+  _MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
 
   final Uri key;
+  final int version;
 
   @override
   Future<String> matchAsync(dynamic item) async {
@@ -1659,29 +1715,32 @@ class _MatchesGoldenFile extends AsyncMatcher {
       imageFuture = _captureImage(elements.single);
     }
 
+    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
+
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
       final ui.Image image = await imageFuture;
-      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png)
-        .timeout(const Duration(seconds: 10), onTimeout: () => null);
+      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png);
       if (bytes == null)
-        return 'Failed to generate screenshot from engine within the 10,000ms timeout.';
+        return 'could not encode screenshot.';
       if (autoUpdateGoldenFiles) {
-        await goldenFileComparator.update(key, bytes.buffer.asUint8List());
+        await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
         return null;
       }
       try {
-        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), key);
+        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
         return success ? null : 'does not match';
       } on TestFailure catch (ex) {
         return ex.message;
       }
-    }, additionalTime: const Duration(seconds: 11));
+    }, additionalTime: const Duration(minutes: 1));
   }
 
   @override
-  Description describe(Description description) =>
-      description.add('one widget whose rasterized image matches golden image "$key"');
+  Description describe(Description description) {
+    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
+    return description.add('one widget whose rasterized image matches golden image "$testNameUri"');
+  }
 }
 
 class _MatchesSemanticsData extends Matcher {
@@ -1698,6 +1757,7 @@ class _MatchesSemanticsData extends Matcher {
     this.size,
     this.elevation,
     this.thickness,
+    this.platformViewId,
     this.customActions,
     this.hintOverrides,
     this.children,
@@ -1717,6 +1777,7 @@ class _MatchesSemanticsData extends Matcher {
   final Size size;
   final double elevation;
   final double thickness;
+  final int platformViewId;
   final List<Matcher> children;
 
   @override
@@ -1746,6 +1807,8 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with elevation: $elevation');
     if (thickness != null)
       description.add(' with thickness: $thickness');
+    if (platformViewId != null)
+      description.add(' with platformViewId: $platformViewId');
     if (customActions != null)
       description.add(' with custom actions: $customActions');
     if (hintOverrides != null)
@@ -1786,6 +1849,8 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'elevation was: ${data.elevation}');
     if (thickness != null && thickness != data.thickness)
       return failWithDescription(matchState, 'thickness was: ${data.thickness}');
+    if (platformViewId != null && platformViewId != data.platformViewId)
+      return failWithDescription(matchState, 'platformViewId was: ${data.platformViewId}');
     if (actions != null) {
       int actionBits = 0;
       for (SemanticsAction action in actions)
@@ -1803,7 +1868,7 @@ class _MatchesSemanticsData extends Matcher {
       final List<CustomSemanticsAction> providedCustomActions = data.customSemanticsActionIds.map((int id) {
         return CustomSemanticsAction.getAction(id);
       }).toList();
-      final List<CustomSemanticsAction> expectedCustomActions = List<CustomSemanticsAction>.from(customActions ?? const <int>[]);
+      final List<CustomSemanticsAction> expectedCustomActions = customActions?.toList() ?? <CustomSemanticsAction>[];
       if (hintOverrides?.onTapHint != null)
         expectedCustomActions.add(CustomSemanticsAction.overridingAction(hint: hintOverrides.onTapHint, action: SemanticsAction.tap));
       if (hintOverrides?.onLongPressHint != null)
@@ -1852,11 +1917,11 @@ class _MatchesSemanticsData extends Matcher {
 
   @override
   Description describeMismatch(
-      dynamic item,
-      Description mismatchDescription,
-      Map<dynamic, dynamic> matchState,
-      bool verbose
-      ) {
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
     return mismatchDescription.add(matchState['failure']);
   }
 }

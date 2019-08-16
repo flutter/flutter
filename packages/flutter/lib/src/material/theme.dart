@@ -142,18 +142,18 @@ class Theme extends StatelessWidget {
   Widget build(BuildContext context) {
     return _InheritedTheme(
       theme: this,
-      child: IconTheme(
-        data: data.iconTheme,
-        child: CupertinoTheme(
-          // We're using a MaterialBasedCupertinoThemeData here instead of a
-          // CupertinoThemeData because it defers some properties to the Material
-          // ThemeData.
-          data: MaterialBasedCupertinoThemeData(
-            materialTheme: data,
-          ),
+      child: CupertinoTheme(
+        // We're using a MaterialBasedCupertinoThemeData here instead of a
+        // CupertinoThemeData because it defers some properties to the Material
+        // ThemeData.
+        data: MaterialBasedCupertinoThemeData(
+          materialTheme: data,
+        ),
+        child: IconTheme(
+          data: data.iconTheme,
           child: child,
         ),
-      ),
+      )
     );
   }
 
@@ -168,7 +168,7 @@ class _InheritedTheme extends InheritedWidget {
   const _InheritedTheme({
     Key key,
     @required this.theme,
-    @required Widget child
+    @required Widget child,
   }) : assert(theme != null),
        super(key: key, child: child);
 
@@ -256,7 +256,7 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
     return Theme(
       isMaterialAppTheme: widget.isMaterialAppTheme,
       child: widget.child,
-      data: _data.evaluate(animation)
+      data: _data.evaluate(animation),
     );
   }
 

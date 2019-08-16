@@ -15,10 +15,14 @@ class RenderFixedSize extends RenderBox {
     markNeedsLayout();
   }
 
-  @override double computeMinIntrinsicWidth(double height) => dimension;
-  @override double computeMaxIntrinsicWidth(double height) => dimension;
-  @override double computeMinIntrinsicHeight(double width) => dimension;
-  @override double computeMaxIntrinsicHeight(double width) => dimension;
+  @override
+  double computeMinIntrinsicWidth(double height) => dimension;
+  @override
+  double computeMaxIntrinsicWidth(double height) => dimension;
+  @override
+  double computeMinIntrinsicHeight(double width) => dimension;
+  @override
+  double computeMaxIntrinsicHeight(double width) => dimension;
 
   @override
   void performLayout() {
@@ -51,7 +55,7 @@ class RenderIntrinsicSize extends RenderProxyBox {
     child.layout(constraints);
     size = Size(
       child.getMinIntrinsicWidth(double.infinity),
-      child.getMinIntrinsicHeight(double.infinity)
+      child.getMinIntrinsicHeight(double.infinity),
     );
   }
 }
@@ -70,8 +74,8 @@ void main() {
         minWidth: 0.0,
         minHeight: 0.0,
         maxWidth: 1000.0,
-        maxHeight: 1000.0
-      )
+        maxHeight: 1000.0,
+      ),
     );
     expect(root.size, equals(inner.size));
 

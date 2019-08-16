@@ -164,6 +164,16 @@ enum ListTileControlAffinity {
 /// and to ensure that [subtitle] doesn't wrap (if [isThreeLine] is false) or
 /// wraps to two lines (if it is true).
 ///
+/// The heights of the [leading] and [trailing] widgets are constrained
+/// according to the
+/// [Material spec](https://material.io/design/components/lists.html).
+/// An exception is made for one-line ListTiles for accessibility. Please
+/// see the example below to see how to adhere to both Material spec and
+/// accessibility requirements.
+///
+/// Note that [leading] and [trailing] widgets can expand as far as they wish
+/// horizontally, so ensure that they are properly constrained.
+///
 /// List tiles are typically used in [ListView]s, or arranged in [Column]s in
 /// [Drawer]s and [Card]s.
 ///
@@ -171,12 +181,60 @@ enum ListTileControlAffinity {
 ///
 /// {@tool sample}
 ///
-/// Here is a simple tile with an icon and some text.
+/// This example uses a [ListView] to demonstrate different configurations of
+/// [ListTile]s in [Card]s.
+///
+/// ![Different variations of ListTile](https://flutter.github.io/assets-for-api-docs/assets/material/list_tile.png)
 ///
 /// ```dart
-/// ListTile(
-///   leading: const Icon(Icons.event_seat),
-///   title: const Text('The seat for the narrator'),
+/// ListView(
+///   children: const <Widget>[
+///     Card(child: ListTile(title: Text('One-line ListTile'))),
+///     Card(
+///       child: ListTile(
+///         leading: FlutterLogo(),
+///         title: Text('One-line with leading widget'),
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         title: Text('One-line with trailing widget'),
+///         trailing: Icon(Icons.more_vert),
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         leading: FlutterLogo(),
+///         title: Text('One-line with both widgets'),
+///         trailing: Icon(Icons.more_vert),
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         title: Text('One-line dense ListTile'),
+///         dense: true,
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         leading: FlutterLogo(size: 56.0),
+///         title: Text('Two-line ListTile'),
+///         subtitle: Text('Here is a second line'),
+///         trailing: Icon(Icons.more_vert),
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         leading: FlutterLogo(size: 72.0),
+///         title: Text('Three-line ListTile'),
+///         subtitle: Text(
+///           'A sufficiently long subtitle warrants three lines.'
+///         ),
+///         trailing: Icon(Icons.more_vert),
+///         isThreeLine: true,
+///       ),
+///     ),
+///   ],
 /// )
 /// ```
 /// {@end-tool}
@@ -196,6 +254,339 @@ enum ListTileControlAffinity {
 ///   enabled: _act == 2,
 ///   onTap: () { /* react to the tile being tapped */ }
 /// )
+/// ```
+/// {@end-tool}
+///
+/// To be accessible, tappable [leading] and [trailing] widgets have to
+/// be at least 48x48 in size. However, to adhere to the Material spec,
+/// [trailing] and [leading] widgets in one-line ListTiles should visually be
+/// at most 32 ([dense]: true) or 40 ([dense]: false) in height, which may
+/// conflict with the accessibility requirement.
+///
+/// For this reason, a one-line ListTile allows the height of [leading]
+/// and [trailing] widgets to be constrained by the height of the ListTile.
+/// This allows for the creation of tappable [leading] and [trailing] widgets
+/// that are large enough, but it is up to the developer to ensure that
+/// their widgets follow the Material spec.
+///
+/// {@tool sample}
+///
+/// Here is an example of a one-line, non-[dense] ListTile with a
+/// tappable leading widget that adheres to accessibility requirements and
+/// the Material spec. To adjust the use case below for a one-line, [dense]
+/// ListTile, adjust the vertical padding to 8.0.
+///
+/// ```dart
+/// ListTile(
+///   leading: GestureDetector(
+///     behavior: HitTestBehavior.translucent,
+///     onTap: () {},
+///     child: Container(
+///       width: 48,
+///       height: 48,
+///       padding: EdgeInsets.symmetric(vertical: 4.0),
+///       alignment: Alignment.center,
+///       child: CircleAvatar(),
+///     ),
+///   ),
+///   title: Text('title'),
+///   dense: false,
+/// ),
+/// ```
+/// {@end-tool}
+///
+/// ## The ListTile layout isn't exactly what I want
+///
+/// If the way ListTile pads and positions its elements isn't quite what
+/// you're looking for, it's easy to create custom list items with a
+/// combination of other widgets, such as [Row]s and [Column]s.
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// Here is an example of a custom list item that resembles a Youtube related
+/// video list item created with [Expanded] and [Container] widgets.
+///
+/// ![Custom list item a](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_a.png)
+///
+/// ```dart preamble
+/// class CustomListItem extends StatelessWidget {
+///   const CustomListItem({
+///     this.thumbnail,
+///     this.title,
+///     this.user,
+///     this.viewCount,
+///   });
+///
+///   final Widget thumbnail;
+///   final String title;
+///   final String user;
+///   final int viewCount;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Padding(
+///       padding: const EdgeInsets.symmetric(vertical: 5.0),
+///       child: Row(
+///         crossAxisAlignment: CrossAxisAlignment.start,
+///         children: <Widget>[
+///           Expanded(
+///             flex: 2,
+///             child: thumbnail,
+///           ),
+///           Expanded(
+///             flex: 3,
+///             child: _VideoDescription(
+///               title: title,
+///               user: user,
+///               viewCount: viewCount,
+///             ),
+///           ),
+///           const Icon(
+///             Icons.more_vert,
+///             size: 16.0,
+///           ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+///
+/// class _VideoDescription extends StatelessWidget {
+///   const _VideoDescription({
+///     Key key,
+///     this.title,
+///     this.user,
+///     this.viewCount,
+///   }) : super(key: key);
+///
+///   final String title;
+///   final String user;
+///   final int viewCount;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Padding(
+///       padding: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
+///       child: Column(
+///         crossAxisAlignment: CrossAxisAlignment.start,
+///         children: <Widget>[
+///           Text(
+///             title,
+///             style: const TextStyle(
+///               fontWeight: FontWeight.w500,
+///               fontSize: 14.0,
+///             ),
+///           ),
+///           const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
+///           Text(
+///             user,
+///             style: const TextStyle(fontSize: 10.0),
+///           ),
+///           const Padding(padding: EdgeInsets.symmetric(vertical: 1.0)),
+///           Text(
+///             '$viewCount views',
+///             style: const TextStyle(fontSize: 10.0),
+///           ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return ListView(
+///     padding: const EdgeInsets.all(8.0),
+///     itemExtent: 106.0,
+///     children: <CustomListItem>[
+///       CustomListItem(
+///         user: 'Flutter',
+///         viewCount: 999000,
+///         thumbnail: Container(
+///           decoration: const BoxDecoration(color: Colors.blue),
+///         ),
+///         title: 'The Flutter YouTube Channel',
+///       ),
+///       CustomListItem(
+///         user: 'Dash',
+///         viewCount: 884000,
+///         thumbnail: Container(
+///           decoration: const BoxDecoration(color: Colors.yellow),
+///         ),
+///         title: 'Announcing Flutter 1.0',
+///       ),
+///     ],
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// Here is an example of an article list item with multi-line titles and
+/// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
+/// [AspectRatio] widgets to organize its layout.
+///
+/// ![Custom list item b](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_b.png)
+///
+/// ```dart preamble
+/// class _ArticleDescription extends StatelessWidget {
+///   _ArticleDescription({
+///     Key key,
+///     this.title,
+///     this.subtitle,
+///     this.author,
+///     this.publishDate,
+///     this.readDuration,
+///   }) : super(key: key);
+///
+///   final String title;
+///   final String subtitle;
+///   final String author;
+///   final String publishDate;
+///   final String readDuration;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Column(
+///       crossAxisAlignment: CrossAxisAlignment.start,
+///       children: <Widget>[
+///         Expanded(
+///           flex: 2,
+///           child: Column(
+///             crossAxisAlignment: CrossAxisAlignment.start,
+///             children: <Widget>[
+///               Text(
+///                 '$title',
+///                 maxLines: 2,
+///                 overflow: TextOverflow.ellipsis,
+///                 style: const TextStyle(
+///                   fontWeight: FontWeight.bold,
+///                 ),
+///               ),
+///               const Padding(padding: EdgeInsets.only(bottom: 2.0)),
+///               Text(
+///                 '$subtitle',
+///                 maxLines: 2,
+///                 overflow: TextOverflow.ellipsis,
+///                 style: const TextStyle(
+///                   fontSize: 12.0,
+///                   color: Colors.black54,
+///                 ),
+///               ),
+///             ],
+///           ),
+///         ),
+///         Expanded(
+///           flex: 1,
+///           child: Column(
+///             crossAxisAlignment: CrossAxisAlignment.start,
+///             mainAxisAlignment: MainAxisAlignment.end,
+///             children: <Widget>[
+///               Text(
+///                 '$author',
+///                 style: const TextStyle(
+///                   fontSize: 12.0,
+///                   color: Colors.black87,
+///                 ),
+///               ),
+///               Text(
+///                 '$publishDate · $readDuration ★',
+///                 style: const TextStyle(
+///                   fontSize: 12.0,
+///                   color: Colors.black54,
+///                 ),
+///               ),
+///             ],
+///           ),
+///         ),
+///       ],
+///     );
+///   }
+/// }
+///
+/// class CustomListItemTwo extends StatelessWidget {
+///   CustomListItemTwo({
+///     Key key,
+///     this.thumbnail,
+///     this.title,
+///     this.subtitle,
+///     this.author,
+///     this.publishDate,
+///     this.readDuration,
+///   }) : super(key: key);
+///
+///   final Widget thumbnail;
+///   final String title;
+///   final String subtitle;
+///   final String author;
+///   final String publishDate;
+///   final String readDuration;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Padding(
+///       padding: const EdgeInsets.symmetric(vertical: 10.0),
+///       child: SizedBox(
+///         height: 100,
+///         child: Row(
+///           crossAxisAlignment: CrossAxisAlignment.start,
+///           children: <Widget>[
+///             AspectRatio(
+///               aspectRatio: 1.0,
+///               child: thumbnail,
+///             ),
+///             Expanded(
+///               child: Padding(
+///                 padding: const EdgeInsets.fromLTRB(20.0, 0.0, 2.0, 0.0),
+///                 child: _ArticleDescription(
+///                   title: title,
+///                   subtitle: subtitle,
+///                   author: author,
+///                   publishDate: publishDate,
+///                   readDuration: readDuration,
+///                 ),
+///               ),
+///             )
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return ListView(
+///     padding: const EdgeInsets.all(10.0),
+///     children: <Widget>[
+///       CustomListItemTwo(
+///         thumbnail: Container(
+///           decoration: const BoxDecoration(color: Colors.pink),
+///         ),
+///         title: 'Flutter 1.0 Launch',
+///         subtitle:
+///           'Flutter continues to improve and expand its horizons.'
+///           'This text should max out at two lines and clip',
+///         author: 'Dash',
+///         publishDate: 'Dec 28',
+///         readDuration: '5 mins',
+///       ),
+///       CustomListItemTwo(
+///         thumbnail: Container(
+///           decoration: const BoxDecoration(color: Colors.blue),
+///         ),
+///         title: 'Flutter 1.2 Release - Continual updates to the framework',
+///         subtitle: 'Flutter once again improves and makes updates.',
+///         author: 'Flutter',
+///         publishDate: 'Feb 26',
+///         readDuration: '12 mins',
+///       ),
+///     ],
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
@@ -391,7 +782,7 @@ class ListTile extends StatelessWidget {
   }
 
   bool _isDenseLayout(ListTileTheme tileTheme) {
-    return dense != null ? dense : (tileTheme?.dense ?? false);
+    return dense ?? tileTheme?.dense ?? false;
   }
 
   TextStyle _titleTextStyle(ThemeData theme, ListTileTheme tileTheme) {
@@ -444,7 +835,7 @@ class ListTile extends StatelessWidget {
     final Widget titleText = AnimatedDefaultTextStyle(
       style: titleStyle,
       duration: kThemeChangeDuration,
-      child: title ?? const SizedBox()
+      child: title ?? const SizedBox(),
     );
 
     Widget subtitleText;
@@ -738,7 +1129,7 @@ class _RenderListTile extends RenderBox {
   }
 
   // The returned list is ordered for hit testing.
-  Iterable<RenderBox> get _children sync *{
+  Iterable<RenderBox> get _children sync* {
     if (leading != null)
       yield leading;
     if (title != null)
@@ -883,7 +1274,7 @@ class _RenderListTile extends RenderBox {
   double computeMinIntrinsicHeight(double width) {
     return math.max(
       _defaultTileHeight,
-      title.getMinIntrinsicHeight(width) + (subtitle?.getMinIntrinsicHeight(width) ?? 0.0)
+      title.getMinIntrinsicHeight(width) + (subtitle?.getMinIntrinsicHeight(width) ?? 0.0),
     );
   }
 
@@ -924,11 +1315,29 @@ class _RenderListTile extends RenderBox {
     final bool hasTrailing = trailing != null;
     final bool isTwoLine = !isThreeLine && hasSubtitle;
     final bool isOneLine = !isThreeLine && !hasSubtitle;
+
+    final BoxConstraints maxIconHeightConstraint = BoxConstraints(
+      // One-line trailing and leading widget heights do not follow
+      // Material specifications, but this sizing is required to adhere
+      // to accessibility requirements for smallest tappable widget.
+      // Two- and three-line trailing widget heights are constrained
+      // properly according to the Material spec.
+      maxHeight: isDense ? 48.0 : 56.0,
+    );
     final BoxConstraints looseConstraints = constraints.loosen();
+    final BoxConstraints iconConstraints = looseConstraints.enforce(maxIconHeightConstraint);
 
     final double tileWidth = looseConstraints.maxWidth;
-    final Size leadingSize = _layoutBox(leading, looseConstraints);
-    final Size trailingSize = _layoutBox(trailing, looseConstraints);
+    final Size leadingSize = _layoutBox(leading, iconConstraints);
+    final Size trailingSize = _layoutBox(trailing, iconConstraints);
+    assert(
+      tileWidth != leadingSize.width,
+      'Leading widget consumes entire tile width. Please use a sized widget.'
+    );
+    assert(
+      tileWidth != trailingSize.width,
+      'Trailing widget consumes entire tile width. Please use a sized widget.'
+    );
 
     final double titleStart = hasLeading
       ? math.max(_minLeadingWidth, leadingSize.width) + _horizontalTitleGap
@@ -1051,11 +1460,19 @@ class _RenderListTile extends RenderBox {
   bool hitTestSelf(Offset position) => true;
 
   @override
-  bool hitTestChildren(HitTestResult result, { @required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     assert(position != null);
     for (RenderBox child in _children) {
       final BoxParentData parentData = child.parentData;
-      if (child.hitTest(result, position: position - parentData.offset))
+      final bool isHit = result.addWithPaintOffset(
+        offset: parentData.offset,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          assert(transformed == position - parentData.offset);
+          return child.hitTest(result, position: transformed);
+        },
+      );
+      if (isHit)
         return true;
     }
     return false;

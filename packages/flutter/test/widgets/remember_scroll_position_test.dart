@@ -23,7 +23,7 @@ class ThePositiveNumbers extends StatelessWidget {
       controller: _controller,
       itemBuilder: (BuildContext context, int index) {
         return Text('${index + from}', key: ValueKey<int>(index));
-      }
+      },
     );
   }
 }
@@ -50,7 +50,7 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
             );
           }
           return null;
-        }
+        },
       ),
     ),
   );

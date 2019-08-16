@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -180,7 +178,9 @@ class DrawerController extends StatefulWidget {
     @required this.child,
     @required this.alignment,
     this.drawerCallback,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.scrimColor,
+    this.edgeDragWidth,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
        assert(alignment != null),
@@ -200,7 +200,6 @@ class DrawerController extends StatefulWidget {
   /// Optional callback that is called when a [Drawer] is opened or closed.
   final DrawerCallback drawerCallback;
 
-  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
   /// {@template flutter.material.drawer.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
@@ -213,13 +212,31 @@ class DrawerController extends StatefulWidget {
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
   ///
-  /// By default, the drag start behavior is [DragStartBehavior.down].
+  /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
   /// See also:
   ///
-  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for
+  ///    the different behaviors.
+  ///
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
+
+  /// The color to use for the scrim that obscures primary content while a drawer is open.
+  ///
+  /// By default, the color used is [Colors.black54]
+  final Color scrimColor;
+
+  /// The width of the area within which a horizontal swipe will open the
+  /// drawer.
+  ///
+  /// By default, the value used is 20.0 added to the padding edge of
+  /// `MediaQuery.of(context).padding` that corresponds to [alignment].
+  /// This ensures that the drag area for notched devices is not obscured. For
+  /// example, if [alignment] is set to [DrawerAlignment.start] and
+  /// `TextDirection.of(context)` is set to [TextDirection.ltr],
+  /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
+  final double edgeDragWidth;
 
   @override
   DrawerControllerState createState() => DrawerControllerState();
@@ -232,6 +249,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   void initState() {
     super.initState();
+    _scrimColorTween = _buildScrimColorTween();
     _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
@@ -242,6 +260,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     _historyEntry?.remove();
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(DrawerController oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.scrimColor != oldWidget.scrimColor)
+      _scrimColorTween = _buildScrimColorTween();
   }
 
   void _animationChanged() {
@@ -331,7 +356,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         break;
     }
 
-    final bool opened = _controller.value > 0.5 ? true : false;
+    final bool opened = _controller.value > 0.5;
     if (opened != _previouslyOpened && widget.drawerCallback != null)
       widget.drawerCallback(opened);
     _previouslyOpened = opened;
@@ -380,8 +405,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       widget.drawerCallback(false);
   }
 
-  final ColorTween _color = ColorTween(begin: Colors.transparent, end: Colors.black54);
+  ColorTween _scrimColorTween;
   final GlobalKey _gestureDetectorKey = GlobalKey();
+
+  ColorTween _buildScrimColorTween() {
+    return ColorTween(begin: Colors.transparent, end: widget.scrimColor ?? Colors.black54);
+  }
 
   AlignmentDirectional get _drawerOuterAlignment {
     assert(widget.alignment != null);
@@ -408,12 +437,24 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   Widget _buildDrawer(BuildContext context) {
     final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
     final EdgeInsets padding = MediaQuery.of(context).padding;
-    double dragAreaWidth = drawerIsStart ? padding.left : padding.right;
+    final TextDirection textDirection = Directionality.of(context);
 
-    if (Directionality.of(context) == TextDirection.rtl)
-      dragAreaWidth = drawerIsStart ? padding.right : padding.left;
+    double dragAreaWidth = widget.edgeDragWidth;
+    if (widget.edgeDragWidth == null) {
+      switch (textDirection) {
+        case TextDirection.ltr: {
+          dragAreaWidth = _kEdgeDragWidth +
+            (drawerIsStart ? padding.left : padding.right);
+        }
+        break;
+        case TextDirection.rtl: {
+          dragAreaWidth = _kEdgeDragWidth +
+            (drawerIsStart ? padding.right : padding.left);
+        }
+        break;
+      }
+    }
 
-    dragAreaWidth = max(dragAreaWidth, _kEdgeDragWidth);
     if (_controller.status == AnimationStatus.dismissed) {
       return Align(
         alignment: _drawerOuterAlignment,
@@ -446,8 +487,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   onTap: close,
                   child: Semantics(
                     label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
-                    child: Container(
-                      color: _color.evaluate(_controller),
+                    child: Container( // The drawer's "scrim"
+                      color: _scrimColorTween.evaluate(_controller),
                     ),
                   ),
                 ),

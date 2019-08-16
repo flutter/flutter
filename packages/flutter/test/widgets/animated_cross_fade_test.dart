@@ -263,7 +263,7 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(325.0, 175.0));
   });
 
-  Widget crossFadeWithWatcher({bool towardsSecond = false}) {
+  Widget crossFadeWithWatcher({ bool towardsSecond = false }) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: AnimatedCrossFade(
@@ -376,7 +376,7 @@ class _TickerWatchingWidgetState extends State<_TickerWatchingWidget> with Singl
   @override
   void initState() {
     super.initState();
-    ticker = createTicker((_) {})..start();
+    ticker = createTicker((_) { })..start();
   }
 
   @override

@@ -21,6 +21,42 @@ import 'icon_theme_data.dart';
 /// Typically this is introduced automatically by the [WidgetsApp] or
 /// [MaterialApp].
 ///
+/// This widget assumes that the rendered icon is squared. Non-squared icons may
+/// render incorrectly.
+///
+/// {@tool sample}
+///
+/// This example shows how to create a [Row] of [Icon]s in different colors and
+/// sizes. The first [Icon] uses a [semanticLabel] to announce in accessibility
+/// modes like TalkBack and VoiceOver.
+///
+/// ![A row of icons representing a pink heart, a green musical note, and a blue umbrella](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
+///
+/// ```dart
+/// Row(
+///   mainAxisAlignment: MainAxisAlignment.spaceAround,
+///   children: const <Widget>[
+///     Icon(
+///       Icons.favorite,
+///       color: Colors.pink,
+///       size: 24.0,
+///       semanticLabel: 'Text to announce in accessibility modes',
+///     ),
+///     Icon(
+///       Icons.audiotrack,
+///       color: Colors.green,
+///       size: 30.0,
+///     ),
+///     Icon(
+///       Icons.beach_access,
+///       color: Colors.blue,
+///       size: 36.0,
+///     ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [IconButton], for interactive icons.
@@ -31,7 +67,8 @@ class Icon extends StatelessWidget {
   /// Creates an icon.
   ///
   /// The [size] and [color] default to the value given by the current [IconTheme].
-  const Icon(this.icon, {
+  const Icon(
+    this.icon, {
     Key key,
     this.size,
     this.color,
@@ -124,7 +161,7 @@ class Icon extends StatelessWidget {
     if (icon == null) {
       return Semantics(
         label: semanticLabel,
-        child: SizedBox(width: iconSize, height: iconSize)
+        child: SizedBox(width: iconSize, height: iconSize),
       );
     }
 
@@ -134,6 +171,7 @@ class Icon extends StatelessWidget {
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
 
     Widget iconWidget = RichText(
+      overflow: TextOverflow.visible, // Never clip.
       textDirection: textDirection, // Since we already fetched it for the assert...
       text: TextSpan(
         text: String.fromCharCode(icon.codePoint),
@@ -179,8 +217,8 @@ class Icon extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<IconData>('icon', icon, ifNull: '<empty>', showName: false));
+    properties.add(IconDataProperty('icon', icon, ifNull: '<empty>', showName: false));
     properties.add(DoubleProperty('size', size, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
   }
 }

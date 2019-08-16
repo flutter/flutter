@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart' show visibleForTesting;
+
 /// Signature for callbacks passed to [LicenseRegistry.addLicense].
 typedef LicenseEntryCollector = Stream<LicenseEntry> Function();
 
@@ -305,5 +307,12 @@ class LicenseRegistry {
       return;
     for (LicenseEntryCollector collector in _collectors)
       yield* collector();
+  }
+
+  /// Resets the internal state of [LicenseRegistry]. Intended for use in
+  /// testing.
+  @visibleForTesting
+  static void reset() {
+    _collectors = null;
   }
 }

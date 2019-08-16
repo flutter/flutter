@@ -26,7 +26,7 @@ void main() {
       expect(node.isTagged(tag1), isFalse);
       expect(node.isTagged(tag2), isFalse);
 
-      node.tags = Set<SemanticsTag>()..add(tag1);
+      node.tags = <SemanticsTag>{tag1};
       expect(node.isTagged(tag1), isTrue);
       expect(node.isTagged(tag2), isFalse);
 
@@ -36,12 +36,10 @@ void main() {
     });
 
     test('getSemanticsData includes tags', () {
-      final Set<SemanticsTag> tags = Set<SemanticsTag>()
-        ..add(tag1)
-        ..add(tag2);
+      final Set<SemanticsTag> tags = <SemanticsTag>{tag1, tag2};
 
       final SemanticsNode node = SemanticsNode()
-        ..rect = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+        ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
         ..tags = tags;
 
       expect(node.getSemanticsData().tags, tags);
@@ -57,12 +55,113 @@ void main() {
         childrenInInversePaintOrder: <SemanticsNode>[
           SemanticsNode()
             ..isMergedIntoParent = true
-            ..rect = Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
+            ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
             ..tags = tags,
         ],
       );
 
       expect(node.getSemanticsData().tags, tags);
+    });
+
+    test('mutate existing semantic node list errors', () {
+      final SemanticsNode node = SemanticsNode()
+        ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+
+      final SemanticsConfiguration config = SemanticsConfiguration()
+        ..isSemanticBoundary = true
+        ..isMergingSemanticsOfDescendants = true;
+
+      final List<SemanticsNode> children = <SemanticsNode>[
+        SemanticsNode()
+          ..isMergedIntoParent = true
+          ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
+      ];
+
+      node.updateWith(
+        config: config,
+        childrenInInversePaintOrder: children
+      );
+
+      children.add( SemanticsNode()
+        ..isMergedIntoParent = true
+        ..rect = const Rect.fromLTRB(42.0, 42.0, 10.0, 10.0)
+      );
+
+      {
+        FlutterError error;
+        try {
+          node.updateWith(
+            config: config,
+            childrenInInversePaintOrder: children
+          );
+        } on FlutterError catch (e) {
+          error = e;
+        }
+        expect(error, isNotNull);
+        expect(error.toString(), equalsIgnoringHashCodes(
+          'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
+          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
+          'Error details:\n'
+          'The list\'s length has changed from 1 to 2.'
+        ));
+        expect(
+          error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.'
+        );
+      }
+
+      {
+        FlutterError error;
+        final List<SemanticsNode> modifiedChildren = <SemanticsNode>[
+          SemanticsNode()
+            ..isMergedIntoParent = true
+            ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
+          SemanticsNode()
+            ..isMergedIntoParent = true
+            ..rect = const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0)
+        ];
+        node.updateWith(
+          config: config,
+          childrenInInversePaintOrder: modifiedChildren,
+        );
+        try {
+          modifiedChildren[0] = SemanticsNode()
+            ..isMergedIntoParent = true
+            ..rect = const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
+          modifiedChildren[1] = SemanticsNode()
+            ..isMergedIntoParent = true
+            ..rect = const Rect.fromLTRB(40.0, 14.0, 20.0, 20.0);
+          node.updateWith(
+            config: config,
+            childrenInInversePaintOrder: modifiedChildren
+          );
+        } on FlutterError catch (e) {
+          error = e;
+        }
+        expect(error, isNotNull);
+        expect(error.toStringDeep(), equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   Failed to replace child semantics nodes because the list of\n'
+          '   `SemanticsNode`s was mutated.\n'
+          '   Instead of mutating the existing list, create a new list\n'
+          '   containing the desired `SemanticsNode`s.\n'
+          '   Error details:\n'
+          '   Child node at position 0 was replaced:\n'
+          '   Previous child: SemanticsNode#6(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(0.0, 0.0, 20.0, 20.0))\n'
+          '   New child: SemanticsNode#4(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(5.0, 5.0, 10.0, 10.0))\n'
+          '\n'
+          '   Child node at position 1 was replaced:\n'
+          '   Previous child: SemanticsNode#7(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(40.0, 14.0, 20.0, 20.0))\n'
+          '   New child: SemanticsNode#5(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(10.0, 10.0, 20.0, 20.0))\n'
+        ));
+
+        expect(
+          error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.'
+        );
+        // Two previous children and two new children.
+        expect(error.diagnostics.where((DiagnosticsNode node) => node.value is SemanticsNode).length, 4);
+      }
     });
 
     test('after markNeedsSemanticsUpdate() all render objects between two semantic boundaries are asked for annotations', () {
@@ -84,10 +183,10 @@ void main() {
               child: TestRender(
                 hasScrollUpAction: true,
                 isSemanticBoundary: true,
-              )
-            )
-          )
-        )
+              ),
+            ),
+          ),
+        ),
       );
 
       layout(root);
@@ -110,11 +209,11 @@ void main() {
 
   test('toStringDeep() does not throw with transform == null', () {
     final SemanticsNode child1 = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 5.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0);
     final SemanticsNode child2 = SemanticsNode()
-      ..rect = Rect.fromLTRB(5.0, 0.0, 10.0, 5.0);
+      ..rect = const Rect.fromLTRB(5.0, 0.0, 10.0, 5.0);
     final SemanticsNode root = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
     root.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
@@ -139,7 +238,7 @@ void main() {
       ' └─SemanticsNode#2\n'
       '     STALE\n'
       '     owner: null\n'
-      '     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
+      '     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n',
     );
   });
 
@@ -189,11 +288,11 @@ void main() {
 
   test('toStringDeep respects childOrder parameter', () {
     final SemanticsNode child1 = SemanticsNode()
-      ..rect = Rect.fromLTRB(15.0, 0.0, 20.0, 5.0);
+      ..rect = const Rect.fromLTRB(15.0, 0.0, 20.0, 5.0);
     final SemanticsNode child2 = SemanticsNode()
-      ..rect = Rect.fromLTRB(10.0, 0.0, 15.0, 5.0);
+      ..rect = const Rect.fromLTRB(10.0, 0.0, 15.0, 5.0);
     final SemanticsNode root = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 20.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 20.0, 5.0);
     root.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
@@ -213,7 +312,7 @@ void main() {
       ' └─SemanticsNode#2\n'
       '     STALE\n'
       '     owner: null\n'
-      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
+      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n',
     );
 
     expect(
@@ -231,26 +330,26 @@ void main() {
       ' └─SemanticsNode#2\n'
       '     STALE\n'
       '     owner: null\n'
-      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
+      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n',
     );
 
     final SemanticsNode child3 = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
     child3.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[
         SemanticsNode()
-          ..rect = Rect.fromLTRB(5.0, 0.0, 10.0, 5.0),
+          ..rect = const Rect.fromLTRB(5.0, 0.0, 10.0, 5.0),
         SemanticsNode()
-          ..rect = Rect.fromLTRB(0.0, 0.0, 5.0, 5.0),
+          ..rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0),
       ],
     );
 
     final SemanticsNode rootComplex = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
     rootComplex.updateWith(
         config: null,
-        childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3]
+        childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3],
     );
 
     expect(
@@ -283,7 +382,7 @@ void main() {
       '   └─SemanticsNode#6\n'
       '       STALE\n'
       '       owner: null\n'
-      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
+      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n',
     );
 
     expect(
@@ -316,7 +415,7 @@ void main() {
       '   └─SemanticsNode#6\n'
       '       STALE\n'
       '       owner: null\n'
-      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
+      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n',
     );
   });
 
@@ -326,7 +425,7 @@ void main() {
       minimalProperties.toStringDeep(),
       'SemanticsNode#1\n'
       '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
-      '   invisible\n'
+      '   invisible\n',
     );
 
     expect(
@@ -336,6 +435,7 @@ void main() {
       '   isMergedIntoParent: false\n'
       '   mergeAllDescendantsIntoThisNode: false\n'
       '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+      '   tags: null\n'
       '   actions: []\n'
       '   customActions: []\n'
       '   flags: []\n'
@@ -348,13 +448,14 @@ void main() {
       '   hint: ""\n'
       '   textDirection: null\n'
       '   sortKey: null\n'
+      '   platformViewId: null\n'
       '   scrollChildren: null\n'
       '   scrollIndex: null\n'
       '   scrollExtentMin: null\n'
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   elevation: 0.0\n'
-      '   thicknes: 0.0\n'
+      '   thickness: 0.0\n',
     );
 
     final SemanticsConfiguration config = SemanticsConfiguration()
@@ -370,7 +471,7 @@ void main() {
       ..textDirection = TextDirection.rtl
       ..sortKey = const OrdinalSortKey(1.0);
     final SemanticsNode allProperties = SemanticsNode()
-      ..rect = Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = Matrix4.translation(Vector3(10.0, 10.0, 0.0))
       ..updateWith(config: config, childrenInInversePaintOrder: null);
     expect(
@@ -394,7 +495,7 @@ void main() {
     );
 
     final SemanticsNode scaled = SemanticsNode()
-      ..rect = Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = Matrix4.diagonal3(Vector3(10.0, 10.0, 1.0));
     expect(
       scaled.toStringDeep(),
@@ -415,9 +516,9 @@ void main() {
     const CustomSemanticsAction action2 = CustomSemanticsAction(label: 'action2');
     const CustomSemanticsAction action3 = CustomSemanticsAction(label: 'action3');
     configuration.customSemanticsActions = <CustomSemanticsAction, VoidCallback>{
-      action1: () {},
-      action2: () {},
-      action3: () {},
+      action1: () { },
+      action2: () { },
+      action3: () { },
     };
     final SemanticsNode actionNode = SemanticsNode();
     actionNode.updateWith(config: configuration);
@@ -430,6 +531,7 @@ void main() {
       '   isMergedIntoParent: false\n'
       '   mergeAllDescendantsIntoThisNode: false\n'
       '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+      '   tags: null\n'
       '   actions: customAction\n'
       '   customActions: action1, action2, action3\n'
       '   flags: []\n'
@@ -442,15 +544,25 @@ void main() {
       '   hint: ""\n'
       '   textDirection: null\n'
       '   sortKey: null\n'
+      '   platformViewId: null\n'
       '   scrollChildren: null\n'
       '   scrollIndex: null\n'
       '   scrollExtentMin: null\n'
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   elevation: 0.0\n'
-      '   thicknes: 0.0\n'
+      '   thickness: 0.0\n',
     );
+  });
 
+  test('Tags show up in debug properties', () {
+    final SemanticsNode actionNode = SemanticsNode()
+      ..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
+
+    expect(
+      actionNode.toStringDeep(),
+      contains('\n   tags: RenderViewport.twoPane\n'),
+    );
   });
 
   test('SemanticsConfiguration getter/setter', () {
@@ -501,7 +613,7 @@ void main() {
     final MoveCursorHandler onMoveCursorForwardByCharacter = (bool _) { };
     final MoveCursorHandler onMoveCursorBackwardByCharacter = (bool _) { };
     final VoidCallback onTap = () { };
-    final VoidCallback onCustomAction = () {};
+    final VoidCallback onCustomAction = () { };
 
     config.onShowOnScreen = onShowOnScreen;
     config.onScrollDown = onScrollDown;
@@ -551,7 +663,7 @@ class TestRender extends RenderProxyBox {
     this.hasScrollUpAction = false,
     this.hasScrollDownAction = false,
     this.isSemanticBoundary,
-    RenderObject child
+    RenderObject child,
   }) : super(child);
 
   bool hasTapAction;

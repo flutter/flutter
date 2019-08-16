@@ -46,24 +46,37 @@ BuildApp() {
     target_path="${FLUTTER_TARGET}"
   fi
 
+  local derived_dir="${SOURCE_ROOT}/Flutter"
+  if [[ -e "${project_path}/.ios" ]]; then
+    derived_dir="${project_path}/.ios/Flutter"
+  fi
+
+  # Default value of assets_path is flutter_assets
+  local assets_path="flutter_assets"
+  # The value of assets_path can set by add FLTAssetsPath to AppFrameworkInfo.plist
+  FLTAssetsPath=$(/usr/libexec/PlistBuddy -c "Print :FLTAssetsPath" "${derived_dir}/AppFrameworkInfo.plist" 2>/dev/null)
+  if [[ -n "$FLTAssetsPath" ]]; then
+    assets_path="${FLTAssetsPath}"
+  fi
+
   # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
   # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
   # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
   local build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
   local artifact_variant="unknown"
   case "$build_mode" in
-    release*) build_mode="release"; artifact_variant="ios-release";;
-    profile*) build_mode="profile"; artifact_variant="ios-profile";;
-    debug*) build_mode="debug"; artifact_variant="ios";;
+    *release*) build_mode="release"; artifact_variant="ios-release";;
+    *profile*) build_mode="profile"; artifact_variant="ios-profile";;
+    *debug*) build_mode="debug"; artifact_variant="ios";;
     *)
       EchoError "========================================================================"
       EchoError "ERROR: Unknown FLUTTER_BUILD_MODE: ${build_mode}."
       EchoError "Valid values are 'Debug', 'Profile', or 'Release' (case insensitive)."
-      EchoError "This is controlled by the FLUTTER_BUILD_MODE environment varaible."
+      EchoError "This is controlled by the FLUTTER_BUILD_MODE environment variable."
       EchoError "If that is not set, the CONFIGURATION environment variable is used."
       EchoError ""
       EchoError "You can fix this by either adding an appropriately named build"
-      EchoError "configuration, or adding an appriate value for FLUTTER_BUILD_MODE to the"
+      EchoError "configuration, or adding an appropriate value for FLUTTER_BUILD_MODE to the"
       EchoError ".xcconfig file for the current build configuration (${CONFIGURATION})."
       EchoError "========================================================================"
       exit -1;;
@@ -87,19 +100,21 @@ BuildApp() {
   AssertExists "${framework_path}"
   AssertExists "${project_path}"
 
-  local derived_dir="${SOURCE_ROOT}/Flutter"
-  if [[ -e "${project_path}/.ios" ]]; then
-    derived_dir="${project_path}/.ios/Flutter"
-  fi
   RunCommand mkdir -p -- "$derived_dir"
   AssertExists "$derived_dir"
 
   RunCommand rm -rf -- "${derived_dir}/App.framework"
 
+  local flutter_engine_flag=""
   local local_engine_flag=""
   local flutter_framework="${framework_path}/Flutter.framework"
   local flutter_podspec="${framework_path}/Flutter.podspec"
 
+  if [[ -n "$FLUTTER_ENGINE" ]]; then
+    flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
+  fi
+
+  local bitcode_flag=""
   if [[ -n "$LOCAL_ENGINE" ]]; then
     if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
       EchoError "========================================================================"
@@ -114,8 +129,11 @@ BuildApp() {
       exit -1
     fi
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
-    flutter_framework="${LOCAL_ENGINE}/Flutter.framework"
-    flutter_podspec="${LOCAL_ENGINE}/Flutter.podspec"
+    flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.framework"
+    flutter_podspec="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.podspec"
+    if [[ $ENABLE_BITCODE == "YES" ]]; then
+      bitcode_flag="--bitcode"
+    fi
   fi
 
   if [[ -e "${project_path}/.ios" ]]; then
@@ -160,6 +178,7 @@ BuildApp() {
       EchoError "========================================================================"
       exit -1
     fi
+
     RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
       ${verbose_flag}                                                       \
       build aot                                                             \
@@ -168,8 +187,9 @@ BuildApp() {
       --target="${target_path}"                                             \
       --${build_mode}                                                       \
       --ios-arch="${archs}"                                                 \
+      ${flutter_engine_flag}                                                \
       ${local_engine_flag}                                                  \
-      ${track_widget_creation_flag}
+      ${bitcode_flag}
 
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to build ${project_path}."
@@ -181,27 +201,29 @@ BuildApp() {
 
     RunCommand cp -r -- "${app_framework}" "${derived_dir}"
 
-    StreamOutput " ├─Generating dSYM file..."
-    # Xcode calls `symbols` during app store upload, which uses Spotlight to
-    # find dSYM files for embedded frameworks. When it finds the dSYM file for
-    # `App.framework` it throws an error, which aborts the app store upload.
-    # To avoid this, we place the dSYM files in a folder ending with ".noindex",
-    # which hides it from Spotlight, https://github.com/flutter/flutter/issues/22560.
-    RunCommand mkdir -p -- "${build_dir}/dSYMs.noindex"
-    RunCommand xcrun dsymutil -o "${build_dir}/dSYMs.noindex/App.framework.dSYM" "${app_framework}/App"
-    if [[ $? -ne 0 ]]; then
-      EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
-      exit -1
-    fi
-    StreamOutput "done"
+    if [[ "${build_mode}" == "release" ]]; then
+      StreamOutput " ├─Generating dSYM file..."
+      # Xcode calls `symbols` during app store upload, which uses Spotlight to
+      # find dSYM files for embedded frameworks. When it finds the dSYM file for
+      # `App.framework` it throws an error, which aborts the app store upload.
+      # To avoid this, we place the dSYM files in a folder ending with ".noindex",
+      # which hides it from Spotlight, https://github.com/flutter/flutter/issues/22560.
+      RunCommand mkdir -p -- "${build_dir}/dSYMs.noindex"
+      RunCommand xcrun dsymutil -o "${build_dir}/dSYMs.noindex/App.framework.dSYM" "${app_framework}/App"
+      if [[ $? -ne 0 ]]; then
+        EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
+        exit -1
+      fi
+      StreamOutput "done"
 
-    StreamOutput " ├─Stripping debug symbols..."
-    RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
-    if [[ $? -ne 0 ]]; then
-      EchoError "Failed to strip ${derived_dir}/App.framework/App."
-      exit -1
+      StreamOutput " ├─Stripping debug symbols..."
+      RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
+      if [[ $? -ne 0 ]]; then
+        EchoError "Failed to strip ${derived_dir}/App.framework/App."
+        exit -1
+      fi
+      StreamOutput "done"
     fi
-    StreamOutput "done"
 
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
@@ -235,15 +257,16 @@ BuildApp() {
   fi
 
   StreamOutput " ├─Assembling Flutter resources..."
-  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics             \
+  RunCommand "${FLUTTER_ROOT}/bin/flutter"     \
     ${verbose_flag}                                                         \
     build bundle                                                            \
     --target-platform=ios                                                   \
     --target="${target_path}"                                               \
     --${build_mode}                                                         \
     --depfile="${build_dir}/snapshot_blob.bin.d"                            \
-    --asset-dir="${derived_dir}/App.framework/flutter_assets"               \
+    --asset-dir="${derived_dir}/App.framework/${assets_path}"               \
     ${precompilation_flag}                                                  \
+    ${flutter_engine_flag}                                                  \
     ${local_engine_flag}                                                    \
     ${track_widget_creation_flag}
 

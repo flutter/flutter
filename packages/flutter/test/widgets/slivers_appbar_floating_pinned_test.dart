@@ -6,7 +6,239 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
+import 'semantics_tester.dart';
+
 void main() {
+  testWidgets('Sliver appBars - floating and pinned - correct elevation', (WidgetTester tester) async {
+    await tester.pumpWidget(Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const SliverAppBar(
+                  bottom: PreferredSize(
+                    preferredSize: Size.fromHeight(28),
+                    child: Text('Bottom'),
+                  ),
+                  backgroundColor: Colors.green,
+                  floating: true,
+                  primary: false,
+                  automaticallyImplyLeading: false,
+                ),
+                SliverToBoxAdapter(child: Container(color: Colors.yellow, height: 50.0)),
+                SliverToBoxAdapter(child: Container(color: Colors.red, height: 50.0)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderPhysicalModel renderObject = tester.renderObject<RenderPhysicalModel>(find.byType(PhysicalModel));
+    expect(renderObject, isNotNull);
+    expect(renderObject.elevation, 0.0);
+  });
+
+  testWidgets('Sliver appbars - floating and pinned - correct semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const SliverAppBar(
+                  title: Text('Hello'),
+                  pinned: true,
+                  floating: true,
+                  expandedHeight: 200.0,
+                ),
+                SliverFixedExtentList(
+                  itemExtent: 100.0,
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext _, int index) {
+                      return Container(
+                        height: 100.0,
+                        color: index % 2 == 0 ? Colors.red : Colors.yellow,
+                        child: Text('Tile $index'),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  thickness: 0,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'Hello',
+                      elevation: 0,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHeader, SemanticsFlag.namesRoute],
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
+                ),
+                TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.scrollUp],
+                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                  scrollIndex: 0,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'Tile 0',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      label: 'Tile 1',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      label: 'Tile 2',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      label: 'Tile 3',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      label: 'Tile 4',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
+                    TestSemantics(
+                      label: 'Tile 5',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
+                    TestSemantics(
+                      label: 'Tile 6',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+
+    await tester.fling(find.text('Tile 2'), const Offset(0, -600), 2000);
+    await tester.pumpAndSettle();
+
+    expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'Hello',
+                      flags: <SemanticsFlag>[SemanticsFlag.isHeader, SemanticsFlag.namesRoute],
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
+                ),
+                TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
+                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                  scrollIndex: 10,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'Tile 7',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
+                    TestSemantics(
+                      label: 'Tile 8',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
+                    TestSemantics(
+                      label: 'Tile 9',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
+                    TestSemantics(
+                      label: 'Tile 10',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      label: 'Tile 11',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      label: 'Tile 12',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      label: 'Tile 13',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      label: 'Tile 14',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      label: 'Tile 15',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      label: 'Tile 16',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      label: 'Tile 17',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
+                    TestSemantics(
+                      label: 'Tile 18',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+  });
+
   testWidgets('Sliver appbars - floating and pinned - second app bar stacks below', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
@@ -22,12 +254,12 @@ void main() {
             data: const MediaQueryData(),
             child: CustomScrollView(
               controller: controller,
-              slivers: const <Widget>[
-                SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: Text('A')),
-                SliverAppBar(primary: false, pinned: true, title: Text('B')),
+              slivers: <Widget>[
+                const SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: Text('A')),
+                const SliverAppBar(primary: false, pinned: true, title: Text('B')),
                 SliverList(
                   delegate: SliverChildListDelegate(
-                    <Widget>[
+                    const <Widget>[
                       Text('C'),
                       Text('D'),
                       SizedBox(height: 500.0),
@@ -66,7 +298,7 @@ void main() {
     // initial position of E was 200 + 56 + cSize.height + cSize.height + 500
     // we've scrolled that up by 600.0, meaning it's at that minus 600 now:
     expect(tester.getTopLeft(find.text('E')), Offset(0.0, 200.0 + 56.0 + cSize.height * 2.0 + 500.0 - 600.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Does not crash when there is less than minExtent remainingPaintExtent', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/21887.
@@ -93,7 +325,7 @@ void main() {
                       height: 100.0,
                     );
                   })),
-                )
+                ),
               ],
             ),
           ),
@@ -111,5 +343,107 @@ void main() {
     expect(render.geometry.scrollExtent, 120.0);
     expect(render.geometry.paintExtent, availableHeight);
     expect(render.geometry.layoutExtent, 0.0);
+  });
+
+  testWidgets('Pinned and floating SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
+    const Key anchor = Key('drag');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Container(
+            height: 300,
+            color: Colors.green,
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: <Widget>[
+                const SliverAppBar(
+                  pinned: true,
+                  floating: true,
+                  expandedHeight: 100.0,
+                ),
+                SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),
+                SliverToBoxAdapter(child: Container(height: 600, color: Colors.green)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderSliverFloatingPinnedPersistentHeader render = tester.renderObject(find.byType(SliverAppBar));
+
+    const double scrollDistance = 40;
+    final TestGesture gesture = await tester.press(find.byKey(anchor));
+    await gesture.moveBy(const Offset(0, scrollDistance));
+    await tester.pump();
+
+    expect(render.geometry.paintOrigin, -scrollDistance);
+  });
+
+  testWidgets('Floating SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
+    const Key anchor = Key('drag');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Container(
+            height: 300,
+            color: Colors.green,
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: <Widget>[
+                const SliverAppBar(
+                  pinned: false,
+                  floating: true,
+                  expandedHeight: 100.0,
+                ),
+                SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),
+                SliverToBoxAdapter(child: Container(height: 600, color: Colors.green)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderSliverFloatingPersistentHeader render = tester.renderObject(find.byType(SliverAppBar));
+
+    const double scrollDistance = 40;
+    final TestGesture gesture = await tester.press(find.byKey(anchor));
+    await gesture.moveBy(const Offset(0, scrollDistance));
+    await tester.pump();
+
+    expect(render.geometry.paintOrigin, -scrollDistance);
+  });
+
+  testWidgets('Pinned SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
+    const Key anchor = Key('drag');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Container(
+            height: 300,
+            color: Colors.green,
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: <Widget>[
+                const SliverAppBar(
+                  pinned: true,
+                  floating: false,
+                  expandedHeight: 100.0,
+                ),
+                SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),
+                SliverToBoxAdapter(child: Container(height: 600, color: Colors.green)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderSliverPinnedPersistentHeader render = tester.renderObject(find.byType(SliverAppBar));
+
+    const double scrollDistance = 40;
+    final TestGesture gesture = await tester.press(find.byKey(anchor));
+    await gesture.moveBy(const Offset(0, scrollDistance));
+    await tester.pump();
+
+    expect(render.geometry.paintOrigin, -scrollDistance);
   });
 }

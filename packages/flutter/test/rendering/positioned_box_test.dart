@@ -11,7 +11,7 @@ void main() {
   test('RenderPositionedBox expands', () {
     final RenderConstrainedBox sizer = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
-      child: RenderDecoratedBox(decoration: const BoxDecoration())
+      child: RenderDecoratedBox(decoration: const BoxDecoration()),
     );
     final RenderPositionedBox positioner = RenderPositionedBox(child: sizer);
     layout(positioner, constraints: BoxConstraints.loose(const Size(200.0, 200.0)));
@@ -23,7 +23,7 @@ void main() {
   test('RenderPositionedBox shrink wraps', () {
     final RenderConstrainedBox sizer = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
-      child: RenderDecoratedBox(decoration: const BoxDecoration())
+      child: RenderDecoratedBox(decoration: const BoxDecoration()),
     );
     final RenderPositionedBox positioner = RenderPositionedBox(child: sizer, widthFactor: 1.0);
     layout(positioner, constraints: BoxConstraints.loose(const Size(200.0, 200.0)));
@@ -48,7 +48,7 @@ void main() {
   test('RenderPositionedBox width and height factors', () {
     final RenderConstrainedBox sizer = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
-      child: RenderDecoratedBox(decoration: const BoxDecoration())
+      child: RenderDecoratedBox(decoration: const BoxDecoration()),
     );
     final RenderPositionedBox positioner = RenderPositionedBox(child: sizer, widthFactor: 1.0, heightFactor: 0.0);
     layout(positioner, constraints: BoxConstraints.loose(const Size(200.0, 200.0)));
@@ -69,5 +69,5 @@ void main() {
 
     expect(positioner.size.width, equals(200.0));
     expect(positioner.size.height, equals(200.0));
-  });
+  }, skip: isBrowser);
 }

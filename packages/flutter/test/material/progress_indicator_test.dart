@@ -65,8 +65,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 50.0, 6.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 6.0)),
     );
 
     expect(tester.binding.transientCallbackCount, 0);
@@ -88,8 +88,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: Rect.fromLTRB(150.0, 0.0, 200.0, 6.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: const Rect.fromLTRB(150.0, 0.0, 200.0, 6.0)),
     );
 
     expect(tester.binding.transientCallbackCount, 0);
@@ -115,8 +115,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 6.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 6.0)),
     );
 
     expect(tester.binding.transientCallbackCount, 1);
@@ -142,8 +142,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: Rect.fromLTRB(200.0 - animationValue * 200.0, 0.0, 200.0, 6.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(200.0 - animationValue * 200.0, 0.0, 200.0, 6.0)),
     );
 
     expect(tester.binding.transientCallbackCount, 1);
@@ -169,8 +169,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 50.0, 6.0), color: Colors.white)
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 50.0, 6.0), color: Colors.white),
     );
   });
 
@@ -180,8 +180,8 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: CircularProgressIndicator(value: 0.0)
-        )
+          child: CircularProgressIndicator(value: 0.0),
+        ),
       )
     );
 
@@ -196,7 +196,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Center(
-        child: CircularProgressIndicator(value: null)
+        child: CircularProgressIndicator(value: null),
       )
     );
 
@@ -226,6 +226,26 @@ void main() {
     await tester.pumpWidget(const CircularProgressIndicator(strokeWidth: 16.0));
 
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
+  });
+
+  testWidgets('CircularProgressIndicator paint background color', (WidgetTester tester) async {
+    const Color green = Color(0xFF00FF00);
+    const Color blue = Color(0xFF0000FF);
+
+    await tester.pumpWidget(const CircularProgressIndicator(
+      valueColor: AlwaysStoppedAnimation<Color>(blue),
+    ));
+
+    expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
+    expect(find.byType(CircularProgressIndicator), paints..arc(color: blue));
+
+    await tester.pumpWidget(const CircularProgressIndicator(
+      backgroundColor: green,
+      valueColor: AlwaysStoppedAnimation<Color>(blue),
+    ));
+
+    expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 2));
+    expect(find.byType(CircularProgressIndicator), paints..arc(color: green)..arc(color: blue));
   });
 
   testWidgets('Indeterminate RefreshProgressIndicator keeps spinning until end of time (approximate)', (WidgetTester tester) async {
@@ -258,12 +278,15 @@ void main() {
     double progressValue;
     StateSetter setState;
     await tester.pumpWidget(
-      Center(
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setter) {
-            setState = setter;
-            return CircularProgressIndicator(value: progressValue);
-          }
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return CircularProgressIndicator(value: progressValue);
+            }
+          ),
         ),
       )
     );
@@ -294,8 +317,8 @@ void main() {
     expect(
         find.byType(LinearProgressIndicator),
         paints
-          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 100.0, 12.0))
-          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 25.0, 12.0))
+          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 12.0))
+          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 12.0)),
     );
     expect(tester.binding.transientCallbackCount, 0);
   });
@@ -316,8 +339,8 @@ void main() {
     expect(
         find.byType(LinearProgressIndicator),
         paints
-          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 100.0, 3.0))
-          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 25.0, 3.0))
+          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 3.0))
+          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 3.0)),
     );
     expect(tester.binding.transientCallbackCount, 0);
   });
@@ -338,8 +361,8 @@ void main() {
     expect(
         find.byType(LinearProgressIndicator),
         paints
-          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 100.0, 4.0))
-          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 25.0, 4.0))
+          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 4.0))
+          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 4.0)),
     );
     expect(tester.binding.transientCallbackCount, 0);
   });

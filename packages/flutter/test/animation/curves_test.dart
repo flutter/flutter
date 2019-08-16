@@ -46,6 +46,7 @@ void main() {
     assertMaximumSlope(Curves.linear, 20.0);
     assertMaximumSlope(Curves.decelerate, 20.0);
     assertMaximumSlope(Curves.fastOutSlowIn, 20.0);
+    assertMaximumSlope(Curves.slowMiddle, 20.0);
     assertMaximumSlope(Curves.bounceIn, 20.0);
     assertMaximumSlope(Curves.bounceOut, 20.0);
     assertMaximumSlope(Curves.bounceInOut, 20.0);
@@ -200,6 +201,47 @@ void main() {
 
     expect(() => Curves.bounceInOut.transform(-0.0001), throwsAssertionError);
     expect(() => Curves.bounceInOut.transform(1.0001), throwsAssertionError);
+  });
+
+  test('Curve transform method should return 0.0 for t=0.0 and 1.0 for t=1.0', () {
+    expect(const SawTooth(2).transform(0), 0);
+    expect(const SawTooth(2).transform(1), 1);
+
+    expect(const Interval(0, 1).transform(0), 0);
+    expect(const Interval(0, 1).transform(1), 1);
+
+    expect(const Threshold(0.5).transform(0), 0);
+    expect(const Threshold(0.5).transform(1), 1);
+
+    expect(const ElasticInCurve().transform(0), 0);
+    expect(const ElasticInCurve().transform(1), 1);
+
+    expect(const ElasticOutCurve().transform(0), 0);
+    expect(const ElasticOutCurve().transform(1), 1);
+
+    expect(const ElasticInOutCurve().transform(0), 0);
+    expect(const ElasticInOutCurve().transform(1), 1);
+
+    expect(Curves.linear.transform(0), 0);
+    expect(Curves.linear.transform(1), 1);
+
+    expect(Curves.easeInOutExpo.transform(0), 0);
+    expect(Curves.easeInOutExpo.transform(1), 1);
+
+    expect(const FlippedCurve(Curves.easeInOutExpo).transform(0), 0);
+    expect(const FlippedCurve(Curves.easeInOutExpo).transform(1), 1);
+
+    expect(Curves.decelerate.transform(0), 0);
+    expect(Curves.decelerate.transform(1), 1);
+
+    expect(Curves.bounceIn.transform(0), 0);
+    expect(Curves.bounceIn.transform(1), 1);
+
+    expect(Curves.bounceOut.transform(0), 0);
+    expect(Curves.bounceOut.transform(1), 1);
+
+    expect(Curves.bounceInOut.transform(0), 0);
+    expect(Curves.bounceInOut.transform(1), 1);
   });
 
 }

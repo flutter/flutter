@@ -124,7 +124,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
       showDescription = 'neither side (!)';
     }
     properties.add(MessageProperty('show', showDescription));
-    properties.add(DiagnosticsProperty<Color>('color', color, showName: false));
+    properties.add(ColorProperty('color', color, showName: false));
   }
 }
 

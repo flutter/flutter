@@ -1,11 +1,19 @@
 <<skip until matching line>>
 ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
 The following assertion was thrown running a test:
-Guarded function conflict\. You must use "await" with all Future-returning test APIs\.
-The guarded "guardedHelper" function was called from .*dev/automated_tests/flutter_test/test_async_utils_guarded_test\.dart on line [0-9]+\.
-Then, the "expect" function was called from .*dev/automated_tests/flutter_test/test_async_utils_guarded_test\.dart on line [0-9]+\.
-The first function \(guardedHelper\) had not yet finished executing at the time that the second function \(expect\) was called\. Since both are guarded, and the second was not a nested call inside the first, the first must complete its execution before the second can be called\. Typically, this is achieved by putting an "await" statement in front of the call to the first\.
-If you are confident that all test APIs are being called using "await", and this expect\(\) call is not being called at the top level but is itself being called from some sort of callback registered before the guardedHelper method was called, then consider using expectSync\(\) instead\.
+Guarded function conflict\.
+You must use "await" with all Future-returning test APIs\.
+The guarded "guardedHelper" function was called from
+.*dev/automated_tests/flutter_test/test_async_utils_guarded_test\.dart[ \n]on[ \n]line[ \n][0-9]+\.
+Then, the "expect" function was called from
+.*dev/automated_tests/flutter_test/test_async_utils_guarded_test\.dart[ \n]on[ \n]line[ \n][0-9]+\.
+The first function \(guardedHelper\) had not yet finished executing at the time that the second
+function \(expect\) was called\. Since both are guarded, and the second was not a nested call inside
+the first, the first must complete its execution before the second can be called\. Typically, this is
+achieved by putting an "await" statement in front of the call to the first\.
+If you are confident that all test APIs are being called using "await", and this expect\(\) call is
+not being called at the top level but is itself being called from some sort of callback registered
+before the guardedHelper method was called, then consider using expectSync\(\) instead\.
 
 When the first function \(guardedHelper\) was called, this was the stack:
 <<skip until matching line>>

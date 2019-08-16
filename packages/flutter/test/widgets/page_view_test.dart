@@ -81,8 +81,7 @@ void main() {
     expect(find.text('Arizona'), findsNothing);
   });
 
-  testWidgets('PageView does not squish when overscrolled',
-      (WidgetTester tester) async {
+  testWidgets('PageView does not squish when overscrolled', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
       home: PageView(
@@ -172,7 +171,7 @@ void main() {
           child: PageView(
             children: kStates.map<Widget>((String state) => Text(state)).toList(),
           ),
-        )
+        ),
       ),
     ));
 
@@ -332,7 +331,7 @@ void main() {
     final List<int> log = <int>[];
     final PageController controller = PageController(viewportFraction: 0.9);
 
-    Widget build(PageController controller, {Size size}) {
+    Widget build(PageController controller, { Size size }) {
       final Widget pageView = Directionality(
         textDirection: TextDirection.ltr,
         child: PageView(
@@ -566,8 +565,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-100.0, 0.0));
   });
 
-  testWidgets('PageView does not report page changed on overscroll',
-      (WidgetTester tester) async {
+  testWidgets('PageView does not report page changed on overscroll', (WidgetTester tester) async {
     final PageController controller = PageController(
       initialPage: kStates.length - 1,
     );
@@ -594,8 +592,7 @@ void main() {
     expect(changeIndex, 0);
   });
 
-  testWidgets('PageView can restore page',
-      (WidgetTester tester) async {
+  testWidgets('PageView can restore page', (WidgetTester tester) async {
     final PageController controller = PageController();
     try {
       controller.page;
@@ -690,7 +687,7 @@ void main() {
               child: Text('Page #$i'),
               container: true,
             );
-          })
+          }),
         ),
     ));
     expect(controller.page, 0);
@@ -730,5 +727,25 @@ void main() {
       pixels: page.pixels - 100.0,
     );
     expect(page2.page, 4.0);
+  });
+
+  testWidgets('Page controller can handle rounding issue', (WidgetTester tester) async {
+    final PageController pageController = PageController();
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+        controller: pageController,
+        children: List<Widget>.generate(3, (int i) {
+          return Semantics(
+            child: Text('Page #$i'),
+            container: true,
+          );
+        }),
+      ),
+    ));
+    // Simulate precision error.
+    pageController.position.jumpTo(799.99999999999);
+    expect(pageController.page, 1);
   });
 }

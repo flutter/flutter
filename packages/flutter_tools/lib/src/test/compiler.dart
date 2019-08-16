@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as prefix0;
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
@@ -14,13 +15,13 @@ import '../dart/package_map.dart';
 import '../globals.dart';
 
 class _CompilationRequest {
-  _CompilationRequest(this.path, this.result, {List<String> invalidatedFiles = const <String>[]}) {
-    this.invalidatedFiles = <String>[path];
+  _CompilationRequest(this.path, this.result, {List<Uri> invalidatedFiles = const <Uri>[]}) {
+    this.invalidatedFiles = <Uri>[Uri.parse(path)];
     this.invalidatedFiles.addAll(invalidatedFiles);
   }
   String path;
   Completer<String> result;
-  List<String> invalidatedFiles;
+  List<Uri> invalidatedFiles;
 }
 
 // This class is a wrapper around compiler that allows multiple isolates to
@@ -134,7 +135,7 @@ class TestCompiler {
   final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
   ResidentCompiler compiler;
 
-  Future<String> compile(String mainDart, {List<String> invalidatedFiles = const <String>[]}) {
+  Future<String> compile(String mainDart, {List<Uri> invalidatedFiles = const <Uri>[]}) {
     final Completer<String> completer = Completer<String>();
     compilerController.add(
       _CompilationRequest(

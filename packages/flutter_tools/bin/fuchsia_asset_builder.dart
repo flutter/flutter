@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
-import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/asset.dart' hide defaultManifestPath;
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' as libfs;
 import 'package:flutter_tools/src/base/io.dart';
@@ -13,10 +13,9 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:flutter_tools/src/disabled_usage.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/globals.dart';
-import 'package:flutter_tools/src/usage.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 
 const String _kOptionPackages = 'packages';
 const String _kOptionAsset = 'asset-dir';

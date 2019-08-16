@@ -222,7 +222,7 @@ List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
 
       final _Transform subtreeTransform = _Transform(
         transformMatrix: transformMatrix,
-        opacity: opacity
+        opacity: opacity,
       );
       paths.addAll(_interpretSvgGroup(element.children, subtreeTransform));
     }
@@ -252,7 +252,7 @@ List<Point<double>> parsePoints(String points) {
     final Match m = _pointMatcher.firstMatch(unParsed);
     result.add(Point<double>(
         double.parse(m.group(1)),
-        double.parse(m.group(2))
+        double.parse(m.group(2)),
     ));
     unParsed = m.group(3);
   }

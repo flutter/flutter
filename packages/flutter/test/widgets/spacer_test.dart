@@ -68,6 +68,6 @@ void main() {
     final Rect flexRect = tester.getRect(find.byType(Column));
     expect(spacerRect.size, const Size(0.0, 580.0));
     expect(spacerRect.topLeft, const Offset(400.0, 10.0));
-    expect(flexRect, Rect.fromLTWH(390.0, 0.0, 20.0, 600.0));
+    expect(flexRect, const Rect.fromLTWH(390.0, 0.0, 20.0, 600.0));
   });
 }

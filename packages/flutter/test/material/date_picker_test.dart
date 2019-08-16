@@ -445,6 +445,7 @@ void _tests() {
               TestSemantics(
                 children: <TestSemantics>[
                   TestSemantics(
+                    id: 55,
                     actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight],
                     children: <TestSemantics>[
                       TestSemantics(
@@ -452,7 +453,22 @@ void _tests() {
                           TestSemantics(
                             children: <TestSemantics>[
                               TestSemantics(
+                                id: 11,
+                                flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                                 children: <TestSemantics>[
+                                  // TODO(dnfield): These shouldn't be here. https://github.com/flutter/flutter/issues/34431
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
                                   TestSemantics(
                                     actions: <SemanticsAction>[SemanticsAction.tap],
                                     label: '1, Friday, January 1, 2016',
@@ -701,7 +717,7 @@ void _tests() {
 
     // Initial chevron animation state should be dismissed
     // An AlwaysStoppedAnimation is also found and is ignored
-    for(RenderAnimatedOpacity renderer in chevronRenderers) {
+    for (RenderAnimatedOpacity renderer in chevronRenderers) {
       expect(renderer.opacity.value, equals(1.0));
       expect(renderer.opacity.status, equals(AnimationStatus.dismissed));
     }
@@ -710,7 +726,7 @@ void _tests() {
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     await gesture.moveBy(const Offset(50.0, 100.0));
     await tester.pumpAndSettle();
-    for(RenderAnimatedOpacity renderer in chevronRenderers) {
+    for (RenderAnimatedOpacity renderer in chevronRenderers) {
       expect(renderer.opacity.value, equals(0.0));
       expect(renderer.opacity.status, equals(AnimationStatus.completed));
     }
@@ -718,7 +734,7 @@ void _tests() {
     // Release the drag and test for the opacity to return to original value
     await gesture.up();
     await tester.pumpAndSettle();
-    for(RenderAnimatedOpacity renderer in chevronRenderers) {
+    for (RenderAnimatedOpacity renderer in chevronRenderers) {
       expect(renderer.opacity.value, equals(1.0));
       expect(renderer.opacity.status, equals(AnimationStatus.dismissed));
     }
@@ -773,4 +789,88 @@ void _tests() {
     // button and the right edge of the 800 wide window.
     expect(tester.getBottomLeft(find.text('OK')).dx, 800 - ltrOkRight);
   });
+
+  group('screen configurations', () {
+    // Test various combinations of screen sizes, orientations and text scales
+    // to ensure the layout doesn't overflow and cause an exception to be thrown.
+
+    // Regression tests for https://github.com/flutter/flutter/issues/21383
+    // Regression tests for https://github.com/flutter/flutter/issues/19744
+    // Regression tests for https://github.com/flutter/flutter/issues/17745
+
+    // Common screen size roughly based on a Pixel 1
+    const Size kCommonScreenSizePortrait = Size(1070, 1770);
+    const Size kCommonScreenSizeLandscape = Size(1770, 1070);
+
+    // Small screen size based on a LG K130
+    const Size kSmallScreenSizePortrait = Size(320, 521);
+    const Size kSmallScreenSizeLandscape = Size(521, 320);
+
+    Future<void> _showPicker(WidgetTester tester, Size size, [double textScaleFactor = 1.0]) async {
+      tester.binding.window.physicalSizeTestValue = size;
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                child: const Text('X'),
+                onPressed: () {
+                  showDatePicker(
+                    context: context,
+                    initialDate: initialDate,
+                    firstDate: firstDate,
+                    lastDate: lastDate,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      );
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('common screen size - portrait', (WidgetTester tester) async {
+      await _showPicker(tester, kCommonScreenSizePortrait);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('common screen size - landscape', (WidgetTester tester) async {
+      await _showPicker(tester, kCommonScreenSizeLandscape);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('common screen size - portrait - textScale 1.3', (WidgetTester tester) async {
+      await _showPicker(tester, kCommonScreenSizePortrait, 1.3);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('common screen size - landscape - textScale 1.3', (WidgetTester tester) async {
+      await _showPicker(tester, kCommonScreenSizeLandscape, 1.3);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('small screen size - portrait', (WidgetTester tester) async {
+      await _showPicker(tester, kSmallScreenSizePortrait);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('small screen size - landscape', (WidgetTester tester) async {
+      await _showPicker(tester, kSmallScreenSizeLandscape);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('small screen size - portrait -textScale 1.3', (WidgetTester tester) async {
+      await _showPicker(tester, kSmallScreenSizePortrait, 1.3);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('small screen size - landscape - textScale 1.3', (WidgetTester tester) async {
+      await _showPicker(tester, kSmallScreenSizeLandscape, 1.3);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
 }

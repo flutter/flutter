@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('BorderRadius control test', () {
-    final Rect rect = Rect.fromLTRB(19.0, 23.0, 29.0, 31.0);
+    const Rect rect = Rect.fromLTRB(19.0, 23.0, 29.0, 31.0);
     BorderRadius borderRadius;
 
     borderRadius = const BorderRadius.all(Radius.elliptical(5.0, 7.0));
@@ -162,7 +162,7 @@ void main() {
   });
 
   test('BorderRadiusDirectional control test', () {
-    final Rect rect = Rect.fromLTRB(19.0, 23.0, 29.0, 31.0);
+    const Rect rect = Rect.fromLTRB(19.0, 23.0, 29.0, 31.0);
     BorderRadiusDirectional borderRadius;
 
     borderRadius = const BorderRadiusDirectional.all(Radius.elliptical(5.0, 7.0));

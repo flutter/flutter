@@ -17,7 +17,7 @@ void main() {
       decoration: const BoxDecoration(
         color: Color(0xFFFF0000),
       ),
-      child: size
+      child: size,
     );
 
     final RenderBox green = RenderDecoratedBox(

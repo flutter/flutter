@@ -82,7 +82,7 @@ void main() {
     });
 
     group('compare', () {
-      Future<bool> doComparison([String golden = 'golden.png']) {
+      Future<bool> doComparison([ String golden = 'golden.png' ]) {
         final Uri uri = fs.file(fix(golden)).uri;
         return comparator.compare(
           Uint8List.fromList(_kExpectedBytes),
@@ -180,6 +180,19 @@ void main() {
         await comparator.update(fs.file('foo.png').uri, Uint8List.fromList(newBytes));
         expect(fs.file(fix('/foo.png')).existsSync(), isTrue);
         expect(fs.file(fix('/foo.png')).readAsBytesSync(), newBytes);
+      });
+    });
+
+    group('getTestUri', () {
+      test('updates file name with version number', () {
+        final Uri key = Uri.parse('foo.png');
+        final Uri key1 = comparator.getTestUri(key, 1);
+        expect(key1, Uri.parse('foo.1.png'));
+      });
+      test('does nothing for null version number', () {
+        final Uri key = Uri.parse('foo.png');
+        final Uri keyNull = comparator.getTestUri(key, null);
+        expect(keyNull, Uri.parse('foo.png'));
       });
     });
   });

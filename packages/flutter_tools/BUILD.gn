@@ -14,33 +14,43 @@ dart_library("flutter_tools") {
   disable_analysis = true
 
   deps = [
-    "//third_party/dart/pkg/analyzer",
-    "//third_party/dart/third_party/pkg/linter",
+    "//third_party/dart-pkg/pub/analyzer",
     "//third_party/dart-pkg/pub/archive",
     "//third_party/dart-pkg/pub/args",
+    "//third_party/dart-pkg/pub/build_daemon",
     "//third_party/dart-pkg/pub/build_runner_core",
     "//third_party/dart-pkg/pub/collection",
     "//third_party/dart-pkg/pub/completion",
     "//third_party/dart-pkg/pub/coverage",
     "//third_party/dart-pkg/pub/crypto",
+    "//third_party/dart-pkg/pub/dwds",
     "//third_party/dart-pkg/pub/file",
     # The HTTP dependency is removed because http doesn't work on Fuchsia
     # because it uses mirrors which Fuchsia's Dart VM doesn't support.
     "//third_party/dart-pkg/pub/json_rpc_2",
     "//third_party/dart-pkg/pub/json_schema",
+    "//third_party/dart-pkg/pub/linter",
     "//third_party/dart-pkg/pub/meta",
+    "//third_party/dart-pkg/pub/mime",
+    "//third_party/dart-pkg/pub/multi_server_socket",
+    "//third_party/dart-pkg/pub/multicast_dns",
     "//third_party/dart-pkg/pub/mustache",
     "//third_party/dart-pkg/pub/package_config",
     "//third_party/dart-pkg/pub/path",
     "//third_party/dart-pkg/pub/platform",
     "//third_party/dart-pkg/pub/process",
+    "//third_party/dart-pkg/pub/protobuf",
     "//third_party/dart-pkg/pub/quiver",
+    "//third_party/dart-pkg/pub/shelf_packages_handler",
+    "//third_party/dart-pkg/pub/shelf_static",
     "//third_party/dart-pkg/pub/stack_trace",
     "//third_party/dart-pkg/pub/test",
     "//third_party/dart-pkg/pub/usage",
     "//third_party/dart-pkg/pub/web_socket_channel",
+    "//third_party/dart-pkg/pub/webkit_inspection_protocol",
     "//third_party/dart-pkg/pub/xml",
     "//third_party/dart-pkg/pub/yaml",
+    "//third_party/dart-pkg/pub/node_preamble",
   ]
 }
 
@@ -249,5 +259,9 @@ dart_tool("fuchsia_attach") {
 
   deps = [
     ":flutter_tools",
+  ]
+
+  non_dart_deps = [
+    "//third_party/flutter/frontend_server:frontend_server_tool_snapshot($host_toolchain)",
   ]
 }

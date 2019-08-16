@@ -47,8 +47,8 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
                           });
                         },
                       ),
-                      const Text(
-                        'Active'
+                      Text(
+                        "Enabled - ${_switchValue ? "On" : "Off"}"
                       ),
                     ],
                   ),
@@ -62,7 +62,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
                         onChanged: null,
                       ),
                       Text(
-                        'Disabled'
+                        'Disabled - On'
                       ),
                     ],
                   ),
@@ -76,7 +76,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
                         onChanged: null,
                       ),
                       Text(
-                        'Disabled'
+                        'Disabled - Off'
                       ),
                     ],
                   ),

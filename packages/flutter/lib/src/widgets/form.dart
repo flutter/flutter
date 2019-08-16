@@ -15,6 +15,54 @@ import 'will_pop_scope.dart';
 /// descendant of this [Form]. To obtain the [FormState], you may use [Form.of]
 /// with a context whose ancestor is the [Form], or pass a [GlobalKey] to the
 /// [Form] constructor and call [GlobalKey.currentState].
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+/// This example shows a [Form] with one [TextFormField] and a [RaisedButton]. A
+/// [GlobalKey] is used here to identify the [Form] and validate input.
+///
+/// ```dart
+/// final _formKey = GlobalKey<FormState>();
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Form(
+///     key: _formKey,
+///     child: Column(
+///       crossAxisAlignment: CrossAxisAlignment.start,
+///       children: <Widget>[
+///         TextFormField(
+///           validator: (value) {
+///             if (value.isEmpty) {
+///               return 'Please enter some text';
+///             }
+///             return null;
+///           },
+///         ),
+///         Padding(
+///           padding: const EdgeInsets.symmetric(vertical: 16.0),
+///           child: RaisedButton(
+///             onPressed: () {
+///               // Validate will return true if the form is valid, or false if
+///               // the form is invalid.
+///               if (_formKey.currentState.validate()) {
+///                 // Process data.
+///               }
+///             },
+///             child: Text('Submit'),
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [GlobalKey], a key that is unique across the entire app.
+///  * [FormField], a single form field widget that maintains the current state.
+///  * [TextFormField], a convenience widget that wraps a [TextField] widget in a [FormField].
 class Form extends StatefulWidget {
   /// Creates a container for form fields.
   ///
@@ -83,7 +131,7 @@ class Form extends StatefulWidget {
 /// Typically obtained via [Form.of].
 class FormState extends State<Form> {
   int _generation = 0;
-  final Set<FormFieldState<dynamic>> _fields = Set<FormFieldState<dynamic>>();
+  final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
@@ -162,7 +210,7 @@ class _FormScope extends InheritedWidget {
     Key key,
     Widget child,
     FormState formState,
-    int generation
+    int generation,
   }) : _formState = formState,
        _generation = generation,
        super(key: key, child: child);
@@ -181,6 +229,9 @@ class _FormScope extends InheritedWidget {
 }
 
 /// Signature for validating a form field.
+///
+/// Returns an error string to display if the input is invalid, or null
+/// otherwise.
 ///
 /// Used by [FormField.validator].
 typedef FormFieldValidator<T> = String Function(T value);
@@ -241,6 +292,13 @@ class FormField<T> extends StatefulWidget {
   /// The returned value is exposed by the [FormFieldState.errorText] property.
   /// The [TextFormField] uses this to override the [InputDecoration.errorText]
   /// value.
+  ///
+  /// Alternating between error and normal state can cause the height of the
+  /// [TextFormField] to change if no other subtext decoration is set on the
+  /// field. To create a field whose height is fixed regardless of whether or
+  /// not an error is displayed, either wrap the  [TextFormField] in a fixed
+  /// height parent like [SizedBox], or set the [TextFormField.helperText]
+  /// parameter to a space.
   final FormFieldValidator<T> validator;
 
   /// Function that returns the widget representing this form field. It is
@@ -254,7 +312,7 @@ class FormField<T> extends StatefulWidget {
   /// If true, this form field will validate and update its error text
   /// immediately after every change. Otherwise, you must call
   /// [FormFieldState.validate] to validate. If part of a [Form] that
-  /// autovalidates, this value will be ignored.
+  /// auto-validates, this value will be ignored.
   final bool autovalidate;
 
   /// Whether the form is able to receive user input.
@@ -308,10 +366,9 @@ class FormFieldState<T> extends State<FormField<T>> {
     return !hasError;
   }
 
-  bool _validate() {
+  void _validate() {
     if (widget.validator != null)
       _errorText = widget.validator(_value);
-    return !hasError;
   }
 
   /// Updates this field's state to the new value. Useful for responding to

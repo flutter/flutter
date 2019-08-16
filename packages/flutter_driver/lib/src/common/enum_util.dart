@@ -20,11 +20,11 @@ class EnumIndex<E> {
   EnumIndex(List<E> enumValues)
     : _nameToValue = Map<String, E>.fromIterable(
         enumValues,
-        key: _getSimpleName
+        key: _getSimpleName,
       ),
       _valueToName = Map<E, String>.fromIterable(
         enumValues,
-        value: _getSimpleName
+        value: _getSimpleName,
       );
 
   final Map<String, E> _nameToValue;

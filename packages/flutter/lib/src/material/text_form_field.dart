@@ -29,6 +29,9 @@ import 'theme.dart';
 /// If a [controller] is not specified, [initialValue] can be used to give
 /// the automatically generated controller an initial value.
 ///
+/// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
+/// This will ensure we discard any resources used by the object.
+///
 /// For a documentation about the various parameters, see [TextField].
 ///
 /// {@tool sample}
@@ -60,6 +63,7 @@ import 'theme.dart';
 ///    integration.
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
   ///
@@ -80,15 +84,23 @@ class TextFormField extends FormField<String> {
     TextCapitalization textCapitalization = TextCapitalization.none,
     TextInputAction textInputAction,
     TextStyle style,
+    StrutStyle strutStyle,
     TextDirection textDirection,
     TextAlign textAlign = TextAlign.start,
     bool autofocus = false,
+    bool readOnly = false,
+    ToolbarOptions toolbarOptions,
+    bool showCursor,
     bool obscureText = false,
     bool autocorrect = true,
     bool autovalidate = false,
     bool maxLengthEnforced = true,
     int maxLines = 1,
+    int minLines,
+    bool expands = false,
     int maxLength,
+    ValueChanged<String> onChanged,
+    GestureTapCallback onTap,
     VoidCallback onEditingComplete,
     ValueChanged<String> onFieldSubmitted,
     FormFieldSetter<String> onSaved,
@@ -105,12 +117,23 @@ class TextFormField extends FormField<String> {
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
+       assert(readOnly != null),
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(autovalidate != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
+       assert(minLines == null || minLines > 0),
+       assert(
+         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+         'minLines can\'t be greater than maxLines',
+       ),
+       assert(expands != null),
+       assert(
+         !expands || (maxLines == null && minLines == null),
+         'minLines and maxLines must be null when expands is true.',
+       ),
        assert(maxLength == null || maxLength > 0),
        assert(enableInteractiveSelection != null),
        super(
@@ -124,6 +147,12 @@ class TextFormField extends FormField<String> {
       final _TextFormFieldState state = field;
       final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
         .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+      void onChangedHandler(String value) {
+        if (onChanged != null) {
+          onChanged(value);
+        }
+        field.didChange(value);
+      }
       return TextField(
         controller: state._effectiveController,
         focusNode: focusNode,
@@ -131,16 +160,23 @@ class TextFormField extends FormField<String> {
         keyboardType: keyboardType,
         textInputAction: textInputAction,
         style: style,
+        strutStyle: strutStyle,
         textAlign: textAlign,
         textDirection: textDirection,
         textCapitalization: textCapitalization,
         autofocus: autofocus,
+        toolbarOptions: toolbarOptions,
+        readOnly: readOnly,
+        showCursor: showCursor,
         obscureText: obscureText,
         autocorrect: autocorrect,
         maxLengthEnforced: maxLengthEnforced,
         maxLines: maxLines,
+        minLines: minLines,
+        expands: expands,
         maxLength: maxLength,
-        onChanged: field.didChange,
+        onChanged: onChangedHandler,
+        onTap: onTap,
         onEditingComplete: onEditingComplete,
         onSubmitted: onFieldSubmitted,
         inputFormatters: inputFormatters,

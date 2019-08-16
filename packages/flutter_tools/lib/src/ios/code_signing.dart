@@ -46,7 +46,7 @@ It's also possible that a previously installed app with the same Bundle\u0020
 Identifier was signed with a different certificate.
 
 For more information, please visit:
-  https://flutter.io/setup/#deploy-to-ios-devices
+  https://flutter.dev/setup/#deploy-to-ios-devices
 
 Or run on an iOS simulator without code signing
 ════════════════════════════════════════════════════════════════════════════════''';
@@ -60,7 +60,7 @@ Provisioning Profile. Please ensure that a Development Team is selected by:
 $fixWithDevelopmentTeamInstruction
 
 For more information, please visit:
-  https://flutter.io/setup/#deploy-to-ios-devices
+  https://flutter.dev/setup/#deploy-to-ios-devices
 
 Or run on an iOS simulator without code signing
 ════════════════════════════════════════════════════════════════════════════════''';
@@ -79,7 +79,7 @@ const String fixWithDevelopmentTeamInstruction = '''
 
 
 final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern =
-    RegExp(r'^\s*\d+\).+"(.+Developer.+)"$');
+    RegExp(r'^\s*\d+\).+"(.+Develop(ment|er).+)"$');
 final RegExp _securityFindIdentityCertificateCnExtractionPattern = RegExp(r'.*\(([a-zA-Z0-9]+)\)');
 final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-zA-Z0-9]+)');
 
@@ -94,8 +94,8 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-z
 /// project has a development team set in the project's build settings.
 Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   BuildableIOSApp iosApp,
-  bool usesTerminalUi = true
-}) async{
+  bool usesTerminalUi = true,
+}) async {
   final Map<String, String> buildSettings = iosApp.project.buildSettings;
   if (buildSettings == null)
     return null;
@@ -120,7 +120,16 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
 
   const List<String> findIdentityCommand =
       <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
-  final List<String> validCodeSigningIdentities = runCheckedSync(findIdentityCommand)
+
+  String findIdentityStdout;
+  try {
+    findIdentityStdout = runCheckedSync(findIdentityCommand);
+  } catch (error) {
+    printTrace('Unexpected failure from find-identity: $error.');
+    return null;
+  }
+
+  final List<String> validCodeSigningIdentities = findIdentityStdout
       .split('\n')
       .map<String>((String outputLine) {
         return _securityFindIdentityDeveloperIdentityExtractionPattern
@@ -148,12 +157,18 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   if (signingCertificateId == null)
     return null;
 
-  final String signingCertificate = runCheckedSync(
-    <String>['security', 'find-certificate', '-c', signingCertificateId, '-p']
-  );
+  String signingCertificateStdout;
+  try {
+    signingCertificateStdout = runCheckedSync(
+      <String>['security', 'find-certificate', '-c', signingCertificateId, '-p']
+    );
+  } catch (error) {
+    printTrace('Couldn\'t find the certificate: $error.');
+    return null;
+  }
 
   final Process opensslProcess = await runCommand(const <String>['openssl', 'x509', '-subject']);
-  await (opensslProcess.stdin..write(signingCertificate)).close();
+  await (opensslProcess.stdin..write(signingCertificateStdout)).close();
 
   final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);
   // Fire and forget discard of the stderr stream so we don't hold onto resources.
@@ -163,7 +178,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   if (await opensslProcess.exitCode != 0)
     return null;
 
-  return <String, String> {
+  return <String, String>{
     'DEVELOPMENT_TEAM': _certificateOrganizationalUnitExtractionPattern
       .firstMatch(opensslOutput)
       ?.group(1),
@@ -187,8 +202,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, b
       if (validCodeSigningIdentities.contains(savedCertChoice)) {
         printStatus('Found saved certificate choice "$savedCertChoice". To clear, use "flutter config".');
         return savedCertChoice;
-      }
-      else {
+      } else {
         printError('Saved signing certificate "$savedCertChoice" is not a valid development certificate');
       }
     }

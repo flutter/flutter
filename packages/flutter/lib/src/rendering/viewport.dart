@@ -10,7 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
 import 'sliver.dart';
@@ -68,7 +67,7 @@ abstract class RenderAbstractViewport extends RenderObject {
   /// See also:
   ///
   ///  * [RevealedOffset], which describes the return value of this method.
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect});
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect rect });
 
   /// The default value for the cache extent of the viewport.
   ///
@@ -558,7 +557,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     double mainAxisPosition, crossAxisPosition;
     switch (axis) {
       case Axis.vertical:
@@ -572,12 +571,25 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     }
     assert(mainAxisPosition != null);
     assert(crossAxisPosition != null);
+    final SliverHitTestResult sliverResult = SliverHitTestResult.wrap(result);
     for (RenderSliver child in childrenInHitTestOrder) {
-      if (child.geometry.visible && child.hitTest(
-        result,
-        mainAxisPosition: computeChildMainAxisPosition(child, mainAxisPosition),
-        crossAxisPosition: crossAxisPosition
-      )) {
+      if (!child.geometry.visible) {
+        continue;
+      }
+      final Matrix4 transform = Matrix4.identity();
+      applyPaintTransform(child, transform);
+      final bool isHit = result.addWithPaintTransform(
+        transform: transform,
+        position: null, // Manually adapting from box to sliver position below.
+        hitTest: (BoxHitTestResult result, Offset _) {
+          return child.hitTest(
+            sliverResult,
+            mainAxisPosition: computeChildMainAxisPosition(child, mainAxisPosition),
+            crossAxisPosition: crossAxisPosition,
+          );
+        },
+      );
+      if (isHit) {
         return true;
       }
     }
@@ -585,7 +597,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect rect }) {
     double leadingScrollOffset = 0.0;
     double targetMainAxisExtent;
     rect ??= target.paintBounds;

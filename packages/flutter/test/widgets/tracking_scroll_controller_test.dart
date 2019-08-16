@@ -6,8 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('TrackingScrollController saves offset',
-      (WidgetTester tester) async {
+  testWidgets('TrackingScrollController saves offset', (WidgetTester tester) async {
     final TrackingScrollController controller = TrackingScrollController();
     const double listItemHeight = 100.0;
 

@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 void main() {
   test('AnimationLocalStatusListenersMixin with AnimationLazyListenerMixin - removing unregistered listener is no-op', () {
     final _TestAnimationLocalStatusListeners uut = _TestAnimationLocalStatusListeners();
-    final AnimationStatusListener fakeListener = (AnimationStatus status) {};
+    final AnimationStatusListener fakeListener = (AnimationStatus status) { };
     uut.removeStatusListener(fakeListener);
     expect(uut.callsToStart, 0);
     expect(uut.callsToStop, 0);
@@ -17,7 +17,7 @@ void main() {
 
   test('AnimationLocalListenersMixin with AnimationLazyListenerMixin - removing unregistered listener is no-op', () {
     final _TestAnimationLocalListeners uut = _TestAnimationLocalListeners();
-    final VoidCallback fakeListener = () {};
+    final VoidCallback fakeListener = () { };
     uut.removeListener(fakeListener);
     expect(uut.callsToStart, 0);
     expect(uut.callsToStop, 0);

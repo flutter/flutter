@@ -49,7 +49,7 @@ List<Color> indicatorColors(WidgetTester tester) {
   final Iterable<TabPageSelectorIndicator> indicators = tester.widgetList(
     find.descendant(
       of: find.byType(TabPageSelector),
-      matching: find.byType(TabPageSelectorIndicator)
+      matching: find.byType(TabPageSelectorIndicator),
     )
   );
   return indicators.map<Color>((TabPageSelectorIndicator indicator) => indicator.backgroundColor).toList();

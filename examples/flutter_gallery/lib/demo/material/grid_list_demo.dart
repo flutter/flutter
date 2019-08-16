@@ -121,7 +121,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
     final double distance = (Offset.zero & context.size).shortestSide;
     _flingAnimation = _controller.drive(Tween<Offset>(
       begin: _offset,
-      end: _clampOffset(_offset + direction * distance)
+      end: _clampOffset(_offset + direction * distance),
     ));
     _controller
       ..value = 0.0
@@ -155,7 +155,7 @@ class GridDemoPhotoItem extends StatelessWidget {
     Key key,
     @required this.photo,
     @required this.tileStyle,
-    @required this.onBannerTap
+    @required this.onBannerTap,
   }) : assert(photo != null && photo.isValid),
        assert(tileStyle != null),
        assert(onBannerTap != null),
@@ -170,7 +170,7 @@ class GridDemoPhotoItem extends StatelessWidget {
       builder: (BuildContext context) {
         return Scaffold(
           appBar: AppBar(
-            title: Text(photo.title)
+            title: Text(photo.title),
           ),
           body: SizedBox.expand(
             child: Hero(
@@ -194,8 +194,8 @@ class GridDemoPhotoItem extends StatelessWidget {
           photo.assetName,
           package: photo.assetPackage,
           fit: BoxFit.cover,
-        )
-      )
+        ),
+      ),
     );
 
     final IconData icon = photo.isFavorite ? Icons.star : Icons.star_border;
@@ -382,7 +382,7 @@ class GridListDemoState extends State<GridListDemo> {
                       setState(() {
                         photo.isFavorite = !photo.isFavorite;
                       });
-                    }
+                    },
                   );
                 }).toList(),
               ),

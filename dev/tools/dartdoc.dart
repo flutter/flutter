@@ -49,8 +49,13 @@ Future<void> main(List<String> arguments) async {
   // Create the pubspec.yaml file.
   final StringBuffer buf = StringBuffer();
   buf.writeln('name: Flutter');
-  buf.writeln('homepage: https://flutter.io');
-  buf.writeln('version: $version');
+  buf.writeln('homepage: https://flutter.dev');
+  // TODO(dnfield): We should make DartDoc able to avoid emitting this. If we
+  // use the real value here, every file will get marked as new instead of only
+  // files that have otherwise changed. Instead, we replace it dynamically using
+  // JavaScript so that fewer files get marked as changed.
+  // https://github.com/dart-lang/dartdoc/issues/1982
+  buf.writeln('version: 0.0.0');
   buf.writeln('dependencies:');
   for (String package in findPackageNames()) {
     buf.writeln('  $package:');
@@ -98,7 +103,7 @@ Future<void> main(List<String> arguments) async {
   if (code != 0)
     exit(code);
 
-  createFooter('$kDocsRoot/lib/footer.html');
+  createFooter('$kDocsRoot/lib/', version);
   copyAssets();
   createSearchMetadata('$kDocsRoot/lib/opensearch.xml', '$kDocsRoot/doc/opensearch.xml');
   cleanOutSnippets();
@@ -112,11 +117,13 @@ Future<void> main(List<String> arguments) async {
   // Verify which version of dartdoc we're using.
   final ProcessResult result = Process.runSync(
     pubExecutable,
-    <String>[]..addAll(dartdocBaseArgs)..add('--version'),
+    <String>[...dartdocBaseArgs, '--version'],
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
   );
   print('\n${result.stdout}flutter version: $version\n');
+
+  dartdocBaseArgs.add('--allow-tools');
 
   if (args['json']) {
     dartdocBaseArgs.add('--json');
@@ -128,11 +135,12 @@ Future<void> main(List<String> arguments) async {
   }
   dartdocBaseArgs.addAll(<String>['--link-to-source-excludes', '../../bin/cache',
                                   '--link-to-source-root', '../..',
-                                  '--link-to-source-uri-template', 'https://github.com/flutter/flutter/blob/${gitRevision()}/%f%#L%l%']);
+                                  '--link-to-source-uri-template', 'https://github.com/flutter/flutter/blob/master/%f%#L%l%']);
   // Generate the documentation.
   // We don't need to exclude flutter_tools in this list because it's not in the
   // recursive dependencies of the package defined at dev/docs/pubspec.yaml
-  final List<String> dartdocArgs = <String>[]..addAll(dartdocBaseArgs)..addAll(<String>[
+  final List<String> dartdocArgs = <String>[
+    ...dartdocBaseArgs,
     '--inject-html',
     '--header', 'styles.html',
     '--header', 'analytics.html',
@@ -140,7 +148,8 @@ Future<void> main(List<String> arguments) async {
     '--header', 'snippets.html',
     '--header', 'opensearch.html',
     '--footer-text', 'lib/footer.html',
-    '--allow-warnings-in-packages', <String>[
+    '--allow-warnings-in-packages',
+    <String>[
       'Flutter',
       'flutter',
       'platform_integration',
@@ -193,7 +202,7 @@ Future<void> main(List<String> arguments) async {
     '--favicon=favicon.ico',
     '--package-order', 'flutter,Dart,platform_integration,flutter_test,flutter_driver',
     '--auto-include-dependencies',
-  ]);
+  ];
 
   String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
   print('Executing: (cd $kDocsRoot ; $pubExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
@@ -264,15 +273,24 @@ String gitRevision() {
   return gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
 }
 
-void createFooter(String footerPath) {
+void createFooter(String footerPath, String version) {
   final String timestamp = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
   final String gitBranch = getBranchName();
-  final String gitBranchOut = gitBranch.isEmpty ? '' : '• </span class="no-break">$gitBranch</span>';
-
-  File(footerPath).writeAsStringSync(<String>[
-    '• </span class="no-break">$timestamp<span>',
-    '• </span class="no-break">${gitRevision()}</span>',
-    gitBranchOut].join(' '));
+  final String gitBranchOut = gitBranch.isEmpty ? '' : '• $gitBranch';
+  File('${footerPath}footer.html').writeAsStringSync('<script src="footer.js"></script>');
+  File('$kPublishRoot/api/footer.js')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('''(function() {
+  var span = document.querySelector('footer>span');
+  if (span) {
+    span.innerText = 'Flutter $version • $timestamp • ${gitRevision()} $gitBranchOut';
+  }
+  var sourceLink = document.querySelector('a.source-link');
+  if (sourceLink) {
+    sourceLink.href = sourceLink.href.replace('/master/', '/${gitRevision()}/');
+  }
+})();
+''');
 }
 
 /// Generates an OpenSearch XML description that can be used to add a custom
@@ -389,8 +407,8 @@ void changePackageToSdkInTitlebar() {
   final File indexFile = File('$kPublishRoot/index.html');
   String indexContents = indexFile.readAsStringSync();
   indexContents = indexContents.replaceFirst(
-    '<li><a href="https://flutter.io">Flutter package</a></li>',
-    '<li><a href="https://flutter.io">Flutter SDK</a></li>',
+    '<li><a href="https://flutter.dev">Flutter package</a></li>',
+    '<li><a href="https://flutter.dev">Flutter SDK</a></li>',
   );
 
   indexFile.writeAsStringSync(indexContents);

@@ -1,26 +1,39 @@
 {@inject-html}
+<a name="{{id}}"></a>
+<div class="anchor-container">
+  <a class="anchor-button-overlay anchor-button" title="Copy link to clipboard"
+     onmouseenter="fixHref(this, '{{id}}');"
+     onclick="fixHref(this, '{{id}}'); copyStringToClipboard(this.href);"
+     href="#">
+    <i class="material-icons copy-image">link</i>
+  </a>
+</div>
 <div class="snippet-buttons">
-  <button id="shortSnippetButton" onclick="showSnippet(shortSnippet);" selected>Sample</button>
-  <button id="longSnippetButton" onclick="showSnippet(longSnippet);">Sample in an App</button>
+  <script>var visibleSnippet{{serial}} = "shortSnippet{{serial}}";</script>
+  <button id="shortSnippet{{serial}}Button"
+          onclick="visibleSnippet{{serial}} = showSnippet('shortSnippet{{serial}}', visibleSnippet{{serial}});"
+          selected>Sample</button>
+  <button id="longSnippet{{serial}}Button"
+          onclick="visibleSnippet{{serial}} = showSnippet('longSnippet{{serial}}', visibleSnippet{{serial}});">Sample in an App</button>
 </div>
 <div class="snippet-container">
-  <div class="snippet" id="shortSnippet">
+  <div class="snippet" id="shortSnippet{{serial}}">
     {{description}}
     <div class="copyable-container">
       <button class="copy-button-overlay copy-button" title="Copy to clipboard"
-              onclick="copyTextToClipboard();">
+              onclick="copyTextToClipboard(visibleSnippet{{serial}});">
         <i class="material-icons copy-image">assignment</i>
       </button>
       <pre class="language-{{language}}"><code class="language-{{language}}">{{code}}</code></pre>
     </div>
   </div>
-  <div class="snippet" id="longSnippet" hidden>
+  <div class="snippet" id="longSnippet{{serial}}" hidden>
     <div class="snippet-description">To create a sample project with this code snippet, run:<br/>
       <span class="snippet-create-command">flutter create --sample={{id}} mysample</span>
     </div>
     <div class="copyable-container">
       <button class="copy-button-overlay copy-button" title="Copy to clipboard"
-              onclick="copyTextToClipboard();">
+              onclick="copyTextToClipboard(visibleSnippet{{serial}});">
         <i class="material-icons copy-image">assignment</i>
       </button>
       <pre class="language-{{language}}"><code class="language-{{language}}">{{app}}</code></pre>

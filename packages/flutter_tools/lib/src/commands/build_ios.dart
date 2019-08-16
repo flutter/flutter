@@ -10,7 +10,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
 
 class BuildIOSCommand extends BuildSubCommand {
@@ -47,6 +47,12 @@ class BuildIOSCommand extends BuildSubCommand {
 
   @override
   final String description = 'Build an iOS application bundle (Mac OS X host only).';
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.iOS,
+  };
 
   @override
   Future<FlutterCommandResult> runCommand() async {

@@ -217,10 +217,10 @@ void generate(String commit) {
     <String, String>{
       'imports': samples.map<String>((SampleInfo page) {
         return "import '${page.importPath}' show ${page.sampleClass};\n";
-      }).toList().join(),
+      }).join(),
       'widgets': samples.map<String>((SampleInfo sample) {
         return 'new ${sample.sampleClass}(),\n';
-      }).toList().join(),
+      }).join(),
     },
   );
 
@@ -232,7 +232,7 @@ void generate(String commit) {
     <String, String>{
       'paths': samples.map<String>((SampleInfo sample) {
         return "'${outputFile(sample.sourceName + '.png').path}'";
-      }).toList().join(',\n'),
+      }).join(',\n'),
     },
   );
 

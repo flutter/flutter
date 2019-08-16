@@ -19,6 +19,9 @@ import 'view.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
 
+// Examples can assume:
+// dynamic context;
+
 /// The glue between the render tree and the Flutter engine.
 mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, HitTestable {
   @override
@@ -83,6 +86,17 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
             return _forceRepaint();
           return Future<void>.value();
         },
+      );
+      registerBoolServiceExtension(
+        name: 'debugCheckElevationsEnabled',
+        getter: () async => debugCheckElevationsEnabled,
+        setter: (bool value) {
+          if (debugCheckElevationsEnabled == value) {
+            return Future<void>.value();
+          }
+          debugCheckElevationsEnabled = value;
+          return _forceRepaint();
+        }
       );
       registerSignalServiceExtension(
         name: 'debugDumpLayerTree',
@@ -175,26 +189,30 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// The current platform brightness can be queried either from a Flutter
   /// binding, or from a [MediaQuery] widget.
   ///
-  /// ## Sample Code
-  ///
-  /// Querying [Window.platformBrightness]:
+  /// {@tool sample}
+  /// Querying [Window.platformBrightness].
   ///
   /// ```dart
   /// final Brightness brightness = WidgetsBinding.instance.window.platformBrightness;
   /// ```
+  /// {@end-tool}
   ///
-  /// Querying [MediaQuery] directly:
+  /// {@tool sample}
+  /// Querying [MediaQuery] directly.
   ///
   /// ```dart
   /// final Brightness brightness = MediaQuery.platformBrightnessOf(context);
   /// ```
+  /// {@end-tool}
   ///
-  /// Querying [MediaQueryData]:
+  /// {@tool sample}
+  /// Querying [MediaQueryData].
   ///
   /// ```dart
   /// final MediaQueryData mediaQueryData = MediaQuery.of(context);
   /// final Brightness brightness = mediaQueryData.platformBrightness;
   /// ```
+  /// {@end-tool}
   ///
   /// See [Window.onPlatformBrightnessChanged].
   /// {@endtemplate}
@@ -228,8 +246,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       // Layer hit testing is done using device pixels, so we have to convert
       // the logical coordinates of the event location back to device pixels
       // here.
-      return renderView.layer
-          .find<MouseTrackerAnnotation>(offset * window.devicePixelRatio);
+      return renderView.layer.findAll<MouseTrackerAnnotation>(offset * window.devicePixelRatio);
     });
   }
 

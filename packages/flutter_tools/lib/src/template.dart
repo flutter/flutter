@@ -4,6 +4,7 @@
 
 import 'package:mustache/mustache.dart' as mustache;
 
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'cache.dart';
 import 'globals.dart';
@@ -62,13 +63,22 @@ class Template {
 
   Map<String /* relative */, String /* absolute source */> _templateFilePaths;
 
+  /// Render the template into [directory].
+  ///
+  /// May throw a [ToolExit] if the directory is not writable.
   int render(
     Directory destination,
     Map<String, dynamic> context, {
     bool overwriteExisting = true,
     bool printStatusWhenWriting = true,
   }) {
-    destination.createSync(recursive: true);
+    try {
+      destination.createSync(recursive: true);
+    } on FileSystemException catch (err) {
+      printError(err.toString());
+      throwToolExit('Failed to flutter create at ${destination.path}.');
+      return 0;
+    }
     int fileCount = 0;
 
     /// Returns the resolved destination path corresponding to the specified
@@ -84,6 +94,11 @@ class Template {
         if (language != match.group(2))
           return null;
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
+      }
+      // Only build a web project if explicitly asked.
+      final bool web = context['web'];
+      if (relativeDestinationPath.contains('web') && !web) {
+        return null;
       }
       final String projectName = context['projectName'];
       final String androidIdentifier = context['androidIdentifier'];

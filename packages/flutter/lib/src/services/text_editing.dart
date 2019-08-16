@@ -20,7 +20,7 @@ class TextRange {
   /// constant.
   const TextRange({
     @required this.start,
-    @required this.end
+    @required this.end,
   }) : assert(start != null && start >= -1),
        assert(end != null && end >= -1);
 
@@ -86,7 +86,7 @@ class TextRange {
   @override
   int get hashCode => hashValues(
     start.hashCode,
-    end.hashCode
+    end.hashCode,
   );
 
   @override
@@ -103,7 +103,7 @@ class TextSelection extends TextRange {
     @required this.baseOffset,
     @required this.extentOffset,
     this.affinity = TextAffinity.downstream,
-    this.isDirectional = false
+    this.isDirectional = false,
   }) : super(
          start: baseOffset < extentOffset ? baseOffset : extentOffset,
          end: baseOffset < extentOffset ? extentOffset : baseOffset
@@ -118,7 +118,7 @@ class TextSelection extends TextRange {
   /// The [offset] argument must not be null.
   const TextSelection.collapsed({
     @required int offset,
-    this.affinity = TextAffinity.downstream
+    this.affinity = TextAffinity.downstream,
   }) : baseOffset = offset,
        extentOffset = offset,
        isDirectional = false,
@@ -200,7 +200,7 @@ class TextSelection extends TextRange {
     baseOffset.hashCode,
     extentOffset.hashCode,
     affinity.hashCode,
-    isDirectional.hashCode
+    isDirectional.hashCode,
   );
 
   /// Creates a new [TextSelection] based on the current selection, with the

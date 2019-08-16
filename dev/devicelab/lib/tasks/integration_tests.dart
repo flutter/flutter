@@ -29,7 +29,7 @@ TaskFunction createFlavorsTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'lib/main.dart',
-    extraOptions: <String>['--flavor', 'paid']
+    extraOptions: <String>['--flavor', 'paid'],
   );
 }
 
@@ -47,6 +47,13 @@ TaskFunction createPlatformChannelSampleTest() {
   );
 }
 
+TaskFunction createPlatformChannelSwiftSampleTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/examples/platform_channel_swift',
+    'test_driver/button_tap.dart',
+  );
+}
+
 TaskFunction createEmbeddedAndroidViewsIntegrationTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/android_views',
@@ -57,6 +64,23 @@ TaskFunction createEmbeddedAndroidViewsIntegrationTest() {
 TaskFunction createAndroidSemanticsIntegrationTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/android_semantics_testing',
+    'lib/main.dart',
+  );
+}
+
+TaskFunction createCodegenerationIntegrationTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/codegen',
+    'lib/main.dart',
+    environment: <String, String>{
+      'FLUTTER_EXPERIMENTAL_BUILD': 'true',
+    },
+  );
+}
+
+TaskFunction createImageLoadingIntegrationTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/image_loading',
     'lib/main.dart',
   );
 }
@@ -77,18 +101,27 @@ TaskFunction createFlutterCreateOfflineTest() {
   };
 }
 
+TaskFunction createAndroidSplashScreenKitchenSinkTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink',
+    'test_driver/main.dart',
+  );
+}
+
 class DriverTest {
 
   DriverTest(
     this.testDirectory,
     this.testTarget, {
       this.extraOptions = const <String>[],
+      this.environment =  const <String, String>{},
     }
   );
 
   final String testDirectory;
   final String testTarget;
   final List<String> extraOptions;
+  final Map<String, String> environment;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -105,9 +138,9 @@ class DriverTest {
         testTarget,
         '-d',
         deviceId,
+        ...extraOptions,
       ];
-      options.addAll(extraOptions);
-      await flutter('drive', options: options);
+      await flutter('drive', options: options, environment: Map<String, String>.from(environment));
 
       return TaskResult.success(null);
     });

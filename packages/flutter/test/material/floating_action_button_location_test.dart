@@ -77,7 +77,7 @@ void main() {
     });
 
     group('interrupts in-progress animations without jumps', () {
-       _GeometryListener geometryListener;
+      _GeometryListener geometryListener;
       ScaffoldGeometry geometry;
       _GeometryListenerState listenerState;
       Size previousRect;
@@ -213,7 +213,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-      });
+      }, skip: isBrowser);
 
       testWidgets('interrupting entrance of a new fab.', (WidgetTester tester) async {
         await tester.pumpWidget(
@@ -238,7 +238,7 @@ void main() {
         );
         await tester.pumpAndSettle();
       });
-    });
+    }, skip: isBrowser);
   });
 
   testWidgets('Docked floating action button locations', (WidgetTester tester) async {
@@ -274,7 +274,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 500.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Docked floating action button locations: no BAB, small BAB', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -293,7 +293,7 @@ void main() {
       ),
     );
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 572.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Mini-start-top floating action button location', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -314,7 +314,7 @@ void main() {
     );
     expect(tester.getCenter(find.byType(FloatingActionButton)).dx, tester.getCenter(find.byType(CircleAvatar)).dx);
     expect(tester.getCenter(find.byType(FloatingActionButton)).dy, kToolbarHeight);
-  });
+  }, skip: isBrowser);
 
   testWidgets('Start-top floating action button location LTR', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -326,8 +326,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), Rect.fromLTWH(16.0, 28.0, 56.0, 56.0));
-  });
+    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(16.0, 28.0, 56.0, 56.0)));
+  }, skip: isBrowser);
 
   testWidgets('End-top floating action button location RTL', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -342,8 +342,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), Rect.fromLTWH(16.0, 28.0, 56.0, 56.0));
-  });
+    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(16.0, 28.0, 56.0, 56.0)));
+  }, skip: isBrowser);
 
   testWidgets('Start-top floating action button location RTL', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -358,8 +358,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0));
-  });
+    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0)));
+  }, skip: isBrowser);
 
   testWidgets('End-top floating action button location LTR', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -371,8 +371,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0));
-  });
+    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0)));
+  }, skip: isBrowser);
 }
 
 

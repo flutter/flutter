@@ -43,37 +43,37 @@ void main() {
     await test(tester, 0.0, padding, AxisDirection.down, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
-      Rect.fromLTWH(25.0, 420.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
+      const Rect.fromLTWH(25.0, 420.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
-      Rect.fromLTWH(25.0, 220.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
+      const Rect.fromLTWH(25.0, 220.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, -390.0, 800.0, 400.0),
-      Rect.fromLTWH(25.0, 30.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, 465.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, -390.0, 800.0, 400.0),
+      const Rect.fromLTWH(25.0, 30.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, 465.0, 800.0, 400.0),
     ]);
 
     await test(tester, 490.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, -490.0, 800.0, 400.0),
-      Rect.fromLTWH(25.0, -70.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, 365.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, -490.0, 800.0, 400.0),
+      const Rect.fromLTWH(25.0, -70.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, 365.0, 800.0, 400.0),
     ]);
 
     await test(tester, 10000.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, -10000.0, 800.0, 400.0),
-      Rect.fromLTWH(25.0, -9580.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, -9145.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, -10000.0, 800.0, 400.0),
+      const Rect.fromLTWH(25.0, -9580.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, -9145.0, 800.0, 400.0),
     ]);
   });
 
@@ -82,37 +82,37 @@ void main() {
     await test(tester, 0.0, padding, AxisDirection.down, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
-      Rect.fromLTWH(25.0, 420.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
+      const Rect.fromLTWH(25.0, 420.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
-      Rect.fromLTWH(25.0, 220.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
+      const Rect.fromLTWH(25.0, 220.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, -390.0, 800.0, 400.0),
-      Rect.fromLTWH(25.0, 30.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, 465.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, -390.0, 800.0, 400.0),
+      const Rect.fromLTWH(25.0, 30.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, 465.0, 800.0, 400.0),
     ]);
 
     await test(tester, 490.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, -490.0, 800.0, 400.0),
-      Rect.fromLTWH(25.0, -70.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, 365.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, -490.0, 800.0, 400.0),
+      const Rect.fromLTWH(25.0, -70.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, 365.0, 800.0, 400.0),
     ]);
 
     await test(tester, 10000.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, -10000.0, 800.0, 400.0),
-      Rect.fromLTWH(25.0, -9580.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, -9145.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, -10000.0, 800.0, 400.0),
+      const Rect.fromLTWH(25.0, -9580.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, -9145.0, 800.0, 400.0),
     ]);
   });
 
@@ -121,37 +121,37 @@ void main() {
     await test(tester, 0.0, padding, AxisDirection.down, TextDirection.rtl);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
-      Rect.fromLTWH(15.0, 420.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
+      const Rect.fromLTWH(15.0, 420.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.rtl);
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
-      Rect.fromLTWH(15.0, 220.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
+      const Rect.fromLTWH(15.0, 220.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.rtl);
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, -390.0, 800.0, 400.0),
-      Rect.fromLTWH(15.0, 30.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, 465.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, -390.0, 800.0, 400.0),
+      const Rect.fromLTWH(15.0, 30.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, 465.0, 800.0, 400.0),
     ]);
 
     await test(tester, 490.0, padding, AxisDirection.down, TextDirection.rtl);
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, -490.0, 800.0, 400.0),
-      Rect.fromLTWH(15.0, -70.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, 365.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, -490.0, 800.0, 400.0),
+      const Rect.fromLTWH(15.0, -70.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, 365.0, 800.0, 400.0),
     ]);
 
     await test(tester, 10000.0, padding, AxisDirection.down, TextDirection.rtl);
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, -10000.0, 800.0, 400.0),
-      Rect.fromLTWH(15.0, -9580.0, 760.0, 400.0),
-      Rect.fromLTWH(0.0, -9145.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, -10000.0, 800.0, 400.0),
+      const Rect.fromLTWH(15.0, -9580.0, 760.0, 400.0),
+      const Rect.fromLTWH(0.0, -9145.0, 800.0, 400.0),
     ]);
   });
 
@@ -160,9 +160,9 @@ void main() {
     await test(tester, 350.0, padding, AxisDirection.down, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, -350.0, 800.0, 400.0),
-      Rect.fromLTWH(30.0, 80.0, 740.0, 400.0),
-      Rect.fromLTWH(0.0, 510.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, -350.0, 800.0, 400.0),
+      const Rect.fromLTWH(30.0, 80.0, 740.0, 400.0),
+      const Rect.fromLTWH(0.0, 510.0, 800.0, 400.0),
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
@@ -182,9 +182,9 @@ void main() {
     await test(tester, 350.0, padding, AxisDirection.up, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      Rect.fromLTWH(0.0, 600.0+350.0-400.0, 800.0, 400.0),
-      Rect.fromLTWH(30.0, 600.0-80.0-400.0, 740.0, 400.0),
-      Rect.fromLTWH(0.0, 600.0-510.0-400.0, 800.0, 400.0),
+      const Rect.fromLTWH(0.0, 600.0+350.0-400.0, 800.0, 400.0),
+      const Rect.fromLTWH(30.0, 600.0-80.0-400.0, 740.0, 400.0),
+      const Rect.fromLTWH(0.0, 600.0-510.0-400.0, 800.0, 400.0),
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-10.0));
@@ -204,9 +204,9 @@ void main() {
     await test(tester, 350.0, padding, AxisDirection.left, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      Rect.fromLTWH(800.0+350.0-400.0, 0.0, 400.0, 600.0),
-      Rect.fromLTWH(800.0-80.0-400.0, 30.0, 400.0, 540.0),
-      Rect.fromLTWH(800.0-510.0-400.0, 0.0, 400.0, 600.0),
+      const Rect.fromLTWH(800.0+350.0-400.0, 0.0, 400.0, 600.0),
+      const Rect.fromLTWH(800.0-80.0-400.0, 30.0, 400.0, 540.0),
+      const Rect.fromLTWH(800.0-510.0-400.0, 0.0, 400.0, 600.0),
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(800.0-10.0, 10.0));
@@ -226,9 +226,9 @@ void main() {
     await test(tester, 350.0, padding, AxisDirection.right, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      Rect.fromLTWH(-350.0, 0.0, 400.0, 600.0),
-      Rect.fromLTWH(80.0, 30.0, 400.0, 540.0),
-      Rect.fromLTWH(510.0, 0.0, 400.0, 600.0),
+      const Rect.fromLTWH(-350.0, 0.0, 400.0, 600.0),
+      const Rect.fromLTWH(80.0, 30.0, 400.0, 540.0),
+      const Rect.fromLTWH(510.0, 0.0, 400.0, 600.0),
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
@@ -397,7 +397,7 @@ void main() {
 
     expect(
       tester.getRect(find.widgetWithText(Container, '2')),
-      Rect.fromLTRB(0.0, 100.0, 800.0, 300.0),
+      const Rect.fromLTRB(0.0, 100.0, 800.0, 300.0),
     );
 
     // Now item 0 is 400.0px and going back will underflow.
@@ -420,7 +420,7 @@ void main() {
 
     expect(
       tester.getRect(find.widgetWithText(Container, '0')),
-      Rect.fromLTRB(0.0, -200.0, 800.0, 200.0),
+      const Rect.fromLTRB(0.0, -200.0, 800.0, 200.0),
     );
   });
 }

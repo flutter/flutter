@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome')
 import 'dart:async';
 import 'dart:io';
 
@@ -30,8 +31,8 @@ void _tests() {
           Semantics(
             selected: true,
             checked: true,
-            onTap: () {},
-            onDecrease: () {},
+            onTap: () { },
+            onDecrease: () { },
             value: 'test-value',
             increasedValue: 'test-increasedValue',
             decreasedValue: 'test-decreasedValue',
@@ -150,7 +151,7 @@ void _tests() {
         ignoreRect: true,
         ignoreTransform: true,
         ignoreId: true,
-      )
+      ),
     );
     semantics.dispose();
   });

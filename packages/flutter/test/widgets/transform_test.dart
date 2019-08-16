@@ -349,9 +349,9 @@ void main() {
             child: Container(
               key: key1,
               color: const Color(0xFF000000),
-            )
-          )
-        )
+            ),
+          ),
+        ),
       ),
     );
     expect(_pointerDown, isFalse);

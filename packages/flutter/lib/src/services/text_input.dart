@@ -15,6 +15,9 @@ import 'text_editing.dart';
 
 export 'dart:ui' show TextAffinity;
 
+// Whether we're compiled to JavaScript in a web browser.
+const bool _kIsBrowser = identical(0, 0.0);
+
 /// The type of information for which to optimize the text input control.
 ///
 /// On Android, behavior may vary across device and keyboard provider.
@@ -93,14 +96,19 @@ class TextInputType {
   /// Requests a keyboard with ready access to the "/" and "." keys.
   static const TextInputType url = TextInputType._(6);
 
+  /// Optimize for passwords that are visible to the user.
+  ///
+  /// Requests a keyboard with ready access to both letters and numbers.
+  static const TextInputType visiblePassword = TextInputType._(7);
+
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
-    text, multiline, number, phone, datetime, emailAddress, url,
+    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword,
   ];
 
   // Corresponding string name for each of the [values].
   static const List<String> _names = <String>[
-    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url',
+    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
@@ -389,7 +397,7 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool obscureText;
 
-  /// Whether to enable autocorrection.
+  /// Whether to enable auto-correction.
   ///
   /// Defaults to true.
   final bool autocorrect;
@@ -400,7 +408,7 @@ class TextInputConfiguration {
   /// What kind of action to request for the action button on the IME.
   final TextInputAction inputAction;
 
-  /// Specifies how platforms may automatically capitialize text entered by the
+  /// Specifies how platforms may automatically capitalize text entered by the
   /// user.
   ///
   /// Defaults to [TextCapitalization.none].
@@ -466,7 +474,7 @@ class RawFloatingCursorPoint {
     this.offset,
     @required this.state,
   }) : assert(state != null),
-       assert(state == FloatingCursorDragState.Update ? offset != null : true);
+       assert(state != FloatingCursorDragState.Update || offset != null);
 
   /// The raw position of the floating cursor as determined by the iOS sdk.
   final Offset offset;
@@ -487,7 +495,7 @@ class TextEditingValue {
   const TextEditingValue({
     this.text = '',
     this.selection = const TextSelection.collapsed(offset: -1),
-    this.composing = TextRange.empty
+    this.composing = TextRange.empty,
   }) : assert(text != null),
        assert(selection != null),
        assert(composing != null);
@@ -538,12 +546,12 @@ class TextEditingValue {
   TextEditingValue copyWith({
     String text,
     TextSelection selection,
-    TextRange composing
+    TextRange composing,
   }) {
     return TextEditingValue(
       text: text ?? this.text,
       selection: selection ?? this.selection,
-      composing: composing ?? this.composing
+      composing: composing ?? this.composing,
     );
   }
 
@@ -566,7 +574,7 @@ class TextEditingValue {
   int get hashCode => hashValues(
     text.hashCode,
     selection.hashCode,
-    composing.hashCode
+    composing.hashCode,
   );
 }
 
@@ -585,6 +593,18 @@ abstract class TextSelectionDelegate {
   /// Brings the provided [TextPosition] into the visible area of the text
   /// input.
   void bringIntoView(TextPosition position);
+
+  /// Whether cut is enabled, must not be null.
+  bool get cutEnabled => true;
+
+  /// Whether copy is enabled, must not be null.
+  bool get copyEnabled => true;
+
+  /// Whether paste is enabled, must not be null.
+  bool get pasteEnabled => true;
+
+  /// Whether select all is enabled, must not be null.
+  bool get selectAllEnabled => true;
 }
 
 /// An interface to receive information from [TextInput].
@@ -813,6 +833,10 @@ class TextInput {
 
   static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
     assert(() {
+      if (_kIsBrowser) {
+        // TODO(flutterweb): what makes sense here?
+        return true;
+      }
       if (Platform.isIOS) {
         assert(
           _iOSSupportedInputActions.contains(inputAction),

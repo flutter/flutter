@@ -71,11 +71,13 @@ abstract class InputBorder extends ShapeBorder {
   /// [gapExtent] parameters define a floating label width interval, and
   /// [gapPercentage] defines the animation's progress (0.0 to 1.0).
   @override
-  void paint(Canvas canvas, Rect rect, {
-      double gapStart,
-      double gapExtent = 0.0,
-      double gapPercentage = 0.0,
-      TextDirection textDirection,
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection textDirection,
   });
 }
 
@@ -106,11 +108,13 @@ class _NoInputBorder extends InputBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {
-      double gapStart,
-      double gapExtent = 0.0,
-      double gapPercentage = 0.0,
-      TextDirection textDirection,
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection textDirection,
   }) {
     // Do not paint.
   }
@@ -217,11 +221,13 @@ class UnderlineInputBorder extends InputBorder {
   /// The [borderSide] defines the line's color and weight. The `textDirection`
   /// `gap` and `textDirection` parameters are ignored.
   @override
-  void paint(Canvas canvas, Rect rect, {
-      double gapStart,
-      double gapExtent = 0.0,
-      double gapPercentage = 0.0,
-      TextDirection textDirection,
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection textDirection,
   }) {
     if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero)
       canvas.clipPath(getOuterPath(rect, textDirection: textDirection));
@@ -379,63 +385,68 @@ class OutlineInputBorder extends InputBorder {
   }
 
   Path _gapBorderPath(Canvas canvas, RRect center, double start, double extent) {
+    // When the corner radii on any side add up to be greater than the
+    // given height, each radius has to be scaled to not exceed the
+    // size of the width/height of the RRect.
+    final RRect scaledRRect = center.scaleRadii();
+
     final Rect tlCorner = Rect.fromLTWH(
-      center.left,
-      center.top,
-      center.tlRadiusX * 2.0,
-      center.tlRadiusY * 2.0,
+      scaledRRect.left,
+      scaledRRect.top,
+      scaledRRect.tlRadiusX * 2.0,
+      scaledRRect.tlRadiusY * 2.0,
     );
     final Rect trCorner = Rect.fromLTWH(
-      center.right - center.trRadiusX * 2.0,
-      center.top,
-      center.trRadiusX * 2.0,
-      center.trRadiusY * 2.0,
+      scaledRRect.right - scaledRRect.trRadiusX * 2.0,
+      scaledRRect.top,
+      scaledRRect.trRadiusX * 2.0,
+      scaledRRect.trRadiusY * 2.0,
     );
     final Rect brCorner = Rect.fromLTWH(
-      center.right - center.brRadiusX * 2.0,
-      center.bottom - center.brRadiusY * 2.0,
-      center.brRadiusX * 2.0,
-      center.brRadiusY * 2.0,
+      scaledRRect.right - scaledRRect.brRadiusX * 2.0,
+      scaledRRect.bottom - scaledRRect.brRadiusY * 2.0,
+      scaledRRect.brRadiusX * 2.0,
+      scaledRRect.brRadiusY * 2.0,
     );
     final Rect blCorner = Rect.fromLTWH(
-      center.left,
-      center.bottom - center.brRadiusY * 2.0,
-      center.blRadiusX * 2.0,
-      center.blRadiusY * 2.0,
+      scaledRRect.left,
+      scaledRRect.bottom - scaledRRect.blRadiusY * 2.0,
+      scaledRRect.blRadiusX * 2.0,
+      scaledRRect.blRadiusX * 2.0,
     );
 
     const double cornerArcSweep = math.pi / 2.0;
-    final double tlCornerArcSweep = start < center.tlRadiusX
-      ? math.asin(start / center.tlRadiusX)
+    final double tlCornerArcSweep = start < scaledRRect.tlRadiusX
+      ? math.asin((start / scaledRRect.tlRadiusX).clamp(-1.0, 1.0))
       : math.pi / 2.0;
 
     final Path path = Path()
       ..addArc(tlCorner, math.pi, tlCornerArcSweep)
-      ..moveTo(center.left + center.tlRadiusX, center.top);
+      ..moveTo(scaledRRect.left + scaledRRect.tlRadiusX, scaledRRect.top);
 
-    if (start > center.tlRadiusX)
-      path.lineTo(center.left + start, center.top);
+    if (start > scaledRRect.tlRadiusX)
+      path.lineTo(scaledRRect.left + start, scaledRRect.top);
 
     const double trCornerArcStart = (3 * math.pi) / 2.0;
     const double trCornerArcSweep = cornerArcSweep;
-    if (start + extent < center.width - center.trRadiusX) {
+    if (start + extent < scaledRRect.width - scaledRRect.trRadiusX) {
       path
         ..relativeMoveTo(extent, 0.0)
-        ..lineTo(center.right - center.trRadiusX, center.top)
+        ..lineTo(scaledRRect.right - scaledRRect.trRadiusX, scaledRRect.top)
         ..addArc(trCorner, trCornerArcStart, trCornerArcSweep);
-    } else if (start + extent < center.width) {
-      final double dx = center.width - (start + extent);
-      final double sweep = math.acos(dx / center.trRadiusX);
+    } else if (start + extent < scaledRRect.width) {
+      final double dx = scaledRRect.width - (start + extent);
+      final double sweep = math.acos(dx / scaledRRect.trRadiusX);
       path.addArc(trCorner, trCornerArcStart + sweep, trCornerArcSweep - sweep);
     }
 
     return path
-      ..moveTo(center.right, center.top + center.trRadiusY)
-      ..lineTo(center.right, center.bottom - center.brRadiusY)
+      ..moveTo(scaledRRect.right, scaledRRect.top + scaledRRect.trRadiusY)
+      ..lineTo(scaledRRect.right, scaledRRect.bottom - scaledRRect.brRadiusY)
       ..addArc(brCorner, 0.0, cornerArcSweep)
-      ..lineTo(center.left + center.blRadiusX, center.bottom)
+      ..lineTo(scaledRRect.left + scaledRRect.blRadiusX, scaledRRect.bottom)
       ..addArc(blCorner, math.pi / 2.0, cornerArcSweep)
-      ..lineTo(center.left, center.top + center.trRadiusY);
+      ..lineTo(scaledRRect.left, scaledRRect.top + scaledRRect.tlRadiusY);
   }
 
   /// Draw a rounded rectangle around [rect] using [borderRadius].
@@ -447,11 +458,13 @@ class OutlineInputBorder extends InputBorder {
   /// `gapStart - gapPadding` (assuming that the [textDirection] is [TextDirection.ltr]).
   /// The gap's width is `(gapPadding + gapExtent + gapPadding) * gapPercentage`.
   @override
-  void paint(Canvas canvas, Rect rect, {
-      double gapStart,
-      double gapExtent = 0.0,
-      double gapPercentage = 0.0,
-      TextDirection textDirection,
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection textDirection,
   }) {
     assert(gapExtent != null);
     assert(gapPercentage >= 0.0 && gapPercentage <= 1.0);
@@ -466,12 +479,12 @@ class OutlineInputBorder extends InputBorder {
       final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage);
       switch (textDirection) {
         case TextDirection.rtl: {
-          final Path path = _gapBorderPath(canvas, center, gapStart + gapPadding - extent, extent);
+          final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart + gapPadding - extent), extent);
           canvas.drawPath(path, paint);
           break;
         }
         case TextDirection.ltr: {
-          final Path path = _gapBorderPath(canvas, center, gapStart - gapPadding, extent);
+          final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart - gapPadding), extent);
           canvas.drawPath(path, paint);
           break;
         }

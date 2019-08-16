@@ -141,15 +141,15 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
             itemBuilder: (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
               const PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.iconsAndText,
-                child: Text('Icons and text')
+                child: Text('Icons and text'),
               ),
               const PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.iconsOnly,
-                child: Text('Icons only')
+                child: Text('Icons only'),
               ),
               const PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.textOnly,
-                child: Text('Text only')
+                child: Text('Text only'),
               ),
             ],
           ),
@@ -193,7 +193,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
               ),
             ),
           );
-        }).toList()
+        }).toList(),
       ),
     );
   }

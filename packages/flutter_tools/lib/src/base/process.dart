@@ -94,10 +94,10 @@ Future<void> runShutdownHooks() async {
   printTrace('Shutdown hooks complete');
 }
 
-Map<String, String> _environment(bool allowReentrantFlutter, [Map<String, String> environment]) {
+Map<String, String> _environment(bool allowReentrantFlutter, [ Map<String, String> environment ]) {
   if (allowReentrantFlutter) {
     if (environment == null)
-      environment = <String, String>{ 'FLUTTER_ALREADY_LOCKED': 'true' };
+      environment = <String, String>{'FLUTTER_ALREADY_LOCKED': 'true'};
     else
       environment['FLUTTER_ALREADY_LOCKED'] = 'true';
   }
@@ -107,10 +107,11 @@ Map<String, String> _environment(bool allowReentrantFlutter, [Map<String, String
 
 /// This runs the command in the background from the specified working
 /// directory. Completes when the process has been started.
-Future<Process> runCommand(List<String> cmd, {
+Future<Process> runCommand(
+  List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
-  Map<String, String> environment
+  Map<String, String> environment,
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   return processManager.start(
@@ -128,25 +129,26 @@ Future<Process> runCommand(List<String> cmd, {
 /// If [filter] is non-null, all lines that do not match it are removed. If
 /// [mapFunction] is present, all lines that match [filter] are also forwarded
 /// to [mapFunction] for further processing.
-Future<int> runCommandAndStreamOutput(List<String> cmd, {
+Future<int> runCommandAndStreamOutput(
+  List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
   String prefix = '',
   bool trace = false,
   RegExp filter,
   StringConverter mapFunction,
-  Map<String, String> environment
+  Map<String, String> environment,
 }) async {
   final Process process = await runCommand(
     cmd,
     workingDirectory: workingDirectory,
     allowReentrantFlutter: allowReentrantFlutter,
-    environment: environment
+    environment: environment,
   );
   final StreamSubscription<String> stdoutSubscription = process.stdout
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
-    .where((String line) => filter == null ? true : filter.hasMatch(line))
+    .where((String line) => filter == null || filter.hasMatch(line))
     .listen((String line) {
       if (mapFunction != null)
         line = mapFunction(line);
@@ -161,7 +163,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
   final StreamSubscription<String> stderrSubscription = process.stderr
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
-    .where((String line) => filter == null ? true : filter.hasMatch(line))
+    .where((String line) => filter == null || filter.hasMatch(line))
     .listen((String line) {
       if (mapFunction != null)
         line = mapFunction(line);
@@ -187,10 +189,11 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
 /// Runs the [command] interactively, connecting the stdin/stdout/stderr
 /// streams of this process to those of the child process. Completes with
 /// the exit code of the child process.
-Future<int> runInteractively(List<String> command, {
+Future<int> runInteractively(
+  List<String> command, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
-  Map<String, String> environment
+  Map<String, String> environment,
 }) async {
   final Process process = await runCommand(
     command,
@@ -219,10 +222,11 @@ Future<Process> runDetached(List<String> cmd) {
   return proc;
 }
 
-Future<RunResult> runAsync(List<String> cmd, {
+Future<RunResult> runAsync(
+  List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
-  Map<String, String> environment
+  Map<String, String> environment,
 }) async {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   final ProcessResult results = await processManager.run(
@@ -235,10 +239,14 @@ Future<RunResult> runAsync(List<String> cmd, {
   return runResults;
 }
 
-Future<RunResult> runCheckedAsync(List<String> cmd, {
+typedef RunResultChecker = bool Function(int);
+
+Future<RunResult> runCheckedAsync(
+  List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
-  Map<String, String> environment
+  Map<String, String> environment,
+  RunResultChecker whiteListFailures,
 }) async {
   final RunResult result = await runAsync(
     cmd,
@@ -247,26 +255,36 @@ Future<RunResult> runCheckedAsync(List<String> cmd, {
     environment: environment,
   );
   if (result.exitCode != 0) {
-    throw ProcessException(cmd[0], cmd.sublist(1),
-      'Process "${cmd[0]}" exited abnormally:\n$result', result.exitCode);
+    if (whiteListFailures == null || !whiteListFailures(result.exitCode)) {
+      throw ProcessException(cmd[0], cmd.sublist(1),
+          'Process "${cmd[0]}" exited abnormally:\n$result', result.exitCode);
+    }
   }
   return result;
 }
 
-bool exitsHappy(List<String> cli) {
+bool exitsHappy(
+  List<String> cli, {
+  Map<String, String> environment,
+}) {
   _traceCommand(cli);
   try {
-    return processManager.runSync(cli).exitCode == 0;
+    return processManager.runSync(cli, environment: environment).exitCode == 0;
   } catch (error) {
+    printTrace('$cli failed with $error');
     return false;
   }
 }
 
-Future<bool> exitsHappyAsync(List<String> cli) async {
+Future<bool> exitsHappyAsync(
+  List<String> cli, {
+  Map<String, String> environment,
+}) async {
   _traceCommand(cli);
   try {
-    return (await processManager.run(cli)).exitCode == 0;
+    return (await processManager.run(cli, environment: environment)).exitCode == 0;
   } catch (error) {
+    printTrace('$cli failed with $error');
     return false;
   }
 }
@@ -274,11 +292,13 @@ Future<bool> exitsHappyAsync(List<String> cli) async {
 /// Run cmd and return stdout.
 ///
 /// Throws an error if cmd exits with a non-zero value.
-String runCheckedSync(List<String> cmd, {
+String runCheckedSync(
+  List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
   bool hideStdout = false,
   Map<String, String> environment,
+  RunResultChecker whiteListFailures,
 }) {
   return _runWithLoggingSync(
     cmd,
@@ -288,18 +308,20 @@ String runCheckedSync(List<String> cmd, {
     checked: true,
     noisyErrors: true,
     environment: environment,
+    whiteListFailures: whiteListFailures
   );
 }
 
 /// Run cmd and return stdout.
-String runSync(List<String> cmd, {
+String runSync(
+  List<String> cmd, {
   String workingDirectory,
-  bool allowReentrantFlutter = false
+  bool allowReentrantFlutter = false,
 }) {
   return _runWithLoggingSync(
     cmd,
     workingDirectory: workingDirectory,
-    allowReentrantFlutter: allowReentrantFlutter
+    allowReentrantFlutter: allowReentrantFlutter,
   );
 }
 
@@ -312,7 +334,8 @@ void _traceCommand(List<String> args, { String workingDirectory }) {
   }
 }
 
-String _runWithLoggingSync(List<String> cmd, {
+String _runWithLoggingSync(
+  List<String> cmd, {
   bool checked = false,
   bool noisyErrors = false,
   bool throwStandardErrorOnError = false,
@@ -320,6 +343,7 @@ String _runWithLoggingSync(List<String> cmd, {
   bool allowReentrantFlutter = false,
   bool hideStdout = false,
   Map<String, String> environment,
+  RunResultChecker whiteListFailures,
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   final ProcessResult results = processManager.runSync(
@@ -330,14 +354,19 @@ String _runWithLoggingSync(List<String> cmd, {
 
   printTrace('Exit code ${results.exitCode} from: ${cmd.join(' ')}');
 
+  bool failedExitCode = results.exitCode != 0;
+  if (whiteListFailures != null && failedExitCode) {
+    failedExitCode = !whiteListFailures(results.exitCode);
+  }
+
   if (results.stdout.isNotEmpty && !hideStdout) {
-    if (results.exitCode != 0 && noisyErrors)
+    if (failedExitCode && noisyErrors)
       printStatus(results.stdout.trim());
     else
       printTrace(results.stdout.trim());
   }
 
-  if (results.exitCode != 0) {
+  if (failedExitCode) {
     if (results.stderr.isNotEmpty) {
       if (noisyErrors)
         printError(results.stderr.trim());

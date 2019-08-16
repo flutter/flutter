@@ -34,6 +34,7 @@ class AppBarTheme extends Diagnosticable {
     this.color,
     this.elevation,
     this.iconTheme,
+    this.actionsIconTheme,
     this.textTheme,
   });
 
@@ -57,6 +58,11 @@ class AppBarTheme extends Diagnosticable {
   /// If null, [AppBar] uses [ThemeData.primaryIconTheme].
   final IconThemeData iconTheme;
 
+  /// Default value for [AppBar.actionsIconTheme].
+  ///
+  /// If null, [AppBar] uses [ThemeData.primaryIconTheme].
+  final IconThemeData actionsIconTheme;
+
   /// Default value for [AppBar.textTheme].
   ///
   /// If null, [AppBar] uses [ThemeData.primaryTextTheme].
@@ -65,6 +71,7 @@ class AppBarTheme extends Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
+    IconThemeData actionsIconTheme,
     Brightness brightness,
     Color color,
     double elevation,
@@ -76,6 +83,7 @@ class AppBarTheme extends Diagnosticable {
       color: color ?? this.color,
       elevation: elevation ?? this.elevation,
       iconTheme: iconTheme ?? this.iconTheme,
+      actionsIconTheme: actionsIconTheme ?? this.actionsIconTheme,
       textTheme: textTheme ?? this.textTheme,
     );
   }
@@ -97,6 +105,7 @@ class AppBarTheme extends Diagnosticable {
       color: Color.lerp(a?.color, b?.color, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       iconTheme: IconThemeData.lerp(a?.iconTheme, b?.iconTheme, t),
+      actionsIconTheme: IconThemeData.lerp(a?.actionsIconTheme, b?.actionsIconTheme, t),
       textTheme: TextTheme.lerp(a?.textTheme, b?.textTheme, t),
     );
   }
@@ -108,6 +117,7 @@ class AppBarTheme extends Diagnosticable {
       color,
       elevation,
       iconTheme,
+      actionsIconTheme,
       textTheme,
     );
   }
@@ -123,6 +133,7 @@ class AppBarTheme extends Diagnosticable {
         && typedOther.color == color
         && typedOther.elevation == elevation
         && typedOther.iconTheme == iconTheme
+        && typedOther.actionsIconTheme == actionsIconTheme
         && typedOther.textTheme == textTheme;
   }
 
@@ -130,9 +141,10 @@ class AppBarTheme extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<IconThemeData>('actionsIconTheme', actionsIconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, defaultValue: null));
   }
 }

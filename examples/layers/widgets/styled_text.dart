@@ -29,7 +29,7 @@ const TextStyle _kBold = TextStyle(fontWeight: FontWeight.bold);
 const TextStyle _kUnderline = TextStyle(
   decoration: TextDecoration.underline,
   decorationColor: Color(0xFF000000),
-  decorationStyle: TextDecorationStyle.wavy
+  decorationStyle: TextDecorationStyle.wavy,
 );
 
 Widget toStyledText(String name, String text) {
@@ -44,14 +44,14 @@ Widget toStyledText(String name, String text) {
           children: <TextSpan>[
             TextSpan(
               style: _kUnderline,
-              text: name
+              text: name,
             ),
-            const TextSpan(text: ':')
-          ]
+            const TextSpan(text: ':'),
+          ],
         ),
-        TextSpan(text: text)
-      ]
-    )
+        TextSpan(text: text),
+      ],
+    ),
   );
 }
 
@@ -67,7 +67,7 @@ class SpeakerSeparator extends StatelessWidget {
         border: Border(
           bottom: BorderSide(color: Color.fromARGB(24, 0, 0, 0))
         )
-      )
+      ),
     );
   }
 }
@@ -112,9 +112,9 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
         child: Column(
           children: children,
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start
-        )
-      )
+          crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+      ),
     );
   }
 }
@@ -124,12 +124,12 @@ void main() {
     theme: ThemeData.light(),
     home: Scaffold(
       appBar: AppBar(
-        title: const Text('Hal and Dave')
+        title: const Text('Hal and Dave'),
       ),
       body: Material(
         color: Colors.grey.shade50,
-        child: StyledTextDemo()
-      )
-    )
+        child: StyledTextDemo(),
+      ),
+    ),
   ));
 }

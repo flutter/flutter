@@ -12,8 +12,16 @@ import '../convert.dart' show json;
 import '../globals.dart';
 import '../version.dart';
 import 'file_system.dart';
+import 'platform.dart';
 
 typedef FingerprintPathFilter = bool Function(String path);
+
+/// Whether to completely disable build caching.
+///
+/// This is done by always returning false from fingerprinter invocations. This
+/// is safe to do generally, because fingerprinting is only a performance
+/// improvement.
+bool get _disableBuildCache => platform.environment['DISABLE_FLUTTER_BUILD_CACHE']?.toLowerCase() == 'true';
 
 /// A tool that can be used to compute, compare, and write [Fingerprint]s for a
 /// set of input files and associated build settings.
@@ -50,6 +58,9 @@ class Fingerprinter {
   }
 
   Future<bool> doesFingerprintMatch() async {
+    if (_disableBuildCache) {
+      return false;
+    }
     try {
       final File fingerprintFile = fs.file(fingerprintPath);
       if (!fingerprintFile.existsSync())
@@ -83,9 +94,11 @@ class Fingerprinter {
   }
 
   Future<List<String>> _getPaths() async {
-    final Set<String> paths = _paths.toSet();
-    for (String depfilePath in _depfilePaths)
-      paths.addAll(await readDepfile(depfilePath));
+    final Set<String> paths = <String>{
+      ..._paths,
+      for (String depfilePath in _depfilePaths)
+        ...await readDepfile(depfilePath),
+    };
     final FingerprintPathFilter filter = _pathFilter ?? (String path) => true;
     return paths.where(filter).toList()..sort();
   }
@@ -107,7 +120,7 @@ class Fingerprint {
       final List<int> bytes = file.readAsBytesSync();
       _checksums[file.path] = md5.convert(bytes).toString();
     }
-    _properties = <String, String>{}..addAll(properties);
+    _properties = <String, String>{...properties};
   }
 
   /// Creates a Fingerprint from serialized JSON.

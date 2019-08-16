@@ -14,9 +14,9 @@ import 'utils.dart';
 final AnsiTerminal _kAnsiTerminal = AnsiTerminal();
 
 AnsiTerminal get terminal {
-  return (context == null || context[AnsiTerminal] == null)
+  return (context == null || context.get<AnsiTerminal>() == null)
       ? _kAnsiTerminal
-      : context[AnsiTerminal];
+      : context.get<AnsiTerminal>();
 }
 
 enum TerminalColor {
@@ -31,9 +31,9 @@ enum TerminalColor {
 
 final OutputPreferences _kOutputPreferences = OutputPreferences();
 
-OutputPreferences get outputPreferences => (context == null || context[OutputPreferences] == null)
+OutputPreferences get outputPreferences => (context == null || context.get<OutputPreferences>() == null)
     ? _kOutputPreferences
-    : context[OutputPreferences];
+    : context.get<OutputPreferences>();
 
 /// A class that contains the context settings for command text output to the
 /// console.

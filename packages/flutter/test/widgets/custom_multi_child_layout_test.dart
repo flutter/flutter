@@ -51,8 +51,8 @@ Widget buildFrame(MultiChildLayoutDelegate delegate) {
         LayoutId(id: 0, child: Container(width: 150.0, height: 100.0)),
         LayoutId(id: 1, child: Container(width: 100.0, height: 200.0)),
       ],
-      delegate: delegate
-    )
+      delegate: delegate,
+    ),
   );
 }
 
@@ -127,13 +127,13 @@ void main() {
                 LayoutId(id: 0, child: Container(width: 150.0, height: 100.0)),
                 LayoutId(id: 1, child: Container(width: 100.0, height: 200.0)),
               ],
-              delegate: delegate
-            )
+              delegate: delegate,
+            ),
           ),
           LayoutId(id: 1, child: Container(width: 100.0, height: 200.0)),
         ],
-        delegate: delegate
-      )
+        delegate: delegate,
+      ),
     ));
 
   });
@@ -143,8 +143,8 @@ void main() {
     await tester.pumpWidget(Center(
       child: CustomMultiChildLayout(
         key: key,
-        delegate: PreferredSizeDelegate(preferredSize: const Size(300.0, 200.0))
-      )
+        delegate: PreferredSizeDelegate(preferredSize: const Size(300.0, 200.0)),
+      ),
     ));
 
     final RenderBox box = tester.renderObject(find.byKey(key));
@@ -154,8 +154,8 @@ void main() {
     await tester.pumpWidget(Center(
       child: CustomMultiChildLayout(
         key: key,
-        delegate: PreferredSizeDelegate(preferredSize: const Size(350.0, 250.0))
-      )
+        delegate: PreferredSizeDelegate(preferredSize: const Size(350.0, 250.0)),
+      ),
     ));
 
     expect(box.size.width, equals(350.0));

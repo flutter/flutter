@@ -31,7 +31,7 @@ class ProductPage extends StatelessWidget {
     return ScopedModelDescendant<AppStateModel>(
       builder: (BuildContext context, Widget child, AppStateModel model) {
         return AsymmetricView(products: model.getProducts());
-    });
+      });
   }
 }
 
@@ -50,7 +50,7 @@ class HomePage extends StatelessWidget {
     return Stack(
       children: <Widget>[
         backdrop,
-        Align(child: expandingBottomSheet, alignment: Alignment.bottomRight)
+        Align(child: expandingBottomSheet, alignment: Alignment.bottomRight),
       ],
     );
   }

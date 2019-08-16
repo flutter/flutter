@@ -82,15 +82,15 @@ Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
   verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance?.renderView?.debugLayer?.toStringDeep());
 
   // Scroll the demo around a bit more.
+  await tester.flingFrom(const Offset(400.0, 300.0), const Offset(0.0, 400.0), 1000.0);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
   await tester.flingFrom(const Offset(400.0, 300.0), const Offset(-200.0, 0.0), 500.0);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 50));
   await tester.pump(const Duration(milliseconds: 200));
   await tester.pump(const Duration(milliseconds: 400));
   await tester.flingFrom(const Offset(400.0, 300.0), const Offset(100.0, 0.0), 500.0);
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 400));
-  await tester.flingFrom(const Offset(400.0, 300.0), const Offset(0.0, 400.0), 1000.0);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 400));
 
@@ -109,28 +109,28 @@ Future<void> smokeOptionsPage(WidgetTester tester) async {
   await tester.tap(showOptionsPageButton);
   await tester.pumpAndSettle();
 
-  // Switch to the dark theme: first switch control
+  // Switch to the dark theme: first menu button, choose 'Dark'
+  await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Dark'));
+  await tester.pumpAndSettle();
+
+  // Switch back to system theme setting: first menu button, choose 'System Default'
+  await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('System Default').at(1));
+  await tester.pumpAndSettle();
+
+  // Switch text direction: first switch
   await tester.tap(find.byType(Switch).first);
   await tester.pumpAndSettle();
 
-  // Switch back to the light theme: first switch control again
+  // Switch back to system text direction: first switch control again
   await tester.tap(find.byType(Switch).first);
-  await tester.pumpAndSettle();
-
-  // Popup the text size menu: first menu button, choose 'Small'
-  await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('Small'));
-  await tester.pumpAndSettle();
-
-  // Popup the text size menu: first menu button, choose 'Normal'
-  await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('Normal'));
   await tester.pumpAndSettle();
 
   // Scroll the 'Send feedback' item into view
-  await tester.drag(find.text('Normal'), const Offset(0.0, -1000.0));
+  await tester.drag(find.text('Theme'), const Offset(0.0, -1000.0));
   await tester.pumpAndSettle();
   await tester.tap(find.text('Send feedback'));
   await tester.pumpAndSettle();

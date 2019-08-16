@@ -44,7 +44,7 @@ mixin SemanticsBinding on BindingBase {
 
   /// The platform is requesting that animations be disabled or simplified.
   ///
-  /// This setting can be overriden for testing or debugging by setting
+  /// This setting can be overridden for testing or debugging by setting
   /// [debugSemanticsDisableAnimations].
   bool get disableAnimations {
     bool value = _accessibilityFeatures.disableAnimations;

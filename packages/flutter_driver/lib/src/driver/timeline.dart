@@ -42,7 +42,7 @@ class TimelineEvent {
         : null,
       json['ts'],
       json['tts'],
-      json['args']
+      json['args'],
     );
   }
 
@@ -57,7 +57,7 @@ class TimelineEvent {
     this.threadDuration,
     this.timestampMicros,
     this.threadTimestampMicros,
-    this.arguments
+    this.arguments,
   );
 
   /// The original event JSON.

@@ -56,16 +56,6 @@ void main() {
     expect(darkTheme.accentTextTheme.title.color, typography.white.title.color);
   });
 
-  test('Default slider indicator style gets a default body2 if accentTextTheme.body2 is null', () {
-    const TextTheme noBody2TextTheme = TextTheme(body2: null);
-    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, accentTextTheme: noBody2TextTheme);
-    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, accentTextTheme: noBody2TextTheme);
-    final Typography typography = Typography(platform: lightTheme.platform);
-
-    expect(lightTheme.sliderTheme.valueIndicatorTextStyle, equals(typography.white.body2));
-    expect(darkTheme.sliderTheme.valueIndicatorTextStyle, equals(typography.black.body2));
-  });
-
   test('Default chip label style gets a default body2 if textTheme.body2 is null', () {
     const TextTheme noBody2TextTheme = TextTheme(body2: null);
     final ThemeData lightTheme = ThemeData(brightness: Brightness.light, textTheme: noBody2TextTheme);
@@ -146,4 +136,38 @@ void main() {
   test('cursorColor', () {
     expect(ThemeData(cursorColor: Colors.red).cursorColor, Colors.red);
   });
+
+  testWidgets('ThemeData.from a light color scheme sets appropriate values', (WidgetTester tester) async {
+    const ColorScheme lightColors = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(colorScheme: lightColors);
+
+    expect(theme.brightness, equals(Brightness.light));
+    expect(theme.primaryColor, equals(lightColors.primary));
+    expect(theme.accentColor, equals(lightColors.secondary));
+    expect(theme.cardColor, equals(lightColors.surface));
+    expect(theme.backgroundColor, equals(lightColors.background));
+    expect(theme.canvasColor, equals(lightColors.background));
+    expect(theme.scaffoldBackgroundColor, equals(lightColors.background));
+    expect(theme.dialogBackgroundColor, equals(lightColors.background));
+    expect(theme.errorColor, equals(lightColors.error));
+    expect(theme.applyElevationOverlayColor, isFalse);
+  });
+
+  testWidgets('ThemeData.from a dark color scheme sets appropriate values', (WidgetTester tester) async {
+    const ColorScheme darkColors = ColorScheme.dark();
+    final ThemeData theme = ThemeData.from(colorScheme: darkColors);
+
+    expect(theme.brightness, equals(Brightness.dark));
+    // in dark theme's the color used for main components is surface instead of primary
+    expect(theme.primaryColor, equals(darkColors.surface));
+    expect(theme.accentColor, equals(darkColors.secondary));
+    expect(theme.cardColor, equals(darkColors.surface));
+    expect(theme.backgroundColor, equals(darkColors.background));
+    expect(theme.canvasColor, equals(darkColors.background));
+    expect(theme.scaffoldBackgroundColor, equals(darkColors.background));
+    expect(theme.dialogBackgroundColor, equals(darkColors.background));
+    expect(theme.errorColor, equals(darkColors.error));
+    expect(theme.applyElevationOverlayColor, isTrue);
+  });
+
 }

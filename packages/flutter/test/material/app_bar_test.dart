@@ -153,8 +153,8 @@ void main() {
           appBar: AppBar(
             centerTitle: true,
             title: const Text('X'),
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -244,30 +244,9 @@ void main() {
   testWidgets(
     'AppBar centerTitle:false leading button title left edge is 72.0 (LTR)',
     (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-            centerTitle: false,
-            title: const Text('X'),
-          ),
-          // A drawer causes a leading hamburger.
-          drawer: const Drawer(),
-        ),
-      ),
-    );
-
-    expect(tester.getTopLeft(find.text('X')).dx, 72.0);
-  });
-
-  testWidgets(
-    'AppBar centerTitle:false leading button title left edge is 72.0 (RTL)',
-    (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.rtl,
-          child: Scaffold(
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
             appBar: AppBar(
               centerTitle: false,
               title: const Text('X'),
@@ -276,11 +255,32 @@ void main() {
             drawer: const Drawer(),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(tester.getTopRight(find.text('X')).dx, 800.0 - 72.0);
-  });
+      expect(tester.getTopLeft(find.text('X')).dx, 72.0);
+    });
+
+  testWidgets(
+    'AppBar centerTitle:false leading button title left edge is 72.0 (RTL)',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Scaffold(
+              appBar: AppBar(
+                centerTitle: false,
+                title: const Text('X'),
+              ),
+              // A drawer causes a leading hamburger.
+              drawer: const Drawer(),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.getTopRight(find.text('X')).dx, 800.0 - 72.0);
+    });
 
   testWidgets('AppBar centerTitle:false title overflow OK', (WidgetTester tester) async {
     // The app bar's title should be constrained to fit within the available space
@@ -318,7 +318,7 @@ void main() {
 
     actions = <Widget>[
       const SizedBox(width: 100.0),
-      const SizedBox(width: 100.0)
+      const SizedBox(width: 100.0),
     ];
     await tester.pumpWidget(buildApp());
 
@@ -383,7 +383,7 @@ void main() {
     titleWidth = 620.0;
     actions = <Widget>[
       const SizedBox(width: 48.0),
-      const SizedBox(width: 48.0)
+      const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48);
@@ -438,7 +438,7 @@ void main() {
     titleWidth = 620.0;
     actions = <Widget>[
       const SizedBox(width: 48.0),
-      const SizedBox(width: 48.0)
+      const SizedBox(width: 48.0),
     ];
     await tester.pumpWidget(buildApp());
     expect(tester.getTopRight(title).dx, 620 + 48 + 48);
@@ -878,7 +878,7 @@ void main() {
             data: topPadding100,
             child: Scaffold(
               primary: true,
-              appBar: AppBar(title: const Text('title'))
+              appBar: AppBar(title: const Text('title')),
           ),
         ),
       ),
@@ -1221,9 +1221,9 @@ void main() {
         ),
       ),
     ));
-    expect(tester.getRect(find.byType(AppBar)), Rect.fromLTRB(0.0, 0.0, 800.00, 100.0 + 56.0));
-    expect(tester.getRect(find.byKey(leadingKey)), Rect.fromLTRB(800.0 - 56.0, 100.0, 800.0, 100.0 + 56.0));
-    expect(tester.getRect(find.byKey(trailingKey)), Rect.fromLTRB(0.0, 100.0, 400.0, 100.0 + 56.0));
+    expect(tester.getRect(find.byType(AppBar)), const Rect.fromLTRB(0.0, 0.0, 800.00, 100.0 + 56.0));
+    expect(tester.getRect(find.byKey(leadingKey)), const Rect.fromLTRB(800.0 - 56.0, 100.0, 800.0, 100.0 + 56.0));
+    expect(tester.getRect(find.byKey(trailingKey)), const Rect.fromLTRB(0.0, 100.0, 400.0, 100.0 + 56.0));
   });
 
   testWidgets('SliverAppBar provides correct semantics in LTR', (WidgetTester tester) async {
@@ -1396,7 +1396,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: darkTheme,
       home: Scaffold(
-        appBar: AppBar(title: const Text('test'))
+        appBar: AppBar(title: const Text('test')),
       ),
     ));
 
@@ -1412,7 +1412,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: lightTheme,
       home: Scaffold(
-        appBar: AppBar(title: const Text('test'))
+        appBar: AppBar(title: const Text('test')),
       ),
     ));
 
@@ -1425,7 +1425,6 @@ void main() {
 
   testWidgets('Changing SliverAppBar snap from true to false', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17598
-
     const double appBarHeight = 256.0;
     bool snap = true;
 
@@ -1484,5 +1483,101 @@ void main() {
     await gesture.moveBy(const Offset(0.0, -100.0));
     await gesture.up();
     await tester.pump();
+  });
+
+  testWidgets('AppBar shape default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AppBar(
+          leading: const Text('L'),
+          title: const Text('No Scaffold'),
+          actions: const <Widget>[Text('A1'), Text('A2')],
+        ),
+      ),
+    );
+
+    final Finder appBarFinder = find.byType(AppBar);
+    AppBar getAppBarWidget(Finder finder) => tester.widget<AppBar>(finder);
+    expect(getAppBarWidget(appBarFinder).shape, null);
+
+    final Finder materialFinder = find.byType(Material);
+    Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
+    expect(getMaterialWidget(materialFinder).shape, null);
+  });
+
+  testWidgets('AppBar with shape', (WidgetTester tester) async {
+    const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(15.0))
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AppBar(
+          leading: const Text('L'),
+          title: const Text('No Scaffold'),
+          actions: const <Widget>[Text('A1'), Text('A2')],
+          shape: roundedRectangleBorder,
+        ),
+      ),
+    );
+
+    final Finder appBarFinder = find.byType(AppBar);
+    AppBar getAppBarWidget(Finder finder) => tester.widget<AppBar>(finder);
+    expect(getAppBarWidget(appBarFinder).shape, roundedRectangleBorder);
+
+    final Finder materialFinder = find.byType(Material);
+    Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
+    expect(getMaterialWidget(materialFinder).shape, roundedRectangleBorder);
+  });
+
+  testWidgets('SliverAppBar shape default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              leading: Text('L'),
+              title: Text('No Scaffold'),
+              actions: <Widget>[Text('A1'), Text('A2')],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Finder sliverAppBarFinder = find.byType(SliverAppBar);
+    SliverAppBar getSliverAppBarWidget(Finder finder) => tester.widget<SliverAppBar>(finder);
+    expect(getSliverAppBarWidget(sliverAppBarFinder).shape, null);
+
+    final Finder materialFinder = find.byType(Material);
+    Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
+    expect(getMaterialWidget(materialFinder).shape, null);
+  });
+
+  testWidgets('SliverAppBar with shape', (WidgetTester tester) async {
+    const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(15.0)),
+    );
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              leading: Text('L'),
+              title: Text('No Scaffold'),
+              actions: <Widget>[Text('A1'), Text('A2')],
+              shape: roundedRectangleBorder,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Finder sliverAppBarFinder = find.byType(SliverAppBar);
+    SliverAppBar getSliverAppBarWidget(Finder finder) => tester.widget<SliverAppBar>(finder);
+    expect(getSliverAppBarWidget(sliverAppBarFinder).shape, roundedRectangleBorder);
+
+    final Finder materialFinder = find.byType(Material);
+    Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
+    expect(getMaterialWidget(materialFinder).shape, roundedRectangleBorder);
   });
 }

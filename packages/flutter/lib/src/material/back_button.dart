@@ -89,7 +89,7 @@ class BackButton extends StatelessWidget {
       tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () {
         Navigator.maybePop(context);
-      }
+      },
     );
   }
 }

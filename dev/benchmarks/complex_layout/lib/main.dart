@@ -71,7 +71,7 @@ class TileScrollLayout extends StatelessWidget {
               child: IconBar(),
             ),
           );
-        }
+        },
       ),
       drawer: const GalleryDrawer(),
     );
@@ -101,8 +101,8 @@ class ComplexLayoutState extends State<ComplexLayout> {
               print('Pressed search');
             },
           ),
-          TopBarMenu()
-        ]
+          TopBarMenu(),
+        ],
       ),
       body: Column(
         children: <Widget>[
@@ -115,7 +115,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
                 else
                   return FancyGalleryItem(index, key: PageStorageKey<int>(index));
               },
-            )
+            ),
           ),
           BottomBar(),
         ],
@@ -133,45 +133,45 @@ class TopBarMenu extends StatelessWidget {
       itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
         const PopupMenuItem<String>(
           value: 'Friends',
-          child: MenuItemWithIcon(Icons.people, 'Friends', '5 new')
+          child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
+          child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.group, 'Groups', '14')
+          child: MenuItemWithIcon(Icons.group, 'Groups', '14'),
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.image, 'Pictures', '12')
+          child: MenuItemWithIcon(Icons.image, 'Pictures', '12'),
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
+          child: MenuItemWithIcon(Icons.near_me, 'Nearby', '33'),
         ),
         const PopupMenuItem<String>(
           value: 'Friends',
-          child: MenuItemWithIcon(Icons.people, 'Friends', '5')
+          child: MenuItemWithIcon(Icons.people, 'Friends', '5'),
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.event, 'Events', '12')
+          child: MenuItemWithIcon(Icons.event, 'Events', '12'),
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.group, 'Groups', '14')
+          child: MenuItemWithIcon(Icons.group, 'Groups', '14'),
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.image, 'Pictures', '12')
+          child: MenuItemWithIcon(Icons.image, 'Pictures', '12'),
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
-        )
-      ]
+          child: MenuItemWithIcon(Icons.near_me, 'Nearby', '33'),
+        ),
+      ],
     );
   }
 }
@@ -190,10 +190,10 @@ class MenuItemWithIcon extends StatelessWidget {
         Icon(icon),
         Padding(
           padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-          child: Text(title)
+          child: Text(title),
         ),
-        Text(subtitle, style: Theme.of(context).textTheme.caption)
-      ]
+        Text(subtitle, style: Theme.of(context).textTheme.caption),
+      ],
     );
   }
 }
@@ -213,11 +213,11 @@ class FancyImageItem extends StatelessWidget {
         InfoBar(),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 8.0),
-          child: Divider()
+          child: Divider(),
         ),
         IconBar(),
-        FatDivider()
-      ]
+        FatDivider(),
+      ],
     );
   }
 }
@@ -235,11 +235,11 @@ class FancyGalleryItem extends StatelessWidget {
         InfoBar(),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 8.0),
-          child: Divider()
+          child: Divider(),
         ),
         IconBar(),
-        FatDivider()
-      ]
+        FatDivider(),
+      ],
     );
   }
 }
@@ -253,9 +253,9 @@ class InfoBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           const MiniIconWithText(Icons.thumb_up, '42'),
-          Text('3 Comments', style: Theme.of(context).textTheme.caption)
-        ]
-      )
+          Text('3 Comments', style: Theme.of(context).textTheme.caption),
+        ],
+      ),
     );
   }
 }
@@ -271,8 +271,8 @@ class IconBar extends StatelessWidget {
           IconWithText(Icons.thumb_up, 'Like'),
           IconWithText(Icons.comment, 'Comment'),
           IconWithText(Icons.share, 'Share'),
-        ]
-      )
+        ],
+      ),
     );
   }
 }
@@ -290,10 +290,10 @@ class IconWithText extends StatelessWidget {
       children: <Widget>[
         IconButton(
           icon: Icon(icon),
-          onPressed: () { print('Pressed $title button'); }
+          onPressed: () { print('Pressed $title button'); },
         ),
-        Text(title)
-      ]
+        Text(title),
+      ],
     );
   }
 }
@@ -316,13 +316,13 @@ class MiniIconWithText extends StatelessWidget {
             height: 16.0,
             decoration: BoxDecoration(
               color: Theme.of(context).primaryColor,
-              shape: BoxShape.circle
+              shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: Colors.white, size: 12.0)
-          )
+            child: Icon(icon, color: Colors.white, size: 12.0),
+          ),
         ),
-        Text(title, style: Theme.of(context).textTheme.caption)
-      ]
+        Text(title, style: Theme.of(context).textTheme.caption),
+      ],
     );
   }
 }
@@ -354,8 +354,8 @@ class UserHeader extends StatelessWidget {
             child: Image(
               image: AssetImage('packages/flutter_gallery_assets/people/square/ali.png'),
               width: 32.0,
-              height: 32.0
-            )
+              height: 32.0,
+            ),
           ),
           Expanded(
             child: Column(
@@ -367,21 +367,21 @@ class UserHeader extends StatelessWidget {
                   children: <TextSpan>[
                     TextSpan(text: userName, style: const TextStyle(fontWeight: FontWeight.bold)),
                     const TextSpan(text: ' shared a new '),
-                    const TextSpan(text: 'photo', style: TextStyle(fontWeight: FontWeight.bold))
-                  ]
+                    const TextSpan(text: 'photo', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
                 )),
                 Row(
                   children: <Widget>[
                     Text('Yesterday at 11:55 • ', style: Theme.of(context).textTheme.caption),
-                    Icon(Icons.people, size: 16.0, color: Theme.of(context).textTheme.caption.color)
-                  ]
-                )
-              ]
-            )
+                    Icon(Icons.people, size: 16.0, color: Theme.of(context).textTheme.caption.color),
+                  ],
+                ),
+              ],
+            ),
           ),
-          TopBarMenu()
-        ]
-      )
+          TopBarMenu(),
+        ],
+      ),
     );
   }
 }
@@ -391,7 +391,7 @@ class ItemDescription extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Padding(
       padding: EdgeInsets.all(8.0),
-      child: Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')
+      child: Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'),
     );
   }
 }
@@ -411,7 +411,7 @@ class ItemImageBox extends StatelessWidget {
                   height: 230.0,
                   child: Image(
                     image: AssetImage('packages/flutter_gallery_assets/places/india_chettinad_silk_maker.png')
-                  )
+                  ),
                 ),
                 Theme(
                   data: ThemeData.dark(),
@@ -420,14 +420,14 @@ class ItemImageBox extends StatelessWidget {
                     children: <Widget>[
                       IconButton(
                         icon: const Icon(Icons.edit),
-                        onPressed: () { print('Pressed edit button'); }
+                        onPressed: () { print('Pressed edit button'); },
                       ),
                       IconButton(
                         icon: const Icon(Icons.zoom_in),
-                        onPressed: () { print('Pressed zoom button'); }
+                        onPressed: () { print('Pressed zoom button'); },
                       ),
-                    ]
-                  )
+                    ],
+                  ),
                 ),
                 Positioned(
                   bottom: 4.0,
@@ -435,11 +435,11 @@ class ItemImageBox extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.black54,
-                      borderRadius: BorderRadius.circular(2.0)
+                      borderRadius: BorderRadius.circular(2.0),
                     ),
                     padding: const EdgeInsets.all(4.0),
-                    child: const RichText(
-                      text: TextSpan(
+                    child: RichText(
+                      text: const TextSpan(
                         style: TextStyle(color: Colors.white),
                         children: <TextSpan>[
                           TextSpan(
@@ -447,14 +447,14 @@ class ItemImageBox extends StatelessWidget {
                           ),
                           TextSpan(
                             style: TextStyle(fontWeight: FontWeight.bold),
-                            text: 'Chris Godley'
-                          )
-                        ]
-                      )
-                    )
-                  )
-                )
-              ]
+                            text: 'Chris Godley',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             )
             ,
             Padding(
@@ -464,13 +464,13 @@ class ItemImageBox extends StatelessWidget {
                 children: <Widget>[
                   Text('Artisans of Southern India', style: Theme.of(context).textTheme.body2),
                   Text('Silk Spinners', style: Theme.of(context).textTheme.body1),
-                  Text('Sivaganga, Tamil Nadu', style: Theme.of(context).textTheme.caption)
-                ]
-              )
-            )
-          ]
-        )
-      )
+                  Text('Sivaganga, Tamil Nadu', style: Theme.of(context).textTheme.caption),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -483,7 +483,7 @@ class ItemGalleryBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> tabNames = <String>[
-      'A', 'B', 'C', 'D'
+      'A', 'B', 'C', 'D',
     ];
 
     return SizedBox(
@@ -507,8 +507,8 @@ class ItemGalleryBox extends StatelessWidget {
                                 color: Theme.of(context).primaryColor,
                                 child: Center(
                                   child: Text(tabName, style: Theme.of(context).textTheme.headline.copyWith(color: Colors.white)),
-                                )
-                              )
+                                ),
+                              ),
                             ),
                             Row(
                               children: <Widget>[
@@ -524,24 +524,24 @@ class ItemGalleryBox extends StatelessWidget {
                                   child: Padding(
                                     padding: const EdgeInsets.only(left: 8.0),
                                     child: Text('This is item $tabName'),
-                                  )
-                                )
-                              ]
-                            )
-                          ]
-                        )
-                      )
-                    )
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   );
-                }).toList()
-              )
+                }).toList(),
+              ),
             ),
             Container(
-              child: const TabPageSelector()
-            )
-          ]
-        )
-      )
+              child: const TabPageSelector(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -554,9 +554,9 @@ class BottomBar extends StatelessWidget {
         border: Border(
           top: BorderSide(
             color: Theme.of(context).dividerColor,
-            width: 1.0
-          )
-        )
+            width: 1.0,
+          ),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -586,11 +586,11 @@ class BottomBarButton extends StatelessWidget {
         children: <Widget>[
           IconButton(
             icon: Icon(icon),
-            onPressed: () { print('Pressed: $title'); }
+            onPressed: () { print('Pressed: $title'); },
           ),
-          Text(title, style: Theme.of(context).textTheme.caption)
-        ]
-      )
+          Text(title, style: Theme.of(context).textTheme.caption),
+        ],
+      ),
     );
   }
 }
@@ -625,7 +625,7 @@ class GalleryDrawer extends StatelessWidget {
               _changeScrollMode(context, currentMode == ScrollMode.complex ? ScrollMode.tile : ScrollMode.complex);
              Navigator.pop(context);
             },
-            trailing: Text(currentMode == ScrollMode.complex ? 'Tile' : 'Complex')
+            trailing: Text(currentMode == ScrollMode.complex ? 'Tile' : 'Complex'),
           ),
           ListTile(
             leading: const Icon(Icons.brightness_5),
@@ -635,7 +635,7 @@ class GalleryDrawer extends StatelessWidget {
             trailing: Radio<bool>(
               value: true,
               groupValue: ComplexLayoutApp.of(context).lightTheme,
-              onChanged: (bool value) { _changeTheme(context, value); }
+              onChanged: (bool value) { _changeTheme(context, value); },
             ),
           ),
           ListTile(
@@ -657,7 +657,7 @@ class GalleryDrawer extends StatelessWidget {
             onTap: () { ComplexLayoutApp.of(context).toggleAnimationSpeed(); },
             trailing: Checkbox(
               value: timeDilation != 1.0,
-              onChanged: (bool value) { ComplexLayoutApp.of(context).toggleAnimationSpeed(); }
+              onChanged: (bool value) { ComplexLayoutApp.of(context).toggleAnimationSpeed(); },
             ),
           ),
         ],

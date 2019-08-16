@@ -478,7 +478,7 @@ void main() {
     );
     expect(children.sublist(0, 21).any((RenderBox r) => r.attached), false);
     expect(children.sublist(21, 30).every((RenderBox r) => r.attached), true);
-  });
+  }, skip: isBrowser);
 
   test('RenderSliverGrid calculates correct geometry', () {
     // Viewport is 800x600, each grid element is 400x100, giving us space for 12 visible children
@@ -878,14 +878,14 @@ void main() {
   });
 }
 
-void expectSliverConstraints({RenderSliver sliver, double cacheOrigin, double remainingPaintExtent, double remainingCacheExtent, double scrollOffset}) {
+void expectSliverConstraints({ RenderSliver sliver, double cacheOrigin, double remainingPaintExtent, double remainingCacheExtent, double scrollOffset }) {
   expect(sliver.constraints.cacheOrigin, cacheOrigin, reason: 'cacheOrigin');
   expect(sliver.constraints.remainingPaintExtent, remainingPaintExtent, reason: 'remainingPaintExtent');
   expect(sliver.constraints.remainingCacheExtent, remainingCacheExtent, reason: 'remainingCacheExtent');
   expect(sliver.constraints.scrollOffset, scrollOffset, reason: 'scrollOffset');
 }
 
-void expectSliverGeometry({RenderSliver sliver, double paintExtent, double cacheExtent, bool visible}) {
+void expectSliverGeometry({ RenderSliver sliver, double paintExtent, double cacheExtent, bool visible }) {
   expect(sliver.geometry.paintExtent, paintExtent, reason: 'paintExtent');
   expect(sliver.geometry.cacheExtent, cacheExtent, reason: 'cacheExtent');
   expect(sliver.geometry.visible, visible, reason: 'visible');
@@ -946,7 +946,8 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   }
 
   @override
-  double estimateMaxScrollOffset(SliverConstraints constraints, {
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,

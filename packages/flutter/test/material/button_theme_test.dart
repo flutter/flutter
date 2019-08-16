@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -168,7 +170,7 @@ void main() {
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
     expect(tester.widget<Material>(find.byType(Material)).color, disabledColor);
     expect(tester.getSize(find.byType(Material)), const Size(88.0, 48.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Theme buttonTheme ButtonTheme overrides', (WidgetTester tester) async {
     ButtonTextTheme textTheme;
@@ -325,4 +327,79 @@ void main() {
     expect(fooText, findsNWidgets(2));
     expect(tester.getRect(fooText.at(0)), tester.getRect(fooText.at(1)));
   });
+
+  testWidgets('button theme with stateful color changes color in states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
+
+    Color getTextColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return pressedColor;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return hoverColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return focusedColor;
+      }
+      return defaultColor;
+    }
+
+    const ColorScheme colorScheme = ColorScheme.light();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ButtonTheme(
+              colorScheme: colorScheme.copyWith(
+                primary: MaterialStateColor.resolveWith(getTextColor),
+              ),
+              textTheme: ButtonTextTheme.primary,
+              child: FlatButton(
+                child: const Text('FlatButton'),
+                onPressed: () {},
+                focusNode: focusNode,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Color textColor() {
+      return tester.renderObject<RenderParagraph>(find.text('FlatButton')).text.style.color;
+    }
+
+    // Default, not disabled.
+    expect(textColor(), equals(defaultColor));
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(textColor(), focusedColor);
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(FlatButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(textColor(), hoverColor);
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    expect(textColor(), pressedColor);
+  },
+    semanticsEnabled: true,
+  );
 }

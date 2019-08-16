@@ -16,7 +16,7 @@ void main() {
     await tester.pumpWidget(ErrorWidget(Exception(errorMessage)));
 
     expect(find.byType(ErrorWidget), paints
-        ..rect(rect: Rect.fromLTWH(0.0, 0.0, 800.0, 600.0))
+        ..rect(rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0))
         ..paragraph(offset: Offset.zero));
   });
 }
