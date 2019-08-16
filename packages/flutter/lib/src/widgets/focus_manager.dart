@@ -382,6 +382,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// This may be used to place nodes in the focus tree that may be focused, but
   /// not traversed, allowing them to receive key events as part of the focus
   /// chain, but not be traversed to via focus traversal.
+  ///
+  /// This is different from [canRequestFocus] because it only implies that the
+  /// node can't be reached via traversal, not that it can't be focused. It may
+  /// still be focused explicitly.
   bool get skipTraversal => _skipTraversal;
   bool _skipTraversal;
   set skipTraversal(bool value) {
@@ -395,8 +399,22 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// Defaults to true.  Set to false if you want this node to do nothing when
   /// [requestFocus] is called on it. Does not affect the children of this node,
-  /// and [FocusNode.hasFocus] can still return true if this node is the
-  /// ancestor of a node with primary focus.
+  /// and [hasFocus] can still return true if this node is the ancestor of a
+  /// node with primary focus.
+  ///
+  /// This is different than [skipTraversal] because [skipTraversal] still
+  /// allows the node to be focused, just not traversed to via the
+  /// [FocusTraversalPolicy]
+  ///
+  /// Setting [canRequestFocus] to false implies that the node will also be
+  /// skipped for traversal purposes.
+  ///
+  /// See also:
+  ///
+  ///   - [DefaultFocusTraversal], a widget that sets the traversal policy for
+  ///     its descendants.
+  ///   - [FocusTraversalPolicy], a class that can be extended to describe a
+  ///     traversal policy.
   bool get canRequestFocus => _canRequestFocus;
   bool _canRequestFocus;
   set canRequestFocus(bool value) {
