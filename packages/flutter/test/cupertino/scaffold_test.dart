@@ -481,4 +481,32 @@ void main() {
     expect(positionWithInsetNoNavBar.dy, lessThan(positionNoInsetNoNavBar.dy));
     expect(positionWithInsetNoNavBar, equals(positionWithInsetWithNavBar));
   });
+
+  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
+            child: const CupertinoPageScaffold(
+              navigationBar: CupertinoNavigationBar(
+                middle: Text('middle'),
+                leading: Text('leading'),
+                trailing: Text('trailing'),
+              ),
+              child: Text('content'),
+            ),
+          );
+        }),
+      ),
+    );
+    final Iterable<RichText> richTextList = tester.widgetList<RichText>(
+      find.descendant(of: find.byType(CupertinoNavigationBar), matching: find.byType(RichText)),
+    );
+
+    expect(richTextList.length, greaterThan(0));
+    expect(richTextList.any((RichText text) => text.textScaleFactor != 1), isFalse);
+
+    expect(tester.widget<RichText>(find.descendant(of: find.text('content'), matching: find.byType(RichText))).textScaleFactor, 99);
+  });
 }
