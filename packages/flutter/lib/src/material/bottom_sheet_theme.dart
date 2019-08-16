@@ -29,7 +29,7 @@ class BottomSheetThemeData extends Diagnosticable {
   const BottomSheetThemeData({
     this.backgroundColor,
     this.elevation,
-    this.persistentElevation,
+    this.modalElevation,
     this.shape,
   });
 
@@ -48,7 +48,7 @@ class BottomSheetThemeData extends Diagnosticable {
   /// Value for [BottomSheet.elevation], if specified.
   ///
   /// If null, [BottomSheet.elevation] defaults to [elevation].
-  final double persistentElevation;
+  final double modalElevation;
 
   /// Default value for [BottomSheet.shape].
   ///
@@ -61,13 +61,13 @@ class BottomSheetThemeData extends Diagnosticable {
   BottomSheetThemeData copyWith({
     Color backgroundColor,
     double elevation,
-    double persistentElevation,
+    double modalElevation,
     ShapeBorder shape,
   }) {
     return BottomSheetThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       elevation: elevation ?? this.elevation,
-      persistentElevation: persistentElevation ?? this.persistentElevation,
+      modalElevation: modalElevation ?? this.modalElevation,
       shape: shape ?? this.shape,
     );
   }
@@ -84,7 +84,7 @@ class BottomSheetThemeData extends Diagnosticable {
     return BottomSheetThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
-      persistentElevation: lerpDouble(a?.persistentElevation, b?.persistentElevation, t),
+      modalElevation: lerpDouble(a?.modalElevation, b?.modalElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
     );
   }
@@ -94,7 +94,7 @@ class BottomSheetThemeData extends Diagnosticable {
     return hashValues(
       backgroundColor,
       elevation,
-      persistentElevation,
+      modalElevation,
       shape,
     );
   }
@@ -108,7 +108,7 @@ class BottomSheetThemeData extends Diagnosticable {
     final BottomSheetThemeData typedOther = other;
     return typedOther.backgroundColor == backgroundColor
         && typedOther.elevation == elevation
-        && typedOther.persistentElevation == persistentElevation
+        && typedOther.modalElevation == modalElevation
         && typedOther.shape == shape;
   }
 
@@ -117,7 +117,7 @@ class BottomSheetThemeData extends Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
-    properties.add(DoubleProperty('persistentElevation', persistentElevation, defaultValue: null));
+    properties.add(DoubleProperty('modalElevation', modalElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }

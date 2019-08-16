@@ -439,7 +439,7 @@ Future<T> showModalBottomSheet<T>({
     isScrollControlled: isScrollControlled,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     backgroundColor: backgroundColor,
-    elevation: elevation,
+    elevation: elevation ?? Theme.of(context).bottomSheetTheme.modalElevation,
     shape: shape,
   ));
 }
@@ -493,7 +493,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   return Scaffold.of(context).showBottomSheet<T>(
     builder,
     backgroundColor: backgroundColor,
-    elevation: Theme.of(context).bottomSheetTheme.persistentElevation ?? elevation,
+    elevation: elevation,
     shape: shape,
   );
 }

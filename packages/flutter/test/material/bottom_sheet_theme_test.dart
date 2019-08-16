@@ -133,31 +133,12 @@ void main() {
     expect(material.shape, shape);
   });
 
-  testWidgets('BottomSheet persistentElevation takes priority over elevation - Persistent', (WidgetTester tester) async {
-    const modalElevation = 5.0;
-    const persistentElevation = 7.0;
-    const bottomSheetTheme = BottomSheetThemeData(
-      elevation: modalElevation,
-      persistentElevation: persistentElevation,
-    );
-    await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
-    await tester.tap(find.byIcon(Icons.check));
-    await tester.pumpAndSettle();
-    final Material material = tester.widget<Material>(
-      find.descendant(
-        of: find.byType(BottomSheet),
-        matching: find.byType(Material),
-      ).first,
-    );
-    expect(material.elevation, persistentElevation);
-  });
-
   testWidgets('BottomSheet persistentElevation takes priority over elevation - Modal', (WidgetTester tester) async {
     const modalElevation = 5.0;
     const persistentElevation = 7.0;
     const bottomSheetTheme = BottomSheetThemeData(
-      elevation: modalElevation,
-      persistentElevation: persistentElevation,
+      elevation: persistentElevation,
+      modalElevation: modalElevation,
     );
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
     await tester.tap(find.byIcon(Icons.clear));
@@ -171,10 +152,12 @@ void main() {
     expect(material.elevation, modalElevation);
   });
 
-  testWidgets('BottomSheet persistentElevation only sets elevation for persistent bottom sheet - Persistent', (WidgetTester tester) async {
+  testWidgets('BottomSheet modalElevation takes priority over elevation - Persistent', (WidgetTester tester) async {
     const persistentElevation = 7.0;
+    const modalElevation = 5.0;
     const bottomSheetTheme = BottomSheetThemeData(
-      persistentElevation: persistentElevation,
+      elevation: persistentElevation,
+      modalElevation: modalElevation,
     );
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
     await tester.tap(find.byIcon(Icons.check));
@@ -188,13 +171,13 @@ void main() {
     expect(material.elevation, persistentElevation);
   });
 
-  testWidgets('BottomSheet persistentElevation only sets elevation for persistent bottom sheet - Modal', (WidgetTester tester) async {
-    const persistentElevation = 7.0;
+  testWidgets('BottomSheet modalElevation only sets elevation for modal bottom sheet - Persistent', (WidgetTester tester) async {
+    const modalElevation = 5.0;
     const bottomSheetTheme = BottomSheetThemeData(
-      persistentElevation: persistentElevation,
+      modalElevation: modalElevation,
     );
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
-    await tester.tap(find.byIcon(Icons.clear));
+    await tester.tap(find.byIcon(Icons.check));
     await tester.pumpAndSettle();
     final Material material = tester.widget<Material>(
       find.descendant(
@@ -215,19 +198,6 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
           return Column(
               children: [
                 RawMaterialButton(
-                  child: const Icon(Icons.check),
-                  onPressed: () {
-                    showBottomSheet<void>(
-                      context: context,
-                      builder: (_) => Container(
-                        child: const Text(
-                          'This is a persistent bottom sheet.',
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                RawMaterialButton(
                   child: const Icon(Icons.clear),
                   onPressed: () {
                     showModalBottomSheet<void>(
@@ -235,6 +205,19 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
                       builder: (_) => Container(
                         child: const Text(
                           'This is a modal bottom sheet.',
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                RawMaterialButton(
+                  child: const Icon(Icons.check),
+                  onPressed: () {
+                    showBottomSheet<void>(
+                      context: context,
+                      builder: (_) => Container(
+                        child: const Text(
+                          'This is a persistent bottom sheet.',
                         ),
                       ),
                     );
