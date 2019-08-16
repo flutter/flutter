@@ -345,7 +345,7 @@ class _ShortcutsState extends State<Shortcuts> {
   @override
   Widget build(BuildContext context) {
     return Focus(
-      skipTraversal: true,
+      canRequestFocus: false,
       onKey: _handleOnKey,
       child: _ShortcutsMarker(
         manager: manager,
