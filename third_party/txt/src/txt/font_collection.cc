@@ -209,26 +209,33 @@ std::shared_ptr<minikin::FontFamily> FontCollection::CreateMinikinFontFamily(
     return nullptr;
   }
 
-  std::vector<minikin::Font> minikin_fonts;
-
-  // Add fonts to the Minikin font family.
+  std::vector<sk_sp<SkTypeface>> skia_typefaces;
   for (int i = 0; i < font_style_set->count(); ++i) {
-    TRACE_EVENT0("flutter", "CreateMinikinFont");
-    // Create the skia typeface.
+    TRACE_EVENT0("flutter", "CreateSkiaTypeface");
     sk_sp<SkTypeface> skia_typeface(
         sk_sp<SkTypeface>(font_style_set->createTypeface(i)));
-    if (skia_typeface == nullptr) {
-      continue;
+    if (skia_typeface != nullptr) {
+      skia_typefaces.emplace_back(std::move(skia_typeface));
     }
+  }
 
+  std::sort(skia_typefaces.begin(), skia_typefaces.end(),
+            [](const sk_sp<SkTypeface>& a, const sk_sp<SkTypeface>& b) {
+              SkFontStyle a_style = a->fontStyle();
+              SkFontStyle b_style = b->fontStyle();
+              return (a_style.weight() != b_style.weight())
+                         ? a_style.weight() < b_style.weight()
+                         : a_style.slant() < b_style.slant();
+            });
+
+  std::vector<minikin::Font> minikin_fonts;
+  for (const sk_sp<SkTypeface>& skia_typeface : skia_typefaces) {
     // Create the minikin font from the skia typeface.
     // Divide by 100 because the weights are given as "100", "200", etc.
-    minikin::Font minikin_font(
+    minikin_fonts.emplace_back(
         std::make_shared<FontSkia>(skia_typeface),
         minikin::FontStyle{skia_typeface->fontStyle().weight() / 100,
                            skia_typeface->isItalic()});
-
-    minikin_fonts.emplace_back(std::move(minikin_font));
   }
 
   return std::make_shared<minikin::FontFamily>(std::move(minikin_fonts));
