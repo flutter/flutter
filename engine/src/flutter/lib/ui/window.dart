@@ -637,7 +637,7 @@ class Window {
   /// will likely place system UI, such as the keyboard, that fully obscures
   /// any content.
   ///
-  /// When this changes, [onMetricsChanged] is called.
+  /// When this property changes, [onMetricsChanged] is called.
   ///
   /// The relationship between this [Window.viewInsets], [Window.viewPadding],
   /// and [Window.padding] are described in more detail in the documentation for
@@ -664,7 +664,7 @@ class Window {
   /// response to the soft keyboard being visible or hidden, whereas
   /// [Window.padding] will.
   ///
-  /// When this changes, [onMetricsChanged] is called.
+  /// When this property changes, [onMetricsChanged] is called.
   ///
   /// The relationship between this [Window.viewInsets], [Window.viewPadding],
   /// and [Window.padding] are described in more detail in the documentation for
@@ -679,6 +679,24 @@ class Window {
   ///    applications.
   WindowPadding get viewPadding => _viewPadding;
   WindowPadding _viewPadding = WindowPadding.zero;
+
+  /// The number of physical pixels on each side of the display rectangle into
+  /// which the application can render, but where the operating system will
+  /// consume input gestures for the sake of system navigation.
+  ///
+  /// For example, an operating system might use the vertical edges of the
+  /// screen, where swiping inwards from the edges takes users backward
+  /// through the history of screens they previously visited.
+  ///
+  /// When this property changes, [onMetricsChanged] is called.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this value changes.
+  ///  * [MediaQuery.of], a simpler mechanism for the same.
+  WindowPadding get systemGestureInsets => _systemGestureInsets;
+  WindowPadding _systemGestureInsets = WindowPadding.zero;
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the application can render, but which may be partially obscured by
@@ -711,9 +729,10 @@ class Window {
   WindowPadding _padding = WindowPadding.zero;
 
   /// A callback that is invoked whenever the [devicePixelRatio],
-  /// [physicalSize], [padding], or [viewInsets] values change, for example
-  /// when the device is rotated or when the application is resized (e.g. when
-  /// showing applications side-by-side on Android).
+  /// [physicalSize], [padding], [viewInsets], or [systemGestureInsets]
+  /// values change, for example when the device is rotated or when the
+  /// application is resized (e.g. when showing applications side-by-side
+  /// on Android).
   ///
   /// The engine invokes this callback in the same zone in which the callback
   /// was set.

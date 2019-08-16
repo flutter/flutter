@@ -5,11 +5,13 @@
 package io.flutter.view;
 
 import android.annotation.TargetApi;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -100,6 +102,10 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
         int physicalViewInsetRight = 0;
         int physicalViewInsetBottom = 0;
         int physicalViewInsetLeft = 0;
+        int systemGestureInsetTop = 0;
+        int systemGestureInsetRight = 0;
+        int systemGestureInsetBottom = 0;
+        int systemGestureInsetLeft = 0;
     }
 
     private final DartExecutor dartExecutor;
@@ -542,9 +548,13 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
 
     // This callback is not present in API < 20, which means lower API devices will see
     // the wider than expected padding when the status and navigation bars are hidden.
+    // The annotations to suppress "InlinedApi" and "NewApi" lints prevent lint warnings
+    // caused by usage of Android Q APIs. These calls are safe because they are
+    // guarded.
     @Override
     @TargetApi(20)
     @RequiresApi(20)
+    @SuppressLint({"InlinedApi", "NewApi"})
     public final WindowInsets onApplyWindowInsets(WindowInsets insets) {
         boolean statusBarHidden =
             (SYSTEM_UI_FLAG_FULLSCREEN & getWindowSystemUiVisibility()) != 0;
@@ -574,6 +584,14 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
         mMetrics.physicalViewInsetBottom =
             navigationBarHidden ? calculateBottomKeyboardInset(insets) : insets.getSystemWindowInsetBottom();
         mMetrics.physicalViewInsetLeft = 0;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Insets systemGestureInsets = insets.getSystemGestureInsets();
+            mMetrics.systemGestureInsetTop = systemGestureInsets.top;
+            mMetrics.systemGestureInsetRight = systemGestureInsets.right;
+            mMetrics.systemGestureInsetBottom = systemGestureInsets.bottom;
+            mMetrics.systemGestureInsetLeft = systemGestureInsets.left;
+        }
         updateViewportMetrics();
         return super.onApplyWindowInsets(insets);
     }
@@ -642,10 +660,23 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
     private void updateViewportMetrics() {
         if (!isAttached())
             return;
-        mNativeView.getFlutterJNI().setViewportMetrics(mMetrics.devicePixelRatio, mMetrics.physicalWidth,
-                mMetrics.physicalHeight, mMetrics.physicalPaddingTop, mMetrics.physicalPaddingRight,
-                mMetrics.physicalPaddingBottom, mMetrics.physicalPaddingLeft, mMetrics.physicalViewInsetTop,
-                mMetrics.physicalViewInsetRight, mMetrics.physicalViewInsetBottom, mMetrics.physicalViewInsetLeft);
+        mNativeView.getFlutterJNI().setViewportMetrics(
+            mMetrics.devicePixelRatio,
+            mMetrics.physicalWidth,
+            mMetrics.physicalHeight,
+            mMetrics.physicalPaddingTop,
+            mMetrics.physicalPaddingRight,
+            mMetrics.physicalPaddingBottom,
+            mMetrics.physicalPaddingLeft,
+            mMetrics.physicalViewInsetTop,
+            mMetrics.physicalViewInsetRight,
+            mMetrics.physicalViewInsetBottom,
+            mMetrics.physicalViewInsetLeft,
+            mMetrics.systemGestureInsetTop,
+            mMetrics.systemGestureInsetRight,
+            mMetrics.systemGestureInsetBottom,
+            mMetrics.systemGestureInsetLeft
+        );
     }
 
     // Called by native to update the semantics/accessibility tree.

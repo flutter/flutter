@@ -573,6 +573,8 @@ abstract class Window {
 
   WindowPadding get viewPadding => WindowPadding.zero;
 
+  WindowPadding get systemGestureInsets => WindowPadding.zero;
+
   /// The number of physical pixels on each side of the display rectangle into
   /// which the application can render, but which may be partially obscured by
   /// system UI (such as the system notification area), or or physical
