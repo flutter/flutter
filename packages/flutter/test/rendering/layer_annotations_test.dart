@@ -327,67 +327,6 @@ void main() {
     expect(root.findAll<int>(outsidePosition), <int>[1000]);
   });
 
-  test('FollowerLayer.findAll respects parameters', () {
-    final LayerLink link = LayerLink();
-    final LayerLink unusedLink = LayerLink();
-    const Offset limbo = Offset(-1000, -1000);
-
-    final Layer root = _appendAnnotationIfNotOpaque(1000,
-      _Layers(
-        LeaderLayer(link: link, offset: const Offset(10, 10)),
-        children: <Object>[
-          // Follower 1: linked
-          _Layers(
-            FollowerLayer(
-              link: link,
-              linkedOffset: const Offset(100, 100),
-              unlinkedOffset: limbo,
-              showWhenUnlinked: true,
-            ),
-            children: <Object>[
-              _TestAnnotatedLayer(1, opaque: true, size: const Size(10, 10)),
-            ],
-          ),
-          // Follower 2: unlinked, showWhenUnlinked default (true)
-          _Layers(
-            FollowerLayer(
-              link: unusedLink,
-              linkedOffset: limbo,
-              unlinkedOffset: const Offset(200, 200),
-            ),
-            children: <Object>[
-              _TestAnnotatedLayer(2, opaque: true, size: const Size(10, 10)),
-            ],
-          ),
-          // Follower 3: unlinked, showWhenUnlinked false
-          _Layers(
-            FollowerLayer(
-              link: unusedLink,
-              linkedOffset: limbo,
-              unlinkedOffset: const Offset(300, 300),
-              showWhenUnlinked: false,
-            ),
-            children: <Object>[
-              _TestAnnotatedLayer(3, opaque: true, size: const Size(10, 10)),
-            ],
-          ),
-        ]
-      ).build(),
-    );
-
-    // Follower 1
-    expect(root.findAll<int>(const Offset(115, 115)), <int>[1]);
-    expect(root.findAll<int>(const Offset(105, 105)), <int>[1000]);
-    // Follower 2
-    expect(root.findAll<int>(const Offset(215, 215)), <int>[1000]);
-    expect(root.findAll<int>(const Offset(205, 205)), <int>[2]);
-    // Follower 3
-    expect(root.findAll<int>(const Offset(305, 305)), <int>[1000]);
-    expect(root.findAll<int>(const Offset(315, 315)), <int>[1000]);
-
-    expect(root.findAll<int>(const Offset(5, 5)), <int>[1000]);
-  });
-
   test('AnnotatedRegionLayer.findAll should append to the list '
     'and return the given opacity (false) during a successful hit', () {
     const Offset position = Offset(5, 5);
