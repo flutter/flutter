@@ -76,18 +76,34 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 
   final _CupertinoTextFieldState _state;
 
+  // Returns true if the event should be ignored, false otherwise. Events on the
+  // CupertinoTextField's prefix are ignored when prefixGesturesIgnored is set
+  // to true, and similarly for suffix.
+  static bool _shouldIgnore(GlobalKey globalKey, Offset globalPosition, bool ignoreWhenHit) {
+    if (globalKey.currentContext == null) {
+      return false;
+    }
+
+    final RenderBox renderBox = globalKey.currentContext.findRenderObject();
+    final Offset localOffset = renderBox.globalToLocal(globalPosition);
+    return renderBox.hitTest(BoxHitTestResult(), position: localOffset) && ignoreWhenHit;
+  }
+
   @override
   void onSingleTapUp(TapUpDetails details) {
     // Because TextSelectionGestureDetector listens to taps that happen on
-    // widgets in front of it, tapping the clear button will also trigger
-    // this handler. If the the clear button widget recognizes the up event,
-    // then do not handle it.
-    if (_state._clearGlobalKey.currentContext != null) {
-      final RenderBox renderBox = _state._clearGlobalKey.currentContext.findRenderObject();
-      final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
-      if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
-        return;
-      }
+    // widgets in front of it, tapping the clear button, prefix, or suffix will
+    // also trigger this handler. All taps on the clear button are ignored. Taps
+    // on the prefix or suffix are ignored if prefixGesturesIgnored or
+    // suffixGesturesIgnored are set to true, respectively.
+    if (_shouldIgnore(_state._clearGlobalKey, details.globalPosition, true)) {
+      return;
+    }
+    if (_shouldIgnore(_state._prefixGlobalKey, details.globalPosition, _state.widget.prefixGesturesIgnored)) {
+      return;
+    }
+    if (_shouldIgnore(_state._suffixGlobalKey, details.globalPosition, _state.widget.suffixGesturesIgnored)) {
+      return;
     }
     super.onSingleTapUp(details);
     _state._requestKeyboard();
@@ -204,8 +220,10 @@ class CupertinoTextField extends StatefulWidget {
       color: _kInactiveTextColor
     ),
     this.prefix,
+    this.prefixGesturesIgnored = false,
     this.prefixMode = OverlayVisibilityMode.always,
     this.suffix,
+    this.suffixGesturesIgnored = false,
     this.suffixMode = OverlayVisibilityMode.always,
     this.clearButtonMode = OverlayVisibilityMode.never,
     TextInputType keyboardType,
@@ -321,6 +339,23 @@ class CupertinoTextField extends StatefulWidget {
   /// An optional [Widget] to display before the text.
   final Widget prefix;
 
+  /// Whether the TextField ignores gestures on its [prefix].
+  ///
+  /// When false, gestures that happen on top of the prefix may be handled by
+  /// the field as well. For example, a tap on the prefix will focus the field
+  /// if unfocused, or move the cursor to the beginning of the text if already
+  /// focused.
+  ///
+  /// When true, gestures that happen on top of the prefix are ignored by the
+  /// field. In this case, a tap on the prefix will not focus the field when
+  /// unfocused, and will not move the cursor when already focused.
+  ///
+  /// Defaults to false.
+  ///
+  /// See also:
+  ///   * [suffixGesturesIgnored], which does the same for [suffix].
+  final bool prefixGesturesIgnored;
+
   /// Controls the visibility of the [prefix] widget based on the state of
   /// text entry when the [prefix] argument is not null.
   ///
@@ -331,6 +366,26 @@ class CupertinoTextField extends StatefulWidget {
 
   /// An optional [Widget] to display after the text.
   final Widget suffix;
+
+  /// Whether the TextField ignores gestures on its [suffix].
+  ///
+  /// When false, gestures that happen on top of the suffix may be handled by
+  /// the field as well. For example, a tap on the suffix will focus the field
+  /// if unfocused, or move the cursor to the end of the text if already
+  /// focused.
+  ///
+  /// When true, gestures that happen on top of the suffix are ignored by the
+  /// field. In this case, a tap on the suffix will not focus the field when
+  /// unfocused, and will not move the cursor when already focused.
+  ///
+  /// The clear button created using [clearButtonMode] always has its gestures
+  /// ignored by the field and is not affected by this parameter.
+  ///
+  /// Defaults to false.
+  ///
+  /// See also:
+  ///   * [prefixGesturesIgnored], which does the same for [prefix].
+  final bool suffixGesturesIgnored;
 
   /// Controls the visibility of the [suffix] widget based on the state of
   /// text entry when the [suffix] argument is not null.
@@ -563,6 +618,8 @@ class CupertinoTextField extends StatefulWidget {
 
 class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticKeepAliveClientMixin implements TextSelectionGestureDetectorBuilderDelegate {
   final GlobalKey _clearGlobalKey = GlobalKey();
+  final GlobalKey _prefixGlobalKey = GlobalKey();
+  final GlobalKey _suffixGlobalKey = GlobalKey();
 
   TextEditingController _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller;
@@ -735,7 +792,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         // Insert a prefix at the front if the prefix visibility mode matches
         // the current text state.
         if (_showPrefixWidget(text)) {
-          rowChildren.add(widget.prefix);
+          rowChildren.add(
+            Container(
+              key: _prefixGlobalKey,
+              child: widget.prefix,
+            ),
+          );
         }
 
         final List<Widget> stackChildren = <Widget>[];
@@ -764,7 +826,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
         // First add the explicit suffix if the suffix visibility mode matches.
         if (_showSuffixWidget(text)) {
-          rowChildren.add(widget.suffix);
+          rowChildren.add(
+            Container(
+              key: _suffixGlobalKey,
+              child: widget.suffix,
+            ),
+          );
         // Otherwise, try to show a clear button if its visibility mode matches.
         } else if (_showClearButton(text)) {
           rowChildren.add(
