@@ -547,7 +547,6 @@ void main() {
 
   test('has correct maxScrollExtent', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
-    final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
     EditableText.debugDeterministicCursor = true;
 
     final RenderEditable editable = RenderEditable(
@@ -572,7 +571,7 @@ void main() {
     );
 
     editable.layout(BoxConstraints.loose(const Size(100.0, 1000.0)));
-    expect(editable.size, equals(Size(100, 20)));
+    expect(editable.size, equals(const Size(100, 20)));
     expect(editable.maxLines, equals(2));
     expect(editable.maxScrollExtent, equals(90));
 

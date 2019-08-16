@@ -2608,12 +2608,12 @@ void main() {
     await tester.pump();
     expect(scrollable.controller.position.pixels, equals(20));
 
-    state.bringIntoView(TextPosition(offset: 0));
+    state.bringIntoView(const TextPosition(offset: 0));
     await tester.pump();
     expect(scrollable.controller.position.pixels, equals(0));
 
 
-    state.bringIntoView(TextPosition(offset: 13));
+    state.bringIntoView(const TextPosition(offset: 13));
     await tester.pump();
     expect(scrollable.controller.position.pixels, equals(14));
     expect(scrollable.controller.position.pixels, equals(renderEditable.maxScrollExtent));
