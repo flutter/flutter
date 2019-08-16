@@ -265,12 +265,13 @@ enum TargetPlatform {
   web_javascript,
 }
 
-/// iOS target device architecture.
+/// iOS and macOS target device architecture.
 //
 // TODO(cbracken): split TargetPlatform.ios into ios_armv7, ios_arm64.
-enum IOSArch {
+enum DarwinArch {
   armv7,
   arm64,
+  x86_64,
 }
 
 enum AndroidArch {
@@ -281,27 +282,29 @@ enum AndroidArch {
 }
 
 /// The default set of iOS device architectures to build for.
-const List<IOSArch> defaultIOSArchs = <IOSArch>[
-  IOSArch.arm64,
+const List<DarwinArch> defaultIOSArchs = <DarwinArch>[
+  DarwinArch.arm64,
 ];
 
-String getNameForIOSArch(IOSArch arch) {
+String getNameForDarwinArch(DarwinArch arch) {
   switch (arch) {
-    case IOSArch.armv7:
+    case DarwinArch.armv7:
       return 'armv7';
-    case IOSArch.arm64:
+    case DarwinArch.arm64:
       return 'arm64';
+    case DarwinArch.x86_64:
+      return 'x86_64';
   }
   assert(false);
   return null;
 }
 
-IOSArch getIOSArchForName(String arch) {
+DarwinArch getIOSArchForName(String arch) {
   switch (arch) {
     case 'armv7':
-      return IOSArch.armv7;
+      return DarwinArch.armv7;
     case 'arm64':
-      return IOSArch.arm64;
+      return DarwinArch.arm64;
   }
   assert(false);
   return null;

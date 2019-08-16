@@ -265,7 +265,7 @@ class IOSDevice extends Device {
       printTrace('Building ${package.name} for $id');
 
       final String cpuArchitecture = await iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
-      final IOSArch iosArch = getIOSArchForName(cpuArchitecture);
+      final DarwinArch iosArch = getIOSArchForName(cpuArchitecture);
 
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
