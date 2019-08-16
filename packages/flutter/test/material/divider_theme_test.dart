@@ -71,7 +71,9 @@ void main() {
       final Container container = tester.widget(find.byType(Container));
       final BoxDecoration decoration = container.decoration;
       expect(decoration.border.bottom.width, 0.0);
-      expect(decoration.border.bottom.color, const Color(0x1F000000));
+
+      final ThemeData theme = ThemeData();
+      expect(decoration.border.bottom.color, theme.dividerColor);
 
       final Rect dividerRect = tester.getRect(find.byType(Divider));
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
@@ -153,7 +155,9 @@ void main() {
       final BoxDecoration decoration = container.decoration;
       final Border border = decoration.border;
       expect(border.left.width, 0.0);
-      expect(border.left.color, const Color(0x1F000000));
+
+      final ThemeData theme = ThemeData();
+      expect(border.left.color, theme.dividerColor);
 
       final Rect dividerRect = tester.getRect(find.byType(VerticalDivider));
       final Rect lineRect = tester.getRect(find.byType(DecoratedBox));
