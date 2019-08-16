@@ -66,20 +66,6 @@ config("compiler") {
   ldflags = []
   defines = []
 
-  # We want to force a recompile and relink of the world whenever our toolchain
-  # changes since artifacts from an older version of the toolchain may or may
-  # not be compatible with newer ones. To achieve this, we insert a synthetic
-  # define into the compile line. We only do this for toolchains that we use
-  # from buildtools.
-  toolchain_version =
-      exec_script("//build/util/lastchange.py",
-                  [
-                    "--source-dir=" + rebase_path("//buildtools"),
-                    "--revision-only",
-                  ],
-                  "trim string")
-  defines = [ "TOOLCHAIN_VERSION=$toolchain_version" ]
-
   # In general, Windows is totally different, but all the other builds share
   # some common GCC configuration. This section sets up Windows and the common
   # GCC flags, and then we handle the other non-Windows platforms specifically

@@ -29,7 +29,7 @@ toolchain("custom") {
 
   tool("cc") {
     depfile = "{{output}}.d"
-    command = "$cc -MMD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+    command = "$cc -MD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "CC {{output}}"
     outputs = [
@@ -39,7 +39,7 @@ toolchain("custom") {
 
   tool("cxx") {
     depfile = "{{output}}.d"
-    command = "$cxx -MMD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
+    command = "$cxx -MD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "CXX {{output}}"
     outputs = [
@@ -49,7 +49,7 @@ toolchain("custom") {
 
   tool("asm") {
     depfile = "{{output}}.d"
-    command = "$cc -MMD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{asmflags}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+    command = "$cc -MD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{asmflags}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "ASM {{output}}"
     outputs = [

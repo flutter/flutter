@@ -41,7 +41,7 @@ toolchain("fuchsia") {
 
   tool("cc") {
     depfile = "{{output}}.d"
-    command = "$goma_prefix $cc -MMD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+    command = "$goma_prefix $cc -MD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "CC {{output}}"
     outputs = [
@@ -51,7 +51,7 @@ toolchain("fuchsia") {
 
   tool("cxx") {
     depfile = "{{output}}.d"
-    command = "$goma_prefix $cxx -MMD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
+    command = "$goma_prefix $cxx -MD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "CXX {{output}}"
     outputs = [
@@ -61,7 +61,7 @@ toolchain("fuchsia") {
 
   tool("asm") {
     depfile = "{{output}}.d"
-    command = "$goma_prefix $cc -MMD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{asmflags}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+    command = "$goma_prefix $cc -MD -MF $depfile $target_triple_flags $sysroot_flags {{defines}} {{include_dirs}} {{asmflags}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     depsformat = "gcc"
     description = "ASM {{output}}"
     outputs = [

@@ -9,14 +9,14 @@ toolchain("x86_newlib") {
   ld = toolprefix + "g++"
 
   tool("cc") {
-    command = "$cc -MMD -MF \$out.d \$defines \$includes \$cflags \$cflags_c -c \$in -o \$out"
+    command = "$cc -MD -MF \$out.d \$defines \$includes \$cflags \$cflags_c -c \$in -o \$out"
     description = "CC(NaCl x86 Newlib) \$out"
     depfile = "\$out.d"
     depsformat = "gcc"
   }
   tool("cxx") {
     # cflags_pch_cc
-    command = "$cxx -MMD -MF \$out.d \$defines \$includes \$cflags \$cflags_cc -c \$in -o \$out"
+    command = "$cxx -MD -MF \$out.d \$defines \$includes \$cflags \$cflags_cc -c \$in -o \$out"
     description = "CXX(NaCl x86 Newlib) \$out"
     depfile = "\$out.d"
     depsformat = "gcc"
