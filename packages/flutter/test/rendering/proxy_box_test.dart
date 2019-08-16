@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
-import 'dart:ui' as ui show Image;
+import 'dart:ui' as ui show Gradient, Image, ImageFilter;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -218,7 +218,7 @@ void main() {
     expect(getPixel(0, 0), equals(0x00000080));
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
-    final OffsetLayer layer = boundary.layer;
+    final OffsetLayer layer = boundary.debugLayer;
 
     image = await layer.toImage(Offset.zero & const Size(20.0, 20.0));
     expect(image.width, equals(20));
@@ -268,6 +268,13 @@ void main() {
     expect(renderOpacity.needsCompositing, false);
   });
 
+  test('RenderOpacity reuses its layer', () {
+    _testLayerReuse<OpacityLayer>(RenderOpacity(
+      opacity: 0.5,  // must not be 0 or 1.0. Otherwise, it won't create a layer
+      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    ));
+  });
+
   test('RenderAnimatedOpacity does not composite if it is transparent', () async {
     final Animation<double> opacityAnimation = AnimationController(
       vsync: _FakeTickerProvider(),
@@ -297,6 +304,183 @@ void main() {
     layout(renderAnimatedOpacity, phase: EnginePhase.composite);
     expect(renderAnimatedOpacity.needsCompositing, false);
   });
+
+  test('RenderAnimatedOpacity reuses its layer', () {
+    final Animation<double> opacityAnimation = AnimationController(
+      vsync: _FakeTickerProvider(),
+    )..value = 0.5;  // must not be 0 or 1.0. Otherwise, it won't create a layer
+
+    _testLayerReuse<OpacityLayer>(RenderAnimatedOpacity(
+      opacity: opacityAnimation,
+      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    ));
+  });
+
+  test('RenderShaderMask reuses its layer', () {
+    _testLayerReuse<ShaderMaskLayer>(RenderShaderMask(
+      shaderCallback: (Rect rect) {
+        return ui.Gradient.radial(
+          rect.center,
+          rect.shortestSide / 2.0,
+          const <Color>[Color.fromRGBO(0, 0, 0, 1.0), Color.fromRGBO(255, 255, 255, 1.0)],
+        );
+      },
+      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    ));
+  });
+
+  test('RenderBackdropFilter reuses its layer', () {
+    _testLayerReuse<BackdropFilterLayer>(RenderBackdropFilter(
+      filter: ui.ImageFilter.blur(),
+      child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    ));
+  });
+
+  test('RenderClipRect reuses its layer', () {
+    _testLayerReuse<ClipRectLayer>(RenderClipRect(
+      clipper: _TestRectClipper(),
+      // Inject opacity under the clip to force compositing.
+      child: RenderOpacity(
+        opacity: 0.5,
+        child: RenderSizedBox(const Size(1.0, 1.0)),
+      ), // size doesn't matter
+    ));
+  });
+
+  test('RenderClipRRect reuses its layer', () {
+    _testLayerReuse<ClipRRectLayer>(RenderClipRRect(
+      clipper: _TestRRectClipper(),
+      // Inject opacity under the clip to force compositing.
+      child: RenderOpacity(
+        opacity: 0.5,
+        child: RenderSizedBox(const Size(1.0, 1.0)),
+      ), // size doesn't matter
+    ));
+  });
+
+  test('RenderClipOval reuses its layer', () {
+    _testLayerReuse<ClipPathLayer>(RenderClipOval(
+      clipper: _TestRectClipper(),
+      // Inject opacity under the clip to force compositing.
+      child: RenderOpacity(
+        opacity: 0.5,
+        child: RenderSizedBox(const Size(1.0, 1.0)),
+      ), // size doesn't matter
+    ));
+  });
+
+  test('RenderClipPath reuses its layer', () {
+    _testLayerReuse<ClipPathLayer>(RenderClipPath(
+      clipper: _TestPathClipper(),
+      // Inject opacity under the clip to force compositing.
+      child: RenderOpacity(
+        opacity: 0.5,
+        child: RenderSizedBox(const Size(1.0, 1.0)),
+      ), // size doesn't matter
+    ));
+  });
+
+  test('RenderPhysicalModel reuses its layer', () {
+    _testLayerReuse<PhysicalModelLayer>(RenderPhysicalModel(
+      color: const Color.fromRGBO(0, 0, 0, 1.0),
+      // Inject opacity under the clip to force compositing.
+      child: RenderOpacity(
+        opacity: 0.5,
+        child: RenderSizedBox(const Size(1.0, 1.0)),
+      ), // size doesn't matter
+    ));
+  });
+
+  test('RenderPhysicalShape reuses its layer', () {
+    _testLayerReuse<PhysicalModelLayer>(RenderPhysicalShape(
+      clipper: _TestPathClipper(),
+      color: const Color.fromRGBO(0, 0, 0, 1.0),
+      // Inject opacity under the clip to force compositing.
+      child: RenderOpacity(
+        opacity: 0.5,
+        child: RenderSizedBox(const Size(1.0, 1.0)),
+      ), // size doesn't matter
+    ));
+  });
+
+  test('RenderTransform reuses its layer', () {
+    _testLayerReuse<TransformLayer>(RenderTransform(
+      // Use a 3D transform to force compositing.
+      transform: Matrix4.rotationX(0.1),
+      // Inject opacity under the clip to force compositing.
+      child: RenderOpacity(
+        opacity: 0.5,
+        child: RenderSizedBox(const Size(1.0, 1.0)),
+      ), // size doesn't matter
+    ));
+  });
+
+  void _testFittedBoxWithClipRectLayer() {
+    _testLayerReuse<ClipRectLayer>(RenderFittedBox(
+      alignment: Alignment.center,
+      fit: BoxFit.cover,
+      // Inject opacity under the clip to force compositing.
+      child: RenderOpacity(
+        opacity: 0.5,
+        child: RenderSizedBox(const Size(100.0, 200.0)),
+      ), // size doesn't matter
+    ));
+  }
+
+  void _testFittedBoxWithTransformLayer() {
+    _testLayerReuse<TransformLayer>(RenderFittedBox(
+      alignment: Alignment.center,
+      fit: BoxFit.fill,
+      // Inject opacity under the clip to force compositing.
+      child: RenderOpacity(
+        opacity: 0.5,
+        child: RenderSizedBox(const Size(1, 1)),
+      ), // size doesn't matter
+    ));
+  }
+
+  test('RenderFittedBox reuses ClipRectLayer', () {
+    _testFittedBoxWithClipRectLayer();
+  });
+
+  test('RenderFittedBox reuses TransformLayer', () {
+    _testFittedBoxWithTransformLayer();
+  });
+
+  test('RenderFittedBox switches between ClipRectLayer and TransformLayer, and reuses them', () {
+    _testFittedBoxWithClipRectLayer();
+
+    // clip -> transform
+    _testFittedBoxWithTransformLayer();
+    // transform -> clip
+    _testFittedBoxWithClipRectLayer();
+  });
+}
+
+class _TestRectClipper extends CustomClipper<Rect> {
+  @override
+  Rect getClip(Size size) {
+    return Rect.zero;
+  }
+
+  @override
+  Rect getApproximateClipRect(Size size) => getClip(size);
+
+  @override
+  bool shouldReclip(_TestRectClipper oldClipper) => true;
+}
+
+class _TestRRectClipper extends CustomClipper<RRect> {
+  @override
+  RRect getClip(Size size) {
+    return RRect.zero;
+  }
+
+  @override
+  Rect getApproximateClipRect(Size size) => getClip(size).outerRect;
+
+  @override
+  bool shouldReclip(_TestRRectClipper oldClipper) => true;
 }
 
 class _FakeTickerProvider implements TickerProvider {
@@ -347,4 +531,33 @@ class _FakeTicker implements Ticker {
 
   @override
   String toString({ bool debugIncludeStack = false }) => super.toString();
+}
+
+// Forces two frames and checks that:
+// - a layer is created on the first frame
+// - the layer is reused on the second frame
+void _testLayerReuse<L extends Layer>(RenderObject renderObject) {
+  expect(L, isNot(Layer));
+  expect(renderObject.debugLayer, null);
+  layout(renderObject, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
+  final Layer layer = renderObject.debugLayer;
+  expect(layer, isInstanceOf<L>());
+  expect(layer, isNotNull);
+
+  // Mark for repaint otherwise pumpFrame is a noop.
+  renderObject.markNeedsPaint();
+  expect(renderObject.debugNeedsPaint, true);
+  pumpFrame(phase: EnginePhase.paint);
+  expect(renderObject.debugNeedsPaint, false);
+  expect(renderObject.debugLayer, same(layer));
+}
+
+class _TestPathClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    return Path()
+      ..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+  }
+  @override
+  bool shouldReclip(_TestPathClipper oldClipper) => false;
 }

@@ -221,6 +221,48 @@ void main() {
     expect(tester.state<EditableTextState>(find.byType(EditableText)), editableState);
     expect(find.text("don't lose me"), findsOneWidget);
   });
+
+  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
+            child: CupertinoTabScaffold(
+              tabBar: CupertinoTabBar(
+                items: List<BottomNavigationBarItem>.generate(
+                  10,
+                  (int i) => BottomNavigationBarItem(icon: const ImageIcon(TestImageProvider(24, 23)), title: Text('$i'))
+                ),
+              ),
+              tabBuilder: (BuildContext context, int index) => const Text('content'),
+            ),
+          );
+        }),
+      ),
+    );
+
+    final Iterable<RichText> barItems = tester.widgetList<RichText>(
+      find.descendant(
+        of: find.byType(CupertinoTabBar),
+        matching: find.byType(RichText),
+      ),
+    );
+
+    final Iterable<RichText> contents = tester.widgetList<RichText>(
+      find.descendant(
+        of: find.text('content'),
+        matching: find.byType(RichText),
+        skipOffstage: false,
+      ),
+    );
+
+    expect(barItems.length, greaterThan(0));
+    expect(barItems.any((RichText t) => t.textScaleFactor != 1), isFalse);
+
+    expect(contents.length, greaterThan(0));
+    expect(contents.any((RichText t) => t.textScaleFactor != 99), isFalse);
+  });
 }
 
 CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {

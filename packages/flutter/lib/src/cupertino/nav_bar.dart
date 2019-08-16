@@ -179,6 +179,14 @@ bool _isTransitionable(BuildContext context) {
 /// Use [transitionBetweenRoutes] or [heroTag] to customize the transition
 /// behavior for multiple navigation bars per route.
 ///
+/// When used in a [CupertinoPageScaffold], [CupertinoPageScaffold.navigationBar]
+/// has its text scale factor set to 1.0 and does not respond to text scale factor
+/// changes from the operating system, to match the native iOS behavior. To override
+/// this behavior, wrap each of the `navigationBar`'s components inside a [MediaQuery]
+/// with the desired [MediaQueryData.textScaleFactor] value. The text scale factor
+/// value from the operating system can be retrieved in many ways, such as querying
+/// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
+///
 /// See also:
 ///
 ///  * [CupertinoPageScaffold], a page layout helper typically hosting the
@@ -499,6 +507,14 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// Use [transitionBetweenRoutes] or [heroTag] to customize the transition
 /// behavior for multiple navigation bars per route.
 ///
+/// `CupertinoSliverNavigationBar` has its text scale factor set to 1.0 by default
+/// and does not respond to text scale factor changes from the operating system,
+/// to match the native iOS behavior. To override this behavior, wrap each of the
+/// `CupertinoSliverNavigationBar`'s components inside a [MediaQuery] with the
+/// desired [MediaQueryData.textScaleFactor] value. The text scale factor value
+/// from the operating system can be retrieved in many ways, such as querying
+/// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
+///
 /// See also:
 ///
 ///  * [CupertinoNavigationBar], an iOS navigation bar for use on non-scrolling
@@ -652,20 +668,23 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       // Lint ignore to maintain backward compatibility.
       widget.actionsForegroundColor, // ignore: deprecated_member_use_from_same_package
       context,
-      SliverPersistentHeader(
-        pinned: true, // iOS navigation bars are always pinned.
-        delegate: _LargeTitleNavigationBarSliverDelegate(
-          keys: keys,
-          components: components,
-          userMiddle: widget.middle,
-          backgroundColor: widget.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor,
-          border: widget.border,
-          padding: widget.padding,
-          actionsForegroundColor: actionsForegroundColor,
-          transitionBetweenRoutes: widget.transitionBetweenRoutes,
-          heroTag: widget.heroTag,
-          persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-          alwaysShowMiddle: widget.middle != null,
+      MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
+        child: SliverPersistentHeader(
+          pinned: true, // iOS navigation bars are always pinned.
+          delegate: _LargeTitleNavigationBarSliverDelegate(
+            keys: keys,
+            components: components,
+            userMiddle: widget.middle,
+            backgroundColor: widget.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor,
+            border: widget.border,
+            padding: widget.padding,
+            actionsForegroundColor: actionsForegroundColor,
+            transitionBetweenRoutes: widget.transitionBetweenRoutes,
+            heroTag: widget.heroTag,
+            persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
+            alwaysShowMiddle: widget.middle != null,
+          ),
         ),
       ),
     );
