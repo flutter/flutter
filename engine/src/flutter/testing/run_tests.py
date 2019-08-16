@@ -246,6 +246,7 @@ def RunJavaTests(filter, android_variant='android_debug_unopt'):
     '-Drobolectric.offline=true',
     '-Drobolectric.dependency.dir=' + robolectric_dir,
     '-classpath', ':'.join(classpath),
+    '-Drobolectric.logging=stdout',
     'org.junit.runner.JUnitCore',
     test_class
   ]
