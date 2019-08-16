@@ -747,9 +747,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       return;
     }
 
-    assert(
-      widget.value == null
-      || widget.items.where((DropdownMenuItem<T> item) => item.value == widget.value).length == 1);
+    assert(widget.value == null ||
+      widget.items.where((DropdownMenuItem<T> item) => item.value == widget.value).length == 1);
     _selectedIndex = null;
     for (int itemIndex = 0; itemIndex < widget.items.length; itemIndex++) {
       if (widget.items[itemIndex].value == widget.value) {
