@@ -1425,6 +1425,10 @@ abstract class RenderSliver extends RenderObject {
   /// This means that the dimensions may be negative.
   ///
   /// This is only valid after [layout] has completed.
+  ///
+  /// See also:
+  ///
+  ///  * [getAbsoluteSize], which returns absolute size.
   @protected
   Size getAbsoluteSizeRelativeToOrigin() {
     assert(geometry != null);
@@ -1438,6 +1442,30 @@ abstract class RenderSliver extends RenderObject {
         return Size(constraints.crossAxisExtent, geometry.paintExtent);
       case AxisDirection.left:
         return Size(-geometry.paintExtent, constraints.crossAxisExtent);
+    }
+    return null;
+  }
+
+  /// This returns the absolute [Size] of the sliver.
+  ///
+  /// The dimensions are always positive and calling this is only valid after
+  /// [layout] has completed.
+  ///
+  /// See also:
+  ///
+  ///  * [getAbsoluteSizeRelativeToOrigin], which returns the size relative to
+  ///    the leading edge of the sliver.
+  @protected
+  Size getAbsoluteSize() {
+    assert(geometry != null);
+    assert(!debugNeedsLayout);
+    switch (constraints.axisDirection) {
+      case AxisDirection.up:
+      case AxisDirection.down:
+        return Size(constraints.crossAxisExtent, geometry.paintExtent);
+      case AxisDirection.right:
+      case AxisDirection.left:
+        return Size(geometry.paintExtent, constraints.crossAxisExtent);
     }
     return null;
   }

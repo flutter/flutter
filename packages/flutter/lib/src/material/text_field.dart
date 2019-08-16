@@ -198,7 +198,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///    [TextField]. The [EditableText] widget is rarely used directly unless
 ///    you are implementing an entirely different design language, such as
 ///    Cupertino.
-///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
+///  * Learn how to use a [TextEditingController] in one of our
+///    [cookbook recipe](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)s.
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
@@ -256,6 +257,7 @@ class TextField extends StatefulWidget {
     this.textAlignVertical,
     this.textDirection,
     this.readOnly = false,
+    ToolbarOptions toolbarOptions,
     this.showCursor,
     this.autofocus = false,
     this.obscureText = false,
@@ -276,7 +278,7 @@ class TextField extends StatefulWidget {
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
-    this.enableInteractiveSelection,
+    this.enableInteractiveSelection = true,
     this.onTap,
     this.buildCounter,
     this.scrollController,
@@ -286,6 +288,7 @@ class TextField extends StatefulWidget {
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
@@ -302,6 +305,17 @@ class TextField extends StatefulWidget {
        ),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
+       toolbarOptions = toolbarOptions ?? obscureText ?
+         const ToolbarOptions(
+           selectAll: true,
+           paste: true,
+         ) :
+         const ToolbarOptions(
+           copy: true,
+           cut: true,
+           selectAll: true,
+           paste: true,
+         ),
        super(key: key);
 
   /// Controls the text being edited.
@@ -409,6 +423,13 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.readOnly}
   final bool readOnly;
+
+  /// Configuration of toolbar options.
+  ///
+  /// If not set, select all and paste will default to be enabled. Copy and cut
+  /// will be disabled if [obscureText] is true. If [readOnly] is true,
+  /// paste and cut will be disabled regardless.
+  final ToolbarOptions toolbarOptions;
 
   /// {@macro flutter.widgets.editableText.showCursor}
   final bool showCursor;
@@ -518,7 +539,8 @@ class TextField extends StatefulWidget {
 
   /// The color to use when painting the cursor.
   ///
-  /// Defaults to the theme's `cursorColor` when null.
+  /// Defaults to [ThemeData.cursorColor] or [CupertinoTheme.primaryColor]
+  /// depending on [ThemeData.platform].
   final Color cursorColor;
 
   /// The appearance of the keyboard.
@@ -538,9 +560,7 @@ class TextField extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   /// {@macro flutter.rendering.editable.selectionEnabled}
-  bool get selectionEnabled {
-    return enableInteractiveSelection ?? !obscureText;
-  }
+  bool get selectionEnabled => enableInteractiveSelection;
 
   /// {@template flutter.material.textfield.onTap}
   /// Called for each distinct tap except for every second tap of a double tap.
@@ -887,8 +907,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     super.deactivate();
   }
 
-  void _handlePointerEnter(PointerEnterEvent event) => _handleHover(true);
-  void _handlePointerExit(PointerExitEvent event) => _handleHover(false);
+  void _handleMouseEnter(PointerEnterEvent event) => _handleHover(true);
+  void _handleMouseExit(PointerExitEvent event) => _handleHover(false);
 
   void _handleHover(bool hovering) {
     if (hovering != _isHovering) {
@@ -952,6 +972,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       child: EditableText(
         key: editableTextKey,
         readOnly: widget.readOnly,
+        toolbarOptions: widget.toolbarOptions,
         showCursor: widget.showCursor,
         showSelectionHandles: _showSelectionHandles,
         controller: controller,
@@ -1020,9 +1041,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
         _requestKeyboard();
       },
-      child: Listener(
-        onPointerEnter: _handlePointerEnter,
-        onPointerExit: _handlePointerExit,
+      child: MouseRegion(
+        onEnter: _handleMouseEnter,
+        onExit: _handleMouseExit,
         child: IgnorePointer(
           ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
           child: _selectionGestureDetectorBuilder.buildGestureDetector(

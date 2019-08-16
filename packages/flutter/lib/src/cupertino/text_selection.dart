@@ -305,11 +305,12 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     // The toolbar should appear below the TextField when there is not enough
     // space above the TextField to show it, assuming there's always enough space
     // at the bottom in this case.
-    final bool isArrowPointingDown =
-      mediaQuery.padding.top
+    final double toolbarHeightNeeded = mediaQuery.padding.top
       + _kToolbarScreenPadding
       + _kToolbarHeight
-      + _kToolbarContentDistance <= globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
+      + _kToolbarContentDistance;
+    final double availableHeight = globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
+    final bool isArrowPointingDown = toolbarHeightNeeded <= availableHeight;
 
     final double arrowTipX = (position.dx + globalEditableRegion.left).clamp(
       _kArrowScreenPadding + mediaQuery.padding.left,

@@ -74,5 +74,30 @@ void main() {
       final String shouldNotFormatted = srcFile.readAsStringSync();
       expect(shouldNotFormatted, nonFormatted);
     });
+
+    testUsingContext('line-length', () async {
+      const int lineLengthShort = 50;
+      const int lineLengthLong = 120;
+      final String projectPath = await createProject(tempDir);
+
+      final File srcFile = fs.file(
+          fs.path.join(projectPath, 'lib', 'main.dart'));
+      final String nonFormatted = srcFile.readAsStringSync();
+      srcFile.writeAsStringSync(
+          nonFormatted.replaceFirst('main()',
+              'main(anArgument1, anArgument2, anArgument3, anArgument4, anArgument5)'));
+
+      final String nonFormattedWithLongLine = srcFile.readAsStringSync();
+      final FormatCommand command = FormatCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['format', '--line-length', '$lineLengthLong', srcFile.path]);
+      final String notFormatted = srcFile.readAsStringSync();
+      expect(nonFormattedWithLongLine, notFormatted);
+
+      await runner.run(<String>['format', '--line-length', '$lineLengthShort', srcFile.path]);
+      final String shouldFormatted = srcFile.readAsStringSync();
+      expect(nonFormattedWithLongLine, isNot(shouldFormatted));
+    });
   });
 }

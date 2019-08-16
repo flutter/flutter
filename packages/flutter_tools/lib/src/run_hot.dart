@@ -8,6 +8,7 @@ import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 
+import 'base/async_guard.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -155,6 +156,13 @@ class HotRunner extends ResidentRunner {
       );
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
+      // https://github.com/flutter/flutter/issues/33050
+      // TODO(blasten): Remove this check once https://issuetracker.google.com/issues/132325318 has been fixed.
+      if (await hasDeviceRunningAndroidQ(flutterDevices) &&
+          error.toString().contains(kAndroidQHttpConnectionClosedExp)) {
+        printStatus('🔨 If you are using an emulator running Android Q Beta, consider using an emulator running API level 29 or lower.');
+        printStatus('Learn more about the status of this issue on https://issuetracker.google.com/issues/132325318.');
+      }
       return 2;
     }
 
@@ -231,7 +239,6 @@ class HotRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild = true,
   }) async {
     if (!fs.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
@@ -247,7 +254,6 @@ class HotRunner extends ResidentRunner {
       final int result = await device.runHot(
         hotRunner: this,
         route: route,
-        shouldBuild: shouldBuild,
       );
       if (result != 0) {
         return result;
@@ -571,10 +577,14 @@ class HotRunner extends ResidentRunner {
       if (!(await hotRunnerConfig.setupHotRestart())) {
         return OperationResult(1, 'setupHotRestart failed');
       }
-      result = await _restartFromSources(
+      // The current implementation of the vmservice and JSON rpc may throw
+      // unhandled exceptions into the zone that cannot be caught with a regular
+      // try catch. The usage is [asyncGuard] is required to normalize the error
+      // handling, at least until we can refactor the underlying code.
+      result = await asyncGuard(() => _restartFromSources(
         reason: reason,
         benchmarkMode: benchmarkMode,
-      );
+      ));
       if (!result.isOk) {
         restartEvent = 'restart-failed';
       }
@@ -649,7 +659,7 @@ class HotRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         if (view.uiIsolate == null) {
-          throw 'Application isolate not found';
+          return OperationResult(2, 'Application isolate not found', fatal: true);
         }
       }
     }
@@ -757,7 +767,6 @@ class HotRunner extends ResidentRunner {
     }
     // Record time it took for the VM to reload the sources.
     _addBenchmarkData('hotReloadVMReloadMilliseconds', vmReloadTimer.elapsed.inMilliseconds);
-
     final Stopwatch reassembleTimer = Stopwatch()..start();
     // Reload the isolate.
     final List<Future<void>> allDevices = <Future<void>>[];

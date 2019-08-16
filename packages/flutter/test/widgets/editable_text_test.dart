@@ -619,6 +619,79 @@ void main() {
     expect(find.text('PASTE'), findsOneWidget);
   });
 
+  testWidgets('can dynamically disable options in toolbar', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            selectAll: true,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+    tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Select something. Doesn't really matter what.
+    state.renderEditable.selectWordsInRange(
+      from: const Offset(0, 0),
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('COPY'), findsOneWidget);
+    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('CUT'), findsNothing);
+  });
+
+  testWidgets('cut and paste are disabled in read only mode even if explicit set', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          readOnly: true,
+          toolbarOptions: const ToolbarOptions(
+            paste: true,
+            cut: true,
+            selectAll: true,
+            copy: true,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+    tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Select something. Doesn't really matter what.
+    state.renderEditable.selectWordsInRange(
+      from: const Offset(0, 0),
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('COPY'), findsOneWidget);
+    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('CUT'), findsNothing);
+  });
+
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
     String changedValue;
     final Widget widget = MaterialApp(
@@ -1714,8 +1787,14 @@ void main() {
                         SemanticsFlag.isObscured,
                         SemanticsFlag.isFocused,
                       ],
+                      actions: <SemanticsAction>[
+                        SemanticsAction.moveCursorBackwardByCharacter,
+                        SemanticsAction.setSelection,
+                        SemanticsAction.moveCursorBackwardByWord
+                      ],
                       value: expectedValue,
                       textDirection: TextDirection.ltr,
+                      textSelection: const TextSelection.collapsed(offset: 24),
                     ),
                   ],
                 ),
@@ -2189,8 +2268,8 @@ void main() {
             expect(
               pos,
               inExclusiveRange(
-                0 - kMinInteractiveSize,
-                0 + kMinInteractiveSize,
+                0 - kMinInteractiveDimension,
+                0 + kMinInteractiveDimension,
               ),
             );
             break;
@@ -2198,8 +2277,8 @@ void main() {
             expect(
               pos,
               inExclusiveRange(
-                viewport.width - kMinInteractiveSize,
-                viewport.width + kMinInteractiveSize,
+                viewport.width - kMinInteractiveDimension,
+                viewport.width + kMinInteractiveDimension,
               ),
             );
             break;
@@ -2207,8 +2286,8 @@ void main() {
             expect(
               pos,
               inExclusiveRange(
-                0 - kMinInteractiveSize,
-                viewport.width + kMinInteractiveSize,
+                0 - kMinInteractiveDimension,
+                viewport.width + kMinInteractiveDimension,
               ),
             );
             break;
@@ -2302,15 +2381,15 @@ void main() {
     expect(
       handles[0].localToGlobal(Offset.zero).dx,
       inExclusiveRange(
-        -kMinInteractiveSize,
-        kMinInteractiveSize,
+        -kMinInteractiveDimension,
+        kMinInteractiveDimension,
       ),
     );
     expect(
       handles[1].localToGlobal(Offset.zero).dx,
       inExclusiveRange(
-        70.0 - kMinInteractiveSize,
-        70.0 + kMinInteractiveSize,
+        70.0 - kMinInteractiveDimension,
+        70.0 + kMinInteractiveDimension,
       ),
     );
     expect(state.selectionOverlay.handlesAreVisible, isTrue);
@@ -2418,8 +2497,8 @@ void main() {
             expect(
               pos,
               inExclusiveRange(
-                0 - kMinInteractiveSize,
-                0 + kMinInteractiveSize,
+                0 - kMinInteractiveDimension,
+                0 + kMinInteractiveDimension,
               ),
             );
             break;
@@ -2427,8 +2506,8 @@ void main() {
             expect(
               pos,
               inExclusiveRange(
-                viewport.width - kMinInteractiveSize,
-                viewport.width + kMinInteractiveSize,
+                viewport.width - kMinInteractiveDimension,
+                viewport.width + kMinInteractiveDimension,
               ),
             );
             break;
@@ -2436,8 +2515,8 @@ void main() {
             expect(
               pos,
               inExclusiveRange(
-                0 - kMinInteractiveSize,
-                viewport.width + kMinInteractiveSize,
+                0 - kMinInteractiveDimension,
+                viewport.width + kMinInteractiveDimension,
               ),
             );
             break;

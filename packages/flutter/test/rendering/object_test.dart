@@ -81,7 +81,26 @@ void main() {
       ),
     );
   });
+
+  test('ContainerParentDataMixin requires nulled out pointers to siblings before detach', () {
+    expect(() => TestParentData().detach(), isNot(throwsAssertionError));
+
+    final TestParentData data1 = TestParentData()
+      ..nextSibling = RenderOpacity()
+      ..previousSibling = RenderOpacity();
+    expect(() => data1.detach(), throwsAssertionError);
+
+    final TestParentData data2 = TestParentData()
+      ..previousSibling = RenderOpacity();
+    expect(() => data2.detach(), throwsAssertionError);
+
+    final TestParentData data3 = TestParentData()
+      ..nextSibling = RenderOpacity();
+    expect(() => data3.detach(), throwsAssertionError);
+  });
 }
+
+class TestParentData extends ParentData with ContainerParentDataMixin<RenderBox> { }
 
 class TestRenderObject extends RenderObject {
   @override

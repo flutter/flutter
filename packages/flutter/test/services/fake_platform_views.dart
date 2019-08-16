@@ -8,6 +8,40 @@ import 'package:collection/collection.dart';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
+/// Used in internal testing.
+class FakePlatformViewController extends PlatformViewController {
+
+  FakePlatformViewController(int id) {
+    _id = id;
+  }
+
+  bool disposed = false;
+
+  /// Events that are dispatched;
+  List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
+
+  int _id;
+
+  @override
+  int get viewId => _id;
+
+  @override
+  void dispatchPointerEvent(PointerEvent event) {
+    dispatchedPointerEvents.add(event);
+  }
+
+  void clearTestingVariables() {
+    dispatchedPointerEvents.clear();
+    disposed = false;
+  }
+
+  @override
+  void dispose() {
+    disposed = true;
+  }
+}
 
 class FakeAndroidPlatformViewsController {
   FakeAndroidPlatformViewsController() {

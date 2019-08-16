@@ -399,9 +399,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
     // Only check for hovering if there is a mouse connected.
     if (_mouseIsConnected) {
-      result = Listener(
-        onPointerEnter: (PointerEnterEvent event) => _showTooltip(),
-        onPointerExit: (PointerExitEvent event) => _hideTooltip(),
+      result = MouseRegion(
+        onEnter: (PointerEnterEvent event) => _showTooltip(),
+        onExit: (PointerExitEvent event) => _hideTooltip(),
         child: result,
       );
     }
@@ -500,16 +500,19 @@ class _TooltipOverlay extends StatelessWidget {
             opacity: animation,
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: height),
-              child: Container(
-                decoration: decoration,
-                padding: padding,
-                margin: margin,
-                child: Center(
-                  widthFactor: 1.0,
-                  heightFactor: 1.0,
-                  child: Text(
-                    message,
-                    style: textStyle,
+              child: DefaultTextStyle(
+                style: Theme.of(context).textTheme.body1,
+                child: Container(
+                  decoration: decoration,
+                  padding: padding,
+                  margin: margin,
+                  child: Center(
+                    widthFactor: 1.0,
+                    heightFactor: 1.0,
+                    child: Text(
+                      message,
+                      style: textStyle,
+                    ),
                   ),
                 ),
               ),

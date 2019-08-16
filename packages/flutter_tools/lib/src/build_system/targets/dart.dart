@@ -64,6 +64,7 @@ class KernelSnapshot extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
+    Source.pattern('{PROJECT_DIR}/.packages'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
     Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and in .packages
     Source.artifact(Artifact.platformKernelDill),
@@ -96,7 +97,7 @@ class KernelSnapshot extends Target {
     final CompilerOutput output = await compiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
       aot: buildMode != BuildMode.debug,
-      trackWidgetCreation: false,
+      trackWidgetCreation: buildMode == BuildMode.debug,
       targetModel: TargetModel.flutter,
       targetProductVm: buildMode == BuildMode.release,
       outputFilePath: environment.buildDir.childFile('app.dill').path,

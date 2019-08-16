@@ -184,7 +184,10 @@ class SelectableText extends StatefulWidget {
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
   ///
-  /// The [data] parameter must not be null.
+
+  /// The [showCursor], [autofocus], [dragStartBehavior], and [data] parameters
+  /// must not be null. If specified, the [maxLines] argument must be greater
+  /// than zero.
   const SelectableText(
     this.data, {
     Key key,
@@ -195,6 +198,7 @@ class SelectableText extends StatefulWidget {
     this.textDirection,
     this.showCursor = false,
     this.autofocus = false,
+    ToolbarOptions toolbarOptions,
     this.maxLines,
     this.cursorWidth = 2.0,
     this.cursorRadius,
@@ -213,12 +217,19 @@ class SelectableText extends StatefulWidget {
           'A non-null String must be provided to a SelectableText widget.',
         ),
         textSpan = null,
+        toolbarOptions = toolbarOptions ??
+          const ToolbarOptions(
+            selectAll: true,
+            copy: true,
+          ),
         super(key: key);
 
   /// Creates a selectable text widget with a [TextSpan].
   ///
   /// The [textSpan] parameter must not be null and only contain [TextSpan] in
   /// [textSpan.children]. Other type of [InlineSpan] is not allowed.
+  ///
+  /// The [autofocus] and [dragStartBehavior] arguments must not be null.
   const SelectableText.rich(
     this.textSpan, {
     Key key,
@@ -229,6 +240,7 @@ class SelectableText extends StatefulWidget {
     this.textDirection,
     this.showCursor = false,
     this.autofocus = false,
+    ToolbarOptions toolbarOptions,
     this.maxLines,
     this.cursorWidth = 2.0,
     this.cursorRadius,
@@ -247,6 +259,11 @@ class SelectableText extends StatefulWidget {
       'A non-null TextSpan must be provided to a SelectableText.rich widget.',
     ),
     data = null,
+    toolbarOptions = toolbarOptions ??
+      const ToolbarOptions(
+        selectAll: true,
+        copy: true,
+      ),
     super(key: key);
 
   /// The text to display.
@@ -324,6 +341,13 @@ class SelectableText extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+  /// Configuration of toolbar options.
+  ///
+  /// Paste and cut will be disabled regardless.
+  ///
+  /// If not set, select all and copy will be enabled by default.
+  final ToolbarOptions toolbarOptions;
 
   /// {@macro flutter.rendering.editable.selectionEnabled}
   bool get selectionEnabled {
@@ -543,6 +567,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         textDirection: widget.textDirection,
         autofocus: widget.autofocus,
         forceLine: false,
+        toolbarOptions: widget.toolbarOptions,
         maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
         selectionColor: themeData.textSelectionColor,
         selectionControls: widget.selectionEnabled ? textSelectionControls : null,

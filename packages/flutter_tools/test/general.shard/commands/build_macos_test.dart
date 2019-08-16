@@ -8,8 +8,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/dart.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -79,7 +78,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
-  testUsingContext('macOS build invokes build script', () async {
+  testUsingContext('macOS build invokes xcode build', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     fs.directory('macos').createSync();
@@ -87,15 +86,7 @@ void main() {
     fs.file('.packages').createSync();
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.currentDirectory);
-    final Environment environment = Environment(
-      projectDir: flutterProject.directory,
-      buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
-      defines: <String, String>{
-        kBuildMode: 'release',
-        kTargetFile: fs.path.absolute(fs.path.join('lib', 'main.dart')),
-        kTargetPlatform: 'darwin-x64',
-      }
-    );
+    final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
     when(mockProcessManager.start(<String>[
       '/usr/bin/env',
       'xcrun',
@@ -103,9 +94,10 @@ void main() {
       '-workspace', flutterProject.macos.xcodeWorkspace.path,
       '-configuration', 'Release',
       '-scheme', 'Runner',
-      '-derivedDataPath', environment.buildDir.path,
-      'OBJROOT=${fs.path.join(environment.buildDir.path, 'Build', 'Intermediates.noindex')}',
-      'SYMROOT=${fs.path.join(environment.buildDir.path, 'Build', 'Products')}',
+      '-derivedDataPath', flutterBuildDir.absolute.path,
+      'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+      'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+      'COMPILER_INDEX_STORE_ENABLE=NO',
     ])).thenAnswer((Invocation invocation) async {
       fs.file(fs.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
         ..createSync(recursive: true)
@@ -113,9 +105,9 @@ void main() {
       return mockProcess;
     });
 
-    expect(createTestCommandRunner(command).run(
+    await createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--release']
-    ), throwsA(isInstanceOf<AssertionError>()));
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => memoryFilesystem,
     ProcessManager: () => mockProcessManager,

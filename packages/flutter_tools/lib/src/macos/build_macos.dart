@@ -8,34 +8,25 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
-import '../build_system/build_system.dart';
-import '../build_system/targets/dart.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../ios/xcodeproj.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
-import 'application_package.dart';
 
-/// Builds the macOS project through xcodebuild and returns the app bundle.
-Future<PrebuiltMacOSApp> buildMacOS({
+import 'cocoapod_utils.dart';
+
+/// Builds the macOS project through xcodebuild.
+// TODO(jonahwilliams): refactor to share code with the existing iOS code.
+Future<void> buildMacOS({
   FlutterProject flutterProject,
   BuildInfo buildInfo,
-  String targetOverride = 'lib/main.dart',
+  String targetOverride,
 }) async {
-  // Create the environment used to process the build. This needs to match what
-  // is provided in bin/macos_build_flutter_assets.sh otherwise the directories
-  // will be different.
-  final Environment environment = Environment(
-    projectDir: flutterProject.directory,
-    buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
-    defines: <String, String>{
-      kBuildMode: buildInfo.isDebug == true ? 'debug' : 'release',
-      kTargetPlatform: 'darwin-x64',
-      kTargetFile: fs.file(targetOverride).absolute.path
-    },
-  );
-
+  final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
+  if (!flutterBuildDir.existsSync()) {
+    flutterBuildDir.createSync(recursive: true);
+  }
   // Write configuration to an xconfig file in a standard location.
   await updateGeneratedXcodeProperties(
     project: flutterProject,
@@ -43,34 +34,35 @@ Future<PrebuiltMacOSApp> buildMacOS({
     targetOverride: targetOverride,
     useMacOSConfig: true,
     setSymroot: false,
-    buildDirOverride: environment.buildDir.path,
   );
+  await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
   // If the xcfilelists do not exist, create empty version.
   if (!flutterProject.macos.inputFileList.existsSync()) {
-    flutterProject.macos.inputFileList.createSync(recursive: true);
+     flutterProject.macos.inputFileList.createSync(recursive: true);
   }
   if (!flutterProject.macos.outputFileList.existsSync()) {
     flutterProject.macos.outputFileList.createSync(recursive: true);
   }
+
   // Set debug or release mode.
   String config = 'Debug';
-  if (buildInfo.isRelease ?? false) {
+  if (buildInfo.isRelease) {
     config = 'Release';
   }
-  // Invoke Xcode with correct configuration.
+  // Run build script provided by application.
   final Stopwatch sw = Stopwatch()..start();
-  final List<String> command = <String>[
+  final Process process = await processManager.start(<String>[
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
     '-workspace', flutterProject.macos.xcodeWorkspace.path,
-    '-configuration', config,
+    '-configuration', '$config',
     '-scheme', 'Runner',
-    '-derivedDataPath', environment.buildDir.path,
-    'OBJROOT=${fs.path.join(environment.buildDir.path, 'Build', 'Intermediates.noindex')}',
-    'SYMROOT=${fs.path.join(environment.buildDir.path, 'Build', 'Products')}',
-  ];
-  final Process process = await processManager.start(command);
+    '-derivedDataPath', flutterBuildDir.absolute.path,
+    'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+    'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+    'COMPILER_INDEX_STORE_ENABLE=NO',
+  ]);
   final Status status = logger.startProgress(
     'Building macOS application...',
     timeout: null,
@@ -93,13 +85,4 @@ Future<PrebuiltMacOSApp> buildMacOS({
     throwToolExit('Build process failed');
   }
   flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
-  final File appBundleNameFile = flutterProject.macos.nameFile;
-  final Directory bundleDir = fs.directory(fs.path.join(
-    environment.buildDir.path,
-    'Build',
-    'Products',
-    buildInfo.mode == BuildMode.debug ? 'Debug' : 'Release',
-    appBundleNameFile.readAsStringSync().trim(),
-  ));
-  return MacOSApp.fromPrebuiltApp(bundleDir);
 }

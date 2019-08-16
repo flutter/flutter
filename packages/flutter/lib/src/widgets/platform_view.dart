@@ -580,3 +580,225 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
     renderObject.updateGestureRecognizers(gestureRecognizers);
   }
 }
+
+/// The parameters used to create a [PlatformViewController].
+///
+/// See also [CreatePlatformViewController] which uses this object to create a [PlatformViewController].
+class PlatformViewCreationParams {
+
+  const PlatformViewCreationParams._({
+    @required this.id,
+    @required this.onPlatformViewCreated
+  }) : assert(id != null),
+       assert(onPlatformViewCreated != null);
+
+  /// The unique identifier for the new platform view.
+  ///
+  /// [PlatformViewController.viewId] should match this id.
+  final int id;
+
+  /// Callback invoked after the platform view has been created.
+  final PlatformViewCreatedCallback onPlatformViewCreated;
+}
+
+/// A factory for a surface presenting a platform view as part of the widget hierarchy.
+///
+/// The returned widget should present the platform view associated with `controller`.
+///
+/// See also:
+/// * [PlatformViewSurface], a common widget for presenting platform views.
+typedef PlatformViewSurfaceFactory = Widget Function(BuildContext context, PlatformViewController controller);
+
+/// Constructs a [PlatformViewController].
+///
+/// The [PlatformViewController.id] field of the created controller must match the value of the
+/// params [PlatformViewCreationParams.id] field.
+///
+/// See also [PlatformViewLink.onCreate].
+typedef CreatePlatformViewController = PlatformViewController Function(PlatformViewCreationParams params);
+
+/// Links a platform view with the Flutter framework.
+///
+/// Provides common functionality for embedding a platform view (e.g an android.view.View on Android)
+/// with the Flutter framework.
+///
+/// {@macro flutter.widgets.platformViews.lifetime}
+///
+/// To implement a new platform view widget, return this widget in the `build` method.
+/// For example:
+/// ```dart
+/// class FooPlatformView extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return PlatformViewLink(
+///       createCallback: createFooWebView,
+///       surfaceFactory: (BuildContext context, PlatformViewController controller) {
+///        return PlatformViewSurface(
+///            gestureRecognizers: gestureRecognizers,
+///            controller: controller,
+///            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+///        );
+///       },
+///    );
+///   }
+/// }
+/// ```
+///
+/// The `surfaceFactory` and the `createPlatformViewController` only take affect when the state of this widget is initialized.
+/// If the widget is rebuilt without losing its state, `surfaceFactory` and `createPlatformViewController` are ignored.
+class PlatformViewLink extends StatefulWidget {
+
+  /// Construct a [PlatformViewLink] widget.
+  ///
+  /// The `surfaceFactory` and the `createPlatformViewController` must not be null.
+  ///
+  /// See also:
+  /// * [PlatformViewSurface] for details on the widget returned by `surfaceFactory`.
+  /// * [PlatformViewCreationParams] for how each parameter can be used when implementing `createPlatformView`.
+  const PlatformViewLink({
+    Key key,
+    @required PlatformViewSurfaceFactory surfaceFactory,
+    @required CreatePlatformViewController createPlatformViewController,
+    }) : assert(surfaceFactory != null),
+                                  assert(createPlatformViewController != null),
+                                  _surfaceFactory = surfaceFactory,
+                                  _createPlatformViewController = createPlatformViewController,
+                                  super(key: key);
+
+
+  final PlatformViewSurfaceFactory _surfaceFactory;
+  final CreatePlatformViewController _createPlatformViewController;
+
+  @override
+  State<StatefulWidget> createState() => _PlatformViewLinkState();
+}
+
+class _PlatformViewLinkState extends State<PlatformViewLink> {
+
+  int _id;
+  PlatformViewController _controller;
+  bool _platformViewCreated = false;
+  PlatformViewSurface _surface;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_platformViewCreated) {
+      return const SizedBox.expand();
+    }
+    _surface ??= widget._surfaceFactory(context, _controller);
+    return _surface;
+  }
+
+  @override
+  void initState() {
+    _initialize();
+    super.initState();
+  }
+
+  void _initialize() {
+    _id = platformViewsRegistry.getNextPlatformViewId();
+    _controller = widget._createPlatformViewController(PlatformViewCreationParams._(id:_id, onPlatformViewCreated:_onPlatformViewCreated));
+  }
+
+  void _onPlatformViewCreated(int id) {
+    setState(() => _platformViewCreated = true);
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+}
+
+/// Integrates a platform view with Flutter's compositor, touch, and semantics subsystems.
+///
+/// The compositor integration is done by adding a [PlatformViewLayer] to the layer tree. [PlatformViewLayer]
+/// isn't supported on all platforms (e.g on Android platform views are composited using a [TextureLayer]).
+/// Custom Flutter embedders can support [PlatformViewLayer]s by implementing a SystemCompositor.
+///
+/// The widget fills all available space, the parent of this object must provide bounded layout
+/// constraints.
+///
+/// If the associated platform view is not created the [PlatformViewSurface] does not paint any contents.
+///
+/// See also:
+/// * [AndroidView] which embeds an Android platform view in the widget hierarchy.
+/// * [UIKitView] which embeds an iOS platform view in the widget hierarchy.
+// TODO(amirh): Link to the embedder's system compositor documentation once available.
+class PlatformViewSurface extends LeafRenderObjectWidget {
+
+  /// Construct a `PlatformViewSurface`.
+  ///
+  /// The [controller] must not be null.
+  const PlatformViewSurface({
+    @required this.controller,
+    @required this.hitTestBehavior,
+    @required this.gestureRecognizers,
+  }) : assert(controller != null),
+       assert(hitTestBehavior != null),
+       assert(gestureRecognizers != null);
+
+  /// The controller for the platform view integrated by this [PlatformViewSurface].
+  ///
+  /// [PlatformViewController] is used for dispatching touch events to the platform view.
+  /// [PlatformViewController.viewId] identifies the platform view whose contents are painted by this widget.
+  final PlatformViewController controller;
+
+  /// Which gestures should be forwarded to the PlatformView.
+  ///
+  /// {@macro flutter.widgets.platformViews.gestureRecognizersDescHead}
+  ///
+  /// For example, with the following setup vertical drags will not be dispatched to the platform view
+  /// as the vertical drag gesture is claimed by the parent [GestureDetector].
+  ///
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   child: PlatformViewSurface(
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// To get the [PlatformViewSurface] to claim the vertical drag gestures we can pass a vertical drag
+  /// gesture recognizer factory in [gestureRecognizers] e.g:
+  ///
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   child: SizedBox(
+  ///     width: 200.0,
+  ///     height: 100.0,
+  ///     child: PlatformViewSurface(
+  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+  ///         new Factory<OneSequenceGestureRecognizer>(
+  ///           () => new EagerGestureRecognizer(),
+  ///         ),
+  ///       ].toSet(),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// {@macro flutter.widgets.platformViews.gestureRecognizersDescFoot}
+  // We use OneSequenceGestureRecognizers as they support gesture arena teams.
+  // TODO(amirh): get a list of GestureRecognizers here.
+  // https://github.com/flutter/flutter/issues/20953
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
+
+  /// {@macro flutter.widgets.platformViews.hittestParam}
+  final PlatformViewHitTestBehavior hitTestBehavior;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return PlatformViewRenderBox(controller: controller, gestureRecognizers: gestureRecognizers, hitTestBehavior: hitTestBehavior);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, PlatformViewRenderBox renderObject) {
+    renderObject
+      ..controller = controller
+      ..hitTestBehavior = hitTestBehavior
+      ..updateGestureRecognizers(gestureRecognizers);
+  }
+}

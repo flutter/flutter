@@ -10,6 +10,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 
 void main() {
+  test('TestWindow can handle new methods without breaking', () {
+    final dynamic testWindow = TestWindow(window: ui.window);
+    expect(testWindow.someNewProperty, null);
+  });
+
   testWidgets('TestWindow can fake device pixel ratio', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<double>(
       tester: tester,

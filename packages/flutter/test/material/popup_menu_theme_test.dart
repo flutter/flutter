@@ -261,10 +261,12 @@ void main() {
         child: Column(
           children: <Widget>[
             PopupMenuTheme(
-              color: Colors.pink,
-              shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              elevation: 6.0,
-              textStyle: const TextStyle(color: Color(0xfffff000), textBaseline: TextBaseline.alphabetic),
+              data: PopupMenuThemeData(
+                color: Colors.pink,
+                shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                elevation: 6.0,
+                textStyle: const TextStyle(color: Color(0xfffff000), textBaseline: TextBaseline.alphabetic),
+              ),
               child: PopupMenuButton<void>(
                 key: popupButtonKey,
                 itemBuilder: (BuildContext context) {

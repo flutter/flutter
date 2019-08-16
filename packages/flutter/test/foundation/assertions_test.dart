@@ -14,7 +14,7 @@ void main() {
     });
     expect(log[0], contains('Example label'));
     expect(log[1], contains('debugPrintStack'));
-  }, skip: isBrowser);
+  });
 
   test('debugPrintStack', () {
     final List<String> log = captureOutput(() {
@@ -39,7 +39,7 @@ void main() {
 
     expect(joined, contains('captureOutput'));
     expect(joined, contains('\nExample information\n'));
-  }, skip: isBrowser);
+  });
 
   test('FlutterErrorDetails.toString', () {
     expect(
@@ -326,6 +326,30 @@ void main() {
         '  https://github.com/flutter/flutter/issues/new?template=BUG.md\n'
         '═════════════════════════════════════════════════════════════════\n',
       );
+    }
+  });
+
+  test('User-thrown exceptions have ErrorSummary properties', () {
+    {
+      DiagnosticsNode node;
+      try {
+        throw 'User thrown string';
+      } catch (e) {
+        node = FlutterErrorDetails(exception: e).toDiagnosticsNode();
+      }
+      final ErrorSummary summary = node.getProperties().whereType<ErrorSummary>().single;
+      expect(summary.value, equals(<String>['User thrown string']));
+    }
+
+    {
+      DiagnosticsNode node;
+      try {
+        throw ArgumentError.notNull('myArgument');
+      } catch (e) {
+        node = FlutterErrorDetails(exception: e).toDiagnosticsNode();
+      }
+      final ErrorSummary summary = node.getProperties().whereType<ErrorSummary>().single;
+      expect(summary.value, equals(<String>['Invalid argument(s) (myArgument): Must not be null']));
     }
   });
 }

@@ -479,8 +479,7 @@ void main() {
           inMutuallyExclusiveGroup: true,
           header: true,
           obscured: true,
-          // TODO(mdebbar): Uncomment after https://github.com/flutter/engine/pull/9894
-          //multiline: true,
+          multiline: true,
           scopesRoute: true,
           namesRoute: true,
           image: true,
@@ -489,8 +488,6 @@ void main() {
     );
     final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
     flags
-      // TODO(mdebbar): Remove this line after https://github.com/flutter/engine/pull/9894
-      ..remove(SemanticsFlag.isMultiline)
       ..remove(SemanticsFlag.hasToggledState)
       ..remove(SemanticsFlag.isToggled)
       ..remove(SemanticsFlag.hasImplicitScrolling);

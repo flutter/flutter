@@ -13,6 +13,13 @@ import 'media_query.dart';
 // String _name;
 
 /// The text style to apply to descendant [Text] widgets without explicit style.
+///
+/// See also:
+///
+///  * [AnimatedDefaultTextStyle], which animates changes in the text style
+///    smoothly over a given duration.
+///  * [DefaultTextStyleTransition], which takes a provided [Animation] to
+///    animate changes in text style smoothly over time.
 class DefaultTextStyle extends InheritedWidget {
   /// Creates a default text style for the given subtree.
   ///

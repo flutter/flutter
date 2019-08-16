@@ -36,6 +36,8 @@ class ChromeDevice extends Device {
       ephemeral: false,
   );
 
+  // TODO(jonahwilliams): this is technically false, but requires some refactoring
+  // to allow hot mode restart only devices.
   @override
   bool get supportsHotReload => true;
 

@@ -80,13 +80,10 @@ class MacOSDevice extends Device {
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
-    Cache.releaseLockEarly();
     // Stop any running applications with the same executable.
-    PrebuiltMacOSApp prebuiltMacOSApp;
-    if (prebuiltApplication) {
-      prebuiltMacOSApp = package;
-    } else {
-      prebuiltMacOSApp = await buildMacOS(
+    if (!prebuiltApplication) {
+      Cache.releaseLockEarly();
+      await buildMacOS(
         flutterProject: FlutterProject.current(),
         buildInfo: debuggingOptions?.buildInfo,
         targetOverride: mainPath,
@@ -94,15 +91,16 @@ class MacOSDevice extends Device {
     }
 
     // Ensure that the executable is locatable.
-    if (prebuiltMacOSApp == null) {
+    final String executable = package.executable(debuggingOptions?.buildInfo?.mode);
+    if (executable == null) {
       printError('Unable to find executable to run');
       return LaunchResult.failed();
     }
 
     // Make sure to call stop app after we've built.
-    await stopApp(prebuiltMacOSApp);
+    await stopApp(package);
     final Process process = await processManager.start(<String>[
-      prebuiltMacOSApp.executable,
+      executable
     ]);
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
@@ -113,7 +111,7 @@ class MacOSDevice extends Device {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       // Bring app to foreground.
       await processManager.run(<String>[
-        'open', prebuiltMacOSApp.bundleName,
+        'open', package.applicationBundle(debuggingOptions?.buildInfo?.mode),
       ]);
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
@@ -127,8 +125,8 @@ class MacOSDevice extends Device {
   // TODO(jonahwilliams): implement using process manager.
   // currently we rely on killing the isolate taking down the application.
   @override
-  Future<bool> stopApp(covariant PrebuiltMacOSApp app) async {
-    return killProcess(app.executable);
+  Future<bool> stopApp(covariant MacOSApp app) async {
+    return killProcess(app.executable(BuildMode.debug));
   }
 
   @override
