@@ -229,28 +229,25 @@ void main() {
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     // The enabled slider thumb has track segments that extend to and from
-    // the center of the thumb.
+    // the center of the thumb to the furthest points the center of the thumb
+    // can be at, 0 and 1 (empty and full).
     expect(
       sliderBox,
       paints
-        ..rect(rect: const Rect.fromLTRB(25.0, 299.0, 202.0, 301.0), color: sliderTheme.activeTrackColor)
-        ..rect(rect: const Rect.fromLTRB(222.0, 299.0, 776.0, 301.0), color: sliderTheme.inactiveTrackColor),
+        ..rect(rect: const Rect.fromLTRB(24.0, 299.0, 212.0, 301.0), color: sliderTheme.activeTrackColor)
+        ..rect(rect: const Rect.fromLTRB(212.0, 299.0, 776.0, 301.0), color: sliderTheme.inactiveTrackColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
 
-    // The disabled slider thumb has a horizontal gap between itself and the
-    // track segments. Therefore, the track segments are shorter since they do
-    // not extend to the center of the thumb, but rather the outer edge of th
-    // gap. As a result, the `right` value of the first segment is less than it
-    // is above, and the `left` value of the second segment is more than it is
-    // above.
+    // the disabled segments are the same as the enabled segments
+    // in size, and differ only in colors.
     expect(
       sliderBox,
       paints
-        ..rect(rect: const Rect.fromLTRB(25.0, 299.0, 202.0, 301.0), color: sliderTheme.disabledActiveTrackColor)
-        ..rect(rect: const Rect.fromLTRB(222.0, 299.0, 776.0, 301.0), color: sliderTheme.disabledInactiveTrackColor),
+        ..rect(rect: const Rect.fromLTRB(24.0, 299.0, 212.0, 301.0), color: sliderTheme.disabledActiveTrackColor)
+        ..rect(rect: const Rect.fromLTRB(212.0, 299.0, 776.0, 301.0), color: sliderTheme.disabledInactiveTrackColor),
     );
   });
 
@@ -538,23 +535,24 @@ void main() {
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     // Top and bottom are centerY (300) + and - trackRadius (8).
+    // Left point of the left segment is extended by trackRadius also
+    // in order to reach the furthest point the thumbCenter can be at.
     expect(
       sliderBox,
       paints
-        ..rect(rect: const Rect.fromLTRB(32.0, 292.0, 202.0, 308.0), color: sliderTheme.activeTrackColor)
-        ..rect(rect: const Rect.fromLTRB(222.0, 292.0, 776.0, 308.0), color: sliderTheme.inactiveTrackColor),
+        ..rect(rect: const Rect.fromLTRB(24.0, 292.0, 212.0, 308.0), color: sliderTheme.activeTrackColor)
+        ..rect(rect: const Rect.fromLTRB(212.0, 292.0, 776.0, 308.0), color: sliderTheme.inactiveTrackColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
 
-    // The disabled thumb is smaller so the active track has to paint longer to
-    // get to the edge.
+    // the same as the above, just a difference in colors
     expect(
       sliderBox,
       paints
-        ..rect(rect: const Rect.fromLTRB(32.0, 292.0, 202.0, 308.0), color: sliderTheme.disabledActiveTrackColor)
-        ..rect(rect: const Rect.fromLTRB(222.0, 292.0, 776.0, 308.0), color: sliderTheme.disabledInactiveTrackColor),
+        ..rect(rect: const Rect.fromLTRB(24.0, 292.0, 212.0, 308.0), color: sliderTheme.disabledActiveTrackColor)
+        ..rect(rect: const Rect.fromLTRB(212.0, 292.0, 776.0, 308.0), color: sliderTheme.disabledInactiveTrackColor),
     );
   });
 
