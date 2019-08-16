@@ -146,13 +146,10 @@ class Focus extends StatefulWidget {
     this.onFocusChange,
     this.onKey,
     this.debugLabel,
-    this.focusable = true,
-    this.skipTraversal = false,
+    this.canRequestFocus,
+    this.skipTraversal,
   })  : assert(child != null),
         assert(autofocus != null),
-        assert(focusable != null),
-        assert(skipTraversal != null),
-        assert(focusable == true || autofocus == false, 'Autofocus cannot be true if focusable is false.'),
         super(key: key);
 
   /// A debug label for this widget.
@@ -229,11 +226,13 @@ class Focus extends StatefulWidget {
   /// part of the focus chain, but shouldn't be accessible via focus traversal.
   final bool skipTraversal;
 
-  /// If true, this widget may be focused.
+  /// If true, this widget may request the primary focus.
   ///
   /// Defaults to true.  Set to false if you want this node to do nothing when
-  /// [requestFocus] is called on it. Does not affect the children of this node.
-  final bool focusable;
+  /// [requestFocus] is called on it. Does not affect the children of this node,
+  /// and [hasFocus] can still return true if this node is the ancestor of the
+  /// primary focus.
+  final bool canRequestFocus;
 
   /// Returns the [focusNode] of the [Focus] that most tightly encloses the
   /// given [BuildContext].
@@ -323,8 +322,8 @@ class _FocusState extends State<Focus> {
       // _createNode is overridden in _FocusScopeState.
       _internalNode ??= _createNode();
     }
-    focusNode.skipTraversal = widget.skipTraversal;
-    focusNode.focusable = widget.focusable;
+    focusNode.skipTraversal = widget.skipTraversal ?? focusNode.skipTraversal;
+    focusNode.canRequestFocus = widget.canRequestFocus ?? focusNode.canRequestFocus;
     _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
     _hasFocus = focusNode.hasFocus;
 
@@ -337,8 +336,8 @@ class _FocusState extends State<Focus> {
   FocusNode _createNode() {
     return FocusNode(
       debugLabel: widget.debugLabel,
-      focusable: widget.focusable,
-      skipTraversal: widget.skipTraversal,
+      canRequestFocus: widget.canRequestFocus ?? true,
+      skipTraversal: widget.skipTraversal ?? false,
     );
   }
 
@@ -383,9 +382,9 @@ class _FocusState extends State<Focus> {
       return true;
     }());
 
-    if (oldWidget.focusNode == widget.focusNode &&
-        widget.focusNode?.focusable == widget.focusable &&
-        widget.focusNode?.skipTraversal == widget.skipTraversal) {
+    if (oldWidget.focusNode == widget.focusNode) {
+      focusNode.skipTraversal = widget.skipTraversal ?? focusNode.skipTraversal;
+      focusNode.canRequestFocus = widget.canRequestFocus ?? focusNode.canRequestFocus;
       return;
     }
 

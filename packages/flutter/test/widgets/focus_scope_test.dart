@@ -1157,7 +1157,7 @@ void main() {
       bool gotFocus;
       await tester.pumpWidget(
         Focus(
-          focusable: false,
+          canRequestFocus: false,
           onFocusChange: (bool focused) => gotFocus = focused,
           child: Container(key: key1),
         ),
@@ -1178,7 +1178,7 @@ void main() {
       await tester.pumpWidget(
         Focus(
           autofocus: true,
-          focusable: true,
+          canRequestFocus: true,
           onFocusChange: (bool focused) => gotFocus = focused,
           child: Container(key: key1),
         ),
@@ -1196,7 +1196,7 @@ void main() {
       gotFocus = null;
       await tester.pumpWidget(
         Focus(
-          focusable: false,
+          canRequestFocus: false,
           onFocusChange: (bool focused) => gotFocus = focused,
           child: Container(key: key1),
         ),
@@ -1208,7 +1208,7 @@ void main() {
 
       await tester.pump();
 
-      expect(gotFocus, isNull);
+      expect(gotFocus, false);
       expect(node.hasFocus, isFalse);
     });
     testWidgets('Child of unfocusable Focus can get focus.', (WidgetTester tester) async {
@@ -1218,7 +1218,7 @@ void main() {
       bool gotFocus;
       await tester.pumpWidget(
         Focus(
-          focusable: false,
+          canRequestFocus: false,
           onFocusChange: (bool focused) => gotFocus = focused,
           child: Focus(key: key1, focusNode: focusNode, child: Container(key: key2)),
         ),

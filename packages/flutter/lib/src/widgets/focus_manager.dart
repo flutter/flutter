@@ -16,7 +16,7 @@ import 'framework.dart';
 
 // Used for debugging focus code. Set to true to see highly verbose debug output
 // when focus changes occur.
-const bool _kDebugFocus = false;
+const bool _kDebugFocus = true;
 
 bool _focusDebug(String message, [Iterable<String> details]) {
   if (_kDebugFocus) {
@@ -366,11 +366,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     String debugLabel,
     FocusOnKeyCallback onKey,
     bool skipTraversal = false,
-    bool focusable = true,
+    bool canRequestFocus = true,
   })  : assert(skipTraversal != null),
-        assert(focusable != null),
+        assert(canRequestFocus != null),
         _skipTraversal = skipTraversal,
-        _focusable = focusable,
+        _canRequestFocus = canRequestFocus,
         _onKey = onKey {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
@@ -391,16 +391,18 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  /// If true, this focus node may be focused.
+  /// If true, this focus node may request the primary focus.
   ///
   /// Defaults to true.  Set to false if you want this node to do nothing when
-  /// [requestFocus] is called on it. Does not affect the children of this node.
-  bool get focusable => _focusable;
-  bool _focusable;
-  set focusable(bool value) {
-    if (value != _focusable) {
-      _focusable = value;
-      if (!_focusable) {
+  /// [requestFocus] is called on it. Does not affect the children of this node,
+  /// and [FocusNode.hasFocus] can still return true if this node is the
+  /// ancestor of a node with primary focus.
+  bool get canRequestFocus => _canRequestFocus;
+  bool _canRequestFocus;
+  set canRequestFocus(bool value) {
+    if (value != _canRequestFocus) {
+      _canRequestFocus = value;
+      if (!_canRequestFocus) {
         unfocus();
       }
       _notify();
@@ -438,7 +440,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// An iterator over the children that are allowed to be traversed by the
   /// [FocusTraversalPolicy].
-  Iterable<FocusNode> get traversalChildren => children.where((FocusNode node) => !node.skipTraversal);
+  Iterable<FocusNode> get traversalChildren {
+    return children.where(
+      (FocusNode node) => !node.skipTraversal && node.canRequestFocus,
+    );
+  }
 
   /// A debug label that is used for diagnostic output.
   ///
@@ -465,7 +471,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   }
 
   /// Returns all descendants which do not have the [skipTraversal] flag set.
-  Iterable<FocusNode> get traversalDescendants => descendants.where((FocusNode node) => !node.skipTraversal);
+  Iterable<FocusNode> get traversalDescendants => descendants.where((FocusNode node) => !node.skipTraversal && node.canRequestFocus);
 
   /// An [Iterable] over the ancestors of this node.
   ///
@@ -755,8 +761,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       if (node._parent == null) {
         _reparent(node);
       }
-      assert(node.ancestors.contains(this),
-        'Focus was requested for a node that is not a descendant of the scope from which it was requested.');
+      assert(node.ancestors.contains(this), 'Focus was requested for a node that is not a descendant of the scope from which it was requested.');
       node._doRequestFocus();
       return;
     }
@@ -765,7 +770,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   // Note that this is overridden in FocusScopeNode.
   void _doRequestFocus() {
-    if (!focusable) {
+    if (!canRequestFocus) {
       return;
     }
     _setAsFocusedChild();
@@ -820,7 +825,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<BuildContext>('context', context, defaultValue: null));
-    properties.add(FlagProperty('focusable', value: focusable, ifFalse: 'NOT FOCUSABLE', defaultValue: true));
+    properties.add(FlagProperty('canRequestFocus', value: canRequestFocus, ifFalse: 'NOT FOCUSABLE', defaultValue: true));
     properties.add(FlagProperty('hasFocus', value: hasFocus, ifTrue: 'FOCUSED', defaultValue: false));
     properties.add(StringProperty('debugLabel', debugLabel, defaultValue: null));
   }
@@ -887,8 +892,7 @@ class FocusScopeNode extends FocusNode {
   ///
   /// Returns null if there is no currently focused child.
   FocusNode get focusedChild {
-    assert(_focusedChildren.isEmpty || _focusedChildren.last.enclosingScope == this,
-      'Focused child does not have the same idea of its enclosing scope as the scope does.');
+    assert(_focusedChildren.isEmpty || _focusedChildren.last.enclosingScope == this, 'Focused child does not have the same idea of its enclosing scope as the scope does.');
     return _focusedChildren.isNotEmpty ? _focusedChildren.last : null;
   }
 
@@ -930,15 +934,14 @@ class FocusScopeNode extends FocusNode {
       if (node._parent == null) {
         _reparent(node);
       }
-      assert(node.ancestors.contains(this),
-        'Autofocus was requested for a node that is not a descendant of the scope from which it was requested.');
+      assert(node.ancestors.contains(this), 'Autofocus was requested for a node that is not a descendant of the scope from which it was requested.');
       node._doRequestFocus();
     }
   }
 
   @override
   void _doRequestFocus() {
-    if (!focusable) {
+    if (!canRequestFocus) {
       return;
     }
 
