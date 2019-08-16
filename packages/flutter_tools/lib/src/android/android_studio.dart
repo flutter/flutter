@@ -10,8 +10,7 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
 import '../globals.dart';
-import '../ios/ios_workflow.dart';
-import '../ios/plist_utils.dart' as plist;
+import '../ios/plist_utils.dart';
 
 AndroidStudio get androidStudio => context.get<AndroidStudio>();
 
@@ -43,34 +42,23 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   factory AndroidStudio.fromMacOSBundle(String bundlePath) {
     String studioPath = fs.path.join(bundlePath, 'Contents');
     String plistFile = fs.path.join(studioPath, 'Info.plist');
-    String plistValue = iosWorkflow.getPlistValueFromFile(
-      plistFile,
-      null,
-    );
-    final RegExp _pathsSelectorMatcher = RegExp(r'"idea.paths.selector" = "[^;]+"');
-    final RegExp _jetBrainsToolboxAppMatcher = RegExp(r'JetBrainsToolboxApp = "[^;]+"');
+    Map<String, dynamic> plistValues = PlistUtils.instance.parseFile(plistFile);
     // As AndroidStudio managed by JetBrainsToolbox could have a wrapper pointing to the real Android Studio.
     // Check if we've found a JetBrainsToolbox wrapper and deal with it properly.
-    final String jetBrainsToolboxAppBundlePath = extractStudioPlistValueWithMatcher(plistValue, _jetBrainsToolboxAppMatcher);
+    final String jetBrainsToolboxAppBundlePath = plistValues['JetBrainsToolboxApp'];
     if (jetBrainsToolboxAppBundlePath != null) {
       studioPath = fs.path.join(jetBrainsToolboxAppBundlePath, 'Contents');
       plistFile = fs.path.join(studioPath, 'Info.plist');
-      plistValue = iosWorkflow.getPlistValueFromFile(
-        plistFile,
-        null,
-      );
+      plistValues = PlistUtils.instance.parseFile(plistFile);
     }
 
-    final String versionString = iosWorkflow.getPlistValueFromFile(
-      plistFile,
-      plist.kCFBundleShortVersionStringKey,
-    );
+    final String versionString = plistValues[PlistUtils.kCFBundleShortVersionStringKey];
 
     Version version;
     if (versionString != null)
       version = Version.parse(versionString);
 
-    final String pathsSelectorValue = extractStudioPlistValueWithMatcher(plistValue, _pathsSelectorMatcher);
+    final String pathsSelectorValue = plistValues['JVMOptions']['Properties']['idea.paths.selector'];
     final String presetPluginsPath = pathsSelectorValue == null
         ? null
         : fs.path.join(homeDirPath, 'Library', 'Application Support', '$pathsSelectorValue');

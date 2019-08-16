@@ -17,8 +17,7 @@ import 'cache.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart';
-import 'ios/ios_workflow.dart';
-import 'ios/plist_utils.dart' as plist;
+import 'ios/plist_utils.dart';
 import 'ios/xcodeproj.dart' as xcode;
 import 'plugins.dart';
 import 'template.dart';
@@ -361,9 +360,9 @@ class IosProject implements XcodeBasedProject {
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
   String get productBundleIdentifier {
-    final String fromPlist = iosWorkflow.getPlistValueFromFile(
+    final String fromPlist = PlistUtils.instance.getValueFromFile(
       hostInfoPlist.path,
-      plist.kCFBundleIdentifierKey,
+      PlistUtils.kCFBundleIdentifierKey,
     );
     if (fromPlist != null && !fromPlist.contains('\$')) {
       // Info.plist has no build variables in product bundle ID.

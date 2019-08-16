@@ -379,7 +379,7 @@ class IOSSimulator extends Device {
       // parsing the xcodeproj or configuration files.
       // See https://github.com/flutter/flutter/issues/31037 for more information.
       final String plistPath = fs.path.join(package.simulatorBundlePath, 'Info.plist');
-      final String bundleIdentifier = iosWorkflow.getPlistValueFromFile(plistPath, kCFBundleIdentifierKey);
+      final String bundleIdentifier = PlistUtils.instance.getValueFromFile(plistPath, PlistUtils.kCFBundleIdentifierKey);
 
       await SimControl.instance.launch(id, bundleIdentifier, args);
     } catch (error) {

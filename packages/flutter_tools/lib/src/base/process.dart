@@ -368,8 +368,9 @@ String _runWithLoggingSync(
 
   if (failedExitCode) {
     if (results.stderr.isNotEmpty) {
-      if (noisyErrors)
+      if (noisyErrors) {
         printError(results.stderr.trim());
+      }
       else
         printTrace(results.stderr.trim());
     }

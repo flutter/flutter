@@ -86,7 +86,7 @@ void testUsingContext(
           SimControl: () => MockSimControl(),
           Usage: () => FakeUsage(),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
-          FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
+          FileSystem: () => const LocalFileSystemBlockingSetCurrentDirectory(),
           TimeoutConfiguration: () => const TimeoutConfiguration(),
         },
         body: () {
@@ -357,6 +357,8 @@ class MockClock extends Mock implements SystemClock {}
 class MockHttpClient extends Mock implements HttpClient {}
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
+  const LocalFileSystemBlockingSetCurrentDirectory();
+
   @override
   set currentDirectory(dynamic value) {
     throw 'fs.currentDirectory should not be set on the local file system during '

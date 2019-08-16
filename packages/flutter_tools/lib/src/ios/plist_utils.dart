@@ -2,39 +2,46 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
+import '../convert.dart';
+import '../globals.dart';
 
-const String kCFBundleIdentifierKey = 'CFBundleIdentifier';
-const String kCFBundleShortVersionStringKey = 'CFBundleShortVersionString';
-const String kCFBundleExecutable = 'CFBundleExecutable';
+class PlistUtils {
+  const PlistUtils();
 
-// Prefer using [iosWorkflow.getPlistValueFromFile] to enable mocking.
-String getValueFromFile(String plistFilePath, String key) {
-  // TODO(chinmaygarde): For now, we only need to read from plist files on a mac
-  // host. If this changes, we will need our own Dart plist reader.
+  static const String kCFBundleIdentifierKey = 'CFBundleIdentifier';
+  static const String kCFBundleShortVersionStringKey = 'CFBundleShortVersionString';
+  static const String kCFBundleExecutable = 'CFBundleExecutable';
 
-  // Don't use PlistBuddy since that is not guaranteed to be installed.
-  // 'defaults' requires the path to be absolute and without the 'plist'
-  // extension.
-  const String executable = '/usr/bin/defaults';
-  if (!fs.isFileSync(executable))
-    return null;
-  if (!fs.isFileSync(plistFilePath))
-    return null;
+  static PlistUtils get instance => context.get<PlistUtils>() ?? const PlistUtils();
 
-  final String normalizedPlistPath = fs.path.withoutExtension(fs.path.absolute(plistFilePath));
+  Map<String, dynamic> parseFile(String plistFilePath) {
+    assert(plistFilePath != null);
+    const String executable = '/usr/bin/plutil';
+    if (!fs.isFileSync(executable))
+      return null;
+    if (!fs.isFileSync(plistFilePath))
+      return null;
 
-  try {
-    final List<String> args = <String>[
-      executable, 'read', normalizedPlistPath,
-    ];
-    if (key != null && key.isNotEmpty) {
-      args.add(key);
+    final String normalizedPlistPath = fs.path.absolute(plistFilePath);
+
+    try {
+      final List<String> args = <String>[
+        executable, '-convert', 'json', '-o', '-', normalizedPlistPath,
+      ];
+      final String jsonContent = runCheckedSync(args);
+      return json.decode(jsonContent);
+    } catch (error) {
+      printTrace('$error');
+      return null;
     }
-    final String value = runCheckedSync(args);
-    return value.isEmpty ? null : value;
-  } catch (error) {
-    return null;
+  }
+
+  String getValueFromFile(String plistFilePath, String key) {
+    assert(key != null);
+    final Map<String, dynamic> parsed = parseFile(plistFilePath);
+    return parsed == null ? null : parsed[key];
   }
 }

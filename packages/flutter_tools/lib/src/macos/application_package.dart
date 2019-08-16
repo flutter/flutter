@@ -8,7 +8,7 @@ import '../application_package.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../globals.dart';
-import '../ios/plist_utils.dart' as plist;
+import '../ios/plist_utils.dart';
 import '../project.dart';
 
 /// Tests whether a [FileSystemEntity] is an macOS bundle directory
@@ -65,8 +65,8 @@ abstract class MacOSApp extends ApplicationPackage {
       printError('Invalid prebuilt macOS app. Does not contain Info.plist.');
       return null;
     }
-    final String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
-    final String executableName = plist.getValueFromFile(plistPath, plist.kCFBundleExecutable);
+    final String id = const PlistUtils().getValueFromFile(plistPath, PlistUtils.kCFBundleIdentifierKey);
+    final String executableName = const PlistUtils().getValueFromFile(plistPath, PlistUtils.kCFBundleExecutable);
     if (id == null) {
       printError('Invalid prebuilt macOS app. Info.plist does not contain bundle identifier');
       return null;
