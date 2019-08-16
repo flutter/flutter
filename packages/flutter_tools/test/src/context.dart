@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -88,6 +89,7 @@ void testUsingContext(
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
           FileSystem: () => const LocalFileSystemBlockingSetCurrentDirectory(),
           TimeoutConfiguration: () => const TimeoutConfiguration(),
+          PlistParser: () => FakePlistParser(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -355,6 +357,14 @@ class MockFlutterVersion extends Mock implements FlutterVersion {
 class MockClock extends Mock implements SystemClock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
+
+class FakePlistParser implements PlistParser {
+  @override
+  Map<String, dynamic> parseFile(String plistFilePath) => const <String, dynamic>{};
+
+  @override
+  String getValueFromFile(String plistFilePath, String key) => null;
+}
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
   const LocalFileSystemBlockingSetCurrentDirectory();

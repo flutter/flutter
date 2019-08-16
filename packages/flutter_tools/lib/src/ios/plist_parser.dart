@@ -22,7 +22,7 @@ class PlistParser {
   /// associated map of key/value property list pairs.
   ///
   /// If [plistFilePath] points to a non-existent file or a file that's not a
-  /// valid property list file, this will return null.
+  /// valid property list file, this will return an empty map.
   ///
   /// The [plistFilePath] argument must not be null.
   Map<String, dynamic> parseFile(String plistFilePath) {
@@ -31,7 +31,7 @@ class PlistParser {
     if (!fs.isFileSync(executable))
       throw ToolExit('Could not find $executable');
     if (!fs.isFileSync(plistFilePath))
-      return null;
+      return const <String, dynamic>{};
 
     final String normalizedPlistPath = fs.path.absolute(plistFilePath);
 
@@ -43,7 +43,7 @@ class PlistParser {
       return json.decode(jsonContent);
     } catch (error) {
       printTrace('$error');
-      return null;
+      return const <String, dynamic>{};
     }
   }
 
@@ -59,6 +59,6 @@ class PlistParser {
   String getValueFromFile(String plistFilePath, String key) {
     assert(key != null);
     final Map<String, dynamic> parsed = parseFile(plistFilePath);
-    return parsed == null ? null : parsed[key];
+    return parsed[key];
   }
 }

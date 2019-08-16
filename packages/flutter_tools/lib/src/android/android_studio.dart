@@ -58,7 +58,14 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (versionString != null)
       version = Version.parse(versionString);
 
-    final String pathsSelectorValue = plistValues['JVMOptions']['Properties']['idea.paths.selector'];
+    String pathsSelectorValue;
+    final Map<String, dynamic> jvmOptions = plistValues['JVMOptions'];
+    if (jvmOptions != null) {
+      final Map<String, dynamic> jvmProperties = jvmOptions['Properties'];
+      if (jvmProperties != null) {
+        pathsSelectorValue = jvmProperties['idea.paths.selector'];
+      }
+    }
     final String presetPluginsPath = pathsSelectorValue == null
         ? null
         : fs.path.join(homeDirPath, 'Library', 'Application Support', '$pathsSelectorValue');
