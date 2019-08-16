@@ -367,8 +367,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   FocusNode({
     String debugLabel,
     FocusOnKeyCallback onKey,
-    this.skipTraversal = false,
+    bool skipTraversal = false,
+    bool canRequestFocus = true,
   })  : assert(skipTraversal != null),
+        assert(canRequestFocus != null),
+        _skipTraversal = skipTraversal,
+        _canRequestFocus = canRequestFocus,
         _onKey = onKey {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
@@ -380,7 +384,50 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// This may be used to place nodes in the focus tree that may be focused, but
   /// not traversed, allowing them to receive key events as part of the focus
   /// chain, but not be traversed to via focus traversal.
-  bool skipTraversal;
+  ///
+  /// This is different from [canRequestFocus] because it only implies that the
+  /// node can't be reached via traversal, not that it can't be focused. It may
+  /// still be focused explicitly.
+  bool get skipTraversal => _skipTraversal;
+  bool _skipTraversal;
+  set skipTraversal(bool value) {
+    if (value != _skipTraversal) {
+      _skipTraversal = value;
+      _notify();
+    }
+  }
+
+  /// If true, this focus node may request the primary focus.
+  ///
+  /// Defaults to true.  Set to false if you want this node to do nothing when
+  /// [requestFocus] is called on it. Does not affect the children of this node,
+  /// and [hasFocus] can still return true if this node is the ancestor of a
+  /// node with primary focus.
+  ///
+  /// This is different than [skipTraversal] because [skipTraversal] still
+  /// allows the node to be focused, just not traversed to via the
+  /// [FocusTraversalPolicy]
+  ///
+  /// Setting [canRequestFocus] to false implies that the node will also be
+  /// skipped for traversal purposes.
+  ///
+  /// See also:
+  ///
+  ///   - [DefaultFocusTraversal], a widget that sets the traversal policy for
+  ///     its descendants.
+  ///   - [FocusTraversalPolicy], a class that can be extended to describe a
+  ///     traversal policy.
+  bool get canRequestFocus => _canRequestFocus;
+  bool _canRequestFocus;
+  set canRequestFocus(bool value) {
+    if (value != _canRequestFocus) {
+      _canRequestFocus = value;
+      if (!_canRequestFocus) {
+        unfocus();
+      }
+      _notify();
+    }
+  }
 
   /// The context that was supplied to [attach].
   ///
@@ -413,7 +460,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// An iterator over the children that are allowed to be traversed by the
   /// [FocusTraversalPolicy].
-  Iterable<FocusNode> get traversalChildren => children.where((FocusNode node) => !node.skipTraversal);
+  Iterable<FocusNode> get traversalChildren {
+    return children.where(
+      (FocusNode node) => !node.skipTraversal && node.canRequestFocus,
+    );
+  }
 
   /// A debug label that is used for diagnostic output.
   ///
@@ -440,7 +491,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   }
 
   /// Returns all descendants which do not have the [skipTraversal] flag set.
-  Iterable<FocusNode> get traversalDescendants => descendants.where((FocusNode node) => !node.skipTraversal);
+  Iterable<FocusNode> get traversalDescendants => descendants.where((FocusNode node) => !node.skipTraversal && node.canRequestFocus);
 
   /// An [Iterable] over the ancestors of this node.
   ///
@@ -733,8 +784,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       if (node._parent == null) {
         _reparent(node);
       }
-      assert(node.ancestors.contains(this),
-        'Focus was requested for a node that is not a descendant of the scope from which it was requested.');
+      assert(node.ancestors.contains(this), 'Focus was requested for a node that is not a descendant of the scope from which it was requested.');
       node._doRequestFocus();
       return;
     }
@@ -743,6 +793,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   // Note that this is overridden in FocusScopeNode.
   void _doRequestFocus() {
+    if (!canRequestFocus) {
+      return;
+    }
     _setAsFocusedChild();
     if (hasPrimaryFocus) {
       return;
@@ -795,6 +848,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<BuildContext>('context', context, defaultValue: null));
+    properties.add(FlagProperty('canRequestFocus', value: canRequestFocus, ifFalse: 'NOT FOCUSABLE', defaultValue: true));
     properties.add(FlagProperty('hasFocus', value: hasFocus, ifTrue: 'FOCUSED', defaultValue: false));
     properties.add(StringProperty('debugLabel', debugLabel, defaultValue: null));
   }
@@ -861,8 +915,7 @@ class FocusScopeNode extends FocusNode {
   ///
   /// Returns null if there is no currently focused child.
   FocusNode get focusedChild {
-    assert(_focusedChildren.isEmpty || _focusedChildren.last.enclosingScope == this,
-      'Focused child does not have the same idea of its enclosing scope as the scope does.');
+    assert(_focusedChildren.isEmpty || _focusedChildren.last.enclosingScope == this, 'Focused child does not have the same idea of its enclosing scope as the scope does.');
     return _focusedChildren.isNotEmpty ? _focusedChildren.last : null;
   }
 
@@ -904,14 +957,17 @@ class FocusScopeNode extends FocusNode {
       if (node._parent == null) {
         _reparent(node);
       }
-      assert(node.ancestors.contains(this),
-        'Autofocus was requested for a node that is not a descendant of the scope from which it was requested.');
+      assert(node.ancestors.contains(this), 'Autofocus was requested for a node that is not a descendant of the scope from which it was requested.');
       node._doRequestFocus();
     }
   }
 
   @override
   void _doRequestFocus() {
+    if (!canRequestFocus) {
+      return;
+    }
+
     // Start with the primary focus as the focused child of this scope, if there
     // is one. Otherwise start with this node itself.
     FocusNode primaryFocus = focusedChild ?? this;
