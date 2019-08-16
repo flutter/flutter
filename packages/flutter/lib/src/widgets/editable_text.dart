@@ -1328,12 +1328,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               keyboardAppearance: widget.keyboardAppearance,
           ),
       )
-      ..setEditingState(localValue)
-      ..addListener(() {
-        if (!_textInputConnection.attached) {
-          widget.focusNode.unfocus();
-        }
-      });
+      ..setEditingState(localValue);
     }
     _textInputConnection.show();
   }
