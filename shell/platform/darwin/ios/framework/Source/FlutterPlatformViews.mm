@@ -182,10 +182,10 @@ PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
     } else {
       CancelFrame();
       gpu_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
-      return PostPrerollResult::kSuccess;
+      return PostPrerollResult::kResubmitFrame;
     }
   }
-  return PostPrerollResult::kResubmitFrame;
+  return PostPrerollResult::kSuccess;
 }
 
 void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(
