@@ -1063,6 +1063,8 @@ const List<List<String>> _linuxDesktopBinaryDirs = <List<String>>[
 
 const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[
   <String>['darwin-x64', 'darwin-x64/FlutterMacOS.framework.zip'],
+  <String>['darwin-x64', 'darwin-x64-profile/FlutterMacOS.framework.zip'],
+  <String>['darwin-x64', 'darwin-x64-release/FlutterMacOS.framework.zip'],
 ];
 
 const List<List<String>> _osxBinaryDirs = <List<String>>[

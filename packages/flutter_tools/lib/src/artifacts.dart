@@ -160,7 +160,6 @@ class CachedArtifacts extends Artifacts {
 
   @override
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
-    platform ??= _currentHostPlatform;
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
@@ -170,20 +169,29 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.ios:
         return _getIosArtifactPath(artifact, platform, mode);
       case TargetPlatform.darwin_x64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-        return _getHostArtifactPath(artifact, platform, mode);
+        final String result = _getDarwinArtifactPath(artifact, platform, mode);
+        if (result == null) {
+          continue rest;
+        }
+        return result;
+      rest: default:
+        return _getHostArtifactPath(artifact, _currentHostPlatform, mode);
     }
-    assert(false, 'Invalid platform $platform.');
-    return null;
   }
 
   @override
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]) {
     return fs.path.basename(_getEngineArtifactsPath(platform, mode));
+  }
+
+  String _getDarwinArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
+    switch (artifact) {
+      case Artifact.genSnapshot:
+        final String engineDir = _getEngineArtifactsPath(platform, BuildMode.debug);
+        return fs.path.join(engineDir, _artifactToFileName(artifact));
+      default:
+        return null;
+    }
   }
 
   String _getAndroidArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {

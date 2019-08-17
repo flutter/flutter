@@ -79,7 +79,7 @@ class UnpackMacOS extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-    Source.artifact(Artifact.flutterMacOSFramework),
+    Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
   ];
 
   @override
@@ -430,7 +430,7 @@ class ReleaseBundleFlutterAssets extends Target {
   @override
   List<Target> get dependencies => const <Target>[
     ReleaseMacOSFramework(),
-    ReleaseUnpackMacOS(),
+    UnpackMacOS(),
   ];
 
   @override
