@@ -713,7 +713,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// sent to the GPU.
   ///
   /// 8. The semantics phase: All the dirty [RenderObject]s in the system have
-  /// their semantics updated (see [RenderObject.semanticsAnnotator]). This
+  /// their semantics updated (see [RenderObject.assembleSemanticsNode]). This
   /// generates the [SemanticsNode] tree. See
   /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
   /// object dirty for semantics.

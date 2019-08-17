@@ -83,12 +83,17 @@ Future<void> runCommand(String executable, List<String> arguments, {
   bool expectNonZeroExit = false,
   int expectedExitCode,
   String failureMessage,
-  bool printOutput = true,
+  OutputMode outputMode = OutputMode.print,
+  CapturedOutput output,
   bool skip = false,
   bool expectFlaky = false,
   Duration timeout = _kLongTimeout,
   bool Function(String) removeLine,
 }) async {
+  assert((outputMode == OutputMode.capture) == (output != null),
+      'The output parameter must be non-null with and only with '
+      'OutputMode.capture');
+
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
   if (skip) {
@@ -110,14 +115,18 @@ Future<void> runCommand(String executable, List<String> arguments, {
     .where((String line) => removeLine == null || !removeLine(line))
     .map((String line) => '$line\n')
     .transform(const Utf8Encoder());
-  if (printOutput) {
-    await Future.wait<void>(<Future<void>>[
-      stdout.addStream(stdoutSource),
-      stderr.addStream(process.stderr),
-    ]);
-  } else {
-    savedStdout = stdoutSource.toList();
-    savedStderr = process.stderr.toList();
+  switch (outputMode) {
+    case OutputMode.print:
+      await Future.wait<void>(<Future<void>>[
+        stdout.addStream(stdoutSource),
+        stderr.addStream(process.stderr),
+      ]);
+      break;
+    case OutputMode.capture:
+    case OutputMode.discard:
+      savedStdout = stdoutSource.toList();
+      savedStderr = process.stderr.toList();
+      break;
   }
 
   final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
@@ -125,6 +134,12 @@ Future<void> runCommand(String executable, List<String> arguments, {
     return (expectNonZeroExit || expectFlaky) ? 0 : 1;
   });
   print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
+
+  if (output != null) {
+    output.stdout = _flattenToString(await savedStdout);
+    output.stderr = _flattenToString(await savedStderr);
+  }
+
   // If the test is flaky we don't care about the actual exit.
   if (expectFlaky) {
     return;
@@ -133,9 +148,17 @@ Future<void> runCommand(String executable, List<String> arguments, {
     if (failureMessage != null) {
       print(failureMessage);
     }
-    if (!printOutput) {
-      stdout.writeln(utf8.decode((await savedStdout).expand<int>((List<int> ints) => ints).toList()));
-      stderr.writeln(utf8.decode((await savedStderr).expand<int>((List<int> ints) => ints).toList()));
+
+    // Print the output when we get unexpected results (unless output was
+    // printed already).
+    switch (outputMode) {
+      case OutputMode.print:
+        break;
+      case OutputMode.capture:
+      case OutputMode.discard:
+        stdout.writeln(_flattenToString(await savedStdout));
+        stderr.writeln(_flattenToString(await savedStderr));
+        break;
     }
     print(
         '$redLine\n'
@@ -146,4 +169,17 @@ Future<void> runCommand(String executable, List<String> arguments, {
     );
     exit(1);
   }
+}
+
+/// Flattens a nested list of UTF-8 code units into a single string.
+String _flattenToString(List<List<int>> chunks) =>
+  utf8.decode(chunks.expand<int>((List<int> ints) => ints).toList());
+
+/// Specifies what to do with command output from [runCommand].
+enum OutputMode { print, capture, discard }
+
+/// Stores command output from [runCommand] when used with [OutputMode.capture].
+class CapturedOutput {
+  String stdout;
+  String stderr;
 }

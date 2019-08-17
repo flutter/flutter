@@ -20,12 +20,19 @@ import 'channel.dart';
 
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand() {
-    argParser.addFlag(
-      'force',
-      abbr: 'f',
-      help: 'force upgrade the flutter branch, potentially discarding local changes.',
-      negatable: false,
-    );
+    argParser
+      ..addFlag(
+        'force',
+        abbr: 'f',
+        help: 'Force upgrade the flutter branch, potentially discarding local changes.',
+        negatable: false,
+      )
+      ..addFlag(
+        'continue',
+        hide: true,
+        negatable: false,
+        help: 'For the second half of the upgrade flow requiring the new version of Flutter. Should not be invoked manually, but re-entrantly by the standard upgrade command.',
+      );
   }
 
   @override
@@ -45,7 +52,12 @@ class UpgradeCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final UpgradeCommandRunner upgradeCommandRunner = UpgradeCommandRunner();
-    await upgradeCommandRunner.runCommand(argResults['force'], GitTagVersion.determine(), FlutterVersion.instance);
+    await upgradeCommandRunner.runCommand(
+      argResults['force'],
+      argResults['continue'],
+      GitTagVersion.determine(),
+      FlutterVersion.instance,
+    );
     return null;
   }
 }
@@ -53,7 +65,25 @@ class UpgradeCommand extends FlutterCommand {
 
 @visibleForTesting
 class UpgradeCommandRunner {
-  Future<FlutterCommandResult> runCommand(bool force, GitTagVersion gitTagVersion, FlutterVersion flutterVersion) async {
+  Future<FlutterCommandResult> runCommand(
+    bool force,
+    bool continueFlow,
+    GitTagVersion gitTagVersion,
+    FlutterVersion flutterVersion,
+  ) async {
+    if (!continueFlow) {
+      await runCommandFirstHalf(force, gitTagVersion, flutterVersion);
+    } else {
+      await runCommandSecondHalf(flutterVersion);
+    }
+    return null;
+  }
+
+  Future<void> runCommandFirstHalf(
+    bool force,
+    GitTagVersion gitTagVersion,
+    FlutterVersion flutterVersion,
+  ) async {
     await verifyUpstreamConfigured();
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
       // If the commit is a recognized branch and not master,
@@ -87,10 +117,31 @@ class UpgradeCommandRunner {
     await resetChanges(gitTagVersion);
     await upgradeChannel(flutterVersion);
     await attemptFastForward();
+    await flutterUpgradeContinue();
+  }
+
+  Future<void> flutterUpgradeContinue() async {
+    final int code = await runCommandAndStreamOutput(
+      <String>[
+        fs.path.join('bin', 'flutter'),
+        'upgrade',
+        '--continue',
+        '--no-version-check',
+      ],
+      workingDirectory: Cache.flutterRoot,
+      allowReentrantFlutter: true,
+    );
+    if (code != 0) {
+      throwToolExit(null, exitCode: code);
+    }
+  }
+
+  // This method should only be called if the upgrade command is invoked
+  // re-entrantly with the `--continue` flag
+  Future<void> runCommandSecondHalf(FlutterVersion flutterVersion) async {
     await precacheArtifacts();
     await updatePackages(flutterVersion);
     await runDoctor();
-    return null;
   }
 
   Future<bool> hasUncomittedChanges() async {
