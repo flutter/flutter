@@ -449,6 +449,7 @@ action("robolectric_tests") {
   args += rebase_path(sources, root_build_dir)
 
   deps = [
+    ":android",
     ":flutter_shell_java",
   ]
 }
