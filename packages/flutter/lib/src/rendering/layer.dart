@@ -398,9 +398,6 @@ class PictureLayer extends Layer {
   }
 
   @override
-  S find<S>(Offset regionOffset) => null;
-
-  @override
   @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     return false;
@@ -472,9 +469,6 @@ class TextureLayer extends Layer {
   }
 
   @override
-  S find<S>(Offset regionOffset) => null;
-
-  @override
   @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     return false;
@@ -511,9 +505,6 @@ class PlatformViewLayer extends Layer {
       height: shiftedRect.height,
     );
   }
-
-  @override
-  S find<S>(Offset regionOffset) => null;
 
   @override
   @protected
@@ -590,9 +581,6 @@ class PerformanceOverlayLayer extends Layer {
     builder.setCheckerboardRasterCacheImages(checkerboardRasterCacheImages);
     builder.setCheckerboardOffscreenLayers(checkerboardOffscreenLayers);
   }
-
-  @override
-  S find<S>(Offset regionOffset) => null;
 
   @override
   @protected
@@ -776,19 +764,6 @@ class ContainerLayer extends Layer {
       _needsAddToScene = _needsAddToScene || child._needsAddToScene;
       child = child.nextSibling;
     }
-  }
-
-  @override
-  S find<S>(Offset regionOffset) {
-    Layer current = lastChild;
-    while (current != null) {
-      final Object value = current.find<S>(regionOffset);
-      if (value != null) {
-        return value;
-      }
-      current = current.previousSibling;
-    }
-    return null;
   }
 
   @override
@@ -1023,11 +998,6 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
-  S find<S>(Offset regionOffset) {
-    return super.find<S>(regionOffset - offset);
-  }
-
-  @override
   @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     return super.findAnnotations<S>(result, regionOffset - offset, onlyFirst: onlyFirst);
@@ -1148,13 +1118,6 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  S find<S>(Offset regionOffset) {
-    if (!clipRect.contains(regionOffset))
-      return null;
-    return super.find<S>(regionOffset);
-  }
-
-  @override
   @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     if (!clipRect.contains(regionOffset))
@@ -1233,13 +1196,6 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  S find<S>(Offset regionOffset) {
-    if (!clipRRect.contains(regionOffset))
-      return null;
-    return super.find<S>(regionOffset);
-  }
-
-  @override
   @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     if (!clipRRect.contains(regionOffset))
@@ -1315,13 +1271,6 @@ class ClipPathLayer extends ContainerLayer {
       _clipBehavior = value;
       markNeedsAddToScene();
     }
-  }
-
-  @override
-  S find<S>(Offset regionOffset) {
-    if (!clipPath.contains(regionOffset))
-      return null;
-    return super.find<S>(regionOffset);
   }
 
   @override
@@ -1457,12 +1406,6 @@ class TransformLayer extends OffsetLayer {
     final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
     return Offset(result[0], result[1]);
-  }
-
-  @override
-  S find<S>(Offset regionOffset) {
-    final Offset transformedOffset = _transformOffset(regionOffset);
-    return transformedOffset == null ? null : super.find<S>(transformedOffset);
   }
 
   @override
@@ -1779,13 +1722,6 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  S find<S>(Offset regionOffset) {
-    if (!clipPath.contains(regionOffset))
-      return null;
-    return super.find<S>(regionOffset);
-  }
-
-  @override
   @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     if (!clipPath.contains(regionOffset))
@@ -2050,15 +1986,6 @@ class FollowerLayer extends ContainerLayer {
   }
 
   @override
-  S find<S>(Offset regionOffset) {
-    if (link.leader == null) {
-      return showWhenUnlinked ? super.find<S>(regionOffset - unlinkedOffset) : null;
-    }
-    final Offset transformedOffset = _transformOffset<S>(regionOffset);
-    return transformedOffset == null ? null : super.find<S>(transformedOffset);
-  }
-
-  @override
   @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     if (link.leader == null) {
@@ -2266,21 +2193,6 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   ///  * [HitTestBehavior], which controls similar logic when hit-testing in the
   ///    render tree.
   final bool opaque;
-
-  @override
-  S find<S>(Offset regionOffset) {
-    final S result = super.find<S>(regionOffset);
-    if (result != null)
-      return result;
-    if (size != null && !(offset & size).contains(regionOffset))
-      return null;
-    if (T == S) {
-      final Object untypedResult = value;
-      final S typedResult = untypedResult;
-      return typedResult;
-    }
-    return null;
-  }
 
   @override
   @protected
