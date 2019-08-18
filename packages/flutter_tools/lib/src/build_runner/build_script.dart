@@ -36,7 +36,24 @@ const String jsEntrypointSourceMapExtension = '.dart.js.map';
 const String jsEntrypointArchiveExtension = '.dart.js.tar.gz';
 const String digestsEntrypointExtension = '.digests';
 
-// TODO(jonahwilliams): remove this hack.
+// NB: this is a hack.
+//
+// Currently there are multiple sources of truth for what constitutes a
+// "supported" dart library. The libraries.json file contains a field for
+// whether or not the particular library is supported, but this is sometimes
+// in addition to a runtime patch which allows the library to be imported
+// without crashing. Additionally, there is the [DartPlatform] type which
+// controls how "package:build" computes transitive dependencies for the
+// build modules used for incremental compilation.
+
+// dart2js and ddc seem to disagree on which source of truth is required.
+// Specifically, if we include `dart:io` and `dart:isolate` as supported
+// libraries, then ddc compiles while dart2js fails, and vice-versa. This
+// is likely due to package:build's stricter requirements to determine
+// what modules need to be built for incremental comilation.
+//
+// The only reasonable long-term solution is to unify on the definition of
+// what support means.
 DartPlatform _webPlatform;
 DartPlatform createWebPlatform(bool release) {
   return _webPlatform ??= DartPlatform.register('flutter_web', <String>[
@@ -155,7 +172,6 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
         'lib/**_web_entrypoint.dart',
       ],
     ),
-    appliesBuilders: <String>['flutter_tools:dart2js_modules'],
   ),
   core.apply(
     'flutter_tools:test_entrypoint',
