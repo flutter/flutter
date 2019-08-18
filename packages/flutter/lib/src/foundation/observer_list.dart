@@ -28,6 +28,7 @@ class ObserverList<T> extends Iterable<T> {
   /// Returns whether the item was present in the list.
   bool remove(T item) {
     _isDirty = true;
+    _set?.clear();
     return _list.remove(item);
   }
 

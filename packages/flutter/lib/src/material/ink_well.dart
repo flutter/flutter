@@ -473,12 +473,17 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   bool get highlightsExist => _highlights.values.where((InkHighlight highlight) => highlight != null).isNotEmpty;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _focusNode?.removeListener(_handleFocusUpdate);
     _focusNode = Focus.of(context, nullOk: true);
     _focusNode?.addListener(_handleFocusUpdate);
-    WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
   @override
