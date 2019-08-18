@@ -35,35 +35,38 @@ const String jsEntrypointExtension = '.dart.js';
 const String jsEntrypointSourceMapExtension = '.dart.js.map';
 const String jsEntrypointArchiveExtension = '.dart.js.tar.gz';
 const String digestsEntrypointExtension = '.digests';
-const String jsModuleErrorsExtension = '.ddc.js.errors';
-const String jsModuleExtension = '.ddc.js';
-const String jsSourceMapExtension = '.ddc.js.map';
 
-final DartPlatform flutterWebPlatform =
-    DartPlatform.register('flutter_web', <String>[
-  'async',
-  'collection',
-  'convert',
-  'core',
-  'developer',
-  'html',
-  'html_common',
-  'indexed_db',
-  'js',
-  'js_util',
-  'math',
-  'svg',
-  'typed_data',
-  'web_audio',
-  'web_gl',
-  'web_sql',
-  '_internal',
-  // Flutter web specific libraries.
-  'ui',
-  '_engine',
-  'io',
-  'isolate',
-]);
+// TODO(jonahwilliams): remove this hack.
+DartPlatform _webPlatform;
+DartPlatform createWebPlatform(bool release) {
+  return _webPlatform ??= DartPlatform.register('flutter_web', <String>[
+    'async',
+    'collection',
+    'convert',
+    'core',
+    'developer',
+    'html',
+    'html_common',
+    'indexed_db',
+    'js',
+    'js_util',
+    'math',
+    'svg',
+    'typed_data',
+    'web_audio',
+    'web_gl',
+    'web_sql',
+    '_internal',
+    // Flutter web specific libraries.
+    'ui',
+    '_engine',
+    // Not technically supported but required to compile with dartdevc.
+    if (!release)
+      'io',
+    if (!release)
+      'isolate',
+  ]);
+}
 
 /// The builders required to compile a Flutter application to the web.
 final List<core.BuilderApplication> builders = <core.BuilderApplication>[
@@ -105,9 +108,9 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
   core.apply(
       'flutter_tools:ddc_modules',
       <Builder Function(BuilderOptions)>[
-        (BuilderOptions options) => MetaModuleBuilder(flutterWebPlatform),
-        (BuilderOptions options) => MetaModuleCleanBuilder(flutterWebPlatform),
-        (BuilderOptions options) => ModuleBuilder(flutterWebPlatform),
+        (BuilderOptions builderOptions) => MetaModuleBuilder(createWebPlatform(builderOptions.config['release'])),
+        (BuilderOptions builderOptions) => MetaModuleCleanBuilder(createWebPlatform(builderOptions.config['release'])),
+        (BuilderOptions builderOptions) => ModuleBuilder(createWebPlatform(builderOptions.config['release'])),
       ],
       core.toNoneByDefault(),
       isOptional: true,
@@ -121,13 +124,13 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               summaryOnly: true,
               sdkKernelPath: path.join('kernel', 'flutter_ddc_sdk.dill'),
               outputExtension: ddcKernelExtension,
-              platform: flutterWebPlatform,
+              platform: createWebPlatform(builderOptions.config['release']),
               librariesPath: 'libraries.json',
               kernelTargetName: 'ddc',
             ),
         (BuilderOptions builderOptions) => DevCompilerBuilder(
               useIncrementalCompiler: false,
-              platform: flutterWebPlatform,
+              platform: createWebPlatform(builderOptions.config['release']),
               platformSdk: builderOptions.config['flutterWebSdk'],
               sdkKernelPath: path.url.join('kernel', 'flutter_ddc_sdk.dill'),
               librariesPath: 'libraries.json',
@@ -140,9 +143,9 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
   core.apply(
     'flutter_tools:entrypoint',
     <BuilderFactory>[
-      (BuilderOptions options) => FlutterWebEntrypointBuilder(
-          options.config['release'] ??  false,
-          options.config['flutterWebSdk'],
+      (BuilderOptions builderOptions) => FlutterWebEntrypointBuilder(
+          builderOptions.config['release'] ??  false,
+          builderOptions.config['flutterWebSdk'],
       ),
     ],
     core.toRoot(),
@@ -152,6 +155,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
         'lib/**_web_entrypoint.dart',
       ],
     ),
+    appliesBuilders: <String>['flutter_tools:dart2js_modules'],
   ),
   core.apply(
     'flutter_tools:test_entrypoint',
@@ -195,7 +199,7 @@ class FlutterWebTestEntrypointBuilder implements Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
     log.info('building for target ${buildStep.inputId.path}');
-    await bootstrapDdc(buildStep, platform: flutterWebPlatform);
+    await bootstrapDdc(buildStep, platform: createWebPlatform(false));
   }
 }
 
@@ -222,7 +226,7 @@ class FlutterWebEntrypointBuilder implements Builder {
     if (release) {
       await bootstrapDart2Js(buildStep, flutterWebSdk);
     } else {
-      await bootstrapDdc(buildStep, platform: flutterWebPlatform);
+      await bootstrapDdc(buildStep, platform: createWebPlatform(false));
     }
   }
 }
@@ -368,7 +372,7 @@ Future<void> main() async {
 
 Future<void> bootstrapDart2Js(BuildStep buildStep, String flutterWebSdk) async {
   final AssetId dartEntrypointId = buildStep.inputId;
-  final AssetId moduleId = dartEntrypointId.changeExtension(moduleExtension(flutterWebPlatform));
+  final AssetId moduleId = dartEntrypointId.changeExtension(moduleExtension(createWebPlatform(true)));
   final Module module = Module.fromJson(json.decode(await buildStep.readAsString(moduleId)));
 
   final List<Module> allDeps = await module.computeTransitiveDependencies(buildStep, throwIfUnsupported: false)..add(module);

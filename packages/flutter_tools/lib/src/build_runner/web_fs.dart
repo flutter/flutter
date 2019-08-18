@@ -317,6 +317,7 @@ class BuildDaemonCreator {
         '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
         '--define', 'flutter_tools:entrypoint=release=$release',
         '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
+        '--define', 'flutter_tools:ddc_modules=release=$release'
       ],
       logHandler: (ServerLog serverLog) {
         switch (serverLog.level) {
