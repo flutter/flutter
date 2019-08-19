@@ -8,7 +8,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/commands/build_aot.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -22,14 +22,14 @@ void main() {
   MemoryFileSystem memoryFileSystem;
   MockProcessManager mockProcessManager;
   BufferLogger bufferLogger;
-  MockIOSWorkflow mockIOSWorkflow;
+  MockPlistUtils mockPlistUtils;
 
   setUp(() {
     mockXcode = MockXcode();
     memoryFileSystem = MemoryFileSystem(style: FileSystemStyle.posix);
     mockProcessManager = MockProcessManager();
     bufferLogger = BufferLogger();
-    mockIOSWorkflow = MockIOSWorkflow();
+    mockPlistUtils = MockPlistUtils();
   });
 
   testUsingContext('build aot validates building with bitcode requires a local engine', () async {
@@ -82,18 +82,19 @@ void main() {
       const <String>['foo'],
     );
     final RunResult clangResult = RunResult(
-      FakeProcessResult(stdout: 'BadVersion\nBlahBlah\n', stderr: ''),
+      FakeProcessResult(stdout: 'Apple LLVM version 10.0.0 (clang-4567.1.1.1)\nBlahBlah\n', stderr: ''),
       const <String>['foo'],
     );
     when(mockXcode.otool(any)).thenAnswer((_) => Future<RunResult>.value(otoolResult));
     when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(clangResult));
-    when(mockIOSWorkflow.getPlistValueFromFile(infoPlist.path, 'ClangVersion')).thenReturn('Apple LLVM Version 10.0.1');
+    when(mockPlistUtils.getValueFromFile(infoPlist.path, 'ClangVersion')).thenReturn('Apple LLVM version 10.0.1 (clang-1234.1.12.1)');
 
-    await validateBitcode();
-
-    expect(
-      bufferLogger.statusText,
-      startsWith('The Flutter.framework at ${flutterFramework.path} was built with "Apple LLVM Version 10.0.1'),
+    await expectToolExitLater(
+      validateBitcode(),
+      equals('The Flutter.framework at ios_profile/Flutter.framework was built with "Apple LLVM version 10.0.1 '
+             '(clang-1234.1.12.1)", but the current version of clang is "Apple LLVM version 10.0.0 (clang-4567.1.1.1)". '
+             'This will result in failures when trying toarchive an IPA. To resolve this issue, update your version '
+             'of Xcode to at least 10.0.1.'),
     );
   }, overrides: <Type, Generator>{
     Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
@@ -101,10 +102,10 @@ void main() {
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
     Logger: () => bufferLogger,
-    IOSWorkflow: () => mockIOSWorkflow,
+    PlistParser: () => mockPlistUtils,
   });
 
-  testUsingContext('build aot validates and succeeds', () async {
+  testUsingContext('build aot validates and succeeds - same version of Xcode', () async {
     final Directory flutterFramework = memoryFileSystem.directory('ios_profile/Flutter.framework')
       ..createSync(recursive: true);
     flutterFramework.childFile('Flutter').createSync();
@@ -115,12 +116,12 @@ void main() {
       const <String>['foo'],
     );
     final RunResult clangResult = RunResult(
-      FakeProcessResult(stdout: 'Apple LLVM Version 10.0.1\nBlahBlah\n', stderr: ''),
+      FakeProcessResult(stdout: 'Apple LLVM version 10.0.1 (clang-1234.1.12.1)\nBlahBlah\n', stderr: ''),
       const <String>['foo'],
     );
     when(mockXcode.otool(any)).thenAnswer((_) => Future<RunResult>.value(otoolResult));
     when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(clangResult));
-    when(mockIOSWorkflow.getPlistValueFromFile(infoPlist.path, 'ClangVersion')).thenReturn('Apple LLVM Version 10.0.1');
+    when(mockPlistUtils.getValueFromFile(infoPlist.path, 'ClangVersion')).thenReturn('Apple LLVM version 10.0.1 (clang-1234.1.12.1)');
 
     await validateBitcode();
 
@@ -131,9 +132,39 @@ void main() {
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
     Logger: () => bufferLogger,
-    IOSWorkflow: () => mockIOSWorkflow,
+    PlistParser: () => mockPlistUtils,
+  });
+
+  testUsingContext('build aot validates and succeeds when user has newer version of Xcode', () async {
+    final Directory flutterFramework = memoryFileSystem.directory('ios_profile/Flutter.framework')
+      ..createSync(recursive: true);
+    flutterFramework.childFile('Flutter').createSync();
+    final File infoPlist = flutterFramework.childFile('Info.plist')..createSync();
+
+    final RunResult otoolResult = RunResult(
+      FakeProcessResult(stdout: '__LLVM', stderr: ''),
+      const <String>['foo'],
+    );
+    final RunResult clangResult = RunResult(
+      FakeProcessResult(stdout: 'Apple LLVM version 11.0.1 (clang-1234.1.12.1)\nBlahBlah\n', stderr: ''),
+      const <String>['foo'],
+    );
+    when(mockXcode.otool(any)).thenAnswer((_) => Future<RunResult>.value(otoolResult));
+    when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(clangResult));
+    when(mockPlistUtils.getValueFromFile(infoPlist.path, 'ClangVersion')).thenReturn('Apple LLVM version 10.0.1 (clang-1234.1.12.1)');
+
+    await validateBitcode();
+
+    expect(bufferLogger.statusText, '');
+  }, overrides: <Type, Generator>{
+    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
+    FileSystem: () => memoryFileSystem,
+    ProcessManager: () => mockProcessManager,
+    Xcode: () => mockXcode,
+    Logger: () => bufferLogger,
+    PlistParser: () => mockPlistUtils,
   });
 }
 
 class MockXcode extends Mock implements Xcode {}
-class MockIOSWorkflow extends Mock implements IOSWorkflow {}
+class MockPlistUtils extends Mock implements PlistParser {}

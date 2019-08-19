@@ -102,7 +102,7 @@ typedef GestureTapCancelCallback = void Function();
 ///
 /// Gesture recognizers take part in gesture arenas to enable potential gestures
 /// to be disambiguated from each other. This process is managed by a
-/// [GestureArenaManager] (q.v.).
+/// [GestureArenaManager].
 ///
 /// [TapGestureRecognizer] considers all the pointers involved in the pointer
 /// event sequence as contributing to one gesture. For this reason, extra

@@ -544,4 +544,47 @@ void main() {
     editable.hasFocus = false;
     expect(editable.hasFocus, false);
   });
+
+  test('has correct maxScrollExtent', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    EditableText.debugDeterministicCursor = true;
+
+    final RenderEditable editable = RenderEditable(
+      maxLines: 2,
+      backgroundCursorColor: Colors.grey,
+      textDirection: TextDirection.ltr,
+      cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(
+        text: '撒地方加咖啡哈金凤凰卡号方式剪坏算法发挥福建垃\nasfjafjajfjaslfjaskjflasjfksajf撒分开建安路口附近拉设\n计费可使肌肤撒附近埃里克圾房卡设计费"',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Roboto',
+        ),
+      ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    editable.layout(BoxConstraints.loose(const Size(100.0, 1000.0)));
+    expect(editable.size, equals(const Size(100, 20)));
+    expect(editable.maxLines, equals(2));
+    expect(editable.maxScrollExtent, equals(90));
+
+    editable.layout(BoxConstraints.loose(const Size(150.0, 1000.0)));
+    expect(editable.maxScrollExtent, equals(50));
+
+    editable.layout(BoxConstraints.loose(const Size(200.0, 1000.0)));
+    expect(editable.maxScrollExtent, equals(40));
+
+    editable.layout(BoxConstraints.loose(const Size(500.0, 1000.0)));
+    expect(editable.maxScrollExtent, equals(10));
+
+    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    expect(editable.maxScrollExtent, equals(10));
+  });
 }

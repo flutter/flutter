@@ -26,6 +26,8 @@ import 'toggle_buttons_theme.dart';
 /// Each toggle's behavior can be configured by the [onPressed] callback, which
 /// can update the [isSelected] list however it wants to.
 ///
+/// {@animation 700 150 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_simple.mp4}
+///
 /// Here is an implementation that allows for multiple buttons to be
 /// simultaneously selected, while requiring none of the buttons to be
 /// selected.
@@ -44,6 +46,8 @@ import 'toggle_buttons_theme.dart';
 ///   isSelected: isSelected,
 /// ),
 /// ```
+///
+/// {@animation 700 150 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_required_mutually_exclusive.mp4}
 ///
 /// Here is an implementation that requires mutually exclusive selection
 /// while requiring at least one selection. Note that this assumes that
@@ -70,6 +74,8 @@ import 'toggle_buttons_theme.dart';
 /// ),
 /// ```
 ///
+/// {@animation 700 150 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_mutually_exclusive.mp4}
+///
 /// Here is an implementation that requires mutually exclusive selection,
 /// but allows for none of the buttons to be selected.
 /// ```dart
@@ -93,6 +99,8 @@ import 'toggle_buttons_theme.dart';
 ///   isSelected: isSelected,
 /// ),
 /// ```
+///
+/// {@animation 700 150 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_required.mp4}
 ///
 /// Here is an implementation that allows for multiple buttons to be
 /// simultaneously selected, while requiring at least one selection. Note
@@ -679,13 +687,7 @@ class _ToggleButton extends StatelessWidget {
   /// The splash color for the button's [InkWell].
   final Color splashColor;
 
-  /// A leaf node in the focus tree for this button.
-  ///
-  /// Focus is used to determine which widget should be affected by keyboard
-  /// events. The focus tree keeps track of which widget is currently focused
-  /// on by the user.
-  ///
-  /// See [FocusNode] for more information about how focus nodes are used.
+  /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
 
   /// Called when the button is tapped or otherwise activated.

@@ -20,6 +20,7 @@ import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'dialog_theme.dart';
+import 'divider_theme.dart';
 import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
@@ -179,6 +180,7 @@ class ThemeData extends Diagnosticable {
     BottomSheetThemeData bottomSheetTheme,
     PopupMenuThemeData popupMenuTheme,
     MaterialBannerThemeData bannerTheme,
+    DividerThemeData dividerTheme,
     ButtonBarThemeData buttonBarTheme,
   }) {
     brightness ??= Brightness.light;
@@ -284,6 +286,7 @@ class ThemeData extends Diagnosticable {
     bottomSheetTheme ??= const BottomSheetThemeData();
     popupMenuTheme ??= const PopupMenuThemeData();
     bannerTheme ??= const MaterialBannerThemeData();
+    dividerTheme ??= const DividerThemeData();
     buttonBarTheme ??= const ButtonBarThemeData();
 
     return ThemeData.raw(
@@ -347,6 +350,7 @@ class ThemeData extends Diagnosticable {
       bottomSheetTheme: bottomSheetTheme,
       popupMenuTheme: popupMenuTheme,
       bannerTheme: bannerTheme,
+      dividerTheme: dividerTheme,
       buttonBarTheme: buttonBarTheme,
     );
   }
@@ -422,6 +426,7 @@ class ThemeData extends Diagnosticable {
     @required this.bottomSheetTheme,
     @required this.popupMenuTheme,
     @required this.bannerTheme,
+    @required this.dividerTheme,
     @required this.buttonBarTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
@@ -480,6 +485,7 @@ class ThemeData extends Diagnosticable {
        assert(bottomSheetTheme != null),
        assert(popupMenuTheme != null),
        assert(bannerTheme != null),
+       assert(dividerTheme != null),
        assert(buttonBarTheme != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
@@ -873,6 +879,10 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the color and text style of a [MaterialBanner].
   final MaterialBannerThemeData bannerTheme;
 
+  /// A theme for customizing the color, thickness, and indents of [Divider]s,
+  /// [VerticalDivider]s, etc.
+  final DividerThemeData dividerTheme;
+
   /// A theme for customizing the appearance and layout of [ButtonBar] widgets.
   final ButtonBarThemeData buttonBarTheme;
 
@@ -938,6 +948,7 @@ class ThemeData extends Diagnosticable {
     BottomSheetThemeData bottomSheetTheme,
     PopupMenuThemeData popupMenuTheme,
     MaterialBannerThemeData bannerTheme,
+    DividerThemeData dividerTheme,
     ButtonBarThemeData buttonBarTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -1002,6 +1013,7 @@ class ThemeData extends Diagnosticable {
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
       popupMenuTheme: popupMenuTheme ?? this.popupMenuTheme,
       bannerTheme: bannerTheme ?? this.bannerTheme,
+      dividerTheme: dividerTheme ?? this.dividerTheme,
       buttonBarTheme: buttonBarTheme ?? this.buttonBarTheme,
     );
   }
@@ -1144,6 +1156,7 @@ class ThemeData extends Diagnosticable {
       bottomSheetTheme: BottomSheetThemeData.lerp(a.bottomSheetTheme, b.bottomSheetTheme, t),
       popupMenuTheme: PopupMenuThemeData.lerp(a.popupMenuTheme, b.popupMenuTheme, t),
       bannerTheme: MaterialBannerThemeData.lerp(a.bannerTheme, b.bannerTheme, t),
+      dividerTheme: DividerThemeData.lerp(a.dividerTheme, b.dividerTheme, t),
       buttonBarTheme: ButtonBarThemeData.lerp(a.buttonBarTheme, b.buttonBarTheme, t),
     );
   }
@@ -1214,6 +1227,7 @@ class ThemeData extends Diagnosticable {
            (otherData.bottomSheetTheme == bottomSheetTheme) &&
            (otherData.popupMenuTheme == popupMenuTheme) &&
            (otherData.bannerTheme == bannerTheme) &&
+           (otherData.dividerTheme == dividerTheme) &&
            (otherData.buttonBarTheme == buttonBarTheme);
   }
 
@@ -1283,6 +1297,7 @@ class ThemeData extends Diagnosticable {
       bottomSheetTheme,
       popupMenuTheme,
       bannerTheme,
+      dividerTheme,
       buttonBarTheme,
     ];
     return hashList(values);
@@ -1349,6 +1364,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme));
     properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme));
     properties.add(DiagnosticsProperty<MaterialBannerThemeData>('bannerTheme', bannerTheme, defaultValue: defaultData.bannerTheme));
+    properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme));
     properties.add(DiagnosticsProperty<ButtonBarThemeData>('buttonBarTheme', buttonBarTheme, defaultValue: defaultData.buttonBarTheme));
   }
 }

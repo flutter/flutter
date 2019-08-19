@@ -1017,6 +1017,14 @@ class RenderEditable extends RenderBox {
     return enableInteractiveSelection ?? !obscureText;
   }
 
+  /// The maximum amount the text is allowed to scroll.
+  ///
+  /// This value is only valid after layout and can change as additional
+  /// text is entered or removed in order to accommodate expanding when
+  /// [expands] is set to true.
+  double get maxScrollExtent => _maxScrollExtent;
+  double _maxScrollExtent = 0;
+
   double get _caretMargin => _kCaretGap + cursorWidth;
 
   @override
@@ -1228,8 +1236,6 @@ class RenderEditable extends RenderBox {
     }
     return null;
   }
-
-  double _maxScrollExtent = 0;
 
   // We need to check the paint offset here because during animation, the start of
   // the text may position outside the visible region even when the text fits.

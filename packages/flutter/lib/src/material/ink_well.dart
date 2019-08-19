@@ -478,6 +478,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     _focusNode?.removeListener(_handleFocusUpdate);
     _focusNode = Focus.of(context, nullOk: true);
     _focusNode?.addListener(_handleFocusUpdate);
+    WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
   @override
@@ -491,6 +492,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   @override
   void dispose() {
+    WidgetsBinding.instance.focusManager.removeHighlightModeListener(_handleFocusHighlightModeChange);
     _focusNode?.removeListener(_handleFocusUpdate);
     super.dispose();
   }
@@ -608,8 +610,25 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     return splash;
   }
 
+  void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _handleFocusUpdate();
+    });
+  }
+
   void _handleFocusUpdate() {
-    final bool showFocus = enabled && (Focus.of(context, nullOk: true)?.hasPrimaryFocus ?? false);
+    bool showFocus;
+    switch (WidgetsBinding.instance.focusManager.highlightMode) {
+      case FocusHighlightMode.touch:
+        showFocus = false;
+        break;
+      case FocusHighlightMode.traditional:
+        showFocus = enabled && (Focus.of(context, nullOk: true)?.hasPrimaryFocus ?? false);
+        break;
+    }
     updateHighlight(_HighlightType.focus, value: showFocus);
   }
 

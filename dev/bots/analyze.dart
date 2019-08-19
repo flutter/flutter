@@ -585,7 +585,7 @@ Future<void> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
     }
     await runCommand(flutter, <String>['inject-plugins'],
       workingDirectory: package,
-      printOutput: false,
+      outputMode: OutputMode.discard,
     );
     for (File registrant in fileToContent.keys) {
       if (registrant.readAsStringSync() != fileToContent[registrant]) {
