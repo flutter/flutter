@@ -268,15 +268,17 @@ void main() {
     );
 
     TextStyle textStyle;
-    textStyle = tester.firstWidget<DefaultTextStyle>(
-      find.widgetWithText(DefaultTextStyle, 'First child'),
-    ).style;
+    textStyle = tester.widget<DefaultTextStyle>(find.descendant(
+        of: find.widgetWithText(RawMaterialButton, 'First child'),
+        matching: find.byType(DefaultTextStyle),
+    )).style;
     expect(textStyle.fontFamily, theme.textTheme.body1.fontFamily);
     expect(textStyle.decoration, theme.textTheme.body1.decoration);
 
-    textStyle = tester.firstWidget<DefaultTextStyle>(
-      find.widgetWithText(DefaultTextStyle, 'Second child'),
-    ).style;
+    textStyle = tester.widget<DefaultTextStyle>(find.descendant(
+        of: find.widgetWithText(RawMaterialButton, 'Second child'),
+        matching: find.byType(DefaultTextStyle),
+    )).style;
     expect(textStyle.fontFamily, theme.textTheme.body1.fontFamily);
     expect(textStyle.decoration, theme.textTheme.body1.decoration);
   });
