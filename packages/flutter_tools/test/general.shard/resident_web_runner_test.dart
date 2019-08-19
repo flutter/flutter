@@ -34,6 +34,9 @@ void main() {
     mockDebugConnection = MockDebugConnection();
     mockVmService = MockVmService();
     final MockWebDevice mockWebDevice = MockWebDevice();
+    when(mockWebFs.onTabClose).thenAnswer((Invocation invocation) {
+      return Future<void>.value();
+    });
     testbed = Testbed(
       setup: () {
         residentWebRunner = ResidentWebRunner(

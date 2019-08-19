@@ -28,6 +28,9 @@ void main() {
   setUp(() {
     mockWebFs = MockFlutterWebFs();
     final MockWebDevice mockWebDevice = MockWebDevice();
+    when(mockWebFs.onTabClose).thenAnswer((Invocation invocation) {
+      return Future<void>.value();
+    });
     testbed = Testbed(
       setup: () {
         residentWebRunner = ResidentWebRunner(
