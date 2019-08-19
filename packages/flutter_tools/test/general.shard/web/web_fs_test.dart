@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/build_runner/web_fs.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -26,6 +27,10 @@ void main() {
   MockHttpMultiServer mockHttpMultiServer;
   MockBuildDaemonClient mockBuildDaemonClient;
   MockOperatingSystemUtils mockOperatingSystemUtils;
+  MockChrome mockChrome;
+  MockChromeConnection mockChromeConnection;
+  MockChromeTab mockChromeTab;
+  MockWipConnection mockWipConnection;
 
   setUp(() {
     mockBuildDaemonCreator =  MockBuildDaemonCreator();
@@ -34,7 +39,11 @@ void main() {
     mockBuildDaemonClient = MockBuildDaemonClient();
     mockOperatingSystemUtils = MockOperatingSystemUtils();
     mockDwds = MockDwds();
-    when(mockBuildDaemonCreator.startBuildDaemon(any, release: anyNamed('release')))
+    mockChrome = MockChrome();
+    mockChromeConnection = MockChromeConnection();
+    mockChromeTab = MockChromeTab();
+    mockWipConnection = MockWipConnection();
+    when(mockBuildDaemonCreator.startBuildDaemon(any))
       .thenAnswer((Invocation _) async {
         return mockBuildDaemonClient;
       });
@@ -45,6 +54,21 @@ void main() {
       return const Stream<BuildResults>.empty();
     });
     when(mockBuildDaemonCreator.assetServerPort(any)).thenReturn(4321);
+    when(mockChromeLauncher.launch(any, headless: anyNamed('headless')))
+        .thenAnswer((Invocation invocation) {
+      return Future<Chrome>.value(mockChrome);
+    });
+    when(mockChrome.chromeConnection).thenReturn(mockChromeConnection);
+    when(mockChromeConnection.getTabs()).thenAnswer((Invocation invocation) {
+      return Future<List<ChromeTab>>.value(<ChromeTab>[mockChromeTab]);
+    });
+    when(mockChromeTab.url).thenReturn('localhost:');
+    when(mockChromeTab.connect()).thenAnswer((Invocation invocation) {
+      return Future<WipConnection>.value(mockWipConnection);
+    });
+    when(mockWipConnection.onClose).thenAnswer((Invocation invocation) {
+      return const Stream<WipConnection>.empty();
+    });
     testbed = Testbed(
       overrides: <Type, Generator>{
         OperatingSystemUtils: () => mockOperatingSystemUtils,
@@ -92,4 +116,7 @@ class MockDwds extends Mock implements Dwds {}
 class MockHttpMultiServer extends Mock implements HttpMultiServer {}
 class MockChromeLauncher extends Mock implements ChromeLauncher {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
-
+class MockChromeTab extends Mock implements ChromeTab {}
+class MockChrome extends Mock implements Chrome {}
+class MockChromeConnection extends Mock implements ChromeConnection {}
+class MockWipConnection extends Mock implements WipConnection {}
