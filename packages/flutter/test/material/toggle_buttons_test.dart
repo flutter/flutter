@@ -250,6 +250,74 @@ void main() {
     },
   );
 
+  testWidgets('Default text style is applied', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[false, true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    TextStyle textStyle;
+    textStyle = tester.firstWidget<DefaultTextStyle>(
+      find.widgetWithText(DefaultTextStyle, 'First child'),
+    ).style;
+    expect(textStyle.fontFamily, theme.textTheme.body1.fontFamily);
+    expect(textStyle.decoration, theme.textTheme.body1.decoration);
+
+    textStyle = tester.firstWidget<DefaultTextStyle>(
+      find.widgetWithText(DefaultTextStyle, 'Second child'),
+    ).style;
+    expect(textStyle.fontFamily, theme.textTheme.body1.fontFamily);
+    expect(textStyle.decoration, theme.textTheme.body1.decoration);
+  });
+
+  testWidgets('Custom text style except color is applied', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[false, true],
+            onPressed: (int index) {},
+            textStyle: const TextStyle(
+              textBaseline: TextBaseline.ideographic,
+              fontSize: 20.0,
+              color: Colors.orange,
+            ),
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    TextStyle textStyle;
+    textStyle = tester.firstWidget<DefaultTextStyle>(
+      find.widgetWithText(DefaultTextStyle, 'First child'),
+    ).style;
+    expect(textStyle.textBaseline, TextBaseline.ideographic);
+    expect(textStyle.fontSize, 20.0);
+    expect(textStyle.color, isNot(Colors.orange));
+
+    textStyle = tester.firstWidget<DefaultTextStyle>(
+      find.widgetWithText(DefaultTextStyle, 'Second child'),
+    ).style;
+    expect(textStyle.textBaseline, TextBaseline.ideographic);
+    expect(textStyle.fontSize, 20.0);
+    expect(textStyle.color, isNot(Colors.orange));
+  });
+
   testWidgets(
     'Default text/icon colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
@@ -350,6 +418,7 @@ void main() {
       );
     },
   );
+
 
   testWidgets(
     'Custom text/icon colors for enabled, selected and disabled states',
