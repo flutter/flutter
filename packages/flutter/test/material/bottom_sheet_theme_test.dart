@@ -17,6 +17,7 @@ void main() {
     expect(bottomSheetTheme.backgroundColor, null);
     expect(bottomSheetTheme.elevation, null);
     expect(bottomSheetTheme.shape, null);
+    expect(bottomSheetTheme.clipBehavior, null);
   });
 
   testWidgets('Default BottomSheetThemeData debugFillProperties', (WidgetTester tester) async {
@@ -37,6 +38,7 @@ void main() {
       backgroundColor: const Color(0xFFFFFFFF),
       elevation: 2.0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)),
+      clipBehavior: Clip.antiAlias,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -48,6 +50,7 @@ void main() {
       'backgroundColor: Color(0xffffffff)',
       'elevation: 2.0',
       'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(2.0))',
+      'clipBehavior: Clip.antiAlias'
     ]);
   });
 
@@ -72,6 +75,7 @@ void main() {
     expect(material.color, null);
     expect(material.elevation, 0.0);
     expect(material.shape, null);
+    expect(material.clipBehavior, Clip.none);
   });
 
   testWidgets('BottomSheet uses values from BottomSheetThemeData', (WidgetTester tester) async {
@@ -98,6 +102,7 @@ void main() {
     expect(material.color, bottomSheetTheme.backgroundColor);
     expect(material.elevation, bottomSheetTheme.elevation);
     expect(material.shape, bottomSheetTheme.shape);
+    expect(material.clipBehavior, bottomSheetTheme.clipBehavior);
   });
 
   testWidgets('BottomSheet widget properties take priority over theme', (WidgetTester tester) async {
@@ -106,6 +111,7 @@ void main() {
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
     );
+    const Clip clipBehavior = Clip.hardEdge;
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(bottomSheetTheme: _bottomSheetTheme()),
@@ -114,6 +120,7 @@ void main() {
           backgroundColor: backgroundColor,
           elevation: elevation,
           shape: shape,
+          clipBehavior: Clip.hardEdge,
           onClosing: () {},
           builder: (BuildContext context) {
             return Container();
@@ -131,6 +138,7 @@ void main() {
     expect(material.color, backgroundColor);
     expect(material.elevation, elevation);
     expect(material.shape, shape);
+    expect(material.clipBehavior, clipBehavior);
   });
 }
 
@@ -139,5 +147,6 @@ BottomSheetThemeData _bottomSheetTheme() {
     backgroundColor: Colors.orange,
     elevation: 12.0,
     shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    clipBehavior: Clip.antiAlias,
   );
 }

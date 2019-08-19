@@ -1623,6 +1623,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     Color backgroundColor,
     double elevation,
     ShapeBorder shape,
+    Clip clipBehavior,
   }) {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
@@ -1703,6 +1704,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       backgroundColor: backgroundColor,
       elevation: elevation,
       shape: shape,
+      clipBehavior: clipBehavior,
     );
 
     if (!isPersistent)
@@ -1760,6 +1762,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     Color backgroundColor,
     double elevation,
     ShapeBorder shape,
+    Clip clipBehavior,
   }) {
     assert(() {
       if (widget.bottomSheet != null) {
@@ -1783,6 +1786,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         backgroundColor: backgroundColor,
         elevation: elevation,
         shape: shape,
+        clipBehavior: clipBehavior,
       );
     });
     return _currentBottomSheet;
@@ -2318,6 +2322,7 @@ class _StandardBottomSheet extends StatefulWidget {
     this.backgroundColor,
     this.elevation,
     this.shape,
+    this.clipBehavior,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
@@ -2329,6 +2334,7 @@ class _StandardBottomSheet extends StatefulWidget {
   final Color backgroundColor;
   final double elevation;
   final ShapeBorder shape;
+  final Clip clipBehavior;
 
   @override
   _StandardBottomSheetState createState() => _StandardBottomSheetState();
@@ -2417,6 +2423,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
             backgroundColor: widget.backgroundColor,
             elevation: widget.elevation,
             shape: widget.shape,
+            clipBehavior: widget.clipBehavior,
           ),
         ),
       );
@@ -2427,6 +2434,9 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
         onClosing: widget.onClosing,
         builder: widget.builder,
         backgroundColor: widget.backgroundColor,
+        elevation: widget.elevation,
+        shape: widget.shape,
+        clipBehavior: widget.clipBehavior,
       ),
     );
   }
