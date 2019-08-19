@@ -4,13 +4,16 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
 import 'package:test_api/test_api.dart' as test_package show TestFailure;
 
-/// Compares rasterized image bytes against a golden image file.
+/// Compares image pixels against a golden image file.
 ///
 /// Instances of this comparator will be used as the backend for
 /// [matchesGoldenFile].
@@ -21,14 +24,16 @@ import 'package:test_api/test_api.dart' as test_package show TestFailure;
 /// need or the ability to call [WidgetTester.pump] to advance the microtask
 /// queue).
 abstract class GoldenFileComparator {
-  /// Compares [imageBytes] against the golden file identified by [golden].
+  /// Compares the pixels of decoded png [imageBytes] against the golden file
+  /// identified by [golden].
   ///
   /// The returned future completes with a boolean value that indicates whether
-  /// [imageBytes] matches the golden file's bytes within the tolerance defined
-  /// by the comparator.
+  /// the pixels decoded from [imageBytes] match the golden file's pixels.
   ///
   /// In the case of comparison mismatch, the comparator may choose to throw a
-  /// [TestFailure] if it wants to control the failure message.
+  /// [TestFailure] if it wants to control the failure message, often in the
+  /// form of a [ComparisonResult] that provides detailed information about the
+  /// mismatch.
   ///
   /// The method by which [golden] is located and by which its bytes are loaded
   /// is left up to the implementation class. For instance, some implementations
@@ -65,17 +70,91 @@ abstract class GoldenFileComparator {
         .join() + '.' + version.toString() + extension
     );
   }
+
+  /// Returns a [ComparisonResult] to describe the pixel differential of the
+  /// [test] and [master] image bytes provided.
+  static ComparisonResult compareLists<T>(List<int> test, List<int> master) {
+    if (identical(test, master))
+      return ComparisonResult(passed: true);
+
+    if (test == null || master == null || test.isEmpty || master.isEmpty) {
+      return ComparisonResult(
+        passed: false,
+        error: 'Pixel test failed, null image provided.',
+      );
+    }
+
+    final Image testImage = decodePng(test);
+    final Image masterImage = decodePng(master);
+
+    assert(testImage != null);
+    assert(masterImage != null);
+
+    final int width = testImage.width;
+    final int height = testImage.height;
+
+    if (width != masterImage.width || height != masterImage.height) {
+      return ComparisonResult(
+        passed: false,
+        error: 'Pixel test failed, image sizes do not match.\n'
+          'Master Image: ${masterImage.width} X ${masterImage.height}\n'
+          'Test Image: ${testImage.width} X ${testImage.height}',
+      );
+    }
+
+    int pixelDiffCount = 0;
+    final int totalPixels = width * height;
+    final Image invertedMaster = invert(Image.from(masterImage));
+    final Image invertedTest = invert(Image.from(testImage));
+
+    final Map<String, Image> diffs = <String, Image>{
+      'masterImage' : masterImage,
+      'testImage' : testImage,
+      'maskedDiff' : Image.from(testImage),
+      'isolatedDiff' : Image(width, height),
+    };
+
+    for (int x = 0; x < width; x++) {
+      for (int y =0; y < height; y++) {
+        final int testPixel = testImage.getPixel(x, y);
+        final int masterPixel = masterImage.getPixel(x, y);
+
+        final int diffPixel = (getRed(testPixel) - getRed(masterPixel)).abs()
+          + (getGreen(testPixel) - getGreen(masterPixel)).abs()
+          + (getBlue(testPixel) - getBlue(masterPixel)).abs()
+          + (getAlpha(testPixel) - getAlpha(masterPixel)).abs();
+
+        if (diffPixel != 0 ) {
+          final int invertedMasterPixel = invertedMaster.getPixel(x, y);
+          final int invertedTestPixel = invertedTest.getPixel(x, y);
+          final int maskPixel = math.max(invertedMasterPixel, invertedTestPixel);
+          diffs['maskedDiff'].setPixel(x, y, maskPixel);
+          diffs['isolatedDiff'].setPixel(x, y, maskPixel);
+          pixelDiffCount++;
+        }
+      }
+    }
+
+    if (pixelDiffCount > 0) {
+      return ComparisonResult(
+        passed: false,
+        error: 'Pixel test failed, ${((pixelDiffCount/totalPixels) * 100).toStringAsFixed(2)}% diff detected.',
+        diffs: diffs,
+      );
+    }
+    return ComparisonResult(passed: true);
+  }
 }
 
-/// Compares rasterized image bytes against a golden image file.
+/// Compares pixels against those of a golden image file.
 ///
 /// This comparator is used as the backend for [matchesGoldenFile].
 ///
 /// When using `flutter test`, a comparator implemented by [LocalFileComparator]
 /// is used if no other comparator is specified. It treats the golden key as
 /// a relative path from the test file's directory. It will then load the
-/// golden file's bytes from disk and perform a byte-for-byte comparison of the
-/// encoded PNGs, returning true only if there's an exact match.
+/// golden file's bytes from disk and perform a pixel-for-pixel comparison of
+/// the decoded PNGs, returning true only if there's an exact match.
 ///
 /// When using `flutter test --update-goldens`, the [LocalFileComparator]
 /// updates the files on disk to match the rendering.
@@ -86,10 +165,8 @@ abstract class GoldenFileComparator {
 ///
 /// Callers may choose to override the default comparator by setting this to a
 /// custom comparator during test set-up (or using directory-level test
-/// configuration). For example, some projects may wish to install a more
-/// intelligent comparator that knows how to decode the PNG images to raw
-/// pixels and compare pixel vales, reporting specific differences between the
-/// images.
+/// configuration). For example, some projects may wish to install a comparator
+/// with tolerance levels for allowable differences.
 ///
 /// See also:
 ///
@@ -116,6 +193,32 @@ set goldenFileComparator(GoldenFileComparator value) {
 ///
 ///   * [goldenFileComparator]
 bool autoUpdateGoldenFiles = false;
+
+/// The result of a pixel comparison test.
+///
+/// The [ComparisonResult] will always indicate if a test has [passed]. The
+/// optional [error] and [diffs] parameters provide further information about
+/// the result of a failing test.
+class ComparisonResult {
+  /// Creates a new [ComparisonResult] for the current test.
+  ComparisonResult({
+    @required this.passed,
+    this.error,
+    this.diffs,
+  }) : assert(passed != null);
+
+  /// Indicates whether or not a pixel comparison test has failed.
+  ///
+  /// This value cannot be null.
+  final bool passed;
+
+  /// Error message used to describe the cause of the pixel comparison failure.
+  final String error;
+
+  /// Map containing differential images to illustrate found variants in pixel
+  /// values in the execution of the pixel test.
+  final Map<String, Image> diffs;
+}
 
 /// Placeholder comparator that is set as the value of [goldenFileComparator]
 /// when the initialization that happens in the test bootstrap either has not
@@ -158,10 +261,8 @@ class TrivialComparator implements GoldenFileComparator {
 /// This comparator loads golden files from the local file system, treating the
 /// golden key as a relative path from the test file's directory.
 ///
-/// This comparator performs a very simplistic comparison, doing a byte-for-byte
-/// comparison of the encoded PNGs, returning true only if there's an exact
-/// match. This means it will fail the test if two PNGs represent the same
-/// pixels but are encoded differently.
+/// This comparator performs a pixel-for-pixel comparison of the decoded PNGs,
+/// returning true only if there's an exact match.
 ///
 /// When using `flutter test --update-goldens`, [LocalFileComparator]
 /// updates the files on disk to match the rendering.
@@ -200,41 +301,46 @@ class LocalFileComparator extends GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    final File goldenFile = _getFile(golden);
+    final File goldenFile = _getGoldenFile(golden);
     if (!goldenFile.existsSync()) {
       throw test_package.TestFailure('Could not be compared against non-existent file: "$golden"');
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
-    return _areListsEqual<int>(imageBytes, goldenBytes);
+    final ComparisonResult result = GoldenFileComparator.compareLists<Uint8List>(imageBytes, goldenBytes);
+
+    if (!result.passed) {
+      String additionalFeedback = '';
+      if (result.diffs != null) {
+        additionalFeedback = '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
+        final Map<String, Image> diffs = result.diffs;
+        diffs.forEach((String name, Image image) {
+          final File output = _getFailureFile(name, golden);
+          output.parent.createSync(recursive: true);
+          output.writeAsBytesSync(encodePng(image));
+        });
+      }
+      throw test_package.TestFailure('Golden "$golden": ${result.error}$additionalFeedback');
+    }
+    return result.passed;
   }
 
   @override
   Future<void> update(Uri golden, Uint8List imageBytes) async {
-    final File goldenFile = _getFile(golden);
+    final File goldenFile = _getGoldenFile(golden);
     await goldenFile.parent.create(recursive: true);
     await goldenFile.writeAsBytes(imageBytes, flush: true);
   }
 
-  File _getFile(Uri golden) {
+  File _getGoldenFile(Uri golden) {
     return File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
   }
 
-  static bool _areListsEqual<T>(List<T> list1, List<T> list2) {
-    if (identical(list1, list2)) {
-      return true;
-    }
-    if (list1 == null || list2 == null) {
-      return false;
-    }
-    final int length = list1.length;
-    if (length != list2.length) {
-      return false;
-    }
-    for (int i = 0; i < length; i++) {
-      if (list1[i] != list2[i]) {
-        return false;
-      }
-    }
-    return true;
+  File _getFailureFile(String failure, Uri golden) {
+    final String fileName = golden.pathSegments[0];
+    final String testName = fileName.split(path.extension(fileName))[0]
+      + '_'
+      + failure
+      + '.png';
+    return File(_path.join('failures', testName));
   }
 }
