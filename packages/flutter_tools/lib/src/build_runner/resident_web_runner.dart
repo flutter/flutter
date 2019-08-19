@@ -218,6 +218,9 @@ class ResidentWebRunner extends ResidentRunner {
     String reason,
     bool benchmarkMode = false,
   }) async {
+    if (!fullRestart) {
+      return OperationResult(1, 'hot reload not supported on the web.');
+    }
     final Stopwatch timer = Stopwatch()..start();
     final Status status = logger.startProgress(
       'Performing hot restart...',
