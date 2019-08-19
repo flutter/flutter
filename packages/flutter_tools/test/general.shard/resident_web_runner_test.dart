@@ -62,7 +62,7 @@ void main() {
       return mockDebugConnection;
     });
     when(mockWebFs.recompile()).thenAnswer((Invocation _) {
-      return Future.value(false);
+      return Future<bool>.value(false);
     });
     when(mockDebugConnection.vmService).thenReturn(mockVmService);
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
