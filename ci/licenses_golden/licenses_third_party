@@ -1,4 +1,4 @@
-Signature: af7e69d1833139bb32039ff653e04843
+Signature: c8b14d4559bda4f646507775a134f9f7
 
 UNUSED LICENSES:
 
@@ -8963,11 +8963,6 @@ FILE: ../../../third_party/dart/runtime/lib/async.cc
 FILE: ../../../third_party/dart/runtime/lib/bigint_patch.dart
 FILE: ../../../third_party/dart/runtime/lib/class_id_fasta.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/containers/search_bar.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/allocations.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/dashboard.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/graph.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/profile.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/snapshot.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/reload.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/singletargetcache_ref.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/singletargetcache_view.dart
@@ -9280,7 +9275,6 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/vm_menu
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/retaining_path.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/source_link.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/strongly_reachable_instances.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/top_retaining_instances.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/vm_connect_target.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/heap_snapshot/heap_snapshot.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/exceptions.dart
@@ -9358,7 +9352,6 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/script.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/strongly_reachable_instances.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/target.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/top_retaining_instances.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/type_arguments.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/allocation_profile.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/breakpoint.dart
@@ -9392,7 +9385,6 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/script.
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/settings.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/strongly_reachable_instances.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/target.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/top_retaining_instances.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/type_arguments.dart
 FILE: ../../../third_party/dart/runtime/observatory/web/timeline_message_handler.js
 FILE: ../../../third_party/dart/runtime/platform/atomic_fuchsia.h
