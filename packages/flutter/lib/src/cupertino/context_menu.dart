@@ -413,34 +413,44 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
     // TODO(justinmc): Are taps not dismissing the modal when above or below?
     // Might need to make something transparent to gestures if possible. Some
     // parent of the transformed child is overhanging it.
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Transform(
-                transformHitTests: true,
-                alignment: Alignment.center,
-                transform: Matrix4.identity()
-                  ..translate(offset.dx, offset.dy)
-                  ..scale(scale),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: _onTap,
-                  child: _builder(context),
+    return OrientationBuilder(
+      builder: (BuildContext context, Orientation orientation) {
+        final List<Widget> children =  <Widget>[
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Transform(
+                  transformHitTests: true,
+                  alignment: Alignment.center,
+                  transform: Matrix4.identity()
+                    ..translate(offset.dx, offset.dy)
+                    ..scale(scale),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: _onTap,
+                    child: _builder(context),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        Expanded(
-          child: _ContextMenuSheet(
-            actions: _actions,
+          Expanded(
+            child: _ContextMenuSheet(
+              actions: _actions,
+            ),
           ),
-        ),
-      ],
+        ];
+
+        return orientation == Orientation.portrait ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: children,
+          )
+          : Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: children,
+          );
+      },
     );
   }
 }
@@ -459,7 +469,7 @@ class _ContextMenuSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        padding: const EdgeInsets.all(20.0),
           child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
