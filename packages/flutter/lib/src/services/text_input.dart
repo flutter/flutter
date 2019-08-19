@@ -632,7 +632,7 @@ abstract class TextInputClient {
 /// See also:
 ///
 ///  * [TextInput.attach]
-class TextInputConnection {
+class TextInputConnection with ChangeNotifier {
   TextInputConnection._(this._client)
     : assert(_client != null),
       _id = _nextId++;
@@ -667,11 +667,18 @@ class TextInputConnection {
   void close() {
     if (attached) {
       SystemChannels.textInput.invokeMethod<void>('TextInput.clearClient');
-      _clientHandler
-        .._currentConnection = null
-        .._scheduleHide();
+      _onConnectionClosed();
+      _clientHandler._scheduleHide();
     }
     assert(!attached);
+  }
+
+  /// Clear out the current text input connection.
+  ///
+  /// Call this method when the current text input connection has cleared.
+  void _onConnectionClosed() {
+    _clientHandler._currentConnection = null;
+    notifyListeners();
   }
 }
 
@@ -752,6 +759,9 @@ class _TextInputClientHandler {
         break;
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
+        break;
+      case 'TextInputClient.onConnectionClosed':
+        _currentConnection._onConnectionClosed();
         break;
       default:
         throw MissingPluginException();
