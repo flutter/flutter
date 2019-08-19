@@ -28,7 +28,6 @@ import '../common/render_tree.dart';
 import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
-import '../common/wait.dart';
 import 'common.dart';
 import 'timeline.dart';
 
@@ -492,17 +491,12 @@ class FlutterDriver {
     await _sendCommand(WaitForAbsent(finder, timeout: timeout));
   }
 
-  /// Waits until the given [waitCondition] is satisfied.
-  Future<void> waitForCondition(WaitCondition waitCondition, {Duration timeout}) async {
-    await _sendCommand(WaitForCondition(waitCondition, timeout: timeout));
-  }
-
   /// Waits until there are no more transient callbacks in the queue.
   ///
   /// Use this method when you need to wait for the moment when the application
   /// becomes "stable", for example, prior to taking a [screenshot].
   Future<void> waitUntilNoTransientCallbacks({ Duration timeout }) async {
-    await _sendCommand(WaitForCondition(const NoTransientCallbacksCondition(), timeout: timeout));
+    await _sendCommand(WaitUntilNoTransientCallbacks(timeout: timeout));
   }
 
   /// Waits until the next [Window.onReportTimings] is called.
@@ -510,7 +504,7 @@ class FlutterDriver {
   /// Use this method to wait for the first frame to be rasterized during the
   /// app launch.
   Future<void> waitUntilFirstFrameRasterized() async {
-    await _sendCommand(const WaitForCondition(FirstFrameRasterizedCondition()));
+    await _sendCommand(const WaitUntilFirstFrameRasterized());
   }
 
   Future<DriverOffset> _getOffset(SerializableFinder finder, OffsetType type, { Duration timeout }) async {
