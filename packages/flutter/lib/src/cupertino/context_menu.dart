@@ -15,7 +15,6 @@ const double _kOpenScale = 1.2;
 ///
 /// Long pressing or 3d touching on the child will open in up in a full-screen
 /// overlay menu.
-// TODO(justinmc): Set up type param here for return value.
 class ContextMenu extends StatefulWidget {
   /// Create a context menu.
   ContextMenu({
@@ -53,7 +52,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   final GlobalKey _childGlobalKey = GlobalKey();
   final GlobalKey _containerGlobalKey = GlobalKey();
 
-  Animation<int> _mask;
+  Animation<Color> _mask;
   Animation<Matrix4> _transform;
   AnimationController _controller;
   bool _isOpen = false;
@@ -64,17 +63,11 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 500),
     );
     _controller.addStatusListener(_onAnimationChangeStatus);
-    _mask = IntTween(begin: 1, end: 0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(
-          0.0,
-          0.9,
-        ),
-      ),
+    _mask = _OnOffAnimation(
+      _controller,
     );
     _transform = Tween<Matrix4>(
       begin: Matrix4.identity(),
@@ -82,7 +75,11 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Curves.easeInBack,
+        curve: Interval(
+          0.2,
+          1.0,
+          curve: Curves.easeInBack,
+        ),
       ),
     );
   }
@@ -159,12 +156,15 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     _controller.reverse();
   }
 
-  Widget _buildAnimation(BuildContext context, Widget child) {
-    final bool isAnimating = _controller.status == AnimationStatus.forward;
-    final Color maskColor = isAnimating && _mask.value == 1
-      ? _lightModeMaskColor
-      : const Color(0xFFFFFFFF);
+  void _onTap() {
+    // A regular tap should be totally separate from a long-press to open the
+    // ContextMenu. If this gesture is just a tap, then don't do any animation
+    // and allow the tap to be handled by another GestureDetector as if the
+    // ContextMenu didn't exist.
+    _controller.reset();
+  }
 
+  Widget _buildAnimation(BuildContext context, Widget child) {
     return Container(
       key: _containerGlobalKey,
       child: Transform(
@@ -175,7 +175,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
             return LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: <Color>[maskColor, maskColor],
+              colors: <Color>[_mask.value, _mask.value],
             ).createShader(bounds);
           },
           child: Opacity(
@@ -194,6 +194,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     return GestureDetector(
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
+      onTap: _onTap,
       child: AnimatedBuilder(
         builder: _buildAnimation,
         animation: _controller,
@@ -208,6 +209,31 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     _transform = null;
     super.dispose();
   }
+}
+
+class _OnOffAnimation extends CompoundAnimation<Color> {
+  _OnOffAnimation(
+    AnimationController controller,
+  ) : super(
+    first: ColorTween(begin: _offColor, end: _onColor).animate(
+      CurvedAnimation(
+        parent: controller,
+        curve: const Interval(0.2, 0.2),
+      ),
+    ),
+    next: ColorTween(begin: _onColor, end: _offColor).animate(
+      CurvedAnimation(
+        parent: controller,
+        curve: const Interval(0.8, 0.8),
+      ),
+    ),
+  );
+
+  static const Color _onColor = Color(0xAAAAAAAA);
+  static const Color _offColor = Color(0xFFFFFFFF);
+
+  @override
+  Color get value => next.value == _offColor ? next.value : first.value;
 }
 
 // The open context menu.
@@ -313,7 +339,6 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
       originalChild.width * endScale,
       originalChild.height * endScale,
     );
-    print('justin container left ${container.left}');
     final Offset topLeftEnd = Offset(
       // Center horizontally, which won't be affected by the center alignment.
       container.left + (container.width - originalChild.width) / 2,
