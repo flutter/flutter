@@ -52,6 +52,7 @@ void SessionConnection::Present(
   TRACE_EVENT0("gfx", "SessionConnection::Present");
   TRACE_FLOW_BEGIN("gfx", "SessionConnection::PresentSession",
                    next_present_session_trace_id_);
+  next_present_session_trace_id_++;
 
   // Throttle vsync if presentation callback is already pending. This allows
   // the paint tasks for this frame to execute in parallel with presentation
@@ -63,11 +64,6 @@ void SessionConnection::Present(
   } else {
     PresentSession();
   }
-
-  // Flush all session ops. Paint tasks have not yet executed but those are
-  // fenced. The compositor can start processing ops while we finalize paint
-  // tasks.
-  PresentSession();
 
   // Execute paint tasks and signal fences.
   auto surfaces_to_submit = scene_update_context_.ExecutePaintTasks(frame);
