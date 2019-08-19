@@ -258,6 +258,7 @@ class _OnOffColorAnimation extends CompoundAnimation<Color> {
 // eventually dismisses.
 @visibleForTesting
 class ContextMenuRoute<T> extends PopupRoute<T> {
+  /// Build a ContextMenuRoute.
   ContextMenuRoute({
     this.barrierLabel,
     @required List<ContextMenuSheetAction> actions,
@@ -456,28 +457,30 @@ class _ContextMenuSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Flexible(
-            fit: FlexFit.tight,
-            flex: 2,
-            child: IntrinsicHeight(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: actions,
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Flexible(
+              fit: FlexFit.tight,
+              flex: 2,
+              child: IntrinsicHeight(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: actions,
+                  ),
                 ),
               ),
             ),
-          ),
-          const Spacer(
-            flex: 1,
-          ),
-        ],
+            const Spacer(
+              flex: 1,
+            ),
+          ],
+        ),
       ),
     );
   }
