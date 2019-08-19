@@ -158,6 +158,7 @@ class ResidentWebRunner extends ResidentRunner {
         flutterProject: flutterProject,
         buildInfo: debuggingOptions.buildInfo,
       );
+      unawaited(_webFs.onTabClose.whenComplete(exit));
       if (supportsServiceProtocol) {
         _debugConnection = await _webFs.runAndDebug();
       }

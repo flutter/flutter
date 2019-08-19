@@ -80,14 +80,26 @@ class WebFs {
     this._server,
     this._dwds,
     this._chrome,
-  );
+    this._wipConnection,
+  ) {
+    _wipConnection.onClose.listen((WipConnection data) {
+      if (_onTabClose.isCompleted) {
+        return;
+      }
+      _onTabClose.complete();
+    });
+  }
 
   final HttpServer _server;
   final Dwds _dwds;
   final Chrome _chrome;
   final BuildDaemonClient _client;
+  final Completer<void> _onTabClose = Completer<void>();
+  final WipConnection _wipConnection;
 
   static const String _kHostName = 'localhost';
+
+  Future<void> get onTabClose => _onTabClose.future;
 
   Future<void> stop() async {
     await _client.close();
@@ -105,14 +117,7 @@ class WebFs {
 
   /// Perform a hard refresh of all connected browser tabs.
   Future<void> hardRefresh() async {
-    final List<ChromeTab> tabs = await _chrome.chromeConnection.getTabs();
-    for (ChromeTab tab in tabs) {
-      if (!tab.url.contains('localhost')) {
-        continue;
-      }
-      final WipConnection connection = await tab.connect();
-      await connection.sendCommand('Page.reload');
-    }
+    await _wipConnection?.sendCommand('Page.reload');
   }
 
   /// Recompile the web application and return whether this was successful.
@@ -210,12 +215,26 @@ class WebFs {
     final HttpServer server = await httpMultiServerFactory(_kHostName, port);
     shelf_io.serveRequests(server, cascade.handler);
     final Chrome chrome = await chromeLauncher.launch('http://$_kHostName:$port/');
+    final WipConnection wipConnection = await _connectToTab(chrome);
     return WebFs(
       client,
       server,
       dwds,
       chrome,
+      wipConnection,
     );
+  }
+
+  static Future<WipConnection> _connectToTab(Chrome chrome) async {
+    final List<ChromeTab> tabs = await chrome.chromeConnection.getTabs();
+    for (ChromeTab tab in tabs) {
+      if (!tab.url.contains('localhost')) {
+        continue;
+      }
+      return tab.connect();
+    }
+    assert(false);
+    return null;
   }
 
   static Future<Response> _assetHandler(Request request) async {
