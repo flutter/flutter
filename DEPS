@@ -96,7 +96,7 @@ vars = {
   'dart_term_glyph_tag': '1.0.1',
   'dart_test_reflective_loader_tag': '0.1.8',
   'dart_test_tag': 'test-v1.6.4',
-  'dart_tflite_native_rev': '7f3748a2adf0e7c246813d0b206396312cbaa0db',
+  'dart_tflite_native_rev': '65889224d8ee32ceaf4f78d8d29fd59750e1b817',
   'dart_typed_data_tag': '1.1.6',
   'dart_usage_tag': '3.4.0',
   'dart_watcher_rev': '0.9.7+12-pub',
@@ -505,7 +505,7 @@ deps = {
      'packages': [
        {
         'package': 'dart/language_model',
-        'version': 'gABkW8D_-f45it57vQ_ZTKFwev16RcCjvrdTCytEnQgC',
+        'version': 'EFtZ0Z5T822s4EUOOaWeiXUppRGKp5d9Z6jomJIeQYcC',
        }
      ],
      'dep_type': 'cipd',
