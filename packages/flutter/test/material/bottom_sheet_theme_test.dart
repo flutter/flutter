@@ -140,9 +140,11 @@ void main() {
       elevation: persistentElevation,
       modalElevation: modalElevation,
     );
+
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
     await tester.tap(find.text('Show Modal'));
     await tester.pumpAndSettle();
+
     final Material material = tester.widget<Material>(
       find.descendant(
         of: find.byType(BottomSheet),
@@ -152,16 +154,18 @@ void main() {
     expect(material.elevation, modalElevation);
   });
 
-  testWidgets('BottomSheet modalElevation takes priority over elevation - Persistent', (WidgetTester tester) async {
+  testWidgets('BottomSheet elevation takes priority over modalElevation - Persistent', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
       elevation: persistentElevation,
       modalElevation: modalElevation,
     );
+
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
     await tester.tap(find.text('Show Persistent'));
     await tester.pumpAndSettle();
+
     final Material material = tester.widget<Material>(
       find.descendant(
         of: find.byType(BottomSheet),
@@ -176,9 +180,11 @@ void main() {
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
       modalElevation: modalElevation,
     );
+
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
     await tester.tap(find.text('Show Persistent'));
     await tester.pumpAndSettle();
+
     final Material material = tester.widget<Material>(
       find.descendant(
         of: find.byType(BottomSheet),
