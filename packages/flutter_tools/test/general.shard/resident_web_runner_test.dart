@@ -61,6 +61,9 @@ void main() {
     when(mockWebFs.runAndDebug()).thenAnswer((Invocation _) async {
       return mockDebugConnection;
     });
+    when(mockWebFs.recompile()).thenAnswer((Invocation _) {
+      return Future.value(false);
+    });
     when(mockDebugConnection.vmService).thenReturn(mockVmService);
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
