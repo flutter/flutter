@@ -5,12 +5,15 @@
 #include "flutter/shell/platform/embedder/embedder_task_runner.h"
 
 #include "flutter/fml/message_loop_impl.h"
+#include "flutter/fml/message_loop_task_queues.h"
 
 namespace flutter {
 
 EmbedderTaskRunner::EmbedderTaskRunner(DispatchTable table)
     : TaskRunner(nullptr /* loop implemenation*/),
-      dispatch_table_(std::move(table)) {
+      dispatch_table_(std::move(table)),
+      placeholder_id_(
+          fml::MessageLoopTaskQueues::GetInstance()->CreateTaskQueue()) {
   FML_DCHECK(dispatch_table_.post_task_callback);
   FML_DCHECK(dispatch_table_.runs_task_on_current_thread_callback);
 }
@@ -67,6 +70,11 @@ bool EmbedderTaskRunner::PostTask(uint64_t baton) {
   FML_DCHECK(task);
   task();
   return true;
+}
+
+// |fml::TaskRunner|
+fml::TaskQueueId EmbedderTaskRunner::GetTaskQueueId() {
+  return placeholder_id_;
 }
 
 }  // namespace flutter

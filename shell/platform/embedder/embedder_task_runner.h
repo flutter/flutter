@@ -42,12 +42,16 @@ class EmbedderTaskRunner final : public fml::TaskRunner {
   // |fml::TaskRunner|
   bool RunsTasksOnCurrentThread() override;
 
+  // |fml::TaskRunner|
+  fml::TaskQueueId GetTaskQueueId() override;
+
  private:
   DispatchTable dispatch_table_;
   std::mutex tasks_mutex_;
   uint64_t last_baton_ FML_GUARDED_BY(tasks_mutex_);
   std::unordered_map<uint64_t, fml::closure> pending_tasks_
       FML_GUARDED_BY(tasks_mutex_);
+  fml::TaskQueueId placeholder_id_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTaskRunner);
 };

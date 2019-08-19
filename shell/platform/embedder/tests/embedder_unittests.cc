@@ -110,40 +110,49 @@ TEST_F(EmbedderTest, CanInvokeCustomEntrypointMacro) {
   ASSERT_TRUE(engine.is_valid());
 }
 
+//------------------------------------------------------------------------------
+/// @brief      A task runner that we expect the embedder to provide but whose
+///             implementation is a real FML task runner.
+///
 class EmbedderTestTaskRunner {
  public:
-  EmbedderTestTaskRunner(std::function<void(FlutterTask)> on_forward_task)
-      : on_forward_task_(on_forward_task) {}
+  using TaskExpiryCallback = std::function<void(FlutterTask)>;
+  EmbedderTestTaskRunner(fml::RefPtr<fml::TaskRunner> real_task_runner,
+                         TaskExpiryCallback on_task_expired)
+      : real_task_runner_(real_task_runner), on_task_expired_(on_task_expired) {
+    FML_CHECK(real_task_runner_);
+    FML_CHECK(on_task_expired_);
 
-  void SetForwardingTaskRunner(fml::RefPtr<fml::TaskRunner> runner) {
-    forwarding_target_ = std::move(runner);
-  }
-
-  FlutterTaskRunnerDescription GetEmbedderDescription() {
-    FlutterTaskRunnerDescription desc;
-    desc.struct_size = sizeof(desc);
-    desc.user_data = this;
-    desc.runs_task_on_current_thread_callback = [](void* user_data) -> bool {
+    task_runner_description_.struct_size = sizeof(FlutterTaskRunnerDescription);
+    task_runner_description_.user_data = this;
+    task_runner_description_.runs_task_on_current_thread_callback =
+        [](void* user_data) -> bool {
       return reinterpret_cast<EmbedderTestTaskRunner*>(user_data)
-          ->forwarding_target_->RunsTasksOnCurrentThread();
+          ->real_task_runner_->RunsTasksOnCurrentThread();
     };
-    desc.post_task_callback = [](FlutterTask task, uint64_t target_time_nanos,
-                                 void* user_data) -> void {
-      auto runner = reinterpret_cast<EmbedderTestTaskRunner*>(user_data);
+    task_runner_description_.post_task_callback = [](FlutterTask task,
+                                                     uint64_t target_time_nanos,
+                                                     void* user_data) -> void {
+      auto thiz = reinterpret_cast<EmbedderTestTaskRunner*>(user_data);
 
       auto target_time = fml::TimePoint::FromEpochDelta(
           fml::TimeDelta::FromNanoseconds(target_time_nanos));
+      auto on_task_expired = thiz->on_task_expired_;
+      auto invoke_task = [task, on_task_expired]() { on_task_expired(task); };
+      auto real_task_runner = thiz->real_task_runner_;
 
-      runner->forwarding_target_->PostTaskForTime(
-          [task, forwarder = runner->on_forward_task_]() { forwarder(task); },
-          target_time);
+      real_task_runner->PostTaskForTime(invoke_task, target_time);
     };
-    return desc;
+  }
+
+  const FlutterTaskRunnerDescription& GetFlutterTaskRunnerDescription() {
+    return task_runner_description_;
   }
 
  private:
-  fml::RefPtr<fml::TaskRunner> forwarding_target_;
-  std::function<void(FlutterTask)> on_forward_task_;
+  fml::RefPtr<fml::TaskRunner> real_task_runner_;
+  TaskExpiryCallback on_task_expired_;
+  FlutterTaskRunnerDescription task_runner_description_ = {};
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestTaskRunner);
 };
@@ -152,58 +161,58 @@ TEST_F(EmbedderTest, CanSpecifyCustomTaskRunner) {
   auto& context = GetEmbedderContext();
   fml::AutoResetWaitableEvent latch;
 
-  // Run the test on its own thread with a message loop so that it san safely
+  // Run the test on its own thread with a message loop so that it can safely
   // pump its event loop while we wait for all the conditions to be checked.
-  fml::Thread thread;
+  auto platform_task_runner = CreateNewThread("test_platform_thread");
+  static std::mutex engine_mutex;
+  static bool signaled_once = false;
   UniqueEngine engine;
-  bool signaled = false;
 
-  EmbedderTestTaskRunner runner([&](FlutterTask task) {
-    // There may be multiple tasks posted but we only need to check assertions
-    // once.
-    if (signaled) {
-      // Since we have the baton, return it back to the engine. We don't care
-      // about the return value because the engine could be shutting down an it
-      // may not actually be able to accept the same.
-      FlutterEngineRunTask(engine.get(), &task);
-      return;
-    }
+  EmbedderTestTaskRunner test_task_runner(
+      platform_task_runner, [&](FlutterTask task) {
+        std::scoped_lock lock(engine_mutex);
+        if (!engine.is_valid()) {
+          return;
+        }
+        // There may be multiple tasks posted but we only need to check
+        // assertions once.
+        if (signaled_once) {
+          FlutterEngineRunTask(engine.get(), &task);
+          return;
+        }
 
-    signaled = true;
-    FML_LOG(INFO) << "Checking assertions.";
-    ASSERT_TRUE(engine.is_valid());
-    ASSERT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
-    latch.Signal();
-  });
+        signaled_once = true;
+        ASSERT_TRUE(engine.is_valid());
+        ASSERT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
+        latch.Signal();
+      });
 
-  thread.GetTaskRunner()->PostTask([&]() {
+  platform_task_runner->PostTask([&]() {
     EmbedderConfigBuilder builder(context);
-    const auto task_runner_description = runner.GetEmbedderDescription();
-    runner.SetForwardingTaskRunner(
-        fml::MessageLoop::GetCurrent().GetTaskRunner());
+    const auto task_runner_description =
+        test_task_runner.GetFlutterTaskRunnerDescription();
     builder.SetPlatformTaskRunner(&task_runner_description);
     builder.SetDartEntrypoint("invokePlatformTaskRunner");
+    std::scoped_lock lock(engine_mutex);
     engine = builder.LaunchEngine();
     ASSERT_TRUE(engine.is_valid());
   });
 
   // Signaled when all the assertions are checked.
   latch.Wait();
-  FML_LOG(INFO) << "Assertions checked. Killing engine.";
   ASSERT_TRUE(engine.is_valid());
 
   // Since the engine was started on its own thread, it must be killed there as
   // well.
   fml::AutoResetWaitableEvent kill_latch;
-  thread.GetTaskRunner()->PostTask(
-      fml::MakeCopyable([&engine, &kill_latch]() mutable {
-        engine.reset();
-        FML_LOG(INFO) << "Engine killed.";
-        kill_latch.Signal();
-      }));
+  platform_task_runner->PostTask(fml::MakeCopyable([&]() mutable {
+    std::scoped_lock lock(engine_mutex);
+    engine.reset();
+    kill_latch.Signal();
+  }));
   kill_latch.Wait();
 
-  ASSERT_TRUE(signaled);
+  ASSERT_TRUE(signaled_once);
 }
 
 TEST(EmbedderTestNoFixture, CanGetCurrentTimeInNanoseconds) {
@@ -229,15 +238,8 @@ TEST_F(EmbedderTest, IsolateServiceIdSent) {
   UniqueEngine engine;
   std::string isolate_message;
 
-  EmbedderTestTaskRunner runner(
-      [&](FlutterTask task) { FlutterEngineRunTask(engine.get(), &task); });
-
   thread.GetTaskRunner()->PostTask([&]() {
     EmbedderConfigBuilder builder(context);
-    const auto task_runner_description = runner.GetEmbedderDescription();
-    runner.SetForwardingTaskRunner(
-        fml::MessageLoop::GetCurrent().GetTaskRunner());
-    builder.SetPlatformTaskRunner(&task_runner_description);
     builder.SetDartEntrypoint("main");
     builder.SetPlatformMessageCallback(
         [&](const FlutterPlatformMessage* message) {
@@ -1067,6 +1069,131 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
                    << GetFixturesPath();
   }
   ASSERT_TRUE(images_are_same);
+}
+
+//------------------------------------------------------------------------------
+/// Custom compositor must play nicely with a custom task runner. The GPU thread
+/// merging mechanism must not interfere with the custom compositor.
+///
+TEST_F(EmbedderTest, CustomCompositorMustWorkWithCustomTaskRunner) {
+  auto& context = GetEmbedderContext();
+
+  auto platform_task_runner = CreateNewThread("test_platform_thread");
+  static std::mutex engine_mutex;
+  UniqueEngine engine;
+  fml::AutoResetWaitableEvent sync_latch;
+
+  EmbedderTestTaskRunner test_task_runner(
+      platform_task_runner, [&](FlutterTask task) {
+        std::scoped_lock lock(engine_mutex);
+        if (!engine.is_valid()) {
+          return;
+        }
+        ASSERT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
+      });
+
+  context.SetupCompositor();
+
+  context.GetCompositor().SetRenderTargetType(
+      EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
+
+  fml::CountDownLatch latch(3);
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 3u);
+
+        {
+          FlutterBackingStore backing_store = *layers[0]->backing_store;
+          backing_store.struct_size = sizeof(backing_store);
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0, 0);
+
+          ASSERT_EQ(*layers[0], layer);
+        }
+
+        {
+          FlutterPlatformView platform_view = {};
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 42;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(123.0, 456.0);
+          layer.offset = FlutterPointMake(1.0, 2.0);
+
+          ASSERT_EQ(*layers[1], layer);
+        }
+
+        {
+          FlutterBackingStore backing_store = *layers[2]->backing_store;
+          backing_store.struct_size = sizeof(backing_store);
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[2], layer);
+        }
+
+        latch.CountDown();
+      });
+
+  const auto task_runner_description =
+      test_task_runner.GetFlutterTaskRunnerDescription();
+
+  EmbedderConfigBuilder builder(context);
+
+  builder.SetPlatformTaskRunner(&task_runner_description);
+  builder.SetOpenGLRendererConfig();
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("can_composite_platform_views");
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+
+  platform_task_runner->PostTask([&]() {
+    std::scoped_lock lock(engine_mutex);
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+
+    // Send a window metrics events so frames may be scheduled.
+    FlutterWindowMetricsEvent event = {};
+    event.struct_size = sizeof(event);
+    event.width = 800;
+    event.height = 600;
+
+    ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+              kSuccess);
+    ASSERT_TRUE(engine.is_valid());
+    sync_latch.Signal();
+  });
+  sync_latch.Wait();
+
+  latch.Wait();
+
+  platform_task_runner->PostTask([&]() {
+    std::scoped_lock lock(engine_mutex);
+    engine.reset();
+    sync_latch.Signal();
+  });
+  sync_latch.Wait();
 }
 
 }  // namespace testing
