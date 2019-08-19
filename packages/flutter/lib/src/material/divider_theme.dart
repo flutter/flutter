@@ -132,7 +132,7 @@ class DividerThemeData extends Diagnosticable {
 /// An inherited widget that defines the configuration for
 /// [Divider]s, [VerticalDividers]s, dividers between [ListTile]s, and dividers
 /// between rows in [DataTable]s in this widget's subtree.
-class DividerTheme extends InheritedWidget {
+class DividerTheme extends InheritedTheme {
   /// Creates a divider theme that controls the configurations for
   /// [Divider]s, [VerticalDividers]s, dividers between [ListTile]s, and dividers
   /// between rows in [DataTable]s in its widget subtree.
@@ -161,6 +161,12 @@ class DividerTheme extends InheritedWidget {
   static DividerThemeData of(BuildContext context) {
     final DividerTheme dividerTheme = context.inheritFromWidgetOfExactType(DividerTheme);
     return dividerTheme?.data ?? Theme.of(context).dividerTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final DividerTheme ancestorTheme = context.ancestorWidgetOfExactType(DividerTheme);
+    return identical(this, ancestorTheme) ? child : DividerTheme(data: data, child: child);
   }
 
   @override
