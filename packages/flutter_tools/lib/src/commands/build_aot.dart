@@ -15,7 +15,7 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
-import '../ios/ios_workflow.dart';
+import '../ios/plist_parser.dart';
 import '../macos/xcode.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
@@ -222,7 +222,7 @@ Future<void> validateBitcode() async {
   }
   final RunResult clangResult = await xcode.clang(<String>['--version']);
   final String clangVersion = clangResult.stdout.split('\n').first;
-  final String engineClangVersion = iosWorkflow.getPlistValueFromFile(
+  final String engineClangVersion = PlistParser.instance.getValueFromFile(
     fs.path.join(flutterFrameworkPath, 'Info.plist'),
     'ClangVersion',
   );

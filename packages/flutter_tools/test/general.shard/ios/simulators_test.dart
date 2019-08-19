@@ -11,8 +11,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -30,7 +30,7 @@ class MockProcess extends Mock implements Process {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcode extends Mock implements Xcode {}
 class MockSimControl extends Mock implements SimControl {}
-class MockIOSWorkflow extends Mock implements IOSWorkflow {}
+class MockPlistUtils extends Mock implements PlistParser {}
 
 void main() {
   FakePlatform osx;
@@ -455,7 +455,7 @@ void main() {
 
     testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
         final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
-        when(iosWorkflow.getPlistValueFromFile(any, any)).thenReturn('correct');
+        when(PlistParser.instance.getValueFromFile(any, any)).thenReturn('correct');
 
         final Directory mockDir = fs.currentDirectory;
         final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
@@ -468,7 +468,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         SimControl: () => simControl,
-        IOSWorkflow: () => MockIOSWorkflow()
+        PlistParser: () => MockPlistUtils(),
       },
     );
   });

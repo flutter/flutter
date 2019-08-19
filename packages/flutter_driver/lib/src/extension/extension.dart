@@ -29,6 +29,7 @@ import '../common/render_tree.dart';
 import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
+import '../common/wait.dart';
 
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
@@ -112,9 +113,10 @@ class FlutterDriverExtension {
       'tap': _tap,
       'waitFor': _waitFor,
       'waitForAbsent': _waitForAbsent,
-      'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
-      'waitUntilNoPendingFrame': _waitUntilNoPendingFrame,
-      'waitUntilFirstFrameRasterized': _waitUntilFirstFrameRasterized,
+      'waitForCondition': _waitForCondition,
+      'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks, // ignore: deprecated_member_use_from_same_package
+      'waitUntilNoPendingFrame': _waitUntilNoPendingFrame, // ignore: deprecated_member_use_from_same_package
+      'waitUntilFirstFrameRasterized': _waitUntilFirstFrameRasterized, // ignore: deprecated_member_use_from_same_package
       'get_semantics_id': _getSemanticsId,
       'get_offset': _getOffset,
       'get_diagnostics_tree': _getDiagnosticsTree,
@@ -134,9 +136,10 @@ class FlutterDriverExtension {
       'tap': (Map<String, String> params) => Tap.deserialize(params),
       'waitFor': (Map<String, String> params) => WaitFor.deserialize(params),
       'waitForAbsent': (Map<String, String> params) => WaitForAbsent.deserialize(params),
-      'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params),
-      'waitUntilNoPendingFrame': (Map<String, String> params) => WaitUntilNoPendingFrame.deserialize(params),
-      'waitUntilFirstFrameRasterized': (Map<String, String> params) => WaitUntilFirstFrameRasterized.deserialize(params),
+      'waitForCondition': (Map<String, String> params) => WaitForCondition.deserialize(params),
+      'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params), // ignore: deprecated_member_use_from_same_package
+      'waitUntilNoPendingFrame': (Map<String, String> params) => WaitUntilNoPendingFrame.deserialize(params), // ignore: deprecated_member_use_from_same_package
+      'waitUntilFirstFrameRasterized': (Map<String, String> params) => WaitUntilFirstFrameRasterized.deserialize(params), // ignore: deprecated_member_use_from_same_package
       'get_semantics_id': (Map<String, String> params) => GetSemanticsId.deserialize(params),
       'get_offset': (Map<String, String> params) => GetOffset.deserialize(params),
       'get_diagnostics_tree': (Map<String, String> params) => GetDiagnosticsTree.deserialize(params),
@@ -223,6 +226,7 @@ class FlutterDriverExtension {
   }
 
   // This can be used to wait for the first frame being rasterized during app launch.
+  @Deprecated('This method has been deprecated in favor of _waitForCondition.')
   Future<Result> _waitUntilFirstFrameRasterized(Command command) async {
     await WidgetsBinding.instance.waitUntilFirstFrameRasterized;
     return null;
@@ -370,6 +374,14 @@ class FlutterDriverExtension {
     return const WaitForAbsentResult();
   }
 
+  Future<Result> _waitForCondition(Command command) async {
+    assert(command != null);
+    final WaitForCondition waitForConditionCommand = command;
+    await waitForConditionCommand.condition.wait();
+    return null;
+  }
+
+  @Deprecated('This method has been deprecated in favor of _waitForCondition.')
   Future<Result> _waitUntilNoTransientCallbacks(Command command) async {
     if (SchedulerBinding.instance.transientCallbackCount != 0)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
@@ -393,6 +405,9 @@ class FlutterDriverExtension {
   /// `set_frame_sync` method. See [FlutterDriver.runUnsynchronized] for more
   /// details on how to do this. Note, disabling frame sync will require the
   /// test author to use some other method to avoid flakiness.
+  ///
+  /// This method has been deprecated in favor of [_waitForCondition].
+  @Deprecated('This method has been deprecated in favor of _waitForCondition.')
   Future<Result> _waitUntilNoPendingFrame(Command command) async {
     await _waitUntilFrame(() {
       return SchedulerBinding.instance.transientCallbackCount == 0

@@ -157,3 +157,13 @@ bool isOlderThanReference({ @required FileSystemEntity entity, @required File re
   return referenceFile.existsSync()
       && referenceFile.lastModifiedSync().isAfter(entity.statSync().modified);
 }
+
+/// Exception indicating that a file that was expected to exist was not found.
+class FileNotFoundException implements IOException {
+  const FileNotFoundException(this.path);
+
+  final String path;
+
+  @override
+  String toString() => 'File not found: $path';
+}
