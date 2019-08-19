@@ -32,13 +32,12 @@ class Plugin {
 
   /// Parses [Plugin] specification from the provided pluginYaml.
   ///
-  /// This currently supports two formats. V1 (Legacy) and V2 (Multi-platform).
-  /// Example V1 format. Which is deprecated.
+  /// This currently supports two formats. Legacy and Multi-platform.
+  /// Example of the deprecated Legacy format.
   /// flutter:
   ///  plugin:
   ///    androidPackage: io.flutter.plugins.sample
   ///    iosPrefix: FLT
-  ///    macosPrefix: FLT
   ///    pluginClass: SamplePlugin
   ///
   /// Example V2 format.
@@ -52,7 +51,6 @@ class Plugin {
   ///        classPrefix: FLT
   ///        pluginClass: SamplePlugin
   ///      macos:
-  ///        classPrefix: FLT
   ///        pluginClass: SamplePlugin
   factory Plugin.fromYaml(String name, String path, dynamic pluginYaml) {
     // TODO(kaushikiska): Fail if both old and new formats are present.
@@ -111,15 +109,6 @@ class Plugin {
       platformPlugins[IOSPlugin.kConfigKey] =
           IOSPlugin(
             classPrefix: iosPrefix,
-            pluginClass: pluginClass,
-          );
-
-      // TODO(stuartmorgan): Add |?? ''| here as well once this isn't used as
-      // an indicator of macOS support, see https://github.com/flutter/flutter/issues/33597
-      final String macosPrefix = pluginYaml['macosPrefix'];
-      platformPlugins[MacOSPlugin.kConfigKey] =
-          IOSPlugin(
-            classPrefix: macosPrefix,
             pluginClass: pluginClass,
           );
     }
@@ -378,8 +367,6 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
 }
 
 Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  // TODO(stuartmorgan): Replace macosPrefix check with formal metadata check,
-  // see https://github.com/flutter/flutter/issues/33597.
   final List<Map<String, dynamic>> macosPlugins = _filterPlugins(plugins, MacOSPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'macos',

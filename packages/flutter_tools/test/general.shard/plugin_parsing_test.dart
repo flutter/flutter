@@ -36,6 +36,8 @@ void main() {
 
     test('Multi-platform Format', () {
       const String pluginYamlRaw = 'platforms:\n'
+          ' macos:\n'
+          '  pluginClass: MSamplePlugin\n'
           ' android:\n'
           '  package: com.flutter.dev\n'
           '  pluginClass: ASamplePlugin\n'
@@ -49,6 +51,8 @@ void main() {
 
       final AndroidPlugin androidPlugin =
           plugin.platformPlugins[AndroidPlugin.kConfigKey];
+      final MacOSPlugin macOSPlugin =
+          plugin.platformPlugins[MacOSPlugin.kConfigKey];
       final IOSPlugin iosPlugin = plugin.platformPlugins[IOSPlugin.kConfigKey];
       final String androidPluginClass = androidPlugin.pluginClass;
       final String iosPluginClass = iosPlugin.pluginClass;
@@ -57,7 +61,7 @@ void main() {
       expect(androidPluginClass, 'ASamplePlugin');
       expect(iosPlugin.classPrefix, 'FLT');
       expect(androidPlugin.package, 'com.flutter.dev');
+      expect(macOSPlugin.pluginClass, 'MSamplePlugin');
     });
-
   });
 }
