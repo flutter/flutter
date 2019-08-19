@@ -502,12 +502,38 @@ class ContextMenuSheetAction extends StatefulWidget {
   const ContextMenuSheetAction({
     Key key,
     @required this.child,
+    this.isDefaultAction = false,
+    this.isDestructiveAction = false,
     this.onPressed,
+    this.trailingIcon,
   }) : assert(child != null),
+       assert(isDefaultAction != null),
+       assert(isDestructiveAction != null),
        super(key: key);
 
+  /// The widget that will be placed inside the action.
   final Widget child;
+
+  /// Indicates whether this action should receive the style of an emphasized,
+  /// default action.
+  final bool isDefaultAction;
+
+  /// Indicates whether this action should receive the style of a destructive
+  /// action.
+  final bool isDestructiveAction;
+
+  /// Called when the action is pressed.
   final VoidCallback onPressed;
+
+  // TODO(justinmc): Is this in the spirit how we usually do things like this in
+  // Flutter? All Apple examples I've seen of ContextMenus feature icons, so
+  // this seemed like a nice way to encourage that. However, it's also totally
+  // possible for the user to do this without this field.
+  /// An optional icon to display to the right of the child.
+  ///
+  /// Will be colored in the same way as the [TextStyle] used for [child] (for
+  /// example, if using [isDestructiveAction]).
+  final IconData trailingIcon;
 
   @override
   _ContextMenuSheetActionState createState() => _ContextMenuSheetActionState();
@@ -522,7 +548,7 @@ class _ContextMenuSheetActionState extends State<ContextMenuSheetAction> {
     inherit: false,
     fontSize: 20.0,
     fontWeight: FontWeight.w400,
-    color: CupertinoColors.activeBlue,
+    color: CupertinoColors.black,
     textBaseline: TextBaseline.alphabetic,
   );
 
@@ -546,6 +572,21 @@ class _ContextMenuSheetActionState extends State<ContextMenuSheetAction> {
       _isPressed = false;
     });
   }
+
+  TextStyle get _textStyle {
+    if (widget.isDefaultAction) {
+      return _kActionSheetActionStyle.copyWith(
+        fontWeight: FontWeight.w600,
+      );
+    }
+    if (widget.isDestructiveAction) {
+      return _kActionSheetActionStyle.copyWith(
+        color: CupertinoColors.destructiveRed,
+      );
+    }
+    return _kActionSheetActionStyle;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -574,8 +615,18 @@ class _ContextMenuSheetActionState extends State<ContextMenuSheetAction> {
               horizontal: 10.0,
             ),
             child: DefaultTextStyle(
-              style: _kActionSheetActionStyle,
-              child: widget.child,
+              style: _textStyle,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  widget.child,
+                  if (widget.trailingIcon != null)
+                    Icon(
+                      widget.trailingIcon,
+                      color: CupertinoColors.destructiveRed,
+                    ),
+                ],
+              ),
             ),
           ),
         ),
