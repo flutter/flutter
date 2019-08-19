@@ -48,6 +48,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   // supported for iOS.
   //static const Color _darkModeMaskColor = Color(0xAAFFFFFF);
   static const Color _lightModeMaskColor = Color(0xAAAAAAAA);
+  static const Color _masklessColor = Color(0xFFFFFFFF);
 
   final GlobalKey _childGlobalKey = GlobalKey();
   final GlobalKey _containerGlobalKey = GlobalKey();
@@ -66,8 +67,12 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       duration: const Duration(milliseconds: 500),
     );
     _controller.addStatusListener(_onAnimationChangeStatus);
-    _mask = _OnOffAnimation(
-      _controller,
+    _mask = _OnOffColorAnimation(
+      controller: _controller,
+      onColor: _lightModeMaskColor,
+      offColor: _masklessColor,
+      intervalOn: 0.2,
+      intervalOff: 0.8,
     );
     _transform = Tween<Matrix4>(
       begin: Matrix4.identity(),
@@ -75,7 +80,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Interval(
+        curve: const Interval(
           0.2,
           1.0,
           curve: Curves.easeInBack,
@@ -211,26 +216,38 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   }
 }
 
-class _OnOffAnimation extends CompoundAnimation<Color> {
-  _OnOffAnimation(
+// An animation that switches immediately between two colors.
+//
+// The transition is immediate, so there are no intermediate values or
+// interpolation. The color switches from offColor to onColor and back to
+// offColor at the times given by intervalOn and intervalOff.
+class _OnOffColorAnimation extends CompoundAnimation<Color> {
+  _OnOffColorAnimation({
     AnimationController controller,
-  ) : super(
-    first: ColorTween(begin: _offColor, end: _onColor).animate(
-      CurvedAnimation(
-        parent: controller,
-        curve: const Interval(0.2, 0.2),
-      ),
-    ),
-    next: ColorTween(begin: _onColor, end: _offColor).animate(
-      CurvedAnimation(
-        parent: controller,
-        curve: const Interval(0.8, 0.8),
-      ),
-    ),
-  );
+    @required Color onColor,
+    @required Color offColor,
+    @required double intervalOn,
+    @required double intervalOff,
+  }) : _offColor = offColor,
+       assert(intervalOn >= 0.0 && intervalOn <= 1.0),
+       assert(intervalOff >= 0.0 && intervalOff <= 1.0),
+       assert(intervalOn <= intervalOff),
+       super(
+        first: ColorTween(begin: offColor, end: onColor).animate(
+          CurvedAnimation(
+            parent: controller,
+            curve: Interval(intervalOn, intervalOn),
+          ),
+        ),
+        next: ColorTween(begin: onColor, end: offColor).animate(
+          CurvedAnimation(
+            parent: controller,
+            curve: Interval(intervalOff, intervalOff),
+          ),
+        ),
+       );
 
-  static const Color _onColor = Color(0xAAAAAAAA);
-  static const Color _offColor = Color(0xFFFFFFFF);
+  final Color _offColor;
 
   @override
   Color get value => next.value == _offColor ? next.value : first.value;
@@ -535,7 +552,7 @@ class _ContextMenuSheetActionState extends State<ContextMenuSheetAction> {
           child: Container(
             decoration: BoxDecoration(
               color: _isPressed ? _kBackgroundColorPressed : _kBackgroundColor,
-              border: Border(
+              border: const Border(
                 bottom: BorderSide(width: 1.0, color: _kBackgroundColorPressed),
               ),
             ),
