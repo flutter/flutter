@@ -431,6 +431,13 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
+  backdrop_filter_perf_ios__timeline_summary:
+    description: >
+      Measures the runtime performance of backdrop filter blurs on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
+
   complex_layout_scroll_perf_ios__timeline_summary:
     description: >
       Measures the runtime performance of the Complex Layout sample app on
