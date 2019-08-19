@@ -66,9 +66,15 @@ id<FlutterViewEngineDelegate> _delegate;
 
 #if FLUTTER_SHELL_ENABLE_METAL
   if ([self.layer isKindOfClass:[CAMetalLayer class]]) {
-    CGFloat screenScale = [UIScreen mainScreen].scale;
-    self.layer.contentsScale = screenScale;
-    self.layer.rasterizationScale = screenScale;
+    const CGFloat screenScale = [UIScreen mainScreen].scale;
+
+    auto metal_layer = reinterpret_cast<CAMetalLayer*>(self.layer);
+    metal_layer.contentsScale = screenScale;
+    metal_layer.rasterizationScale = screenScale;
+
+    const auto layer_size = self.bounds.size;
+    metal_layer.drawableSize =
+        CGSizeMake(layer_size.width * screenScale, layer_size.height * screenScale);
   }
 
 #endif  //  FLUTTER_SHELL_ENABLE_METAL
