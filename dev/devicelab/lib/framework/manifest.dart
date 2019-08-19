@@ -68,12 +68,11 @@ class ManifestTask {
 
   /// Whether the task is supported by the current host platform
   bool isSupportedByHost() {
-    final Set<String> supportedHosts = <String>{};
-    String supportedHost;
-    for (String capability in requiredAgentCapabilities) {
-      supportedHost = capability.split('/')[0];
-      supportedHosts.add(supportedHost);
-    }
+    final Set<String> supportedHosts = Set<String>.from(
+      requiredAgentCapabilities.map<String>(
+        (String str) => str.split('/')[0]
+      )
+    );
     String hostPlatform = platform.operatingSystem;
     if (hostPlatform == 'macos') {
       hostPlatform = 'mac'; // package:platform uses 'macos' while manifest.yaml uses 'mac'

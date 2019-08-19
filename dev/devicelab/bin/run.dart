@@ -89,16 +89,15 @@ void addTasks({
   if (args.wasParsed('continue-from')) {
     final int index = tasks.indexWhere((ManifestTask task) => task.name == args['continue-from']);
     if (index == -1) {
-      throw 'Invalid task name "${args['continue-from']}"';
+      throw Exception('Invalid task name "${args['continue-from']}"');
     }
     tasks.removeRange(0, index);
   }
   // Only start skipping if user specified a task to continue from
-  bool isQualifyingStage;
-  bool isQualifyingHost;
+  final String stage = args['stage'];
   for (ManifestTask task in tasks) {
-    isQualifyingStage = !args.wasParsed('stage') || task.stage == args['stage'];
-    isQualifyingHost = !args['match-host-platform'] || task.isSupportedByHost();
+    final bool isQualifyingStage = stage == null || task.stage == stage;
+    final bool isQualifyingHost = !args['match-host-platform'] || task.isSupportedByHost();
     if (isQualifyingHost && isQualifyingStage) {
       taskNames.add(task.name);
     }
