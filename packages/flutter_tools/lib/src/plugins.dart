@@ -100,6 +100,7 @@ class Plugin {
       if (androidPackage != null) {
         platformPlugins[AndroidPlugin.kConfigKey] =
             AndroidPlugin(
+              name: name,
               package: pluginYaml['androidPackage'],
               pluginClass: pluginClass,
             );
@@ -108,6 +109,7 @@ class Plugin {
       final String iosPrefix = pluginYaml['iosPrefix'] ?? '';
       platformPlugins[IOSPlugin.kConfigKey] =
           IOSPlugin(
+            name: name,
             classPrefix: iosPrefix,
             pluginClass: pluginClass,
           );
