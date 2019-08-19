@@ -381,7 +381,7 @@ void main() {
       BotDetector: () => const AlwaysTrueBotDetector(),
     });
 
-      testUsingContext('publish', () async {
+    testUsingContext('packages publish', () async {
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(2));
