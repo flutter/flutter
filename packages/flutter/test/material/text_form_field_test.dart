@@ -184,7 +184,6 @@ void main() {
     );
 
     expect(_validateCalled, 1);
-    await tester.showKeyboard(find.byType(TextField));
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
     expect(_validateCalled, 2);
@@ -207,9 +206,7 @@ void main() {
       ),
     );
 
-    expect(_validateCalled, 0);
-    await tester.showKeyboard(find.byType(TextField));
-    await tester.enterText(find.byType(TextField), 'a');
+    await tester.enterText(find.byType(TextField), 'a', ignoreKeyboardState: true);
     await tester.pump();
     expect(_validateCalled, 0);
   });
@@ -232,7 +229,6 @@ void main() {
     );
 
     expect(_validateCalled, 1);
-    await tester.showKeyboard(find.byType(TextField));
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
     expect(_validateCalled, 2);
