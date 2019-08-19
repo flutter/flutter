@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:yaml/yaml.dart';
 
 /// Marker interface for all platform specific plugin config impls.
 abstract class PlatformPlugin {
@@ -22,7 +23,7 @@ class AndroidPlugin extends PlatformPlugin {
     @required this.pluginClass,
   });
 
-  factory AndroidPlugin.fromYaml(String name, dynamic yaml) {
+  factory AndroidPlugin.fromYaml(String name, YamlMap yaml) {
     assert(yaml != null);
     return AndroidPlugin(
       name: name,
@@ -59,7 +60,7 @@ class IOSPlugin extends PlatformPlugin {
     @required this.pluginClass,
   });
 
-  factory IOSPlugin.fromYaml(String name, dynamic yaml) {
+  factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(yaml != null);
     return IOSPlugin(
       name: name,
@@ -94,7 +95,7 @@ class MacOSPlugin extends PlatformPlugin {
     @required this.pluginClass,
   });
 
-  factory MacOSPlugin.fromYaml(String name, dynamic yaml) {
+  factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(yaml != null);
     return MacOSPlugin(
       name: name,
