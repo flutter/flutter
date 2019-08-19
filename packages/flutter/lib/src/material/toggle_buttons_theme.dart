@@ -44,7 +44,11 @@ class ToggleButtonsThemeData extends Diagnosticable {
     this.borderWidth,
   });
 
-  /// TODO(shihaohong): add docs, note that color will be ignored
+  /// The [TextStyle] to apply to any text that appears in this button.
+  ///
+  /// [TextStyle.color] will be ignored and substituted by [color],
+  /// [selectedColor] or [disabledColor] depending on whether the buttons
+  /// are active, selected, or disabled.
   final TextStyle textStyle;
 
   /// The color for descendant [Text] and [Icon] widgets if the toggle button
