@@ -16,7 +16,19 @@ typedef VoidCallback = void Function();
 /// common time base.
 typedef FrameCallback = void Function(Duration duration);
 
+// ignore: deprecated_member_use_from_same_package
 /// Signature for [Window.onReportTimings].
+///
+/// The callback takes a list of [FrameTiming] because it may not be immediately
+/// triggered after each frame. The list is sorted in ascending order of time
+/// (earliest frame first).
+/// {@template dart.ui.timings_batching}
+/// Flutter tries to batch frames together and send all their timings at once to
+/// decrease the overhead (as this is available in the release mode). The timing
+/// of any frame will be sent within about 1 second (100ms if in the
+/// profile/debug mode) even if there are no later frames to batch. The timing
+/// of the first frame will be sent immediately without batching.
+/// {@endtemplate}
 typedef TimingsCallback = void Function(List<FrameTiming> timings);
 
 /// Signature for [Window.onPointerDataPacket].
@@ -766,25 +778,72 @@ abstract class Window {
   /// A callback that is invoked to report the [FrameTiming] of recently
   /// rasterized frames.
   ///
+  /// This is deprecated, use [frameTimings] instead.
+  @Deprecated('Use frameTimings instead.')
+  TimingsCallback get onReportTimings => _onReportTimings;
+  TimingsCallback _onReportTimings;
+  Zone _onReportTimingsZone;
+  @Deprecated('Use frameTimings instead.')
+  set onReportTimings(TimingsCallback callback) {
+    _internalSetOnReportTimings(callback);
+  }
+
+  void _internalSetOnReportTimings(TimingsCallback callback) {
+    _onReportTimings = callback;
+    _onReportTimingsZone = Zone.current;
+  }
+
+  // ignore: deprecated_member_use_from_same_package
+  /// Mock the calling of [onReportTimings] for unit tests.
+  void debugReportTimings(List<FrameTiming> timings) {
+    _onReportTimings(timings);
+  }
+
+  /// Check whether the engine has to report timings.
+  ///
+  /// This is for unit tests and debug purposes only.
+  bool get debugNeedsReportTimings => _onReportTimings != null;
+
+  StreamController<FrameTiming> _frameTimingBroadcastController;
+
+  void _onFrameTimingListen() {
+    _internalSetOnReportTimings((List<FrameTiming> timings) {
+      timings.forEach(_frameTimingBroadcastController.add);
+    });
+  }
+
+  // If there's no one listening, set [onReportTimings] back to null so the
+  // engine won't send [FrameTiming] from engine to the framework.
+  void _onFrameTimingCancel() {
+    _internalSetOnReportTimings(null);
+  }
+
+  /// A broadcast stream of the frames' time-related performance metrics.
+  ///
   /// This can be used to see if the application has missed frames (through
   /// [FrameTiming.buildDuration] and [FrameTiming.rasterDuration]), or high
   /// latencies (through [FrameTiming.totalSpan]).
   ///
   /// Unlike [Timeline], the timing information here is available in the release
-  /// mode (additional to the profile and the debug mode). Hence this can be
-  /// used to monitor the application's performance in the wild.
+  /// mode (additional to profile and debug mode). Hence this can be used to
+  /// monitor the application's performance in the wild.
   ///
-  /// The callback may not be immediately triggered after each frame. Instead,
-  /// it tries to batch frames together and send all their timings at once to
-  /// decrease the overhead (as this is available in the release mode). The
-  /// timing of any frame will be sent within about 1 second even if there are
-  /// no later frames to batch.
-  TimingsCallback get onReportTimings => _onReportTimings;
-  TimingsCallback _onReportTimings;
-  Zone _onReportTimingsZone;
-  set onReportTimings(TimingsCallback callback) {
-    _onReportTimings = callback;
-    _onReportTimingsZone = Zone.current;
+  /// {@macro dart.ui.timings_batching}
+  ///
+  /// If no one is listening to this stream, no additional work will be done.
+  /// Otherwise, Flutter spends less than 0.1ms every 1 second to report the
+  /// timings (measured on iPhone 6s). The 0.1ms is about 0.6% of 16ms (frame
+  /// budget for 60fps), or 0.01% CPU usage per second.
+  ///
+  /// See also:
+  ///
+  ///  * [FrameTiming], the data event of this stream
+  Stream<FrameTiming> get frameTimings {
+    _frameTimingBroadcastController ??= StreamController<FrameTiming>.broadcast(
+      onListen: _onFrameTimingListen,
+      onCancel: _onFrameTimingCancel,
+    );
+    return _frameTimingBroadcastController.stream;
   }
 
   /// A callback that is invoked for each frame after [onBeginFrame] has
@@ -1153,7 +1212,7 @@ enum FramePhase {
 
 /// Time-related performance metrics of a frame.
 ///
-/// See [Window.onReportTimings] for how to get this.
+/// See [Window.frameTimings] for how to get this.
 ///
 /// The metrics in debug mode (`flutter run` without any flags) may be very
 /// different from those in profile and release modes due to the debug overhead.
@@ -1166,17 +1225,15 @@ class FrameTiming {
   /// [FramePhase.values].
   ///
   /// This constructor is usually only called by the Flutter engine, or a test.
-  /// To get the [FrameTiming] of your app, see [Window.onReportTimings].
+  /// To get the [FrameTiming] of your app, see [Window.frameTimings].
   FrameTiming(List<int> timestamps)
-      : assert(timestamps.length == FramePhase.values.length),
-        _timestamps = timestamps;
+      : assert(timestamps.length == FramePhase.values.length), _timestamps = timestamps;
 
   /// This is a raw timestamp in microseconds from some epoch. The epoch in all
   /// [FrameTiming] is the same, but it may not match [DateTime]'s epoch.
   int timestampInMicroseconds(FramePhase phase) => _timestamps[phase.index];
 
-  Duration _rawDuration(FramePhase phase) =>
-      Duration(microseconds: _timestamps[phase.index]);
+  Duration _rawDuration(FramePhase phase) => Duration(microseconds: _timestamps[phase.index]);
 
   /// The duration to build the frame on the UI thread.
   ///
@@ -1193,17 +1250,13 @@ class FrameTiming {
   /// {@template dart.ui.FrameTiming.fps_milliseconds}
   /// That's about 16ms for 60fps, and 8ms for 120fps.
   /// {@endtemplate}
-  Duration get buildDuration =>
-      _rawDuration(FramePhase.buildFinish) -
-      _rawDuration(FramePhase.buildStart);
+  Duration get buildDuration => _rawDuration(FramePhase.buildFinish) - _rawDuration(FramePhase.buildStart);
 
   /// The duration to rasterize the frame on the GPU thread.
   ///
   /// {@macro dart.ui.FrameTiming.fps_smoothness_milliseconds}
   /// {@macro dart.ui.FrameTiming.fps_milliseconds}
-  Duration get rasterDuration =>
-      _rawDuration(FramePhase.rasterFinish) -
-      _rawDuration(FramePhase.rasterStart);
+  Duration get rasterDuration => _rawDuration(FramePhase.rasterFinish) - _rawDuration(FramePhase.rasterStart);
 
   /// The timespan between build start and raster finish.
   ///
@@ -1212,11 +1265,9 @@ class FrameTiming {
   /// {@macro dart.ui.FrameTiming.fps_milliseconds}
   ///
   /// See also [buildDuration] and [rasterDuration].
-  Duration get totalSpan =>
-      _rawDuration(FramePhase.rasterFinish) -
-      _rawDuration(FramePhase.buildStart);
+  Duration get totalSpan => _rawDuration(FramePhase.rasterFinish) - _rawDuration(FramePhase.buildStart);
 
-  final List<int> _timestamps; // in microseconds
+  final List<int> _timestamps;  // in microseconds
 
   String _formatMS(Duration duration) => '${duration.inMicroseconds * 0.001}ms';
 
