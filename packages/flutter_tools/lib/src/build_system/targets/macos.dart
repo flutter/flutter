@@ -240,11 +240,41 @@ class DebugBundleFlutterAssets extends Target {
     } catch (err, st) {
       throw Exception('Failed to copy assets: $st');
     }
-    // Copy Info.plist
-    flutterProject.directory
-        .childDirectory('macos')
-        .childFile('Info.plist')
-        .copySync(assetDirectory.parent.childFile('Info.plist').path);
+    // Copy Info.plist template.
+    assetDirectory.parent.childFile('Info.plist')
+      ..createSync()
+      ..writeAsStringSync(r'''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIconFile</key>
+	<string></string>
+	<key>CFBundleIdentifier</key>
+	<string>io.flutter.flutter.app</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>NSMainStoryboardFile</key>
+	<string>Main</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+</dict>
+</plist>
+''');
 
     // Copy dill file.
     try {
@@ -273,13 +303,13 @@ class DebugBundleFlutterAssets extends Target {
       if (!currentVersion.existsSync()) {
         currentVersion.createSync(outputDirectory.path);
       }
-      // Create symlink to current resources
+      // Create symlink to current resources.
       final Link currentResources = frameworkRootDirectory
           .childLink('Resources');
       if (!currentResources.existsSync()) {
         currentResources.createSync(fs.path.join(currentVersion.path, 'Resources'));
       }
-      // Create symlink to current resources
+      // Create symlink to current binary.
       final Link currentFramework = frameworkRootDirectory
           .childLink('App');
       if (!currentFramework.existsSync()) {
@@ -287,7 +317,7 @@ class DebugBundleFlutterAssets extends Target {
       }
     } on FileSystemException {
       throw Exception('Failed to create symlinks for framework. try removing '
-        'the "macos/Fluter/ephemeral" directory and rerunning');
+        'the "${flutterProject.macos.ephemeralDirectory.path}" directory and rerunning');
     }
   }
 

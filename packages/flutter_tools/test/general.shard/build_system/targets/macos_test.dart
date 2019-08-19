@@ -120,14 +120,13 @@ void main() {
         'isolate_snapshot.bin')).createSync(recursive: true);
     fs.file(fs.path.join(environment.buildDir.path, 'App.framework', 'App'))
         ..createSync(recursive: true);
-    fs.file(fs.path.join(environment.projectDir.path, 'macos', 'Info.plist'))
-        ..createSync(recursive: true);
     final String frameworkPath = fs.path.join(environment.projectDir.path,
         'macos', 'Flutter', 'ephemeral', 'App.framework');
     final String inputKernel = fs.path.join(environment.buildDir.path, 'app.dill');
     fs.directory(frameworkPath).createSync(recursive: true);
     final String outputKernel = fs.path.join(frameworkPath, 'Resources',
         'flutter_assets', 'kernel_blob.bin');
+    final String outputPlist = fs.path.join(frameworkPath, 'Resources', 'Info.plist');
     fs.file(inputKernel)
       ..createSync(recursive: true)
       ..writeAsStringSync('testing');
@@ -135,6 +134,7 @@ void main() {
     await const DebugBundleFlutterAssets().build(<File>[], environment);
 
     expect(fs.file(outputKernel).readAsStringSync(), 'testing');
+    expect(fs.file(outputPlist).readAsStringSync(), contains('io.flutter.flutter.app'));
   }));
 }
 
