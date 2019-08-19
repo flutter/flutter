@@ -216,7 +216,7 @@ class ToggleButtons extends StatelessWidget {
   /// When the callback is null, all toggle buttons will be disabled.
   final void Function(int index) onPressed;
 
-  /// The [TextStyle] to apply to any text that appears in this button.
+  /// The [TextStyle] to apply to any text in these toggle buttons.
   ///
   /// [TextStyle.color] will be ignored and substituted by [color],
   /// [selectedColor] or [disabledColor] depending on whether the buttons

@@ -44,7 +44,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
     this.borderWidth,
   });
 
-  /// The [TextStyle] to apply to any text that appears in this button.
+  /// The default text style for [ToggleButtons.children].
   ///
   /// [TextStyle.color] will be ignored and substituted by [color],
   /// [selectedColor] or [disabledColor] depending on whether the buttons
