@@ -40,7 +40,7 @@ class Plugin {
   ///    iosPrefix: FLT
   ///    pluginClass: SamplePlugin
   ///
-  /// Example V2 format.
+  /// Example Multi-platform format.
   /// flutter:
   ///  plugin:
   ///    platforms:
