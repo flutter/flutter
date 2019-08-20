@@ -179,12 +179,12 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrac
   buffer.writeln('```\n${await _doctorText()}```');
 
   try {
-    await crashFile.writeAsString(buffer.toString());
+    crashFile.writeAsStringSync(buffer.toString());
   } on FileSystemException catch (_) {
     // Fallback to the system temporary directory.
     crashFile = getUniqueFile(crashFileSystem.systemTempDirectory, 'flutter', 'log');
     try {
-      await crashFile.writeAsString(buffer.toString());
+      crashFile.writeAsStringSync(buffer.toString());
     } on FileSystemException catch (e) {
       printError('Could not write crash report to disk: $e');
       printError(buffer.toString());

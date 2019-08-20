@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:platform/platform.dart';
 
 import 'context.dart';
@@ -25,17 +23,17 @@ Platform get platform => context.get<Platform>() ?? _kLocalPlatform;
 /// subdirectory.
 ///
 /// Returns the existing platform.
-Future<Platform> getRecordingPlatform(String location) async {
+Platform getRecordingPlatform(String location) {
   final Directory dir = getRecordingSink(location, _kRecordingType);
   final File file = _getPlatformManifest(dir);
-  await file.writeAsString(platform.toJson(), flush: true);
+  file.writeAsStringSync(platform.toJson(), flush: true);
   return platform;
 }
 
-Future<FakePlatform> getReplayPlatform(String location) async {
+FakePlatform getReplayPlatform(String location) {
   final Directory dir = getReplaySource(location, _kRecordingType);
   final File file = _getPlatformManifest(dir);
-  final String json = await file.readAsString();
+  final String json = file.readAsStringSync();
   return FakePlatform.fromJson(json);
 }
 

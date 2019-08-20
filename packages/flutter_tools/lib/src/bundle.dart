@@ -99,8 +99,8 @@ class BundleBuilder {
       }
       kernelContent = DevFSFileContent(fs.file(compilerOutput.outputFilename));
 
-      await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
-          .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
+      fs.directory(getBuildDirectory()).childFile('frontend_server.d')
+          .writeAsStringSync('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
     }
 
     final AssetBundle assets = await buildAssets(

@@ -269,7 +269,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool codesign = true,
   bool usesTerminalUi = true,
 }) async {
-  if (!await upgradePbxProjWithFlutterAssets(app.project))
+  if (!upgradePbxProjWithFlutterAssets(app.project))
     return XcodeBuildResult(success: false);
 
   if (!_checkXcodeVersion())
@@ -679,10 +679,10 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
   manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
 }
 
-Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
+bool upgradePbxProjWithFlutterAssets(IosProject project) {
   final File xcodeProjectFile = project.xcodeProjectInfoFile;
-  assert(await xcodeProjectFile.exists());
-  final List<String> lines = await xcodeProjectFile.readAsLines();
+  assert(xcodeProjectFile.existsSync());
+  final List<String> lines = xcodeProjectFile.readAsLinesSync();
 
   final RegExp oldAssets = RegExp(r'\/\* (flutter_assets|app\.flx)');
   final StringBuffer buffer = StringBuffer();
@@ -697,6 +697,6 @@ Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
       buffer.writeln(line);
     }
   }
-  await xcodeProjectFile.writeAsString(buffer.toString());
+  xcodeProjectFile.writeAsStringSync(buffer.toString());
   return true;
 }
