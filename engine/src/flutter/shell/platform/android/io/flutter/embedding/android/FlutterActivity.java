@@ -39,20 +39,16 @@ import io.flutter.view.FlutterMain;
  * <p>
  * <strong>Dart entrypoint, initial route, and app bundle path</strong>
  * <p>
- * The Dart entrypoint executed within this {@code Activity} is "main()" by default. The entrypoint
- * may be specified explicitly by passing the name of the entrypoint method as a {@code String} in
- * {@link #EXTRA_DART_ENTRYPOINT}, e.g., "myEntrypoint".
+ * The Dart entrypoint executed within this {@code Activity} is "main()" by default. To change the
+ * entrypoint that a {@code FlutterActivity} executes, subclass {@code FlutterActivity} and
+ * override {@link #getDartEntrypointFunctionName()}.
  * <p>
  * The Flutter route that is initially loaded within this {@code Activity} is "/". The initial
  * route may be specified explicitly by passing the name of the route as a {@code String} in
  * {@link #EXTRA_INITIAL_ROUTE}, e.g., "my/deep/link".
  * <p>
- * The Dart entrypoint and initial route can each be controlled using a {@link NewEngineIntentBuilder}
- * via the following methods:
- * <ul>
- *   <li>{@link NewEngineIntentBuilder#dartEntrypoint}</li>
- *   <li>{@link NewEngineIntentBuilder#initialRoute}</li>
- * </ul>
+ * The initial route can each be controlled using a {@link NewEngineIntentBuilder} via
+ * {@link NewEngineIntentBuilder#initialRoute}.
  * <p>
  * The app bundle path, Dart entrypoint, and initial route can also be controlled in a subclass of
  * {@code FlutterActivity} by overriding their respective methods:
@@ -62,12 +58,24 @@ import io.flutter.view.FlutterMain;
  *   <li>{@link #getInitialRoute()}</li>
  * </ul>
  * <p>
+ * The Dart entrypoint and app bundle path are not supported as {@code Intent} parameters due to
+ * security concerns. If such configurations were exposed via {@code Intent}, then a
+ * {@code FlutterActivity} that is {@code exported} from your Android app would allow other apps to
+ * invoke arbitrary Dart entrypoints in your app by specifying different Dart entrypoints for your
+ * {@code FlutterActivity}. Therefore, these configurations are not available via {@code Intent}.
+ * <p>
+ * <strong>Using a cached FlutterEngine</strong>
+ * <p>
  * {@code FlutterActivity} can be used with a cached {@link FlutterEngine} instead of creating a new
  * one. Use {@link #withCachedEngine(String)} to build a {@code FlutterActivity} {@code Intent} that
- * is configured to use an existing, cached {@link FlutterEngine}. {@link FlutterEngineCache} is the
- * cache that is used to obtain a given cached {@link FlutterEngine}. An
- * {@code IllegalStateException} will be thrown if a cached engine is requested but does not exist
- * in the cache.
+ * is configured to use an existing, cached {@link FlutterEngine}.
+ * {@link io.flutter.embedding.engine.FlutterEngineCache} is the cache that is used to obtain a
+ * given cached {@link FlutterEngine}. An {@code IllegalStateException} will be thrown if a cached
+ * engine is requested but does not exist in the cache.
+ * <p>
+ * When using a cached {@link FlutterEngine}, that {@link FlutterEngine} should already be executing
+ * Dart code, which means that the Dart entrypoint and initial route have already been defined.
+ * Therefore, {@link CachedEngineIntentBuilder} does not offer configuration of these properties.
  * <p>
  * It is generally recommended to use a cached {@link FlutterEngine} to avoid a momentary delay
  * when initializing a new {@link FlutterEngine}. The two exceptions to using a cached
@@ -91,6 +99,8 @@ import io.flutter.view.FlutterMain;
  *   // Cache the pre-warmed FlutterEngine in the FlutterEngineCache.
  *   FlutterEngineCache.getInstance().put("my_engine", flutterEngine);
  * }
+ * <p>
+ * <strong>Alternatives to FlutterActivity</strong>
  * <p>
  * If Flutter is needed in a location that cannot use an {@code Activity}, consider using
  * a {@link FlutterFragment}. Using a {@link FlutterFragment} requires forwarding some calls from
@@ -177,7 +187,6 @@ public class FlutterActivity extends Activity
   protected static final String NORMAL_THEME_META_DATA_KEY = "io.flutter.embedding.android.NormalTheme";
 
   // Intent extra arguments.
-  protected static final String EXTRA_DART_ENTRYPOINT = "dart_entrypoint";
   protected static final String EXTRA_INITIAL_ROUTE = "initial_route";
   protected static final String EXTRA_BACKGROUND_MODE = "background_mode";
   protected static final String EXTRA_CACHED_ENGINE_ID = "cached_engine_id";
@@ -213,7 +222,6 @@ public class FlutterActivity extends Activity
    */
   public static class NewEngineIntentBuilder {
     private final Class<? extends FlutterActivity> activityClass;
-    private String dartEntrypoint = DEFAULT_DART_ENTRYPOINT;
     private String initialRoute = DEFAULT_INITIAL_ROUTE;
     private String backgroundMode = DEFAULT_BACKGROUND_MODE;
 
@@ -232,15 +240,6 @@ public class FlutterActivity extends Activity
      */
     protected NewEngineIntentBuilder(@NonNull Class<? extends FlutterActivity> activityClass) {
       this.activityClass = activityClass;
-    }
-
-    /**
-     * The name of the initial Dart method to invoke, defaults to "main".
-     */
-    @NonNull
-    public NewEngineIntentBuilder dartEntrypoint(@NonNull String dartEntrypoint) {
-      this.dartEntrypoint = dartEntrypoint;
-      return this;
     }
 
     /**
@@ -282,7 +281,6 @@ public class FlutterActivity extends Activity
     @NonNull
     public Intent build(@NonNull Context context) {
       return new Intent(context, activityClass)
-          .putExtra(EXTRA_DART_ENTRYPOINT, dartEntrypoint)
           .putExtra(EXTRA_INITIAL_ROUTE, initialRoute)
           .putExtra(EXTRA_BACKGROUND_MODE, backgroundMode)
           .putExtra(EXTRA_DESTROY_ENGINE_WITH_ACTIVITY, true);
@@ -292,7 +290,7 @@ public class FlutterActivity extends Activity
   /**
    * Creates a {@link CachedEngineIntentBuilder}, which can be used to configure an {@link Intent}
    * to launch a {@code FlutterActivity} that internally uses an existing {@link FlutterEngine} that
-   * is cached in {@link FlutterEngineCache}.
+   * is cached in {@link io.flutter.embedding.engine.FlutterEngineCache}.
    */
   public static CachedEngineIntentBuilder withCachedEngine(@NonNull String cachedEngineId) {
     return new CachedEngineIntentBuilder(FlutterActivity.class, cachedEngineId);
@@ -300,7 +298,7 @@ public class FlutterActivity extends Activity
 
   /**
    * Builder to create an {@code Intent} that launches a {@code FlutterActivity} with an existing
-   * {@link FlutterEngine} that is cached in {@link FlutterEngineCache}.
+   * {@link FlutterEngine} that is cached in {@link io.flutter.embedding.engine.FlutterEngineCache}.
    */
   public static class CachedEngineIntentBuilder {
     private final Class<? extends FlutterActivity> activityClass;
@@ -671,26 +669,14 @@ public class FlutterActivity extends Activity
   /**
    * The Dart entrypoint that will be executed as soon as the Dart snapshot is loaded.
    * <p>
-   * This preference can be controlled with 2 methods:
-   * <ol>
-   *   <li>Pass a {@code String} as {@link #EXTRA_DART_ENTRYPOINT} with the launching {@code Intent}, or</li>
-   *   <li>Set a {@code <meta-data>} called {@link #DART_ENTRYPOINT_META_DATA_KEY} for this
-   *       {@code Activity} in the Android manifest.</li>
-   * </ol>
-   * If both preferences are set, the {@code Intent} preference takes priority.
-   * <p>
-   * The reason that a {@code <meta-data>} preference is supported is because this {@code Activity}
-   * might be the very first {@code Activity} launched, which means the developer won't have
-   * control over the incoming {@code Intent}.
+   * This preference can be controlled by setting a {@code <meta-data>} called
+   * {@link #DART_ENTRYPOINT_META_DATA_KEY} within the Android manifest definition for this
+   * {@code FlutterActivity}.
    * <p>
    * Subclasses may override this method to directly control the Dart entrypoint.
    */
   @NonNull
   public String getDartEntrypointFunctionName() {
-    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT)) {
-      return getIntent().getStringExtra(EXTRA_DART_ENTRYPOINT);
-    }
-
     try {
       ActivityInfo activityInfo = getPackageManager().getActivityInfo(
           getComponentName(),
