@@ -39,14 +39,12 @@ public class FlutterActivityTest {
   @Test
   public void itCreatesNewEngineIntentWithRequestedSettings() {
     Intent intent = FlutterActivity.withNewEngine()
-        .dartEntrypoint("custom_entrypoint")
         .initialRoute("/custom/route")
         .backgroundMode(FlutterActivity.BackgroundMode.transparent)
         .build(RuntimeEnvironment.application);
     ActivityController<FlutterActivity> activityController = Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
 
-    assertEquals("custom_entrypoint", flutterActivity.getDartEntrypointFunctionName());
     assertEquals("/custom/route", flutterActivity.getInitialRoute());
     assertArrayEquals(new String[]{}, flutterActivity.getFlutterShellArgs().toArray());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
