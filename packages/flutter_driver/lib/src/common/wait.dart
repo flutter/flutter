@@ -246,7 +246,7 @@ class CombinedCondition extends SerializableWaitCondition {
   }
 }
 
-/// Parses a [WaitCondition] or its subclass from the given [json] map.
+/// Parses a [SerializableWaitCondition] or its subclass from the given [json] map.
 ///
 /// The [json] argument must not be null.
 SerializableWaitCondition _deserialize(Map<String, dynamic> json) {
