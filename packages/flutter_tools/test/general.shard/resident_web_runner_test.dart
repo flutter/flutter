@@ -61,6 +61,9 @@ void main() {
     when(mockWebFs.runAndDebug()).thenAnswer((Invocation _) async {
       return mockDebugConnection;
     });
+    when(mockWebFs.recompile()).thenAnswer((Invocation _) {
+      return Future<bool>.value(false);
+    });
     when(mockDebugConnection.vmService).thenReturn(mockVmService);
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
@@ -163,6 +166,23 @@ void main() {
 
     expect(result.code, 1);
     expect(result.message, contains('Failed'));
+  }));
+
+  test('Fails on vmservice RpcError', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
+      return true;
+    });
+    when(mockVmService.callServiceExtension('hotRestart')).thenThrow(RPCError('', 2, '123'));
+    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+
+    expect(result.code, 1);
+    expect(result.message, contains('Page requires full reload'));
   }));
 
   test('printHelp without details is spoopy', () => testbed.run(() async {
