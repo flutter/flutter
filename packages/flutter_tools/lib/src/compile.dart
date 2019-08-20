@@ -98,12 +98,34 @@ class StdoutHandler {
 
   bool _suppressCompilerMessages;
   bool _expectSources;
+  bool _badState = false;
 
   void handler(String message) {
     printTrace('-> $message');
+    if (_badState) {
+      return;
+    }
     const String kResultPrefix = 'result ';
     if (boundaryKey == null && message.startsWith(kResultPrefix)) {
       boundaryKey = message.substring(kResultPrefix.length);
+      return;
+    }
+    // Invalid state, see commented issue below for more information.
+    if (boundaryKey == null) {
+      // This needs to complete error so that the exceptions are not swallowed
+      // by the zone.
+      compilerOutput.completeError(ToolExit(
+        'The Dart compiler encountered an internal problem. '
+        'The Flutter team would greatly appreciate if you could leave a '
+        'comment on the issue https://github.com/flutter/flutter/issues/35924 '
+        'describing what you were doing when the crash happened.\n\n'
+        'Additional debugging information:\n'
+        '  StdoutState: $state\n'
+        '  compilerMessageReceived: $compilerMessageReceived\n'
+        '  _expectSources: $_expectSources\n'
+        '  sources: $sources\n'
+      ));
+      _badState = true;
       return;
     }
     if (message.startsWith(boundaryKey)) {
