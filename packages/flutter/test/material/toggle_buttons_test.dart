@@ -305,16 +305,18 @@ void main() {
     );
 
     TextStyle textStyle;
-    textStyle = tester.firstWidget<DefaultTextStyle>(
-      find.widgetWithText(DefaultTextStyle, 'First child'),
-    ).style;
+    textStyle = tester.widget<DefaultTextStyle>(find.descendant(
+        of: find.widgetWithText(RawMaterialButton, 'First child'),
+        matching: find.byType(DefaultTextStyle),
+    )).style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
     expect(textStyle.color, isNot(Colors.orange));
 
-    textStyle = tester.firstWidget<DefaultTextStyle>(
-      find.widgetWithText(DefaultTextStyle, 'Second child'),
-    ).style;
+    textStyle = tester.widget<DefaultTextStyle>(find.descendant(
+        of: find.widgetWithText(RawMaterialButton, 'Second child'),
+        matching: find.byType(DefaultTextStyle),
+    )).style;
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
     expect(textStyle.color, isNot(Colors.orange));
