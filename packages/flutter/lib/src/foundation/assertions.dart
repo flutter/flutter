@@ -737,20 +737,25 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   }
 }
 
-/// Dump the current stack to the console using [debugPrint] and
+/// Dump the stack to the console using [debugPrint] and
 /// [FlutterError.defaultStackFilter].
 ///
-/// The current stack is obtained using [StackTrace.current].
+/// If the `stackTrace` parameter is null, the [StackTrace.current] is used to
+/// obtain the stack.
 ///
 /// The `maxFrames` argument can be given to limit the stack to the given number
-/// of lines. By default, all non-filtered stack lines are shown.
+/// of lines before filtering is applied. By default, all stack lines are
+/// included.
 ///
 /// The `label` argument, if present, will be printed before the stack.
-void debugPrintStack({ String label, int maxFrames }) {
+void debugPrintStack({StackTrace stackTrace, String label, int maxFrames}) {
   if (label != null)
     debugPrint(label);
-  Iterable<String> lines = StackTrace.current.toString().trimRight().split('\n');
-  if (kIsWeb) {
+  stackTrace ??= StackTrace.current;
+  Iterable<String> lines = stackTrace.toString().trimRight().split('\n');
+  if (   kIsWeb
+      && lines.isNotEmpty
+      && lines.first.contains('StackTrace.current')) {
     // Remove extra call to StackTrace.current for web platform.
     // TODO(ferhat): remove when https://github.com/flutter/flutter/issues/37635
     // is addressed.
