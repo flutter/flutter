@@ -423,7 +423,6 @@ void main() {
     },
   );
 
-
   testWidgets(
     'Custom text/icon colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
