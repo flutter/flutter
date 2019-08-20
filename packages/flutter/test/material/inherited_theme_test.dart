@@ -103,7 +103,7 @@ void main() {
       return MaterialApp(
         home: Scaffold(
           body: PopupMenuTheme(
-            data: PopupMenuThemeData(
+            data: const PopupMenuThemeData(
               // The menu route's elevation, shape, and color are defined by the
               // current context, so they're not affected by ThemeData.captureAll().
               textStyle: TextStyle(fontSize: menuFontSize, color: menuTextColor),
@@ -181,7 +181,7 @@ void main() {
       return MaterialApp(
         home: Scaffold(
           body: MaterialBannerTheme(
-            data: MaterialBannerThemeData(
+            data: const MaterialBannerThemeData(
               backgroundColor: bannerBackgroundColor,
               contentTextStyle: TextStyle(fontSize: bannerFontSize, color: bannerTextColor),
             ),
@@ -637,7 +637,7 @@ void main() {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            RaisedButton(child: const Text('disabled'), onPressed: null),
+            const RaisedButton(child: Text('disabled'), onPressed: null),
             RaisedButton(child: const Text('enabled'), onPressed: () { }),
           ],
         ),
