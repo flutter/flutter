@@ -111,6 +111,16 @@ Future<void> _runSmokeTests() async {
     printOutput: false,
     timeout: _kShortTimeout,
   );
+  await _runFlutterTest(automatedTests,
+    script: path.join('test_smoke_test', 'pending_timer_fail_test.dart'),
+    expectFailure: true,
+    printOutput: false,
+    outputChecker: (CapturedOutput output) =>
+      output.stdout.contains('failingPendingTimerTest')
+      ? null
+      : 'Failed to find the stack trace for the pending Timer.',
+    timeout: _kShortTimeout,
+  );
   // We run the remaining smoketests in parallel, because they each take some
   // time to run (e.g. compiling), so we don't want to run them in series,
   // especially on 20-core machines...

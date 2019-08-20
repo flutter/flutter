@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_bar.dart';
-import 'button_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'dialog.dart';
@@ -1613,19 +1612,17 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
       ),
     );
 
-    final Widget actions = ButtonTheme.bar(
-      child: ButtonBar(
-        children: <Widget>[
-          FlatButton(
-            child: Text(localizations.cancelButtonLabel),
-            onPressed: _handleCancel,
-          ),
-          FlatButton(
-            child: Text(localizations.okButtonLabel),
-            onPressed: _handleOk,
-          ),
-        ],
-      ),
+    final Widget actions = ButtonBar(
+      children: <Widget>[
+        FlatButton(
+          child: Text(localizations.cancelButtonLabel),
+          onPressed: _handleCancel,
+        ),
+        FlatButton(
+          child: Text(localizations.okButtonLabel),
+          onPressed: _handleOk,
+        ),
+      ],
     );
 
     final Dialog dialog = Dialog(
