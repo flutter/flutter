@@ -249,7 +249,6 @@ class MediaQueryData {
   ///       ),
   ///     ),
   ///   );
-  ///  }
   /// }
   /// ```
   /// {@end-tool}
