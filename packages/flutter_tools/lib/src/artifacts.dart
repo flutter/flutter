@@ -308,7 +308,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.windows_x64:
         // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
-        if (mode == BuildMode.debug) {
+        if (mode == BuildMode.debug || mode == null) {
           return fs.path.join(engineDir, platformName);
         }
         final String suffix = mode != BuildMode.debug ? '-${snakeCase(getModeName(mode), '-')}' : '';
