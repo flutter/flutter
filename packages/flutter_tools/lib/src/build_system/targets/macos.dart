@@ -252,8 +252,6 @@ class DebugBundleFlutterAssets extends Target {
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
-	<key>CFBundleIconFile</key>
-	<string></string>
 	<key>CFBundleIdentifier</key>
 	<string>io.flutter.flutter.app</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -261,19 +259,14 @@ class DebugBundleFlutterAssets extends Target {
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
-	<string>APPL</string>
+	<string>FMWK</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
-	<key>LSMinimumSystemVersion</key>
-	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
-	<key>NSMainStoryboardFile</key>
-	<string>Main</string>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 </dict>
 </plist>
+
 ''');
 
     // Copy dill file.
