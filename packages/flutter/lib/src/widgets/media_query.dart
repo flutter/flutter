@@ -342,11 +342,8 @@ class MediaQueryData {
     EdgeInsets padding,
     EdgeInsets viewPadding,
     EdgeInsets viewInsets,
-<<<<<<< HEAD
     EdgeInsets systemGestureInsets,
-=======
     double physicalDepth,
->>>>>>> e833a5820e798ad2e5920484b99a2d7bbb391460
     bool alwaysUse24HourFormat,
     bool disableAnimations,
     bool invertColors,
@@ -361,11 +358,8 @@ class MediaQueryData {
       padding: padding ?? this.padding,
       viewPadding: viewPadding ?? this.viewPadding,
       viewInsets: viewInsets ?? this.viewInsets,
-<<<<<<< HEAD
       systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
-=======
       physicalDepth: physicalDepth ?? this.physicalDepth,
->>>>>>> e833a5820e798ad2e5920484b99a2d7bbb391460
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
       disableAnimations: disableAnimations ?? this.disableAnimations,
