@@ -285,7 +285,7 @@ class CachedArtifacts extends Artifacts {
         // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         String platformDirName = getNameForTargetPlatform(platform);
-        if (mode != BuildMode.debug) {
+        if (mode == BuildMode.profile || mode == BuildMode.release) {
           platformDirName = '$platformDirName-${getNameForBuildMode(mode)}';
         }
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
