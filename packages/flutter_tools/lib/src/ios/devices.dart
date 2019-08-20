@@ -230,7 +230,8 @@ class IOSDevice extends Device {
         ),
       );
       return true;
-    } on ProcessException {
+    } on ProcessException catch (error) {
+      printError(error.message);
       return false;
     }
   }
@@ -245,7 +246,8 @@ class IOSDevice extends Device {
         ),
       );
       return true;
-    } on ProcessException {
+    } on ProcessException catch (error) {
+      printError(error.message);
       return false;
     }
   }
