@@ -319,7 +319,7 @@ class AlertDialog extends StatelessWidget {
         ),
       ));
     } else {
-      switch (defaultTargetPlatform) {
+      switch (theme.platform) {
         case TargetPlatform.iOS:
           label = semanticLabel;
           break;
@@ -587,16 +587,18 @@ class SimpleDialog extends StatelessWidget {
     final List<Widget> body = <Widget>[];
     String label = semanticLabel;
 
+    final ThemeData theme = Theme.of(context);
+
     if (title != null) {
       body.add(Padding(
         padding: titlePadding,
         child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.title,
+          style: theme.textTheme.title,
           child: Semantics(namesRoute: true, child: title),
         ),
       ));
     } else {
-      switch (defaultTargetPlatform) {
+      switch (theme.platform) {
         case TargetPlatform.iOS:
           label = semanticLabel;
           break;
