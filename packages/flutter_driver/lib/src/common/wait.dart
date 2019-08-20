@@ -120,8 +120,13 @@ class SerializationException implements Exception {
 
 /// Base class for Flutter Driver wait conditions, objects that describe conditions
 /// the driver can wait for.
+///
+/// This class is sent from the driver script running on the host to the driver
+/// extension on device to perform waiting on a given condition. In the extension,
+/// it will be converted to a [WaitCondition] that actually defines the wait logic.
+///
+/// If you subclass this, you also need to implement a [WaitCondition] in the extension.
 abstract class SerializableWaitCondition {
-
   /// A const constructor to allow subclasses to be const.
   const SerializableWaitCondition();
 
@@ -138,7 +143,6 @@ abstract class SerializableWaitCondition {
 
 /// A condition that waits until no transient callbacks are scheduled.
 class NoTransientCallbacks extends SerializableWaitCondition {
-
   /// Creates a [NoTransientCallbacks] condition.
   const NoTransientCallbacks();
 
@@ -159,7 +163,6 @@ class NoTransientCallbacks extends SerializableWaitCondition {
 
 /// A condition that waits until no pending frame is scheduled.
 class NoPendingFrame extends SerializableWaitCondition {
-
   /// Creates a [NoPendingFrame] condition.
   const NoPendingFrame();
 
@@ -180,7 +183,6 @@ class NoPendingFrame extends SerializableWaitCondition {
 
 /// A condition that waits until the Flutter engine has rasterized the first frame.
 class FirstFrameRasterized extends SerializableWaitCondition {
-
   /// Creates a [FirstFrameRasterized] condition.
   const FirstFrameRasterized();
 
@@ -201,7 +203,6 @@ class FirstFrameRasterized extends SerializableWaitCondition {
 
 /// A combined condition that waits until all the given [conditions] are met.
 class CombinedCondition extends SerializableWaitCondition {
-
   /// Creates a [CombinedCondition] condition.
   ///
   /// The [conditions] argument must not be null.

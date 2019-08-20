@@ -8,6 +8,13 @@ import 'package:flutter/widgets.dart';
 import '../common/wait.dart';
 
 /// Base class for a condition that can be waited upon.
+///
+/// This class defines the wait logic and runs on device, while
+/// [SerializableWaitCondition] takes care of the serialization between the
+/// driver script running on the host and the extension running on device.
+///
+/// If you subclass this, you might also want to implement a [SerializableWaitCondition]
+/// that takes care of serialization.
 abstract class WaitCondition {
   /// Gets the current status of the [condition], executed in the context of the
   /// Flutter app:
@@ -24,19 +31,19 @@ abstract class WaitCondition {
 }
 
 /// A condition that waits until no transient callbacks are scheduled.
-class InternalNoTransientCallbacksCondition implements WaitCondition {
+class _InternalNoTransientCallbacksCondition implements WaitCondition {
   /// Creates an [InternalNoTransientCallbacksCondition] instance.
-  const InternalNoTransientCallbacksCondition();
+  const _InternalNoTransientCallbacksCondition();
 
   /// Factory constructor to parse an [InternalNoTransientCallbacksCondition]
   /// instance from the given [SerializableWaitCondition] instance.
   ///
   /// The [condition] argument must not be null.
-  factory InternalNoTransientCallbacksCondition.deserialize(SerializableWaitCondition condition) {
+  factory _InternalNoTransientCallbacksCondition.deserialize(SerializableWaitCondition condition) {
     assert(condition != null);
     if (condition.conditionName != 'NoTransientCallbacksCondition')
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
-    return const InternalNoTransientCallbacksCondition();
+    return const _InternalNoTransientCallbacksCondition();
   }
 
   @override
@@ -52,19 +59,19 @@ class InternalNoTransientCallbacksCondition implements WaitCondition {
 }
 
 /// A condition that waits until no pending frame is scheduled.
-class InternalNoPendingFrameCondition implements WaitCondition {
+class _InternalNoPendingFrameCondition implements WaitCondition {
   /// Creates an [InternalNoPendingFrameCondition] instance.
-  const InternalNoPendingFrameCondition();
+  const _InternalNoPendingFrameCondition();
 
   /// Factory constructor to parse an [InternalNoPendingFrameCondition] instance
   /// from the given [SerializableWaitCondition] instance.
   ///
   /// The [condition] argument must not be null.
-  factory InternalNoPendingFrameCondition.deserialize(SerializableWaitCondition condition) {
+  factory _InternalNoPendingFrameCondition.deserialize(SerializableWaitCondition condition) {
     assert(condition != null);
     if (condition.conditionName != 'NoPendingFrameCondition')
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
-    return const InternalNoPendingFrameCondition();
+    return const _InternalNoPendingFrameCondition();
   }
 
   @override
@@ -80,19 +87,19 @@ class InternalNoPendingFrameCondition implements WaitCondition {
 }
 
 /// A condition that waits until the Flutter engine has rasterized the first frame.
-class InternalFirstFrameRasterizedCondition implements WaitCondition {
+class _InternalFirstFrameRasterizedCondition implements WaitCondition {
   /// Creates an [InternalFirstFrameRasterizedCondition] instance.
-  const InternalFirstFrameRasterizedCondition();
+  const _InternalFirstFrameRasterizedCondition();
 
   /// Factory constructor to parse an [InternalNoPendingFrameCondition] instance
   /// from the given [SerializableWaitCondition] instance.
   ///
   /// The [condition] argument must not be null.
-  factory InternalFirstFrameRasterizedCondition.deserialize(SerializableWaitCondition condition) {
+  factory _InternalFirstFrameRasterizedCondition.deserialize(SerializableWaitCondition condition) {
     assert(condition != null);
     if (condition.conditionName != 'FirstFrameRasterizedCondition')
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
-    return const InternalFirstFrameRasterizedCondition();
+    return const _InternalFirstFrameRasterizedCondition();
   }
 
   @override
@@ -106,31 +113,31 @@ class InternalFirstFrameRasterizedCondition implements WaitCondition {
 }
 
 /// A combined condition that waits until all the given [conditions] are met.
-class InternalCombinedCondition implements WaitCondition {
+class _InternalCombinedCondition implements WaitCondition {
   /// Creates an [InternalCombinedCondition] instance with the given list of
   /// [conditions].
   ///
   /// The [conditions] argument must not be null.
-  const InternalCombinedCondition(this.conditions)
+  const _InternalCombinedCondition(this.conditions)
       : assert(conditions != null);
 
   /// Factory constructor to parse an [InternalCombinedCondition] instance from
   /// the given [SerializableWaitCondition] instance.
   ///
   /// The [condition] argument must not be null.
-  factory InternalCombinedCondition.deserialize(SerializableWaitCondition condition) {
+  factory _InternalCombinedCondition.deserialize(SerializableWaitCondition condition) {
     assert(condition != null);
     if (condition.conditionName != 'CombinedCondition')
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
     final CombinedCondition combinedCondition = condition;
     if (combinedCondition.conditions == null) {
-      return const InternalCombinedCondition(<WaitCondition>[]);
+      return const _InternalCombinedCondition(<WaitCondition>[]);
     }
 
     final List<WaitCondition> conditions = combinedCondition.conditions.map(
         (SerializableWaitCondition serializableCondition) => deserializeCondition(serializableCondition)
       ).toList();
-    return InternalCombinedCondition(conditions);
+    return _InternalCombinedCondition(conditions);
   }
 
   /// A list of conditions it waits for.
@@ -161,13 +168,13 @@ WaitCondition deserializeCondition(SerializableWaitCondition waitCondition) {
   final String conditionName = waitCondition.conditionName;
   switch (conditionName) {
     case 'NoTransientCallbacksCondition':
-      return InternalNoTransientCallbacksCondition.deserialize(waitCondition);
+      return _InternalNoTransientCallbacksCondition.deserialize(waitCondition);
     case 'NoPendingFrameCondition':
-      return InternalNoPendingFrameCondition.deserialize(waitCondition);
+      return _InternalNoPendingFrameCondition.deserialize(waitCondition);
     case 'FirstFrameRasterizedCondition':
-      return InternalFirstFrameRasterizedCondition.deserialize(waitCondition);
+      return _InternalFirstFrameRasterizedCondition.deserialize(waitCondition);
     case 'CombinedCondition':
-      return InternalCombinedCondition.deserialize(waitCondition);
+      return _InternalCombinedCondition.deserialize(waitCondition);
   }
   throw SerializationException(
       'Unsupported wait condition $conditionName in ${waitCondition.serialize()}');

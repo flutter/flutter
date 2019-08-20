@@ -30,7 +30,7 @@ import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
 import '../common/wait.dart';
-import 'internal_wait.dart';
+import 'wait_conditions.dart';
 
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
