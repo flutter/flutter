@@ -15,7 +15,7 @@ import 'utils.dart';
 typedef StringConverter = String Function(String string);
 
 /// A function that will be run before the VM exits.
-typedef ShutdownHook = Future<dynamic> Function();
+typedef ShutdownHook = FutureOr<dynamic> Function();
 
 // TODO(ianh): We have way too many ways to run subprocesses in this project.
 // Convert most of these into one or more lightweight wrappers around the
@@ -83,8 +83,12 @@ Future<void> runShutdownHooks() async {
       printTrace('Shutdown hook priority ${stage.priority}');
       final List<ShutdownHook> hooks = _shutdownHooks.remove(stage);
       final List<Future<dynamic>> futures = <Future<dynamic>>[];
-      for (ShutdownHook shutdownHook in hooks)
-        futures.add(shutdownHook());
+      for (ShutdownHook shutdownHook in hooks) {
+        final FutureOr<dynamic> result = shutdownHook();
+        if (result is Future<dynamic>) {
+          futures.add(result);
+        }
+      }
       await Future.wait<dynamic>(futures);
     }
   } finally {

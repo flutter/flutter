@@ -748,8 +748,9 @@ Future<T> showMenu<T>({
   assert(position != null);
   assert(items != null && items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
+
   String label = semanticLabel;
-  switch (defaultTargetPlatform) {
+  switch (Theme.of(context).platform) {
     case TargetPlatform.iOS:
       label = semanticLabel;
       break;

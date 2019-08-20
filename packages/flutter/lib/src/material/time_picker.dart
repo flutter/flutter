@@ -203,8 +203,13 @@ class _DayPeriodControl extends StatelessWidget {
     if (fragmentContext.selectedTime.period == DayPeriod.am) {
       return;
     }
-    if (fragmentContext.targetPlatform == TargetPlatform.android) {
-      _announceToAccessibility(context, MaterialLocalizations.of(context).anteMeridiemAbbreviation);
+    switch (fragmentContext.targetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        _announceToAccessibility(context, MaterialLocalizations.of(context).anteMeridiemAbbreviation);
+        break;
+      case TargetPlatform.iOS:
+        break;
     }
     _togglePeriod();
   }
@@ -213,8 +218,13 @@ class _DayPeriodControl extends StatelessWidget {
     if (fragmentContext.selectedTime.period == DayPeriod.pm) {
       return;
     }
-    if (fragmentContext.targetPlatform == TargetPlatform.android) {
-      _announceToAccessibility(context, MaterialLocalizations.of(context).postMeridiemAbbreviation);
+    switch (fragmentContext.targetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        _announceToAccessibility(context, MaterialLocalizations.of(context).postMeridiemAbbreviation);
+        break;
+      case TargetPlatform.iOS:
+        break;
     }
     _togglePeriod();
   }

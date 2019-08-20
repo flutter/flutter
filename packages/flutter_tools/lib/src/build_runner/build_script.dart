@@ -376,7 +376,7 @@ Future<void> bootstrapDart2Js(BuildStep buildStep, String flutterWebSdk) async {
   final Iterable<AssetId> allSrcs = allDeps.expand((Module module) => module.sources);
   await scratchSpace.ensureAssets(allSrcs, buildStep);
 
-  final String packageFile = await _createPackageFile(allSrcs, buildStep, scratchSpace);
+  final String packageFile = _createPackageFile(allSrcs, buildStep, scratchSpace);
   final String dartPath = dartEntrypointId.path.startsWith('lib/')
       ? 'package:${dartEntrypointId.package}/'
           '${dartEntrypointId.path.substring('lib/'.length)}'
@@ -430,7 +430,7 @@ Future<void> _copyIfExists(
 /// The filename is based off the MD5 hash of the asset path so that files are
 /// unique regarless of situations like `web/foo/bar.dart` vs
 /// `web/foo-bar.dart`.
-Future<String> _createPackageFile(Iterable<AssetId> inputSources, BuildStep buildStep, ScratchSpace scratchSpace) async {
+String _createPackageFile(Iterable<AssetId> inputSources, BuildStep buildStep, ScratchSpace scratchSpace) {
   final Uri inputUri = buildStep.inputId.uri;
   final String packageFileName =
       '.package-${md5.convert(inputUri.toString().codeUnits)}';
@@ -439,8 +439,7 @@ Future<String> _createPackageFile(Iterable<AssetId> inputSources, BuildStep buil
   final Set<String> packageNames = inputSources.map((AssetId s) => s.package).toSet();
   final String packagesFileContent =
       packageNames.map((String name) => '$name:packages/$name/').join('\n');
-  await packagesFile
-      .writeAsString('# Generated for $inputUri\n$packagesFileContent');
+  packagesFile .writeAsStringSync('# Generated for $inputUri\n$packagesFileContent');
   return packageFileName;
 }
 
