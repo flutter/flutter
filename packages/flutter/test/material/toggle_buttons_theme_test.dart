@@ -142,13 +142,15 @@ void main() {
 
       // custom theme enabled color
       expect(theme.colorScheme.onSurface, isNot(enabledColor));
-      textStyle = tester.firstWidget<DefaultTextStyle>(
-        find.widgetWithText(DefaultTextStyle, 'First child'),
-      );
+      textStyle = tester.widget(find.descendant(
+        of: find.widgetWithText(RawMaterialButton, 'First child'),
+        matching: find.byType(DefaultTextStyle),
+      ));
       expect(textStyle.style.color, enabledColor);
-      iconTheme = tester.firstWidget<IconTheme>(
-        find.widgetWithIcon(IconTheme, Icons.check),
-      );
+      iconTheme = tester.widget(find.descendant(
+        of: find.widgetWithIcon(RawMaterialButton, Icons.check),
+        matching: find.byType(IconTheme),
+      ));
       expect(iconTheme.data.color, enabledColor);
 
       await tester.pumpWidget(
@@ -176,13 +178,15 @@ void main() {
       await tester.pumpAndSettle();
       // custom theme selected color
       expect(theme.colorScheme.primary, isNot(selectedColor));
-      textStyle = tester.firstWidget<DefaultTextStyle>(
-        find.widgetWithText(DefaultTextStyle, 'First child'),
-      );
+      textStyle = tester.widget(find.descendant(
+        of: find.widgetWithText(RawMaterialButton, 'First child'),
+        matching: find.byType(DefaultTextStyle),
+      ));
       expect(textStyle.style.color, selectedColor);
-      iconTheme = tester.firstWidget<IconTheme>(
-        find.widgetWithIcon(IconTheme, Icons.check),
-      );
+      iconTheme = tester.widget(find.descendant(
+        of: find.widgetWithIcon(RawMaterialButton, Icons.check),
+        matching: find.byType(IconTheme),
+      ));
       expect(iconTheme.data.color, selectedColor);
 
       await tester.pumpWidget(
@@ -209,13 +213,15 @@ void main() {
       await tester.pumpAndSettle();
       // custom theme disabled color
       expect(theme.disabledColor, isNot(disabledColor));
-      textStyle = tester.firstWidget<DefaultTextStyle>(
-        find.widgetWithText(DefaultTextStyle, 'First child'),
-      );
+      textStyle = tester.widget(find.descendant(
+        of: find.widgetWithText(RawMaterialButton, 'First child'),
+        matching: find.byType(DefaultTextStyle),
+      ));
       expect(textStyle.style.color, disabledColor);
-      iconTheme = tester.firstWidget<IconTheme>(
-        find.widgetWithIcon(IconTheme, Icons.check),
-      );
+      iconTheme = tester.widget(find.descendant(
+        of: find.widgetWithIcon(RawMaterialButton, Icons.check),
+        matching: find.byType(IconTheme),
+      ));
       expect(iconTheme.data.color, disabledColor);
     },
   );
@@ -241,12 +247,10 @@ void main() {
       ),
     );
 
-    final Material material = tester.firstWidget<Material>(
-      find.descendant(
-        of: find.byType(RawMaterialButton),
-        matching: find.byType(Material),
-      ),
-    );
+    final Material material = tester.widget<Material>(find.descendant(
+      of: find.byType(RawMaterialButton),
+      matching: find.byType(Material),
+    ));
     expect(material.color, customFillColor);
     expect(material.type, MaterialType.button);
   });
