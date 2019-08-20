@@ -522,7 +522,7 @@ void main() {
       ),
     );
 
-    final Material material = tester.firstWidget<Material>(find.descendant(
+    final Material material = tester.widget<Material>(find.descendant(
       of: find.byType(RawMaterialButton),
       matching: find.byType(Material),
     ));
@@ -551,7 +551,7 @@ void main() {
       ),
     );
 
-    final Material material = tester.firstWidget<Material>(find.descendant(
+    final Material material = tester.widget<Material>(find.descendant(
       of: find.byType(RawMaterialButton),
       matching: find.byType(Material),
     ));
@@ -581,7 +581,7 @@ void main() {
       ),
     );
 
-    final Material material = tester.firstWidget<Material>(find.descendant(
+    final Material material = tester.widget<Material>(find.descendant(
       of: find.byType(RawMaterialButton),
       matching: find.byType(Material),
     ));
