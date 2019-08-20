@@ -110,7 +110,6 @@ class StdoutHandler {
       boundaryKey = message.substring(kResultPrefix.length);
       return;
     }
-    boundaryKey = null;
     // Invalid state, see commented issue below for more information.
     // NB: both the completeError and _badState flags are required to avoid
     // filling the console with exceptions.
