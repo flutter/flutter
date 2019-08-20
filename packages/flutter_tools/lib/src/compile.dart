@@ -110,10 +110,14 @@ class StdoutHandler {
       boundaryKey = message.substring(kResultPrefix.length);
       return;
     }
+    boundaryKey = null;
     // Invalid state, see commented issue below for more information.
+    // NB: both the completeError and _badState flags are required to avoid
+    // filling the console with exceptions.
     if (boundaryKey == null) {
-      // This needs to complete error so that the exceptions are not swallowed
-      // by the zone.
+      // Throwing a synchronous exception via throwToolExit will fail to cancel
+      // the stream. Instead use completeError so that the error is returned
+      // from the awaited future that the compiler consumers are expecting.
       compilerOutput.completeError(ToolExit(
         'The Dart compiler encountered an internal problem. '
         'The Flutter team would greatly appreciate if you could leave a '
@@ -125,6 +129,12 @@ class StdoutHandler {
         '  _expectSources: $_expectSources\n'
         '  sources: $sources\n'
       ));
+      // There are several event turns before the tool actually exits from a
+      // tool exception. Normally, the stream should be cancelled to prevent
+      // more events from entering the bad state, but because the error
+      // is coming from handler itself, there is no clean way to pipe this
+      // through. Instead, we set a flag to prevent more messages from
+      // registering.
       _badState = true;
       return;
     }
