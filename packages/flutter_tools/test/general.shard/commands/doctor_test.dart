@@ -308,6 +308,23 @@ void main() {
       ));
     }, overrides: noColorTerminalOverride);
 
+    testUsingContext('validate non-verbose output format for run with crash', () async {
+      expect(await FakeCrashingDoctor().diagnose(verbose: false), isFalse);
+      expect(testLogger.statusText, equals(
+              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              '[✓] Passing Validator (with statusInfo)\n'
+              '[✓] Another Passing Validator (with statusInfo)\n'
+              '[☠] Crashing validator (the doctor check crashed)\n'
+              '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
+              'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
+              '    ✗ fatal error\n'
+              '[✓] Validators are fun (with statusInfo)\n'
+              '[✓] Four score and seven validators ago (with statusInfo)\n'
+              '\n'
+              '! Doctor found issues in 1 category.\n'
+      ));
+    }, overrides: noColorTerminalOverride);
+
     testUsingContext('validate non-verbose output format when only one category fails', () async {
       expect(await FakeSinglePassingDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
@@ -647,6 +664,15 @@ class PartialValidatorWithHintsOnly extends DoctorValidator {
   }
 }
 
+class CrashingValidator extends DoctorValidator {
+  CrashingValidator() : super('Crashing validator');
+
+  @override
+  Future<ValidationResult> validate() async {
+    throw 'fatal error';
+  }
+}
+
 /// A doctor that fails with a missing [ValidationResult].
 class FakeDoctor extends Doctor {
   List<DoctorValidator> _validators;
@@ -704,6 +730,23 @@ class FakeQuietDoctor extends Doctor {
       _validators = <DoctorValidator>[];
       _validators.add(PassingValidator('Passing Validator'));
       _validators.add(PassingValidator('Another Passing Validator'));
+      _validators.add(PassingValidator('Validators are fun'));
+      _validators.add(PassingValidator('Four score and seven validators ago'));
+    }
+    return _validators;
+  }
+}
+
+/// A doctor with a validator that throws an exception.
+class FakeCrashingDoctor extends Doctor {
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    if (_validators == null) {
+      _validators = <DoctorValidator>[];
+      _validators.add(PassingValidator('Passing Validator'));
+      _validators.add(PassingValidator('Another Passing Validator'));
+      _validators.add(CrashingValidator());
       _validators.add(PassingValidator('Validators are fun'));
       _validators.add(PassingValidator('Four score and seven validators ago'));
     }
