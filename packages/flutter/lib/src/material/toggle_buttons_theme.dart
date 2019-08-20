@@ -28,6 +28,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
   /// Creates the set of color and border properties used to configure
   /// [ToggleButtons].
   const ToggleButtonsThemeData({
+    this.textStyle,
     this.color,
     this.selectedColor,
     this.disabledColor,
@@ -42,6 +43,13 @@ class ToggleButtonsThemeData extends Diagnosticable {
     this.borderRadius,
     this.borderWidth,
   });
+
+  /// The default text style for [ToggleButtons.children].
+  ///
+  /// [TextStyle.color] will be ignored and substituted by [color],
+  /// [selectedColor] or [disabledColor] depending on whether the buttons
+  /// are active, selected, or disabled.
+  final TextStyle textStyle;
 
   /// The color for descendant [Text] and [Icon] widgets if the toggle button
   /// is enabled.
@@ -95,6 +103,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ToggleButtonsThemeData copyWith({
+    TextStyle textStyle,
     Color color,
     Color selectedColor,
     Color disabledColor,
@@ -110,6 +119,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
     double borderWidth,
   }) {
     return ToggleButtonsThemeData(
+      textStyle: textStyle ?? this.textStyle,
       color: color ?? this.color,
       selectedColor: selectedColor ?? this.selectedColor,
       disabledColor: disabledColor ?? this.disabledColor,
@@ -132,6 +142,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
     if (a == null && b == null)
       return null;
     return ToggleButtonsThemeData(
+      textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
       color: Color.lerp(a?.color, b?.color, t),
       selectedColor: Color.lerp(a?.selectedColor, b?.selectedColor, t),
       disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
@@ -151,6 +162,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
   @override
   int get hashCode {
     return hashValues(
+      textStyle,
       color,
       selectedColor,
       disabledColor,
@@ -174,7 +186,8 @@ class ToggleButtonsThemeData extends Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     final ToggleButtonsThemeData typedOther = other;
-    return typedOther.color == color
+    return typedOther.textStyle == textStyle
+        && typedOther.color == color
         && typedOther.selectedColor == selectedColor
         && typedOther.disabledColor == disabledColor
         && typedOther.fillColor == fillColor
@@ -192,6 +205,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
