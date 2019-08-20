@@ -67,7 +67,7 @@ class CupertinoTheme extends StatelessWidget {
   /// in the ancestry tree, unless [nullOk] is set to true.
   static Brightness brightnessOf(BuildContext context, { bool nullOk = false }) {
     final _InheritedCupertinoTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedCupertinoTheme);
-    return inheritedTheme?.theme?.data?._brightness ?? MediaQuery.of(context, nullOk: nullOk).platformBrightness;
+    return inheritedTheme?.theme?.data?._brightness ?? MediaQuery.of(context, nullOk: nullOk)?.platformBrightness;
   }
 
   /// The widget below this widget in the tree.
