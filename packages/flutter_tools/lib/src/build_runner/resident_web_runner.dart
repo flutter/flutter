@@ -203,6 +203,9 @@ class ResidentWebRunner extends ResidentRunner {
       });
       websocketUri = Uri.parse(_debugConnection.uri);
     }
+    if (websocketUri != null) {
+      printStatus('Debug service listening on $websocketUri.');
+    }
     connectionInfoCompleter?.complete(
       DebugConnectionInfo(wsUri: websocketUri)
     );
