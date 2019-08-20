@@ -109,7 +109,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('testing');
 
-    expect(() async => await const DebugBundleFlutterAssets().build(<File>[], environment),
+    expect(() async => await const DebugMacOSBundleFlutterAssets().build(<File>[], environment),
         throwsA(isInstanceOf<Exception>()));
   }));
 
@@ -131,7 +131,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('testing');
 
-    await const DebugBundleFlutterAssets().build(<File>[], environment);
+    await const DebugMacOSBundleFlutterAssets().build(<File>[], environment);
 
     expect(fs.file(outputKernel).readAsStringSync(), 'testing');
     expect(fs.file(outputPlist).readAsStringSync(), contains('io.flutter.flutter.app'));
