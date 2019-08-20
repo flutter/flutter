@@ -1,4 +1,4 @@
-Signature: ab0f4765e8482db906336fce5d9e25c3
+Signature: a5d388236359db7d324b2211c1d2fa37
 
 UNUSED LICENSES:
 
@@ -4839,6 +4839,8 @@ FILE: ../../../third_party/skia/src/gpu/GrSwizzle.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTextureResolveManager.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureResolveRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTextureResolveRenderTask.h
+FILE: ../../../third_party/skia/src/gpu/GrTransferFromRenderTask.cpp
+FILE: ../../../third_party/skia/src/gpu/GrTransferFromRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrUtil.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrColorMatrixFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrColorMatrixFragmentProcessor.cpp
@@ -4853,8 +4855,6 @@ FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleWebGLInterfaceAutogen.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLTypesPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockTypes.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrTransferFromOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrTransferFromOp.h
 FILE: ../../../third_party/skia/src/sksl/SkSLASTFile.h
 FILE: ../../../third_party/skia/src/sksl/SkSLASTNode.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLASTNode.h
