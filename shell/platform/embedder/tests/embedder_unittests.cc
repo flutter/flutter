@@ -208,7 +208,11 @@ TEST_F(EmbedderTest, CanSpecifyCustomTaskRunner) {
   platform_task_runner->PostTask(fml::MakeCopyable([&]() mutable {
     std::scoped_lock lock(engine_mutex);
     engine.reset();
-    kill_latch.Signal();
+
+    // There may still be pending tasks on the platform thread that were queued
+    // by the test_task_runner.  Signal the latch after these tasks have been
+    // consumed.
+    platform_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
   }));
   kill_latch.Wait();
 
