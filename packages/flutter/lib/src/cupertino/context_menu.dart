@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'colors.dart';
@@ -19,6 +20,8 @@ class ContextMenu extends StatefulWidget {
   /// Create a context menu.
   ContextMenu({
     Key key,
+    // TODO(justinmc): Use a builder instead of child so that it's easier to
+    // make duplicates?
     @required this.child,
     @required this.actions,
     this.onTap,
@@ -67,10 +70,10 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       duration: const Duration(milliseconds: 500),
     );
     _controller.addStatusListener(_onAnimationChangeStatus);
-    _mask = _OnOffColorAnimation(
+    _mask = _OnOffAnimation<Color>(
       controller: _controller,
-      onColor: _lightModeMaskColor,
-      offColor: _masklessColor,
+      onValue: _lightModeMaskColor,
+      offValue: _masklessColor,
       intervalOn: 0.2,
       intervalOff: 0.8,
     );
@@ -221,25 +224,25 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 // The transition is immediate, so there are no intermediate values or
 // interpolation. The color switches from offColor to onColor and back to
 // offColor at the times given by intervalOn and intervalOff.
-class _OnOffColorAnimation extends CompoundAnimation<Color> {
-  _OnOffColorAnimation({
+class _OnOffAnimation<T> extends CompoundAnimation<T> {
+  _OnOffAnimation({
     AnimationController controller,
-    @required Color onColor,
-    @required Color offColor,
+    @required T onValue,
+    @required T offValue,
     @required double intervalOn,
     @required double intervalOff,
-  }) : _offColor = offColor,
+  }) : _offValue = offValue,
        assert(intervalOn >= 0.0 && intervalOn <= 1.0),
        assert(intervalOff >= 0.0 && intervalOff <= 1.0),
        assert(intervalOn <= intervalOff),
        super(
-        first: ColorTween(begin: offColor, end: onColor).animate(
+        first: Tween<T>(begin: offValue, end: onValue).animate(
           CurvedAnimation(
             parent: controller,
             curve: Interval(intervalOn, intervalOn),
           ),
         ),
-        next: ColorTween(begin: onColor, end: offColor).animate(
+        next: Tween<T>(begin: onValue, end: offValue).animate(
           CurvedAnimation(
             parent: controller,
             curve: Interval(intervalOff, intervalOff),
@@ -247,10 +250,10 @@ class _OnOffColorAnimation extends CompoundAnimation<Color> {
         ),
        );
 
-  final Color _offColor;
+  final T _offValue;
 
   @override
-  Color get value => next.value == _offColor ? next.value : first.value;
+  T get value => next.value == _offValue ? next.value : first.value;
 }
 
 // The open context menu.
@@ -313,165 +316,161 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
-  Animation<double> _animation;
+  RectTween _rectTween = RectTween();
+  RectTween _rectTweenReverse = RectTween();
 
-  Tween<Offset> _offsetTween;
-  Tween<double> _scaleTween;
-  Tween<double> _scaleTweenReverse;
+  // The final position of the child produced by builder after all animation has
+  // stopped.
+  Rect _childRectFinal;
 
-  // Given an initial untransformed child Rect and a parent to put it in, return
-  // the Rect for its final position in the open ContextMenu.
-  //
-  // The final position is aligned so that its bottom is at the center of the
-  // screen, and it's sized to be as big as possible. It's considered to be
-  // inside of a Transform with `alignment` set to `Alignment.center`.
-  @visibleForTesting
-  static Rect getEndRect(Rect child, Rect parent) {
-    // The given child is the child at the time the ContextMenu opens, after the
-    // bounce animation. originalChild is the child before any animation.
-    final Rect originalChild = Rect.fromLTWH(
-      // left and top are the same because the transform alignment is center.
-      child.left,
-      child.top,
-      child.width / _kOpenScale,
-      child.height / _kOpenScale,
-    );
+  final GlobalKey _containerGlobalKey = GlobalKey();
 
-    // TODO(justinmc): Use real padding and/or safe area. Child needs to line up
-    // with menu when full width, but unfortunately it's always coming out too
-    // thin.
-    const double topInset = 40.0;
-    const double horizontalPadding = 20.0;
-    final Rect container = Rect.fromLTWH(
-      parent.left + horizontalPadding,
-      parent.top + topInset,
-      parent.width - horizontalPadding * 2,
-      parent.height / 2 - topInset,
-    );
+  bool _externalOffstage = false;
+  bool _internalOffstage = false;
 
-    final double endScale = math.min(
-      container.width / originalChild.width,
-      container.height / originalChild.height,
-    );
-    final Size endChildSize = Size(
-      originalChild.width * endScale,
-      originalChild.height * endScale,
-    );
-    final Offset topLeftEnd = Offset(
-      // Center horizontally, which won't be affected by the center alignment.
-      container.left + (container.width - originalChild.width) / 2,
-      // Align the bottom of the child with the bottom of the parent, adjusting
-      // to consider center alignment of the transform.
-      container.bottom - endChildSize.height + (container.height - originalChild.height) / 2,
-    );
-    return topLeftEnd & endChildSize;
+  @override
+  set offstage(bool value) {
+    _externalOffstage = value;
+    _setOffstageInternally();
+  }
+
+  void _setOffstageInternally() {
+    super.offstage = _externalOffstage || _internalOffstage;
+    // It's necessary to call changedInternalState to get the backdrop to
+    // update.
+    changedInternalState();
+  }
+
+  @override
+  TickerFuture didPush() {
+    _internalOffstage = true;
+    _setOffstageInternally();
+
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      assert(_containerGlobalKey.currentContext != null);
+      final RenderBox renderBoxContainer = _containerGlobalKey.currentContext.findRenderObject();
+      final Offset containerOffset = renderBoxContainer.localToGlobal(renderBoxContainer.paintBounds.topLeft);
+      _childRectFinal = containerOffset & renderBoxContainer.paintBounds.size;
+      _rectTween.begin = _childRect;
+      _rectTween.end = _childRectFinal;
+
+      // When opening, the transition happens from the end of the child's bounce
+      // animation to the final state. When closing, it goes from the final state
+      // to the original position before the bounce.
+      final Rect childRectOriginal = Rect.fromLTWH(
+        _childRect.left,
+        _childRect.top,
+        _childRect.width / _kOpenScale,
+        _childRect.height / _kOpenScale,
+      );
+      _rectTweenReverse.begin = childRectOriginal;
+      _rectTweenReverse.end = _childRectFinal;
+
+
+      _internalOffstage = false;
+      _setOffstageInternally();
+    });
+    return super.didPush();
   }
 
   @override
   Animation<double> createAnimation() {
-    assert(_animation == null);
-    _animation = CurvedAnimation(
+    return CurvedAnimation(
       parent: super.createAnimation(),
       curve: Curves.linearToEaseOut,
     );
-
-    final Rect endChildRect = getEndRect(_childRect, _parentRect);
-    _offsetTween = Tween<Offset>(
-      begin: _childRect.topLeft,
-      end: endChildRect.topLeft,
-    );
-
-    // When opening, the scale happens from the end of the child's bounce
-    // animation to the final state. When closing, it goes from the final state
-    // to the original position before the bounce.
-    final double endScale = endChildRect.width / _childRect.width;
-    _scaleTween = Tween<double>(
-      begin: _kOpenScale,
-      end: endScale,
-    );
-    _scaleTweenReverse = Tween<double>(
-      begin: 1.0,
-      end: endScale,
-    );
-
-    return _animation;
   }
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return _builder(context);
+    // This is usually used to build the "page", which is then passed to
+    // buildTransitions as child, the idea being that buildTransitions will
+    // animate the entire page into the scene. In the case of ContextMenuRoute,
+    // two individual pieces of the page are animated into the scene in
+    // buildTransitions, and null is returned here.
+    return null;
   }
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    final bool reverse = _animation.status == AnimationStatus.reverse;
-    final Offset offset = _offsetTween.evaluate(_animation);
-    final double scale = reverse
-      ? _scaleTweenReverse.evaluate(_animation)
-      : _scaleTween.evaluate(_animation);
+    final bool reverse = animation.status == AnimationStatus.reverse;
+    final Rect rect = reverse ? _rectTweenReverse.evaluate(animation) : _rectTween.evaluate(animation);
 
-    // TODO(justinmc): Are taps not dismissing the modal when above or below?
-    // Might need to make something transparent to gestures if possible. Some
-    // parent of the transformed child is overhanging it.
+    // TODO(justinmc): Try various types of children in the app. Things
+    // contained in a SizedBox, a SizedBox itself, some Text, etc.
+
+    // While the animation is running, render everything in a Stack so that
+    // they're movable.
+    // TODO(justinmc): At the start, doesn't quite line up with pre-modal child.
+    // Maybe do entire animation inside this modal though?
+    if (!animation.isCompleted) {
+      return Stack(
+        children: <Widget>[
+          Positioned(
+            left: rect.left,
+            top: rect.top,
+            width: rect.width,
+            height: rect.height,
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: _builder(context),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // When the animation is done, just render everything in a static layout in
+    // the final position.
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: OrientationBuilder(
-          builder: (BuildContext context, Orientation orientation) {
-            final List<Widget> children =  <Widget>[
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    /*
-                    Transform(
-                      transformHitTests: true,
-                      alignment: Alignment.center,
-                      transform: Matrix4.identity()
-                        ..translate(offset.dx, offset.dy)
-                        ..scale(scale),
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: _onTap,
-                        child: _builder(context),
-                      ),
-                    ),
-                    */
-                    Expanded(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: _onTap,
-                        child: FittedBox(
-                          fit: BoxFit.contain,
-                          child: _builder(context),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: OrientationBuilder(
+            builder: (BuildContext context, Orientation orientation) {
+              final List<Widget> children =  <Widget>[
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: _onTap,
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            key: _containerGlobalKey,
+                            child: _builder(context),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              // Create space between items in both Row and Column.
-              Container(
-                width: 20,
-                height: 20,
-              ),
-              Expanded(
-                child: _ContextMenuSheet(
-                  actions: _actions,
+                // Create space between items in both Row and Column.
+                Container(
+                  width: 20,
+                  height: 20,
                 ),
-              ),
-            ];
+                Expanded(
+                  child: _ContextMenuSheet(
+                    actions: _actions,
+                  ),
+                ),
+              ];
 
-            return orientation == Orientation.portrait ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: children,
-              )
-              : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: children,
-              );
-          },
+              return orientation == Orientation.portrait ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: children,
+                )
+                : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: children,
+                );
+            },
+          ),
         ),
       ),
     );
