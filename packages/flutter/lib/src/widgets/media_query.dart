@@ -218,7 +218,7 @@ class MediaQueryData {
   /// The parts of the display that contain system gestures, typically swipes
   /// from the edge of the screen for navigation.
   ///
-  /// {@tool snippet --template=stateful_widget_scaffold}
+  /// {@tool snippet --template=stateful_widget_material}
   ///
   /// When using Android Q with full gestural navigation turned on,
   /// use [MediaQuery.systemGestureInsets] with [Padding] to avoid overlapping
