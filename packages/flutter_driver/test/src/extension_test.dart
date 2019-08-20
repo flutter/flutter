@@ -88,8 +88,8 @@ void main() {
       extension = FlutterDriverExtension((String message) async { log.add(message); return (messageId += 1).toString(); }, false);
     });
 
-    testWidgets('waiting for NoTransientCallbacksCondition returns immediately when transient callback queue is empty', (WidgetTester tester) async {
-      extension.call(const WaitForCondition(NoTransientCallbacksCondition()).serialize())
+    testWidgets('waiting for NoTransientCallbacks returns immediately when transient callback queue is empty', (WidgetTester tester) async {
+      extension.call(const WaitForCondition(NoTransientCallbacks()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
@@ -104,12 +104,12 @@ void main() {
       );
     });
 
-    testWidgets('waiting for NoTransientCallbacksCondition returns until no transient callbacks', (WidgetTester tester) async {
+    testWidgets('waiting for NoTransientCallbacks returns until no transient callbacks', (WidgetTester tester) async {
       SchedulerBinding.instance.scheduleFrameCallback((_) {
         // Intentionally blank. We only care about existence of a callback.
       });
 
-      extension.call(const WaitForCondition(NoTransientCallbacksCondition()).serialize())
+      extension.call(const WaitForCondition(NoTransientCallbacks()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
@@ -129,9 +129,9 @@ void main() {
       );
     });
 
-    testWidgets('waiting for NoPendingFrameCondition returns immediately when frame is synced', (
+    testWidgets('waiting for NoPendingFrame returns immediately when frame is synced', (
         WidgetTester tester) async {
-      extension.call(const WaitForCondition(NoPendingFrameCondition()).serialize())
+      extension.call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
@@ -146,10 +146,10 @@ void main() {
       );
     });
 
-    testWidgets('waiting for NoPendingFrameCondition returns until no pending scheduled frame', (WidgetTester tester) async {
+    testWidgets('waiting for NoPendingFrame returns until no pending scheduled frame', (WidgetTester tester) async {
       SchedulerBinding.instance.scheduleFrame();
 
-      extension.call(const WaitForCondition(NoPendingFrameCondition()).serialize())
+      extension.call(const WaitForCondition(NoPendingFrame()).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
@@ -171,7 +171,8 @@ void main() {
 
     testWidgets(
         'waiting for combined conditions returns immediately', (WidgetTester tester) async {
-      const WaitCondition combinedCondition = CombinedCondition(<WaitCondition>[NoTransientCallbacksCondition(), NoPendingFrameCondition()]);
+      const SerializableWaitCondition combinedCondition =
+          CombinedCondition(<SerializableWaitCondition>[NoTransientCallbacks(), NoPendingFrame()]);
       extension.call(const WaitForCondition(combinedCondition).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
@@ -194,7 +195,8 @@ void main() {
         // Intentionally blank. We only care about existence of a callback.
       });
 
-      const WaitCondition combinedCondition = CombinedCondition(<WaitCondition>[NoTransientCallbacksCondition(), NoPendingFrameCondition()]);
+      const SerializableWaitCondition combinedCondition =
+          CombinedCondition(<SerializableWaitCondition>[NoTransientCallbacks(), NoPendingFrame()]);
       extension.call(const WaitForCondition(combinedCondition).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
@@ -222,7 +224,8 @@ void main() {
         // Intentionally blank. We only care about existence of a callback.
       });
 
-      const WaitCondition combinedCondition = CombinedCondition(<WaitCondition>[NoPendingFrameCondition(), NoTransientCallbacksCondition()]);
+      const SerializableWaitCondition combinedCondition =
+          CombinedCondition(<SerializableWaitCondition>[NoPendingFrame(), NoTransientCallbacks()]);
       extension.call(const WaitForCondition(combinedCondition).serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;

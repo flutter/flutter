@@ -30,6 +30,7 @@ import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
 import '../common/wait.dart';
+import 'internal_wait.dart';
 
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
@@ -377,7 +378,8 @@ class FlutterDriverExtension {
   Future<Result> _waitForCondition(Command command) async {
     assert(command != null);
     final WaitForCondition waitForConditionCommand = command;
-    await waitForConditionCommand.condition.wait();
+    final WaitCondition condition = deserializeCondition(waitForConditionCommand.condition);
+    await condition.wait();
     return null;
   }
 

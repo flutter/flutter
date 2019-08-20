@@ -259,7 +259,7 @@ void main() {
           });
           return makeMockResponse(<String, dynamic>{});
         });
-        await driver.waitForCondition(const NoPendingFrameCondition(), timeout: _kTestTimeout);
+        await driver.waitForCondition(const NoPendingFrame(), timeout: _kTestTimeout);
       });
 
       test('sends the waitForCondition of combined conditions command', () async {
@@ -272,7 +272,8 @@ void main() {
           });
           return makeMockResponse(<String, dynamic>{});
         });
-        const WaitCondition combinedCondition = CombinedCondition(<WaitCondition>[NoPendingFrameCondition(), NoTransientCallbacksCondition()]);
+        const SerializableWaitCondition combinedCondition =
+            CombinedCondition(<SerializableWaitCondition>[NoPendingFrame(), NoTransientCallbacks()]);
         await driver.waitForCondition(combinedCondition, timeout: _kTestTimeout);
       });
     });
@@ -288,6 +289,19 @@ void main() {
           return makeMockResponse(<String, dynamic>{});
         });
         await driver.waitUntilNoTransientCallbacks(timeout: _kTestTimeout);
+      });
+    });
+
+    group('waitUntilFirstFrameRasterized', () {
+      test('sends the waitUntilFirstFrameRasterized command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'waitForCondition',
+            'conditionName': 'FirstFrameRasterizedCondition',
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        await driver.waitUntilFirstFrameRasterized();
       });
     });
 
