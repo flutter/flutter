@@ -175,7 +175,7 @@ class CachedArtifacts extends Artifacts {
         }
         return result;
       rest: default:
-        return _getHostArtifactPath(artifact, _currentHostPlatform, mode);
+        return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform, mode);
     }
   }
 
