@@ -47,6 +47,7 @@ void main() {
     expect(data.disableAnimations, false);
     expect(data.boldText, false);
     expect(data.platformBrightness, Brightness.light);
+    expect(data.physicalDepth, equals(WidgetsBinding.instance.window.physicalDepth));
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
@@ -59,6 +60,7 @@ void main() {
     expect(copied.viewPadding, data.viewPadding);
     expect(copied.viewInsets, data.viewInsets);
     expect(copied.systemGestureInsets, data.systemGestureInsets);
+    expect(copied.physicalDepth, data.physicalDepth);
     expect(copied.alwaysUse24HourFormat, data.alwaysUse24HourFormat);
     expect(copied.accessibleNavigation, data.accessibleNavigation);
     expect(copied.invertColors, data.invertColors);
@@ -77,6 +79,7 @@ void main() {
       viewPadding: const EdgeInsets.all(11.24031),
       viewInsets: const EdgeInsets.all(1.67262),
       systemGestureInsets: const EdgeInsets.all(1.5556),
+      physicalDepth: 120.0,
       alwaysUse24HourFormat: true,
       accessibleNavigation: true,
       invertColors: true,
@@ -91,6 +94,7 @@ void main() {
     expect(copied.viewPadding, const EdgeInsets.all(11.24031));
     expect(copied.viewInsets, const EdgeInsets.all(1.67262));
     expect(copied.systemGestureInsets, const EdgeInsets.all(1.5556));
+    expect(copied.physicalDepth, 120.0);
     expect(copied.alwaysUse24HourFormat, true);
     expect(copied.accessibleNavigation, true);
     expect(copied.invertColors, true);

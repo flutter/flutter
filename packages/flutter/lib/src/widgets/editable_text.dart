@@ -16,6 +16,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -221,6 +222,54 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   }
 }
 
+/// Toolbar configuration for [EditableText].
+///
+/// Toolbar is a context menu that will show up when user right click or long
+/// press the [EditableText]. It includes several options: cut, copy, paste,
+/// and select all.
+///
+/// [EditableText] and its derived widgets have their own default [ToolbarOptions].
+/// Create a custom [ToolbarOptions] if you want explicit control over the toolbar
+/// option.
+class ToolbarOptions {
+  /// Create a toolbar configuration with given options.
+  ///
+  /// All options default to false if they are not explicitly set.
+  const ToolbarOptions({
+    this.copy = false,
+    this.cut = false,
+    this.paste = false,
+    this.selectAll = false,
+  }) : assert(copy != null),
+       assert(cut != null),
+       assert(paste != null),
+       assert(selectAll != null);
+
+  /// Whether to show copy option in toolbar.
+  ///
+  /// Defaults to false. Must not be null.
+  final bool copy;
+
+  /// Whether to show cut option in toolbar.
+  ///
+  /// If [EditableText.readOnly] is set to true, cut will be disabled regardless.
+  ///
+  /// Defaults to false. Must not be null.
+  final bool cut;
+
+  /// Whether to show paste option in toolbar.
+  ///
+  /// If [EditableText.readOnly] is set to true, paste will be disabled regardless.
+  ///
+  /// Defaults to false. Must not be null.
+  final bool paste;
+
+  /// Whether to show select all option in toolbar.
+  ///
+  /// Defaults to false. Must not be null.
+  final bool selectAll;
+}
+
 /// A basic text input field.
 ///
 /// This widget interacts with the [TextInput] service to let the user edit the
@@ -290,9 +339,12 @@ class EditableText extends StatefulWidget {
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
   ///
-  /// The [controller], [focusNode], [style], [cursorColor], [backgroundCursorColor],
-  /// [textAlign], [dragStartBehavior], [rendererIgnoresPointer] and [readOnly]
-  /// arguments must not be null.
+  /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
+  /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
+  /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
+  /// [paintCursorAboveText], [textAlign], [dragStartBehavior], [scrollPadding],
+  /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer], and
+  /// [readOnly] arguments must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -336,14 +388,21 @@ class EditableText extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.enableInteractiveSelection,
+    this.enableInteractiveSelection = true,
     this.scrollController,
     this.scrollPhysics,
+    this.toolbarOptions = const ToolbarOptions(
+      copy: true,
+      cut: true,
+      paste: true,
+      selectAll: true
+    )
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(showSelectionHandles != null),
+       assert(enableInteractiveSelection != null),
        assert(readOnly != null),
        assert(forceLine != null),
        assert(style != null),
@@ -367,6 +426,7 @@ class EditableText extends StatefulWidget {
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
+       assert(toolbarOptions != null),
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
@@ -418,6 +478,12 @@ class EditableText extends StatefulWidget {
   ///
   ///  * [textWidthBasis], which controls the calculation of text width.
   final bool forceLine;
+
+  /// Configuration of toolbar options.
+  ///
+  /// By default, all options are enabled. If [readOnly] is true,
+  /// paste and cut will be disabled regardless.
+  final ToolbarOptions toolbarOptions;
 
   /// Whether to show selection handles.
   ///
@@ -903,9 +969,7 @@ class EditableText extends StatefulWidget {
   final ScrollPhysics scrollPhysics;
 
   /// {@macro flutter.rendering.editable.selectionEnabled}
-  bool get selectionEnabled {
-    return enableInteractiveSelection ?? !obscureText;
-  }
+  bool get selectionEnabled => enableInteractiveSelection;
 
   @override
   EditableTextState createState() => EditableTextState();
@@ -969,16 +1033,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
 
   @override
-  bool get cutEnabled => !widget.readOnly;
+  bool get cutEnabled => widget.toolbarOptions.cut && !widget.readOnly;
 
   @override
-  bool get copyEnabled => true;
+  bool get copyEnabled => widget.toolbarOptions.copy;
 
   @override
-  bool get pasteEnabled => !widget.readOnly;
+  bool get pasteEnabled => widget.toolbarOptions.paste && !widget.readOnly;
 
   @override
-  bool get selectAllEnabled => true;
+  bool get selectAllEnabled => widget.toolbarOptions.selectAll;
 
   // State lifecycle:
 
@@ -1061,7 +1125,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
     if (value.text != _value.text) {
-      _hideSelectionOverlayIfNeeded();
+      hideToolbar();
       _showCaretOnScreen();
       if (widget.obscureText && value.text.length == _value.text.length + 1) {
         _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
@@ -1222,6 +1286,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       caretStart = caretRect.top - caretOffset;
       caretEnd = caretRect.bottom + caretOffset;
     } else {
+      // Scrolls horizontally for single-line fields.
       caretStart = caretRect.left;
       caretEnd = caretRect.right;
     }
@@ -1232,6 +1297,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       scrollOffset += caretStart;
     } else if (caretEnd >= viewportExtent) { // cursor after end of bounds
       scrollOffset += caretEnd - viewportExtent;
+    }
+
+    if (_isMultiline) {
+      // Clamp the final results to prevent programmatically scrolling to
+      // out-of-paragraph-bounds positions when encountering tall fonts/scripts that
+      // extend past the ascent.
+      scrollOffset = scrollOffset.clamp(0.0, renderEditable.maxScrollExtent);
     }
     return scrollOffset;
   }
@@ -1300,11 +1372,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _hideSelectionOverlayIfNeeded() {
-    _selectionOverlay?.hide();
-    _selectionOverlay = null;
-  }
-
   void _updateOrDisposeSelectionOverlayIfNeeded() {
     if (_selectionOverlay != null) {
       if (_hasFocus) {
@@ -1323,7 +1390,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // EditableWidget, not just changes triggered by user gestures.
     requestKeyboard();
 
-    _hideSelectionOverlayIfNeeded();
+    _selectionOverlay?.hide();
+    _selectionOverlay = null;
 
     if (widget.selectionControls != null) {
       _selectionOverlay = TextSelectionOverlay(
@@ -1390,7 +1458,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           .getHandleSize(renderEditable.preferredLineHeight).height;
         final double interactiveHandleHeight = math.max(
           handleHeight,
-          kMinInteractiveSize,
+          kMinInteractiveDimension,
         );
         final Offset anchor = _selectionOverlay.selectionControls
           .getHandleAnchor(
@@ -1601,9 +1669,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void hideToolbar() {
-    if (_selectionOverlay == null || !_selectionOverlay.toolbarIsVisible) {
-      return;
-    }
     _selectionOverlay?.hide();
   }
 

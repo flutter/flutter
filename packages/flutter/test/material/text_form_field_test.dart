@@ -280,4 +280,31 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   });
+
+  testWidgets('onTap is called upon tap', (WidgetTester tester) async {
+    int tapCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              onTap: () {
+                tapCount += 1;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tapCount, 0);
+    await tester.tap(find.byType(TextField));
+    // Wait a bit so they're all single taps and not double taps.
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tapCount, 3);
+  });
 }

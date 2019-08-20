@@ -547,6 +547,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   void _handlePointerScroll(PointerEvent event) {
     assert(event is PointerScrollEvent);
+    if (_physics != null && !_physics.shouldAcceptUserOffset(position)) {
+      return;
+    }
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
     if (targetScrollOffset != position.pixels) {
       position.jumpTo(targetScrollOffset);

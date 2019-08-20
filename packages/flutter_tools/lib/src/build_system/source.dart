@@ -38,8 +38,10 @@ class SourceVisitor {
 
   /// Visit a [Source] which contains a file uri.
   ///
-  /// The uri may that may include constants defined in an [Environment].
-  void visitPattern(String pattern) {
+  /// The uri may include constants defined in an [Environment]. If
+  /// [optional] is true, the file is not required to exist. In this case, it
+  /// is never resolved as an input.
+  void visitPattern(String pattern, bool optional) {
     // perform substitution of the environmental values and then
     // of the local values.
     final List<String> segments = <String>[];
@@ -74,38 +76,41 @@ class SourceVisitor {
     }
     rawParts.skip(1).forEach(segments.add);
     final String filePath = fs.path.joinAll(segments);
-    if (hasWildcard) {
-      // Perform a simple match by splitting the wildcard containing file one
-      // the `*`. For example, for `/*.dart`, we get [.dart]. We then check
-      // that part of the file matches. If there are values before and after
-      // the `*` we need to check that both match without overlapping. For
-      // example, `foo_*_.dart`. We want to match `foo_b_.dart` but not
-      // `foo_.dart`. To do so, we first subtract the first section from the
-      // string if the first segment matches.
-      final List<String> segments = wildcardFile.split('*');
-      if (segments.length > 2) {
-        throw InvalidPatternException(pattern);
+    if (!hasWildcard) {
+      if (optional && !fs.isFileSync(filePath)) {
+        return;
       }
-      if (!fs.directory(filePath).existsSync()) {
-        throw Exception('$filePath does not exist!');
-      }
-      for (FileSystemEntity entity in fs.directory(filePath).listSync()) {
-        final String filename = fs.path.basename(entity.path);
-        if (segments.isEmpty) {
-          sources.add(fs.file(entity.absolute));
-        } else if (segments.length == 1) {
-          if (filename.startsWith(segments[0]) ||
-              filename.endsWith(segments[0])) {
-            sources.add(entity.absolute);
-          }
-        } else if (filename.startsWith(segments[0])) {
-          if (filename.substring(segments[0].length).endsWith(segments[1])) {
-            sources.add(entity.absolute);
-          }
+      sources.add(fs.file(fs.path.normalize(filePath)));
+      return;
+    }
+    // Perform a simple match by splitting the wildcard containing file one
+    // the `*`. For example, for `/*.dart`, we get [.dart]. We then check
+    // that part of the file matches. If there are values before and after
+    // the `*` we need to check that both match without overlapping. For
+    // example, `foo_*_.dart`. We want to match `foo_b_.dart` but not
+    // `foo_.dart`. To do so, we first subtract the first section from the
+    // string if the first segment matches.
+    final List<String> wildcardSegments = wildcardFile.split('*');
+    if (wildcardSegments.length > 2) {
+      throw InvalidPatternException(pattern);
+    }
+    if (!fs.directory(filePath).existsSync()) {
+      throw Exception('$filePath does not exist!');
+    }
+    for (FileSystemEntity entity in fs.directory(filePath).listSync()) {
+      final String filename = fs.path.basename(entity.path);
+      if (wildcardSegments.isEmpty) {
+        sources.add(fs.file(entity.absolute));
+      } else if (wildcardSegments.length == 1) {
+        if (filename.startsWith(wildcardSegments[0]) ||
+            filename.endsWith(wildcardSegments[0])) {
+          sources.add(entity.absolute);
+        }
+      } else if (filename.startsWith(wildcardSegments[0])) {
+        if (filename.substring(wildcardSegments[0].length).endsWith(wildcardSegments[1])) {
+          sources.add(entity.absolute);
         }
       }
-    } else {
-      sources.add(fs.file(fs.path.normalize(filePath)));
     }
   }
 
@@ -139,7 +144,7 @@ class SourceVisitor {
 abstract class Source {
   /// This source is a file-uri which contains some references to magic
   /// environment variables.
-  const factory Source.pattern(String pattern) = _PatternSource;
+  const factory Source.pattern(String pattern, { bool optional }) = _PatternSource;
 
   /// This source is produced by invoking the provided function.
   const factory Source.function(InputFunction function) = _FunctionSource;
@@ -203,12 +208,13 @@ class _FunctionSource implements Source {
 }
 
 class _PatternSource implements Source {
-  const _PatternSource(this.value);
+  const _PatternSource(this.value, { this.optional = false });
 
   final String value;
+  final bool optional;
 
   @override
-  void accept(SourceVisitor visitor) => visitor.visitPattern(value);
+  void accept(SourceVisitor visitor) => visitor.visitPattern(value, optional);
 
   @override
   bool get implicit => value.contains('*');

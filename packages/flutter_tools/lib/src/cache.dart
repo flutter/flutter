@@ -141,12 +141,21 @@ class Cache {
     if (!_lockEnabled)
       return;
     assert(_lock == null);
-    _lock = await fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile')).open(mode: FileMode.write);
+    final File lockFile =
+        fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile'));
+    try {
+      _lock = lockFile.openSync(mode: FileMode.write);
+    } on FileSystemException catch (e) {
+      printError('Failed to open or create the artifact cache lockfile: "$e"');
+      printError('Please ensure you have permissions to create or open '
+                 '${lockFile.path}');
+      throwToolExit('Failed to open or create the lockfile');
+    }
     bool locked = false;
     bool printed = false;
     while (!locked) {
       try {
-        await _lock.lock();
+        _lock.lockSync();
         locked = true;
       } on FileSystemException {
         if (!printed) {
@@ -389,7 +398,15 @@ abstract class CachedArtifact {
       return;
     }
     if (!location.existsSync()) {
-      location.createSync(recursive: true);
+      try {
+        location.createSync(recursive: true);
+      } on FileSystemException catch (err) {
+        printError(err.toString());
+        throwToolExit(
+          'Failed to create directory for flutter cache at ${location.path}. '
+          'Flutter may be missing permissions in its cache directory.'
+        );
+      }
     }
     await updateInner();
     cache.setStampFor(stampName, version);
@@ -1035,13 +1052,13 @@ void _ensureExists(Directory directory) {
 }
 
 const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[
-  <String>['windows-x64', 'windows-x64/windows-x64-flutter.zip'],
-  <String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper.zip'],
+  <String>['windows-x64', 'windows-x64/windows-x64-flutter-glfw.zip'],
+  <String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper-glfw.zip'],
 ];
 
 const List<List<String>> _linuxDesktopBinaryDirs = <List<String>>[
-  <String>['linux-x64', 'linux-x64/linux-x64-flutter.zip'],
-  <String>['linux-x64', 'linux-x64/flutter-cpp-client-wrapper.zip'],
+  <String>['linux-x64', 'linux-x64/linux-x64-flutter-glfw.zip'],
+  <String>['linux-x64', 'linux-x64/flutter-cpp-client-wrapper-glfw.zip'],
 ];
 
 const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[

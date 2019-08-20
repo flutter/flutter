@@ -16,12 +16,26 @@ documentation, or to help out in any other way.
 
 We grant commit access (which includes full rights to the issue
 database, such as being able to edit labels) to people who have gained
-our trust and demonstrated a commitment to Flutter.
+our trust and demonstrated a commitment to Flutter. For more details
+see the [Contributor access](https://github.com/flutter/flutter/wiki/Contributor-access)
+page on our wiki.
 
-This document focuses on what is needed to contribute by writing code
-and submitting pull requests for the Flutter framework. For
-information on contributing in other ways, see [the community page
-on flutter.dev](https://flutter.dev/community).
+Chat
+----
+
+If you would like to chat to other people who work on Flutter, consider joining the
+https://gitter.im/flutter/contributors chat channel. We also have a [general chat
+channel](https://gitter.im/flutter/flutter) for people who aren't working on Flutter
+but who use Flutter.
+
+Issues
+------
+
+The main way to contribute to Flutter that doesn't involve writing code is to go through
+our issues database, providing reproduction steps, reduced test cases, finding duplicates,
+and so forth. See the [Triage](https://github.com/flutter/flutter/wiki/Triage) page on our
+wiki for details. When commenting on the issues database, please be sure to follow our
+[code of conduct](CODE_OF_CONDUCT.md).
 
 Developing for Flutter
 ----------------------
@@ -68,8 +82,3 @@ In addition to the above, there are many pages on [our
 Wiki](https://github.com/flutter/flutter/wiki/) that may be of
 interest. For a curated list of pages see the sidebar on the wiki's
 home page. They are more or less listed in order of importance.
-
-If you would like to chat to other people who work on Flutter, consider joining the
-https://gitter.im/flutter/contributors chat channel. We also have a [general chat
-channel](https://gitter.im/flutter/flutter) for people who aren't working on Flutter
-but who use Flutter.

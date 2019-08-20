@@ -221,9 +221,51 @@ class TextStyleTween extends Tween<TextStyle> {
 /// respond to those _changes_ by animating the changes over a specified
 /// [duration].
 ///
-/// Which properties are animated is left up to the subclass. Subclasses' States
+/// Which properties are animated is left up to the subclass. Subclasses' [State]s
 /// must extend [ImplicitlyAnimatedWidgetState] and provide a way to visit the
 /// relevant fields to animate.
+///
+/// ## Relationship to [AnimatedWidget]s
+///
+/// [ImplicitlyAnimatedWidget]s (and their subclasses) automatically animate
+/// changes in their properties whenever they change. For this,
+/// they create and manage their own internal [AnimationController]s to power
+/// the animation. While these widgets are simple to use and don't require you
+/// to manually manage the lifecycle of an [AnimationController], they
+/// are also somewhat limited: Besides the target value for the animated
+/// property, developers can only chose a [duration] and [curve] for the
+/// animation. If you require more control over the animation (e.g. you want
+/// to stop it somewhere in the middle), consider using a
+/// [AnimatedWidget] or one of its subclasses. These widget take an [Animation]
+/// as an argument to power the animation. This gives the developer full control
+/// over the animation at the cost of requiring you to manually manage the
+/// underlying [AnimationController].
+///
+/// ## Common implicitly animated widgets
+///
+/// A number of implicitly animated widgets ship with the framework. They are
+/// usually named `AnimatedFoo`, where `Foo` is the name of the non-animated
+/// version of that widget. Commonly used implicitly animated widgets include:
+///
+///  * [AnimatedAlign], which is an implicitly animated version of [Align].
+///  * [AnimatedContainer], which is an implicitly animated version of
+///    [Container].
+///  * [AnimatedDefaultTextStyle], which is an implicitly animated version of
+///    [DefaultTextStyle].
+///  * [AnimatedOpacity], which is an implicitly animated version of [Opacity].
+///  * [AnimatedPadding], which is an implicitly animated version of [Padding].
+///  * [AnimatedPhysicalModel], which is an implicitly animated version of
+///    [PhysicalModel].
+///  * [AnimatedPositioned], which is an implicitly animated version of
+///    [Positioned].
+///  * [AnimatedPositionedDirectional], which is an implicitly animated version
+///    of [PositionedDirectional].
+///  * [AnimatedTheme], which is an implicitly animated version of [Theme].
+///  * [AnimatedCrossFade], which cross-fades between two given children and
+///    animates itself between their sizes.
+///  * [AnimatedSize], which automatically transitions its size over a given
+///    duration.
+///  * [AnimatedSwitcher], which fades from one widget to another.
 abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// Initializes fields for subclasses.
   ///
@@ -497,7 +539,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   }
 }
 
-/// A container that gradually changes its values over a period of time.
+/// Animated version of [Container] that gradually changes its values over a period of time.
 ///
 /// The [AnimatedContainer] will automatically animate between the old and
 /// new values of properties when they change using the provided curve and
@@ -788,6 +830,14 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 /// [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_align.mp4}
 ///
+/// For the animation, you can chose a [curve] as well as a [duration] and the
+/// widget will automatically animate to the new target [alignment]. If you require
+/// more control over the animation (e.g. if you want to stop it mid-animation),
+/// consider using an [AlignTransition] instead, which takes a provided
+/// [Animation] as argument. While that allows you to fine-tune the animation,
+/// it also requires more development overhead as you have to manually manage
+/// the lifecycle of the underlying [AnimationController].
+///
 /// See also:
 ///
 ///  * [AnimatedContainer], which can transition more values at once.
@@ -881,6 +931,14 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_positioned.mp4}
+///
+/// For the animation, you can chose a [curve] as well as a [duration] and the
+/// widget will automatically animate to the new target position. If you require
+/// more control over the animation (e.g. if you want to stop it mid-animation),
+/// consider using an [PositionedTransition] instead, which takes a provided
+/// [Animation] as argument. While that allows you to fine-tune the animation,
+/// it also requires more development overhead as you have to manually manage
+/// the lifecycle of the underlying [AnimationController].
 ///
 /// See also:
 ///
@@ -1272,6 +1330,14 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.elasticInOut].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_default_text_style.mp4}
+///
+/// For the animation, you can chose a [curve] as well as a [duration] and the
+/// widget will automatically animate to the new default text style. If you require
+/// more control over the animation (e.g. if you want to stop it mid-animation),
+/// consider using an [DefaultTextStyleTransition] instead, which takes a provided
+/// [Animation] as argument. While that allows you to fine-tune the animation,
+/// it also requires more development overhead as you have to manually manage
+/// the lifecycle of the underlying [AnimationController].
 class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the default text style implicitly.
   ///

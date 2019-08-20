@@ -50,7 +50,7 @@ class _FakeGenSnapshot implements GenSnapshot {
   Future<int> run({
     SnapshotType snapshotType,
     String depfilePath,
-    IOSArch iosArch,
+    DarwinArch darwinArch,
     Iterable<String> additionalArgs = const <String>[],
   }) async {
     _callCount += 1;
@@ -191,7 +191,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
-        iosArch: IOSArch.armv7,
+        darwinArch: DarwinArch.armv7,
         bitcode: true,
       );
 
@@ -210,7 +210,11 @@ void main() {
 
       verify(xcode.cc(argThat(contains('-fembed-bitcode')))).called(1);
       verify(xcode.clang(argThat(contains('-fembed-bitcode')))).called(1);
-      verify(xcode.dsymutil(any)).called(1);
+      verify(xcode.dsymutil(<String>[
+        'build/foo/App.framework/App',
+        '-o',
+        'build/foo/App.framework.dSYM.noindex',
+      ])).called(1);
 
       final File assemblyFile = fs.file(assembly);
       final File assemblyBitcodeFile = fs.file('$assembly.bitcode');
@@ -241,7 +245,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
-        iosArch: IOSArch.armv7,
+        darwinArch: DarwinArch.armv7,
         bitcode: false,
       );
 
@@ -288,7 +292,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
-        iosArch: IOSArch.arm64,
+        darwinArch: DarwinArch.arm64,
         bitcode: false,
       );
 
@@ -324,7 +328,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
-        iosArch: IOSArch.armv7,
+        darwinArch: DarwinArch.armv7,
         bitcode: false,
       );
 
@@ -362,7 +366,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
-        iosArch: IOSArch.arm64,
+        darwinArch: DarwinArch.arm64,
         bitcode: false,
       );
 
@@ -463,306 +467,5 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(bufferLogger.statusText, matches(RegExp(r'snapshot\(CompileTime\): \d+ ms.')));
     }, overrides: contextOverrides);
-  });
-
-  group('Snapshotter - JIT', () {
-    const String kTrace = 'trace.txt';
-    const String kEngineVmSnapshotData = 'engine_vm_snapshot_data';
-    const String kEngineIsolateSnapshotData = 'engine_isolate_snapshot_data';
-
-    _FakeGenSnapshot genSnapshot;
-    MemoryFileSystem fs;
-    JITSnapshotter snapshotter;
-    MockAndroidSdk mockAndroidSdk;
-    MockArtifacts mockArtifacts;
-
-    setUp(() async {
-      fs = MemoryFileSystem();
-      fs.file(kTrace).createSync();
-      fs.file(kEngineVmSnapshotData).createSync();
-      fs.file(kEngineIsolateSnapshotData).createSync();
-
-      genSnapshot = _FakeGenSnapshot();
-      snapshotter = JITSnapshotter();
-      mockAndroidSdk = MockAndroidSdk();
-      mockArtifacts = MockArtifacts();
-
-      for (BuildMode mode in BuildMode.values) {
-        when(mockArtifacts.getArtifactPath(Artifact.vmSnapshotData,
-            platform: anyNamed('platform'), mode: mode))
-            .thenReturn(kEngineVmSnapshotData);
-        when(mockArtifacts.getArtifactPath(Artifact.isolateSnapshotData,
-            platform: anyNamed('platform'), mode: mode))
-            .thenReturn(kEngineIsolateSnapshotData);
-      }
-    });
-
-    final Map<Type, Generator> contextOverrides = <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      Artifacts: () => mockArtifacts,
-      FileSystem: () => fs,
-      GenSnapshot: () => genSnapshot,
-    };
-
-    testUsingContext('iOS debug JIT snapshot is invalid', () async {
-      final String outputPath = fs.path.join('build', 'foo');
-      expect(await snapshotter.build(
-        platform: TargetPlatform.ios,
-        buildMode: BuildMode.debug,
-        mainPath: 'main.dill',
-        packagesPath: '.packages',
-        outputPath: outputPath,
-        compilationTraceFilePath: kTrace,
-      ), isNot(equals(0)));
-    }, overrides: contextOverrides);
-
-    testUsingContext('builds Android arm debug JIT snapshot', () async {
-      fs.file('main.dill').writeAsStringSync('binary magic');
-
-      final String outputPath = fs.path.join('build', 'foo');
-      fs.directory(outputPath).createSync(recursive: true);
-
-      genSnapshot.outputs = <String, String>{
-        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
-        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-      };
-
-      final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.android_arm,
-        buildMode: BuildMode.debug,
-        mainPath: 'main.dill',
-        packagesPath: '.packages',
-        outputPath: outputPath,
-        compilationTraceFilePath: kTrace,
-      );
-
-      expect(genSnapshotExitCode, 0);
-      expect(genSnapshot.callCount, 1);
-      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
-      expect(genSnapshot.snapshotType.mode, BuildMode.debug);
-      expect(genSnapshot.additionalArgs, <String>[
-        '--deterministic',
-        '--enable_asserts',
-        '--snapshot_kind=app-jit',
-        '--load_compilation_trace=$kTrace',
-        '--load_vm_snapshot_data=$kEngineVmSnapshotData',
-        '--load_isolate_snapshot_data=$kEngineIsolateSnapshotData',
-        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
-        '--isolate_snapshot_instructions=build/foo/isolate_snapshot_instr',
-        '--no-sim-use-hardfp',
-        '--no-use-integer-division',
-        'main.dill',
-      ]);
-    }, overrides: contextOverrides);
-
-    testUsingContext('builds Android arm64 debug JIT snapshot', () async {
-      fs.file('main.dill').writeAsStringSync('binary magic');
-
-      final String outputPath = fs.path.join('build', 'foo');
-      fs.directory(outputPath).createSync(recursive: true);
-
-      genSnapshot.outputs = <String, String>{
-        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
-        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-      };
-
-      final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.android_arm64,
-        buildMode: BuildMode.debug,
-        mainPath: 'main.dill',
-        packagesPath: '.packages',
-        outputPath: outputPath,
-        compilationTraceFilePath: kTrace,
-      );
-
-      expect(genSnapshotExitCode, 0);
-      expect(genSnapshot.callCount, 1);
-      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm64);
-      expect(genSnapshot.snapshotType.mode, BuildMode.debug);
-      expect(genSnapshot.additionalArgs, <String>[
-        '--deterministic',
-        '--enable_asserts',
-        '--snapshot_kind=app-jit',
-        '--load_compilation_trace=$kTrace',
-        '--load_vm_snapshot_data=$kEngineVmSnapshotData',
-        '--load_isolate_snapshot_data=$kEngineIsolateSnapshotData',
-        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
-        '--isolate_snapshot_instructions=build/foo/isolate_snapshot_instr',
-        'main.dill',
-      ]);
-    }, overrides: contextOverrides);
-
-    testUsingContext('iOS release JIT snapshot is invalid', () async {
-      final String outputPath = fs.path.join('build', 'foo');
-      expect(await snapshotter.build(
-        platform: TargetPlatform.ios,
-        buildMode: BuildMode.profile,
-        mainPath: 'main.dill',
-        packagesPath: '.packages',
-        outputPath: outputPath,
-        compilationTraceFilePath: kTrace,
-      ), isNot(equals(0)));
-    }, overrides: contextOverrides);
-
-    testUsingContext('builds Android arm profile JIT snapshot', () async {
-      fs.file('main.dill').writeAsStringSync('binary magic');
-
-      final String outputPath = fs.path.join('build', 'foo');
-      fs.directory(outputPath).createSync(recursive: true);
-
-      genSnapshot.outputs = <String, String>{
-        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
-        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-      };
-
-      final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.android_arm,
-        buildMode: BuildMode.profile,
-        mainPath: 'main.dill',
-        packagesPath: '.packages',
-        outputPath: outputPath,
-        compilationTraceFilePath: kTrace,
-      );
-
-      expect(genSnapshotExitCode, 0);
-      expect(genSnapshot.callCount, 1);
-      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
-      expect(genSnapshot.snapshotType.mode, BuildMode.profile);
-      expect(genSnapshot.additionalArgs, <String>[
-        '--deterministic',
-        '--snapshot_kind=app-jit',
-        '--load_compilation_trace=$kTrace',
-        '--load_vm_snapshot_data=$kEngineVmSnapshotData',
-        '--load_isolate_snapshot_data=$kEngineIsolateSnapshotData',
-        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
-        '--isolate_snapshot_instructions=build/foo/isolate_snapshot_instr',
-        '--no-sim-use-hardfp',
-        '--no-use-integer-division',
-        'main.dill',
-      ]);
-    }, overrides: contextOverrides);
-
-    testUsingContext('builds Android arm64 profile JIT snapshot', () async {
-      fs.file('main.dill').writeAsStringSync('binary magic');
-
-      final String outputPath = fs.path.join('build', 'foo');
-      fs.directory(outputPath).createSync(recursive: true);
-
-      genSnapshot.outputs = <String, String>{
-        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
-        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-      };
-
-      final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.android_arm64,
-        buildMode: BuildMode.profile,
-        mainPath: 'main.dill',
-        packagesPath: '.packages',
-        outputPath: outputPath,
-        compilationTraceFilePath: kTrace,
-      );
-
-      expect(genSnapshotExitCode, 0);
-      expect(genSnapshot.callCount, 1);
-      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm64);
-      expect(genSnapshot.snapshotType.mode, BuildMode.profile);
-      expect(genSnapshot.additionalArgs, <String>[
-        '--deterministic',
-        '--snapshot_kind=app-jit',
-        '--load_compilation_trace=$kTrace',
-        '--load_vm_snapshot_data=$kEngineVmSnapshotData',
-        '--load_isolate_snapshot_data=$kEngineIsolateSnapshotData',
-        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
-        '--isolate_snapshot_instructions=build/foo/isolate_snapshot_instr',
-        'main.dill',
-      ]);
-    }, overrides: contextOverrides);
-
-    testUsingContext('iOS release JIT snapshot is invalid', () async {
-      final String outputPath = fs.path.join('build', 'foo');
-      expect(await snapshotter.build(
-        platform: TargetPlatform.ios,
-        buildMode: BuildMode.release,
-        mainPath: 'main.dill',
-        packagesPath: '.packages',
-        outputPath: outputPath,
-        compilationTraceFilePath: kTrace,
-      ), isNot(equals(0)));
-    }, overrides: contextOverrides);
-
-    testUsingContext('builds Android arm release JIT snapshot', () async {
-      fs.file('main.dill').writeAsStringSync('binary magic');
-
-      final String outputPath = fs.path.join('build', 'foo');
-      fs.directory(outputPath).createSync(recursive: true);
-
-      genSnapshot.outputs = <String, String>{
-        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
-        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-      };
-
-      final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.android_arm,
-        buildMode: BuildMode.release,
-        mainPath: 'main.dill',
-        packagesPath: '.packages',
-        outputPath: outputPath,
-        compilationTraceFilePath: kTrace,
-      );
-
-      expect(genSnapshotExitCode, 0);
-      expect(genSnapshot.callCount, 1);
-      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
-      expect(genSnapshot.snapshotType.mode, BuildMode.release);
-      expect(genSnapshot.additionalArgs, <String>[
-        '--deterministic',
-        '--snapshot_kind=app-jit',
-        '--load_compilation_trace=$kTrace',
-        '--load_vm_snapshot_data=$kEngineVmSnapshotData',
-        '--load_isolate_snapshot_data=$kEngineIsolateSnapshotData',
-        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
-        '--isolate_snapshot_instructions=build/foo/isolate_snapshot_instr',
-        '--no-sim-use-hardfp',
-        '--no-use-integer-division',
-        'main.dill',
-      ]);
-    }, overrides: contextOverrides);
-
-    testUsingContext('builds Android arm64 release JIT snapshot', () async {
-      fs.file('main.dill').writeAsStringSync('binary magic');
-
-      final String outputPath = fs.path.join('build', 'foo');
-      fs.directory(outputPath).createSync(recursive: true);
-
-      genSnapshot.outputs = <String, String>{
-        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
-        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
-      };
-
-      final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.android_arm64,
-        buildMode: BuildMode.release,
-        mainPath: 'main.dill',
-        packagesPath: '.packages',
-        outputPath: outputPath,
-        compilationTraceFilePath: kTrace,
-      );
-
-      expect(genSnapshotExitCode, 0);
-      expect(genSnapshot.callCount, 1);
-      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm64);
-      expect(genSnapshot.snapshotType.mode, BuildMode.release);
-      expect(genSnapshot.additionalArgs, <String>[
-        '--deterministic',
-        '--snapshot_kind=app-jit',
-        '--load_compilation_trace=$kTrace',
-        '--load_vm_snapshot_data=$kEngineVmSnapshotData',
-        '--load_isolate_snapshot_data=$kEngineIsolateSnapshotData',
-        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
-        '--isolate_snapshot_instructions=build/foo/isolate_snapshot_instr',
-        'main.dill',
-      ]);
-    }, overrides: contextOverrides);
-
   });
 }

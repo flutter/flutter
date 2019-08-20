@@ -7,6 +7,8 @@ import 'package:pool/pool.dart';
 import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../devfs.dart';
+import '../../plugins.dart';
+import '../../project.dart';
 import '../build_system.dart';
 
 /// The copying logic for flutter assets.
@@ -98,5 +100,47 @@ class CopyAssets extends Target {
           resource.release();
         }
       }));
+  }
+}
+
+/// Rewrites the `.flutter-plugins` file of [project] based on the plugin
+/// dependencies declared in `pubspec.yaml`.
+// TODO(jonahwiliams): this should be per platform and located in build
+// outputs.
+class FlutterPlugins extends Target {
+  const FlutterPlugins();
+
+  @override
+  String get name => 'flutter_plugins';
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart'),
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{PROJECT_DIR}/.flutter-plugins')
+  ];
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async {
+    // The pubspec may change for reasons other than plugins changing, so we compare
+    // the manifest before writing. Some hosting build systems use timestamps
+    // so we need to be careful to avoid tricking them into doing more work than
+    // necessary.
+    final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
+    final List<Plugin> plugins = findPlugins(project);
+    final String pluginManifest = plugins
+        .map<String>((Plugin p) => '${p.name}=${escapePath(p.path)}')
+        .join('\n');
+    final File flutterPluginsFile = environment.projectDir.childFile('.flutter-plugins');
+    if (!flutterPluginsFile.existsSync() || flutterPluginsFile.readAsStringSync() != pluginManifest) {
+      flutterPluginsFile.writeAsStringSync(pluginManifest);
+    }
   }
 }

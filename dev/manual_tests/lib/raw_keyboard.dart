@@ -105,7 +105,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           } else if (data is RawKeyEventDataLinux) {
             dataText.add(Text('keyCode: ${data.keyCode} (${_asHex(data.keyCode)})'));
             dataText.add(Text('scanCode: ${data.scanCode}'));
-            dataText.add(Text('codePoint: ${data.codePoint}'));
+            dataText.add(Text('unicodeScalarValues: ${data.unicodeScalarValues}'));
             dataText.add(Text('modifiers: ${data.modifiers} (${_asHex(data.modifiers)})'));
           }
           dataText.add(Text('logical: ${_event.logicalKey}'));

@@ -78,7 +78,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
-  testUsingContext('macOS build invokes build script', () async {
+  testUsingContext('macOS build invokes xcode build', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     fs.directory('macos').createSync();
@@ -87,23 +87,26 @@ void main() {
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.currentDirectory);
     final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
-
     when(mockProcessManager.start(<String>[
       '/usr/bin/env',
       'xcrun',
       'xcodebuild',
       '-workspace', flutterProject.macos.xcodeWorkspace.path,
-      '-configuration', 'Debug',
+      '-configuration', 'Release',
       '-scheme', 'Runner',
       '-derivedDataPath', flutterBuildDir.absolute.path,
       'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
       'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
-    ], runInShell: true)).thenAnswer((Invocation invocation) async {
+      'COMPILER_INDEX_STORE_ENABLE=NO',
+    ])).thenAnswer((Invocation invocation) async {
+      fs.file(fs.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('example.app');
       return mockProcess;
     });
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'macos']
+      const <String>['build', 'macos', '--release']
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => memoryFilesystem,

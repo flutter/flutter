@@ -116,7 +116,8 @@ const int kTouchContact = kPrimaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth mouse button.
 ///
-/// The `number` argument can be at most 62.
+/// The `number` argument can be at most 62 in Flutter for mobile and desktop,
+/// and at most 32 on Flutter for web.
 ///
 /// See [kPrimaryMouseButton], [kSecondaryMouseButton], [kMiddleMouseButton],
 /// [kBackMouseButton], and [kForwardMouseButton] for semantic names for some
@@ -125,7 +126,8 @@ int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUn
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth stylus button.
 ///
-/// The `number` argument can be at most 62.
+/// The `number` argument can be at most 62 in Flutter for mobile and desktop,
+/// and at most 32 on Flutter for web.
 ///
 /// See [kPrimaryStylusButton] and [kSecondaryStylusButton] for semantic names
 /// for some stylus buttons.

@@ -56,17 +56,25 @@ Future<int> run(
     );
 
     String getVersion() => flutterVersion ?? FlutterVersion.instance.getVersionString(redactUnknownBranches: true);
+    Object firstError;
+    StackTrace firstStackTrace;
     return await runZoned<Future<int>>(() async {
       try {
         await runner.run(args);
         return await _exit(0);
       } catch (error, stackTrace) {
+        firstError = error;
+        firstStackTrace = stackTrace;
         return await _handleToolError(
             error, stackTrace, verbose, args, reportCrashes, getVersion);
       }
     }, onError: (Object error, StackTrace stackTrace) async {
-      await _handleToolError(
-          error, stackTrace, verbose, args, reportCrashes, getVersion);
+      // If sending a crash report throws an error into the zone, we don't want
+      // to re-try sending the crash report with *that* error. Rather, we want
+      // to send the original error that triggered the crash report.
+      final Object e = firstError ?? error;
+      final StackTrace s = firstStackTrace ?? stackTrace;
+      await _handleToolError(e, s, verbose, args, reportCrashes, getVersion);
     });
   }, overrides: overrides);
 }

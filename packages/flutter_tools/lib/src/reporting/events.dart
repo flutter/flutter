@@ -90,12 +90,27 @@ class HotEvent extends UsageEvent {
 /// An event that reports the result of a [DoctorValidator]
 class DoctorResultEvent extends UsageEvent {
   DoctorResultEvent({
-    @required DoctorValidator validator,
-    @required ValidationResult result
-  }) : super('doctorResult.${validator.runtimeType.toString()}',
+    @required this.validator,
+    @required this.result,
+  }) : super('doctorResult.${validator.runtimeType}',
              result.typeStr);
-  // TODO(zra): Override send() to detect a GroupedValidator and send separate
-  // events for each sub-validator.
+
+  final DoctorValidator validator;
+  final ValidationResult result;
+
+  @override
+  void send() {
+    if (validator is! GroupedValidator) {
+      flutterUsage.sendEvent(category, parameter);
+      return;
+    }
+    final GroupedValidator group = validator;
+    for (int i = 0; i < group.subValidators.length; i++) {
+      final DoctorValidator v = group.subValidators[i];
+      final ValidationResult r = group.subResults[i];
+      DoctorResultEvent(validator: v, result: r).send();
+    }
+  }
 }
 
 /// An event that reports success or failure of a pub get.

@@ -126,7 +126,6 @@ class MacOSDevice extends Device {
   // currently we rely on killing the isolate taking down the application.
   @override
   Future<bool> stopApp(covariant MacOSApp app) async {
-    // Assume debug for now.
     return killProcess(app.executable(BuildMode.debug));
   }
 

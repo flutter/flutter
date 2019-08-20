@@ -276,6 +276,22 @@ void main() {
       Platform: _kNoColorOutputPlatform,
       Usage: () => mockUsage,
     });
+
+    testUsingContext('events for grouped validators are properly decomposed', () async {
+      await FakeGroupedDoctor().diagnose(verbose: false);
+
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PassingGroupedValidator', captureAny)).captured,
+        <dynamic>['installed', 'installed', 'installed'],
+      );
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.MissingGroupedValidator', captureAny)).captured,
+        <dynamic>['missing'],
+      );
+    }, overrides: <Type, Generator>{
+      Platform: _kNoColorOutputPlatform,
+      Usage: () => mockUsage,
+    });
   });
 
   group('doctor with fake validators', () {

@@ -56,7 +56,7 @@ static NSString *_kPing = @"ping";
 
   _messageChannel = [[FlutterBasicMessageChannel alloc]
          initWithName:_kChannel
-      binaryMessenger:_flutterViewController
+      binaryMessenger:_flutterViewController.binaryMessenger
                 codec:[FlutterStringCodec sharedInstance]];
   [self addChildViewController:_flutterViewController];
   [stackView addArrangedSubview:_flutterViewController.view];

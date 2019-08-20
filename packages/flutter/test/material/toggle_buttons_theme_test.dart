@@ -22,8 +22,9 @@ void main() {
     expect(const ToggleButtonsThemeData().hashCode, const ToggleButtonsThemeData().copyWith().hashCode);
   });
 
-   test('ToggleButtonsThemeData defaults', () {
+  test('ToggleButtonsThemeData defaults', () {
     const ToggleButtonsThemeData themeData = ToggleButtonsThemeData();
+    expect(themeData.textStyle, null);
     expect(themeData.color, null);
     expect(themeData.selectedColor, null);
     expect(themeData.disabledColor, null);
@@ -38,7 +39,8 @@ void main() {
     expect(themeData.borderRadius, null);
     expect(themeData.borderWidth, null);
 
-    final ToggleButtonsTheme theme = ToggleButtonsTheme();
+    const ToggleButtonsTheme theme = ToggleButtonsTheme(data: ToggleButtonsThemeData());
+    expect(theme.data.textStyle, null);
     expect(theme.data.color, null);
     expect(theme.data.selectedColor, null);
     expect(theme.data.disabledColor, null);
@@ -69,6 +71,7 @@ void main() {
   testWidgets('ToggleButtonsThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData(
+      textStyle: TextStyle(fontSize: 10),
       color: Color(0xfffffff0),
       selectedColor: Color(0xfffffff1),
       disabledColor: Color(0xfffffff2),
@@ -90,6 +93,8 @@ void main() {
         .toList();
 
      expect(description, <String>[
+      'textStyle.inherit: true',
+      'textStyle.size: 10.0',
       'color: Color(0xfffffff0)',
       'selectedColor: Color(0xfffffff1)',
       'disabledColor: Color(0xfffffff2)',
@@ -106,6 +111,49 @@ void main() {
     ]);
   });
 
+  testWidgets('Theme text style, except color, is applied', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtonsTheme(
+            data: const ToggleButtonsThemeData(
+              textStyle: TextStyle(
+                color: Colors.orange,
+                textBaseline: TextBaseline.ideographic,
+                fontSize: 20.0,
+              ),
+            ),
+            child: ToggleButtons(
+              isSelected: const <bool>[false, true],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    TextStyle textStyle;
+    textStyle = tester.widget<DefaultTextStyle>(find.descendant(
+        of: find.widgetWithText(RawMaterialButton, 'First child'),
+        matching: find.byType(DefaultTextStyle),
+    )).style;
+    expect(textStyle.textBaseline, TextBaseline.ideographic);
+    expect(textStyle.fontSize, 20.0);
+    expect(textStyle.color, isNot(Colors.orange));
+
+    textStyle = tester.widget<DefaultTextStyle>(find.descendant(
+        of: find.widgetWithText(RawMaterialButton, 'Second child'),
+        matching: find.byType(DefaultTextStyle),
+    )).style;
+    expect(textStyle.textBaseline, TextBaseline.ideographic);
+    expect(textStyle.fontSize, 20.0);
+    expect(textStyle.color, isNot(Colors.orange));
+  });
+
   testWidgets(
     'Theme text/icon colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
@@ -118,6 +166,7 @@ void main() {
         Material(
           child: boilerplate(
             child: ToggleButtonsTheme(
+              data: const ToggleButtonsThemeData(),
               child: ToggleButtons(
                 color: enabledColor,
                 isSelected: const <bool>[false],
@@ -154,7 +203,9 @@ void main() {
         Material(
           child: boilerplate(
             child: ToggleButtonsTheme(
-              selectedColor: selectedColor,
+              data: const ToggleButtonsThemeData(
+                selectedColor: selectedColor,
+              ),
               child: ToggleButtons(
                 color: enabledColor,
                 isSelected: const <bool>[true],
@@ -186,7 +237,9 @@ void main() {
         Material(
           child: boilerplate(
             child: ToggleButtonsTheme(
-              disabledColor: disabledColor,
+              data: const ToggleButtonsThemeData(
+                disabledColor: disabledColor,
+              ),
               child: ToggleButtons(
                 color: enabledColor,
                 isSelected: const <bool>[false],
@@ -221,7 +274,7 @@ void main() {
       Material(
         child: boilerplate(
           child: ToggleButtonsTheme(
-            fillColor: customFillColor,
+            data: const ToggleButtonsThemeData(fillColor: customFillColor),
             child: ToggleButtons(
               isSelected: const <bool>[true],
               onPressed: (int index) {},
@@ -257,10 +310,12 @@ void main() {
       Material(
         child: boilerplate(
           child: ToggleButtonsTheme(
-            splashColor: splashColor,
-            highlightColor: highlightColor,
-            hoverColor: hoverColor,
-            focusColor: focusColor,
+            data: const ToggleButtonsThemeData(
+              splashColor: splashColor,
+              highlightColor: highlightColor,
+              hoverColor: hoverColor,
+              focusColor: focusColor,
+            ),
             child: ToggleButtons(
               isSelected: const <bool>[true],
               onPressed: (int index) {},
@@ -332,8 +387,10 @@ void main() {
         Material(
           child: boilerplate(
             child: ToggleButtonsTheme(
-              borderColor: borderColor,
-              borderWidth: customWidth,
+              data: const ToggleButtonsThemeData(
+                borderColor: borderColor,
+                borderWidth: customWidth,
+              ),
               child: ToggleButtons(
                 isSelected: const <bool>[false],
                 onPressed: (int index) {},
@@ -371,8 +428,10 @@ void main() {
         Material(
           child: boilerplate(
             child: ToggleButtonsTheme(
-              selectedBorderColor: selectedBorderColor,
-              borderWidth: customWidth,
+              data: const ToggleButtonsThemeData(
+                selectedBorderColor: selectedBorderColor,
+                borderWidth: customWidth,
+              ),
               child: ToggleButtons(
                 isSelected: const <bool>[true],
                 onPressed: (int index) {},
@@ -409,8 +468,10 @@ void main() {
         Material(
           child: boilerplate(
             child: ToggleButtonsTheme(
-              disabledBorderColor: disabledBorderColor,
-              borderWidth: customWidth,
+              data: const ToggleButtonsThemeData(
+                disabledBorderColor: disabledBorderColor,
+                borderWidth: customWidth,
+              ),
               child: ToggleButtons(
                 isSelected: const <bool>[false],
                 children: const <Widget>[

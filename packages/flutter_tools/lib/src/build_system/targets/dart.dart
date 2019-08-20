@@ -43,6 +43,9 @@ List<File> listDartSources(Environment environment) {
   final List<File> dartFiles = <File>[];
   for (Uri uri in packageMap.values) {
     final Directory libDirectory = fs.directory(uri.toFilePath(windows: platform.isWindows));
+    if (!libDirectory.existsSync()) {
+      continue;
+    }
     for (FileSystemEntity entity in libDirectory.listSync(recursive: true)) {
       if (entity is File && entity.path.endsWith('.dart')) {
         dartFiles.add(entity);
@@ -61,6 +64,7 @@ class KernelSnapshot extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
+    Source.pattern('{PROJECT_DIR}/.packages'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
     Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and in .packages
     Source.artifact(Artifact.platformKernelDill),
@@ -86,16 +90,20 @@ class KernelSnapshot extends Target {
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
+    final String packagesPath = environment.projectDir.childFile('.packages').path;
+    final PackageUriMapper packageUriMapper = PackageUriMapper(targetFile,
+        packagesPath, null, null);
 
     final CompilerOutput output = await compiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
       aot: buildMode != BuildMode.debug,
-      trackWidgetCreation: false,
+      trackWidgetCreation: buildMode == BuildMode.debug,
       targetModel: TargetModel.flutter,
       targetProductVm: buildMode == BuildMode.release,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       depFilePath: null,
-      mainPath: targetFile,
+      packagesPath: packagesPath,
+      mainPath: packageUriMapper.map(targetFile)?.toString() ?? targetFile,
     );
     if (output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');

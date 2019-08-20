@@ -48,13 +48,15 @@ Future<void> updateGeneratedXcodeProperties({
   String targetOverride,
   bool useMacOSConfig = false,
   bool setSymroot = true,
+  String buildDirOverride,
 }) async {
   final List<String> xcodeBuildSettings = _xcodeBuildSettingsLines(
     project: project,
     buildInfo: buildInfo,
     targetOverride: targetOverride,
     useMacOSConfig: useMacOSConfig,
-    setSymroot: setSymroot
+    setSymroot: setSymroot,
+    buildDirOverride: buildDirOverride
   );
 
   _updateGeneratedXcodePropertiesFile(
@@ -121,6 +123,7 @@ List<String> _xcodeBuildSettingsLines({
   String targetOverride,
   bool useMacOSConfig = false,
   bool setSymroot = true,
+  String buildDirOverride,
 }) {
   final List<String> xcodeBuildSettings = <String>[];
 
@@ -135,7 +138,7 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('FLUTTER_TARGET=$targetOverride');
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
-  xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${getBuildDirectory()}');
+  xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory()}');
 
   if (setSymroot) {
     xcodeBuildSettings.add('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
@@ -152,12 +155,17 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('FLUTTER_FRAMEWORK_DIR=$frameworkDir');
   }
 
-  final String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, buildInfo?.buildName ?? project.manifest.buildName);
+  final String buildNameToParse = buildInfo?.buildName ?? project.manifest.buildName;
+  final String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse);
   if (buildName != null) {
     xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');
   }
 
-  final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildInfo?.buildNumber ?? project.manifest.buildNumber);
+  String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildInfo?.buildNumber ?? project.manifest.buildNumber);
+  // Drop back to parsing build name if build number is not present. Build number is optional in the manifest, but
+  // FLUTTER_BUILD_NUMBER is required as the backing value for the required CFBundleVersion.
+  buildNumber ??= validatedBuildNumberForPlatform(TargetPlatform.ios, buildNameToParse);
+
   if (buildNumber != null) {
     xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
   }

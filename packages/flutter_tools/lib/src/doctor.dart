@@ -24,7 +24,7 @@ import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
-import 'ios/plist_utils.dart';
+import 'ios/plist_parser.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
 import 'macos/cocoapods_validator.dart';
@@ -334,6 +334,15 @@ class GroupedValidator extends DoctorValidator {
 
   final List<DoctorValidator> subValidators;
 
+  List<ValidationResult> _subResults;
+
+  /// Subvalidator results.
+  ///
+  /// To avoid losing information when results are merged, the subresults are
+  /// cached on this field when they are available. The results are in the same
+  /// order as the subvalidator list.
+  List<ValidationResult> get subResults => _subResults;
+
   @override
   String get slowWarning => _currentSlowWarning;
   String _currentSlowWarning = 'Initializing...';
@@ -356,6 +365,7 @@ class GroupedValidator extends DoctorValidator {
 
   ValidationResult _mergeValidationResults(List<ValidationResult> results) {
     assert(results.isNotEmpty, 'Validation results should not be empty');
+    _subResults = results;
     ValidationType mergedType = results[0].type;
     final List<ValidationMessage> mergedMessages = <ValidationMessage>[];
     String statusInfo;
@@ -721,9 +731,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   String get version {
     if (_version == null) {
       final String plistFile = fs.path.join(installPath, 'Contents', 'Info.plist');
-      _version = iosWorkflow.getPlistValueFromFile(
+      _version = PlistParser.instance.getValueFromFile(
         plistFile,
-        kCFBundleShortVersionStringKey,
+        PlistParser.kCFBundleShortVersionStringKey,
       ) ?? 'unknown';
     }
     return _version;
