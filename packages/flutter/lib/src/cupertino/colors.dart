@@ -99,10 +99,9 @@ class CupertinoColors {
 ///
 /// When used as a regular color, `CupertinoDynamicColor` is equivalent to the
 /// effective color (i.e. [CupertinoDynamicColor.value] will come from the effective
-/// color), which is determined by the [BuildContext] it is last resolved against. If it has never
-/// been resolved, typically the light, normal contrast, base elevation variant
+/// color), which is determined by the [BuildContext] it is last resolved against.
+/// If it has never been resolved, the light, normal contrast, base elevation variant
 /// [CupertinoDynamicColor.color] will be the effective color.
-///
 // TODO(LongCatIsLooong): publicize once all Cupertino components have adopted this.
 // {@tool sample}
 //
@@ -231,7 +230,9 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.light].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `false`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.base].
-  Color get color => _colorMap[1][0][0];
+  Color get color => _colorMap[Brightness.light.index]
+                              [0]  // 0 for normal contrast.
+                              [CupertinoUserInterfaceLevelData.base.index];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// normal contrast, and base interface elevation.
@@ -242,7 +243,9 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.dark].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `false`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.base].
-  Color get darkColor => _colorMap[0][0][0];
+  Color get darkColor => _colorMap[Brightness.dark.index]
+                                  [0]  // 0 for normal contrast.
+                                  [CupertinoUserInterfaceLevelData.base.index];
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// high contrast, and base interface elevation.
@@ -253,7 +256,9 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.light].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `true`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.base].
-  Color get highContrastColor => _colorMap[1][1][0];
+  Color get highContrastColor => _colorMap[Brightness.light.index]
+                                          [1]  // 1 for high contrast.
+                                          [CupertinoUserInterfaceLevelData.base.index];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// high contrast, and base interface elevation.
@@ -264,7 +269,9 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.dark].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `true`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.base].
-  Color get darkHighContrastColor => _colorMap[0][1][0];
+  Color get darkHighContrastColor => _colorMap[Brightness.dark.index]
+                                              [1]  // 1 for high contrast.
+                                              [CupertinoUserInterfaceLevelData.base.index];
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// normal contrast, and elevated interface elevation.
@@ -275,7 +282,9 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.light].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `false`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.elevated].
-  Color get elevatedColor => _colorMap[1][0][1];
+  Color get elevatedColor => _colorMap [Brightness.light.index]
+                                       [0]  // 0 for normal contrast.
+                                       [CupertinoUserInterfaceLevelData.elevated.index];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// normal contrast, and elevated interface elevation.
@@ -286,7 +295,9 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.dark].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `false`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.elevated].
-  Color get darkElevatedColor => _colorMap[0][0][1];
+  Color get darkElevatedColor => _colorMap[Brightness.dark.index]
+                                          [0]  // 0 for normal contrast.
+                                          [CupertinoUserInterfaceLevelData.elevated.index];
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// high contrast, and elevated interface elevation.
@@ -297,7 +308,9 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.light].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `true`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.elevated].
-  Color get highContrastElevatedColor => _colorMap[1][1][1];
+  Color get highContrastElevatedColor => _colorMap[Brightness.light.index]
+                                                  [1]  // 1 for high contrast.
+                                                  [CupertinoUserInterfaceLevelData.elevated.index];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// high contrast, and elevated interface elevation.
@@ -308,7 +321,9 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.dark].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `true`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.elevated].
-  Color get darkHighContrastElevatedColor => _colorMap[0][1][1];
+  Color get darkHighContrastElevatedColor => _colorMap[Brightness.dark.index]
+                                                      [1]  // 1 for high contrast.
+                                                      [CupertinoUserInterfaceLevelData.elevated.index];
 
   final List<List<List<Color>>> _colorMap;
 
@@ -410,7 +425,7 @@ class CupertinoDynamicColor extends Color {
 
     return other.runtimeType == runtimeType
         && value == other.value
-        && const DeepCollectionEquality().equals(_colorMap, other._colorMap);
+        && (identical(_colorMap, other._colorMap) || const DeepCollectionEquality().equals(_colorMap, other._colorMap));
   }
 
   @override
