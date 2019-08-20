@@ -227,6 +227,7 @@ class CombinedCondition extends SerializableWaitCondition {
     return CombinedCondition(conditions);
   }
 
+  /// A list of conditions it waits for.
   final List<SerializableWaitCondition> conditions;
 
   @override
