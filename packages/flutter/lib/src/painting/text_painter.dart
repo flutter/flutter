@@ -782,6 +782,10 @@ class TextPainter {
       offset: rect != null ? Offset(rect.left, rect.top) : _emptyOffset,
       fullHeight: rect != null ? rect.bottom - rect.top : null,
     );
+
+    // Cache the input parameters to prevent repeat work later.
+    _previousCaretPosition = position;
+    _previousCaretPrototype = caretPrototype;
   }
 
   /// Returns a list of rects that bound the given selection.
