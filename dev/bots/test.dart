@@ -15,6 +15,14 @@ import 'run_command.dart';
 
 typedef ShardRunner = Future<void> Function();
 
+/// A function used to validate the output of a test.
+///
+/// If the output matches expectations, the function shall return null.
+///
+/// If the output does not match expectations, the function shall return an
+/// appropriate error message.
+typedef OutputChecker = String Function(CapturedOutput);
+
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
@@ -103,6 +111,16 @@ Future<void> _runSmokeTests() async {
     printOutput: false,
     timeout: _kShortTimeout,
   );
+  await _runFlutterTest(automatedTests,
+    script: path.join('test_smoke_test', 'pending_timer_fail_test.dart'),
+    expectFailure: true,
+    printOutput: false,
+    outputChecker: (CapturedOutput output) =>
+      output.stdout.contains('failingPendingTimerTest')
+      ? null
+      : 'Failed to find the stack trace for the pending Timer.',
+    timeout: _kShortTimeout,
+  );
   // We run the remaining smoketests in parallel, because they each take some
   // time to run (e.g. compiling), so we don't want to run them in series,
   // especially on 20-core machines...
@@ -142,7 +160,7 @@ Future<void> _runSmokeTests() async {
         <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
         workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
         expectNonZeroExit: true,
-        printOutput: false,
+        outputMode: OutputMode.discard,
         timeout: _kShortTimeout,
       ),
     ],
@@ -463,19 +481,25 @@ Future<void> _runTests() async {
 }
 
 Future<void> _runWebTests() async {
+  // Run a small subset of web tests to smoke-test the Web test infrastructure.
   await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
-    'test/foundation/',
-    'test/physics/',
-    'test/rendering/',
-    'test/services/',
-    'test/painting/',
-    'test/scheduler/',
-    'test/semantics/',
-    // TODO(flutterweb): re-enable when instabiliy around pumpAndSettle is
-    // resolved.
-    // 'test/widgets/',
-    // 'test/material/',
+    'test/foundation/assertions_test.dart',
   ]);
+
+  // TODO(yjbanov): re-enable when web test cirrus flakiness is resolved
+  // await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
+  //   'test/foundation/',
+  //   'test/physics/',
+  //   'test/rendering/',
+  //   'test/services/',
+  //   'test/painting/',
+  //   'test/scheduler/',
+  //   'test/semantics/',
+  // TODO(yjbanov): re-enable when instabiliy around pumpAndSettle is
+  //   // resolved.
+  //   // 'test/widgets/',
+  //   // 'test/material/',
+  // ]);
 }
 
 Future<void> _runCoverage() async {
@@ -759,8 +783,6 @@ class EvalResult {
 }
 
 Future<void> _runFlutterWebTest(String workingDirectory, {
-  bool printOutput = true,
-  bool skip = false,
   Duration timeout = _kLongTimeout,
   List<String> tests,
 }) async {
@@ -796,6 +818,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   String script,
   bool expectFailure = false,
   bool printOutput = true,
+  OutputChecker outputChecker,
   List<String> options = const <String>[],
   bool skip = false,
   Duration timeout = _kLongTimeout,
@@ -803,6 +826,9 @@ Future<void> _runFlutterTest(String workingDirectory, {
   Map<String, String> environment,
   List<String> tests = const <String>[],
 }) async {
+  assert(!printOutput || outputChecker == null,
+      'Output either can be printed or checked but not both');
+
   final List<String> args = <String>[
     'test',
     ...options,
@@ -832,14 +858,38 @@ Future<void> _runFlutterTest(String workingDirectory, {
   args.addAll(tests);
 
   if (!shouldProcessOutput) {
-    return runCommand(flutter, args,
+    OutputMode outputMode = OutputMode.discard;
+    CapturedOutput output;
+
+    if (outputChecker != null) {
+      outputMode = OutputMode.capture;
+      output = CapturedOutput();
+    } else if (printOutput) {
+      outputMode = OutputMode.print;
+    }
+
+    await runCommand(
+      flutter,
+      args,
       workingDirectory: workingDirectory,
       expectNonZeroExit: expectFailure,
-      printOutput: printOutput,
+      outputMode: outputMode,
+      output: output,
       skip: skip,
       timeout: timeout,
       environment: environment,
     );
+
+    if (outputChecker != null) {
+      final String message = outputChecker(output);
+      if (message != null) {
+        print('$redLine');
+        print(message);
+        print('$redLine');
+        exit(1);
+      }
+    }
+    return;
   }
 
   if (useFlutterTestFormatter) {

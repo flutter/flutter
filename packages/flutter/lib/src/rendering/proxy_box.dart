@@ -789,14 +789,18 @@ class RenderOpacity extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       if (_alpha == 0) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
         return;
       }
       if (_alpha == 255) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
         context.paintChild(child, offset);
         return;
       }
       assert(needsCompositing);
-      context.pushOpacity(offset, _alpha, super.paint);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer);
     }
   }
 
@@ -904,14 +908,19 @@ class RenderAnimatedOpacity extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      if (_alpha == 0)
+      if (_alpha == 0) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
         return;
+      }
       if (_alpha == 255) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
         context.paintChild(child, offset);
         return;
       }
       assert(needsCompositing);
-      context.pushOpacity(offset, _alpha, super.paint);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer);
     }
   }
 
@@ -952,6 +961,9 @@ class RenderShaderMask extends RenderProxyBox {
        _blendMode = blendMode,
        super(child);
 
+  @override
+  ShaderMaskLayer get layer => super.layer;
+
   /// Called to creates the [Shader] that generates the mask.
   ///
   /// The shader callback is called with the current size of the child so that
@@ -989,15 +1001,14 @@ class RenderShaderMask extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      context.pushLayer(
-        ShaderMaskLayer(
-          shader: _shaderCallback(offset & size),
-          maskRect: offset & size,
-          blendMode: _blendMode,
-        ),
-        super.paint,
-        offset,
-      );
+      layer ??= ShaderMaskLayer();
+      layer
+        ..shader = _shaderCallback(offset & size)
+        ..maskRect = offset & size
+        ..blendMode = _blendMode;
+      context.pushLayer(layer, super.paint, offset);
+    } else {
+      layer = null;
     }
   }
 }
@@ -1014,6 +1025,9 @@ class RenderBackdropFilter extends RenderProxyBox {
     : assert(filter != null),
       _filter = filter,
       super(child);
+
+  @override
+  BackdropFilterLayer get layer => super.layer;
 
   /// The image filter to apply to the existing painted content before painting
   /// the child.
@@ -1037,7 +1051,11 @@ class RenderBackdropFilter extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      context.pushLayer(BackdropFilterLayer(filter: _filter), super.paint, offset);
+      layer ??= BackdropFilterLayer();
+      layer.filter = _filter;
+      context.pushLayer(layer, super.paint, offset);
+    } else {
+      layer = null;
     }
   }
 }
@@ -1292,7 +1310,9 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipRect(needsCompositing, offset, _clip, super.paint, clipBehavior: clipBehavior);
+      layer = context.pushClipRect(needsCompositing, offset, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+    } else {
+      layer = null;
     }
   }
 
@@ -1368,7 +1388,9 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint, clipBehavior: clipBehavior);
+      layer = context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+    } else {
+      layer = null;
     }
   }
 
@@ -1436,7 +1458,9 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint, clipBehavior: clipBehavior);
+      layer = context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+    } else {
+      layer = null;
     }
   }
 
@@ -1498,7 +1522,9 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint, clipBehavior: clipBehavior);
+      layer = context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+    } else {
+      layer = null;
     }
   }
 
@@ -1631,6 +1657,9 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
          shadowColor: shadowColor
        );
 
+  @override
+  PhysicalModelLayer get layer => super.layer;
+
   /// The shape of the layer.
   ///
   /// Defaults to [BoxShape.rectangle]. The [borderRadius] affects the corners
@@ -1710,18 +1739,20 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         }
         return true;
       }());
-      final PhysicalModelLayer physicalModel = PhysicalModelLayer(
-        clipPath: offsetRRectAsPath,
-        clipBehavior: clipBehavior,
-        elevation: paintShadows ? elevation : 0.0,
-        color: color,
-        shadowColor: shadowColor,
-      );
+      layer ??= PhysicalModelLayer();
+      layer
+        ..clipPath = offsetRRectAsPath
+        ..clipBehavior = clipBehavior
+        ..elevation = paintShadows ? elevation : 0.0
+        ..color = color
+        ..shadowColor = shadowColor;
+      context.pushLayer(layer, super.paint, offset, childPaintBounds: offsetBounds);
       assert(() {
-        physicalModel.debugCreator = debugCreator;
+        layer.debugCreator = debugCreator;
         return true;
       }());
-      context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
+    } else {
+      layer = null;
     }
   }
 
@@ -1769,6 +1800,9 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
        );
 
   @override
+  PhysicalModelLayer get layer => super.layer;
+
+  @override
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
 
   @override
@@ -1804,18 +1838,20 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
         }
         return true;
       }());
-      final PhysicalModelLayer physicalModel = PhysicalModelLayer(
-        clipPath: offsetPath,
-        clipBehavior: clipBehavior,
-        elevation: paintShadows ? elevation : 0.0,
-        color: color,
-        shadowColor: shadowColor,
-      );
+      layer ??= PhysicalModelLayer();
+      layer
+        ..clipPath = offsetPath
+        ..clipBehavior = clipBehavior
+        ..elevation = paintShadows ? elevation : 0.0
+        ..color = color
+        ..shadowColor = shadowColor;
+      context.pushLayer(layer, super.paint, offset, childPaintBounds: offsetBounds);
       assert(() {
-        physicalModel.debugCreator = debugCreator;
+        layer.debugCreator = debugCreator;
         return true;
       }());
-      context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
+    } else {
+      layer = null;
     }
   }
 
@@ -2145,10 +2181,12 @@ class RenderTransform extends RenderProxyBox {
     if (child != null) {
       final Matrix4 transform = _effectiveTransform;
       final Offset childOffset = MatrixUtils.getAsTranslation(transform);
-      if (childOffset == null)
-        context.pushTransform(needsCompositing, offset, transform, super.paint);
-      else
+      if (childOffset == null) {
+        layer = context.pushTransform(needsCompositing, offset, transform, super.paint, oldLayer: layer);
+      } else {
         super.paint(context, offset + childOffset);
+        layer = null;
+      }
     }
   }
 
@@ -2288,12 +2326,14 @@ class RenderFittedBox extends RenderProxyBox {
     }
   }
 
-  void _paintChildWithTransform(PaintingContext context, Offset offset) {
+  TransformLayer _paintChildWithTransform(PaintingContext context, Offset offset) {
     final Offset childOffset = MatrixUtils.getAsTranslation(_transform);
     if (childOffset == null)
-      context.pushTransform(needsCompositing, offset, _transform, super.paint);
+      return context.pushTransform(needsCompositing, offset, _transform, super.paint,
+          oldLayer: layer is TransformLayer ? layer : null);
     else
       super.paint(context, offset + childOffset);
+    return null;
   }
 
   @override
@@ -2303,9 +2343,10 @@ class RenderFittedBox extends RenderProxyBox {
     _updatePaintData();
     if (child != null) {
       if (_hasVisualOverflow)
-        context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform);
+        layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
+            oldLayer: layer is ClipRectLayer ? layer : null);
       else
-        _paintChildWithTransform(context, offset);
+        layer = _paintChildWithTransform(context, offset);
     }
   }
 
@@ -2568,15 +2609,13 @@ class RenderMouseRegion extends RenderProxyBox {
   }) : _onEnter = onEnter,
        _onHover = onHover,
        _onExit = onExit,
+       _annotationIsActive = false,
        super(child) {
-    if (_onEnter != null || _onHover != null || _onExit != null) {
-      _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onEnter,
-        onHover: _onHover,
-        onExit: _onExit,
-      );
-    }
-    _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
+    _hoverAnnotation = MouseTrackerAnnotation(
+      onEnter: _handleEnter,
+      onHover: _handleHover,
+      onExit: _handleExit,
+    );
   }
 
   /// Called when a hovering pointer enters the region for this widget.
@@ -2591,6 +2630,10 @@ class RenderMouseRegion extends RenderProxyBox {
     }
   }
   PointerEnterEventListener _onEnter;
+  void _handleEnter(PointerEnterEvent event) {
+    if (_onEnter != null)
+      _onEnter(event);
+  }
 
   /// Called when a pointer that has not triggered an [onPointerDown] changes
   /// position.
@@ -2604,6 +2647,10 @@ class RenderMouseRegion extends RenderProxyBox {
     }
   }
   PointerHoverEventListener _onHover;
+  void _handleHover(PointerHoverEvent event) {
+    if (_onHover != null)
+      _onHover(event);
+  }
 
   /// Called when a hovering pointer leaves the region for this widget.
   ///
@@ -2617,6 +2664,10 @@ class RenderMouseRegion extends RenderProxyBox {
     }
   }
   PointerExitEventListener _onExit;
+  void _handleExit(PointerExitEvent event) {
+    if (_onExit != null)
+      _onExit(event);
+  }
 
   // Object used for annotation of the layer used for hover hit detection.
   MouseTrackerAnnotation _hoverAnnotation;
@@ -2629,45 +2680,22 @@ class RenderMouseRegion extends RenderProxyBox {
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
 
   void _updateAnnotations() {
-    assert(_hoverAnnotation == null || _onEnter != _hoverAnnotation.onEnter || _onHover != _hoverAnnotation.onHover || _onExit != _hoverAnnotation.onExit,
-      "Shouldn't call _updateAnnotations if nothing has changed.");
-    bool changed = false;
-    final bool hadHoverAnnotation = _hoverAnnotation != null;
-    if (_hoverAnnotation != null && attached) {
-      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
-      changed = true;
-    }
-    if (_onEnter != null || _onHover != null || _onExit != null) {
-      _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onEnter,
-        onHover: _onHover,
-        onExit: _onExit,
-      );
-      if (attached) {
-        RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
-        changed = true;
-      }
-    } else {
-      _hoverAnnotation = null;
-    }
-    if (changed) {
+    final bool annotationWasActive = _annotationIsActive;
+    final bool annotationWillBeActive = (
+        _onEnter != null ||
+        _onHover != null ||
+        _onExit != null
+      ) &&
+      RendererBinding.instance.mouseTracker.mouseIsConnected;
+    if (annotationWasActive != annotationWillBeActive) {
       markNeedsPaint();
-    }
-    final bool hasHoverAnnotation = _hoverAnnotation != null;
-    if (hadHoverAnnotation != hasHoverAnnotation) {
       markNeedsCompositingBitsUpdate();
-    }
-  }
-
-  bool _mouseIsConnected;
-  void _handleMouseTrackerChanged() {
-    final bool newState = RendererBinding.instance.mouseTracker.mouseIsConnected;
-    if (newState != _mouseIsConnected) {
-      _mouseIsConnected = newState;
-      if (_hoverAnnotation != null) {
-        markNeedsCompositingBitsUpdate();
-        markNeedsPaint();
+      if (annotationWillBeActive) {
+        RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+      } else {
+        RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
       }
+      _annotationIsActive = annotationWillBeActive;
     }
   }
 
@@ -2675,60 +2703,60 @@ class RenderMouseRegion extends RenderProxyBox {
   void attach(PipelineOwner owner) {
     super.attach(owner);
     // Add a listener to listen for changes in mouseIsConnected.
-    RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChanged);
-    postActivate();
+    RendererBinding.instance.mouseTracker.addListener(_updateAnnotations);
+    _updateAnnotations();
   }
 
   /// Attaches the annotation for this render object, if any.
   ///
-  /// This is called by [attach] to attach any new annotations.
-  ///
-  /// This is also called by the [Listener]'s [Element] to tell this
-  /// [RenderPointerListener] that it will shortly be attached. That way,
+  /// This is called by the [MouseRegion]'s [Element] to tell this
+  /// [RenderMouseRegion] that it has transitioned from "inactive"
+  /// state to "active". We call it here so that
   /// [MouseTrackerAnnotation.onEnter] isn't called during the build step for
   /// the widget that provided the callback, and [State.setState] can safely be
   /// called within that callback.
   void postActivate() {
-    if (_hoverAnnotation != null) {
+    if (_annotationIsActive)
       RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
-    }
   }
 
   /// Detaches the annotation for this render object, if any.
   ///
-  /// This is called by the [Listener]'s [Element] to tell this
-  /// [RenderPointerListener] that it will shortly be attached. That way,
+  /// This is called by the [MouseRegion]'s [Element] to tell this
+  /// [RenderMouseRegion] that it will shortly be transitioned from "active"
+  /// state to "inactive". We call it here so that
   /// [MouseTrackerAnnotation.onExit] isn't called during the build step for the
   /// widget that provided the callback, and [State.setState] can safely be
   /// called within that callback.
   void preDeactivate() {
-    if (_hoverAnnotation != null) {
+    if (_annotationIsActive)
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
-    }
   }
 
   @override
   void detach() {
-    RendererBinding.instance.mouseTracker.removeListener(_handleMouseTrackerChanged);
+    RendererBinding.instance.mouseTracker.removeListener(_updateAnnotations);
     super.detach();
   }
 
-  bool get _hasActiveAnnotation => _hoverAnnotation != null && _mouseIsConnected;
+  bool _annotationIsActive;
 
   @override
-  bool get needsCompositing => super.needsCompositing || _hasActiveAnnotation;
+  bool get needsCompositing => super.needsCompositing || _annotationIsActive;
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_hasActiveAnnotation) {
+    if (_annotationIsActive) {
+      // Annotated region layers are not retained because they do not create engine layers.
       final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
         _hoverAnnotation,
         size: size,
         offset: offset,
       );
       context.pushLayer(layer, super.paint, offset);
+    } else {
+      super.paint(context, offset);
     }
-    super.paint(context, offset);
   }
 
   @override
@@ -2846,7 +2874,8 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage({ double pixelRatio = 1.0 }) {
     assert(!debugNeedsPaint);
-    return layer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
+    final OffsetLayer offsetLayer = layer;
+    return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
 
 
@@ -4671,7 +4700,16 @@ class RenderLeaderLayer extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.pushLayer(LeaderLayer(link: link, offset: offset), super.paint, Offset.zero);
+    if (layer == null) {
+      layer = LeaderLayer(link: link, offset: offset);
+    } else {
+      final LeaderLayer leaderLayer = layer;
+      leaderLayer
+        ..link = link
+        ..offset = offset;
+    }
+    context.pushLayer(layer, super.paint, Offset.zero);
+    assert(layer != null);
   }
 
   @override
@@ -4757,7 +4795,7 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   @override
   void detach() {
-    _layer = null;
+    layer = null;
     super.detach();
   }
 
@@ -4765,7 +4803,8 @@ class RenderFollowerLayer extends RenderProxyBox {
   bool get alwaysNeedsCompositing => true;
 
   /// The layer we created when we were last painted.
-  FollowerLayer _layer;
+  @override
+  FollowerLayer get layer => super.layer;
 
   /// Return the transform that was used in the last composition phase, if any.
   ///
@@ -4774,7 +4813,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// [FollowerLayer.getLastTransform]), this returns the identity matrix (see
   /// [new Matrix4.identity].
   Matrix4 getCurrentTransform() {
-    return _layer?.getLastTransform() ?? Matrix4.identity();
+    return layer?.getLastTransform() ?? Matrix4.identity();
   }
 
   @override
@@ -4800,14 +4839,22 @@ class RenderFollowerLayer extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(showWhenUnlinked != null);
-    _layer = FollowerLayer(
-      link: link,
-      showWhenUnlinked: showWhenUnlinked,
-      linkedOffset: this.offset,
-      unlinkedOffset: offset,
-    );
+    if (layer == null) {
+      layer = FollowerLayer(
+        link: link,
+        showWhenUnlinked: showWhenUnlinked,
+        linkedOffset: this.offset,
+        unlinkedOffset: offset,
+      );
+    } else {
+      layer
+        ..link = link
+        ..showWhenUnlinked = showWhenUnlinked
+        ..linkedOffset = this.offset
+        ..unlinkedOffset = offset;
+    }
     context.pushLayer(
-      _layer,
+      layer,
       super.paint,
       Offset.zero,
       childPaintBounds: const Rect.fromLTRB(
@@ -4885,6 +4932,7 @@ class RenderAnnotatedRegion<T> extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    // Annotated region layers are not retained because they do not create engine layers.
     final AnnotatedRegionLayer<T> layer = AnnotatedRegionLayer<T>(
       value,
       size: sized ? size : null,

@@ -24,7 +24,7 @@ import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
-import 'ios/plist_utils.dart';
+import 'ios/plist_parser.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
 import 'macos/cocoapods_validator.dart';
@@ -731,9 +731,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   String get version {
     if (_version == null) {
       final String plistFile = fs.path.join(installPath, 'Contents', 'Info.plist');
-      _version = iosWorkflow.getPlistValueFromFile(
+      _version = PlistParser.instance.getValueFromFile(
         plistFile,
-        kCFBundleShortVersionStringKey,
+        PlistParser.kCFBundleShortVersionStringKey,
       ) ?? 'unknown';
     }
     return _version;

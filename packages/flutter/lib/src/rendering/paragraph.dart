@@ -513,7 +513,7 @@ class RenderParagraph extends RenderBox
   void _setParentData() {
     RenderBox child = firstChild;
     int childIndex = 0;
-    while (child != null) {
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
       final TextParentData textParentData = child.parentData;
       textParentData.offset = Offset(
         _textPainter.inlinePlaceholderBoxes[childIndex].left,
@@ -640,8 +640,11 @@ class RenderParagraph extends RenderBox
 
     RenderBox child = firstChild;
     int childIndex = 0;
-    while (child != null) {
-      assert(childIndex < _textPainter.inlinePlaceholderBoxes.length);
+    // childIndex might be out of index of placeholder boxes. This can happen
+    // if engine truncates children due to ellipsis. Sadly, we would not know
+    // it until we finish layout, and RenderObject is in immutable state at
+    // this point.
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
       final TextParentData textParentData = child.parentData;
 
       final double scale = textParentData.scale;

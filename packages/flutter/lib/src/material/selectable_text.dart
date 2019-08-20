@@ -184,7 +184,10 @@ class SelectableText extends StatefulWidget {
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
   ///
-  /// The [data] parameter must not be null.
+
+  /// The [showCursor], [autofocus], [dragStartBehavior], and [data] parameters
+  /// must not be null. If specified, the [maxLines] argument must be greater
+  /// than zero.
   const SelectableText(
     this.data, {
     Key key,
@@ -225,6 +228,8 @@ class SelectableText extends StatefulWidget {
   ///
   /// The [textSpan] parameter must not be null and only contain [TextSpan] in
   /// [textSpan.children]. Other type of [InlineSpan] is not allowed.
+  ///
+  /// The [autofocus] and [dragStartBehavior] arguments must not be null.
   const SelectableText.rich(
     this.textSpan, {
     Key key,

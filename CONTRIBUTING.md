@@ -16,10 +16,11 @@ documentation, or to help out in any other way.
 
 We grant commit access (which includes full rights to the issue
 database, such as being able to edit labels) to people who have gained
-our trust and demonstrated a commitment to Flutter.
+our trust and demonstrated a commitment to Flutter. For more details
+see the [Contributor access](https://github.com/flutter/flutter/wiki/Contributor-access)
+page on our wiki.
 
 We communicate primarily over GitHub and on [chat channels](https://github.com/flutter/flutter/wiki/Chat).
-
 
 Helping out in the issue database
 ---------------------------------
@@ -48,7 +49,6 @@ If you want to help us triage, you are very welcome to do so!
    team on GitHub and you'll be able to add labels too. See the
    [contributor access](https://github.com/flutter/flutter/wiki/Contributor-access) wiki
    page for details.
-
 
 Developing for Flutter
 ----------------------

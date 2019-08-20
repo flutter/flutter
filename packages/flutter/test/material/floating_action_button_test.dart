@@ -107,8 +107,9 @@ void main() {
     expect(find.text('Add'), findsNothing);
 
     // Test hover for tooltip.
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(() => gesture?.removePointer());
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
     await tester.pumpAndSettle();
 
@@ -116,6 +117,7 @@ void main() {
 
     await gesture.moveTo(Offset.zero);
     await gesture.removePointer();
+    gesture = null;
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsNothing);
@@ -142,18 +144,17 @@ void main() {
     expect(find.text('Add'), findsNothing);
 
     // Test hover for tooltip.
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    try {
-      await gesture.addPointer();
-      await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
-      await tester.pumpAndSettle();
+    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(() => gesture?.removePointer());
+    await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
+    await tester.pumpAndSettle();
 
-      expect(find.text('Add'), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
 
-      await gesture.moveTo(Offset.zero);
-    } finally {
-      await gesture.removePointer();
-    }
+    await gesture.moveTo(Offset.zero);
+    await gesture.removePointer();
+    gesture = null;
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsNothing);
@@ -797,6 +798,26 @@ void main() {
       find.descendant(of: find.byIcon(Icons.access_alarm), matching: find.byType(RichText)),
     );
     expect(iconRichText.text.style.color, foregroundColor);
+  });
+
+  testWidgets('FloatingActionButton uses custom splash color', (WidgetTester tester) async {
+    const Color splashColor = Color(0xcafefeed);
+
+    await tester.pumpWidget(MaterialApp(
+      home: FloatingActionButton(
+        onPressed: () {},
+        splashColor: splashColor,
+        child: const Icon(Icons.access_alarm),
+      ),
+    ));
+
+    await tester.press(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(FloatingActionButton),
+      paints..circle(color: splashColor),
+    );
   });
 }
 

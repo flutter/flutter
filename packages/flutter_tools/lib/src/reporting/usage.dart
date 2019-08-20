@@ -60,13 +60,17 @@ Map<String, String> _useCdKeys(Map<CustomDimensions, String> parameters) {
 Usage get flutterUsage => Usage.instance;
 
 abstract class Usage {
+  /// Create a new Usage instance; [versionOverride], [configDirOverride], and
+  /// [logFile] are used for testing.
   factory Usage({
     String settingsName = 'flutter',
     String versionOverride,
-    String configDirOverride
-  }) => _UsageImpl(settingsName: settingsName,
-                   versionOverride: versionOverride,
-                   configDirOverride: configDirOverride);
+    String configDirOverride,
+    String logFile,
+  }) => _DefaultUsage(settingsName: settingsName,
+                      versionOverride: versionOverride,
+                      configDirOverride: configDirOverride,
+                      logFile: logFile);
 
   /// Returns [Usage] active in the current app context.
   static Usage get instance => context.get<Usage>();
@@ -134,28 +138,49 @@ abstract class Usage {
   void printWelcome();
 }
 
-class _UsageImpl implements Usage {
-  /// Create a new Usage instance; [versionOverride] and [configDirOverride] are
-  /// used for testing.
-  _UsageImpl({
+class _DefaultUsage implements Usage {
+  _DefaultUsage({
     String settingsName = 'flutter',
     String versionOverride,
-    String configDirOverride
+    String configDirOverride,
+    String logFile,
   }) {
     final FlutterVersion flutterVersion = FlutterVersion.instance;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
+    final bool suppressEnvFlag = platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
+    final String logFilePath = logFile ?? platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
+    final bool usingLogFile = logFilePath != null && logFilePath.isNotEmpty;
 
-    final String logFilePath = platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
+    if (// To support testing, only allow other signals to supress analytics
+        // when analytics are not being shunted to a file.
+        !usingLogFile && (
+        // Ignore local user branches.
+        version.startsWith('[user-branch]') ||
+        // Many CI systems don't do a full git checkout.
+        version.endsWith('/unknown') ||
+        // Ignore bots.
+        isRunningOnBot ||
+        // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
+        suppressEnvFlag
+      )) {
+      // If we think we're running on a CI system, suppress sending analytics.
+      suppressAnalytics = true;
+      _analytics = AnalyticsMock();
+      return;
+    }
 
-    _analytics = logFilePath == null || logFilePath.isEmpty ?
-        AnalyticsIO(
-          _kFlutterUA,
-          settingsName,
-          version,
-          documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null,
-        ) :
-        // Used for testing.
-        LogToFileAnalytics(logFilePath);
+    if (usingLogFile) {
+      _analytics = LogToFileAnalytics(logFilePath);
+    } else {
+      _analytics = AnalyticsIO(
+            _kFlutterUA,
+            settingsName,
+            version,
+            documentDirectory:
+                configDirOverride != null ? fs.directory(configDirOverride) : null,
+          );
+    }
+    assert(_analytics != null);
 
     // Report a more detailed OS version string than package:usage does by default.
     _analytics.setSessionValue(cdKey(CustomDimensions.sessionHostOsDetails), os.name);
@@ -178,14 +203,6 @@ class _UsageImpl implements Usage {
       _analytics.setSessionValue('aiid', platform.environment['FLUTTER_HOST']);
     }
     _analytics.analyticsOpt = AnalyticsOpt.optOut;
-
-    final bool suppressEnvFlag = platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
-    _analytics.sendScreenView('version is $version, is bot $isRunningOnBot, suppressed $suppressEnvFlag');
-    // Many CI systems don't do a full git checkout.
-    if (version.endsWith('/unknown') || isRunningOnBot || suppressEnvFlag) {
-      // If we think we're running on a CI system, suppress sending analytics.
-      suppressAnalytics = true;
-    }
   }
 
   Analytics _analytics;
@@ -325,13 +342,23 @@ class LogToFileAnalytics extends AnalyticsMock {
   final File logFile;
   final Map<String, String> _sessionValues = <String, String>{};
 
+  final StreamController<Map<String, dynamic>> _sendController =
+        StreamController<Map<String, dynamic>>.broadcast(sync: true);
+
+  @override
+  Stream<Map<String, dynamic>> get onSend => _sendController.stream;
+
   @override
   Future<void> sendScreenView(String viewName, {
     Map<String, String> parameters,
   }) {
+    if (!enabled) {
+      return Future<void>.value(null);
+    }
     parameters ??= <String, String>{};
     parameters['viewName'] = viewName;
     parameters.addAll(_sessionValues);
+    _sendController.add(parameters);
     logFile.writeAsStringSync('screenView $parameters\n', mode: FileMode.append);
     return Future<void>.value(null);
   }
@@ -339,10 +366,31 @@ class LogToFileAnalytics extends AnalyticsMock {
   @override
   Future<void> sendEvent(String category, String action,
       {String label, int value, Map<String, String> parameters}) {
+    if (!enabled) {
+      return Future<void>.value(null);
+    }
     parameters ??= <String, String>{};
     parameters['category'] = category;
     parameters['action'] = action;
+    _sendController.add(parameters);
     logFile.writeAsStringSync('event $parameters\n', mode: FileMode.append);
+    return Future<void>.value(null);
+  }
+
+  @override
+  Future<void> sendTiming(String variableName, int time,
+      {String category, String label}) {
+    if (!enabled) {
+      return Future<void>.value(null);
+    }
+    final Map<String, String> parameters = <String, String>{
+      'variableName': variableName,
+      'time': '$time',
+      if (category != null) 'category': category,
+      if (label != null) 'label': label,
+    };
+    _sendController.add(parameters);
+    logFile.writeAsStringSync('timing $parameters\n', mode: FileMode.append);
     return Future<void>.value(null);
   }
 

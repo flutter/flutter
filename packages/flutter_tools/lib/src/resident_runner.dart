@@ -350,7 +350,6 @@ class FlutterDevice {
   Future<int> runHot({
     HotRunner hotRunner,
     String route,
-    bool shouldBuild,
   }) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
@@ -406,7 +405,6 @@ class FlutterDevice {
   Future<int> runCold({
     ColdRunner coldRunner,
     String route,
-    bool shouldBuild = true,
   }) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
@@ -542,12 +540,10 @@ abstract class ResidentRunner {
     this.stayResident = true,
     this.hotMode = true,
     this.dillOutputPath,
-  }) {
-    _mainPath = findMainDartFile(target);
-    _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
-    _packagesFilePath =
-        packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath);
-    _assetBundle = AssetBundleFactory.instance.createBundle();
+  }) : mainPath = findMainDartFile(target),
+       projectRootPath = projectRootPath ?? fs.currentDirectory.path,
+       packagesFilePath = packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
+       assetBundle = AssetBundleFactory.instance.createBundle() {
     // TODO(jonahwilliams): this is transitionary logic to allow us to support
     // platforms that are not yet using flutter assemble. In the "new world",
     // builds are isolated based on a number of factors. Thus, we cannot assume
@@ -562,6 +558,8 @@ abstract class ResidentRunner {
     }
   }
 
+  @protected
+  @visibleForTesting
   final List<FlutterDevice> flutterDevices;
   final String target;
   final DebuggingOptions debuggingOptions;
@@ -570,18 +568,14 @@ abstract class ResidentRunner {
   final bool ipv6;
   final Completer<int> _finished = Completer<int>();
   final String dillOutputPath;
+  final String packagesFilePath;
+  final String projectRootPath;
+  final String mainPath;
+  final AssetBundle assetBundle;
+
   bool _exited = false;
   bool hotMode ;
-  String _packagesFilePath;
-  String get packagesFilePath => _packagesFilePath;
-  String _projectRootPath;
-  String get projectRootPath => _projectRootPath;
-  String _mainPath;
-  String get mainPath => _mainPath;
   String getReloadPath({ bool fullRestart }) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
-
-  AssetBundle _assetBundle;
-  AssetBundle get assetBundle => _assetBundle;
 
   bool get isRunningDebug => debuggingOptions.buildInfo.isDebug;
   bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
@@ -599,6 +593,17 @@ abstract class ResidentRunner {
     });
   }
 
+  /// Invoke an RPC extension method on the first attached ui isolate of the first device.
+  // TODO(jonahwilliams): Update/Remove this method when refactoring the resident
+  // runner to support a single flutter device.
+  Future<Map<String, dynamic>> invokeFlutterExtensionRpcRawOnFirstIsolate(
+    String method, {
+    Map<String, dynamic> params,
+  }) {
+    return flutterDevices.first.views.first.uiIsolate
+        .invokeFlutterExtensionRpcRaw(method, params: params);
+  }
+
   /// Whether this runner can hot reload.
   bool get canHotReload => hotMode;
 
@@ -610,7 +615,6 @@ abstract class ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild = true,
   });
 
   Future<int> attach({
@@ -1112,7 +1116,10 @@ class TerminalHandler {
       lastReceivedCommand = command;
       await _commonTerminalInputHandler(command);
     } catch (error, st) {
-      printError('$error\n$st');
+      // Don't print stack traces for known error types.
+      if (error is! ToolExit) {
+        printError('$error\n$st');
+      }
       await _cleanUp(null);
       rethrow;
     } finally {

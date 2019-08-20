@@ -132,7 +132,7 @@ abstract class BindingBase {
       return true;
     }());
 
-    if (!kReleaseMode) {
+    if (!kReleaseMode && !kIsWeb) {
       registerSignalServiceExtension(
         name: 'exit',
         callback: _exitApplication,

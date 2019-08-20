@@ -569,6 +569,7 @@ class ResidentCompiler {
           // process has died unexpectedly.
           if (!_stdoutHandler.compilerOutput.isCompleted) {
             _stdoutHandler.compilerOutput.complete(null);
+            throwToolExit('the Dart compiler exited unexpectedly.');
           }
         });
 
@@ -576,6 +577,12 @@ class ResidentCompiler {
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String message) { printError(message); });
+
+    unawaited(_server.exitCode.then((int code) {
+      if (code != 0) {
+        throwToolExit('the Dart compiler exited unexpectedly.');
+      }
+    }));
 
     _server.stdin.writeln('compile $scriptUri');
     printTrace('<- compile $scriptUri');
@@ -653,7 +660,7 @@ class ResidentCompiler {
     if (!_compileRequestNeedsConfirmation) {
       return Future<CompilerOutput>.value(null);
     }
-    _stdoutHandler.reset();
+    _stdoutHandler.reset(expectSources: false);
     _server.stdin.writeln('reject');
     printTrace('<- reject');
     _compileRequestNeedsConfirmation = false;

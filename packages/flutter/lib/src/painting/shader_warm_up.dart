@@ -192,5 +192,22 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
     final ui.Paragraph paragraph = paragraphBuilder.build()
       ..layout(const ui.ParagraphConstraints(width: 60.0));
     canvas.drawParagraph(paragraph, const ui.Offset(20.0, 20.0));
+
+    // Draw a rect inside a rrect with a non-trivial intersection. If the
+    // intersection is trivial (e.g., equals the rrect clip), Skia will optimize
+    // the clip out.
+    //
+    // Add an integral or fractional translation to trigger Skia's non-AA or AA
+    // optimizations (as did before in normal FillRectOp in rrect clip cases).
+    for (double fraction in <double>[0.0, 0.5]) {
+      canvas
+        ..save()
+        ..translate(fraction, fraction)
+        ..clipRRect(ui.RRect.fromLTRBR(8, 8, 328, 248, const ui.Radius.circular(16)))
+        ..drawRect(const ui.Rect.fromLTRB(10, 10, 320, 240), ui.Paint())
+        ..restore();
+      canvas.translate(drawCallSpacing, 0.0);
+    }
+    canvas.translate(0.0, drawCallSpacing);
   }
 }

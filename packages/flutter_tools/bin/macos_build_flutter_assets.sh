@@ -3,6 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# TODO(jonahwilliams): refactor this and xcode_backend.sh into one script
+# once macOS supports the same configuration as iOS.
 RunCommand() {
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
     echo "♦ $*"
@@ -53,44 +55,25 @@ fi
 
 # Set the build mode
 build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
-case "$build_mode" in
-    debug)
-        build_target="debug_macos_application"
-        ;;
-    profile)
-        build_target="profile_macos_application"
-        ;;
-    release)
-        build_target="release_macos_application"
-        ;;
-    *)
-        EchoError "Unknown build mode ${build_mode}"
-        exit -1
-        ;;
-esac
 
 # The path where the input/output xcfilelists are stored. These are used by xcode
 # to conditionally skip this script phase if neither have changed.
-build_inputs_path="${SOURCE_ROOT}/Flutter/ephemeral/FlutterInputs.xcfilelist"
-build_outputs_path="${SOURCE_ROOT}/Flutter/ephemeral/FlutterOutputs.xcfilelist"
+ephemeral_dir="${SOURCE_ROOT}/Flutter/ephemeral"
+build_inputs_path="${ephemeral_dir}/FlutterInputs.xcfilelist"
+build_outputs_path="${ephemeral_dir}/FlutterOutputs.xcfilelist"
 
-# Precache artifacts
-RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
-    ${verbose_flag}                                                         \
-    precache                                                                \
-    --no-android                                                            \
-    --no-ios                                                                \
-    --macos
-
-# TODO(jonahwilliams): support flavors https://github.com/flutter/flutter/issues/32923
+# TODO(jonahwilliams): connect AOT rules once engine artifacts are published.
+# The build mode is currently hard-coded to debug only. Since this does not yet
+# support AOT, we need to ensure that we compile the kernel file in debug so that
+# the VM can load it.
 RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     ${verbose_flag}                                                         \
     ${flutter_engine_flag}                                                  \
     ${local_engine_flag}                                                    \
     assemble                                                                \
-    -dTargetFile="${target_path}"                                           \
     -dTargetPlatform=darwin-x64                                             \
+    -dTargetFile="${target_path}"                                           \
     -dBuildMode=debug                                                       \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
-    "${build_target}"
+   debug_bundle_flutter_assets
