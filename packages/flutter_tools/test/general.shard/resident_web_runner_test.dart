@@ -88,12 +88,14 @@ void main() {
 
   test('Can successfully run and connect to vmservice', () => testbed.run(() async {
     _setupMocks();
+    final BufferLogger bufferLogger = logger;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
 
+    expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
   }));
 
