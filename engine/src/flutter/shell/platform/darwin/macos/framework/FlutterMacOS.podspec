@@ -13,7 +13,6 @@ Flutter is Google's portable UI toolkit for building beautiful, natively-compile
   s.license          = { :type => 'MIT' }
   s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
-  # TODO: Decide what value should be here. See #33200.
-  s.osx.deployment_target = '10.12'
+  s.osx.deployment_target = '10.11'
   s.vendored_frameworks = 'FlutterMacOS.framework'
 end
