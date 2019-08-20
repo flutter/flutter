@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'dart:ui' show TextAffinity, hashValues, Offset;
 
 import 'package:flutter/foundation.dart';
@@ -837,12 +836,12 @@ class TextInput {
         // TODO(flutterweb): what makes sense here?
         return true;
       }
-      if (Platform.isIOS) {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
         assert(
           _iOSSupportedInputActions.contains(inputAction),
           'The requested TextInputAction "$inputAction" is not supported on iOS.',
         );
-      } else if (Platform.isAndroid) {
+      } else if (defaultTargetPlatform == TargetPlatform.android) {
         assert(
           _androidSupportedInputActions.contains(inputAction),
           'The requested TextInputAction "$inputAction" is not supported on Android.',

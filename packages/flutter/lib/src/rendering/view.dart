@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, Window;
 
 import 'package:flutter/foundation.dart';
@@ -270,7 +269,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // root superclasses don't include any interesting information for this
     // class
     assert(() {
-      properties.add(DiagnosticsNode.message('debug mode enabled - ${kIsWeb ? 'Web' :  Platform.operatingSystem}'));
+      properties.add(DiagnosticsNode.message('debug mode enabled - ${kIsWeb ? 'Web' :  defaultTargetPlatform}'));
       return true;
     }());
     properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));

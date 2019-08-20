@@ -5,7 +5,10 @@
 import 'package:flutter/material.dart';
 
 import '../demo/all.dart';
+import '../demo/video_demo.dart'
+  if (dart.library.html) '../demo/video_demo_web.dart';
 import 'icons.dart';
+
 
 class GalleryDemoCategory {
   const GalleryDemoCategory._({

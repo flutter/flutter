@@ -36,54 +36,28 @@ const String jsEntrypointSourceMapExtension = '.dart.js.map';
 const String jsEntrypointArchiveExtension = '.dart.js.tar.gz';
 const String digestsEntrypointExtension = '.digests';
 
-// NB: this is a hack.
-//
-// Currently there are multiple sources of truth for what constitutes a
-// "supported" dart library. The libraries.json file contains a field for
-// whether or not the particular library is supported, but this is sometimes
-// in addition to a runtime patch which allows the library to be imported
-// without crashing. Additionally, there is the [DartPlatform] type which
-// controls how "package:build" computes transitive dependencies for the
-// build modules used for incremental compilation.
-
-// dart2js and ddc seem to disagree on which source of truth is required.
-// Specifically, if we include `dart:io` and `dart:isolate` as supported
-// libraries, then ddc compiles while dart2js fails, and vice-versa. This
-// is likely due to package:build's stricter requirements to determine
-// what modules need to be built for incremental comilation.
-//
-// The only reasonable long-term solution is to unify on the definition of
-// what support means.
-DartPlatform _webPlatform;
-DartPlatform createWebPlatform(bool release) {
-  return _webPlatform ??= DartPlatform.register('flutter_web', <String>[
-    'async',
-    'collection',
-    'convert',
-    'core',
-    'developer',
-    'html',
-    'html_common',
-    'indexed_db',
-    'js',
-    'js_util',
-    'math',
-    'svg',
-    'typed_data',
-    'web_audio',
-    'web_gl',
-    'web_sql',
-    '_internal',
-    // Flutter web specific libraries.
-    'ui',
-    '_engine',
-    // Not technically supported but required to compile with dartdevc.
-    if (!release)
-      'io',
-    if (!release)
-      'isolate',
-  ]);
-}
+final DartPlatform _webPlatform = DartPlatform.register('flutter_web', <String>[
+  'async',
+  'collection',
+  'convert',
+  'core',
+  'developer',
+  'html',
+  'html_common',
+  'indexed_db',
+  'js',
+  'js_util',
+  'math',
+  'svg',
+  'typed_data',
+  'web_audio',
+  'web_gl',
+  'web_sql',
+  '_internal',
+  // Flutter web specific libraries.
+  'ui',
+  '_engine',
+]);
 
 /// The builders required to compile a Flutter application to the web.
 final List<core.BuilderApplication> builders = <core.BuilderApplication>[
@@ -125,9 +99,9 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
   core.apply(
       'flutter_tools:ddc_modules',
       <Builder Function(BuilderOptions)>[
-        (BuilderOptions builderOptions) => MetaModuleBuilder(createWebPlatform(builderOptions.config['release'])),
-        (BuilderOptions builderOptions) => MetaModuleCleanBuilder(createWebPlatform(builderOptions.config['release'])),
-        (BuilderOptions builderOptions) => ModuleBuilder(createWebPlatform(builderOptions.config['release'])),
+        (BuilderOptions builderOptions) => MetaModuleBuilder(_webPlatform),
+        (BuilderOptions builderOptions) => MetaModuleCleanBuilder(_webPlatform),
+        (BuilderOptions builderOptions) => ModuleBuilder(_webPlatform),
       ],
       core.toNoneByDefault(),
       isOptional: true,
@@ -141,13 +115,13 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               summaryOnly: true,
               sdkKernelPath: path.join('kernel', 'flutter_ddc_sdk.dill'),
               outputExtension: ddcKernelExtension,
-              platform: createWebPlatform(builderOptions.config['release']),
+              platform: _webPlatform,
               librariesPath: 'libraries.json',
               kernelTargetName: 'ddc',
             ),
         (BuilderOptions builderOptions) => DevCompilerBuilder(
               useIncrementalCompiler: false,
-              platform: createWebPlatform(builderOptions.config['release']),
+              platform: _webPlatform,
               platformSdk: builderOptions.config['flutterWebSdk'],
               sdkKernelPath: path.url.join('kernel', 'flutter_ddc_sdk.dill'),
               librariesPath: 'libraries.json',
@@ -215,7 +189,7 @@ class FlutterWebTestEntrypointBuilder implements Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
     log.info('building for target ${buildStep.inputId.path}');
-    await bootstrapDdc(buildStep, platform: createWebPlatform(false));
+    await bootstrapDdc(buildStep, platform: _webPlatform);
   }
 }
 
@@ -242,7 +216,7 @@ class FlutterWebEntrypointBuilder implements Builder {
     if (release) {
       await bootstrapDart2Js(buildStep, flutterWebSdk);
     } else {
-      await bootstrapDdc(buildStep, platform: createWebPlatform(false));
+      await bootstrapDdc(buildStep, platform: _webPlatform);
     }
   }
 }
@@ -388,7 +362,7 @@ Future<void> main() async {
 
 Future<void> bootstrapDart2Js(BuildStep buildStep, String flutterWebSdk) async {
   final AssetId dartEntrypointId = buildStep.inputId;
-  final AssetId moduleId = dartEntrypointId.changeExtension(moduleExtension(createWebPlatform(true)));
+  final AssetId moduleId = dartEntrypointId.changeExtension(moduleExtension(_webPlatform));
   final Module module = Module.fromJson(json.decode(await buildStep.readAsString(moduleId)));
 
   final List<Module> allDeps = await module.computeTransitiveDependencies(buildStep, throwIfUnsupported: false)..add(module);

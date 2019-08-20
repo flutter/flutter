@@ -5,12 +5,12 @@
 import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
-import 'dart:io' show exit;
 import 'dart:ui' as ui show saveCompilationTrace, Window, window;
-// Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
 
+import '_exit_io.dart'
+  if (dart.library.html) '_exit_web.dart';
 import 'assertions.dart';
 import 'basic_types.dart';
 import 'constants.dart';
@@ -542,5 +542,5 @@ abstract class BindingBase {
 
 /// Terminate the Flutter application.
 Future<void> _exitApplication() async {
-  exit(0);
+  exit();
 }

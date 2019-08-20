@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui show Codec;
 import 'dart:ui' show Size, Locale, TextDirection, hashValues;
@@ -11,6 +10,8 @@ import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '_file_image_io.dart'
+  if (dart.library.html) '_file_image_web.dart' as file_image;
 import '_network_image_io.dart'
   if (dart.library.html) '_network_image_web.dart' as network_image;
 import 'binding.dart';
@@ -502,63 +503,24 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
 /// Decodes the given [File] object as an image, associating it with the given
 /// scale.
 ///
+/// This class is not supported when build Flutter for web applications.
+///
 /// See also:
 ///
 ///  * [Image.file] for a shorthand of an [Image] widget backed by [FileImage].
-class FileImage extends ImageProvider<FileImage> {
+abstract class FileImage implements ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
   ///
+  /// [file] must be an instance of the `dart:io` [File] type.
+  ///
   /// The arguments must not be null.
-  const FileImage(this.file, { this.scale = 1.0 })
-    : assert(file != null),
-      assert(scale != null);
+  const factory FileImage(Object file, { double scale }) = file_image.FileImage;
 
   /// The file to decode into an image.
-  final File file;
+  final Object file;
 
   /// The scale to place in the [ImageInfo] object of the image.
   final double scale;
-
-  @override
-  Future<FileImage> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<FileImage>(this);
-  }
-
-  @override
-  ImageStreamCompleter load(FileImage key) {
-    return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
-      scale: key.scale,
-      informationCollector: () sync* {
-        yield ErrorDescription('Path: ${file?.path}');
-      },
-    );
-  }
-
-  Future<ui.Codec> _loadAsync(FileImage key) async {
-    assert(key == this);
-
-    final Uint8List bytes = await file.readAsBytes();
-    if (bytes.lengthInBytes == 0)
-      return null;
-
-    return await PaintingBinding.instance.instantiateImageCodec(bytes);
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    final FileImage typedOther = other;
-    return file?.path == typedOther.file?.path
-        && scale == typedOther.scale;
-  }
-
-  @override
-  int get hashCode => hashValues(file?.path, scale);
-
-  @override
-  String toString() => '$runtimeType("${file?.path}", scale: $scale)';
 }
 
 /// Decodes the given [Uint8List] buffer as an image, associating it with the

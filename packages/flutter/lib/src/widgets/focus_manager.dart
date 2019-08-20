@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -1128,7 +1127,9 @@ class FocusManager with DiagnosticableTreeMixin {
     //
     // This only affects the initial value: the ongoing value is updated as soon
     // as any input events are received.
-    _lastInteractionWasTouch ??= Platform.isAndroid || Platform.isIOS || !WidgetsBinding.instance.mouseTracker.mouseIsConnected;
+    _lastInteractionWasTouch ??= defaultTargetPlatform == TargetPlatform.android ||
+                                 defaultTargetPlatform == TargetPlatform.iOS ||
+                                 !WidgetsBinding.instance.mouseTracker.mouseIsConnected;
     FocusHighlightMode newMode;
     switch (highlightStrategy) {
       case FocusHighlightStrategy.automatic:

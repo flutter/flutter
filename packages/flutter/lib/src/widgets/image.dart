@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show File;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -333,6 +332,8 @@ class Image extends StatefulWidget {
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
   ///
+  /// This class is not supported in Flutter for web applications.
+  ///
   /// The [file], [scale], and [repeat] arguments must not be null.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
@@ -350,7 +351,7 @@ class Image extends StatefulWidget {
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.file(
-    File file, {
+    Object file, {
     Key key,
     double scale = 1.0,
     this.frameBuilder,

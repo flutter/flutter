@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:developer' show Timeline, Flow;
-import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -528,7 +527,7 @@ String _defaultApplicationName(BuildContext context) {
   // can provide an explicit applicationName to the widgets defined in this
   // file, instead of relying on the default.
   final Title ancestorTitle = context.ancestorWidgetOfExactType(Title);
-  return ancestorTitle?.title ?? Platform.resolvedExecutable.split(Platform.pathSeparator).last;
+  return ancestorTitle?.title ?? 'Flutter';
 }
 
 String _defaultApplicationVersion(BuildContext context) {

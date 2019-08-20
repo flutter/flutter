@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'package:connectivity/connectivity.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:device_info/device_info.dart';
@@ -332,6 +332,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
   Widget build(BuildContext context) => widget.child;
 }
 
+// This needs to match the public API in video_demo_web.dart.
 class VideoDemo extends StatefulWidget {
   const VideoDemo({ Key key }) : super(key: key);
 
@@ -344,7 +345,7 @@ class VideoDemo extends StatefulWidget {
 final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
 
 Future<bool> isIOSSimulator() async {
-  return Platform.isIOS && !(await deviceInfoPlugin.iosInfo).isPhysicalDevice;
+  return defaultTargetPlatform == TargetPlatform.iOS && !(await deviceInfoPlugin.iosInfo).isPhysicalDevice;
 }
 
 class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMixin {
