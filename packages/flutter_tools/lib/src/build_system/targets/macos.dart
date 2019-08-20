@@ -74,12 +74,6 @@ class MacOSAssetBehavior extends SourceBehavior {
 abstract class UnpackMacOS extends Target {
   const UnpackMacOS();
 
-  // @override
-  // List<Source> get inputs => const <Source>[
-  //   Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-  //   Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
-  // ];
-
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('$_kOutputPrefix/FlutterMacOS'),

@@ -668,15 +668,6 @@ class MacOSProject implements XcodeBasedProject {
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
-  /// The subdirectory where debug assets are generated.
-  Directory get debugDirectory => managedDirectory.childDirectory('debug');
-
-  /// The subdirectory where profile assets are generated.
-  Directory get profileDirectory => managedDirectory.childDirectory('profile');
-
-  /// The subdirectory where release assets are generated.
-  Directory get releaseDirectory => managedDirectory.childDirectory('release');
-
   /// The xcfilelist used to track the inputs for the Flutter script phase in
   /// the Xcode build.
   File get inputFileList => ephemeralDirectory.childFile('FlutterInputs.xcfilelist');
