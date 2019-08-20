@@ -664,10 +664,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       menu = InheritedTheme.captureAll(showMenuContext, menu);
     } else {
       // For the sake of backwards compatibility. An (unlikely) app that relied
-      // on having menus only inherit from these themes could set
+      // on having menus only inherit from the material Theme could set
       // captureInheritedThemes to false and get the original behvaior.
-      if (popupMenuTheme != null)
-        menu = PopupMenuTheme(data: PopupMenuThemeData(textStyle: popupMenuTheme.textStyle), child: menu);
       if (theme != null)
         menu = Theme(data: theme, child: menu);
     }
