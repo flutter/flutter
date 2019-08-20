@@ -432,6 +432,7 @@ class ReleaseBundleFlutterAssets extends Target {
   @override
   List<Source> get outputs => const <Source>[
     Source.behavior(MacOSAssetBehavior()),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/App'),
     Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/AssetManifest.json'),
     Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/FontManifest.json'),
     Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/LICENSE'),

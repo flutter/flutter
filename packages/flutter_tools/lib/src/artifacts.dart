@@ -187,7 +187,7 @@ class CachedArtifacts extends Artifacts {
   String _getDarwinArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
     switch (artifact) {
       case Artifact.genSnapshot:
-        final String engineDir = _getEngineArtifactsPath(platform, BuildMode.debug);
+        final String engineDir = _getEngineArtifactsPath(platform, mode);
         return fs.path.join(engineDir, _artifactToFileName(artifact));
       default:
         return null;
