@@ -79,12 +79,11 @@ class TestServiceExtensionsBinding extends BindingBase
     await flushMicrotasks();
     if (ui.window.onDrawFrame != null)
       ui.window.onDrawFrame();
-    // use frameTimings. https://github.com/flutter/flutter/issues/38838
-    // ignore: deprecated_member_use
-    if (ui.window.onReportTimings != null)
-      // use frameTimings. https://github.com/flutter/flutter/issues/38838
-      // ignore: deprecated_member_use
-      ui.window.onReportTimings(<ui.FrameTiming>[]);
+    final Future<ui.FrameTiming> firstFrameEventFired = window.frameTimings.first;
+    ui.window.debugReportTimings(<ui.FrameTiming>[
+      ui.FrameTiming(List<int>.filled(ui.FramePhase.values.length, 0)),
+    ]);
+    await firstFrameEventFired;
   }
 
   @override
