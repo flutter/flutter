@@ -67,7 +67,7 @@ void main() {
       find.descendant(
         of: find.byType(BottomSheet),
         matching: find.byType(Material),
-      ).first,
+      ),
     );
     expect(material.color, null);
     expect(material.elevation, 0.0);
@@ -93,7 +93,7 @@ void main() {
       find.descendant(
         of: find.byType(BottomSheet),
         matching: find.byType(Material),
-      ).first,
+      ),
     );
     expect(material.color, bottomSheetTheme.backgroundColor);
     expect(material.elevation, bottomSheetTheme.elevation);
@@ -126,14 +126,14 @@ void main() {
       find.descendant(
         of: find.byType(BottomSheet),
         matching: find.byType(Material),
-      ).first,
+      ),
     );
     expect(material.color, backgroundColor);
     expect(material.elevation, elevation);
     expect(material.shape, shape);
   });
 
-  testWidgets('BottomSheet modalElevation takes priority over elevation - Modal', (WidgetTester tester) async {
+  testWidgets('BottomSheetThemeData.modalElevation takes priority over BottomSheetThemeData.elevation for modal bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
@@ -149,12 +149,12 @@ void main() {
       find.descendant(
         of: find.byType(BottomSheet),
         matching: find.byType(Material),
-      ).first,
+      ),
     );
     expect(material.elevation, modalElevation);
   });
 
-  testWidgets('BottomSheet elevation takes priority over modalElevation - Persistent', (WidgetTester tester) async {
+  testWidgets('BottomSheetThemeData.elevation takes priority over BottomSheetThemeData.modalElevation for peristent bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
@@ -170,12 +170,12 @@ void main() {
       find.descendant(
         of: find.byType(BottomSheet),
         matching: find.byType(Material),
-      ).first,
+      ),
     );
     expect(material.elevation, persistentElevation);
   });
 
-  testWidgets('BottomSheet modalElevation only sets elevation for modal bottom sheet - Persistent', (WidgetTester tester) async {
+  testWidgets('BottomSheetThemeData.modalElevation doesn\'t apply to persistent bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
       modalElevation: modalElevation,
@@ -189,7 +189,7 @@ void main() {
       find.descendant(
         of: find.byType(BottomSheet),
         matching: find.byType(Material),
-      ).first,
+      ),
     );
     expect(material.elevation, 0);
   });
@@ -208,11 +208,13 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
                   onPressed: () {
                     showModalBottomSheet<void>(
                       context: context,
-                      builder: (_) => Container(
-                        child: const Text(
-                          'This is a modal bottom sheet.',
-                        ),
-                      ),
+                      builder: (BuildContext _) {
+                        return Container(
+                          child: const Text(
+                            'This is a modal bottom sheet.',
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
@@ -221,11 +223,13 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
                   onPressed: () {
                     showBottomSheet<void>(
                       context: context,
-                      builder: (_) => Container(
-                        child: const Text(
-                          'This is a persistent bottom sheet.',
-                        ),
-                      ),
+                      builder: (BuildContext _) {
+                        return Container(
+                          child: const Text(
+                            'This is a persistent bottom sheet.',
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
