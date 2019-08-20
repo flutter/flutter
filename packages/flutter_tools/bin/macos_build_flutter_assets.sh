@@ -53,19 +53,12 @@ if [[ -n "$LOCAL_ENGINE" ]]; then
   local_engine_flag="--local-engine=${LOCAL_ENGINE}"
 fi
 
-# Set the build mode
-build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
-
 # The path where the input/output xcfilelists are stored. These are used by xcode
 # to conditionally skip this script phase if neither have changed.
 ephemeral_dir="${SOURCE_ROOT}/Flutter/ephemeral"
 build_inputs_path="${ephemeral_dir}/FlutterInputs.xcfilelist"
 build_outputs_path="${ephemeral_dir}/FlutterOutputs.xcfilelist"
 
-# TODO(jonahwilliams): connect AOT rules once engine artifacts are published.
-# The build mode is currently hard-coded to debug only. Since this does not yet
-# support AOT, we need to ensure that we compile the kernel file in debug so that
-# the VM can load it.
 RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     ${verbose_flag}                                                         \
     ${flutter_engine_flag}                                                  \
@@ -73,7 +66,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     assemble                                                                \
     -dTargetPlatform=darwin-x64                                             \
     -dTargetFile="${target_path}"                                           \
-    -dBuildMode=release                                                     \
+    -dBuildMode="${build_mode}"                                             \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
-   release_bundle_flutter_assets
+   "${build_mode}_bundle_flutter_assets"

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/build.dart';
 import 'package:pool/pool.dart';
 
 import '../../artifacts.dart';
 import '../../asset.dart';
+import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process.dart';
@@ -17,6 +17,7 @@ import '../../globals.dart';
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../build_system.dart';
+import '../exceptions.dart';
 import 'dart.dart';
 
 const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/ephemeral/FlutterMacOS.framework';
@@ -70,17 +71,14 @@ class MacOSAssetBehavior extends SourceBehavior {
 /// Removes any previous version of the framework that already exists in the
 /// target directory.
 // TODO(jonahwilliams): remove shell out.
-class UnpackMacOS extends Target {
+abstract class UnpackMacOS extends Target {
   const UnpackMacOS();
 
-  @override
-  String get name => 'unpack_macos';
-
-  @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-    Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
-  ];
+  // @override
+  // List<Source> get inputs => const <Source>[
+  //   Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+  //   Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
+  // ];
 
   @override
   List<Source> get outputs => const <Source>[
@@ -109,7 +107,11 @@ class UnpackMacOS extends Target {
 
   @override
   Future<void> build(List<File> inputFiles, Environment environment) async {
-    final String basePath = artifacts.getArtifactPath(Artifact.flutterMacOSFramework);
+    if (environment.defines[kBuildMode] == null) {
+      throw MissingDefineException(kBuildMode, 'unpack_macos');
+    }
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final String basePath = artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final Directory targetDirectory = flutterProject.macos
       .ephemeralDirectory
@@ -129,63 +131,46 @@ class UnpackMacOS extends Target {
   }
 }
 
-class ReleaseUnpackMacOS extends Target {
+/// Unpack the release prebuilt engine framework.
+class ReleaseUnpackMacOS extends UnpackMacOS {
   const ReleaseUnpackMacOS();
 
   @override
-  String get name => 'unpack_macos';
+  String get name => 'release_unpack_macos';
 
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-    Source.pattern('{FLUTTER_ROOT}/bin/cache/artifacts/engine/darwin-x64-release/FlutterMacOS.framework/FlutterMacOS'),
+    Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.release),
   ];
+}
+
+/// Unpack the profile prebuilt engine framework.
+class ProfileUnpackMacOS extends UnpackMacOS {
+  const ProfileUnpackMacOS();
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('$_kOutputPrefix/FlutterMacOS'),
-    // Headers
-    Source.pattern('$_kOutputPrefix/Headers/FlutterDartProject.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterEngine.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterViewController.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterBinaryMessenger.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterChannels.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterCodecs.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterMacros.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterPluginMacOS.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterPluginRegistrarMacOS.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterMacOS.h'),
-    // Modules
-    Source.pattern('$_kOutputPrefix/Modules/module.modulemap'),
-    // Resources
-    Source.pattern('$_kOutputPrefix/Resources/icudtl.dat'),
-    Source.pattern('$_kOutputPrefix/Resources/Info.plist'),
-    // Ignore Versions folder for now
+  String get name => 'profile_unpack_macos';
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+    Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.profile),
   ];
+}
+
+/// Unpack the debug prebuilt engine framework.
+class DebugUnpackMacOS extends UnpackMacOS {
+  const DebugUnpackMacOS();
 
   @override
-  List<Target> get dependencies => <Target>[];
+  String get name => 'debug_unpack_macos';
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
-    const String basePath = '/Users/jonahwilliams/Documents/flutter/bin/cache/artifacts/engine/darwin-x64-release/FlutterMacOS.framework';
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-    final Directory targetDirectory = flutterProject.macos
-      .ephemeralDirectory
-      .childDirectory('FlutterMacOS.framework');
-    if (targetDirectory.existsSync()) {
-      targetDirectory.deleteSync(recursive: true);
-    }
-
-    final ProcessResult result = await processManager
-        .run(<String>['cp', '-R', basePath, targetDirectory.path]);
-    if (result.exitCode != 0) {
-      throw Exception(
-        'Failed to copy framework (exit ${result.exitCode}:\n'
-        '${result.stdout}\n---\n${result.stderr}',
-      );
-    }
-  }
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+    Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
+  ];
 }
 
 /// Create an App.framework for debug macOS targets.
@@ -239,18 +224,22 @@ static const int Moo = 88;
   ];
 }
 
-class ReleaseMacOSFramework extends Target {
-  const ReleaseMacOSFramework();
+class CompileMacOSFramework extends Target {
+  const CompileMacOSFramework();
 
   @override
-  String get name => 'release_macos_framework';
+  String get name => 'compile_macos_framework';
 
   @override
   Future<void> build(List<File> inputFiles, Environment environment) async {
+    if (environment.defines[kBuildMode] == null) {
+      throw MissingDefineException(kBuildMode, 'compile_macos_framework');
+    }
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final int result = await AOTSnapshotter(reportTimings: false).build(
       bitcode: false,
-      buildMode: BuildMode.release,
+      buildMode: buildMode,
       mainPath: environment.buildDir.childFile('app.dill').path,
       outputPath: flutterProject.macos.ephemeralDirectory.path,
       platform: TargetPlatform.darwin_x64,
@@ -271,6 +260,7 @@ class ReleaseMacOSFramework extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+    Source.artifact(Artifact.genSnapshot, mode: BuildMode.release, platform: TargetPlatform.darwin_x64),
   ];
 
   @override
@@ -353,7 +343,7 @@ class DebugBundleFlutterAssets extends Target {
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
     DebugMacOSFramework(),
-    UnpackMacOS(),
+    DebugUnpackMacOS(),
   ];
 
   @override
@@ -429,8 +419,8 @@ class ReleaseBundleFlutterAssets extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    ReleaseMacOSFramework(),
-    UnpackMacOS(),
+    CompileMacOSFramework(),
+    ReleaseUnpackMacOS(),
   ];
 
   @override

@@ -282,8 +282,13 @@ class CachedArtifacts extends Artifacts {
       case Artifact.linuxDesktopPath:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterMacOSPodspec:
+        // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
+        // under a separate directory from the host artifacts.
+        String platformDirName = getNameForTargetPlatform(platform);
+        if (mode != BuildMode.debug) {
+          platformDirName = '$platformDirName-${getNameForBuildMode(mode)}';
+        }
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
-        final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
       case Artifact.skyEnginePath:
         final Directory dartPackageDirectory = cache.getCacheDir('pkg');
@@ -301,6 +306,13 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.linux_x64:
       case TargetPlatform.darwin_x64:
       case TargetPlatform.windows_x64:
+        // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
+        // under a separate directory from the host artifacts.
+        if (mode == BuildMode.debug) {
+          return fs.path.join(engineDir, platformName);
+        }
+        final String suffix = mode != BuildMode.debug ? '-${snakeCase(getModeName(mode), '-')}' : '';
+        return fs.path.join(engineDir, platformName + suffix);
       case TargetPlatform.fuchsia:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
@@ -419,7 +431,7 @@ class LocalEngineArtifacts extends Artifacts {
   }
 
   String _genSnapshotPath() {
-    const List<String> clangDirs = <String>['.', 'clang_x86', 'clang_x64', 'clang_i386'];
+    const List<String> clangDirs = <String>['.', 'clang_x64', 'clang_x86', 'clang_i386'];
     final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot);
     for (String clangDir in clangDirs) {
       final String genSnapshotPath = fs.path.join(engineOutPath, clangDir, genSnapshotName);

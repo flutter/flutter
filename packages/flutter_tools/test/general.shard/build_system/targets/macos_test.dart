@@ -95,7 +95,7 @@ void main() {
       }
       return FakeProcessResult()..exitCode = 0;
     });
-    await const UnpackMacOS().build(<File>[], environment);
+    await const DebugUnpackMacOS().build(<File>[], environment);
 
     expect(fs.directory('$_kOutputPrefix').existsSync(), true);
     for (File file in inputs) {

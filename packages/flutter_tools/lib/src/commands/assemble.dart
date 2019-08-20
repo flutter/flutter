@@ -23,7 +23,6 @@ BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// All currently implemented targets.
 const List<Target> _kDefaultTargets = <Target>[
-  UnpackMacOS(),
   UnpackLinux(),
   UnpackWindows(),
   CopyAssets(),
