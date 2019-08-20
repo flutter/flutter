@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+
 import 'image_stream.dart';
 
 const int _kDefaultSize = 1000;
@@ -130,6 +134,36 @@ class ImageCache {
       return true;
     }
     return false;
+  }
+
+  /// Returns a [Future] that waits for all currently pending images to finish
+  /// loading at least one frame.
+  ///
+  /// In a Flutter widget test, this must be used with [WidgetTester.runAsync]
+  /// or [TestWidgetsFlutterBinding.runAsync].
+  @visibleForTesting
+  Future<void> waitForPendingImages() {
+    final List<Future<void>> waitList = <Future<void>>[];
+    for (final _PendingImage pendingImage in _pendingImages.values) {
+      final Completer<void> completer = Completer<void>();
+      ImageStreamListener listener;
+
+      void onDone() {
+        assert(listener != null);
+        pendingImage.completer.removeListener(listener);
+
+        completer.complete();
+      }
+
+      listener = ImageStreamListener(
+        (ImageInfo image, bool synchronousCall) => onDone(),
+        onError: (dynamic exception, StackTrace st) => onDone(),
+      );
+
+      pendingImage.completer.addListener(listener);
+      waitList.add(completer.future);
+    }
+    return Future.wait<void>(waitList);
   }
 
   /// Returns the previously cached [ImageStream] for the given key, if available;
