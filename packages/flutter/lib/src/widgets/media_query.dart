@@ -221,44 +221,35 @@ class MediaQueryData {
   /// {@tool snippet --template=stateful_widget_scaffold}
   ///
   /// When using Android Q with full gestural navigation turned on,
-  /// [BottomAppBar.child] can use [MediaQuery.systemGestureInsets] with
-  /// [Padding] to avoid overlapping its contents with the device's system
-  /// gesture areas.
-  ///
-  /// ```dart imports
-  /// import 'package:flutter/services.dart';
-  /// ```
+  /// use [MediaQuery.systemGestureInsets] with [Padding] to avoid overlapping
+  /// a [Slider] with system gesture navigation.
   ///
   /// ```dart
-  /// @override
-  /// void initState() {
-  ///   SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top]);
-  ///   super.initState();
-  /// }
+  /// double _currentValue = 0.2;
   ///
   /// @override
   /// Widget build(BuildContext context) {
+  ///   EdgeInsets systemGestureInsets = MediaQuery.of(context).systemGestureInsets;
   ///   return Scaffold(
-  ///     appBar: AppBar(
-  ///       title: Text(widget.title),
-  ///     ),
-  ///     bottomNavigationBar: BottomAppBar(
-  ///       color: Colors.green,
-  ///       child: Padding(
-  ///         padding: EdgeInsets.only(
-  ///           bottom: MediaQuery.of(context).systemGestureInsets.bottom,
-  ///         ),
-  ///         child: Row(
-  ///           mainAxisAlignment: MainAxisAlignment.spaceAround,
-  ///           children: <Widget>[
-  ///             IconButton(onPressed: () {}, icon: Icon(Icons.menu)),
-  ///             IconButton(onPressed: () {}, icon: Icon(Icons.mail)),
-  ///             IconButton(onPressed: () {}, icon: Icon(Icons.radio_button_checked)),
-  ///           ],
-  ///         ),
+  ///     appBar: AppBar(title: Text('Sample Gesture Nav')),
+  ///     body: Padding(
+  ///       padding: EdgeInsets.fromLTRB(
+  ///         systemGestureInsets.left,
+  ///         10.0,
+  ///         systemGestureInsets.right,
+  ///         10.0,
+  ///       ),
+  ///       child: Slider(
+  ///         value: _currentValue.toDouble(),
+  ///         onChanged: (double newValue) {
+  ///           setState(() {
+  ///             _currentValue = newValue;
+  ///           });
+  ///         },
   ///       ),
   ///     ),
   ///   );
+  ///  }
   /// }
   /// ```
   /// {@end-tool}
