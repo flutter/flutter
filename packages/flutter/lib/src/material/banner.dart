@@ -118,11 +118,9 @@ class MaterialBanner extends StatelessWidget {
         ?? bannerTheme.padding
         ?? const EdgeInsetsDirectional.only(end: 16.0);
 
-    final Widget buttonBar = ButtonTheme.bar(
+    final Widget buttonBar = ButtonBar(
       layoutBehavior: ButtonBarLayoutBehavior.constrained,
-      child: ButtonBar(
-        children: actions,
-      ),
+      children: actions,
     );
 
     final Color backgroundColor = this.backgroundColor

@@ -99,8 +99,9 @@ class FlutterVersion {
   String get engineRevision => Cache.instance.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
-  Future<void> ensureVersionFile() async {
+  Future<void> ensureVersionFile() {
     fs.file(fs.path.join(Cache.flutterRoot, 'version')).writeAsStringSync(_frameworkVersion);
+    return Future<void>.value();
   }
 
   @override

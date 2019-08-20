@@ -36,6 +36,13 @@ Future<void> buildMacOS({
     setSymroot: false,
   );
   await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
+  // If the xcfilelists do not exist, create empty version.
+  if (!flutterProject.macos.inputFileList.existsSync()) {
+     flutterProject.macos.inputFileList.createSync(recursive: true);
+  }
+  if (!flutterProject.macos.outputFileList.existsSync()) {
+    flutterProject.macos.outputFileList.createSync(recursive: true);
+  }
 
   // Set debug or release mode.
   String config = 'Debug';

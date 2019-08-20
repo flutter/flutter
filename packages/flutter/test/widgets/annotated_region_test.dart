@@ -31,12 +31,12 @@ void main() {
         ),
       ),
     );
-    int result = RendererBinding.instance.renderView.layer.find<int>(Offset(
+    int result = RendererBinding.instance.renderView.debugLayer.find<int>(Offset(
       10.0 * window.devicePixelRatio,
       10.0 * window.devicePixelRatio,
     ));
     expect(result, null);
-    result = RendererBinding.instance.renderView.layer.find<int>(Offset(
+    result = RendererBinding.instance.renderView.debugLayer.find<int>(Offset(
       50.0 * window.devicePixelRatio,
       50.0 * window.devicePixelRatio,
     ));
