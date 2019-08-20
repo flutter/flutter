@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'colors.dart';
+import 'route.dart';
 
 // The scale of the child at the time that the ContextMenu opens.
 const double _kOpenScale = 1.2;
@@ -21,6 +22,8 @@ class ContextMenu extends StatefulWidget {
     Key key,
     @required this.child,
     @required this.actions,
+    // TODO(justinnmc): Should I include a previewChild param to allow the
+    // preview to look differently than the original?
     this.onTap,
   }) : assert(actions != null && actions.isNotEmpty),
        assert(child != null),
@@ -122,7 +125,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     );
 
     final Rect parentRect = Offset.zero & MediaQuery.of(context).size;
-    final Opacity container = _childGlobalKey.currentContext.widget;
+    final Hero container = _childGlobalKey.currentContext.widget;
     _route = ContextMenuRoute<void>(
       barrierLabel: 'Dismiss',
       filter: ui.ImageFilter.blur(
@@ -137,20 +140,23 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         return container.child;
       },
     );
-    Navigator.of(context, rootNavigator: true).push<void>(_route);
-    _route.animation.addStatusListener(_routeAnimationStatusListener);
-  }
-
-  void _routeAnimationStatusListener(AnimationStatus status) {
-    if (status != AnimationStatus.dismissed) {
-      return;
-    }
+    // TODO(justinmc): Get rid of swipe animation, use own blur.
+    Navigator.of(context).push(CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return _ContextMenuOpen(
+          actions: widget.actions,
+          onTap: widget.onTap,
+          child: Hero(
+            tag: container.child,
+            child: container.child,
+          ),
+        );
+      }
+    ));
     _controller.reset();
     setState(() {
       _isOpen = false;
     });
-    _route.animation.removeStatusListener(_routeAnimationStatusListener);
-    _route = null;
   }
 
   void _onTapDown(TapDownDetails details) {
@@ -185,9 +191,12 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
           },
           child: Opacity(
             opacity: _isOpen ? 0.0 : 1.0,
-            key: _childGlobalKey,
             // TODO(justinmc): Round corners of child?
-            child: widget.child,
+            child: Hero(
+              key: _childGlobalKey,
+              tag: widget.child,
+              child: widget.child,
+            ),
           ),
         ),
       ),
@@ -214,43 +223,6 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     _transform = null;
     super.dispose();
   }
-}
-
-// An animation that switches immediately between two colors.
-//
-// The transition is immediate, so there are no intermediate values or
-// interpolation. The color switches from offColor to onColor and back to
-// offColor at the times given by intervalOn and intervalOff.
-class _OnOffColorAnimation extends CompoundAnimation<Color> {
-  _OnOffColorAnimation({
-    AnimationController controller,
-    @required Color onColor,
-    @required Color offColor,
-    @required double intervalOn,
-    @required double intervalOff,
-  }) : _offColor = offColor,
-       assert(intervalOn >= 0.0 && intervalOn <= 1.0),
-       assert(intervalOff >= 0.0 && intervalOff <= 1.0),
-       assert(intervalOn <= intervalOff),
-       super(
-        first: ColorTween(begin: offColor, end: onColor).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(intervalOn, intervalOn),
-          ),
-        ),
-        next: ColorTween(begin: onColor, end: offColor).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(intervalOff, intervalOff),
-          ),
-        ),
-       );
-
-  final Color _offColor;
-
-  @override
-  Color get value => next.value == _offColor ? next.value : first.value;
 }
 
 // The open context menu.
@@ -455,6 +427,94 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   }
 }
 
+class _ContextMenuOpen extends StatelessWidget {
+  _ContextMenuOpen({
+    @required List<ContextMenuSheetAction> actions,
+    Widget child,
+    ui.ImageFilter filter,
+    RouteSettings settings,
+    Rect childRect,
+    VoidCallback onTap,
+    Rect parentRect,
+  }) : assert(actions != null && actions.isNotEmpty),
+       _actions = actions,
+       _child = child,
+       _childRect = childRect,
+       _onTap = onTap,
+       _parentRect = parentRect,
+       super();
+
+  // The rect containing the widget that should show in the ContextMenu, in its
+  // original position before animating.
+  final Rect _childRect;
+
+  // A rect that indicates the space available to position the child.
+  // TODO(justinmc): I don't like the idea of needing to pass this in. Is it
+  // possible to get the full screen size in createAnimation? Problem is that
+  // this widget hasn't built yet by the time createAnimation is called.
+  final Rect _parentRect;
+
+  // Barrier color for a Cupertino modal barrier.
+  static const Color _kModalBarrierColor = Color(0x6604040F);
+  // The duration of the transition used when a modal popup is shown.
+  static const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
+
+  final List<ContextMenuSheetAction> _actions;
+  final VoidCallback _onTap;
+  final Widget _child;
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO(justinmc): Are taps not dismissing the modal when above or below?
+    // Might need to make something transparent to gestures if possible. Some
+    // parent of the transformed child is overhanging it.
+    return BackdropFilter(
+      filter: ui.ImageFilter.blur(
+        sigmaX: 5.0,
+        sigmaY: 5.0,
+      ),
+      child: OrientationBuilder(
+        builder: (BuildContext context, Orientation orientation) {
+          final List<Widget> children =  <Widget>[
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: _onTap,
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: _child,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: _ContextMenuSheet(
+                actions: _actions,
+              ),
+            ),
+          ];
+
+          return orientation == Orientation.portrait ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            )
+            : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            );
+        },
+      ),
+    );
+  }
+}
+
 // A menu of _ContextMenuSheetActions.
 class _ContextMenuSheet extends StatelessWidget {
   _ContextMenuSheet({
@@ -633,4 +693,41 @@ class _ContextMenuSheetActionState extends State<ContextMenuSheetAction> {
       ),
     );
   }
+}
+
+// An animation that switches immediately between two colors.
+//
+// The transition is immediate, so there are no intermediate values or
+// interpolation. The color switches from offColor to onColor and back to
+// offColor at the times given by intervalOn and intervalOff.
+class _OnOffColorAnimation extends CompoundAnimation<Color> {
+  _OnOffColorAnimation({
+    AnimationController controller,
+    @required Color onColor,
+    @required Color offColor,
+    @required double intervalOn,
+    @required double intervalOff,
+  }) : _offColor = offColor,
+       assert(intervalOn >= 0.0 && intervalOn <= 1.0),
+       assert(intervalOff >= 0.0 && intervalOff <= 1.0),
+       assert(intervalOn <= intervalOff),
+       super(
+        first: ColorTween(begin: offColor, end: onColor).animate(
+          CurvedAnimation(
+            parent: controller,
+            curve: Interval(intervalOn, intervalOn),
+          ),
+        ),
+        next: ColorTween(begin: onColor, end: offColor).animate(
+          CurvedAnimation(
+            parent: controller,
+            curve: Interval(intervalOff, intervalOff),
+          ),
+        ),
+       );
+
+  final Color _offColor;
+
+  @override
+  Color get value => next.value == _offColor ? next.value : first.value;
 }
