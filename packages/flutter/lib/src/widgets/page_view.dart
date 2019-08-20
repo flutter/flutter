@@ -385,7 +385,9 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     return actual;
   }
 
-  double getPixelsFromPage(double page) => page * viewportDimension * viewportFraction + _initialPageOffset;
+  double getPixelsFromPage(double page) {
+    return page * viewportDimension * viewportFraction + _initialPageOffset;
+  }
 
   @override
   double get page {
