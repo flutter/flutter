@@ -46,7 +46,7 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
   // See |EnsureSingleChild|.
   FML_DCHECK(layers().size() == 1);
-  if (context->raster_cache &&
+  if (context->view_embedder == nullptr && context->raster_cache &&
       SkRect::Intersects(context->cull_rect, paint_bounds())) {
     Layer* child = layers()[0].get();
     SkMatrix ctm = child_matrix;
