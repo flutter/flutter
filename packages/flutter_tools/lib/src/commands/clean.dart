@@ -58,43 +58,45 @@ class CleanCommand extends FlutterCommand {
   }
 
   Future<void> _cleanXcode(XcodeBasedProject xcodeProject) async {
-    if (xcodeProject.existsSync()) {
-      Status xcodeStatus;
-      try {
-        final Directory xcodeWorkspace = xcodeProject.xcodeWorkspace;
-        final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path);
-        for (String scheme in projectInfo.schemes) {
-          xcodeStatus = logger.startProgress('Cleaning Xcode workspace for scheme $scheme...', timeout: timeoutConfiguration.slowOperation);
-          xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme);
-        }
-      } catch (error) {
-        printTrace('Could not clean Xcode workspace: $error');
-      } finally {
-        xcodeStatus?.stop();
+    if (!xcodeProject.existsSync()) {
+      return;
+    }
+    Status xcodeStatus;
+    try {
+      final Directory xcodeWorkspace = xcodeProject.xcodeWorkspace;
+      final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path);
+      for (String scheme in projectInfo.schemes) {
+        xcodeStatus = logger.startProgress('Cleaning Xcode workspace for scheme $scheme...', timeout: timeoutConfiguration.slowOperation);
+        xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme);
       }
+    } catch (error) {
+      printTrace('Could not clean Xcode workspace: $error');
+    } finally {
+      xcodeStatus?.stop();
     }
   }
 
   @visibleForTesting
   void deleteFile(FileSystemEntity file) {
-    if (file.existsSync()) {
-      final Status deletionStatus = logger.startProgress('Deleting ${file.basename}...', timeout: timeoutConfiguration.fastOperation);
-      try {
-        file.deleteSync(recursive: true);
-      } on FileSystemException catch (error) {
-        final String path = file.path;
-        if (platform.isWindows) {
-          printError(
-            'Failed to remove $path. '
+    if (!file.existsSync()) {
+      return;
+    }
+    final Status deletionStatus = logger.startProgress('Deleting ${file.basename}...', timeout: timeoutConfiguration.fastOperation);
+    try {
+      file.deleteSync(recursive: true);
+    } on FileSystemException catch (error) {
+      final String path = file.path;
+      if (platform.isWindows) {
+        printError(
+          'Failed to remove $path. '
             'A program may still be using a file in the directory or the directory itself. '
             'To find and stop such a program, see: '
             'https://superuser.com/questions/1333118/cant-delete-empty-folder-because-it-is-used');
-        } else {
-          printError('Failed to remove $path: $error');
-        }
-      } finally {
-        deletionStatus.stop();
+      } else {
+        printError('Failed to remove $path: $error');
       }
+    } finally {
+      deletionStatus.stop();
     }
   }
 }
