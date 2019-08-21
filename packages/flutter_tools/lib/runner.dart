@@ -115,39 +115,40 @@ Future<int> _handleToolError(
       stderr.writeln('$error');
       stderr.writeln(stackTrace.toString());
       return _exit(1);
+    }
+
+    // Report to both [Usage] and [CrashReportSender].
+    flutterUsage.sendException(error);
+    await CrashReportSender.instance.sendReport(
+      error: error,
+      stackTrace: stackTrace,
+      getFlutterVersion: getFlutterVersion,
+      command: args.join(' '),
+    );
+
+    if (error is String) {
+      stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
     } else {
-      // Report to both [Usage] and [CrashReportSender].
-      flutterUsage.sendException(error);
-      await CrashReportSender.instance.sendReport(
-        error: error,
-        stackTrace: stackTrace,
-        getFlutterVersion: getFlutterVersion,
-        command: args.join(' '),
+      stderr.writeln('Oops; flutter has exited unexpectedly.');
+    }
+
+    try {
+      final File file = await _createLocalCrashReport(args, error, stackTrace);
+      stderr.writeln(
+        'Crash report written to ${file.path};\n'
+            'please let us know at https://github.com/flutter/flutter/issues.',
       );
-
-      if (error is String)
-        stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
-      else
-        stderr.writeln('Oops; flutter has exited unexpectedly.');
-
-      try {
-        final File file = await _createLocalCrashReport(args, error, stackTrace);
-        stderr.writeln(
-          'Crash report written to ${file.path};\n'
-              'please let us know at https://github.com/flutter/flutter/issues.',
-        );
-        return _exit(1);
-      } catch (error) {
-        stderr.writeln(
-          'Unable to generate crash report due to secondary error: $error\n'
-              'please let us know at https://github.com/flutter/flutter/issues.',
-        );
-        // Any exception throw here (including one thrown by `_exit()`) will
-        // get caught by our zone's `onError` handler. In order to avoid an
-        // infinite error loop, we throw an error that is recognized above
-        // and will trigger an immediate exit.
-        throw ProcessExit(1, immediate: true);
-      }
+      return _exit(1);
+    } catch (error) {
+      stderr.writeln(
+        'Unable to generate crash report due to secondary error: $error\n'
+            'please let us know at https://github.com/flutter/flutter/issues.',
+      );
+      // Any exception throw here (including one thrown by `_exit()`) will
+      // get caught by our zone's `onError` handler. In order to avoid an
+      // infinite error loop, we throw an error that is recognized above
+      // and will trigger an immediate exit.
+      throw ProcessExit(1, immediate: true);
     }
   }
 }
