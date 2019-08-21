@@ -244,7 +244,7 @@ void main() {
       matches(
         r'^'
         r'RenderView#[0-9a-f]{5}\n'
-        r'   debug mode enabled - [a-zA-Z]+\n'
+        r'   debug mode enabled - [a-zA-Z\.]+\n'
         r'   window size: Size\(2400\.0, 1800\.0\) \(in physical pixels\)\n'
         r'   device pixel ratio: 3\.0 \(physical pixels per logical pixel\)\n'
         r'   configuration: Size\(800\.0, 600\.0\) at 3\.0x \(in logical pixels\)\n'
