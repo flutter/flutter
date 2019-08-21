@@ -83,7 +83,10 @@ config("embedder_prefix_config") {
 
 test_fixtures("fixtures") {
   dart_main = "fixtures/main.dart"
-  fixtures = [ "fixtures/compositor.png" ]
+  fixtures = [
+    "fixtures/compositor.png",
+    "fixtures/compositor_with_root_layer_only.png",
+  ]
 }
 
 if (current_toolchain == host_toolchain) {

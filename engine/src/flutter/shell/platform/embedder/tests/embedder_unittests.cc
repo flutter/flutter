@@ -1200,5 +1200,244 @@ TEST_F(EmbedderTest, CustomCompositorMustWorkWithCustomTaskRunner) {
   sync_latch.Wait();
 }
 
+//------------------------------------------------------------------------------
+/// Test the layer structure and pixels rendered when using a custom compositor
+/// and a single layer.
+///
+TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithRootLayerOnly) {
+  auto& context = GetEmbedderContext();
+
+  context.SetupCompositor();
+
+  context.GetCompositor().SetRenderTargetType(
+      EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
+
+  fml::CountDownLatch latch(4);
+
+  sk_sp<SkImage> scene_image;
+  context.SetNextSceneCallback([&](sk_sp<SkImage> scene) {
+    scene_image = std::move(scene);
+    latch.CountDown();
+  });
+
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 1u);
+
+        // Layer Root
+        {
+          FlutterBackingStore backing_store = *layers[0]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[0], layer);
+        }
+
+        latch.CountDown();
+      });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig();
+  builder.SetCompositor();
+  builder.SetDartEntrypoint(
+      "can_composite_platform_views_with_root_layer_only");
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  latch.Wait();
+
+  // Render the scene and assert that it matches expectation.
+  ASSERT_TRUE(scene_image);
+
+  fml::FileMapping fixture_image_mapping(
+      OpenFixture("compositor_with_root_layer_only.png"));
+  ASSERT_GE(fixture_image_mapping.GetSize(), 0u);
+  auto encoded_image = SkData::MakeWithoutCopy(
+      fixture_image_mapping.GetMapping(), fixture_image_mapping.GetSize());
+  auto fixture_image =
+      SkImage::MakeFromEncoded(std::move(encoded_image))->makeRasterImage();
+  ASSERT_TRUE(fixture_image);
+  auto scene_image_subset = scene_image->makeSubset(
+      SkIRect::MakeWH(fixture_image->width(), fixture_image->height()));
+  ASSERT_TRUE(scene_image_subset);
+  const auto images_are_same =
+      RasterImagesAreSame(scene_image_subset, fixture_image);
+  if (!images_are_same) {
+    auto fixtures_fd = OpenFixturesDirectory();
+    ASSERT_TRUE(WriteImageToDisk(fixtures_fd, "actual_with_root_layer_only.png",
+                                 scene_image_subset));
+    ASSERT_TRUE(WriteImageToDisk(
+        fixtures_fd, "expectation_with_root_layer_only.png", fixture_image));
+    FML_LOG(ERROR) << "Test compositor did not generated expected images. Got: "
+                      "'actual_with_root_layer_only.png' Expected: "
+                      "'compositor_with_root_layer_only.png' in Directory: "
+                   << GetFixturesPath();
+  }
+  ASSERT_TRUE(images_are_same);
+}
+
+//------------------------------------------------------------------------------
+/// Test the layer structure and pixels rendered when using a custom compositor
+/// and ensure that a redundant layer is not added.
+///
+TEST_F(EmbedderTest,
+       DISABLED_CompositorMustBeAbleToRenderWithPlatformLayerOnBottom) {
+  auto& context = GetEmbedderContext();
+
+  context.SetupCompositor();
+
+  context.GetCompositor().SetRenderTargetType(
+      EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
+
+  fml::CountDownLatch latch(4);
+
+  sk_sp<SkImage> scene_image;
+  context.SetNextSceneCallback([&](sk_sp<SkImage> scene) {
+    scene_image = std::move(scene);
+    latch.CountDown();
+  });
+
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 2u);
+
+        // Layer Root
+        {
+          FlutterBackingStore backing_store = *layers[0]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[0], layer);
+        }
+
+        // Layer 1
+        {
+          FlutterPlatformView platform_view = {};
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 1;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(50.0, 150.0);
+          layer.offset = FlutterPointMake(20.0, 20.0);
+
+          ASSERT_EQ(*layers[1], layer);
+        }
+
+        latch.CountDown();
+      });
+
+  context.GetCompositor().SetPlatformViewRendererCallback(
+      [&](const FlutterLayer& layer, GrContext* context) -> sk_sp<SkImage> {
+        auto surface = CreateRenderSurface(layer, context);
+        auto canvas = surface->getCanvas();
+        FML_CHECK(canvas != nullptr);
+
+        switch (layer.platform_view->identifier) {
+          case 1: {
+            SkPaint paint;
+            // See dart test for total order.
+            paint.setColor(SK_ColorGREEN);
+            paint.setAlpha(127);
+            const auto& rect =
+                SkRect::MakeWH(layer.size.width, layer.size.height);
+            canvas->drawRect(rect, paint);
+            latch.CountDown();
+          } break;
+          default:
+            // Asked to render an unknown platform view.
+            FML_CHECK(false)
+                << "Test was asked to composite an unknown platform view.";
+        }
+
+        return surface->makeImageSnapshot();
+      });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig();
+  builder.SetCompositor();
+  builder.SetDartEntrypoint(
+      "can_composite_platform_views_with_platform_layer_on_bottom");
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  latch.Wait();
+
+  // Render the scene and assert that it matches expectation.
+  ASSERT_TRUE(scene_image);
+  fml::FileMapping fixture_image_mapping(
+      OpenFixture("compositor_with_platform_layer_on_bottom.png"));
+  ASSERT_GE(fixture_image_mapping.GetSize(), 0u);
+  auto encoded_image = SkData::MakeWithoutCopy(
+      fixture_image_mapping.GetMapping(), fixture_image_mapping.GetSize());
+  auto fixture_image =
+      SkImage::MakeFromEncoded(std::move(encoded_image))->makeRasterImage();
+  ASSERT_TRUE(fixture_image);
+  auto scene_image_subset = scene_image->makeSubset(
+      SkIRect::MakeWH(fixture_image->width(), fixture_image->height()));
+  ASSERT_TRUE(scene_image_subset);
+  const auto images_are_same =
+      RasterImagesAreSame(scene_image_subset, fixture_image);
+  if (!images_are_same) {
+    auto fixtures_fd = OpenFixturesDirectory();
+    ASSERT_TRUE(WriteImageToDisk(fixtures_fd,
+                                 "actual_with_platform_layer_on_bottom.png",
+                                 scene_image_subset));
+    ASSERT_TRUE(WriteImageToDisk(
+        fixtures_fd, "expectation_with_platform_layer_on_bottom.png",
+        fixture_image));
+    FML_LOG(ERROR) << "Test compositor did not generated expected images. Got: "
+                      "'actual_with_platform_layer_on_bottom.png' Expected: "
+                      "'expectation_with_patform_layer_on_bottom.png' in "
+                      "Directory: "
+                   << GetFixturesPath();
+  }
+  ASSERT_TRUE(images_are_same);
+}
+
 }  // namespace testing
 }  // namespace flutter
