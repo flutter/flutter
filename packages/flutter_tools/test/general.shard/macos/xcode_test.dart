@@ -120,7 +120,7 @@ void main() {
       when(mockPlatform.isMacOS).thenReturn(true);
 
       when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-        .thenReturn(null);
+        .thenReturn(ProcessResult(1, 127, '', 'ERROR'));
 
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
       when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
