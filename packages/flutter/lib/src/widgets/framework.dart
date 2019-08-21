@@ -2176,14 +2176,7 @@ class BuildOwner {
   /// the [FocusScopeNode] for a given [BuildContext].
   ///
   /// See [FocusManager] for more details.
-  FocusManager get focusManager {
-    _focusManager ??= FocusManager();
-    return _focusManager;
-  }
-  FocusManager _focusManager;
-  set focusManager(FocusManager focusManager) {
-    _focusManager = focusManager;
-  }
+  FocusManager focusManager = FocusManager();
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.drawFrame] calls [buildScope].
