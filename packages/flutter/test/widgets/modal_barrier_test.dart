@@ -42,7 +42,7 @@ void main() {
     await tester.tap(find.text('target'));
     await tester.pumpWidget(subject);
     expect(tapped, isFalse,
-      reason: 'because the tap is prevented by ModalBarrier');
+      reason: 'because the tap is not prevented by ModalBarrier');
   });
 
   testWidgets('ModalBarrier does not prevent interactions with widgets in front of it', (WidgetTester tester) async {
@@ -58,7 +58,35 @@ void main() {
     await tester.tap(find.text('target'));
     await tester.pumpWidget(subject);
     expect(tapped, isTrue,
-      reason: 'because the tap is not prevented by ModalBarrier');
+      reason: 'because the tap is prevented by ModalBarrier');
+  });
+
+  testWidgets('ModalBarrier does not prevent interactions with translucent widgets in front of it', (WidgetTester tester) async {
+    bool dragged = false;
+    final Widget subject = Stack(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        const ModalBarrier(dismissible: false),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onHorizontalDragStart: (_) {
+            dragged = true;
+          },
+          child: const Center(
+            child: Text('target', textDirection: TextDirection.ltr),
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(subject);
+    await tester.dragFrom(
+      tester.getBottomRight(find.byType(GestureDetector)) - const Offset(10, 10),
+      const Offset(-20, 0),
+    );
+    await tester.pumpWidget(subject);
+    expect(dragged, isTrue,
+      reason: 'because the drag is prevented by ModalBarrier');
   });
 
   testWidgets('ModalBarrier pops the Navigator when dismissed by primay tap', (WidgetTester tester) async {

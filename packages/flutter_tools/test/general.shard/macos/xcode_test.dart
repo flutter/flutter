@@ -30,6 +30,9 @@ void main() {
       when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
           .thenThrow(const ProcessException('/usr/bin/xcode-select', <String>['--print-path']));
       expect(xcode.xcodeSelectPath, isNull);
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
+          .thenThrow(ArgumentError('Invalid argument(s): Cannot find executable for /usr/bin/xcode-select'));
+      expect(xcode.xcodeSelectPath, isNull);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

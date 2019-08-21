@@ -12,7 +12,7 @@ import '../convert.dart';
 import '../globals.dart';
 import '../ios/xcodeproj.dart';
 import '../project.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 
 import 'cocoapod_utils.dart';
 
@@ -36,6 +36,13 @@ Future<void> buildMacOS({
     setSymroot: false,
   );
   await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
+  // If the xcfilelists do not exist, create empty version.
+  if (!flutterProject.macos.inputFileList.existsSync()) {
+     flutterProject.macos.inputFileList.createSync(recursive: true);
+  }
+  if (!flutterProject.macos.outputFileList.existsSync()) {
+    flutterProject.macos.outputFileList.createSync(recursive: true);
+  }
 
   // Set debug or release mode.
   String config = 'Debug';
@@ -54,7 +61,8 @@ Future<void> buildMacOS({
     '-derivedDataPath', flutterBuildDir.absolute.path,
     'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
     'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
-  ], runInShell: true);
+    'COMPILER_INDEX_STORE_ENABLE=NO',
+  ]);
   final Status status = logger.startProgress(
     'Building macOS application...',
     timeout: null,

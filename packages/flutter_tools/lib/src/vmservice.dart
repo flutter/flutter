@@ -313,8 +313,8 @@ class VMService {
     Map<String, dynamic> params,
   ) {
     return Future.any<Map<String, dynamic>>(<Future<Map<String, dynamic>>>[
-      _peer.sendRequest(method, params).then<Map<String, dynamic>>(castStringKeyedMap),
-      _connectionError.future,
+        _peer.sendRequest(method, params).then<Map<String, dynamic>>(castStringKeyedMap),
+        _connectionError.future,
     ]);
   }
 
@@ -1177,7 +1177,7 @@ class Isolate extends ServiceObjectOwner {
       final Map<String, dynamic> response = await invokeRpcRaw('_reloadSources', params: arguments);
       return response;
     } on rpc.RpcException catch (e) {
-      return Future<Map<String, dynamic>>.error(<String, dynamic>{
+      return Future<Map<String, dynamic>>.value(<String, dynamic>{
         'code': e.code,
         'message': e.message,
         'data': e.data,
@@ -1313,7 +1313,7 @@ class Isolate extends ServiceObjectOwner {
   }
 
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame() async {
-    final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw('ext.flutter.didSendFirstFrameEvent');
+    final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw('ext.flutter.didSendFirstFrameRasterizedEvent');
     // result might be null when the service extension is not initialized
     return result != null && result['enabled'] == 'true';
   }

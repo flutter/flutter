@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/linux/makefile.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
@@ -17,6 +19,7 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
+import '../../src/testbed.dart';
 
 void main() {
   MockProcessManager mockProcessManager;
@@ -55,6 +58,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FileSystem: () => MemoryFileSystem(),
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
   testUsingContext('Linux build fails on non-linux platform', () async {
@@ -71,6 +75,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => notLinuxPlatform,
     FileSystem: () => MemoryFileSystem(),
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
   testUsingContext('Linux build invokes make and writes temporary files', () async {
@@ -97,6 +102,7 @@ void main() {
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
     Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
   testUsingContext('linux can extract binary name from Makefile', () async {
@@ -112,7 +118,19 @@ BINARY_NAME=fizz_bar
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(makefileExecutableName(flutterProject.linux), 'fizz_bar');
-  }, overrides: <Type, Generator>{FileSystem: () => MemoryFileSystem()});
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('Refuses to build for Linux when feature is disabled', () {
+    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
+
+    expect(() => runner.run(<String>['build', 'linux']),
+        throwsA(isInstanceOf<ToolExit>()));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+  });
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}

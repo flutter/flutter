@@ -36,6 +36,9 @@ class FeatureFlags {
   /// Whether flutter desktop for Windows is enabled.
   bool get isWindowsEnabled => _isEnabled(flutterWindowsDesktopFeature);
 
+  /// Whether plugins are built as AARs in app projects.
+  bool get isPluginAsAarEnabled => _isEnabled(flutterBuildPluginAsAarFeature);
+
   // Calculate whether a particular feature is enabled for the current channel.
   static bool _isEnabled(Feature feature) {
     final String currentChannel = FlutterVersion.instance.channel;
@@ -65,11 +68,12 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
+  flutterBuildPluginAsAarFeature,
 ];
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature(
-  name: 'Flutter Web',
+  name: 'Flutter for web',
   configSetting: 'enable-web',
   environmentOverride: 'FLUTTER_WEB',
   master: FeatureChannelSetting(
@@ -84,7 +88,7 @@ const Feature flutterWebFeature = Feature(
 
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature(
-  name: 'Flutter Desktop for macOS',
+  name: 'Flutter for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(
@@ -95,7 +99,7 @@ const Feature flutterMacOSDesktopFeature = Feature(
 
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature(
-  name: 'Flutter Desktop for Linux',
+  name: 'Flutter for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(
@@ -106,9 +110,19 @@ const Feature flutterLinuxDesktopFeature = Feature(
 
 /// The [Feature] for Windows desktop.
 const Feature flutterWindowsDesktopFeature = Feature(
-  name: 'Flutter Desktop for Windows',
+  name: 'Flutter for desktop on Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+);
+
+/// The [Feature] for building plugins as AARs in an app project.
+const Feature flutterBuildPluginAsAarFeature = Feature(
+  name: 'Build plugins independently as AARs in app projects',
+  configSetting: 'enable-build-plugin-as-aar',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
@@ -121,7 +135,7 @@ const Feature flutterWindowsDesktopFeature = Feature(
 /// a "safe" value, such as being off.
 ///
 /// The top level feature settings can be provided to apply to all channels.
-/// Otherwise, more specific settings take precidence over higher level
+/// Otherwise, more specific settings take precedence over higher level
 /// settings.
 class Feature {
   /// Creates a [Feature].
@@ -169,7 +183,8 @@ class Feature {
     if (configSetting == null) {
       return null;
     }
-    final StringBuffer buffer = StringBuffer('Enable or disable $name on ');
+    final StringBuffer buffer = StringBuffer('Enable or disable $name. '
+        'This setting will take effect on ');
     final List<String> channels = <String>[
       if (master.available) 'master',
       if (dev.available) 'dev',
@@ -178,8 +193,12 @@ class Feature {
     ];
     if (channels.length == 1) {
       buffer.write('the ${channels.single} channel.');
+    } else if (channels.length == 2) {
+      buffer.write('the ${channels.join(' and ')} channels.');
     } else {
-      buffer.write('${channels.join(', ')} channels.');
+      final String prefix = (channels.toList()
+        ..removeLast()).join(', ');
+      buffer.write('the $prefix, and ${channels.last} channels.');
     }
     return buffer.toString();
   }

@@ -89,16 +89,13 @@ class AttachCommand extends FlutterCommand {
         'project-root',
         hide: !verboseHelp,
         help: 'Normally used only in run target',
-      )..addFlag('track-widget-creation',
-        hide: !verboseHelp,
-        help: 'Track widget creation locations.',
-        defaultsTo: false,
       )..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
         help: 'Handle machine structured JSON command input and provide output '
               'and progress in machine friendly format.',
       );
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
     hotRunnerFactory ??= HotRunnerFactory();
   }
 
@@ -246,6 +243,8 @@ class AttachCommand extends FlutterCommand {
           // Determine ipv6 status from the scanned logs.
           usesIpv6 = observatoryDiscovery.ipv6;
           printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
+        } catch (error) {
+          throwToolExit('Failed to establish a debug connection with ${device.name}: $error');
         } finally {
           await observatoryDiscovery?.cancel();
         }
@@ -260,7 +259,6 @@ class AttachCommand extends FlutterCommand {
         device,
         flutterProject: flutterProject,
         trackWidgetCreation: argResults['track-widget-creation'],
-        dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],

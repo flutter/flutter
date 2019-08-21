@@ -12,7 +12,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
@@ -111,6 +111,7 @@ void main() {
       );
       await _flutter.waitForPause();
       await evaluateTrivialExpressions(_flutter);
+      await _flutter.resume();
     });
 
     test('can evaluate complex expressions in a test', () async {
@@ -120,6 +121,7 @@ void main() {
       );
       await _flutter.waitForPause();
       await evaluateComplexExpressions(_flutter);
+      await _flutter.resume();
     });
 
     test('can evaluate expressions returning complex objects in a test', () async {
@@ -129,9 +131,9 @@ void main() {
       );
       await _flutter.waitForPause();
       await evaluateComplexReturningExpressions(_flutter);
+      await _flutter.resume();
     });
-    // Skipped due to https://github.com/flutter/flutter/issues/26518
-  }, timeout: const Timeout.factor(10), skip: true, tags: <String>['integration']); // The DevFS sync takes a really long time, so these tests can be slow.
+  }, timeout: const Timeout.factor(10), tags: <String>['integration']); // The DevFS sync takes a really long time, so these tests can be slow.
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {

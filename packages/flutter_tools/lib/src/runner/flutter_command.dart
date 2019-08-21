@@ -25,10 +25,10 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../doctor.dart';
+import '../features.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../reporting/usage.dart';
-import '../version.dart';
+import '../reporting/reporting.dart';
 import 'flutter_command_runner.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
@@ -63,6 +63,21 @@ class FlutterCommandResult {
   /// [FlutterCommand] will automatically measure and report the command's
   /// complete time if not overridden.
   final DateTime endTimeOverride;
+
+  @override
+  String toString() {
+    switch (exitStatus) {
+      case ExitStatus.success:
+        return 'success';
+      case ExitStatus.warning:
+        return 'warning';
+      case ExitStatus.fail:
+        return 'fail';
+      default:
+        assert(false);
+        return null;
+    }
+  }
 }
 
 /// Common flutter command line options.
@@ -288,8 +303,18 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption(
       'flavor',
       help: 'Build a custom app flavor as defined by platform-specific build setup.\n'
-        'Supports the use of product flavors in Android Gradle scripts.\n'
-        'Supports the use of custom Xcode schemes.',
+            'Supports the use of product flavors in Android Gradle scripts, and '
+            'the use of custom Xcode schemes.',
+    );
+  }
+
+  void usesTrackWidgetCreation({ bool hasEffect = true, @required bool verboseHelp }) {
+    argParser.addFlag(
+      'track-widget-creation',
+      hide: !hasEffect && !verboseHelp,
+      defaultsTo: false, // this will soon be changed to true
+      help: 'Track widget creation locations. This enables features such as the widget inspector. '
+            'This parameter is only functional in debug mode (i.e. when compiling JIT, not AOT).',
     );
   }
 
@@ -355,13 +380,9 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
-  /// Whether this feature should not be usable on stable branches.
-  ///
-  /// Defaults to false, meaning it is usable.
-  bool get isExperimental => false;
-
   /// Additional usage values to be sent with the usage ping.
-  Future<Map<String, String>> get usageValues async => const <String, String>{};
+  Future<Map<CustomDimensions, String>> get usageValues async =>
+      const <CustomDimensions, String>{};
 
   /// Runs this command.
   ///
@@ -377,8 +398,9 @@ abstract class FlutterCommand extends Command<void> {
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
-        if (flutterUsage.isFirstRun)
+        if (flutterUsage.isFirstRun) {
           flutterUsage.printWelcome();
+        }
         final String commandPath = await usagePath;
         FlutterCommandResult commandResult;
         try {
@@ -389,7 +411,6 @@ abstract class FlutterCommand extends Command<void> {
         } finally {
           final DateTime endTime = systemClock.now();
           printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
-          printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
           _sendPostUsage(commandPath, commandResult, startTime, endTime);
         }
       },
@@ -407,21 +428,7 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     // Send command result.
-    String result = 'unspecified';
-    if (commandResult != null) {
-      switch (commandResult.exitStatus) {
-        case ExitStatus.success:
-          result = 'success';
-          break;
-        case ExitStatus.warning:
-          result = 'warning';
-          break;
-        case ExitStatus.fail:
-          result = 'fail';
-          break;
-      }
-    }
-    flutterUsage.sendEvent(commandPath, result);
+    CommandResultEvent(commandPath, commandResult).send();
 
     // Send timing.
     final List<String> labels = <String>[
@@ -472,12 +479,12 @@ abstract class FlutterCommand extends Command<void> {
     setupApplicationPackages();
 
     if (commandPath != null) {
-      final Map<String, String> additionalUsageValues = <String,String>{
-        ...?await usageValues,
-      };
-      additionalUsageValues[kCommandHasTerminal] =
-          io.stdout.hasTerminal ? 'true' : 'false';
-      flutterUsage.sendCommand(commandPath, parameters: additionalUsageValues);
+      final Map<CustomDimensions, String> additionalUsageValues =
+        <CustomDimensions, String>{
+          ...?await usageValues,
+          CustomDimensions.commandHasTerminal: io.stdout.hasTerminal ? 'true' : 'false',
+        };
+      Usage.command(commandPath, parameters: additionalUsageValues);
     }
 
     return await runCommand();
@@ -555,12 +562,6 @@ abstract class FlutterCommand extends Command<void> {
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
-    // If we're on a stable branch, then don't allow the usage of
-    // "experimental" features.
-    if (isExperimental && !FlutterVersion.instance.isMaster) {
-      throwToolExit('Experimental feature $name is not supported on stable branches');
-    }
-
     if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {
@@ -653,17 +654,17 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin_x64:
-      if (FlutterVersion.instance.isMaster) {
+      if (featureFlags.isMacOSEnabled) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
-      if (!FlutterVersion.instance.isMaster) {
+      if (featureFlags.isWindowsEnabled) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
-      if (!FlutterVersion.instance.isMaster) {
+      if (featureFlags.isLinuxEnabled) {
         return DevelopmentArtifact.linux;
       }
       return null;

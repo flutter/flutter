@@ -9,6 +9,7 @@ import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -24,6 +25,8 @@ import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import 'common.dart';
+
+final Generator kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
@@ -150,13 +153,14 @@ ro.build.version.codename=REL
 typedef ProcessFactory = Process Function(List<String> command);
 
 /// A ProcessManager that starts Processes by delegating to a ProcessFactory.
-class MockProcessManager implements ProcessManager {
+class MockProcessManager extends Mock implements ProcessManager {
   ProcessFactory processFactory = (List<String> commands) => MockProcess();
-  bool succeed = true;
+  bool canRunSucceeds = true;
+  bool runSucceeds = true;
   List<String> commands;
 
   @override
-  bool canRun(dynamic command, { String workingDirectory }) => succeed;
+  bool canRun(dynamic command, { String workingDirectory }) => canRunSucceeds;
 
   @override
   Future<Process> start(
@@ -167,7 +171,7 @@ class MockProcessManager implements ProcessManager {
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
   }) {
-    if (!succeed) {
+    if (!runSucceeds) {
       final String executable = command[0];
       final List<String> arguments = command.length > 1 ? command.sublist(1) : <String>[];
       throw ProcessException(executable, arguments);
@@ -176,9 +180,6 @@ class MockProcessManager implements ProcessManager {
     commands = command;
     return Future<Process>.value(processFactory(command));
   }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
 }
 
 /// A process that exits successfully with no output and ignores all input.
@@ -610,3 +611,25 @@ class FakeProcessResult implements ProcessResult {
   @override
   String toString() => stdout?.toString() ?? stderr?.toString() ?? runtimeType.toString();
 }
+
+class MockStdIn extends Mock implements IOSink {
+  final StringBuffer stdInWrites = StringBuffer();
+
+  String getAndClear() {
+    final String result = stdInWrites.toString();
+    stdInWrites.clear();
+    return result;
+  }
+
+  @override
+  void write([ Object o = '' ]) {
+    stdInWrites.write(o);
+  }
+
+  @override
+  void writeln([ Object o = '' ]) {
+    stdInWrites.writeln(o);
+  }
+}
+
+class MockStream extends Mock implements Stream<List<int>> {}

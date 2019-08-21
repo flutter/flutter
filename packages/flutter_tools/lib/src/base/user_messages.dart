@@ -102,6 +102,10 @@ class UserMessages {
       'Android sdkmanager tool not found ($sdkManagerPath).\n'
       'Try re-installing or updating your Android SDK,\n'
       'visit https://flutter.dev/setup/#android-setup for detailed instructions.';
+  String androidCannotRunSdkManager(String sdkManagerPath, String error) =>
+      'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "$error".\n'
+      'Try re-installing or updating your Android SDK,\n'
+      'visit https://flutter.dev/setup/#android-setup for detailed instructions.';
   String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update using sdkmanager, run:\n'

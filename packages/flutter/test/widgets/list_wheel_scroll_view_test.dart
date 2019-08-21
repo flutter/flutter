@@ -539,7 +539,6 @@ void main() {
           'list_wheel_scroll_view.center_child.magnified.png',
           version: null,
         ),
-        skip: !isLinux,
       );
     }, skip: isBrowser);
 
@@ -597,7 +596,6 @@ void main() {
           'list_wheel_scroll_view.curved_wheel.left.png',
           version: null,
         ),
-        skip: !isLinux,
       );
     }, skip: isBrowser);
 

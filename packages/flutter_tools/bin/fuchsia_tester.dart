@@ -18,8 +18,7 @@ import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/disabled_usage.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/runner.dart';
 
@@ -117,9 +116,14 @@ Future<void> run(List<String> args) async {
     CoverageCollector collector;
     if (argResults['coverage']) {
       collector = CoverageCollector(
-        flutterProject: FlutterProject.current(),
-        coverageDirectory: coverageDirectory,
-      );
+        libraryPredicate: (String libraryName) {
+          // If we have a specified coverage directory then accept all libraries.
+          if (coverageDirectory != null) {
+            return true;
+          }
+          final String projectName = FlutterProject.current().manifest.appName;
+          return libraryName.contains(projectName);
+        });
       if (!argResults.options.contains(_kOptionTestDirectory)) {
         throwToolExit('Use of --coverage requires setting --test-directory');
       }

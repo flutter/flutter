@@ -13,7 +13,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 
 import 'msbuild_utils.dart';
 import 'visual_studio.dart';
@@ -81,7 +81,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
     status.cancel();
   }
   if (result != 0) {
-    throwToolExit('Build process failed');
+    throwToolExit('Build process failed. To view the stack trace, please run `flutter run -d windows -v`.');
   }
   flutterUsage.sendTiming('build', 'vs_build', Duration(milliseconds: sw.elapsedMilliseconds));
 }

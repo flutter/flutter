@@ -14,7 +14,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
 import 'button_bar.dart';
-import 'button_theme.dart';
 import 'colors.dart';
 import 'divider.dart';
 import 'drawer.dart';
@@ -432,6 +431,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
       if (extendBody) {
         bodyMaxHeight += bottomWidgetsHeight;
+        bodyMaxHeight = bodyMaxHeight.clamp(0.0, looseConstraints.maxHeight - contentTop).toDouble();
         assert(bodyMaxHeight <= math.max(0.0, looseConstraints.maxHeight - contentTop));
       }
 
@@ -776,12 +776,73 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
 ///
 /// {@tool snippet --template=stateful_widget_material}
+/// This example shows a [Scaffold] with a [body] and [FloatingActionButton].
+/// The [body] is a [Text] placed in a [Center] in order to center the text
+/// within the [Scaffold]. The [FloatingActionButton] is connected to a
+/// callback that increments a counter.
+///
+/// ![A screenshot of the Scaffold widget with a body and floating action button](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold.png)
+///
+/// ```dart
+/// int _count = 0;
+///
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('Sample Code'),
+///     ),
+///     body: Center(
+///       child: Text('You have pressed the button $_count times.')
+///     ),
+///     floatingActionButton: FloatingActionButton(
+///       onPressed: () => setState(() => _count++),
+///       tooltip: 'Increment Counter',
+///       child: const Icon(Icons.add),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateful_widget_material}
+/// This example shows a [Scaffold] with a [backgroundColor], [body] and
+/// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
+/// to center the text within the [Scaffold]. The [FloatingActionButton] is
+/// connected to a callback that increments a counter.
+///
+/// ![A screenshot of the Scaffold widget example with a background color](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold_background_color.png)
+///
+/// ```dart
+/// int _count = 0;
+///
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('Sample Code'),
+///     ),
+///     body: Center(
+///       child: Text('You have pressed the button $_count times.')
+///     ),
+///     backgroundColor: Colors.blueGrey.shade200,
+///     floatingActionButton: FloatingActionButton(
+///       onPressed: () => setState(() => _count++),
+///       tooltip: 'Increment Counter',
+///       child: const Icon(Icons.add),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateful_widget_material}
 /// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] and a
 /// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
-/// to center the text within the [Scaffold] and the [FloatingActionButton] is
+/// to center the text within the [Scaffold]. The [FloatingActionButton] is
 /// centered and docked within the [BottomAppBar] using
 /// [FloatingActionButtonLocation.centerDocked]. The [FloatingActionButton] is
 /// connected to a callback that increments a counter.
+///
+/// ![A screenshot of the Scaffold widget with a bottom navigation bar and docked floating action button](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold_bottom_app_bar.png)
 ///
 /// ```dart
 /// int _count = 0;
@@ -795,6 +856,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///       child: Text('You have pressed the button $_count times.'),
 ///     ),
 ///     bottomNavigationBar: BottomAppBar(
+///       shape: const CircularNotchedRectangle(),
 ///       child: Container(height: 50.0,),
 ///     ),
 ///     floatingActionButton: FloatingActionButton(
@@ -905,6 +967,7 @@ class Scaffold extends StatefulWidget {
     this.drawerDragStartBehavior = DragStartBehavior.start,
     this.extendBody = false,
     this.drawerScrimColor,
+    this.drawerEdgeDragWidth,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(drawerDragStartBehavior != null),
@@ -1076,6 +1139,16 @@ class Scaffold extends StatefulWidget {
 
   /// {@macro flutter.material.drawer.dragStartBehavior}
   final DragStartBehavior drawerDragStartBehavior;
+
+  /// The width of the area within which a horizontal swipe will open the
+  /// drawer.
+  ///
+  /// By default, the value used is 20.0 added to the padding edge of
+  /// `MediaQuery.of(context).padding` that corresponds to [alignment].
+  /// This ensures that the drag area for notched devices is not obscured. For
+  /// example, if `TextDirection.of(context)` is set to [TextDirection.ltr],
+  /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
+  final double drawerEdgeDragWidth;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -1674,7 +1747,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// See also:
   ///
-  ///  * [BottomSheet], which is the widget typically returned by the `builder`.
+  ///  * [BottomSheet], which becomes the parent of the widget returned by the
+  ///    `builder`.
   ///  * [showBottomSheet], which calls this method given a [BuildContext].
   ///  * [showModalBottomSheet], which can be used to display a modal bottom
   ///    sheet.
@@ -1920,6 +1994,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           drawerCallback: _endDrawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
+          edgeDragWidth: widget.drawerEdgeDragWidth,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -1943,6 +2018,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           drawerCallback: _drawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
+          edgeDragWidth: widget.drawerEdgeDragWidth,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
@@ -2077,13 +2153,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             ),
           ),
           child: SafeArea(
-            child: ButtonTheme.bar(
-              child: SafeArea(
-                top: false,
-                child: ButtonBar(
-                  children: widget.persistentFooterButtons,
-                ),
-              ),
+            top: false,
+            child: ButtonBar(
+              children: widget.persistentFooterButtons,
             ),
           ),
         ),

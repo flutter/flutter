@@ -13,8 +13,6 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import 'adb.dart';
-
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
 
@@ -303,7 +301,7 @@ Future<int> exec(
 
 /// Executes a command and returns its standard output as a String.
 ///
-/// For logging purposes, the command's output is also printed out.
+/// For logging purposes, the command's output is also printed out by default.
 Future<String> eval(
   String executable,
   List<String> arguments, {
@@ -311,6 +309,8 @@ Future<String> eval(
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   String workingDirectory,
   StringBuffer stderr, // if not null, the stderr will be written here
+  bool printStdout = true,
+  bool printStderr = true,
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
@@ -321,14 +321,18 @@ Future<String> eval(
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String line) {
-        print('stdout: $line');
+        if (printStdout) {
+          print('stdout: $line');
+        }
         output.writeln(line);
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String line) {
-        print('stderr: $line');
+        if (printStderr) {
+          print('stderr: $line');
+        }
         stderr?.writeln(line);
       }, onDone: () { stderrDone.complete(); });
 
@@ -341,17 +345,21 @@ Future<String> eval(
   return output.toString().trimRight();
 }
 
-Future<int> flutter(String command, {
-  List<String> options = const <String>[],
-  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
-  Map<String, String> environment,
-}) {
-  final List<String> args = <String>[
+List<String> flutterCommandArgs(String command, List<String> options) {
+  return <String>[
     command,
     if (localEngine != null) ...<String>['--local-engine', localEngine],
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
     ...options,
   ];
+}
+
+Future<int> flutter(String command, {
+  List<String> options = const <String>[],
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  Map<String, String> environment,
+}) {
+  final List<String> args = flutterCommandArgs(command, options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
       canFail: canFail, environment: environment);
 }
@@ -363,12 +371,7 @@ Future<String> evalFlutter(String command, {
   Map<String, String> environment,
   StringBuffer stderr, // if not null, the stderr will be written here.
 }) {
-  final List<String> args = <String>[
-    command,
-    if (localEngine != null) ...<String>['--local-engine', localEngine],
-    if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
-    ...options,
-  ];
+  final List<String> args = flutterCommandArgs(command, options);
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
       canFail: canFail, environment: environment, stderr: stderr);
 }
@@ -587,35 +590,9 @@ Uri parseServiceUri(String line, {
   return matches.isEmpty ? null : Uri.parse(matches[0].group(0));
 }
 
-/// If FLUTTER_ENGINE environment variable is set then we need to pass
-/// correct --local-engine setting too.
-void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
-  if (Platform.environment['FLUTTER_ENGINE'] != null) {
-    if (flavor == null) {
-      // If engine flavor was not specified explicitly then scan options looking
-      // for flags that specify the engine flavor (--release, --profile or
-      // --debug). Default flavor to debug if no flags were found.
-      const Map<String, String> optionToFlavor = <String, String>{
-        '--release': 'release',
-        '--debug': 'debug',
-        '--profile': 'profile',
-      };
-
-      for (String option in options) {
-        flavor = optionToFlavor[option];
-        if (flavor != null) {
-          break;
-        }
-      }
-
-      flavor ??= 'debug';
-    }
-
-    const Map<DeviceOperatingSystem, String> osNames = <DeviceOperatingSystem, String>{
-      DeviceOperatingSystem.ios: 'ios',
-      DeviceOperatingSystem.android: 'android',
-    };
-
-    options.add('--local-engine=${osNames[deviceOperatingSystem]}_$flavor');
+/// Checks that the file exists, otherwise throws a [FileSystemException].
+void checkFileExists(String file) {
+  if (!exists(File(file))) {
+    throw FileSystemException('Expected file to exit.', file);
   }
 }

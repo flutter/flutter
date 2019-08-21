@@ -31,7 +31,6 @@ class FlutterDevice {
   FlutterDevice(
     this.device, {
     @required this.trackWidgetCreation,
-    this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.viewFilter,
@@ -56,7 +55,6 @@ class FlutterDevice {
     @required bool trackWidgetCreation,
     @required String target,
     @required BuildMode buildMode,
-    String dillOutputPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     String viewFilter,
@@ -82,7 +80,6 @@ class FlutterDevice {
     return FlutterDevice(
       device,
       trackWidgetCreation: trackWidgetCreation,
-      dillOutputPath: dillOutputPath,
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme:fileSystemScheme,
       viewFilter: viewFilter,
@@ -99,7 +96,6 @@ class FlutterDevice {
   List<VMService> vmServices;
   DevFS devFS;
   ApplicationPackage package;
-  String dillOutputPath;
   List<String> fileSystemRoots;
   String fileSystemScheme;
   StreamSubscription<String> _loggingSubscription;
@@ -354,7 +350,6 @@ class FlutterDevice {
   Future<int> runHot({
     HotRunner hotRunner,
     String route,
-    bool shouldBuild,
   }) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
@@ -410,7 +405,6 @@ class FlutterDevice {
   Future<int> runCold({
     ColdRunner coldRunner,
     String route,
-    bool shouldBuild = true,
   }) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
@@ -476,6 +470,7 @@ class FlutterDevice {
     bool fullRestart = false,
     String projectRootPath,
     String pathToReload,
+    @required String dillOutputPath,
     @required List<Uri> invalidatedFiles,
   }) async {
     final Status devFSStatus = logger.startProgress(
@@ -515,6 +510,23 @@ class FlutterDevice {
   }
 }
 
+// Issue: https://github.com/flutter/flutter/issues/33050
+// Matches the following patterns:
+//    HttpException: Connection closed before full header was received, uri = *
+//    HttpException: , uri = *
+final RegExp kAndroidQHttpConnectionClosedExp = RegExp(r'^HttpException\:.+\, uri \=.+$');
+
+/// Returns `true` if any of the devices is running Android Q.
+Future<bool> hasDeviceRunningAndroidQ(List<FlutterDevice> flutterDevices) async {
+  for (FlutterDevice flutterDevice in flutterDevices) {
+    final String sdkNameAndVersion = await flutterDevice.device.sdkNameAndVersion;
+    if (sdkNameAndVersion != null && sdkNameAndVersion.startsWith('Android 10')) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Shared code between different resident application runners.
 abstract class ResidentRunner {
   ResidentRunner(
@@ -527,14 +539,27 @@ abstract class ResidentRunner {
     this.usesTerminalUi = true,
     this.stayResident = true,
     this.hotMode = true,
-  }) {
-    _mainPath = findMainDartFile(target);
-    _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
-    _packagesFilePath =
-        packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath);
-    _assetBundle = AssetBundleFactory.instance.createBundle();
+    this.dillOutputPath,
+  }) : mainPath = findMainDartFile(target),
+       projectRootPath = projectRootPath ?? fs.currentDirectory.path,
+       packagesFilePath = packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
+       assetBundle = AssetBundleFactory.instance.createBundle() {
+    // TODO(jonahwilliams): this is transitionary logic to allow us to support
+    // platforms that are not yet using flutter assemble. In the "new world",
+    // builds are isolated based on a number of factors. Thus, we cannot assume
+    // that a debug build will create the expected `build/app.dill` file. For
+    // now, I'm working around this by just creating it if it is missing here.
+    // In the future, once build & run are more strongly separated, the build
+    // environment will be plumbed through so that it all comes from a single
+    // source of truth, the [Environment].
+    final File dillOutput = fs.file(dillOutputPath ?? fs.path.join('build', 'app.dill'));
+    if (!dillOutput.existsSync()) {
+      dillOutput.createSync(recursive: true);
+    }
   }
 
+  @protected
+  @visibleForTesting
   final List<FlutterDevice> flutterDevices;
   final String target;
   final DebuggingOptions debuggingOptions;
@@ -542,18 +567,15 @@ abstract class ResidentRunner {
   final bool stayResident;
   final bool ipv6;
   final Completer<int> _finished = Completer<int>();
+  final String dillOutputPath;
+  final String packagesFilePath;
+  final String projectRootPath;
+  final String mainPath;
+  final AssetBundle assetBundle;
+
   bool _exited = false;
   bool hotMode ;
-  String _packagesFilePath;
-  String get packagesFilePath => _packagesFilePath;
-  String _projectRootPath;
-  String get projectRootPath => _projectRootPath;
-  String _mainPath;
-  String get mainPath => _mainPath;
   String getReloadPath({ bool fullRestart }) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
-
-  AssetBundle _assetBundle;
-  AssetBundle get assetBundle => _assetBundle;
 
   bool get isRunningDebug => debuggingOptions.buildInfo.isDebug;
   bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
@@ -571,6 +593,17 @@ abstract class ResidentRunner {
     });
   }
 
+  /// Invoke an RPC extension method on the first attached ui isolate of the first device.
+  // TODO(jonahwilliams): Update/Remove this method when refactoring the resident
+  // runner to support a single flutter device.
+  Future<Map<String, dynamic>> invokeFlutterExtensionRpcRawOnFirstIsolate(
+    String method, {
+    Map<String, dynamic> params,
+  }) {
+    return flutterDevices.first.views.first.uiIsolate
+        .invokeFlutterExtensionRpcRaw(method, params: params);
+  }
+
   /// Whether this runner can hot reload.
   bool get canHotReload => hotMode;
 
@@ -582,7 +615,6 @@ abstract class ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild = true,
   });
 
   Future<int> attach({
@@ -1084,7 +1116,10 @@ class TerminalHandler {
       lastReceivedCommand = command;
       await _commonTerminalInputHandler(command);
     } catch (error, st) {
-      printError('$error\n$st');
+      // Don't print stack traces for known error types.
+      if (error is! ToolExit) {
+        printError('$error\n$st');
+      }
       await _cleanUp(null);
       rethrow;
     } finally {

@@ -5,7 +5,6 @@
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
@@ -16,69 +15,72 @@ import '../../src/common.dart';
 import '../../src/testbed.dart';
 
 void main() {
-  group('Assemble', () {
-    Testbed testbed;
-    MockBuildSystem mockBuildSystem;
+  Testbed testbed;
+  MockBuildSystem mockBuildSystem;
 
-    setUpAll(() {
-      Cache.disableLocking();
-    });
-
-    setUp(() {
-      mockBuildSystem = MockBuildSystem();
-      testbed = Testbed(overrides: <Type, Generator>{
-        BuildSystem: ()  => mockBuildSystem,
-      });
-    });
-
-    test('Can list the output directory relative to project root', () => testbed.run(() async {
-      final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
-      await commandRunner.run(<String>['assemble', '--flutter-root=.', 'build-dir', '-dBuildMode=debug']);
-      final BufferLogger bufferLogger = logger;
-      final Environment environment = Environment(
-        defines: <String, String>{
-          'BuildMode': 'debug'
-        }, projectDir: fs.currentDirectory,
-        buildDir: fs.directory(getBuildDirectory()),
-      );
-
-      expect(bufferLogger.statusText.trim(),
-          fs.path.relative(environment.buildDir.path, from: fs.currentDirectory.path));
-    }));
-
-    test('Can describe a target', () => testbed.run(() async {
-      when(mockBuildSystem.describe('foobar', any)).thenReturn(<Map<String, Object>>[
-        <String, Object>{'fizz': 'bar'},
-      ]);
-      final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
-      await commandRunner.run(<String>['assemble', '--flutter-root=.', 'describe', 'foobar']);
-      final BufferLogger bufferLogger = logger;
-
-      expect(bufferLogger.statusText.trim(), '[{"fizz":"bar"}]');
-    }));
-
-    test('Can describe a target\'s inputs', () => testbed.run(() async {
-      when(mockBuildSystem.describe('foobar', any)).thenReturn(<Map<String, Object>>[
-        <String, Object>{'name': 'foobar', 'inputs': <String>['bar', 'baz']},
-      ]);
-      final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
-      await commandRunner.run(<String>['assemble', '--flutter-root=.', 'inputs', 'foobar']);
-      final BufferLogger bufferLogger = logger;
-
-      expect(bufferLogger.statusText.trim(), 'bar\nbaz');
-    }));
-
-    test('Can run a build', () => testbed.run(() async {
-      when(mockBuildSystem.build('foobar', any, any)).thenAnswer((Invocation invocation) async {
-        return BuildResult(true, const <String, ExceptionMeasurement>{}, const <String, PerformanceMeasurement>{});
-      });
-      final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
-      await commandRunner.run(<String>['assemble', 'run', 'foobar']);
-      final BufferLogger bufferLogger = logger;
-
-      expect(bufferLogger.statusText.trim(), 'build succeeded');
-    }));
+  setUpAll(() {
+    Cache.disableLocking();
   });
+
+  setUp(() {
+    mockBuildSystem = MockBuildSystem();
+    testbed = Testbed(overrides: <Type, Generator>{
+      BuildSystem: ()  => mockBuildSystem,
+    });
+  });
+
+  test('Can run a build', () => testbed.run(() async {
+    when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+        .thenAnswer((Invocation invocation) async {
+      return BuildResult(success: true);
+    });
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
+    await commandRunner.run(<String>['assemble', 'unpack_macos']);
+    final BufferLogger bufferLogger = logger;
+
+    expect(bufferLogger.statusText.trim(), 'build succeeded.');
+  }));
+
+  test('Only writes input and output files when the values change', () => testbed.run(() async {
+    when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+        .thenAnswer((Invocation invocation) async {
+      return BuildResult(
+        success: true,
+        inputFiles: <File>[fs.file('foo')..createSync()],
+        outputFiles: <File>[fs.file('bar')..createSync()],
+      );
+    });
+
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
+    await commandRunner.run(<String>['assemble', '--build-outputs=outputs', '--build-inputs=inputs', 'unpack_macos']);
+
+    final File inputs = fs.file('inputs');
+    final File outputs = fs.file('outputs');
+    expect(inputs.readAsStringSync(), contains('foo'));
+    expect(outputs.readAsStringSync(), contains('bar'));
+
+    final DateTime theDistantPast = DateTime(1991, 8, 23);
+    inputs.setLastModifiedSync(theDistantPast);
+    outputs.setLastModifiedSync(theDistantPast);
+    await commandRunner.run(<String>['assemble', '--build-outputs=outputs', '--build-inputs=inputs', 'unpack_macos']);
+
+    expect(inputs.lastModifiedSync(), theDistantPast);
+    expect(outputs.lastModifiedSync(), theDistantPast);
+
+
+    when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+        .thenAnswer((Invocation invocation) async {
+      return BuildResult(
+        success: true,
+        inputFiles: <File>[fs.file('foo'), fs.file('fizz')..createSync()],
+        outputFiles: <File>[fs.file('bar'), fs.file(fs.path.join('.dart_tool', 'fizz2'))..createSync(recursive: true)]);
+    });
+    await commandRunner.run(<String>['assemble', '--build-outputs=outputs', '--build-inputs=inputs', 'unpack_macos']);
+
+    expect(inputs.readAsStringSync(), contains('foo'));
+    expect(inputs.readAsStringSync(), contains('fizz'));
+    expect(inputs.lastModifiedSync(), isNot(theDistantPast));
+  }));
 }
 
 class MockBuildSystem extends Mock implements BuildSystem {}

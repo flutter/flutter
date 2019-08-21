@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 void main() {
   testWidgets('Color filter - red', (WidgetTester tester) async {
@@ -21,7 +22,6 @@ void main() {
         'color_filter_red.png',
         version: 1,
       ),
-      skip: !isLinux
     );
   });
 
@@ -63,7 +63,28 @@ void main() {
         'color_filter_sepia.png',
         version: 1,
       ),
-      skip: !isLinux
     );
+  });
+
+  testWidgets('Color filter - reuses its layer', (WidgetTester tester) async {
+    Future<void> pumpWithColor(Color color) async {
+      await tester.pumpWidget(
+        RepaintBoundary(
+          child: ColorFiltered(
+            colorFilter: ColorFilter.mode(color, BlendMode.color),
+            child: const Placeholder(),
+          ),
+        ),
+      );
+    }
+
+    await pumpWithColor(Colors.red);
+    final RenderObject renderObject = tester.firstRenderObject(find.byType(ColorFiltered));
+    final ColorFilterLayer originalLayer = renderObject.debugLayer;
+    expect(originalLayer, isNotNull);
+
+    // Change color to force a repaint.
+    await pumpWithColor(Colors.green);
+    expect(renderObject.debugLayer, same(originalLayer));
   });
 }

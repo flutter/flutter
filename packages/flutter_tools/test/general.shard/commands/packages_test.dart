@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -226,7 +226,8 @@ void main() {
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
-      expect(await getCommand.usageValues, containsPair(kCommandPackagesNumberPlugins, '0'));
+      expect(await getCommand.usageValues,
+             containsPair(CustomDimensions.commandPackagesNumberPlugins, '0'));
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('indicate that the project is not a module in usage value', () async {
@@ -237,7 +238,8 @@ void main() {
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
-      expect(await getCommand.usageValues, containsPair(kCommandPackagesProjectModule, 'false'));
+      expect(await getCommand.usageValues,
+             containsPair(CustomDimensions.commandPackagesProjectModule, 'false'));
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('indicate that the project is a module in usage value', () async {
@@ -248,7 +250,8 @@ void main() {
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
-      expect(await getCommand.usageValues, containsPair(kCommandPackagesProjectModule, 'true'));
+      expect(await getCommand.usageValues,
+             containsPair(CustomDimensions.commandPackagesProjectModule, 'true'));
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('upgrade fetches packages', () async {
@@ -345,7 +348,7 @@ void main() {
     testUsingContext('pub publish', () async {
       final PromptingProcess process = PromptingProcess();
       mockProcessManager.processFactory = (List<String> commands) => process;
-      final Future<void> runPackages = createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
+      final Future<void> runPackages = createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'publish']);
       final Future<void> runPrompt = process.showPrompt('Proceed (y/n)? ', <String>['hello', 'world']);
       final Future<void> simulateUserInput = Future<void>(() {
         mockStdio.simulateStdin('y');
@@ -367,12 +370,23 @@ void main() {
     });
 
     testUsingContext('publish', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'publish']);
+      await createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'publish']);
       final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(3));
+      expect(commands, hasLength(2));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], '--trace');
-      expect(commands[2], 'publish');
+      expect(commands[1], 'publish');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
+    });
+
+    testUsingContext('packages publish', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(2));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], 'publish');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,

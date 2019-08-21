@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
@@ -294,6 +295,87 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('ACTION'));
     expect(tapCount, equals(1));
+  });
+
+  testWidgets('Light theme SnackBar has dark background', (WidgetTester tester) async {
+    final ThemeData lightTheme = ThemeData.light();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: lightTheme,
+        home: Scaffold(
+          body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('I am a snack bar.'),
+                        duration: const Duration(seconds: 2),
+                        action: SnackBarAction(
+                          label: 'ACTION',
+                          onPressed: () { },
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final RenderPhysicalModel renderModel = tester.renderObject(
+        find.widgetWithText(Material, 'I am a snack bar.').first
+    );
+    // There is a somewhat complicated background color calculation based
+    // off of the surface color. For the default light theme it
+    // should be this value.
+    expect(renderModel.color, equals(const Color(0xFF333333)));
+  });
+
+  testWidgets('Dark theme SnackBar has light background', (WidgetTester tester) async {
+    final ThemeData darkTheme = ThemeData.dark();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: darkTheme,
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('I am a snack bar.'),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                        label: 'ACTION',
+                        onPressed: () { },
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final RenderPhysicalModel renderModel = tester.renderObject(
+      find.widgetWithText(Material, 'I am a snack bar.').first
+    );
+    expect(renderModel.color, equals(darkTheme.colorScheme.onSurface));
   });
 
   testWidgets('Snackbar labels can be colored', (WidgetTester tester) async {

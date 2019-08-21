@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -52,7 +52,9 @@ void main() {
     // DevFS Mocks
     when(mockDevFS.lastCompiled).thenReturn(DateTime(2000));
     when(mockDevFS.sources).thenReturn(<Uri>[]);
+    when(mockDevFS.baseUri).thenReturn(Uri());
     when(mockDevFS.destroy()).thenAnswer((Invocation invocation) async { });
+    when(mockDevFS.assetPathsToEvict).thenReturn(<String>{});
     // FlutterDevice Mocks.
     when(mockFlutterDevice.updateDevFS(
       // Intentionally provide empty list to match above mock.
@@ -66,6 +68,7 @@ void main() {
       fullRestart: anyNamed('fullRestart'),
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
+      dillOutputPath: anyNamed('dillOutputPath'),
     )).thenAnswer((Invocation invocation) async {
       return UpdateFSReport(
         success: true,
@@ -79,6 +82,7 @@ void main() {
     ]);
     when(mockFlutterDevice.device).thenReturn(mockDevice);
     when(mockFlutterView.uiIsolate).thenReturn(mockIsolate);
+    when(mockFlutterView.runFromSource(any, any, any)).thenAnswer((Invocation invocation) async {});
     when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.observatoryUris).thenReturn(<Uri>[
       testUri,
@@ -96,6 +100,19 @@ void main() {
       mockVMService,
     ]);
     when(mockFlutterDevice.refreshViews()).thenAnswer((Invocation invocation) async { });
+    when(mockFlutterDevice.reloadSources(any, pause: anyNamed('pause'))).thenReturn(<Future<Map<String, dynamic>>>[
+      Future<Map<String, dynamic>>.value(<String, dynamic>{
+        'type': 'ReloadReport',
+        'success': true,
+        'details': <String, dynamic>{
+          'loadedLibraryCount': 1,
+          'finalLibraryCount': 1,
+          'receivedLibraryCount': 1,
+          'receivedClassesCount': 1,
+          'receivedProceduresCount': 1,
+        },
+      }),
+    ]);
     // VMService mocks.
     when(mockVMService.wsAddress).thenReturn(testUri);
     when(mockVMService.done).thenAnswer((Invocation invocation) {
@@ -107,6 +124,9 @@ void main() {
     });
     when(mockIsolate.flutterExit()).thenAnswer((Invocation invocation) {
       return Future<Map<String, Object>>.value(null);
+    });
+    when(mockIsolate.reload()).thenAnswer((Invocation invocation) {
+      return Future<ServiceObject>.value(null);
     });
   });
 
@@ -156,17 +176,78 @@ void main() {
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
+      dillOutputPath: anyNamed('dillOutputPath'),
     )).thenThrow(RpcException(666, 'something bad happened'));
 
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, true);
     expect(result.code, 1);
     verify(flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
-      reloadExceptionTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
-      reloadExceptionSdkName: 'Example',
-      reloadExceptionEmulator: 'false',
-      reloadExceptionFullRestart: 'false',
+      cdKey(CustomDimensions.hotEventTargetPlatform):
+        getNameForTargetPlatform(TargetPlatform.android_arm),
+      cdKey(CustomDimensions.hotEventSdkName): 'Example',
+      cdKey(CustomDimensions.hotEventEmulator): 'false',
+      cdKey(CustomDimensions.hotEventFullRestart): 'false',
     })).called(1);
+  }, overrides: <Type, Generator>{
+    Usage: () => MockUsage(),
+  }));
+
+  test('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    ));
+
+    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    expect(result.fatal, false);
+    expect(result.code, 0);
+    expect(verify(flutterUsage.sendEvent('hot', 'reload',
+                  parameters: captureAnyNamed('parameters'))).captured[0],
+      containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
+                   getNameForTargetPlatform(TargetPlatform.android_arm))
+    );
+  }, overrides: <Type, Generator>{
+    Usage: () => MockUsage(),
+  }));
+
+  test('ResidentRunner can send target platform to analytics from full restart', () => testbed.run(() async {
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    when(mockDevice.supportsHotRestart).thenReturn(true);
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    ));
+
+    final OperationResult result = await residentRunner.restart(fullRestart: true);
+    expect(result.fatal, false);
+    expect(result.code, 0);
+    expect(verify(flutterUsage.sendEvent('hot', 'restart',
+                  parameters: captureAnyNamed('parameters'))).captured[0],
+      containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
+                   getNameForTargetPlatform(TargetPlatform.android_arm))
+    );
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
   }));
@@ -200,16 +281,18 @@ void main() {
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
+      dillOutputPath: anyNamed('dillOutputPath'),
     )).thenThrow(RpcException(666, 'something bad happened'));
 
     final OperationResult result = await residentRunner.restart(fullRestart: true);
     expect(result.fatal, true);
     expect(result.code, 1);
     verify(flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
-      reloadExceptionTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
-      reloadExceptionSdkName: 'Example',
-      reloadExceptionEmulator: 'false',
-      reloadExceptionFullRestart: 'true',
+      cdKey(CustomDimensions.hotEventTargetPlatform):
+        getNameForTargetPlatform(TargetPlatform.android_arm),
+      cdKey(CustomDimensions.hotEventSdkName): 'Example',
+      cdKey(CustomDimensions.hotEventEmulator): 'false',
+      cdKey(CustomDimensions.hotEventFullRestart): 'true',
     })).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
@@ -351,6 +434,82 @@ void main() {
     await flutterDevice.exitApps();
 
     verify(mockIsolate.flutterExit()).called(1);
+  }));
+
+  test('ResidentRunner refreshViews calls flutter device', () => testbed.run(() async {
+    await residentRunner.refreshViews();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+  }));
+
+  test('ResidentRunner debugDumpApp calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugDumpApp();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.debugDumpApp()).called(1);
+  }));
+
+  test('ResidentRunner debugDumpRenderTree calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugDumpRenderTree();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.debugDumpRenderTree()).called(1);
+  }));
+
+  test('ResidentRunner debugDumpLayerTree calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugDumpLayerTree();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.debugDumpLayerTree()).called(1);
+  }));
+
+  test('ResidentRunner debugDumpSemanticsTreeInTraversalOrder calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugDumpSemanticsTreeInTraversalOrder();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.debugDumpSemanticsTreeInTraversalOrder()).called(1);
+  }));
+
+  test('ResidentRunner debugDumpSemanticsTreeInInverseHitTestOrder calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.debugDumpSemanticsTreeInInverseHitTestOrder()).called(1);
+  }));
+
+  test('ResidentRunner debugToggleDebugPaintSizeEnabled calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugToggleDebugPaintSizeEnabled();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.toggleDebugPaintSizeEnabled()).called(1);
+  }));
+
+  test('ResidentRunner debugToggleDebugCheckElevationsEnabled calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugToggleDebugCheckElevationsEnabled();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.toggleDebugCheckElevationsEnabled()).called(1);
+  }));
+
+  test('ResidentRunner debugTogglePerformanceOverlayOverride calls flutter device', () => testbed.run(()async {
+    await residentRunner.debugTogglePerformanceOverlayOverride();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.debugTogglePerformanceOverlayOverride()).called(1);
+  }));
+
+  test('ResidentRunner debugToggleWidgetInspector calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugToggleWidgetInspector();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.toggleWidgetInspector()).called(1);
+  }));
+
+  test('ResidentRunner debugToggleProfileWidgetBuilds calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugToggleProfileWidgetBuilds();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.toggleProfileWidgetBuilds()).called(1);
   }));
 }
 

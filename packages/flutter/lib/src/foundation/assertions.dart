@@ -411,7 +411,7 @@ class FlutterErrorDetails extends Diagnosticable {
         String message = exceptionAsString();
         if (message.startsWith(prefix))
           message = message.substring(prefix.length);
-        properties.add(ErrorDescription('$message'));
+        properties.add(ErrorSummary('$message'));
       }
     }
 
@@ -459,7 +459,7 @@ class FlutterErrorDetails extends Diagnosticable {
 
   @override
   String toStringShort() {
-    return library != null ? 'Exception Caught By $library' : 'Exception Caught';
+    return library != null ? 'Exception caught by $library' : 'Exception caught';
   }
 
   @override
@@ -750,6 +750,12 @@ void debugPrintStack({ String label, int maxFrames }) {
   if (label != null)
     debugPrint(label);
   Iterable<String> lines = StackTrace.current.toString().trimRight().split('\n');
+  if (kIsWeb) {
+    // Remove extra call to StackTrace.current for web platform.
+    // TODO(ferhat): remove when https://github.com/flutter/flutter/issues/37635
+    // is addressed.
+    lines = lines.skip(1);
+  }
   if (maxFrames != null)
     lines = lines.take(maxFrames);
   debugPrint(FlutterError.defaultStackFilter(lines).join('\n'));

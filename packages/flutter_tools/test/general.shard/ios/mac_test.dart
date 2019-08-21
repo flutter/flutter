@@ -5,14 +5,14 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
-import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -113,6 +113,69 @@ void main() {
       Artifacts: () => mockArtifacts,
     });
 
+    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when user has not yet trusted the host', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
+      when(mockProcessManager.run(
+        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+      )).thenAnswer((_) {
+        final ProcessResult result = ProcessResult(
+          1,
+          255,
+          '',
+          'ERROR: Could not connect to lockdownd, error code -${LockdownReturnCode.pairingDialogResponsePending.code}',
+        );
+        return Future<ProcessResult>.value(result);
+      });
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Cache: () => mockCache,
+      Artifacts: () => mockArtifacts,
+    });
+
+    testUsingContext('getInfoForDevice throws ToolExit lockdownd fails for unknown reason', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
+      when(mockProcessManager.run(
+        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+      )).thenAnswer((_) {
+        final ProcessResult result = ProcessResult(
+          1,
+          255,
+          '',
+          'ERROR: Could not connect to lockdownd, error code -12345',
+        );
+        return Future<ProcessResult>.value(result);
+      });
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsToolExit());
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Cache: () => mockCache,
+      Artifacts: () => mockArtifacts,
+    });
+
+    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when host trust is revoked', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
+      when(mockProcessManager.run(
+        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+      )).thenAnswer((_) {
+        final ProcessResult result = ProcessResult(
+          1,
+          255,
+          '',
+          'ERROR: Could not connect to lockdownd, error code -${LockdownReturnCode.invalidHostId.code}',
+        );
+        return Future<ProcessResult>.value(result);
+      });
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Cache: () => mockCache,
+      Artifacts: () => mockArtifacts,
+    });
+
     group('screenshot', () {
       final String outputPath = fs.path.join('some', 'test', 'path', 'image.png');
       MockProcessManager mockProcessManager;
@@ -183,9 +246,10 @@ void main() {
       );
 
       await diagnoseXcodeBuildFailure(buildResult);
-      verify(mockUsage.sendEvent('Xcode', 'bitcode-failure', parameters: <String, String>{
-        'build-commands': buildCommands.toString(),
-        'build-settings': buildSettings.toString(),
+      verify(mockUsage.sendEvent('build', 'xcode-bitcode-failure',
+        parameters: <String, String>{
+          cdKey(CustomDimensions.buildEventCommand): buildCommands.toString(),
+          cdKey(CustomDimensions.buildEventSettings): buildSettings.toString(),
       })).called(1);
     }, overrides: <Type, Generator>{
       Usage: () => mockUsage,

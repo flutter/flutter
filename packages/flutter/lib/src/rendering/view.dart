@@ -7,6 +7,7 @@ import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, Window;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show MouseTrackerAnnotation;
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -39,7 +40,7 @@ class ViewConfiguration {
   }
 
   @override
-  String toString() => '$size at ${devicePixelRatio}x';
+  String toString() => '$size at ${debugFormatDouble(devicePixelRatio)}x';
 }
 
 /// The root of the render tree.
@@ -173,6 +174,19 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     return true;
   }
 
+  /// Determines the set of mouse tracker annotations at the given position.
+  ///
+  /// See also:
+  ///
+  /// * [Layer.findAll], which is used by this method to find all
+  ///   [AnnotatedRegionLayer]s annotated for mouse tracking.
+  Iterable<MouseTrackerAnnotation> hitTestMouseTrackers(Offset position) {
+    // Layer hit testing is done using device pixels, so we have to convert
+    // the logical coordinates of the event location back to device pixels
+    // here.
+    return layer.findAll<MouseTrackerAnnotation>(position * configuration.devicePixelRatio);
+  }
+
   @override
   bool get isRepaintBoundary => true;
 
@@ -256,7 +270,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // root superclasses don't include any interesting information for this
     // class
     assert(() {
-      properties.add(DiagnosticsNode.message('debug mode enabled - ${Platform.operatingSystem}'));
+      properties.add(DiagnosticsNode.message('debug mode enabled - ${kIsWeb ? 'Web' :  Platform.operatingSystem}'));
       return true;
     }());
     properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));

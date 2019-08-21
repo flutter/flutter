@@ -215,6 +215,7 @@ void main() {
     const Key key = Key('test');
     const Color focusColor = Color(0xff00ff00);
 
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -241,6 +242,7 @@ void main() {
     const Key key = Key('test');
     const Color hoverColor = Color(0xff00ff00);
 
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -257,13 +259,12 @@ void main() {
     final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     expect(box, isNot(paints..rect(color: hoverColor)));
 
     await gesture.moveTo(tester.getCenter(find.byType(RawMaterialButton)));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
     expect(box, paints..rect(color: hoverColor));
-
-    await gesture.removePointer();
   });
 }

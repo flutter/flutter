@@ -11,17 +11,18 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
-import '../ios/ios_workflow.dart';
+import '../ios/plist_parser.dart';
 import '../macos/xcode.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
 class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmentArtifacts {
-  BuildAotCommand() {
+  BuildAotCommand({bool verboseHelp = false}) {
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();
@@ -37,16 +38,10 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         defaultsTo: false,
         help: 'Report timing information about build steps in machine readable form,',
       )
-      // track-widget-creation is exposed as a flag here but ignored to deal with build
-      // invalidation issues - there are no plans to support it for AOT mode.
-      ..addFlag('track-widget-creation',
-        defaultsTo: false,
-        hide: true,
-      )
       ..addMultiOption('ios-arch',
         splitCommas: true,
-        defaultsTo: defaultIOSArchs.map<String>(getNameForIOSArch),
-        allowed: IOSArch.values.map<String>(getNameForIOSArch),
+        defaultsTo: defaultIOSArchs.map<String>(getNameForDarwinArch),
+        allowed: DarwinArch.values.map<String>(getNameForDarwinArch),
         help: 'iOS architectures to build.',
       )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
@@ -62,6 +57,10 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         help: 'Build the AOT bundle with bitcode. Requires a compatible bitcode engine.',
         hide: true,
       );
+    // --track-widget-creation is exposed as a flag here to deal with build
+    // invalidation issues, but it is ignored -- there are no plans to support
+    // it for AOT mode.
+    usesTrackWidgetCreation(hasEffect: false, verboseHelp: verboseHelp);
   }
 
   @override
@@ -119,17 +118,17 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       // Build AOT snapshot.
       if (platform == TargetPlatform.ios) {
         // Determine which iOS architectures to build for.
-        final Iterable<IOSArch> buildArchs = argResults['ios-arch'].map<IOSArch>(getIOSArchForName);
-        final Map<IOSArch, String> iosBuilds = <IOSArch, String>{};
-        for (IOSArch arch in buildArchs)
-          iosBuilds[arch] = fs.path.join(outputPath, getNameForIOSArch(arch));
+        final Iterable<DarwinArch> buildArchs = argResults['ios-arch'].map<DarwinArch>(getIOSArchForName);
+        final Map<DarwinArch, String> iosBuilds = <DarwinArch, String>{};
+        for (DarwinArch arch in buildArchs)
+          iosBuilds[arch] = fs.path.join(outputPath, getNameForDarwinArch(arch));
 
         // Generate AOT snapshot and compile to arch-specific App.framework.
-        final Map<IOSArch, Future<int>> exitCodes = <IOSArch, Future<int>>{};
-        iosBuilds.forEach((IOSArch iosArch, String outputPath) {
+        final Map<DarwinArch, Future<int>> exitCodes = <DarwinArch, Future<int>>{};
+        iosBuilds.forEach((DarwinArch iosArch, String outputPath) {
           exitCodes[iosArch] = snapshotter.build(
             platform: platform,
-            iosArch: iosArch,
+            darwinArch: iosArch,
             buildMode: buildMode,
             mainPath: mainPath,
             packagesPath: PackageMap.globalPackagesPath,
@@ -151,17 +150,17 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
             '-create',
             '-output', fs.path.join(outputPath, 'App.framework', 'App'),
           ]);
-          final Iterable<String> dSYMs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework.dSYM'));
-          fs.directory(fs.path.join(outputPath, 'App.framework.dSYM', 'Contents', 'Resources', 'DWARF'))..createSync(recursive: true);
+          final Iterable<String> dSYMs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework.dSYM.noindex'));
+          fs.directory(fs.path.join(outputPath, 'App.framework.dSYM.noindex', 'Contents', 'Resources', 'DWARF'))..createSync(recursive: true);
           await runCheckedAsync(<String>[
             'lipo',
             '-create',
-            '-output', fs.path.join(outputPath, 'App.framework.dSYM', 'Contents', 'Resources', 'DWARF', 'App'),
+            '-output', fs.path.join(outputPath, 'App.framework.dSYM.noindex', 'Contents', 'Resources', 'DWARF', 'App'),
             ...dSYMs.map((String path) => fs.path.join(path, 'Contents', 'Resources', 'DWARF', 'App'))
           ]);
         } else {
           status?.cancel();
-          exitCodes.forEach((IOSArch iosArch, Future<int> exitCodeFuture) async {
+          exitCodes.forEach((DarwinArch iosArch, Future<int> exitCodeFuture) async {
             final int buildExitCode = await exitCodeFuture;
             printError('Snapshotting ($iosArch) exited with non-zero exit code: $buildExitCode');
           });
@@ -223,17 +222,39 @@ Future<void> validateBitcode() async {
   }
   final RunResult clangResult = await xcode.clang(<String>['--version']);
   final String clangVersion = clangResult.stdout.split('\n').first;
-  final String engineClangVersion = iosWorkflow.getPlistValueFromFile(
+  final String engineClangVersion = PlistParser.instance.getValueFromFile(
     fs.path.join(flutterFrameworkPath, 'Info.plist'),
     'ClangVersion',
   );
-  if (clangVersion != engineClangVersion) {
-    printStatus(
+  final Version engineClangSemVer = _parseVersionFromClang(engineClangVersion);
+  final Version clangSemVer = _parseVersionFromClang(clangVersion);
+  if (engineClangSemVer > clangSemVer) {
+    throwToolExit(
       'The Flutter.framework at $flutterFrameworkPath was built '
       'with "${engineClangVersion ?? 'unknown'}", but the current version '
-      'of clang is "$clangVersion". This may result in failures when '
-      'archiving your application in Xcode.',
-      emphasis: true,
+      'of clang is "$clangVersion". This will result in failures when trying to'
+      'archive an IPA. To resolve this issue, update your version of Xcode to '
+      'at least $engineClangSemVer.',
     );
   }
+}
+
+Version _parseVersionFromClang(String clangVersion) {
+  const String prefix = 'Apple LLVM version ';
+  void _invalid() {
+    throwToolExit('Unable to parse Clang version from "$clangVersion". '
+                  'Expected a string like "$prefix #.#.# (clang-####.#.##.#)".');
+  }
+  if (clangVersion == null || clangVersion.length <= prefix.length || !clangVersion.startsWith(prefix)) {
+    _invalid();
+  }
+  final int lastSpace = clangVersion.lastIndexOf(' ');
+  if (lastSpace == -1) {
+    _invalid();
+  }
+  final Version version = Version.parse(clangVersion.substring(prefix.length, lastSpace));
+  if (version == null) {
+    _invalid();
+  }
+  return version;
 }

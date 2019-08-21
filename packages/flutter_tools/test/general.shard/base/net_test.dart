@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/net.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
@@ -105,7 +106,32 @@ void main() {
     ),
   });
 
-testUsingContext('retry from HttpException', () async {
+  testUsingContext('check for bad override on ArgumentError', () async {
+    String error;
+    FakeAsync().run((FakeAsync time) {
+      fetchUrl(Uri.parse('example.invalid/')).then((List<int> value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic exception) {
+        error = 'test failed: $exception';
+      });
+      expect(testLogger.statusText, '');
+      time.elapse(const Duration(milliseconds: 10000));
+      expect(testLogger.statusText, '');
+    });
+    expect(error, startsWith('test failed'));
+    expect(testLogger.errorText, contains('Invalid argument'));
+    expect(error, contains('FLUTTER_STORAGE_BASE_URL'));
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () => () => MockHttpClientThrowing(
+      ArgumentError('test exception handling'),
+    ),
+    Platform: () => FakePlatform.fromPlatform(const LocalPlatform())
+      ..environment = <String, String>{
+        'FLUTTER_STORAGE_BASE_URL': 'example.invalid'
+      },
+  });
+
+  testUsingContext('retry from HttpException', () async {
     String error;
     FakeAsync().run((FakeAsync time) {
       fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
@@ -183,7 +209,7 @@ testUsingContext('retry from HttpException', () async {
 class MockHttpClientThrowing implements io.HttpClient {
   MockHttpClientThrowing(this.exception);
 
-  final Exception exception;
+  final Object exception;
 
   @override
   Future<io.HttpClientRequest> getUrl(Uri url) async {

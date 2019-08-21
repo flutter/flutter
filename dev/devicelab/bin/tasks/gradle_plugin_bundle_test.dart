@@ -17,17 +17,14 @@ Future<void> main() async {
         await project.runGradleTask('bundleRelease');
 
         final String releaseBundle = path.join(
-            project.rootPath,
-            'build',
-            'app',
-            'outputs',
-            'bundle',
-            'release',
-            'app.aab',
-          );
-
-        final Iterable<String> bundleFiles = await getFilesInAppBundle(releaseBundle);
-
+          project.rootPath,
+          'build',
+          'app',
+          'outputs',
+          'bundle',
+          'release',
+          'app.aab',
+        );
         checkItContains<String>(<String>[
           'base/manifest/AndroidManifest.xml',
           'base/dex/classes.dex',
@@ -35,28 +32,30 @@ Future<void> main() async {
           'base/lib/arm64-v8a/libflutter.so',
           'base/lib/armeabi-v7a/libapp.so',
           'base/lib/armeabi-v7a/libflutter.so',
-        ], bundleFiles);
+        ], await getFilesInAppBundle(releaseBundle));
       });
 
       await runProjectTest((FlutterProject project) async {
         section('App bundle content using flavors without explicit target platform');
         // Add a few flavors.
-        await project.addProductFlavors(<String> ['production', 'staging', 'development']);
+        await project.addProductFlavors(<String> [
+          'production',
+          'staging',
+          'development',
+          'flavor_underscore', // https://github.com/flutter/flutter/issues/36067
+        ]);
         // Build the production flavor in release mode.
         await project.runGradleTask('bundleProductionRelease');
 
-        final String bundlePath = path.join(
-            project.rootPath,
-            'build',
-            'app',
-            'outputs',
-            'bundle',
-            'productionRelease',
-            'app.aab',
-          );
-
-        final Iterable<String> bundleFiles = await getFilesInAppBundle(bundlePath);
-
+        final String bundleFromGradlePath = path.join(
+          project.rootPath,
+          'build',
+          'app',
+          'outputs',
+          'bundle',
+          'productionRelease',
+          'app.aab',
+        );
         checkItContains<String>(<String>[
           'base/manifest/AndroidManifest.xml',
           'base/dex/classes.dex',
@@ -64,7 +63,78 @@ Future<void> main() async {
           'base/lib/arm64-v8a/libflutter.so',
           'base/lib/armeabi-v7a/libapp.so',
           'base/lib/armeabi-v7a/libflutter.so',
-        ], bundleFiles);
+        ], await getFilesInAppBundle(bundleFromGradlePath));
+
+        section('Build app bundle using the flutter tool - flavor: flavor_underscore');
+
+        int exitCode;
+        await inDirectory(project.rootPath, () async {
+          exitCode = await flutter(
+            'build',
+            options: <String>[
+              'appbundle',
+              '--flavor=flavor_underscore',
+              '--verbose',
+            ],
+          );
+        });
+
+        if (exitCode != 0) {
+          throw TaskResult.failure('flutter build appbundle command exited with code: $exitCode');
+        }
+
+        final String flavorUnderscoreBundlePath = path.join(
+          project.rootPath,
+          'build',
+          'app',
+          'outputs',
+          'bundle',
+          'flavor_underscoreRelease',
+          'app.aab',
+        );
+        checkItContains<String>(<String>[
+          'base/manifest/AndroidManifest.xml',
+          'base/dex/classes.dex',
+          'base/lib/arm64-v8a/libapp.so',
+          'base/lib/arm64-v8a/libflutter.so',
+          'base/lib/armeabi-v7a/libapp.so',
+          'base/lib/armeabi-v7a/libflutter.so',
+        ], await getFilesInAppBundle(flavorUnderscoreBundlePath));
+
+        section('Build app bundle using the flutter tool - flavor: production');
+
+        await inDirectory(project.rootPath, () async {
+          exitCode = await flutter(
+            'build',
+            options: <String>[
+              'appbundle',
+              '--flavor=production',
+              '--verbose',
+            ],
+          );
+        });
+
+        if (exitCode != 0) {
+          throw TaskResult.failure('flutter build appbundle command exited with code: $exitCode');
+        }
+
+        final String productionBundlePath = path.join(
+          project.rootPath,
+          'build',
+          'app',
+          'outputs',
+          'bundle',
+          'productionRelease',
+          'app.aab',
+        );
+        checkItContains<String>(<String>[
+          'base/manifest/AndroidManifest.xml',
+          'base/dex/classes.dex',
+          'base/lib/arm64-v8a/libapp.so',
+          'base/lib/arm64-v8a/libflutter.so',
+          'base/lib/armeabi-v7a/libapp.so',
+          'base/lib/armeabi-v7a/libflutter.so',
+        ], await getFilesInAppBundle(productionBundlePath));
       });
 
       await runProjectTest((FlutterProject project) async {
@@ -73,14 +143,14 @@ Future<void> main() async {
             options: <String>['-Ptarget-platform=android-arm']);
 
         final String releaseBundle = path.join(
-            project.rootPath,
-            'build',
-            'app',
-            'outputs',
-            'bundle',
-            'release',
-            'app.aab',
-          );
+          project.rootPath,
+          'build',
+          'app',
+          'outputs',
+          'bundle',
+          'release',
+          'app.aab',
+        );
 
         final Iterable<String> bundleFiles = await getFilesInAppBundle(releaseBundle);
 

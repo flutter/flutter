@@ -304,6 +304,12 @@ Information about project "Runner":
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('ARCHS=armv7'), isTrue);
+
+      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+      expect(buildPhaseScript.existsSync(), isTrue);
+
+      final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
+      expect(buildPhaseScriptContents.contains('ARCHS=armv7'), isTrue);
     });
 
     testUsingOsxContext('sets TRACK_WIDGET_CREATION=true when trackWidgetCreation is true', () async {
@@ -322,6 +328,12 @@ Information about project "Runner":
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('TRACK_WIDGET_CREATION=true'), isTrue);
+
+      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+      expect(buildPhaseScript.existsSync(), isTrue);
+
+      final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
+      expect(buildPhaseScriptContents.contains('TRACK_WIDGET_CREATION=true'), isTrue);
     });
 
     testUsingOsxContext('does not set TRACK_WIDGET_CREATION when trackWidgetCreation is false', () async {
@@ -340,6 +352,12 @@ Information about project "Runner":
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('TRACK_WIDGET_CREATION=true'), isFalse);
+
+      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+      expect(buildPhaseScript.existsSync(), isTrue);
+
+      final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
+      expect(buildPhaseScriptContents.contains('TRACK_WIDGET_CREATION=true'), isFalse);
     });
 
     testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () async {
@@ -395,6 +413,7 @@ Information about project "Runner":
       final File localPropertiesFile = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(propertyFor('FLUTTER_BUILD_NAME', localPropertiesFile), expectedBuildName);
       expect(propertyFor('FLUTTER_BUILD_NUMBER', localPropertiesFile), expectedBuildNumber);
+      expect(propertyFor('FLUTTER_BUILD_NUMBER', localPropertiesFile), isNotNull);
     }
 
     testUsingOsxContext('extract build name and number from pubspec.yaml', () async {
@@ -430,7 +449,7 @@ flutter:
         manifestString: manifest,
         buildInfo: buildInfo,
         expectedBuildName: '1.0.0',
-        expectedBuildNumber: null,
+        expectedBuildNumber: '1.0.0',
       );
     });
 
@@ -449,6 +468,24 @@ flutter:
         buildInfo: buildInfo,
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '1',
+      );
+    });
+
+    testUsingOsxContext('allow build info to override build name with build number fallback', () async {
+      const String manifest = '''
+name: test
+version: 1.0.0
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2');
+      await checkBuildVersion(
+        manifestString: manifest,
+        buildInfo: buildInfo,
+        expectedBuildName: '1.0.2',
+        expectedBuildNumber: '1.0.2',
       );
     });
 

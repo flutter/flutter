@@ -1192,24 +1192,17 @@ void main() {
                 TestSemantics(
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isSelected,
-                    SemanticsFlag.isHeader,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'AC\nTab 1 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Alarm\nTab 2 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Hot Tub\nTab 3 of 3',
                   textDirection: TextDirection.ltr,
@@ -1260,24 +1253,17 @@ void main() {
                 TestSemantics(
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isSelected,
-                    SemanticsFlag.isHeader,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'AC\nTab 1 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Alarm\nTab 2 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Hot Tub\nTab 3 of 3',
                   textDirection: TextDirection.ltr,
@@ -1438,7 +1424,6 @@ void main() {
           'bottom_navigation_bar.shifting_transition.$pump.png',
           version: 2,
         ),
-        skip: !isLinux,
       );
     }
   }, skip: isBrowser);
@@ -1566,16 +1551,12 @@ void main() {
                 TestSemantics(
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isSelected,
-                    SemanticsFlag.isHeader,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Red\nTab 1 of 2',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Green\nTab 2 of 2',
                   textDirection: TextDirection.ltr,
@@ -1624,16 +1605,12 @@ void main() {
                 TestSemantics(
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isSelected,
-                    SemanticsFlag.isHeader,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Red\nTab 1 of 2',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Green\nTab 2 of 2',
                   textDirection: TextDirection.ltr,

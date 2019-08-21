@@ -11,6 +11,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 Future<void> main() async {
+  final String dot = Platform.isWindows ? '-' : '•';
   await task(() async {
     final Stopwatch clock = Stopwatch()..start();
     final Process analysis = await startProcess(
@@ -27,9 +28,9 @@ Future<void> main() async {
       print('analyzer stdout: $entry');
       if (entry == 'Building flutter tool...') {
         // ignore this line
-      } else if (entry.startsWith('info • Document all public members •')) {
+      } else if (entry.startsWith('info $dot Document all public members $dot')) {
         publicMembers += 1;
-      } else if (entry.startsWith('info •') || entry.startsWith('warning •') || entry.startsWith('error •')) {
+      } else if (entry.startsWith('info $dot') || entry.startsWith('warning $dot') || entry.startsWith('error $dot')) {
         otherErrors += 1;
       } else if (entry.contains(' (ran in ') && !sawFinalLine) {
         // ignore this line once

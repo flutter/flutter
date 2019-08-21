@@ -42,8 +42,22 @@ void main() {
     return (List<String> command) => MockProcess(stdout: stdoutStream);
   }
 
+  testUsingContext('licensesAccepted returns LicensesAccepted.unknown if cannot find sdkmanager', () async {
+    processManager.canRunSucceeds = false;
+    when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
+    final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
+    expect(licenseStatus, LicensesAccepted.unknown);
+  }, overrides: <Type, Generator>{
+    AndroidSdk: () => sdk,
+    FileSystem: () => fs,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    ProcessManager: () => processManager,
+    Stdio: () => stdio,
+  });
+
   testUsingContext('licensesAccepted returns LicensesAccepted.unknown if cannot run sdkmanager', () async {
-    processManager.succeed = false;
+    processManager.runSucceeds = false;
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
@@ -168,7 +182,20 @@ void main() {
 
   testUsingContext('runLicenseManager errors when sdkmanager is not found', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
-    processManager.succeed = false;
+    processManager.canRunSucceeds = false;
+
+    expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit());
+  }, overrides: <Type, Generator>{
+    AndroidSdk: () => sdk,
+    FileSystem: () => fs,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    ProcessManager: () => processManager,
+    Stdio: () => stdio,
+  });
+
+  testUsingContext('runLicenseManager errors when sdkmanager fails to run', () async {
+    when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
+    processManager.runSucceeds = false;
 
     expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit());
   }, overrides: <Type, Generator>{

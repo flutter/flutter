@@ -35,7 +35,6 @@ TaskFunction createMicrobenchmarkTask() {
             '-d',
             device.deviceId,
           ];
-          setLocalEngineOptionIfNecessary(options);
           options.add(benchmarkPath);
           return await _startFlutter(
             options: options,
@@ -70,7 +69,7 @@ Future<Process> _startFlutter({
   bool canFail = false,
   Map<String, String> environment,
 }) {
-  final List<String> args = <String>['run', ...options];
+  final List<String> args = flutterCommandArgs('run', options);
   return startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), args, environment: environment);
 }
 

@@ -22,7 +22,6 @@ class BuildApkCommand extends BuildSubCommand {
     usesBuildNameOption();
 
     argParser
-      ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
       ..addFlag('split-per-abi',
         negatable: false,
         help: 'Whether to split the APKs per ABIs.'
@@ -34,6 +33,7 @@ class BuildApkCommand extends BuildSubCommand {
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'The target platform for which the app is compiled.',
       );
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
 
   @override

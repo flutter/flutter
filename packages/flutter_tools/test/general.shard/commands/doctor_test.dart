@@ -16,9 +16,9 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -271,6 +271,22 @@ void main() {
       expect(
         verify(mockUsage.sendEvent('doctorResult.PartialValidatorWithErrors', captureAny)).captured,
         <dynamic>['partial'],
+      );
+    }, overrides: <Type, Generator>{
+      Platform: _kNoColorOutputPlatform,
+      Usage: () => mockUsage,
+    });
+
+    testUsingContext('events for grouped validators are properly decomposed', () async {
+      await FakeGroupedDoctor().diagnose(verbose: false);
+
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PassingGroupedValidator', captureAny)).captured,
+        <dynamic>['installed', 'installed', 'installed'],
+      );
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.MissingGroupedValidator', captureAny)).captured,
+        <dynamic>['missing'],
       );
     }, overrides: <Type, Generator>{
       Platform: _kNoColorOutputPlatform,

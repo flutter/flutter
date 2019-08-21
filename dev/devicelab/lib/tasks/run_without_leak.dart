@@ -19,12 +19,11 @@ TaskFunction createRunWithoutLeakTest(dynamic dir) {
     final List<String> options = <String>[
       '-d', device.deviceId, '--verbose',
     ];
-    setLocalEngineOptionIfNecessary(options);
     int exitCode;
     await inDirectory<void>(dir, () async {
       final Process process = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
-          <String>['run', ...options],
+          flutterCommandArgs('run', options),
           environment: null,
       );
       final Completer<void> stdoutDone = Completer<void>();

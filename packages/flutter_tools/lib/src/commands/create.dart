@@ -20,9 +20,10 @@ import '../cache.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../doctor.dart';
+import '../features.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 import '../version.dart';
@@ -128,13 +129,13 @@ class CreateCommand extends FlutterCommand {
     argParser.addOption(
       'ios-language',
       abbr: 'i',
-      defaultsTo: 'objc',
+      defaultsTo: 'swift',
       allowed: <String>['objc', 'swift'],
     );
     argParser.addOption(
       'android-language',
       abbr: 'a',
-      defaultsTo: 'java',
+      defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
     );
     argParser.addFlag(
@@ -164,11 +165,11 @@ class CreateCommand extends FlutterCommand {
   String get invocation => '${runner.executableName} $name <output directory>';
 
   @override
-  Future<Map<String, String>> get usageValues async {
-    return <String, String>{
-      kCommandCreateProjectType: argResults['template'],
-      kCommandCreateAndroidLanguage: argResults['android-language'],
-      kCommandCreateIosLanguage: argResults['ios-language'],
+  Future<Map<CustomDimensions, String>> get usageValues async {
+    return <CustomDimensions, String>{
+      CustomDimensions.commandCreateProjectType: argResults['template'],
+      CustomDimensions.commandCreateAndroidLanguage: argResults['android-language'],
+      CustomDimensions.commandCreateIosLanguage: argResults['ios-language'],
     };
   }
 
@@ -613,7 +614,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'iosLanguage': iosLanguage,
       'flutterRevision': FlutterVersion.instance.frameworkRevision,
       'flutterChannel': FlutterVersion.instance.channel,
-      'web': web && FlutterVersion.instance.isMaster
+      'web': web && featureFlags.isWebEnabled,
     };
   }
 

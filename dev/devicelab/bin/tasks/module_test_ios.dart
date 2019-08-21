@@ -59,6 +59,13 @@ Future<void> main() async {
         );
       }
 
+      if (await _hasDebugSymbols(ephemeralReleaseHostApp)) {
+        return TaskResult.failure(
+          "Ephemeral host app ${ephemeralReleaseHostApp.path}'s App.framework's "
+          "debug symbols weren't stripped in release mode"
+        );
+      }
+
       section('Clean build');
 
       await inDirectory(projectDir, () async {
@@ -89,6 +96,12 @@ Future<void> main() async {
       if (!await _isAppAotBuild(ephemeralProfileHostApp)) {
         return TaskResult.failure(
           'Ephemeral host app ${ephemeralProfileHostApp.path} was not a profile build as expected'
+        );
+      }
+
+      if (!await _hasDebugSymbols(ephemeralProfileHostApp)) {
+        return TaskResult.failure(
+          "Ephemeral host app ${ephemeralProfileHostApp.path}'s App.framework does not contain debug symbols"
         );
       }
 
@@ -143,7 +156,7 @@ Future<void> main() async {
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  battery:\n  package_info:\n',
+        '\ndependencies:\n  device_info:\n  package_info:\n',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -172,6 +185,15 @@ Future<void> main() async {
 
       if (!ephemeralHostAppWithCocoaPodsBuilt) {
         return TaskResult.failure('Failed to build ephemeral host .app with CocoaPods');
+      }
+
+      final File podfileLockFile = File(path.join(projectDir.path, '.ios', 'Podfile.lock'));
+      final String podfileLockOutput = podfileLockFile.readAsStringSync();
+      if (!podfileLockOutput.contains(':path: Flutter/engine')
+        || !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant')
+        || !podfileLockOutput.contains(':path: Flutter/.symlinks/device_info/ios')
+        || !podfileLockOutput.contains(':path: Flutter/.symlinks/package_info/ios')) {
+        return TaskResult.failure('Building ephemeral host app Podfile.lock does not contain expected pods');
       }
 
       section('Clean build');
@@ -237,6 +259,7 @@ Future<void> main() async {
             'CODE_SIGN_IDENTITY=-',
             'EXPANDED_CODE_SIGN_IDENTITY=-',
             'CONFIGURATION_BUILD_DIR=${tempDir.path}',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           environment: <String, String> {
             'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
@@ -261,6 +284,34 @@ Future<void> main() async {
           'Building outer app produced the following analytics: "$analyticsOutput"'
           'but not the expected strings: "cd24: ios", "cd25: true", "viewName: build/bundle"'
         );
+      }
+
+      section('Fail building existing iOS app if flutter script fails');
+      int xcodebuildExitCode = 0;
+      await inDirectory(hostApp, () async {
+        xcodebuildExitCode = await exec(
+          'xcodebuild',
+          <String>[
+            '-workspace',
+            'Host.xcworkspace',
+            '-scheme',
+            'Host',
+            '-configuration',
+            'Debug',
+            'ARCHS=i386', // i386 is not supported in Debug mode.
+            'CODE_SIGNING_ALLOWED=NO',
+            'CODE_SIGNING_REQUIRED=NO',
+            'CODE_SIGN_IDENTITY=-',
+            'EXPANDED_CODE_SIGN_IDENTITY=-',
+            'CONFIGURATION_BUILD_DIR=${tempDir.path}',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+          ],
+          canFail: true
+        );
+      });
+
+      if (xcodebuildExitCode != 65) { // 65 returned on PhaseScriptExecution failure.
+        return TaskResult.failure('Host app build succeeded though flutter script failed');
       }
 
       return TaskResult.success(null);
@@ -289,4 +340,27 @@ Future<bool> _isAppAotBuild(Directory app) async {
   );
 
   return symbolTable.contains('kDartIsolateSnapshotInstructions');
+}
+
+Future<bool> _hasDebugSymbols(Directory app) async {
+  final String binary = path.join(
+    app.path,
+    'Frameworks',
+    'App.framework',
+    'App'
+  );
+
+  final String symbolTable = await eval(
+    'dsymutil',
+    <String> [
+      '--dump-debug-map',
+      binary,
+    ],
+    // The output is huge.
+    printStdout: false,
+  );
+
+  // Search for some random Flutter framework Dart function which should always
+  // be in App.framework.
+  return symbolTable.contains('BuildOwner_reassemble');
 }

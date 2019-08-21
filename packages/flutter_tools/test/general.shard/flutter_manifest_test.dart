@@ -415,6 +415,23 @@ flutter:
       );
     });
 
+    test('parses major.minor.patch with no build version', () async {
+      const String manifest = '''
+name: test
+version: 0.0.1
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: '0.0.1',
+        expectedBuildName: '0.0.1',
+        expectedBuildNumber: null,
+      );
+    });
+
     test('parses major.minor.patch+build version clause 2', () async {
       const String manifest = '''
 name: test
@@ -500,6 +517,45 @@ flutter:
 
       expect(flutterManifest, null);
       expect(logger.errorText, contains('Expected "fonts" to either be null or a list.'));
+    });
+
+    testUsingContext('Returns proper error when font is a map instead of a list', () async {
+      final BufferLogger logger = context.get<Logger>();
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  fonts:
+    family: foo
+    fonts:
+      -asset: a/bar
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+
+      expect(flutterManifest, null);
+      expect(logger.errorText, contains('Expected "fonts" to be a list'));
+    });
+
+    testUsingContext('Returns proper error when second font family is invalid', () async {
+      final BufferLogger logger = context.get<Logger>();
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: foo
+      fonts:
+        - asset: a/bar
+    - string
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      expect(flutterManifest, null);
+      expect(logger.errorText, contains('Expected a map.'));
     });
   });
 

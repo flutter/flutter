@@ -2217,20 +2217,28 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   );
 
   @override
-  String valueToString({ TextTreeConfiguration parentConfiguration }) {
+  String valueToString({TextTreeConfiguration parentConfiguration}) {
     if (value == null)
       return value.toString();
 
     if (value.isEmpty)
       return ifEmpty ?? '[]';
 
+    final Iterable<String> formattedValues = value.map((T v) {
+      if (T == double && v is double) {
+        return debugFormatDouble(v);
+      } else {
+        return v.toString();
+      }
+    });
+
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Always display the value as a single line and enclose the iterable
       // value in brackets to avoid ambiguity.
-      return '[${value.join(', ')}]';
+      return '[${formattedValues.join(', ')}]';
     }
 
-    return value.join(_isSingleLine(style) ? ', ' : '\n');
+    return formattedValues.join(_isSingleLine(style) ? ', ' : '\n');
   }
 
   /// Priority level of the diagnostic used to control which diagnostics should

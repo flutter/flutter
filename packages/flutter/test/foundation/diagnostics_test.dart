@@ -1611,6 +1611,15 @@ void main() {
     expect(intsProperty.isFiltered(DiagnosticLevel.info), isFalse);
     expect(intsProperty.toString(), equals('ints: 1, 2, 3'));
 
+    final List<double> doubles = <double>[1,2,3];
+    final IterableProperty<double> doublesProperty = IterableProperty<double>(
+      'doubles',
+      doubles,
+    );
+    expect(doublesProperty.value, equals(doubles));
+    expect(doublesProperty.isFiltered(DiagnosticLevel.info), isFalse);
+    expect(doublesProperty.toString(), equals('doubles: 1.0, 2.0, 3.0'));
+
     final IterableProperty<Object> emptyProperty = IterableProperty<Object>(
       'name',
       <Object>[],

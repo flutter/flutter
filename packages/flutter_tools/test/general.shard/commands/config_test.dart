@@ -7,14 +7,14 @@ import 'dart:convert';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
-import 'package:flutter_tools/src/desktop.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -26,9 +26,6 @@ void main() {
   MockFlutterVersion mockFlutterVersion;
 
   setUpAll(() {
-    // TODO(jonahwilliams): remove once features are landed.
-    debugDisableDesktop = true;
-    debugDisableWeb = true;
     Cache.disableLocking();
   });
 
@@ -56,6 +53,28 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidStudio: () => mockAndroidStudio,
       AndroidSdk: () => mockAndroidSdk,
+    });
+
+    testUsingContext('Can set build-dir', () async {
+      final ConfigCommand configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+      await commandRunner.run(<String>[
+        'config',
+        '--build-dir=foo'
+      ]);
+
+      expect(getBuildDirectory(), 'foo');
+    });
+
+    testUsingContext('throws error on absolute path to build-dir', () async {
+      final ConfigCommand configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+      expect(() => commandRunner.run(<String>[
+        'config',
+        '--build-dir=/foo'
+      ]), throwsA(isInstanceOf<ToolExit>()));
     });
 
     testUsingContext('allows setting and removing feature flags', () async {

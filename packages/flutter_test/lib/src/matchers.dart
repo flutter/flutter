@@ -1620,7 +1620,7 @@ Future<ui.Image> _captureImage(Element element) {
     assert(renderObject != null);
   }
   assert(!renderObject.debugNeedsPaint);
-  final OffsetLayer layer = renderObject.layer;
+  final OffsetLayer layer = renderObject.debugLayer;
   return layer.toImage(renderObject.paintBounds);
 }
 
@@ -1715,7 +1715,7 @@ class _MatchesGoldenFile extends AsyncMatcher {
       imageFuture = _captureImage(elements.single);
     }
 
-    final Uri testNameUri = _getTestNameUri(key, version);
+    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
@@ -1737,19 +1737,9 @@ class _MatchesGoldenFile extends AsyncMatcher {
   }
 
   @override
-  Description describe(Description description) =>
-      description.add('one widget whose rasterized image matches golden image "${_getTestNameUri(key, version)}"');
-
-  Uri _getTestNameUri(Uri key, int version) {
-    return version == null ? key : Uri.parse(
-      key
-        .toString()
-        .splitMapJoin(
-          RegExp(r'.png'),
-          onMatch: (Match m) => '${'.' + version.toString() + m.group(0)}',
-          onNonMatch: (String n) => '$n'
-        )
-    );
+  Description describe(Description description) {
+    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
+    return description.add('one widget whose rasterized image matches golden image "$testNameUri"');
   }
 }
 
