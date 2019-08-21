@@ -148,19 +148,6 @@ copy("copy_headers") {
 if (is_mac && !embedder_for_target) {
   _flutter_embedder_framework_dir = "$root_out_dir/FlutterEmbedder.framework"
 
-  copy("copy_dylib") {
-    visibility = [ ":*" ]
-    sources = [
-      "$root_out_dir/libflutter_engine.dylib",
-    ]
-    outputs = [
-      "$_flutter_embedder_framework_dir/Versions/A/FlutterEmbedder",
-    ]
-    deps = [
-      ":flutter_engine_library",
-    ]
-  }
-
   copy("copy_framework_headers") {
     visibility = [ ":*" ]
     sources = [
@@ -209,28 +196,30 @@ if (is_mac && !embedder_for_target) {
 
   action("install_dylib") {
     visibility = [ ":*" ]
-    stamp_file = "$root_build_dir/flutter_embedder_install_name_stamp"
     script = "$flutter_root/sky/tools/change_install_name.py"
+    framework_binary_subpath = "Versions/A/FlutterEmbedder"
 
     inputs = [
-      "$_flutter_embedder_framework_dir/Versions/A/FlutterEmbedder",
+      script,
     ]
-
+    sources = [
+      "$root_out_dir/libflutter_engine.dylib",
+    ]
     outputs = [
-      stamp_file,
+      "$_flutter_embedder_framework_dir/$framework_binary_subpath",
     ]
 
     args = [
       "--dylib",
-      "FlutterEmbedder.framework/Versions/A/FlutterEmbedder",
+      rebase_path(sources[0]),
       "--install_name",
-      "@rpath/FlutterEmbedder.framework/Versions/A/FlutterEmbedder",
-      "--stamp",
-      rebase_path(stamp_file),
+      "@rpath/FlutterEmbedder.framework/$framework_binary_subpath",
+      "--output",
+      rebase_path(outputs[0]),
     ]
 
     deps = [
-      ":copy_dylib",
+      ":flutter_engine_library",
     ]
   }
 

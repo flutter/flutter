@@ -76,44 +76,32 @@ shared_library("create_flutter_framework_dylib") {
   libs = [ "Cocoa.framework" ]
 }
 
-copy("copy_framework_dylib") {
+action("copy_dylib_and_update_framework_install_name") {
   visibility = [ ":*" ]
+  script = "$flutter_root/sky/tools/change_install_name.py"
+  framework_binary_subpath = "Versions/A/$_flutter_framework_name"
 
+  inputs = [
+    script,
+  ]
   sources = [
     "$root_out_dir/lib$_flutter_framework_name.dylib",
   ]
   outputs = [
-    "$_flutter_framework_dir/Versions/A/$_flutter_framework_name",
-  ]
-
-  deps = [
-    ":create_flutter_framework_dylib",
-  ]
-}
-
-action("copy_dylib_and_update_framework_install_name") {
-  visibility = [ ":*" ]
-  stamp_file = "$root_out_dir/flutter_install_name_stamp"
-  script = "$flutter_root/sky/tools/change_install_name.py"
-
-  inputs = [
-    "$_flutter_framework_dir/Versions/A/$_flutter_framework_name",
-  ]
-  outputs = [
-    stamp_file,
+    "$_flutter_framework_dir/$framework_binary_subpath",
   ]
 
   args = [
     "--dylib",
-    rebase_path("$_flutter_framework_dir/Versions/A/$_flutter_framework_name"),
+    rebase_path(sources[0]),
     "--install_name",
-    "@rpath/$_flutter_framework_filename/Versions/A/$_flutter_framework_name",
-    "--stamp",
-    rebase_path(stamp_file),
+    "@rpath/$_flutter_framework_filename/$framework_binary_subpath",
+    "--output",
+    rebase_path(outputs[0]),
   ]
 
   deps = [
-    ":copy_framework_dylib",
+    ":create_flutter_framework_dylib",
   ]
 }
 
