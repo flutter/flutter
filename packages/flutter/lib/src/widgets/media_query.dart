@@ -215,15 +215,19 @@ class MediaQueryData {
   ///   property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
-  /// The parts of the display where the system may be detecting certain
-  /// gestures for system actions.
+  /// The areas along the edges of the display where the system consumes
+  /// certain input events and blocks delivery of those events to the app.
   ///
-  /// These gestures are typically drags from the edge of the screen to
-  /// perform system actions, like returning to the previous screen or
-  /// opening the notification tray. Gestures reserved for system actions
-  /// may not be forwarded to the app when performed in the area specified
-  /// by these insets. Therefore, elements placed in these areas may not properly
-  /// respond to them.
+  /// Starting with Android Q, simple swipe gestures that start within the
+  /// [systemGestureInsets] areas are used by the system for page navigation
+  /// and may not be delivered to the app. Taps and swipe gestures that begin
+  /// with a long-press are delivered to the app, but simple press-drag-release
+  /// swipe gestures which begin within the area defined by [systemGestureInsets]
+  /// may not.
+  ///
+  /// Apps should avoid locating gesture detectors within the system gesture
+  /// insets area. There is no reason to avoid putting visual elements within
+  /// this area.
   ///
   /// This property is currently only expected to be set to a non-default value
   /// on Android starting with version Q.
