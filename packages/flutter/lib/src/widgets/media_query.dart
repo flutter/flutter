@@ -215,13 +215,18 @@ class MediaQueryData {
   ///   property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
-  /// The parts of the display where the system may be detecting particular
-  /// gestures.
+  /// The parts of the display where the system may be detecting certain
+  /// gestures for system actions.
   ///
-  /// This value is typically a drag gesture from an edge of the screen.
-  /// Gestures in these areas may not be forwarded to the app or may
-  /// be canceled by the system. Therefore, elements placed in these areas may
-  /// not properly respond to them.
+  /// These gestures are typically drags from the edge of the screen to
+  /// perform system actions, like returning to the previous screen or
+  /// opening the notification tray. Gestures reserved for system actions
+  /// may not be forwarded to the app when performed in the area specified
+  /// by these insets. Therefore, elements placed in these areas may not properly
+  /// respond to them.
+  ///
+  /// This property is currently only expected to be set to a non-default value
+  /// on Android starting with version Q.
   ///
   /// {@tool snippet --template=stateful_widget_material}
   ///
