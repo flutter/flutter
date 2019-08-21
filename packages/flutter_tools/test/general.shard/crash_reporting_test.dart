@@ -14,11 +14,13 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:pedantic/pedantic.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -32,6 +34,7 @@ void main() {
     setUp(() async {
       tools.crashFileSystem = MemoryFileSystem();
       setExitFunctionForTests((_) { });
+      MockCrashReportSender.sendCalls = 0;
     });
 
     tearDown(() {
@@ -72,9 +75,40 @@ void main() {
         reportCrashes: true,
         flutterVersion: 'test-version',
       ));
-      expect(await exitCodeCompleter.future, equals(1));
+      expect(await exitCodeCompleter.future, 1);
       await verifyCrashReportSent(requestInfo);
     }, overrides: <Type, Generator>{
+      Stdio: () => const _NoStderr(),
+    });
+
+    testUsingContext('should send only one crash report when async throws many', () async {
+      final Completer<int> exitCodeCompleter = Completer<int>();
+      setExitFunctionForTests((int exitCode) {
+        if (!exitCodeCompleter.isCompleted) {
+          exitCodeCompleter.complete(exitCode);
+        }
+      });
+
+      final RequestInfo requestInfo = RequestInfo();
+      final MockCrashReportSender sender = MockCrashReportSender(requestInfo);
+      CrashReportSender.initializeWith(sender);
+
+      FakeAsync().run((FakeAsync time) {
+        time.elapse(const Duration(seconds: 1));
+        unawaited(tools.run(
+          <String>['crash'],
+          <FlutterCommand>[_MultiCrashAsyncCommand(crashes: 4)],
+          reportCrashes: true,
+          flutterVersion: 'test-version',
+        ));
+        time.elapse(const Duration(seconds: 1));
+        time.flushMicrotasks();
+      });
+      expect(await exitCodeCompleter.future, 1);
+      expect(MockCrashReportSender.sendCalls, 1);
+      await verifyCrashReportSent(requestInfo, crashes: 4);
+    }, overrides: <Type, Generator>{
+      DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
       Stdio: () => const _NoStderr(),
     });
 
@@ -159,7 +193,9 @@ class RequestInfo {
   Map<String, String> fields;
 }
 
-Future<void> verifyCrashReportSent(RequestInfo crashInfo) async {
+Future<void> verifyCrashReportSent(RequestInfo crashInfo, {
+  int crashes = 1,
+}) async {
   // Verify that we sent the crash report.
   expect(crashInfo.method, 'POST');
   expect(crashInfo.uri, Uri(
@@ -190,12 +226,13 @@ Future<void> verifyCrashReportSent(RequestInfo crashInfo) async {
   final List<String> writtenFiles =
   (await tools.crashFileSystem.directory('/').list(recursive: true).toList())
       .map((FileSystemEntity e) => e.path).toList();
-  expect(writtenFiles, hasLength(1));
+  expect(writtenFiles, hasLength(crashes));
   expect(writtenFiles, contains('flutter_01.log'));
 }
 
 class MockCrashReportSender extends MockClient {
   MockCrashReportSender(RequestInfo crashInfo) : super((Request request) async {
+      MockCrashReportSender.sendCalls++;
       crashInfo.method = request.method;
       crashInfo.uri = request.url;
 
@@ -229,6 +266,8 @@ class MockCrashReportSender extends MockClient {
         200,
       );
     });
+
+  static int sendCalls = 0;
 }
 
 /// Throws a random error to simulate a CLI crash.
@@ -276,6 +315,41 @@ class _CrashAsyncCommand extends FlutterCommand {
     });
     return Completer<FlutterCommandResult>().future; // expect StateError
   }
+}
+
+/// Generates multiple asynchronous unhandled exceptions.
+class _MultiCrashAsyncCommand extends FlutterCommand {
+  _MultiCrashAsyncCommand({
+    int crashes = 1,
+  }) : _crashes = crashes;
+
+  final int _crashes;
+
+  @override
+  String get description => 'Simulates a crash';
+
+  @override
+  String get name => 'crash';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    for (int i = 0; i < _crashes; i++) {
+      Timer.run(() {
+        throw StateError('Test bad state error');
+      });
+    }
+    return Completer<FlutterCommandResult>().future; // expect StateError
+  }
+}
+
+/// A DoctorValidatorsProvider that overrides the default validators without
+/// overriding the doctor.
+class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
+  @override
+  List<DoctorValidator> get validators => <DoctorValidator>[];
+
+  @override
+  List<Workflow> get workflows => <Workflow>[];
 }
 
 class _NoStderr extends Stdio {
