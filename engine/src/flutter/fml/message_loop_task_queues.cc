@@ -125,6 +125,7 @@ size_t MessageLoopTaskQueues::GetNumPendingTasks(TaskQueueId queue_id) {
 void MessageLoopTaskQueues::AddTaskObserver(TaskQueueId queue_id,
                                             intptr_t key,
                                             fml::closure callback) {
+  FML_DCHECK(callback != nullptr) << "Observer callback must be non-null.";
   std::scoped_lock lock(GetMutex(queue_id, MutexType::kObservers));
   task_observers_[queue_id][key] = std::move(callback);
 }
