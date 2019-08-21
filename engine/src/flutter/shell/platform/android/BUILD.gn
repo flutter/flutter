@@ -109,11 +109,10 @@ action("gen_android_build_config_java") {
 }
 
 embedding_artifact_id = "flutter_embedding_$flutter_runtime_mode"
-embedding_jar_filename = "$embedding_artifact_id-1.0.0-$engine_version.jar"
+embedding_jar_filename = "$embedding_artifact_id.jar"
 embedding_jar_path = "$root_out_dir/$embedding_jar_filename"
 
-embedding_sources_jar_filename =
-    "$embedding_artifact_id-1.0.0-$engine_version-sources.jar"
+embedding_sources_jar_filename = "$embedding_artifact_id-sources.jar"
 embedding_source_jar_path = "$root_out_dir/$embedding_sources_jar_filename"
 
 action("flutter_shell_java") {
@@ -315,7 +314,7 @@ action("android") {
   engine_artifact_id =
       string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
 
-  engine_jar_filename = "$engine_artifact_id-1.0.0-$engine_version.jar"
+  engine_jar_filename = "$engine_artifact_id.jar"
 
   outputs = [
     "$root_build_dir/flutter.jar",
@@ -354,7 +353,7 @@ action("pom_libflutter") {
       string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
 
   outputs = [
-    "$root_build_dir/$artifact_id-1.0.0-$engine_version.pom",
+    "$root_build_dir/$artifact_id.pom",
   ]
 
   args = [
@@ -377,7 +376,7 @@ action("pom_embedding") {
   artifact_id = "flutter_embedding_$flutter_runtime_mode"
 
   outputs = [
-    "$root_build_dir/$artifact_id-1.0.0-$engine_version.pom",
+    "$root_build_dir/$artifact_id.pom",
   ]
 
   args = [
