@@ -737,6 +737,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   @override
   void dispose() {
     _controller?.dispose();
+    _controller = null;
     super.dispose();
   }
 }
