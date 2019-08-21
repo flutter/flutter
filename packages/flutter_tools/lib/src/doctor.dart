@@ -113,6 +113,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (windowsWorkflow.appliesToHostPlatform)
         _workflows.add(windowsWorkflow);
 
+      if (webWorkflow.appliesToHostPlatform)
+        _workflows.add(webWorkflow);
+
     }
     return _workflows;
   }
