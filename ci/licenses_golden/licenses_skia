@@ -1,4 +1,4 @@
-Signature: c6c738b2722622ecff701f83295db23c
+Signature: 7fe394ce7bac55cb799d75376c09de09
 
 UNUSED LICENSES:
 
@@ -2271,7 +2271,6 @@ FILE: ../../../third_party/skia/src/gpu/GrFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/GrGpuResourceCacheAccess.h
 FILE: ../../../third_party/skia/src/gpu/GrPathRendering.cpp
 FILE: ../../../third_party/skia/src/gpu/GrPathRendering.h
-FILE: ../../../third_party/skia/src/gpu/GrPendingIOResource.h
 FILE: ../../../third_party/skia/src/gpu/GrPrimitiveProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProcessorAnalysis.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProcessorAnalysis.h
@@ -2877,8 +2876,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrAALinearizingConvexPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasTextOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrAtlasTextOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrCopySurfaceOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrCopySurfaceOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDashLinePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDashLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasOp.cpp
@@ -4831,6 +4828,8 @@ FILE: ../../../third_party/skia/src/core/SkImageFilter_Base.h
 FILE: ../../../third_party/skia/src/core/SkVM.cpp
 FILE: ../../../third_party/skia/src/core/SkVM.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkImageFilters.cpp
+FILE: ../../../third_party/skia/src/gpu/GrCopyRenderTask.cpp
+FILE: ../../../third_party/skia/src/gpu/GrCopyRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrShaderUtils.cpp
