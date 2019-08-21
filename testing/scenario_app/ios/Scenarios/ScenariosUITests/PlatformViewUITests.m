@@ -31,15 +31,20 @@
   UIImage* golden = [[UIImage alloc] initWithContentsOfFile:path];
 
   XCUIScreenshot* screenshot = [[XCUIScreen mainScreen] screenshot];
+  XCTAttachment* attachment = [XCTAttachment attachmentWithScreenshot:screenshot];
+  attachment.lifetime = XCTAttachmentLifetimeKeepAlways;
+  [self addAttachment:attachment];
+
   if (golden) {
     XCTAttachment* goldenAttachment = [XCTAttachment attachmentWithImage:golden];
     goldenAttachment.lifetime = XCTAttachmentLifetimeKeepAlways;
     [self addAttachment:goldenAttachment];
+  } else {
+    XCTFail(@"This test will fail - no golden named %@ found. Follow the steps in the "
+            @"README to add a new golden.",
+            goldenName);
   }
 
-  XCTAttachment* attachment = [XCTAttachment attachmentWithScreenshot:screenshot];
-  attachment.lifetime = XCTAttachmentLifetimeKeepAlways;
-  [self addAttachment:attachment];
   XCTAssertTrue([self compareImage:golden toOther:screenshot.image]);
 }
 

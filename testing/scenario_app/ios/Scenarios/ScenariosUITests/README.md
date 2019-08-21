@@ -11,3 +11,9 @@ names are taken from the environment.
 New devices require running the test on the device, gathering the attachment
 and verifying it manually, and then adding an appropriately named file to
 this folder.
+
+If the test is attempted on a new device, the log will contain a message
+indicating the file name it expected to find. The test will continue and fail,
+but will contain an attachment with the expected screen shot. If the screen
+shot looks good, add it with the correct name to the project and run the test
+again - it should pass this time.
