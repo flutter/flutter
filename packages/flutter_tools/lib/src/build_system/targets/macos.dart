@@ -53,7 +53,7 @@ class MacOSAssetBehavior extends SourceBehavior {
     );
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final String prefix = fs.path.join(flutterProject.macos.ephemeralDirectory.path,
-        'App.framework', 'Resources', 'flutter_assets');
+        'App.framework', 'Versions', 'A', 'Resources', 'flutter_assets');
     final List<File> results = <File>[];
     for (String key in assetBundle.entries.keys) {
       final File file = fs.file(fs.path.join(prefix, key));
@@ -239,6 +239,9 @@ class CompileMacOSFramework extends Target {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    if (buildMode == BuildMode.debug) {
+      throw Exception('precompiled macOS framework only supported in release/profile builds.');
+    }
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final int result = await AOTSnapshotter(reportTimings: false).build(
       bitcode: false,
@@ -387,24 +390,35 @@ abstract class MacOSBundleFlutterAssets extends Target {
         throw Exception('Failed to copy precompiled runtimes: $err');
       }
     }
-    // Create symlink to current version.
+    // Create symlink to current version. These must be relative, from the
+    // framework root for Resources/App and from the versions root for
+    // Current.
     try {
       final Link currentVersion = outputDirectory.parent
           .childLink('Current');
       if (!currentVersion.existsSync()) {
-        currentVersion.createSync(outputDirectory.path);
+        final String linkPath = fs.path.relative(outputDirectory.path,
+            from: outputDirectory.parent.path);
+         print(linkPath);
+        currentVersion.createSync('$linkPath${fs.path.separator}');
       }
       // Create symlink to current resources.
       final Link currentResources = frameworkRootDirectory
           .childLink('Resources');
       if (!currentResources.existsSync()) {
-        currentResources.createSync(fs.path.join(currentVersion.path, 'Resources'));
+        final String linkPath = fs.path.relative(fs.path.join(currentVersion.path, 'Resources'),
+            from: frameworkRootDirectory.path);
+        print(linkPath);
+        currentResources.createSync(linkPath);
       }
       // Create symlink to current binary.
       final Link currentFramework = frameworkRootDirectory
           .childLink('App');
       if (!currentFramework.existsSync()) {
-        currentFramework.createSync(fs.path.join(currentVersion.path, 'App'));
+        final String linkPath = fs.path.relative(fs.path.join(currentVersion.path, 'App'),
+            from: frameworkRootDirectory.path);
+         print(linkPath);
+        currentFramework.createSync(linkPath);
       }
     } on FileSystemException {
       throw Exception('Failed to create symlinks for framework. try removing '
