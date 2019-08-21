@@ -598,12 +598,12 @@ class PlatformViewCreationParams {
   /// [PlatformViewController.viewId] should match this id.
   final int id;
 
+  /// Callback invoked after the platform view has been created.
+  final PlatformViewCreatedCallback onPlatformViewCreated;
+
   /// Callback invoked when the platform view's focus is changed on the platform side.
   ///
   /// The value is true when the platform view gains focus and false when it loses focus.
-  final PlatformViewCreatedCallback onPlatformViewCreated;
-
-  /// Notifies the [PlatformViewLink] when the focus is changed from the platform.
   final ValueChanged<bool> onFocusChanged;
 }
 
