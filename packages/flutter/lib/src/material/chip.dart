@@ -98,6 +98,12 @@ abstract class ChipAttributes {
   /// {@macro flutter.widgets.Clip}
   Clip get clipBehavior;
 
+  /// {@macro flutter.widgets.Focus.focusNode}
+  FocusNode get focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  bool get autofocus;
+
   /// Color to be used for the unselected, enabled chip's background.
   ///
   /// The default is light grey.
@@ -493,7 +499,7 @@ abstract class TappableChipAttributes {
 class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttributes {
   /// Creates a material design chip.
   ///
-  /// The [label] and [clipBehavior] arguments must not be null.
+  /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
   /// The [elevation] must be null or non-negative.
   const Chip({
     Key key,
@@ -507,12 +513,15 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.deleteButtonTooltipMessage,
     this.shape,
     this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
   }) : assert(label != null),
+       assert(autofocus != null),
        assert(clipBehavior != null),
        assert(elevation == null || elevation >= 0.0),
        super(key: key);
@@ -529,6 +538,10 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final ShapeBorder shape;
   @override
   final Clip clipBehavior;
+  @override
+  final FocusNode focusNode;
+  @override
+  final bool autofocus;
   @override
   final Color backgroundColor;
   @override
@@ -563,6 +576,8 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       tapEnabled: false,
       shape: shape,
       clipBehavior: clipBehavior,
+      focusNode: focusNode,
+      autofocus: autofocus,
       backgroundColor: backgroundColor,
       padding: padding,
       materialTapTargetSize: materialTapTargetSize,
@@ -630,9 +645,10 @@ class InputChip extends StatelessWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], [selected], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or
-  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  /// The [label], [isEnabled], [selected], [autofocus], and [clipBehavior]
+  /// arguments must not be null. The [pressElevation] and [elevation] must be
+  /// null or non-negative. Typically, [pressElevation] is greater than
+  /// [elevation].
   const InputChip({
     Key key,
     this.avatar,
@@ -653,6 +669,8 @@ class InputChip extends StatelessWidget
     this.tooltip,
     this.shape,
     this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
@@ -664,6 +682,7 @@ class InputChip extends StatelessWidget
        assert(isEnabled != null),
        assert(label != null),
        assert(clipBehavior != null),
+       assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        super(key: key);
@@ -705,6 +724,10 @@ class InputChip extends StatelessWidget
   @override
   final Clip clipBehavior;
   @override
+  final FocusNode focusNode;
+  @override
+  final bool autofocus;
+  @override
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
@@ -741,6 +764,8 @@ class InputChip extends StatelessWidget
       tooltip: tooltip,
       shape: shape,
       clipBehavior: clipBehavior,
+      focusNode: focusNode,
+      autofocus: autofocus,
       backgroundColor: backgroundColor,
       padding: padding,
       materialTapTargetSize: materialTapTargetSize,
@@ -814,9 +839,9 @@ class ChoiceChip extends StatelessWidget
         DisabledChipAttributes {
   /// Create a chip that acts like a radio button.
   ///
-  /// The [label], [selected], and [clipBehavior] arguments must not be null.
-  /// The [pressElevation] and [elevation] must be null or non-negative.
-  /// Typically, [pressElevation] is greater than [elevation].
+  /// The [label], [selected], [autofocus], and [clipBehavior] arguments must
+  /// not be null. The [pressElevation] and [elevation] must be null or
+  /// non-negative. Typically, [pressElevation] is greater than [elevation].
   const ChoiceChip({
     Key key,
     this.avatar,
@@ -831,6 +856,8 @@ class ChoiceChip extends StatelessWidget
     this.tooltip,
     this.shape,
     this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
@@ -841,6 +868,7 @@ class ChoiceChip extends StatelessWidget
   }) : assert(selected != null),
        assert(label != null),
        assert(clipBehavior != null),
+       assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        super(key: key);
@@ -869,6 +897,10 @@ class ChoiceChip extends StatelessWidget
   final ShapeBorder shape;
   @override
   final Clip clipBehavior;
+  @override
+  final FocusNode focusNode;
+  @override
+  final bool autofocus;
   @override
   final Color backgroundColor;
   @override
@@ -904,6 +936,8 @@ class ChoiceChip extends StatelessWidget
       tooltip: tooltip,
       shape: shape,
       clipBehavior: clipBehavior,
+      focusNode: focusNode,
+      autofocus: autofocus,
       disabledColor: disabledColor,
       selectedColor: selectedColor ?? chipTheme.secondarySelectedColor,
       backgroundColor: backgroundColor,
@@ -1011,9 +1045,9 @@ class FilterChip extends StatelessWidget
         DisabledChipAttributes {
   /// Create a chip that acts like a checkbox.
   ///
-  /// The [selected], [label], and [clipBehavior] arguments must not be null.
-  /// The [pressElevation] and [elevation] must be null or non-negative.
-  /// Typically, [pressElevation] is greater than [elevation].
+  /// The [selected], [label], [autofocus], and [clipBehavior] arguments must
+  /// not be null. The [pressElevation] and [elevation] must be null or
+  /// non-negative. Typically, [pressElevation] is greater than [elevation].
   const FilterChip({
     Key key,
     this.avatar,
@@ -1028,6 +1062,8 @@ class FilterChip extends StatelessWidget
     this.tooltip,
     this.shape,
     this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
@@ -1038,6 +1074,7 @@ class FilterChip extends StatelessWidget
   }) : assert(selected != null),
        assert(label != null),
        assert(clipBehavior != null),
+       assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        super(key: key);
@@ -1066,6 +1103,10 @@ class FilterChip extends StatelessWidget
   final ShapeBorder shape;
   @override
   final Clip clipBehavior;
+  @override
+  final FocusNode focusNode;
+  @override
+  final bool autofocus;
   @override
   final Color backgroundColor;
   @override
@@ -1098,6 +1139,8 @@ class FilterChip extends StatelessWidget
       tooltip: tooltip,
       shape: shape,
       clipBehavior: clipBehavior,
+      focusNode: focusNode,
+      autofocus: autofocus,
       backgroundColor: backgroundColor,
       disabledColor: disabledColor,
       selectedColor: selectedColor,
@@ -1162,9 +1205,9 @@ class FilterChip extends StatelessWidget
 class ActionChip extends StatelessWidget implements ChipAttributes, TappableChipAttributes {
   /// Create a chip that acts like a button.
   ///
-  /// The [label], [onPressed] and [clipBehavior] arguments must not be null.
-  /// The [pressElevation] and [elevation] must be null or non-negative.
-  /// Typically, [pressElevation] is greater than [elevation].
+  /// The [label], [onPressed], [autofocus], and [clipBehavior] arguments must
+  /// not be null. The [pressElevation] and [elevation] must be null or
+  /// non-negative. Typically, [pressElevation] is greater than [elevation].
   const ActionChip({
     Key key,
     this.avatar,
@@ -1176,12 +1219,15 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.tooltip,
     this.shape,
     this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
   }) : assert(label != null),
+       assert(autofocus != null),
        assert(
          onPressed != null,
          'Rather than disabling an ActionChip by setting onPressed to null, '
@@ -1210,6 +1256,10 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   @override
   final Clip clipBehavior;
   @override
+  final FocusNode focusNode;
+  @override
+  final bool autofocus;
+  @override
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
@@ -1233,6 +1283,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       backgroundColor: backgroundColor,
       shape: shape,
       clipBehavior: clipBehavior,
+      focusNode: focusNode,
+      autofocus: autofocus,
       padding: padding,
       labelPadding: labelPadding,
       isEnabled: true,
@@ -1285,9 +1337,10 @@ class RawChip extends StatefulWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], [selected], and [clipBehavior] arguments must
-  /// not be null. The [pressElevation] and [elevation] must be null or non-negative.
-  /// Typically, [pressElevation] is greater than [elevation].
+  /// The [label], [isEnabled], [selected], [autofocus], and [clipBehavior]
+  /// arguments must not be null. The [pressElevation] and [elevation] must be
+  /// null or non-negative. Typically, [pressElevation] is greater than
+  /// [elevation].
   const RawChip({
     Key key,
     this.avatar,
@@ -1311,6 +1364,8 @@ class RawChip extends StatefulWidget
     this.tooltip,
     this.shape,
     this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
     this.backgroundColor,
     this.materialTapTargetSize,
     this.elevation,
@@ -1321,6 +1376,7 @@ class RawChip extends StatefulWidget
        assert(isEnabled != null),
        assert(selected != null),
        assert(clipBehavior != null),
+       assert(autofocus != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
@@ -1362,6 +1418,10 @@ class RawChip extends StatefulWidget
   final ShapeBorder shape;
   @override
   final Clip clipBehavior;
+  @override
+  final FocusNode focusNode;
+  @override
+  final bool autofocus;
   @override
   final Color backgroundColor;
   @override
@@ -1663,6 +1723,8 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
 
     Widget result = Focus(
       onFocusChange: _handleFocus,
+      focusNode: widget.focusNode,
+      autofocus: widget.autofocus,
       child: Material(
         elevation: isTapping ? pressElevation : elevation,
         shadowColor: widget.selected ? selectedShadowColor : shadowColor,

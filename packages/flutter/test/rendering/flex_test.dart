@@ -365,10 +365,6 @@ void main() {
   });
 
   test('MainAxisSize.min inside unconstrained', () {
-    final List<dynamic> exceptions = <dynamic>[];
-    FlutterError.onError = (FlutterErrorDetails details) {
-      exceptions.add(details.exception);
-    };
     const BoxConstraints square = BoxConstraints.tightFor(width: 100.0, height: 100.0);
     final RenderConstrainedBox box1 = RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box2 = RenderConstrainedBox(additionalConstraints: square);
@@ -387,17 +383,15 @@ void main() {
     flex.addAll(<RenderBox>[box1, box2, box3]);
     final FlexParentData box2ParentData = box2.parentData;
     box2ParentData.flex = 1;
-    expect(exceptions, isEmpty);
-    layout(parent);
+    final List<dynamic> exceptions = <dynamic>[];
+    layout(parent, onErrors: () {
+      exceptions.addAll(renderer.takeAllFlutterExceptions());
+    });
     expect(exceptions, isNotEmpty);
     expect(exceptions.first, isInstanceOf<FlutterError>());
   });
 
   test('MainAxisSize.min inside unconstrained', () {
-    final List<dynamic> exceptions = <dynamic>[];
-    FlutterError.onError = (FlutterErrorDetails details) {
-      exceptions.add(details.exception);
-    };
     const BoxConstraints square = BoxConstraints.tightFor(width: 100.0, height: 100.0);
     final RenderConstrainedBox box1 = RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box2 = RenderConstrainedBox(additionalConstraints: square);
@@ -417,8 +411,10 @@ void main() {
     final FlexParentData box2ParentData = box2.parentData;
     box2ParentData.flex = 1;
     box2ParentData.fit = FlexFit.loose;
-    expect(exceptions, isEmpty);
-    layout(parent);
+    final List<dynamic> exceptions = <dynamic>[];
+    layout(parent, onErrors: () {
+      exceptions.addAll(renderer.takeAllFlutterExceptions());
+    });
     expect(exceptions, isNotEmpty);
     expect(exceptions.first, isInstanceOf<FlutterError>());
   });

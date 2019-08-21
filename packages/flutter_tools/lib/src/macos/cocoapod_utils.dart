@@ -38,9 +38,9 @@ Future<void> processPodsIfNeeded(XcodeBasedProject xcodeProject,
     xcodeProject: xcodeProject,
     engineDir: flutterFrameworkDir(buildMode),
     isSwift: xcodeProject.isSwift,
-    dependenciesChanged: !await fingerprinter.doesFingerprintMatch(),
+    dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
   );
   if (didPodInstall) {
-    await fingerprinter.writeFingerprint();
+    fingerprinter.writeFingerprint();
   }
 }

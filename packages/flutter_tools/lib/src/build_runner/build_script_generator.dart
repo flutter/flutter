@@ -49,8 +49,8 @@ class BuildScriptGenerator {
         // ignore_for_file: directives_ordering
         ${library.accept(emitter)}''');
       final File output = fs.file(location);
-      await output.create(recursive: true);
-      await fs.file(location).writeAsString(result);
+      output.createSync(recursive: true);
+      fs.file(location).writeAsStringSync(result);
     } on FormatterException {
       throwToolExit('Generated build script could not be parsed. '
         'This is likely caused by a misconfigured builder definition.');

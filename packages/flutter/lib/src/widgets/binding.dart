@@ -713,7 +713,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// sent to the GPU.
   ///
   /// 8. The semantics phase: All the dirty [RenderObject]s in the system have
-  /// their semantics updated (see [RenderObject.semanticsAnnotator]). This
+  /// their semantics updated (see [RenderObject.assembleSemanticsNode]). This
   /// generates the [SemanticsNode] tree. See
   /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
   /// object dirty for semantics.
@@ -741,7 +741,11 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     if (_needToReportFirstFrame && _reportFirstFrame) {
       assert(!_firstFrameCompleter.isCompleted);
       // TODO(liyuqian): use a broadcast stream approach
+      // use frameTimings. https://github.com/flutter/flutter/issues/38838
+      // ignore: deprecated_member_use
       final TimingsCallback oldCallback = WidgetsBinding.instance.window.onReportTimings;
+      // use frameTimings. https://github.com/flutter/flutter/issues/38838
+      // ignore: deprecated_member_use
       WidgetsBinding.instance.window.onReportTimings = (List<FrameTiming> timings) {
         if (!kReleaseMode) {
           developer.Timeline.instantSync('Rasterized first useful frame');
@@ -750,6 +754,8 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
         if (oldCallback != null) {
           oldCallback(timings);
         }
+        // use frameTimings. https://github.com/flutter/flutter/issues/38838
+        // ignore: deprecated_member_use
         WidgetsBinding.instance.window.onReportTimings = oldCallback;
         _firstFrameCompleter.complete();
       };

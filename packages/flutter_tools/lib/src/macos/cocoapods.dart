@@ -106,7 +106,7 @@ class CocoaPods {
     bool isSwift = false,
     bool dependenciesChanged = true,
   }) async {
-    if (!(await xcodeProject.podfile.exists())) {
+    if (!xcodeProject.podfile.existsSync()) {
       throwToolExit('Podfile missing');
     }
     if (await _checkPodCondition()) {

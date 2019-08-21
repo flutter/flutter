@@ -1939,7 +1939,7 @@ void main() {
 
       PlatformViewCreatedCallback onPlatformViewCreatedCallBack;
 
-      final PlatformViewLink platformViewLink = PlatformViewLink(createPlatformViewController: (PlatformViewCreationParams params){
+      final PlatformViewLink platformViewLink = PlatformViewLink(onCreatePlatformView: (PlatformViewCreationParams params){
         onPlatformViewCreatedCallBack = params.onPlatformViewCreated;
         createdPlatformViewId = params.id;
         return FakePlatformViewController(params.id);
@@ -1967,8 +1967,7 @@ void main() {
 
     testWidgets('PlatformViewLink Widget dispose', (WidgetTester tester) async {
       FakePlatformViewController disposedController;
-      final PlatformViewLink platformViewLink = PlatformViewLink(createPlatformViewController: (PlatformViewCreationParams params){
-        params.onPlatformViewCreated(params.id);
+      final PlatformViewLink platformViewLink = PlatformViewLink(onCreatePlatformView: (PlatformViewCreationParams params){
         disposedController = FakePlatformViewController(params.id);
         params.onPlatformViewCreated(params.id);
         return disposedController;
@@ -1997,7 +1996,7 @@ void main() {
       PlatformViewLink createPlatformViewLink() {
         return PlatformViewLink(
           key: key,
-          createPlatformViewController: (PlatformViewCreationParams params){
+          onCreatePlatformView: (PlatformViewCreationParams params){
             ids.add(params.id);
             controller = FakePlatformViewController(params.id);
             params.onPlatformViewCreated(params.id);
@@ -2042,12 +2041,28 @@ void main() {
       );
     });
 
+    testWidgets('PlatformViewLink can take any widget to return in the SurfaceFactory', (WidgetTester tester) async {
+      final PlatformViewLink platformViewLink = PlatformViewLink(onCreatePlatformView: (PlatformViewCreationParams params){
+        params.onPlatformViewCreated(params.id);
+        return FakePlatformViewController(params.id);
+      }, surfaceFactory: (BuildContext context,PlatformViewController controller) {
+        return Container();
+      });
+
+      await tester.pumpWidget(platformViewLink);
+
+      final Container container = tester.allWidgets.firstWhere((Widget widget){
+        return widget is Container;
+      });
+      expect(container, isNotNull);
+    });
+
     testWidgets('PlatformViewLink manages the focus properly', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       FakePlatformViewController controller;
       ValueChanged<bool> focusChanged;
       final PlatformViewLink platformViewLink = PlatformViewLink(
-        createPlatformViewController: (PlatformViewCreationParams params){
+        onCreatePlatformView: (PlatformViewCreationParams params){
           params.onPlatformViewCreated(params.id);
           focusChanged = params.onFocusChanged;
           controller = FakePlatformViewController(params.id);

@@ -10,8 +10,8 @@ Welcome
 
 We invite you to join our team! Everyone is welcome to contribute code
 via pull requests, to file issues on GitHub, to help people asking for
-help on our mailing lists or on Stack Overflow, to help triage,
-reproduce, or fix bugs that people have filed, to add to our
+help on our mailing lists, our chat channels, or on Stack Overflow, to
+help triage, reproduce, or fix bugs that people have filed, to add to our
 documentation, or to help out in any other way.
 
 We grant commit access (which includes full rights to the issue
@@ -20,22 +20,35 @@ our trust and demonstrated a commitment to Flutter. For more details
 see the [Contributor access](https://github.com/flutter/flutter/wiki/Contributor-access)
 page on our wiki.
 
-Chat
-----
+We communicate primarily over GitHub and on [chat channels](https://github.com/flutter/flutter/wiki/Chat).
 
-If you would like to chat to other people who work on Flutter, consider joining the
-https://gitter.im/flutter/contributors chat channel. We also have a [general chat
-channel](https://gitter.im/flutter/flutter) for people who aren't working on Flutter
-but who use Flutter.
+Helping out in the issue database
+---------------------------------
 
-Issues
-------
+If you want to help us triage, you are very welcome to do so!
 
-The main way to contribute to Flutter that doesn't involve writing code is to go through
-our issues database, providing reproduction steps, reduced test cases, finding duplicates,
-and so forth. See the [Triage](https://github.com/flutter/flutter/wiki/Triage) page on our
-wiki for details. When commenting on the issues database, please be sure to follow our
-[code of conduct](CODE_OF_CONDUCT.md).
+1. Join the #hackers-triage [chat](https://github.com/flutter/flutter/wiki/Chat) channel.
+
+2. Read [our code of conduct](CODE_OF_CONDUCT.md), which stipulates explicitly
+   that everyone must be gracious, respectful, and professional. If you're helping out
+   with triage, you are representing the Flutter team, and so you want to make sure to
+   make a good impression!
+   
+3. Help out as described in our wiki: https://github.com/flutter/flutter/wiki/Triage
+   You won't be able to add labels at first, so instead start by trying to
+   do the other steps, e.g. trying to reproduce the problem and asking for people to
+   provide enough details that you can reproduce the problem, pointing out duplicates,
+   and so on. Chat on the #hackers-triage channel to let us know what you're up to!
+   
+4. Familiarize yourself with our
+   [issue hygiene](https://github.com/flutter/flutter/wiki/Issue-hygiene) wiki page,
+   which covers the meanings of some important GitHub labels and
+   milestones.
+ 
+5. Once you've been doing this for a while, someone will invite you to the flutter-hackers
+   team on GitHub and you'll be able to add labels too. See the
+   [contributor access](https://github.com/flutter/flutter/wiki/Contributor-access) wiki
+   page for details.
 
 Developing for Flutter
 ----------------------

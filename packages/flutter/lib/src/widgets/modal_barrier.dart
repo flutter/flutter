@@ -75,7 +75,18 @@ class ModalBarrier extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(!dismissible || semanticsLabel == null || debugCheckHasDirectionality(context));
-    final bool semanticsDismissible = dismissible && defaultTargetPlatform != TargetPlatform.android;
+    bool platformSupportsDismissingBarrier;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        platformSupportsDismissingBarrier = false;
+        break;
+      case TargetPlatform.iOS:
+        platformSupportsDismissingBarrier = true;
+        break;
+    }
+    assert(platformSupportsDismissingBarrier != null);
+    final bool semanticsDismissible = dismissible && platformSupportsDismissingBarrier;
     final bool modalBarrierSemanticsDismissible = barrierSemanticsDismissible ?? semanticsDismissible;
     return BlockSemantics(
       child: ExcludeSemantics(

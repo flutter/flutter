@@ -97,6 +97,8 @@ import 'theme_data.dart';
 ///  * <https://material.io/design/components/buttons.html>
 class FlatButton extends MaterialButton {
   /// Create a simple text button.
+  ///
+  /// The [autofocus] and [clipBehavior] arguments must not be null.
   const FlatButton({
     Key key,
     @required VoidCallback onPressed,
@@ -115,9 +117,11 @@ class FlatButton extends MaterialButton {
     ShapeBorder shape,
     Clip clipBehavior,
     FocusNode focusNode,
+    bool autofocus = false,
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget child,
-  }) : super(
+  }) : assert(autofocus != null),
+       super(
          key: key,
          onPressed: onPressed,
          onHighlightChanged: onHighlightChanged,
@@ -135,6 +139,7 @@ class FlatButton extends MaterialButton {
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
+         autofocus: autofocus,
          materialTapTargetSize: materialTapTargetSize,
          child: child,
       );
@@ -164,6 +169,7 @@ class FlatButton extends MaterialButton {
     ShapeBorder shape,
     Clip clipBehavior,
     FocusNode focusNode,
+    bool autofocus,
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
@@ -192,6 +198,7 @@ class FlatButton extends MaterialButton {
       shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior ?? Clip.none,
       focusNode: focusNode,
+      autofocus: autofocus,
       materialTapTargetSize: buttonTheme.getMaterialTapTargetSize(this),
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
@@ -222,11 +229,13 @@ class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
     ShapeBorder shape,
     Clip clipBehavior,
     FocusNode focusNode,
+    bool autofocus = false,
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
   }) : assert(icon != null),
        assert(label != null),
+       assert(autofocus != null),
        super(
          key: key,
          onPressed: onPressed,
@@ -245,6 +254,7 @@ class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
+         autofocus: autofocus,
          materialTapTargetSize: materialTapTargetSize,
          child: Row(
            mainAxisSize: MainAxisSize.min,
