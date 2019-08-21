@@ -138,7 +138,6 @@ class _CaptureAll extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //Widget wrappedChild = Builder(builder: (BuildContext context) => child);
     Widget wrappedChild = child;
     for (InheritedTheme theme in themes)
       wrappedChild = theme.wrap(context, wrappedChild);

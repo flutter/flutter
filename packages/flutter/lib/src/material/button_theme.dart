@@ -233,24 +233,7 @@ class ButtonTheme extends InheritedTheme {
   @override
   Widget wrap(BuildContext context, Widget child) {
     final ButtonTheme ancestorTheme = context.ancestorWidgetOfExactType(ButtonTheme);
-    return identical(this, ancestorTheme) ? child : ButtonTheme(
-      textTheme: data.textTheme,
-      layoutBehavior: data.layoutBehavior,
-      minWidth: data.minWidth,
-      height: data.height,
-      padding: data._padding,
-      shape: data._shape,
-      alignedDropdown: data.alignedDropdown,
-      buttonColor: data._buttonColor,
-      disabledColor: data._disabledColor,
-      focusColor: data._focusColor,
-      hoverColor: data._hoverColor,
-      highlightColor: data._highlightColor,
-      splashColor: data._splashColor,
-      colorScheme: data.colorScheme,
-      materialTapTargetSize: data._materialTapTargetSize,
-      child: child,
-    );
+    return identical(this, ancestorTheme) ? child : ButtonTheme.fromButtonThemeData(data: data, child: child);
   }
 
   @override
