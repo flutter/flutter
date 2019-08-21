@@ -1,4 +1,4 @@
-Signature: 94bb4276408984fa58f0cf5fe27bc7bd
+Signature: 7cb10c923a4e55c4725593b670e4e82f
 
 UNUSED LICENSES:
 
@@ -206,19 +206,65 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: angle
 LIBRARY: base
-ORIGIN: ../../../third_party/angle/src/common/third_party/base/anglebase/base_export.h + ../../../third_party/angle/LICENSE
+ORIGIN: ../../../third_party/angle/include/EGL/eglext_angle.h + ../../../third_party/angle/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/angle/include/EGL/eglext_angle.h
+FILE: ../../../third_party/angle/include/GLES2/gl2ext_angle.h
+FILE: ../../../third_party/angle/samples/multiview/Multiview.cpp
 FILE: ../../../third_party/angle/src/common/PackedEnums.h
 FILE: ../../../third_party/angle/src/common/aligned_memory.cpp
 FILE: ../../../third_party/angle/src/common/aligned_memory.h
 FILE: ../../../third_party/angle/src/common/aligned_memory_unittest.cpp
+FILE: ../../../third_party/angle/src/common/angleutils_unittest.cpp
 FILE: ../../../third_party/angle/src/common/third_party/base/anglebase/base_export.h
 FILE: ../../../third_party/angle/src/common/third_party/base/anglebase/macros.h
 FILE: ../../../third_party/angle/src/common/third_party/base/anglebase/sys_byteorder.h
+FILE: ../../../third_party/angle/src/compiler/translator/Declarator.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/Declarator.h
+FILE: ../../../third_party/angle/src/compiler/translator/ExtensionBehavior.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/HashNames.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ImageFunctionHLSL.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ImageFunctionHLSL.h
+FILE: ../../../third_party/angle/src/compiler/translator/IsASTDepthBelowLimit.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/IsASTDepthBelowLimit.h
+FILE: ../../../third_party/angle/src/compiler/translator/OutputTree.h
+FILE: ../../../third_party/angle/src/compiler/translator/StaticType.h
+FILE: ../../../third_party/angle/src/compiler/translator/Symbol.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/Symbol.h
+FILE: ../../../third_party/angle/src/compiler/translator/SymbolUniqueId.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/SymbolUniqueId.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ClampFragDepth.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ClampFragDepth.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ClampPointSize.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ClampPointSize.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/DeclareAndInitBuiltinsForInstancedMultiview.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/DeclareAndInitBuiltinsForInstancedMultiview.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveArrayLengthMethod.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveArrayLengthMethod.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveUnreferencedVariables.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveUnreferencedVariables.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/VectorizeVectorScalarArithmetic.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/VectorizeVectorScalarArithmetic.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/WrapSwitchStatementsInBlocks.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/WrapSwitchStatementsInBlocks.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/FindMain.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/FindMain.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermNode_util.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermNode_util.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermTraverse.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/RunAtTheEndOfShader.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/RunAtTheEndOfShader.h
+FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_mac.mm
 FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_unittest.cpp
+FILE: ../../../third_party/angle/src/libANGLE/ErrorStrings.h
 FILE: ../../../third_party/angle/src/libANGLE/LoggingAnnotator.cpp
 FILE: ../../../third_party/angle/src/libANGLE/LoggingAnnotator.h
 FILE: ../../../third_party/angle/src/libANGLE/MemoryProgramCache.cpp
+FILE: ../../../third_party/angle/src/libANGLE/MemoryProgramCache.h
+FILE: ../../../third_party/angle/src/libANGLE/ProgramLinkedResources.cpp
+FILE: ../../../third_party/angle/src/libANGLE/ProgramLinkedResources.h
+FILE: ../../../third_party/angle/src/libANGLE/ProgramPipeline.cpp
+FILE: ../../../third_party/angle/src/libANGLE/ProgramPipeline.h
 FILE: ../../../third_party/angle/src/libANGLE/ResourceMap.h
 FILE: ../../../third_party/angle/src/libANGLE/SizedMRUCache.h
 FILE: ../../../third_party/angle/src/libANGLE/SizedMRUCache_unittest.cpp
@@ -228,17 +274,23 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/ProgramPipeline
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/ProgramPipeline11.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/ResourceManager11.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/ResourceManager11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/shaders/Clear11.hlsl
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ClearMultiviewGL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ClearMultiviewGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ProgramPipelineGL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ProgramPipelineGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/cgl/IOSurfaceSurfaceCGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/egl_utils.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/egl_utils.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/SurfaceWGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/null/ProgramPipelineNULL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/null/ProgramPipelineNULL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/CommandGraph.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/CommandGraph.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/ProgramPipelineVk.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/ProgramPipelineVk.h
-FILE: ../../../third_party/angle/src/libGLESv2/proc_table.h
+FILE: ../../../third_party/angle/src/libGL/proc_table_wgl.h
+FILE: ../../../third_party/angle/src/libGLESv2/proc_table_egl.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2017 The ANGLE Project Authors. All rights reserved.
 
@@ -276,35 +328,119 @@ POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: angle
 LIBRARY: base
-ORIGIN: ../../../third_party/angle/src/common/third_party/base/anglebase/logging.h + ../../../third_party/angle/LICENSE
+ORIGIN: ../../../third_party/angle/include/platform/FrontendFeatures.h + ../../../third_party/angle/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/angle/include/platform/FrontendFeatures.h
+FILE: ../../../third_party/angle/src/common/Color.h
+FILE: ../../../third_party/angle/src/common/Color.inc
 FILE: ../../../third_party/angle/src/common/third_party/base/anglebase/logging.h
 FILE: ../../../third_party/angle/src/common/vector_utils.h
 FILE: ../../../third_party/angle/src/common/vector_utils_unittest.cpp
+FILE: ../../../third_party/angle/src/compiler/fuzz/translator_fuzzer.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/ConstantUnion.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/OutputVulkanGLSL.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/OutputVulkanGLSL.h
+FILE: ../../../third_party/angle/src/compiler/translator/Severity.h
+FILE: ../../../third_party/angle/src/compiler/translator/TextureFunctionHLSL.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/TextureFunctionHLSL.h
+FILE: ../../../third_party/angle/src/compiler/translator/TranslatorVulkan.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/TranslatorVulkan.h
+FILE: ../../../third_party/angle/src/compiler/translator/ValidateMaxParameters.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ValidateMaxParameters.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/AddAndTrueToLoopCondition.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/AddAndTrueToLoopCondition.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/AddDefaultReturnStatements.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/AddDefaultReturnStatements.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/BreakVariableAliasingInInnerLoops.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/BreakVariableAliasingInInnerLoops.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/DeferGlobalInitializers.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/DeferGlobalInitializers.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ExpandIntegerPowExpressions.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ExpandIntegerPowExpressions.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveInvariantDeclaration.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveInvariantDeclaration.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteTexelFetchOffset.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteTexelFetchOffset.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteUnaryMinusOperatorFloat.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteUnaryMinusOperatorFloat.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteUnaryMinusOperatorInt.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteUnaryMinusOperatorInt.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SimplifyLoopConditions.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SimplifyLoopConditions.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SplitSequenceOperator.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SplitSequenceOperator.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/UseInterfaceBlockFields.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/UseInterfaceBlockFields.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermNodePatternMatcher.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermNodePatternMatcher.h
+FILE: ../../../third_party/angle/src/image_util/imageformats.cpp
+FILE: ../../../third_party/angle/src/libANGLE/HandleRangeAllocator.cpp
 FILE: ../../../third_party/angle/src/libANGLE/HandleRangeAllocator_unittest.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Observer.h
+FILE: ../../../third_party/angle/src/libANGLE/Observer_unittest.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Stream.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Stream.h
+FILE: ../../../third_party/angle/src/libANGLE/Thread.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Thread.h
 FILE: ../../../third_party/angle/src/libANGLE/VaryingPacking_unittest.cpp
 FILE: ../../../third_party/angle/src/libANGLE/WorkerThread.cpp
 FILE: ../../../third_party/angle/src/libANGLE/WorkerThread.h
 FILE: ../../../third_party/angle/src/libANGLE/WorkerThread_unittest.cpp
+FILE: ../../../third_party/angle/src/libANGLE/queryutils.cpp
+FILE: ../../../third_party/angle/src/libANGLE/queryutils.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/ContextImpl.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/ContextImpl.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/EGLImplFactory.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/Format.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/FramebufferAttachmentObjectImpl.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/StreamProducerImpl.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/TextureImpl.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/HLSLCompiler.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/NativeWindowD3D.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/NativeWindowD3D.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/SwapChainD3D.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Context11.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Context11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/NativeWindow11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/StreamProducerD3DTexture.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/StreamProducerD3DTexture.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/VertexArray11.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/texture_format_table.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/texture_format_table_utils.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/win32/NativeWindow11Win32.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/win32/NativeWindow11Win32.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/winrt/NativeWindow11WinRT.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/winrt/NativeWindow11WinRT.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Context9.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Context9.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/NativeWindow9.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/NativeWindow9.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/driver_utils.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/driver_utils.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ContextGL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ContextGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/PathGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/PathGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/DisplayEGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/DisplayEGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/FunctionsEGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/FunctionsEGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/FunctionsEGLDL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/FunctionsEGLDL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/PbufferSurfaceEGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/PbufferSurfaceEGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/SurfaceEGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/SurfaceEGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/WindowSurfaceEGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/WindowSurfaceEGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/android/DisplayAndroid.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/android/DisplayAndroid.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/functionsegl_typedefs.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/ozone/DisplayOzone.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/ozone/DisplayOzone.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/ozone/SurfaceOzone.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/ozone/SurfaceOzone.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/glx/SurfaceGLX.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/null/BufferNULL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/null/BufferNULL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/null/CompilerNULL.cpp
@@ -359,10 +495,13 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/FenceNVVk.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/FenceNVVk.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/FramebufferVk.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/FramebufferVk.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/GlslangWrapper.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/GlslangWrapper.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/ImageVk.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/ImageVk.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/ProgramVk.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/ProgramVk.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/QueryVk.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/QueryVk.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/RenderTargetVk.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/RenderTargetVk.h
@@ -396,6 +535,14 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/xcb/DisplayVkXcb.c
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/xcb/DisplayVkXcb.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/xcb/WindowSurfaceVkXcb.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/xcb/WindowSurfaceVkXcb.h
+FILE: ../../../third_party/angle/src/libANGLE/validationEGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationES31.cpp
+FILE: ../../../third_party/angle/util/android/AndroidPixmap.cpp
+FILE: ../../../third_party/angle/util/android/AndroidWindow.cpp
+FILE: ../../../third_party/angle/util/android/AndroidWindow.h
+FILE: ../../../third_party/angle/util/ozone/OzonePixmap.cpp
+FILE: ../../../third_party/angle/util/ozone/OzoneWindow.cpp
+FILE: ../../../third_party/angle/util/ozone/OzoneWindow.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2016 The ANGLE Project Authors. All rights reserved.
 
@@ -926,6 +1073,7 @@ LIBRARY: vulkan-validation-layers
 ORIGIN: ../../../third_party/angle/android/AndroidManifest.xml.jinja2 + ../../../third_party/angle/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/angle/android/AndroidManifest.xml.jinja2
+FILE: ../../../third_party/angle/include/GLES/glext_angle.h
 FILE: ../../../third_party/angle/include/platform/FeaturesVk.h
 FILE: ../../../third_party/angle/samples/gles1/DrawTexture.cpp
 FILE: ../../../third_party/angle/samples/gles1/FlatShading.cpp
@@ -947,21 +1095,40 @@ FILE: ../../../third_party/angle/src/common/hash_utils_unittest.cpp
 FILE: ../../../third_party/angle/src/common/matrix_utils.cpp
 FILE: ../../../third_party/angle/src/common/system_utils.cpp
 FILE: ../../../third_party/angle/src/common/system_utils_posix.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/AtomicCounterFunctionHLSL.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/AtomicCounterFunctionHLSL.h
+FILE: ../../../third_party/angle/src/compiler/translator/FunctionLookup.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/FunctionLookup.h
+FILE: ../../../third_party/angle/src/compiler/translator/ImmutableString.h
+FILE: ../../../third_party/angle/src/compiler/translator/ImmutableStringBuilder.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ImmutableStringBuilder.h
 FILE: ../../../third_party/angle/src/compiler/translator/ShaderStorageBlockFunctionHLSL.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/ShaderStorageBlockFunctionHLSL.h
 FILE: ../../../third_party/angle/src/compiler/translator/ShaderStorageBlockOutputHLSL.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/ShaderStorageBlockOutputHLSL.h
 FILE: ../../../third_party/angle/src/compiler/translator/builtin_variables.json
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulateGLDrawID.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulateGLDrawID.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/FoldExpressions.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/FoldExpressions.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/NameEmbeddedUniformStructs.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/NameEmbeddedUniformStructs.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/PruneEmptyCases.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/PruneEmptyCases.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteAtomicFunctionExpressions.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteAtomicFunctionExpressions.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteExpressionsWithShaderStorageBlock.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteExpressionsWithShaderStorageBlock.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteRepeatedAssignToSwizzled.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteRepeatedAssignToSwizzled.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteStructSamplers.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteStructSamplers.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateArrayConstructorStatements.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateArrayConstructorStatements.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceVariable.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceVariable.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/Visit.h
 FILE: ../../../third_party/angle/src/feature_support_util/feature_support_util.cpp
 FILE: ../../../third_party/angle/src/feature_support_util/feature_support_util.h
+FILE: ../../../third_party/angle/src/feature_support_util/feature_support_util_unittest.cpp
 FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_android.cpp
 FILE: ../../../third_party/angle/src/libANGLE/BlobCache.cpp
 FILE: ../../../third_party/angle/src/libANGLE/BlobCache.h
@@ -975,6 +1142,7 @@ FILE: ../../../third_party/angle/src/libANGLE/GLES1State.cpp
 FILE: ../../../third_party/angle/src/libANGLE/GLES1State.h
 FILE: ../../../third_party/angle/src/libANGLE/Observer.cpp
 FILE: ../../../third_party/angle/src/libANGLE/ResourceMap_unittest.cpp
+FILE: ../../../third_party/angle/src/libANGLE/entry_points_utils.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/QueryImpl.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/RenderTargetCache.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/ContextD3D.h
@@ -982,6 +1150,9 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Program11.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Program11.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/converged/CompositorNativeWindow11.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/converged/CompositorNativeWindow11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/shaders/MultiplyAlpha.hlsl
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/shaders/Passthrough2DArray11.hlsl
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/shaders/Passthrough3D11.hlsl
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ImageGL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ImageGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/ContextEGL.cpp
@@ -993,6 +1164,10 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/RendererEGL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/RendererEGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/android/NativeBufferImageSiblingAndroid.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/android/NativeBufferImageSiblingAndroid.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/ContextWGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/ContextWGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/RendererWGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/RendererWGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/UtilsVk.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/UtilsVk.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/android/DisplayVkAndroid.cpp
@@ -1013,12 +1188,13 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_caps_utils.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_format_map.json
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_helpers.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_helpers.h
+FILE: ../../../third_party/angle/src/libANGLE/validationES1.cpp
 FILE: ../../../third_party/angle/src/libANGLE/validationES1.h
 FILE: ../../../third_party/angle/src/libANGLE/validationES2.h
 FILE: ../../../third_party/angle/src/libANGLE/validationES3.h
 FILE: ../../../third_party/angle/src/libANGLE/validationES31.h
 FILE: ../../../third_party/angle/src/libANGLE/validationESEXT.h
-FILE: ../../../third_party/angle/src/libGLESv2/entry_points_utils.h
+FILE: ../../../third_party/angle/src/libGLESv1_CM/libGLESv1_CM.cpp
 FILE: ../../../third_party/angle/third_party/vulkan-validation-layers/dummy_spirv_tools_commit_id.h
 FILE: ../../../third_party/angle/util/EGLPlatformParameters.h
 FILE: ../../../third_party/angle/util/util_export.h
@@ -1070,6 +1246,7 @@ FILE: ../../../third_party/angle/include/GLES2/gl2ext_explicit_context_autogen.i
 FILE: ../../../third_party/angle/include/GLES3/gl31ext_explicit_context_autogen.inc
 FILE: ../../../third_party/angle/include/GLES3/gl3ext_explicit_context_autogen.inc
 FILE: ../../../third_party/angle/include/platform/Feature.h
+FILE: ../../../third_party/angle/scripts/entry_point_packed_gl_enums.json
 FILE: ../../../third_party/angle/src/common/PackedEGLEnums_autogen.cpp
 FILE: ../../../third_party/angle/src/common/PackedEGLEnums_autogen.h
 FILE: ../../../third_party/angle/src/common/PackedGLEnums_autogen.cpp
@@ -1082,23 +1259,82 @@ FILE: ../../../third_party/angle/src/common/system_utils_unittest_helper.cpp
 FILE: ../../../third_party/angle/src/common/system_utils_unittest_helper.h
 FILE: ../../../third_party/angle/src/common/third_party/xxhash/xxhash_fuzzer.cpp
 FILE: ../../../third_party/angle/src/common/uniform_type_info_autogen.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ImmutableString_autogen.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/ParseContext_autogen.h
 FILE: ../../../third_party/angle/src/compiler/translator/SymbolTable_autogen.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/SymbolTable_autogen.h
 FILE: ../../../third_party/angle/src/compiler/translator/ValidateAST.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/ValidateAST.h
 FILE: ../../../third_party/angle/src/compiler/translator/emulated_builtin_functions_hlsl_autogen.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulateMultiDrawShaderBuiltins.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulateMultiDrawShaderBuiltins.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteAtomicCounters.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteAtomicCounters.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteCubeMapSamplersAs2DArray.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteCubeMapSamplersAs2DArray.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteDfdy.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteDfdy.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/BuiltIn_autogen.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/FindFunction.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/FindFunction.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceShadowingVariables.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceShadowingVariables.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_1_0_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_1_1_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_1_2_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_1_3_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_1_4_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_1_5_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_2_0_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_2_1_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_3_0_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_3_1_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_3_2_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_3_3_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_0_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_1_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_2_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_3_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_4_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_5_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gl_4_6_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/Context_gles_1_0_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gles_2_0_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gles_3_0_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gles_3_1_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/Context_gles_ext_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/EGLSync.h
+FILE: ../../../third_party/angle/src/libANGLE/FrameCapture.cpp
+FILE: ../../../third_party/angle/src/libANGLE/FrameCapture.h
 FILE: ../../../third_party/angle/src/libANGLE/MemoryObject.cpp
 FILE: ../../../third_party/angle/src/libANGLE/MemoryObject.h
 FILE: ../../../third_party/angle/src/libANGLE/Semaphore.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Semaphore.h
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_1_0_autogen.cpp
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_1_0_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_1_0_params.cpp
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_2_0_autogen.cpp
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_2_0_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_2_0_params.cpp
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_3_0_autogen.cpp
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_3_0_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_3_0_params.cpp
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_3_1_autogen.cpp
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_3_1_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_3_1_params.cpp
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_ext_autogen.cpp
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_ext_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/capture_gles_ext_params.cpp
+FILE: ../../../third_party/angle/src/libANGLE/entry_points_enum_autogen.cpp
+FILE: ../../../third_party/angle/src/libANGLE/entry_points_enum_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/es3_copy_conversion_table_autogen.cpp
 FILE: ../../../third_party/angle/src/libANGLE/format_map_autogen.cpp
+FILE: ../../../third_party/angle/src/libANGLE/format_map_desktop.cpp
+FILE: ../../../third_party/angle/src/libANGLE/frame_capture_utils_autogen.cpp
+FILE: ../../../third_party/angle/src/libANGLE/frame_capture_utils_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/gl_enum_utils_autogen.cpp
+FILE: ../../../third_party/angle/src/libANGLE/gl_enum_utils_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/EGLSyncImpl.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/FormatID_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/Format_table_autogen.cpp
@@ -1108,10 +1344,19 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/ShaderImpl.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/DynamicImage2DHLSL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/DynamicImage2DHLSL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Blit11Helper_autogen.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/ExternalImageSiblingImpl11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/ExternalImageSiblingImpl11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/MappedSubresourceVerifier11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/MappedSubresourceVerifier11.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/dxgi_format_map_autogen.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/texture_format_table_autogen.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/driver_utils_mac.mm
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/DispatchTableGL_autogen.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/DispatchTableGL_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/MemoryObjectGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/MemoryObjectGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SemaphoreGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SemaphoreGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/cgl/ContextCGL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/cgl/ContextCGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/cgl/RendererCGL.h
@@ -1125,6 +1370,8 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/null_functions.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/load_functions_table_autogen.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/MemoryObjectVk.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/MemoryObjectVk.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/PersistentCommandPool.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/PersistentCommandPool.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/SecondaryCommandBuffer.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/SecondaryCommandBuffer.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/SemaphoreVk.cpp
@@ -1148,14 +1395,95 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_internal_shader
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_internal_shaders_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_mandatory_format_support_table_autogen.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_wrapper.h
+FILE: ../../../third_party/angle/src/libANGLE/trace.h
 FILE: ../../../third_party/angle/src/libANGLE/validationES1_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/validationES2_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/validationES31_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/validationES3_autogen.h
 FILE: ../../../third_party/angle/src/libANGLE/validationESEXT_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL1.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL11_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL12.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL12_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL13.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL13_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL14.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL14_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL15.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL15_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL1_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL2.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL21.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL21_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL2_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL3.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL31.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL31_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL32.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL32_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL33.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL33_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL3_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL4.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL41.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL41_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL42.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL42_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL43.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL43_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL44.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL44_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL45.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL45_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL46.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationGL46_autogen.h
+FILE: ../../../third_party/angle/src/libANGLE/validationGL4_autogen.h
 FILE: ../../../third_party/angle/src/libEGL/egl_loader_autogen.cpp
 FILE: ../../../third_party/angle/src/libEGL/egl_loader_autogen.h
-FILE: ../../../third_party/angle/src/libGLESv2/entry_points_enum_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_0_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_0_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_1_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_1_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_2_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_2_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_3_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_3_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_4_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_4_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_5_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_1_5_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_2_0_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_2_0_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_2_1_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_2_1_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_0_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_0_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_1_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_1_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_2_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_2_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_3_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_3_3_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_0_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_0_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_1_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_1_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_2_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_2_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_3_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_3_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_4_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_4_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_5_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_5_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_6_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_gl_4_6_autogen.h
+FILE: ../../../third_party/angle/src/libGL/entry_points_wgl.cpp
+FILE: ../../../third_party/angle/src/libGL/entry_points_wgl.h
+FILE: ../../../third_party/angle/src/libGL/libGL_autogen.cpp
+FILE: ../../../third_party/angle/src/libGL/libGL_autogen.def
+FILE: ../../../third_party/angle/src/libGL/proc_table_wgl_autogen.cpp
 FILE: ../../../third_party/angle/src/libGLESv2/entry_points_gles_1_0_autogen.cpp
 FILE: ../../../third_party/angle/src/libGLESv2/entry_points_gles_1_0_autogen.h
 FILE: ../../../third_party/angle/src/libGLESv2/entry_points_gles_2_0_autogen.cpp
@@ -1168,7 +1496,11 @@ FILE: ../../../third_party/angle/src/libGLESv2/entry_points_gles_ext_autogen.cpp
 FILE: ../../../third_party/angle/src/libGLESv2/entry_points_gles_ext_autogen.h
 FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_autogen.cpp
 FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_autogen.def
+FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_no_capture_autogen.def
+FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2_with_capture_autogen.def
 FILE: ../../../third_party/angle/src/libGLESv2/proc_table_autogen.cpp
+FILE: ../../../third_party/angle/src/libGLESv2/proc_table_egl_autogen.cpp
+FILE: ../../../third_party/angle/src/libGLESv2/proc_table_gles_autogen.cpp
 FILE: ../../../third_party/angle/util/egl_loader_autogen.cpp
 FILE: ../../../third_party/angle/util/egl_loader_autogen.h
 FILE: ../../../third_party/angle/util/fuchsia/ScenicWindow.cpp
@@ -1237,8 +1569,26 @@ FILE: ../../../third_party/angle/samples/multiple_draw_buffers/multiple_draw_buf
 FILE: ../../../third_party/angle/samples/multiple_draw_buffers/multiple_draw_buffers_fs.glsl
 FILE: ../../../third_party/angle/samples/multiple_draw_buffers/multiple_draw_buffers_vs.glsl
 FILE: ../../../third_party/angle/samples/particle_system/smoke.tga
-FILE: ../../../third_party/angle/scripts/entry_point_packed_gl_enums.json
-FILE: ../../../third_party/angle/scripts/run_code_generation_hashes.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/ANGLE_format.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/ANGLE_load_functions_table.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/D3D11_blit_shader_selection.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/D3D11_format.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/DXGI_format.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/DXGI_format_support.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/ESSL_static_builtins.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/Emulated_HLSL_functions.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/GL_EGL_WGL_loader.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/GL_EGL_entry_points.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/GL_copy_conversion_table.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/GL_format_map.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/GLenum_value_to_string_map.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/OpenGL_dispatch_table.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/Vulkan_format.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/Vulkan_internal_shader_programs.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/Vulkan_mandatory_format_support_table.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/packed_enum.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/proc_table.json
+FILE: ../../../third_party/angle/scripts/code_generation_hashes/uniform_type.json
 FILE: ../../../third_party/angle/src/common/packed_egl_enums.json
 FILE: ../../../third_party/angle/src/common/packed_gl_enums.json
 FILE: ../../../third_party/angle/src/compiler/preprocessor/64bit-tokenizer-safety.patch
@@ -1493,6 +1843,7 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/Buffer
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/BufferUtils.comp.0000000A.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/BufferUtils.comp.0000000B.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertIndex.comp.00000000.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertIndex.comp.00000001.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000000.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000001.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000002.inc
@@ -1509,6 +1860,16 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/Conver
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.0000000D.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.0000000E.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.0000000F.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000010.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000011.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000012.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000013.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000014.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000015.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000016.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000017.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000018.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ConvertVertex.comp.00000019.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/FullScreenQuad.vert.00000000.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ImageClear.frag.00000000.inc
 FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/shaders/gen/ImageClear.frag.00000001.inc
@@ -1556,11 +1917,12 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/vk_mandatory_forma
 FILE: ../../../third_party/angle/src/libEGL/libEGL.def
 FILE: ../../../third_party/angle/src/libEGL/libEGL.rc
 FILE: ../../../third_party/angle/src/libEGL/resource.h
+FILE: ../../../third_party/angle/src/libGL/libGL.rc
+FILE: ../../../third_party/angle/src/libGL/resource.h
 FILE: ../../../third_party/angle/src/libGLESv1_CM/libGLESv1_CM.def
 FILE: ../../../third_party/angle/src/libGLESv1_CM/libGLESv1_CM.rc
 FILE: ../../../third_party/angle/src/libGLESv1_CM/resource.h
 FILE: ../../../third_party/angle/src/libGLESv2/libGLESv2.rc
-FILE: ../../../third_party/angle/src/libGLESv2/proc_table_data.json
 FILE: ../../../third_party/angle/src/libGLESv2/resource.h
 FILE: ../../../third_party/angle/tools/glslang/glslang_validator.exe.sha1
 FILE: ../../../third_party/angle/tools/glslang/glslang_validator.sha1
@@ -1633,93 +1995,6 @@ MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 
 ====================================================================================================
 LIBRARY: angle
-ORIGIN: ../../../third_party/angle/include/EGL/eglext_angle.h + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/include/EGL/eglext_angle.h
-FILE: ../../../third_party/angle/include/GLES2/gl2ext_angle.h
-FILE: ../../../third_party/angle/samples/multiview/Multiview.cpp
-FILE: ../../../third_party/angle/src/common/angleutils_unittest.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/Declarator.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/Declarator.h
-FILE: ../../../third_party/angle/src/compiler/translator/ExtensionBehavior.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/HashNames.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/ImageFunctionHLSL.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/ImageFunctionHLSL.h
-FILE: ../../../third_party/angle/src/compiler/translator/IsASTDepthBelowLimit.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/IsASTDepthBelowLimit.h
-FILE: ../../../third_party/angle/src/compiler/translator/OutputTree.h
-FILE: ../../../third_party/angle/src/compiler/translator/StaticType.h
-FILE: ../../../third_party/angle/src/compiler/translator/Symbol.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/Symbol.h
-FILE: ../../../third_party/angle/src/compiler/translator/SymbolUniqueId.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/SymbolUniqueId.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ClampFragDepth.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ClampFragDepth.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ClampPointSize.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ClampPointSize.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/DeclareAndInitBuiltinsForInstancedMultiview.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/DeclareAndInitBuiltinsForInstancedMultiview.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveArrayLengthMethod.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveArrayLengthMethod.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveUnreferencedVariables.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveUnreferencedVariables.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/VectorizeVectorScalarArithmetic.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/VectorizeVectorScalarArithmetic.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/WrapSwitchStatementsInBlocks.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/WrapSwitchStatementsInBlocks.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/FindMain.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/FindMain.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermNode_util.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermNode_util.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermTraverse.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/RunAtTheEndOfShader.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/RunAtTheEndOfShader.h
-FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_mac.mm
-FILE: ../../../third_party/angle/src/libANGLE/ErrorStrings.h
-FILE: ../../../third_party/angle/src/libANGLE/ProgramLinkedResources.cpp
-FILE: ../../../third_party/angle/src/libANGLE/ProgramLinkedResources.h
-FILE: ../../../third_party/angle/src/libANGLE/ProgramPipeline.cpp
-FILE: ../../../third_party/angle/src/libANGLE/ProgramPipeline.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/cgl/IOSurfaceSurfaceCGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/egl_utils.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/egl_utils.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/SurfaceWGL.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2017 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
 ORIGIN: ../../../third_party/angle/include/EGL/eglplatform.h
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/angle/include/EGL/eglplatform.h
@@ -1779,76 +2054,6 @@ MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 
 ====================================================================================================
 LIBRARY: angle
-ORIGIN: ../../../third_party/angle/include/GLES/glext_angle.h + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/include/GLES/glext_angle.h
-FILE: ../../../third_party/angle/src/compiler/translator/AtomicCounterFunctionHLSL.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/AtomicCounterFunctionHLSL.h
-FILE: ../../../third_party/angle/src/compiler/translator/FunctionLookup.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/FunctionLookup.h
-FILE: ../../../third_party/angle/src/compiler/translator/ImmutableString.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/ImmutableString.h
-FILE: ../../../third_party/angle/src/compiler/translator/ImmutableStringBuilder.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/ImmutableStringBuilder.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/FoldExpressions.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/FoldExpressions.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/PruneEmptyCases.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/PruneEmptyCases.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteAtomicFunctionExpressions.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteAtomicFunctionExpressions.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteRepeatedAssignToSwizzled.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteRepeatedAssignToSwizzled.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateArrayConstructorStatements.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateArrayConstructorStatements.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceVariable.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/ReplaceVariable.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/Visit.h
-FILE: ../../../third_party/angle/src/feature_support_util/feature_support_util_unittest.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/shaders/MultiplyAlpha.hlsl
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/shaders/Passthrough2DArray11.hlsl
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/shaders/Passthrough3D11.hlsl
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/ContextWGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/ContextWGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/RendererWGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/RendererWGL.h
-FILE: ../../../third_party/angle/src/libANGLE/validationES1.cpp
-FILE: ../../../third_party/angle/src/libGLESv1_CM/libGLESv1_CM.cpp
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2018 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
 ORIGIN: ../../../third_party/angle/include/GLES3/gl31.h
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/angle/include/GLES3/gl31.h
@@ -1882,44 +2087,174 @@ ORIGIN: ../../../third_party/angle/include/GLSLANG/ShaderLang.h + ../../../third
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/angle/include/GLSLANG/ShaderLang.h
 FILE: ../../../third_party/angle/samples/shader_translator/shader_translator.cpp
+FILE: ../../../third_party/angle/src/common/angleutils.h
+FILE: ../../../third_party/angle/src/common/debug.cpp
+FILE: ../../../third_party/angle/src/common/debug.h
 FILE: ../../../third_party/angle/src/common/mathutil.h
 FILE: ../../../third_party/angle/src/common/utilities.cpp
 FILE: ../../../third_party/angle/src/common/utilities.h
+FILE: ../../../third_party/angle/src/compiler/preprocessor/Tokenizer.l
+FILE: ../../../third_party/angle/src/compiler/translator/ASTMetadataHLSL.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ASTMetadataHLSL.h
 FILE: ../../../third_party/angle/src/compiler/translator/BaseTypes.h
+FILE: ../../../third_party/angle/src/compiler/translator/BuiltInFunctionEmulator.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/BuiltInFunctionEmulatorGLSL.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/CallDAG.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/CallDAG.h
 FILE: ../../../third_party/angle/src/compiler/translator/CollectVariables.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/CollectVariables.h
+FILE: ../../../third_party/angle/src/compiler/translator/Common.h
+FILE: ../../../third_party/angle/src/compiler/translator/Compiler.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/Compiler.h
+FILE: ../../../third_party/angle/src/compiler/translator/ConstantUnion.h
+FILE: ../../../third_party/angle/src/compiler/translator/ExtensionBehavior.h
+FILE: ../../../third_party/angle/src/compiler/translator/HashNames.h
+FILE: ../../../third_party/angle/src/compiler/translator/InfoSink.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/InfoSink.h
+FILE: ../../../third_party/angle/src/compiler/translator/Initialize.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/Initialize.h
+FILE: ../../../third_party/angle/src/compiler/translator/InitializeDll.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/InitializeDll.h
+FILE: ../../../third_party/angle/src/compiler/translator/InitializeGlobals.h
+FILE: ../../../third_party/angle/src/compiler/translator/IntermNode.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/IntermNode.h
+FILE: ../../../third_party/angle/src/compiler/translator/Operator.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/Operator.h
 FILE: ../../../third_party/angle/src/compiler/translator/OutputESSL.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/OutputESSL.h
 FILE: ../../../third_party/angle/src/compiler/translator/OutputGLSL.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/OutputGLSL.h
+FILE: ../../../third_party/angle/src/compiler/translator/OutputGLSLBase.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/OutputGLSLBase.h
+FILE: ../../../third_party/angle/src/compiler/translator/OutputHLSL.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/OutputHLSL.h
+FILE: ../../../third_party/angle/src/compiler/translator/OutputTree.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ParseContext.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ParseContext.h
+FILE: ../../../third_party/angle/src/compiler/translator/PoolAlloc.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/PoolAlloc.h
+FILE: ../../../third_party/angle/src/compiler/translator/QualifierTypes.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/QualifierTypes.h
 FILE: ../../../third_party/angle/src/compiler/translator/ShaderLang.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/SymbolTable.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/SymbolTable.h
 FILE: ../../../third_party/angle/src/compiler/translator/TranslatorESSL.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/TranslatorESSL.h
 FILE: ../../../third_party/angle/src/compiler/translator/TranslatorGLSL.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/TranslatorGLSL.h
 FILE: ../../../third_party/angle/src/compiler/translator/TranslatorHLSL.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/TranslatorHLSL.h
+FILE: ../../../third_party/angle/src/compiler/translator/Types.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/Types.h
+FILE: ../../../third_party/angle/src/compiler/translator/ValidateGlobalInitializer.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ValidateGlobalInitializer.h
 FILE: ../../../third_party/angle/src/compiler/translator/ValidateLimitations.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ValidateSwitch.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ValidateSwitch.h
+FILE: ../../../third_party/angle/src/compiler/translator/ValidateVaryingLocations.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ValidateVaryingLocations.h
+FILE: ../../../third_party/angle/src/compiler/translator/VariablePacker.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/VariablePacker.h
+FILE: ../../../third_party/angle/src/compiler/translator/VersionGLSL.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/VersionGLSL.h
 FILE: ../../../third_party/angle/src/compiler/translator/glslang.l
+FILE: ../../../third_party/angle/src/compiler/translator/glslang.y
+FILE: ../../../third_party/angle/src/compiler/translator/glslang.y
+FILE: ../../../third_party/angle/src/compiler/translator/glslang_tab.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ArrayReturnValueToOutParameter.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ArrayReturnValueToOutParameter.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulateGLFragColorBroadcast.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulateGLFragColorBroadcast.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulatePrecision.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulatePrecision.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/InitializeVariables.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/InitializeVariables.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/PruneNoOps.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/PruneNoOps.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RecordConstantPrecision.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RecordConstantPrecision.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RegenerateStructNames.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RegenerateStructNames.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveDynamicIndexing.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveDynamicIndexing.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemovePow.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemovePow.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveSwitchFallThrough.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveSwitchFallThrough.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ScalarizeVecAndMatConstructorArgs.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ScalarizeVecAndMatConstructorArgs.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateArrayInitialization.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateArrayInitialization.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateDeclarations.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateDeclarations.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateExpressionsReturningArrays.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateExpressionsReturningArrays.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/UnfoldShortCircuitAST.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/UnfoldShortCircuitAST.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/UnfoldShortCircuitToIf.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/UnfoldShortCircuitToIf.h
+FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermTraverse.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_util/NodeSearch.h
+FILE: ../../../third_party/angle/src/compiler/translator/util.h
+FILE: ../../../third_party/angle/src/image_util/generatemip.h
+FILE: ../../../third_party/angle/src/libANGLE/Buffer.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Buffer.h
+FILE: ../../../third_party/angle/src/libANGLE/Config.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Config.h
+FILE: ../../../third_party/angle/src/libANGLE/Context.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Context.h
+FILE: ../../../third_party/angle/src/libANGLE/Display.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Display.h
 FILE: ../../../third_party/angle/src/libANGLE/EGLSync.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Fence.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Fence.h
+FILE: ../../../third_party/angle/src/libANGLE/Framebuffer.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Framebuffer.h
+FILE: ../../../third_party/angle/src/libANGLE/HandleAllocator.cpp
+FILE: ../../../third_party/angle/src/libANGLE/HandleAllocator.h
+FILE: ../../../third_party/angle/src/libANGLE/HandleRangeAllocator.h
+FILE: ../../../third_party/angle/src/libANGLE/Path.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Path.h
+FILE: ../../../third_party/angle/src/libANGLE/Program.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Program.h
+FILE: ../../../third_party/angle/src/libANGLE/RefCountObject.h
+FILE: ../../../third_party/angle/src/libANGLE/Renderbuffer.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Renderbuffer.h
+FILE: ../../../third_party/angle/src/libANGLE/ResourceManager.cpp
+FILE: ../../../third_party/angle/src/libANGLE/ResourceManager.h
+FILE: ../../../third_party/angle/src/libANGLE/Shader.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Shader.h
+FILE: ../../../third_party/angle/src/libANGLE/Surface.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Surface.h
+FILE: ../../../third_party/angle/src/libANGLE/Texture.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Texture.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/PathImpl.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/SurfaceImpl.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/ImageD3D.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/ImageD3D.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/IndexBuffer.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/IndexBuffer.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/IndexDataManager.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/IndexDataManager.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/TextureStorage.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/VertexBuffer.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/VertexBuffer.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/VertexDataManager.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/VertexDataManager.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Blit9.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Blit9.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Image9.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Image9.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/IndexBuffer9.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/IndexBuffer9.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/VertexBuffer9.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/VertexBuffer9.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/renderer9_utils.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/renderer9_utils.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/vertexconversion.h
+FILE: ../../../third_party/angle/src/libEGL/libEGL.cpp
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2002-2013 The ANGLE Project Authors. All rights reserved.
+Copyright 2002 The ANGLE Project Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -1957,21 +2292,69 @@ LIBRARY: angle
 ORIGIN: ../../../third_party/angle/include/GLSLANG/ShaderVars.h + ../../../third_party/angle/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/angle/include/GLSLANG/ShaderVars.h
+FILE: ../../../third_party/angle/samples/sample_util/SampleApplication.cpp
+FILE: ../../../third_party/angle/src/common/mathutil.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/CodeGen.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/FlagStd140Structs.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/FlagStd140Structs.h
+FILE: ../../../third_party/angle/src/compiler/translator/ValidateOutputs.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/ValidateOutputs.h
 FILE: ../../../third_party/angle/src/compiler/translator/blocklayout.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/blocklayout.h
 FILE: ../../../third_party/angle/src/compiler/translator/blocklayoutHLSL.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/blocklayoutHLSL.h
+FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo.cpp
+FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo.h
+FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_internal.h
+FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_libpci.cpp
+FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_linux.cpp
+FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_win.cpp
+FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_x11.cpp
+FILE: ../../../third_party/angle/src/image_util/copyimage.cpp
 FILE: ../../../third_party/angle/src/image_util/copyimage.h
+FILE: ../../../third_party/angle/src/image_util/imageformats.h
+FILE: ../../../third_party/angle/src/image_util/loadimage.cpp
+FILE: ../../../third_party/angle/src/image_util/loadimage.h
+FILE: ../../../third_party/angle/src/image_util/loadimage_etc.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Constants.h
+FILE: ../../../third_party/angle/src/libANGLE/IndexRangeCache.cpp
+FILE: ../../../third_party/angle/src/libANGLE/IndexRangeCache.h
+FILE: ../../../third_party/angle/src/libANGLE/Sampler.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Sampler.h
+FILE: ../../../third_party/angle/src/libANGLE/VertexArray.cpp
+FILE: ../../../third_party/angle/src/libANGLE/VertexArray.h
+FILE: ../../../third_party/angle/src/libANGLE/VertexAttribute.h
+FILE: ../../../third_party/angle/src/libANGLE/angletypes.cpp
 FILE: ../../../third_party/angle/src/libANGLE/formatutils.cpp
+FILE: ../../../third_party/angle/src/libANGLE/formatutils.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/QueryImpl.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/copyvertex.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Blit11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Blit11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Clear11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Clear11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Fence11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Fence11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/PixelTransfer11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/PixelTransfer11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Query11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Query11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/VertexBuffer11.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/formatutils11.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/formatutils11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Fence9.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Fence9.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Query9.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Query9.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/formatutils9.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/formatutils9.h
 FILE: ../../../third_party/angle/src/libANGLE/validationES.cpp
+FILE: ../../../third_party/angle/src/libANGLE/validationES.h
 FILE: ../../../third_party/angle/src/libANGLE/validationES2.cpp
 FILE: ../../../third_party/angle/src/libANGLE/validationES3.cpp
+FILE: ../../../third_party/angle/util/EGLWindow.cpp
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2013-2014 The ANGLE Project Authors. All rights reserved.
+Copyright 2013 The ANGLE Project Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -2038,6 +2421,7 @@ ORIGIN: ../../../third_party/angle/include/angle_gl.h + ../../../third_party/ang
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/angle/include/angle_gl.h
 FILE: ../../../third_party/angle/include/angle_windowsstore.h
+FILE: ../../../third_party/angle/include/export.h
 FILE: ../../../third_party/angle/samples/hello_triangle/HelloTriangle.cpp
 FILE: ../../../third_party/angle/samples/mip_map_2d/MipMap2D.cpp
 FILE: ../../../third_party/angle/samples/multi_texture/MultiTexture.cpp
@@ -2079,6 +2463,7 @@ FILE: ../../../third_party/angle/src/compiler/translator/UtilsHLSL.h
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteElseBlocks.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteElseBlocks.h
 FILE: ../../../third_party/angle/src/image_util/copyimage.inc
+FILE: ../../../third_party/angle/src/image_util/loadimage.inc
 FILE: ../../../third_party/angle/src/libANGLE/AttributeMap.cpp
 FILE: ../../../third_party/angle/src/libANGLE/AttributeMap.h
 FILE: ../../../third_party/angle/src/libANGLE/Caps.cpp
@@ -2092,6 +2477,8 @@ FILE: ../../../third_party/angle/src/libANGLE/Error.inc
 FILE: ../../../third_party/angle/src/libANGLE/Fence_unittest.cpp
 FILE: ../../../third_party/angle/src/libANGLE/FramebufferAttachment.cpp
 FILE: ../../../third_party/angle/src/libANGLE/FramebufferAttachment.h
+FILE: ../../../third_party/angle/src/libANGLE/ImageIndex.cpp
+FILE: ../../../third_party/angle/src/libANGLE/ImageIndex.h
 FILE: ../../../third_party/angle/src/libANGLE/ImageIndexIterator_unittest.cpp
 FILE: ../../../third_party/angle/src/libANGLE/State.cpp
 FILE: ../../../third_party/angle/src/libANGLE/State.h
@@ -2099,31 +2486,56 @@ FILE: ../../../third_party/angle/src/libANGLE/Surface_unittest.cpp
 FILE: ../../../third_party/angle/src/libANGLE/TransformFeedback.cpp
 FILE: ../../../third_party/angle/src/libANGLE/TransformFeedback.h
 FILE: ../../../third_party/angle/src/libANGLE/TransformFeedback_unittest.cpp
+FILE: ../../../third_party/angle/src/libANGLE/VertexAttribute.cpp
 FILE: ../../../third_party/angle/src/libANGLE/features.h
 FILE: ../../../third_party/angle/src/libANGLE/queryconversions.cpp
 FILE: ../../../third_party/angle/src/libANGLE/queryconversions.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/BufferImpl.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/CompilerImpl.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/DisplayImpl.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/DisplayImpl.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/FramebufferImpl.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/ProgramImpl.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/RenderbufferImpl.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/SamplerImpl.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/ShaderImpl.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/SurfaceImpl.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/TextureImpl.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/TransformFeedbackImpl.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/VertexArrayImpl.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/copyvertex.inc.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/BufferD3D.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/BufferD3D.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/CompilerD3D.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/DisplayD3D.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/DisplayD3D.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/DynamicHLSL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/DynamicHLSL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/FramebufferD3D.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/FramebufferD3D.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/HLSLCompiler.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/ProgramD3D.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/ProgramD3D.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/RenderbufferD3D.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/RenderbufferD3D.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/RendererD3D.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/RendererD3D.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/SamplerD3D.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/ShaderD3D.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/ShaderD3D.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/SurfaceD3D.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/SurfaceD3D.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/TextureD3D.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/TextureD3D.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Buffer11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Buffer11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Framebuffer11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Framebuffer11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/TransformFeedback11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/TransformFeedback11.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Trim11.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Trim11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/VertexArray11.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/winrt/CoreWindowNativeWindow.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/winrt/CoreWindowNativeWindow.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/winrt/CoreWindowNativeWindow_unittest.cpp
@@ -2132,6 +2544,19 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/winrt/Inspectab
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/winrt/SwapChainPanelNativeWindow.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/winrt/SwapChainPanelNativeWindow.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/winrt/SwapChainPanelNativeWindow_unittest.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Buffer9.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Buffer9.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Framebuffer9.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Framebuffer9.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/VertexArray9.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SamplerGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SamplerGL.h
+FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl.cpp
+FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl.h
+FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl_ext.cpp
+FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl_ext.h
+FILE: ../../../third_party/angle/src/libGLESv2/global_state.cpp
+FILE: ../../../third_party/angle/src/libGLESv2/global_state.h
 FILE: ../../../third_party/angle/util/EGLWindow.h
 FILE: ../../../third_party/angle/util/Event.h
 FILE: ../../../third_party/angle/util/Matrix.cpp
@@ -2156,7 +2581,7 @@ FILE: ../../../third_party/angle/util/windows/win32/Win32Window.cpp
 FILE: ../../../third_party/angle/util/windows/win32/Win32Window.h
 FILE: ../../../third_party/angle/util/windows/win32/Win32_system_utils.cpp
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2014 The ANGLE Project Authors. All rights reserved.
+Copyright 2014 The ANGLE Project Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -2191,58 +2616,23 @@ POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: angle
-ORIGIN: ../../../third_party/angle/include/export.h + ../../../third_party/angle/LICENSE
+ORIGIN: ../../../third_party/angle/include/platform/FeaturesD3D.h + ../../../third_party/angle/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/include/export.h
-FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl.cpp
-FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl.h
-FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl_ext.cpp
-FILE: ../../../third_party/angle/src/libGLESv2/entry_points_egl_ext.h
-FILE: ../../../third_party/angle/src/libGLESv2/global_state.cpp
-FILE: ../../../third_party/angle/src/libGLESv2/global_state.h
-----------------------------------------------------------------------------------------------------
-Copyright(c) 2014 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/include/platform/Platform.h + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
+FILE: ../../../third_party/angle/include/platform/FeaturesD3D.h
+FILE: ../../../third_party/angle/include/platform/FeaturesGL.h
 FILE: ../../../third_party/angle/include/platform/Platform.h
-FILE: ../../../third_party/angle/include/platform/WorkaroundsD3D.h
+FILE: ../../../third_party/angle/samples/WindowTest/WindowTest.cpp
 FILE: ../../../third_party/angle/samples/multi_window/MultiWindow.cpp
 FILE: ../../../third_party/angle/src/common/Optional.h
 FILE: ../../../third_party/angle/src/common/Optional_unittest.cpp
+FILE: ../../../third_party/angle/src/common/bitset_utils.h
+FILE: ../../../third_party/angle/src/common/bitset_utils_unittest.cpp
+FILE: ../../../third_party/angle/src/common/mathutil_unittest.cpp
+FILE: ../../../third_party/angle/src/common/matrix_utils.h
+FILE: ../../../third_party/angle/src/common/matrix_utils_unittest.cpp
+FILE: ../../../third_party/angle/src/common/string_utils.cpp
+FILE: ../../../third_party/angle/src/common/string_utils.h
+FILE: ../../../third_party/angle/src/common/string_utils_unittest.cpp
 FILE: ../../../third_party/angle/src/common/system_utils_linux.cpp
 FILE: ../../../third_party/angle/src/common/system_utils_mac.cpp
 FILE: ../../../third_party/angle/src/common/utilities_unittest.cpp
@@ -2258,37 +2648,85 @@ FILE: ../../../third_party/angle/src/libANGLE/Debug.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Debug.h
 FILE: ../../../third_party/angle/src/libANGLE/Device.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Device.h
+FILE: ../../../third_party/angle/src/libANGLE/HandleAllocator_unittest.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Image.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Image.h
 FILE: ../../../third_party/angle/src/libANGLE/Image_unittest.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Platform.cpp
+FILE: ../../../third_party/angle/src/libANGLE/Program_unittest.cpp
+FILE: ../../../third_party/angle/src/libANGLE/ResourceManager_unittest.cpp
+FILE: ../../../third_party/angle/src/libANGLE/VaryingPacking.cpp
+FILE: ../../../third_party/angle/src/libANGLE/VaryingPacking.h
 FILE: ../../../third_party/angle/src/libANGLE/Version.h
 FILE: ../../../third_party/angle/src/libANGLE/Version.inc
 FILE: ../../../third_party/angle/src/libANGLE/VertexAttribute.inc
+FILE: ../../../third_party/angle/src/libANGLE/histogram_macros.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/BufferImpl_mock.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/DeviceImpl.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/DeviceImpl.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/FenceNVImpl.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/FramebufferImpl_mock.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/GLImplFactory.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/ImageImpl.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/ImageImpl_mock.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/ProgramImpl_mock.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/RenderbufferImpl_mock.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/SyncImpl.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/TextureImpl_mock.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/TransformFeedbackImpl_mock.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/CompilerD3D.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/DeviceD3D.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/DeviceD3D.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/EGLImageD3D.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/EGLImageD3D.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/DebugAnnotator11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/DebugAnnotator11.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/StateManager11.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/StateManager11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/dxgi_support_table.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/dxgi_support_table_autogen.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/texture_format_table.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/DebugAnnotator9.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/DebugAnnotator9.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/StateManager9.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/StateManager9.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/formatutilsD3D.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/BlitGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/BlitGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/BufferGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/BufferGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/CompilerGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/CompilerGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/DisplayGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/DisplayGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/FenceNVGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/FenceNVGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/FramebufferGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/FramebufferGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/FunctionsGL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/FunctionsGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ProgramGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ProgramGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/QueryGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/QueryGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/RenderbufferGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/RenderbufferGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/RendererGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/RendererGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ShaderGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ShaderGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/StateManagerGL.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/StateManagerGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SurfaceGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/WorkaroundsGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SurfaceGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SyncGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SyncGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/TextureGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/TextureGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/TransformFeedbackGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/TransformFeedbackGL.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/VertexArrayGL.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/VertexArrayGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/cgl/DisplayCGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/cgl/DisplayCGL.mm
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/cgl/IOSurfaceSurfaceCGL.mm
@@ -2325,6 +2763,7 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/WindowSurfaceWGL.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/functionswgl_typedefs.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/wgl_utils.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/wgl/wgl_utils.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/load_functions_table.h
 FILE: ../../../third_party/angle/src/libANGLE/validationEGL.h
 FILE: ../../../third_party/angle/util/OSPixmap.h
 FILE: ../../../third_party/angle/util/osx/OSXPixmap.h
@@ -2338,259 +2777,12 @@ FILE: ../../../third_party/angle/util/posix/PosixTimer.h
 FILE: ../../../third_party/angle/util/posix/Posix_system_utils.cpp
 FILE: ../../../third_party/angle/util/windows/win32/Win32Pixmap.cpp
 FILE: ../../../third_party/angle/util/windows/win32/Win32Pixmap.h
-FILE: ../../../third_party/angle/util/windows/winrt/WinRTPixmap.cpp
-FILE: ../../../third_party/angle/util/windows/winrt/WinRTWindow.cpp
-FILE: ../../../third_party/angle/util/windows/winrt/WinRTWindow.h
-FILE: ../../../third_party/angle/util/windows/winrt/WinRT_system_utils.cpp
 FILE: ../../../third_party/angle/util/x11/X11Pixmap.cpp
 FILE: ../../../third_party/angle/util/x11/X11Pixmap.h
 FILE: ../../../third_party/angle/util/x11/X11Window.cpp
 FILE: ../../../third_party/angle/util/x11/X11Window.h
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2015 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/samples/WindowTest/WindowTest.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/samples/WindowTest/WindowTest.cpp
-----------------------------------------------------------------------------------------------------
-Copyright The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/samples/sample_util/SampleApplication.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/samples/sample_util/SampleApplication.cpp
-FILE: ../../../third_party/angle/src/common/mathutil.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/CodeGen.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/FlagStd140Structs.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/FlagStd140Structs.h
-FILE: ../../../third_party/angle/src/compiler/translator/ValidateOutputs.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/ValidateOutputs.h
-FILE: ../../../third_party/angle/src/image_util/copyimage.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Constants.h
-FILE: ../../../third_party/angle/src/libANGLE/IndexRangeCache.cpp
-FILE: ../../../third_party/angle/src/libANGLE/IndexRangeCache.h
-FILE: ../../../third_party/angle/src/libANGLE/Sampler.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Sampler.h
-FILE: ../../../third_party/angle/src/libANGLE/VertexArray.cpp
-FILE: ../../../third_party/angle/src/libANGLE/VertexArray.h
-FILE: ../../../third_party/angle/src/libANGLE/VertexAttribute.h
-FILE: ../../../third_party/angle/src/libANGLE/angletypes.cpp
-FILE: ../../../third_party/angle/src/libANGLE/formatutils.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/QueryImpl.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Blit11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Blit11.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Clear11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Clear11.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Fence11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Fence11.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/PixelTransfer11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/PixelTransfer11.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Query11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Query11.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/VertexBuffer11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Fence9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Fence9.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Query9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Query9.h
-FILE: ../../../third_party/angle/src/libANGLE/validationES.h
-FILE: ../../../third_party/angle/util/EGLWindow.cpp
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2013 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/common/Color.h + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/common/Color.h
-FILE: ../../../third_party/angle/src/common/Color.inc
-FILE: ../../../third_party/angle/src/compiler/fuzz/translator_fuzzer.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/OutputVulkanGLSL.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/OutputVulkanGLSL.h
-FILE: ../../../third_party/angle/src/compiler/translator/Severity.h
-FILE: ../../../third_party/angle/src/compiler/translator/TextureFunctionHLSL.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/TextureFunctionHLSL.h
-FILE: ../../../third_party/angle/src/compiler/translator/TranslatorVulkan.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/TranslatorVulkan.h
-FILE: ../../../third_party/angle/src/compiler/translator/ValidateMaxParameters.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/ValidateMaxParameters.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/AddAndTrueToLoopCondition.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/AddAndTrueToLoopCondition.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/AddDefaultReturnStatements.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/AddDefaultReturnStatements.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/BreakVariableAliasingInInnerLoops.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/BreakVariableAliasingInInnerLoops.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/DeferGlobalInitializers.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/DeferGlobalInitializers.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ExpandIntegerPowExpressions.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ExpandIntegerPowExpressions.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveInvariantDeclaration.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveInvariantDeclaration.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteTexelFetchOffset.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteTexelFetchOffset.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteUnaryMinusOperatorFloat.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteUnaryMinusOperatorFloat.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteUnaryMinusOperatorInt.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RewriteUnaryMinusOperatorInt.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SimplifyLoopConditions.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SimplifyLoopConditions.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SplitSequenceOperator.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SplitSequenceOperator.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermNodePatternMatcher.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermNodePatternMatcher.h
-FILE: ../../../third_party/angle/src/image_util/imageformats.cpp
-FILE: ../../../third_party/angle/src/libANGLE/HandleRangeAllocator.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Observer_unittest.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Stream.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Stream.h
-FILE: ../../../third_party/angle/src/libANGLE/Workarounds.h
-FILE: ../../../third_party/angle/src/libANGLE/queryutils.cpp
-FILE: ../../../third_party/angle/src/libANGLE/queryutils.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/StreamProducerImpl.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/HLSLCompiler.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/NativeWindowD3D.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/NativeWindowD3D.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/SwapChainD3D.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/NativeWindow11.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/StreamProducerD3DTexture.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/StreamProducerD3DTexture.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/win32/NativeWindow11Win32.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/win32/NativeWindow11Win32.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/winrt/NativeWindow11WinRT.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/winrt/NativeWindow11WinRT.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/NativeWindow9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/NativeWindow9.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/driver_utils.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/driver_utils.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/PathGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/PathGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/DisplayEGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/DisplayEGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/FunctionsEGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/FunctionsEGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/FunctionsEGLDL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/FunctionsEGLDL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/PbufferSurfaceEGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/PbufferSurfaceEGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/SurfaceEGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/SurfaceEGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/WindowSurfaceEGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/WindowSurfaceEGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/android/DisplayAndroid.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/android/DisplayAndroid.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/functionsegl_typedefs.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/ozone/DisplayOzone.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/ozone/DisplayOzone.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/ozone/SurfaceOzone.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/egl/ozone/SurfaceOzone.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/glx/SurfaceGLX.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/GlslangWrapper.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/GlslangWrapper.h
-FILE: ../../../third_party/angle/src/libANGLE/validationEGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/validationES31.cpp
-FILE: ../../../third_party/angle/util/android/AndroidPixmap.cpp
-FILE: ../../../third_party/angle/util/android/AndroidWindow.cpp
-FILE: ../../../third_party/angle/util/android/AndroidWindow.h
-FILE: ../../../third_party/angle/util/ozone/OzonePixmap.cpp
-FILE: ../../../third_party/angle/util/ozone/OzoneWindow.cpp
-FILE: ../../../third_party/angle/util/ozone/OzoneWindow.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2016 The ANGLE Project Authors. All rights reserved.
+Copyright 2015 The ANGLE Project Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -2644,12 +2836,24 @@ FILE: ../../../third_party/angle/src/compiler/preprocessor/Lexer.h
 FILE: ../../../third_party/angle/src/compiler/preprocessor/Macro.h
 FILE: ../../../third_party/angle/src/compiler/preprocessor/MacroExpander.h
 FILE: ../../../third_party/angle/src/compiler/preprocessor/SourceLocation.h
+FILE: ../../../third_party/angle/src/compiler/preprocessor/Tokenizer.h
 FILE: ../../../third_party/angle/src/compiler/preprocessor/numeric_lex.h
+FILE: ../../../third_party/angle/src/compiler/translator/Diagnostics.cpp
+FILE: ../../../third_party/angle/src/compiler/translator/Diagnostics.h
+FILE: ../../../third_party/angle/src/compiler/translator/DirectiveHandler.cpp
 FILE: ../../../third_party/angle/src/compiler/translator/DirectiveHandler.h
 FILE: ../../../third_party/angle/src/compiler/translator/Pragma.h
+FILE: ../../../third_party/angle/src/compiler/translator/glslang.l
+FILE: ../../../third_party/angle/src/compiler/translator/glslang_lex.cpp
 FILE: ../../../third_party/angle/src/libANGLE/BinaryStream.h
 FILE: ../../../third_party/angle/src/libANGLE/Query.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Query.h
+FILE: ../../../third_party/angle/src/libANGLE/angletypes.h
+FILE: ../../../third_party/angle/src/libANGLE/angletypes.inc
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/RenderTargetD3D.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/RenderTargetD3D.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/ShaderExecutableD3D.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/ShaderExecutableD3D.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/SwapChainD3D.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Image11.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Image11.h
@@ -2657,256 +2861,40 @@ FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/IndexBuffer11.c
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/IndexBuffer11.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/InputLayoutCache.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/InputLayoutCache.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/RenderStateCache.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/RenderStateCache.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/RenderTarget11.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/RenderTarget11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Renderer11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Renderer11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/ShaderExecutable11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/ShaderExecutable11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/SwapChain11.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/SwapChain11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/TextureStorage11.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/TextureStorage11.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/VertexBuffer11.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/renderer11_utils.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/renderer11_utils.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/RenderTarget9.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/RenderTarget9.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Renderer9.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Renderer9.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/ShaderCache.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/ShaderExecutable9.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/ShaderExecutable9.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/SwapChain9.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/SwapChain9.h
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/TextureStorage9.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/TextureStorage9.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/VertexDeclarationCache.cpp
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/VertexDeclarationCache.h
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/shaders/Blit.ps
 FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/shaders/Blit.vs
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/renderergl_utils.cpp
+FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/renderergl_utils.h
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2012 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/common/angleutils.h + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/common/angleutils.h
-FILE: ../../../third_party/angle/src/compiler/preprocessor/Tokenizer.l
-FILE: ../../../third_party/angle/src/compiler/translator/Compiler.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/ConstantUnion.h
-FILE: ../../../third_party/angle/src/compiler/translator/Initialize.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/IntermNode.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/IntermNode.h
-FILE: ../../../third_party/angle/src/compiler/translator/OutputGLSLBase.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/OutputHLSL.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/OutputHLSL.h
-FILE: ../../../third_party/angle/src/compiler/translator/OutputTree.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/ParseContext.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/ParseContext.h
-FILE: ../../../third_party/angle/src/compiler/translator/SymbolTable.h
-FILE: ../../../third_party/angle/src/compiler/translator/Types.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/glslang.y
-FILE: ../../../third_party/angle/src/compiler/translator/glslang.y
-FILE: ../../../third_party/angle/src/compiler/translator/glslang_tab.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulatePrecision.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulatePrecision.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RegenerateStructNames.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RegenerateStructNames.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ScalarizeVecAndMatConstructorArgs.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ScalarizeVecAndMatConstructorArgs.h
-FILE: ../../../third_party/angle/src/libANGLE/Buffer.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Buffer.h
-FILE: ../../../third_party/angle/src/libANGLE/Context.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Context.h
-FILE: ../../../third_party/angle/src/libANGLE/Display.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Framebuffer.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Program.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Program.h
-FILE: ../../../third_party/angle/src/libANGLE/Shader.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Surface.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Surface.h
-FILE: ../../../third_party/angle/src/libANGLE/Texture.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/SurfaceImpl.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/IndexDataManager.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/IndexDataManager.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Image9.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/IndexBuffer9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/renderer9_utils.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/renderer9_utils.h
-FILE: ../../../third_party/angle/src/libEGL/libEGL.cpp
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2002-2014 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/common/bitset_utils.h + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/common/bitset_utils.h
-FILE: ../../../third_party/angle/src/common/bitset_utils_unittest.cpp
-FILE: ../../../third_party/angle/src/common/mathutil_unittest.cpp
-FILE: ../../../third_party/angle/src/common/matrix_utils.h
-FILE: ../../../third_party/angle/src/common/matrix_utils_unittest.cpp
-FILE: ../../../third_party/angle/src/common/string_utils.cpp
-FILE: ../../../third_party/angle/src/common/string_utils.h
-FILE: ../../../third_party/angle/src/common/string_utils_unittest.cpp
-FILE: ../../../third_party/angle/src/libANGLE/HandleAllocator_unittest.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Platform.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Program_unittest.cpp
-FILE: ../../../third_party/angle/src/libANGLE/ResourceManager_unittest.cpp
-FILE: ../../../third_party/angle/src/libANGLE/VaryingPacking.cpp
-FILE: ../../../third_party/angle/src/libANGLE/VaryingPacking.h
-FILE: ../../../third_party/angle/src/libANGLE/histogram_macros.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/BufferImpl_mock.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/FramebufferImpl_mock.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/GLImplFactory.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/ProgramImpl_mock.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/CompilerD3D.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/DebugAnnotator11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/DebugAnnotator11.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/dxgi_support_table.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/dxgi_support_table_autogen.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/texture_format_table.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/DebugAnnotator9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/DebugAnnotator9.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/BlitGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/BlitGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/BufferGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/BufferGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/CompilerGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/CompilerGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/DisplayGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/FenceNVGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/FenceNVGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/FramebufferGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/FramebufferGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ProgramGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ProgramGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/QueryGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/QueryGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/RenderbufferGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/RenderbufferGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/RendererGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/RendererGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ShaderGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/ShaderGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SurfaceGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SyncGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SyncGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/TextureGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/TextureGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/TransformFeedbackGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/TransformFeedbackGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/VertexArrayGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/VertexArrayGL.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/load_functions_table.h
-----------------------------------------------------------------------------------------------------
-Copyright 2015 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/common/debug.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/common/debug.cpp
-FILE: ../../../third_party/angle/src/common/debug.h
-FILE: ../../../third_party/angle/src/compiler/translator/Common.h
-FILE: ../../../third_party/angle/src/compiler/translator/ExtensionBehavior.h
-FILE: ../../../third_party/angle/src/compiler/translator/InfoSink.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/InfoSink.h
-FILE: ../../../third_party/angle/src/compiler/translator/InitializeDll.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/InitializeDll.h
-FILE: ../../../third_party/angle/src/compiler/translator/InitializeGlobals.h
-FILE: ../../../third_party/angle/src/compiler/translator/PoolAlloc.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/PoolAlloc.h
-FILE: ../../../third_party/angle/src/compiler/translator/TranslatorGLSL.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_util/IntermTraverse.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/util.h
-FILE: ../../../third_party/angle/src/libANGLE/Config.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Config.h
-FILE: ../../../third_party/angle/src/libANGLE/RefCountObject.h
-FILE: ../../../third_party/angle/src/libANGLE/Renderbuffer.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Blit9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Blit9.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/vertexconversion.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2002-2010 The ANGLE Project Authors. All rights reserved.
+Copyright 2012 The ANGLE Project Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -2944,8 +2932,21 @@ LIBRARY: angle
 ORIGIN: ../../../third_party/angle/src/compiler/preprocessor/DirectiveParser.cpp + ../../../third_party/angle/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/angle/src/compiler/preprocessor/DirectiveParser.cpp
+FILE: ../../../third_party/angle/src/compiler/preprocessor/Input.cpp
+FILE: ../../../third_party/angle/src/compiler/preprocessor/Input.h
+FILE: ../../../third_party/angle/src/compiler/preprocessor/Macro.cpp
+FILE: ../../../third_party/angle/src/compiler/preprocessor/MacroExpander.cpp
+FILE: ../../../third_party/angle/src/compiler/preprocessor/Preprocessor.cpp
+FILE: ../../../third_party/angle/src/compiler/preprocessor/Preprocessor.h
+FILE: ../../../third_party/angle/src/compiler/preprocessor/Token.cpp
+FILE: ../../../third_party/angle/src/compiler/preprocessor/Token.h
+FILE: ../../../third_party/angle/src/compiler/preprocessor/Tokenizer.cpp
+FILE: ../../../third_party/angle/src/compiler/preprocessor/Tokenizer.l
+FILE: ../../../third_party/angle/src/compiler/translator/BuiltInFunctionEmulator.h
+FILE: ../../../third_party/angle/src/compiler/translator/BuiltInFunctionEmulatorGLSL.h
+FILE: ../../../third_party/angle/src/compiler/translator/length_limits.h
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2011-2013 The ANGLE Project Authors. All rights reserved.
+Copyright 2011 The ANGLE Project Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -2991,900 +2992,15 @@ FILE: ../../../third_party/angle/src/compiler/translator/glslang_tab.h
 
 ====================================================================================================
 LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/compiler/preprocessor/Input.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/compiler/preprocessor/Input.cpp
-FILE: ../../../third_party/angle/src/compiler/preprocessor/Input.h
-FILE: ../../../third_party/angle/src/compiler/preprocessor/Macro.cpp
-FILE: ../../../third_party/angle/src/compiler/preprocessor/MacroExpander.cpp
-FILE: ../../../third_party/angle/src/compiler/preprocessor/Preprocessor.cpp
-FILE: ../../../third_party/angle/src/compiler/preprocessor/Preprocessor.h
-FILE: ../../../third_party/angle/src/compiler/preprocessor/Token.cpp
-FILE: ../../../third_party/angle/src/compiler/preprocessor/Token.h
-FILE: ../../../third_party/angle/src/compiler/translator/BuiltInFunctionEmulator.h
-FILE: ../../../third_party/angle/src/compiler/translator/BuiltInFunctionEmulatorGLSL.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2011 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/compiler/preprocessor/Tokenizer.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/compiler/preprocessor/Tokenizer.cpp
-FILE: ../../../third_party/angle/src/compiler/preprocessor/Tokenizer.l
-FILE: ../../../third_party/angle/src/compiler/translator/length_limits.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2011-2014 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/compiler/preprocessor/Tokenizer.h + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/compiler/preprocessor/Tokenizer.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/RenderStateCache.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/RenderStateCache.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Renderer11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Renderer11.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/ShaderExecutable11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/ShaderExecutable11.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/SwapChain11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/TextureStorage11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/renderer11_utils.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/renderer11_utils.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/RenderTarget9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Renderer9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Renderer9.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/SwapChain9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/TextureStorage9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/renderergl_utils.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/renderergl_utils.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2012-2014 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/compiler/translator/BuiltInFunctionEmulator.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/compiler/translator/BuiltInFunctionEmulator.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/BuiltInFunctionEmulatorGLSL.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/CollectVariables.h
-FILE: ../../../third_party/angle/src/compiler/translator/TranslatorESSL.h
-FILE: ../../../third_party/angle/src/libANGLE/HandleAllocator.cpp
-FILE: ../../../third_party/angle/src/libANGLE/HandleAllocator.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2002-2011 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/compiler/translator/Diagnostics.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/compiler/translator/Diagnostics.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/Diagnostics.h
-FILE: ../../../third_party/angle/src/compiler/translator/DirectiveHandler.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/glslang.l
-FILE: ../../../third_party/angle/src/compiler/translator/glslang_lex.cpp
-FILE: ../../../third_party/angle/src/libANGLE/angletypes.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/TextureStorage11.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/ShaderExecutable9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/ShaderExecutable9.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/TextureStorage9.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2012-2013 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
 ORIGIN: ../../../third_party/angle/src/compiler/translator/ValidateLimitations.h + ../../../third_party/angle/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/angle/src/compiler/translator/ValidateLimitations.h
 FILE: ../../../third_party/angle/src/compiler/translator/glslang.h
 FILE: ../../../third_party/angle/src/compiler/translator/util.cpp
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2010 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/compiler/translator/ValidateVaryingLocations.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/compiler/translator/ValidateVaryingLocations.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/ValidateVaryingLocations.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2002-2017 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/compiler/translator/tree_ops/ArrayReturnValueToOutParameter.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/compiler/translator/ASTMetadataHLSL.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/ASTMetadataHLSL.h
-FILE: ../../../third_party/angle/src/compiler/translator/CallDAG.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/CallDAG.h
-FILE: ../../../third_party/angle/src/compiler/translator/Operator.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/Operator.h
-FILE: ../../../third_party/angle/src/compiler/translator/ValidateGlobalInitializer.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/ValidateGlobalInitializer.h
-FILE: ../../../third_party/angle/src/compiler/translator/ValidateSwitch.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/ValidateSwitch.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ArrayReturnValueToOutParameter.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/ArrayReturnValueToOutParameter.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/PruneNoOps.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/PruneNoOps.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RecordConstantPrecision.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RecordConstantPrecision.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveDynamicIndexing.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveDynamicIndexing.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemovePow.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemovePow.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveSwitchFallThrough.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/RemoveSwitchFallThrough.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateArrayInitialization.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateArrayInitialization.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateDeclarations.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateDeclarations.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateExpressionsReturningArrays.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/SeparateExpressionsReturningArrays.h
-FILE: ../../../third_party/angle/src/image_util/generatemip.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/ImageD3D.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/ImageD3D.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2002-2015 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulateGLFragColorBroadcast.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/compiler/translator/QualifierTypes.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/QualifierTypes.h
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulateGLFragColorBroadcast.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/EmulateGLFragColorBroadcast.h
-FILE: ../../../third_party/angle/src/libANGLE/HandleRangeAllocator.h
-FILE: ../../../third_party/angle/src/libANGLE/Path.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Path.h
-FILE: ../../../third_party/angle/src/libANGLE/ResourceManager.cpp
-FILE: ../../../third_party/angle/src/libANGLE/ResourceManager.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/PathImpl.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2002-2016 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/compiler/translator/tree_ops/UnfoldShortCircuitToIf.h + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/compiler/translator/HashNames.h
-FILE: ../../../third_party/angle/src/compiler/translator/VariablePacker.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/VariablePacker.h
-FILE: ../../../third_party/angle/src/compiler/translator/VersionGLSL.cpp
-FILE: ../../../third_party/angle/src/compiler/translator/tree_ops/UnfoldShortCircuitToIf.h
-FILE: ../../../third_party/angle/src/libANGLE/Renderbuffer.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/IndexBuffer.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/IndexBuffer.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/VertexBuffer.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/VertexBuffer.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/VertexDataManager.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/VertexDataManager.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Image9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/IndexBuffer9.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/VertexBuffer9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/VertexBuffer9.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2002-2012 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/gpu_info_util/SystemInfo.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo.cpp
-FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo.h
-FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_internal.h
-FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_libpci.cpp
-FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_linux.cpp
-FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_win.cpp
-FILE: ../../../third_party/angle/src/gpu_info_util/SystemInfo_x11.cpp
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2013-2017 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/image_util/imageformats.h + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/image_util/imageformats.h
-FILE: ../../../third_party/angle/src/image_util/loadimage.cpp
-FILE: ../../../third_party/angle/src/image_util/loadimage.h
-FILE: ../../../third_party/angle/src/image_util/loadimage_etc.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/copyvertex.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2013-2015 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/image_util/loadimage.inc + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/image_util/loadimage.inc
-FILE: ../../../third_party/angle/src/libANGLE/renderer/copyvertex.inc.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2014-2015 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/libANGLE/MemoryProgramCache.h + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/libANGLE/MemoryProgramCache.h
-----------------------------------------------------------------------------------------------------
-Copyright 2017-2018 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/libANGLE/Thread.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/libANGLE/Thread.cpp
-FILE: ../../../third_party/angle/src/libANGLE/Thread.h
-----------------------------------------------------------------------------------------------------
-Copyright(c) 2016 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/libANGLE/Uniform.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
 FILE: ../../../third_party/angle/src/libANGLE/Uniform.cpp
 FILE: ../../../third_party/angle/src/libANGLE/Uniform.h
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2010-2013 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/libANGLE/renderer/d3d/RenderTargetD3D.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/libANGLE/angletypes.inc
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/RenderTargetD3D.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/RenderTargetD3D.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/ShaderExecutableD3D.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/ShaderExecutableD3D.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2012-2015 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Buffer11.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/libANGLE/ImageIndex.cpp
-FILE: ../../../third_party/angle/src/libANGLE/ImageIndex.h
-FILE: ../../../third_party/angle/src/libANGLE/VertexAttribute.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/BufferImpl.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/FramebufferImpl.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/ProgramImpl.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/SamplerImpl.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/ShaderImpl.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/TextureImpl.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/TransformFeedbackImpl.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/VertexArrayImpl.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/BufferD3D.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/BufferD3D.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/FramebufferD3D.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/FramebufferD3D.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/HLSLCompiler.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/SamplerD3D.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/TextureD3D.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/TextureD3D.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Buffer11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Buffer11.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Framebuffer11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/Framebuffer11.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/TransformFeedback11.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/TransformFeedback11.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/VertexArray11.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Buffer9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Buffer9.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Framebuffer9.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/Framebuffer9.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d9/VertexArray9.h
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SamplerGL.cpp
-FILE: ../../../third_party/angle/src/libANGLE/renderer/gl/SamplerGL.h
-----------------------------------------------------------------------------------------------------
-Copyright 2014 The ANGLE Project Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/shaders/Clear11.hlsl + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/libANGLE/renderer/d3d/d3d11/shaders/Clear11.hlsl
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2017 The ANGLE Project. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above
-    copyright notice, this list of conditions and the following
-    disclaimer in the documentation and/or other materials provided
-    with the distribution.
-
-    Neither the name of TransGaming Inc., Google Inc., 3DLabs Inc.
-    Ltd., nor the names of their contributors may be used to endorse
-    or promote products derived from this software without specific
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: angle
-ORIGIN: ../../../third_party/angle/src/libANGLE/renderer/vulkan/QueryVk.cpp + ../../../third_party/angle/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/angle/src/libANGLE/renderer/vulkan/QueryVk.cpp
-----------------------------------------------------------------------------------------------------
-Copyright 2016-2018 The ANGLE Project Authors. All rights reserved.
+Copyright 2010 The ANGLE Project Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -3973,6 +3089,41 @@ FILE: ../../../third_party/zlib/google/zip_reader_unittest.cc
 FILE: ../../../third_party/zlib/google/zip_unittest.cc
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2011 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: base
+ORIGIN: ../../../third_party/angle/src/common/third_party/base/anglebase/no_destructor.h + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/angle/src/common/third_party/base/anglebase/no_destructor.h
+----------------------------------------------------------------------------------------------------
+Copyright 2018 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -23468,4 +22619,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 386
+Total license count: 359
