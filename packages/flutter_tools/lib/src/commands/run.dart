@@ -237,19 +237,6 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  void printNoConnectedDevices() {
-    super.printNoConnectedDevices();
-    if (getCurrentHostPlatform() == HostPlatform.darwin_x64 &&
-        xcode.isInstalledAndMeetsVersionCheck) {
-      printStatus('');
-      printStatus("Run 'flutter emulators' to list and start any available device emulators.");
-      printStatus('');
-      printStatus('If you expected your device to be detected, please run "flutter doctor" to diagnose');
-      printStatus('potential issues, or visit https://flutter.dev/setup/ for troubleshooting tips.');
-    }
-  }
-
-  @override
   bool get shouldRunPub {
     // If we are running with a prebuilt application, do not run pub.
     if (runningWithPrebuiltApplication)
