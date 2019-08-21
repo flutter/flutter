@@ -17,7 +17,7 @@ class MessageLoopTaskQueues::MergedQueuesRunner {
                      TaskQueueId owner,
                      MutexType type = MutexType::kTasks)
       : owner_(owner),
-        subsumed_(task_queues_._kUnmerged),
+        subsumed_(MessageLoopTaskQueues::_kUnmerged),
         task_queues_(task_queues),
         type_(type) {
     task_queues_.GetMutex(owner, type).lock();

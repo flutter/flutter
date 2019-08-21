@@ -64,7 +64,11 @@ void MessageLoopImpl::AddTaskObserver(intptr_t key, fml::closure callback) {
   FML_DCHECK(MessageLoop::GetCurrent().GetLoopImpl().get() == this)
       << "Message loop task observer must be added on the same thread as the "
          "loop.";
-  task_queue_->AddTaskObserver(queue_id_, key, callback);
+  if (callback != nullptr) {
+    task_queue_->AddTaskObserver(queue_id_, key, callback);
+  } else {
+    FML_LOG(ERROR) << "Tried to add a null TaskObserver.";
+  }
 }
 
 void MessageLoopImpl::RemoveTaskObserver(intptr_t key) {
