@@ -31,6 +31,7 @@ class BottomSheetThemeData extends Diagnosticable {
     this.elevation,
     this.modalElevation,
     this.shape,
+    this.clipBehavior,
   });
 
   /// Default value for [BottomSheet.backgroundColor].
@@ -57,6 +58,11 @@ class BottomSheetThemeData extends Diagnosticable {
   /// [BottomSheet] is rectangular.
   final ShapeBorder shape;
 
+  /// Default value for [BottomSheet.clipBehavior].
+  ///
+  /// If null, [BottomSheet] uses [Clip.none].
+  final Clip clipBehavior;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   BottomSheetThemeData copyWith({
@@ -64,12 +70,14 @@ class BottomSheetThemeData extends Diagnosticable {
     double elevation,
     double modalElevation,
     ShapeBorder shape,
+    Clip clipBehavior,
   }) {
     return BottomSheetThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       elevation: elevation ?? this.elevation,
       modalElevation: modalElevation ?? this.modalElevation,
       shape: shape ?? this.shape,
+      clipBehavior: clipBehavior ?? this.clipBehavior,
     );
   }
 
@@ -87,6 +95,7 @@ class BottomSheetThemeData extends Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       modalElevation: lerpDouble(a?.modalElevation, b?.modalElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
+      clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
     );
   }
 
@@ -97,6 +106,7 @@ class BottomSheetThemeData extends Diagnosticable {
       elevation,
       modalElevation,
       shape,
+      clipBehavior,
     );
   }
 
@@ -111,6 +121,7 @@ class BottomSheetThemeData extends Diagnosticable {
         && typedOther.elevation == elevation
         && typedOther.modalElevation == modalElevation
         && typedOther.shape == shape;
+        && typedOther.clipBehavior == clipBehavior;
   }
 
   @override
@@ -120,5 +131,6 @@ class BottomSheetThemeData extends Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DoubleProperty('modalElevation', modalElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
   }
 }

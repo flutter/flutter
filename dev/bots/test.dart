@@ -662,7 +662,7 @@ int _getPrNumber() {
 Future<String> _getAuthors() async {
   final String exe = Platform.isWindows ? '.exe' : '';
   final String author = await runAndGetStdout(
-    'git$exe', <String>['log', _getGitHash(), '--pretty="%an <%ae>"'],
+    'git$exe', <String>['-c', 'log.showSignature=false', 'log', _getGitHash(), '--pretty="%an <%ae>"'],
     workingDirectory: flutterRoot,
   ).first;
   return author;
