@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -9,8 +13,15 @@ import 'package:flutter/foundation.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
-/// The dart:html implementation of [image_provider.FileImage].
-class FileImage extends image_provider.ImageProvider<image_provider.FileImage> implements image_provider.FileImage {
+/// Decodes the given [File] object as an image, associating it with the given
+/// scale.
+///
+/// This class is not supported when build Flutter for web applications.
+///
+/// See also:
+///
+///  * [Image.file] for a shorthand of an [Image] widget backed by [FileImage].
+class FileImage extends image_provider.ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
   ///
   /// The arguments must not be null.
@@ -18,10 +29,10 @@ class FileImage extends image_provider.ImageProvider<image_provider.FileImage> i
     : assert(file != null),
       assert(scale != null);
 
-  @override
+  /// The file to decode into an image.
   final Object file;
 
-  @override
+  /// The scale to place in the [ImageInfo] object of the image.
   final double scale;
 
   @override
@@ -30,14 +41,12 @@ class FileImage extends image_provider.ImageProvider<image_provider.FileImage> i
   }
 
   @override
-  ImageStreamCompleter load(image_provider.FileImage key) {
+  ImageStreamCompleter load(FileImage key) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
       scale: key.scale,
-      informationCollector: () {
-        return <ErrorDescription>[
-          ErrorDescription('Path: $file'),
-        ];
+      informationCollector: ()  {
+        return <ErrorDescription>[ErrorDescription('Path: $file')];
       },
     );
   }

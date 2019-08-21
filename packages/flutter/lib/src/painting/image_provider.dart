@@ -10,13 +10,14 @@ import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '_file_image_io.dart'
-  if (dart.library.html) '_file_image_web.dart' as file_image;
 import '_network_image_io.dart'
   if (dart.library.html) '_network_image_web.dart' as network_image;
 import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
+
+export '_file_image_io.dart'
+  if (dart.library.html) '_file_image_web.dart';
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
 /// select a specific image.
@@ -498,29 +499,6 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
 
   @override
   ImageStreamCompleter load(NetworkImage key);
-}
-
-/// Decodes the given [File] object as an image, associating it with the given
-/// scale.
-///
-/// This class is not supported when build Flutter for web applications.
-///
-/// See also:
-///
-///  * [Image.file] for a shorthand of an [Image] widget backed by [FileImage].
-abstract class FileImage implements ImageProvider<FileImage> {
-  /// Creates an object that decodes a [File] as an image.
-  ///
-  /// [file] must be an instance of the `dart:io` [File] type.
-  ///
-  /// The arguments must not be null.
-  const factory FileImage(Object file, { double scale }) = file_image.FileImage;
-
-  /// The file to decode into an image.
-  final Object file;
-
-  /// The scale to place in the [ImageInfo] object of the image.
-  final double scale;
 }
 
 /// Decodes the given [Uint8List] buffer as an image, associating it with the

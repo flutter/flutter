@@ -12,23 +12,26 @@ import 'binding.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
-/// The dart:io implementation of [image_provider.FileImage].
-class FileImage extends image_provider.ImageProvider<image_provider.FileImage> implements image_provider.FileImage {
+/// Decodes the given [File] object as an image, associating it with the given
+/// scale.
+///
+/// This class is not supported when build Flutter for web applications.
+///
+/// See also:
+///
+///  * [Image.file] for a shorthand of an [Image] widget backed by [FileImage].
+class FileImage extends image_provider.ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
-  ///
-  /// [file] must be an instance of the `dart:io` [File] type.
   ///
   /// The arguments must not be null.
   const FileImage(this.file, { this.scale = 1.0 })
     : assert(file != null),
-      assert(file is File),
       assert(scale != null);
 
-  @override
-  final Object file;
-  File get _file => file;
+  /// The file to decode into an image.
+  final File file;
 
-  @override
+  /// The scale to place in the [ImageInfo] object of the image.
   final double scale;
 
   @override
@@ -42,7 +45,7 @@ class FileImage extends image_provider.ImageProvider<image_provider.FileImage> i
       codec: _loadAsync(key),
       scale: key.scale,
       informationCollector: ()  {
-        return <ErrorDescription>[ErrorDescription('Path: ${_file?.path}')];
+        return <ErrorDescription>[ErrorDescription('Path: ${file?.path}')];
       },
     );
   }
@@ -50,7 +53,7 @@ class FileImage extends image_provider.ImageProvider<image_provider.FileImage> i
   Future<ui.Codec> _loadAsync(FileImage key) async {
     assert(key == this);
 
-    final Uint8List bytes = await _file.readAsBytes();
+    final Uint8List bytes = await file.readAsBytes();
     if (bytes.lengthInBytes == 0)
       return null;
 
@@ -62,13 +65,13 @@ class FileImage extends image_provider.ImageProvider<image_provider.FileImage> i
     if (other.runtimeType != runtimeType)
       return false;
     final FileImage typedOther = other;
-    return _file?.path == typedOther._file?.path
-        && scale == typedOther.scale;
+    return file?.path == typedOther.file?.path
+             && scale == typedOther.scale;
   }
 
   @override
-  int get hashCode => ui.hashValues(_file?.path, scale);
+  int get hashCode => ui.hashValues(file?.path, scale);
 
   @override
-  String toString() => '$runtimeType("${_file?.path}", scale: $scale)';
+  String toString() => '$runtimeType("${file?.path}", scale: $scale)';
 }

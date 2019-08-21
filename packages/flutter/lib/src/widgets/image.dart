@@ -3,11 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
 
 import 'basic.dart';
@@ -17,17 +15,8 @@ import 'localizations.dart';
 import 'media_query.dart';
 import 'ticker_provider.dart';
 
-export 'package:flutter/painting.dart' show
-  AssetImage,
-  ExactAssetImage,
-  FileImage,
-  FilterQuality,
-  ImageConfiguration,
-  ImageInfo,
-  ImageStream,
-  ImageProvider,
-  MemoryImage,
-  NetworkImage;
+export '_image_io.dart'
+  if (dart.library.html) '_image_web.dart';
 
 /// Creates an [ImageConfiguration] based on the given [BuildContext] (and
 /// optionally size).
@@ -185,397 +174,13 @@ typedef ImageLoadingBuilder = Widget Function(
   ImageChunkEvent loadingProgress,
 );
 
-/// A widget that displays an image.
-///
-/// Several constructors are provided for the various ways that an image can be
-/// specified:
-///
-///  * [new Image], for obtaining an image from an [ImageProvider].
-///  * [new Image.asset], for obtaining an image from an [AssetBundle]
-///    using a key.
-///  * [new Image.network], for obtaining an image from a URL.
-///  * [new Image.file], for obtaining an image from a [File].
-///  * [new Image.memory], for obtaining an image from a [Uint8List].
-///
-/// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
-///
-/// To automatically perform pixel-density-aware asset resolution, specify the
-/// image using an [AssetImage] and make sure that a [MaterialApp], [WidgetsApp],
-/// or [MediaQuery] widget exists above the [Image] widget in the widget tree.
-///
-/// The image is painted using [paintImage], which describes the meanings of the
-/// various fields on this class in more detail.
-///
-/// {@tool sample}
-/// The default constructor can be used with any [ImageProvider], such as a
-/// [NetworkImage], to display an image from the internet.
-///
-/// ![An image of an owl displayed by the image widget](https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg)
-///
-/// ```dart
-/// const Image(
-///   image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
-/// )
-/// ```
-/// {@end-tool}
-///
-/// {@tool sample}
-/// The [Image] Widget also provides several constructors to display different
-/// types of images for convenience. In this example, use the [Image.network]
-/// constructor to display an image from the internet.
-///
-/// ![An image of an owl displayed by the image widget using the shortcut constructor](https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg)
-///
-/// ```dart
-/// Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg')
-/// ```
-/// {@end-tool}
-///
-/// See also:
-///
-///  * [Icon], which shows an image from a font.
-///  * [new Ink.image], which is the preferred way to show an image in a
-///    material application (especially if the image is in a [Material] and will
-///    have an [InkWell] on top of it).
-///  * [Image](dart-ui/Image-class.html), the class in the [dart:ui] library.
-///
-class Image extends StatefulWidget {
-  /// Creates a widget that displays an image.
-  ///
-  /// To show an image from the network or from an asset bundle, consider using
-  /// [new Image.network] and [new Image.asset] respectively.
-  ///
-  /// The [image], [alignment], [repeat], and [matchTextDirection] arguments
-  /// must not be null.
-  ///
-  /// Either the [width] and [height] arguments should be specified, or the
-  /// widget should be placed in a context that sets tight layout constraints.
-  /// Otherwise, the image dimensions will change as the image is loaded, which
-  /// will result in ugly layout changes.
-  ///
-  /// Use [filterQuality] to change the quality when scaling an image.
-  /// Use the [FilterQuality.low] quality setting to scale the image,
-  /// which corresponds to bilinear interpolation, rather than the default
-  /// [FilterQuality.none] which corresponds to nearest-neighbor.
-  ///
-  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
-  const Image({
-    Key key,
-    @required this.image,
-    this.frameBuilder,
-    this.loadingBuilder,
-    this.semanticLabel,
-    this.excludeFromSemantics = false,
-    this.width,
-    this.height,
-    this.color,
-    this.colorBlendMode,
-    this.fit,
-    this.alignment = Alignment.center,
-    this.repeat = ImageRepeat.noRepeat,
-    this.centerSlice,
-    this.matchTextDirection = false,
-    this.gaplessPlayback = false,
-    this.filterQuality = FilterQuality.low,
-  }) : assert(image != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(filterQuality != null),
-       assert(matchTextDirection != null),
-       super(key: key);
-
-  /// Creates a widget that displays an [ImageStream] obtained from the network.
-  ///
-  /// The [src], [scale], and [repeat] arguments must not be null.
-  ///
-  /// Either the [width] and [height] arguments should be specified, or the
-  /// widget should be placed in a context that sets tight layout constraints.
-  /// Otherwise, the image dimensions will change as the image is loaded, which
-  /// will result in ugly layout changes.
-  ///
-  /// All network images are cached regardless of HTTP headers.
-  ///
-  /// An optional [headers] argument can be used to send custom HTTP headers
-  /// with the image request.
-  ///
-  /// Use [filterQuality] to change the quality when scaling an image.
-  /// Use the [FilterQuality.low] quality setting to scale the image,
-  /// which corresponds to bilinear interpolation, rather than the default
-  /// [FilterQuality.none] which corresponds to nearest-neighbor.
-  ///
-  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
-  Image.network(
-    String src, {
-    Key key,
-    double scale = 1.0,
-    this.frameBuilder,
-    this.loadingBuilder,
-    this.semanticLabel,
-    this.excludeFromSemantics = false,
-    this.width,
-    this.height,
-    this.color,
-    this.colorBlendMode,
-    this.fit,
-    this.alignment = Alignment.center,
-    this.repeat = ImageRepeat.noRepeat,
-    this.centerSlice,
-    this.matchTextDirection = false,
-    this.gaplessPlayback = false,
-    this.filterQuality = FilterQuality.low,
-    Map<String, String> headers,
-  }) : image = NetworkImage(src, scale: scale, headers: headers),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       super(key: key);
-
-  /// Creates a widget that displays an [ImageStream] obtained from a [File].
-  ///
-  /// This class is not supported in Flutter for web applications.
-  ///
-  /// The [file], [scale], and [repeat] arguments must not be null.
-  ///
-  /// Either the [width] and [height] arguments should be specified, or the
-  /// widget should be placed in a context that sets tight layout constraints.
-  /// Otherwise, the image dimensions will change as the image is loaded, which
-  /// will result in ugly layout changes.
-  ///
-  /// On Android, this may require the
-  /// `android.permission.READ_EXTERNAL_STORAGE` permission.
-  ///
-  /// Use [filterQuality] to change the quality when scaling an image.
-  /// Use the [FilterQuality.low] quality setting to scale the image,
-  /// which corresponds to bilinear interpolation, rather than the default
-  /// [FilterQuality.none] which corresponds to nearest-neighbor.
-  ///
-  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
-  Image.file(
-    Object file, {
-    Key key,
-    double scale = 1.0,
-    this.frameBuilder,
-    this.semanticLabel,
-    this.excludeFromSemantics = false,
-    this.width,
-    this.height,
-    this.color,
-    this.colorBlendMode,
-    this.fit,
-    this.alignment = Alignment.center,
-    this.repeat = ImageRepeat.noRepeat,
-    this.centerSlice,
-    this.matchTextDirection = false,
-    this.gaplessPlayback = false,
-    this.filterQuality = FilterQuality.low,
-  }) : image = FileImage(file, scale: scale),
-       loadingBuilder = null,
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(filterQuality != null),
-       assert(matchTextDirection != null),
-       super(key: key);
-
-
-  // TODO(ianh): Implement the following (see ../services/image_resolution.dart):
-  //
-  // * If [width] and [height] are both specified, and [scale] is not, then
-  //   size-aware asset resolution will be attempted also, with the given
-  //   dimensions interpreted as logical pixels.
-  //
-  // * If the images have platform, locale, or directionality variants, the
-  //   current platform, locale, and directionality are taken into account
-  //   during asset resolution as well.
-  /// Creates a widget that displays an [ImageStream] obtained from an asset
-  /// bundle. The key for the image is given by the `name` argument.
-  ///
-  /// The `package` argument must be non-null when displaying an image from a
-  /// package and null otherwise. See the `Assets in packages` section for
-  /// details.
-  ///
-  /// If the `bundle` argument is omitted or null, then the
-  /// [DefaultAssetBundle] will be used.
-  ///
-  /// By default, the pixel-density-aware asset resolution will be attempted. In
-  /// addition:
-  ///
-  /// * If the `scale` argument is provided and is not null, then the exact
-  /// asset specified will be used. To display an image variant with a specific
-  /// density, the exact path must be provided (e.g. `images/2x/cat.png`).
-  ///
-  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
-  ///
-  /// The [name] and [repeat] arguments must not be null.
-  ///
-  /// Either the [width] and [height] arguments should be specified, or the
-  /// widget should be placed in a context that sets tight layout constraints.
-  /// Otherwise, the image dimensions will change as the image is loaded, which
-  /// will result in ugly layout changes.
-  ///
-  /// Use [filterQuality] to change the quality when scaling an image.
-  /// Use the [FilterQuality.low] quality setting to scale the image,
-  /// which corresponds to bilinear interpolation, rather than the default
-  /// [FilterQuality.none] which corresponds to nearest-neighbor.
-  ///
-  /// {@tool sample}
-  ///
-  /// Suppose that the project's `pubspec.yaml` file contains the following:
-  ///
-  /// ```yaml
-  /// flutter:
-  ///   assets:
-  ///     - images/cat.png
-  ///     - images/2x/cat.png
-  ///     - images/3.5x/cat.png
-  /// ```
-  /// {@end-tool}
-  ///
-  /// On a screen with a device pixel ratio of 2.0, the following widget would
-  /// render the `images/2x/cat.png` file:
-  ///
-  /// ```dart
-  /// Image.asset('images/cat.png')
-  /// ```
-  ///
-  /// This corresponds to the file that is in the project's `images/2x/`
-  /// directory with the name `cat.png` (the paths are relative to the
-  /// `pubspec.yaml` file).
-  ///
-  /// On a device with a 4.0 device pixel ratio, the `images/3.5x/cat.png` asset
-  /// would be used. On a device with a 1.0 device pixel ratio, the
-  /// `images/cat.png` resource would be used.
-  ///
-  /// The `images/cat.png` image can be omitted from disk (though it must still
-  /// be present in the manifest). If it is omitted, then on a device with a 1.0
-  /// device pixel ratio, the `images/2x/cat.png` image would be used instead.
-  ///
-  ///
-  /// ## Assets in packages
-  ///
-  /// To create the widget with an asset from a package, the [package] argument
-  /// must be provided. For instance, suppose a package called `my_icons` has
-  /// `icons/heart.png` .
-  ///
-  /// {@tool sample}
-  /// Then to display the image, use:
-  ///
-  /// ```dart
-  /// Image.asset('icons/heart.png', package: 'my_icons')
-  /// ```
-  /// {@end-tool}
-  ///
-  /// Assets used by the package itself should also be displayed using the
-  /// [package] argument as above.
-  ///
-  /// If the desired asset is specified in the `pubspec.yaml` of the package, it
-  /// is bundled automatically with the app. In particular, assets used by the
-  /// package itself must be specified in its `pubspec.yaml`.
-  ///
-  /// A package can also choose to have assets in its 'lib/' folder that are not
-  /// specified in its `pubspec.yaml`. In this case for those images to be
-  /// bundled, the app has to specify which ones to include. For instance a
-  /// package named `fancy_backgrounds` could have:
-  ///
-  /// ```
-  /// lib/backgrounds/background1.png
-  /// lib/backgrounds/background2.png
-  /// lib/backgrounds/background3.png
-  /// ```
-  ///
-  /// To include, say the first image, the `pubspec.yaml` of the app should
-  /// specify it in the assets section:
-  ///
-  /// ```yaml
-  ///   assets:
-  ///     - packages/fancy_backgrounds/backgrounds/background1.png
-  /// ```
-  ///
-  /// The `lib/` is implied, so it should not be included in the asset path.
-  ///
-  ///
-  /// See also:
-  ///
-  ///  * [AssetImage], which is used to implement the behavior when the scale is
-  ///    omitted.
-  ///  * [ExactAssetImage], which is used to implement the behavior when the
-  ///    scale is present.
-  ///  * <https://flutter.dev/assets-and-images/>, an introduction to assets in
-  ///    Flutter.
-  Image.asset(
-    String name, {
-    Key key,
-    AssetBundle bundle,
-    this.frameBuilder,
-    this.semanticLabel,
-    this.excludeFromSemantics = false,
-    double scale,
-    this.width,
-    this.height,
-    this.color,
-    this.colorBlendMode,
-    this.fit,
-    this.alignment = Alignment.center,
-    this.repeat = ImageRepeat.noRepeat,
-    this.centerSlice,
-    this.matchTextDirection = false,
-    this.gaplessPlayback = false,
-    String package,
-    this.filterQuality = FilterQuality.low,
-  }) : image = scale != null
-         ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
-         : AssetImage(name, bundle: bundle, package: package),
-       loadingBuilder = null,
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       super(key: key);
-
-  /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
-  ///
-  /// The [bytes], [scale], and [repeat] arguments must not be null.
-  ///
-  /// This only accepts compressed image formats (e.g. PNG). Uncompressed
-  /// formats like rawRgba (the default format of [ui.Image.toByteData]) will
-  /// lead to exceptions.
-  ///
-  /// Either the [width] and [height] arguments should be specified, or the
-  /// widget should be placed in a context that sets tight layout constraints.
-  /// Otherwise, the image dimensions will change as the image is loaded, which
-  /// will result in ugly layout changes.
-  ///
-  /// Use [filterQuality] to change the quality when scaling an image.
-  /// Use the [FilterQuality.low] quality setting to scale the image,
-  /// which corresponds to bilinear interpolation, rather than the default
-  /// [FilterQuality.none] which corresponds to nearest-neighbor.
-  ///
-  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
-  Image.memory(
-    Uint8List bytes, {
-    Key key,
-    double scale = 1.0,
-    this.frameBuilder,
-    this.semanticLabel,
-    this.excludeFromSemantics = false,
-    this.width,
-    this.height,
-    this.color,
-    this.colorBlendMode,
-    this.fit,
-    this.alignment = Alignment.center,
-    this.repeat = ImageRepeat.noRepeat,
-    this.centerSlice,
-    this.matchTextDirection = false,
-    this.gaplessPlayback = false,
-    this.filterQuality = FilterQuality.low,
-  }) : image = MemoryImage(bytes, scale: scale),
-       loadingBuilder = null,
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       super(key: key);
+/// The base implementation of the [Image] widget.
+abstract class ImageBase extends StatefulWidget {
+  /// A const constructor to allow subtypes to be const.
+  const ImageBase({Key key}) : super(key: key);
 
   /// The image to display.
-  final ImageProvider image;
+  ImageProvider get image;
 
   /// A builder function responsible for creating the widget that represents
   /// this image.
@@ -664,7 +269,7 @@ class Image extends StatefulWidget {
   /// image.
   ///
   /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/frame_builder_image.mp4}
-  final ImageFrameBuilder frameBuilder;
+  ImageFrameBuilder get frameBuilder;
 
   /// A builder that specifies the widget to display to the user while an image
   /// is still loading.
@@ -732,7 +337,7 @@ class Image extends StatefulWidget {
   /// completed image.
   ///
   /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/loading_progress_image.mp4}
-  final ImageLoadingBuilder loadingBuilder;
+  ImageLoadingBuilder get loadingBuilder;
 
   /// If non-null, require the image to have this width.
   ///
@@ -744,7 +349,7 @@ class Image extends StatefulWidget {
   /// layout constraints, so that the image does not change size as it loads.
   /// Consider using [fit] to adapt the image's rendering to fit the given width
   /// and height if the exact image dimensions are not known in advance.
-  final double width;
+  double get width;
 
   /// If non-null, require the image to have this height.
   ///
@@ -756,17 +361,17 @@ class Image extends StatefulWidget {
   /// layout constraints, so that the image does not change size as it loads.
   /// Consider using [fit] to adapt the image's rendering to fit the given width
   /// and height if the exact image dimensions are not known in advance.
-  final double height;
+  double get height;
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
-  final Color color;
+  Color get color;
 
   /// Used to set the [FilterQuality] of the image.
   ///
   /// Use the [FilterQuality.low] quality setting to scale the image with
   /// bilinear interpolation, or the [FilterQuality.none] which corresponds
   /// to nearest-neighbor.
-  final FilterQuality filterQuality;
+  FilterQuality get filterQuality;
 
   /// Used to combine [color] with this image.
   ///
@@ -776,13 +381,13 @@ class Image extends StatefulWidget {
   /// See also:
   ///
   ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
-  final BlendMode colorBlendMode;
+  BlendMode get colorBlendMode;
 
   /// How to inscribe the image into the space allocated during layout.
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
-  final BoxFit fit;
+  BoxFit get fit;
 
   /// How to align the image within its bounds.
   ///
@@ -809,10 +414,10 @@ class Image extends StatefulWidget {
   ///    specify an [AlignmentGeometry].
   ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
   ///    relative to text direction.
-  final AlignmentGeometry alignment;
+  AlignmentGeometry get alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
-  final ImageRepeat repeat;
+  ImageRepeat get repeat;
 
   /// The center slice for a nine-patch image.
   ///
@@ -821,7 +426,7 @@ class Image extends StatefulWidget {
   /// region of the image above and below the center slice will be stretched
   /// only horizontally and the region of the image to the left and right of
   /// the center slice will be stretched only vertically.
-  final Rect centerSlice;
+  Rect get centerSlice;
 
   /// Whether to paint the image in the direction of the [TextDirection].
   ///
@@ -838,23 +443,23 @@ class Image extends StatefulWidget {
   ///
   /// If this is true, there must be an ambient [Directionality] widget in
   /// scope.
-  final bool matchTextDirection;
+  bool get matchTextDirection;
 
   /// Whether to continue showing the old image (true), or briefly show nothing
   /// (false), when the image provider changes.
-  final bool gaplessPlayback;
+  bool get gaplessPlayback;
 
   /// A Semantic description of the image.
   ///
   /// Used to provide a description of the image to TalkBack on Android, and
   /// VoiceOver on iOS.
-  final String semanticLabel;
+  String get semanticLabel;
 
   /// Whether to exclude this image from semantics.
   ///
   /// Useful for images which do not contribute meaningful information to an
   /// application.
-  final bool excludeFromSemantics;
+  bool get excludeFromSemantics;
 
   @override
   _ImageState createState() => _ImageState();
@@ -880,7 +485,7 @@ class Image extends StatefulWidget {
   }
 }
 
-class _ImageState extends State<Image> with WidgetsBindingObserver {
+class _ImageState extends State<ImageBase> with WidgetsBindingObserver {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
   ImageChunkEvent _loadingProgress;
@@ -917,7 +522,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   @override
-  void didUpdateWidget(Image oldWidget) {
+  void didUpdateWidget(ImageBase oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_isListeningToStream &&
         (widget.loadingBuilder == null) != (oldWidget.loadingBuilder == null)) {
