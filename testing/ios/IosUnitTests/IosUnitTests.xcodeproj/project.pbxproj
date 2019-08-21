@@ -572,6 +572,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_STYLE = Automatic;
+				FRAMEWORK_SEARCH_PATHS = ../../../../out/$FLUTTER_ENGINE;
 				HEADER_SEARCH_PATHS = (
 					../../../..,
 					../../../../flutter/shell/platform/darwin/common/framework/Headers,
@@ -593,9 +594,8 @@
 					"$(PROJECT_DIR)/Tests",
 				);
 				OTHER_LDFLAGS = (
-					"-L",
-					../../../../out/$FLUTTER_ENGINE,
-					"-lFlutter",
+					"-framework",
+					Flutter,
 					"-lOCMock",
 					"-ObjC",
 				);
@@ -616,6 +616,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_STYLE = Automatic;
+				FRAMEWORK_SEARCH_PATHS = ../../../../out/$FLUTTER_ENGINE;
 				HEADER_SEARCH_PATHS = (
 					../../../..,
 					../../../../flutter/shell/platform/darwin/common/framework/Headers,
@@ -637,9 +638,8 @@
 					"$(PROJECT_DIR)/Tests",
 				);
 				OTHER_LDFLAGS = (
-					"-L",
-					../../../../out/$FLUTTER_ENGINE,
-					"-lFlutter",
+					"-framework",
+					Flutter,
 					"-lOCMock",
 					"-ObjC",
 				);
