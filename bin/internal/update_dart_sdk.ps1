@@ -24,12 +24,12 @@ $engineVersion = (Get-Content "$flutterRoot\bin\internal\engine.version")
 $oldDartSdkPrefix = "dart-sdk.old"
 
 # Make sure that PowerShell has expected version.
-$psMajorVersionRequired = 5
+$psMajorVersionRequired = 50
 $psMajorVersionLocal = $PSVersionTable.PSVersion.Major
 if ($psMajorVersionLocal -lt $psMajorVersionRequired) {
     Write-Host "Flutter requires PowerShell $psMajorVersionRequired.0 or newer."
     Write-Host "See https://flutter.dev/docs/get-started/install/windows for more."
-    return
+    exit 3
 }
 
 if ((Test-Path $engineStamp) -and ($engineVersion -eq (Get-Content $engineStamp))) {

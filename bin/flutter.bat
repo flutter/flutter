@@ -102,11 +102,17 @@ GOTO :after_subroutine
     SET update_dart_bin=%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
     SET "update_dart_bin=!update_dart_bin:'=''!"
-    PowerShell.exe -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'"
+    PowerShell.exe -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'; exit $LastExitCode"
     IF "%ERRORLEVEL%" NEQ "0" (
-      ECHO Error: Unable to update Dart SDK. Retrying...
-      timeout /t 5 /nobreak
-      GOTO :do_sdk_update_and_snapshot
+      REM Error code 3 is returned by the PowerShell script if the version is not good enough.
+      IF "%ERRORLEVEL%" EQU "3" (
+        SET exit_code=%ERRORLEVEL%
+        GOTO :final_exit
+      ) ELSE (
+        ECHO Error: Unable to update Dart SDK. Retrying...
+        timeout /t 5 /nobreak
+        GOTO :do_sdk_update_and_snapshot
+      )
     )
 
   :do_snapshot
