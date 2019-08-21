@@ -827,6 +827,7 @@ FILE: ../../../flutter/shell/platform/embedder/embedder_task_runner.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_thread_host.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_thread_host.h
 FILE: ../../../flutter/shell/platform/embedder/fixtures/compositor.png
+FILE: ../../../flutter/shell/platform/embedder/fixtures/compositor_with_root_layer_only.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/main.dart
 FILE: ../../../flutter/shell/platform/embedder/platform_view_embedder.cc
 FILE: ../../../flutter/shell/platform/embedder/platform_view_embedder.h

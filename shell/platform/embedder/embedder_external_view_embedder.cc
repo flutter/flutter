@@ -169,6 +169,10 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
     return false;
   }
 
+  if (auto root_canvas = root_render_target_->GetRenderSurface()->getCanvas()) {
+    root_canvas->flush();
+  }
+
   {
     // The root surface is expressed as a layer.
     EmbeddedViewParams params;

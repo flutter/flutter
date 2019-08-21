@@ -254,3 +254,49 @@ void can_composite_platform_views_with_known_scene() {
   window.scheduleFrame();
 }
 
+@pragma('vm:entry-point')
+void can_composite_platform_views_with_root_layer_only() {
+  window.onBeginFrame = (Duration duration) {
+    Color red = Color.fromARGB(127, 255, 0, 0);
+    Size size = Size(50.0, 150.0);
+
+    SceneBuilder builder = SceneBuilder();
+    builder.pushOffset(0.0, 0.0);
+
+    // 10 (Index 0)
+    builder.addPicture(Offset(10.0, 10.0), CreateColoredBox(red, size)); // red - flutter
+    builder.pop();
+
+    window.render(builder.build());
+
+    signalNativeTest(); // Signal 2
+  };
+  signalNativeTest(); // Signal 1
+  window.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
+void can_composite_platform_views_with_platform_layer_on_bottom() {
+  window.onBeginFrame = (Duration duration) {
+    Color red = Color.fromARGB(127, 255, 0, 0);
+    Size size = Size(50.0, 150.0);
+
+    SceneBuilder builder = SceneBuilder();
+    builder.pushOffset(0.0, 0.0);
+
+    // 10 (Index 0)
+    builder.addPicture(Offset(10.0, 10.0), CreateColoredBox(red, size)); // red - flutter
+
+    builder.pushOffset(20.0, 20.0);
+      // 20 (Index 1)
+      builder.addPlatformView(1, width: size.width, height:size.height); // green - platform
+    builder.pop();
+    builder.pop();
+
+    window.render(builder.build());
+
+    signalNativeTest(); // Signal 2
+  };
+  signalNativeTest(); // Signal 1
+  window.scheduleFrame();
+}
