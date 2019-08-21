@@ -207,10 +207,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   void initInstances() {
+    super.initInstances();
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
     HttpOverrides.global = _MockHttpOverrides();
     _testTextInput = TestTextInput(onCleared: _resetFocusedEditable)..register();
-    super.initInstances();
   }
 
   @override
@@ -812,7 +812,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     /// platform messages.
     SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {});
 
-    defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) {
+    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) {
       String key = utf8.decode(message.buffer.asUint8List());
       File asset = File(path.join(assetFolderPath, key));
 
