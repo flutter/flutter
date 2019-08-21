@@ -120,7 +120,7 @@ class BottomSheetThemeData extends Diagnosticable {
     return typedOther.backgroundColor == backgroundColor
         && typedOther.elevation == elevation
         && typedOther.modalElevation == modalElevation
-        && typedOther.shape == shape;
+        && typedOther.shape == shape
         && typedOther.clipBehavior == clipBehavior;
   }
 
