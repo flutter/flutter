@@ -11,9 +11,8 @@
         "services": [
             "fuchsia.crash.Analyzer",
             "fuchsia.fonts.Provider",
-            "fuchsia.posix.socket.Provider",
             "fuchsia.net.NameLookup",
-            "fuchsia.net.SocketProvider",
+            "fuchsia.posix.socket.Provider",
             "fuchsia.sysmem.Allocator",
             "fuchsia.timezone.Timezone",
             "fuchsia.tracing.provider.Registry",
