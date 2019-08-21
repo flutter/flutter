@@ -11,6 +11,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/paths.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
@@ -863,9 +864,9 @@ static bool RasterImagesAreSame(sk_sp<SkImage> a, sk_sp<SkImage> b) {
   return ::memcmp(pixmapA.addr(), pixmapB.addr(), sizeA) == 0;
 }
 
-bool WriteImageToDisk(const fml::UniqueFD& directory,
-                      const std::string& name,
-                      sk_sp<SkImage> image) {
+static bool WriteImageToDisk(const fml::UniqueFD& directory,
+                             const std::string& name,
+                             sk_sp<SkImage> image) {
   if (!image) {
     return false;
   }
@@ -879,6 +880,60 @@ bool WriteImageToDisk(const fml::UniqueFD& directory,
   fml::NonOwnedMapping mapping(static_cast<const uint8_t*>(data->data()),
                                data->size());
   return WriteAtomically(directory, name.c_str(), mapping);
+}
+
+static bool ImageMatchesFixture(const std::string& fixture_file_name,
+                                sk_sp<SkImage> scene_image) {
+  fml::FileMapping fixture_image_mapping(OpenFixture(fixture_file_name));
+
+  FML_CHECK(fixture_image_mapping.GetSize() != 0u)
+      << "Could not find fixture: " << fixture_file_name;
+
+  auto encoded_image = SkData::MakeWithoutCopy(
+      fixture_image_mapping.GetMapping(), fixture_image_mapping.GetSize());
+  auto fixture_image =
+      SkImage::MakeFromEncoded(std::move(encoded_image))->makeRasterImage();
+
+  FML_CHECK(fixture_image) << "Could not create image from fixture: "
+                           << fixture_file_name;
+
+  auto scene_image_subset = scene_image->makeSubset(
+      SkIRect::MakeWH(fixture_image->width(), fixture_image->height()));
+
+  FML_CHECK(scene_image_subset)
+      << "Could not create image subset for fixture comparison: "
+      << scene_image_subset;
+
+  const auto images_are_same =
+      RasterImagesAreSame(scene_image_subset, fixture_image);
+
+  // If the images are not the same, this predicate is going to indicate test
+  // failure. Dump both the actual image and the expectation to disk to the
+  // test author can figure out what went wrong.
+  if (!images_are_same) {
+    const auto fixtures_path = GetFixturesPath();
+
+    const auto actual_file_name = "actual_" + fixture_file_name;
+    const auto expect_file_name = "expectation_" + fixture_file_name;
+
+    auto fixtures_fd = OpenFixturesDirectory();
+
+    FML_CHECK(
+        WriteImageToDisk(fixtures_fd, actual_file_name, scene_image_subset))
+        << "Could not write file to disk: " << actual_file_name;
+
+    FML_CHECK(WriteImageToDisk(fixtures_fd, expect_file_name, fixture_image))
+        << "Could not write file to disk: " << expect_file_name;
+
+    FML_LOG(ERROR) << "Image did not match expectation." << std::endl
+                   << "Expected:"
+                   << fml::paths::JoinPaths({fixtures_path, expect_file_name})
+                   << std::endl
+                   << "Got:"
+                   << fml::paths::JoinPaths({fixtures_path, actual_file_name})
+                   << std::endl;
+  }
+  return images_are_same;
 }
 
 //------------------------------------------------------------------------------
@@ -1048,31 +1103,7 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
 
   latch.Wait();
 
-  // Render the scene and assert that it matches expectation.
-  ASSERT_TRUE(scene_image);
-  fml::FileMapping fixture_image_mapping(OpenFixture("compositor.png"));
-  ASSERT_GE(fixture_image_mapping.GetSize(), 0u);
-  auto encoded_image = SkData::MakeWithoutCopy(
-      fixture_image_mapping.GetMapping(), fixture_image_mapping.GetSize());
-  auto fixture_image =
-      SkImage::MakeFromEncoded(std::move(encoded_image))->makeRasterImage();
-  ASSERT_TRUE(fixture_image);
-  auto scene_image_subset = scene_image->makeSubset(
-      SkIRect::MakeWH(fixture_image->width(), fixture_image->height()));
-  ASSERT_TRUE(scene_image_subset);
-  const auto images_are_same =
-      RasterImagesAreSame(scene_image_subset, fixture_image);
-  if (!images_are_same) {
-    auto fixtures_fd = OpenFixturesDirectory();
-    ASSERT_TRUE(
-        WriteImageToDisk(fixtures_fd, "actual.png", scene_image_subset));
-    ASSERT_TRUE(
-        WriteImageToDisk(fixtures_fd, "expectation.png", fixture_image));
-    FML_LOG(ERROR) << "Test compositor did not generated expected images. Got: "
-                      "'actual.png' Expected: 'expectation.png' in Directory: "
-                   << GetFixturesPath();
-  }
-  ASSERT_TRUE(images_are_same);
+  ASSERT_TRUE(ImageMatchesFixture("compositor.png", scene_image));
 }
 
 //------------------------------------------------------------------------------
@@ -1267,34 +1298,8 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithRootLayerOnly) {
 
   latch.Wait();
 
-  // Render the scene and assert that it matches expectation.
-  ASSERT_TRUE(scene_image);
-
-  fml::FileMapping fixture_image_mapping(
-      OpenFixture("compositor_with_root_layer_only.png"));
-  ASSERT_GE(fixture_image_mapping.GetSize(), 0u);
-  auto encoded_image = SkData::MakeWithoutCopy(
-      fixture_image_mapping.GetMapping(), fixture_image_mapping.GetSize());
-  auto fixture_image =
-      SkImage::MakeFromEncoded(std::move(encoded_image))->makeRasterImage();
-  ASSERT_TRUE(fixture_image);
-  auto scene_image_subset = scene_image->makeSubset(
-      SkIRect::MakeWH(fixture_image->width(), fixture_image->height()));
-  ASSERT_TRUE(scene_image_subset);
-  const auto images_are_same =
-      RasterImagesAreSame(scene_image_subset, fixture_image);
-  if (!images_are_same) {
-    auto fixtures_fd = OpenFixturesDirectory();
-    ASSERT_TRUE(WriteImageToDisk(fixtures_fd, "actual_with_root_layer_only.png",
-                                 scene_image_subset));
-    ASSERT_TRUE(WriteImageToDisk(
-        fixtures_fd, "expectation_with_root_layer_only.png", fixture_image));
-    FML_LOG(ERROR) << "Test compositor did not generated expected images. Got: "
-                      "'actual_with_root_layer_only.png' Expected: "
-                      "'compositor_with_root_layer_only.png' in Directory: "
-                   << GetFixturesPath();
-  }
-  ASSERT_TRUE(images_are_same);
+  ASSERT_TRUE(
+      ImageMatchesFixture("compositor_with_root_layer_only.png", scene_image));
 }
 
 //------------------------------------------------------------------------------
@@ -1407,36 +1412,8 @@ TEST_F(EmbedderTest,
 
   latch.Wait();
 
-  // Render the scene and assert that it matches expectation.
-  ASSERT_TRUE(scene_image);
-  fml::FileMapping fixture_image_mapping(
-      OpenFixture("compositor_with_platform_layer_on_bottom.png"));
-  ASSERT_GE(fixture_image_mapping.GetSize(), 0u);
-  auto encoded_image = SkData::MakeWithoutCopy(
-      fixture_image_mapping.GetMapping(), fixture_image_mapping.GetSize());
-  auto fixture_image =
-      SkImage::MakeFromEncoded(std::move(encoded_image))->makeRasterImage();
-  ASSERT_TRUE(fixture_image);
-  auto scene_image_subset = scene_image->makeSubset(
-      SkIRect::MakeWH(fixture_image->width(), fixture_image->height()));
-  ASSERT_TRUE(scene_image_subset);
-  const auto images_are_same =
-      RasterImagesAreSame(scene_image_subset, fixture_image);
-  if (!images_are_same) {
-    auto fixtures_fd = OpenFixturesDirectory();
-    ASSERT_TRUE(WriteImageToDisk(fixtures_fd,
-                                 "actual_with_platform_layer_on_bottom.png",
-                                 scene_image_subset));
-    ASSERT_TRUE(WriteImageToDisk(
-        fixtures_fd, "expectation_with_platform_layer_on_bottom.png",
-        fixture_image));
-    FML_LOG(ERROR) << "Test compositor did not generated expected images. Got: "
-                      "'actual_with_platform_layer_on_bottom.png' Expected: "
-                      "'expectation_with_patform_layer_on_bottom.png' in "
-                      "Directory: "
-                   << GetFixturesPath();
-  }
-  ASSERT_TRUE(images_are_same);
+  ASSERT_TRUE(ImageMatchesFixture(
+      "compositor_with_platform_layer_on_bottom.png", scene_image));
 }
 
 }  // namespace testing
