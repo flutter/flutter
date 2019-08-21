@@ -274,6 +274,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
     Key key,
     this.curve = Curves.linear,
     @required this.duration,
+    this.onEnd,
   }) : assert(curve != null),
        assert(duration != null),
        super(key: key);
@@ -283,6 +284,9 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
 
   /// The duration over which to animate the parameters of this container.
   final Duration duration;
+
+  /// The callback called at the end of the animation.
+  final VoidCallback onEnd;
 
   @override
   ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState();
@@ -354,6 +358,12 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
       debugLabel: kDebugMode ? '${widget.toStringShort()}' : null,
       vsync: this,
     );
+    _controller.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        if (widget.onEnd != null)
+          widget.onEnd();
+      }
+    });
     _updateCurve();
     _constructTweens();
     didUpdateTweens();
@@ -622,6 +632,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     this.child,
     Curve curve = Curves.linear,
     @required Duration duration,
+    VoidCallback onEnd,
   }) : assert(margin == null || margin.isNonNegative),
        assert(padding == null || padding.isNonNegative),
        assert(decoration == null || decoration.debugAssertIsValid()),
@@ -636,7 +647,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
           ? constraints?.tighten(width: width, height: height)
             ?? BoxConstraints.tightFor(width: width, height: height)
           : constraints,
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The [child] contained by the container.
   ///
@@ -778,9 +789,10 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
     this.child,
     Curve curve = Curves.linear,
     @required Duration duration,
+    VoidCallback onEnd,
   }) : assert(padding != null),
        assert(padding.isNonNegative),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The amount of space by which to inset the child.
   final EdgeInsetsGeometry padding;
@@ -857,8 +869,9 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
     this.child,
     Curve curve = Curves.linear,
     @required Duration duration,
+    VoidCallback onEnd,
   }) : assert(alignment != null),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// How to align the child.
   ///
@@ -965,9 +978,10 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     this.height,
     Curve curve = Curves.linear,
     @required Duration duration,
+    VoidCallback onEnd,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// Creates a widget that animates the rectangle it occupies implicitly.
   ///
@@ -978,13 +992,14 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     Rect rect,
     Curve curve = Curves.linear,
     @required Duration duration,
+    VoidCallback onEnd,
   }) : left = rect.left,
        top = rect.top,
        width = rect.width,
        height = rect.height,
        right = null,
        bottom = null,
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -1116,9 +1131,10 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     this.height,
     Curve curve = Curves.linear,
     @required Duration duration,
+    VoidCallback onEnd,
   }) : assert(start == null || end == null || width == null),
        assert(top == null || bottom == null || height == null),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -1270,8 +1286,9 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
     @required this.opacity,
     Curve curve = Curves.linear,
     @required Duration duration,
+    VoidCallback onEnd,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -1353,12 +1370,13 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     this.maxLines,
     Curve curve = Curves.linear,
     @required Duration duration,
+    VoidCallback onEnd,
   }) : assert(style != null),
        assert(child != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(maxLines == null || maxLines > 0),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
@@ -1468,6 +1486,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     this.animateShadowColor = true,
     Curve curve = Curves.linear,
     @required Duration duration,
+    VoidCallback onEnd,
   }) : assert(child != null),
        assert(shape != null),
        assert(clipBehavior != null),
@@ -1477,7 +1496,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
        assert(shadowColor != null),
        assert(animateColor != null),
        assert(animateShadowColor != null),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
   ///
