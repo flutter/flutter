@@ -5,6 +5,8 @@
 # The ANGLE build requires this file to point to the location of third-party
 # dependencies.
 
+angle_root = "//third_party/angle"
+
 angle_googletest_dir = "//third_party/googletest/src"
 angle_libpng_dir = "//third_party/libpng"
 # Note: This path doesn't actually exist; see
