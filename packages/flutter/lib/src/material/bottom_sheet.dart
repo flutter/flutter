@@ -60,6 +60,7 @@ class BottomSheet extends StatefulWidget {
     this.backgroundColor,
     this.elevation,
     this.shape,
+    this.clipBehavior,
     @required this.onClosing,
     @required this.builder,
   }) : assert(enableDrag != null),
@@ -114,6 +115,19 @@ class BottomSheet extends StatefulWidget {
   ///
   /// Defaults to null and falls back to [Material]'s default.
   final ShapeBorder shape;
+
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defines the bottom sheet's [Material.clipBehavior].
+  ///
+  /// Use this property to enable clipping of content when the bottom sheet has
+  /// a custom [shape] and the content can extend past this shape. For example,
+  /// a bottom sheet with rounded corners and an edge-to-edge [Image] at the
+  /// top.
+  ///
+  /// If this property is null then [ThemeData.bottomSheetTheme.clipBehavior] is
+  /// used. If that's null then the behavior will be [Clip.none].
+  final Clip clipBehavior;
 
   @override
   _BottomSheetState createState() => _BottomSheetState();
@@ -185,12 +199,14 @@ class _BottomSheetState extends State<BottomSheet> {
     final Color color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor;
     final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? 0;
     final ShapeBorder shape = widget.shape ?? bottomSheetTheme.shape;
+    final Clip clipBehavior = widget.clipBehavior ?? bottomSheetTheme.clipBehavior ?? Clip.none;
 
     final Widget bottomSheet = Material(
       key: _childKey,
       color: color,
       elevation: elevation,
       shape: shape,
+      clipBehavior: clipBehavior,
       child: NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
         child: widget.builder(context),
@@ -247,6 +263,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.backgroundColor,
     this.elevation,
     this.shape,
+    this.clipBehavior,
     this.isScrollControlled = false,
   }) : assert(isScrollControlled != null),
        super(key: key);
@@ -256,6 +273,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   final Color backgroundColor;
   final double elevation;
   final ShapeBorder shape;
+  final Clip clipBehavior;
 
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
@@ -306,6 +324,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
                 backgroundColor: widget.backgroundColor,
                 elevation: widget.elevation,
                 shape: widget.shape,
+                clipBehavior: widget.clipBehavior,
               ),
             ),
           ),
@@ -323,6 +342,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.backgroundColor,
     this.elevation,
     this.shape,
+    this.clipBehavior,
     @required this.isScrollControlled,
     RouteSettings settings,
   }) : assert(isScrollControlled != null),
@@ -334,6 +354,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final Color backgroundColor;
   final double elevation;
   final ShapeBorder shape;
+  final Clip clipBehavior;
 
   @override
   Duration get transitionDuration => _bottomSheetDuration;
@@ -369,6 +390,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
         backgroundColor: backgroundColor,
         elevation: elevation,
         shape: shape,
+        clipBehavior: clipBehavior,
         isScrollControlled: isScrollControlled
       ),
     );
@@ -423,6 +445,7 @@ Future<T> showModalBottomSheet<T>({
   Color backgroundColor,
   double elevation,
   ShapeBorder shape,
+  Clip clipBehavior,
   bool isScrollControlled = false,
   bool useRootNavigator = false,
 }) {
@@ -441,6 +464,7 @@ Future<T> showModalBottomSheet<T>({
     backgroundColor: backgroundColor,
     elevation: elevation,
     shape: shape,
+    clipBehavior: clipBehavior,
   ));
 }
 
@@ -485,6 +509,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   Color backgroundColor,
   double elevation,
   ShapeBorder shape,
+  Clip clipBehavior,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -495,5 +520,6 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
     backgroundColor: backgroundColor,
     elevation: elevation,
     shape: shape,
+    clipBehavior: clipBehavior,
   );
 }

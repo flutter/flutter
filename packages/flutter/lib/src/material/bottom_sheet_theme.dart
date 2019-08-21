@@ -30,6 +30,7 @@ class BottomSheetThemeData extends Diagnosticable {
     this.backgroundColor,
     this.elevation,
     this.shape,
+    this.clipBehavior,
   });
 
   /// Default value for [BottomSheet.backgroundColor].
@@ -50,17 +51,24 @@ class BottomSheetThemeData extends Diagnosticable {
   /// [BottomSheet] is rectangular.
   final ShapeBorder shape;
 
+  /// Default value for [BottomSheet.clipBehavior].
+  ///
+  /// If null, [BottomSheet] uses [Clip.none].
+  final Clip clipBehavior;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   BottomSheetThemeData copyWith({
     Color backgroundColor,
     double elevation,
     ShapeBorder shape,
+    Clip clipBehavior,
   }) {
     return BottomSheetThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
+      clipBehavior: clipBehavior ?? this.clipBehavior,
     );
   }
 
@@ -77,6 +85,7 @@ class BottomSheetThemeData extends Diagnosticable {
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
+      clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
     );
   }
 
@@ -86,6 +95,7 @@ class BottomSheetThemeData extends Diagnosticable {
       backgroundColor,
       elevation,
       shape,
+      clipBehavior,
     );
   }
 
@@ -98,7 +108,8 @@ class BottomSheetThemeData extends Diagnosticable {
     final BottomSheetThemeData typedOther = other;
     return typedOther.backgroundColor == backgroundColor
         && typedOther.elevation == elevation
-        && typedOther.shape == shape;
+        && typedOther.shape == shape
+        && typedOther.clipBehavior == clipBehavior;
   }
 
   @override
@@ -107,5 +118,6 @@ class BottomSheetThemeData extends Diagnosticable {
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
   }
 }
