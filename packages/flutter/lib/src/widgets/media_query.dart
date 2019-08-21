@@ -234,9 +234,12 @@ class MediaQueryData {
   ///
   /// {@tool snippet --template=stateful_widget_material}
   ///
-  /// When using Android Q with full gestural navigation, use
-  /// [MediaQuery.systemGestureInsets] with [Padding] to avoid overlapping
-  /// a [Slider] with system gesture navigation.
+  /// For apps that might be deployed on Android Q devices with full gesture
+  /// navigation enabled, use [MediaQuery.systemGestureInsets] with [Padding]
+  /// to avoid overlapping a [Slider] with system gesture navigation.
+  ///
+  /// By default, [Slider]s expand to fill the available width. So, we pad the
+  /// left and right sides.
   ///
   /// ```dart
   /// double _currentValue = 0.2;
@@ -245,13 +248,13 @@ class MediaQueryData {
   /// Widget build(BuildContext context) {
   ///   EdgeInsets systemGestureInsets = MediaQuery.of(context).systemGestureInsets;
   ///   return Scaffold(
-  ///     appBar: AppBar(title: Text('Sample Gesture Nav')),
+  ///     appBar: AppBar(title: Text('Pad Slider to avoid systemGestureInsets')),
   ///     body: Padding(
-  ///       padding: EdgeInsets.fromLTRB(
+  ///       padding: EdgeInsets.fromLTRB( // only left and right padding are likely to be needed
   ///         systemGestureInsets.left,
-  ///         10.0,
+  ///         0,
   ///         systemGestureInsets.right,
-  ///         10.0,
+  ///         0,
   ///       ),
   ///       child: Slider(
   ///         value: _currentValue.toDouble(),
