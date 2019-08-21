@@ -521,7 +521,6 @@ tasks:
     description: >
       A smoke test that runs on macOS Catalina, which is a clone of the Gallery startup latency test.
     stage: devicelab_ios
-    flaky: true
     required_agent_capabilities: ["mac-catalina/ios"]
 
   smoke_catalina_hot_mode_dev_cycle__benchmark:
