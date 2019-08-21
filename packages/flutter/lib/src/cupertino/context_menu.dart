@@ -12,6 +12,14 @@ import 'colors.dart';
 // The scale of the child at the time that the ContextMenu opens.
 const double _kOpenScale = 1.2;
 
+typedef void _AnimationEndCallback(Rect childRect);
+
+Rect _getRect(GlobalKey globalKey) {
+  final RenderBox renderBoxContainer = globalKey.currentContext.findRenderObject();
+  final Offset containerOffset = renderBoxContainer.localToGlobal(renderBoxContainer.paintBounds.topLeft);
+  return containerOffset & renderBoxContainer.paintBounds.size;
+}
+
 /// A full-screen menu that can be activated for the given child.
 ///
 /// Long pressing or 3d touching on the child will open in up in a full-screen
@@ -54,101 +62,72 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   static const Color _masklessColor = Color(0xFFFFFFFF);
 
   final GlobalKey _childGlobalKey = GlobalKey();
-  final GlobalKey _containerGlobalKey = GlobalKey();
 
-  Animation<Color> _mask;
-  Animation<Matrix4> _transform;
-  AnimationController _controller;
-  bool _isOpen = false;
+  OverlayEntry _lastOverlayEntry;
+  bool _isOpen = false; // When modal is pushed on top.
+  bool _isOpening = false; // When long pressed, before modal.
   ContextMenuRoute<void> _route;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    _controller.addStatusListener(_onAnimationChangeStatus);
-    _mask = _OnOffAnimation<Color>(
-      controller: _controller,
-      onValue: _lightModeMaskColor,
-      offValue: _masklessColor,
-      intervalOn: 0.2,
-      intervalOff: 0.8,
-    );
-    _transform = Tween<Matrix4>(
-      begin: Matrix4.identity(),
-      end: Matrix4.identity()..scale(_kOpenScale),
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(
-          0.2,
-          1.0,
-          curve: Curves.easeInBack,
-        ),
-      ),
-    );
-  }
-
-  void _onAnimationChangeStatus(AnimationStatus animationStatus) {
-    if (animationStatus == AnimationStatus.completed) {
-      _openContextMenu();
-    }
-  }
-
-  void _openContextMenu() {
+  void _openContextMenu(Rect childRectEnd) {
     setState(() {
       _isOpen = true;
     });
 
     // Get the original Rect of the child before any transformation.
     assert(_childGlobalKey.currentContext != null);
-    final RenderBox renderBoxContainer = _containerGlobalKey.currentContext.findRenderObject();
-    final Offset containerOffset = renderBoxContainer.localToGlobal(renderBoxContainer.paintBounds.topLeft);
-    final Rect originalChildRect = containerOffset & renderBoxContainer.paintBounds.size;
-
-    // Get the Rect of the child right at the end of the transformation.
-    // Consider that the Transform has `alignment` set to `Alignment.center`.
-    final Vector4 sizeVector = _transform.value.transform(Vector4(
-      originalChildRect.width,
-      originalChildRect.height,
-      0.0,
-      0.0,
-    ));
-    final Rect childRect = Rect.fromLTWH(
-      originalChildRect.left,
-      originalChildRect.top,
-      sizeVector.x,
-      sizeVector.y,
-    );
+    final Rect originalChildRect = _getRect(_childGlobalKey);
 
     final Rect parentRect = Offset.zero & MediaQuery.of(context).size;
-    final Opacity container = _childGlobalKey.currentContext.widget;
     _route = ContextMenuRoute<void>(
       barrierLabel: 'Dismiss',
       filter: ui.ImageFilter.blur(
         sigmaX: 5.0,
         sigmaY: 5.0,
       ),
-      childRect: childRect,
+      childRect: childRectEnd,
       parentRect: parentRect,
       actions: widget.actions,
       onTap: widget.onTap,
       builder: (BuildContext context) {
-        return container.child;
+        return widget.child;
       },
     );
     Navigator.of(context, rootNavigator: true).push<void>(_route);
     _route.animation.addStatusListener(_routeAnimationStatusListener);
   }
 
+  // The OverlayEntry that positions widget.child directly on top of its
+  // original position in this widget.
+  OverlayEntry get _overlayEntry {
+    final Rect childRect = _getRect(_childGlobalKey);
+    final Rect endRect = childRect.inflate(_kOpenScale);
+    return OverlayEntry(
+      opaque: false,
+      builder: (BuildContext context) {
+        return _DummyChild(
+          beginRect: childRect,
+          child: widget.child,
+          endRect: endRect,
+          onAnimationEnd: _onDummyAnimationEnd,
+        );
+      },
+    );
+  }
+
+  void _onDummyAnimationEnd(Rect childRectEnd) {
+    setState(() {
+      _isOpening = false;
+      _isOpen = true;
+    });
+    _lastOverlayEntry?.remove();
+    _lastOverlayEntry = null;
+    _openContextMenu(childRectEnd);
+  }
+
   void _routeAnimationStatusListener(AnimationStatus status) {
     if (status != AnimationStatus.dismissed) {
       return;
     }
-    _controller.reset();
     setState(() {
       _isOpen = false;
     });
@@ -157,65 +136,133 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   }
 
   void _onTapDown(TapDownDetails details) {
-    _controller.forward();
-  }
-
-  void _onTapUp(TapUpDetails details) {
-    _controller.reverse();
-  }
-
-  void _onTap() {
-    // A regular tap should be totally separate from a long-press to open the
-    // ContextMenu. If this gesture is just a tap, then don't do any animation
-    // and allow the tap to be handled by another GestureDetector as if the
-    // ContextMenu didn't exist.
-    _controller.reset();
-  }
-
-  Widget _buildAnimation(BuildContext context, Widget child) {
-    return Container(
-      key: _containerGlobalKey,
-      child: Transform(
-        alignment: Alignment.center,
-        transform: _transform?.value ?? Matrix4.identity(),
-        child: ShaderMask(
-          shaderCallback: (Rect bounds) {
-            return LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: <Color>[_mask.value, _mask.value],
-            ).createShader(bounds);
-          },
-          child: Opacity(
-            opacity: _isOpen ? 0.0 : 1.0,
-            key: _childGlobalKey,
-            // TODO(justinmc): Round corners of child?
-            child: widget.child,
-          ),
-        ),
-      ),
-    );
+    setState(() {
+      _isOpening = true;
+    });
+    _lastOverlayEntry = _overlayEntry;
+    Overlay.of(context).insert(_lastOverlayEntry);
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: _onTapDown,
-      onTapUp: _onTapUp,
-      onTap: _onTap,
-      child: AnimatedBuilder(
-        builder: _buildAnimation,
-        animation: _controller,
+      child: Container(
+        child: Opacity(
+          opacity: _isOpening || _isOpen ? 0.0 : 1.0,
+          key: _childGlobalKey,
+          // TODO(justinmc): Round corners of child?
+          child: widget.child,
+        ),
       ),
     );
   }
 
   @override
   void dispose() {
-    _controller.stop();
-    _controller.reset();
-    _transform = null;
     super.dispose();
+  }
+}
+
+// A floating copy of the child.
+class _DummyChild extends StatefulWidget {
+  _DummyChild({
+    Key key,
+    this.beginRect,
+    this.child,
+    this.endRect,
+    this.onAnimationEnd,
+  }) : super(key: key);
+
+  final Rect beginRect;
+  final Widget child;
+  final Rect endRect;
+  final _AnimationEndCallback onAnimationEnd;
+
+  @override
+  _DummyChildState createState() => _DummyChildState();
+}
+
+class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin {
+  // TODO(justinmc): Replace with real system colors when dark mode is
+  // supported for iOS.
+  //static const Color _darkModeMaskColor = Color(0xAAFFFFFF);
+  static const Color _lightModeMaskColor = Color(0xAAAAAAAA);
+  static const Color _masklessColor = Color(0xFFFFFFFF);
+
+  final GlobalKey _childGlobalKey = GlobalKey();
+  AnimationController _controller;
+  Animation<Color> _mask;
+  Animation<Rect> _rect;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    _mask = _OnOffAnimation<Color>(
+      controller: _controller,
+      onValue: _lightModeMaskColor,
+      offValue: _masklessColor,
+      intervalOn: 0.2,
+      intervalOff: 0.8,
+    );
+    _rect = RectTween(
+      begin: widget.beginRect,
+      end: widget.endRect,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.elasticIn,
+      ),
+    );
+
+    _controller.addStatusListener(_onAnimationChangeStatus);
+    _controller.forward();
+  }
+
+  void _onAnimationChangeStatus(AnimationStatus animationStatus) {
+    if (animationStatus == AnimationStatus.completed) {
+      widget.onAnimationEnd(_getRect(_childGlobalKey));
+    }
+  }
+
+  Widget _buildAnimation(BuildContext context, Widget child) {
+    return Positioned.fromRect(
+      rect: _rect.value,
+      child: ShaderMask(
+        key: _childGlobalKey,
+        shaderCallback: (Rect bounds) {
+          return LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[_mask.value, _mask.value],
+          ).createShader(bounds);
+        },
+        child: widget.child,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        AnimatedBuilder(
+          builder: _buildAnimation,
+          animation: _controller,
+        ),
+      ],
+    );
   }
 }
 
