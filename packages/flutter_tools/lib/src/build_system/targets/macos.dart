@@ -285,6 +285,22 @@ abstract class MacOSBundleFlutterAssets extends Target {
   const MacOSBundleFlutterAssets();
 
   @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.behavior(MacOSAssetBehavior())
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.behavior(MacOSAssetBehavior()),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/App'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/Info.plist'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/AssetManifest.json'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/FontManifest.json'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/LICENSE'),
+  ];
+
+  @override
   Future<void> build(List<File> inputFiles, Environment environment) async {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
@@ -442,25 +458,19 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   ];
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    Source.behavior(MacOSAssetBehavior()),
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.artifact(Artifact.isolateSnapshotData, platform: TargetPlatform.darwin_x64, mode: BuildMode.debug),
-    Source.artifact(Artifact.vmSnapshotData, platform: TargetPlatform.darwin_x64, mode: BuildMode.debug),
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.artifact(Artifact.isolateSnapshotData, platform: TargetPlatform.darwin_x64, mode: BuildMode.debug),
+    const Source.artifact(Artifact.vmSnapshotData, platform: TargetPlatform.darwin_x64, mode: BuildMode.debug),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.behavior(MacOSAssetBehavior()),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/App'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/Info.plist'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/AssetManifest.json'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/FontManifest.json'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/LICENSE'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
+  List<Source> get outputs => <Source>[
+    ...super.inputs,
+    const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'),
+    const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
+    const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
   ];
 }
 
@@ -476,22 +486,6 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     CompileMacOSFramework(),
     ProfileUnpackMacOS(),
   ];
-
-  @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    Source.behavior(MacOSAssetBehavior())
-  ];
-
-  @override
-  List<Source> get outputs => const <Source>[
-    Source.behavior(MacOSAssetBehavior()),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/App'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/Info.plist'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/AssetManifest.json'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/FontManifest.json'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/LICENSE'),
-  ];
 }
 
 
@@ -506,21 +500,5 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   List<Target> get dependencies => const <Target>[
     CompileMacOSFramework(),
     ReleaseUnpackMacOS(),
-  ];
-
-  @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    Source.behavior(MacOSAssetBehavior())
-  ];
-
-  @override
-  List<Source> get outputs => const <Source>[
-    Source.behavior(MacOSAssetBehavior()),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/App'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/Info.plist'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/AssetManifest.json'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/FontManifest.json'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/LICENSE'),
   ];
 }

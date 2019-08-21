@@ -186,7 +186,7 @@ class CachedArtifacts extends Artifacts {
   }
 
   String _getDarwinArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
-    // When platform is null, we're asking for a generic host platform artifact
+    // When platform is null, a generic host platform artifact is being requested
     // and not the gen_snapshot for darwin as a target platform.
     if (platform != null && artifact == Artifact.genSnapshot) {
       final String engineDir = _getEngineArtifactsPath(platform, mode);
