@@ -9,9 +9,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'theme.dart';
 import 'thumb_painter.dart';
-import 'colors.dart';
 
 // Examples can assume:
 // int _cupertinoSliderValue = 1;
