@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -41,6 +42,15 @@ void main() {
     expect(bufferLogger.statusText.trim(), 'build succeeded.');
   }));
 
+  test('Throws ToolExit if called with non-existent rule', () => testbed.run(() async {
+    when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+        .thenAnswer((Invocation invocation) async {
+      return BuildResult(success: true);
+    });
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
+
+    expect(commandRunner.run(<String>['assemble', 'undefined']), throwsA(isInstanceOf<ToolExit>()));
+  }));
   test('Only writes input and output files when the values change', () => testbed.run(() async {
     when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
         .thenAnswer((Invocation invocation) async {
