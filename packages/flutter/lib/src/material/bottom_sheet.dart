@@ -118,6 +118,13 @@ class BottomSheet extends StatefulWidget {
 
   /// {@macro flutter.widgets.Clip}
   ///
+  /// Defines the bottom sheet's [Material.clipBehavior].
+  ///
+  /// Use this property to enable clipping of content when the bottom sheet has
+  /// a custom [shape] and the content can extend past this shape. For example,
+  /// a bottom sheet with rounded corners and an edge-to-edge [Image] at the
+  /// top.
+  ///
   /// If this property is null then [ThemeData.bottomSheetTheme.clipBehavior] is
   /// used. If that's null then the behavior will be [Clip.none].
   final Clip clipBehavior;
