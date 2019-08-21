@@ -20,7 +20,7 @@ cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd
 pushd ios/Scenarios
 
 set -o pipefail && xcodebuild -sdk iphonesimulator \
-  -scheme ScenariosTests \
+  -scheme Scenarios \
   -destination 'platform=iOS Simulator,name=iPhone SE' \
   test \
   FLUTTER_ENGINE=$FLUTTER_ENGINE | $PRETTY
