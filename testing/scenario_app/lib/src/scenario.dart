@@ -21,10 +21,10 @@ abstract class Scenario {
   /// flushed.
   ///
   /// See [Window.onDrawFrame] for more details.
-  void onDrawFrame();
+  void onDrawFrame() {}
 
   /// Called by the program when the window metrics have changed.
   ///
   /// See [Window.onMetricsChanged].
-  void onMetricsChanged();
+  void onMetricsChanged() {}
 }
