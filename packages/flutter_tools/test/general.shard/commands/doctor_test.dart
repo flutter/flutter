@@ -859,4 +859,3 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockPlatform extends Mock implements Platform {}
