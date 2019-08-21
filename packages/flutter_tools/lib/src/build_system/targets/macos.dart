@@ -65,12 +65,22 @@ class MacOSAssetBehavior extends SourceBehavior {
 
 /// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
 ///
-/// The shelling out is done to avoid complications with preserving special
-/// files (e.g., symbolic links) in the framework structure.
+/// This class is abstract to share logic between the three conrete
+/// implementations. The shelling out is done to avoid complications with
+/// preserving special files (e.g., symbolic links) in the framework structure.
 ///
 /// Removes any previous version of the framework that already exists in the
 /// target directory.
+///
+/// The real implementations are:
+///   * [DebugUnpackMacOS]
+///   * [ProfileUnpackMacOS]
+///   * [ReleaseUnpackMacOS]
+///
 // TODO(jonahwilliams): remove shell out.
+// TODO(jonahwilliams): the subtypes are required to specify the different
+// input dependencies as a current limitation of the build system planning.
+// This should be resolved after https://github.com/flutter/flutter/issues/38937.
 abstract class UnpackMacOS extends Target {
   const UnpackMacOS();
 

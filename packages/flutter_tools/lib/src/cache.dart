@@ -1063,6 +1063,7 @@ const List<List<String>> _linuxDesktopBinaryDirs = <List<String>>[
 
 // TODO(jonahwilliams): upload debug desktop artifacts to host-debug and
 // remove from existing host folder.
+// https://github.com/flutter/flutter/issues/38935
 const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[
   <String>['darwin-x64', 'darwin-x64/FlutterMacOS.framework.zip'],
   <String>['darwin-x64-profile', 'darwin-x64-profile/FlutterMacOS.framework.zip'],

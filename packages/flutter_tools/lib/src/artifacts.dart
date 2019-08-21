@@ -169,12 +169,13 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.ios:
         return _getIosArtifactPath(artifact, platform, mode);
       case TargetPlatform.darwin_x64:
-        final String result = _getDarwinArtifactPath(artifact, platform, mode);
-        if (result == null) {
-          continue rest;
-        }
-        return result;
-      rest: default:
+        return _getDarwinArtifactPath(artifact, platform, mode);
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
+      default: // could be null, but that can't be specified as a case.
         return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform, mode);
     }
   }
@@ -185,13 +186,13 @@ class CachedArtifacts extends Artifacts {
   }
 
   String _getDarwinArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
-    switch (artifact) {
-      case Artifact.genSnapshot:
-        final String engineDir = _getEngineArtifactsPath(platform, mode);
-        return fs.path.join(engineDir, _artifactToFileName(artifact));
-      default:
-        return null;
+    // When platform is null, we're asking for a generic host platform artifact
+    // and not the gen_snapshot for darwin as a target platform.
+    if (platform != null && artifact == Artifact.genSnapshot) {
+      final String engineDir = _getEngineArtifactsPath(platform, mode);
+      return fs.path.join(engineDir, _artifactToFileName(artifact));
     }
+    return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform, mode);
   }
 
   String _getAndroidArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
@@ -248,6 +249,7 @@ class CachedArtifacts extends Artifacts {
   }
 
   String _getHostArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
+    assert(platform != null);
     switch (artifact) {
       case Artifact.genSnapshot:
         // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
@@ -284,6 +286,7 @@ class CachedArtifacts extends Artifacts {
       case Artifact.flutterMacOSPodspec:
         // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
+        // https://github.com/flutter/flutter/issues/38935
         String platformDirName = getNameForTargetPlatform(platform);
         if (mode == BuildMode.profile || mode == BuildMode.release) {
           platformDirName = '$platformDirName-${getNameForBuildMode(mode)}';
@@ -308,6 +311,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.windows_x64:
         // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
+        // https://github.com/flutter/flutter/issues/38935
         if (mode == BuildMode.debug || mode == null) {
           return fs.path.join(engineDir, platformName);
         }
