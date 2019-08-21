@@ -6,7 +6,6 @@ import("//third_party/dart/build/dart/dart_action.gni")
 import("//third_party/dart/utils/compile_platform.gni")
 
 sdk_dill = "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk.dill"
-sdk_libraries_json = "$root_out_dir/flutter_web_sdk/libraries.json"
 
 web_ui_sources =
     exec_script("//third_party/dart/tools/list_dart_files.py",
@@ -31,6 +30,7 @@ web_engine_sources += [ "$flutter_root/lib/web_ui/lib/src/engine.dart" ]
 group("web_sdk") {
   deps = [
     ":flutter_dartdevc_kernel_sdk",
+    ":flutter_dartdevc_kernel_sdk_outline",
     ":web_engine_sources",
     ":web_ui_library",
     ":web_ui_sources",
@@ -95,6 +95,48 @@ copy("web_ui_library") {
   ]
 }
 
+# Compile the DDC SDK's summary.
+prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline") {
+  deps = [
+    "//third_party/dart/pkg:pkg_files_stamp",
+    "//third_party/dart/utils/dartdevc:dartdevc_files_stamp",
+    "//third_party/dart/utils/dartdevc:dartdevc_sdk_patch_stamp",
+  ]
+
+  inputs = []
+
+  outputs = [
+    sdk_dill,
+  ]
+
+  script = "//third_party/dart/utils/bazel/kernel_worker.dart"
+
+  args = [
+    "--summary-only",
+    "--target",
+    "ddc",
+    "--packages-file",
+    "file:///" + rebase_path("//third_party/dart/.packages"),
+    "--multi-root-scheme",
+    "org-dartlang-sdk",
+    "--multi-root",
+    rebase_path("../../"),
+    "--libraries-file",
+    "file:///" + rebase_path("$root_out_dir/flutter_web_sdk/libraries.json"),
+    "--output",
+    rebase_path(sdk_dill),
+    "--source",
+    "dart:core",
+
+    # Additional Flutter web dart libraries
+    "--source",
+    "dart:ui",
+    "--source",
+    "dart:_engine",
+  ]
+}
+
+# Compiles the DDC SDK's JS code.
 prebuilt_dart_action("flutter_dartdevc_kernel_sdk") {
   deps = [
     "//third_party/dart/pkg:pkg_files_stamp",
@@ -102,25 +144,39 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk") {
     "//third_party/dart/utils/dartdevc:dartdevc_sdk_patch_stamp",
   ]
 
-  inputs = [
-    "//third_party/dart/pkg/dev_compiler/tool/kernel_sdk.dart",
-  ]
+  inputs = []
+
+  packages = "//third_party/dart/.packages"
+
+  script = "//third_party/dart/pkg/dev_compiler/bin/dartdevc.dart"
 
   outputs = [
-    sdk_dill,
-    "$root_out_dir/flutter_web_sdk/lib/_internal/libraries.json",
     "$root_out_dir/flutter_web_sdk/kernel/amd/dart_sdk.js",
     "$root_out_dir/flutter_web_sdk/kernel/amd/dart_sdk.js.map",
   ]
 
-  script = "flutter_kernel_sdk.dart"
-  packages = "//third_party/dart/.packages"
-
-  output_path = rebase_path(sdk_dill)
-  libraries_path = rebase_path(sdk_libraries_json)
-
   args = [
-    "--output=$output_path",
-    "--libraries=$libraries_path",
+    "-k",
+    "--compile-sdk",
+    "dart:core",
+
+    # Additional Flutter web dart libraries
+    "dart:ui",
+    "dart:_engine",
+    "--no-summarize",
+    "--packages",
+    "file:///" + rebase_path("//third_party/dart/.packages"),
+    "--multi-root-scheme",
+    "org-dartlang-sdk",
+    "--multi-root",
+    rebase_path("../../"),
+    "--multi-root-output-path",
+    rebase_path("$root_out_dir/"),
+    "--libraries-file",
+    "file:///" + rebase_path("$root_out_dir/flutter_web_sdk/libraries.json"),
+    "--modules",
+    "amd",
+    "-o",
+    rebase_path("$root_out_dir/flutter_web_sdk/kernel/amd/dart_sdk.js"),
   ]
 }
