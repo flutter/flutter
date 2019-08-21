@@ -44,14 +44,6 @@ source_set("client_wrapper_glfw") {
   ]
 }
 
-# Copies the GLFW client wrapper code to the output directory in the legacy
-# unsuffixed location.
-# TODO: Remove this copy once build recipes are using the _glfw version below.
-publish_client_wrapper_extension("publish_wrapper_unprefixed") {
-  public = _wrapper_includes
-  sources = _wrapper_sources
-}
-
 # Copies the GLFW client wrapper code to the output directory with a _glfw
 # suffix.
 publish_client_wrapper_extension("publish_wrapper_glfw") {

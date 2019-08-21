@@ -9,11 +9,9 @@ import("$flutter_root/shell/platform/glfw/config.gni")
 group("linux") {
   if (build_glfw_shell) {
     deps = [
-      ":flutter_linux",
       ":flutter_linux_glfw",
       "$flutter_root/shell/platform/glfw:publish_headers_glfw",
       "$flutter_root/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",
-      "$flutter_root/shell/platform/glfw/client_wrapper:publish_wrapper_unprefixed",
     ]
   }
 }
@@ -29,18 +27,6 @@ config("disable_fatal_link_warnings") {
 }
 
 if (build_glfw_shell) {
-  # TODO: Remove this target once the _glfw copy is being uploaded instead. See
-  # https://github.com/flutter/flutter/issues/38589
-  shared_library("flutter_linux") {
-    deps = [
-      "$flutter_root/shell/platform/glfw:flutter_glfw",
-    ]
-
-    configs += [ ":disable_fatal_link_warnings" ]
-
-    public_configs = [ "$flutter_root:config" ]
-  }
-
   shared_library("flutter_linux_glfw") {
     deps = [
       "$flutter_root/shell/platform/glfw:flutter_glfw",

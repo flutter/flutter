@@ -92,19 +92,9 @@ copy("publish_headers_windows") {
   ]
 }
 
-shared_library("flutter_windows_win32") {
-  deps = [
-    ":flutter_windows_source",
-  ]
-
-  public_configs = [ "$flutter_root:config" ]
-}
-
-# TODO: Remove this target once the _glfw copy is being uploaded instead. See
-# https://github.com/flutter/flutter/issues/38589
 shared_library("flutter_windows") {
   deps = [
-    "$flutter_root/shell/platform/glfw:flutter_glfw",
+    ":flutter_windows_source",
   ]
 
   public_configs = [ "$flutter_root:config" ]
@@ -118,27 +108,20 @@ shared_library("flutter_windows_glfw") {
   public_configs = [ "$flutter_root:config" ]
 }
 
-group("windows_win32") {
-  deps = [
-    ":flutter_windows_win32",
-    ":publish_headers_windows",
-    "$flutter_root/shell/platform/windows/client_wrapper:publish_wrapper_windows",
-  ]
-}
-
 group("windows_glfw") {
   deps = [
     ":flutter_windows",
     ":flutter_windows_glfw",
     "$flutter_root/shell/platform/glfw:publish_headers_glfw",
     "$flutter_root/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",
-    "$flutter_root/shell/platform/glfw/client_wrapper:publish_wrapper_unprefixed",
   ]
 }
 
 group("windows") {
   deps = [
-    ":windows_win32",
+    ":flutter_windows",
+    ":publish_headers_windows",
+    "$flutter_root/shell/platform/windows/client_wrapper:publish_wrapper_windows",
   ]
   if (build_glfw_shell) {
     deps += [ ":windows_glfw" ]

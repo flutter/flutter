@@ -40,12 +40,10 @@ source_set("client_wrapper_windows") {
   ]
 }
 
-# Copies the Windows client wrapper code to the output directory with a _windows
-# suffix.
+# Copies the Windows client wrapper code to the output directory.
 publish_client_wrapper_extension("publish_wrapper_windows") {
   public = _wrapper_includes
   sources = _wrapper_sources
-  directory_suffix = "windows"
 }
 
 source_set("client_wrapper_library_stubs_windows") {
