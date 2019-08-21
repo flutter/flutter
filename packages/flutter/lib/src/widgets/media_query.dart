@@ -215,13 +215,18 @@ class MediaQueryData {
   ///   property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
-  /// The parts of the display that contain system gestures, typically swipes
-  /// from the edge of the screen for navigation.
+  /// The parts of the display where the system may be detecting particular
+  /// gestures.
+  ///
+  /// This value is typically a drag gesture from an edge of the screen.
+  /// Gestures in these areas may not be forwarded to the app or may
+  /// be canceled by the system. Therefore, elements placed in these areas may
+  /// not properly respond to them.
   ///
   /// {@tool snippet --template=stateful_widget_material}
   ///
-  /// When using Android Q with full gestural navigation turned on,
-  /// use [MediaQuery.systemGestureInsets] with [Padding] to avoid overlapping
+  /// When using Android Q with full gestural navigation, use
+  /// [MediaQuery.systemGestureInsets] with [Padding] to avoid overlapping
   /// a [Slider] with system gesture navigation.
   ///
   /// ```dart
