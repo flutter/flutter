@@ -1089,9 +1089,19 @@ mixin WidgetInspectorService {
       name: 'getRootWidgetSummaryTree',
       callback: _getRootWidgetSummaryTree,
     );
-    _registerServiceExtensionWithArg(
+    registerServiceExtension(
       name: 'getDetailsSubtree',
-      callback: _getDetailsSubtree,
+      callback: (Map<String, String> parameters) async {
+        assert(parameters.containsKey('objectGroup'));
+        final int subtreeDepth = int.parse(parameters['subtreeDepth'] ?? '2');
+        return <String, Object>{
+          'result': _getDetailsSubtree(
+              parameters['arg'],
+              parameters['objectGroup'],
+              subtreeDepth,
+          ),
+        };
+      },
     );
     _registerServiceExtensionWithArg(
       name: 'getSelectedRenderObject',
@@ -1607,11 +1617,19 @@ mixin WidgetInspectorService {
   ///
   ///  * [getChildrenDetailsSubtree], a method to get children of a node
   ///    in the details subtree.
-  String getDetailsSubtree(String id, String groupName) {
-    return _safeJsonEncode(_getDetailsSubtree( id, groupName));
+  String getDetailsSubtree(
+      String id,
+      String groupName, {
+      int subtreeDepth = 2,
+    }) {
+    return _safeJsonEncode(_getDetailsSubtree( id, groupName, subtreeDepth));
   }
 
-  Map<String, Object> _getDetailsSubtree(String id, String groupName) {
+  Map<String, Object> _getDetailsSubtree(
+      String id,
+      String groupName,
+      int subtreeDepth,
+  ) {
     final DiagnosticsNode root = toObject(id);
     if (root == null) {
       return null;
@@ -1621,7 +1639,7 @@ mixin WidgetInspectorService {
       _SerializationDelegate(
         groupName: groupName,
         summaryTree: false,
-        subtreeDepth: 2,  // TODO(jacobr): make subtreeDepth configurable.
+        subtreeDepth: subtreeDepth,
         includeProperties: true,
         service: this,
       ),
