@@ -136,9 +136,13 @@ shared_library("create_flutter_framework_dylib") {
   ]
 }
 
-copy("copy_framework_dylib") {
+action("copy_dylib_and_update_framework_install_name") {
   visibility = [ ":*" ]
+  script = "$flutter_root/sky/tools/change_install_name.py"
 
+  inputs = [
+    script,
+  ]
   sources = [
     "$root_out_dir/libFlutter.dylib",
   ]
@@ -146,34 +150,17 @@ copy("copy_framework_dylib") {
     "$_flutter_framework_dir/Flutter",
   ]
 
-  deps = [
-    ":create_flutter_framework_dylib",
-  ]
-}
-
-action("copy_dylib_and_update_framework_install_name") {
-  visibility = [ ":*" ]
-  stamp_file = "$root_out_dir/flutter_install_name_stamp"
-  script = "$flutter_root/sky/tools/change_install_name.py"
-
-  inputs = [
-    "$_flutter_framework_dir/Flutter",
-  ]
-  outputs = [
-    stamp_file,
-  ]
-
   args = [
     "--dylib",
-    rebase_path("$_flutter_framework_dir/Flutter"),
+    rebase_path(sources[0]),
     "--install_name",
     "@rpath/Flutter.framework/Flutter",
-    "--stamp",
-    rebase_path(stamp_file),
+    "--output",
+    rebase_path(outputs[0]),
   ]
 
   deps = [
-    ":copy_framework_dylib",
+    ":create_flutter_framework_dylib",
   ]
 }
 
