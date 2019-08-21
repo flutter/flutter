@@ -53,7 +53,7 @@ def main():
   engine_artifact_id = args.engine_artifact_id
   engine_version = args.engine_version
   artifact_version = '1.0.0-' + engine_version
-  out_file_name = '%s-%s.pom' % (engine_artifact_id, artifact_version)
+  out_file_name = '%s.pom' % engine_artifact_id
 
   pom_dependencies = ''
   if args.include_embedding_dependencies:
