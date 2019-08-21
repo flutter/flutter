@@ -20,7 +20,7 @@ import 'globals.dart';
 class FlutterVersion {
   @visibleForTesting
   FlutterVersion([this._clock = const SystemClock()]) {
-    _frameworkRevision = _runGit('git log -n 1 --pretty=format:%H');
+    _frameworkRevision = _runGit(gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '));
     _frameworkVersion = GitTagVersion.determine().frameworkVersionFor(_frameworkRevision);
   }
 
@@ -86,7 +86,7 @@ class FlutterVersion {
 
   String _frameworkAge;
   String get frameworkAge {
-    return _frameworkAge ??= _runGit('git log -n 1 --pretty=format:%ar');
+    return _frameworkAge ??= _runGit(gitLog(<String>['-n', '1', '--pretty=format:%ar']).join(' '));
   }
 
   String _frameworkVersion;
@@ -134,15 +134,13 @@ class FlutterVersion {
   String get frameworkCommitDate => _latestGitCommitDate();
 
   static String _latestGitCommitDate([ String branch ]) {
-    final List<String> args = <String>[
-      'git',
-      'log',
+    final List<String> args = gitLog(<String>[
       if (branch != null) branch,
       '-n',
       '1',
       '--pretty=format:%ad',
       '--date=iso',
-    ];
+    ]);
     return _runSync(args, lenient: false);
   }
 
@@ -330,6 +328,14 @@ class FlutterVersion {
         Future<void>.delayed(timeToPauseToLetUserReadTheMessage),
       ]);
     }
+  }
+
+  /// log.showSignature=false is a user setting and it will break things,
+  /// so we want to disable it for every git log call.  This is a convenience
+  /// wrapper that does that.
+  @visibleForTesting
+  static List<String> gitLog(List<String> args) {
+    return <String>['git', '-c', 'log.showSignature=false', 'log'] + args;
   }
 
   @visibleForTesting
