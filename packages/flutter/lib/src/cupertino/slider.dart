@@ -5,13 +5,13 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 import 'thumb_painter.dart';
+import 'colors.dart';
 
 // Examples can assume:
 // int _cupertinoSliderValue = 1;
@@ -294,7 +294,6 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 const double _kPadding = 8.0;
-//const Color _kTrackColor = Color(0xFFB5B5B5);
 const double _kSliderHeight = 2.0 * (CupertinoThumbPainter.radius + _kPadding);
 const double _kSliderWidth = 176.0; // Matches Material Design slider.
 const Duration _kDiscreteTransitionDuration = Duration(milliseconds: 500);
@@ -368,7 +367,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   Color _trackColor;
   set trackColor(Color value) {
     if (value == _trackColor)
-    return;
+      return;
     _trackColor = value;
     markNeedsPaint();
   }
