@@ -61,12 +61,11 @@ class CleanCommand extends FlutterCommand {
     if (!xcodeProject.existsSync()) {
       return;
     }
-    Status xcodeStatus;
+    final Status xcodeStatus = logger.startProgress('Cleaning Xcode workspace...', timeout: timeoutConfiguration.slowOperation);
     try {
       final Directory xcodeWorkspace = xcodeProject.xcodeWorkspace;
       final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path);
       for (String scheme in projectInfo.schemes) {
-        xcodeStatus = logger.startProgress('Cleaning Xcode workspace for scheme $scheme...', timeout: timeoutConfiguration.slowOperation);
         xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme);
       }
     } catch (error) {
