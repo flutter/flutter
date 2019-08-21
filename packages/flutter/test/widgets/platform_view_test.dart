@@ -2046,13 +2046,15 @@ void main() {
       final GlobalKey containerKey = GlobalKey();
       FakePlatformViewController controller;
       ValueChanged<bool> focusChanged;
-      final PlatformViewLink platformViewLink = PlatformViewLink(createPlatformViewController: (PlatformViewCreationParams params){
-        params.onPlatformViewCreated(params.id);
-        focusChanged = params.onFocusChanged;
-        controller = FakePlatformViewController(params.id);
-        return controller;
-      }, surfaceFactory: (BuildContext context, PlatformViewController controller) {
-        return PlatformViewSurface(
+      final PlatformViewLink platformViewLink = PlatformViewLink(
+        createPlatformViewController: (PlatformViewCreationParams params){
+          params.onPlatformViewCreated(params.id);
+          focusChanged = params.onFocusChanged;
+          controller = FakePlatformViewController(params.id);
+          return controller;
+        },
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return PlatformViewSurface(
             gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
             controller: controller,
             hitTestBehavior: PlatformViewHitTestBehavior.opaque,
@@ -2094,7 +2096,7 @@ void main() {
 
       expect(containerFocusNode.hasFocus, false);
       expect(platformViewFocusNode.hasFocus, true);
-
+      expect(controller.focusCleared, false);
       // ask the container to gain focus, and the platform view should clear focus.
       containerFocusNode.requestFocus();
       await tester.pump();

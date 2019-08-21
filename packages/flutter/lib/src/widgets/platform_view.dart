@@ -598,7 +598,9 @@ class PlatformViewCreationParams {
   /// [PlatformViewController.viewId] should match this id.
   final int id;
 
-  /// Callback invoked after the platform view has been created.
+  /// Callback invoked when the platform view's focus is changed on the platform side.
+  ///
+  /// The value is true when the platform view gains focus and false when it loses focus.
   final PlatformViewCreatedCallback onPlatformViewCreated;
 
   /// Notifies the [PlatformViewLink] when the focus is changed from the platform.
@@ -693,7 +695,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     _surface ??= widget._surfaceFactory(context, _controller);
     return Focus(
       focusNode: _focusNode,
-      onFocusChange: _onFrameworkFocusChange,
+      onFocusChange: _handleFrameworkFocusChanged,
       child: _surface,
     );
   }
@@ -711,7 +713,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
       PlatformViewCreationParams._(
         id:_id,
         onPlatformViewCreated:_onPlatformViewCreated,
-        onFocusChanged:_onPlatformFocusChange
+        onFocusChanged:_handlePlatformFocusChanged
       ),
     );
   }
@@ -720,13 +722,13 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     setState(() => _platformViewCreated = true);
   }
 
-  void _onFrameworkFocusChange(bool isFocused) {
-    if (isFocused && _controller != null) {
-      _controller.clearFocus();
+  void _handleFrameworkFocusChanged(bool isFocused) {
+    if (!isFocused) {
+      _controller?.clearFocus();
     }
   }
 
-  void _onPlatformFocusChange(bool isFocused){
+  void _handlePlatformFocusChanged(bool isFocused){
     if (isFocused) {
       _focusNode.requestFocus();
     }
