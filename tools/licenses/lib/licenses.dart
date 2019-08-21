@@ -395,8 +395,7 @@ abstract class License implements Comparable<License> {
   final String origin;
   final LicenseType type;
 
-  Iterable<String> get licensees => _licensees;
-  final List<String> _licensees = <String>[];
+  final Set<String> _licensees = <String>{};
   final Set<String> _libraries = <String>{};
 
   bool get isUsed => _licensees.isNotEmpty;
@@ -419,7 +418,8 @@ abstract class License implements Comparable<License> {
   String toString() {
     final List<String> prefixes = _libraries.toList();
     prefixes.sort();
-    _licensees.sort();
+    final List<String> licensees = _licensees.toList();
+    licensees.sort();
     final List<String> header = <String>[];
     header.addAll(prefixes.map((String s) => 'LIBRARY: $s'));
     header.add('ORIGIN: $origin');
