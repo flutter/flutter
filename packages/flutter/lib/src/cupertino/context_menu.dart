@@ -87,7 +87,6 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     // Get the original Rect of the child before any transformation.
     final Rect originalChildRect = _getRect(_childGlobalKey);
 
-    final Rect parentRect = Offset.zero & MediaQuery.of(context).size;
     _route = ContextMenuRoute<void>(
       barrierLabel: 'Dismiss',
       filter: ui.ImageFilter.blur(
@@ -95,7 +94,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         sigmaY: 5.0,
       ),
       childRect: childRectEnd,
-      parentRect: parentRect,
+      previousChildGlobalKey: _childGlobalKey,
       actions: widget.actions,
       onTap: widget.onTap,
       builder: (BuildContext context) {
@@ -310,28 +309,25 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
     ui.ImageFilter filter,
     RouteSettings settings,
     Rect childRect,
+    GlobalKey previousChildGlobalKey,
     VoidCallback onTap,
-    Rect parentRect,
   }) : assert(actions != null && actions.isNotEmpty),
        _actions = actions,
        _builder = builder,
-       _childRect = childRect,
        _onTap = onTap,
-       _parentRect = parentRect,
+       _previousChildGlobalKey = previousChildGlobalKey,
        super(
          filter: filter,
          settings: settings,
        );
 
-  // The rect containing the widget that should show in the ContextMenu, in its
-  // original position before animating.
-  final Rect _childRect;
-
   // A rect that indicates the space available to position the child.
   // TODO(justinmc): I don't like the idea of needing to pass this in. Is it
   // possible to get the full screen size in createAnimation? Problem is that
   // this widget hasn't built yet by the time createAnimation is called.
-  final Rect _parentRect;
+
+  // The GlobalKey for the child in the previous route.
+  final GlobalKey _previousChildGlobalKey;
 
   // Barrier color for a Cupertino modal barrier.
   static const Color _kModalBarrierColor = Color(0x6604040F);
@@ -341,6 +337,17 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   final List<ContextMenuSheetAction> _actions;
   final WidgetBuilder _builder;
   final VoidCallback _onTap;
+
+  RectTween _rectTween = RectTween();
+  RectTween _rectTweenReverse = RectTween();
+  RectTween _sheetRectTween = RectTween();
+  final Tween<double> _opacityTween = Tween<double>(begin: 0.0, end: 1.0);
+
+  final GlobalKey _childGlobalKey = GlobalKey();
+  final GlobalKey _sheetGlobalKey = GlobalKey();
+
+  bool _externalOffstage = false;
+  bool _internalOffstage = false;
 
   @override
   final String barrierLabel;
@@ -357,25 +364,25 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
-  RectTween _rectTween = RectTween();
-  RectTween _rectTweenReverse = RectTween();
-  RectTween _sheetRectTween = RectTween();
-  final Tween<double> _opacityTween = Tween<double>(begin: 0.0, end: 1.0);
+  void _updateTweenRects() {
+    // The final Rect of the child where it has finished animating to its static
+    // position.
+    final Rect childRect = _getRect(_childGlobalKey);
 
-  // The final position of the child produced by builder after all animation has
-  // stopped.
-  Rect _childRectFinal;
+    final Rect previousChildRect = _getRect(_previousChildGlobalKey);
+    _rectTween.begin = previousChildRect;
+    _rectTween.end = childRect;
 
-  final GlobalKey _childGlobalKey = GlobalKey();
-  final GlobalKey _sheetGlobalKey = GlobalKey();
+    final Rect sheetRect = _getRect(_sheetGlobalKey);
+    _sheetRectTween.begin = previousChildRect.topLeft & sheetRect.size;
+    _sheetRectTween.end = sheetRect;
 
-  bool _externalOffstage = false;
-  bool _internalOffstage = false;
-
-  @override
-  set offstage(bool value) {
-    _externalOffstage = value;
-    _setOffstageInternally();
+    // When opening, the transition happens from the end of the child's bounce
+    // animation to the final state. When closing, it goes from the final state
+    // to the original position before the bounce.
+    final Rect childRectOriginal = previousChildRect.inflate(1 / _kOpenScale);
+    _rectTweenReverse.begin = childRectOriginal;
+    _rectTweenReverse.end = childRect;
   }
 
   void _setOffstageInternally() {
@@ -386,26 +393,24 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   }
 
   @override
+  bool didPop(T result) {
+    _updateTweenRects();
+    return super.didPop(result);
+  }
+
+  @override
+  set offstage(bool value) {
+    _externalOffstage = value;
+    _setOffstageInternally();
+  }
+
+  @override
   TickerFuture didPush() {
     _internalOffstage = true;
     _setOffstageInternally();
 
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-      _childRectFinal = _getRect(_childGlobalKey);
-      _rectTween.begin = _childRect;
-      _rectTween.end = _childRectFinal;
-
-      final Rect sheetRect = _getRect(_sheetGlobalKey);
-      _sheetRectTween.begin = _childRect.topLeft & sheetRect.size;
-      _sheetRectTween.end = sheetRect;
-
-      // When opening, the transition happens from the end of the child's bounce
-      // animation to the final state. When closing, it goes from the final state
-      // to the original position before the bounce.
-      final Rect childRectOriginal = _childRect.inflate(1 / _kOpenScale);
-      _rectTweenReverse.begin = childRectOriginal;
-      _rectTweenReverse.end = _childRectFinal;
-
+      _updateTweenRects();
       _internalOffstage = false;
       _setOffstageInternally();
     });
@@ -476,6 +481,7 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
               final List<Widget> children =  <Widget>[
                 Expanded(
                   child: Align(
+                    // TODO(justinmc): Is alignment right when landscape?
                     alignment: Alignment.bottomCenter,
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
