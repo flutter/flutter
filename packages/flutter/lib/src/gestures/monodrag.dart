@@ -251,7 +251,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
     if (event is PointerMoveEvent) {
       if (event.buttons != _initialButtons) {
-        resolve(GestureDisposition.rejected);
         stopTrackingPointer(event.pointer);
         return;
       }
@@ -278,7 +277,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           resolve(GestureDisposition.accepted);
       }
     }
-    stopTrackingIfPointerNoLongerDown(event);
+    if (event is PointerUpEvent) {
+      rejectGesture(event.pointer);
+    }
   }
 
   @override
