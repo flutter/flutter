@@ -266,6 +266,18 @@ class XcodeProjectInterpreter {
     }
   }
 
+  void cleanWorkspace(String workspacePath, String scheme) {
+    runSync(<String>[
+      _executable,
+      '-workspace',
+      workspacePath,
+      '-scheme',
+      scheme,
+      '-quiet',
+      'clean'
+    ], workingDirectory: fs.currentDirectory.path);
+  }
+
   Future<XcodeProjectInfo> getInfo(String projectPath) async {
     final RunResult result = await runCheckedAsync(<String>[
       _executable, '-list',

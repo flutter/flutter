@@ -555,10 +555,6 @@ abstract class FlutterCommand extends Command<void> {
     return deviceList.single;
   }
 
-  void printNoConnectedDevices() {
-    printStatus(userMessages.flutterNoConnectedDevices);
-  }
-
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
