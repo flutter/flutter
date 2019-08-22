@@ -139,7 +139,7 @@ class _FlutterApp {
     final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = await pubspec.readAsString();
     String dependency =
-        pluginPath != null ? '$plugin\n    path: $pluginPath' : plugin;
+        pluginPath != null ? '$plugin:\n    path: $pluginPath' : plugin;
     content = content.replaceFirst(
       '\ndependencies:\n',
       '\ndependencies:\n  $dependency\n',
