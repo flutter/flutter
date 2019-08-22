@@ -893,60 +893,24 @@ void main() {
   testGesture('Tapping two dragGRs with two pointers correctly work', (GestureTester tester) {
     final List<String> logs = <String>[];
     final HorizontalDragGestureRecognizer hori = HorizontalDragGestureRecognizer()
-      ..onDown = (DragDownDetails details) {
-        logs.add('downH');
-      }
-      ..onStart = (DragStartDetails details) {
-        logs.add('startH');
-      }
-      ..onUpdate = (DragUpdateDetails details) {
-        logs.add('updateH');
-      }
-      ..onEnd = (DragEndDetails details) {
-        logs.add('endH');
-      }
-      ..onCancel = () {
-        logs.add('cancelH');
-      };
+      ..onDown = (DragDownDetails details) { logs.add('downH'); }
+      ..onStart = (DragStartDetails details) { logs.add('startH'); }
+      ..onUpdate = (DragUpdateDetails details) { logs.add('updateH'); }
+      ..onEnd = (DragEndDetails details) { logs.add('endH'); }
+      ..onCancel = () { logs.add('cancelH'); };
     final VerticalDragGestureRecognizer vert = VerticalDragGestureRecognizer()
-      ..onDown = (DragDownDetails details) {
-        logs.add('downV');
-      }
-      ..onStart = (DragStartDetails details) {
-        logs.add('startV');
-      }
-      ..onUpdate = (DragUpdateDetails details) {
-        logs.add('updateV');
-      }
-      ..onEnd = (DragEndDetails details) {
-        logs.add('endV');
-      }
-      ..onCancel = () {
-        logs.add('cancelV');
-      };
+      ..onDown = (DragDownDetails details) { logs.add('downV'); }
+      ..onStart = (DragStartDetails details) { logs.add('startV'); }
+      ..onUpdate = (DragUpdateDetails details) { logs.add('updateV'); }
+      ..onEnd = (DragEndDetails details) { logs.add('endV'); }
+      ..onCancel = () { logs.add('cancelV'); };
 
-    final TestPointer pointer1 = TestPointer(
-      4,
-      PointerDeviceKind.touch,
-      0,
-      kPrimaryButton,
-    );
+    final TestPointer pointer1 = TestPointer(4, PointerDeviceKind.touch);
+    final TestPointer pointer2 = TestPointer(5, PointerDeviceKind.touch);
 
-    final TestPointer pointer2 = TestPointer(
-      5,
-      PointerDeviceKind.touch,
-      0,
-      kPrimaryButton,
-    );
+    final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
+    final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 10.0));
 
-    final PointerDownEvent down1 = pointer1.down(
-      const Offset(10.0, 10.0),
-      buttons: kPrimaryButton,
-    );
-    final PointerDownEvent down2 = pointer2.down(
-      const Offset(11.0, 10.0),
-      buttons: kPrimaryButton,
-    );
     hori.addPointer(down1);
     vert.addPointer(down1);
     tester.route(down1);
@@ -970,5 +934,6 @@ void main() {
     logs.clear();
 
     hori.dispose();
+    vert.dispose();
   });
 }
