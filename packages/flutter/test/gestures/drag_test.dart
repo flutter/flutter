@@ -993,12 +993,13 @@ void main() {
 
     tester.route(pointer2.up());
     GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
-    expect(logs, <String>['downT', 'upT']);
+    // Tap is not triggered because pointer2 is not its primary pointer
+    expect(logs, <String>[]);
     logs.clear();
 
     tester.route(pointer1.up());
     GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
-    expect(logs, <String>['cancelH']);
+    expect(logs, <String>['cancelH', 'downT', 'upT']);
     logs.clear();
 
   });
@@ -1149,7 +1150,7 @@ void main() {
     logs.clear();
 
     // Pointer 1 changes buttons, which cancel tap, leaving drag the only
-    // remaining member of arena 1, therefore it is accepted.
+    // remaining member of arena 1, therefore drag is accepted.
     tester.route(pointer1.move(const Offset(9.9, 9.9), buttons: kSecondaryButton));
     expect(logs, <String>['startH']);
     logs.clear();
