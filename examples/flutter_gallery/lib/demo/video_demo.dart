@@ -345,7 +345,7 @@ class VideoDemo extends StatefulWidget {
 final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
 
 Future<bool> isIOSSimulator() async {
-  return defaultTargetPlatform == TargetPlatform.iOS && !(await deviceInfoPlugin.iosInfo).isPhysicalDevice;
+  return currentHostPlatform == HostPlatform.iOS && !(await deviceInfoPlugin.iosInfo).isPhysicalDevice;
 }
 
 class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMixin {

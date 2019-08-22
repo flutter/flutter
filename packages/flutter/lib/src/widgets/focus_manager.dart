@@ -1127,9 +1127,19 @@ class FocusManager with DiagnosticableTreeMixin {
     //
     // This only affects the initial value: the ongoing value is updated as soon
     // as any input events are received.
-    _lastInteractionWasTouch ??= defaultTargetPlatform == TargetPlatform.android ||
-                                 defaultTargetPlatform == TargetPlatform.iOS ||
-                                 !WidgetsBinding.instance.mouseTracker.mouseIsConnected;
+    switch (currentHostPlatform) {
+      case HostPlatform.android:
+      case HostPlatform.iOS:
+        _lastInteractionWasTouch ??= true;
+        break;
+      case HostPlatform.fuchsia:
+      case HostPlatform.macOS:
+      case HostPlatform.windows:
+      case HostPlatform.linux:
+      case HostPlatform.browser:
+        _lastInteractionWasTouch = !WidgetsBinding.instance.mouseTracker.mouseIsConnected;
+        break;
+    }
     FocusHighlightMode newMode;
     switch (highlightStrategy) {
       case FocusHighlightStrategy.automatic:

@@ -14,9 +14,6 @@ import 'text_editing.dart';
 
 export 'dart:ui' show TextAffinity;
 
-// Whether we're compiled to JavaScript in a web browser.
-const bool _kIsBrowser = identical(0, 0.0);
-
 /// The type of information for which to optimize the text input control.
 ///
 /// On Android, behavior may vary across device and keyboard provider.
@@ -832,20 +829,29 @@ class TextInput {
 
   static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
     assert(() {
-      if (_kIsBrowser) {
-        // TODO(flutterweb): what makes sense here?
-        return true;
-      }
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        assert(
-          _iOSSupportedInputActions.contains(inputAction),
-          'The requested TextInputAction "$inputAction" is not supported on iOS.',
-        );
-      } else if (defaultTargetPlatform == TargetPlatform.android) {
-        assert(
-          _androidSupportedInputActions.contains(inputAction),
-          'The requested TextInputAction "$inputAction" is not supported on Android.',
-        );
+      switch (currentHostPlatform) {
+        case HostPlatform.android:
+          assert(
+            _androidSupportedInputActions.contains(inputAction),
+            'The requested TextInputAction "$inputAction" is not supported on Android.',
+          );
+          break;
+        case HostPlatform.iOS:
+          assert(
+            _iOSSupportedInputActions.contains(inputAction),
+            'The requested TextInputAction "$inputAction" is not supported on iOS.',
+          );
+          break;
+        case HostPlatform.fuchsia:
+          break;
+        case HostPlatform.macOS:
+          break;
+        case HostPlatform.windows:
+          break;
+        case HostPlatform.linux:
+          break;
+        case HostPlatform.browser:
+          break;
       }
       return true;
     }());

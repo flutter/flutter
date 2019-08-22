@@ -35,6 +35,14 @@ import '_platform_io.dart'
 // (since doing so would be a big breaking change).
 TargetPlatform get defaultTargetPlatform => _platform.defaultTargetPlatform;
 
+/// The [HostPlatform] that matches the platform on which the framework is
+/// currently executing.
+///
+/// Unlike [TargetPlatform], this value is not intended to be overriden
+/// for theming or physics. Instead, it is only for guarding features
+/// which are highly platform specific, such as accessibility adaptions.
+HostPlatform get currentHostPlatform => _platform.currentHostPlatform;
+
 /// The platform that user interaction should adapt to target.
 ///
 /// The [defaultTargetPlatform] getter returns the current platform.
@@ -48,6 +56,44 @@ enum TargetPlatform {
   /// iOS: <http://www.apple.com/ios/>
   iOS,
 }
+
+/// The platform that the application is currently running on.
+///
+/// The [currentHostPlatform] getter returns the current platform.
+enum HostPlatform {
+  /// Android: <https://www.android.com/>
+  android,
+
+  /// iOS: <http://www.apple.com/ios/>
+  iOS,
+
+  /// Fuchsia: <https://fuchsia.googlesource.com/>
+  fuchsia,
+
+  /// iOS: <http://www.apple.com/macos/>
+  macOS,
+
+  /// TBD
+  windows,
+
+  /// TBD
+  linux,
+
+  /// TBD
+  browser,
+}
+
+/// The path of the executable used to run the script in this isolate after
+/// it has been resolved by the OS.
+///
+/// On Flutter for web applications, this always returns the String "browser".
+///
+/// This is the absolute path, with all symlinks resolved, to the executable
+/// used to run the script.
+///
+/// See also:
+///   * [Platform.resolvedExecutable], the dart:io implementation.
+String get resolvedExecutable => _platform.resolvedExecutable;
 
 /// Override the [defaultTargetPlatform].
 ///
