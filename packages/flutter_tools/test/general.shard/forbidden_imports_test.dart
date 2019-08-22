@@ -29,7 +29,8 @@ void main() {
         if (line.startsWith(RegExp(r'import.*commands/'))
          || line.startsWith(RegExp(r'import.*test/'))) {
           final String relativePath = fs.path.relative(file.path, from:flutterTools);
-          fail("$relativePath imports $line. This is an antipattern, please find another way to access the information you are using.");
+          fail("$relativePath imports $line. This import introduces a layering violation. "
+               "Please find another way to access the information you are using.");
         }
       }
     }
