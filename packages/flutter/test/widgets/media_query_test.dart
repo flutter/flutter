@@ -59,6 +59,7 @@ void main() {
     expect(copied.padding, data.padding);
     expect(copied.viewPadding, data.viewPadding);
     expect(copied.viewInsets, data.viewInsets);
+    expect(copied.systemGestureInsets, data.systemGestureInsets);
     expect(copied.physicalDepth, data.physicalDepth);
     expect(copied.alwaysUse24HourFormat, data.alwaysUse24HourFormat);
     expect(copied.accessibleNavigation, data.accessibleNavigation);
@@ -77,6 +78,7 @@ void main() {
       padding: const EdgeInsets.all(9.10938),
       viewPadding: const EdgeInsets.all(11.24031),
       viewInsets: const EdgeInsets.all(1.67262),
+      systemGestureInsets: const EdgeInsets.all(1.5556),
       physicalDepth: 120.0,
       alwaysUse24HourFormat: true,
       accessibleNavigation: true,
@@ -91,6 +93,7 @@ void main() {
     expect(copied.padding, const EdgeInsets.all(9.10938));
     expect(copied.viewPadding, const EdgeInsets.all(11.24031));
     expect(copied.viewInsets, const EdgeInsets.all(1.67262));
+    expect(copied.systemGestureInsets, const EdgeInsets.all(1.5556));
     expect(copied.physicalDepth, 120.0);
     expect(copied.alwaysUse24HourFormat, true);
     expect(copied.accessibleNavigation, true);
