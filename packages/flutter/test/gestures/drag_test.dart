@@ -834,6 +834,8 @@ void main() {
       ..onCancel = () {
         recognized.add('primaryCancel');
       };
+    addTearDown(pan.dispose);
+    addTearDown(tap.dispose);
 
     final TestPointer pointer = TestPointer(
       5,
@@ -853,8 +855,6 @@ void main() {
     expect(recognized, <String>[]);
     recognized.clear();
 
-    addTearDown(pan.dispose);
-    addTearDown(tap.dispose);
     recognized.clear();
   });
 
