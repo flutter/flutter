@@ -71,7 +71,12 @@ class AssembleCommand extends FlutterCommand {
       throwToolExit('missing target name for flutter assemble.');
     }
     final String name = argResults.rest.first;
-    return _kDefaultTargets.firstWhere((Target target) => target.name == name);
+    final Target result = _kDefaultTargets
+        .firstWhere((Target target) => target.name == name, orElse: () => null);
+    if (result == null) {
+      throwToolExit('No target named "{target.name} defined."');
+    }
+    return result;
   }
 
   /// The environmental configuration for a build invocation.
