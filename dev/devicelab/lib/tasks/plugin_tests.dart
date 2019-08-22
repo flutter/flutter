@@ -71,6 +71,18 @@ abstract class _FlutterProject {
 
   String get rootPath => path.join(parent.path, name);
 
+  Future<void> addPlugin(String plugin, {String pluginPath}) async {
+    final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
+    String content = await pubspec.readAsString();
+    String dependency =
+    pluginPath != null ? '$plugin:\n    path: $pluginPath' : plugin;
+    content = content.replaceFirst(
+      '\ndependencies:\n',
+      '\ndependencies:\n  $dependency\n',
+    );
+    await pubspec.writeAsString(content, flush: true);
+  }
+  
   Future<void> delete() async {
     if (Platform.isWindows) {
       // A running Gradle daemon might prevent us from deleting the project
@@ -133,18 +145,6 @@ class _FlutterApp extends _FlutterProject {
       );
     });
     return _FlutterApp(directory, 'plugintestapp');
-  }
-
-  Future<void> addPlugin(String plugin, {String pluginPath}) async {
-    final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
-    String content = await pubspec.readAsString();
-    String dependency =
-        pluginPath != null ? '$plugin:\n    path: $pluginPath' : plugin;
-    content = content.replaceFirst(
-      '\ndependencies:\n',
-      '\ndependencies:\n  $dependency\n',
-    );
-    await pubspec.writeAsString(content, flush: true);
   }
 
   Future<void> build(String target) async {
