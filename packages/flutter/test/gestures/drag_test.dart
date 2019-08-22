@@ -903,7 +903,7 @@ void main() {
   });
 
   testGesture('On multiple pointers, DragGestureRecognizer is canceled '
-    'when all pointers are canceled', (GestureTester tester) {
+    'when all pointers are canceled (FIFO)', (GestureTester tester) {
     // This test simulates the following scenario:
     // P1 down, P2 down, P1 up, P2 up
     final List<String> logs = <String>[];
@@ -953,7 +953,7 @@ void main() {
   });
 
   testGesture('On multiple pointers, DragGestureRecognizer is canceled '
-    'when all pointers are canceled (reversed order)', (GestureTester tester) {
+    'when all pointers are canceled (FILO)', (GestureTester tester) {
     // This test simulates the following scenario:
     // P1 down, P2 down, P1 up, P2 up
     final List<String> logs = <String>[];
