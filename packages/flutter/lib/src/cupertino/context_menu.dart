@@ -62,11 +62,21 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   static const Color _masklessColor = Color(0xFFFFFFFF);
 
   final GlobalKey _childGlobalKey = GlobalKey();
+  AnimationController _dummyController;
 
   OverlayEntry _lastOverlayEntry;
   bool _isOpen = false; // When modal is pushed on top.
   bool _isOpening = false; // When long pressed, before modal.
   ContextMenuRoute<void> _route;
+
+  @override
+  void initState() {
+    _dummyController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _dummyController.addStatusListener(_onDummyAnimationStatusChange);
+  }
 
   void _openContextMenu(Rect childRectEnd) {
     setState(() {
@@ -101,31 +111,50 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   OverlayEntry get _overlayEntry {
     final Rect childRect = _getRect(_childGlobalKey);
     final Rect endRect = childRect.inflate(_kOpenScale);
+
     return OverlayEntry(
       opaque: false,
       builder: (BuildContext context) {
         return _DummyChild(
           beginRect: childRect,
           child: widget.child,
+          controller: _dummyController,
           endRect: endRect,
-          onAnimationEnd: _onDummyAnimationEnd,
         );
       },
     );
   }
 
-  void _onDummyAnimationEnd(Rect childRectEnd) {
-    setState(() {
-      _isOpening = false;
-      _isOpen = true;
-    });
-    _openContextMenu(childRectEnd);
-    // TODO(justinmc): Without this, flashes white. I think due to rendering 1
-    // frame offscreen?
-    Future.delayed(Duration(milliseconds: 1)).then((dynamic ok) {
-      _lastOverlayEntry?.remove();
-      _lastOverlayEntry = null;
-    });
+  void _onDummyAnimationStatusChange(AnimationStatus animationStatus) {
+    switch (animationStatus) {
+      case AnimationStatus.dismissed:
+        setState(() {
+          _isOpening = false;
+          _isOpen = false;
+        });
+        _lastOverlayEntry?.remove();
+        _lastOverlayEntry = null;
+        _dummyController.reset();
+        break;
+
+      case AnimationStatus.completed:
+        setState(() {
+          _isOpening = false;
+          _isOpen = true;
+        });
+        // TODO(justinmc): Maybe cache these instead of recalculating.
+        final Rect childRect = _getRect(_childGlobalKey);
+        final Rect endRect = childRect.inflate(_kOpenScale);
+        _openContextMenu(endRect);
+        // TODO(justinmc): Without this, flashes white. I think due to rendering 1
+        // frame offscreen?
+        Future.delayed(Duration(milliseconds: 1)).then((_) {
+          _lastOverlayEntry?.remove();
+          _lastOverlayEntry = null;
+          _dummyController.reset();
+        });
+        break;
+    }
   }
 
   void _routeAnimationStatusListener(AnimationStatus status) {
@@ -139,18 +168,36 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     _route = null;
   }
 
-  void _onTapDown(TapDownDetails details) {
+  void _onLongPressStart(LongPressStartDetails details) {
     setState(() {
       _isOpening = true;
     });
     _lastOverlayEntry = _overlayEntry;
     Overlay.of(context).insert(_lastOverlayEntry);
+    _dummyController.forward();
+  }
+
+  void _onLongPressEnd(LongPressEndDetails details) {
+    if (_dummyController.isAnimating) {
+      _dummyController.reverse();
+    }
+  }
+
+  // A regular tap should be totally separate from a long-press to open the
+  // ContextMenu. If this gesture is just a tap, then don't do any animation
+  // and allow the tap to be handled by another GestureDetector as if the
+  // ContextMenu didn't exist.
+  void _onTap() {
+    if (_dummyController.isAnimating) {
+      _dummyController.reverse();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: _onTapDown,
+      onLongPressEnd: _onLongPressEnd,
+      onLongPressStart: _onLongPressStart,
       child: Container(
         child: Opacity(
           opacity: _isOpening || _isOpen ? 0.0 : 1.0,
@@ -164,6 +211,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
   @override
   void dispose() {
+    _dummyController.dispose();
     super.dispose();
   }
 }
@@ -174,14 +222,14 @@ class _DummyChild extends StatefulWidget {
     Key key,
     this.beginRect,
     this.child,
+    this.controller,
     this.endRect,
-    this.onAnimationEnd,
   }) : super(key: key);
 
   final Rect beginRect;
   final Widget child;
+  final AnimationController controller;
   final Rect endRect;
-  final _AnimationEndCallback onAnimationEnd;
 
   @override
   _DummyChildState createState() => _DummyChildState();
@@ -195,20 +243,14 @@ class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin 
   static const Color _masklessColor = Color(0xFFFFFFFF);
 
   final GlobalKey _childGlobalKey = GlobalKey();
-  AnimationController _controller;
   Animation<Color> _mask;
   Animation<Rect> _rect;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 500),
-      vsync: this,
-    );
-
     _mask = _OnOffAnimation<Color>(
-      controller: _controller,
+      controller: widget.controller,
       onValue: _lightModeMaskColor,
       offValue: _masklessColor,
       intervalOn: 0.2,
@@ -219,19 +261,10 @@ class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin 
       end: widget.endRect,
     ).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: widget.controller,
         curve: Curves.easeInBack,
       ),
     );
-
-    _controller.addStatusListener(_onAnimationChangeStatus);
-    _controller.forward();
-  }
-
-  void _onAnimationChangeStatus(AnimationStatus animationStatus) {
-    if (animationStatus == AnimationStatus.completed) {
-      widget.onAnimationEnd(_getRect(_childGlobalKey));
-    }
   }
 
   Widget _buildAnimation(BuildContext context, Widget child) {
@@ -252,18 +285,12 @@ class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin 
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
         AnimatedBuilder(
           builder: _buildAnimation,
-          animation: _controller,
+          animation: widget.controller,
         ),
       ],
     );
