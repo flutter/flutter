@@ -33,7 +33,7 @@ import 'package:test_api/test_api.dart' as test_package show TestFailure;
 /// By keeping a master reference of visual aspects of your application, you can
 /// prevent unintended changes as you develop by testing against them.
 ///
-/// TODO(Piinks): images etc.
+/// //TODO(Piinks): images etc.
 ///
 /// See also:
 ///
@@ -301,7 +301,7 @@ class TrivialComparator implements GoldenFileComparator {
 ///
 /// The following images are examples of a test failure output:
 ///
-/// TODO(Piinks) - images etc
+/// //TODO(Piinks): images etc
 ///
 /// See also:
 ///
