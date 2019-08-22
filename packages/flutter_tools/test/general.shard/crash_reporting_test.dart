@@ -59,6 +59,48 @@ void main() {
       Stdio: () => const _NoStderr(),
     });
 
+    testUsingContext('should print an explanatory message when there is a SocketException', () async {
+      final Completer<int> exitCodeCompleter = Completer<int>();
+      setExitFunctionForTests((int exitCode) {
+        exitCodeCompleter.complete(exitCode);
+      });
+
+      CrashReportSender.initializeWith(
+          CrashingCrashReportSender(const SocketException('no internets')));
+
+      unawaited(tools.run(
+        <String>['crash'],
+        <FlutterCommand>[_CrashAsyncCommand()],
+        reportCrashes: true,
+        flutterVersion: 'test-version',
+      ));
+      expect(await exitCodeCompleter.future, 1);
+      expect(testLogger.errorText, contains('Failed to send crash report due to a network error'));
+    }, overrides: <Type, Generator>{
+      Stdio: () => const _NoStderr(),
+    });
+
+    testUsingContext('should print an explanatory message when there is an HttpException', () async {
+      final Completer<int> exitCodeCompleter = Completer<int>();
+      setExitFunctionForTests((int exitCode) {
+        exitCodeCompleter.complete(exitCode);
+      });
+
+      CrashReportSender.initializeWith(
+          CrashingCrashReportSender(const HttpException('no internets')));
+
+      unawaited(tools.run(
+        <String>['crash'],
+        <FlutterCommand>[_CrashAsyncCommand()],
+        reportCrashes: true,
+        flutterVersion: 'test-version',
+      ));
+      expect(await exitCodeCompleter.future, 1);
+      expect(testLogger.errorText, contains('Failed to send crash report due to a network error'));
+    }, overrides: <Type, Generator>{
+      Stdio: () => const _NoStderr(),
+    });
+
     testUsingContext('should send crash reports when async throws', () async {
       final Completer<int> exitCodeCompleter = Completer<int>();
       setExitFunctionForTests((int exitCode) {
@@ -268,6 +310,13 @@ class MockCrashReportSender extends MockClient {
     });
 
   static int sendCalls = 0;
+}
+
+class CrashingCrashReportSender extends MockClient {
+  CrashingCrashReportSender(Object exception)
+      : super((Request request) async {
+    throw exception;
+  });
 }
 
 /// Throws a random error to simulate a CLI crash.
