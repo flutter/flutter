@@ -890,7 +890,9 @@ void main() {
     recognized.clear();
   });
 
-  testGesture('Tapping dragGR with two pointers correctly work', (GestureTester tester) {
+  testGesture('On multiple pointers, DragGR is canceled when all pointers are canceled', (GestureTester tester) {
+    // This test simulates the following scenario:
+    // P1 down, P2 down, P1 up, P2 up
     final List<String> logs = <String>[];
     final HorizontalDragGestureRecognizer hori = HorizontalDragGestureRecognizer()
       ..onDown = (DragDownDetails details) { logs.add('downH'); }
@@ -914,12 +916,14 @@ void main() {
     vert.addPointer(down1);
     tester.route(down1);
     tester.closeArena(pointer1.pointer);
+    expect(logs, <String>['downH']);
+    logs.clear();
 
     hori.addPointer(down2);
     vert.addPointer(down2);
     tester.route(down2);
     tester.closeArena(pointer2.pointer);
-    expect(logs, <String>['downH']);
+    expect(logs, <String>[]);
     logs.clear();
 
     tester.route(pointer1.up());
@@ -930,6 +934,167 @@ void main() {
     tester.route(pointer2.up());
     GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
     expect(logs, <String>['cancelH']);
+    logs.clear();
+
+    hori.dispose();
+    vert.dispose();
+  });
+
+  testGesture('On multiple pointers, DragGR is accepted when the first pointer is accepted', (GestureTester tester) {
+    // This test simulates the following scenario:
+    // P1 down, P2 down, P1 moves away, P2 up
+    final List<String> logs = <String>[];
+    final HorizontalDragGestureRecognizer hori = HorizontalDragGestureRecognizer()
+      ..onDown = (DragDownDetails details) { logs.add('downH'); }
+      ..onStart = (DragStartDetails details) { logs.add('startH'); }
+      ..onUpdate = (DragUpdateDetails details) { logs.add('updateH'); }
+      ..onEnd = (DragEndDetails details) { logs.add('endH'); }
+      ..onCancel = () { logs.add('cancelH'); };
+    // Competitor
+    final TapGestureRecognizer vert = TapGestureRecognizer()
+      ..onTapDown = (TapDownDetails details) { logs.add('downT'); }
+      ..onTapUp = (TapUpDetails details) { logs.add('upT'); }
+      ..onTapCancel = () {};
+
+    final TestPointer pointer1 = TestPointer(4, PointerDeviceKind.touch);
+    final TestPointer pointer2 = TestPointer(5, PointerDeviceKind.touch);
+
+    final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
+    final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 10.0));
+
+    hori.addPointer(down1);
+    vert.addPointer(down1);
+    tester.route(down1);
+    tester.closeArena(pointer1.pointer);
+    expect(logs, <String>['downH']);
+    logs.clear();
+
+    hori.addPointer(down2);
+    vert.addPointer(down2);
+    tester.route(down2);
+    tester.closeArena(pointer2.pointer);
+    expect(logs, <String>[]);
+    logs.clear();
+
+    tester.route(pointer1.move(const Offset(100, 100)));
+    expect(logs, <String>['startH']);
+    logs.clear();
+
+    tester.route(pointer2.up());
+    GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
+    expect(logs, <String>[]);
+    logs.clear();
+
+    tester.route(pointer1.up());
+    GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
+    expect(logs, <String>['endH']);
+    logs.clear();
+
+    hori.dispose();
+    vert.dispose();
+  });
+
+  testGesture('On multiple pointers, canceled pointers (due to up) do not prevent layer pointers getting accepted', (GestureTester tester) {
+    // This test simulates the following scenario:
+    // P1 down, P2 down, P1 Up, P2 moves away
+    final List<String> logs = <String>[];
+    final HorizontalDragGestureRecognizer hori = HorizontalDragGestureRecognizer()
+      ..onDown = (DragDownDetails details) { logs.add('downH'); }
+      ..onStart = (DragStartDetails details) { logs.add('startH'); }
+      ..onUpdate = (DragUpdateDetails details) { logs.add('updateH'); }
+      ..onEnd = (DragEndDetails details) { logs.add('endH'); }
+      ..onCancel = () { logs.add('cancelH'); };
+    // Competitor
+    final TapGestureRecognizer vert = TapGestureRecognizer()
+      ..onTapDown = (TapDownDetails details) { logs.add('downT'); }
+      ..onTapUp = (TapUpDetails details) { logs.add('upT'); }
+      ..onTapCancel = () {};
+
+    final TestPointer pointer1 = TestPointer(4, PointerDeviceKind.touch);
+    final TestPointer pointer2 = TestPointer(5, PointerDeviceKind.touch);
+
+    final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
+    final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 10.0));
+
+    hori.addPointer(down1);
+    vert.addPointer(down1);
+    tester.route(down1);
+    tester.closeArena(pointer1.pointer);
+    expect(logs, <String>['downH']);
+    logs.clear();
+
+    hori.addPointer(down2);
+    vert.addPointer(down2);
+    tester.route(down2);
+    tester.closeArena(pointer2.pointer);
+    expect(logs, <String>[]);
+    logs.clear();
+
+    tester.route(pointer1.up());
+    GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
+    expect(logs, <String>['downT', 'upT']);
+    logs.clear();
+
+    tester.route(pointer2.move(const Offset(100, 100)));
+    expect(logs, <String>['startH']);
+    logs.clear();
+
+    tester.route(pointer2.up());
+    GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
+    expect(logs, <String>['endH']);
+    logs.clear();
+
+    hori.dispose();
+    vert.dispose();
+  });
+
+  testGesture('On multiple pointers, canceled pointers (due to buttons) do not prevent layer pointers getting accepted', (GestureTester tester) {
+    // This test simulates the following scenario:
+    // P1 down, P2 down, P1 change buttons, P2 moves away
+    final List<String> logs = <String>[];
+    final HorizontalDragGestureRecognizer hori = HorizontalDragGestureRecognizer()
+      ..onDown = (DragDownDetails details) { logs.add('downH'); }
+      ..onStart = (DragStartDetails details) { logs.add('startH'); }
+      ..onUpdate = (DragUpdateDetails details) { logs.add('updateH'); }
+      ..onEnd = (DragEndDetails details) { logs.add('endH'); }
+      ..onCancel = () { logs.add('cancelH'); };
+    // Competitor
+    final TapGestureRecognizer vert = TapGestureRecognizer()
+      ..onTapDown = (TapDownDetails details) { logs.add('downT'); }
+      ..onTapUp = (TapUpDetails details) { logs.add('upT'); }
+      ..onTapCancel = () {};
+
+    final TestPointer pointer1 = TestPointer(1, PointerDeviceKind.touch);
+    final TestPointer pointer2 = TestPointer(2, PointerDeviceKind.touch);
+
+    final PointerDownEvent down1 = pointer1.down(const Offset(10.0, 10.0));
+    final PointerDownEvent down2 = pointer2.down(const Offset(11.0, 10.0));
+
+    hori.addPointer(down1);
+    vert.addPointer(down1);
+    tester.route(down1);
+    tester.closeArena(pointer1.pointer);
+
+    hori.addPointer(down2);
+    vert.addPointer(down2);
+    tester.route(down2);
+    tester.closeArena(pointer2.pointer);
+    expect(logs, <String>['downH']);
+    logs.clear();
+
+    // Pointer 1 changes buttons, which cancel tap, leaving drag the only
+    // remaining member of arena 1, therefore it is accepted.
+    tester.route(pointer1.move(const Offset(9.9, 9.9), buttons: kSecondaryButton));
+    expect(logs, <String>['startH']);
+    logs.clear();
+
+    tester.route(pointer2.move(const Offset(100, 100)));
+    expect(logs, <String>['updateH']);
+    logs.clear();
+
+    tester.route(pointer2.up());
+    GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
+    expect(logs, <String>['endH']);
     logs.clear();
 
     hori.dispose();
