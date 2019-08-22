@@ -92,6 +92,10 @@ struct FlutterDesktopWindow {
   // The ratio of pixels per screen coordinate for the window.
   double pixels_per_screen_coordinate = 1.0;
 
+  // If non-zero, a forced pixel ratio to use instead of one computed based on
+  // screen information.
+  double pixel_ratio_override = 0.0;
+
   // Resizing triggers a window refresh, but the resize already updates Flutter.
   // To avoid double messages, the refresh after each resize is skipped.
   bool skip_next_window_refresh = false;
@@ -177,9 +181,14 @@ static void SendWindowMetrics(FlutterDesktopWindowControllerState* state,
   event.struct_size = sizeof(event);
   event.width = width;
   event.height = height;
-  // The Flutter pixel_ratio is defined as DPI/dp. Limit the ratio to a minimum
-  // of 1 to avoid rendering a smaller UI on standard resolution monitors.
-  event.pixel_ratio = std::max(dpi / kDpPerInch, 1.0);
+  if (state->window_wrapper->pixel_ratio_override == 0.0) {
+    // The Flutter pixel_ratio is defined as DPI/dp. Limit the ratio to a
+    // minimum of 1 to avoid rendering a smaller UI on standard resolution
+    // monitors.
+    event.pixel_ratio = std::max(dpi / kDpPerInch, 1.0);
+  } else {
+    event.pixel_ratio = state->window_wrapper->pixel_ratio_override;
+  }
   FlutterEngineSendWindowMetricsEvent(state->engine, &event);
 }
 
@@ -712,6 +721,19 @@ void FlutterDesktopWindowSetFrame(FlutterDesktopWindowRef flutter_window,
 double FlutterDesktopWindowGetScaleFactor(
     FlutterDesktopWindowRef flutter_window) {
   return flutter_window->pixels_per_screen_coordinate;
+}
+
+void FlutterDesktopWindowSetPixelRatioOverride(
+    FlutterDesktopWindowRef flutter_window,
+    double pixel_ratio) {
+  flutter_window->pixel_ratio_override = pixel_ratio;
+  // Send a metrics update using the new pixel ratio.
+  int width_px, height_px;
+  glfwGetFramebufferSize(flutter_window->window, &width_px, &height_px);
+  if (width_px > 0 && height_px > 0) {
+    auto* state = GetSavedWindowState(flutter_window->window);
+    SendWindowMetrics(state, width_px, height_px);
+  }
 }
 
 bool FlutterDesktopRunWindowEventLoopWithTimeout(

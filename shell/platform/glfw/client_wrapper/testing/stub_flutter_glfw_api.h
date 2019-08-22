@@ -65,6 +65,9 @@ class StubFlutterGlfwApi {
   // Called for FlutterDesktopWindowGetScaleFactor.
   virtual double GetWindowScaleFactor() { return 1.0; }
 
+  // Called for FlutterDesktopWindowSetPixelRatioOverride.
+  virtual void SetPixelRatioOverride(double pixel_ratio) {}
+
   // Called for FlutterDesktopRunWindowEventLoopWithTimeout.
   virtual bool RunWindowEventLoopWithTimeout(uint32_t millisecond_timeout) {
     return true;
