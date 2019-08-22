@@ -218,8 +218,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Returns null if no matching region is found.
   ///
-  /// By default it calls [findAnnotations] with `onlyFirst: true` and returns
-  /// the first result.
+  /// By default this method calls [findAnnotations] with `onlyFirst: true`
+  /// and returns the first result.
   /// It is encouraged to override [findAnnotations] instead of this method.
   ///
   /// The main way for a value to be found here is by pushing an
@@ -239,7 +239,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Returns an empty list if no matching region is found.
   ///
-  /// By default it calls [findAnnotations] and returns its result.
+  /// By default this method calls [findAnnotations] and returns its result.
   /// It is encouraged to override [findAnnotations] instead of this method.
   ///
   /// The main way for a value to be found here is by pushing an
@@ -257,20 +257,19 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Finds the list of annotations defined by this layer and its children
   /// located at the given position.
   ///
-  /// It adds the annotations of its children to `result` from visually front
-  /// to back, then the annotation of itself. These annotations must meet the
-  /// given restrictions, such as type `S` and position `regionOffset`.
+  /// It adds the annotations of the children to `result` from visually front
+  /// to back, then the annotation of this layer. These annotations must meet
+  /// the given restrictions, such as type `S` and position `regionOffset`.
   ///
-  /// If `onlyFirst` is true, it will stop after the first result.
+  /// If `onlyFirst` is true, the search will stop after the first result.
   ///
-  /// If this method returns true, its parent layer (and potentially ancestors)
-  /// should skip the remaining children. Normally it means that this layer is
-  /// opaque, and has absorbed the finding request.
+  /// If this method returns true, this layer's parent (and potentially
+  /// ancestors) should skip the remaining children. Normally it means that
+  /// this layer is opaque, and has absorbed the finding request.
   ///
-  /// This method is the default implementation of [find] and [findAll]. If a
-  /// custom layer class wants to change its behavior related to annotations,
-  /// it should override this method, since it is the one that is called
-  /// recursively.
+  /// This method is called by the default implementation of [find] and
+  /// [findAll], and calls itself on different layers recursively. Override
+  /// this method to customize behaviors related to annotations.
   @protected
   bool findAnnotations<S>(
     List<S> result,
@@ -2138,9 +2137,9 @@ class FollowerLayer extends ContainerLayer {
 
 /// A composited layer which annotates its children with a value.
 ///
-/// These values can be retrieved using [Layer.find] with a given [Offset]. If
-/// a [Size] is provided to this layer, then find will check if the provided
-/// offset is within the bounds of the layer.
+/// These values can be retrieved using [Layer.find] or [Layer.findAll] with a
+/// given [Offset]. If a [size] is provided to this layer, then the value will
+/// only be added if the provided offset is within the bounds of the layer.
 class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// Creates a new layer annotated with [value] that clips to rectangle defined
   /// by the [size] and [offset] if provided.
@@ -2174,7 +2173,8 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   ///
   /// Ignored if [size] is not set.
   ///
-  /// Unlike [OffsetLayer], [offset] does not affect the layer's children.
+  /// Unlike [OffsetLayer], this parameter [offset] does not affect the layer's
+  /// children.
   final Offset offset;
 
   /// Whether this layer should prevent layers visually behind it from being
@@ -2183,7 +2183,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// If [opaque] is true, this layer will absorb the hit if this layer contains
   /// the target position and has the requested annotation.
   ///
-  /// If [opaque] is false, this layer will not change the absorption state
+  /// If [opaque] is false, this layer will not change the absorption value
   /// returned by its children.
   ///
   /// This defaults to false.
@@ -2194,6 +2194,15 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   ///    render tree.
   final bool opaque;
 
+  /// Adds annotations from the children, then from this layer.
+  ///
+  /// The children's annotations are always added.
+  ///
+  /// The layer's annotation [value] is added if the type `S` matches `T`, and
+  /// the target position meets the requirement defined by [size] and [offset].
+  ///
+  /// The return value is true if any child returns true, or the layer's
+  /// annotation is added and [opaque] is true.
   @override
   @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
