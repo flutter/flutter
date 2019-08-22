@@ -44,13 +44,13 @@ function retry_upgrade {
   local remaining_tries=$((total_tries - 1))
   while [[ "$remaining_tries" -gt 0 ]]; do
     (cd "$FLUTTER_TOOLS_DIR" && "$PUB" upgrade "$VERBOSITY") && break
-    echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)"
+    echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)" >&2
     remaining_tries=$((remaining_tries - 1))
     sleep 5
   done
 
   if [[ "$remaining_tries" == 0 ]]; then
-    echo "Command 'pub upgrade' still failed after $total_tries tries, giving up."
+    echo "Command 'pub upgrade' still failed after $total_tries tries, giving up." >&2
     return 1
   fi
   return 0
@@ -114,7 +114,7 @@ function upgrade_flutter () {
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
     VERBOSITY="--verbosity=error"
 
-    echo Building flutter tool...
+    echo Building flutter tool... >&2
     if [[ "$CI" == "true" || "$BOT" == "true" || "$CONTINUOUS_INTEGRATION" == "true" || "$CHROME_HEADLESS" == "1" ]]; then
       PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_bot"
       VERBOSITY="--verbosity=normal"
@@ -152,23 +152,23 @@ PUB="$DART_SDK_PATH/bin/pub"
 
 # Test if running as superuser – but don't warn if running within Docker
 if [[ "$EUID" == "0" && ! -f /.dockerenv ]]; then
-  echo "   Woah! You appear to be trying to run flutter as root."
-  echo "   We strongly recommend running the flutter tool without superuser privileges."
-  echo "  /"
-  echo "📎"
+  echo "   Woah! You appear to be trying to run flutter as root." >&2
+  echo "   We strongly recommend running the flutter tool without superuser privileges." >&2
+  echo "  /" >&2
+  echo "📎" >&2
 fi
 
 # Test if Git is available on the Host
 if ! hash git 2>/dev/null; then
-  echo "Error: Unable to find git in your PATH."
+  echo "Error: Unable to find git in your PATH." >&2
   exit 1
 fi
 # Test if the flutter directory is a git clone (otherwise git rev-parse HEAD would fail)
 if [[ ! -e "$FLUTTER_ROOT/.git" ]]; then
-  echo "Error: The Flutter directory is not a clone of the GitHub project."
-  echo "       The flutter tool requires Git in order to operate properly;"
-  echo "       to set up Flutter, run the following command:"
-  echo "       git clone -b stable https://github.com/flutter/flutter.git"
+  echo "Error: The Flutter directory is not a clone of the GitHub project." >&2
+  echo "       The flutter tool requires Git in order to operate properly;" >&2
+  echo "       to set up Flutter, run the following command:" >&2
+  echo "       git clone -b stable https://github.com/flutter/flutter.git" >&2
   exit 1
 fi
 
