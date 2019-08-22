@@ -63,10 +63,7 @@ source_set("flutter_glfw") {
   if (is_linux) {
     libs = [ "GL" ]
 
-    configs += [
-      "$flutter_root/shell/platform/linux/config:gtk3",
-      "$flutter_root/shell/platform/linux/config:x11",
-    ]
+    configs += [ "$flutter_root/shell/platform/linux/config:x11" ]
   } else if (is_mac) {
     libs = [
       "CoreVideo.framework",

@@ -70,12 +70,36 @@ FlutterDesktopPluginRegistrarRef FlutterWindowController::GetRegistrarForPlugin(
   return FlutterDesktopGetPluginRegistrar(controller_, plugin_name.c_str());
 }
 
-void FlutterWindowController::RunEventLoop() {
-  if (controller_) {
-    FlutterDesktopRunWindowLoop(controller_);
+bool FlutterWindowController::RunEventLoopWithTimeout(
+    std::chrono::milliseconds timeout) {
+  if (!controller_) {
+    std::cerr << "Cannot run event loop without a window window; call "
+                 "CreateWindow first."
+              << std::endl;
+    return false;
   }
-  window_ = nullptr;
-  controller_ = nullptr;
+  uint32_t timeout_milliseconds;
+  if (timeout == std::chrono::milliseconds::max()) {
+    // The C API uses 0 to represent no timeout, so convert |max| to 0.
+    timeout_milliseconds = 0;
+  } else if (timeout.count() > UINT32_MAX) {
+    timeout_milliseconds = UINT32_MAX;
+  } else {
+    timeout_milliseconds = static_cast<uint32_t>(timeout.count());
+  }
+  bool still_running = FlutterDesktopRunWindowEventLoopWithTimeout(
+      controller_, timeout_milliseconds);
+  if (!still_running) {
+    FlutterDesktopDestroyWindow(controller_);
+    window_ = nullptr;
+    controller_ = nullptr;
+  }
+  return still_running;
+}
+
+void FlutterWindowController::RunEventLoop() {
+  while (RunEventLoopWithTimeout()) {
+  }
 }
 
 }  // namespace flutter

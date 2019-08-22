@@ -4,10 +4,6 @@
 
 import("//build/config/linux/pkg_config.gni")
 
-pkg_config("gtk3") {
-  packages = [ "gtk+-3.0" ]
-}
-
 pkg_config("x11") {
   packages = [ "x11" ]
 }

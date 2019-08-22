@@ -50,10 +50,9 @@ FLUTTER_EXPORT void FlutterDesktopTerminate();
 // for details. Not all arguments will apply to desktop.
 //
 // Returns a null pointer in the event of an error. Otherwise, the pointer is
-// valid until FlutterDesktopRunWindowLoop has been called and returned, or
-// FlutterDesktopDestroyWindow is called.
+// valid until FlutterDesktopDestroyWindow is called.
 // Note that calling FlutterDesktopCreateWindow without later calling
-// one of those two methods on the returned reference is a memory leak.
+// FlutterDesktopDestroyWindow on the returned reference is a memory leak.
 FLUTTER_EXPORT FlutterDesktopWindowControllerRef
 FlutterDesktopCreateWindow(int initial_width,
                            int initial_height,
@@ -70,15 +69,17 @@ FlutterDesktopCreateWindow(int initial_width,
 FLUTTER_EXPORT void FlutterDesktopDestroyWindow(
     FlutterDesktopWindowControllerRef controller);
 
-// Loops on Flutter window events until the window is closed.
+// Waits for and processes the next event before |timeout_milliseconds|.
 //
-// Once this function returns, |controller| is no longer valid, and must not be
-// be used again, as it calls FlutterDesktopDestroyWindow internally.
+// If |timeout_milliseconds| is zero, it will wait for the next event
+// indefinitely. A non-zero timeout is needed only if processing unrelated to
+// the event loop is necessary (e.g., to handle events from another source).
 //
-// TODO: Replace this with a method that allows running the runloop
-// incrementally.
-FLUTTER_EXPORT void FlutterDesktopRunWindowLoop(
-    FlutterDesktopWindowControllerRef controller);
+// Returns false if the window should be closed as a result of the last event
+// processed.
+FLUTTER_EXPORT bool FlutterDesktopRunWindowEventLoopWithTimeout(
+    FlutterDesktopWindowControllerRef controller,
+    uint32_t timeout_milliseconds);
 
 // Returns the window handle for the window associated with
 // FlutterDesktopWindowControllerRef.
