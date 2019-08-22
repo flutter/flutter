@@ -98,6 +98,7 @@ class MediaQueryData {
     this.alwaysUse24HourFormat = false,
     this.accessibleNavigation = false,
     this.invertColors = false,
+    this.highContrast = false,
     this.disableAnimations = false,
     this.boldText = false,
   });
@@ -121,6 +122,7 @@ class MediaQueryData {
       invertColors = window.accessibilityFeatures.invertColors,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
       boldText = window.accessibilityFeatures.boldText,
+      highContrast = false,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
@@ -259,6 +261,13 @@ class MediaQueryData {
   ///  * [Window.AccessibilityFeatures], where the setting originates.
   final bool invertColors;
 
+  /// Whether the user requested a high contrast between foreground and background
+  /// content on iOS, via Settings -> Accessibility -> Increase Contrast.
+  ///
+  /// This flag is currently only updated on iOS devices that are running iOS 13
+  /// or above.
+  final bool highContrast;
+
   /// Whether the platform is requesting that animations be disabled or reduced
   /// as much as possible.
   ///
@@ -293,6 +302,7 @@ class MediaQueryData {
     EdgeInsets viewInsets,
     double physicalDepth,
     bool alwaysUse24HourFormat,
+    bool highContrast,
     bool disableAnimations,
     bool invertColors,
     bool accessibleNavigation,
@@ -309,6 +319,7 @@ class MediaQueryData {
       physicalDepth: physicalDepth ?? this.physicalDepth,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
+      highContrast: highContrast ?? this.highContrast,
       disableAnimations: disableAnimations ?? this.disableAnimations,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
@@ -357,6 +368,7 @@ class MediaQueryData {
       ),
       viewInsets: viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      highContrast: highContrast,
       disableAnimations: disableAnimations,
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
@@ -404,6 +416,7 @@ class MediaQueryData {
         bottom: removeBottom ? 0.0 : null,
       ),
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      highContrast: highContrast,
       disableAnimations: disableAnimations,
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
@@ -451,6 +464,7 @@ class MediaQueryData {
         bottom: removeBottom ? 0.0 : null,
       ),
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      highContrast: highContrast,
       disableAnimations: disableAnimations,
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
@@ -472,6 +486,7 @@ class MediaQueryData {
         && typedOther.viewInsets == viewInsets
         && typedOther.physicalDepth == physicalDepth
         && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
+        && typedOther.highContrast == highContrast
         && typedOther.disableAnimations == disableAnimations
         && typedOther.invertColors == invertColors
         && typedOther.accessibleNavigation == accessibleNavigation
@@ -490,6 +505,7 @@ class MediaQueryData {
       viewInsets,
       physicalDepth,
       alwaysUse24HourFormat,
+      highContrast,
       disableAnimations,
       invertColors,
       accessibleNavigation,
@@ -510,6 +526,7 @@ class MediaQueryData {
              'physicalDepth: $physicalDepth, '
              'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
              'accessibleNavigation: $accessibleNavigation, '
+             'highContrast: $highContrast,'
              'disableAnimations: $disableAnimations, '
              'invertColors: $invertColors, '
              'boldText: $boldText'
