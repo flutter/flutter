@@ -326,6 +326,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void rejectGesture(int pointer) {
     stopTrackingPointer(pointer);
+    giveUpArena(pointer);
   }
 
   @override

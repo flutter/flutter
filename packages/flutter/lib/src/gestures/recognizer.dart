@@ -325,6 +325,14 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
     }
   }
 
+  @protected
+  void giveUpArena(int pointer) {
+    if (_entries.containsKey(pointer)) {
+      _entries[pointer].resolve(GestureDisposition.rejected);
+      _entries.remove(pointer);
+    }
+  }
+
   /// Stops tracking the pointer associated with the given event if the event is
   /// a [PointerUpEvent] or a [PointerCancelEvent] event.
   @protected
