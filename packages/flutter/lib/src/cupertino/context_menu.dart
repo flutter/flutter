@@ -297,43 +297,6 @@ class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin 
   }
 }
 
-// An animation that switches immediately between two colors.
-//
-// The transition is immediate, so there are no intermediate values or
-// interpolation. The color switches from offColor to onColor and back to
-// offColor at the times given by intervalOn and intervalOff.
-class _OnOffAnimation<T> extends CompoundAnimation<T> {
-  _OnOffAnimation({
-    AnimationController controller,
-    @required T onValue,
-    @required T offValue,
-    @required double intervalOn,
-    @required double intervalOff,
-  }) : _offValue = offValue,
-       assert(intervalOn >= 0.0 && intervalOn <= 1.0),
-       assert(intervalOff >= 0.0 && intervalOff <= 1.0),
-       assert(intervalOn <= intervalOff),
-       super(
-        first: Tween<T>(begin: offValue, end: onValue).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(intervalOn, intervalOn),
-          ),
-        ),
-        next: Tween<T>(begin: onValue, end: offValue).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Interval(intervalOff, intervalOff),
-          ),
-        ),
-       );
-
-  final T _offValue;
-
-  @override
-  T get value => next.value == _offValue ? next.value : first.value;
-}
-
 // The open context menu.
 // TODO(justinmc): In native, dragging on the menu or the child animates and
 // eventually dismisses.
@@ -435,15 +398,9 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
       // When opening, the transition happens from the end of the child's bounce
       // animation to the final state. When closing, it goes from the final state
       // to the original position before the bounce.
-      final Rect childRectOriginal = Rect.fromLTWH(
-        _childRect.left,
-        _childRect.top,
-        _childRect.width / _kOpenScale,
-        _childRect.height / _kOpenScale,
-      );
+      final Rect childRectOriginal = _childRect.inflate(1 / _kOpenScale);
       _rectTweenReverse.begin = childRectOriginal;
       _rectTweenReverse.end = _childRectFinal;
-
 
       _internalOffstage = false;
       _setOffstageInternally();
@@ -482,13 +439,11 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
     // TODO(justinmc): At the start, doesn't quite line up with pre-modal child.
     // Maybe do entire animation inside this modal though?
     if (!animation.isCompleted) {
+      // TODO(justinmc): Use _DummyRect here?
       return Stack(
         children: <Widget>[
-          Positioned(
-            left: rect.left,
-            top: rect.top,
-            width: rect.width,
-            height: rect.height,
+          Positioned.fromRect(
+            rect: rect,
             child: FittedBox(
               fit: BoxFit.cover,
               child: _builder(context),
@@ -725,4 +680,41 @@ class _ContextMenuSheetActionState extends State<ContextMenuSheetAction> {
       ),
     );
   }
+}
+
+// An animation that switches immediately between two colors.
+//
+// The transition is immediate, so there are no intermediate values or
+// interpolation. The color switches from offColor to onColor and back to
+// offColor at the times given by intervalOn and intervalOff.
+class _OnOffAnimation<T> extends CompoundAnimation<T> {
+  _OnOffAnimation({
+    AnimationController controller,
+    @required T onValue,
+    @required T offValue,
+    @required double intervalOn,
+    @required double intervalOff,
+  }) : _offValue = offValue,
+       assert(intervalOn >= 0.0 && intervalOn <= 1.0),
+       assert(intervalOff >= 0.0 && intervalOff <= 1.0),
+       assert(intervalOn <= intervalOff),
+       super(
+        first: Tween<T>(begin: offValue, end: onValue).animate(
+          CurvedAnimation(
+            parent: controller,
+            curve: Interval(intervalOn, intervalOn),
+          ),
+        ),
+        next: Tween<T>(begin: onValue, end: offValue).animate(
+          CurvedAnimation(
+            parent: controller,
+            curve: Interval(intervalOff, intervalOff),
+          ),
+        ),
+       );
+
+  final T _offValue;
+
+  @override
+  T get value => next.value == _offValue ? next.value : first.value;
 }
