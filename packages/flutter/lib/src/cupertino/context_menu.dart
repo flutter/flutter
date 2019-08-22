@@ -66,8 +66,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   AnimationController _dummyController;
 
   OverlayEntry _lastOverlayEntry;
-  bool _isOpen = false; // When modal is pushed on top.
-  bool _isOpening = false; // When long pressed, before modal.
+  double _childOpacity = 1.0;
   ContextMenuRoute<void> _route;
 
   @override
@@ -81,7 +80,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
   void _openContextMenu(Rect childRectEnd) {
     setState(() {
-      _isOpen = true;
+      _childOpacity = 0.0;
     });
 
     // Get the original Rect of the child before any transformation.
@@ -128,8 +127,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     switch (animationStatus) {
       case AnimationStatus.dismissed:
         setState(() {
-          _isOpening = false;
-          _isOpen = false;
+          _childOpacity = 1.0;
         });
         _lastOverlayEntry?.remove();
         _lastOverlayEntry = null;
@@ -138,8 +136,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
       case AnimationStatus.completed:
         setState(() {
-          _isOpening = false;
-          _isOpen = true;
+          _childOpacity = 0.0;
         });
         // TODO(justinmc): Maybe cache these instead of recalculating.
         final Rect childRect = _getRect(_childGlobalKey);
@@ -156,12 +153,13 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     }
   }
 
+  // Watch for when ContextMenuRoute is closed.
   void _routeAnimationStatusListener(AnimationStatus status) {
     if (status != AnimationStatus.dismissed) {
       return;
     }
     setState(() {
-      _isOpen = false;
+      _childOpacity = 1.0;
     });
     _route.animation.removeStatusListener(_routeAnimationStatusListener);
     _route = null;
@@ -169,7 +167,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
   void _onLongPressStart(LongPressStartDetails details) {
     setState(() {
-      _isOpening = true;
+      _childOpacity = 0.0;
     });
     _lastOverlayEntry = _overlayEntry;
     Overlay.of(context).insert(_lastOverlayEntry);
@@ -199,7 +197,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       onLongPressStart: _onLongPressStart,
       child: Container(
         child: Opacity(
-          opacity: _isOpening || _isOpen ? 0.0 : 1.0,
+          opacity: _childOpacity,
           key: _childGlobalKey,
           // TODO(justinmc): Round corners of child?
           child: widget.child,
