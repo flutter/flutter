@@ -123,6 +123,12 @@ class RefreshIndicator extends StatefulWidget {
 
   /// The distance of [RefreshProgressIndicator] from the edge of the screen.
   ///
+  /// Depending whether the indicator is showing on the top or bottom edges of
+  /// screen, the value of this variable controls how far from the edges will
+  /// the progress indicator start to appear. This may come in handy if, for
+  /// example, the UI contains a top [Widget] which covers the edge where the
+  /// progress indicator would otherwise appear.
+  ///
   /// By default, the edge distance is set to 0.
   final double edgeDistance;
 
