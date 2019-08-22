@@ -66,7 +66,14 @@ REM SET FLUTTER_TOOL_ARGS="%FLUTTER_TOOL_ARGS% --observe=65432"
 :acquire_lock
 2>NUL (
   REM "3" is now stderr because of "2>NUL".
-  CALL :subroutine %* 2>&3 9> "%cache_dir%\flutter.bat.lock" || GOTO acquire_lock
+  CALL :subroutine %* 2>&3 9> "%cache_dir%\flutter.bat.lock"
+  REM Error code 3 is returned by the PowerShell script if we cannot continue,
+  REM for example if the PowerShell version is too low.
+  IF "%ERRORLEVEL%" EQU "3" (
+    SET exit_code=%ERRORLEVEL%
+    GOTO :final_exit
+  )
+  IF "%ERRORLEVEL%" NEQ "0" GOTO acquire_lock
 )
 GOTO :after_subroutine
 
@@ -104,7 +111,8 @@ GOTO :after_subroutine
     SET "update_dart_bin=!update_dart_bin:'=''!"
     PowerShell.exe -ExecutionPolicy Bypass -Command "Unblock-File -Path '%update_dart_bin%'; & '%update_dart_bin%'; exit $LastExitCode"
     IF "%ERRORLEVEL%" NEQ "0" (
-      REM Error code 3 is returned by the PowerShell script if the version is not good enough.
+      REM Error code 3 is returned by the PowerShell script if we cannot continue,
+      REM for example if the PowerShell version is too low.
       IF "%ERRORLEVEL%" EQU "3" (
         SET exit_code=%ERRORLEVEL%
         GOTO :final_exit
