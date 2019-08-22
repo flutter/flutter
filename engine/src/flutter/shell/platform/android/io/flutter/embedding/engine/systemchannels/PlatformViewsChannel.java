@@ -7,6 +7,8 @@ package io.flutter.embedding.engine.systemchannels;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,13 @@ public class PlatformViewsChannel {
       return;
     }
     channel.invokeMethod("viewFocused", viewId);
+  }
+
+  private static String detailedExceptionString(Exception exception) {
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+    exception.printStackTrace(printWriter);
+    return stringWriter.toString();
   }
 
   private final MethodChannel.MethodCallHandler parsingHandler = new MethodChannel.MethodCallHandler() {
@@ -89,7 +98,7 @@ public class PlatformViewsChannel {
       } catch (IllegalStateException exception) {
         result.error(
             "error",
-            exception.getMessage(),
+            detailedExceptionString(exception),
             null
         );
       }
@@ -103,7 +112,7 @@ public class PlatformViewsChannel {
       } catch (IllegalStateException exception) {
         result.error(
             "error",
-            exception.getMessage(),
+             detailedExceptionString(exception),
             null
         );
       }
@@ -129,7 +138,7 @@ public class PlatformViewsChannel {
       } catch (IllegalStateException exception) {
         result.error(
             "error",
-            exception.getMessage(),
+            detailedExceptionString(exception),
             null
         );
       }
@@ -161,7 +170,7 @@ public class PlatformViewsChannel {
       } catch (IllegalStateException exception) {
         result.error(
             "error",
-            exception.getMessage(),
+            detailedExceptionString(exception),
             null
         );
       }
@@ -181,7 +190,7 @@ public class PlatformViewsChannel {
       } catch (IllegalStateException exception) {
         result.error(
             "error",
-            exception.getMessage(),
+            detailedExceptionString(exception),
             null
         );
       }
@@ -195,7 +204,7 @@ public class PlatformViewsChannel {
       } catch (IllegalStateException exception) {
         result.error(
                 "error",
-                exception.getMessage(),
+                detailedExceptionString(exception),
                 null
         );
       }
