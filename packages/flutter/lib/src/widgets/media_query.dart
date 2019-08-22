@@ -223,10 +223,10 @@ class MediaQueryData {
   /// and may not be delivered to the app. Taps and swipe gestures that begin
   /// with a long-press are delivered to the app, but simple press-drag-release
   /// swipe gestures which begin within the area defined by [systemGestureInsets]
-  /// may not.
+  /// may not be.
   ///
   /// Apps should avoid locating gesture detectors within the system gesture
-  /// insets area. There is no reason to avoid putting visual elements within
+  /// insets area. Apps should feel free to put visual elements within
   /// this area.
   ///
   /// This property is currently only expected to be set to a non-default value
@@ -236,7 +236,8 @@ class MediaQueryData {
   ///
   /// For apps that might be deployed on Android Q devices with full gesture
   /// navigation enabled, use [MediaQuery.systemGestureInsets] with [Padding]
-  /// to avoid overlapping a [Slider] with system gesture navigation.
+  /// to avoid having the left and right edges of the [Slider] from appearing
+  /// within the area reserved for system gesture navigation.
   ///
   /// By default, [Slider]s expand to fill the available width. So, we pad the
   /// left and right sides.
@@ -250,11 +251,9 @@ class MediaQueryData {
   ///   return Scaffold(
   ///     appBar: AppBar(title: Text('Pad Slider to avoid systemGestureInsets')),
   ///     body: Padding(
-  ///       padding: EdgeInsets.fromLTRB( // only left and right padding are likely to be needed
-  ///         systemGestureInsets.left,
-  ///         0,
-  ///         systemGestureInsets.right,
-  ///         0,
+  ///       padding: EdgeInsets.only( // only left and right padding are needed here
+  ///         left: systemGestureInsets.left,
+  ///         right: systemGestureInsets.right,
   ///       ),
   ///       child: Slider(
   ///         value: _currentValue.toDouble(),
