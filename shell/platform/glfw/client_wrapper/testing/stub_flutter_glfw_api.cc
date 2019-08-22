@@ -49,17 +49,11 @@ void FlutterDesktopTerminate() {
 }
 
 FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
-    int initial_width,
-    int initial_height,
-    const char* title,
-    const char* assets_path,
-    const char* icu_data_path,
-    const char** arguments,
-    size_t argument_count) {
+    const FlutterDesktopWindowProperties& window_properties,
+    const FlutterDesktopEngineProperties& engine_properties) {
   if (s_stub_implementation) {
-    return s_stub_implementation->CreateWindow(
-        initial_width, initial_height, title, assets_path, icu_data_path,
-        arguments, argument_count);
+    return s_stub_implementation->CreateWindow(window_properties,
+                                               engine_properties);
   }
   return nullptr;
 }
@@ -131,13 +125,10 @@ bool FlutterDesktopRunWindowEventLoopWithTimeout(
   return true;
 }
 
-FlutterDesktopEngineRef FlutterDesktopRunEngine(const char* assets_path,
-                                                const char* icu_data_path,
-                                                const char** arguments,
-                                                size_t argument_count) {
+FlutterDesktopEngineRef FlutterDesktopRunEngine(
+    const FlutterDesktopEngineProperties& properties) {
   if (s_stub_implementation) {
-    return s_stub_implementation->RunEngine(assets_path, icu_data_path,
-                                            arguments, argument_count);
+    return s_stub_implementation->RunEngine(properties);
   }
   return nullptr;
 }

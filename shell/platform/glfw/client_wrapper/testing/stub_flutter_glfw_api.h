@@ -37,13 +37,8 @@ class StubFlutterGlfwApi {
 
   // Called for FlutterDesktopCreateWindow.
   virtual FlutterDesktopWindowControllerRef CreateWindow(
-      int initial_width,
-      int initial_height,
-      const char* title,
-      const char* assets_path,
-      const char* icu_data_path,
-      const char** arguments,
-      size_t argument_count) {
+      const FlutterDesktopWindowProperties& window_properties,
+      const FlutterDesktopEngineProperties& engine_properties) {
     return nullptr;
   }
 
@@ -76,10 +71,8 @@ class StubFlutterGlfwApi {
   }
 
   // Called for FlutterDesktopRunEngine.
-  virtual FlutterDesktopEngineRef RunEngine(const char* assets_path,
-                                            const char* icu_data_path,
-                                            const char** arguments,
-                                            size_t argument_count) {
+  virtual FlutterDesktopEngineRef RunEngine(
+      const FlutterDesktopEngineProperties& properties) {
     return nullptr;
   }
 

@@ -17,6 +17,19 @@
 
 namespace flutter {
 
+// Properties for Flutter window creation.
+struct WindowProperties {
+  // The display title.
+  std::string title;
+  // Width in screen coordinates.
+  int32_t width;
+  // Height in screen coordinates.
+  int32_t height;
+  // Whether or not the user is prevented from resizing the window.
+  // Reversed so that the default for a cleared struct is to allow resizing.
+  bool prevent_resize;
+};
+
 // A controller for a window displaying Flutter content.
 //
 // This is the primary wrapper class for the desktop C API.
@@ -51,9 +64,7 @@ class FlutterWindowController {
   // for details. Not all arguments will apply to desktop.
   //
   // Only one Flutter window can exist at a time; see constructor comment.
-  bool CreateWindow(int width,
-                    int height,
-                    const std::string& title,
+  bool CreateWindow(const WindowProperties& window_properties,
                     const std::string& assets_path,
                     const std::vector<std::string>& arguments);
 
