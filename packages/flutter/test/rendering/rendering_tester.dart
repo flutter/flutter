@@ -7,33 +7,111 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart' show EnginePhase, fail;
 
-import 'package:flutter_test/flutter_test.dart' show EnginePhase;
+export 'package:flutter/foundation.dart' show FlutterError, FlutterErrorDetails;
 export 'package:flutter_test/flutter_test.dart' show EnginePhase;
 
 class TestRenderingFlutterBinding extends BindingBase with ServicesBinding, GestureBinding, SchedulerBinding, PaintingBinding, SemanticsBinding, RendererBinding {
+  /// Creates a binding for testing rendering library functionality.
+  ///
+  /// If [onErrors] is not null, it is called if [FlutterError] caught any errors
+  /// while drawing the frame. If [onErrors] is null and [FlutterError] caught at least
+  /// one error, this function fails the test. A test may override [onErrors] and
+  /// inspect errors using [takeFlutterErrorDetails].
+  TestRenderingFlutterBinding({ this.onErrors });
+
+  final List<FlutterErrorDetails> _errors = <FlutterErrorDetails>[];
+
+  /// A function called after drawing a frame if [FlutterError] caught any errors.
+  ///
+  /// This function is expected to inspect these errors and decide whether they
+  /// are expected or not. Use [takeFlutterErrorDetails] to take one error at a
+  /// time, or [takeAllFlutterErrorDetails] to iterate over all errors.
+  VoidCallback onErrors;
+
+  /// Returns the error least recently caught by [FlutterError] and removes it
+  /// from the list of captured errors.
+  ///
+  /// Returns null if no errors were captures, or if the list was exhausted by
+  /// calling this method repeatedly.
+  FlutterErrorDetails takeFlutterErrorDetails() {
+    if (_errors.isEmpty) {
+      return null;
+    }
+    return _errors.removeAt(0);
+  }
+
+  /// Returns all error details caught by [FlutterError] from least recently caught to
+  /// most recently caught, and removes them from the list of captured errors.
+  ///
+  /// The returned iterable takes errors lazily. If, for example, you iterate over 2
+  /// errors, but there are 5 errors total, this binding will still fail the test.
+  /// Tests are expected to take and inspect all errors.
+  Iterable<FlutterErrorDetails> takeAllFlutterErrorDetails() sync* {
+    // sync* and yield are used for lazy evaluation. Otherwise, the list would be
+    // drained eagerly and allow a test pass with unexpected errors.
+    while (_errors.isNotEmpty) {
+      yield _errors.removeAt(0);
+    }
+  }
+
+  /// Returns all exceptions caught by [FlutterError] from least recently caught to
+  /// most recently caught, and removes them from the list of captured errors.
+  ///
+  /// The returned iterable takes errors lazily. If, for example, you iterate over 2
+  /// errors, but there are 5 errors total, this binding will still fail the test.
+  /// Tests are expected to take and inspect all errors.
+  Iterable<dynamic> takeAllFlutterExceptions() sync* {
+    // sync* and yield are used for lazy evaluation. Otherwise, the list would be
+    // drained eagerly and allow a test pass with unexpected errors.
+    while (_errors.isNotEmpty) {
+      yield _errors.removeAt(0).exception;
+    }
+  }
+
   EnginePhase phase = EnginePhase.composite;
 
   @override
   void drawFrame() {
     assert(phase != EnginePhase.build, 'rendering_tester does not support testing the build phase; use flutter_test instead');
-    pipelineOwner.flushLayout();
-    if (phase == EnginePhase.layout)
-      return;
-    pipelineOwner.flushCompositingBits();
-    if (phase == EnginePhase.compositingBits)
-      return;
-    pipelineOwner.flushPaint();
-    if (phase == EnginePhase.paint)
-      return;
-    renderView.compositeFrame();
-    if (phase == EnginePhase.composite)
-      return;
-    pipelineOwner.flushSemantics();
-    if (phase == EnginePhase.flushSemantics)
-      return;
-    assert(phase == EnginePhase.flushSemantics ||
-           phase == EnginePhase.sendSemanticsUpdate);
+    final FlutterExceptionHandler oldErrorHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      _errors.add(details);
+    };
+    try {
+      pipelineOwner.flushLayout();
+      if (phase == EnginePhase.layout)
+        return;
+      pipelineOwner.flushCompositingBits();
+      if (phase == EnginePhase.compositingBits)
+        return;
+      pipelineOwner.flushPaint();
+      if (phase == EnginePhase.paint)
+        return;
+      renderView.compositeFrame();
+      if (phase == EnginePhase.composite)
+        return;
+      pipelineOwner.flushSemantics();
+      if (phase == EnginePhase.flushSemantics)
+        return;
+      assert(phase == EnginePhase.flushSemantics ||
+            phase == EnginePhase.sendSemanticsUpdate);
+    } finally {
+      FlutterError.onError = oldErrorHandler;
+      if (_errors.isNotEmpty) {
+        if (onErrors != null) {
+          onErrors();
+          if (_errors.isNotEmpty) {
+            _errors.forEach(FlutterError.dumpErrorToConsole);
+            fail('There are more errors than the test inspected using TestRenderingFlutterBinding.takeFlutterErrorDetails.');
+          }
+        } else {
+          _errors.forEach(FlutterError.dumpErrorToConsole);
+          fail('Caught error while rendering frame. See preceding logs for details.');
+        }
+      }
+    }
   }
 }
 
@@ -55,11 +133,14 @@ TestRenderingFlutterBinding get renderer {
 ///
 /// The EnginePhase must not be [EnginePhase.build], since the rendering layer
 /// has no build phase.
+///
+/// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
 void layout(
   RenderBox box, {
   BoxConstraints constraints,
   Alignment alignment = Alignment.center,
   EnginePhase phase = EnginePhase.layout,
+  VoidCallback onErrors,
 }) {
   assert(box != null); // If you want to just repump the last box, call pumpFrame().
   assert(box.parent == null); // We stick the box in another, so you can't reuse it easily, sorry.
@@ -76,13 +157,21 @@ void layout(
   }
   renderer.renderView.child = box;
 
-  pumpFrame(phase: phase);
+  pumpFrame(phase: phase, onErrors: onErrors);
 }
 
-void pumpFrame({ EnginePhase phase = EnginePhase.layout }) {
+/// Pumps a single frame.
+///
+/// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
+void pumpFrame({ EnginePhase phase = EnginePhase.layout, VoidCallback onErrors }) {
   assert(renderer != null);
   assert(renderer.renderView != null);
   assert(renderer.renderView.child != null); // call layout() first!
+
+  if (onErrors != null) {
+    renderer.onErrors = onErrors;
+  }
+
   renderer.phase = phase;
   renderer.drawFrame();
 }

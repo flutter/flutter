@@ -107,5 +107,5 @@ class FileHashStore {
     return dirty;
   }
 
-  File get _cacheFile => environment.rootBuildDir.childFile(_kFileCache);
+  File get _cacheFile => environment.buildDir.childFile(_kFileCache);
 }

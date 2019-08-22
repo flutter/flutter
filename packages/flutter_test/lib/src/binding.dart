@@ -207,10 +207,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   void initInstances() {
+    super.initInstances();
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
     HttpOverrides.global = _MockHttpOverrides();
     _testTextInput = TestTextInput(onCleared: _resetFocusedEditable)..register();
-    super.initInstances();
   }
 
   @override
@@ -808,7 +808,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     final String assetFolderPath = Platform.environment['UNIT_TEST_ASSETS'];
     final String prefix =  'packages/${Platform.environment['APP_NAME']}/';
 
-    defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) {
+    /// Navigation related actions (pop, push, replace) broadcasts these actions via
+    /// platform messages.
+    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {});
+
+    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) {
       String key = utf8.decode(message.buffer.asUint8List());
       File asset = File(path.join(assetFolderPath, key));
 
@@ -1044,14 +1048,29 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void _verifyInvariants() {
     super._verifyInvariants();
-    assert(
-      _currentFakeAsync.periodicTimerCount == 0,
-      'A periodic Timer is still running even after the widget tree was disposed.'
-    );
-    assert(
-      _currentFakeAsync.nonPeriodicTimerCount == 0,
-      'A Timer is still pending even after the widget tree was disposed.'
-    );
+
+    assert(() {
+      if (   _currentFakeAsync.periodicTimerCount == 0
+          && _currentFakeAsync.nonPeriodicTimerCount == 0) {
+        return true;
+      }
+
+      debugPrint('Pending timers:');
+      for (String timerInfo in _currentFakeAsync.pendingTimersDebugInfo) {
+        final int firstLineEnd = timerInfo.indexOf('\n');
+        assert(firstLineEnd != -1);
+
+        // No need to include the newline.
+        final String firstLine = timerInfo.substring(0, firstLineEnd);
+        final String stackTrace = timerInfo.substring(firstLineEnd + 1);
+
+        debugPrint(firstLine);
+        debugPrintStack(stackTrace: StackTrace.fromString(stackTrace));
+        debugPrint('');
+      }
+      return false;
+    }(), 'A Timer is still pending even after the widget tree was disposed.');
+
     assert(_currentFakeAsync.microtaskCount == 0); // Shouldn't be possible.
   }
 

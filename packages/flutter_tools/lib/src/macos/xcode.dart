@@ -7,6 +7,7 @@ import 'dart:async';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../ios/xcodeproj.dart';
@@ -17,7 +18,7 @@ const int kXcodeRequiredVersionMinor = 0;
 Xcode get xcode => context.get<Xcode>();
 
 class Xcode {
-  bool get isInstalledAndMeetsVersionCheck => isInstalled && isVersionSatisfactory;
+  bool get isInstalledAndMeetsVersionCheck => platform.isMacOS && isInstalled && isVersionSatisfactory;
 
   String _xcodeSelectPath;
   String get xcodeSelectPath {

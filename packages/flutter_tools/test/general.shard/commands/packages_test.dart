@@ -348,7 +348,7 @@ void main() {
     testUsingContext('pub publish', () async {
       final PromptingProcess process = PromptingProcess();
       mockProcessManager.processFactory = (List<String> commands) => process;
-      final Future<void> runPackages = createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
+      final Future<void> runPackages = createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'publish']);
       final Future<void> runPrompt = process.showPrompt('Proceed (y/n)? ', <String>['hello', 'world']);
       final Future<void> simulateUserInput = Future<void>(() {
         mockStdio.simulateStdin('y');
@@ -370,12 +370,23 @@ void main() {
     });
 
     testUsingContext('publish', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'publish']);
+      await createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'publish']);
       final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(3));
+      expect(commands, hasLength(2));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], '--trace');
-      expect(commands[2], 'publish');
+      expect(commands[1], 'publish');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
+    });
+
+    testUsingContext('packages publish', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(2));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], 'publish');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
