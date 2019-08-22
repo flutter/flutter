@@ -38,6 +38,15 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
     ..createSync(recursive: true)
     ..writeAsStringSync(buffer.toString());
 
+  if (!buildInfo.isDebug) {
+    const String warning = '🚧 ';
+    printStatus(warning * 20);
+    printStatus('Warning: Only debug is currently implemented for Linux. This is effectively a debug build.');
+    printStatus('See https://github.com/flutter/flutter/issues/38478 for details and updates.');
+    printStatus(warning * 20);
+    printStatus('');
+  }
+
   // Invoke make.
   final Stopwatch sw = Stopwatch()..start();
   final Process process = await processManager.start(<String>[

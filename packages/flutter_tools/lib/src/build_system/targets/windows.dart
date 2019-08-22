@@ -22,16 +22,16 @@ class UnpackWindows extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.dll'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.dll.exp'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.dll.lib'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.dll.pdb'),
+    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows_glfw.dll'),
+    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows_glfw.dll.exp'),
+    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows_glfw.dll.lib'),
+    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows_glfw.dll.pdb'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_export.h'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_messenger.h'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_plugin_registrar.h'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_glfw.h'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/icudtl.dat'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/cpp_client_wrapper/*'),
+    Source.pattern('{PROJECT_DIR}/windows/flutter/cpp_client_wrapper_glfw/*'),
   ];
 
   @override

@@ -336,6 +336,10 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
+  void cleanWorkspace(String workspacePath, String scheme) {
+  }
+
+  @override
   Future<XcodeProjectInfo> getInfo(String projectPath) async {
     return XcodeProjectInfo(
       <String>['Runner'],
