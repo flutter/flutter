@@ -15,6 +15,7 @@ const double _kOpenScale = 1.2;
 typedef void _AnimationEndCallback(Rect childRect);
 
 Rect _getRect(GlobalKey globalKey) {
+  assert(globalKey.currentContext != null);
   final RenderBox renderBoxContainer = globalKey.currentContext.findRenderObject();
   final Offset containerOffset = renderBoxContainer.localToGlobal(renderBoxContainer.paintBounds.topLeft);
   return containerOffset & renderBoxContainer.paintBounds.size;
@@ -84,7 +85,6 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     });
 
     // Get the original Rect of the child before any transformation.
-    assert(_childGlobalKey.currentContext != null);
     final Rect originalChildRect = _getRect(_childGlobalKey);
 
     final Rect parentRect = Offset.zero & MediaQuery.of(context).size;
@@ -359,12 +359,15 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
 
   RectTween _rectTween = RectTween();
   RectTween _rectTweenReverse = RectTween();
+  RectTween _sheetRectTween = RectTween();
+  final Tween<double> _opacityTween = Tween<double>(begin: 0.0, end: 1.0);
 
   // The final position of the child produced by builder after all animation has
   // stopped.
   Rect _childRectFinal;
 
-  final GlobalKey _containerGlobalKey = GlobalKey();
+  final GlobalKey _childGlobalKey = GlobalKey();
+  final GlobalKey _sheetGlobalKey = GlobalKey();
 
   bool _externalOffstage = false;
   bool _internalOffstage = false;
@@ -388,12 +391,13 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
     _setOffstageInternally();
 
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-      assert(_containerGlobalKey.currentContext != null);
-      final RenderBox renderBoxContainer = _containerGlobalKey.currentContext.findRenderObject();
-      final Offset containerOffset = renderBoxContainer.localToGlobal(renderBoxContainer.paintBounds.topLeft);
-      _childRectFinal = containerOffset & renderBoxContainer.paintBounds.size;
+      _childRectFinal = _getRect(_childGlobalKey);
       _rectTween.begin = _childRect;
       _rectTween.end = _childRectFinal;
+
+      final Rect sheetRect = _getRect(_sheetGlobalKey);
+      _sheetRectTween.begin = _childRect.topLeft & sheetRect.size;
+      _sheetRectTween.end = sheetRect;
 
       // When opening, the transition happens from the end of the child's bounce
       // animation to the final state. When closing, it goes from the final state
@@ -436,12 +440,19 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
 
     // While the animation is running, render everything in a Stack so that
     // they're movable.
-    // TODO(justinmc): At the start, doesn't quite line up with pre-modal child.
-    // Maybe do entire animation inside this modal though?
     if (!animation.isCompleted) {
       // TODO(justinmc): Use _DummyRect here?
       return Stack(
         children: <Widget>[
+          Positioned.fromRect(
+            rect: _sheetRectTween.evaluate(animation),
+            child: Opacity(
+              opacity: _opacityTween.evaluate(animation),
+              child: _ContextMenuSheet(
+                actions: _actions,
+              ),
+            ),
+          ),
           Positioned.fromRect(
             rect: rect,
             child: FittedBox(
@@ -471,7 +482,7 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
                       onTap: _onTap,
                       child: FittedBox(
                         fit: BoxFit.cover,
-                        key: _containerGlobalKey,
+                        key: _childGlobalKey,
                         child: _builder(context),
                       ),
                     ),
@@ -484,6 +495,7 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
                 ),
                 Expanded(
                   child: _ContextMenuSheet(
+                    key: _sheetGlobalKey,
                     actions: _actions,
                   ),
                 ),
@@ -517,28 +529,26 @@ class _ContextMenuSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Flexible(
-            fit: FlexFit.tight,
-            flex: 2,
-            child: IntrinsicHeight(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: actions,
-                ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Flexible(
+          fit: FlexFit.tight,
+          flex: 2,
+          child: IntrinsicHeight(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: actions,
               ),
             ),
           ),
-          const Spacer(
-            flex: 1,
-          ),
-        ],
-      ),
+        ),
+        const Spacer(
+          flex: 1,
+        ),
+      ],
     );
   }
 }
