@@ -6,7 +6,8 @@ part of engine;
 
 /// This class downloads assets over the network.
 ///
-/// The assets are resolved relative to [assetsDir].
+/// The assets are resolved relative to [assetsDir] inside the directory
+/// containing the currently executing JS script.
 class AssetManager {
   static const String _defaultAssetsDir = 'assets';
 
@@ -15,18 +16,19 @@ class AssetManager {
 
   const AssetManager({this.assetsDir = _defaultAssetsDir});
 
+  String get _baseUrl {
+    return html.window.document
+        .querySelectorAll('meta')
+        .whereType<html.MetaElement>()
+        .firstWhere((dynamic e) => e.name == 'assetBase', orElse: () => null)
+        ?.content;
+  }
+
   String getAssetUrl(String asset) {
-    final Uri assetUri = Uri.parse(asset);
-
-    String url;
-
-    if (assetUri.hasScheme) {
-      url = asset;
-    } else {
-      url = '$assetsDir/$asset';
+    if (Uri.parse(asset).hasScheme) {
+      return asset;
     }
-
-    return url;
+    return (_baseUrl ?? '') + '$assetsDir/$asset';
   }
 
   Future<ByteData> load(String asset) async {
@@ -71,6 +73,9 @@ class WebOnlyMockAssetManager implements AssetManager {
 
   @override
   String get assetsDir => defaultAssetsDir;
+
+  @override
+  String get _baseUrl => '';
 
   @override
   String getAssetUrl(String asset) => '$asset';

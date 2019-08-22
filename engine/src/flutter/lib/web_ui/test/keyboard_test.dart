@@ -20,11 +20,11 @@ void main() {
 
     test('dispatches keyup to flutter/keyevent channel', () {
       String channelReceived;
-      Map dataReceived;
+      Map<String, dynamic> dataReceived;
       ui.window.onPlatformMessage = (String channel, ByteData data,
           ui.PlatformMessageResponseCallback callback) {
         channelReceived = channel;
-        dataReceived = JSONMessageCodec().decodeMessage(data);
+        dataReceived = const JSONMessageCodec().decodeMessage(data);
       };
 
       html.window.dispatchEvent(html.KeyboardEvent('keyup'));
@@ -42,11 +42,11 @@ void main() {
 
     test('dispatches keydown to flutter/keyevent channel', () {
       String channelReceived;
-      Map dataReceived;
+      Map<String, dynamic> dataReceived;
       ui.window.onPlatformMessage = (String channel, ByteData data,
           ui.PlatformMessageResponseCallback callback) {
         channelReceived = channel;
-        dataReceived = JSONMessageCodec().decodeMessage(data);
+        dataReceived = const JSONMessageCodec().decodeMessage(data);
       };
 
       html.window.dispatchEvent(html.KeyboardEvent('keydown'));

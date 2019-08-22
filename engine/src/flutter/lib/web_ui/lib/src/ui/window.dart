@@ -782,7 +782,6 @@ abstract class Window {
   @Deprecated('Use frameTimings instead.')
   TimingsCallback get onReportTimings => _onReportTimings;
   TimingsCallback _onReportTimings;
-  Zone _onReportTimingsZone;
   @Deprecated('Use frameTimings instead.')
   set onReportTimings(TimingsCallback callback) {
     _internalSetOnReportTimings(callback);
@@ -790,7 +789,6 @@ abstract class Window {
 
   void _internalSetOnReportTimings(TimingsCallback callback) {
     _onReportTimings = callback;
-    _onReportTimingsZone = Zone.current;
   }
 
   // ignore: deprecated_member_use_from_same_package

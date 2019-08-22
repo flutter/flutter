@@ -172,6 +172,42 @@ class ClipRRectLayer extends ContainerLayer {
   }
 }
 
+/// A layer that paints its children with the given opacity.
+class OpacityLayer extends ContainerLayer implements ui.OpacityEngineLayer {
+  final int _alpha;
+  final ui.Offset _offset;
+
+  OpacityLayer(this._alpha, this._offset);
+
+  @override
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    Matrix4 childMatrix = Matrix4.copy(matrix);
+    childMatrix.translate(_offset.dx, _offset.dy);
+    final ui.Rect childPaintBounds =
+        prerollChildren(prerollContext, childMatrix);
+    paintBounds = childPaintBounds.translate(_offset.dx, _offset.dy);
+  }
+
+  @override
+  void paint(PaintContext context) {
+    assert(needsPainting);
+
+    final ui.Paint paint = ui.Paint();
+    paint.color = ui.Color.fromARGB(_alpha, 0, 0, 0);
+
+    context.canvas.save();
+    context.canvas.translate(_offset.dx, _offset.dy);
+
+    final ui.Rect saveLayerBounds = paintBounds.shift(-_offset);
+
+    context.canvas.saveLayer(saveLayerBounds, paint);
+    paintChildren(context);
+    // Restore twice: once for the translate and once for the saveLayer.
+    context.canvas.restore();
+    context.canvas.restore();
+  }
+}
+
 /// A layer that transforms its child layers by the given transform matrix.
 class TransformLayer extends ContainerLayer
     implements ui.OffsetEngineLayer, ui.TransformEngineLayer {
@@ -330,16 +366,13 @@ class PhysicalShapeLayer extends ContainerLayer
     final int saveCount = paintContext.canvas.save();
     switch (_clipBehavior) {
       case ui.Clip.hardEdge:
-        paintContext.canvas.clipPath(_path);
+        paintContext.canvas.clipPath(_path, doAntiAlias: false);
         break;
       case ui.Clip.antiAlias:
-        // TODO(het): This is supposed to be different from Clip.hardEdge in
-        // that it anti-aliases the clip. The canvas clipPath() method
-        // should support this.
-        paintContext.canvas.clipPath(_path);
+        paintContext.canvas.clipPath(_path, doAntiAlias: true);
         break;
       case ui.Clip.antiAliasWithSaveLayer:
-        paintContext.canvas.clipPath(_path);
+        paintContext.canvas.clipPath(_path, doAntiAlias: true);
         paintContext.canvas.saveLayer(paintBounds, null);
         break;
       case ui.Clip.none:

@@ -23,7 +23,8 @@ class SkPictureRecorder implements ui.PictureRecorder {
 
   @override
   ui.Picture endRecording() {
-    js.JsObject skPicture = _recorder.callMethod('finishRecordingAsPicture');
+    final js.JsObject skPicture =
+        _recorder.callMethod('finishRecordingAsPicture');
     _recorder.callMethod('delete');
     return SkPicture(skPicture, cullRect);
   }

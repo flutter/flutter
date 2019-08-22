@@ -226,7 +226,8 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
       ctx.lineJoin = 'miter';
     }
     if (paint.shader != null) {
-      final Object paintStyle = paint.shader.createPaintStyle(ctx);
+      final EngineGradient engineShader = paint.shader;
+      final Object paintStyle = engineShader.createPaintStyle(ctx);
       _setFillAndStrokeStyle(paintStyle, paintStyle);
     } else if (paint.color != null) {
       final String colorString = paint.color.toCssString();
@@ -367,20 +368,6 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     //
     // This matrix is sufficient to represent 2D rotates, translates, scales,
     // and skews.
-    assert(() {
-      if (matrix4[2] != 0.0 ||
-          matrix4[3] != 0.0 ||
-          matrix4[7] != 0.0 ||
-          matrix4[8] != 0.0 ||
-          matrix4[9] != 0.0 ||
-          matrix4[10] != 1.0 ||
-          matrix4[11] != 0.0 ||
-          matrix4[14] != 0.0 ||
-          matrix4[15] != 1.0) {
-        print('WARNING: 3D transformation matrix was passed to BitmapCanvas.');
-      }
-      return true;
-    }());
     _ctx.transform(
       matrix4[0],
       matrix4[1],
@@ -505,11 +492,11 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     final double blRadiusY = rrect.blRadiusY.abs();
     final double brRadiusY = rrect.brRadiusY.abs();
 
-    ctx.moveTo(left + trRadiusX, top);
-
     if (startNewPath) {
       ctx.beginPath();
     }
+
+    ctx.moveTo(left + trRadiusX, top);
 
     // Top side and top-right corner
     ctx.lineTo(right - trRadiusX, top);
@@ -838,7 +825,9 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     } else {
       final String cssTransform =
           matrix4ToCssTransform(transformWithOffset(currentTransform, offset));
-      paragraphElement.style.transform = cssTransform;
+      paragraphElement.style
+        ..transformOrigin = '0 0 0'
+        ..transform = cssTransform;
       rootElement.append(paragraphElement);
     }
     _children.add(paragraphElement);
@@ -1075,8 +1064,9 @@ List<html.Element> _clipContent(List<_SaveClipEntry> clipStack,
 
   root.style.position = 'absolute';
   domRenderer.append(curElement, content);
-  content.style.transform =
-      _cssTransformAtOffset(currentTransform, offset.dx, offset.dy);
+  content.style
+    ..transformOrigin = '0 0 0'
+    ..transform = _cssTransformAtOffset(currentTransform, offset.dx, offset.dy);
   return <html.Element>[root]..addAll(clipDefs);
 }
 

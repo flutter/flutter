@@ -14,25 +14,27 @@ import 'matchers.dart';
 void main() {
   group('SceneBuilder', () {
     test('pushOffset implements surface lifecycle', () {
-      testLayerLifeCycle((sceneBuilder, paintedBy) {
-        return sceneBuilder.pushOffset(10, 20);
+      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
+        return sceneBuilder.pushOffset(10, 20, oldLayer: oldLayer);
       }, () {
         return '''<s><flt-offset></flt-offset></s>''';
       });
     });
 
     test('pushTransform implements surface lifecycle', () {
-      testLayerLifeCycle((sceneBuilder, paintedBy) {
+      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
         return sceneBuilder.pushTransform(
-            Matrix4.translationValues(10, 20, 0).storage);
+            Matrix4.translationValues(10, 20, 0).storage,
+            oldLayer: oldLayer);
       }, () {
         return '''<s><flt-transform></flt-transform></s>''';
       });
     });
 
     test('pushClipRect implements surface lifecycle', () {
-      testLayerLifeCycle((sceneBuilder, paintedBy) {
-        return sceneBuilder.pushClipRect(Rect.fromLTRB(10, 20, 30, 40));
+      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
+        return sceneBuilder.pushClipRect(const Rect.fromLTRB(10, 20, 30, 40),
+            oldLayer: oldLayer);
       }, () {
         return '''
 <s>
@@ -43,9 +45,10 @@ void main() {
     });
 
     test('pushClipRRect implements surface lifecycle', () {
-      testLayerLifeCycle((sceneBuilder, paintedBy) {
+      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
         return sceneBuilder.pushClipRRect(
-            RRect.fromLTRBR(10, 20, 30, 40, Radius.circular(3)));
+            RRect.fromLTRBR(10, 20, 30, 40, const Radius.circular(3)),
+            oldLayer: oldLayer);
       }, () {
         return '''
 <s>
@@ -56,9 +59,9 @@ void main() {
     });
 
     test('pushClipPath implements surface lifecycle', () {
-      testLayerLifeCycle((sceneBuilder, paintedBy) {
-        final Path path = Path()..addRect(Rect.fromLTRB(10, 20, 30, 40));
-        return sceneBuilder.pushClipPath(path);
+      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
+        final Path path = Path()..addRect(const Rect.fromLTRB(10, 20, 30, 40));
+        return sceneBuilder.pushClipPath(path, oldLayer: oldLayer);
       }, () {
         return '''
 <s>
@@ -71,24 +74,39 @@ void main() {
     });
 
     test('pushOpacity implements surface lifecycle', () {
-      testLayerLifeCycle((sceneBuilder, paintedBy) {
-        return sceneBuilder.pushOpacity(10);
+      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
+        return sceneBuilder.pushOpacity(10, oldLayer: oldLayer);
       }, () {
         return '''<s><o></o></s>''';
       });
     });
 
     test('pushPhysicalShape implements surface lifecycle', () {
-      testLayerLifeCycle((sceneBuilder, paintedBy) {
-        final Path path = Path()..addRect(Rect.fromLTRB(10, 20, 30, 40));
+      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
+        final Path path = Path()..addRect(const Rect.fromLTRB(10, 20, 30, 40));
         return sceneBuilder.pushPhysicalShape(
           path: path,
           elevation: 2,
-          color: Color.fromRGBO(0, 0, 0, 1),
-          shadowColor: Color.fromRGBO(0, 0, 0, 1),
+          color: const Color.fromRGBO(0, 0, 0, 1),
+          shadowColor: const Color.fromRGBO(0, 0, 0, 1),
+          oldLayer: oldLayer,
         );
       }, () {
         return '''<s><pshape><clip-i></clip-i></pshape></s>''';
+      });
+    });
+
+    test('pushBackdropFilter implements surface lifecycle', () {
+      testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
+        return sceneBuilder.pushBackdropFilter(
+          ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
+          oldLayer: oldLayer,
+        );
+      }, () {
+        return '<s><flt-backdrop>'
+            '<flt-backdrop-filter></flt-backdrop-filter>'
+            '<flt-backdrop-interior></flt-backdrop-interior>'
+            '</flt-backdrop></s>';
       });
     });
   });
@@ -97,13 +115,11 @@ void main() {
     test(
         'build, retain, update, and applyPaint are called the right number of times',
         () {
-      final Object paintedBy = Object();
-      final PersistedScene scene1 = PersistedScene();
+      final PersistedScene scene1 = PersistedScene(null);
       final PersistedClipRect clip1 =
-          PersistedClipRect(paintedBy, Rect.fromLTRB(10, 10, 20, 20));
-      final PersistedOpacity opacity =
-          PersistedOpacity(paintedBy, 100, Offset.zero);
-      final MockPersistedPicture picture = MockPersistedPicture(paintedBy);
+          PersistedClipRect(null, const Rect.fromLTRB(10, 10, 20, 20));
+      final PersistedOpacity opacity = PersistedOpacity(null, 100, Offset.zero);
+      final MockPersistedPicture picture = MockPersistedPicture();
 
       scene1.appendChild(clip1);
       clip1.appendChild(opacity);
@@ -114,7 +130,9 @@ void main() {
       expect(picture.updateCount, 0);
       expect(picture.applyPaintCount, 0);
 
+      scene1.preroll();
       scene1.build();
+      commitScene(scene1);
       expect(picture.retainCount, 0);
       expect(picture.buildCount, 1);
       expect(picture.updateCount, 0);
@@ -122,14 +140,17 @@ void main() {
 
       // The second scene graph retains the opacity, but not the clip. However,
       // because the clip didn't change no repaints should happen.
-      final PersistedScene scene2 = PersistedScene();
+      final PersistedScene scene2 = PersistedScene(scene1);
       final PersistedClipRect clip2 =
-          PersistedClipRect(paintedBy, Rect.fromLTRB(10, 10, 20, 20));
+          PersistedClipRect(clip1, const Rect.fromLTRB(10, 10, 20, 20));
+      clip1.state = PersistedSurfaceState.pendingUpdate;
       scene2.appendChild(clip2);
-      opacity.reuseStrategy = PersistedSurfaceReuseStrategy.retain;
+      opacity.state = PersistedSurfaceState.pendingRetention;
       clip2.appendChild(opacity);
 
+      scene2.preroll();
       scene2.update(scene1);
+      commitScene(scene1);
       expect(picture.retainCount, 1);
       expect(picture.buildCount, 1);
       expect(picture.updateCount, 0);
@@ -137,14 +158,17 @@ void main() {
 
       // The third scene graph retains the opacity, and produces a new clip.
       // This should cause the picture to repaint despite being retained.
-      final PersistedScene scene3 = PersistedScene();
+      final PersistedScene scene3 = PersistedScene(scene2);
       final PersistedClipRect clip3 =
-          PersistedClipRect(paintedBy, Rect.fromLTRB(10, 10, 50, 50));
+          PersistedClipRect(clip2, const Rect.fromLTRB(10, 10, 50, 50));
+      clip2.state = PersistedSurfaceState.pendingUpdate;
       scene3.appendChild(clip3);
-      opacity.reuseStrategy = PersistedSurfaceReuseStrategy.retain;
+      opacity.state = PersistedSurfaceState.pendingRetention;
       clip3.appendChild(opacity);
 
+      scene3.preroll();
       scene3.update(scene2);
+      commitScene(scene1);
       expect(picture.retainCount, 2);
       expect(picture.buildCount, 1);
       expect(picture.updateCount, 0);
@@ -154,7 +178,7 @@ void main() {
 }
 
 typedef TestLayerBuilder = EngineLayer Function(
-    SceneBuilder sceneBuilder, Object paintedBy);
+    SceneBuilder sceneBuilder, EngineLayer oldLayer);
 typedef ExpectedHtmlGetter = String Function();
 
 void testLayerLifeCycle(
@@ -163,11 +187,9 @@ void testLayerLifeCycle(
   // scene starts from the "build" phase.
   SceneBuilder.debugForgetFrameScene();
 
-  final Object paintedBy = Object();
-
   // Build: builds a brand new layer.
   SceneBuilder sceneBuilder = SceneBuilder();
-  final EngineLayer layer1 = layerBuilder(sceneBuilder, paintedBy);
+  final EngineLayer layer1 = layerBuilder(sceneBuilder, null);
   final Type surfaceType = layer1.runtimeType;
   sceneBuilder.pop();
 
@@ -176,7 +198,7 @@ void testLayerLifeCycle(
 
   PersistedSurface findSurface() {
     return enumerateSurfaces()
-        .where((s) => s.runtimeType == surfaceType)
+        .where((PersistedSurface s) => s.runtimeType == surfaceType)
         .single;
   }
 
@@ -198,7 +220,7 @@ void testLayerLifeCycle(
 
   // Reuse: reuses a layer's DOM elements by matching it.
   sceneBuilder = SceneBuilder();
-  final EngineLayer layer3 = layerBuilder(sceneBuilder, paintedBy);
+  final EngineLayer layer3 = layerBuilder(sceneBuilder, layer1);
   sceneBuilder.pop();
   expect(layer3, isNot(same(layer1)));
   tester = SceneTester(sceneBuilder.build());
@@ -232,21 +254,25 @@ void testLayerLifeCycle(
 }
 
 class MockPersistedPicture extends PersistedPicture {
-  factory MockPersistedPicture(Object paintedBy) {
+  factory MockPersistedPicture() {
     final PictureRecorder recorder = PictureRecorder();
     // Use the largest cull rect so that layer clips are effective. The tests
     // rely on this.
     recorder.beginRecording(Rect.largest)..drawPaint(Paint());
-    return MockPersistedPicture._(paintedBy, recorder.endRecording());
+    return MockPersistedPicture._(recorder.endRecording());
   }
 
-  MockPersistedPicture._(Object paintedBy, Picture picture)
-      : super(paintedBy, 0, 0, picture, 0);
+  MockPersistedPicture._(Picture picture) : super(0, 0, picture, 0);
 
   int retainCount = 0;
   int buildCount = 0;
   int updateCount = 0;
   int applyPaintCount = 0;
+
+  @override
+  double matchForUpdate(PersistedPicture existingSurface) {
+    return identical(existingSurface.picture, picture) ? 0.0 : 1.0;
+  }
 
   @override
   void build() {

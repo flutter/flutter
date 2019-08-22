@@ -4,7 +4,7 @@
 
 part of engine;
 
-final _supportsDecode =
+final bool _supportsDecode =
     js_util.hasProperty(js.JsObject(js.context['Image']), 'decode');
 
 class HtmlCodec implements ui.Codec {

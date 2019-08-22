@@ -5,7 +5,7 @@
 part of engine;
 
 const String _testFontFamily = 'Ahem';
-const String _testFontUrl = 'packages/flutter_web/assets/Ahem.ttf';
+const String _testFontUrl = 'packages/ui/assets/ahem.ttf';
 const String _robotoFontUrl =
     'packages/flutter_web_ui/assets/Roboto-Regular.ttf';
 

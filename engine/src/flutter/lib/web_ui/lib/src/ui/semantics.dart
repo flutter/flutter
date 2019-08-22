@@ -346,6 +346,11 @@ class SemanticsFlag {
   /// affordances.
   static const SemanticsFlag isTextField = SemanticsFlag._(_kIsTextFieldIndex);
 
+  /// Whether the semantic node is read only.
+  ///
+  /// Only applicable when [isTextField] is true.
+  static const SemanticsFlag isReadOnly = SemanticsFlag._(_kIsReadOnlyIndex);
+
   /// Whether the semantic node currently holds the user's focus.
   ///
   /// The focused element is usually the current receiver of keyboard inputs.
@@ -359,12 +364,6 @@ class SemanticsFlag {
   /// therefore does not have an "enabled" state.
   static const SemanticsFlag hasEnabledState =
       SemanticsFlag._(_kHasEnabledStateIndex);
-
-  /// Whether the semantic node is read only.
-  ///
-  /// Only applicable when [isTextField] is true.
-  static const SemanticsFlag isReadOnly =
-      const SemanticsFlag._(_kIsReadOnlyIndex);
 
   /// Whether a semantic node that [hasEnabledState] is currently enabled.
   ///
@@ -509,6 +508,9 @@ class SemanticsFlag {
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
+  /// The possible semantics flags.
+  ///
+  /// The map's key is the [index] of the flag and the value is the flag itself.
   static const Map<int, SemanticsFlag> values = <int, SemanticsFlag>{
     _kHasCheckedStateIndex: hasCheckedState,
     _kIsCheckedIndex: isChecked,
@@ -530,6 +532,7 @@ class SemanticsFlag {
     _kIsToggledIndex: isToggled,
     _kHasImplicitScrollingIndex: hasImplicitScrolling,
     _kIsMultilineIndex: isMultiline,
+    _kIsReadOnlyIndex: isReadOnly,
   };
 
   @override
@@ -575,6 +578,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.hasImplicitScrolling';
       case _kIsMultilineIndex:
         return 'SemanticsFlag.isMultiline';
+      case _kIsReadOnlyIndex:
+        return 'SemanticsFlag.isReadOnly';
     }
     return null;
   }

@@ -154,7 +154,7 @@ class RecordingCanvas {
     _commands.add(PaintClipRRect(rrect));
   }
 
-  void clipPath(ui.Path path) {
+  void clipPath(ui.Path path, {bool doAntiAlias = true}) {
     _paintBounds.clipRect(path.getBounds());
     _hasArbitraryPaint = true;
     _commands.add(PaintClipPath(path));
@@ -267,7 +267,10 @@ class RecordingCanvas {
       pathBounds = pathBounds.inflate(paint.strokeWidth);
     }
     _paintBounds.grow(pathBounds);
-    _commands.add(PaintDrawPath(path, paint.webOnlyPaintData));
+    // Clone path so it can be reused for subsequent draw calls.
+    final ui.Path clone = ui.Path.from(path);
+    clone.fillType = path.fillType;
+    _commands.add(PaintDrawPath(clone, paint.webOnlyPaintData));
   }
 
   void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
@@ -982,6 +985,7 @@ class PaintDrawParagraph extends PaintCommand {
 }
 
 List<dynamic> _serializePaintToCssPaint(ui.PaintData paint) {
+  final EngineGradient engineShader = paint.shader;
   return <dynamic>[
     paint.blendMode?.index,
     paint.style?.index,
@@ -989,7 +993,7 @@ List<dynamic> _serializePaintToCssPaint(ui.PaintData paint) {
     paint.strokeCap?.index,
     paint.isAntiAlias,
     paint.color.toCssString(),
-    paint.shader?.webOnlySerializeToCssPaint(),
+    engineShader?.webOnlySerializeToCssPaint(),
     paint.maskFilter?.webOnlySerializeToCssPaint(),
     paint.filterQuality?.index,
     paint.colorFilter?.webOnlySerializeToCssPaint(),

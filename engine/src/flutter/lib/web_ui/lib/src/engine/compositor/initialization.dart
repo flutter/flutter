@@ -5,7 +5,8 @@
 part of engine;
 
 /// EXPERIMENTAL: Enable the Skia-based rendering backend.
-const bool experimentalUseSkia = false;
+const bool experimentalUseSkia =
+    bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
 
 /// The URL to use when downloading the CanvasKit script and associated wasm.
 const String canvasKitBaseUrl = 'https://unpkg.com/canvaskit-wasm@0.6.0/bin/';
@@ -18,17 +19,17 @@ Future<void> initializeSkia() {
   StreamSubscription<html.Event> loadSubscription;
   loadSubscription = domRenderer.canvasKitScript.onLoad.listen((_) {
     loadSubscription.cancel();
-    final js.JsObject canvasKitInitArgs = js.JsObject.jsify(<dynamic, dynamic>{
-      'locateFile': js.allowInterop((String file) => canvasKitBaseUrl + file)
+    final js.JsObject canvasKitInitArgs = js.JsObject.jsify(<String, dynamic>{
+      'locateFile': (String file, String unusedBase) => canvasKitBaseUrl + file,
     });
     final js.JsObject canvasKitInit =
         js.JsObject(js.context['CanvasKitInit'], <dynamic>[canvasKitInitArgs]);
     final js.JsObject canvasKitInitPromise = canvasKitInit.callMethod('ready');
     canvasKitInitPromise.callMethod('then', <dynamic>[
-      js.allowInterop((js.JsObject ck) {
+      (js.JsObject ck) {
         canvasKit = ck;
         canvasKitCompleter.complete();
-      })
+      },
     ]);
   });
   return canvasKitCompleter.future;
@@ -38,3 +39,6 @@ Future<void> initializeSkia() {
 ///
 /// This is created by [initializeSkia].
 js.JsObject canvasKit;
+
+/// The Skia font collection.
+SkiaFontCollection skiaFontCollection;
