@@ -2795,6 +2795,7 @@ class RenderMouseRegion extends RenderProxyBox {
     if (listeners.isEmpty)
       listeners.add('<none>');
     properties.add(IterableProperty<String>('listeners', listeners));
+    properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
     // TODO(jacobr): add raw listeners to the diagnostics data.
   }
 }

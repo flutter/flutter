@@ -2227,5 +2227,6 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
     properties.add(DiagnosticsProperty<T>('value', value));
     properties.add(DiagnosticsProperty<Size>('size', size, defaultValue: null));
     properties.add(DiagnosticsProperty<Offset>('offset', offset, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: false));
   }
 }

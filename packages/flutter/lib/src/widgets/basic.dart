@@ -5848,6 +5848,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     if (onHover != null)
       listeners.add('hover');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
+    properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
   }
 }
 
