@@ -1096,9 +1096,9 @@ mixin WidgetInspectorService {
         final int subtreeDepth = int.parse(parameters['subtreeDepth'] ?? '2');
         return <String, Object>{
           'result': _getDetailsSubtree(
-              parameters['arg'],
-              parameters['objectGroup'],
-              subtreeDepth,
+            parameters['arg'],
+            parameters['objectGroup'],
+            subtreeDepth,
           ),
         };
       },
@@ -1612,6 +1612,9 @@ mixin WidgetInspectorService {
   /// Returns a JSON representation of the subtree rooted at the
   /// [DiagnosticsNode] object that `diagnosticsNodeId` references providing
   /// information needed for the details subtree view.
+  ///
+  /// [subtreeDepth] - the number of levels of the subtree that should be
+  /// returned. This value defaults to 2 for backwards compatibility.
   ///
   /// See also:
   ///
