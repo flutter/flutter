@@ -890,7 +890,8 @@ void main() {
     recognized.clear();
   });
 
-  testGesture('On multiple pointers, DragGR is canceled when all pointers are canceled', (GestureTester tester) {
+  testGesture('On multiple pointers, DragGestureRecognizer is canceled '
+    'when all pointers are canceled', (GestureTester tester) {
     // This test simulates the following scenario:
     // P1 down, P2 down, P1 up, P2 up
     final List<String> logs = <String>[];
@@ -940,7 +941,8 @@ void main() {
     vert.dispose();
   });
 
-  testGesture('On multiple pointers, DragGR is accepted when the first pointer is accepted', (GestureTester tester) {
+  testGesture('On multiple pointers, DragGestureRecognizer is accepted when the '
+    'first pointer is accepted', (GestureTester tester) {
     // This test simulates the following scenario:
     // P1 down, P2 down, P1 moves away, P2 up
     final List<String> logs = <String>[];
@@ -994,7 +996,8 @@ void main() {
     vert.dispose();
   });
 
-  testGesture('On multiple pointers, canceled pointers (due to up) do not prevent layer pointers getting accepted', (GestureTester tester) {
+  testGesture('On multiple pointers, canceled pointers (due to up) do not '
+    'prevent layer pointers getting accepted', (GestureTester tester) {
     // This test simulates the following scenario:
     // P1 down, P2 down, P1 Up, P2 moves away
     final List<String> logs = <String>[];
@@ -1048,7 +1051,8 @@ void main() {
     vert.dispose();
   });
 
-  testGesture('On multiple pointers, canceled pointers (due to buttons) do not prevent layer pointers getting accepted', (GestureTester tester) {
+  testGesture('On multiple pointers, canceled pointers (due to buttons) do not '
+    'prevent layer pointers getting accepted', (GestureTester tester) {
     // This test simulates the following scenario:
     // P1 down, P2 down, P1 change buttons, P2 moves away
     final List<String> logs = <String>[];
