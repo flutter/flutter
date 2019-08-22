@@ -48,8 +48,10 @@ class PluginTest {
         section('Add plugins');
         await app.addPlugin('plugintest', pluginPath: '../plugintest');
         await app.addPlugin('path_provider');
-        section('Build');
+        section('Build app');
         await app.build(buildTarget);
+        section('Test app');
+        await app.test();
       } finally {
         await plugin.delete();
         await app.delete();
@@ -82,7 +84,13 @@ abstract class _FlutterProject {
     );
     await pubspec.writeAsString(content, flush: true);
   }
-  
+
+  Future<void> test() async {
+    await inDirectory(Directory(rootPath), () async {
+      await flutter('test');
+    });
+  }
+
   Future<void> delete() async {
     if (Platform.isWindows) {
       // A running Gradle daemon might prevent us from deleting the project
@@ -118,12 +126,6 @@ class _FlutterPlugin extends _FlutterProject {
       );
     });
     return _FlutterPlugin(directory, 'plugintest');
-  }
-
-  Future<void> test() async {
-    await inDirectory(Directory(rootPath), () async {
-      await flutter('test');
-    });
   }
 }
 
