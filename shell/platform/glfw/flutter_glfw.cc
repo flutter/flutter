@@ -21,19 +21,6 @@
 #include "flutter/shell/platform/glfw/platform_handler.h"
 #include "flutter/shell/platform/glfw/text_input_plugin.h"
 
-// For compatibility with GTK-based plugins, special message loop setup is
-// required (e.g., for GTK modal windows). This can be disabled for cases where
-// a GTK dependency is undesirable by defining FLUTTER_DISABLE_GTK.
-#if defined(__linux__) && !defined(FLUTTER_DISABLE_GTK)
-#define FLUTTER_USE_GTK 1
-#endif
-
-#ifdef FLUTTER_USE_GTK
-// For plugin-compatible event handling (e.g., modal windows).
-#include <X11/Xlib.h>
-#include <gtk/gtk.h>
-#endif
-
 // GLFW_TRUE & GLFW_FALSE are introduced since libglfw-3.3,
 // add definitions here to compile under the old versions.
 #ifndef GLFW_TRUE
@@ -564,10 +551,6 @@ FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
     const char* icu_data_path,
     const char** arguments,
     size_t argument_count) {
-#ifdef FLUTTER_USE_GTK
-  gtk_init(0, nullptr);
-#endif
-
   auto state = std::make_unique<FlutterDesktopWindowControllerState>();
 
   // Create the window, and set the state as its user data.
@@ -734,25 +717,15 @@ double FlutterDesktopWindowGetScaleFactor(
   return flutter_window->pixels_per_screen_coordinate;
 }
 
-void FlutterDesktopRunWindowLoop(FlutterDesktopWindowControllerRef controller) {
-  GLFWwindow* window = controller->window.get();
-#ifdef FLUTTER_USE_GTK
-  // Necessary for GTK thread safety.
-  XInitThreads();
-#endif
+bool FlutterDesktopRunWindowEventLoopWithTimeout(
+    FlutterDesktopWindowControllerRef controller,
+    uint32_t timeout_milliseconds) {
+  auto wait_duration = timeout_milliseconds == 0
+                           ? std::chrono::milliseconds::max()
+                           : std::chrono::milliseconds(timeout_milliseconds);
+  controller->event_loop->WaitForEvents(wait_duration);
 
-  while (!glfwWindowShouldClose(window)) {
-    auto wait_duration = std::chrono::milliseconds::max();
-#ifdef FLUTTER_USE_GTK
-    // If we are not using GTK, there is no point in waking up.
-    wait_duration = std::chrono::milliseconds(10);
-    if (gtk_events_pending()) {
-      gtk_main_iteration();
-    }
-#endif
-    controller->event_loop->WaitForEvents(wait_duration);
-  }
-  FlutterDesktopDestroyWindow(controller);
+  return !glfwWindowShouldClose(controller->window.get());
 }
 
 FlutterDesktopWindowRef FlutterDesktopGetWindow(

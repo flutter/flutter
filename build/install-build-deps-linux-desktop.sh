@@ -8,4 +8,4 @@
 
 set -e
 
-sudo apt-get -y install libgtk-3-dev libx11-dev
+sudo apt-get -y install libx11-dev

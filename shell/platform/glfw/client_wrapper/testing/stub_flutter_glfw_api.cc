@@ -121,10 +121,14 @@ double FlutterDesktopWindowGetScaleFactor(
   return 1.0;
 }
 
-void FlutterDesktopRunWindowLoop(FlutterDesktopWindowControllerRef controller) {
+bool FlutterDesktopRunWindowEventLoopWithTimeout(
+    FlutterDesktopWindowControllerRef controller,
+    uint32_t millisecond_timeout) {
   if (s_stub_implementation) {
-    s_stub_implementation->RunWindowLoop();
+    return s_stub_implementation->RunWindowEventLoopWithTimeout(
+        millisecond_timeout);
   }
+  return true;
 }
 
 FlutterDesktopEngineRef FlutterDesktopRunEngine(const char* assets_path,

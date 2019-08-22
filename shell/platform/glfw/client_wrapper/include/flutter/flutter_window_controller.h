@@ -5,11 +5,12 @@
 #ifndef FLUTTER_SHELL_PLATFORM_GLFW_CLIENT_WRAPPER_INCLUDE_FLUTTER_FLUTTER_WINDOW_CONTROLLER_H_
 #define FLUTTER_SHELL_PLATFORM_GLFW_CLIENT_WRAPPER_INCLUDE_FLUTTER_FLUTTER_WINDOW_CONTROLLER_H_
 
+#include <flutter_glfw.h>
+
+#include <chrono>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include <flutter_glfw.h>
 
 #include "flutter_window.h"
 #include "plugin_registrar.h"
@@ -67,7 +68,14 @@ class FlutterWindowController {
   // before CreateWindow is called, and after RunEventLoop returns;
   FlutterWindow* window() { return window_.get(); }
 
-  // Loops on Flutter window events until the window closes.
+  // Processes the next event on this window, or returns early if |timeout| is
+  // reached before the next event.
+  //
+  // Returns false if the window was closed as a result of event processing.
+  bool RunEventLoopWithTimeout(
+      std::chrono::milliseconds timeout = std::chrono::milliseconds::max());
+
+  // Deprecated. Use RunEventLoopWithTimeout.
   void RunEventLoop();
 
  private:

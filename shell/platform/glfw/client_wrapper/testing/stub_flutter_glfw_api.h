@@ -70,8 +70,10 @@ class StubFlutterGlfwApi {
   // Called for FlutterDesktopWindowGetScaleFactor.
   virtual double GetWindowScaleFactor() { return 1.0; }
 
-  // Called for FlutterDesktopRunWindowLoop.
-  virtual void RunWindowLoop() {}
+  // Called for FlutterDesktopRunWindowEventLoopWithTimeout.
+  virtual bool RunWindowEventLoopWithTimeout(uint32_t millisecond_timeout) {
+    return true;
+  }
 
   // Called for FlutterDesktopRunEngine.
   virtual FlutterDesktopEngineRef RunEngine(const char* assets_path,
