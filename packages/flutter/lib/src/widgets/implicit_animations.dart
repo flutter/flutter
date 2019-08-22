@@ -364,9 +364,10 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   @override
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final bool curveChanged = widget.curve != oldWidget.curve;
+    if (widget.curve != oldWidget.curve)
+      _updateCurve();
     _controller.duration = widget.duration;
-    if (_constructTweens() || (_controller.isAnimating && curveChanged)) {
+    if (_constructTweens()) {
       forEachTween((Tween<dynamic> tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
         _updateTween(tween, targetValue);
         return tween;
@@ -375,9 +376,6 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
         ..value = 0.0
         ..forward();
       didUpdateTweens();
-    }
-    if (curveChanged) {
-      _updateCurve();
     }
   }
 
