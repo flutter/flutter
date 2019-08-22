@@ -1142,6 +1142,7 @@ FILE: ../../../flutter/third_party/txt/src/txt/font_skia.cc
 FILE: ../../../flutter/third_party/txt/src/txt/font_skia.h
 FILE: ../../../flutter/third_party/txt/src/txt/font_style.h
 FILE: ../../../flutter/third_party/txt/src/txt/font_weight.h
+FILE: ../../../flutter/third_party/txt/src/txt/line_metrics.h
 FILE: ../../../flutter/third_party/txt/src/txt/paint_record.cc
 FILE: ../../../flutter/third_party/txt/src/txt/paint_record.h
 FILE: ../../../flutter/third_party/txt/src/txt/paragraph.h
@@ -1155,6 +1156,7 @@ FILE: ../../../flutter/third_party/txt/src/txt/paragraph_txt.cc
 FILE: ../../../flutter/third_party/txt/src/txt/paragraph_txt.h
 FILE: ../../../flutter/third_party/txt/src/txt/placeholder_run.cc
 FILE: ../../../flutter/third_party/txt/src/txt/placeholder_run.h
+FILE: ../../../flutter/third_party/txt/src/txt/run_metrics.h
 FILE: ../../../flutter/third_party/txt/src/txt/styled_runs.cc
 FILE: ../../../flutter/third_party/txt/src/txt/styled_runs.h
 FILE: ../../../flutter/third_party/txt/src/txt/test_font_manager.cc
