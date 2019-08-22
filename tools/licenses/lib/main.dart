@@ -293,15 +293,6 @@ class _RepositoryDartLicenseFile extends _RepositorySingleLicenseFile {
     : super(parent, io, _parseLicense(io));
 
   static final RegExp _pattern = RegExp(
-    r'^This license applies to all parts of Dart that are not externally\n'
-    r'maintained libraries\. The external maintained libraries used by\n'
-    r'Dart are:\n'
-    r'\n'
-    r'(?:.+\n)+'
-    r'\n'
-    r'The libraries may have their own licenses; we recommend you read them,\n'
-    r'as their terms may differ from the terms below\.\n'
-    r'\n'
     r'(Copyright (?:.|\n)+)$',
     caseSensitive: false
   );

@@ -1,4 +1,4 @@
-Signature: 7cb10c923a4e55c4725593b670e4e82f
+Signature: 62b256d3ce5db5ab6fe733271ebc1871
 
 UNUSED LICENSES:
 
@@ -7373,7 +7373,8 @@ FILE: ../../../third_party/dart/sdk/lib/vmservice_libraries.json
 FILE: ../../../third_party/dart/third_party/7zip.tar.gz.sha1
 FILE: ../../../third_party/dart/third_party/clang.tar.gz.sha1
 ----------------------------------------------------------------------------------------------------
-Copyright 2012, the Dart project authors. All rights reserved.
+Copyright 2012, the Dart project authors.
+
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
@@ -7439,6 +7440,8 @@ FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.html
 FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.js
 FILE: ../../../third_party/dart/runtime/vm/catch_entry_moves_test.cc
 FILE: ../../../third_party/dart/runtime/vm/class_id.h
+FILE: ../../../third_party/dart/runtime/vm/code_comments.cc
+FILE: ../../../third_party/dart/runtime/vm/code_comments.h
 FILE: ../../../third_party/dart/runtime/vm/code_entry_kind.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier.h
@@ -7494,6 +7497,8 @@ FILE: ../../../third_party/dart/runtime/vm/constants_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/debugger_kbc.cc
 FILE: ../../../third_party/dart/runtime/vm/elf.cc
 FILE: ../../../third_party/dart/runtime/vm/elf.h
+FILE: ../../../third_party/dart/runtime/vm/ffi_callback_trampolines.cc
+FILE: ../../../third_party/dart/runtime/vm/ffi_callback_trampolines.h
 FILE: ../../../third_party/dart/runtime/vm/frame_layout.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist_test.cc
@@ -21630,6 +21635,37 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: wasmer
+ORIGIN: ../../../third_party/dart/third_party/wasmer/LICENSE
+TYPE: LicenseType.mit
+FILE: ../../../third_party/dart/third_party/wasmer/Cargo.toml
+FILE: ../../../third_party/dart/third_party/wasmer/wasmer.hh
+FILE: ../../../third_party/dart/third_party/wasmer/wasmer.rs
+----------------------------------------------------------------------------------------------------
+MIT License
+
+Copyright (c) 2019 Wasmer, Inc. and its affiliates.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+====================================================================================================
+
+====================================================================================================
 LIBRARY: wuffs
 ORIGIN: ../../../third_party/wuffs/LICENSE
 TYPE: LicenseType.apache
@@ -22578,4 +22614,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 359
+Total license count: 360
