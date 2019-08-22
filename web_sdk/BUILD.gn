@@ -178,5 +178,9 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk") {
     "amd",
     "-o",
     rebase_path("$root_out_dir/flutter_web_sdk/kernel/amd/dart_sdk.js"),
+    "--modules",
+    "legacy",
+    "-o",
+    rebase_path("$root_out_dir/flutter_web_sdk/kernel/legacy/dart_sdk.js"),
   ]
 }
