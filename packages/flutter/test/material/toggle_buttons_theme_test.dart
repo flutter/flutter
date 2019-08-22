@@ -109,6 +109,18 @@ void main() {
   testWidgets(
     'Theme text/icon colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
+      TextStyle buttonTextStyle(String text) {
+        return tester.widget<DefaultTextStyle>(find.descendant(
+          of: find.widgetWithText(RawMaterialButton, text),
+          matching: find.byType(DefaultTextStyle),
+        )).style;
+      }
+      IconTheme iconTheme(IconData icon) {
+        return tester.widget(find.descendant(
+          of: find.widgetWithIcon(RawMaterialButton, icon),
+          matching: find.byType(IconTheme),
+        ));
+      }
       final ThemeData theme = ThemeData();
       const Color enabledColor = Colors.lime;
       const Color selectedColor = Colors.green;
@@ -136,22 +148,10 @@ void main() {
           ),
         ),
       );
-
-      DefaultTextStyle textStyle;
-      IconTheme iconTheme;
-
-      // custom theme enabled color
+      // Custom theme enabled color
       expect(theme.colorScheme.onSurface, isNot(enabledColor));
-      textStyle = tester.widget(find.descendant(
-        of: find.widgetWithText(RawMaterialButton, 'First child'),
-        matching: find.byType(DefaultTextStyle),
-      ));
-      expect(textStyle.style.color, enabledColor);
-      iconTheme = tester.widget(find.descendant(
-        of: find.widgetWithIcon(RawMaterialButton, Icons.check),
-        matching: find.byType(IconTheme),
-      ));
-      expect(iconTheme.data.color, enabledColor);
+      expect(buttonTextStyle('First child').color, enabledColor);
+      expect(iconTheme(Icons.check).data.color, enabledColor);
 
       await tester.pumpWidget(
         Material(
@@ -176,18 +176,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      // custom theme selected color
+      // Custom theme selected color
       expect(theme.colorScheme.primary, isNot(selectedColor));
-      textStyle = tester.widget(find.descendant(
-        of: find.widgetWithText(RawMaterialButton, 'First child'),
-        matching: find.byType(DefaultTextStyle),
-      ));
-      expect(textStyle.style.color, selectedColor);
-      iconTheme = tester.widget(find.descendant(
-        of: find.widgetWithIcon(RawMaterialButton, Icons.check),
-        matching: find.byType(IconTheme),
-      ));
-      expect(iconTheme.data.color, selectedColor);
+      expect(buttonTextStyle('First child').color, selectedColor);
+      expect(iconTheme(Icons.check).data.color, selectedColor);
 
       await tester.pumpWidget(
         Material(
@@ -211,18 +203,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      // custom theme disabled color
+      // Custom theme disabled color
       expect(theme.disabledColor, isNot(disabledColor));
-      textStyle = tester.widget(find.descendant(
-        of: find.widgetWithText(RawMaterialButton, 'First child'),
-        matching: find.byType(DefaultTextStyle),
-      ));
-      expect(textStyle.style.color, disabledColor);
-      iconTheme = tester.widget(find.descendant(
-        of: find.widgetWithIcon(RawMaterialButton, Icons.check),
-        matching: find.byType(IconTheme),
-      ));
-      expect(iconTheme.data.color, disabledColor);
+      expect(buttonTextStyle('First child').color, disabledColor);
+      expect(iconTheme(Icons.check).data.color, disabledColor);
     },
   );
 

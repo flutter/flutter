@@ -355,7 +355,7 @@ void main() {
       const Color selectedColor = Colors.green;
       const Color disabledColor = Colors.yellow;
 
-      // tests are ineffective if the custom colors are the same as the theme's
+      // Tests are ineffective if the custom colors are the same as the theme's
       expect(theme.colorScheme.onSurface, isNot(enabledColor));
       expect(theme.colorScheme.primary, isNot(selectedColor));
       expect(theme.colorScheme.onSurface.withOpacity(0.38), isNot(disabledColor));
@@ -421,7 +421,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      // Custom Disabled color
+      // Custom disabled color
       expect(buttonTextStyle('First child').color, disabledColor);
       expect(iconTheme(Icons.check).data.color, disabledColor);
     },
