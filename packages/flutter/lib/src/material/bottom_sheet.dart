@@ -462,7 +462,7 @@ Future<T> showModalBottomSheet<T>({
     isScrollControlled: isScrollControlled,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     backgroundColor: backgroundColor,
-    elevation: elevation,
+    elevation: elevation ?? Theme.of(context).bottomSheetTheme.modalElevation,
     shape: shape,
     clipBehavior: clipBehavior,
   ));
