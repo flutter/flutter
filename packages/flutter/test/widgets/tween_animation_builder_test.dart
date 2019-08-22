@@ -135,11 +135,6 @@ void main() {
     await tester.pump(const Duration(seconds: 2)); // finish animation.
 
     values.clear();
-    // Update curve (and tween to re-trigger animation).
-    await tester.pumpWidget(buildWidget(tween: IntTween(begin: 100, end: 200), curve: Curves.linear));
-    expect(values, <int>[100]);
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[100, 150]);
   });
 
   testWidgets('Duration is respected', (WidgetTester tester) async {
