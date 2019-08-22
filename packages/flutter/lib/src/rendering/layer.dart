@@ -214,7 +214,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   /// Returns the value of `S` that corresponds to the point described by
-  /// `regionOffset`.
+  /// `localPosition`.
   ///
   /// Returns null if no matching region is found.
   ///
@@ -228,14 +228,14 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// See also:
   ///
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  S find<S>(Offset regionOffset) {
+  S find<S>(Offset localPosition) {
     final List<S> result = <S>[];
-    findAnnotations<S>(result, regionOffset, onlyFirst: true);
+    findAnnotations<S>(result, localPosition, onlyFirst: true);
     return result.isEmpty ? null : result.first;
   }
 
   /// Returns an iterable of `S` values that corresponds to the point described
-  /// by `regionOffset` on all layers under the point.
+  /// by `localPosition` on all layers under the point.
   ///
   /// Returns an empty list if no matching region is found.
   ///
@@ -248,9 +248,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// See also:
   ///
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  Iterable<S> findAll<S>(Offset regionOffset) {
+  Iterable<S> findAll<S>(Offset localPosition) {
     final List<S> result = <S>[];
-    findAnnotations<S>(result, regionOffset, onlyFirst: false);
+    findAnnotations<S>(result, localPosition, onlyFirst: false);
     return result;
   }
 
@@ -259,7 +259,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// It adds the annotations of the children to `result` from visually front
   /// to back, then the annotation of this layer. These annotations must meet
-  /// the given restrictions, such as type `S` and position `regionOffset`.
+  /// the given restrictions, such as type `S` and position `localPosition`.
   ///
   /// If `onlyFirst` is true, the search will stop after the first result.
   ///
@@ -273,7 +273,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @protected
   bool findAnnotations<S>(
     List<S> result,
-    Offset regionOffset, {
+    Offset localPosition, {
     @required bool onlyFirst,
   });
 
@@ -398,7 +398,7 @@ class PictureLayer extends Layer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
     return false;
   }
 }
@@ -469,7 +469,7 @@ class TextureLayer extends Layer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
     return false;
   }
 }
@@ -507,7 +507,7 @@ class PlatformViewLayer extends Layer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
     return false;
   }
 }
@@ -583,7 +583,7 @@ class PerformanceOverlayLayer extends Layer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
     return false;
   }
 }
@@ -767,9 +767,9 @@ class ContainerLayer extends Layer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
     for (Layer child = lastChild; child != null; child = child.previousSibling) {
-      final bool isAbsorbed = child.findAnnotations<S>(result, regionOffset, onlyFirst: onlyFirst);
+      final bool isAbsorbed = child.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
       if (isAbsorbed)
         return true;
       if (onlyFirst && result.isNotEmpty)
@@ -998,8 +998,8 @@ class OffsetLayer extends ContainerLayer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
-    return super.findAnnotations<S>(result, regionOffset - offset, onlyFirst: onlyFirst);
+  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    return super.findAnnotations<S>(result, localPosition - offset, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1118,10 +1118,10 @@ class ClipRectLayer extends ContainerLayer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
-    if (!clipRect.contains(regionOffset))
+  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    if (!clipRect.contains(localPosition))
       return false;
-    return super.findAnnotations<S>(result, regionOffset, onlyFirst: onlyFirst);
+    return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1196,10 +1196,10 @@ class ClipRRectLayer extends ContainerLayer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
-    if (!clipRRect.contains(regionOffset))
+  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    if (!clipRRect.contains(localPosition))
       return false;
-    return super.findAnnotations<S>(result, regionOffset, onlyFirst: onlyFirst);
+    return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1274,10 +1274,10 @@ class ClipPathLayer extends ContainerLayer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
-    if (!clipPath.contains(regionOffset))
+  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    if (!clipPath.contains(localPosition))
       return false;
-    return super.findAnnotations<S>(result, regionOffset, onlyFirst: onlyFirst);
+    return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1393,7 +1393,7 @@ class TransformLayer extends OffsetLayer {
     builder.pop();
   }
 
-  Offset _transformOffset(Offset regionOffset) {
+  Offset _transformOffset(Offset localPosition) {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(
         PointerEvent.removePerspectiveTransform(transform)
@@ -1402,15 +1402,15 @@ class TransformLayer extends OffsetLayer {
     }
     if (_invertedTransform == null)
       return null;
-    final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
+    final Vector4 vector = Vector4(localPosition.dx, localPosition.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
     return Offset(result[0], result[1]);
   }
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
-    final Offset transformedOffset = _transformOffset(regionOffset);
+  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    final Offset transformedOffset = _transformOffset(localPosition);
     if (transformedOffset == null)
       return false;
     return super.findAnnotations<S>(result, transformedOffset, onlyFirst: onlyFirst);
@@ -1722,10 +1722,10 @@ class PhysicalModelLayer extends ContainerLayer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
-    if (!clipPath.contains(regionOffset))
+  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    if (!clipPath.contains(localPosition))
       return false;
-    return super.findAnnotations<S>(result, regionOffset, onlyFirst: onlyFirst);
+    return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1852,8 +1852,8 @@ class LeaderLayer extends ContainerLayer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
-    return super.findAnnotations<S>(result, regionOffset - offset, onlyFirst: onlyFirst);
+  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    return super.findAnnotations<S>(result, localPosition - offset, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1972,27 +1972,27 @@ class FollowerLayer extends ContainerLayer {
   Matrix4 _invertedTransform;
   bool _inverseDirty = true;
 
-  Offset _transformOffset<S>(Offset regionOffset) {
+  Offset _transformOffset<S>(Offset localPosition) {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(getLastTransform());
       _inverseDirty = false;
     }
     if (_invertedTransform == null)
       return null;
-    final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
+    final Vector4 vector = Vector4(localPosition.dx, localPosition.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
     return Offset(result[0] - linkedOffset.dx, result[1] - linkedOffset.dy);
   }
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
     if (link.leader == null) {
       if (showWhenUnlinked)
-        return super.findAnnotations(result, regionOffset - unlinkedOffset, onlyFirst: onlyFirst);
+        return super.findAnnotations(result, localPosition - unlinkedOffset, onlyFirst: onlyFirst);
       return false;
     }
-    final Offset transformedOffset = _transformOffset<S>(regionOffset);
+    final Offset transformedOffset = _transformOffset<S>(localPosition);
     if (transformedOffset == null) {
       return false;
     }
@@ -2205,11 +2205,11 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// annotation is added and [opaque] is true.
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
-    bool isAbsorbed = super.findAnnotations(result, regionOffset, onlyFirst: onlyFirst);
+  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    bool isAbsorbed = super.findAnnotations(result, localPosition, onlyFirst: onlyFirst);
     if (result.isNotEmpty && onlyFirst)
       return isAbsorbed;
-    if (size != null && !(offset & size).contains(regionOffset)) {
+    if (size != null && !(offset & size).contains(localPosition)) {
       return isAbsorbed;
     }
     if (T == S) {
