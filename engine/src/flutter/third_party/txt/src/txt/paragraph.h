@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2017 Google Inc.
  *
@@ -17,6 +18,7 @@
 #ifndef LIB_TXT_SRC_PARAGRAPH_H_
 #define LIB_TXT_SRC_PARAGRAPH_H_
 
+#include "line_metrics.h"
 #include "paragraph_style.h"
 
 class SkCanvas;
@@ -171,6 +173,8 @@ class Paragraph {
   // Finds the first and last glyphs that define a word containing the glyph at
   // index offset.
   virtual Range<size_t> GetWordBoundary(size_t offset) = 0;
+
+  virtual std::vector<LineMetrics>& GetLineMetrics() = 0;
 };
 
 }  // namespace txt
