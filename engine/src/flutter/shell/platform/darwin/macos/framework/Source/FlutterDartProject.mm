@@ -8,9 +8,10 @@
 #include <vector>
 
 static NSString* const kICUBundlePath = @"icudtl.dat";
+static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
 
 @implementation FlutterDartProject {
-  NSBundle* _bundle;
+  NSBundle* _dartBundle;
 }
 
 - (instancetype)init {
@@ -21,16 +22,18 @@ static NSString* const kICUBundlePath = @"icudtl.dat";
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
 
-  _bundle = bundle ?: [NSBundle mainBundle];
+  _dartBundle = bundle ?: [NSBundle bundleWithIdentifier:kAppBundleIdentifier];
   return self;
 }
 
 - (NSString*)assetsPath {
-  NSString* flutterAssetsName = [_bundle objectForInfoDictionaryKey:@"FLTAssetsPath"];
+  // If there's no App.framework, fall back to checking the main bundle for assets.
+  NSBundle* assetBundle = _dartBundle ?: [NSBundle mainBundle];
+  NSString* flutterAssetsName = [assetBundle objectForInfoDictionaryKey:@"FLTAssetsPath"];
   if (flutterAssetsName == nil) {
     flutterAssetsName = @"flutter_assets";
   }
-  NSString* path = [_bundle pathForResource:flutterAssetsName ofType:@""];
+  NSString* path = [_dartBundle pathForResource:flutterAssetsName ofType:@""];
   if (!path) {
     NSLog(@"Failed to find path for \"%@\"", flutterAssetsName);
   }
