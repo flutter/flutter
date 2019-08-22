@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/process_manager.dart';
-import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:mockito/mockito.dart';
