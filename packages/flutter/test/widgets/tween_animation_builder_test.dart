@@ -135,6 +135,11 @@ void main() {
     await tester.pump(const Duration(seconds: 2)); // finish animation.
 
     values.clear();
+    // Update curve (and tween to re-trigger animation).
+    await tester.pumpWidget(buildWidget(tween: IntTween(begin: 100, end: 200), curve: Curves.linear));
+    expect(values, <int>[100]);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(values, <int>[100, 150]);
   });
 
   testWidgets('Duration is respected', (WidgetTester tester) async {
@@ -316,40 +321,6 @@ void main() {
     expect(values, <int>[100]);
     await tester.pump(const Duration(seconds: 2));
     expect(values, <int>[100]);
-  });
-
-  testWidgets('Changed curve while animating gaplessly is respected', (WidgetTester tester) async {
-    final List<int> values = <int>[];
-    Widget buildWidget({Curve curve}) {
-      return TweenAnimationBuilder<int>(
-        tween: IntTween(begin: 0, end: 100),
-        curve: curve,
-        duration: const Duration(seconds: 1),
-        builder: (BuildContext context, int i, Widget child) {
-          values.add(i);
-          return const Placeholder();
-        },
-      );
-    }
-
-    await tester.pumpWidget(buildWidget(
-      curve: Curves.linear,
-    ));
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[0, 50]);
-    values.clear();
-
-    await tester.pumpWidget(buildWidget(
-      curve: Curves.easeInExpo,
-    ));
-    expect(values, <int>[50]);
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, hasLength(2));
-    expect(values.last, greaterThan(50));
-    expect(values.last, lessThan(75));
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, hasLength(3));
-    expect(values.last, 100);
   });
 
   testWidgets('Setting same tween and direction does not trigger animation', (WidgetTester tester) async {
