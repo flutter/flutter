@@ -890,7 +890,7 @@ void main() {
     recognized.clear();
   });
 
-  testGesture('Tapping two dragGRs with two pointers correctly work', (GestureTester tester) {
+  testGesture('Tapping dragGR with two pointers correctly work', (GestureTester tester) {
     final List<String> logs = <String>[];
     final HorizontalDragGestureRecognizer hori = HorizontalDragGestureRecognizer()
       ..onDown = (DragDownDetails details) { logs.add('downH'); }
@@ -898,12 +898,11 @@ void main() {
       ..onUpdate = (DragUpdateDetails details) { logs.add('updateH'); }
       ..onEnd = (DragEndDetails details) { logs.add('endH'); }
       ..onCancel = () { logs.add('cancelH'); };
-    final VerticalDragGestureRecognizer vert = VerticalDragGestureRecognizer()
-      ..onDown = (DragDownDetails details) { logs.add('downV'); }
-      ..onStart = (DragStartDetails details) { logs.add('startV'); }
-      ..onUpdate = (DragUpdateDetails details) { logs.add('updateV'); }
-      ..onEnd = (DragEndDetails details) { logs.add('endV'); }
-      ..onCancel = () { logs.add('cancelV'); };
+    // Competitor
+    final TapGestureRecognizer vert = TapGestureRecognizer()
+      ..onTapDown = (TapDownDetails details) { logs.add('downT'); }
+      ..onTapUp = (TapUpDetails details) { logs.add('upT'); }
+      ..onTapCancel = () {};
 
     final TestPointer pointer1 = TestPointer(4, PointerDeviceKind.touch);
     final TestPointer pointer2 = TestPointer(5, PointerDeviceKind.touch);
@@ -920,17 +919,17 @@ void main() {
     vert.addPointer(down2);
     tester.route(down2);
     tester.closeArena(pointer2.pointer);
-    expect(logs, <String>['downH', 'downV']);
+    expect(logs, <String>['downH']);
     logs.clear();
 
     tester.route(pointer1.up());
     GestureBinding.instance.gestureArena.sweep(pointer1.pointer);
-    expect(logs, <String>[]);
+    expect(logs, <String>['downT', 'upT']);
     logs.clear();
 
     tester.route(pointer2.up());
     GestureBinding.instance.gestureArena.sweep(pointer2.pointer);
-    expect(logs, <String>['cancelH', 'cancelV']);
+    expect(logs, <String>['cancelH']);
     logs.clear();
 
     hori.dispose();
