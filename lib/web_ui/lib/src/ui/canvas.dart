@@ -436,7 +436,7 @@ class Canvas {
   }
 
   void _clipPath(Path path, bool doAntiAlias) {
-    _canvas.clipPath(path);
+    _canvas.clipPath(path, doAntiAlias: doAntiAlias);
   }
 
   /// Paints the given [Color] onto the canvas, applying the given

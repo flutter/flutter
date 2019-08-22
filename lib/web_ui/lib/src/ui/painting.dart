@@ -17,6 +17,18 @@ bool _matrix4IsValid(Float64List matrix4) {
   return true;
 }
 
+void _validateColorStops(List<Color> colors, List<double> colorStops) {
+  if (colorStops == null) {
+    if (colors.length != 2)
+      throw ArgumentError(
+          '"colors" must have length 2 if "colorStops" is omitted.');
+  } else {
+    if (colors.length != colorStops.length)
+      throw ArgumentError(
+          '"colors" and "colorStops" arguments must have equal length.');
+  }
+}
+
 Color _scaleAlpha(Color a, double factor) {
   return a.withAlpha((a.alpha * factor).round().clamp(0, 255));
 }
@@ -1217,13 +1229,6 @@ abstract class Shader {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
   Shader._();
-
-  /// Creates a fill style to be used in painting.
-  Object createPaintStyle(html.CanvasRenderingContext2D ctx);
-
-  List<dynamic> webOnlySerializeToCssPaint() {
-    throw UnsupportedError('CSS paint not implemented for this shader type');
-  }
 }
 
 /// A shader (as used by [Paint.shader]) that renders a color gradient.
@@ -1259,7 +1264,7 @@ abstract class Gradient extends Shader {
     Float64List
         matrix4, // TODO(flutter_web): see https://github.com/flutter/flutter/issues/32819
   ]) =>
-      _GradientLinear(from, to, colors, colorStops, tileMode);
+      engine.GradientLinear(from, to, colors, colorStops, tileMode);
 
   /// Creates a radial gradient centered at `center` that ends at `radius`
   /// distance from the center.
@@ -1301,12 +1306,12 @@ abstract class Gradient extends Shader {
     // If focal is null or focal radius is null, this should be treated as a regular radial gradient
     // If focal == center and the focal radius is 0.0, it's still a regular radial gradient
     if (focal == null || (focal == center && focalRadius == 0.0)) {
-      return _GradientRadial(
+      return engine.GradientRadial(
           center, radius, colors, colorStops, tileMode, matrix4);
     } else {
       assert(center != Offset.zero ||
           focal != Offset.zero); // will result in exception(s) in Skia side
-      return _GradientConical(focal, focalRadius, center, radius, colors,
+      return engine.GradientConical(focal, focalRadius, center, radius, colors,
           colorStops, tileMode, matrix4);
     }
   }
@@ -1346,142 +1351,8 @@ abstract class Gradient extends Shader {
     double endAngle = math.pi * 2,
     Float64List matrix4,
   ]) =>
-      _GradientSweep(
+      engine.GradientSweep(
           center, colors, colorStops, tileMode, startAngle, endAngle, matrix4);
-}
-
-class _GradientSweep extends Gradient {
-  _GradientSweep(this.center, this.colors, this.colorStops, this.tileMode,
-      this.startAngle, this.endAngle, this.matrix4)
-      : assert(_offsetIsValid(center)),
-        assert(colors != null),
-        assert(tileMode != null),
-        assert(startAngle != null),
-        assert(endAngle != null),
-        assert(startAngle < endAngle),
-        assert(matrix4 == null || _matrix4IsValid(matrix4)),
-        super._() {
-    _validateColorStops(colors, colorStops);
-  }
-
-  @override
-  Object createPaintStyle(_) {
-    throw UnimplementedError();
-  }
-
-  final Offset center;
-  final List<Color> colors;
-  final List<double> colorStops;
-  final TileMode tileMode;
-  final double startAngle;
-  final double endAngle;
-  final Float64List matrix4;
-}
-
-void _validateColorStops(List<Color> colors, List<double> colorStops) {
-  if (colorStops == null) {
-    if (colors.length != 2)
-      throw ArgumentError(
-          '"colors" must have length 2 if "colorStops" is omitted.');
-  } else {
-    if (colors.length != colorStops.length)
-      throw ArgumentError(
-          '"colors" and "colorStops" arguments must have equal length.');
-  }
-}
-
-class _GradientLinear extends Gradient {
-  _GradientLinear(
-    this.from,
-    this.to,
-    this.colors,
-    this.colorStops,
-    this.tileMode,
-  )   : assert(_offsetIsValid(from)),
-        assert(_offsetIsValid(to)),
-        assert(colors != null),
-        assert(tileMode != null),
-        super._() {
-    _validateColorStops(colors, colorStops);
-  }
-
-  final Offset from;
-  final Offset to;
-  final List<Color> colors;
-  final List<double> colorStops;
-  final TileMode tileMode;
-
-  @override
-  html.CanvasGradient createPaintStyle(html.CanvasRenderingContext2D ctx) {
-    final html.CanvasGradient gradient =
-        ctx.createLinearGradient(from.dx, from.dy, to.dx, to.dy);
-    if (colorStops == null) {
-      assert(colors.length == 2);
-      gradient.addColorStop(0, colors[0].toCssString());
-      gradient.addColorStop(1, colors[1].toCssString());
-      return gradient;
-    }
-    for (int i = 0; i < colors.length; i++) {
-      gradient.addColorStop(colorStops[i], colors[i].toCssString());
-    }
-    return gradient;
-  }
-
-  @override
-  List<dynamic> webOnlySerializeToCssPaint() {
-    final List<dynamic> serializedColors = <dynamic>[];
-    for (int i = 0; i < colors.length; i++) {
-      serializedColors.add(colors[i].toCssString());
-    }
-    return <dynamic>[
-      1,
-      from.dx,
-      from.dy,
-      to.dx,
-      to.dy,
-      serializedColors,
-      colorStops,
-      tileMode.index
-    ];
-  }
-}
-
-class _GradientRadial extends Gradient {
-  _GradientRadial(this.center, this.radius, this.colors, this.colorStops,
-      this.tileMode, this.matrix4)
-      : super._();
-
-  final Offset center;
-  final double radius;
-  final List<Color> colors;
-  final List<double> colorStops;
-  final TileMode tileMode;
-  final Float64List matrix4;
-
-  @override
-  Object createPaintStyle(_) {
-    throw UnimplementedError();
-  }
-}
-
-class _GradientConical extends Gradient {
-  _GradientConical(this.focal, this.focalRadius, this.center, this.radius,
-      this.colors, this.colorStops, this.tileMode, this.matrix4)
-      : super._();
-
-  final Offset focal;
-  final double focalRadius;
-  final Offset center;
-  final double radius;
-  final List<Color> colors;
-  final List<double> colorStops;
-  final TileMode tileMode;
-  final Float64List matrix4;
-
-  @override
-  Object createPaintStyle(_) {
-    throw UnimplementedError();
-  }
 }
 
 /// Opaque handle to raw decoded image data (pixels).
@@ -1636,6 +1507,9 @@ class MaskFilter {
 
   /// On the web returns the value of sigma passed to [MaskFilter.blur].
   double get webOnlySigma => _sigma;
+
+  /// On the web returns the value of `style` passed to [MaskFilter.blur].
+  BlurStyle get webOnlyBlurStyle => _style;
 
   @override
   bool operator ==(dynamic other) {
@@ -1848,6 +1722,15 @@ Future<Codec> instantiateImageCodec(Uint8List list,
 /// Returns an error message if the instantiation has failed, null otherwise.
 String _instantiateImageCodec(
     Uint8List list, engine.Callback<Codec> callback, _ImageInfo imageInfo) {
+  if (engine.experimentalUseSkia) {
+    if (imageInfo == null) {
+      engine.skiaInstantiateImageCodec(list, callback);
+    } else {
+      engine.skiaInstantiateImageCodec(list, callback, imageInfo.width,
+          imageInfo.height, imageInfo.format, imageInfo.rowBytes);
+    }
+    return null;
+  }
   final html.Blob blob = html.Blob(<dynamic>[list.buffer]);
   callback(engine.HtmlBlobCodec(blob));
   return null;

@@ -266,9 +266,14 @@ class SceneBuilder {
   /// The given color is applied to the objects' rasterization using the given
   /// blend mode.
   ///
+  /// {@macro dart.ui.sceneBuilder.oldLayer}
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  ///
   /// See [pop] for details about the operation stack.
   ColorFilterEngineLayer pushColorFilter(ColorFilter filter,
       {ColorFilterEngineLayer oldLayer}) {
+    assert(filter != null);
     throw UnimplementedError();
   }
 

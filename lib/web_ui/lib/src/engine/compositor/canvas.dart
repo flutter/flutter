@@ -30,7 +30,7 @@ class SkCanvas {
 
   int saveLayer(ui.Rect bounds, ui.Paint paint) {
     return skCanvas.callMethod(
-        'saveLayer', <js.JsObject>[_makeSkRect(bounds), _makeSkPaint(paint)]);
+        'saveLayer', <js.JsObject>[makeSkRect(bounds), makeSkPaint(paint)]);
   }
 
   void restore() {
@@ -50,16 +50,26 @@ class SkCanvas {
   }
 
   void transform(Float64List matrix) {
-    skCanvas.callMethod('concat', <js.JsArray<double>>[toSkMatrix(matrix)]);
+    skCanvas.callMethod('concat', <js.JsArray<double>>[makeSkMatrix(matrix)]);
   }
 
-  void clipPath(ui.Path path) {
+  void clipPath(ui.Path path, {bool doAntiAlias = true}) {
     final SkPath skPath = path;
-    skCanvas.callMethod('clipPath', <js.JsObject>[skPath._skPath]);
+    final js.JsObject intersectClipOp = canvasKit['ClipOp']['Intersect'];
+    skCanvas.callMethod('clipPath', <dynamic>[
+      skPath._skPath,
+      intersectClipOp,
+      doAntiAlias,
+    ]);
   }
 
-  void clipRect(ui.Rect rect) {
-    skCanvas.callMethod('clipRect', <js.JsObject>[_makeSkRect(rect)]);
+  void clipRect(ui.Rect rect, {bool doAntiAlias = true}) {
+    final js.JsObject intersectClipOp = canvasKit['ClipOp']['Intersect'];
+    skCanvas.callMethod('clipRect', <dynamic>[
+      makeSkRect(rect),
+      intersectClipOp,
+      doAntiAlias,
+    ]);
   }
 
   void clipRRect(ui.RRect rrect) {
@@ -76,30 +86,17 @@ class SkCanvas {
   void drawPath(ui.Path path, ui.Paint paint) {
     final SkPath skPath = path;
     skCanvas.callMethod(
-        'drawPath', <js.JsObject>[skPath._skPath, _makeSkPaint(paint)]);
+        'drawPath', <js.JsObject>[skPath._skPath, makeSkPaint(paint)]);
   }
 
   void drawPaint(ui.Paint paint) {
-    skCanvas.callMethod('drawPaint', <js.JsObject>[_makeSkPaint(paint)]);
+    skCanvas.callMethod('drawPaint', <js.JsObject>[makeSkPaint(paint)]);
   }
 
   void drawShadow(ui.Path path, ui.Color color, double elevation,
       bool transparentOccluder) {
-    throw 'drawShadow';
+    drawSkShadow(skCanvas, path, color, elevation, transparentOccluder);
   }
 
   Matrix4 get currentTransform => throw 'currentTransform';
-
-  js.JsObject _makeSkRect(ui.Rect rect) {
-    return js.JsObject(canvasKit['LTRBRect'],
-        <double>[rect.left, rect.top, rect.right, rect.bottom]);
-  }
-
-  js.JsObject _makeSkPaint(ui.Paint paint) {
-    final js.JsObject skPaint = js.JsObject(canvasKit['SkPaint']);
-    if (paint.color != null) {
-      skPaint.callMethod('setColor', <int>[paint.color.value]);
-    }
-    return skPaint;
-  }
 }

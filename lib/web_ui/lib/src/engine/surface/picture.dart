@@ -114,7 +114,7 @@ class PersistedHoudiniPicture extends PersistedPicture {
       paintWorklet,
       'addModule',
       <dynamic>[
-        '/packages/flutter_web/assets/houdini_painter.js',
+        '/packages/flutter_web_ui/assets/houdini_painter.js',
       ],
     );
   }

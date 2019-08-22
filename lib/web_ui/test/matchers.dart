@@ -6,10 +6,10 @@
 library matchers;
 
 import 'dart:html' as html;
+import 'dart:math' as math;
 
 import 'package:html/parser.dart' as html_package;
 import 'package:html/dom.dart' as html_package;
-import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:test/test.dart';
@@ -159,8 +159,12 @@ class _IsWithinDistance<T> extends Matcher {
 
   @override
   bool matches(Object object, Map<dynamic, dynamic> matchState) {
-    if (object is! T) return false;
-    if (object == value) return true;
+    if (object is! T) {
+      return false;
+    }
+    if (object == value) {
+      return true;
+    }
     final T test = object;
     final num distance = distanceFunction(test, value);
     if (distance < 0) {
@@ -264,7 +268,7 @@ String canonicalizeHtml(String htmlContent,
             replacementTag = 'pshape';
             break;
           default:
-            throw Exception('Unknown clip type: ${clipType}');
+            throw Exception('Unknown clip type: $clipType');
         }
         break;
       case 'flt-clip-interior':
@@ -296,7 +300,8 @@ String canonicalizeHtml(String htmlContent,
         break;
     }
 
-    html_package.Element replacement = html_package.Element.tag(replacementTag);
+    final html_package.Element replacement =
+        html_package.Element.tag(replacementTag);
 
     if (mode != HtmlComparisonMode.noAttributes) {
       original.attributes.forEach((dynamic name, String value) {
@@ -309,26 +314,26 @@ String canonicalizeHtml(String htmlContent,
       });
 
       if (original.attributes.containsKey('style')) {
-        final styleValue = original.attributes['style'];
+        final String styleValue = original.attributes['style'];
 
         int attrCount = 0;
-        String processedAttributes = styleValue
+        final String processedAttributes = styleValue
             .split(';')
-            .map((attr) {
+            .map((String attr) {
               attr = attr.trim();
               if (attr.isEmpty) {
                 return null;
               }
 
               if (mode != HtmlComparisonMode.everything) {
-                final forLayout = mode == HtmlComparisonMode.layoutOnly;
-                List<String> parts = attr.split(':');
+                final bool forLayout = mode == HtmlComparisonMode.layoutOnly;
+                final List<String> parts = attr.split(':');
                 if (parts.length == 2) {
-                  String name = parts.first;
+                  final String name = parts.first;
                   // Whether the attribute is one that's set to the same value and
                   // never changes. Such attributes are usually not interesting to
                   // test.
-                  bool isStaticAttribute = const <String>[
+                  final bool isStaticAttribute = const <String>[
                     'top',
                     'left',
                     'position',
@@ -339,7 +344,7 @@ String canonicalizeHtml(String htmlContent,
                   }
 
                   // Whether the attribute is set by the layout system.
-                  bool isLayoutAttribute = const <String>[
+                  final bool isLayoutAttribute = const <String>[
                     'top',
                     'left',
                     'bottom',
@@ -363,7 +368,7 @@ String canonicalizeHtml(String htmlContent,
               attrCount++;
               return attr.trim();
             })
-            .where((attr) => attr != null && attr.isNotEmpty)
+            .where((String attr) => attr != null && attr.isNotEmpty)
             .join('; ');
 
         if (attrCount > 0) {
@@ -390,11 +395,12 @@ String canonicalizeHtml(String htmlContent,
     return replacement;
   }
 
-  html_package.DocumentFragment originalDom =
+  final html_package.DocumentFragment originalDom =
       html_package.parseFragment(htmlContent);
 
-  html_package.DocumentFragment cleanDom = html_package.DocumentFragment();
-  for (var child in originalDom.children) {
+  final html_package.DocumentFragment cleanDom =
+      html_package.DocumentFragment();
+  for (html_package.Element child in originalDom.children) {
     cleanDom.append(_cleanup(child));
   }
 
@@ -406,7 +412,7 @@ void expectHtml(html.Element element, String expectedHtml,
     {HtmlComparisonMode mode = HtmlComparisonMode.nonLayoutOnly}) {
   expectedHtml =
       canonicalizeHtml(expectedHtml, mode: mode, throwOnUnusedAttributes: true);
-  String actualHtml = canonicalizeHtml(element.outerHtml, mode: mode);
+  final String actualHtml = canonicalizeHtml(element.outerHtml, mode: mode);
   expect(actualHtml, expectedHtml);
 }
 
@@ -441,7 +447,7 @@ void expectHtml(html.Element element, String expectedHtml,
 void expectPageHtml(String expectedHtml,
     {HtmlComparisonMode mode = HtmlComparisonMode.nonLayoutOnly}) {
   expectedHtml = canonicalizeHtml(expectedHtml, mode: mode);
-  String actualHtml = canonicalizeHtml(currentHtml, mode: mode);
+  final String actualHtml = canonicalizeHtml(currentHtml, mode: mode);
   expect(actualHtml, expectedHtml);
 }
 
@@ -460,3 +466,28 @@ class SceneTester {
         mode: HtmlComparisonMode.noAttributes);
   }
 }
+
+/// A matcher for functions that throw [AssertionError].
+///
+/// This is equivalent to `throwsA(isInstanceOf<AssertionError>())`.
+///
+/// If you are trying to test whether a call to [WidgetTester.pumpWidget]
+/// results in an [AssertionError], see
+/// [TestWidgetsFlutterBinding.takeException].
+///
+/// See also:
+///
+///  * [throwsFlutterError], to test if a function throws a [FlutterError].
+///  * [throwsArgumentError], to test if a functions throws an [ArgumentError].
+///  * [isAssertionError], to test if any object is any kind of [AssertionError].
+final Matcher throwsAssertionError = throwsA(isAssertionError);
+
+/// A matcher for [AssertionError].
+///
+/// This is equivalent to `isInstanceOf<AssertionError>()`.
+///
+/// See also:
+///
+///  * [throwsAssertionError], to test if a function throws any [AssertionError].
+///  * [isFlutterError], to test if any object is a [FlutterError].
+const Matcher isAssertionError = TypeMatcher<AssertionError>();

@@ -8,31 +8,6 @@ class SkRecordingCanvas implements RecordingCanvas {
   final js.JsObject skCanvas;
   SkRecordingCanvas(this.skCanvas);
 
-  js.JsObject _makeSkRect(ui.Rect rect) {
-    return js.JsObject(canvasKit['LTRBRect'],
-        <double>[rect.left, rect.top, rect.right, rect.bottom]);
-  }
-
-  js.JsObject _makeSkPaint(ui.Paint paint) {
-    final skPaint = js.JsObject(canvasKit['SkPaint']);
-
-    skPaint.callMethod('setColor', <int>[paint.color.value]);
-
-    js.JsObject skPaintStyle;
-    switch (paint.style) {
-      case ui.PaintingStyle.stroke:
-        skPaintStyle = canvasKit['PaintStyle']['Stroke'];
-        break;
-      case ui.PaintingStyle.fill:
-        skPaintStyle = canvasKit['PaintStyle']['Fill'];
-        break;
-    }
-    skPaint.callMethod('setStyle', <js.JsObject>[skPaintStyle]);
-
-    skPaint.callMethod('setAntiAlias', <bool>[paint.isAntiAlias]);
-    return skPaint;
-  }
-
   @override
   bool _didDraw = true;
 
@@ -40,7 +15,7 @@ class SkRecordingCanvas implements RecordingCanvas {
   bool _hasArbitraryPaint = true;
 
   @override
-  int saveCount;
+  int saveCount = 0;
 
   @override
   // TODO: implement _commands
@@ -56,18 +31,47 @@ class SkRecordingCanvas implements RecordingCanvas {
   }
 
   @override
-  void clipPath(ui.Path path) {
-    throw 'clipPath';
+  void clipPath(ui.Path path, {bool doAntiAlias = true}) {
+    final SkPath skPath = path;
+    final js.JsObject intersectClipOp = canvasKit['ClipOp']['Intersect'];
+    skCanvas.callMethod('clipPath', <dynamic>[
+      skPath._skPath,
+      intersectClipOp,
+      doAntiAlias,
+    ]);
   }
 
   @override
-  void clipRRect(ui.RRect rrect) {
-    throw 'clipRRect';
+  void clipRRect(
+    ui.RRect rrect, {
+    bool doAntiAlias = true,
+  }) {
+    // TODO(het): Use `clipRRect` when CanvasKit makes it available.
+    // CanvasKit doesn't expose `Canvas.clipRRect`, so we create a path, add the
+    // RRect to it, and call clipPath with it.
+    final SkPath rrectPath = SkPath();
+    rrectPath.addRRect(rrect);
+    clipPath(rrectPath, doAntiAlias: doAntiAlias);
   }
 
   @override
-  void clipRect(ui.Rect rect) {
-    throw 'clipRect';
+  void clipRect(
+    ui.Rect rect, {
+    ui.ClipOp clipOp = ui.ClipOp.intersect,
+    bool doAntiAlias = true,
+  }) {
+    js.JsObject skClipOp;
+    switch (clipOp) {
+      case ui.ClipOp.difference:
+        skClipOp = canvasKit['ClipOp']['Difference'];
+        break;
+      case ui.ClipOp.intersect:
+        skClipOp = canvasKit['ClipOp']['Intersect'];
+        break;
+    }
+
+    skCanvas.callMethod(
+        'clipRect', <dynamic>[makeSkRect(rect), skClipOp, doAntiAlias]);
   }
 
   @override
@@ -95,7 +99,12 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void drawCircle(ui.Offset c, double radius, ui.Paint paint) {
-    throw 'drawCircle';
+    final js.JsObject skPaint = makeSkPaint(paint);
+    // TODO(het): Use `drawCircle` when CanvasKit makes it available.
+    // Since CanvasKit does not expose `drawCircle`, use `drawOval` instead.
+    final js.JsObject skRect = makeSkRect(ui.Rect.fromLTWH(
+        c.dx - radius, c.dy - radius, 2.0 * radius, 2.0 * radius));
+    skCanvas.callMethod('drawOval', <js.JsObject>[skRect, skPaint]);
   }
 
   @override
@@ -115,12 +124,25 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
-    throw 'drawImageRect';
+    final SkImage skImage = image;
+    skCanvas.callMethod('drawImageRect', <dynamic>[
+      skImage.skImage,
+      makeSkRect(src),
+      makeSkRect(dst),
+      makeSkPaint(paint),
+      false,
+    ]);
   }
 
   @override
   void drawLine(ui.Offset p1, ui.Offset p2, ui.Paint paint) {
-    throw 'drawLine';
+    skCanvas.callMethod('drawLine', <dynamic>[
+      p1.dx,
+      p1.dy,
+      p2.dx,
+      p2.dy,
+      makeSkPaint(paint),
+    ]);
   }
 
   @override
@@ -135,30 +157,67 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
-    throw 'drawParagraph';
+    // TODO(het): This doesn't support most paragraph features. We are just
+    // creating a font from the family and size, and drawing it with
+    // ShapedText.
+    final EngineParagraph engineParagraph = paragraph;
+    final ParagraphGeometricStyle style = engineParagraph.geometricStyle;
+    final js.JsObject skFont =
+        skiaFontCollection.getFont(style.effectiveFontFamily, style.fontSize);
+    final js.JsObject skShapedTextOpts = js.JsObject.jsify(<String, dynamic>{
+      'font': skFont,
+      'leftToRight': true,
+      'text': engineParagraph.plainText,
+      'width': engineParagraph.width + 1,
+    });
+    final js.JsObject skShapedText =
+        js.JsObject(canvasKit['ShapedText'], <js.JsObject>[skShapedTextOpts]);
+    skCanvas.callMethod('drawText', <dynamic>[
+      skShapedText,
+      offset.dx + engineParagraph._alignOffset,
+      offset.dy,
+      makeSkPaint(engineParagraph._paint)
+    ]);
   }
 
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
-    throw 'drawPath';
+    final js.JsObject skPaint = makeSkPaint(paint);
+    final SkPath enginePath = path;
+    final js.JsObject skPath = enginePath._skPath;
+    skCanvas.callMethod('drawPath', <js.JsObject>[skPath, skPaint]);
   }
 
   @override
   void drawRRect(ui.RRect rrect, ui.Paint paint) {
-    throw 'drawRRect';
+    // Since CanvasKit does not expose `drawRRect` we have to make do with
+    // `drawRoundRect`. The downside of `drawRoundRect` is that all of the
+    // corner radii must be the same.
+    assert(
+      rrect.tlRadius == rrect.trRadius &&
+          rrect.tlRadius == rrect.brRadius &&
+          rrect.tlRadius == rrect.blRadius,
+      'CanvasKit only supports drawing RRects where the radii are all the same.',
+    );
+    skCanvas.callMethod('drawRoundRect', <dynamic>[
+      makeSkRect(rrect.outerRect),
+      rrect.tlRadiusX,
+      rrect.tlRadiusY,
+      makeSkPaint(paint),
+    ]);
   }
 
   @override
   void drawRect(ui.Rect rect, ui.Paint paint) {
-    final js.JsObject skRect = _makeSkRect(rect);
-    final js.JsObject skPaint = _makeSkPaint(paint);
+    final js.JsObject skRect = makeSkRect(rect);
+    final js.JsObject skPaint = makeSkPaint(paint);
     skCanvas.callMethod('drawRect', <js.JsObject>[skRect, skPaint]);
   }
 
   @override
   void drawShadow(ui.Path path, ui.Color color, double elevation,
       bool transparentOccluder) {
-    throw 'drawShadow';
+    drawSkShadow(skCanvas, path, color, elevation, transparentOccluder);
   }
 
   @override
@@ -166,22 +225,29 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void restore() {
-    throw 'restore';
+    skCanvas.callMethod('restore');
+    saveCount--;
   }
 
   @override
   void rotate(double radians) {
-    throw 'rotate';
+    skCanvas
+        .callMethod('rotate', <double>[radians * 180.0 / math.pi, 0.0, 0.0]);
   }
 
   @override
   void save() {
-    throw 'save';
+    skCanvas.callMethod('save');
+    saveCount++;
   }
 
   @override
   void saveLayer(ui.Rect bounds, ui.Paint paint) {
-    throw 'saveLayer';
+    skCanvas.callMethod('saveLayer', <js.JsObject>[
+      makeSkRect(bounds),
+      makeSkPaint(paint),
+    ]);
+    saveCount++;
   }
 
   @override
@@ -191,7 +257,7 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void scale(double sx, double sy) {
-    throw 'scale';
+    skCanvas.callMethod('scale', <double>[sx, sy]);
   }
 
   @override
@@ -201,11 +267,11 @@ class SkRecordingCanvas implements RecordingCanvas {
 
   @override
   void transform(Float64List matrix4) {
-    throw 'transform';
+    skCanvas.callMethod('concat', <js.JsArray<double>>[makeSkMatrix(matrix4)]);
   }
 
   @override
   void translate(double dx, double dy) {
-    throw 'translate';
+    skCanvas.callMethod('translate', <double>[dx, dy]);
   }
 }

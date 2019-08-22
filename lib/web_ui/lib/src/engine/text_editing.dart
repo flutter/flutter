@@ -467,9 +467,9 @@ class PersistentTextEditingElement extends TextEditingElement {
   PersistentTextEditingElement(
     html.HtmlElement domElement, {
     @required html.VoidCallback onDomElementSwap,
-  })  : _onDomElementSwap = onDomElementSwap,
-        // Make sure the dom element is of a type that we support for text editing.
-        assert(_getTypeFromElement(domElement) != null) {
+  })  : _onDomElementSwap = onDomElementSwap {
+    // Make sure the dom element is of a type that we support for text editing.
+    assert(_getTypeFromElement(domElement) != null);
     this.domElement = domElement;
   }
 

@@ -1,0 +1,18 @@
+# Sources of inspiration for this file:
+#
+# * https://github.com/dart-lang/angular/blob/master/dev/tool/test/dart_test_repo.yaml
+# * https://github.com/dart-lang/angular/blob/master/_tests/dart_test.yaml
+
+platforms:
+  - chrome
+  - vm
+presets:
+  cirrus:
+    override_platforms:
+      chrome:
+        settings:
+          # Required because Cirrus runs us as root.
+          # https://chromium.googlesource.com/chromium/src/+/master/docs/design/sandbox.md
+          # https://docs.travis-ci.com/user/chrome#Sandboxing
+          arguments: --no-sandbox
+    reporter: expanded

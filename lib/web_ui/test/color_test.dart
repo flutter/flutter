@@ -21,7 +21,7 @@ void main() {
 
   test('paint set to black', () {
     const Color c = Color(0x00000000);
-    final Paint p = new Paint();
+    final Paint p = Paint();
     p.color = c;
     expect(c.toString(), equals('Color(0x00000000)'));
   });
@@ -29,7 +29,7 @@ void main() {
   test('color created with out of bounds value', () {
     try {
       const Color c = Color(0x100 << 24);
-      final Paint p = new Paint();
+      final Paint p = Paint();
       p.color = c;
     } catch (e) {
       expect(e != null, equals(true));
@@ -39,7 +39,7 @@ void main() {
   test('color created with wildly out of bounds value', () {
     try {
       const Color c = Color(1 << 1000000);
-      final Paint p = new Paint();
+      final Paint p = Paint();
       p.color = c;
     } catch (e) {
       expect(e != null, equals(true));

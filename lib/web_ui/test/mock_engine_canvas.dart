@@ -65,7 +65,7 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   void translate(double dx, double dy) {
-    _called('translate', arguments: {
+    _called('translate', arguments: <String, double>{
       'dx': dx,
       'dy': dy,
     });
@@ -73,7 +73,7 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   void scale(double sx, double sy) {
-    _called('scale', arguments: {
+    _called('scale', arguments: <String, double>{
       'sx': sx,
       'sy': sy,
     });
@@ -86,7 +86,7 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   void skew(double sx, double sy) {
-    _called('skew', arguments: {
+    _called('skew', arguments: <String, double>{
       'sx': sx,
       'sy': sy,
     });
@@ -114,7 +114,7 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   void drawColor(Color color, BlendMode blendMode) {
-    _called('drawColor', arguments: {
+    _called('drawColor', arguments: <String, dynamic>{
       'color': color,
       'blendMode': blendMode,
     });
@@ -122,7 +122,7 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   void drawLine(Offset p1, Offset p2, PaintData paint) {
-    _called('drawLine', arguments: {
+    _called('drawLine', arguments: <String, dynamic>{
       'p1': p1,
       'p2': p2,
       'paint': paint,
@@ -141,7 +141,7 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   void drawRRect(RRect rrect, PaintData paint) {
-    _called('drawRRect', arguments: {
+    _called('drawRRect', arguments: <String, dynamic>{
       'rrect': rrect,
       'paint': paint,
     });
@@ -149,7 +149,7 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   void drawDRRect(RRect outer, RRect inner, PaintData paint) {
-    _called('drawDRRect', arguments: {
+    _called('drawDRRect', arguments: <String, dynamic>{
       'outer': outer,
       'inner': inner,
       'paint': paint,
@@ -158,7 +158,7 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   void drawOval(Rect rect, PaintData paint) {
-    _called('drawOval', arguments: {
+    _called('drawOval', arguments: <String, dynamic>{
       'rect': rect,
       'paint': paint,
     });
@@ -166,7 +166,7 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   void drawCircle(Offset c, double radius, PaintData paint) {
-    _called('drawCircle', arguments: {
+    _called('drawCircle', arguments: <String, dynamic>{
       'c': c,
       'radius': radius,
       'paint': paint,
@@ -175,7 +175,7 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   void drawPath(Path path, PaintData paint) {
-    _called('drawPath', arguments: {
+    _called('drawPath', arguments: <String, dynamic>{
       'path': path,
       'paint': paint,
     });
@@ -184,7 +184,7 @@ class MockEngineCanvas implements EngineCanvas {
   @override
   void drawShadow(
       Path path, Color color, double elevation, bool transparentOccluder) {
-    _called('drawShadow', arguments: {
+    _called('drawShadow', arguments: <String, dynamic>{
       'path': path,
       'color': color,
       'elevation': elevation,
@@ -194,7 +194,7 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   void drawImage(Image image, Offset p, PaintData paint) {
-    _called('drawImage', arguments: {
+    _called('drawImage', arguments: <String, dynamic>{
       'image': image,
       'p': p,
       'paint': paint,
@@ -203,7 +203,7 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   void drawImageRect(Image image, Rect src, Rect dst, PaintData paint) {
-    _called('drawImageRect', arguments: {
+    _called('drawImageRect', arguments: <String, dynamic>{
       'image': image,
       'src': src,
       'dst': dst,
@@ -213,7 +213,7 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   void drawParagraph(Paragraph paragraph, Offset offset) {
-    _called('drawParagraph', arguments: {
+    _called('drawParagraph', arguments: <String, dynamic>{
       'paragraph': paragraph,
       'offset': offset,
     });
