@@ -89,7 +89,7 @@ abstract class _FlutterProject {
 }
 
 class _FlutterPlugin extends _FlutterProject {
-  _FlutterPlugin(this.parent, this.name) : _FlutterProject(parent, name);
+  _FlutterPlugin(Directory parent, String name) : super(parent, name);
 
   static Future<_FlutterPlugin> create(
       Directory directory, List<String> options) async {
@@ -116,7 +116,7 @@ class _FlutterPlugin extends _FlutterProject {
 }
 
 class _FlutterApp extends _FlutterProject {
-  _FlutterApp(this.parent, this.name) : _FlutterProject(parent, name);
+  _FlutterApp(Directory parent, String name) : super(parent, name);
 
   static Future<_FlutterApp> create(
       Directory directory, List<String> options) async {
