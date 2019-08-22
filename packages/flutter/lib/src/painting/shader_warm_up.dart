@@ -211,22 +211,3 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
     canvas.translate(0.0, drawCallSpacing);
   }
 }
-
-/// A shader warm-up that does not do anything.
-///
-/// Use this warm-up if you do not want to warm-up shaders, e.g. when your
-/// target platform does not support this feature.
-class NoopShaderWarmUp extends ShaderWarmUp {
-  /// Creates a noop shader warm-up.
-  const NoopShaderWarmUp();
-
-  @override
-  Future<void> warmUpOnCanvas(ui.Canvas canvas) async {
-    // Intentionally blank.
-  }
-
-  @override
-  Future<void> execute() async {
-    // Intentionally blank.
-  }
-}

@@ -51,7 +51,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// See also:
   ///
   ///  * [ShaderWarmUp], the interface of how this warm up works.
-  static ShaderWarmUp shaderWarmUp = !kIsWeb ? const DefaultShaderWarmUp() : const NoopShaderWarmUp();
+  static ShaderWarmUp shaderWarmUp = const DefaultShaderWarmUp();
 
   /// The singleton that implements the Flutter framework's image cache.
   ///

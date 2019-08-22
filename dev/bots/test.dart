@@ -464,13 +464,13 @@ Future<void> _runWebTests() async {
   // TODO(yjbanov): re-enable when web test cirrus flakiness is resolved
   await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
     'test/foundation/',
-    'test/physics/',
-    'test/rendering/',
-    'test/services/',
-    'test/painting/',
-    'test/scheduler/',
-    'test/semantics/',
-    // TODO(yjbanov): re-enable when instabiliy around pumpAndSettle is
+    // TODO(yjbanov): re-enable when flakiness is resolved
+    // 'test/physics/',
+    // 'test/rendering/',
+    // 'test/services/',
+    // 'test/painting/',
+    // 'test/scheduler/',
+    // 'test/semantics/',
     // 'test/widgets/',
     // 'test/material/',
   ]);
@@ -807,7 +807,6 @@ Future<void> _runFlutterWebTestBatch(String workingDirectory, {
       args,
       workingDirectory: workingDirectory,
       expectFlaky: false,
-      timeout: _kShortTimeout,
       environment: <String, String>{
         'FLUTTER_WEB': 'true',
         'FLUTTER_LOW_RESOURCE_MODE': 'true',
