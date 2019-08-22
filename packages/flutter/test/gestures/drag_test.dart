@@ -221,8 +221,6 @@ void main() {
     expect(updatedTimestamp, const Duration(milliseconds: 300));
   });
 
-  // TODO(jslavitz): Revert these tests.
-
   testGesture('Should report initial down point to onStart with a down configuration', (GestureTester tester) {
     HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
       ..dragStartBehavior = DragStartBehavior.down;
