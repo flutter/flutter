@@ -119,9 +119,13 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       _isOpening = false;
       _isOpen = true;
     });
-    _lastOverlayEntry?.remove();
-    _lastOverlayEntry = null;
     _openContextMenu(childRectEnd);
+    // TODO(justinmc): Without this, flashes white. I think due to rendering 1
+    // frame offscreen?
+    Future.delayed(Duration(milliseconds: 1)).then((dynamic ok) {
+      _lastOverlayEntry?.remove();
+      _lastOverlayEntry = null;
+    });
   }
 
   void _routeAnimationStatusListener(AnimationStatus status) {
@@ -216,7 +220,7 @@ class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin 
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Curves.elasticIn,
+        curve: Curves.easeInBack,
       ),
     );
 
@@ -478,22 +482,17 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
             builder: (BuildContext context, Orientation orientation) {
               final List<Widget> children =  <Widget>[
                 Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Expanded(
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: _onTap,
-                          child: FittedBox(
-                            fit: BoxFit.contain,
-                            key: _containerGlobalKey,
-                            child: _builder(context),
-                          ),
-                        ),
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: _onTap,
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        key: _containerGlobalKey,
+                        child: _builder(context),
                       ),
-                    ],
+                    ),
                   ),
                 ),
                 // Create space between items in both Row and Column.
