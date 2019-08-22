@@ -115,6 +115,14 @@ double FlutterDesktopWindowGetScaleFactor(
   return 1.0;
 }
 
+void FlutterDesktopWindowSetPixelRatioOverride(
+    FlutterDesktopWindowRef flutter_window,
+    double pixel_ratio) {
+  if (s_stub_implementation) {
+    return s_stub_implementation->SetPixelRatioOverride(pixel_ratio);
+  }
+}
+
 bool FlutterDesktopRunWindowEventLoopWithTimeout(
     FlutterDesktopWindowControllerRef controller,
     uint32_t millisecond_timeout) {

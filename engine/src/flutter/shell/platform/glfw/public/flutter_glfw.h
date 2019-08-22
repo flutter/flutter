@@ -159,6 +159,14 @@ FLUTTER_EXPORT void FlutterDesktopWindowSetFrame(
 FLUTTER_EXPORT double FlutterDesktopWindowGetScaleFactor(
     FlutterDesktopWindowRef flutter_window);
 
+// Forces a specific pixel ratio for Flutter rendering in |flutter_window|,
+// rather than one computed automatically from screen information.
+//
+// To clear a previously set override, pass an override value of zero.
+FLUTTER_EXPORT void FlutterDesktopWindowSetPixelRatioOverride(
+    FlutterDesktopWindowRef flutter_window,
+    double pixel_ratio);
+
 // Runs an instance of a headless Flutter engine.
 //
 // Returns a null pointer in the event of an error.
