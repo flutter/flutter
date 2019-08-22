@@ -106,7 +106,7 @@ class ScreenshotCommand extends FlutterCommand {
     } catch (error) {
       throwToolExit('Error taking screenshot: $error');
     }
-    await showOutputFileInfo(outputFile);
+    _showOutputFileInfo(outputFile);
   }
 
   Future<void> runSkia(File outputFile) async {
@@ -115,8 +115,8 @@ class ScreenshotCommand extends FlutterCommand {
     final IOSink sink = outputFile.openWrite();
     sink.add(base64.decode(skp['skp']));
     await sink.close();
-    await showOutputFileInfo(outputFile);
-    await _ensureOutputIsNotJsonRpcError(outputFile);
+    _showOutputFileInfo(outputFile);
+    _ensureOutputIsNotJsonRpcError(outputFile);
   }
 
   Future<void> runRasterizer(File outputFile) async {
@@ -125,8 +125,8 @@ class ScreenshotCommand extends FlutterCommand {
     final IOSink sink = outputFile.openWrite();
     sink.add(base64.decode(response['screenshot']));
     await sink.close();
-    await showOutputFileInfo(outputFile);
-    await _ensureOutputIsNotJsonRpcError(outputFile);
+    _showOutputFileInfo(outputFile);
+    _ensureOutputIsNotJsonRpcError(outputFile);
   }
 
   Future<Map<String, dynamic>> _invokeVmServiceRpc(String method) async {
@@ -135,18 +135,20 @@ class ScreenshotCommand extends FlutterCommand {
     return await vmService.vm.invokeRpcRaw(method);
   }
 
-  Future<void> _ensureOutputIsNotJsonRpcError(File outputFile) async {
-    if (await outputFile.length() < 1000) {
-      final String content = await outputFile.readAsString(
-        encoding: const AsciiCodec(allowInvalid: true),
-      );
-      if (content.startsWith('{"jsonrpc":"2.0", "error"'))
-        throwToolExit('\nIt appears the output file contains an error message, not valid skia output.');
+  void _ensureOutputIsNotJsonRpcError(File outputFile) {
+    if (outputFile.lengthSync() >= 1000) {
+      return;
+    }
+    final String content = outputFile.readAsStringSync(
+      encoding: const AsciiCodec(allowInvalid: true),
+    );
+    if (content.startsWith('{"jsonrpc":"2.0", "error"')) {
+      throwToolExit('It appears the output file contains an error message, not valid skia output.');
     }
   }
 
-  Future<void> showOutputFileInfo(File outputFile) async {
-    final int sizeKB = (await outputFile.length()) ~/ 1024;
+  void _showOutputFileInfo(File outputFile) {
+    final int sizeKB = (outputFile.lengthSync()) ~/ 1024;
     printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
   }
 }

@@ -15,8 +15,8 @@ void main() {
           tested = true;
           MediaQuery.of(context); // should throw
           return Container();
-        }
-      )
+        },
+      ),
     );
     expect(tested, isTrue);
     expect(tester.takeException(), isFlutterError);
@@ -31,8 +31,8 @@ void main() {
           expect(data, isNull);
           tested = true;
           return Container();
-        }
-      )
+        },
+      ),
     );
     expect(tested, isTrue);
   });
@@ -59,6 +59,7 @@ void main() {
     expect(copied.padding, data.padding);
     expect(copied.viewPadding, data.viewPadding);
     expect(copied.viewInsets, data.viewInsets);
+    expect(copied.systemGestureInsets, data.systemGestureInsets);
     expect(copied.physicalDepth, data.physicalDepth);
     expect(copied.alwaysUse24HourFormat, data.alwaysUse24HourFormat);
     expect(copied.accessibleNavigation, data.accessibleNavigation);
@@ -69,15 +70,27 @@ void main() {
   });
 
   testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
+    // Random and unique double values are used to ensure that the correct
+    // values are copied over exactly
+    const Size customSize = Size(3.14, 2.72);
+    const double customDevicePixelRatio = 1.41;
+    const double customTextScaleFactor = 1.62;
+    const EdgeInsets customPadding = EdgeInsets.all(9.10938);
+    const EdgeInsets customViewPadding = EdgeInsets.all(11.24031);
+    const EdgeInsets customViewInsets = EdgeInsets.all(1.67262);
+    const EdgeInsets customSystemGestureInsets = EdgeInsets.all(1.5556);
+    const double customPhysicalDepth = 120.0;
+
     final MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
     final MediaQueryData copied = data.copyWith(
-      size: const Size(3.14, 2.72),
-      devicePixelRatio: 1.41,
-      textScaleFactor: 1.62,
-      padding: const EdgeInsets.all(9.10938),
-      viewPadding: const EdgeInsets.all(11.24031),
-      viewInsets: const EdgeInsets.all(1.67262),
-      physicalDepth: 120.0,
+      size: customSize,
+      devicePixelRatio: customDevicePixelRatio,
+      textScaleFactor: customTextScaleFactor,
+      padding: customPadding,
+      viewPadding: customViewPadding,
+      viewInsets: customViewInsets,
+      systemGestureInsets: customSystemGestureInsets,
+      physicalDepth: customPhysicalDepth,
       alwaysUse24HourFormat: true,
       accessibleNavigation: true,
       invertColors: true,
@@ -85,13 +98,14 @@ void main() {
       boldText: true,
       platformBrightness: Brightness.dark,
     );
-    expect(copied.size, const Size(3.14, 2.72));
-    expect(copied.devicePixelRatio, 1.41);
-    expect(copied.textScaleFactor, 1.62);
-    expect(copied.padding, const EdgeInsets.all(9.10938));
-    expect(copied.viewPadding, const EdgeInsets.all(11.24031));
-    expect(copied.viewInsets, const EdgeInsets.all(1.67262));
-    expect(copied.physicalDepth, 120.0);
+    expect(copied.size, customSize);
+    expect(copied.devicePixelRatio, customDevicePixelRatio);
+    expect(copied.textScaleFactor, customTextScaleFactor);
+    expect(copied.padding, customPadding);
+    expect(copied.viewPadding, customViewPadding);
+    expect(copied.viewInsets, customViewInsets);
+    expect(copied.systemGestureInsets, customSystemGestureInsets);
+    expect(copied.physicalDepth, customPhysicalDepth);
     expect(copied.alwaysUse24HourFormat, true);
     expect(copied.accessibleNavigation, true);
     expect(copied.invertColors, true);
@@ -136,12 +150,12 @@ void main() {
                 builder: (BuildContext context) {
                   unpadded = MediaQuery.of(context);
                   return Container();
-                }
+                },
               ),
             );
           },
         ),
-      )
+      ),
     );
 
     expect(unpadded.size, size);
@@ -193,12 +207,12 @@ void main() {
                 builder: (BuildContext context) {
                   unpadded = MediaQuery.of(context);
                   return Container();
-                }
+                },
               ),
             );
           },
         ),
-      )
+      ),
     );
 
     expect(unpadded.size, size);
@@ -250,12 +264,12 @@ void main() {
                 builder: (BuildContext context) {
                   unpadded = MediaQuery.of(context);
                   return Container();
-                }
+                },
               ),
             );
           },
         ),
-      )
+      ),
     );
 
     expect(unpadded.size, size);

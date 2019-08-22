@@ -218,8 +218,18 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   void _handleSelectedItemChanged(int index) {
     // Only the haptic engine hardware on iOS devices would produce the
     // intended effects.
-    if (defaultTargetPlatform == TargetPlatform.iOS
-        && index != _lastHapticIndex) {
+    bool hasSuitableHapticHardware;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        hasSuitableHapticHardware = true;
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        hasSuitableHapticHardware = false;
+        break;
+    }
+    assert(hasSuitableHapticHardware != null);
+    if (hasSuitableHapticHardware && index != _lastHapticIndex) {
       _lastHapticIndex = index;
       HapticFeedback.selectionClick();
     }

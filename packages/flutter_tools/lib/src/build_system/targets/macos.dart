@@ -51,7 +51,7 @@ class MacOSAssetBehavior extends SourceBehavior {
     );
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final String prefix = fs.path.join(flutterProject.macos.ephemeralDirectory.path,
-        'App.framework', 'flutter_assets');
+        'App.framework', 'Resources', 'flutter_assets');
     final List<File> results = <File>[];
     for (String key in assetBundle.entries.keys) {
       final File file = fs.file(fs.path.join(prefix, key));
@@ -141,9 +141,8 @@ class DebugMacOSFramework extends Target {
 
   @override
   Future<void> build(List<File> inputFiles, Environment environment) async {
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final File outputFile = fs.file(fs.path.join(
-        flutterProject.macos.ephemeralDirectory.path, 'App.framework', 'App'));
+        environment.buildDir.path, 'App.framework', 'App'));
     outputFile.createSync(recursive: true);
     final File debugApp = environment.buildDir.childFile('debug_app.cc')
         ..writeAsStringSync(r'''
@@ -158,7 +157,7 @@ static const int Moo = 88;
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
-      '-o', 'macos/Flutter/ephemeral/App.framework/App',
+      '-o', outputFile.path,
     ]);
     if (result.exitCode != 0) {
       throw Exception('Failed to compile debug App.framework');
@@ -175,11 +174,14 @@ static const int Moo = 88;
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/App'),
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
   ];
 }
 
 /// Bundle the flutter assets, app.dill, and precompiled runtimes into the App.framework.
+///
+/// See https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPFrameworks/Concepts/FrameworkAnatomy.html
+/// for more information on Framework structure.
 class DebugBundleFlutterAssets extends Target {
   const DebugBundleFlutterAssets();
 
@@ -189,19 +191,30 @@ class DebugBundleFlutterAssets extends Target {
   @override
   Future<void> build(List<File> inputFiles, Environment environment) async {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-    final Directory outputDirectory = flutterProject.macos
-        .ephemeralDirectory.childDirectory('App.framework');
-    if (!outputDirectory.existsSync()) {
-      throw Exception('App.framework must exist to bundle assets.');
-    }
+    final Directory frameworkRootDirectory = flutterProject.macos
+        .ephemeralDirectory
+        .childDirectory('App.framework');
+    final Directory outputDirectory = frameworkRootDirectory
+        .childDirectory('Versions')
+        .childDirectory('A')
+        ..createSync(recursive: true);
+
+    // Copy App into framework directory.
+    environment.buildDir
+      .childDirectory('App.framework')
+      .childFile('App')
+      .copySync(outputDirectory.childFile('App').path);
+
     // Copy assets into asset directory.
-    final Directory assetDirectory = outputDirectory.childDirectory('flutter_assets');
+    final Directory assetDirectory = outputDirectory
+      .childDirectory('Resources')
+      .childDirectory('flutter_assets');
     // We're not smart enough to only remove assets that are removed. If
     // anything changes blow away the whole directory.
     if (assetDirectory.existsSync()) {
       assetDirectory.deleteSync(recursive: true);
     }
-    assetDirectory.createSync();
+    assetDirectory.createSync(recursive: true);
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int result = await assetBundle.build(
       manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
@@ -224,9 +237,38 @@ class DebugBundleFlutterAssets extends Target {
             resource.release();
           }
         }));
-    } catch (err, st){
+    } catch (err, st) {
       throw Exception('Failed to copy assets: $st');
     }
+    // Copy Info.plist template.
+    assetDirectory.parent.childFile('Info.plist')
+      ..createSync()
+      ..writeAsStringSync(r'''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>App</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.flutter.flutter.app</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>App</string>
+	<key>CFBundlePackageType</key>
+	<string>FMWK</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+</dict>
+</plist>
+
+''');
+
     // Copy dill file.
     try {
       final File sourceFile = environment.buildDir.childFile('app.dill');
@@ -246,6 +288,29 @@ class DebugBundleFlutterAssets extends Target {
           assetDirectory.childFile('isolate_snapshot_data').path);
     } catch (err) {
       throw Exception('Failed to copy precompiled runtimes: $err');
+    }
+    // Create symlink to current version.
+    try {
+      final Link currentVersion = outputDirectory.parent
+          .childLink('Current');
+      if (!currentVersion.existsSync()) {
+        currentVersion.createSync(outputDirectory.path);
+      }
+      // Create symlink to current resources.
+      final Link currentResources = frameworkRootDirectory
+          .childLink('Resources');
+      if (!currentResources.existsSync()) {
+        currentResources.createSync(fs.path.join(currentVersion.path, 'Resources'));
+      }
+      // Create symlink to current binary.
+      final Link currentFramework = frameworkRootDirectory
+          .childLink('App');
+      if (!currentFramework.existsSync()) {
+        currentFramework.createSync(fs.path.join(currentVersion.path, 'App'));
+      }
+    } on FileSystemException {
+      throw Exception('Failed to create symlinks for framework. try removing '
+        'the "${flutterProject.macos.ephemeralDirectory.path}" directory and rerunning');
     }
   }
 
@@ -268,11 +333,13 @@ class DebugBundleFlutterAssets extends Target {
   @override
   List<Source> get outputs => const <Source>[
     Source.behavior(MacOSAssetBehavior()),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/AssetManifest.json'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/FontManifest.json'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/LICENSE'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/kernel_blob.bin'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/vm_snapshot_data'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/isolate_snapshot_data'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/App'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/Info.plist'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/AssetManifest.json'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/FontManifest.json'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/LICENSE'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
   ];
 }

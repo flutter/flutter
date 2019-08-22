@@ -149,6 +149,20 @@ class TestWindow implements Window {
   }
 
   @override
+  WindowPadding get systemGestureInsets => _systemGestureInsetsTestValue ?? _window.systemGestureInsets;
+  WindowPadding _systemGestureInsetsTestValue;
+  /// Hides the real system gesture insets and reports the given [systemGestureInsetsTestValue] instead.
+  set systemGestureInsetsTestValue(WindowPadding systemGestureInsetsTestValue) {
+    _systemGestureInsetsTestValue = systemGestureInsetsTestValue;
+    onMetricsChanged();
+  }
+  /// Deletes any existing test system gesture insets and returns to using the real system gesture insets.
+  void clearSystemGestureInsetsTestValue() {
+    _systemGestureInsetsTestValue = null;
+    onMetricsChanged();
+  }
+
+  @override
   VoidCallback get onMetricsChanged => _window.onMetricsChanged;
   @override
   set onMetricsChanged(VoidCallback callback) {
@@ -272,9 +286,13 @@ class TestWindow implements Window {
   }
 
   @override
+  // use frameTimings. https://github.com/flutter/flutter/issues/38838
+  // ignore: deprecated_member_use
   TimingsCallback get onReportTimings => _window.onReportTimings;
   @override
   set onReportTimings(TimingsCallback callback) {
+    // use frameTimings. https://github.com/flutter/flutter/issues/38838
+    // ignore: deprecated_member_use
     _window.onReportTimings = callback;
   }
 
