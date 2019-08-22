@@ -352,7 +352,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   void _giveUpPointer(int pointer) {
     stopTrackingPointer(pointer);
-    giveUpArena(pointer);
+    resolvePointer(pointer, GestureDisposition.rejected);
   }
 
   void _checkDown() {
