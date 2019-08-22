@@ -1297,12 +1297,27 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         expect(service.toObject(childJson['valueId']), equals(children[i].value));
         expect(service.toObject(childJson['objectId']), isInstanceOf<DiagnosticsNode>());
         final List<Object> propertiesJson = childJson['properties'];
+        for (Map<String, Object> propertyJson in propertiesJson) {
+          expect(propertyJson.containsKey('children'), isFalse);
+        }
         final DiagnosticsNode diagnosticsNode = service.toObject(childJson['objectId']);
         final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
         for (Map<String, Object> propertyJson in propertiesJson) {
           final Object property = service.toObject(propertyJson['objectId']);
           expect(property, isInstanceOf<DiagnosticsNode>());
           expect(expectedProperties.contains(property), isTrue);
+        }
+      }
+
+      final Map<String, Object> deepSubtreeJson = await service.testExtension(
+        'getDetailsSubtree',
+        <String, String>{'arg': id, 'objectGroup': group, 'subtreeDepth': '3'},
+      );
+      final List<Object> deepChildrenJson = deepSubtreeJson['children'];
+      for(Map<String, Object> childJson in deepChildrenJson) {
+        final List<Object> propertiesJson = childJson['properties'];
+        for (Map<String, Object> propertyJson in propertiesJson) {
+          expect(propertyJson.containsKey('children'), isTrue);
         }
       }
     });
