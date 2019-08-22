@@ -26,6 +26,34 @@ typedef struct FlutterDesktopWindow* FlutterDesktopWindowRef;
 // Opaque reference to a Flutter engine instance.
 typedef struct FlutterDesktopEngineState* FlutterDesktopEngineRef;
 
+// Properties for configuring a Flutter engine instance.
+typedef struct {
+  // The path to the flutter_assets folder for the application to be run.
+  const char* assets_path;
+  // The path to the icudtl.dat file for the version of Flutter you are using.
+  const char* icu_data_path;
+  // The switches to pass to the Flutter engine.
+  //
+  // See: https://github.com/flutter/engine/blob/master/shell/common/switches.h
+  // for details. Not all arguments will apply to desktop.
+  const char** switches;
+  // The number of elements in |switches|.
+  size_t switches_count;
+} FlutterDesktopEngineProperties;
+
+// Properties for configuring the initial settings of a Flutter window.
+typedef struct {
+  // The display title.
+  const char* title;
+  // Width in screen coordinates.
+  int32_t width;
+  // Height in screen coordinates.
+  int32_t height;
+  // Whether or not the user is prevented from resizing the window.
+  // Reversed so that the default for a cleared struct is to allow resizing.
+  bool prevent_resize;
+} FlutterDesktopWindowProperties;
+
 // Sets up the library's graphic context. Must be called before any other
 // methods.
 //
@@ -41,26 +69,16 @@ FLUTTER_EXPORT void FlutterDesktopTerminate();
 //
 // FlutterDesktopInit() must be called prior to this function.
 //
-// The |assets_path| is the path to the flutter_assets folder for the Flutter
-// application to be run. |icu_data_path| is the path to the icudtl.dat file
-// for the version of Flutter you are using.
-//
-// The |arguments| are passed to the Flutter engine. See:
-// https://github.com/flutter/engine/blob/master/shell/common/switches.h for
-// for details. Not all arguments will apply to desktop.
+// This will set up and run an associated Flutter engine using the settings in
+// |engine_properties|.
 //
 // Returns a null pointer in the event of an error. Otherwise, the pointer is
 // valid until FlutterDesktopDestroyWindow is called.
 // Note that calling FlutterDesktopCreateWindow without later calling
 // FlutterDesktopDestroyWindow on the returned reference is a memory leak.
-FLUTTER_EXPORT FlutterDesktopWindowControllerRef
-FlutterDesktopCreateWindow(int initial_width,
-                           int initial_height,
-                           const char* title,
-                           const char* assets_path,
-                           const char* icu_data_path,
-                           const char** arguments,
-                           size_t argument_count);
+FLUTTER_EXPORT FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
+    const FlutterDesktopWindowProperties& window_properties,
+    const FlutterDesktopEngineProperties& engine_properties);
 
 // Shuts down the engine instance associated with |controller|, and cleans up
 // associated state.
@@ -143,20 +161,9 @@ FLUTTER_EXPORT double FlutterDesktopWindowGetScaleFactor(
 
 // Runs an instance of a headless Flutter engine.
 //
-// The |assets_path| is the path to the flutter_assets folder for the Flutter
-// application to be run. |icu_data_path| is the path to the icudtl.dat file
-// for the version of Flutter you are using.
-//
-// The |arguments| are passed to the Flutter engine. See:
-// https://github.com/flutter/engine/blob/master/shell/common/switches.h for
-// for details. Not all arguments will apply to desktop.
-//
 // Returns a null pointer in the event of an error.
 FLUTTER_EXPORT FlutterDesktopEngineRef
-FlutterDesktopRunEngine(const char* assets_path,
-                        const char* icu_data_path,
-                        const char** arguments,
-                        size_t argument_count);
+FlutterDesktopRunEngine(const FlutterDesktopEngineProperties& properties);
 
 // Shuts down the given engine instance. Returns true if the shutdown was
 // successful. |engine_ref| is no longer valid after this call.

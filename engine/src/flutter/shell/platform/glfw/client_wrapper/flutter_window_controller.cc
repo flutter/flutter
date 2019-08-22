@@ -25,9 +25,7 @@ FlutterWindowController::~FlutterWindowController() {
 }
 
 bool FlutterWindowController::CreateWindow(
-    int width,
-    int height,
-    const std::string& title,
+    const WindowProperties& window_properties,
     const std::string& assets_path,
     const std::vector<std::string>& arguments) {
   if (!init_succeeded_) {
@@ -41,15 +39,26 @@ bool FlutterWindowController::CreateWindow(
     return false;
   }
 
-  std::vector<const char*> engine_arguments;
-  std::transform(
-      arguments.begin(), arguments.end(), std::back_inserter(engine_arguments),
-      [](const std::string& arg) -> const char* { return arg.c_str(); });
-  size_t arg_count = engine_arguments.size();
+  FlutterDesktopWindowProperties c_window_properties = {};
+  c_window_properties.title = window_properties.title.c_str();
+  c_window_properties.width = window_properties.width;
+  c_window_properties.height = window_properties.height;
+  c_window_properties.prevent_resize = window_properties.prevent_resize;
 
-  controller_ = FlutterDesktopCreateWindow(
-      width, height, title.c_str(), assets_path.c_str(), icu_data_path_.c_str(),
-      arg_count > 0 ? &engine_arguments[0] : nullptr, arg_count);
+  FlutterDesktopEngineProperties c_engine_properties = {};
+  c_engine_properties.assets_path = assets_path.c_str();
+  c_engine_properties.icu_data_path = icu_data_path_.c_str();
+  std::vector<const char*> engine_switches;
+  std::transform(
+      arguments.begin(), arguments.end(), std::back_inserter(engine_switches),
+      [](const std::string& arg) -> const char* { return arg.c_str(); });
+  if (engine_switches.size() > 0) {
+    c_engine_properties.switches = &engine_switches[0];
+    c_engine_properties.switches_count = engine_switches.size();
+  }
+
+  controller_ =
+      FlutterDesktopCreateWindow(c_window_properties, c_engine_properties);
   if (!controller_) {
     std::cerr << "Failed to create window." << std::endl;
     return false;

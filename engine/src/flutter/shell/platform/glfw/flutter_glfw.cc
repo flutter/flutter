@@ -482,17 +482,15 @@ static void GLFWErrorCallback(int error_code, const char* description) {
 // Returns a caller-owned pointer to the engine.
 static FLUTTER_API_SYMBOL(FlutterEngine)
     RunFlutterEngine(GLFWwindow* window,
-                     const char* assets_path,
-                     const char* icu_data_path,
-                     const char** arguments,
-                     size_t arguments_count,
+                     const FlutterDesktopEngineProperties& engine_properties,
                      const FlutterCustomTaskRunners* custom_task_runners) {
   // FlutterProjectArgs is expecting a full argv, so when processing it for
   // flags the first item is treated as the executable and ignored. Add a dummy
   // value so that all provided arguments are used.
   std::vector<const char*> argv = {"placeholder"};
-  if (arguments_count > 0) {
-    argv.insert(argv.end(), &arguments[0], &arguments[arguments_count]);
+  if (engine_properties.switches_count > 0) {
+    argv.insert(argv.end(), &engine_properties.switches[0],
+                &engine_properties.switches[engine_properties.switches_count]);
   }
 
   FlutterRendererConfig config = {};
@@ -516,8 +514,8 @@ static FLUTTER_API_SYMBOL(FlutterEngine)
   }
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
-  args.assets_path = assets_path;
-  args.icu_data_path = icu_data_path;
+  args.assets_path = engine_properties.assets_path;
+  args.icu_data_path = engine_properties.icu_data_path;
   args.command_line_argc = static_cast<int>(argv.size());
   args.command_line_argv = &argv[0];
   args.platform_message_callback = GLFWOnFlutterPlatformMessage;
@@ -544,19 +542,19 @@ void FlutterDesktopTerminate() {
 }
 
 FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
-    int initial_width,
-    int initial_height,
-    const char* title,
-    const char* assets_path,
-    const char* icu_data_path,
-    const char** arguments,
-    size_t argument_count) {
+    const FlutterDesktopWindowProperties& window_properties,
+    const FlutterDesktopEngineProperties& engine_properties) {
   auto state = std::make_unique<FlutterDesktopWindowControllerState>();
 
   // Create the window, and set the state as its user data.
+  if (window_properties.prevent_resize) {
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  }
   state->window = UniqueGLFWwindowPtr(
-      glfwCreateWindow(initial_width, initial_height, title, NULL, NULL),
+      glfwCreateWindow(window_properties.width, window_properties.height,
+                       window_properties.title, NULL, NULL),
       glfwDestroyWindow);
+  glfwDefaultWindowHints();
   GLFWwindow* window = state->window.get();
   if (window == nullptr) {
     return nullptr;
@@ -598,8 +596,7 @@ FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
 
   // Start the engine.
   state->engine =
-      RunFlutterEngine(window, assets_path, icu_data_path, arguments,
-                       argument_count, &custom_task_runners);
+      RunFlutterEngine(window, engine_properties, &custom_task_runners);
   if (state->engine == nullptr) {
     return nullptr;
   }
@@ -745,13 +742,10 @@ FlutterDesktopPluginRegistrarRef FlutterDesktopGetPluginRegistrar(
   return controller->plugin_registrar.get();
 }
 
-FlutterDesktopEngineRef FlutterDesktopRunEngine(const char* assets_path,
-                                                const char* icu_data_path,
-                                                const char** arguments,
-                                                size_t argument_count) {
+FlutterDesktopEngineRef FlutterDesktopRunEngine(
+    const FlutterDesktopEngineProperties& properties) {
   auto engine =
-      RunFlutterEngine(nullptr, assets_path, icu_data_path, arguments,
-                       argument_count, nullptr /* custom task runners */);
+      RunFlutterEngine(nullptr, properties, nullptr /* custom task runners */);
   if (engine == nullptr) {
     return nullptr;
   }
