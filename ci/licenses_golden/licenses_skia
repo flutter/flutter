@@ -1,4 +1,4 @@
-Signature: acf11dca6c47f0ef283df6eba08b6d6a
+Signature: eab4f838899f93a7ff8a36ea19e0afe6
 
 UNUSED LICENSES:
 
@@ -613,8 +613,6 @@ FILE: ../../../third_party/skia/src/gpu/GrGpuCommandBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrGpuCommandBuffer.h
 FILE: ../../../third_party/skia/src/gpu/GrImageTextureMaker.cpp
 FILE: ../../../third_party/skia/src/gpu/GrImageTextureMaker.h
-FILE: ../../../third_party/skia/src/gpu/GrOpList.cpp
-FILE: ../../../third_party/skia/src/gpu/GrOpList.h
 FILE: ../../../third_party/skia/src/gpu/GrProgramDesc.cpp
 FILE: ../../../third_party/skia/src/gpu/GrReducedClip.cpp
 FILE: ../../../third_party/skia/src/gpu/GrReducedClip.h
@@ -640,8 +638,6 @@ FILE: ../../../third_party/skia/src/gpu/GrTextureContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTextureContext.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureMaker.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTextureMaker.h
-FILE: ../../../third_party/skia/src/gpu/GrTextureOpList.cpp
-FILE: ../../../third_party/skia/src/gpu/GrTextureOpList.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureProducer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTextureProducer.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureProxy.cpp
@@ -1021,7 +1017,7 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPathCache.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPathCache.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerFlushResources.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerFlushResources.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerOpListPaths.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerOpsTaskPaths.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCSTLList.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStrokeGeometry.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStrokeGeometry.h
@@ -4989,6 +4985,8 @@ FILE: ../../../third_party/skia/src/gpu/GrGpuBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrGpuBuffer.h
 FILE: ../../../third_party/skia/src/gpu/GrImageContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrImageContextPriv.h
+FILE: ../../../third_party/skia/src/gpu/GrOpsTask.cpp
+FILE: ../../../third_party/skia/src/gpu/GrOpsTask.h
 FILE: ../../../third_party/skia/src/gpu/GrRecordingContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRecordingContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrSamplePatternDictionary.cpp
@@ -5731,8 +5729,6 @@ FILE: ../../../third_party/skia/src/gpu/GrGlyph.h
 FILE: ../../../third_party/skia/src/gpu/GrGpu.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRectanizer.h
 FILE: ../../../third_party/skia/src/gpu/GrRectanizer_pow2.cpp
-FILE: ../../../third_party/skia/src/gpu/GrRenderTargetOpList.cpp
-FILE: ../../../third_party/skia/src/gpu/GrRenderTargetOpList.h
 FILE: ../../../third_party/skia/src/gpu/GrVertexWriter.h
 FILE: ../../../third_party/skia/src/gpu/SkGpuDevice.h
 FILE: ../../../third_party/skia/src/gpu/SkGr.cpp
