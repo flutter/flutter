@@ -31,3 +31,7 @@ export 'src/gestures/scale.dart';
 export 'src/gestures/tap.dart';
 export 'src/gestures/team.dart';
 export 'src/gestures/velocity_tracker.dart';
+
+void blah() {
+  print(' this is a test that should never be landed');
+}
