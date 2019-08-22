@@ -205,8 +205,8 @@ class _TweenAnimationBuilderState<T> extends AnimatedWidgetBaseState<TweenAnimat
 
   @override
   void initState() {
-    widget.tween.begin ??= widget.tween.end;
     _currentTween = widget.tween;
+    _currentTween.begin ??= _currentTween.end;
     super.initState();
     // The statusListener is removed when the superclass disposes the controller.
     controller.addStatusListener(_onAnimationStatusChanged);
