@@ -1600,8 +1600,9 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
   ///
   /// Setting this value to false will allow the child to fill the remainder of
   /// the viewport and not extend further. However, if the
-  /// [precedingScrollExtent] of the [SliverContraintsexceeds the size of the viewport, the sliver will
-  /// defer to the child's size rather than overriding it.
+  /// [precedingScrollExtent] of the [SliverContraints] and/or the [child]'s
+  /// extent exceeds the size of the viewport, the sliver will defer to the
+  /// child's size rather than overriding it.
   final bool hasScrollBody;
 
   /// Indicates whether the child should stretch to fill the overscroll area
