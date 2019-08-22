@@ -1,7 +1,7 @@
 # Scenario App
 
-This folder contains a dart:ui application and scripts to compile it to AOT
-for exercising embedders.
+This folder contains a dart:ui application and scripts to compile it to JIT or
+AOT for exercising embedders.
 
 It intentionally has no dependencies on the Flutter framework or tooling, such
 that it should be buildable as a presubmit or postsubmit to the engine even in
@@ -28,7 +28,7 @@ This will create an `App.framework` copy it as well as the correct
 You can then use `xcodebuild` to build the `ios/Scenarios/Scenarios.xcodeproj`,
 or open that in Xcode and build it that way.
 
-Currently, only AOT modes are supported.
+Compiling to JIT mode is similar, using the `compile_ios_jit.sh` script.
 
 ## Building for Android
 
