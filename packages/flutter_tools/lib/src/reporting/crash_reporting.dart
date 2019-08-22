@@ -127,7 +127,7 @@ class CrashReportSender {
         printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
       }
     } catch (sendError, sendStackTrace) {
-      if (sendError is SocketException) {
+      if (sendError is SocketException || sendError is HttpException) {
         printError('Failed to send crash report due to a network error: $sendError');
       } else {
         // If the sender itself crashes, just print. We did our best.
