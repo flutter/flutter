@@ -23,8 +23,8 @@ FLUTTER_EXPORT
  * The bundle must either contain a flutter_assets resource directory, or set the Info.plist key
  * FLTAssetsPath to override that name (if you are doing a custom build using a different name).
  *
- * @param bundle The bundle containing the Flutter assets directory. If nil, the main bundle is
- *               used.
+ * @param bundle The bundle containing the Flutter assets directory. If nil, the App framework
+ *               created by Flutter will be used.
  */
 - (nonnull instancetype)initWithPrecompiledDartBundle:(nullable NSBundle*)bundle
     NS_DESIGNATED_INITIALIZER;
