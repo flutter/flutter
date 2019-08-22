@@ -65,6 +65,9 @@ void main() {
       return Future<bool>.value(false);
     });
     when(mockDebugConnection.vmService).thenReturn(mockVmService);
+    when(mockDebugConnection.onDone).thenAnswer((Invocation invocation) {
+      return Completer<void>().future;
+    });
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
