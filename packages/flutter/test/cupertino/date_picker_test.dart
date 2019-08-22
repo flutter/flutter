@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -102,6 +103,28 @@ void main() {
         },
         throwsAssertionError,
       );
+    });
+
+    testWidgets('background color default value', (WidgetTester tester) async {
+      final CupertinoTimerPicker picker = CupertinoTimerPicker(
+        onTimerDurationChanged: (Duration value) {},
+      );
+      expect(picker.backgroundColor, Colors.white);
+    });
+
+    testWidgets('background color is not null', (WidgetTester tester) async {
+      final CupertinoTimerPicker picker = CupertinoTimerPicker(
+        onTimerDurationChanged: (Duration value) {},
+      );
+      expect(picker.backgroundColor, isNotNull);
+    });
+
+    testWidgets('specified background color is applied', (WidgetTester tester) async {
+      final CupertinoTimerPicker picker = CupertinoTimerPicker(
+        onTimerDurationChanged: (Duration value) {},
+        backgroundColor: Colors.red,
+      );
+      expect(picker.backgroundColor, Colors.red);
     });
 
     testWidgets('columns are ordered correctly when text direction is ltr', (WidgetTester tester) async {
@@ -263,6 +286,28 @@ void main() {
         onDateTimeChanged: (_) { },
       );
       expect(picker.initialDateTime, isNotNull);
+    });
+
+    testWidgets('background color default value', (WidgetTester tester) async {
+      final CupertinoDatePicker picker = CupertinoDatePicker(
+        onDateTimeChanged: (_) { },
+      );
+      expect(picker.backgroundColor, Colors.white);
+    });
+
+    testWidgets('background color is not null', (WidgetTester tester) async {
+      final CupertinoDatePicker picker = CupertinoDatePicker(
+        onDateTimeChanged: (_) { },
+      );
+      expect(picker.backgroundColor, isNotNull);
+    });
+
+    testWidgets('specified background color is applied', (WidgetTester tester) async {
+      final CupertinoDatePicker picker = CupertinoDatePicker(
+        onDateTimeChanged: (_) { },
+        backgroundColor: Colors.red,
+      );
+      expect(picker.backgroundColor, Colors.red);
     });
 
     testWidgets('initial date honors minuteInterval', (WidgetTester tester) async {

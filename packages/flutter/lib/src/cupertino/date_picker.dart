@@ -215,6 +215,7 @@ class CupertinoDatePicker extends StatefulWidget {
        assert(mode != null),
        assert(onDateTimeChanged != null),
        assert(minimumYear != null),
+       assert(backgroundColor != null),
        assert(
          minuteInterval > 0 && 60 % minuteInterval == 0,
          'minute interval is not a positive integer factor of 60',
@@ -282,7 +283,9 @@ class CupertinoDatePicker extends StatefulWidget {
   /// null.
   final ValueChanged<DateTime> onDateTimeChanged;
 
-  /// Background color behind the children.
+  /// Background color of date picker.
+  /// 
+  /// Defaults to [CupertinoColors.white] when null.
   final Color backgroundColor;
 
   @override
@@ -1064,7 +1067,8 @@ class CupertinoTimerPicker extends StatefulWidget {
        assert(minuteInterval > 0 && 60 % minuteInterval == 0),
        assert(secondInterval > 0 && 60 % secondInterval == 0),
        assert(initialTimerDuration.inMinutes % minuteInterval == 0),
-       assert(initialTimerDuration.inSeconds % secondInterval == 0);
+       assert(initialTimerDuration.inSeconds % secondInterval == 0),
+       assert(backgroundColor != null);
 
   /// The mode of the timer picker.
   final CupertinoTimerPickerMode mode;
@@ -1083,7 +1087,9 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// Callback called when the timer duration changes.
   final ValueChanged<Duration> onTimerDurationChanged;
   
-  /// Background color behind the children.
+  /// Background color of timer picker.
+  /// 
+  /// Defaults to [CupertinoColors.white] when null.
   final Color backgroundColor;
 
   @override
