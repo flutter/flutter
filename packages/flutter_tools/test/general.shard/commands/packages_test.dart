@@ -396,10 +396,9 @@ void main() {
     testUsingContext('deps', () async {
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'deps']);
       final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(3));
+      expect(commands, hasLength(2));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], '--trace');
-      expect(commands[2], 'deps');
+      expect(commands[1], 'deps');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
@@ -409,10 +408,9 @@ void main() {
     testUsingContext('cache', () async {
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'cache']);
       final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(3));
+      expect(commands, hasLength(2));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], '--trace');
-      expect(commands[2], 'cache');
+      expect(commands[1], 'cache');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
@@ -422,10 +420,9 @@ void main() {
     testUsingContext('version', () async {
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'version']);
       final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(3));
+      expect(commands, hasLength(2));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], '--trace');
-      expect(commands[2], 'version');
+      expect(commands[1], 'version');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
@@ -435,10 +432,9 @@ void main() {
     testUsingContext('uploader', () async {
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'uploader']);
       final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(3));
+      expect(commands, hasLength(2));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], '--trace');
-      expect(commands[2], 'uploader');
+      expect(commands[1], 'uploader');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
@@ -448,11 +444,10 @@ void main() {
     testUsingContext('global', () async {
       await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'global', 'list']);
       final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(4));
+      expect(commands, hasLength(3));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], '--trace');
-      expect(commands[2], 'global');
-      expect(commands[3], 'list');
+      expect(commands[1], 'global');
+      expect(commands[2], 'list');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
