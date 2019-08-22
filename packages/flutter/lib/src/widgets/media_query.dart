@@ -93,6 +93,7 @@ class MediaQueryData {
     this.platformBrightness = Brightness.light,
     this.padding = EdgeInsets.zero,
     this.viewInsets = EdgeInsets.zero,
+    this.systemGestureInsets = EdgeInsets.zero,
     this.viewPadding = EdgeInsets.zero,
     this.physicalDepth = double.maxFinite,
     this.alwaysUse24HourFormat = false,
@@ -117,6 +118,7 @@ class MediaQueryData {
       padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
       viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
       viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
+      systemGestureInsets = EdgeInsets.fromWindowPadding(window.systemGestureInsets, window.devicePixelRatio),
       physicalDepth = window.physicalDepth,
       accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
       invertColors = window.accessibilityFeatures.invertColors,
@@ -215,6 +217,61 @@ class MediaQueryData {
   ///   property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
+  /// The areas along the edges of the display where the system consumes
+  /// certain input events and blocks delivery of those events to the app.
+  ///
+  /// Starting with Android Q, simple swipe gestures that start within the
+  /// [systemGestureInsets] areas are used by the system for page navigation
+  /// and may not be delivered to the app. Taps and swipe gestures that begin
+  /// with a long-press are delivered to the app, but simple press-drag-release
+  /// swipe gestures which begin within the area defined by [systemGestureInsets]
+  /// may not be.
+  ///
+  /// Apps should avoid locating gesture detectors within the system gesture
+  /// insets area. Apps should feel free to put visual elements within
+  /// this area.
+  ///
+  /// This property is currently only expected to be set to a non-default value
+  /// on Android starting with version Q.
+  ///
+  /// {@tool snippet --template=stateful_widget_material}
+  ///
+  /// For apps that might be deployed on Android Q devices with full gesture
+  /// navigation enabled, use [MediaQuery.systemGestureInsets] with [Padding]
+  /// to avoid having the left and right edges of the [Slider] from appearing
+  /// within the area reserved for system gesture navigation.
+  ///
+  /// By default, [Slider]s expand to fill the available width. So, we pad the
+  /// left and right sides.
+  ///
+  /// ```dart
+  /// double _currentValue = 0.2;
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   EdgeInsets systemGestureInsets = MediaQuery.of(context).systemGestureInsets;
+  ///   return Scaffold(
+  ///     appBar: AppBar(title: Text('Pad Slider to avoid systemGestureInsets')),
+  ///     body: Padding(
+  ///       padding: EdgeInsets.only( // only left and right padding are needed here
+  ///         left: systemGestureInsets.left,
+  ///         right: systemGestureInsets.right,
+  ///       ),
+  ///       child: Slider(
+  ///         value: _currentValue.toDouble(),
+  ///         onChanged: (double newValue) {
+  ///           setState(() {
+  ///             _currentValue = newValue;
+  ///           });
+  ///         },
+  ///       ),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  final EdgeInsets systemGestureInsets;
+
   /// The physical depth is the maximum elevation that the Window allows.
   ///
   /// Physical layers drawn at or above this elevation will have their elevation
@@ -300,6 +357,7 @@ class MediaQueryData {
     EdgeInsets padding,
     EdgeInsets viewPadding,
     EdgeInsets viewInsets,
+    EdgeInsets systemGestureInsets,
     double physicalDepth,
     bool alwaysUse24HourFormat,
     bool highContrast,
@@ -316,6 +374,7 @@ class MediaQueryData {
       padding: padding ?? this.padding,
       viewPadding: viewPadding ?? this.viewPadding,
       viewInsets: viewInsets ?? this.viewInsets,
+      systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
       physicalDepth: physicalDepth ?? this.physicalDepth,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
