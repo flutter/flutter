@@ -85,6 +85,11 @@ abstract class UnpackMacOS extends Target {
   const UnpackMacOS();
 
   @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+  ];
+
+  @override
   List<Source> get outputs => const <Source>[
     Source.pattern('$_kOutputPrefix/FlutterMacOS'),
     // Headers
@@ -143,9 +148,9 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
   String get name => 'release_unpack_macos';
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-    Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.release),
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.release),
   ];
 }
 
@@ -157,9 +162,9 @@ class ProfileUnpackMacOS extends UnpackMacOS {
   String get name => 'profile_unpack_macos';
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-    Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.profile),
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.profile),
   ];
 }
 
@@ -171,9 +176,9 @@ class DebugUnpackMacOS extends UnpackMacOS {
   String get name => 'debug_unpack_macos';
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-    Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
   ];
 }
 
@@ -467,7 +472,7 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
 
   @override
   List<Source> get outputs => <Source>[
-    ...super.inputs,
+    ...super.outputs,
     const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'),
     const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
     const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
