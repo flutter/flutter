@@ -4,6 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/process_manager.dart';
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -22,6 +25,7 @@ import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/testbed.dart';
 
 final Generator _kNoColorOutputPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
@@ -586,6 +590,15 @@ void main() {
       expect(await FakeSmallGroupDoctor(missing, missing).diagnose(), isFalse);
       expect(testLogger.statusText, startsWith('[✗]'));
     }, overrides: noColorTerminalOverride);
+  });
+
+  testUsingContext('WebWorkflow is a part of validator workflows if enabled', () async {
+    when(processManager.canRun(any)).thenReturn(true);
+
+    expect(DoctorValidatorsProvider.defaultInstance.workflows.contains(webWorkflow), true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    ProcessManager: () => MockProcessManager(),
   });
 }
 
