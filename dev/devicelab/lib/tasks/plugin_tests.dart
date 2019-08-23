@@ -122,9 +122,9 @@ class _FlutterProject {
     if (Platform.isWindows) {
       // A running Gradle daemon might prevent us from deleting the project
       // folder on Windows.
-      String wrapperPath =
+      final String wrapperPath =
           path.absolute(path.join(rootPath, 'android', 'gradlew.bat'));
-      if (await File(wrapperPath).exists()) {
+      if (File(wrapperPath).existsSync()) {
         await exec(wrapperPath, <String>['--stop'], canFail: true);
       }
       // TODO(ianh): Investigating if flakiness is timing dependent.
