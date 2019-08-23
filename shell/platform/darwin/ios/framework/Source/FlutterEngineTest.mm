@@ -4,7 +4,7 @@
 
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 
 @interface FlutteEngineTest : XCTestCase
 @end
