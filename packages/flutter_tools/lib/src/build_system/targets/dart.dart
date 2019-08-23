@@ -103,6 +103,7 @@ class KernelSnapshot extends Target {
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       depFilePath: null,
       packagesPath: packagesPath,
+      linkPlatformKernelIn: buildMode == BuildMode.release,
       mainPath: packageUriMapper.map(targetFile)?.toString() ?? targetFile,
     );
     if (output.errorCount != 0) {

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:crypto/crypto.dart' show md5;
 import 'package:meta/meta.dart';
 import 'package:quiver/core.dart' show hash2;
@@ -52,12 +50,12 @@ class Fingerprinter {
   final List<String> _depfilePaths;
   final FingerprintPathFilter _pathFilter;
 
-  Future<Fingerprint> buildFingerprint() async {
-    final List<String> paths = await _getPaths();
+  Fingerprint buildFingerprint() {
+    final List<String> paths = _getPaths();
     return Fingerprint.fromBuildInputs(_properties, paths);
   }
 
-  Future<bool> doesFingerprintMatch() async {
+  bool doesFingerprintMatch() {
     if (_disableBuildCache) {
       return false;
     }
@@ -69,12 +67,12 @@ class Fingerprinter {
       if (!_depfilePaths.every(fs.isFileSync))
         return false;
 
-      final List<String> paths = await _getPaths();
+      final List<String> paths = _getPaths();
       if (!paths.every(fs.isFileSync))
         return false;
 
-      final Fingerprint oldFingerprint = Fingerprint.fromJson(await fingerprintFile.readAsString());
-      final Fingerprint newFingerprint = await buildFingerprint();
+      final Fingerprint oldFingerprint = Fingerprint.fromJson(fingerprintFile.readAsStringSync());
+      final Fingerprint newFingerprint = buildFingerprint();
       return oldFingerprint == newFingerprint;
     } catch (e) {
       // Log exception and continue, fingerprinting is only a performance improvement.
@@ -83,9 +81,9 @@ class Fingerprinter {
     return false;
   }
 
-  Future<void> writeFingerprint() async {
+  void writeFingerprint() {
     try {
-      final Fingerprint fingerprint = await buildFingerprint();
+      final Fingerprint fingerprint = buildFingerprint();
       fs.file(fingerprintPath).writeAsStringSync(fingerprint.toJson());
     } catch (e) {
       // Log exception and continue, fingerprinting is only a performance improvement.
@@ -93,11 +91,11 @@ class Fingerprinter {
     }
   }
 
-  Future<List<String>> _getPaths() async {
+  List<String> _getPaths() {
     final Set<String> paths = <String>{
       ..._paths,
       for (String depfilePath in _depfilePaths)
-        ...await readDepfile(depfilePath),
+        ...readDepfile(depfilePath),
     };
     final FingerprintPathFilter filter = _pathFilter ?? (String path) => true;
     return paths.where(filter).toList()..sort();
@@ -183,10 +181,10 @@ final RegExp _escapeExpr = RegExp(r'\\(.)');
 /// outfile : file1.dart fil\\e2.dart fil\ e3.dart
 ///
 /// will return a set containing: 'file1.dart', 'fil\e2.dart', 'fil e3.dart'.
-Future<Set<String>> readDepfile(String depfilePath) async {
+Set<String> readDepfile(String depfilePath) {
   // Depfile format:
   // outfile1 outfile2 : file1.dart file2.dart file3.dart
-  final String contents = await fs.file(depfilePath).readAsString();
+  final String contents = fs.file(depfilePath).readAsStringSync();
 
   final String dependencies = contents.split(': ')[1];
   return dependencies

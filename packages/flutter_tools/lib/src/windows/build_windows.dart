@@ -42,6 +42,15 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
         'Please run `flutter doctor` for more details.');
   }
 
+  if (!buildInfo.isDebug) {
+    const String warning = '🚧 ';
+    printStatus(warning * 20);
+    printStatus('Warning: Only debug is currently implemented for Windows. This is effectively a debug build.');
+    printStatus('See https://github.com/flutter/flutter/issues/38477 for details and updates.');
+    printStatus(warning * 20);
+    printStatus('');
+  }
+
   final String buildScript = fs.path.join(
     Cache.flutterRoot,
     'packages',

@@ -15,7 +15,6 @@ import '../cache.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart';
-import '../macos/xcode.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -234,19 +233,6 @@ class RunCommand extends RunCommandBase {
       CustomDimensions.commandRunProjectModule: '${FlutterProject.current().isModule}',
       CustomDimensions.commandRunProjectHostLanguage: hostLanguage.join(','),
     };
-  }
-
-  @override
-  void printNoConnectedDevices() {
-    super.printNoConnectedDevices();
-    if (getCurrentHostPlatform() == HostPlatform.darwin_x64 &&
-        xcode.isInstalledAndMeetsVersionCheck) {
-      printStatus('');
-      printStatus("Run 'flutter emulators' to list and start any available device emulators.");
-      printStatus('');
-      printStatus('If you expected your device to be detected, please run "flutter doctor" to diagnose');
-      printStatus('potential issues, or visit https://flutter.dev/setup/ for troubleshooting tips.');
-    }
   }
 
   @override

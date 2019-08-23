@@ -14,7 +14,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
 import 'button_bar.dart';
-import 'button_theme.dart';
 import 'colors.dart';
 import 'divider.dart';
 import 'drawer.dart';
@@ -1623,6 +1622,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     Color backgroundColor,
     double elevation,
     ShapeBorder shape,
+    Clip clipBehavior,
   }) {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
@@ -1703,6 +1703,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       backgroundColor: backgroundColor,
       elevation: elevation,
       shape: shape,
+      clipBehavior: clipBehavior,
     );
 
     if (!isPersistent)
@@ -1760,6 +1761,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     Color backgroundColor,
     double elevation,
     ShapeBorder shape,
+    Clip clipBehavior,
   }) {
     assert(() {
       if (widget.bottomSheet != null) {
@@ -1783,6 +1785,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         backgroundColor: backgroundColor,
         elevation: elevation,
         shape: shape,
+        clipBehavior: clipBehavior,
       );
     });
     return _currentBottomSheet;
@@ -2154,13 +2157,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             ),
           ),
           child: SafeArea(
-            child: ButtonTheme.bar(
-              child: SafeArea(
-                top: false,
-                child: ButtonBar(
-                  children: widget.persistentFooterButtons,
-                ),
-              ),
+            top: false,
+            child: ButtonBar(
+              children: widget.persistentFooterButtons,
             ),
           ),
         ),
@@ -2318,6 +2317,7 @@ class _StandardBottomSheet extends StatefulWidget {
     this.backgroundColor,
     this.elevation,
     this.shape,
+    this.clipBehavior,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
@@ -2329,6 +2329,7 @@ class _StandardBottomSheet extends StatefulWidget {
   final Color backgroundColor;
   final double elevation;
   final ShapeBorder shape;
+  final Clip clipBehavior;
 
   @override
   _StandardBottomSheetState createState() => _StandardBottomSheetState();
@@ -2417,6 +2418,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
             backgroundColor: widget.backgroundColor,
             elevation: widget.elevation,
             shape: widget.shape,
+            clipBehavior: widget.clipBehavior,
           ),
         ),
       );

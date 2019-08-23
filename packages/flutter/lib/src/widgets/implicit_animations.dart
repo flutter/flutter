@@ -247,6 +247,8 @@ class TextStyleTween extends Tween<TextStyle> {
 /// usually named `AnimatedFoo`, where `Foo` is the name of the non-animated
 /// version of that widget. Commonly used implicitly animated widgets include:
 ///
+///  * [TweenAnimationBuilder], which animates any property expressed by
+///    a [Tween] to a specified target value.
 ///  * [AnimatedAlign], which is an implicitly animated version of [Align].
 ///  * [AnimatedContainer], which is an implicitly animated version of
 ///    [Container].
