@@ -64,7 +64,7 @@ void ensureDirectoryExists(String filePath) {
   }
 }
 
-// Creates `destDir` if needed, then recursively copies `srcDir` to `destDir`,
+/// Creates `destDir` if needed, then recursively copies `srcDir` to `destDir`,
 /// invoking [onFileCopied], if specified, for each source/destination file pair.
 ///
 /// Skips files if [shouldCopyFile] returns `false`.
