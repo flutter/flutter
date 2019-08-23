@@ -82,8 +82,6 @@ class _FlutterProject {
       '\ndependencies:\n',
       '\ndependencies:\n  $dependency\n',
     );
-    print('COLLIN');
-    print(content);
     await pubspec.writeAsString(content, flush: true);
   }
 
