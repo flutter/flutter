@@ -1086,7 +1086,7 @@ class CupertinoTimerPicker extends StatefulWidget {
 
   /// Callback called when the timer duration changes.
   final ValueChanged<Duration> onTimerDurationChanged;
-  
+
   /// Background color of timer picker.
   ///
   /// Defaults to [CupertinoColors.white] when null.
