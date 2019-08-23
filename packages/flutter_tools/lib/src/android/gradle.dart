@@ -302,7 +302,7 @@ Future<String> _initializeGradle(FlutterProject project) async {
   return gradle;
 }
 
-/// Injects the Gradle wrapper into [directory] if [directory] doesn't exist.
+/// Injects the Gradle wrapper files if any of these files don't exist in [directory].
 void injectGradleWrapperIfNeeded(Directory directory) {
   copyDirectorySync(
     cache.getArtifactDirectory('gradle_wrapper'),
