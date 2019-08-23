@@ -46,11 +46,9 @@ void main() {
         fs.path.join(basePath, '.idea'): 'dir',
         fs.path.join(basePath, '.idea', 'modules.xml$suffix'): 'modules $marker',
         fs.path.join(basePath, '.idea', 'vcs.xml$suffix'): 'vcs $marker',
-        fs.path.join(basePath, '.idea', '.name$suffix'):
-            'codeStyleSettings $marker',
+        fs.path.join(basePath, '.idea', '.name$suffix'): 'codeStyleSettings $marker',
         fs.path.join(basePath, '.idea', 'runConfigurations'): 'dir',
-        fs.path.join(basePath, '.idea', 'runConfigurations', 'hello_world.xml$suffix'):
-            'hello_world $marker',
+        fs.path.join(basePath, '.idea', 'runConfigurations', 'hello_world.xml$suffix'): 'hello_world $marker',
         fs.path.join(basePath, 'flutter.iml$suffix'): 'flutter $marker',
         fs.path.join(basePath, 'packages', 'new', 'deep.iml$suffix'): 'deep $marker',
       };
