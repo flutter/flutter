@@ -9,8 +9,11 @@
 
 namespace flutter {
 
-GPUSurfaceSoftware::GPUSurfaceSoftware(GPUSurfaceSoftwareDelegate* delegate)
-    : delegate_(delegate), weak_factory_(this) {}
+GPUSurfaceSoftware::GPUSurfaceSoftware(GPUSurfaceSoftwareDelegate* delegate,
+                                       bool render_to_surface)
+    : delegate_(delegate),
+      render_to_surface_(render_to_surface),
+      weak_factory_(this) {}
 
 GPUSurfaceSoftware::~GPUSurfaceSoftware() = default;
 
@@ -22,6 +25,15 @@ bool GPUSurfaceSoftware::IsValid() {
 // |Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceSoftware::AcquireFrame(
     const SkISize& logical_size) {
+  // TODO(38466): Refactor GPU surface APIs take into account the fact that an
+  // external view embedder may want to render to the root surface.
+  if (!render_to_surface_) {
+    return std::make_unique<SurfaceFrame>(
+        nullptr, [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
+          return true;
+        });
+  }
+
   if (!IsValid()) {
     return nullptr;
   }

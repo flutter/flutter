@@ -43,7 +43,7 @@ std::unique_ptr<Surface> IOSSurfaceSoftware::CreateGPUSurface() {
     return nullptr;
   }
 
-  auto surface = std::make_unique<GPUSurfaceSoftware>(this);
+  auto surface = std::make_unique<GPUSurfaceSoftware>(this, true /* render to surface */);
 
   if (!surface->IsValid()) {
     return nullptr;

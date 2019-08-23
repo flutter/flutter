@@ -1105,6 +1105,10 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
   latch.Wait();
 
   ASSERT_TRUE(ImageMatchesFixture("compositor.png", scene_image));
+
+  // There should no present calls on the root surface.
+  ASSERT_EQ(context.GetSoftwareSurfacePresentCount(), 0u);
+  ASSERT_EQ(context.GetGLSurfacePresentCount(), 0u);
 }
 
 //------------------------------------------------------------------------------
@@ -1279,6 +1283,10 @@ TEST_F(EmbedderTest,
   latch.Wait();
 
   ASSERT_TRUE(ImageMatchesFixture("compositor_software.png", scene_image));
+
+  // There should no present calls on the root surface.
+  ASSERT_EQ(context.GetSoftwareSurfacePresentCount(), 0u);
+  ASSERT_EQ(context.GetGLSurfacePresentCount(), 0u);
 }
 
 //------------------------------------------------------------------------------

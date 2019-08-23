@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "third_party/skia/include/core/SkBitmap.h"
 
 namespace flutter {
 namespace testing {
@@ -48,7 +49,21 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
 
   software_renderer_config_.struct_size = sizeof(FlutterSoftwareRendererConfig);
   software_renderer_config_.surface_present_callback =
-      [](void*, const void*, size_t, size_t) { return true; };
+      [](void* context, const void* allocation, size_t row_bytes,
+         size_t height) {
+        auto image_info =
+            SkImageInfo::MakeN32Premul(SkISize::Make(row_bytes / 4, height));
+        SkBitmap bitmap;
+        if (!bitmap.installPixels(image_info, const_cast<void*>(allocation),
+                                  row_bytes)) {
+          FML_LOG(ERROR) << "Could not copy pixels for the software "
+                            "composition from the engine.";
+          return false;
+        }
+        bitmap.setImmutable();
+        return reinterpret_cast<EmbedderTestContext*>(context)->SofwarePresent(
+            SkImage::MakeFromBitmap(bitmap));
+      };
 
   if (preference == InitializationPreference::kInitialize) {
     SetSoftwareRendererConfig();
