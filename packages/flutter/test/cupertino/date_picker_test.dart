@@ -140,7 +140,7 @@ void main() {
       );
 
       final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
-      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor == CupertinoColors.black), true);
+      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.black), false);
     });
 
     testWidgets('columns are ordered correctly when text direction is ltr', (WidgetTester tester) async {
@@ -340,7 +340,7 @@ void main() {
       );
 
       final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
-      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor == CupertinoColors.black), true);
+      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.black), false);
     });
 
     testWidgets('initial date honors minuteInterval', (WidgetTester tester) async {
