@@ -866,7 +866,7 @@ flutter:
     });
   });
 
-  group('runGradleCheckedAsync', () {
+  group('Gradle HTTP failures', () {
     MemoryFileSystem fs;
     MockProcessManager processManager;
     Exception shouldBeToolExit;

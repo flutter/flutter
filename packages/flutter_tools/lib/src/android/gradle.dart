@@ -283,22 +283,6 @@ Future<String> _ensureGradle(FlutterProject project) async {
   return _cachedGradleExecutable;
 }
 
-@visibleForTesting
-Future<RunResult> runGradleCheckedAsync(
-  List<String> cmd, {
- 	void Function(Exception) check,
- 	Map<String, String> environment,
-}) async {
-  try {
-    return await runCheckedAsync(cmd, environment: environment);
-  } catch (e) {
-    if (check != null) {
-      check(e);
-    }
-    rethrow;
-  }
-}
-
 // Note: Gradle may be bootstrapped and possibly downloaded as a side-effect
 // of validating the Gradle executable. This may take several seconds.
 Future<String> _initializeGradle(FlutterProject project) async {
@@ -314,17 +298,16 @@ Future<String> _initializeGradle(FlutterProject project) async {
   printTrace('Using gradle from $gradle.');
   // Validates the Gradle executable by asking for its version.
   // Makes Gradle Wrapper download and install Gradle distribution, if needed.
-  await runGradleCheckedAsync(
-    <String>[gradle, '-v'],
-    check: (Exception e) {
-      if (e is ProcessException &&
-          e.toString().contains('java.io.FileNotFoundException: https://downloads.gradle.org') ||
-          e.toString().contains('java.io.IOException: Unable to tunnel through proxy')) {
-        throwToolExit('$gradle threw an error while trying to update itself.\n$e');
-      }
-    },
-    environment: _gradleEnv,
-  );
+  try {
+    await runCheckedAsync(<String>[gradle, '-v'], environment: _gradleEnv);
+  } catch (e) {
+    if (e is ProcessException &&
+        e.toString().contains('java.io.FileNotFoundException: https://downloads.gradle.org') ||
+        e.toString().contains('java.io.IOException: Unable to tunnel through proxy')) {
+      throwToolExit('$gradle threw an error while trying to update itself.\n$e');
+    }
+    rethrow;
+  }
   status.stop();
   return gradle;
 }
