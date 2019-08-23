@@ -1058,8 +1058,10 @@ class OffsetLayer extends ContainerLayer {
 class ClipRectLayer extends ContainerLayer {
   /// Creates a layer with a rectangular clip.
   ///
-  /// The [clipRect] and [clipBehavior] properties must be non-null before the
-  /// compositing phase of the pipeline.
+  /// The [clipRect] argument must not be null before the compositing phase of
+  /// the pipeline.
+  ///
+  /// The [clipBehavior] argument must not be null, and must not be [Clip.none].
   ClipRectLayer({
     Rect clipRect,
     Clip clipBehavior = Clip.hardEdge,
@@ -1082,10 +1084,12 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   /// {@template flutter.clipper.clipBehavior}
-  /// Controls how to clip (defaults to [Clip.hardEdge]).
+  /// Controls how to clip.
   ///
-  /// [Clip.none] is not allowed here.
+  /// Must not be set to null or [Clip.none].
   /// {@endtemplate}
+  ///
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
@@ -1170,6 +1174,8 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   /// {@macro flutter.clipper.clipBehavior}
+  ///
+  /// Defaults to [Clip.antiAlias].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
@@ -1254,6 +1260,8 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   /// {@macro flutter.clipper.clipBehavior}
+  ///
+  /// Defaults to [Clip.antiAlias].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
