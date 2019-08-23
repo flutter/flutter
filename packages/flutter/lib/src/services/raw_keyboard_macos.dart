@@ -81,7 +81,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     if (keyLabel != null &&
         !LogicalKeyboardKey.isControlCharacter(keyLabel) &&
         !_isUnprintableKey(keyLabel)) {
-      // Given that |charactersIgnoringModifiers| can contain a String of arbitrary length,
+      // Given that charactersIgnoringModifiers can contain a String of arbitrary length,
       // limit to a maximum of two Unicode scalar values. It is unlikely that a keyboard would produce a code point
       // bigger than 32 bits, but it is still worth defending against this case.
       assert(charactersIgnoringModifiers.length <= 2);
