@@ -30,10 +30,6 @@ void main() {
   CocoaPods cocoaPodsUnderTest;
   InvokeProcess resultOfPodVersion;
 
-  void pretendPodIsNotInstalled() {
-    resultOfPodVersion = () async => throw 'Executable does not exist';
-  }
-
   void pretendPodVersionFails() {
     resultOfPodVersion = () async => exitsWithError();
   }
@@ -93,6 +89,22 @@ void main() {
     )).thenAnswer((_) async => exitsHappy());
   });
 
+  void pretendPodIsNotInstalled() {
+    when(mockProcessManager.run(
+      <String>['which', 'pod'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenAnswer((_) async => exitsWithError());
+  }
+
+  void pretendPodIsInstalled() {
+    when(mockProcessManager.run(
+      <String>['which', 'pod'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenAnswer((_) async => exitsHappy());
+  }
+
   group('Evaluate installation', () {
     testUsingContext('detects not installed, if pod exec does not exist', () async {
       pretendPodIsNotInstalled();
@@ -101,14 +113,16 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('detects not installed, if pod version fails', () async {
+    testUsingContext('detects not installed, if pod is installed but version fails', () async {
+      pretendPodIsInstalled();
       pretendPodVersionFails();
-      expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.notInstalled);
+      expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.brokenInstall);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
 
     testUsingContext('detects installed', () async {
+      pretendPodIsInstalled();
       pretendPodVersionIs('0.0.1');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, isNot(CocoaPodsStatus.notInstalled));
     }, overrides: <Type, Generator>{
@@ -116,6 +130,7 @@ void main() {
     });
 
     testUsingContext('detects unknown version', () async {
+      pretendPodIsInstalled();
       pretendPodVersionIs('Plugin loaded.\n1.5.3');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.unknownVersion);
     }, overrides: <Type, Generator>{
@@ -123,6 +138,7 @@ void main() {
     });
 
     testUsingContext('detects below minimum version', () async {
+      pretendPodIsInstalled();
       pretendPodVersionIs('1.5.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowMinimumVersion);
     }, overrides: <Type, Generator>{
@@ -130,6 +146,7 @@ void main() {
     });
 
     testUsingContext('detects at recommended version', () async {
+      pretendPodIsInstalled();
       pretendPodVersionIs('1.6.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
     }, overrides: <Type, Generator>{
@@ -137,6 +154,7 @@ void main() {
     });
 
     testUsingContext('detects above recommended version', () async {
+      pretendPodIsInstalled();
       pretendPodVersionIs('1.6.1');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
     }, overrides: <Type, Generator>{
@@ -279,6 +297,7 @@ void main() {
     });
 
     testUsingContext('throws, if Podfile is missing.', () async {
+      pretendPodIsInstalled();
       try {
         await cocoaPodsUnderTest.processPods(
           xcodeProject: projectUnderTest.ios,
@@ -299,6 +318,7 @@ void main() {
     });
 
     testUsingContext('throws, if specs repo is outdated.', () async {
+      pretendPodIsInstalled();
       fs.file(fs.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
@@ -345,6 +365,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     });
 
     testUsingContext('run pod install, if Podfile.lock is missing', () async {
+      pretendPodIsInstalled();
       projectUnderTest.ios.podfile
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
@@ -368,6 +389,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     });
 
     testUsingContext('runs pod install, if Manifest.lock is missing', () async {
+      pretendPodIsInstalled();
       projectUnderTest.ios.podfile
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
@@ -394,6 +416,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     });
 
     testUsingContext('runs pod install, if Manifest.lock different from Podspec.lock', () async {
+      pretendPodIsInstalled();
       projectUnderTest.ios.podfile
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
@@ -423,6 +446,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     });
 
     testUsingContext('runs pod install, if flutter framework changed', () async {
+      pretendPodIsInstalled();
       projectUnderTest.ios.podfile
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
@@ -452,6 +476,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     });
 
     testUsingContext('runs pod install, if Podfile.lock is older than Podfile', () async {
+      pretendPodIsInstalled();
       projectUnderTest.ios.podfile
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
@@ -483,6 +508,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     });
 
     testUsingContext('skips pod install, if nothing changed', () async {
+      pretendPodIsInstalled();
       projectUnderTest.ios.podfile
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
@@ -509,6 +535,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     });
 
     testUsingContext('a failed pod install deletes Pods/Manifest.lock', () async {
+      pretendPodIsInstalled();
       projectUnderTest.ios.podfile
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
@@ -559,6 +586,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     });
 
     testUsingContext('succeeds, if specs repo is in CP_REPOS_DIR.', () async {
+      pretendPodIsInstalled();
       fs.file(fs.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
