@@ -156,6 +156,65 @@ void main() {
 
   }, skip: isBrowser);
 
+  testWidgets('FlexibleSpaceBar test expandedScale', (WidgetTester tester) async {
+    const double minExtent = 100.0;
+    const double initExtent = 200.0;
+    const double maxExtent = 300.0;
+
+    final FlexibleSpaceBarSettings customSettings = FlexibleSpaceBar.createSettings(
+      currentExtent: initExtent,
+      minExtent: minExtent,
+      maxExtent: maxExtent,
+      child: AppBar(
+        flexibleSpace: const FlexibleSpaceBar(
+          title: Text('title'),
+          background:  Text('X'),
+          collapseMode: CollapseMode.pin,
+          expandedScale: 2.0,
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            primary: true,
+            slivers: <Widget>[
+              SliverPersistentHeader(
+                floating: true,
+                pinned: true,
+                delegate: TestDelegate(settings: customSettings),
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200.0,
+                  color: Colors.orange[400],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox clipRect = tester.renderObject(find.byType(ClipRect).first);
+    final Transform transform = tester.firstWidget(find.byType(Transform));
+
+    // The current (200) is half way between the min (100) and max (300) and the
+    // lerp values used to calculate the scale are 1.0 and 2.0, so we check for 1.5.
+    expect(transform.transform.getMaxScaleOnAxis(), 1.5);
+
+    // The space bar rect always starts fully expanded.
+    expect(clipRect.size.height, maxExtent);
+
+    // We drag up to fully collapse the space bar.
+    await tester.drag(find.byType(Container).first, const Offset(0, -400.0));
+    await tester.pumpAndSettle();
+
+    expect(clipRect.size.height, minExtent);
+  });
+
   testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool centerTitle) {
       return MaterialApp(
