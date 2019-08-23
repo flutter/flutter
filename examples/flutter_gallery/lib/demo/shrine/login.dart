@@ -24,7 +24,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  static final ShapeDecoration _decoration = const ShapeDecoration(
+  static const ShapeDecoration _decoration =  ShapeDecoration(
     shape: BeveledRectangleBorder(
       side: BorderSide(color: kShrineBrown900, width: 0.5),
       borderRadius: BorderRadius.all(Radius.circular(7.0)),
