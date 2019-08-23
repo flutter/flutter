@@ -318,6 +318,9 @@ class TouchAdapter extends BaseAdapter {
     });
 
     _addEventListener('touchend', (html.Event event) {
+      // On Safari Mobile, the keyboard does not show unless this line is
+      // added.
+      event.preventDefault();
       _updateButtonDownState(_kPrimaryMouseButton, false);
       _callback(_convertEventToPointerData(ui.PointerChange.up, event));
     });
