@@ -1898,7 +1898,7 @@ void main() {
     expect(focusNode1.hasPrimaryFocus, isTrue);
     expect(focusNode2.hasPrimaryFocus, isFalse);
 
-    focusNode1.nextFocus();
+    expect(focusNode1.nextFocus(), isFalse);
 
     await tester.pump();
     expect(focusNode1.hasPrimaryFocus, isTrue);
