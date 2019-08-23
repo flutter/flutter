@@ -365,14 +365,17 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.floatingActionButtonMotionAnimator,
     @required this.isSnackBarFloating,
     @required this.extendBody,
+    @required this.extendBehindAppBar,
   }) : assert(minInsets != null),
        assert(textDirection != null),
        assert(geometryNotifier != null),
        assert(previousFloatingActionButtonLocation != null),
        assert(currentFloatingActionButtonLocation != null),
-       assert(extendBody != null);
+       assert(extendBody != null),
+       assert(extendBehindAppBar != null);
 
   final bool extendBody;
+  final bool extendBehindAppBar;
   final EdgeInsets minInsets;
   final TextDirection textDirection;
   final _ScaffoldGeometryNotifier geometryNotifier;
@@ -429,10 +432,18 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     if (hasChild(_ScaffoldSlot.body)) {
       double bodyMaxHeight = math.max(0.0, contentBottom - contentTop);
 
-      if (extendBody) {
+      if (extendBehindAppBar && extendBody) {
+        bodyMaxHeight += contentTop + bottomWidgetsHeight;
+        bodyMaxHeight = bodyMaxHeight.clamp(0.0, looseConstraints.maxHeight).toDouble();
+        assert(bodyMaxHeight <= math.max(0.0, looseConstraints.maxHeight));
+      } else if (extendBody) {
         bodyMaxHeight += bottomWidgetsHeight;
         bodyMaxHeight = bodyMaxHeight.clamp(0.0, looseConstraints.maxHeight - contentTop).toDouble();
         assert(bodyMaxHeight <= math.max(0.0, looseConstraints.maxHeight - contentTop));
+      } else if (extendBehindAppBar) {
+        bodyMaxHeight += contentTop;
+        bodyMaxHeight = bodyMaxHeight.clamp(0.0, looseConstraints.maxHeight).toDouble();
+        assert(bodyMaxHeight <= math.max(0.0, looseConstraints.maxHeight));
       }
 
       final BoxConstraints bodyConstraints = _BodyBoxConstraints(
@@ -441,7 +452,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         bottomWidgetsHeight: extendBody ? bottomWidgetsHeight : 0.0,
       );
       layoutChild(_ScaffoldSlot.body, bodyConstraints);
-      positionChild(_ScaffoldSlot.body, Offset(0.0, contentTop));
+      positionChild(_ScaffoldSlot.body, extendBehindAppBar ? Offset.zero : Offset(0.0, contentTop));
     }
 
     // The BottomSheet and the SnackBar are anchored to the bottom of the parent,
@@ -966,6 +977,7 @@ class Scaffold extends StatefulWidget {
     this.primary = true,
     this.drawerDragStartBehavior = DragStartBehavior.start,
     this.extendBody = false,
+    this.extendBehindAppBar = false,
     this.drawerScrimColor,
     this.drawerEdgeDragWidth,
   }) : assert(primary != null),
@@ -988,6 +1000,11 @@ class Scaffold extends StatefulWidget {
   /// In this case specifying `extendBody: true` ensures that that scaffold's
   /// body will be visible through the bottom navigation bar's notch.
   final bool extendBody;
+
+  /// If true, [body] is extended up behing the [appBar], instead of being
+  /// positioned to start beneath the [appBar]. Useful for translucent or
+  /// transparent [appBar]s.
+  final bool extendBehindAppBar;
 
   /// An app bar to display at the top of the scaffold.
   final PreferredSizeWidget appBar;
@@ -2270,6 +2287,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
               children: children,
               delegate: _ScaffoldLayout(
                 extendBody: _extendBody,
+                extendBehindAppBar: widget.extendBehindAppBar,
                 minInsets: minInsets,
                 currentFloatingActionButtonLocation: _floatingActionButtonLocation,
                 floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
