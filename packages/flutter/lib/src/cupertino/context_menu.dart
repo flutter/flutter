@@ -10,6 +10,8 @@ import 'colors.dart';
 // The scale of the child at the time that the ContextMenu opens.
 const double _kOpenScale = 1.2;
 
+// Given a GlobalKey, return the Rect of the corresponding RenderBox's
+// paintBounds.
 Rect _getRect(GlobalKey globalKey) {
   assert(globalKey.currentContext != null);
   final RenderBox renderBoxContainer = globalKey.currentContext.findRenderObject();
@@ -101,7 +103,11 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   // original position in this widget.
   OverlayEntry get _overlayEntry {
     final Rect childRect = _getRect(_childGlobalKey);
-    final Rect endRect = childRect.inflate(_kOpenScale);
+    final Rect endRect = Rect.fromCenter(
+      center: childRect.center,
+      width: childRect.width * _kOpenScale,
+      height: childRect.height * _kOpenScale,
+    );
 
     return OverlayEntry(
       opaque: false,
@@ -133,7 +139,11 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         });
         // TODO(justinmc): Maybe cache these instead of recalculating.
         final Rect childRect = _getRect(_childGlobalKey);
-        final Rect endRect = childRect.inflate(_kOpenScale);
+        final Rect endRect = Rect.fromCenter(
+          center: childRect.center,
+          width: childRect.width * _kOpenScale,
+          height: childRect.height * _kOpenScale,
+        );
         _openContextMenu(endRect);
         // TODO(justinmc): Without this, flashes white. I think due to rendering 1
         // frame offscreen?
@@ -374,7 +384,11 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
     // When opening, the transition happens from the end of the child's bounce
     // animation to the final state. When closing, it goes from the final state
     // to the original position before the bounce.
-    final Rect childRectOriginal = previousChildRect.inflate(1 / _kOpenScale);
+    final Rect childRectOriginal = Rect.fromCenter(
+      center: previousChildRect.center,
+      width: previousChildRect.width / _kOpenScale,
+      height: previousChildRect.height / _kOpenScale,
+    );
     _rectTweenReverse.begin = childRectOriginal;
     _rectTweenReverse.end = childRect;
   }
