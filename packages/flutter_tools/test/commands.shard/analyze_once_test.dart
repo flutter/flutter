@@ -12,8 +12,8 @@ import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
+import '../src/common.dart';
+import '../src/context.dart';
 
 /// Test case timeout for tests involving project analysis.
 const Timeout allowForSlowAnalyzeTests = Timeout.factor(5.0);

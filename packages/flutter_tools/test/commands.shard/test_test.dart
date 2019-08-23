@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
+import '../src/common.dart';
+import '../src/context.dart';
 
 // This test depends on some files in ///dev/automated_tests/flutter_test/*
 

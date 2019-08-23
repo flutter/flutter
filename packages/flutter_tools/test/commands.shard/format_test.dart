@@ -7,8 +7,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/format.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
+import '../src/common.dart';
+import '../src/context.dart';
 
 void main() {
   group('format', () {

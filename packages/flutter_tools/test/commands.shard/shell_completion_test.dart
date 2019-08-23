@@ -10,9 +10,9 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/shell_completion.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
-import '../../src/mocks.dart';
+import '../src/common.dart';
+import '../src/context.dart';
+import '../src/mocks.dart';
 
 void main() {
   group('shell_completion', () {

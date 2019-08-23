@@ -24,9 +24,9 @@ import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/testing/async.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
-import '../../src/testbed.dart';
+import '../src/common.dart';
+import '../src/context.dart';
+import '../src/testbed.dart';
 
 final Generator _kNoColorOutputPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
