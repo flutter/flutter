@@ -327,7 +327,7 @@ TEST_F(DartIsolateTest, CanRegisterNativeCallback) {
                     })));
   const auto settings = CreateSettingsForFixture();
   auto vm_ref = DartVMRef::Create(settings);
-  auto isolate = RunDartCodeInIsolate(vm_ref, settings, GetThreadTaskRunner(),
+  auto isolate = RunDartCodeInIsolate(vm_ref, settings, CreateNewThread(),
                                       "canRegisterNativeCallback", {});
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
@@ -350,7 +350,7 @@ TEST_F(DartIsolateTest, CanSaveCompilationTrace) {
 
   const auto settings = CreateSettingsForFixture();
   auto vm_ref = DartVMRef::Create(settings);
-  auto isolate = RunDartCodeInIsolate(vm_ref, settings, GetThreadTaskRunner(),
+  auto isolate = RunDartCodeInIsolate(vm_ref, settings, CreateNewThread(),
                                       "testCanSaveCompilationTrace", {});
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
@@ -373,7 +373,7 @@ TEST_F(DartIsolateTest, CanLaunchSecondaryIsolates) {
       })));
   const auto settings = CreateSettingsForFixture();
   auto vm_ref = DartVMRef::Create(settings);
-  auto isolate = RunDartCodeInIsolate(vm_ref, settings, GetThreadTaskRunner(),
+  auto isolate = RunDartCodeInIsolate(vm_ref, settings, CreateNewThread(),
                                       "testCanLaunchSecondaryIsolate", {});
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
@@ -392,7 +392,7 @@ TEST_F(DartIsolateTest, CanRecieveArguments) {
 
   const auto settings = CreateSettingsForFixture();
   auto vm_ref = DartVMRef::Create(settings);
-  auto isolate = RunDartCodeInIsolate(vm_ref, settings, GetThreadTaskRunner(),
+  auto isolate = RunDartCodeInIsolate(vm_ref, settings, CreateNewThread(),
                                       "testCanRecieveArguments", {"arg1"});
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);

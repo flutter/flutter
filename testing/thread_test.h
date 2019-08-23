@@ -45,22 +45,6 @@ class ThreadTest : public ::testing::Test {
   fml::RefPtr<fml::TaskRunner> GetCurrentTaskRunner();
 
   //----------------------------------------------------------------------------
-  /// @brief      Get the task runner for a dedicated thread created for this
-  ///             test instance by this fixture. This threads message loop will
-  ///             be terminated and the thread joined when the test is done.
-  ///
-  /// @attention  Prefer using the `CreateNewThread` call.
-  ///
-  /// @bug        This is an older call that should probably be deprecated and
-  ///             eventually removed from use. It is redundant now that the
-  ///             `CreateNewThread` call allows tests to create new threads (and
-  ///             name them to boot) as necessary.
-  ///
-  /// @return     The task runner for a dedicated thread created for the test.
-  ///
-  fml::RefPtr<fml::TaskRunner> GetThreadTaskRunner();
-
-  //----------------------------------------------------------------------------
   /// @brief      Creates a new thread, initializes a message loop on it, and,
   ///             returns its task runner to the unit-test. The message loop is
   ///             terminated (and its thread joined) when the test ends. This
@@ -80,8 +64,6 @@ class ThreadTest : public ::testing::Test {
   void TearDown() override;
 
  private:
-  std::unique_ptr<fml::Thread> thread_;
-  fml::RefPtr<fml::TaskRunner> thread_task_runner_;
   fml::RefPtr<fml::TaskRunner> current_task_runner_;
   std::vector<std::unique_ptr<fml::Thread>> extra_threads_;
 };

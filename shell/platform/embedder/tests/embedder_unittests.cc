@@ -313,7 +313,7 @@ TEST_F(EmbedderTest, PlatformMessagesCanReceiveResponse) {
   };
   Captures captures;
 
-  GetThreadTaskRunner()->PostTask([&]() {
+  CreateNewThread()->PostTask([&]() {
     captures.thread_id = std::this_thread::get_id();
     auto& context = GetEmbedderContext();
     EmbedderConfigBuilder builder(context);
