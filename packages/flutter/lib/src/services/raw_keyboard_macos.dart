@@ -204,7 +204,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
 
   /// Returns true if the given label represents an unprintable key.
   ///
-  /// Examples of function characters are characters like "NSUpArrowFunctionKey = 0xF700"
+  /// Examples of unprintable keys are "NSUpArrowFunctionKey = 0xF700"
   /// or "NSHomeFunctionKey = 0xF729".
   ///
   /// See <https://developer.apple.com/documentation/appkit/1535851-function-key_unicodes?language=objc> for more
