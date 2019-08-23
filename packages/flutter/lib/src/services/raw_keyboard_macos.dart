@@ -202,7 +202,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     return null;
   }
 
-  /// Returns true if the given label represents a function key.
+  /// Returns true if the given label represents an unprintable key.
   ///
   /// Examples of function characters are characters like "NSUpArrowFunctionKey = 0xF700"
   /// or "NSHomeFunctionKey = 0xF729".
