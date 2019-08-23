@@ -106,13 +106,10 @@ class TestTextInput {
   bool _isVisible = false;
 
   /// Simulates the user changing the [TextEditingValue] to the given value.
-  ///
-  /// To ignore the state of the simulated soft keyboard, and attempt to enter
-  /// text anyhow, pass true for `ignoreKeyboardState`.
-  void updateEditingValue(TextEditingValue value, { bool ignoreKeyboardState = false }) {
+  void updateEditingValue(TextEditingValue value) {
     // Not using the `expect` function because in the case of a FlutterDriver
     // test this code does not run in a package:test test zone.
-    if (_client == 0 && !ignoreKeyboardState)
+    if (_client == 0)
       throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
     _binaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
@@ -127,13 +124,10 @@ class TestTextInput {
   }
 
   /// Simulates the user typing the given text.
-  ///
-  /// To ignore the state of the simulated soft keyboard, and attempt to enter
-  /// text anyhow, pass true for `ignoreKeyboardState`.
-  void enterText(String text, { bool ignoreKeyboardState = false }) {
+  void enterText(String text) {
     updateEditingValue(TextEditingValue(
       text: text,
-    ), ignoreKeyboardState: ignoreKeyboardState);
+    ));
   }
 
   /// Simulates the user pressing one of the [TextInputAction] buttons.

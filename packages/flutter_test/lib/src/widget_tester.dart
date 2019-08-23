@@ -711,13 +711,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// To just give [finder] the focus without entering any text,
   /// see [showKeyboard].
-  ///
-  /// To ignore the state of the simulated soft keyboard, and attempt to enter
-  /// text anyhow, pass true for `ignoreKeyboardState`.
-  Future<void> enterText(Finder finder, String text, { bool ignoreKeyboardState = false }) async {
+  Future<void> enterText(Finder finder, String text) async {
     return TestAsyncUtils.guard<void>(() async {
       await showKeyboard(finder);
-      testTextInput.enterText(text, ignoreKeyboardState: ignoreKeyboardState);
+      testTextInput.enterText(text);
       await idle();
     });
   }
