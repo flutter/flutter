@@ -195,7 +195,24 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     if (firstChild == null) {
       if (!addInitialChild(index: firstIndex, layoutOffset: indexToLayoutOffset(itemExtent, firstIndex))) {
         // There are either no children, or we are past the end of all our children.
-        final double max = computeMaxScrollOffset(constraints, itemExtent);
+        // If it is the later, we will need to find the first available child.
+        double max;
+        if (childManager.childCount != null) {
+          max = computeMaxScrollOffset(constraints, itemExtent);
+        } else if (firstIndex <= 0) {
+          max = 0.0;
+        } else {
+          // We will have to find it manually.
+          int possibleFirstIndex = firstIndex - 1;
+          while (possibleFirstIndex > 0 &&
+            !addInitialChild(
+              index: possibleFirstIndex,
+              layoutOffset: indexToLayoutOffset(itemExtent, possibleFirstIndex)
+            )
+          )
+            possibleFirstIndex -= 1;
+          max = possibleFirstIndex * itemExtent;
+        }
         geometry = SliverGeometry(
           scrollExtent: max,
           maxPaintExtent: max,
@@ -229,12 +246,14 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       trailingChildWithLayout = firstChild;
     }
 
+    double estimatedMaxScrollOffset = double.infinity;
     for (int index = indexOf(trailingChildWithLayout) + 1; targetLastIndex == null || index <= targetLastIndex; ++index) {
       RenderBox child = childAfter(trailingChildWithLayout);
       if (child == null || indexOf(child) != index) {
         child = insertAndLayoutChild(childConstraints, after: trailingChildWithLayout);
         if (child == null) {
           // We have run out of children.
+          estimatedMaxScrollOffset = index * itemExtent;
           break;
         }
       } else {
@@ -256,12 +275,15 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     assert(indexOf(firstChild) == firstIndex);
     assert(targetLastIndex == null || lastIndex <= targetLastIndex);
 
-    final double estimatedMaxScrollOffset = estimateMaxScrollOffset(
-      constraints,
-      firstIndex: firstIndex,
-      lastIndex: lastIndex,
-      leadingScrollOffset: leadingScrollOffset,
-      trailingScrollOffset: trailingScrollOffset,
+    estimatedMaxScrollOffset = math.min(
+      estimatedMaxScrollOffset,
+      estimateMaxScrollOffset(
+        constraints,
+        firstIndex: firstIndex,
+        lastIndex: lastIndex,
+        leadingScrollOffset: leadingScrollOffset,
+        trailingScrollOffset: trailingScrollOffset,
+      )
     );
 
     final double paintExtent = calculatePaintOffset(
