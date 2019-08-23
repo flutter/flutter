@@ -36,12 +36,12 @@ class PluginTest {
         Directory.systemTemp.createTempSync('flutter_devicelab_plugin_test.');
     try {
       section('Create plugin');
-      final _FlutterPlugin plugin =
-          await _FlutterPlugin.create(tempDir, options);
+      final _FlutterProject plugin =
+          await _FlutterProject.create(tempDir, options, name: 'plugintest', template: 'plugin');
       section('Test plugin');
       await plugin.test();
       section('Create Flutter app');
-      final _FlutterApp app = await _FlutterApp.create(tempDir, options);
+      final _FlutterProject app = await _FlutterProject.create(tempDir, options, name: 'plugintestapp', template: 'app');
       try {
         if (buildTarget == 'ios')
           await prepareProvisioningCertificates(app.rootPath);
@@ -65,7 +65,7 @@ class PluginTest {
   }
 }
 
-abstract class _FlutterProject {
+class _FlutterProject {
   _FlutterProject(this.parent, this.name);
 
   final Directory parent;
@@ -77,17 +77,42 @@ abstract class _FlutterProject {
     final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = await pubspec.readAsString();
     String dependency =
-    pluginPath != null ? '$plugin:\n    path: $pluginPath' : plugin;
+    pluginPath != null ? '$plugin:\n    path: $pluginPath' : '$plugin:';
     content = content.replaceFirst(
       '\ndependencies:\n',
       '\ndependencies:\n  $dependency\n',
     );
+    print('COLLIN');
+    print(content);
     await pubspec.writeAsString(content, flush: true);
   }
 
   Future<void> test() async {
     await inDirectory(Directory(rootPath), () async {
       await flutter('test');
+    });
+  }
+
+  static Future<_FlutterProject> create(
+      Directory directory, List<String> options, { String name, String template }) async {
+    await inDirectory(directory, () async {
+      await flutter(
+        'create',
+        options: <String>[
+          '--template=$template',
+          '--org',
+          'io.flutter.devicelab',
+          ...options,
+          name
+        ],
+      );
+    });
+    return _FlutterProject(directory, name);
+  }
+
+  Future<void> build(String target) async {
+    await inDirectory(Directory(rootPath), () async {
+      await flutter('build', options: <String>[target]);
     });
   }
 
@@ -106,52 +131,4 @@ abstract class _FlutterProject {
     rmTree(parent);
   }
 
-}
-
-class _FlutterPlugin extends _FlutterProject {
-  _FlutterPlugin(Directory parent, String name) : super(parent, name);
-
-  static Future<_FlutterPlugin> create(
-      Directory directory, List<String> options) async {
-    await inDirectory(directory, () async {
-      await flutter(
-        'create',
-        options: <String>[
-          '--template=plugin',
-          '--org',
-          'io.flutter.devicelab',
-          ...options,
-          'plugintest'
-        ],
-      );
-    });
-    return _FlutterPlugin(directory, 'plugintest');
-  }
-}
-
-class _FlutterApp extends _FlutterProject {
-  _FlutterApp(Directory parent, String name) : super(parent, name);
-
-  static Future<_FlutterApp> create(
-      Directory directory, List<String> options) async {
-    await inDirectory(directory, () async {
-      await flutter(
-        'create',
-        options: <String>[
-          '--template=app',
-          '--org',
-          'io.flutter.devicelab',
-          ...options,
-          'plugintestapp'
-        ],
-      );
-    });
-    return _FlutterApp(directory, 'plugintestapp');
-  }
-
-  Future<void> build(String target) async {
-    await inDirectory(Directory(rootPath), () async {
-      await flutter('build', options: <String>[target]);
-    });
-  }
 }
