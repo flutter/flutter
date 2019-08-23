@@ -2,17 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:vector_math/vector_math_64.dart';
 import 'colors.dart';
 
 // The scale of the child at the time that the ContextMenu opens.
 const double _kOpenScale = 1.2;
-
-typedef void _AnimationEndCallback(Rect childRect);
 
 Rect _getRect(GlobalKey globalKey) {
   assert(globalKey.currentContext != null);
@@ -71,6 +67,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
   @override
   void initState() {
+    super.initState();
     _dummyController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
@@ -83,16 +80,12 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       _childOpacity = 0.0;
     });
 
-    // Get the original Rect of the child before any transformation.
-    final Rect originalChildRect = _getRect(_childGlobalKey);
-
     _route = ContextMenuRoute<void>(
       barrierLabel: 'Dismiss',
       filter: ui.ImageFilter.blur(
         sigmaX: 5.0,
         sigmaY: 5.0,
       ),
-      childRect: childRectEnd,
       previousChildGlobalKey: _childGlobalKey,
       actions: widget.actions,
       onTap: widget.onTap,
@@ -144,12 +137,15 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         _openContextMenu(endRect);
         // TODO(justinmc): Without this, flashes white. I think due to rendering 1
         // frame offscreen?
-        Future.delayed(Duration(milliseconds: 1)).then((_) {
+        Future<void>.delayed(const Duration(milliseconds: 1)).then((_) {
           _lastOverlayEntry?.remove();
           _lastOverlayEntry = null;
           _dummyController.reset();
         });
         break;
+
+      default:
+        return;
     }
   }
 
@@ -215,7 +211,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
 // A floating copy of the child.
 class _DummyChild extends StatefulWidget {
-  _DummyChild({
+  const _DummyChild({
     Key key,
     this.beginRect,
     this.child,
@@ -297,6 +293,7 @@ class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin 
 // The open context menu.
 // TODO(justinmc): In native, dragging on the menu or the child animates and
 // eventually dismisses.
+/// The open ContextMenu modal.
 @visibleForTesting
 class ContextMenuRoute<T> extends PopupRoute<T> {
   /// Build a ContextMenuRoute.
@@ -306,7 +303,6 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
     WidgetBuilder builder,
     ui.ImageFilter filter,
     RouteSettings settings,
-    Rect childRect,
     GlobalKey previousChildGlobalKey,
     VoidCallback onTap,
   }) : assert(actions != null && actions.isNotEmpty),
@@ -336,9 +332,9 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   final WidgetBuilder _builder;
   final VoidCallback _onTap;
 
-  RectTween _rectTween = RectTween();
-  RectTween _rectTweenReverse = RectTween();
-  RectTween _sheetRectTween = RectTween();
+  final RectTween _rectTween = RectTween();
+  final RectTween _rectTweenReverse = RectTween();
+  final RectTween _sheetRectTween = RectTween();
   final Tween<double> _opacityTween = Tween<double>(begin: 0.0, end: 1.0);
 
   final GlobalKey _childGlobalKey = GlobalKey();
