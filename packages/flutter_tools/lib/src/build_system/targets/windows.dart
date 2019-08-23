@@ -4,6 +4,7 @@
 
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
+import '../../build_info.dart';
 import '../../globals.dart';
 import '../build_system.dart';
 
@@ -17,7 +18,7 @@ class UnpackWindows extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/windows.dart'),
-    Source.artifact(Artifact.windowsDesktopPath),
+    Source.artifact(Artifact.windowsDesktopPath, mode: BuildMode.debug),
   ];
 
   @override
