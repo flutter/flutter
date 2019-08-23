@@ -315,7 +315,6 @@ class TrivialComparator implements GoldenFileComparator {
 /// |  testName_isolatedDiff.png | ![An isolated pixel difference.](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_isolatedDiff.png) |
 /// |  testName_maskedDiff.png   | ![A masked pixel difference](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_maskedDiff.png) |
 ///
-///
 /// See also:
 ///
 ///   * [GoldenFileComparator], the abstract class that [LocalFileComparator]
