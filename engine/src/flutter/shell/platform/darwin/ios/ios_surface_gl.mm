@@ -38,12 +38,11 @@ void IOSSurfaceGL::UpdateStorageSizeIfNecessary() {
   }
 }
 
-std::unique_ptr<Surface> IOSSurfaceGL::CreateGPUSurface() {
+std::unique_ptr<Surface> IOSSurfaceGL::CreateGPUSurface(GrContext* gr_context) {
+  if (gr_context) {
+    return std::make_unique<GPUSurfaceGL>(sk_ref_sp(gr_context), this, true);
+  }
   return std::make_unique<GPUSurfaceGL>(this, true);
-}
-
-std::unique_ptr<Surface> IOSSurfaceGL::CreateSecondaryGPUSurface(GrContext* gr_context) {
-  return std::make_unique<GPUSurfaceGL>(sk_ref_sp(gr_context), this, true);
 }
 
 intptr_t IOSSurfaceGL::GLContextFBO() const {
@@ -146,7 +145,7 @@ bool IOSSurfaceGL::SubmitFrame(GrContext* context) {
     return true;
   }
 
-  bool submitted = platform_views_controller->SubmitFrame(true, std::move(context), context_);
+  bool submitted = platform_views_controller->SubmitFrame(std::move(context), context_);
   [CATransaction commit];
   return submitted;
 }

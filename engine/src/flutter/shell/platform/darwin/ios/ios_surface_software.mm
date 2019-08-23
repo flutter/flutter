@@ -38,7 +38,7 @@ void IOSSurfaceSoftware::UpdateStorageSizeIfNecessary() {
   // Android oddities.
 }
 
-std::unique_ptr<Surface> IOSSurfaceSoftware::CreateGPUSurface() {
+std::unique_ptr<Surface> IOSSurfaceSoftware::CreateGPUSurface(GrContext* gr_context) {
   if (!IsValid()) {
     return nullptr;
   }
@@ -184,7 +184,7 @@ bool IOSSurfaceSoftware::SubmitFrame(GrContext* context) {
   if (platform_views_controller == nullptr) {
     return true;
   }
-  return platform_views_controller->SubmitFrame(false, nullptr, nullptr);
+  return platform_views_controller->SubmitFrame(nullptr, nullptr);
 }
 
 }  // namespace flutter

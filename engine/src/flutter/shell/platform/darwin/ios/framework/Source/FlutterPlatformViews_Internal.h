@@ -100,9 +100,7 @@ class FlutterPlatformViewsController {
   // Discards all platform views instances and auxiliary resources.
   void Reset();
 
-  bool SubmitFrame(bool gl_rendering,
-                   GrContext* gr_context,
-                   std::shared_ptr<IOSGLContext> gl_context);
+  bool SubmitFrame(GrContext* gr_context, std::shared_ptr<IOSGLContext> gl_context);
 
   void OnMethodCall(FlutterMethodCall* call, FlutterResult& result);
 
@@ -163,10 +161,9 @@ class FlutterPlatformViewsController {
   void DetachUnusedLayers();
   // Dispose the views in `views_to_dispose_`.
   void DisposeViews();
-  void EnsureOverlayInitialized(int64_t overlay_id);
-  void EnsureGLOverlayInitialized(int64_t overlay_id,
-                                  std::shared_ptr<IOSGLContext> gl_context,
-                                  GrContext* gr_context);
+  void EnsureOverlayInitialized(int64_t overlay_id,
+                                std::shared_ptr<IOSGLContext> gl_context,
+                                GrContext* gr_context);
 
   // This will return true after pre-roll if any of the embedded views
   // have mutated for last layer tree.
