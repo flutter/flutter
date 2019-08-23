@@ -89,7 +89,7 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
   };
 
   explicit Pipeline(uint32_t depth)
-      : depth_(depth), empty_(depth), available_(0) {}
+      : depth_(depth), empty_(depth), available_(0), inflight_(0) {}
 
   ~Pipeline() = default;
 
@@ -99,6 +99,11 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
     if (!empty_.TryWait()) {
       return {};
     }
+    ++inflight_;
+    FML_TRACE_COUNTER("flutter", "Pipeline Depth",
+                      reinterpret_cast<int64_t>(this),      //
+                      "frames in flight", inflight_.load()  //
+    );
 
     return ProducerContinuation{
         std::bind(&Pipeline::ProducerCommit, this, std::placeholders::_1,
@@ -149,6 +154,7 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
     }
 
     empty_.Signal();
+    --inflight_;
 
     TRACE_FLOW_END("flutter", "PipelineItem", trace_id);
     TRACE_EVENT_ASYNC_END0("flutter", "PipelineItem", trace_id);
@@ -158,9 +164,10 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
   }
 
  private:
-  uint32_t depth_;
+  const uint32_t depth_;
   fml::Semaphore empty_;
   fml::Semaphore available_;
+  std::atomic<int> inflight_;
   std::mutex queue_mutex_;
   std::deque<std::pair<ResourcePtr, size_t>> queue_;
 
