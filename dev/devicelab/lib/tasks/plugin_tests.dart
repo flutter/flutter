@@ -36,12 +36,14 @@ class PluginTest {
         Directory.systemTemp.createTempSync('flutter_devicelab_plugin_test.');
     try {
       section('Create plugin');
-      final _FlutterProject plugin =
-          await _FlutterProject.create(tempDir, options, name: 'plugintest', template: 'plugin');
+      final _FlutterProject plugin = await _FlutterProject.create(
+          tempDir, options,
+          name: 'plugintest', template: 'plugin');
       section('Test plugin');
       await plugin.test();
       section('Create Flutter app');
-      final _FlutterProject app = await _FlutterProject.create(tempDir, options, name: 'plugintestapp', template: 'app');
+      final _FlutterProject app = await _FlutterProject.create(tempDir, options,
+          name: 'plugintestapp', template: 'app');
       try {
         if (buildTarget == 'ios')
           await prepareProvisioningCertificates(app.rootPath);
@@ -76,8 +78,8 @@ class _FlutterProject {
   Future<void> addPlugin(String plugin, {String pluginPath}) async {
     final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = await pubspec.readAsString();
-    String dependency =
-    pluginPath != null ? '$plugin:\n    path: $pluginPath' : '$plugin:';
+    final String dependency =
+        pluginPath != null ? '$plugin:\n    path: $pluginPath' : '$plugin:';
     content = content.replaceFirst(
       '\ndependencies:\n',
       '\ndependencies:\n  $dependency\n',
@@ -92,7 +94,8 @@ class _FlutterProject {
   }
 
   static Future<_FlutterProject> create(
-      Directory directory, List<String> options, { String name, String template }) async {
+      Directory directory, List<String> options,
+      {String name, String template}) async {
     await inDirectory(directory, () async {
       await flutter(
         'create',
@@ -128,5 +131,4 @@ class _FlutterProject {
     }
     rmTree(parent);
   }
-
 }
