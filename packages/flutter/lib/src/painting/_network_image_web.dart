@@ -15,7 +15,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments [url] and [scale] must not be null.
-  const NetworkImage(this.url, {this.scale = 1.0, this.headers})
+  const NetworkImage(this.url, {this.scale = 1.0, this.headers, this.certificate})
       : assert(url != null),
         assert(scale != null);
 
@@ -27,6 +27,9 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
   @override
   final Map<String, String> headers;
+
+  @override
+  final String certificate;
 
   @override
   Future<NetworkImage> obtainKey(image_provider.ImageConfiguration configuration) {

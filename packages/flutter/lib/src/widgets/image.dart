@@ -333,8 +333,6 @@ class Image extends StatefulWidget {
        assert(matchTextDirection != null),
        super(key: key);
 
-  final String certificate;
-
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
   ///
   /// The [file], [scale], and [repeat] arguments must not be null.
@@ -861,6 +859,11 @@ class Image extends StatefulWidget {
   /// Useful for images which do not contribute meaningful information to an
   /// application.
   final bool excludeFromSemantics;
+
+  /// For https-originated images, this optionally provides a certificate.
+  ///
+  /// This allows to override default certificates used for https operations.
+  final String certificate;
 
   @override
   _ImageState createState() => _ImageState();
