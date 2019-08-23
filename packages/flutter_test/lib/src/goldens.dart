@@ -24,7 +24,7 @@ import 'package:test_api/test_api.dart' as test_package show TestFailure;
 /// need or the ability to call [WidgetTester.pump] to advance the microtask
 /// queue).
 ///
-/// ### What is Golden File Testing?
+/// ## What is Golden File Testing?
 ///
 /// The term __golden file__ refers to a master image that is considered the true
 /// rendering of a given widget, state, application, or other visual
@@ -33,7 +33,14 @@ import 'package:test_api/test_api.dart' as test_package show TestFailure;
 /// By keeping a master reference of visual aspects of your application, you can
 /// prevent unintended changes as you develop by testing against them.
 ///
-/// //TODO(Piinks): images etc.
+/// Here, a minor code change has altered the appearance of a widget. A golden
+/// file test has identified the change, preventing unintended modifications.
+///
+/// |  Sample     |  Image |
+/// |-------------|--------|
+/// |  Master     | ![A golden master image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_masterImage.png)  |
+/// |  Difference | ![The pixel difference](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_isolatedDiff.png)  |
+/// |  Test       | ![Test image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_testImage.png) |
 ///
 /// See also:
 ///
@@ -290,7 +297,7 @@ class TrivialComparator implements GoldenFileComparator {
 /// When using `flutter test --update-goldens`, [LocalFileComparator]
 /// updates the golden files on disk to match the rendering.
 ///
-/// ### Local Output from Golden File Testing
+/// ## Local Output from Golden File Testing
 ///
 /// The [LocalFileComparator] will output test feedback when a golden file test
 /// fails. This output takes the form of differential images contained within a
@@ -301,7 +308,13 @@ class TrivialComparator implements GoldenFileComparator {
 ///
 /// The following images are examples of a test failure output:
 ///
-/// //TODO(Piinks): images etc
+/// |  File Name                 |  Image Output |
+/// |----------------------------|---------------|
+/// |  testName_masterImage.png  | ![A golden master image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_masterImage.png)  |
+/// |  testName_testImage.png    | ![Test image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_testImage.png)  |
+/// |  testName_isolatedDiff.png | ![An isolated pixel difference.](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_isolatedDiff.png) |
+/// |  testName_maskedDiff.png   | ![A masked pixel difference](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_maskedDiff.png) |
+///
 ///
 /// See also:
 ///
