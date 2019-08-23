@@ -241,6 +241,8 @@ class RawMaterialButton extends StatefulWidget {
   final bool autofocus;
 
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
   @override

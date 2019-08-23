@@ -77,7 +77,8 @@ class MaterialButton extends StatelessWidget {
     this.minWidth,
     this.height,
     this.child,
-  }) : assert(autofocus != null),
+  }) : assert(clipBehavior != null),
+       assert(autofocus != null),
        assert(elevation == null || elevation >= 0.0),
        assert(focusElevation == null || focusElevation >= 0.0),
        assert(hoverElevation == null || hoverElevation >= 0.0),
@@ -306,6 +307,8 @@ class MaterialButton extends StatelessWidget {
   final ShapeBorder shape;
 
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -362,7 +365,7 @@ class MaterialButton extends StatelessWidget {
         minHeight: height,
       ),
       shape: buttonTheme.getShape(this),
-      clipBehavior: clipBehavior ?? Clip.none,
+      clipBehavior: clipBehavior,
       focusNode: focusNode,
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,

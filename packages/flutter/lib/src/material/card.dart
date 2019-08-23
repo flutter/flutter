@@ -145,6 +145,7 @@ class Card extends StatelessWidget {
   final bool borderOnForeground;
 
   /// {@macro flutter.widgets.Clip}
+  ///
   /// If this property is null then [ThemeData.cardTheme.clipBehavior] is used.
   /// If that's null then the behavior will be [Clip.none].
   final Clip clipBehavior;
@@ -177,7 +178,6 @@ class Card extends StatelessWidget {
   final Widget child;
 
   static const double _defaultElevation = 1.0;
-  static const Clip _defaultClipBehavior = Clip.none;
 
   @override
   Widget build(BuildContext context) {
@@ -195,7 +195,7 @@ class Card extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(4.0)),
           ),
           borderOnForeground: borderOnForeground,
-          clipBehavior: clipBehavior ?? cardTheme.clipBehavior ?? _defaultClipBehavior,
+          clipBehavior: clipBehavior ?? cardTheme.clipBehavior ?? Clip.none,
           child: Semantics(
             explicitChildNodes: !semanticContainer,
             child: child,
