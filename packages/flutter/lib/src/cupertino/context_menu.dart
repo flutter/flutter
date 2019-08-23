@@ -277,6 +277,9 @@ class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin 
   }
 
   Widget _buildAnimation(BuildContext context, Widget child) {
+    final Color color = widget.controller.status == AnimationStatus.reverse
+      ? _masklessColor
+      : _mask.value;
     return Positioned.fromRect(
       rect: _rect.value,
       child: ShaderMask(
@@ -285,7 +288,7 @@ class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin 
           return LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: <Color>[_mask.value, _mask.value],
+            colors: <Color>[color, color],
           ).createShader(bounds);
         },
         child: widget.child,
