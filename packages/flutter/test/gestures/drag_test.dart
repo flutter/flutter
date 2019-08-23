@@ -848,8 +848,6 @@ void main() {
     tester.route(pointer.up());
     expect(recognized, <String>[]);
     recognized.clear();
-
-    recognized.clear();
   });
 
   testGesture('A secondary drag should not trigger primary', (GestureTester tester) {
