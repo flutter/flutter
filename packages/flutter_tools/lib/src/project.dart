@@ -570,7 +570,7 @@ class AndroidProject {
     _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
-    gradle.injectGradleWrapper(_editableHostAppDirectory);
+    gradle.injectGradleWrapperIfNeeded(_editableHostAppDirectory);
     gradle.writeLocalProperties(_editableHostAppDirectory.childFile('local.properties'));
     await injectPlugins(parent);
   }
@@ -583,7 +583,7 @@ class AndroidProject {
     _deleteIfExistsSync(ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'library'), ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
-    gradle.injectGradleWrapper(ephemeralDirectory);
+    gradle.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
   void _overwriteFromTemplate(String path, Directory target) {

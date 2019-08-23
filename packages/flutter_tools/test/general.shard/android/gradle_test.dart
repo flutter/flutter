@@ -865,6 +865,102 @@ flutter:
           throwsA(predicate<Exception>((Exception e) => e is ToolExit)));
     });
   });
+
+  group('injectGradleWrapperIfNeeded', () {
+    MemoryFileSystem memoryFileSystem;
+    Directory tempDir;
+    Directory gradleWrapperDirectory;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+      tempDir = memoryFileSystem.systemTempDirectory.createTempSync('artifacts_test.');
+      gradleWrapperDirectory = memoryFileSystem.directory(
+          memoryFileSystem.path.join(tempDir.path, 'bin/cache/artifacts/gradle_wrapper'));
+      gradleWrapperDirectory.createSync(recursive: true);
+      gradleWrapperDirectory.childFile('gradlew').writeAsStringSync('irrelevant');
+      gradleWrapperDirectory.childDirectory('gradle/wrapper').createSync(recursive: true);
+      gradleWrapperDirectory
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.jar')
+        .writeAsStringSync('irrelevant');
+    });
+
+    testUsingContext('Inject the wrapper when all files are missing', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+
+      injectGradleWrapperIfNeeded(sampleAppAndroid);
+
+      expect(sampleAppAndroid.childFile('gradlew').existsSync(), isTrue);
+
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.jar')
+        .existsSync(), isTrue);
+
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties')
+        .existsSync(), isTrue);
+
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties')
+        .readAsStringSync(),
+            'distributionBase=GRADLE_USER_HOME\n'
+            'distributionPath=wrapper/dists\n'
+            'zipStoreBase=GRADLE_USER_HOME\n'
+            'zipStorePath=wrapper/dists\n'
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-4.10.2-all.zip\n');
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => memoryFileSystem,
+    });
+
+    testUsingContext('Inject the wrapper when some files are missing', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+
+      // There's an existing gradlew
+      sampleAppAndroid.childFile('gradlew').writeAsStringSync('existing gradlew');
+
+      injectGradleWrapperIfNeeded(sampleAppAndroid);
+
+      expect(sampleAppAndroid.childFile('gradlew').existsSync(), isTrue);
+      expect(sampleAppAndroid.childFile('gradlew').readAsStringSync(),
+          equals('existing gradlew'));
+
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.jar')
+        .existsSync(), isTrue);
+
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties')
+        .existsSync(), isTrue);
+
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties')
+        .readAsStringSync(),
+            'distributionBase=GRADLE_USER_HOME\n'
+            'distributionPath=wrapper/dists\n'
+            'zipStoreBase=GRADLE_USER_HOME\n'
+            'zipStorePath=wrapper/dists\n'
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-4.10.2-all.zip\n');
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => memoryFileSystem,
+    });
+  });
 }
 
 Platform fakePlatform(String name) {
