@@ -157,9 +157,9 @@ abstract class MaterialInkController {
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
-  /// The [type], [elevation], [shadowColor], [borderOnForeground] and
-  /// [animationDuration] arguments must not be null. Additionally, [elevation]
-  /// must be non-negative.
+  /// The [type], [elevation], [shadowColor], [borderOnForeground],
+  /// [clipBehavior], and [animationDuration] arguments must not be null.
+  /// Additionally, [elevation] must be non-negative.
   ///
   /// If a [shape] is specified, then the [borderRadius] property must be
   /// null and the [type] property must not be [MaterialType.circle]. If the
@@ -185,8 +185,8 @@ class Material extends StatefulWidget {
        assert(!(shape != null && borderRadius != null)),
        assert(animationDuration != null),
        assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
-       assert(clipBehavior != null),
        assert(borderOnForeground != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -264,6 +264,8 @@ class Material extends StatefulWidget {
   /// See the enum [Clip] for details of all possible options and their common
   /// use cases.
   /// {@endtemplate}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
   /// Defines the duration of animated changes for [shape], [elevation],
@@ -670,6 +672,11 @@ class ShapeBorderTween extends Tween<ShapeBorder> {
 ///
 /// Animates [elevation], [shadowColor], and [shape].
 class _MaterialInterior extends ImplicitlyAnimatedWidget {
+  /// Creates a const instance of [_MaterialInterior].
+  ///
+  /// The [child], [shape], [clipBehavior], [color], and [shadowColor] arguments
+  /// must not be null. The [elevation] must be specified and greater than or
+  /// equal to zero.
   const _MaterialInterior({
     Key key,
     @required this.child,
@@ -707,6 +714,8 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   final bool borderOnForeground;
 
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
   /// The target z-coordinate at which to place this physical object relative
