@@ -75,7 +75,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     if (numPadKey != null) {
       return numPadKey;
     }
-    // If this key is printable, generate the LogicalKeyboardKey from its unicode value.
+    // If this key is printable, generate the LogicalKeyboardKey from its Unicode value.
     // Control keys such as ESC, CRTL, and SHIFT are not printable. HOME, DEL, arrow keys, and function
     // keys are considered modifier function keys, which generate invalid Unicode scalar values.
     if (keyLabel != null &&
