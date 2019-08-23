@@ -52,16 +52,19 @@ bool EmbedderTestCompositor::UpdateOffscrenComposition(
   last_composition_ = nullptr;
 
   auto surface_size = SkISize::Make(800, 600);
+  const auto image_info = SkImageInfo::MakeN32Premul(surface_size);
 
-  auto surface = SkSurface::MakeRenderTarget(
-      context_.get(),                            // context
-      SkBudgeted::kNo,                           // budgeted
-      SkImageInfo::MakeN32Premul(surface_size),  // image info
-      1,                                         // sample count
-      kTopLeft_GrSurfaceOrigin,                  // surface origin
-      nullptr,                                   // surface properties
-      false                                      // create mipmaps
-  );
+  auto surface = type_ == RenderTargetType::kSoftwareBuffer
+                     ? SkSurface::MakeRaster(image_info)
+                     : SkSurface::MakeRenderTarget(
+                           context_.get(),            // context
+                           SkBudgeted::kNo,           // budgeted
+                           image_info,                // image info
+                           1,                         // sample count
+                           kTopLeft_GrSurfaceOrigin,  // surface origin
+                           nullptr,                   // surface properties
+                           false                      // create mipmaps
+                       );
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not update the off-screen composition.";
