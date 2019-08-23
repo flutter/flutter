@@ -16,7 +16,7 @@ import 'package:flutter/services.dart';
 ///
 /// This is used in [$FH/flutter/devicelab/bin/tasks/image_list_reported_duration.dart] test.
 ///
-String certificate = """
+String certificate = '''
 -----BEGIN CERTIFICATE-----
 MIIDlTCCAn2gAwIBAgIUNfw2s1D9qwYw8bMEZ1rdNVQXi9YwDQYJKoZIhvcNAQEL
 BQAwcjELMAkGA1UEBhMCVVMxETAPBgNVBAgMCE5ldyBZb3JrMRIwEAYDVQQHDAlS
@@ -39,9 +39,9 @@ ijFsQ67xa0nUn1Llviy3pHX50IU2C+cwlWKNgxfmj6HKG9XIlu8gC/R+Ruf4aSUZ
 QT170jY8Lf6PzqLmbIW86tcKftbkP5RiEp8ESg9jDdNjhwZjxlF13aAVE8uJxP0j
 I12tWIG+68AM
 -----END CERTIFICATE-----
-""";
+''';
 
-String privateKey = """
+String privateKey = '''
 -----BEGIN PRIVATE KEY-----
 MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCi/fmozdYuCIZb
 JS7y4zYPp2NRboLXrpUcUzzvzz+24k/TYUPNeRvf6wiNXHvr1ijMg1j3wQP72Rph
@@ -70,10 +70,10 @@ fNjJ7e1NHhVdgpGjaOiBSKj2rHNRy6iwCNbs5wjmRWlgqnFEM5r0VfFn9L0PvcQK
 7iExMTm/PkSqHUntpy82Q8zRWmhw0G5p9DYyIPtaeW1NIKpIlCw6dTlf750BiGkr
 mhBKvYQc85gja0s1c+1VXA==
 -----END PRIVATE KEY-----
-""";
+''';
 
 Future<void> main() async {
-  SecurityContext serverContext = new SecurityContext()
+  final SecurityContext serverContext = SecurityContext()
     ..useCertificateChainBytes(certificate.codeUnits)
     ..usePrivateKeyBytes(privateKey.codeUnits);
 
