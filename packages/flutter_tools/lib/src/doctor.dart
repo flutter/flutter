@@ -20,7 +20,6 @@ import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
-import 'commands/doctor.dart';
 import 'device.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart';
@@ -34,7 +33,6 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
 import 'reporting/reporting.dart';
-import 'runner/flutter_command.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
@@ -71,19 +69,12 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       ...VsCodeValidator.installedValidators,
     ];
 
-    bool verbose = false;
-    if (FlutterCommand.current is DoctorCommand) {
-      verbose = (FlutterCommand.current as DoctorCommand).verbose;
-    }
-
     _validators = <DoctorValidator>[
       FlutterValidator(),
       if (androidWorkflow.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator],
-          verbose: verbose),
+        GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
       if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator],
-          verbose: verbose),
+        GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
       if (webWorkflow.appliesToHostPlatform)
         const WebValidator(),
       if (linuxWorkflow.appliesToHostPlatform)
@@ -253,9 +244,7 @@ class Doctor {
       try {
         result = await validatorTask.result;
       } catch (exception, stackTrace) {
-        // Only include the stacktrace in verbose mode.
-        result = ValidationResult.crash(
-            exception, stackTrace: verbose ? stackTrace : null);
+        result = ValidationResult.crash(exception, stackTrace);
       } finally {
         status.stop();
       }
@@ -374,12 +363,9 @@ abstract class DoctorValidator {
 /// passed to the constructor and reports the statusInfo of the first validator
 /// that provides one. Other titles and statusInfo strings are discarded.
 class GroupedValidator extends DoctorValidator {
-  GroupedValidator(this.subValidators, {
-    this.verbose = false,
-  }) : super(subValidators[0].title);
+  GroupedValidator(this.subValidators) : super(subValidators[0].title);
 
   final List<DoctorValidator> subValidators;
-  final bool verbose;
 
   List<ValidationResult> _subResults;
 
@@ -409,8 +395,7 @@ class GroupedValidator extends DoctorValidator {
       try {
         results.add(await subValidator.result);
       } catch (exception, stackTrace) {
-        results.add(ValidationResult.crash(
-            exception, stackTrace: verbose ? stackTrace : null));
+        results.add(ValidationResult.crash(exception, stackTrace));
       }
     }
     _currentSlowWarning = 'Merging results...';
@@ -458,16 +443,16 @@ class ValidationResult {
   /// if no [messages] are hints or errors.
   ValidationResult(this.type, this.messages, { this.statusInfo });
 
-  factory ValidationResult.crash(Object error, { StackTrace stackTrace }) {
+  factory ValidationResult.crash(Object error, [StackTrace stackTrace]) {
     return ValidationResult(ValidationType.crash, <ValidationMessage>[
       ValidationMessage.error(
           'Due to an error, the doctor check did not complete. '
           'If the error message below is not helpful, '
           'please let us know about this issue at https://github.com/flutter/flutter/issues.'),
-      if (stackTrace == null)
-          ValidationMessage.error('$error'),
+      ValidationMessage.error('$error'),
       if (stackTrace != null)
-          ValidationMessage.error('$error:\n$stackTrace'),
+          // Stacktrace is informational. Printed in verbose mode only.
+          ValidationMessage('$stackTrace'),
     ], statusInfo: 'the doctor check crashed');
   }
 
