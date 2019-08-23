@@ -372,6 +372,7 @@ void main() {
 
   testGesture('Synthesized pointer events are ignored for velocity tracking', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    addTearDown(drag.dispose);
 
     Velocity velocity;
     drag.onEnd = (DragEndDetails details) {
@@ -398,14 +399,13 @@ void main() {
     tester.route(pointer.up(timeStamp: const Duration(milliseconds: 70)));
     expect(velocity.pixelsPerSecond.dx, moreOrLessEquals(1000.0));
     expect(velocity.pixelsPerSecond.dy, moreOrLessEquals(0.0));
-
-    addTearDown(drag.dispose);
   });
 
   /// Checks that quick flick gestures with 1 down, 2 move and 1 up pointer
   /// events still have a velocity
   testGesture('Quick flicks have velocity', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    addTearDown(drag.dispose);
 
     Velocity velocity;
     drag.onEnd = (DragEndDetails details) {
@@ -423,8 +423,6 @@ void main() {
     // 3 events moving by 10px every 10ms = 1000px/s.
     expect(velocity.pixelsPerSecond.dx, moreOrLessEquals(1000.0));
     expect(velocity.pixelsPerSecond.dy, moreOrLessEquals(0.0));
-
-    addTearDown(drag.dispose);
   });
 
   testGesture('Drag details', (GestureTester tester) {
@@ -436,6 +434,7 @@ void main() {
 
   testGesture('Should recognize drag', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    addTearDown(drag.dispose);
 
     bool didStartDrag = false;
     drag.onStart = (_) {
@@ -493,12 +492,11 @@ void main() {
     expect(updatePrimaryDelta, isNull);
     expect(didEndDrag, isTrue);
     didEndDrag = false;
-
-    addTearDown(drag.dispose);
   });
 
   testGesture('Should recognize drag', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer() ..dragStartBehavior = DragStartBehavior.down;
+    addTearDown(drag.dispose);
 
     Offset latestGlobalPosition;
     drag.onStart = (DragStartDetails details) {
@@ -528,7 +526,6 @@ void main() {
     expect(latestDelta, const Offset(-20.0, 0.0));
 
     tester.route(pointer.up());
-    addTearDown(drag.dispose);
   });
 
   testGesture('Can filter drags based on device kind', (GestureTester tester) {
@@ -537,6 +534,7 @@ void main() {
             kind: PointerDeviceKind.mouse,
         )
         ..dragStartBehavior = DragStartBehavior.down;
+    addTearDown(drag.dispose);
 
     bool didStartDrag = false;
     drag.onStart = (_) {
@@ -606,8 +604,6 @@ void main() {
     expect(updatedDelta, isNull);
     expect(didEndDrag, isTrue);
     didEndDrag = false;
-
-    addTearDown(drag.dispose);
   });
 
   group('Enforce consistent-button restriction:', () {
@@ -637,8 +633,8 @@ void main() {
     });
 
     tearDown(() {
-      addTearDown(pan.dispose);
-      addTearDown(tap.dispose);
+      pan.dispose();
+      tap.dispose();
       logs.clear();
     });
 
@@ -772,9 +768,9 @@ void main() {
 
     tearDown(() {
       recognized.clear();
-      addTearDown(tapPrimary.dispose);
-      addTearDown(tapSecondary.dispose);
-      addTearDown(pan.dispose);
+      tapPrimary.dispose();
+      tapSecondary.dispose();
+      pan.dispose();
     });
 
     testGesture('A primary pan recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
