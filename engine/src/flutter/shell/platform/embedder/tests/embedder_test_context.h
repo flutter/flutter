@@ -61,6 +61,10 @@ class EmbedderTestContext {
   using NextSceneCallback = std::function<void(sk_sp<SkImage> image)>;
   void SetNextSceneCallback(NextSceneCallback next_scene_callback);
 
+  size_t GetGLSurfacePresentCount() const;
+
+  size_t GetSoftwareSurfacePresentCount() const;
+
  private:
   // This allows the builder to access the hooks.
   friend class EmbedderConfigBuilder;
@@ -76,8 +80,11 @@ class EmbedderTestContext {
   SemanticsActionCallback update_semantics_custom_action_callback_;
   std::function<void(const FlutterPlatformMessage*)> platform_message_callback_;
   std::unique_ptr<TestGLSurface> gl_surface_;
+  sk_sp<SkImage> software_surface_;
   std::unique_ptr<EmbedderTestCompositor> compositor_;
   NextSceneCallback next_scene_callback_;
+  size_t gl_surface_present_count_ = 0;
+  size_t software_surface_present_count_ = 0;
 
   static VoidCallback GetIsolateCreateCallbackHook();
 
@@ -106,6 +113,8 @@ class EmbedderTestContext {
   void* GLGetProcAddress(const char* name);
 
   void PlatformMessageCallback(const FlutterPlatformMessage* message);
+
+  bool SofwarePresent(sk_sp<SkImage> image);
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContext);
 };

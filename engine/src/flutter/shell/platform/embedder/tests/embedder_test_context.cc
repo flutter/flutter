@@ -143,6 +143,7 @@ bool EmbedderTestContext::GLClearCurrent() {
 }
 
 bool EmbedderTestContext::GLPresent() {
+  gl_surface_present_count_++;
   FML_CHECK(gl_surface_) << "GL surface must be initialized.";
 
   if (next_scene_callback_) {
@@ -198,6 +199,20 @@ void EmbedderTestContext::SetNextSceneCallback(
     return;
   }
   next_scene_callback_ = next_scene_callback;
+}
+
+bool EmbedderTestContext::SofwarePresent(sk_sp<SkImage> image) {
+  software_surface_present_count_++;
+  software_surface_ = std::move(image);
+  return software_surface_ != nullptr;
+}
+
+size_t EmbedderTestContext::GetGLSurfacePresentCount() const {
+  return gl_surface_present_count_;
+}
+
+size_t EmbedderTestContext::GetSoftwareSurfacePresentCount() const {
+  return software_surface_present_count_;
 }
 
 }  // namespace testing

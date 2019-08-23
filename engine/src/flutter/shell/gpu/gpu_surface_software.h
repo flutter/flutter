@@ -14,7 +14,8 @@ namespace flutter {
 
 class GPUSurfaceSoftware : public Surface {
  public:
-  GPUSurfaceSoftware(GPUSurfaceSoftwareDelegate* delegate);
+  GPUSurfaceSoftware(GPUSurfaceSoftwareDelegate* delegate,
+                     bool render_to_surface);
 
   ~GPUSurfaceSoftware() override;
 
@@ -35,6 +36,11 @@ class GPUSurfaceSoftware : public Surface {
 
  private:
   GPUSurfaceSoftwareDelegate* delegate_;
+  // TODO(38466): Refactor GPU surface APIs take into account the fact that an
+  // external view embedder may want to render to the root surface. This is a
+  // hack to make avoid allocating resources for the root surface when an
+  // external view embedder is present.
+  const bool render_to_surface_;
   fml::WeakPtrFactory<GPUSurfaceSoftware> weak_factory_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceSoftware);
