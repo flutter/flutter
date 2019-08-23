@@ -106,25 +106,42 @@ void main() {
     });
 
     testWidgets('background color default value', (WidgetTester tester) async {
-      final CupertinoTimerPicker picker = CupertinoTimerPicker(
-        onTimerDurationChanged: (Duration value) {},
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTimerPicker(
+            onTimerDurationChanged: (_) { },
+          ),
+        ),
       );
-      expect(picker.backgroundColor, Colors.white);
+
+      final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
+      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.white), false);
     });
 
     testWidgets('background color is not null', (WidgetTester tester) async {
-      final CupertinoTimerPicker picker = CupertinoTimerPicker(
-        onTimerDurationChanged: (Duration value) {},
+      expect(
+        () {
+          CupertinoTimerPicker(
+            onTimerDurationChanged: (_) { },
+            backgroundColor: null,
+          );
+        },
+        throwsAssertionError,
       );
-      expect(picker.backgroundColor, isNotNull);
     });
 
     testWidgets('specified background color is applied', (WidgetTester tester) async {
-      final CupertinoTimerPicker picker = CupertinoTimerPicker(
-        onTimerDurationChanged: (Duration value) {},
-        backgroundColor: Colors.red,
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTimerPicker(
+            onTimerDurationChanged: (_) { },
+            backgroundColor: CupertinoColors.black,
+          ),
+        ),
       );
-      expect(picker.backgroundColor, Colors.red);
+
+      final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
+      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor == CupertinoColors.black), true);
     });
 
     testWidgets('columns are ordered correctly when text direction is ltr', (WidgetTester tester) async {
@@ -289,25 +306,42 @@ void main() {
     });
 
     testWidgets('background color default value', (WidgetTester tester) async {
-      final CupertinoDatePicker picker = CupertinoDatePicker(
-        onDateTimeChanged: (_) { },
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoDatePicker(
+            onDateTimeChanged: (_) { },
+          ),
+        ),
       );
-      expect(picker.backgroundColor, Colors.white);
+
+      final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
+      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.white), false);
     });
 
     testWidgets('background color is not null', (WidgetTester tester) async {
-      final CupertinoDatePicker picker = CupertinoDatePicker(
-        onDateTimeChanged: (_) { },
+       expect(
+        () {
+          CupertinoDatePicker(
+            onDateTimeChanged: (_) { },
+            backgroundColor: null,
+          );
+        },
+        throwsAssertionError,
       );
-      expect(picker.backgroundColor, isNotNull);
     });
 
     testWidgets('specified background color is applied', (WidgetTester tester) async {
-      final CupertinoDatePicker picker = CupertinoDatePicker(
-        onDateTimeChanged: (_) { },
-        backgroundColor: Colors.red,
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoDatePicker(
+            onDateTimeChanged: (_) { },
+            backgroundColor: CupertinoColors.black,
+          ),
+        ),
       );
-      expect(picker.backgroundColor, Colors.red);
+
+      final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
+      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor == CupertinoColors.black), true);
     });
 
     testWidgets('initial date honors minuteInterval', (WidgetTester tester) async {

@@ -284,7 +284,7 @@ class CupertinoDatePicker extends StatefulWidget {
   final ValueChanged<DateTime> onDateTimeChanged;
 
   /// Background color of date picker.
-  /// 
+  ///
   /// Defaults to [CupertinoColors.white] when null.
   final Color backgroundColor;
 
@@ -1088,7 +1088,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   final ValueChanged<Duration> onTimerDurationChanged;
   
   /// Background color of timer picker.
-  /// 
+  ///
   /// Defaults to [CupertinoColors.white] when null.
   final Color backgroundColor;
 
