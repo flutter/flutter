@@ -42,7 +42,6 @@ source_set("fml") {
     "memory/weak_ptr.h",
     "memory/weak_ptr_internal.cc",
     "memory/weak_ptr_internal.h",
-    "merged_queues_runner.cc",
     "message.cc",
     "message.h",
     "message_loop.cc",

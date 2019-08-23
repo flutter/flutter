@@ -127,7 +127,6 @@ FILE: ../../../flutter/fml/memory/weak_ptr.h
 FILE: ../../../flutter/fml/memory/weak_ptr_internal.cc
 FILE: ../../../flutter/fml/memory/weak_ptr_internal.h
 FILE: ../../../flutter/fml/memory/weak_ptr_unittest.cc
-FILE: ../../../flutter/fml/merged_queues_runner.cc
 FILE: ../../../flutter/fml/message.cc
 FILE: ../../../flutter/fml/message.h
 FILE: ../../../flutter/fml/message_loop.cc
