@@ -299,11 +299,15 @@ class _BodyBoxConstraints extends BoxConstraints {
     double minHeight = 0.0,
     double maxHeight = double.infinity,
     @required this.bottomWidgetsHeight,
+    @required this.topWidgetsHeight,
   }) : assert(bottomWidgetsHeight != null),
        assert(bottomWidgetsHeight >= 0),
+       assert(topWidgetsHeight != null),
+       assert(topWidgetsHeight >= 0),
        super(minWidth: minWidth, maxWidth: maxWidth, minHeight: minHeight, maxHeight: maxHeight);
 
   final double bottomWidgetsHeight;
+  final double topWidgetsHeight;
 
   // RenderObject.layout() will only short-circuit its call to its performLayout
   // method if the new layout constraints are not == to the current constraints.
@@ -314,12 +318,13 @@ class _BodyBoxConstraints extends BoxConstraints {
     if (super != other)
       return false;
     final _BodyBoxConstraints typedOther = other;
-    return bottomWidgetsHeight == typedOther.bottomWidgetsHeight;
+    return bottomWidgetsHeight == typedOther.bottomWidgetsHeight
+        && topWidgetsHeight == typedOther.topWidgetsHeight;
   }
 
   @override
   int get hashCode {
-    return hashValues(super.hashCode, bottomWidgetsHeight);
+    return hashValues(super.hashCode, bottomWidgetsHeight, topWidgetsHeight);
   }
 }
 
@@ -450,6 +455,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         maxWidth: fullWidthConstraints.maxWidth,
         maxHeight: bodyMaxHeight,
         bottomWidgetsHeight: extendBody ? bottomWidgetsHeight : 0.0,
+        topWidgetsHeight: extendBehindAppBar ? contentTop : 0.0,
       );
       layoutChild(_ScaffoldSlot.body, bodyConstraints);
       positionChild(_ScaffoldSlot.body, extendBehindAppBar ? Offset.zero : Offset(0.0, contentTop));
@@ -557,7 +563,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         || oldDelegate.textDirection != textDirection
         || oldDelegate.floatingActionButtonMoveAnimationProgress != floatingActionButtonMoveAnimationProgress
         || oldDelegate.previousFloatingActionButtonLocation != previousFloatingActionButtonLocation
-        || oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation;
+        || oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation
+        || oldDelegate.extendBody != extendBody
+        || oldDelegate.extendBehindAppBar != extendBehindAppBar;
   }
 }
 
