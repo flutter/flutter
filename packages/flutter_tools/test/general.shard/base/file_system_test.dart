@@ -69,7 +69,6 @@ void main() {
 
       final Directory destination = fs.directory('/destination');
       copyDirectorySync(origin, destination, shouldCopyFile: (File origin, File dest) {
-        print(origin.basename);
         return origin.basename == 'b.txt';
       });
 
