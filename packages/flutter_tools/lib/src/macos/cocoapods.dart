@@ -31,7 +31,7 @@ const String unknownCocoaPodsConsequence = '''
 
 const String brokenCocoaPodsConsequence = '''
   You appear to have CocoaPods installed but it is not working.
-  This can happen if the version of ruby that CocoaPods was installed with is different from the one being used to invoke it.
+  This can happen if the version of Ruby that CocoaPods was installed with is different from the one being used to invoke it.
   This can usually be fixed by re-installing CocoaPods. For more info, see https://github.com/flutter/flutter/issues/14293.''';
 
 const String cocoaPodsInstallInstructions = '''
