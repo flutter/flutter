@@ -237,7 +237,7 @@ class PackagesForwardCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
-    await pub(<String>[_commandName, ...argResults.rest], context: PubContext.pubForward, retry: false);
+    await pubInteractively(<String>[_commandName, ...argResults.rest]);
     return null;
   }
 
