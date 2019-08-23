@@ -13,6 +13,7 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
+#include "flutter/shell/platform/darwin/ios/ios_surface_metal.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
 
@@ -51,6 +52,13 @@
     layer.allowsGroupOpacity = NO;
     layer.contentsScale = contentsScale;
     layer.rasterizationScale = contentsScale;
+#if FLUTTER_SHELL_ENABLE_METAL
+  } else if ([self.layer isKindOfClass:[CAMetalLayer class]]) {
+    CAMetalLayer* layer = reinterpret_cast<CAMetalLayer*>(self.layer);
+    layer.allowsGroupOpacity = NO;
+    layer.contentsScale = contentsScale;
+    layer.rasterizationScale = contentsScale;
+#endif  // FLUTTER_SHELL_ENABLE_METAL
   }
 
   return self;
@@ -59,27 +67,39 @@
 + (Class)layerClass {
 #if TARGET_IPHONE_SIMULATOR
   return [CALayer class];
-#else   // TARGET_IPHONE_SIMULATOR
+#else  // TARGET_IPHONE_SIMULATOR
+#if FLUTTER_SHELL_ENABLE_METAL
+  return [CAMetalLayer class];
+#else   // FLUTTER_SHELL_ENABLE_METAL
   return [CAEAGLLayer class];
+#endif  //  FLUTTER_SHELL_ENABLE_METAL
 #endif  // TARGET_IPHONE_SIMULATOR
 }
 
-- (std::unique_ptr<flutter::IOSSurface>)createSoftwareSurface {
-  fml::scoped_nsobject<CALayer> layer(reinterpret_cast<CALayer*>([self.layer retain]));
-  return std::make_unique<flutter::IOSSurfaceSoftware>(std::move(layer), nullptr);
-}
-
-- (std::unique_ptr<flutter::IOSSurfaceGL>)createGLSurfaceWithContext:
+- (std::unique_ptr<flutter::IOSSurface>)createSurface:
     (std::shared_ptr<flutter::IOSGLContext>)gl_context {
-  fml::scoped_nsobject<CAEAGLLayer> eagl_layer(reinterpret_cast<CAEAGLLayer*>([self.layer retain]));
-  // TODO(amirh): We can lower this to iOS 8.0 once we have a Metal rendering backend.
-  // https://github.com/flutter/flutter/issues/24132
-  if (@available(iOS 9.0, *)) {
-    eagl_layer.get().presentsWithTransaction = YES;
+  if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
+    fml::scoped_nsobject<CAEAGLLayer> eagl_layer(
+        reinterpret_cast<CAEAGLLayer*>([self.layer retain]));
+    if (@available(iOS 9.0, *)) {
+      eagl_layer.get().presentsWithTransaction = YES;
+    }
+    return std::make_unique<flutter::IOSSurfaceGL>(std::move(eagl_layer), gl_context);
+#if FLUTTER_SHELL_ENABLE_METAL
+  } else if ([self.layer isKindOfClass:[CAMetalLayer class]]) {
+    fml::scoped_nsobject<CAMetalLayer> metalLayer(
+        reinterpret_cast<CAMetalLayer*>([self.layer retain]));
+    if (@available(iOS 8.0, *)) {
+      metalLayer.get().presentsWithTransaction = YES;
+    }
+    return std::make_unique<flutter::IOSSurfaceMetal>(std::move(metalLayer));
+#endif  //  FLUTTER_SHELL_ENABLE_METAL
+  } else {
+    fml::scoped_nsobject<CALayer> layer(reinterpret_cast<CALayer*>([self.layer retain]));
+    return std::make_unique<flutter::IOSSurfaceSoftware>(std::move(layer), nullptr);
   }
-  return std::make_unique<flutter::IOSSurfaceGL>(eagl_layer, std::move(gl_context));
 }
 
-// TODO(amirh): implement drawLayer to suppoer snapshotting.
+// TODO(amirh): implement drawLayer to support snapshotting.
 
 @end
