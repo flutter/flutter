@@ -17,6 +17,8 @@ class FakePlatformViewController extends PlatformViewController {
     _id = id;
   }
 
+  bool disposed = false;
+
   /// Events that are dispatched;
   List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
 
@@ -32,6 +34,12 @@ class FakePlatformViewController extends PlatformViewController {
 
   void clearTestingVariables() {
     dispatchedPointerEvents.clear();
+    disposed = false;
+  }
+
+  @override
+  void dispose() {
+    disposed = true;
   }
 }
 
@@ -63,7 +71,7 @@ class FakeAndroidPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    defaultBinaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData data) {});
+    ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {

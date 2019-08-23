@@ -31,9 +31,8 @@ const String unknownCocoaPodsConsequence = '''
 
 const String brokenCocoaPodsConsequence = '''
   You appear to have CocoaPods installed but it is not working.
-  This can happen if you've upgraded your macOS or are using RVM to change your ruby version.
-  If you are using RVM, reset your ruby to the system version with:
-  rvm use system''';
+  This can happen if the version of ruby that CocoaPods was installed with is different from the one being used to invoke it.
+  This can usually be fixed by re-installing CocoaPods. For more info, see https://github.com/flutter/flutter/issues/14293.''';
 
 const String cocoaPodsInstallInstructions = '''
   sudo gem install cocoapods
@@ -120,7 +119,7 @@ class CocoaPods {
     bool isSwift = false,
     bool dependenciesChanged = true,
   }) async {
-    if (!(await xcodeProject.podfile.exists())) {
+    if (!xcodeProject.podfile.existsSync()) {
       throwToolExit('Podfile missing');
     }
     if (await _checkPodCondition()) {

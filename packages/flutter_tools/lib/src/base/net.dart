@@ -8,6 +8,7 @@ import '../base/context.dart';
 import '../globals.dart';
 import 'common.dart';
 import 'io.dart';
+import 'platform.dart';
 
 const int kNetworkProblemExitCode = 50;
 
@@ -47,12 +48,27 @@ Future<List<int>> _attempt(Uri url, { bool onlyHeaders = false }) async {
     httpClient = HttpClient();
   }
   HttpClientRequest request;
+  HttpClientResponse response;
   try {
     if (onlyHeaders) {
       request = await httpClient.headUrl(url);
     } else {
       request = await httpClient.getUrl(url);
     }
+    response = await request.close();
+  } on ArgumentError catch (error) {
+    final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
+    if (overrideUrl != null && url.toString().contains(overrideUrl)) {
+      printError(error.toString());
+      throwToolExit(
+        'The value of FLUTTER_STORAGE_BASE_URL ($overrideUrl) could not be '
+        'parsed as a valid url. Please see https://flutter.dev/community/china '
+        'for an example of how to use it.\n'
+        'Full URL: $url',
+        exitCode: kNetworkProblemExitCode,);
+    }
+    printError(error.toString());
+    rethrow;
   } on HandshakeException catch (error) {
     printTrace(error.toString());
     throwToolExit(
@@ -68,7 +84,8 @@ Future<List<int>> _attempt(Uri url, { bool onlyHeaders = false }) async {
     printTrace('Download error: $error');
     return null;
   }
-  final HttpClientResponse response = await request.close();
+  assert(response != null);
+
   // If we're making a HEAD request, we're only checking to see if the URL is
   // valid.
   if (onlyHeaders) {

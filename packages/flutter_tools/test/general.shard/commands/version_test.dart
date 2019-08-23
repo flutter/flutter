@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/version.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -116,7 +117,7 @@ class MockProcessManager extends Mock implements ProcessManager {
     Encoding stderrEncoding = systemEncoding,
   }) {
     final String commandStr = command.join(' ');
-    if (commandStr == 'git log -n 1 --pretty=format:%H') {
+    if (commandStr == FlutterVersion.gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' ')) {
       return ProcessResult(0, 0, '000000000000000000000', '');
     }
     if (commandStr ==
