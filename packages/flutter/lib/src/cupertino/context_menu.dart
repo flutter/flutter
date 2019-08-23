@@ -71,7 +71,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   void initState() {
     super.initState();
     _dummyController = AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
     _dummyController.addStatusListener(_onDummyAnimationStatusChange);
@@ -171,7 +171,25 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     _route = null;
   }
 
-  void _onLongPressStart(LongPressStartDetails details) {
+  void _onTap() {
+    if (_dummyController.isAnimating) {
+      _dummyController.reverse();
+    }
+  }
+
+  void _onTapCancel() {
+    if (_dummyController.isAnimating) {
+      _dummyController.reverse();
+    }
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    if (_dummyController.isAnimating) {
+      _dummyController.reverse();
+    }
+  }
+
+  void _onTapDown(TapDownDetails details) {
     setState(() {
       _childOpacity = 0.0;
     });
@@ -180,34 +198,20 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     _dummyController.forward();
   }
 
-  void _onLongPressEnd(LongPressEndDetails details) {
-    if (_dummyController.isAnimating) {
-      _dummyController.reverse();
-    }
-  }
-
-  // A regular tap should be totally separate from a long-press to open the
-  // ContextMenu. If this gesture is just a tap, then don't do any animation
-  // and allow the tap to be handled by another GestureDetector as if the
-  // ContextMenu didn't exist.
-  void _onTap() {
-    if (_dummyController.isAnimating) {
-      _dummyController.reverse();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onLongPressEnd: _onLongPressEnd,
-      onLongPressStart: _onLongPressStart,
-      child: Container(
-        child: Opacity(
-          opacity: _childOpacity,
-          key: _childGlobalKey,
-          // TODO(justinmc): Round corners of child?
-          child: widget.child,
-        ),
+      //onLongPressEnd: _onLongPressEnd,
+      //onLongPressStart: _onLongPressStart,
+      onTapCancel: _onTapCancel,
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTap: _onTap,
+      child: Opacity(
+        opacity: _childOpacity,
+        key: _childGlobalKey,
+        // TODO(justinmc): Round corners of child?
+        child: widget.child,
       ),
     );
   }
@@ -242,7 +246,7 @@ class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin 
   // TODO(justinmc): Replace with real system colors when dark mode is
   // supported for iOS.
   //static const Color _darkModeMaskColor = Color(0xAAFFFFFF);
-  static const Color _lightModeMaskColor = Color(0xAAAAAAAA);
+  static const Color _lightModeMaskColor = Color(0xFF888888);
   static const Color _masklessColor = Color(0xFFFFFFFF);
 
   final GlobalKey _childGlobalKey = GlobalKey();
@@ -256,8 +260,8 @@ class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin 
       controller: widget.controller,
       onValue: _lightModeMaskColor,
       offValue: _masklessColor,
-      intervalOn: 0.2,
-      intervalOff: 0.8,
+      intervalOn: 0.0,
+      intervalOff: 0.4,
     );
     _rect = RectTween(
       begin: widget.beginRect,
@@ -265,6 +269,8 @@ class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin 
     ).animate(
       CurvedAnimation(
         parent: widget.controller,
+        // TODO(justinmc): This curve is close but not quite right. Should I
+        // hack some delay and amplitude changes, or write a new curve?
         curve: Curves.easeInBack,
       ),
     );
