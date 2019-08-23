@@ -36,7 +36,7 @@ void main() {
       return BuildResult(success: true);
     });
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
-    await commandRunner.run(<String>['assemble', 'unpack_macos']);
+    await commandRunner.run(<String>['assemble', 'debug_macos_bundle_flutter_assets']);
     final BufferLogger bufferLogger = logger;
 
     expect(bufferLogger.statusText.trim(), 'build succeeded.');
@@ -62,7 +62,7 @@ void main() {
     });
 
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
-    await commandRunner.run(<String>['assemble', '--build-outputs=outputs', '--build-inputs=inputs', 'unpack_macos']);
+    await commandRunner.run(<String>['assemble', '--build-outputs=outputs', '--build-inputs=inputs', 'debug_macos_bundle_flutter_assets']);
 
     final File inputs = fs.file('inputs');
     final File outputs = fs.file('outputs');
@@ -72,7 +72,7 @@ void main() {
     final DateTime theDistantPast = DateTime(1991, 8, 23);
     inputs.setLastModifiedSync(theDistantPast);
     outputs.setLastModifiedSync(theDistantPast);
-    await commandRunner.run(<String>['assemble', '--build-outputs=outputs', '--build-inputs=inputs', 'unpack_macos']);
+    await commandRunner.run(<String>['assemble', '--build-outputs=outputs', '--build-inputs=inputs', 'debug_macos_bundle_flutter_assets']);
 
     expect(inputs.lastModifiedSync(), theDistantPast);
     expect(outputs.lastModifiedSync(), theDistantPast);
@@ -85,7 +85,7 @@ void main() {
         inputFiles: <File>[fs.file('foo'), fs.file('fizz')..createSync()],
         outputFiles: <File>[fs.file('bar'), fs.file(fs.path.join('.dart_tool', 'fizz2'))..createSync(recursive: true)]);
     });
-    await commandRunner.run(<String>['assemble', '--build-outputs=outputs', '--build-inputs=inputs', 'unpack_macos']);
+    await commandRunner.run(<String>['assemble', '--build-outputs=outputs', '--build-inputs=inputs', 'debug_macos_bundle_flutter_assets']);
 
     expect(inputs.readAsStringSync(), contains('foo'));
     expect(inputs.readAsStringSync(), contains('fizz'));

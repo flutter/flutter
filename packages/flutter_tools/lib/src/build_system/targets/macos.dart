@@ -6,6 +6,7 @@ import 'package:pool/pool.dart';
 
 import '../../artifacts.dart';
 import '../../asset.dart';
+import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process.dart';
@@ -16,6 +17,7 @@ import '../../globals.dart';
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../build_system.dart';
+import '../exceptions.dart';
 import 'dart.dart';
 
 const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/ephemeral/FlutterMacOS.framework';
@@ -51,7 +53,7 @@ class MacOSAssetBehavior extends SourceBehavior {
     );
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final String prefix = fs.path.join(flutterProject.macos.ephemeralDirectory.path,
-        'App.framework', 'Resources', 'flutter_assets');
+        'App.framework', 'Versions', 'A', 'Resources', 'flutter_assets');
     final List<File> results = <File>[];
     for (String key in assetBundle.entries.keys) {
       final File file = fs.file(fs.path.join(prefix, key));
@@ -63,22 +65,28 @@ class MacOSAssetBehavior extends SourceBehavior {
 
 /// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
 ///
-/// The shelling out is done to avoid complications with preserving special
-/// files (e.g., symbolic links) in the framework structure.
+/// This class is abstract to share logic between the three conrete
+/// implementations. The shelling out is done to avoid complications with
+/// preserving special files (e.g., symbolic links) in the framework structure.
 ///
 /// Removes any previous version of the framework that already exists in the
 /// target directory.
+///
+/// The real implementations are:
+///   * [DebugUnpackMacOS]
+///   * [ProfileUnpackMacOS]
+///   * [ReleaseUnpackMacOS]
+///
 // TODO(jonahwilliams): remove shell out.
-class UnpackMacOS extends Target {
+// TODO(jonahwilliams): the subtypes are required to specify the different
+// input dependencies as a current limitation of the build system planning.
+// This should be resolved after https://github.com/flutter/flutter/issues/38937.
+abstract class UnpackMacOS extends Target {
   const UnpackMacOS();
-
-  @override
-  String get name => 'unpack_macos';
 
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
-    Source.artifact(Artifact.flutterMacOSFramework),
   ];
 
   @override
@@ -108,7 +116,11 @@ class UnpackMacOS extends Target {
 
   @override
   Future<void> build(List<File> inputFiles, Environment environment) async {
-    final String basePath = artifacts.getArtifactPath(Artifact.flutterMacOSFramework);
+    if (environment.defines[kBuildMode] == null) {
+      throw MissingDefineException(kBuildMode, 'unpack_macos');
+    }
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final String basePath = artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final Directory targetDirectory = flutterProject.macos
       .ephemeralDirectory
@@ -126,6 +138,48 @@ class UnpackMacOS extends Target {
       );
     }
   }
+}
+
+/// Unpack the release prebuilt engine framework.
+class ReleaseUnpackMacOS extends UnpackMacOS {
+  const ReleaseUnpackMacOS();
+
+  @override
+  String get name => 'release_unpack_macos';
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.release),
+  ];
+}
+
+/// Unpack the profile prebuilt engine framework.
+class ProfileUnpackMacOS extends UnpackMacOS {
+  const ProfileUnpackMacOS();
+
+  @override
+  String get name => 'profile_unpack_macos';
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.profile),
+  ];
+}
+
+/// Unpack the debug prebuilt engine framework.
+class DebugUnpackMacOS extends UnpackMacOS {
+  const DebugUnpackMacOS();
+
+  @override
+  String get name => 'debug_unpack_macos';
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
+  ];
 }
 
 /// Create an App.framework for debug macOS targets.
@@ -178,18 +232,85 @@ static const int Moo = 88;
   ];
 }
 
-/// Bundle the flutter assets, app.dill, and precompiled runtimes into the App.framework.
-///
-/// See https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPFrameworks/Concepts/FrameworkAnatomy.html
-/// for more information on Framework structure.
-class DebugBundleFlutterAssets extends Target {
-  const DebugBundleFlutterAssets();
+class CompileMacOSFramework extends Target {
+  const CompileMacOSFramework();
 
   @override
-  String get name => 'debug_bundle_flutter_assets';
+  String get name => 'compile_macos_framework';
 
   @override
   Future<void> build(List<File> inputFiles, Environment environment) async {
+    if (environment.defines[kBuildMode] == null) {
+      throw MissingDefineException(kBuildMode, 'compile_macos_framework');
+    }
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    if (buildMode == BuildMode.debug) {
+      throw Exception('precompiled macOS framework only supported in release/profile builds.');
+    }
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final int result = await AOTSnapshotter(reportTimings: false).build(
+      bitcode: false,
+      buildMode: buildMode,
+      mainPath: environment.buildDir.childFile('app.dill').path,
+      outputPath: environment.buildDir.path,
+      platform: TargetPlatform.darwin_x64,
+      darwinArch: DarwinArch.x86_64,
+      packagesPath: flutterProject.packagesFile.path
+    );
+    if (result != 0) {
+      throw Exception('gen shapshot failed.');
+    }
+  }
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/app.dill'),
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
+    Source.artifact(Artifact.genSnapshot, mode: BuildMode.release, platform: TargetPlatform.darwin_x64),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
+  ];
+}
+
+/// Bundle the flutter assets into the App.framework.
+///
+/// In debug mode, also include the app.dill and precompiled runtimes.
+///
+/// See https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPFrameworks/Concepts/FrameworkAnatomy.html
+/// for more information on Framework structure.
+abstract class MacOSBundleFlutterAssets extends Target {
+  const MacOSBundleFlutterAssets();
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.behavior(MacOSAssetBehavior())
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.behavior(MacOSAssetBehavior()),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/App'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/Info.plist'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/AssetManifest.json'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/FontManifest.json'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/LICENSE'),
+  ];
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async {
+    if (environment.defines[kBuildMode] == null) {
+      throw MissingDefineException(kBuildMode, 'compile_macos_framework');
+    }
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final Directory frameworkRootDirectory = flutterProject.macos
         .ephemeralDirectory
@@ -268,78 +389,121 @@ class DebugBundleFlutterAssets extends Target {
 </plist>
 
 ''');
-
-    // Copy dill file.
-    try {
-      final File sourceFile = environment.buildDir.childFile('app.dill');
-      sourceFile.copySync(assetDirectory.childFile('kernel_blob.bin').path);
-    } catch (err) {
-      throw Exception('Failed to copy app.dill: $err');
+    if (buildMode == BuildMode.debug) {
+      // Copy dill file.
+      try {
+        final File sourceFile = environment.buildDir.childFile('app.dill');
+        sourceFile.copySync(assetDirectory.childFile('kernel_blob.bin').path);
+      } catch (err) {
+        throw Exception('Failed to copy app.dill: $err');
+      }
+      // Copy precompiled runtimes.
+      try {
+        final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData,
+            platform: TargetPlatform.darwin_x64, mode: BuildMode.debug);
+        final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData,
+            platform: TargetPlatform.darwin_x64, mode: BuildMode.debug);
+        fs.file(vmSnapshotData).copySync(
+            assetDirectory.childFile('vm_snapshot_data').path);
+        fs.file(isolateSnapshotData).copySync(
+            assetDirectory.childFile('isolate_snapshot_data').path);
+      } catch (err) {
+        throw Exception('Failed to copy precompiled runtimes: $err');
+      }
     }
-    // Copy precompiled runtimes.
-    try {
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData,
-          platform: TargetPlatform.darwin_x64, mode: BuildMode.debug);
-      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData,
-          platform: TargetPlatform.darwin_x64, mode: BuildMode.debug);
-      fs.file(vmSnapshotData).copySync(
-          assetDirectory.childFile('vm_snapshot_data').path);
-      fs.file(isolateSnapshotData).copySync(
-          assetDirectory.childFile('isolate_snapshot_data').path);
-    } catch (err) {
-      throw Exception('Failed to copy precompiled runtimes: $err');
-    }
-    // Create symlink to current version.
+    // Create symlink to current version. These must be relative, from the
+    // framework root for Resources/App and from the versions root for
+    // Current.
     try {
       final Link currentVersion = outputDirectory.parent
           .childLink('Current');
       if (!currentVersion.existsSync()) {
-        currentVersion.createSync(outputDirectory.path);
+        final String linkPath = fs.path.relative(outputDirectory.path,
+            from: outputDirectory.parent.path);
+         print(linkPath);
+        currentVersion.createSync('$linkPath${fs.path.separator}');
       }
       // Create symlink to current resources.
       final Link currentResources = frameworkRootDirectory
           .childLink('Resources');
       if (!currentResources.existsSync()) {
-        currentResources.createSync(fs.path.join(currentVersion.path, 'Resources'));
+        final String linkPath = fs.path.relative(fs.path.join(currentVersion.path, 'Resources'),
+            from: frameworkRootDirectory.path);
+        print(linkPath);
+        currentResources.createSync(linkPath);
       }
       // Create symlink to current binary.
       final Link currentFramework = frameworkRootDirectory
           .childLink('App');
       if (!currentFramework.existsSync()) {
-        currentFramework.createSync(fs.path.join(currentVersion.path, 'App'));
+        final String linkPath = fs.path.relative(fs.path.join(currentVersion.path, 'App'),
+            from: frameworkRootDirectory.path);
+         print(linkPath);
+        currentFramework.createSync(linkPath);
       }
     } on FileSystemException {
       throw Exception('Failed to create symlinks for framework. try removing '
         'the "${flutterProject.macos.ephemeralDirectory.path}" directory and rerunning');
     }
   }
+}
+
+/// Bundle the debug flutter assets into the App.framework.
+class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
+  const DebugMacOSBundleFlutterAssets();
+
+  @override
+  String get name => 'debug_macos_bundle_flutter_assets';
 
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
     DebugMacOSFramework(),
-    UnpackMacOS(),
+    DebugUnpackMacOS(),
   ];
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    Source.behavior(MacOSAssetBehavior()),
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.artifact(Artifact.isolateSnapshotData, platform: TargetPlatform.darwin_x64, mode: BuildMode.debug),
-    Source.artifact(Artifact.vmSnapshotData, platform: TargetPlatform.darwin_x64, mode: BuildMode.debug),
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.artifact(Artifact.isolateSnapshotData, platform: TargetPlatform.darwin_x64, mode: BuildMode.debug),
+    const Source.artifact(Artifact.vmSnapshotData, platform: TargetPlatform.darwin_x64, mode: BuildMode.debug),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.behavior(MacOSAssetBehavior()),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/App'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/Info.plist'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/AssetManifest.json'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/FontManifest.json'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/LICENSE'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
+  List<Source> get outputs => <Source>[
+    ...super.outputs,
+    const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin'),
+    const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
+    const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
+  ];
+}
+
+/// Bundle the profile flutter assets into the App.framework.
+class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
+  const ProfileMacOSBundleFlutterAssets();
+
+  @override
+  String get name => 'profile_macos_bundle_flutter_assets';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    CompileMacOSFramework(),
+    ProfileUnpackMacOS(),
+  ];
+}
+
+
+/// Bundle the release flutter assets into the App.framework.
+class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
+  const ReleaseMacOSBundleFlutterAssets();
+
+  @override
+  String get name => 'release_macos_bundle_flutter_assets';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    CompileMacOSFramework(),
+    ReleaseUnpackMacOS(),
   ];
 }

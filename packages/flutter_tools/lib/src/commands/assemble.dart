@@ -23,7 +23,6 @@ BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// All currently implemented targets.
 const List<Target> _kDefaultTargets = <Target>[
-  UnpackMacOS(),
   UnpackLinux(),
   UnpackWindows(),
   CopyAssets(),
@@ -33,7 +32,9 @@ const List<Target> _kDefaultTargets = <Target>[
   AotAssemblyProfile(),
   AotAssemblyRelease(),
   DebugMacOSFramework(),
-  DebugBundleFlutterAssets(),
+  DebugMacOSBundleFlutterAssets(),
+  ProfileMacOSBundleFlutterAssets(),
+  ReleaseMacOSBundleFlutterAssets(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
