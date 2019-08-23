@@ -105,11 +105,12 @@ static sk_sp<SkData> OpenFixtureAsSkData(const char* name) {
 
 TEST_F(ImageDecoderFixtureTest, CanCreateImageDecoder) {
   auto loop = fml::ConcurrentMessageLoop::Create();
-  TaskRunners runners(GetCurrentTestName(),   // label
-                      GetThreadTaskRunner(),  // platform
-                      GetThreadTaskRunner(),  // gpu
-                      GetThreadTaskRunner(),  // ui
-                      GetThreadTaskRunner()   // io
+  auto thread_task_runner = CreateNewThread();
+  TaskRunners runners(GetCurrentTestName(),  // label
+                      thread_task_runner,    // platform
+                      thread_task_runner,    // gpu
+                      thread_task_runner,    // ui
+                      thread_task_runner     // io
 
   );
 
@@ -125,15 +126,16 @@ TEST_F(ImageDecoderFixtureTest, CanCreateImageDecoder) {
 
 TEST_F(ImageDecoderFixtureTest, InvalidImageResultsError) {
   auto loop = fml::ConcurrentMessageLoop::Create();
-  TaskRunners runners(GetCurrentTestName(),   // label
-                      GetThreadTaskRunner(),  // platform
-                      GetThreadTaskRunner(),  // gpu
-                      GetThreadTaskRunner(),  // ui
-                      GetThreadTaskRunner()   // io
+  auto thread_task_runner = CreateNewThread();
+  TaskRunners runners(GetCurrentTestName(),  // label
+                      thread_task_runner,    // platform
+                      thread_task_runner,    // gpu
+                      thread_task_runner,    // ui
+                      thread_task_runner     // io
   );
 
   fml::AutoResetWaitableEvent latch;
-  GetThreadTaskRunner()->PostTask([&]() {
+  thread_task_runner->PostTask([&]() {
     TestIOManager manager(runners.GetIOTaskRunner());
     ImageDecoder decoder(runners, loop->GetTaskRunner(),
                          manager.GetWeakIOManager());
@@ -155,11 +157,11 @@ TEST_F(ImageDecoderFixtureTest, InvalidImageResultsError) {
 
 TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
   auto loop = fml::ConcurrentMessageLoop::Create();
-  TaskRunners runners(GetCurrentTestName(),    // label
-                      GetThreadTaskRunner(),   // platform
-                      CreateNewThread("gpu"),  // gpu
-                      CreateNewThread("ui"),   // ui
-                      CreateNewThread("io")    // io
+  TaskRunners runners(GetCurrentTestName(),         // label
+                      CreateNewThread("platform"),  // platform
+                      CreateNewThread("gpu"),       // gpu
+                      CreateNewThread("ui"),        // ui
+                      CreateNewThread("io")         // io
   );
 
   fml::AutoResetWaitableEvent latch;
@@ -197,11 +199,11 @@ TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
 
 TEST_F(ImageDecoderFixtureTest, ExifDataIsRespectedOnDecode) {
   auto loop = fml::ConcurrentMessageLoop::Create();
-  TaskRunners runners(GetCurrentTestName(),    // label
-                      GetThreadTaskRunner(),   // platform
-                      CreateNewThread("gpu"),  // gpu
-                      CreateNewThread("ui"),   // ui
-                      CreateNewThread("io")    // io
+  TaskRunners runners(GetCurrentTestName(),         // label
+                      CreateNewThread("platform"),  // platform
+                      CreateNewThread("gpu"),       // gpu
+                      CreateNewThread("ui"),        // ui
+                      CreateNewThread("io")         // io
   );
 
   fml::AutoResetWaitableEvent latch;
@@ -244,11 +246,11 @@ TEST_F(ImageDecoderFixtureTest, ExifDataIsRespectedOnDecode) {
 
 TEST_F(ImageDecoderFixtureTest, CanDecodeWithoutAGPUContext) {
   auto loop = fml::ConcurrentMessageLoop::Create();
-  TaskRunners runners(GetCurrentTestName(),    // label
-                      GetThreadTaskRunner(),   // platform
-                      CreateNewThread("gpu"),  // gpu
-                      CreateNewThread("ui"),   // ui
-                      CreateNewThread("io")    // io
+  TaskRunners runners(GetCurrentTestName(),         // label
+                      CreateNewThread("platform"),  // platform
+                      CreateNewThread("gpu"),       // gpu
+                      CreateNewThread("ui"),        // ui
+                      CreateNewThread("io")         // io
   );
 
   fml::AutoResetWaitableEvent latch;
@@ -295,11 +297,11 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
   ASSERT_NE(image_dimensions.width(), image_dimensions.height());
 
   auto loop = fml::ConcurrentMessageLoop::Create();
-  TaskRunners runners(GetCurrentTestName(),    // label
-                      GetThreadTaskRunner(),   // platform
-                      CreateNewThread("gpu"),  // gpu
-                      CreateNewThread("ui"),   // ui
-                      CreateNewThread("io")    // io
+  TaskRunners runners(GetCurrentTestName(),         // label
+                      CreateNewThread("platform"),  // platform
+                      CreateNewThread("gpu"),       // gpu
+                      CreateNewThread("ui"),        // ui
+                      CreateNewThread("io")         // io
   );
 
   fml::AutoResetWaitableEvent latch;
@@ -380,11 +382,11 @@ TEST_F(ImageDecoderFixtureTest, CanResizeWithoutDecode) {
   ASSERT_NE(image_dimensions.width(), image_dimensions.height());
 
   auto loop = fml::ConcurrentMessageLoop::Create();
-  TaskRunners runners(GetCurrentTestName(),    // label
-                      GetThreadTaskRunner(),   // platform
-                      CreateNewThread("gpu"),  // gpu
-                      CreateNewThread("ui"),   // ui
-                      CreateNewThread("io")    // io
+  TaskRunners runners(GetCurrentTestName(),         // label
+                      CreateNewThread("platform"),  // platform
+                      CreateNewThread("gpu"),       // gpu
+                      CreateNewThread("ui"),        // ui
+                      CreateNewThread("io")         // io
   );
 
   fml::AutoResetWaitableEvent latch;
