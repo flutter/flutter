@@ -263,6 +263,7 @@ class Image extends StatefulWidget {
   const Image({
     Key key,
     @required this.image,
+    this.certificate,
     this.frameBuilder,
     this.loadingBuilder,
     this.semanticLabel,
@@ -307,6 +308,7 @@ class Image extends StatefulWidget {
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.network(
     String src, {
+    this.certificate,
     Key key,
     double scale = 1.0,
     this.frameBuilder,
@@ -325,11 +327,13 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
     Map<String, String> headers,
-  }) : image = NetworkImage(src, scale: scale, headers: headers),
+  }) : image = NetworkImage(src, scale: scale, headers: headers, certificate: certificate),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
        super(key: key);
+
+  final String certificate;
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
   ///
@@ -369,6 +373,7 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
   }) : image = FileImage(file, scale: scale),
        loadingBuilder = null,
+       certificate = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(filterQuality != null),
@@ -524,6 +529,7 @@ class Image extends StatefulWidget {
          ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
          : AssetImage(name, bundle: bundle, package: package),
        loadingBuilder = null,
+       certificate = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -568,6 +574,7 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
   }) : image = MemoryImage(bytes, scale: scale),
        loadingBuilder = null,
+       certificate = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),

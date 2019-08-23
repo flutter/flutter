@@ -482,7 +482,7 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments [url] and [scale] must not be null.
-  const factory NetworkImage(String url, { double scale, Map<String, String> headers }) = network_image.NetworkImage;
+  const factory NetworkImage(String url, { double scale, Map<String, String> headers, String certificate }) = network_image.NetworkImage;
 
   /// The URL from which the image will be fetched.
   String get url;
@@ -494,6 +494,9 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   ///
   /// When running flutter on the web, headers are not used.
   Map<String, String> get headers;
+
+  /// If specified, this is the certificate that will be used for https request.
+  String get certificate;
 
   @override
   ImageStreamCompleter load(NetworkImage key);
