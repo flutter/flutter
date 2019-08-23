@@ -1051,7 +1051,7 @@ void main() {
   });
 
   testGesture('On multiple pointers, canceled pointers (due to up) do not '
-    'prevent layer pointers getting accepted', (GestureTester tester) {
+    'prevent later pointers getting accepted', (GestureTester tester) {
     // This test simulates the following scenario:
     // P1 down, P2 down, P1 Up, P2 moves away
     final List<String> logs = <String>[];
@@ -1105,7 +1105,7 @@ void main() {
   });
 
   testGesture('On multiple pointers, canceled pointers (due to buttons) do not '
-    'prevent layer pointers getting accepted', (GestureTester tester) {
+    'prevent later pointers getting accepted', (GestureTester tester) {
     // This test simulates the following scenario:
     // P1 down, P2 down, P1 change buttons, P2 moves away
     final List<String> logs = <String>[];
