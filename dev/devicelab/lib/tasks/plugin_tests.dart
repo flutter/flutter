@@ -48,7 +48,8 @@ class PluginTest {
         if (buildTarget == 'ios')
           await prepareProvisioningCertificates(app.rootPath);
         section('Add plugins');
-        await app.addPlugin('plugintest', pluginPath: '../plugintest');
+        await app.addPlugin('plugintest',
+            pluginPath: path.join('..', 'plugintest'));
         await app.addPlugin('path_provider');
         section('Build app');
         await app.build(buildTarget);
@@ -121,11 +122,11 @@ class _FlutterProject {
     if (Platform.isWindows) {
       // A running Gradle daemon might prevent us from deleting the project
       // folder on Windows.
-      await exec(
-        path.absolute(path.join(rootPath, 'android', 'gradlew.bat')),
-        <String>['--stop'],
-        canFail: true,
-      );
+      String wrapperPath =
+          path.absolute(path.join(rootPath, 'android', 'gradlew.bat'));
+      if (await File(wrapperPath).exists()) {
+        await exec(wrapperPath, <String>['--stop'], canFail: true);
+      }
       // TODO(ianh): Investigating if flakiness is timing dependent.
       await Future<void>.delayed(const Duration(seconds: 10));
     }
