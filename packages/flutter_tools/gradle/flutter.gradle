@@ -32,12 +32,6 @@ buildscript {
     }
 }
 
-repositories {
-    maven {
-        url "http://download.flutter.io"
-    }
-}
-
 android {
     compileOptions {
         sourceCompatibility 1.8
@@ -48,6 +42,8 @@ android {
 apply plugin: FlutterPlugin
 
 class FlutterPlugin implements Plugin<Project> {
+    private static final String MAVEN_REPO      = "http://download.flutter.io";
+
     // The platforms that can be passed to the `--Ptarget-platform` flag.
     private static final String PLATFORM_ARM32  = "android-arm";
     private static final String PLATFORM_ARM64  = "android-arm64";
@@ -103,6 +99,12 @@ class FlutterPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.extensions.create("flutter", FlutterExtension)
         project.afterEvaluate this.&addFlutterTasks
+
+        project.repositories {
+            maven {
+                url MAVEN_REPO
+            }
+        }
 
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
         // Configuring split per ABI allows to generate separate APKs for each abi.
@@ -177,8 +179,7 @@ class FlutterPlugin implements Plugin<Project> {
                 })
             }
         } else {
-            String engineVersion = Paths.get(flutterRoot.absolutePath,
-                    "bin", "internal", "engine.version").toFile().text.trim()
+            String engineVersion = getEngineVersion()
             project.android.buildTypes.each { buildType ->
                 // Add the embedding dependency.
                 addApiDependencies(project, buildType.name,
@@ -186,9 +187,9 @@ class FlutterPlugin implements Plugin<Project> {
 
                 List<String> targetPlatforms = getTargetPlatforms(project).collect()
                 // Debug mode includes x86 and x64, which are commonly used in emulators.
-                if (buildModeFor(buildType) == 'debug') {
-                    targetPlatforms.add('android-x86')
-                    targetPlatforms.add('android-x64')
+                if (buildModeFor(buildType) == "debug") {
+                    targetPlatforms.add("android-x86")
+                    targetPlatforms.add("android-x64")
                 }
                 targetPlatforms.each { targetPlatform ->
                     String arch = PLATFORM_ARCH_MAP[targetPlatform].replace("-", "_")
@@ -198,6 +199,11 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
+    }
+    
+    private String getEngineVersion() {
+        return Paths.get(flutterRoot.absolutePath,
+                "bin", "internal", "engine.version").toFile().text.trim()
     }
 
     /**
@@ -382,7 +388,7 @@ class FlutterPlugin implements Plugin<Project> {
         return PLATFORM_ARM32;
     }
 
-    private void addFlutterJarCompileOnlyDependency(Project project, String variantName, FileCollection files) {
+    private void addFlutterJarCompileOnlyDependency(Project project, String variantName, Object dependency) {
         if (project.state.failure) {
             return
         }
@@ -392,7 +398,7 @@ class FlutterPlugin implements Plugin<Project> {
         } else {
             configuration = "${variantName}Provided";
         }
-        project.dependencies.add(configuration, files)
+        project.dependencies.add(configuration, dependency)
     }
 
     private static void addApiDependencies(Project project, String variantName, Object dependency, Closure config = null) {
@@ -432,6 +438,7 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private void addFlutterTasks(Project project) {
+
         if (project.state.failure) {
             return
         }
@@ -591,6 +598,7 @@ class FlutterPlugin implements Plugin<Project> {
                 buildPlugins(project, buildTypes)
             }
         } else {
+            String engineVersion = getEngineVersion()
             getPluginList(project).each { name, _ ->
                 def pluginProject = project.rootProject.findProject(":$name")
                 if (pluginProject != null) {
@@ -601,19 +609,27 @@ class FlutterPlugin implements Plugin<Project> {
                             compile pluginProject
                         }
                     }
+                    pluginProject.repositories {
+                        maven {
+                            url MAVEN_REPO
+                        }
+                    }
                     pluginProject.afterEvaluate {
                         pluginProject.android.buildTypes {
                             profile {
                                 initWith debug
                             }
                         }
-                        pluginProject.android.buildTypes.each {
-                            def buildMode = buildModeFor(it)
-                            addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))
+                        // Add the embedding as a compile only dependency to the plugin.
+                        pluginProject.android.buildTypes.each { buildType ->
+                            def buildMode = buildModeFor(buildType)
+                            addFlutterJarCompileOnlyDependency(pluginProject, buildType.name,
+                                    "io.flutter:flutter_embedding_${buildType.name}:1.0.0-$engineVersion")
                         }
                         pluginProject.android.buildTypes.whenObjectAdded {
                             def buildMode = buildModeFor(it)
-                            addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))
+                            addFlutterJarCompileOnlyDependency(pluginProject, buildType.name,
+                                    "io.flutter:flutter_embedding_${buildType.name}:1.0.0-$engineVersion")
                         }
                     }
                 } else {
