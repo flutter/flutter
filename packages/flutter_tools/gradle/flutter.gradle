@@ -28,7 +28,13 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath "com.android.tools.build:gradle:3.2.1"
+    }
+}
+
+repositories {
+    maven {
+        url "http://download.flutter.io"
     }
 }
 
@@ -118,10 +124,6 @@ class FlutterPlugin implements Plugin<Project> {
         getTargetPlatforms(project).each { targetArch ->
             String abiValue = PLATFORM_ARCH_MAP[targetArch]
             project.android {
-                packagingOptions {
-                    // Prevent the ELF library from getting corrupted.
-                    doNotStrip "*/${abiValue}/libapp.so"
-                }
                 if (splitPerAbi(project)) {
                     splits {
                         abi {
@@ -175,37 +177,25 @@ class FlutterPlugin implements Plugin<Project> {
                 })
             }
         } else {
-            String basePlatformArch = getBasePlatform(project)
-            // This is meant to include the compiled classes only, however it will include `libflutter.so` as well.
-            Path baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
-            File debugJar = baseEnginePath.resolve("${basePlatformArch}").resolve("flutter.jar").toFile()
-            baseJar["debug"] = debugJar
-            if (!debugJar.isFile()) {
-                project.exec {
-                    executable flutterExecutable.absolutePath
-                    args "--suppress-analytics"
-                    args "precache"
-                }
-                if (!debugJar.isFile()) {
-                    throw new GradleException("Unable to find flutter.jar in SDK: ${debugJar}")
-                }
-            }
-            baseJar["profile"] = baseEnginePath.resolve("${basePlatformArch}-profile").resolve("flutter.jar").toFile()
-            baseJar["release"] = baseEnginePath.resolve("${basePlatformArch}-release").resolve("flutter.jar").toFile()
+            String engineVersion = Paths.get(flutterRoot.absolutePath,
+                    "bin", "internal", "engine.version").toFile().text.trim()
+            project.android.buildTypes.each { buildType ->
+                // Add the embedding dependency.
+                addApiDependencies(project, buildType.name,
+                        "io.flutter:flutter_embedding_${buildType.name}:1.0.0-$engineVersion")
 
-            // Add flutter.jar dependencies to all <buildType>Api configurations, including custom ones
-            // added after applying the Flutter plugin.
-            project.android.buildTypes.each {
-                def buildMode = buildModeFor(it)
-                addApiDependencies(project, it.name, project.files {
-                    baseJar[buildMode]
-                })
-            }
-            project.android.buildTypes.whenObjectAdded {
-                def buildMode = buildModeFor(it)
-                addApiDependencies(project, it.name, project.files {
-                    baseJar[buildMode]
-                })
+                List<String> targetPlatforms = getTargetPlatforms(project).collect()
+                // Debug mode includes x86 and x64, which are commonly used in emulators.
+                if (buildModeFor(buildType) == 'debug') {
+                    targetPlatforms.add('android-x86')
+                    targetPlatforms.add('android-x64')
+                }
+                targetPlatforms.each { targetPlatform ->
+                    String arch = PLATFORM_ARCH_MAP[targetPlatform].replace("-", "_")
+                    // Add the `libflutter.so` dependency.
+                    addApiDependencies(project, buildType.name,
+                            "io.flutter:${arch}_${buildType.name}:1.0.0-$engineVersion")
+                }
             }
         }
     }
@@ -492,7 +482,6 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('extra-gen-snapshot-options')) {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
-
         def targetPlatforms = getTargetPlatforms(project)
         def addFlutterDeps = { variant ->
             if (splitPerAbi(project)) {
@@ -509,25 +498,13 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
 
-            String flutterBuildMode = buildModeFor(variant.buildType)
-            if (flutterBuildMode == 'debug' && project.tasks.findByName("${FLUTTER_BUILD_PREFIX}X86Jar")) {
-                Task task = project.tasks.findByName("compile${variant.name.capitalize()}JavaWithJavac")
-                if (task) {
-                    task.dependsOn project.flutterBuildX86Jar
-                }
-                task = project.tasks.findByName("compile${variant.name.capitalize()}Kotlin")
-                if (task) {
-                    task.dependsOn project.flutterBuildX86Jar
-                }
-            }
-
             def compileTasks = targetPlatforms.collect { targetArch ->
                 String abiValue = PLATFORM_ARCH_MAP[targetArch]
                 String taskName = toCammelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name, targetArch.replace('android-', '')])
-                FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
+                project.tasks.create(name: taskName, type: FlutterTask) {
                     flutterRoot this.flutterRoot
                     flutterExecutable this.flutterExecutable
-                    buildMode flutterBuildMode
+                    buildMode buildModeFor(variant.buildType)
                     localEngine this.localEngine
                     localEngineSrcPath this.localEngineSrcPath
                     abi abiValue
@@ -547,35 +524,10 @@ class FlutterPlugin implements Plugin<Project> {
                     extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 }
             }
-
             def libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
-            def libFlutterPlatforms = targetPlatforms.collect()
-            // x86/x86_64 native library used for debugging only, for now.
-            if (flutterBuildMode == 'debug') {
-                libFlutterPlatforms.add('android-x86')
-                libFlutterPlatforms.add('android-x64')
-            }
             Task packFlutterSnapshotsAndLibsTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name
-                libFlutterPlatforms.each { targetArch ->
-                    // This check prevents including `libflutter.so` twice, since it's included in the base platform jar.
-                    // Unfortunately, the `pickFirst` setting in `packagingOptions` does not work when the project `:flutter`
-                    // is included as an implementation dependency, which causes duplicated `libflutter.so`.
-                    if (getBasePlatform(project) == targetArch) {
-                        return
-                    }
-                    // Don't include `libflutter.so` for other architectures when a local engine is specified.
-                    if (useLocalEngine(project)) {
-                        return
-                    }
-                    def engineArtifactSubdir = getEngineArtifactDirName(variant.buildType, targetArch);
-                    // Include `libflutter.so`.
-                    // TODO(blasten): The libs should be outside `flutter.jar` when the artifacts are downloaded.
-                    from(project.zipTree("${flutterRoot}/bin/cache/artifacts/engine/${engineArtifactSubdir}/flutter.jar")) {
-                        include 'lib/**'
-                    }
-                }
                 dependsOn compileTasks
                 // Add the ELF library.
                 compileTasks.each { compileTask ->
@@ -587,7 +539,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-            // Include the snapshots and libflutter.so in `lib/`.
+            // Include `libapp.so` in `lib/`.
             addApiDependencies(project, variant.name, project.files {
                 packFlutterSnapshotsAndLibsTask
             })
