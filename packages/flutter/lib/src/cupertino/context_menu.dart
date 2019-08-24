@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -309,7 +310,6 @@ class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin 
   }
 }
 
-// The open context menu.
 // TODO(justinmc): In native, dragging on the menu or the child animates and
 // eventually dismisses.
 /// The open ContextMenu modal.
@@ -488,55 +488,185 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
 
     // When the animation is done, just render everything in a static layout in
     // the final position.
+    return _ContextMenuRouteStatic(
+      actions: _actions,
+      child: _builder(context),
+      childGlobalKey: _childGlobalKey,
+      onTap: _onTap,
+      sheetGlobalKey: _sheetGlobalKey,
+    );
+  }
+}
+
+class _ContextMenuRouteStatic extends StatefulWidget {
+  const _ContextMenuRouteStatic({
+    Key key,
+    this.actions,
+    this.child,
+    this.childGlobalKey,
+    this.onTap,
+    this.sheetGlobalKey,
+  }) : super(key: key);
+
+  final List<ContextMenuSheetAction> actions;
+  final Widget child;
+  final GlobalKey childGlobalKey;
+  final VoidCallback onTap;
+  final GlobalKey sheetGlobalKey;
+
+  @override
+  _ContextMenuRouteStaticState createState() => _ContextMenuRouteStaticState();
+}
+
+class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with TickerProviderStateMixin {
+  static const double _kMinScale = 0.8;
+  // Distance where a drag should be considered a dismissal, in fraction of the
+  // screen size.
+  static const double _kDismissThreshold = 0.2;
+
+  AnimationController _moveController;
+  Animation<Offset> _moveAnimation;
+  double _dragDistance = 0.0;
+
+  Offset get _translation {
+    if (_dragDistance == null) {
+      return Offset.zero;
+    }
+    return Offset(
+      0.0,
+      math.max(0.0, _dragDistance),
+    );
+  }
+
+  // TODO(justinmc): Use this to scale the child (not menu too).
+  double _getScale(Orientation orientation, double maxDragDistance) {
+    if (orientation != Orientation.portrait || _dragDistance <= 0) {
+      return 1.0;
+    }
+
+    return _dragDistance * _kMinScale / maxDragDistance;
+  }
+
+  void _onVerticalDragStart(DragStartDetails details) {
+    _moveController.value = 1.0;
+    _setDragDistance(0.0);
+  }
+
+  void _onVerticalDragUpdate(DragUpdateDetails details) {
+    _setDragDistance(_dragDistance + details.delta.dy);
+  }
+
+  void _onVerticalDragEnd(DragEndDetails details) {
+    // TODO(justinmc): Fling.
+    // Dismiss if the drag is enough.
+    final double dismissDragDistance = context.size.height * _kDismissThreshold;
+    if (_dragDistance >= dismissDragDistance) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    // Otherwise animate back home.
+    _moveController.reverse();
+  }
+
+  void _setDragDistance([double dragDistance]) {
+    setState(() {
+      _dragDistance = math.max(0.0, dragDistance);
+      _moveAnimation = Tween<Offset>(
+        begin: Offset.zero,
+        end: Offset(0.0, _dragDistance),
+      ).animate(
+        CurvedAnimation(
+          parent: _moveController,
+          curve: Curves.elasticIn,
+        ),
+      );
+    });
+  }
+
+  Widget _buildAnimation(BuildContext context, Widget child) {
+    return Transform.translate(
+      offset: _moveAnimation.value,
+      child: OrientationBuilder(
+        builder: (BuildContext context, Orientation orientation) {
+          final List<Widget> children =  <Widget>[
+            Expanded(
+              child: Align(
+                // TODO(justinmc): Is alignment right when landscape?
+                alignment: Alignment.bottomCenter,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: widget.onTap,
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    key: widget.childGlobalKey,
+                    child: widget.child,
+                  ),
+                ),
+              ),
+            ),
+            // Create space between items in both Row and Column.
+            Container(
+              width: 20,
+              height: 20,
+            ),
+            Expanded(
+              child: _ContextMenuSheet(
+                key: widget.sheetGlobalKey,
+                actions: widget.actions,
+              ),
+            ),
+          ];
+
+          return orientation == Orientation.portrait ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            )
+            : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            );
+        },
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _moveController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      value: 1.0,
+      vsync: this,
+    );
+    _setDragDistance(0.0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Align(
           alignment: Alignment.topLeft,
-          child: OrientationBuilder(
-            builder: (BuildContext context, Orientation orientation) {
-              final List<Widget> children =  <Widget>[
-                Expanded(
-                  child: Align(
-                    // TODO(justinmc): Is alignment right when landscape?
-                    alignment: Alignment.bottomCenter,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: _onTap,
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        key: _childGlobalKey,
-                        child: _builder(context),
-                      ),
-                    ),
-                  ),
-                ),
-                // Create space between items in both Row and Column.
-                Container(
-                  width: 20,
-                  height: 20,
-                ),
-                Expanded(
-                  child: _ContextMenuSheet(
-                    key: _sheetGlobalKey,
-                    actions: _actions,
-                  ),
-                ),
-              ];
-
-              return orientation == Orientation.portrait ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: children,
-                )
-                : Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: children,
-                );
-            },
+          child: GestureDetector(
+            onVerticalDragEnd: _onVerticalDragEnd,
+            onVerticalDragStart: _onVerticalDragStart,
+            onVerticalDragUpdate: _onVerticalDragUpdate,
+            child: AnimatedBuilder(
+              animation: _moveController,
+              builder: _buildAnimation,
+            ),
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _moveController.dispose();
+    super.dispose();
   }
 }
 
