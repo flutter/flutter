@@ -348,6 +348,13 @@ class Shell final : public PlatformView::Delegate,
   // here for easier conversions to Dart objects.
   std::vector<int64_t> unreported_timings_;
 
+  // A cache of `Engine::GetDisplayRefreshRate` (only callable in the UI thread)
+  // so we can access it from `Rasterizer` (in the GPU thread).
+  //
+  // The atomic is for extra thread safety as this is written in the UI thread
+  // and read from the GPU thread.
+  std::atomic<float> display_refresh_rate_ = 0.0f;
+
   // How many frames have been timed since last report.
   size_t UnreportedFramesCount() const;
 
@@ -450,6 +457,9 @@ class Shell final : public PlatformView::Delegate,
 
   // |Rasterizer::Delegate|
   void OnFrameRasterized(const FrameTiming&) override;
+
+  // |Rasterizer::Delegate|
+  fml::Milliseconds GetFrameBudget() override;
 
   // |ServiceProtocol::Handler|
   fml::RefPtr<fml::TaskRunner> GetServiceProtocolHandlerTaskRunner(
