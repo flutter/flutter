@@ -481,6 +481,9 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   PersistentCache::GetCacheForProcess()->SetIsDumpingSkp(
       settings_.dump_skp_on_shader_compilation);
 
+  // Shell::Setup is running on the UI thread so we can do the following.
+  display_refresh_rate_ = weak_engine_->GetDisplayRefreshRate();
+
   return true;
 }
 
@@ -1067,6 +1070,14 @@ void Shell::OnFrameRasterized(const FrameTiming& timing) {
           }
         },
         fml::TimeDelta::FromMilliseconds(kBatchTimeInMilliseconds));
+  }
+}
+
+fml::Milliseconds Shell::GetFrameBudget() {
+  if (display_refresh_rate_ > 0) {
+    return fml::RefreshRateToFrameBudget(display_refresh_rate_.load());
+  } else {
+    return fml::kDefaultFrameBudget;
   }
 }
 

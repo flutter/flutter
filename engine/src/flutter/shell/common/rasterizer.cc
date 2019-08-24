@@ -34,7 +34,8 @@ Rasterizer::Rasterizer(
 Rasterizer::Rasterizer(Delegate& delegate, TaskRunners task_runners)
     : Rasterizer(delegate,
                  std::move(task_runners),
-                 std::make_unique<flutter::CompositorContext>()) {}
+                 std::make_unique<flutter::CompositorContext>(
+                     delegate.GetFrameBudget())) {}
 
 Rasterizer::Rasterizer(
     Delegate& delegate,

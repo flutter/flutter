@@ -63,11 +63,17 @@ class Rasterizer final {
     ///                           the frame workload.
     ///
     virtual void OnFrameRasterized(const FrameTiming& frame_timing) = 0;
+
+    /// Time limit for a smooth frame. See `Engine::GetDisplayRefreshRate`.
+    virtual fml::Milliseconds GetFrameBudget() = 0;
   };
 
   // TODO(dnfield): remove once embedders have caught up.
   class DummyDelegate : public Delegate {
     void OnFrameRasterized(const FrameTiming&) override {}
+    fml::Milliseconds GetFrameBudget() override {
+      return fml::kDefaultFrameBudget;
+    }
   };
 
   //----------------------------------------------------------------------------

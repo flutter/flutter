@@ -8,10 +8,23 @@
 #include <stdint.h>
 #include <time.h>
 
+#include <chrono>
 #include <iosfwd>
 #include <limits>
 
 namespace fml {
+
+using namespace std::chrono_literals;
+
+using Milliseconds = std::chrono::duration<double, std::milli>;
+
+// Default to 60fps.
+constexpr Milliseconds kDefaultFrameBudget = Milliseconds(1s) / 60;
+
+template <typename T>
+Milliseconds RefreshRateToFrameBudget(T refresh_rate) {
+  return Milliseconds(1s) / refresh_rate;
+}
 
 // A TimeDelta represents the difference between two time points.
 class TimeDelta {
