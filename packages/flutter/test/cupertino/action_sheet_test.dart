@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -61,7 +62,59 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.widgetWithText(DefaultTextStyle, 'Ok'));
 
-    expect(widget.style.color, CupertinoColors.destructiveRed);
+    expect(widget.style.color, CupertinoSystemColors.fallbackValues.systemRed);
+  });
+
+  testWidgets('Action sheet dark mode', (WidgetTester tester) async {
+    final Widget action = CupertinoActionSheetAction(
+      child: const Text('action'),
+      onPressed: () {},
+    );
+
+    await tester.pumpWidget(
+        createAppWithButtonThatLaunchesActionSheet(
+          CupertinoTheme(
+            data: CupertinoThemeData(
+              brightness: Brightness.light,
+              primaryColor: CupertinoSystemColors.fallbackValues.systemBlue,
+            ),
+          child: CupertinoActionSheet(actions: <Widget>[action]),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    // Draw the overlay.
+    expect(find.byType(CupertinoActionSheet), paints..rect(color: const Color(0x66000000)));
+    expect(
+      tester.firstWidget<DefaultTextStyle>(find.widgetWithText(DefaultTextStyle, 'action')).style.color.value,
+      CupertinoSystemColors.fallbackValues.systemBlue.color.value,
+    );
+
+    await tester.pumpWidget(const Placeholder());
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoTheme(
+          data: CupertinoThemeData(
+            brightness: Brightness.dark,
+            primaryColor: CupertinoSystemColors.fallbackValues.systemBlue,
+          ),
+          child: CupertinoActionSheet(actions: <Widget>[action]),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    // Draw the overlay.
+    expect(find.byType(CupertinoActionSheet), paints..rect(color: const Color(0x99000000)));
+    expect(
+      tester.firstWidget<DefaultTextStyle>(find.widgetWithText(DefaultTextStyle, 'action')).style.color.value,
+      CupertinoSystemColors.fallbackValues.systemBlue.darkColor.value,
+    );
   });
 
   testWidgets('Action sheet default text style', (WidgetTester tester) async {
