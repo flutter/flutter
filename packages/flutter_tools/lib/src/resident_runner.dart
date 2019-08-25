@@ -620,7 +620,11 @@ abstract class ResidentRunner {
 
   bool get supportsRestart => false;
 
-  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason });
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {
+    final String mode = isRunningProfile ? 'profile' :
+        isRunningRelease ? 'release' : 'this';
+    throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
+  }
 
   Future<void> exit() async {
     _exited = true;
@@ -775,7 +779,7 @@ abstract class ResidentRunner {
     CompileExpression compileExpression,
   }) async {
     if (!debuggingOptions.debuggingEnabled)
-      throw Exception('The service protocol is not enabled.');
+      throw 'The service protocol is not enabled.';
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
@@ -791,9 +795,9 @@ abstract class ResidentRunner {
     }
     if (!viewFound) {
       if (flutterDevices.length == 1)
-        throw Exception('No Flutter view is available on ${flutterDevices.first.device.name}.');
-      throw Exception('No Flutter view is available on any device '
-            '(${flutterDevices.map<String>((FlutterDevice device) => device.device.name).join(', ')}).');
+        throw 'No Flutter view is available on ${flutterDevices.first.device.name}.';
+      throw 'No Flutter view is available on any device '
+            '(${flutterDevices.map<String>((FlutterDevice device) => device.device.name).join(', ')}).';
     }
 
     // Listen for service protocol connection to close.

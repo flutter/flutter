@@ -207,9 +207,4 @@ class ColdRunner extends ResidentRunner {
         await device.device.stopApp(device.package);
     }
   }
-
-  @override
-  Future<OperationResult> restart({bool fullRestart = false, bool pauseAfterRestart = false, String reason}) async {
-    return OperationResult(1, 'Restart not supported.');
-  }
 }
