@@ -23,7 +23,6 @@ BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// All currently implemented targets.
 const List<Target> _kDefaultTargets = <Target>[
-  UnpackMacOS(),
   UnpackLinux(),
   UnpackWindows(),
   CopyAssets(),
@@ -33,7 +32,9 @@ const List<Target> _kDefaultTargets = <Target>[
   AotAssemblyProfile(),
   AotAssemblyRelease(),
   DebugMacOSFramework(),
-  DebugBundleFlutterAssets(),
+  DebugMacOSBundleFlutterAssets(),
+  ProfileMacOSBundleFlutterAssets(),
+  ReleaseMacOSBundleFlutterAssets(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -71,7 +72,12 @@ class AssembleCommand extends FlutterCommand {
       throwToolExit('missing target name for flutter assemble.');
     }
     final String name = argResults.rest.first;
-    return _kDefaultTargets.firstWhere((Target target) => target.name == name);
+    final Target result = _kDefaultTargets
+        .firstWhere((Target target) => target.name == name, orElse: () => null);
+    if (result == null) {
+      throwToolExit('No target named "{target.name} defined."');
+    }
+    return result;
   }
 
   /// The environmental configuration for a build invocation.

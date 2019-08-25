@@ -134,7 +134,7 @@ import 'theme_data.dart';
 /// {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
-class SliderTheme extends InheritedWidget {
+class SliderTheme extends InheritedTheme {
   /// Applies the given theme [data] to [child].
   ///
   /// The [data] and [child] arguments must not be null.
@@ -187,6 +187,12 @@ class SliderTheme extends InheritedWidget {
   static SliderThemeData of(BuildContext context) {
     final SliderTheme inheritedTheme = context.inheritFromWidgetOfExactType(SliderTheme);
     return inheritedTheme != null ? inheritedTheme.data : Theme.of(context).sliderTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final SliderTheme ancestorTheme = context.ancestorWidgetOfExactType(SliderTheme);
+    return identical(this, ancestorTheme) ? child : SliderTheme(data: data, child: child);
   }
 
   @override
@@ -2928,4 +2934,3 @@ class RangeLabels {
     return '$runtimeType($start, $end)';
   }
 }
-

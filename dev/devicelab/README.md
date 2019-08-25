@@ -122,6 +122,9 @@ To run all tests defined in `manifest.yaml`, use option `-a` (`--all`):
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart -a
 ```
 
+This defaults to only running tests supported by your host device's platform
+(`--match-host-platform`) and exiting after the first failure (`--exit`).
+
 ## Running specific tests
 
 To run a test, use option `-t` (`--task`):

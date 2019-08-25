@@ -303,15 +303,15 @@ class FlutterCommandRunner extends CommandRunner<void> {
         ..writeln()
         ..writeln('# rest')
         ..writeln(topLevelResults.rest);
-      await manifest.writeAsString(buffer.toString(), flush: true);
+      manifest.writeAsStringSync(buffer.toString(), flush: true);
 
       // ZIP the recording up once the recording has been serialized.
-      addShutdownHook(() async {
+      addShutdownHook(() {
         final File zipFile = getUniqueFile(fs.currentDirectory, 'bugreport', 'zip');
         os.zip(tempDir, zipFile);
         printStatus(userMessages.runnerBugReportFinished(zipFile.basename));
       }, ShutdownStage.POST_PROCESS_RECORDING);
-      addShutdownHook(() => tempDir.delete(recursive: true), ShutdownStage.CLEANUP);
+      addShutdownHook(() => tempDir.deleteSync(recursive: true), ShutdownStage.CLEANUP);
     }
 
     assert(recordTo == null || replayFrom == null);
@@ -323,7 +323,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       contextOverrides.addAll(<Type, dynamic>{
         ProcessManager: getRecordingProcessManager(recordTo),
         FileSystem: getRecordingFileSystem(recordTo),
-        Platform: await getRecordingPlatform(recordTo),
+        Platform: getRecordingPlatform(recordTo),
       });
       VMService.enableRecordingConnection(recordTo);
     }
@@ -335,7 +335,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       contextOverrides.addAll(<Type, dynamic>{
         ProcessManager: await getReplayProcessManager(replayFrom),
         FileSystem: getReplayFileSystem(replayFrom),
-        Platform: await getReplayPlatform(replayFrom),
+        Platform: getReplayPlatform(replayFrom),
       });
       VMService.enableReplayConnection(replayFrom);
     }

@@ -747,7 +747,7 @@ abstract class ResidentRunner {
           }
         }
       }
-      final int sizeKB = (await outputFile.length()) ~/ 1024;
+      final int sizeKB = outputFile.lengthSync() ~/ 1024;
       status.stop();
       printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
     } catch (error) {
