@@ -347,7 +347,7 @@ void main() {
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: false);
+      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
       expect(
         testLogger.statusText,

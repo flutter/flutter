@@ -58,7 +58,6 @@ class HotRunner extends ResidentRunner {
     List<FlutterDevice> devices, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUi = true,
     this.benchmarkMode = false,
     this.applicationBinary,
     this.hostIsIde = false,
@@ -70,7 +69,6 @@ class HotRunner extends ResidentRunner {
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
-             usesTerminalUi: usesTerminalUi,
              projectRootPath: projectRootPath,
              packagesFilePath: packagesFilePath,
              stayResident: stayResident,

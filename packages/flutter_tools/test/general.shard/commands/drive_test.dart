@@ -338,7 +338,6 @@ void main() {
             debuggingOptions: anyNamed('debuggingOptions'),
             platformArgs: anyNamed('platformArgs'),
             prebuiltApplication: anyNamed('prebuiltApplication'),
-            usesTerminalUi: false,
         )).thenAnswer((_) => Future<LaunchResult>.value(mockLaunchResult));
         when(mockDevice.isAppInstalled(any)).thenAnswer((_) => Future<bool>.value(false));
 
@@ -380,7 +379,6 @@ void main() {
                 debuggingOptions: anyNamed('debuggingOptions'),
                 platformArgs: anyNamed('platformArgs'),
                 prebuiltApplication: false,
-                usesTerminalUi: false,
         ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -407,7 +405,6 @@ void main() {
                 debuggingOptions: anyNamed('debuggingOptions'),
                 platformArgs: anyNamed('platformArgs'),
                 prebuiltApplication: false,
-                usesTerminalUi: false,
         ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -434,7 +431,6 @@ void main() {
                 debuggingOptions: anyNamed('debuggingOptions'),
                 platformArgs: anyNamed('platformArgs'),
                 prebuiltApplication: true,
-                usesTerminalUi: false,
         ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,

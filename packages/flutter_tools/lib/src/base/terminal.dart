@@ -110,6 +110,9 @@ class AnsiTerminal {
   bool get supportsColor => platform.stdoutSupportsAnsi ?? false;
   final RegExp _boldControls = RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
 
+  /// Whether we are interacting with the flutter tool via the terminal.
+  bool usesTerminalUi = false;
+
   String bolden(String message) {
     assert(message != null);
     if (!supportsColor || message.isEmpty)

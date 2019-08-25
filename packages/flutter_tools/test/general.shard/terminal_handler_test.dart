@@ -423,4 +423,9 @@ class TestRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
   }) async => null;
+
+  @override
+  Future<OperationResult> restart({bool fullRestart = false, bool pauseAfterRestart = false, String reason}) {
+    return null;
+  }
 }

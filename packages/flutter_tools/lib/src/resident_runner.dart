@@ -382,7 +382,6 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      usesTerminalUi: hotRunner.usesTerminalUi,
       ipv6: hotRunner.ipv6,
     );
 
@@ -443,7 +442,6 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      usesTerminalUi: coldRunner.usesTerminalUi,
       ipv6: coldRunner.ipv6,
     );
 
@@ -536,7 +534,6 @@ abstract class ResidentRunner {
     String projectRootPath,
     String packagesFilePath,
     this.ipv6,
-    this.usesTerminalUi = true,
     this.stayResident = true,
     this.hotMode = true,
     this.dillOutputPath,
@@ -563,7 +560,6 @@ abstract class ResidentRunner {
   final List<FlutterDevice> flutterDevices;
   final String target;
   final DebuggingOptions debuggingOptions;
-  final bool usesTerminalUi;
   final bool stayResident;
   final bool ipv6;
   final Completer<int> _finished = Completer<int>();
@@ -624,11 +620,7 @@ abstract class ResidentRunner {
 
   bool get supportsRestart => false;
 
-  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {
-    final String mode = isRunningProfile ? 'profile' :
-        isRunningRelease ? 'release' : 'this';
-    throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
-  }
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason });
 
   Future<void> exit() async {
     _exited = true;
@@ -783,7 +775,7 @@ abstract class ResidentRunner {
     CompileExpression compileExpression,
   }) async {
     if (!debuggingOptions.debuggingEnabled)
-      throw 'The service protocol is not enabled.';
+      throw Exception('The service protocol is not enabled.');
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
@@ -799,9 +791,9 @@ abstract class ResidentRunner {
     }
     if (!viewFound) {
       if (flutterDevices.length == 1)
-        throw 'No Flutter view is available on ${flutterDevices.first.device.name}.';
-      throw 'No Flutter view is available on any device '
-            '(${flutterDevices.map<String>((FlutterDevice device) => device.device.name).join(', ')}).';
+        throw Exception('No Flutter view is available on ${flutterDevices.first.device.name}.');
+      throw Exception('No Flutter view is available on any device '
+            '(${flutterDevices.map<String>((FlutterDevice device) => device.device.name).join(', ')}).');
     }
 
     // Listen for service protocol connection to close.
