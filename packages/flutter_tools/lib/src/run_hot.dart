@@ -26,6 +26,10 @@ import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
+ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? const ProjectFileInvalidator();
+
+HotRunnerConfig get hotRunnerConfig => context.get<HotRunnerConfig>();
+
 class HotRunnerConfig {
   /// Should the hot runner assume that the minimal Dart dependencies do not change?
   bool stableDartDependencies = false;
@@ -40,8 +44,6 @@ class HotRunnerConfig {
     return;
   }
 }
-
-HotRunnerConfig get hotRunnerConfig => context.get<HotRunnerConfig>();
 
 const bool kHotReloadDefault = true;
 
@@ -82,6 +84,8 @@ class HotRunner extends ResidentRunner {
   final File applicationBinary;
   final bool hostIsIde;
   bool _didAttach = false;
+  // Whether we built the app before running it.
+  bool _didBuild = false;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
   // The initial launch is from a snapshot.
@@ -240,6 +244,7 @@ class HotRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     String route,
   }) async {
+    _didBuild = true;
     if (!fs.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
       if (target == null)
@@ -292,7 +297,7 @@ class HotRunner extends ResidentRunner {
 
     // Picking up first device's compiler as a source of truth - compilers
     // for all devices should be in sync.
-    final List<Uri> invalidatedFiles = ProjectFileInvalidator.findInvalidated(
+    final List<Uri> invalidatedFiles = await projectFileInvalidator.findInvalidated(
       lastCompiled: flutterDevices[0].devFS.lastCompiled,
       urisToMonitor: flutterDevices[0].devFS.sources,
       packagesPath: packagesFilePath,
@@ -312,6 +317,13 @@ class HotRunner extends ResidentRunner {
         invalidatedFiles: invalidatedFiles,
         dillOutputPath: dillOutputPath,
       ));
+    }
+    // If the app was not built by the runner, null the build time to force all
+    // sources into the next compile. This handles the case where the user
+    // attached with changes from the last build.
+    if (!_didBuild) {
+      flutterDevices[0].devFS.lastCompiled = null;
+      _didBuild = true;
     }
     return results;
   }
@@ -1022,10 +1034,12 @@ class HotRunner extends ResidentRunner {
 }
 
 class ProjectFileInvalidator {
+  const ProjectFileInvalidator();
+
   static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
-  static List<Uri> findInvalidated({
+  FutureOr<List<Uri>> findInvalidated({
     @required DateTime lastCompiled,
     @required List<Uri> urisToMonitor,
     @required String packagesPath,
@@ -1045,7 +1059,7 @@ class ProjectFileInvalidator {
       if (updatedAt == null) {
         continue;
       }
-      if (updatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
+      if (lastCompiled == null || updatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
         invalidatedFiles.add(uri);
       }
     }
