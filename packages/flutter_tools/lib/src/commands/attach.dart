@@ -11,6 +11,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
@@ -269,6 +270,7 @@ class AttachCommand extends FlutterCommand {
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
       final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
+      terminal.usesTerminalUi = daemon == null;
       final ResidentRunner runner = useHot ?
           hotRunnerFactory.build(
             flutterDevices,

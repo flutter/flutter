@@ -111,6 +111,8 @@ class AnsiTerminal {
   final RegExp _boldControls = RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
 
   /// Whether we are interacting with the flutter tool via the terminal.
+  ///
+  /// If not set, defaults to false.
   bool usesTerminalUi = false;
 
   String bolden(String message) {
