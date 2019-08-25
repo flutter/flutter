@@ -1,4 +1,4 @@
-Signature: 7349e05037d1159bf61029cfd72b63b7
+Signature: d69f0da56ddba88850cba1b28d8c1314
 
 UNUSED LICENSES:
 
@@ -3882,7 +3882,6 @@ FILE: ../../../third_party/skia/docs/examples/IRect_bottom.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_contains.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_containsNoEmptyCheck.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_containsNoEmptyCheck_2.cpp
-FILE: ../../../third_party/skia/docs/examples/IRect_contains_2.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_contains_3.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_contains_4.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_equal_operator.cpp
@@ -3892,10 +3891,8 @@ FILE: ../../../third_party/skia/docs/examples/IRect_inset.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_intersect.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_intersectNoEmptyCheck.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_intersect_2.cpp
-FILE: ../../../third_party/skia/docs/examples/IRect_intersect_3.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_isEmpty.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_isEmpty64.cpp
-FILE: ../../../third_party/skia/docs/examples/IRect_join.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_join_2.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_left.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_makeInset.cpp
@@ -3908,7 +3905,6 @@ FILE: ../../../third_party/skia/docs/examples/IRect_offsetTo.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_offset_2.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_outset.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_right.cpp
-FILE: ../../../third_party/skia/docs/examples/IRect_set.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_setEmpty.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_setLTRB.cpp
 FILE: ../../../third_party/skia/docs/examples/IRect_setXYWH.cpp
@@ -4514,8 +4510,6 @@ FILE: ../../../third_party/skia/docs/examples/Rect_intersects_3.cpp
 FILE: ../../../third_party/skia/docs/examples/Rect_isEmpty.cpp
 FILE: ../../../third_party/skia/docs/examples/Rect_isFinite.cpp
 FILE: ../../../third_party/skia/docs/examples/Rect_isSorted.cpp
-FILE: ../../../third_party/skia/docs/examples/Rect_iset.cpp
-FILE: ../../../third_party/skia/docs/examples/Rect_isetWH.cpp
 FILE: ../../../third_party/skia/docs/examples/Rect_join.cpp
 FILE: ../../../third_party/skia/docs/examples/Rect_joinNonEmptyArg.cpp
 FILE: ../../../third_party/skia/docs/examples/Rect_joinPossiblyEmptyRect.cpp
@@ -4545,8 +4539,6 @@ FILE: ../../../third_party/skia/docs/examples/Rect_setEmpty.cpp
 FILE: ../../../third_party/skia/docs/examples/Rect_setLTRB.cpp
 FILE: ../../../third_party/skia/docs/examples/Rect_setWH.cpp
 FILE: ../../../third_party/skia/docs/examples/Rect_setXYWH.cpp
-FILE: ../../../third_party/skia/docs/examples/Rect_set_2.cpp
-FILE: ../../../third_party/skia/docs/examples/Rect_set_3.cpp
 FILE: ../../../third_party/skia/docs/examples/Rect_set_4.cpp
 FILE: ../../../third_party/skia/docs/examples/Rect_sort.cpp
 FILE: ../../../third_party/skia/docs/examples/Rect_toQuad.cpp
@@ -4594,7 +4586,6 @@ FILE: ../../../third_party/skia/docs/examples/Region_op_4.cpp
 FILE: ../../../third_party/skia/docs/examples/Region_op_5.cpp
 FILE: ../../../third_party/skia/docs/examples/Region_op_6.cpp
 FILE: ../../../third_party/skia/docs/examples/Region_quickContains.cpp
-FILE: ../../../third_party/skia/docs/examples/Region_quickContains_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Region_quickReject.cpp
 FILE: ../../../third_party/skia/docs/examples/Region_quickReject_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Region_readFromMemory.cpp
@@ -4602,7 +4593,6 @@ FILE: ../../../third_party/skia/docs/examples/Region_set.cpp
 FILE: ../../../third_party/skia/docs/examples/Region_setEmpty.cpp
 FILE: ../../../third_party/skia/docs/examples/Region_setPath.cpp
 FILE: ../../../third_party/skia/docs/examples/Region_setRect.cpp
-FILE: ../../../third_party/skia/docs/examples/Region_setRect_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Region_setRects.cpp
 FILE: ../../../third_party/skia/docs/examples/Region_setRegion.cpp
 FILE: ../../../third_party/skia/docs/examples/Region_swap.cpp
