@@ -528,9 +528,14 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   // Returns the offset that should result from applying [event] to the current
   // position, taking min/max scroll extent into account.
   double _targetScrollOffsetForPointerScroll(PointerScrollEvent event) {
-    final double delta = widget.axis == Axis.horizontal
+    double delta = widget.axis == Axis.horizontal
         ? event.scrollDelta.dx
         : event.scrollDelta.dy;
+
+    if (widget.axisDirection == AxisDirection.up || widget.axisDirection == AxisDirection.left) {
+      delta *= -1;
+    }
+
     return math.min(math.max(position.pixels + delta, position.minScrollExtent),
         position.maxScrollExtent);
   }
