@@ -183,8 +183,9 @@ void main([List<String> args = const <String>[]]) {
     setUpAll(() async {
       driver = await FlutterDriver.connect();
 
+      // TODO(liyuqian): re-enable this once the driver test is no longer flaky.
       // Wait for the first frame to be rasterized.
-      await driver.waitUntilFirstFrameRasterized();
+      // await driver.waitUntilFirstFrameRasterized();
 
       if (args.contains('--with_semantics')) {
         print('Enabeling semantics...');
