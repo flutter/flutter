@@ -100,8 +100,10 @@ class TestDefaultBinaryMessenger extends DefaultBinaryMessenger {
     final Future<ByteData> resultFuture = super.send(channel, message);
     // Removes the future itself from the [_pendingMessages] list when it
     // completes.
-    resultFuture.whenComplete(() => _pendingMessages.remove(resultFuture));
-    _pendingMessages.add(resultFuture);
+    if (resultFuture != null) {
+      resultFuture.whenComplete(() => _pendingMessages.remove(resultFuture));
+      _pendingMessages.add(resultFuture);
+    }
     return resultFuture;
   }
 
