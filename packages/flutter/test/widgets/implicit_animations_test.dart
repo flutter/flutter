@@ -124,7 +124,7 @@ class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
 
   Widget getAnimatedWidget() {
     const Widget child = Placeholder();
-    final Duration duration = Duration(milliseconds: 10);
+    const Duration duration = Duration(milliseconds: 10);
 
     switch (widget.widgetType) {
       case ImplicitAnimatedWidgetType.AnimatedContainer:
@@ -176,8 +176,8 @@ class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
             duration: duration,
             onEnd: widget.callback,
             style: toggle
-                ? TextStyle(fontStyle: FontStyle.italic)
-                : TextStyle(fontStyle: FontStyle.normal));
+                ? const TextStyle(fontStyle: FontStyle.italic)
+                : const TextStyle(fontStyle: FontStyle.normal));
       case ImplicitAnimatedWidgetType.AnimatedPhysicalModel:
         return AnimatedPhysicalModel(
           child: child,
