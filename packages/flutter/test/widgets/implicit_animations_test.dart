@@ -15,6 +15,8 @@ enum ImplicitAnimatedWidgetType {
   AnimatedOpacity,
   AnimatedDefaultTextStyle,
   AnimatedPhysicalModel,
+  TweenAnimationBuilder,
+  AnimatedTheme,
 }
 
 class MockOnEndFunction implements Function {
@@ -187,6 +189,27 @@ class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
           elevation: 0,
           shadowColor: Colors.blue,
           shape: BoxShape.rectangle,
+        );
+      case ImplicitAnimatedWidgetType.TweenAnimationBuilder:
+        return TweenAnimationBuilder<double>(
+          child: child,
+          tween: Tween<double>(begin: 1, end: 2),
+          duration: duration,
+          onEnd: widget.callback,
+          builder: (BuildContext context, double size, Widget child) {
+            return Container(
+              child: child,
+              width: size,
+              height: size,
+            );
+          }
+        );
+      case ImplicitAnimatedWidgetType.AnimatedTheme:
+        return AnimatedTheme(
+          child: child,
+          data: toggle ? ThemeData.dark() : ThemeData.light(),
+          duration: duration,
+          onEnd: widget.callback,
         );
     }
     return null;

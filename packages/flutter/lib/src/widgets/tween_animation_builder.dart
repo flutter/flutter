@@ -29,8 +29,8 @@ import 'value_listenable_builder.dart';
 /// current animation value. The [builder] is called throughout the animation
 /// for every animation value until [Tween.end] is reached.
 ///
-/// A provided [onEnd] callback is called whenever an animation completes.
-/// Registering an [onEnd] callback my be useful to trigger an action (like
+/// A provided [ImplicitlyAnimatedWidget.onEnd] callback is called whenever an animation completes.
+/// Registering an [ImplicitlyAnimatedWidget.onEnd] callback my be useful to trigger an action (like
 /// another animation) at the end of the current animation.
 ///
 /// ## Performance optimizations
@@ -129,12 +129,12 @@ class TweenAnimationBuilder<T> extends ImplicitlyAnimatedWidget {
     @required Duration duration,
     Curve curve = Curves.linear,
     @required this.builder,
-    this.onEnd,
+    VoidCallback onEnd,
     this.child,
   }) : assert(tween != null),
        assert(curve != null),
        assert(builder != null),
-       super(key: key, duration: duration, curve: curve);
+       super(key: key, duration: duration, curve: curve, onEnd: onEnd);
 
   /// Defines the target value for the animation.
   ///
@@ -188,12 +188,6 @@ class TweenAnimationBuilder<T> extends ImplicitlyAnimatedWidget {
   /// performance significantly in some cases and is therefore a good practice.
   final Widget child;
 
-  /// Called every time an animation completes.
-  ///
-  /// This can be useful to trigger additional actions (e.g. another animation)
-  /// at the end of the current animation.
-  final VoidCallback onEnd;
-
   @override
   ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState() {
     return _TweenAnimationBuilderState<T>();
@@ -208,24 +202,8 @@ class _TweenAnimationBuilderState<T> extends AnimatedWidgetBaseState<TweenAnimat
     _currentTween = widget.tween;
     _currentTween.begin ??= _currentTween.end;
     super.initState();
-    // The statusListener is removed when the superclass disposes the controller.
-    controller.addStatusListener(_onAnimationStatusChanged);
     if (_currentTween.begin != _currentTween.end) {
       controller.forward();
-    }
-  }
-
-  void _onAnimationStatusChanged(AnimationStatus status) {
-    switch (status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        break;
-      case AnimationStatus.completed:
-        if (widget.onEnd != null) {
-          widget.onEnd();
-        }
-        break;
     }
   }
 

@@ -227,10 +227,11 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
     this.isMaterialAppTheme = false,
     Curve curve = Curves.linear,
     Duration duration = kThemeAnimationDuration,
+    VoidCallback onEnd,
     @required this.child,
   }) : assert(child != null),
        assert(data != null),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;

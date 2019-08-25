@@ -287,7 +287,10 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// The duration over which to animate the parameters of this container.
   final Duration duration;
 
-  /// The callback called at the end of the animation.
+  /// Called every time an animation completes.
+  ///
+  /// This can be useful to trigger additional actions (e.g. another animation)
+  /// at the end of the current animation.
   final VoidCallback onEnd;
 
   @override
