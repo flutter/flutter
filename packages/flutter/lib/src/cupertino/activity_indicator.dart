@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 
 const double _kDefaultIndicatorRadius = 10.0;
+// Extracted from the large activity indicators in https://developer.apple.com/design/resources/.
 final Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
   color: const Color(0x99606067),
   darkColor: const Color(0x99EBEBF5),
@@ -21,7 +22,7 @@ final Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/progress-indicators/#activity-indicators>
 class CupertinoActivityIndicator extends StatefulWidget {
   /// Creates an iOS-style activity indicator that spins clockwise.
-  CupertinoActivityIndicator({
+  const CupertinoActivityIndicator({
     Key key,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
@@ -29,7 +30,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
   }) : assert(animating != null),
        assert(radius != null),
        assert(radius > 0),
-       activeTickColor = activeTickColor ?? _kActiveTickColor,
+       _activeTickerColor = activeTickColor,
        super(key: key);
 
   /// Whether the activity indicator is running its animation.
@@ -44,9 +45,9 @@ class CupertinoActivityIndicator extends StatefulWidget {
 
   /// The color used to paint the most prominent tick (the tick with the highest opacity).
   ///
-  /// Defaults to a CupertinoDynamicColor extracted from the large indeterminate
-  /// spinners in https://developer.apple.com/design/resources/.
-  final Color activeTickColor;
+  /// Defaults to a [CupertinoDynamicColor] that matches the native `UIActivityIndicatorView`.
+  Color get activeTickColor => _activeTickerColor ?? _kActiveTickColor;
+  final Color _activeTickerColor;
 
   @override
   _CupertinoActivityIndicatorState createState() => _CupertinoActivityIndicatorState();
@@ -135,7 +136,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
 
     for (int i = 0; i < _kTickCount; ++ i) {
       final double t = (((i + activeTick) % _kTickCount) / _kHalfTickCount).clamp(0.0, 1.0);
-      paint.color = activeColor.withAlpha((t * activeColor.alpha).clamp(0, 255));
+      paint.color = activeColor.withAlpha((t * activeColor.alpha).clamp(0, 255).toInt());
       canvas.drawRRect(tickFundamentalRRect, paint);
       canvas.rotate(-_kTwoPI / _kTickCount);
     }
