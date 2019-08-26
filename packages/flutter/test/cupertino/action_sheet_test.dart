@@ -71,14 +71,22 @@ void main() {
       onPressed: () {},
     );
 
+    Brightness brightness = Brightness.light;
+    StateSetter stateSetter;
+
     await tester.pumpWidget(
-        createAppWithButtonThatLaunchesActionSheet(
-          CupertinoTheme(
-            data: CupertinoThemeData(
-              brightness: Brightness.light,
-              primaryColor: CupertinoSystemColors.fallbackValues.systemBlue,
-            ),
-          child: CupertinoActionSheet(actions: <Widget>[action]),
+      createAppWithButtonThatLaunchesActionSheet(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            stateSetter = setter;
+            return CupertinoTheme(
+              data: CupertinoThemeData(
+                brightness: brightness,
+                primaryColor: CupertinoSystemColors.fallbackValues.systemBlue,
+              ),
+              child: CupertinoActionSheet(actions: <Widget>[action]),
+            );
+          },
         ),
       ),
     );
@@ -86,30 +94,17 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    // Draw the overlay.
+    // Draw the overlay using the light variant.
     expect(find.byType(CupertinoActionSheet), paints..rect(color: const Color(0x66000000)));
     expect(
       tester.firstWidget<DefaultTextStyle>(find.widgetWithText(DefaultTextStyle, 'action')).style.color.value,
       CupertinoSystemColors.fallbackValues.systemBlue.color.value,
     );
 
-    await tester.pumpWidget(const Placeholder());
-    await tester.pumpWidget(
-      createAppWithButtonThatLaunchesActionSheet(
-        CupertinoTheme(
-          data: CupertinoThemeData(
-            brightness: Brightness.dark,
-            primaryColor: CupertinoSystemColors.fallbackValues.systemBlue,
-          ),
-          child: CupertinoActionSheet(actions: <Widget>[action]),
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('Go'));
+    stateSetter(() { brightness = Brightness.dark; });
     await tester.pump();
 
-    // Draw the overlay.
+    // Draw the overlay using the dark variant.
     expect(find.byType(CupertinoActionSheet), paints..rect(color: const Color(0x99000000)));
     expect(
       tester.firstWidget<DefaultTextStyle>(find.widgetWithText(DefaultTextStyle, 'action')).style.color.value,

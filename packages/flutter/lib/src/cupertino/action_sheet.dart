@@ -49,8 +49,9 @@ final Color _kAlertBlurOverlayColor = CupertinoDynamicColor.withBrightness(
 
 // Translucent, very light gray that is painted on top of the blurred backdrop
 // as the action sheet's background color.
-// These should be from System Materials which we don't have yet. They're eye-balled
-// from iOS 13 beta simulator.
+// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/39272. Use
+// System Materials once we have them.
+// Eye-balled from iOS 13 beta simulator.
 final Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
   color: const Color(0xC7F9F9F9),
   darkColor: const Color(0xC7252525),
@@ -1111,7 +1112,6 @@ class _RenderCupertinoAlertActions extends RenderBox
     }
 
     _buttonBackgroundPaint.color = newValue;
-    print(newValue);
     markNeedsPaint();
   }
 
@@ -1127,8 +1127,9 @@ class _RenderCupertinoAlertActions extends RenderBox
 
   Color get dividerColor => _dividerPaint.color;
   set dividerColor(Color value) {
-    if (value == _dividerPaint.color)
-    return;
+    if (value == _dividerPaint.color) {
+      return;
+    }
     _dividerPaint.color = value;
     markNeedsPaint();
   }
