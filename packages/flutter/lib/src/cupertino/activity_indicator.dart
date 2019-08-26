@@ -112,12 +112,12 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     @required this.activeColor,
     double radius,
   }) : tickFundamentalRRect = RRect.fromLTRBXY(
-           -radius,
-           1.0 * radius / _kDefaultIndicatorRadius,
-           -radius / 2.0,
-           -1.0 * radius / _kDefaultIndicatorRadius,
-           1.0,
-           1.0,
+         -radius,
+         1.0 * radius / _kDefaultIndicatorRadius,
+         -radius / 2.0,
+         -1.0 * radius / _kDefaultIndicatorRadius,
+         1.0,
+         1.0,
        ),
        super(repaint: position);
 
@@ -136,7 +136,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
 
     for (int i = 0; i < _kTickCount; ++ i) {
       final double t = (((i + activeTick) % _kTickCount) / _kHalfTickCount).clamp(0.0, 1.0);
-      paint.color = activeColor.withAlpha((t * activeColor.alpha).clamp(0, 255).toInt());
+      paint.color = activeColor.withOpacity((t * activeColor.opacity).clamp(0, 1));
       canvas.drawRRect(tickFundamentalRRect, paint);
       canvas.rotate(-_kTwoPI / _kTickCount);
     }

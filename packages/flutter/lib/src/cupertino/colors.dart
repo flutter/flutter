@@ -333,7 +333,7 @@ class CupertinoDynamicColor extends Color {
   /// If the given color is a [CupertinoDynamicColor], but the given [BuildContext]
   /// lacks the dependencies essential to the color resolution, an exception will
   /// be thrown, unless [nullOk] is set to true.
-  static Color resolve(Color resolvable, BuildContext context, { bool nullOk = false }) {
+  static Color resolve(Color resolvable, BuildContext context, { bool nullOk = true }) {
     assert(resolvable != null);
     assert(context != null);
     return (resolvable is CupertinoDynamicColor)
