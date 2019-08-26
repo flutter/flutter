@@ -140,7 +140,7 @@ class WebFs {
   }) async {
     // Start the build daemon and run an initial build.
     final BuildDaemonClient client = await buildDaemonCreator
-      .startBuildDaemon(fs.currentDirectory.path, release: buildInfo.isRelease);
+      .startBuildDaemon(fs.currentDirectory.path, release: buildInfo.isRelease, profile: buildInfo.isProfile);
     client.startBuild();
     // Only provide relevant build results
     final Stream<BuildResult> filteredBuildResults = client.buildResults
@@ -266,11 +266,12 @@ class BuildDaemonCreator {
   const BuildDaemonCreator();
 
   /// Start a build daemon and register the web targets.
-  Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {bool release = false}) async {
+  Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {bool release = false, bool profile = false }) async {
     try {
       final BuildDaemonClient client = await _connectClient(
         workingDirectory,
         release: release,
+        profile: profile,
       );
       _registerBuildTargets(client);
       return client;
@@ -297,7 +298,7 @@ class BuildDaemonCreator {
 
   Future<BuildDaemonClient> _connectClient(
     String workingDirectory,
-    { bool release }
+    { bool release, bool profile }
   ) {
     final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
     final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
@@ -316,6 +317,7 @@ class BuildDaemonCreator {
         '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
         '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
         '--define', 'flutter_tools:entrypoint=release=$release',
+        '--define', 'flutter_tools:entrypoint=profile=$profile',
         '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
       ],
       logHandler: (ServerLog serverLog) {

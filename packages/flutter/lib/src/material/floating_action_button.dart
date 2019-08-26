@@ -122,7 +122,7 @@ class _DefaultHeroTag {
 class FloatingActionButton extends StatelessWidget {
   /// Creates a circular floating action button.
   ///
-  /// The [mini] and [clipBehavior] arguments must be non-null. Additionally,
+  /// The [mini] and [clipBehavior] arguments must not be null. Additionally,
   /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
   /// must be non-negative.
   const FloatingActionButton({
@@ -154,6 +154,7 @@ class FloatingActionButton extends StatelessWidget {
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
        assert(mini != null),
+       assert(clipBehavior != null),
        assert(isExtended != null),
        assert(autofocus != null),
        _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
@@ -162,7 +163,7 @@ class FloatingActionButton extends StatelessWidget {
   /// Creates a wider [StadiumBorder]-shaped floating action button with
   /// an optional [icon] and a [label].
   ///
-  /// The [label], [autofocus], and [clipBehavior] arguments must non-null.
+  /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
   /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
   /// (if specified) must be non-negative.
   FloatingActionButton.extended({
@@ -194,6 +195,7 @@ class FloatingActionButton extends StatelessWidget {
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
        assert(isExtended != null),
+       assert(clipBehavior != null),
        assert(autofocus != null),
        _sizeConstraints = _kExtendedSizeConstraints,
        mini = false,
@@ -363,6 +365,8 @@ class FloatingActionButton extends StatelessWidget {
   final ShapeBorder shape;
 
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
   /// True if this is an "extended" floating action button.
@@ -463,7 +467,7 @@ class FloatingActionButton extends StatelessWidget {
       splashColor: splashColor,
       textStyle: textStyle,
       shape: shape,
-      clipBehavior: clipBehavior ?? Clip.none,
+      clipBehavior: clipBehavior,
       focusNode: focusNode,
       autofocus: autofocus,
       child: child,
