@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+import 'package:flutter/gestures.dart' show kMinFlingVelocity;
+import 'package:flutter/physics.dart' show FrictionSimulation;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'colors.dart';
@@ -526,25 +528,14 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
   AnimationController _moveController;
   Animation<Offset> _moveAnimation;
-  double _dragDistance = 0.0;
-
-  Offset get _translation {
-    if (_dragDistance == null) {
-      return Offset.zero;
-    }
-    return Offset(
-      0.0,
-      math.max(0.0, _dragDistance),
-    );
-  }
 
   // TODO(justinmc): Use this to scale the child (not menu too).
   double _getScale(Orientation orientation, double maxDragDistance) {
-    if (orientation != Orientation.portrait || _dragDistance <= 0) {
+    if (orientation != Orientation.portrait || _moveAnimation.value.dy <= 0) {
       return 1.0;
     }
 
-    return _dragDistance * _kMinScale / maxDragDistance;
+    return _moveAnimation.value.dy * _kMinScale / maxDragDistance;
   }
 
   void _onVerticalDragStart(DragStartDetails details) {
@@ -553,28 +544,66 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
-    _setDragDistance(_dragDistance + details.delta.dy);
+    _setDragDistance(_moveAnimation.value.dy + details.delta.dy);
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
-    // TODO(justinmc): Fling.
+    // If flung, animate a bit before handling the potential dismiss.
+    if (details.velocity.pixelsPerSecond.dy.abs() >= kMinFlingVelocity) {
+      final FrictionSimulation frictionSimulation = FrictionSimulation(
+        0.135,
+        _moveAnimation.value.dy,
+        details.velocity.pixelsPerSecond.dy,
+      );
+      final bool flingIsAway = details.velocity.pixelsPerSecond.dy > 0;
+      final double end = flingIsAway ? frictionSimulation.finalX : 0.0;
+      _moveAnimation = Tween<Offset>(
+        begin: Offset(0.0, _moveAnimation.value.dy),
+        end: Offset(0.0, end),
+      ).animate(_moveController);
+      _moveController.reset();
+      _moveController.fling();
+      _moveController.addStatusListener(_flingStatusListener);
+      // The fastest possible velocity is 8000 px/s. Limit the longest animation
+      // to 500ms and scale the duration so fast velocities animate for longer.
+      _moveController.duration = Duration(
+        milliseconds: details.velocity.pixelsPerSecond.distance ~/ 16,
+      );
+      _moveController.fling();
+
+      return;
+    }
+
     // Dismiss if the drag is enough.
     final double dismissDragDistance = context.size.height * _kDismissThreshold;
-    if (_dragDistance >= dismissDragDistance) {
+    if (_moveAnimation.value.dy >= dismissDragDistance) {
       Navigator.of(context).pop();
       return;
     }
 
     // Otherwise animate back home.
+    _setDragDistance(_moveAnimation.value.dy);
     _moveController.reverse();
+  }
+
+  void _flingStatusListener(AnimationStatus status) {
+    if (status != AnimationStatus.completed) {
+      return;
+    }
+    _moveController.removeStatusListener(_flingStatusListener);
+    // If it was a fling back to the start, it has reset itself, and it should
+    // not be dismissed.
+    if (_moveAnimation.value.dy == 0.0) {
+      return;
+    }
+    Navigator.of(context).pop();
   }
 
   void _setDragDistance([double dragDistance]) {
     setState(() {
-      _dragDistance = math.max(0.0, dragDistance);
       _moveAnimation = Tween<Offset>(
         begin: Offset.zero,
-        end: Offset(0.0, _dragDistance),
+        end: Offset(0.0, math.max(0.0, dragDistance)),
       ).animate(
         CurvedAnimation(
           parent: _moveController,
