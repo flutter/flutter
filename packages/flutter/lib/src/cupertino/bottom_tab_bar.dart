@@ -199,7 +199,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     return result;
   }
 
-  Widget _buildTabItems(BuildContext context, bool isWide) {
+  Widget _buildTabItems(BuildContext context) {
     final List<Widget> result = <Widget>[];
 
     for (int index = 0; index < items.length; index += 1) {
