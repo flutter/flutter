@@ -98,7 +98,7 @@ class MacOSDevice extends Device {
     }
 
     // Make sure to call stop app after we've built.
-    _lastBuiltMode = debuggingOptions.buildInfo.mode;
+    _lastBuiltMode = debuggingOptions?.buildInfo?.mode;
     await stopApp(package);
     final Process process = await processManager.start(<String>[
       executable
