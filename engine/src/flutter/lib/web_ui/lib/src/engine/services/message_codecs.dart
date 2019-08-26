@@ -271,7 +271,9 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
 
   @override
   ByteData encodeMessage(dynamic message) {
-    if (message == null) return null;
+    if (message == null) {
+      return null;
+    }
     final WriteBuffer buffer = WriteBuffer();
     writeValue(buffer, message);
     return buffer.done();
@@ -279,10 +281,14 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
 
   @override
   dynamic decodeMessage(ByteData message) {
-    if (message == null) return null;
+    if (message == null) {
+      return null;
+    }
     final ReadBuffer buffer = ReadBuffer(message);
     final dynamic result = readValue(buffer);
-    if (buffer.hasRemaining) throw const FormatException('Message corrupted');
+    if (buffer.hasRemaining) {
+      throw const FormatException('Message corrupted');
+    }
     return result;
   }
 
@@ -350,7 +356,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         writeValue(buffer, value);
       });
     } else {
-      throw new ArgumentError.value(value);
+      throw ArgumentError.value(value);
     }
   }
 
@@ -359,7 +365,9 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   /// This method is intended for use by subclasses overriding
   /// [readValueOfType].
   dynamic readValue(ReadBuffer buffer) {
-    if (!buffer.hasRemaining) throw const FormatException('Message corrupted');
+    if (!buffer.hasRemaining) {
+      throw const FormatException('Message corrupted');
+    }
     final int type = buffer.getUint8();
     return readValueOfType(type, buffer);
   }
@@ -543,7 +551,9 @@ class StandardMethodCodec implements MethodCodec {
     if (envelope.lengthInBytes == 0)
       throw const FormatException('Expected envelope, got nothing');
     final ReadBuffer buffer = ReadBuffer(envelope);
-    if (buffer.getUint8() == 0) return messageCodec.readValue(buffer);
+    if (buffer.getUint8() == 0) {
+      return messageCodec.readValue(buffer);
+    }
     final dynamic errorCode = messageCodec.readValue(buffer);
     final dynamic errorMessage = messageCodec.readValue(buffer);
     final dynamic errorDetails = messageCodec.readValue(buffer);

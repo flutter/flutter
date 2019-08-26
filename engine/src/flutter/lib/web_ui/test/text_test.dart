@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:html';
+
 import 'package:test/test.dart';
 
 import 'package:ui/ui.dart';
@@ -215,5 +217,32 @@ void main() async {
         secondSpanStartPosition);
     expect(paragraph.getPositionForOffset(const Offset(150, 0)).offset,
         thirdSpanStartPosition);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/38972
+  test(
+      'should not set fontFamily to effectiveFontFamily for spans in rich text',
+      () {
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'Roboto',
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: 15.0,
+    ));
+    builder
+        .pushStyle(TextStyle(fontFamily: 'Menlo', fontWeight: FontWeight.bold));
+    const String firstSpanText = 'abc';
+    builder.addText(firstSpanText);
+    builder.pushStyle(TextStyle(fontSize: 30.0, fontWeight: FontWeight.normal));
+    const String secondSpanText = 'def';
+    builder.addText(secondSpanText);
+    final EngineParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 800.0));
+    expect(paragraph.plainText, isNull);
+    final List<SpanElement> spans =
+        paragraph.paragraphElement.querySelectorAll('span');
+    expect(spans[0].style.fontFamily, 'Ahem');
+    // The nested span here should not set it's family to default sans-serif.
+    expect(spans[1].style.fontFamily, 'Ahem');
   });
 }

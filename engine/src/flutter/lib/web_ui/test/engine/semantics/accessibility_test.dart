@@ -27,7 +27,7 @@ void main() {
         'is after a delay', () {
       // Set the a11y announcement's duration on DOM to half seconds.
       accessibilityAnnouncements.durationA11yMessageIsOnDom =
-          Duration(milliseconds: 500);
+          const Duration(milliseconds: 500);
 
       // Initially there is no accessibility-element
       expect(document.getElementById('accessibility-element'), isNull);

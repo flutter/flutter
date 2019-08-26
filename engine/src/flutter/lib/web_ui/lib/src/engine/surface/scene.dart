@@ -18,8 +18,13 @@ class PersistedScene extends PersistedContainerSurface {
     //                update this code when we add add2app support.
     final double screenWidth = html.window.innerWidth.toDouble();
     final double screenHeight = html.window.innerHeight.toDouble();
-    _globalClip = ui.Rect.fromLTRB(0, 0, screenWidth, screenHeight);
+    _localClipBounds = ui.Rect.fromLTRB(0, 0, screenWidth, screenHeight);
+    _localTransformInverse = Matrix4.identity();
+    _projectedClip = null;
   }
+
+  @override
+  Matrix4 get localTransformInverse => _localTransformInverse;
 
   @override
   html.Element createElement() {

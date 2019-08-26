@@ -110,38 +110,25 @@ bool get assertionsEnabled {
   return k;
 }
 
-/// Converts a rectangular clip specified in local coordinates to screen
-/// coordinates given the effective [transform].
+/// Transforms a [ui.Rect] given the effective [transform].
 ///
-/// The resulting clip is a rectangle aligned to the pixel grid, i.e. two of
+/// The resulting rect is aligned to the pixel grid, i.e. two of
 /// its sides are vertical and two are horizontal. In the presence of rotations
 /// the rectangle is inflated such that it fits the rotated rectangle.
-ui.Rect localClipRectToGlobalClip({ui.Rect localClip, Matrix4 transform}) {
-  return localClipToGlobalClip(
-    localLeft: localClip.left,
-    localTop: localClip.top,
-    localRight: localClip.right,
-    localBottom: localClip.bottom,
-    transform: transform,
-  );
+ui.Rect transformRect(Matrix4 transform, ui.Rect rect) {
+  return transformLTRB(transform, rect.left, rect.top, rect.right, rect.bottom);
 }
 
-/// Converts a rectangular clip specified in local coordinates to screen
-/// coordinates given the effective [transform].
+/// Transforms a rectangle given the effective [transform].
 ///
-/// This is the same as [localClipRectToGlobalClip], except that the local clip
-/// rect is specified in terms of left, top, right, and bottom edge offsets.
-ui.Rect localClipToGlobalClip({
-  double localLeft,
-  double localTop,
-  double localRight,
-  double localBottom,
-  Matrix4 transform,
-}) {
-  assert(localLeft != null);
-  assert(localTop != null);
-  assert(localRight != null);
-  assert(localBottom != null);
+/// This is the same as [transformRect], except that the rect is specified
+/// in terms of left, top, right, and bottom edge offsets.
+ui.Rect transformLTRB(
+    Matrix4 transform, double left, double top, double right, double bottom) {
+  assert(left != null);
+  assert(top != null);
+  assert(right != null);
+  assert(bottom != null);
 
   // Construct a matrix where each row represents a vector pointing at
   // one of the four corners of the (left, top, right, bottom) rectangle.
@@ -162,23 +149,23 @@ ui.Rect localClipToGlobalClip({
   final Float64List pointData = Float64List(16);
 
   // Row 0: top-left
-  pointData[0] = localLeft;
-  pointData[4] = localTop;
+  pointData[0] = left;
+  pointData[4] = top;
   pointData[12] = 1;
 
   // Row 1: top-right
-  pointData[1] = localRight;
-  pointData[5] = localTop;
+  pointData[1] = right;
+  pointData[5] = top;
   pointData[13] = 1;
 
   // Row 2: bottom-left
-  pointData[2] = localLeft;
-  pointData[6] = localBottom;
+  pointData[2] = left;
+  pointData[6] = bottom;
   pointData[14] = 1;
 
   // Row 3: bottom-right
-  pointData[3] = localRight;
-  pointData[7] = localBottom;
+  pointData[3] = right;
+  pointData[7] = bottom;
   pointData[15] = 1;
 
   final Matrix4 pointMatrix = Matrix4.fromFloat64List(pointData);
@@ -231,4 +218,23 @@ String _pathToSvgClipPath(ui.Path path,
   pathToSvg(path, sb, offsetX: offsetX, offsetY: offsetY);
   sb.write('"></path></clipPath></defs></svg');
   return sb.toString();
+}
+
+/// Determines if the (dynamic) exception passed in is a NS_ERROR_FAILURE
+/// (from Firefox).
+///
+/// NS_ERROR_FAILURE (0x80004005) is the most general of all the (Firefox)
+/// errors and occurs for all errors for which a more specific error code does
+/// not apply. (https://developer.mozilla.org/en-US/docs/Mozilla/Errors)
+///
+/// Other browsers do not throw this exception.
+///
+/// In Flutter, this exception happens when we try to perform some operations on
+/// a Canvas when the application is rendered in a display:none iframe.
+///
+/// We need this in [BitmapCanvas] and [RecordingCanvas] to swallow this
+/// Firefox exception without interfering with others (potentially useful
+/// for the programmer).
+bool _isNsErrorFailureException(dynamic e) {
+  return js_util.getProperty(e, 'name') == 'NS_ERROR_FAILURE';
 }

@@ -323,6 +323,11 @@ class TouchAdapter extends BaseAdapter {
       event.preventDefault();
       _updateButtonDownState(_kPrimaryMouseButton, false);
       _callback(_convertEventToPointerData(ui.PointerChange.up, event));
+      if (textEditing.needsKeyboard &&
+          browserEngine == BrowserEngine.webkit &&
+          operatingSystem == OperatingSystem.iOs) {
+        textEditing.editingElement.configureInputElementForIOS();
+      }
     });
 
     _addEventListener('touchcancel', (html.Event event) {

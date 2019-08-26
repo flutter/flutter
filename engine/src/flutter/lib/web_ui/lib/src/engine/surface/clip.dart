@@ -66,11 +66,14 @@ class PersistedClipRect extends PersistedContainerSurface
   @override
   void recomputeTransformAndClip() {
     _transform = parent._transform;
-    _globalClip = parent._globalClip.intersect(localClipRectToGlobalClip(
-      localClip: rect,
-      transform: _transform,
-    ));
+    _localClipBounds = rect;
+    _localTransformInverse = null;
+    _projectedClip = null;
   }
+
+  @override
+  Matrix4 get localTransformInverse =>
+      _localTransformInverse ??= Matrix4.identity();
 
   @override
   html.Element createElement() {
@@ -114,11 +117,14 @@ class PersistedClipRRect extends PersistedContainerSurface
   @override
   void recomputeTransformAndClip() {
     _transform = parent._transform;
-    _globalClip = parent._globalClip.intersect(localClipRectToGlobalClip(
-      localClip: rrect.outerRect,
-      transform: _transform,
-    ));
+    _localClipBounds = rrect.outerRect;
+    _localTransformInverse = null;
+    _projectedClip = null;
   }
+
+  @override
+  Matrix4 get localTransformInverse =>
+      _localTransformInverse ??= Matrix4.identity();
 
   @override
   html.Element createElement() {
@@ -174,22 +180,22 @@ class PersistedPhysicalShape extends PersistedContainerSurface
 
     final ui.RRect roundRect = path.webOnlyPathAsRoundedRect;
     if (roundRect != null) {
-      _globalClip = parent._globalClip.intersect(localClipRectToGlobalClip(
-        localClip: roundRect.outerRect,
-        transform: transform,
-      ));
+      _localClipBounds = roundRect.outerRect;
     } else {
       final ui.Rect rect = path.webOnlyPathAsRect;
       if (rect != null) {
-        _globalClip = parent._globalClip.intersect(localClipRectToGlobalClip(
-          localClip: rect,
-          transform: transform,
-        ));
+        _localClipBounds = rect;
       } else {
-        _globalClip = parent._globalClip;
+        _localClipBounds = null;
       }
     }
+    _localTransformInverse = null;
+    _projectedClip = null;
   }
+
+  @override
+  Matrix4 get localTransformInverse =>
+      _localTransformInverse ??= Matrix4.identity();
 
   void _applyColor() {
     rootElement.style.backgroundColor = color.toCssString();
@@ -339,6 +345,16 @@ class PersistedClipPath extends PersistedContainerSurface
   }
 
   @override
+  void recomputeTransformAndClip() {
+    super.recomputeTransformAndClip();
+    _localClipBounds ??= clipPath.getBounds();
+  }
+
+  @override
+  Matrix4 get localTransformInverse =>
+      _localTransformInverse ??= Matrix4.identity();
+
+  @override
   void apply() {
     if (clipPath == null) {
       if (_clipElement != null) {
@@ -364,6 +380,7 @@ class PersistedClipPath extends PersistedContainerSurface
   void update(PersistedClipPath oldSurface) {
     super.update(oldSurface);
     if (oldSurface.clipPath != clipPath) {
+      _localClipBounds = null;
       oldSurface._clipElement?.remove();
       apply();
     } else {

@@ -25,6 +25,10 @@ class PersistedBackdropFilter extends PersistedContainerSurface
   Matrix4 _previousTransform;
 
   @override
+  Matrix4 get localTransformInverse =>
+      _localTransformInverse ??= Matrix4.identity();
+
+  @override
   void adoptElements(PersistedBackdropFilter oldSurface) {
     super.adoptElements(oldSurface);
     _childContainer = oldSurface._childContainer;
@@ -64,10 +68,8 @@ class PersistedBackdropFilter extends PersistedContainerSurface
       _invertedTransform = Matrix4.inverted(_transform);
       _previousTransform = _transform;
     }
-    final ui.Rect rect = localClipRectToGlobalClip(
-        localClip: ui.Rect.fromLTRB(
-            0, 0, ui.window.physicalSize.width, ui.window.physicalSize.height),
-        transform: _invertedTransform);
+    final ui.Rect rect = transformLTRB(_invertedTransform, 0, 0,
+        ui.window.physicalSize.width, ui.window.physicalSize.height);
     final html.CssStyleDeclaration filterElementStyle = _filterElement.style;
     filterElementStyle
       ..position = 'absolute'

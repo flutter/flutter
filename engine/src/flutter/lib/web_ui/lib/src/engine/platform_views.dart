@@ -56,7 +56,7 @@ void handlePlatformViewCall(
 
 void _createPlatformView(
     MethodCall methodCall, ui.PlatformMessageResponseCallback callback) {
-  final Map args = methodCall.arguments;
+  final Map<dynamic, dynamic> args = methodCall.arguments;
   final int id = args['id'];
   final String viewType = args['viewType'];
   // TODO(het): Use 'direction', 'width', and 'height'.

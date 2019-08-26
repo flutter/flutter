@@ -54,6 +54,9 @@ class PersistedPlatformView extends PersistedLeafSurface {
   }
 
   @override
+  Matrix4 get localTransformInverse => null;
+
+  @override
   void apply() {
     _hostElement.style
       ..transform = 'translate(${dx}px, ${dy}px)'

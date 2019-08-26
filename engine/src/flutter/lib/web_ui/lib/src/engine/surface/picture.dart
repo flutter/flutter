@@ -100,6 +100,10 @@ class PersistedHoudiniPicture extends PersistedPicture {
     return existingSurface.picture == picture ? 0.0 : 1.0;
   }
 
+  @override
+  Matrix4 get localTransformInverse =>
+      _localTransformInverse ??= Matrix4.identity();
+
   static void _registerCssPainter() {
     _cssPainterRegistered = true;
     final dynamic css = js_util.getProperty(html.window, 'CSS');
@@ -185,6 +189,9 @@ class PersistedStandardPicture extends PersistedPicture {
       }
     }
   }
+
+  @override
+  Matrix4 get localTransformInverse => null;
 
   @override
   int get bitmapPixelCount {
@@ -358,7 +365,6 @@ abstract class PersistedPicture extends PersistedLeafSurface {
       _transform = _transform.clone();
       _transform.translate(dx, dy);
     }
-    _globalClip = parent._globalClip;
     _computeExactCullRects();
   }
 
@@ -389,39 +395,52 @@ abstract class PersistedPicture extends PersistedLeafSurface {
   void _computeExactCullRects() {
     assert(transform != null);
     assert(localPaintBounds != null);
-    final ui.Rect globalPaintBounds = localClipRectToGlobalClip(
-        localClip: localPaintBounds, transform: transform);
 
-    // The exact cull rect required in screen coordinates.
-    ui.Rect tightGlobalCullRect = globalPaintBounds.intersect(_globalClip);
-
-    // The exact cull rect required in local coordinates.
-    ui.Rect tightLocalCullRect;
-    if (tightGlobalCullRect.width <= 0 || tightGlobalCullRect.height <= 0) {
-      tightGlobalCullRect = ui.Rect.zero;
-      tightLocalCullRect = ui.Rect.zero;
-    } else {
-      final Matrix4 invertedTransform =
-          Matrix4.fromFloat64List(Float64List(16));
-
-      // TODO(yjbanov): When we move to our own vector math library, rewrite
-      //                this to check for the case of simple transform before
-      //                inverting. Inversion of simple transforms can be made
-      //                much cheaper.
-      final double det = invertedTransform.copyInverse(transform);
-      if (det == 0) {
-        // Determinant is zero, which means the transform is not invertible.
-        tightGlobalCullRect = ui.Rect.zero;
-        tightLocalCullRect = ui.Rect.zero;
-      } else {
-        tightLocalCullRect = localClipRectToGlobalClip(
-            localClip: tightGlobalCullRect, transform: invertedTransform);
+    if (parent._projectedClip == null) {
+      // Compute and cache chain of clipping bounds on parent of picture since
+      // parent may include multiple pictures so it can be reused by all
+      // child pictures.
+      ui.Rect bounds;
+      PersistedSurface parentSurface = parent;
+      final Matrix4 clipTransform = Matrix4.identity();
+      while (parentSurface != null) {
+        final ui.Rect localClipBounds = parentSurface._localClipBounds;
+        if (localClipBounds != null) {
+          if (bounds == null) {
+            bounds = transformRect(clipTransform, localClipBounds);
+          } else {
+            bounds =
+                bounds.intersect(transformRect(clipTransform, localClipBounds));
+          }
+        }
+        final Matrix4 localInverse = parentSurface.localTransformInverse;
+        if (localInverse != null && !localInverse.isIdentity()) {
+          clipTransform.multiply(localInverse);
+        }
+        parentSurface = parentSurface.parent;
       }
+      if (bounds != null && (bounds.width <= 0 || bounds.height <= 0)) {
+        bounds = ui.Rect.zero;
+      }
+      // Cache projected clip on parent.
+      parent._projectedClip = bounds;
     }
-
-    assert(tightLocalCullRect != null);
-    _exactLocalCullRect = tightLocalCullRect;
-    _exactGlobalCullRect = tightGlobalCullRect;
+    // Intersect localPaintBounds with parent projected clip to calculate
+    // and cache [_exactLocalCullRect].
+    if (parent._projectedClip == null) {
+      _exactLocalCullRect = localPaintBounds;
+    } else {
+      _exactLocalCullRect = localPaintBounds.intersect(parent._projectedClip);
+    }
+    if (_exactLocalCullRect.width <= 0 || _exactLocalCullRect.height <= 0) {
+      _exactLocalCullRect = ui.Rect.zero;
+      _exactGlobalCullRect = ui.Rect.zero;
+    } else {
+      assert(() {
+        _exactGlobalCullRect = transformRect(transform, _exactLocalCullRect);
+        return true;
+      }());
+    }
   }
 
   bool _computeOptimalCullRect(PersistedPicture oldSurface) {

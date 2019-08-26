@@ -86,10 +86,14 @@ void _initialize() {
 ///
 /// The `label` argument, if present, will be printed before the stack.
 void debugPrintStack({String label, int maxFrames}) {
-  if (label != null) print(label);
+  if (label != null) {
+    print(label);
+  }
   Iterable<String> lines =
       StackTrace.current.toString().trimRight().split('\n');
-  if (maxFrames != null) lines = lines.take(maxFrames);
+  if (maxFrames != null) {
+    lines = lines.take(maxFrames);
+  }
   print(defaultStackFilter(lines).join('\n'));
 }
 
@@ -132,7 +136,9 @@ Iterable<String> defaultStackFilter(Iterable<String> frames) {
     result.add('(elided one frame from ${skipped.single})');
   } else if (skipped.length > 1) {
     final List<String> where = Set<String>.from(skipped).toList()..sort();
-    if (where.length > 1) where[where.length - 1] = 'and ${where.last}';
+    if (where.length > 1) {
+      where[where.length - 1] = 'and ${where.last}';
+    }
     if (where.length > 2) {
       result.add('(elided ${skipped.length} frames from ${where.join(", ")})');
     } else {
