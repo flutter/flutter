@@ -734,4 +734,7 @@ abstract class PlatformViewController {
   ///
   /// The [PlatformViewController] is unusable after calling dispose.
   void dispose();
+
+  /// Clears the view's focus on the platform side.
+  void clearFocus();
 }
