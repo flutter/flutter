@@ -473,10 +473,13 @@ abstract class TextStyle {
     List<FontFeature> fontFeatures,
   }) = engine.EngineTextStyle;
 
+  @override
   int get hashCode;
 
+  @override
   bool operator ==(dynamic other);
 
+  @override
   String toString();
 }
 
@@ -551,10 +554,13 @@ abstract class ParagraphStyle {
     Locale locale,
   }) = engine.EngineParagraphStyle;
 
+  @override
   bool operator ==(dynamic other);
 
+  @override
   int get hashCode;
 
+  @override
   String toString();
 }
 
@@ -605,8 +611,10 @@ abstract class StrutStyle {
     bool forceStrutHeight,
   }) = engine.EngineStrutStyle;
 
+  @override
   int get hashCode;
 
+  @override
   bool operator ==(dynamic other);
 }
 

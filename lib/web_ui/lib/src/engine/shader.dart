@@ -1,6 +1,7 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 part of engine;
 
 bool _offsetIsValid(ui.Offset offset) {
@@ -46,7 +47,7 @@ class GradientSweep extends EngineGradient {
   }
 
   @override
-  Object createPaintStyle(_) {
+  Object createPaintStyle(html.CanvasRenderingContext2D ctx) {
     throw UnimplementedError();
   }
 
@@ -135,7 +136,7 @@ class GradientLinear extends EngineGradient {
   js.JsObject createSkiaShader() {
     assert(experimentalUseSkia);
 
-    js.JsArray<num> jsColors = js.JsArray<num>();
+    final js.JsArray<num> jsColors = js.JsArray<num>();
     jsColors.length = colors.length;
     for (int i = 0; i < colors.length; i++) {
       jsColors[i] = colors[i].value;
@@ -174,7 +175,7 @@ class GradientRadial extends EngineGradient {
   final Float64List matrix4;
 
   @override
-  Object createPaintStyle(_) {
+  Object createPaintStyle(html.CanvasRenderingContext2D ctx) {
     throw UnimplementedError();
   }
 
@@ -199,7 +200,7 @@ class GradientConical extends EngineGradient {
   final Float64List matrix4;
 
   @override
-  Object createPaintStyle(_) {
+  Object createPaintStyle(html.CanvasRenderingContext2D ctx) {
     throw UnimplementedError();
   }
 

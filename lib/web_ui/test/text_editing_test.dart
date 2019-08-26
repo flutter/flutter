@@ -42,7 +42,7 @@ void trackEditingState(EditingState editingState) {
 void main() {
   group('$TextEditingElement', () {
     setUp(() {
-      editingElement = TextEditingElement();
+      editingElement = TextEditingElement(HybridTextEditing());
     });
 
     tearDown(() {
@@ -193,7 +193,8 @@ void main() {
         // A regular <span> shouldn't be accepted.
         final HtmlElement span = SpanElement();
         expect(
-          () => PersistentTextEditingElement(span, onDomElementSwap: null),
+          () => PersistentTextEditingElement(HybridTextEditing(), span,
+              onDomElementSwap: null),
           throwsAssertionError,
         );
       });
@@ -203,7 +204,8 @@ void main() {
         // re-acquiring focus shouldn't happen in persistent mode.
         final InputElement input = InputElement();
         final PersistentTextEditingElement persistentEditingElement =
-            PersistentTextEditingElement(input, onDomElementSwap: () {});
+            PersistentTextEditingElement(HybridTextEditing(), input,
+                onDomElementSwap: () {});
         expect(document.activeElement, document.body);
 
         document.body.append(input);
@@ -221,7 +223,8 @@ void main() {
       test('Does not dispose and recreate dom elements in persistent mode', () {
         final InputElement input = InputElement();
         final PersistentTextEditingElement persistentEditingElement =
-            PersistentTextEditingElement(input, onDomElementSwap: () {});
+            PersistentTextEditingElement(HybridTextEditing(), input,
+                onDomElementSwap: () {});
 
         // The DOM element should've been eagerly created.
         expect(input, isNotNull);
@@ -254,7 +257,8 @@ void main() {
       test('Refocuses when setting editing state', () {
         final InputElement input = InputElement();
         final PersistentTextEditingElement persistentEditingElement =
-            PersistentTextEditingElement(input, onDomElementSwap: () {});
+            PersistentTextEditingElement(HybridTextEditing(), input,
+                onDomElementSwap: () {});
 
         document.body.append(input);
         persistentEditingElement.enable(singlelineConfig,
@@ -274,7 +278,8 @@ void main() {
       test('Works in multi-line mode', () {
         final TextAreaElement textarea = TextAreaElement();
         final PersistentTextEditingElement persistentEditingElement =
-            PersistentTextEditingElement(textarea, onDomElementSwap: () {});
+            PersistentTextEditingElement(HybridTextEditing(), textarea,
+                onDomElementSwap: () {});
 
         expect(persistentEditingElement.domElement, textarea);
         expect(document.activeElement, document.body);
@@ -321,6 +326,7 @@ void main() {
     });
 
     tearDown(() {
+      // TODO(mdebbar): clean-up stuff that HybridTextEditing registered on the page
       spy.deactivate();
     });
 
@@ -389,6 +395,40 @@ void main() {
       expect(spy.messages, isEmpty);
     });
 
+    test('setClient, setEditingState, show, setClient', () {
+      final MethodCall setClient = MethodCall(
+          'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
+      textEditing.handleTextInput(codec.encodeMethodCall(setClient));
+
+      const MethodCall setEditingState =
+          MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+      });
+      textEditing.handleTextInput(codec.encodeMethodCall(setEditingState));
+
+      // Editing shouldn't have started yet.
+      expect(document.activeElement, document.body);
+
+      const MethodCall show = MethodCall('TextInput.show');
+      textEditing.handleTextInput(codec.encodeMethodCall(show));
+
+      checkInputEditingState(
+          textEditing.editingElement.domElement, 'abcd', 2, 3);
+
+      final MethodCall setClient2 = MethodCall(
+          'TextInput.setClient', <dynamic>[567, flutterSinglelineConfig]);
+      textEditing.handleTextInput(codec.encodeMethodCall(setClient2));
+
+      // Receiving another client via setClient should stop editing, hence
+      // should remove the previous active element.
+      expect(document.activeElement, document.body);
+
+      // Confirm that [HybridTextEditing] didn't send any messages.
+      expect(spy.messages, isEmpty);
+    });
+
     test('setClient, setEditingState, show, setEditingState, clearClient', () {
       final MethodCall setClient = MethodCall(
           'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
@@ -416,6 +456,60 @@ void main() {
       // The second [setEditingState] should override the first one.
       checkInputEditingState(
           textEditing.editingElement.domElement, 'xyz', 0, 2);
+
+      const MethodCall clearClient = MethodCall('TextInput.clearClient');
+      textEditing.handleTextInput(codec.encodeMethodCall(clearClient));
+
+      // Confirm that [HybridTextEditing] didn't send any messages.
+      expect(spy.messages, isEmpty);
+    });
+
+    test(
+        'setClient, setLocationSize, setStyle, setEditingState, show, clearClient',
+        () {
+      final MethodCall setClient = MethodCall(
+          'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
+      textEditing.handleTextInput(codec.encodeMethodCall(setClient));
+
+      const MethodCall setLocationSize =
+          MethodCall('TextInput.setEditingLocationSize', <String, dynamic>{
+        'top': 0,
+        'left': 0,
+        'width': 150,
+        'height': 50,
+      });
+      textEditing.handleTextInput(codec.encodeMethodCall(setLocationSize));
+
+      const MethodCall setStyle =
+          MethodCall('TextInput.setStyle', <String, dynamic>{
+        'fontSize': 12,
+        'fontFamily': 'sans-serif',
+        'textAlignIndex': 4,
+        'fontWeightValue': 4,
+      });
+      textEditing.handleTextInput(codec.encodeMethodCall(setStyle));
+
+      const MethodCall setEditingState =
+          MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+      });
+      textEditing.handleTextInput(codec.encodeMethodCall(setEditingState));
+
+      const MethodCall show = MethodCall('TextInput.show');
+      textEditing.handleTextInput(codec.encodeMethodCall(show));
+
+      checkInputEditingState(
+          textEditing.editingElement.domElement, 'abcd', 2, 3);
+
+      // Check if the location and styling is correct.
+      expect(
+          textEditing.editingElement.domElement.getBoundingClientRect(),
+          Rectangle<double>.fromPoints(
+              const Point<double>(0.0, 0.0), const Point<double>(150.0, 50.0)));
+      expect(textEditing.editingElement.domElement.style.font,
+          '500 12px sans-serif');
 
       const MethodCall clearClient = MethodCall('TextInput.clearClient');
       textEditing.handleTextInput(codec.encodeMethodCall(clearClient));

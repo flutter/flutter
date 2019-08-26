@@ -275,6 +275,9 @@ class MockPersistedPicture extends PersistedPicture {
   }
 
   @override
+  Matrix4 get localTransformInverse => null;
+
+  @override
   void build() {
     super.build();
     buildCount++;

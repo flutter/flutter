@@ -309,6 +309,21 @@ flt-glass-pane * {
     setElementStyle(bodyElement, 'font', defaultCssFont);
     setElementStyle(bodyElement, 'color', 'red');
 
+    // TODO(flutter_web): send the location during the scroll for more frequent
+    // location updates from the framework. Remove spellcheck=false property.
+    /// The spell check is being disabled for now.
+    ///
+    /// Flutter web is positioning the input box on top of editable widget.
+    /// This location is updated only in the paint phase of the widget.
+    /// It is wrong during the scroll. It is not important for text editing
+    /// since the content is already invisible. On the other hand, the red
+    /// indicator for spellcheck gets confusing due to the wrong positioning.
+    /// We are disabling spellcheck until the location starts getting updated
+    /// via scroll. This is possible since we can listen to the scroll on
+    /// Flutter.
+    /// See [HybridTextEditing].
+    bodyElement.spellcheck = false;
+
     for (html.Element viewportMeta
         in html.document.head.querySelectorAll('meta[name="viewport"]')) {
       if (assertionsEnabled) {

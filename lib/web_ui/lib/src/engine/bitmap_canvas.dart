@@ -141,7 +141,15 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     if (_ctx != null) {
       _ctx.restore();
       _ctx.clearRect(0, 0, _widthInBitmapPixels, _heightInBitmapPixels);
-      _ctx.font = '';
+      try {
+        _ctx.font = '';
+      } catch (e) {
+        // Firefox may explode here:
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=941146
+        if (!_isNsErrorFailureException(e)) {
+          rethrow;
+        }
+      }
       _initializeViewport();
     }
     if (_canvas != null) {
@@ -450,12 +458,10 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     _strokeOrFill(paint);
   }
 
-  void _drawRRectPath(ui.RRect rrect, {bool startNewPath = true}) {
-    // TODO(mdebbar): there's a bug in this code, it doesn't correctly handle
-    //                the case when the radius is greater than the width of the
-    //                rect. When we fix that in houdini_painter.js, we need to
-    //                fix it here too.
-    // To draw the rounded rectangle, perform the following 8 steps:
+  void _drawRRectPath(ui.RRect inputRRect, {bool startNewPath = true}) {
+    // TODO(mdebbar): Backport the overlapping corners fix to houdini_painter.js
+    // To draw the rounded rectangle, perform the following steps:
+    //   0. Ensure border radius don't overlap
     //   1. Flip left,right top,bottom since web doesn't support flipped
     //      coordinates with negative radii.
     //   2. draw the line for the top
@@ -470,6 +476,9 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     // After drawing, the current point will be the left side of the top of the
     // rounded rectangle (after the corner).
     // TODO(het): Confirm that this is the end point in Flutter for RRect
+
+    // Ensure border radius curves never overlap
+    final ui.RRect rrect = inputRRect.scaleRadii();
 
     double left = rrect.left;
     double right = rrect.right;
@@ -551,7 +560,10 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     );
   }
 
-  void _drawRRectPathReverse(ui.RRect rrect, {bool startNewPath = true}) {
+  void _drawRRectPathReverse(ui.RRect inputRRect, {bool startNewPath = true}) {
+    // Ensure border radius curves never overlap
+    final ui.RRect rrect = inputRRect.scaleRadii();
+
     double left = rrect.left;
     double right = rrect.right;
     double top = rrect.top;

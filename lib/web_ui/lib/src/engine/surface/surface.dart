@@ -799,8 +799,15 @@ abstract class PersistedSurface implements ui.EngineLayer {
   /// the clip added by this layer (if any).
   ///
   /// The value is update by [recomputeTransformAndClip].
-  ui.Rect get globalClip => _globalClip;
-  ui.Rect _globalClip;
+  ui.Rect _projectedClip;
+
+  /// Bounds of clipping performed by this layer.
+  ui.Rect _localClipBounds;
+  // Cached inverse of transform on this node. Unlike transform, this
+  // Matrix only contains local transform (not chain multiplied since root).
+  Matrix4 _localTransformInverse;
+
+  Matrix4 get localTransformInverse;
 
   /// Recomputes [transform] and [globalClip] fields.
   ///
@@ -812,7 +819,9 @@ abstract class PersistedSurface implements ui.EngineLayer {
   @protected
   void recomputeTransformAndClip() {
     _transform = parent._transform;
-    _globalClip = parent._globalClip;
+    _localClipBounds = null;
+    _localTransformInverse = null;
+    _projectedClip = null;
   }
 
   /// Performs computations before [build], [update], or [retain] are called.
@@ -925,7 +934,9 @@ abstract class PersistedContainerSurface extends PersistedSurface {
   @override
   void recomputeTransformAndClip() {
     _transform = parent._transform;
-    _globalClip = parent._globalClip;
+    _localClipBounds = null;
+    _localTransformInverse = null;
+    _projectedClip = null;
   }
 
   @override

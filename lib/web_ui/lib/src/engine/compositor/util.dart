@@ -1,6 +1,7 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 part of engine;
 
 js.JsObject makeSkRect(ui.Rect rect) {
@@ -9,7 +10,7 @@ js.JsObject makeSkRect(ui.Rect rect) {
 }
 
 js.JsArray<double> makeSkPoint(ui.Offset point) {
-  js.JsArray<double> skPoint = new js.JsArray<double>();
+  final js.JsArray<double> skPoint = js.JsArray<double>();
   skPoint.length = 2;
   skPoint[0] = point.dx;
   skPoint[1] = point.dy;

@@ -22,8 +22,13 @@ class PersistedOffset extends PersistedContainerSurface
       _transform = _transform.clone();
       _transform.translate(dx, dy);
     }
-    _globalClip = parent._globalClip;
+    _projectedClip = null;
+    _localTransformInverse = null;
   }
+
+  @override
+  Matrix4 get localTransformInverse =>
+      _localTransformInverse ??= Matrix4.translationValues(-dx, -dy, 0);
 
   @override
   html.Element createElement() {

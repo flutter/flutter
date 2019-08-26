@@ -181,7 +181,7 @@ class OpacityLayer extends ContainerLayer implements ui.OpacityEngineLayer {
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
-    Matrix4 childMatrix = Matrix4.copy(matrix);
+    final Matrix4 childMatrix = Matrix4.copy(matrix);
     childMatrix.translate(_offset.dx, _offset.dy);
     final ui.Rect childPaintBounds =
         prerollChildren(prerollContext, childMatrix);
@@ -189,22 +189,22 @@ class OpacityLayer extends ContainerLayer implements ui.OpacityEngineLayer {
   }
 
   @override
-  void paint(PaintContext context) {
+  void paint(PaintContext paintContext) {
     assert(needsPainting);
 
     final ui.Paint paint = ui.Paint();
     paint.color = ui.Color.fromARGB(_alpha, 0, 0, 0);
 
-    context.canvas.save();
-    context.canvas.translate(_offset.dx, _offset.dy);
+    paintContext.canvas.save();
+    paintContext.canvas.translate(_offset.dx, _offset.dy);
 
     final ui.Rect saveLayerBounds = paintBounds.shift(-_offset);
 
-    context.canvas.saveLayer(saveLayerBounds, paint);
-    paintChildren(context);
+    paintContext.canvas.saveLayer(saveLayerBounds, paint);
+    paintChildren(paintContext);
     // Restore twice: once for the translate and once for the saveLayer.
-    context.canvas.restore();
-    context.canvas.restore();
+    paintContext.canvas.restore();
+    paintContext.canvas.restore();
   }
 }
 

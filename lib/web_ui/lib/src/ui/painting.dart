@@ -4,6 +4,7 @@
 
 part of ui;
 
+// ignore: unused_element, Used in Shader assert.
 bool _offsetIsValid(Offset offset) {
   assert(offset != null, 'Offset argument was null.');
   assert(!offset.dx.isNaN && !offset.dy.isNaN,
@@ -11,6 +12,7 @@ bool _offsetIsValid(Offset offset) {
   return true;
 }
 
+// ignore: unused_element, Used in Shader assert.
 bool _matrix4IsValid(Float64List matrix4) {
   assert(matrix4 != null, 'Matrix4 argument was null.');
   assert(matrix4.length == 16, 'Matrix4 must have 16 entries.');
@@ -1430,7 +1432,9 @@ class ColorFilter {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! ColorFilter) return false;
+    if (other is! ColorFilter) {
+      return false;
+    }
     final ColorFilter typedOther = other;
     return _color == typedOther._color && _blendMode == typedOther._blendMode;
   }

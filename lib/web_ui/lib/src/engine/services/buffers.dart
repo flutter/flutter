@@ -253,8 +253,10 @@ abstract class _TypedDataBuffer<E> extends ListBase<E> {
   ///
   /// Grows the buffer if necessary, preserving existing data.
   void _ensureCapacity(int requiredCapacity) {
-    if (requiredCapacity <= _buffer.length) return;
-    var newBuffer = _createBiggerBuffer(requiredCapacity);
+    if (requiredCapacity <= _buffer.length) {
+      return;
+    }
+    final List<E> newBuffer = _createBiggerBuffer(requiredCapacity);
     newBuffer.setRange(0, _length, _buffer);
     _buffer = newBuffer;
   }

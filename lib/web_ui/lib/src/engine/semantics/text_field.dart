@@ -20,6 +20,7 @@ class TextField extends RoleManager {
             ? html.TextAreaElement()
             : html.InputElement();
     persistentTextEditingElement = PersistentTextEditingElement(
+      textEditing,
       editableDomElement,
       onDomElementSwap: _setupDomElement,
     );
