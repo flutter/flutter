@@ -306,9 +306,15 @@ action("icudtl_object") {
 action("android") {
   script = "//build/android/gyp/create_flutter_jar.py"
 
+  if (stripped_symbols) {
+    engine_library = "lib.stripped/libflutter.so"
+  } else {
+    engine_library = "libflutter.so"
+  }
+
   inputs = [
     "$root_build_dir/$embedding_jar_filename",
-    "$root_build_dir/lib.stripped/libflutter.so",
+    "$root_build_dir/$engine_library",
   ]
 
   engine_artifact_id =
@@ -329,7 +335,7 @@ action("android") {
     "--dist_jar",
     rebase_path(embedding_jar_filename, root_build_dir, root_build_dir),
     "--native_lib",
-    rebase_path("lib.stripped/libflutter.so", root_build_dir, root_build_dir),
+    rebase_path("$engine_library", root_build_dir, root_build_dir),
     "--android_abi",
     "$android_app_abi",
   ]

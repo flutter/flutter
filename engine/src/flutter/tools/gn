@@ -264,6 +264,8 @@ def to_gn_args(args):
       if args.build_glfw_shell:
         gn_args['build_glfw_shell'] = True
 
+    gn_args['stripped_symbols'] = args.stripped
+
     return gn_args
 
 def parse_args(args):
@@ -334,6 +336,10 @@ def parse_args(args):
 
   parser.add_argument('--bitcode', default=False, action='store_true',
                       help='Enable bitcode for iOS targets. On debug runtime modes, this will be a marker only.')
+
+  parser.add_argument('--stripped', default=True, action='store_true',
+                      help='Strip debug symbols from the output. This defaults to true and has no effect on iOS.')
+  parser.add_argument('--no-stripped', dest='stripped', action='store_false')
 
   return parser.parse_args(args)
 
