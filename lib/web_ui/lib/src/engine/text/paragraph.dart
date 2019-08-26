@@ -290,6 +290,12 @@ class EngineParagraph implements ui.Paragraph {
     final int end = WordBreaker.nextBreakIndex(_plainText, offset);
     return <int>[start, end];
   }
+
+  @override
+  List<ui.LineMetrics> computeLineMetrics() {
+    // TODO(flutter_web): Implement this.
+    return null;
+  }
 }
 
 /// The web implementation of [ui.ParagraphStyle].

@@ -8,6 +8,7 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/canvas.h"
+#include "flutter/lib/ui/text/line_metrics.h"
 #include "flutter/lib/ui/text/text_box.h"
 #include "flutter/third_party/txt/src/txt/paragraph.h"
 
@@ -48,6 +49,7 @@ class Paragraph : public RefCountedDartWrappable<Paragraph> {
   std::vector<TextBox> getRectsForPlaceholders();
   Dart_Handle getPositionForOffset(double dx, double dy);
   Dart_Handle getWordBoundary(unsigned offset);
+  std::vector<LineMetrics> computeLineMetrics();
 
   size_t GetAllocationSize() override;
 

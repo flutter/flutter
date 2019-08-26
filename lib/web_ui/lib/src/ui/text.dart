@@ -1019,6 +1019,51 @@ enum BoxWidthStyle {
   max,
 }
 
+class LineMetrics {
+  LineMetrics({
+    this.hardBreak,
+    this.ascent,
+    this.descent,
+    this.unscaledAscent,
+    this.height,
+    this.width,
+    this.left,
+    this.baseline,
+    this.lineNumber,
+  });
+
+  @pragma('vm:entry-point')
+  LineMetrics._(
+    this.hardBreak,
+    this.ascent,
+    this.descent,
+    this.unscaledAscent,
+    this.height,
+    this.width,
+    this.left,
+    this.baseline,
+    this.lineNumber,
+  );
+
+  final bool hardBreak;
+
+  final double ascent;
+
+  final double descent;
+
+  final double unscaledAscent;
+
+  final double height;
+
+  final double width;
+
+  final double left;
+
+  final double baseline;
+
+  final int lineNumber;
+}
+
 /// A paragraph of text.
 ///
 /// A paragraph retains the size and position of each glyph in the text and can
@@ -1125,6 +1170,8 @@ abstract class Paragraph {
   /// Coordinates of the [TextBox] are relative to the upper-left corner of the paragraph,
   /// where positive y values indicate down.
   List<TextBox> getBoxesForPlaceholders();
+
+  List<LineMetrics> computeLineMetrics();
 }
 
 /// Builds a [Paragraph] containing text with the given styling information.
