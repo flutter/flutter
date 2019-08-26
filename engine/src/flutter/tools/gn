@@ -89,6 +89,8 @@ def to_gn_args(args):
     if args.bitcode:
       if args.target_os != 'ios':
         raise Exception('Bitcode is only supported for iOS')
+      if runtime_mode == 'debug':
+        gn_args['bitcode_marker'] = True
 
     gn_args['enable_bitcode'] = args.bitcode
 
@@ -331,7 +333,7 @@ def parse_args(args):
                       help='Force building the GLFW shell on desktop platforms where it is not built by default.')
 
   parser.add_argument('--bitcode', default=False, action='store_true',
-                      help='Enable bitcode for iOS targets.')
+                      help='Enable bitcode for iOS targets. On debug runtime modes, this will be a marker only.')
 
   return parser.parse_args(args)
 
