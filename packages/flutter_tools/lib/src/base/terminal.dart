@@ -191,6 +191,8 @@ class AnsiTerminal {
   /// null, and the user presses enter without any other input, the return value
   /// will be the character in `acceptedCharacters` at the index given by
   /// `defaultChoiceIndex`.
+  ///
+  /// If [usesTerminalUi] is false, throws a [StateError].
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
     String prompt,
@@ -201,6 +203,9 @@ class AnsiTerminal {
     assert(acceptedCharacters.isNotEmpty);
     assert(prompt == null || prompt.isNotEmpty);
     assert(displayAcceptedCharacters != null);
+    if (!usesTerminalUi) {
+      throw StateError('cannot prompt without a terminal ui');
+    }
     List<String> charactersToDisplay = acceptedCharacters;
     if (defaultChoiceIndex != null) {
       assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
