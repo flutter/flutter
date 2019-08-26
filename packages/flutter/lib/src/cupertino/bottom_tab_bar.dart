@@ -123,11 +123,14 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   final double wideIconSize;
 
-  /// Whether the buttons should have a wide appearance, which, as of iOS 11,
+
+  /// Controls whether the buttons should have a wide appearance, which, as of iOS 11,
   /// is common apps in landscape mode (iPhone) or always on iPad.
   /// (source: https://developer.apple.com/videos/play/wwdc2017/204/)
   /// 
-  /// The default value is
+  /// It is suggested to wrap this widget in a [OrientationBuilder] to control the width of buttons on iPhone.
+  /// 
+  /// The default value is false.
   final bool isWide;
 
   /// The border of the [CupertinoTabBar].
