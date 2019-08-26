@@ -53,7 +53,9 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor,
     this.activeColor,
     this.inactiveColor = CupertinoColors.inactiveGray,
-    this.iconSize = 30.0,
+    this.iconSize = 34.0,
+    this.wideIconSize = 30.0,
+    this.isWide = false,
     this.border = const Border(
       top: BorderSide(
         color: _kDefaultTabBarBorderColor,
@@ -70,6 +72,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
        assert(inactiveColor != null),
+       assert(isWide != null),
        super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
@@ -118,6 +121,15 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Must not be null.
   final double iconSize;
 
+  final double wideIconSize;
+
+  /// Whether the buttons should have a wide appearance, which, as of iOS 11,
+  /// is common apps in landscape mode (iPhone) or always on iPad.
+  /// (source: https://developer.apple.com/videos/play/wwdc2017/204/)
+  /// 
+  /// The default value is
+  final bool isWide;
+
   /// The border of the [CupertinoTabBar].
   ///
   /// The default value is a one physical pixel top border with grey color.
@@ -148,17 +160,15 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         child: IconTheme.merge( // Default with the inactive state.
           data: IconThemeData(
             color: inactiveColor,
-            size: iconSize,
+            size: isWide ? wideIconSize : iconSize,
           ),
           child: DefaultTextStyle( // Default with the inactive state.
-            style: CupertinoTheme.of(context).textTheme.tabLabelTextStyle.copyWith(color: inactiveColor),
+            style: isWide ? 
+              CupertinoTheme.of(context).textTheme.tabWideLabelTextStyle
+              : CupertinoTheme.of(context).textTheme.tabLabelTextStyle,
             child: Padding(
               padding: EdgeInsets.only(bottom: bottomPadding),
-              child: Row(
-                // Align bottom since we want the labels to be aligned.
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: _buildTabItems(context),
-              ),
+              child: _buildTabItems(context, isWide),
             ),
           ),
         ),
@@ -178,7 +188,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     return result;
   }
 
-  List<Widget> _buildTabItems(BuildContext context) {
+  Widget _buildTabItems(BuildContext context, bool isWide) {
     final List<Widget> result = <Widget>[];
 
     for (int index = 0; index < items.length; index += 1) {
@@ -196,10 +206,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
                 onTap: onTap == null ? null : () { onTap(index); },
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: _buildSingleTabItem(items[index], active),
-                  ),
+                  child: isWide ? _buildSingleWideTabItem(items[index], active) : _buildSingleTabItem(items[index], active)
                 ),
               ),
             ),
@@ -209,10 +216,15 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       );
     }
 
-    return result;
+    return Row(
+      // Align bottom since we want the labels to be aligned.
+      // Wide items however need to be center-aligned
+      crossAxisAlignment: isWide ? CrossAxisAlignment.center : CrossAxisAlignment.end,
+      children: result,
+    );
   }
 
-  List<Widget> _buildSingleTabItem(BottomNavigationBarItem item, bool active) {
+  Widget _buildSingleTabItem(BottomNavigationBarItem item, bool active) {
     final List<Widget> components = <Widget>[
       Expanded(
         child: Center(child: active ? item.activeIcon : item.icon),
@@ -223,7 +235,31 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       components.add(item.title);
     }
 
-    return components;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: components
+    );
+  }
+
+  Widget _buildSingleWideTabItem(BottomNavigationBarItem item, bool active) {
+    final List<Widget> components = <Widget>[
+      active ? item.activeIcon : item.icon,
+    ];
+
+    if (item.title != null) {
+      components.add(
+        Padding(
+          padding: const EdgeInsets.only(left: 4.0),
+          child: item.title,
+        )
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: components
+    );
   }
 
   /// Change the active tab item's icon and title colors to active.
@@ -250,6 +286,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Color activeColor,
     Color inactiveColor,
     Size iconSize,
+    Size wideIconSize,
+    bool isWide,
     Border border,
     int currentIndex,
     ValueChanged<int> onTap,
@@ -261,6 +299,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       activeColor: activeColor ?? this.activeColor,
       inactiveColor: inactiveColor ?? this.inactiveColor,
       iconSize: iconSize ?? this.iconSize,
+      wideIconSize: wideIconSize ?? this.wideIconSize,
+      isWide: isWide ?? this.isWide,
       border: border ?? this.border,
       currentIndex: currentIndex ?? this.currentIndex,
       onTap: onTap ?? this.onTap,

@@ -43,7 +43,15 @@ const TextStyle _kDefaultTabLabelTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Text',
   fontSize: 10.0,
-  letterSpacing: -0.24,
+  letterSpacing: 0.11,
+  color: CupertinoColors.inactiveGray,
+);
+
+const TextStyle _kDefaultWideTabLabelTextStyle = TextStyle(
+  inherit: false,
+  fontFamily: '.SF Pro Text',
+  fontSize: 12.0,
+  letterSpacing: 0.0,
   color: CupertinoColors.inactiveGray,
 );
 
@@ -141,6 +149,7 @@ class CupertinoTextThemeData extends Diagnosticable {
     TextStyle textStyle,
     TextStyle actionTextStyle,
     TextStyle tabLabelTextStyle,
+    TextStyle tabWideLabelTextStyle,
     TextStyle navTitleTextStyle,
     TextStyle navLargeTitleTextStyle,
     TextStyle navActionTextStyle,
@@ -151,6 +160,7 @@ class CupertinoTextThemeData extends Diagnosticable {
        _textStyle = textStyle,
        _actionTextStyle = actionTextStyle,
        _tabLabelTextStyle = tabLabelTextStyle,
+       _tabWideLabelTextStyle = tabWideLabelTextStyle,
        _navTitleTextStyle = navTitleTextStyle,
        _navLargeTitleTextStyle = navLargeTitleTextStyle,
        _navActionTextStyle = navActionTextStyle,
@@ -176,6 +186,10 @@ class CupertinoTextThemeData extends Diagnosticable {
   final TextStyle _tabLabelTextStyle;
   /// Typography of unselected tabs.
   TextStyle get tabLabelTextStyle => _tabLabelTextStyle ?? _kDefaultTabLabelTextStyle;
+
+  final TextStyle _tabWideLabelTextStyle;
+  /// Typography of unselected tabs.
+  TextStyle get tabWideLabelTextStyle => _tabWideLabelTextStyle ?? _kDefaultWideTabLabelTextStyle;
 
   final TextStyle _navTitleTextStyle;
   /// Typography of titles in standard navigation bars.
