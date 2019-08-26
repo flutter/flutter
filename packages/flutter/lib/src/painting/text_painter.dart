@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -815,5 +815,17 @@ class TextPainter {
     assert(!_needsLayout);
     final List<int> indices = _paragraph.getWordBoundary(position.offset);
     return TextRange(start: indices[0], end: indices[1]);
+  }
+
+  /// Returns the full list of [LineMetrics] that describe in detail the various
+  /// metrics of each laid out line.
+  ///
+  /// Not valid until after layout.
+  ///
+  /// This can potentially return a large amount of data, so it is not recommended
+  /// to repeatedly call this. Instead, cache the results.
+  List<ui.LineMetrics> computeLineMetrics() {
+    assert(!_needsLayout);
+    return _paragraph.computeLineMetrics();
   }
 }
