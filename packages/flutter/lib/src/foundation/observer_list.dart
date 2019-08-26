@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 /// A list optimized for containment queries.
 ///
 /// Consider using an [ObserverList] instead of a [List] when the number of
@@ -20,23 +18,22 @@ class ObserverList<T> extends Iterable<T> {
 
   /// Removes an item from the list.
   ///
-  /// This is O(N) in the number of items in the list.
-  ///
   /// Returns whether the item was present in the list.
   bool remove(T item) {
-    assert(_map.containsKey(item));
-    final int count = _map[item] -= 1;
-    if (count == 0) {
-      _map.remove(item);
-      return true;
+    final int value = _map[item];
+    if (value == null) {
+      return false;
     }
-    return false;
+    if (value == 1) {
+      _map.remove(item);
+    } else {
+      _map[item] = value - 1;
+    }
+    return true;
   }
 
   @override
-  bool contains(Object element) {
-    return _map.containsKey(element);
-  }
+  bool contains(Object element) => _map.containsKey(element);
 
   @override
   Iterator<T> get iterator => _map.keys.iterator;

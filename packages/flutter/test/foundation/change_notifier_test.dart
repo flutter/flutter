@@ -44,7 +44,7 @@ void main() {
     test.addListener(listener);
     test.addListener(listener);
     test.notify();
-    expect(log, <String>['listener', 'listener']);
+    expect(log, <String>['listener']);
     log.clear();
 
     test.removeListener(listener);
@@ -72,6 +72,11 @@ void main() {
     expect(log, <String>['listener', 'listener1']);
     log.clear();
 
+    test.addListener(listener1);
+    test.notify();
+    expect(log, <String>['listener', 'listener1']);
+    log.clear();
+
     test.addListener(listener2);
     test.notify();
     expect(log, <String>['listener', 'listener1', 'listener2']);
@@ -79,17 +84,17 @@ void main() {
 
     test.removeListener(listener1);
     test.notify();
-    expect(log, <String>['listener', 'listener2']);
+    expect(log, <String>['listener', 'listener1', 'listener2']);
     log.clear();
 
     test.addListener(listener1);
     test.notify();
-    expect(log, <String>['listener', 'listener2', 'listener1']);
+    expect(log, <String>['listener', 'listener1', 'listener2']);
     log.clear();
 
     test.addListener(badListener);
     test.notify();
-    expect(log, <String>['listener', 'listener2', 'listener1', 'badListener']);
+    expect(log, <String>['listener', 'listener1', 'listener2', 'badListener']);
     expect(tester.takeException(), isNullThrownError);
     log.clear();
 
@@ -99,7 +104,7 @@ void main() {
     test.removeListener(listener2);
     test.addListener(listener2);
     test.notify();
-    expect(log, <String>['badListener', 'listener1', 'listener2']);
+    expect(log, <String>['listener1', 'badListener', 'listener2']);
     expect(tester.takeException(), isNullThrownError);
     log.clear();
   }, skip: isBrowser);
@@ -130,7 +135,7 @@ void main() {
     log.clear();
 
     test.notify();
-    expect(log, <String>['listener2', 'listener4', 'listener4']);
+    expect(log, <String>['listener2', 'listener4']);
     log.clear();
   });
 
