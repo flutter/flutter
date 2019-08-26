@@ -76,6 +76,8 @@ public class AndroidTouchProcessor {
   @NonNull
   private final FlutterRenderer renderer;
 
+  private static final int _POINTER_BUTTON_PRIMARY = 1;
+
   /**
    * Constructs an {@code AndroidTouchProcessor} that will send touch event data
    * to the Flutter execution context represented by the given {@link FlutterRenderer}.
@@ -199,13 +201,22 @@ public class AndroidTouchProcessor {
     packet.putDouble(event.getX(pointerIndex)); // physical_x
     packet.putDouble(event.getY(pointerIndex)); // physical_y
 
+    long buttons;
     if (pointerKind == PointerDeviceKind.MOUSE) {
-      packet.putLong(event.getButtonState() & 0x1F); // buttons
+      buttons = event.getButtonState() & 0x1F;
+      // TODO(dkwingsmt): Remove this fix after implementing touchpad gestures
+      // https://github.com/flutter/flutter/issues/23604#issuecomment-524471152
+      if (buttons == 0 &&
+          event.getSource() == InputDevice.SOURCE_MOUSE &&
+          (pointerChange == PointerChange.DOWN || pointerChange == PointerChange.MOVE)) {
+        buttons = _POINTER_BUTTON_PRIMARY;
+      }
     } else if (pointerKind == PointerDeviceKind.STYLUS) {
-      packet.putLong((event.getButtonState() >> 4) & 0xF); // buttons
+      buttons = (event.getButtonState() >> 4) & 0xF;
     } else {
-      packet.putLong(0); // buttons
+      buttons = 0;
     }
+    packet.putLong(buttons); // buttons
 
     packet.putLong(0); // obscured
 
