@@ -160,6 +160,7 @@ class ResidentWebRunner extends ResidentRunner {
       );
       if (supportsServiceProtocol) {
         _debugConnection = await _webFs.runAndDebug();
+        unawaited(_debugConnection.onDone.whenComplete(exit));
       }
     } catch (err, stackTrace) {
       printError(err.toString());
