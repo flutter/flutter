@@ -60,8 +60,13 @@ final Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
 // the background color of a pressed button.
 // Eye-balled from iOS 13 beta simulator.
 final Color _kPressedColor = CupertinoDynamicColor.withBrightness(
-  color: const Color(0xFFe1e1e1),
-  darkColor: const Color(0xFF2e2e2e),
+  color: const Color(0xFFE1E1E1),
+  darkColor: const Color(0xFF2E2E2E),
+);
+
+final Color _kCancelPressedColor = CupertinoDynamicColor.withBrightness(
+  color: const Color(0xFFECECEC),
+  darkColor: const Color(0xFF49494B),
 );
 
 // The gray color used for text that appears in the title area.
@@ -382,7 +387,7 @@ class _CupertinoActionSheetCancelButtonState extends State<_CupertinoActionSheet
   @override
   Widget build(BuildContext context) {
     final Color backgroundColor = isBeingPressed
-      ? _kPressedColor
+      ? _kCancelPressedColor
       : CupertinoSystemColors.of(context).secondarySystemGroupedBackground;
     return GestureDetector(
       excludeFromSemantics: true,
