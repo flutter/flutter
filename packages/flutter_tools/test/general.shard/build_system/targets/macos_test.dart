@@ -21,7 +21,7 @@ import '../../../src/common.dart';
 import '../../../src/testbed.dart';
 
 const String _kInputPrefix = 'bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework';
-const String _kOutputPrefix = 'macos/Flutter/ephemeral/FlutterMacOS.framework';
+const String _kOutputPrefix = 'FlutterMacOS.framework';
 
 final List<File> inputs = <File>[
   fs.file('$_kInputPrefix/FlutterMacOS'),
@@ -68,6 +68,7 @@ void main() {
           'vmservice_io.dart')).createSync(recursive: true);
 
       environment = Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
         defines: <String, String>{
           kBuildMode: 'debug',
@@ -126,13 +127,11 @@ void main() {
         'isolate_snapshot.bin')).createSync(recursive: true);
     fs.file(fs.path.join(environment.buildDir.path, 'App.framework', 'App'))
         ..createSync(recursive: true);
-    final String frameworkPath = fs.path.join(environment.projectDir.path,
-        'macos', 'Flutter', 'ephemeral', 'App.framework');
+
     final String inputKernel = fs.path.join(environment.buildDir.path, 'app.dill');
-    fs.directory(frameworkPath).createSync(recursive: true);
-    final String outputKernel = fs.path.join(frameworkPath, 'Versions', 'A', 'Resources',
+    final String outputKernel = fs.path.join('App.framework', 'Versions', 'A', 'Resources',
         'flutter_assets', 'kernel_blob.bin');
-    final String outputPlist = fs.path.join(frameworkPath, 'Versions', 'A', 'Resources',
+    final String outputPlist = fs.path.join('App.framework', 'Versions', 'A', 'Resources',
         'Info.plist');
     fs.file(inputKernel)
       ..createSync(recursive: true)
@@ -151,14 +150,11 @@ void main() {
         'isolate_snapshot.bin')).createSync(recursive: true);
     fs.file(fs.path.join(environment.buildDir.path, 'App.framework', 'App'))
         ..createSync(recursive: true);
-    final String frameworkPath = fs.path.join(environment.projectDir.path,
-        'macos', 'Flutter', 'ephemeral', 'App.framework');
-    fs.directory(frameworkPath).createSync(recursive: true);
-    final String outputKernel = fs.path.join(frameworkPath, 'Resources',
+    final String outputKernel = fs.path.join('App.framework', 'Resources',
         'flutter_assets', 'kernel_blob.bin');
-    final String precompiledVm = fs.path.join(frameworkPath, 'Resources',
+    final String precompiledVm = fs.path.join('App.framework', 'Resources',
         'flutter_assets', 'vm_snapshot_data');
-    final String precompiledIsolate = fs.path.join(frameworkPath, 'Resources',
+    final String precompiledIsolate = fs.path.join('App.framework', 'Resources',
         'flutter_assets', 'isolate_snapshot_data');
     await const ProfileMacOSBundleFlutterAssets().build(<File>[], environment..defines[kBuildMode] = 'profile');
 

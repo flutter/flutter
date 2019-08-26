@@ -72,4 +72,5 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     -dBuildMode="${build_mode}"                                             \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
+    --output="${ephemeral_dir}"                                             \
    "${build_mode}_macos_bundle_flutter_assets"
