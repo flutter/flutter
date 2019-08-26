@@ -80,7 +80,7 @@ mixin AnimationEagerListenerMixin {
 /// and [didUnregisterListener]. Implementations of these methods can be obtained
 /// by mixing in another mixin from this library, such as [AnimationLazyListenerMixin].
 mixin AnimationLocalListenersMixin {
-  final Set<VoidCallback> _listeners = <VoidCallback>{};
+  final ObserverList<VoidCallback> _listeners = ObserverList<VoidCallback>();
 
   /// Called immediately before a listener is added via [addListener].
   ///
@@ -149,7 +149,7 @@ mixin AnimationLocalListenersMixin {
 /// and [didUnregisterListener]. Implementations of these methods can be obtained
 /// by mixing in another mixin from this library, such as [AnimationLazyListenerMixin].
 mixin AnimationLocalStatusListenersMixin {
-  final Set<AnimationStatusListener> _statusListeners = <AnimationStatusListener>{};
+  final ObserverList<AnimationStatusListener> _statusListeners = ObserverList<AnimationStatusListener>();
 
   /// Called immediately before a status listener is added via [addStatusListener].
   ///

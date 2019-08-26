@@ -11,14 +11,11 @@ import 'dart:collection';
 // TODO(ianh): Use DelegatingIterable, possibly moving it from the collection
 // package to foundation, or to dart:collection.
 class ObserverList<T> extends Iterable<T> {
-  final List<T> _list = <T>[];
-  bool _isDirty = false;
-  HashSet<T> _set;
+  final Map<T, int> _map = <T, int>{};
 
   /// Adds an item to the end of this list.
   void add(T item) {
-    _isDirty = true;
-    _list.add(item);
+    _map[item] = (_map[item] ?? 0) + 1;
   }
 
   /// Removes an item from the list.
@@ -27,34 +24,26 @@ class ObserverList<T> extends Iterable<T> {
   ///
   /// Returns whether the item was present in the list.
   bool remove(T item) {
-    _isDirty = true;
-    return _list.remove(item);
+    assert(_map.containsKey(item));
+    final int count = _map[item] -= 1;
+    if (count == 0) {
+      _map.remove(item);
+      return true;
+    }
+    return false;
   }
 
   @override
   bool contains(Object element) {
-    if (_list.length < 3)
-      return _list.contains(element);
-
-    if (_isDirty) {
-      if (_set == null) {
-        _set = HashSet<T>.from(_list);
-      } else {
-        _set.clear();
-        _set.addAll(_list);
-      }
-      _isDirty = false;
-    }
-
-    return _set.contains(element);
+    return _map.containsKey(element);
   }
 
   @override
-  Iterator<T> get iterator => _list.iterator;
+  Iterator<T> get iterator => _map.keys.iterator;
 
   @override
-  bool get isEmpty => _list.isEmpty;
+  bool get isEmpty => _map.isEmpty;
 
   @override
-  bool get isNotEmpty => _list.isNotEmpty;
+  bool get isNotEmpty => _map.isNotEmpty;
 }
