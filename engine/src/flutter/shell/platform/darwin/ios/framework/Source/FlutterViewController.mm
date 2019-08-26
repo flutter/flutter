@@ -523,6 +523,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
 - (void)dealloc {
   [_engine.get() notifyViewControllerDeallocated];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [_ongoingTouches release];
   [super dealloc];
 }
 
