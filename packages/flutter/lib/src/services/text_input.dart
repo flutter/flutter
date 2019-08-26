@@ -7,6 +7,8 @@ import 'dart:io' show Platform;
 import 'dart:ui' show TextAffinity, hashValues, Offset;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'message_codec.dart';
 import 'system_channels.dart';
@@ -657,6 +659,48 @@ class TextInputConnection with ChangeNotifier {
     SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setEditingState',
       value.toJSON(),
+    );
+  }
+
+  /// Send the size and transform of the editable text to engine.
+  ///
+  /// The values are taken from the size of the render box.
+  ///
+  /// 1. [renderBoxSize]: size of the render box.
+  ///
+  /// 2. [transform]: a matrix that maps the local paint coordinate system
+  ///                 to the [PipelineOwner.rootNode].
+  void setEditableSizeAndTransform(Size renderBoxSize, Matrix4 transform) {
+    final List<double> transformList = List<double>(16);
+    transform.copyIntoArray(transformList);
+
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setEditableSizeAndTransform',
+      <String, dynamic>{
+        'width': renderBoxSize.width,
+        'height': renderBoxSize.height,
+        'transform': transformList,
+      },
+    );
+  }
+
+  /// Send text styling information.
+  ///
+  /// This information is used by the Flutter Web Engine to change the style
+  /// of the hidden native input's content. Hence, the content size will match
+  /// to the size of the editable widget's content.
+  void setStyle(TextStyle textStyle, TextDirection textDirection, TextAlign textAlign) {
+    assert(attached);
+
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setStyle',
+      <String, dynamic>{
+        'fontFamily': textStyle.fontFamily,
+        'fontSize': textStyle.fontSize,
+        'fontWeightIndex': textStyle.fontWeight?.index,
+        'textAlignIndex': textAlign.index,
+        'textDirectionIndex': textDirection.index,
+      },
     );
   }
 
