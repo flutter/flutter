@@ -169,6 +169,11 @@ class SliverConstraints extends Constraints {
   /// will have A at the top, then B, then C, and so forth, with Z at the
   /// bottom, with the bottom of the Z at scroll offset zero, and the top of the
   /// A at the highest scroll offset.
+  ///
+  /// Normally, the [growthDirection] of a sliver is determined by where it is
+  /// relative to a centered sliver with all slivers before the center sliver
+  /// having a [GrowthDirection.reverse] and all other slivers having a
+  /// [GrowthDirection.forward].
   final GrowthDirection growthDirection;
 
   /// The direction in which the user is attempting to scroll, relative to the
