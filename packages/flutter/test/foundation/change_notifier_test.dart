@@ -127,7 +127,7 @@ void main() {
     test.addListener(listener2);
     test.addListener(listener3);
     test.notify();
-    expect(log, <String>['listener1', 'listener2']);
+    expect(log, <String>['listener1', 'listener2', 'listener3']);
     log.clear();
 
     test.notify();

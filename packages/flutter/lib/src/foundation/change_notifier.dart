@@ -199,27 +199,27 @@ class ChangeNotifier implements Listenable {
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
     if (_listeners != null) {
-      final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
-      for (VoidCallback listener in localListeners) {
-        try {
-          if (_listeners.contains(listener))
+      _listeners.safeIteration((Iterable<VoidCallback> iterable) {
+        for (VoidCallback listener in iterable) {
+          try {
             listener();
-        } catch (exception, stack) {
-          FlutterError.reportError(FlutterErrorDetails(
-            exception: exception,
-            stack: stack,
-            library: 'foundation library',
-            context: ErrorDescription('while dispatching notifications for $runtimeType'),
-            informationCollector: () sync* {
-              yield DiagnosticsProperty<ChangeNotifier>(
-                'The $runtimeType sending notification was',
-                this,
-                style: DiagnosticsTreeStyle.errorProperty,
-              );
-            },
-          ));
+          } catch (exception, stack) {
+            FlutterError.reportError(FlutterErrorDetails(
+              exception: exception,
+              stack: stack,
+              library: 'foundation library',
+              context: ErrorDescription('while dispatching notifications for $runtimeType'),
+              informationCollector: () sync* {
+                yield DiagnosticsProperty<ChangeNotifier>(
+                  'The $runtimeType sending notification was',
+                  this,
+                  style: DiagnosticsTreeStyle.errorProperty,
+                );
+              },
+            ));
+          }
         }
-      }
+      });
     }
   }
 }

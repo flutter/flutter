@@ -117,27 +117,27 @@ mixin AnimationLocalListenersMixin {
   /// If listeners are added or removed during this function, the modifications
   /// will not change which listeners are called during this iteration.
   void notifyListeners() {
-    final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
-    for (VoidCallback listener in localListeners) {
-      try {
-        if (_listeners.contains(listener))
+    _listeners.safeIteration((Iterable<VoidCallback> iterable) {
+      for (VoidCallback listener in iterable) {
+        try {
           listener();
-      } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'animation library',
-          context: ErrorDescription('while notifying listeners for $runtimeType'),
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<AnimationLocalListenersMixin>(
-              'The $runtimeType notifying listeners was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            );
-          },
-        ));
+        } catch (exception, stack) {
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'animation library',
+            context: ErrorDescription('while notifying listeners for $runtimeType'),
+            informationCollector: () sync* {
+              yield DiagnosticsProperty<AnimationLocalListenersMixin>(
+                'The $runtimeType notifying listeners was',
+                this,
+                style: DiagnosticsTreeStyle.errorProperty,
+              );
+            },
+          ));
+        }
       }
-    }
+    });
   }
 }
 
@@ -186,26 +186,26 @@ mixin AnimationLocalStatusListenersMixin {
   /// If listeners are added or removed during this function, the modifications
   /// will not change which listeners are called during this iteration.
   void notifyStatusListeners(AnimationStatus status) {
-    final List<AnimationStatusListener> localListeners = List<AnimationStatusListener>.from(_statusListeners);
-    for (AnimationStatusListener listener in localListeners) {
-      try {
-        if (_statusListeners.contains(listener))
+    _statusListeners.safeIteration((Iterable<AnimationStatusListener> iterable) {
+      for (AnimationStatusListener listener in iterable) {
+        try {
           listener(status);
-      } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'animation library',
-          context: ErrorDescription('while notifying status listeners for $runtimeType'),
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
-              'The $runtimeType notifying status listeners was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            );
-          },
-        ));
+        } catch (exception, stack) {
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'animation library',
+            context: ErrorDescription('while notifying status listeners for $runtimeType'),
+            informationCollector: () sync* {
+              yield DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
+                'The $runtimeType notifying status listeners was',
+                this,
+                style: DiagnosticsTreeStyle.errorProperty,
+              );
+            },
+          ));
+        }
       }
-    }
+    });
   }
 }
