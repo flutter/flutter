@@ -125,8 +125,10 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Must not be null.
   final double iconSize;
 
+  /// Same as `iconSize`, but applies when `isWide` is true
   final double wideIconSize;
 
+  /// Same as `iconSize`, but applies when `isWide` and `isCompact` are both true
   final double compactIconSize;
 
   /// Controls whether the buttons should have a wide appearance, which, as of iOS 11,
@@ -138,7 +140,11 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// The default value is false.
   final bool isWide;
 
-  /// Controls whether 
+  /// Controls whether the tab bar should be displayed in its compact mode (landscape mode on iPhone) or the regular one.
+  /// 
+  /// Its value is ignored when `isWide` equals false.
+  /// 
+  /// The default value is false.
   final bool isCompact;
 
   /// The border of the [CupertinoTabBar].
