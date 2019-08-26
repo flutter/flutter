@@ -9,8 +9,8 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
-// Standard iOS 10 tab bar height.
-const double _kTabBarHeight = 50.0;
+// Standard iOS 11 tab bar height.
+const double _kTabBarHeight = 49.0;
 
 const Color _kDefaultTabBarBorderColor = Color(0x4C000000);
 
