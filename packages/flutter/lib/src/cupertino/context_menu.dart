@@ -13,6 +13,8 @@ import 'colors.dart';
 // The scale of the child at the time that the ContextMenu opens.
 const double _kOpenScale = 1.2;
 
+typedef void _DismissCallback(BuildContext context, double scale);
+
 // Given a GlobalKey, return the Rect of the corresponding RenderBox's
 // paintBounds.
 Rect _getRect(GlobalKey globalKey) {
@@ -352,6 +354,7 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   final List<ContextMenuSheetAction> _actions;
   final WidgetBuilder _builder;
   final VoidCallback _onTap;
+  double _scale = 1.0;
 
   final RectTween _rectTween = RectTween();
   final RectTween _rectTweenReverse = RectTween();
@@ -363,6 +366,11 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
 
   bool _externalOffstage = false;
   bool _internalOffstage = false;
+
+  void _onDismiss(BuildContext context, double scale) {
+    _scale = scale;
+    Navigator.of(context).pop();
+  }
 
   @override
   final String barrierLabel;
@@ -479,9 +487,12 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
           ),
           Positioned.fromRect(
             rect: rect,
-            child: FittedBox(
-              fit: BoxFit.cover,
-              child: _builder(context),
+            child: Transform.scale(
+              scale: _scale,
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: _builder(context),
+              ),
             ),
           ),
         ],
@@ -494,6 +505,7 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
       actions: _actions,
       child: _builder(context),
       childGlobalKey: _childGlobalKey,
+      onDismiss: _onDismiss,
       onTap: _onTap,
       sheetGlobalKey: _sheetGlobalKey,
     );
@@ -506,6 +518,7 @@ class _ContextMenuRouteStatic extends StatefulWidget {
     this.actions,
     this.child,
     this.childGlobalKey,
+    this.onDismiss,
     this.onTap,
     this.sheetGlobalKey,
   }) : super(key: key);
@@ -513,6 +526,7 @@ class _ContextMenuRouteStatic extends StatefulWidget {
   final List<ContextMenuSheetAction> actions;
   final Widget child;
   final GlobalKey childGlobalKey;
+  final _DismissCallback onDismiss;
   final VoidCallback onTap;
   final GlobalKey sheetGlobalKey;
 
@@ -521,21 +535,22 @@ class _ContextMenuRouteStatic extends StatefulWidget {
 }
 
 class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with TickerProviderStateMixin {
+  // The child is scaled down as it is dragged down until it hits this minimum
+  // value.
   static const double _kMinScale = 0.8;
-  // Distance where a drag should be considered a dismissal, in fraction of the
-  // screen size.
-  static const double _kDismissThreshold = 0.2;
 
+  double _lastScale;
   AnimationController _moveController;
   Animation<Offset> _moveAnimation;
 
-  // TODO(justinmc): Use this to scale the child (not menu too).
   double _getScale(Orientation orientation, double maxDragDistance) {
     if (orientation != Orientation.portrait || _moveAnimation.value.dy <= 0) {
       return 1.0;
     }
-
-    return _moveAnimation.value.dy * _kMinScale / maxDragDistance;
+    return math.max(
+      _kMinScale,
+      (maxDragDistance - _moveAnimation.value.dy) / maxDragDistance,
+    );
   }
 
   void _onVerticalDragStart(DragStartDetails details) {
@@ -574,10 +589,9 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       return;
     }
 
-    // Dismiss if the drag is enough.
-    final double dismissDragDistance = context.size.height * _kDismissThreshold;
-    if (_moveAnimation.value.dy >= dismissDragDistance) {
-      Navigator.of(context).pop();
+    // Dismiss if the drag is enough to scale down all the way.
+    if (_lastScale == _kMinScale) {
+      widget.onDismiss(context, _lastScale);
       return;
     }
 
@@ -596,7 +610,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     if (_moveAnimation.value.dy == 0.0) {
       return;
     }
-    Navigator.of(context).pop();
+    widget.onDismiss(context, _lastScale);
   }
 
   void _setDragDistance([double dragDistance]) {
@@ -618,6 +632,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       offset: _moveAnimation.value,
       child: OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
+          _lastScale = _getScale(orientation, MediaQuery.of(context).size.height);
           final List<Widget> children =  <Widget>[
             Expanded(
               child: Align(
@@ -626,10 +641,13 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: widget.onTap,
-                  child: FittedBox(
-                    fit: BoxFit.cover,
+                  child: Transform.scale(
+                    scale: _lastScale,
                     key: widget.childGlobalKey,
-                    child: widget.child,
+                    child: FittedBox(
+                      fit: BoxFit.cover,
+                      child: widget.child,
+                    ),
                   ),
                 ),
               ),
