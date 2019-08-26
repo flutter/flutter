@@ -4,6 +4,14 @@
 
 import 'platform.dart' as platform;
 
+/// The dart:html implementation of [platform.resolvedExecutable].
+String get resolvedExecutable => 'browser';
+
+/// The dart:html implementation of [platform.currentHostPlatform].
+platform.HostPlatform get currentHostPlatform {
+  return platform.HostPlatform.browser;
+}
+
 /// The dart:html implementation of [platform.defaultTargetPlatform].
 platform.TargetPlatform get defaultTargetPlatform {
   // To getter a better guess at the targetPlatform we need to be able to

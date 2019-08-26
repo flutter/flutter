@@ -6,6 +6,28 @@ import 'dart:io';
 import 'assertions.dart';
 import 'platform.dart' as platform;
 
+/// The dart:io implementation of [platform.resolvedExecutable].
+String get resolvedExecutable => Platform.resolvedExecutable;
+
+/// The dart:io implementation of [platform.currentHostPlatform].
+platform.HostPlatform get currentHostPlatform {
+  platform.HostPlatform result;
+  if (Platform.isIOS) {
+    result = platform.HostPlatform.iOS;
+  } else if (Platform.isAndroid) {
+    result = platform.HostPlatform.android;
+  } else if (Platform.isFuchsia) {
+    result = platform.HostPlatform.fuchsia;
+  } else if (Platform.isMacOS) {
+    result = platform.HostPlatform.macOS;
+  } else if (Platform.isWindows) {
+    result = platform.HostPlatform.windows;
+  } else if (Platform.isLinux) {
+    result = platform.HostPlatform.linux;
+  }
+  return result;
+}
+
 /// The dart:io implementation of [platform.defaultTargetPlatform].
 platform.TargetPlatform get defaultTargetPlatform {
   platform.TargetPlatform result;
