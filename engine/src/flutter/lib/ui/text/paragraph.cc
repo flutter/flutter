@@ -33,7 +33,8 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
   V(Paragraph, getWordBoundary)         \
   V(Paragraph, getRectsForRange)        \
   V(Paragraph, getRectsForPlaceholders) \
-  V(Paragraph, getPositionForOffset)
+  V(Paragraph, getPositionForOffset)    \
+  V(Paragraph, computeLineMetrics)
 
 DART_BIND_ALL(Paragraph, FOR_EACH_BINDING)
 
@@ -130,6 +131,17 @@ Dart_Handle Paragraph::getWordBoundary(unsigned offset) {
   Dart_Handle result = Dart_NewListOf(Dart_CoreType_Int, 2);
   Dart_ListSetAt(result, 0, ToDart(point.start));
   Dart_ListSetAt(result, 1, ToDart(point.end));
+  return result;
+}
+
+std::vector<LineMetrics> Paragraph::computeLineMetrics() {
+  std::vector<LineMetrics> result;
+  std::vector<txt::LineMetrics> metrics = m_paragraph->GetLineMetrics();
+  for (txt::LineMetrics& line : metrics) {
+    result.emplace_back(&line.hard_break, &line.ascent, &line.descent,
+                        &line.unscaled_ascent, &line.height, &line.width,
+                        &line.left, &line.baseline, &line.line_number);
+  }
   return result;
 }
 

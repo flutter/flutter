@@ -999,7 +999,7 @@ void ParagraphTxt::Layout(double width) {
         size_t run_key = run.end() - 1;
         line_metrics.run_metrics.emplace(run_key, &run.style());
         SkFontMetrics* metrics =
-            &line_metrics.run_metrics.at(run_key).GetFontMetrics();
+            &line_metrics.run_metrics.at(run_key).font_metrics;
         font.getMetrics(metrics);
 
         Range<double> record_x_pos(

@@ -177,50 +177,42 @@ TEST_F(ParagraphTest, LineMetricsParagraph1) {
   ASSERT_EQ(
       paragraph->GetLineMetrics()[0]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[0].start_index)
-          ->second.GetTextStyle()
-          .color,
+          ->second.text_style->color,
       SK_ColorBLACK);
   ASSERT_EQ(
       paragraph->GetLineMetrics()[0]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[0].start_index)
-          ->second.GetTextStyle()
-          .font_families,
+          ->second.text_style->font_families,
       std::vector<std::string>(1, "Roboto"));
   ASSERT_FLOAT_EQ(
       paragraph->GetLineMetrics()[0]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[0].start_index)
-          ->second.GetFontMetrics()
-          .fAscent,
+          ->second.font_metrics.fAscent,
       -12.988281);
   ASSERT_FLOAT_EQ(
       paragraph->GetLineMetrics()[0]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[0].start_index)
-          ->second.GetFontMetrics()
-          .fDescent,
+          ->second.font_metrics.fDescent,
       3.4179688);
   ASSERT_FLOAT_EQ(
       paragraph->GetLineMetrics()[0]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[0].start_index)
-          ->second.GetFontMetrics()
-          .fXHeight,
+          ->second.font_metrics.fXHeight,
       7.3964844);
   ASSERT_FLOAT_EQ(
       paragraph->GetLineMetrics()[0]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[0].start_index)
-          ->second.GetFontMetrics()
-          .fLeading,
+          ->second.font_metrics.fLeading,
       0);
   ASSERT_FLOAT_EQ(
       paragraph->GetLineMetrics()[0]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[0].start_index)
-          ->second.GetFontMetrics()
-          .fTop,
+          ->second.font_metrics.fTop,
       -14.786133);
   ASSERT_FLOAT_EQ(
       paragraph->GetLineMetrics()[0]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[0].start_index)
-          ->second.GetFontMetrics()
-          .fUnderlinePosition,
+          ->second.font_metrics.fUnderlinePosition,
       1.0253906);
 
   ASSERT_EQ(paragraph->GetLineMetrics()[1].start_index, 25ull);
@@ -238,50 +230,42 @@ TEST_F(ParagraphTest, LineMetricsParagraph1) {
   ASSERT_EQ(
       paragraph->GetLineMetrics()[1]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[1].start_index)
-          ->second.GetTextStyle()
-          .color,
+          ->second.text_style->color,
       SK_ColorBLACK);
   ASSERT_EQ(
       paragraph->GetLineMetrics()[1]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[1].start_index)
-          ->second.GetTextStyle()
-          .font_families,
+          ->second.text_style->font_families,
       std::vector<std::string>(1, "Roboto"));
   ASSERT_FLOAT_EQ(
       paragraph->GetLineMetrics()[1]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[1].start_index)
-          ->second.GetFontMetrics()
-          .fAscent,
+          ->second.font_metrics.fAscent,
       -12.988281);
   ASSERT_FLOAT_EQ(
       paragraph->GetLineMetrics()[1]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[1].start_index)
-          ->second.GetFontMetrics()
-          .fDescent,
+          ->second.font_metrics.fDescent,
       3.4179688);
   ASSERT_FLOAT_EQ(
       paragraph->GetLineMetrics()[1]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[1].start_index)
-          ->second.GetFontMetrics()
-          .fXHeight,
+          ->second.font_metrics.fXHeight,
       7.3964844);
   ASSERT_FLOAT_EQ(
       paragraph->GetLineMetrics()[1]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[1].start_index)
-          ->second.GetFontMetrics()
-          .fLeading,
+          ->second.font_metrics.fLeading,
       0);
   ASSERT_FLOAT_EQ(
       paragraph->GetLineMetrics()[1]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[1].start_index)
-          ->second.GetFontMetrics()
-          .fTop,
+          ->second.font_metrics.fTop,
       -14.786133);
   ASSERT_FLOAT_EQ(
       paragraph->GetLineMetrics()[1]
           .run_metrics.lower_bound(paragraph->GetLineMetrics()[1].start_index)
-          ->second.GetFontMetrics()
-          .fUnderlinePosition,
+          ->second.font_metrics.fUnderlinePosition,
       1.0253906);
 }
 
@@ -336,87 +320,71 @@ TEST_F(ParagraphTest, LineMetricsParagraph2) {
   // First run
   ASSERT_EQ(paragraph->GetLineMetrics()[0]
                 .run_metrics.lower_bound(2)
-                ->second.GetTextStyle()
-                .font_size,
+                ->second.text_style->font_size,
             27);
   ASSERT_EQ(paragraph->GetLineMetrics()[0]
                 .run_metrics.lower_bound(2)
-                ->second.GetTextStyle()
-                .font_families,
+                ->second.text_style->font_families,
             text_style.font_families);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0]
                       .run_metrics.lower_bound(2)
-                      ->second.GetFontMetrics()
-                      .fAscent,
+                      ->second.font_metrics.fAscent,
                   -25.048828);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0]
                       .run_metrics.lower_bound(2)
-                      ->second.GetFontMetrics()
-                      .fDescent,
+                      ->second.font_metrics.fDescent,
                   6.5917969);
 
   ASSERT_EQ(paragraph->GetLineMetrics()[0]
                 .run_metrics.lower_bound(21)
-                ->second.GetTextStyle()
-                .font_size,
+                ->second.text_style->font_size,
             27);
   ASSERT_EQ(paragraph->GetLineMetrics()[0]
                 .run_metrics.lower_bound(21)
-                ->second.GetTextStyle()
-                .font_families,
+                ->second.text_style->font_families,
             text_style.font_families);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0]
                       .run_metrics.lower_bound(21)
-                      ->second.GetFontMetrics()
-                      .fAscent,
+                      ->second.font_metrics.fAscent,
                   -25.048828);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0]
                       .run_metrics.lower_bound(21)
-                      ->second.GetFontMetrics()
-                      .fDescent,
+                      ->second.font_metrics.fDescent,
                   6.5917969);
 
   // Second run
   ASSERT_EQ(paragraph->GetLineMetrics()[0]
                 .run_metrics.lower_bound(22)
-                ->second.GetTextStyle()
-                .font_size,
+                ->second.text_style->font_size,
             24);
   ASSERT_EQ(paragraph->GetLineMetrics()[0]
                 .run_metrics.lower_bound(22)
-                ->second.GetTextStyle()
-                .font_families,
+                ->second.text_style->font_families,
             text_style.font_families);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0]
                       .run_metrics.lower_bound(22)
-                      ->second.GetFontMetrics()
-                      .fAscent,
+                      ->second.font_metrics.fAscent,
                   -27.84);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0]
                       .run_metrics.lower_bound(22)
-                      ->second.GetFontMetrics()
-                      .fDescent,
+                      ->second.font_metrics.fDescent,
                   7.6799998);
 
   ASSERT_EQ(paragraph->GetLineMetrics()[0]
                 .run_metrics.lower_bound(24)
-                ->second.GetTextStyle()
-                .font_size,
+                ->second.text_style->font_size,
             24);
   ASSERT_EQ(paragraph->GetLineMetrics()[0]
                 .run_metrics.lower_bound(24)
-                ->second.GetTextStyle()
-                .font_families,
+                ->second.text_style->font_families,
             text_style.font_families);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0]
                       .run_metrics.lower_bound(24)
-                      ->second.GetFontMetrics()
-                      .fAscent,
+                      ->second.font_metrics.fAscent,
                   -27.84);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[0]
                       .run_metrics.lower_bound(24)
-                      ->second.GetFontMetrics()
-                      .fDescent,
+                      ->second.font_metrics.fDescent,
                   7.6799998);
 
   ASSERT_EQ(paragraph->GetLineMetrics()[1].start_index, 26ull);
@@ -434,45 +402,37 @@ TEST_F(ParagraphTest, LineMetricsParagraph2) {
   // Indexing below the line will just resolve to the first run in the line.
   ASSERT_EQ(paragraph->GetLineMetrics()[1]
                 .run_metrics.lower_bound(3)
-                ->second.GetTextStyle()
-                .font_size,
+                ->second.text_style->font_size,
             24);
   ASSERT_EQ(paragraph->GetLineMetrics()[1]
                 .run_metrics.lower_bound(3)
-                ->second.GetTextStyle()
-                .font_families,
+                ->second.text_style->font_families,
             text_style.font_families);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[1]
                       .run_metrics.lower_bound(3)
-                      ->second.GetFontMetrics()
-                      .fAscent,
+                      ->second.font_metrics.fAscent,
                   -27.84);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[1]
                       .run_metrics.lower_bound(3)
-                      ->second.GetFontMetrics()
-                      .fDescent,
+                      ->second.font_metrics.fDescent,
                   7.6799998);
 
   // Indexing within the line
   ASSERT_EQ(paragraph->GetLineMetrics()[1]
                 .run_metrics.lower_bound(31)
-                ->second.GetTextStyle()
-                .font_size,
+                ->second.text_style->font_size,
             24);
   ASSERT_EQ(paragraph->GetLineMetrics()[1]
                 .run_metrics.lower_bound(31)
-                ->second.GetTextStyle()
-                .font_families,
+                ->second.text_style->font_families,
             text_style.font_families);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[1]
                       .run_metrics.lower_bound(31)
-                      ->second.GetFontMetrics()
-                      .fAscent,
+                      ->second.font_metrics.fAscent,
                   -27.84);
   ASSERT_FLOAT_EQ(paragraph->GetLineMetrics()[1]
                       .run_metrics.lower_bound(31)
-                      ->second.GetFontMetrics()
-                      .fDescent,
+                      ->second.font_metrics.fDescent,
                   7.6799998);
 }
 
