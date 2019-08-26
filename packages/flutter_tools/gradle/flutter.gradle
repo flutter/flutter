@@ -103,11 +103,6 @@ class FlutterPlugin implements Plugin<Project> {
 
         project.extensions.create("flutter", FlutterExtension)
         project.afterEvaluate this.&addFlutterTasks
-        project.repositories {
-            maven {
-                url MAVEN_REPO
-            }
-        }
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
         // Configuring split per ABI allows to generate separate APKs for each abi.
         // This is a noop when building a bundle.
@@ -146,7 +141,6 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-
         String flutterRootPath = resolveProperty(project, "flutter.sdk", System.env.FLUTTER_ROOT)
         if (flutterRootPath == null) {
             throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file or with a FLUTTER_ROOT environment variable.")
@@ -190,10 +184,17 @@ class FlutterPlugin implements Plugin<Project> {
     /**
      * Adds the dependencies required by the Flutter project.
      * This includes:
-     *    1) The embedding
-     *    2) libflutter.so
+     *    1. The embedding
+     *    2. libflutter.so
      */
     void addFlutterDependencies(buildType) {
+        project.rootProject.allprojects {
+            repositories {
+                maven {
+                    url MAVEN_REPO
+                }
+            }
+        }
         String flutterBuildMode = buildModeFor(buildType)
         // Add the embedding dependency.
         addApiDependencies(project, buildType.name,
@@ -267,11 +268,6 @@ class FlutterPlugin implements Plugin<Project> {
                 implementation pluginProject
             } else {
                 compile pluginProject
-            }
-        }
-        pluginProject.repositories {
-            maven {
-                url MAVEN_REPO
             }
         }
         Closure addEmbeddingCompileOnlyDependency = { buildType ->
