@@ -14,7 +14,7 @@ config("extra_warnings") {
     # Warns when a const char[] is converted to bool.
     "-Wstring-conversion",
   ]
-  if (enable_bitcode) {
+  if (use_xcode) {
     # Xcode clang throws up warnings about the way we do mutexes.
     cflags += [
       "-Wno-thread-safety",

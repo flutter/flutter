@@ -163,7 +163,7 @@ config("compiler") {
     common_mac_flags = []
 
     if (enable_bitcode) {
-      if (is_debug) {
+      if (bitcode_marker) {
         common_mac_flags += [ "-fembed-bitcode-marker" ]
       } else {
         common_mac_flags += [ "-fembed-bitcode" ]
@@ -799,7 +799,7 @@ if (is_win) {
     "-fno-ident",
   ]
 
-  if (!enable_bitcode) {
+  if (!enable_bitcode || bitcode_marker) {
     common_optimize_on_cflags += [
       # Put data and code in their own sections, so that unused symbols
       # can be removed at link time with --gc-sections.

@@ -16,4 +16,12 @@ declare_args() {
 
   # Set this flag to enable bitcode. Only valid for iOS ARM builds.
   enable_bitcode = false
+
+  # Set this flag to cause bitcode to be marker only.
+  bitcode_marker = false
+}
+
+declare_args() {
+  # Xcode is required if using bitcode, and Xcode builds cannot use goma.
+  use_xcode = enable_bitcode && !bitcode_marker
 }

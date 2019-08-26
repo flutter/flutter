@@ -18,6 +18,7 @@ import("//build/toolchain/clang_static_analyzer.gni")
 import("//build/toolchain/goma.gni")
 
 assert(!enable_bitcode || !use_ios_simulator)
+assert(!enable_bitcode || (use_xcode || bitcode_marker))
 
 if (use_goma) {
   goma_prefix = "$goma_dir/gomacc "
@@ -234,7 +235,7 @@ llvm_bin_path = "//buildtools/mac-x64/clang/bin"
 mac_toolchain("ios_clang_arm") {
   toolchain_cpu = "arm"
   toolchain_os = "mac"
-  if (!enable_bitcode) {
+  if (!use_xcode) {
     prefix = rebase_path(llvm_bin_path, root_build_dir)
     ar = "$prefix/llvm-ar"
     cc = "$prefix/clang"
@@ -266,7 +267,7 @@ mac_toolchain("ios_clang_x64") {
 mac_toolchain("clang_x64") {
   toolchain_cpu = "x64"
   toolchain_os = "mac"
-  if (!enable_bitcode) {
+  if (!use_xcode) {
     prefix = rebase_path(llvm_bin_path, root_build_dir)
     ar = "$prefix/llvm-ar"
     cc = "$prefix/clang"
