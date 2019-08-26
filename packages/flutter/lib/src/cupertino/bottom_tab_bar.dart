@@ -11,6 +11,7 @@ import 'theme.dart';
 
 // Standard iOS 11 tab bar height.
 const double _kTabBarHeight = 49.0;
+const double _kTabBarCompactHeight = 32.0;
 
 const Color _kDefaultTabBarBorderColor = Color(0x4C000000);
 
@@ -55,7 +56,9 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.inactiveColor = CupertinoColors.inactiveGray,
     this.iconSize = 34.0,
     this.wideIconSize = 30.0,
+    this.compactIconSize = 22.0,
     this.isWide = false,
+    this.isCompact = false,
     this.border = const Border(
       top: BorderSide(
         color: _kDefaultTabBarBorderColor,
@@ -73,6 +76,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
        assert(iconSize != null),
        assert(inactiveColor != null),
        assert(isWide != null),
+       assert(isCompact != null),
        super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
@@ -123,6 +127,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   final double wideIconSize;
 
+  final double compactIconSize;
 
   /// Controls whether the buttons should have a wide appearance, which, as of iOS 11,
   /// is common apps in landscape mode (iPhone) or always on iPad.
@@ -133,13 +138,16 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// The default value is false.
   final bool isWide;
 
+  /// Controls whether 
+  final bool isCompact;
+
   /// The border of the [CupertinoTabBar].
   ///
   /// The default value is a one physical pixel top border with grey color.
   final Border border;
 
   @override
-  Size get preferredSize => const Size.fromHeight(_kTabBarHeight);
+  Size get preferredSize => isCompact ? const Size.fromHeight(_kTabBarCompactHeight) : const Size.fromHeight(_kTabBarHeight);
 
   /// Indicates whether the tab bar is fully opaque or can have contents behind
   /// it show through it.
@@ -159,19 +167,19 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         color: backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor,
       ),
       child: SizedBox(
-        height: _kTabBarHeight + bottomPadding,
+        height: (isWide && isCompact ? _kTabBarCompactHeight : _kTabBarHeight) + bottomPadding,
         child: IconTheme.merge( // Default with the inactive state.
           data: IconThemeData(
             color: inactiveColor,
-            size: isWide ? wideIconSize : iconSize,
+            size: isWide ? (isCompact ? compactIconSize : wideIconSize) : iconSize,
           ),
           child: DefaultTextStyle( // Default with the inactive state.
             style: isWide ? 
               CupertinoTheme.of(context).textTheme.tabWideLabelTextStyle
               : CupertinoTheme.of(context).textTheme.tabLabelTextStyle,
             child: Padding(
-              padding: EdgeInsets.only(bottom: bottomPadding),
-              child: _buildTabItems(context, isWide),
+              padding: isWide && isCompact ? EdgeInsets.only(top: 4.0, bottom: bottomPadding) : EdgeInsets.only(bottom: bottomPadding),
+              child: _buildTabItems(context),
             ),
           ),
         ),
@@ -290,7 +298,9 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Color inactiveColor,
     Size iconSize,
     Size wideIconSize,
+    Size compactIconSize,
     bool isWide,
+    bool isCompact,
     Border border,
     int currentIndex,
     ValueChanged<int> onTap,
@@ -303,7 +313,9 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       inactiveColor: inactiveColor ?? this.inactiveColor,
       iconSize: iconSize ?? this.iconSize,
       wideIconSize: wideIconSize ?? this.wideIconSize,
+      compactIconSize: compactIconSize ?? this.compactIconSize,
       isWide: isWide ?? this.isWide,
+      isCompact: isCompact ?? this.isCompact,
       border: border ?? this.border,
       currentIndex: currentIndex ?? this.currentIndex,
       onTap: onTap ?? this.onTap,
