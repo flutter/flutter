@@ -25,16 +25,25 @@ void EmbedderTestCompositor::SetRenderTargetType(RenderTargetType type) {
 bool EmbedderTestCompositor::CreateBackingStore(
     const FlutterBackingStoreConfig* config,
     FlutterBackingStore* backing_store_out) {
+  bool success = false;
   switch (type_) {
     case RenderTargetType::kOpenGLFramebuffer:
-      return CreateFramebufferRenderSurface(config, backing_store_out);
+      success = CreateFramebufferRenderSurface(config, backing_store_out);
+      break;
     case RenderTargetType::kOpenGLTexture:
-      return CreateTextureRenderSurface(config, backing_store_out);
+      success = CreateTextureRenderSurface(config, backing_store_out);
+      break;
     case RenderTargetType::kSoftwareBuffer:
-      return CreateSoftwareRenderSurface(config, backing_store_out);
+      success = CreateSoftwareRenderSurface(config, backing_store_out);
+      break;
+    default:
+      FML_CHECK(false);
+      return false;
   }
-  FML_CHECK(false);
-  return false;
+  if (success) {
+    backing_stores_count_++;
+  }
+  return success;
 }
 
 bool EmbedderTestCompositor::CollectBackingStore(
@@ -43,6 +52,7 @@ bool EmbedderTestCompositor::CollectBackingStore(
   // stores. Our user_data is just the canvas from that backing store and does
   // not need to be explicitly collected. Embedders might have some other state
   // they want to collect though.
+  backing_stores_count_--;
   return true;
 }
 
@@ -302,6 +312,10 @@ void EmbedderTestCompositor::SetNextSceneCallback(
 void EmbedderTestCompositor::SetPlatformViewRendererCallback(
     PlatformViewRendererCallback callback) {
   platform_view_renderer_callback_ = callback;
+}
+
+size_t EmbedderTestCompositor::GetBackingStoresCount() const {
+  return backing_stores_count_;
 }
 
 }  // namespace testing

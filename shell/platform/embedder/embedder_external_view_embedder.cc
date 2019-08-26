@@ -23,6 +23,7 @@ EmbedderExternalViewEmbedder::~EmbedderExternalViewEmbedder() = default;
 
 void EmbedderExternalViewEmbedder::Reset() {
   pending_recorders_.clear();
+  pending_canvas_spies_.clear();
   pending_params_.clear();
   composition_order_.clear();
 }
@@ -80,11 +81,16 @@ void EmbedderExternalViewEmbedder::PrerollCompositeEmbeddedView(
     int view_id,
     std::unique_ptr<EmbeddedViewParams> params) {
   FML_DCHECK(pending_recorders_.count(view_id) == 0);
+  FML_DCHECK(pending_canvas_spies_.count(view_id) == 0);
   FML_DCHECK(pending_params_.count(view_id) == 0);
   FML_DCHECK(std::find(composition_order_.begin(), composition_order_.end(),
                        view_id) == composition_order_.end());
 
   pending_recorders_[view_id] = std::make_unique<SkPictureRecorder>();
+  SkCanvas* recording_canvas = pending_recorders_[view_id]->beginRecording(
+      pending_frame_size_.width(), pending_frame_size_.height());
+  pending_canvas_spies_[view_id] =
+      std::make_unique<CanvasSpy>(recording_canvas);
   pending_params_[view_id] = *params;
   composition_order_.push_back(view_id);
 }
@@ -92,22 +98,21 @@ void EmbedderExternalViewEmbedder::PrerollCompositeEmbeddedView(
 // |ExternalViewEmbedder|
 std::vector<SkCanvas*> EmbedderExternalViewEmbedder::GetCurrentCanvases() {
   std::vector<SkCanvas*> canvases;
-  for (const auto& recorder : pending_recorders_) {
-    canvases.push_back(recorder.second->beginRecording(
-        pending_frame_size_.width(), pending_frame_size_.height()));
+  for (const auto& spy : pending_canvas_spies_) {
+    canvases.push_back(spy.second->GetSpyingCanvas());
   }
   return canvases;
 }
 
 // |ExternalViewEmbedder|
 SkCanvas* EmbedderExternalViewEmbedder::CompositeEmbeddedView(int view_id) {
-  auto found = pending_recorders_.find(view_id);
-  if (found == pending_recorders_.end()) {
+  auto found = pending_canvas_spies_.find(view_id);
+  if (found == pending_canvas_spies_.end()) {
     FML_DCHECK(false) << "Attempted to composite a view that was not "
                          "pre-rolled.";
     return nullptr;
   }
-  return found->second->getRecordingCanvas();
+  return found->second->GetSpyingCanvas();
 }
 
 static FlutterLayer MakeLayer(const SkISize& frame_size,
@@ -184,6 +189,7 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
 
   for (const auto& view_id : composition_order_) {
     FML_DCHECK(pending_recorders_.count(view_id) == 1);
+    FML_DCHECK(pending_canvas_spies_.count(view_id) == 1);
     FML_DCHECK(pending_params_.count(view_id) == 1);
 
     const auto& params = pending_params_.at(view_id);
@@ -196,6 +202,19 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
       return false;
     }
 
+    // Indicate a layer for the platform view. Add to `presented_platform_views`
+    // in order to keep at allocated just for the scope of the current method.
+    // The layers presented to the embedder will contain a back pointer to this
+    // struct. It is safe to deallocate when the embedder callback is done.
+    presented_platform_views[view_id] = MakePlatformView(view_id);
+    presented_layers.push_back(
+        MakeLayer(params, presented_platform_views.at(view_id)));
+
+    if (!pending_canvas_spies_.at(view_id)->DidDrawIntoCanvas()) {
+      // Nothing was drawn into the overlay canvas, we don't need to composite
+      // it.
+      continue;
+    }
     const auto backing_store_config =
         MakeBackingStoreConfig(pending_frame_size_);
 
@@ -233,15 +252,6 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
     render_canvas->clear(SK_ColorTRANSPARENT);
     render_canvas->drawPicture(picture);
     render_canvas->flush();
-
-    // Indicate a layer for the platform view. Add to `presented_platform_views`
-    // in order to keep at allocated just for the scope of the current method.
-    // The layers presented to the embedder will contain a back pointer to this
-    // struct. It is safe to deallocate when the embedder callback is done.
-    presented_platform_views[view_id] = MakePlatformView(view_id);
-    presented_layers.push_back(
-        MakeLayer(params, presented_platform_views.at(view_id)));
-
     // Indicate a layer for the backing store containing contents rendered by
     // Flutter.
     presented_layers.push_back(

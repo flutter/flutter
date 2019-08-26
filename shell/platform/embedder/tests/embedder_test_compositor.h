@@ -56,6 +56,8 @@ class EmbedderTestCompositor {
 
   sk_sp<SkImage> GetLastComposition();
 
+  size_t GetBackingStoresCount() const;
+
  private:
   sk_sp<GrContext> context_;
   RenderTargetType type_ = RenderTargetType::kOpenGLFramebuffer;
@@ -63,6 +65,8 @@ class EmbedderTestCompositor {
   PresentCallback next_present_callback_;
   NextSceneCallback next_scene_callback_;
   sk_sp<SkImage> last_composition_;
+  // The number of currently allocated backing stores (created - collected).
+  size_t backing_stores_count_ = 0;
 
   bool UpdateOffscrenComposition(const FlutterLayer** layers,
                                  size_t layers_count);

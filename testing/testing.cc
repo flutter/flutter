@@ -41,8 +41,8 @@ fml::UniqueFD OpenFixture(std::string fixture_name) {
                                   fml::FilePermission::kRead  // permission
   );
   if (!fixture_fd.is_valid()) {
-    FML_LOG(ERROR) << "Could not open fixture for path: " << fixture_name
-                   << ".";
+    FML_LOG(ERROR) << "Could not open fixture for path: " << GetFixturesPath()
+                   << "/" << fixture_name << ".";
     return {};
   }
 
