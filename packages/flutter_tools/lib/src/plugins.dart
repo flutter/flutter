@@ -397,6 +397,7 @@ void registerPlugins(PluginRegistry registry) {
 {{#plugins}}
   {{class}}.registerWith(registry.registrarFor({{class}}));
 {{/plugins}}
+  registry.registerMessageHandler();
 }
 ''';
 
