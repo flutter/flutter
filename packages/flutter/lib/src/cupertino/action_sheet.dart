@@ -33,10 +33,10 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
 // This decoration is applied to the blurred backdrop to lighten the blurred
 // image. Brightening is done to counteract the dark modal barrier that
 // appears behind the alert. The overlay blend mode does the brightening.
-// The white color doesn't paint any white, it's just the basis for the
-// overlay blend mode.
+// The white color doesn't paint any white, it's a placeholder and is going to be
+// replaced by the resolved color of _kAlertBlurOverlayColor.
 const BoxDecoration _kAlertBlurOverlayDecoration = BoxDecoration(
-  color: CupertinoColors.black,
+  color: CupertinoColors.white,
   backgroundBlendMode: BlendMode.overlay,
 );
 
