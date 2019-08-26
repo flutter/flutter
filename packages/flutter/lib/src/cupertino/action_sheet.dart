@@ -51,7 +51,7 @@ final Color _kAlertBlurOverlayColor = CupertinoDynamicColor.withBrightness(
 // as the action sheet's background color.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/39272. Use
 // System Materials once we have them.
-// Eye-balled from iOS 13 beta simulator.
+// Extracted from https://developer.apple.com/design/resources/.
 final Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
   color: const Color(0xC7F9F9F9),
   darkColor: const Color(0xC7252525),
