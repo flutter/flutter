@@ -134,16 +134,16 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Controls whether the buttons should have a wide appearance, which, as of iOS 11,
   /// is common apps in landscape mode (iPhone) or always on iPad.
   /// (source: https://developer.apple.com/videos/play/wwdc2017/204/)
-  /// 
+  ///
   /// It is suggested to wrap this widget in a [OrientationBuilder] to control the width of buttons on iPhone.
-  /// 
+  ///
   /// The default value is false.
   final bool isWide;
 
   /// Controls whether the tab bar should be displayed in its compact mode (landscape mode on iPhone) or the regular one.
-  /// 
+  ///
   /// Its value is ignored when `isWide` equals false.
-  /// 
+  ///
   /// The default value is false.
   final bool isCompact;
 
@@ -180,7 +180,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
             size: isWide ? (isCompact ? compactIconSize : wideIconSize) : iconSize,
           ),
           child: DefaultTextStyle( // Default with the inactive state.
-            style: isWide ? 
+            style: isWide ?
               CupertinoTheme.of(context).textTheme.tabWideLabelTextStyle
               : CupertinoTheme.of(context).textTheme.tabLabelTextStyle,
             child: Padding(
