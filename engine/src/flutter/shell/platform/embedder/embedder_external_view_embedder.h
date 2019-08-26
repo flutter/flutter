@@ -10,6 +10,7 @@
 
 #include "flutter/flow/embedded_views.h"
 #include "flutter/fml/macros.h"
+#include "flutter/shell/common/canvas_spy.h"
 #include "flutter/shell/platform/embedder/embedder_render_target.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
@@ -115,6 +116,7 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   SkISize pending_frame_size_ = SkISize::Make(0, 0);
   std::map<ViewIdentifier, std::unique_ptr<SkPictureRecorder>>
       pending_recorders_;
+  std::map<ViewIdentifier, std::unique_ptr<CanvasSpy>> pending_canvas_spies_;
   std::map<ViewIdentifier, EmbeddedViewParams> pending_params_;
   std::vector<ViewIdentifier> composition_order_;
   std::shared_ptr<EmbedderRenderTarget> root_render_target_;
