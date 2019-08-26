@@ -270,7 +270,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
     point.set(vector[0] / vector[3], vector[1] / vector[3]);
   }
   SkRect rect;
-  rect.set(quad, 4);
+  rect.setBounds(quad, 4);
 
   // `rect` is in the physical pixel coordinate system. iOS expects the accessibility frame in
   // the logical pixel coordinate system. Therefore, we divide by the `scale` (pixel ratio) to
