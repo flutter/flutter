@@ -15,7 +15,6 @@ import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../globals.dart';
 import '../../macos/xcode.dart';
-import '../../project.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
 import 'dart.dart';
@@ -245,7 +244,6 @@ class CompileMacOSFramework extends Target {
     if (buildMode == BuildMode.debug) {
       throw Exception('precompiled macOS framework only supported in release/profile builds.');
     }
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
     final int result = await AOTSnapshotter(reportTimings: false).build(
       bitcode: false,
       buildMode: buildMode,
@@ -253,7 +251,7 @@ class CompileMacOSFramework extends Target {
       outputPath: environment.buildDir.path,
       platform: TargetPlatform.darwin_x64,
       darwinArch: DarwinArch.x86_64,
-      packagesPath: flutterProject.packagesFile.path
+      packagesPath: environment.projectDir.childFile('.packages').path,
     );
     if (result != 0) {
       throw Exception('gen shapshot failed.');
