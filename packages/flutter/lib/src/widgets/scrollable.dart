@@ -9,6 +9,7 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -532,7 +533,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
         ? event.scrollDelta.dx
         : event.scrollDelta.dy;
 
-    if (widget.axisDirection == AxisDirection.up || widget.axisDirection == AxisDirection.left) {
+    if (axisDirectionIsReversed(widget.axisDirection)) {
       delta *= -1;
     }
 
