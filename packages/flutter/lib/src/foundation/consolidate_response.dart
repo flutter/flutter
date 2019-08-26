@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:typed_data';
-import '_consolidate_response_io.dart'
-  if (dart.library.html) '_consolidate_response_web.dart' as consolidate_reponse;
+
+export '_consolidate_response_io.dart'
+  if (dart.library.html) '_consolidate_response_web.dart';
 
 /// Signature for getting notified when chunks of bytes are received while
 /// consolidating the bytes of an [HttpClientResponse] into a [Uint8List].
@@ -24,35 +24,3 @@ import '_consolidate_response_io.dart'
 ///
 /// This is used in [consolidateHttpClientResponseBytes].
 typedef BytesReceivedCallback = void Function(int cumulative, int total);
-
-/// Efficiently converts the response body of an [HttpClientResponse] into a
-/// [Uint8List].
-///
-/// [response] must be of type [HttpClientResponse] from `dart:io`.
-/// This function is not supported on Flutter for web applications.
-///
-/// The future returned will forward any error emitted by `response`.
-///
-///
-/// The `onBytesReceived` callback, if specified, will be invoked for every
-/// chunk of bytes that is received while consolidating the response bytes.
-/// If the callback throws an error, processing of the response will halt, and
-/// the returned future will complete with the error that was thrown by the
-/// callback. For more information on how to interpret the parameters to the
-/// callback, see the documentation on [BytesReceivedCallback].
-///
-/// If the `response` is gzipped and the `autoUncompress` parameter is true,
-/// this will automatically un-compress the bytes in the returned list if it
-/// hasn't already been done via [HttpClient.autoUncompress]. To get compressed
-/// bytes from this method (assuming the response is sending compressed bytes),
-/// set both [HttpClient.autoUncompress] to false and the `autoUncompress`
-/// parameter to false.
-Future<Uint8List> consolidateHttpClientResponseBytes(
-  Object response, {
-  bool autoUncompress = true,
-  BytesReceivedCallback onBytesReceived,
-}) => consolidate_reponse.consolidateHttpClientResponseBytes(
-  response,
-  autoUncompress: true,
-  onBytesReceived: onBytesReceived,
-);

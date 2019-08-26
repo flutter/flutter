@@ -95,6 +95,12 @@ enum HostPlatform {
 ///   * [Platform.resolvedExecutable], the dart:io implementation.
 String get resolvedExecutable => _platform.resolvedExecutable;
 
+/// The path separator used on the current platform.
+///
+/// See also:
+///   * [Platform.pathSeparator], the dart:io implementation.
+String get pathSeparator => _platform.pathSeparator;
+
 /// Override the [defaultTargetPlatform].
 ///
 /// Setting this to null returns the [defaultTargetPlatform] to its original

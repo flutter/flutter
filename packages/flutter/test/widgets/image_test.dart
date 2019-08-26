@@ -315,7 +315,7 @@ void main() {
   testWidgets('Verify Image stops listening to ImageStream', (WidgetTester tester) async {
     final TestImageProvider imageProvider = TestImageProvider();
     await tester.pumpWidget(Image(image: imageProvider, excludeFromSemantics: true));
-    final State<Image> image = tester.state/*State<Image>*/(find.byType(Image));
+    final State<Image> image = tester.state<State<Image>>(find.byType(Image));
     expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, unresolved, 2 listeners), pixels: null, loadingProgress: null, frameNumber: null, wasSynchronouslyLoaded: false)'));
     imageProvider.complete();
     await tester.pump();

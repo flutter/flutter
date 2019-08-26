@@ -527,7 +527,7 @@ String _defaultApplicationName(BuildContext context) {
   // can provide an explicit applicationName to the widgets defined in this
   // file, instead of relying on the default.
   final Title ancestorTitle = context.ancestorWidgetOfExactType(Title);
-  return ancestorTitle?.title ?? resolvedExecutable;
+  return ancestorTitle?.title ?? resolvedExecutable.split(pathSeparator).last;
 }
 
 String _defaultApplicationVersion(BuildContext context) {

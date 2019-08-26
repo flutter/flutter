@@ -7,6 +7,9 @@ import 'platform.dart' as platform;
 /// The dart:html implementation of [platform.resolvedExecutable].
 String get resolvedExecutable => 'browser';
 
+/// The dart:html implementation of [platform.pathSeparator].
+String get pathSeparator => '/';
+
 /// The dart:html implementation of [platform.currentHostPlatform].
 platform.HostPlatform get currentHostPlatform {
   return platform.HostPlatform.browser;

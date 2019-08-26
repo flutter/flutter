@@ -9,6 +9,9 @@ import 'platform.dart' as platform;
 /// The dart:io implementation of [platform.resolvedExecutable].
 String get resolvedExecutable => Platform.resolvedExecutable;
 
+/// The dart:io implementation of [platform.pathSeparator].
+String get pathSeparator => Platform.pathSeparator;
+
 /// The dart:io implementation of [platform.currentHostPlatform].
 platform.HostPlatform get currentHostPlatform {
   platform.HostPlatform result;

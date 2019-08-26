@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 
+import '_image_io.dart'
+  if (dart.library.html) '_image_web.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
@@ -462,7 +464,7 @@ abstract class ImageBase extends StatefulWidget {
   bool get excludeFromSemantics;
 
   @override
-  _ImageState createState() => _ImageState();
+  State<Image> createState() => _ImageState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -485,7 +487,7 @@ abstract class ImageBase extends StatefulWidget {
   }
 }
 
-class _ImageState extends State<ImageBase> with WidgetsBindingObserver {
+class _ImageState extends State<Image> with WidgetsBindingObserver {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
   ImageChunkEvent _loadingProgress;
