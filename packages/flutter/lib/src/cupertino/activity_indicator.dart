@@ -26,11 +26,9 @@ class CupertinoActivityIndicator extends StatefulWidget {
     Key key,
     this.animating = true,
     this.radius = _kDefaultIndicatorRadius,
-    Color activeTickColor,
   }) : assert(animating != null),
        assert(radius != null),
        assert(radius > 0),
-       _activeTickerColor = activeTickColor,
        super(key: key);
 
   /// Whether the activity indicator is running its animation.
@@ -42,12 +40,6 @@ class CupertinoActivityIndicator extends StatefulWidget {
   ///
   /// Defaults to 10px. Must be positive and cannot be null.
   final double radius;
-
-  /// The color used to paint the most prominent tick (the tick with the highest opacity).
-  ///
-  /// Defaults to a [CupertinoDynamicColor] that matches the native `UIActivityIndicatorView`.
-  Color get activeTickColor => _activeTickerColor ?? _kActiveTickColor;
-  final Color _activeTickerColor;
 
   @override
   _CupertinoActivityIndicatorState createState() => _CupertinoActivityIndicatorState();
@@ -94,7 +86,7 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
       child: CustomPaint(
         painter: _CupertinoActivityIndicatorPainter(
           position: _controller,
-          activeColor: CupertinoDynamicColor.resolve(widget.activeTickColor, context),
+          activeColor: CupertinoDynamicColor.resolve(_kActiveTickColor, context),
           radius: widget.radius,
         ),
       ),

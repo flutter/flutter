@@ -27,32 +27,23 @@ void main() {
   });
 
   testWidgets('Activity indicator dark mode', (WidgetTester tester) async {
-    final CupertinoDynamicColor dynamicColor = CupertinoDynamicColor.withBrightness(
-      color: const Color(0xFF000000),
-      darkColor: const Color(0xFF000001),
-    );
-
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(platformBrightness: Brightness.light),
-        child: CupertinoActivityIndicator(
-          activeTickColor: dynamicColor,
-        ),
+      const MediaQuery(
+        data: MediaQueryData(platformBrightness: Brightness.light),
+        child: CupertinoActivityIndicator(),
       ),
     );
 
-    expect(find.byType(CupertinoActivityIndicator), paints..rrect(color: const Color(0xFF000000)));
+    expect(find.byType(CupertinoActivityIndicator), paints..rrect(color: const Color(0x99606067)));
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(platformBrightness: Brightness.dark),
-        child: CupertinoActivityIndicator(
-          activeTickColor: dynamicColor,
-        ),
+      const MediaQuery(
+        data: MediaQueryData(platformBrightness: Brightness.dark),
+        child: CupertinoActivityIndicator(),
       ),
     );
 
-    expect(find.byType(CupertinoActivityIndicator), paints..rrect(color: const Color(0xFF000001)));
+    expect(find.byType(CupertinoActivityIndicator), paints..rrect(color: const Color(0x99EBEBF5)));
   });
 }
 
