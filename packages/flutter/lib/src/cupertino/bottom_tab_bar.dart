@@ -10,7 +10,7 @@ import 'colors.dart';
 import 'theme.dart';
 
 // Standard iOS 11 tab bar height.
-const double _kTabBarHeight = 49.0;
+const double _kTabBarHeight = 50.0;
 const double _kTabBarCompactHeight = 32.0;
 
 const Color _kDefaultTabBarBorderColor = Color(0x4C000000);
