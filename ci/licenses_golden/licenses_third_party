@@ -1,4 +1,4 @@
-Signature: 81999413cb4dfe9b12839db01f5e8f62
+Signature: 6e656bdcf80af052469a843629e1583e
 
 UNUSED LICENSES:
 
@@ -7454,6 +7454,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/bce_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/block_builder.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_checker.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_checker.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_deserializer.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_deserializer.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_serializer.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_serializer.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_test_helper.cc
