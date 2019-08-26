@@ -141,7 +141,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-        String flutterRootPath = resolveProperty(project, "flutter.sdk", System.env.FLUTTER_ROOT)
+        String flutterRootPath = resolveProperty("flutter.sdk", System.env.FLUTTER_ROOT)
         if (flutterRootPath == null) {
             throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file or with a FLUTTER_ROOT environment variable.")
         }
@@ -386,7 +386,7 @@ class FlutterPlugin implements Plugin<Project> {
         return "${parts[0]}${parts[1..-1].collect { it.capitalize() }.join('')}"
     }
 
-    private String resolveProperty(Project project, String name, String defaultValue) {
+    private String resolveProperty(String name, String defaultValue) {
         if (localProperties == null) {
             localProperties = readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
         }
