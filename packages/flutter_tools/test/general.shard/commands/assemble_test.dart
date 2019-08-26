@@ -36,7 +36,7 @@ void main() {
       return BuildResult(success: true);
     });
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
-    await commandRunner.run(<String>['assemble', 'debug_macos_bundle_flutter_assets']);
+    await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
     final BufferLogger bufferLogger = logger;
 
     expect(bufferLogger.statusText.trim(), 'build succeeded.');
