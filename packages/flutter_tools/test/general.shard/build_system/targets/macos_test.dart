@@ -6,6 +6,7 @@ import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
@@ -61,6 +62,11 @@ void main() {
     when(mockPlatform.isLinux).thenReturn(false);
     when(mockPlatform.environment).thenReturn(const <String, String>{});
     testbed = Testbed(setup: () {
+      fs.file(fs.path.join('bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui',
+          'ui.dart')).createSync(recursive: true);
+      fs.file(fs.path.join('bin', 'cache', 'pkg', 'sky_engine', 'sdk_ext',
+          'vmservice_io.dart')).createSync(recursive: true);
+
       environment = Environment(
         projectDir: fs.currentDirectory,
         defines: <String, String>{
@@ -95,7 +101,7 @@ void main() {
       }
       return FakeProcessResult()..exitCode = 0;
     });
-    await const UnpackMacOS().build(<File>[], environment);
+    await const DebugUnpackMacOS().build(<File>[], environment);
 
     expect(fs.directory('$_kOutputPrefix').existsSync(), true);
     for (File file in inputs) {
@@ -109,11 +115,11 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('testing');
 
-    expect(() async => await const DebugBundleFlutterAssets().build(<File>[], environment),
+    expect(() async => await const DebugMacOSBundleFlutterAssets().build(<File>[], environment),
         throwsA(isInstanceOf<Exception>()));
   }));
 
-  test('debug macOS application copies kernel blob', () => testbed.run(() async {
+  test('debug macOS application creates correctly structured framework', () => testbed.run(() async {
     fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
         'vm_isolate_snapshot.bin')).createSync(recursive: true);
     fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
@@ -124,17 +130,73 @@ void main() {
         'macos', 'Flutter', 'ephemeral', 'App.framework');
     final String inputKernel = fs.path.join(environment.buildDir.path, 'app.dill');
     fs.directory(frameworkPath).createSync(recursive: true);
-    final String outputKernel = fs.path.join(frameworkPath, 'Resources',
+    final String outputKernel = fs.path.join(frameworkPath, 'Versions', 'A', 'Resources',
         'flutter_assets', 'kernel_blob.bin');
-    final String outputPlist = fs.path.join(frameworkPath, 'Resources', 'Info.plist');
+    final String outputPlist = fs.path.join(frameworkPath, 'Versions', 'A', 'Resources',
+        'Info.plist');
     fs.file(inputKernel)
       ..createSync(recursive: true)
       ..writeAsStringSync('testing');
 
-    await const DebugBundleFlutterAssets().build(<File>[], environment);
+    await const DebugMacOSBundleFlutterAssets().build(<File>[], environment);
 
     expect(fs.file(outputKernel).readAsStringSync(), 'testing');
     expect(fs.file(outputPlist).readAsStringSync(), contains('io.flutter.flutter.app'));
+  }));
+
+  test('release/profile macOS application has no blob or precompiled runtime', () => testbed.run(() async {
+    fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
+        'vm_isolate_snapshot.bin')).createSync(recursive: true);
+    fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
+        'isolate_snapshot.bin')).createSync(recursive: true);
+    fs.file(fs.path.join(environment.buildDir.path, 'App.framework', 'App'))
+        ..createSync(recursive: true);
+    final String frameworkPath = fs.path.join(environment.projectDir.path,
+        'macos', 'Flutter', 'ephemeral', 'App.framework');
+    fs.directory(frameworkPath).createSync(recursive: true);
+    final String outputKernel = fs.path.join(frameworkPath, 'Resources',
+        'flutter_assets', 'kernel_blob.bin');
+    final String precompiledVm = fs.path.join(frameworkPath, 'Resources',
+        'flutter_assets', 'vm_snapshot_data');
+    final String precompiledIsolate = fs.path.join(frameworkPath, 'Resources',
+        'flutter_assets', 'isolate_snapshot_data');
+    await const ProfileMacOSBundleFlutterAssets().build(<File>[], environment..defines[kBuildMode] = 'profile');
+
+    expect(fs.file(outputKernel).existsSync(), false);
+    expect(fs.file(precompiledVm).existsSync(), false);
+    expect(fs.file(precompiledIsolate).existsSync(), false);
+  }));
+
+  test('release/profile macOS compilation uses correct gen_snapshot', () => testbed.run(() async {
+    when(genSnapshot.run(
+      snapshotType: anyNamed('snapshotType'),
+      additionalArgs: anyNamed('additionalArgs'),
+      darwinArch: anyNamed('darwinArch'),
+    )).thenAnswer((Invocation invocation) {
+      environment.buildDir.childFile('snapshot_assembly.o').createSync();
+      environment.buildDir.childFile('snapshot_assembly.S').createSync();
+      return Future<int>.value(0);
+    });
+    when(xcode.cc(any)).thenAnswer((Invocation invocation) {
+      return Future<RunResult>.value(RunResult(FakeProcessResult()..exitCode = 0, <String>['test']));
+    });
+    when(xcode.clang(any)).thenAnswer((Invocation invocation) {
+      return Future<RunResult>.value(RunResult(FakeProcessResult()..exitCode = 0, <String>['test']));
+    });
+    when(xcode.dsymutil(any)).thenAnswer((Invocation invocation) {
+      return Future<RunResult>.value(RunResult(FakeProcessResult()..exitCode = 0, <String>['test']));
+    });
+    environment.buildDir.childFile('app.dill').createSync(recursive: true);
+    fs.file('.packages')
+      ..createSync()
+      ..writeAsStringSync('''
+# Generated
+sky_engine:file:///bin/cache/pkg/sky_engine/lib/
+flutter_tools:lib/''');
+    await const CompileMacOSFramework().build(<File>[], environment..defines[kBuildMode] = 'release');
+  }, overrides: <Type, Generator>{
+    GenSnapshot: () => MockGenSnapshot(),
+    Xcode: () => MockXCode(),
   }));
 }
 

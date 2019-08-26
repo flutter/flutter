@@ -194,7 +194,7 @@ class AOTSnapshotter {
     final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
     outputDir.childFile('gen_snapshot.d').writeAsStringSync('gen_snapshot.d: $genSnapshotPath\n');
 
-    // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
+    // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
     if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
       final RunResult result = await _buildFramework(

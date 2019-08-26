@@ -461,25 +461,19 @@ Future<void> _runTests() async {
 }
 
 Future<void> _runWebTests() async {
-  // Run a small subset of web tests to smoke-test the Web test infrastructure.
-  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
-    'test/foundation/assertions_test.dart',
-  ]);
-
   // TODO(yjbanov): re-enable when web test cirrus flakiness is resolved
-  // await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
-  //   'test/foundation/',
-  //   'test/physics/',
-  //   'test/rendering/',
-  //   'test/services/',
-  //   'test/painting/',
-  //   'test/scheduler/',
-  //   'test/semantics/',
-  // TODO(yjbanov): re-enable when instabiliy around pumpAndSettle is
-  //   // resolved.
-  //   // 'test/widgets/',
-  //   // 'test/material/',
-  // ]);
+  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
+    'test/foundation/',
+    // TODO(yjbanov): re-enable when flakiness is resolved
+    // 'test/physics/',
+    // 'test/rendering/',
+    // 'test/services/',
+    // 'test/painting/',
+    // 'test/scheduler/',
+    // 'test/semantics/',
+    // 'test/widgets/',
+    // 'test/material/',
+  ]);
 }
 
 Future<void> _runCoverage() async {
@@ -765,12 +759,43 @@ class EvalResult {
 Future<void> _runFlutterWebTest(String workingDirectory, {
   List<String> tests,
 }) async {
+  final List<String> allTests = <String>[];
+  for (String testDirPath in tests) {
+    final Directory testDir = Directory(path.join(workingDirectory, testDirPath));
+    allTests.addAll(
+      testDir.listSync(recursive: true)
+        .whereType<File>()
+        .where((File file) => file.path.endsWith('_test.dart'))
+        .map((File file) => path.relative(file.path, from: workingDirectory))
+    );
+  }
+  print(allTests.join('\n'));
+  print('${allTests.length} tests total');
+
+  // Maximum number of tests to run in a single `flutter test`. We found that
+  // large batches can get flaky, possibly because we reuse a single instance
+  // of the browser, and after many tests the browser's state gets corrupted.
+  const int kBatchSize = 20;
+  List<String> batch = <String>[];
+  for (int i = 0; i < allTests.length; i += 1) {
+    final String testFilePath = allTests[i];
+    batch.add(testFilePath);
+    if (batch.length == kBatchSize || i == allTests.length - 1) {
+      await _runFlutterWebTestBatch(workingDirectory, batch: batch);
+      batch = <String>[];
+    }
+  }
+}
+
+Future<void> _runFlutterWebTestBatch(String workingDirectory, {
+  List<String> batch,
+}) async {
   final List<String> args = <String>[
     'test',
     '-v',
     '--platform=chrome',
     ...?flutterTestArgs,
-    ...tests,
+    ...batch,
   ];
 
   // TODO(jonahwilliams): fix relative path issues to make this unecessary.
@@ -781,7 +806,7 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
       flutter,
       args,
       workingDirectory: workingDirectory,
-      expectFlaky: true,
+      expectFlaky: false,
       environment: <String, String>{
         'FLUTTER_WEB': 'true',
         'FLUTTER_LOW_RESOURCE_MODE': 'true',
