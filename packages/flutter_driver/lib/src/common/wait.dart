@@ -201,7 +201,7 @@ class FirstFrameRasterized extends SerializableWaitCondition {
   String get conditionName => 'FirstFrameRasterizedCondition';
 }
 
-/// A condition that waits until there's no pending platform messages.
+/// A condition that waits until there are no pending platform messages.
 class NoPendingPlatformMessages extends SerializableWaitCondition {
   /// Creates a [NoPendingPlatformMessages] condition.
   const NoPendingPlatformMessages();

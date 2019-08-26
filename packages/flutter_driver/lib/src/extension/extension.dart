@@ -59,7 +59,7 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
 
   @override
   BinaryMessenger createBinaryMessenger() {
-    return TestDefaultBinaryMessenger();
+    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
 }
 

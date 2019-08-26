@@ -44,7 +44,7 @@ mixin ServicesBinding on BindingBase {
   /// platform messages.
   @protected
   BinaryMessenger createBinaryMessenger() {
-    return const DefaultBinaryMessenger();
+    return const _DefaultBinaryMessenger._();
   }
 
   /// Adds relevant licenses to the [LicenseRegistry].
@@ -141,9 +141,8 @@ mixin ServicesBinding on BindingBase {
 /// This messenger sends messages from the app-side to the platform-side and
 /// dispatches incoming messages from the platform-side to the appropriate
 /// handler.
-class DefaultBinaryMessenger extends BinaryMessenger {
-  /// Creates a [DefaultBinaryMessenger] instance.
-  const DefaultBinaryMessenger();
+class _DefaultBinaryMessenger extends BinaryMessenger {
+  const _DefaultBinaryMessenger._();
 
   // Handlers for incoming messages from platform plugins.
   // This is static so that this class can have a const constructor.

@@ -86,9 +86,14 @@ const Size _kDefaultTestViewportSize = Size(800.0, 600.0);
 /// It tracks status of data sent across the Flutter platform barrier, which is
 /// useful for testing frameworks to monitor and synchronize against the
 /// platform messages.
-class TestDefaultBinaryMessenger extends DefaultBinaryMessenger {
+class TestDefaultBinaryMessenger extends BinaryMessenger {
   /// Creates a [TestDefaultBinaryMessenger] instance.
-  TestDefaultBinaryMessenger();
+  ///
+  /// The [delegate] instance must not be null.
+  TestDefaultBinaryMessenger(this.delegate): assert(delegate != null);
+
+  /// The delegate [BinaryMessenger].
+  final BinaryMessenger delegate;
 
   final List<Future<ByteData>> _pendingMessages = <Future<ByteData>>[];
 
@@ -97,7 +102,7 @@ class TestDefaultBinaryMessenger extends DefaultBinaryMessenger {
 
   @override
   Future<ByteData> send(String channel, ByteData message) {
-    final Future<ByteData> resultFuture = super.send(channel, message);
+    final Future<ByteData> resultFuture = delegate.send(channel, message);
     // Removes the future itself from the [_pendingMessages] list when it
     // completes.
     if (resultFuture != null) {
@@ -114,6 +119,24 @@ class TestDefaultBinaryMessenger extends DefaultBinaryMessenger {
   /// pending message calls.
   Future<void> get platformMessagesFinished {
     return Future.wait<void>(_pendingMessages);
+  }
+
+  @override
+  Future<void> handlePlatformMessage(
+      String channel,
+      ByteData data,
+      ui.PlatformMessageResponseCallback callback) {
+    return delegate.handlePlatformMessage(channel, data, callback);
+  }
+
+  @override
+  void setMessageHandler(String channel, MessageHandler handler) {
+    delegate.setMessageHandler(channel, handler);
+  }
+
+  @override
+  void setMockMessageHandler(String channel, MessageHandler handler) {
+    delegate.setMockMessageHandler(channel, handler);
   }
 }
 
@@ -259,7 +282,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   BinaryMessenger createBinaryMessenger() {
-    return TestDefaultBinaryMessenger();
+    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
 
   /// Whether there is currently a test executing.
