@@ -20,6 +20,9 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 
 /// A delegate that controls the layout of multiple children.
 ///
+/// Used with [CustomMultiChildLayout] (in the widgets library) and 
+/// [RenderCustomMultiChildLayoutBox] (in the rendering library).
+///
 /// Delegates must be idempotent. Specifically, if two delegates are equal, then
 /// they must produce the same layout. To change the layout, replace the
 /// delegate with a different instance whose [shouldRelayout] returns true when
@@ -38,8 +41,10 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 /// Override [shouldRelayout] to determine when the layout of the children needs
 /// to be recomputed when the delegate changes.
 ///
-/// Used with [CustomMultiChildLayout], the widget for the
-/// [RenderCustomMultiChildLayoutBox] render object.
+/// The most efficient way to trigger a relayout is to supply a relayout
+/// argument to the constructor of the [MultiChildLayoutDelegate]. The custom
+/// object will listen to this value and relayout whenever the animation
+/// ticks, avoiding the build phase of the pipeline.
 ///
 /// Each child must be wrapped in a [LayoutId] widget to assign the id that
 /// identifies it to the delegate. The [LayoutId.id] needs to be unique among
@@ -95,6 +100,13 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 /// child list, regardless of the order in which [layoutChild] is called on
 /// them.
 abstract class MultiChildLayoutDelegate {
+  /// Creates a layout delegate.
+  ///
+  /// The layout will update whenever [relayout] notifies its listeners.
+  MultiChildLayoutDelegate({ Listenable relayout }) : _relayout = relayout;
+
+  final Listenable _relayout;
+  
   Map<Object, RenderBox> _idToChild;
   Set<RenderBox> _debugChildrenNeedingLayout;
 
@@ -300,13 +312,30 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   /// The delegate that controls the layout of the children.
   MultiChildLayoutDelegate get delegate => _delegate;
   MultiChildLayoutDelegate _delegate;
-  set delegate(MultiChildLayoutDelegate value) {
-    assert(value != null);
-    if (_delegate == value)
+  set delegate(MultiChildLayoutDelegate newDelegate) {
+    assert(newDelegate != null);
+    if (_delegate == newDelegate)
       return;
-    if (value.runtimeType != _delegate.runtimeType || value.shouldRelayout(_delegate))
+    final MultiChildLayoutDelegate oldDelegate = _delegate;
+    if (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRelayout(oldDelegate))
       markNeedsLayout();
-    _delegate = value;
+    _delegate = newDelegate;
+    if (attached) {
+      oldDelegate?._relayout?.removeListener(markNeedsLayout);
+      newDelegate?._relayout?.addListener(markNeedsLayout);
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _delegate?._relayout?.addListener(markNeedsLayout);
+  }
+
+  @override
+  void detach() {
+    _delegate?._relayout?.removeListener(markNeedsLayout);
+    super.detach();
   }
 
   Size _getSize(BoxConstraints constraints) {

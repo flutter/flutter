@@ -965,7 +965,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 /// The most efficient way to trigger a relayout is to supply a relayout
 /// argument to the constructor of the [SingleChildLayoutDelegate]. The custom
 /// object will listen to this value and relayout whenever the animation
-/// ticks, avoiding both the build phase of the pipeline.
+/// ticks, avoiding the build phase of the pipeline.
 ///
 /// See also:
 ///
