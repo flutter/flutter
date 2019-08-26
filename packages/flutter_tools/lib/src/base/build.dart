@@ -180,7 +180,7 @@ class AOTSnapshotter {
     // gen_snapshot would provide an argument to do this automatically.
     if (platform == TargetPlatform.ios && bitcode) {
       final IOSink sink = fs.file('$assembly.bitcode').openWrite();
-      for (String line in await fs.file(assembly).readAsLines()) {
+      for (String line in fs.file(assembly).readAsLinesSync()) {
         if (line.startsWith('.section __DWARF')) {
           break;
         }
@@ -192,9 +192,9 @@ class AOTSnapshotter {
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
     // the Dart SDK.
     final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
-    await outputDir.childFile('gen_snapshot.d').writeAsString('gen_snapshot.d: $genSnapshotPath\n');
+    outputDir.childFile('gen_snapshot.d').writeAsStringSync('gen_snapshot.d: $genSnapshotPath\n');
 
-    // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
+    // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
     if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
       final RunResult result = await _buildFramework(
@@ -313,7 +313,7 @@ class AOTSnapshotter {
 
     // Write path to frontend_server, since things need to be re-generated when that changes.
     final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
-    await fs.directory(outputPath).childFile('frontend_server.d').writeAsString('frontend_server.d: $frontendPath\n');
+    fs.directory(outputPath).childFile('frontend_server.d').writeAsStringSync('frontend_server.d: $frontendPath\n');
 
     return compilerOutput?.outputFilename;
   }

@@ -588,7 +588,8 @@ class PlatformViewCreationParams {
 
   const PlatformViewCreationParams._({
     @required this.id,
-    @required this.onPlatformViewCreated
+    @required this.onPlatformViewCreated,
+    @required this.onFocusChanged,
   }) : assert(id != null),
        assert(onPlatformViewCreated != null);
 
@@ -599,6 +600,11 @@ class PlatformViewCreationParams {
 
   /// Callback invoked after the platform view has been created.
   final PlatformViewCreatedCallback onPlatformViewCreated;
+
+  /// Callback invoked when the platform view's focus is changed on the platform side.
+  ///
+  /// The value is true when the platform view gains focus and false when it loses focus.
+  final ValueChanged<bool> onFocusChanged;
 }
 
 /// A factory for a surface presenting a platform view as part of the widget hierarchy.
@@ -679,6 +685,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   PlatformViewController _controller;
   bool _platformViewCreated = false;
   Widget _surface;
+  FocusNode _focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -686,27 +693,51 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
       return const SizedBox.expand();
     }
     _surface ??= widget._surfaceFactory(context, _controller);
-    return _surface;
+    return Focus(
+      focusNode: _focusNode,
+      onFocusChange: _handleFrameworkFocusChanged,
+      child: _surface,
+    );
   }
 
   @override
   void initState() {
+    _focusNode = FocusNode(debugLabel: 'PlatformView(id: $_id)',);
     _initialize();
     super.initState();
   }
 
   void _initialize() {
     _id = platformViewsRegistry.getNextPlatformViewId();
-    _controller = widget._onCreatePlatformView(PlatformViewCreationParams._(id:_id, onPlatformViewCreated:_onPlatformViewCreated));
+    _controller = widget._onCreatePlatformView(
+      PlatformViewCreationParams._(
+        id:_id,
+        onPlatformViewCreated:_onPlatformViewCreated,
+        onFocusChanged:_handlePlatformFocusChanged
+      ),
+    );
   }
 
   void _onPlatformViewCreated(int id) {
     setState(() => _platformViewCreated = true);
   }
 
+  void _handleFrameworkFocusChanged(bool isFocused) {
+    if (!isFocused) {
+      _controller?.clearFocus();
+    }
+  }
+
+  void _handlePlatformFocusChanged(bool isFocused){
+    if (isFocused) {
+      _focusNode.requestFocus();
+    }
+  }
+
   @override
   void dispose() {
     _controller?.dispose();
+    _controller = null;
     super.dispose();
   }
 }

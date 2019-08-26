@@ -324,22 +324,20 @@ class TravelDestinationContent extends StatelessWidget {
     if (destination.type == CardDemoType.standard) {
       children.add(
         // share, explore buttons
-        ButtonTheme.bar(
-          child: ButtonBar(
-            alignment: MainAxisAlignment.start,
-            children: <Widget>[
-              FlatButton(
-                child: Text('SHARE', semanticsLabel: 'Share ${destination.title}'),
-                textColor: Colors.amber.shade500,
-                onPressed: () { print('pressed'); },
-              ),
-              FlatButton(
-                child: Text('EXPLORE', semanticsLabel: 'Explore ${destination.title}'),
-                textColor: Colors.amber.shade500,
-                onPressed: () { print('pressed'); },
-              ),
-            ],
-          ),
+        ButtonBar(
+          alignment: MainAxisAlignment.start,
+          children: <Widget>[
+            FlatButton(
+              child: Text('SHARE', semanticsLabel: 'Share ${destination.title}'),
+              textColor: Colors.amber.shade500,
+              onPressed: () { print('pressed'); },
+            ),
+            FlatButton(
+              child: Text('EXPLORE', semanticsLabel: 'Explore ${destination.title}'),
+              textColor: Colors.amber.shade500,
+              onPressed: () { print('pressed'); },
+            ),
+          ],
         ),
       );
     }

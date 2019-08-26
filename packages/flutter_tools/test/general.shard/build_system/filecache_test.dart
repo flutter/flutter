@@ -20,6 +20,7 @@ void main() {
       environment = Environment(
         projectDir: fs.currentDirectory,
       );
+      environment.buildDir.createSync(recursive: true);
     });
   });
 
@@ -28,9 +29,10 @@ void main() {
     fileCache.initialize();
     fileCache.persist();
 
-    expect(fs.file(fs.path.join('build', '.filecache')).existsSync(), true);
+    expect(fs.file(fs.path.join(environment.buildDir.path, '.filecache')).existsSync(), true);
 
-    final List<int> buffer = fs.file(fs.path.join('build', '.filecache')).readAsBytesSync();
+    final List<int> buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
+        .readAsBytesSync();
     final pb.FileStorage fileStorage = pb.FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files, isEmpty);
@@ -46,7 +48,8 @@ void main() {
     fileCache.hashFiles(<File>[file]);
     fileCache.persist();
     final String currentHash =  fileCache.currentHashes[file.resolveSymbolicLinksSync()];
-    final List<int> buffer = fs.file(fs.path.join('build', '.filecache')).readAsBytesSync();
+    final List<int> buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
+        .readAsBytesSync();
     pb.FileStorage fileStorage = pb.FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files.single.hash, currentHash);

@@ -742,10 +742,7 @@ Future<void> _buildGradleProjectV2(
 
   if (exitCode != 0) {
     if (potentialAndroidXFailure) {
-      printError('*******************************************************************************************');
-      printError('The Gradle failure may have been because of AndroidX incompatibilities in this Flutter app.');
-      printError('See https://goo.gl/CP92wY for more information on the problem and how to fix it.');
-      printError('*******************************************************************************************');
+      printStatus('AndroidX incompatibilities may have caused this build to fail. See https://goo.gl/CP92wY.');
       BuildEvent('android-x-failure').send();
     }
     throwToolExit('Gradle task $assembleTask failed with exit code $exitCode', exitCode: exitCode);
