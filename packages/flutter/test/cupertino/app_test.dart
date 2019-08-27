@@ -62,4 +62,26 @@ void main() {
     expect(find.text('Select All'), findsOneWidget);
     expect(find.text('Thu Oct 4 '), findsOneWidget);
   });
+
+  testWidgets('Can use dynamic color', (WidgetTester tester) async {
+    final CupertinoDynamicColor dynamicColor = CupertinoDynamicColor.withBrightness(
+      color: const Color(0xFF000000),
+      darkColor: const Color(0xFF000001),
+    );
+    await tester.pumpWidget(CupertinoApp(
+      theme: const CupertinoThemeData(brightness: Brightness.light),
+      color: dynamicColor,
+      home: const Placeholder(),
+    ));
+
+    expect(tester.widget<Title>(find.byType(Title)).color.value, 0xFF000000);
+
+    await tester.pumpWidget(CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        color: dynamicColor,
+        home: const Placeholder(),
+    ));
+
+    expect(tester.widget<Title>(find.byType(Title)).color.value, 0xFF000001);
+  });
 }

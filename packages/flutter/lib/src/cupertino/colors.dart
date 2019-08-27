@@ -331,8 +331,10 @@ class CupertinoDynamicColor extends Color {
   ///
   /// If the given color is already a concrete [Color], it will be returned as is.
   /// If the given color is a [CupertinoDynamicColor], but the given [BuildContext]
-  /// lacks the dependencies essential to the color resolution, an exception will
-  /// be thrown, unless [nullOk] is set to true.
+  /// lacks the dependencies required to the color resolution, the default trait
+  /// value will be used ([Brightness.light] platform brightness, normal contrast,
+  /// [CupertinoUserInterfaceLevelData.base] elevation level), unless [nullOk] is
+  /// set to false, in which case an exception will be thrown.
   static Color resolve(Color resolvable, BuildContext context, { bool nullOk = true }) {
     assert(resolvable != null);
     assert(context != null);
@@ -385,9 +387,12 @@ class CupertinoDynamicColor extends Color {
   /// from the previous [CupertinoTheme.of] call, in an effort to determine the
   /// brightness value.
   ///
-  /// If any of the required dependecies are missing from the given context, an exception
-  /// will be thrown unless [nullOk] is set to `true`.
-  CupertinoDynamicColor resolveFrom(BuildContext context, { bool nullOk = false }) {
+  /// If any of the required dependecies are missing from the given context, the
+  /// default value of that trait will be used ([Brightness.light] platform
+  /// brightness, normal contrast, [CupertinoUserInterfaceLevelData.base] elevation
+  /// level), unless [nullOk] is set to false, in which case an exception will be
+  /// thrown.
+  CupertinoDynamicColor resolveFrom(BuildContext context, { bool nullOk = true }) {
     int brightnessNumber = 0;
     int highContrastNumber = 0;
     int interfaceElevationNumber = 0;
