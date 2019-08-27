@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -871,6 +872,7 @@ flutter:
 
   group('gradle build', () {
     MockAndroidSdk mockAndroidSdk;
+    MockAndroidStudio mockAndroidStudio;
     MockLocalEngineArtifacts mockArtifacts;
     MockProcessManager mockProcessManager;
     FakePlatform android;
@@ -879,6 +881,7 @@ flutter:
     setUp(() {
       fs = MemoryFileSystem();
       mockAndroidSdk = MockAndroidSdk();
+      mockAndroidStudio = MockAndroidStudio();
       mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
       android = fakePlatform('android');
@@ -945,6 +948,7 @@ flutter:
       expect(actualGradlewCall, contains('-PlocalEngineOut=out/android_arm'));
     }, overrides: <Type, Generator>{
         AndroidSdk: () => mockAndroidSdk,
+        AndroidStudio: () => mockAndroidStudio,
         Artifacts: () => mockArtifacts,
         ProcessManager: () => mockProcessManager,
         Platform: () => android,
@@ -962,3 +966,4 @@ class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockGradleProject extends Mock implements GradleProject {}
 class MockitoAndroidSdk extends Mock implements AndroidSdk {}
+class MockAndroidStudio extends Mock implements AndroidStudio {}
