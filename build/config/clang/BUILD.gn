@@ -13,6 +13,9 @@ config("extra_warnings") {
 
     # Warns when a const char[] is converted to bool.
     "-Wstring-conversion",
+    # Warns when a source file doesn't have a newline at end-of-file.
+    # This is to match Fuchsia, which enables this warning.
+    "-Wnewline-eof",
   ]
   if (use_xcode) {
     # Xcode clang throws up warnings about the way we do mutexes.

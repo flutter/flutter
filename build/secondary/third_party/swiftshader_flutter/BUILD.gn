@@ -35,6 +35,7 @@ config("internal_config") {
   } else {
     cflags = [
       "-Wno-header-hygiene",
+      "-Wno-newline-eof",
       "-Wno-thread-safety-analysis",
       "-Wno-undefined-var-template",
       "-Wno-unneeded-internal-declaration",
