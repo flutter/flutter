@@ -33,6 +33,55 @@ import 'theme.dart';
 ///
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
+/// {@tool snippet --template=stateless_widget_material}
+///
+/// This sample shows two ways to open [AboutDialog]. The first one
+/// using a [AboutListTile], while the second one is by clicking a [RaisedButton].
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///     return Scaffold(
+///       appBar: AppBar(
+///         title: Text("Show About Example"),
+///       ),
+///       drawer: Drawer(
+///         child: ListView(
+///           children: <Widget>[
+///             AboutListTile(
+///               icon: Icon(Icons.info),
+///               applicationIcon: FlutterLogo(),
+///               applicationName: "Show About Example",
+///               applicationVersion: "V1.0.1",
+///               applicationLegalese: "This is a Show About Example",
+///               aboutBoxChildren: <Widget>[
+///                 Text('Extra 1'),
+///                 Text('Extra 2'),
+///               ],
+///             )
+///           ],
+///         ),
+///       ),
+///       body: Center(
+///         child: RaisedButton(
+///           child: Text("Show About Example"),
+///           onPressed: () => showAboutDialog(
+///             context: context,
+///             applicationIcon: FlutterLogo(),
+///             applicationName: "Show About Example",
+///             applicationVersion: "V1.0.1",
+///             applicationLegalese: "This is a Show About Example",
+///             children: <Widget>[
+///               Text('Widget 1'),
+///               Text('Widget 2'),
+///             ],
+///           ),
+///         ),
+///       ),
+///     );
+///   }
+/// ```
+/// {@end-tool}
+///
 class AboutListTile extends StatelessWidget {
   /// Creates a list tile for showing an about box.
   ///
