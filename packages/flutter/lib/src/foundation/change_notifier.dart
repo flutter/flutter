@@ -90,8 +90,18 @@ abstract class ValueListenable<T> extends Listenable {
 /// API using [VoidCallback] for notifications.
 ///
 /// [ChangeNotifier] is optimized for small numbers (one or two) of listeners.
-/// It is O(N) for adding and removing listeners and O(N²) for dispatching
+/// It is O(1) for adding and removing listeners and O(N) for dispatching
 /// notifications (where N is the number of listeners).
+///
+/// If the same listener is added more than once, it will only be called once
+/// during a call to [notify], but must be removed as many times as it has been
+/// added in order to keep it from being called in the future.
+///
+/// Adding and removing listeners is safe to do during a notification phase
+/// (i.e. during a call to [notify]). Added listeners won't be triggered until
+/// the next notification phase. Listeners removed during iteration will be
+/// skipped if they are removed by the time their original position in the
+/// iteration is reached.
 ///
 /// See also:
 ///
