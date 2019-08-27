@@ -200,6 +200,7 @@ class AOTSnapshotter {
     if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
       final RunResult result = await _buildFramework(
         appleArch: darwinArch,
+        isIOS: platform == TargetPlatform.ios,
         assemblyPath: bitcode ? '$assembly.stripped.S' : assembly,
         outputPath: outputDir.path,
         bitcode: bitcode,
@@ -214,15 +215,17 @@ class AOTSnapshotter {
   /// source at [assemblyPath].
   Future<RunResult> _buildFramework({
     @required DarwinArch appleArch,
+    @required bool isIOS,
     @required String assemblyPath,
     @required String outputPath,
     @required bool bitcode,
   }) async {
     final String targetArch = getNameForDarwinArch(appleArch);
     printStatus('Building App.framework for $targetArch...');
+
     final List<String> commonBuildOptions = <String>[
       '-arch', targetArch,
-      if (appleArch == DarwinArch.arm64 || appleArch == DarwinArch.armv7)
+      if (isIOS)
         '-miphoneos-version-min=8.0',
     ];
 
@@ -250,7 +253,8 @@ class AOTSnapshotter {
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
-      if (bitcode) ...<String>[embedBitcodeArg, '-isysroot', await xcode.iPhoneSdkLocation()],
+      if (bitcode) embedBitcodeArg,
+      if (bitcode && isIOS) ...<String>[embedBitcodeArg, '-isysroot', await xcode.iPhoneSdkLocation()],
       '-o', appLib,
       assemblyO,
     ];
