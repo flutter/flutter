@@ -7,11 +7,12 @@
 A top level harness to run all unit-tests in a specific engine build.
 """
 
-import sys
-import os
 import argparse
 import glob
+import os
+import re
 import subprocess
+import sys
 
 buildroot_dir = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..'))
 out_dir = os.path.join(buildroot_dir, 'out')
@@ -228,7 +229,16 @@ def EnsureJavaTestsAreBuilt(android_out_dir):
   subprocess.check_call(gn_command, cwd=buildroot_dir)
   subprocess.check_call(ninja_command, cwd=buildroot_dir)
 
+def AssertExpectedJavaVersion():
+  EXPECTED_VERSION = '1.8'
+  # `java -version` is output to stderr. https://bugs.java.com/bugdatabase/view_bug.do?bug_id=4380614
+  version_output = subprocess.check_output(['java', '-version'], stderr=subprocess.STDOUT)
+  match = bool(re.compile('version "%s' % EXPECTED_VERSION).search(version_output))
+  message = "JUnit tests need to be run with Java %s. Check the `java -version` on your PATH." % EXPECTED_VERSION
+  assert match, message
+
 def RunJavaTests(filter, android_variant='android_debug_unopt'):
+  AssertExpectedJavaVersion()
   android_out_dir = os.path.join(out_dir, android_variant)
   EnsureJavaTestsAreBuilt(android_out_dir)
 
