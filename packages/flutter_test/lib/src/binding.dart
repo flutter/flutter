@@ -19,7 +19,7 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vector_math/vector_math_64.dart';
 
 import '_binding_io.dart'
-  if (dart.library.html) '_binding_html.dart' as binding;
+  if (dart.library.html) '_binding_web.dart' as binding;
 import 'goldens.dart';
 import 'platform.dart';
 import 'stack_manipulation.dart';

@@ -195,7 +195,6 @@ class FlutterWebTestEntrypointBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    log.info('building for target ${buildStep.inputId.path}');
     await bootstrapDdc(buildStep, platform: _webPlatform);
   }
 }
