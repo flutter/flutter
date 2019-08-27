@@ -13,7 +13,9 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
+#if FLUTTER_SHELL_ENABLE_METAL
 #include "flutter/shell/platform/darwin/ios/ios_surface_metal.h"
+#endif
 #include "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
 
