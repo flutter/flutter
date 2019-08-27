@@ -538,31 +538,42 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   // The child is scaled down as it is dragged down until it hits this minimum
   // value.
   static const double _kMinScale = 0.8;
+  static const double _kPadding = 20.0;
 
+  Offset _dragOffset;
   double _lastScale;
   AnimationController _moveController;
   Animation<Offset> _moveAnimation;
+  Animation<double> _scaleAnimation;
 
-  double _getScale(Orientation orientation, double maxDragDistance) {
-    if (orientation != Orientation.portrait || _moveAnimation.value.dy <= 0) {
+  static double _getScale(Orientation orientation, double maxDragDistance, double dy) {
+    if (orientation != Orientation.portrait) {
       return 1.0;
+    }
+    if (dy <= 0) {
+      // Scale much more slowly when dragging in opposite direction of dismiss.
+      final double maxDragDistanceReverse = maxDragDistance * 8;
+      return math.max(
+        _kMinScale,
+        (maxDragDistanceReverse + dy) / maxDragDistanceReverse,
+      );
     }
     return math.max(
       _kMinScale,
-      (maxDragDistance - _moveAnimation.value.dy) / maxDragDistance,
+      (maxDragDistance - dy) / maxDragDistance,
     );
   }
 
-  void _onVerticalDragStart(DragStartDetails details) {
+  void _onPanStart(DragStartDetails details) {
     _moveController.value = 1.0;
-    _setDragDistance(0.0);
+    _setDragOffset(Offset.zero);
   }
 
-  void _onVerticalDragUpdate(DragUpdateDetails details) {
-    _setDragDistance(_moveAnimation.value.dy + details.delta.dy);
+  void _onPanUpdate(DragUpdateDetails details) {
+    _setDragOffset(_dragOffset + details.delta);
   }
 
-  void _onVerticalDragEnd(DragEndDetails details) {
+  void _onPanEnd(DragEndDetails details) {
     // If flung, animate a bit before handling the potential dismiss.
     if (details.velocity.pixelsPerSecond.dy.abs() >= kMinFlingVelocity) {
       final FrictionSimulation frictionSimulation = FrictionSimulation(
@@ -596,7 +607,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     }
 
     // Otherwise animate back home.
-    _setDragDistance(_moveAnimation.value.dy);
+    //_setDragOffset(_moveAnimation.value);
     _moveController.reverse();
   }
 
@@ -613,11 +624,16 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     widget.onDismiss(context, _lastScale);
   }
 
-  void _setDragDistance([double dragDistance]) {
+  void _setDragOffset(Offset dragOffset) {
+    final double endX = _kPadding * dragOffset.dx / 400.0;
     setState(() {
+      _dragOffset = dragOffset;
       _moveAnimation = Tween<Offset>(
         begin: Offset.zero,
-        end: Offset(0.0, math.max(0.0, dragDistance)),
+        end: Offset(
+          endX.clamp(-_kPadding, _kPadding),
+          math.max(0.0, dragOffset.dy),
+        ),
       ).animate(
         CurvedAnimation(
           parent: _moveController,
@@ -632,7 +648,11 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       offset: _moveAnimation.value,
       child: OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
-          _lastScale = _getScale(orientation, MediaQuery.of(context).size.height);
+          _lastScale = _getScale(
+            orientation,
+            MediaQuery.of(context).size.height,
+            _moveAnimation.value.dy,
+          );
           final List<Widget> children =  <Widget>[
             Expanded(
               child: Align(
@@ -654,8 +674,8 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
             ),
             // Create space between items in both Row and Column.
             Container(
-              width: 20,
-              height: 20,
+              width: _kPadding,
+              height: _kPadding,
             ),
             Expanded(
               child: _ContextMenuSheet(
@@ -686,20 +706,20 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       value: 1.0,
       vsync: this,
     );
-    _setDragDistance(0.0);
+    _setDragOffset(Offset.zero);
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(_kPadding),
         child: Align(
           alignment: Alignment.topLeft,
           child: GestureDetector(
-            onVerticalDragEnd: _onVerticalDragEnd,
-            onVerticalDragStart: _onVerticalDragStart,
-            onVerticalDragUpdate: _onVerticalDragUpdate,
+            onPanEnd: _onPanEnd,
+            onPanStart: _onPanStart,
+            onPanUpdate: _onPanUpdate,
             child: AnimatedBuilder(
               animation: _moveController,
               builder: _buildAnimation,
