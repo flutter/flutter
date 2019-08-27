@@ -106,8 +106,8 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     // Removes the future itself from the [_pendingMessages] list when it
     // completes.
     if (resultFuture != null) {
-      resultFuture.whenComplete(() => _pendingMessages.remove(resultFuture));
       _pendingMessages.add(resultFuture);
+      resultFuture.whenComplete(() => _pendingMessages.remove(resultFuture));
     }
     return resultFuture;
   }
@@ -125,7 +125,8 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   Future<void> handlePlatformMessage(
       String channel,
       ByteData data,
-      ui.PlatformMessageResponseCallback callback) {
+      ui.PlatformMessageResponseCallback callback,
+  ) {
     return delegate.handlePlatformMessage(channel, data, callback);
   }
 
