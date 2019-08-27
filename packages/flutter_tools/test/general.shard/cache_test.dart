@@ -155,7 +155,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
     });
-    
+
     test('getter dyLdLibPath includes artifact directories from IosUsbArtifacts', () async {
       final Cache cache = Cache(artifacts: const <CachedArtifact>[]);
 
