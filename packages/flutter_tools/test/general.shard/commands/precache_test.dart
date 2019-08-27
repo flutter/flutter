@@ -32,7 +32,7 @@ void main() {
       expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
         DevelopmentArtifact.iOS,
-        DevelopmentArtifact.android,
+        DevelopmentArtifact.android_gen_snapshot,
         DevelopmentArtifact.web,
         DevelopmentArtifact.macOS,
         DevelopmentArtifact.linux,
@@ -58,7 +58,7 @@ void main() {
      expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
        DevelopmentArtifact.universal,
        DevelopmentArtifact.iOS,
-       DevelopmentArtifact.android,
+       DevelopmentArtifact.android_gen_snapshot,
      }));
     }, overrides: <Type, Generator>{
       Cache: () => cache,
@@ -75,7 +75,7 @@ void main() {
       expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
        DevelopmentArtifact.universal,
        DevelopmentArtifact.iOS,
-       DevelopmentArtifact.android,
+       DevelopmentArtifact.android_gen_snapshot,
      }));
     }, overrides: <Type, Generator>{
       Cache: () => cache,

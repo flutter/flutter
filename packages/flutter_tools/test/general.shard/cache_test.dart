@@ -136,18 +136,17 @@ void main() {
       when(artifact1.isUpToDate()).thenReturn(true);
       when(artifact2.isUpToDate()).thenReturn(false);
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
-      await cache.updateAll(<DevelopmentArtifact>{});
-      verifyNever(artifact1.update(<DevelopmentArtifact>{}));
-      verify(artifact2.update(<DevelopmentArtifact>{}));
+      await cache.updateAll(<DevelopmentArtifact>{
+        null,
+      });
+      verifyNever(artifact1.update());
+      verify(artifact2.update());
     });
     testUsingContext('getter dyLdLibEntry concatenates the output of each artifact\'s dyLdLibEntry getter', () async {
-      final CachedArtifact artifact1 = MockCachedArtifact();
-      final CachedArtifact artifact2 = MockCachedArtifact();
-      final CachedArtifact artifact3 = MockCachedArtifact();
-      when(artifact1.dyLdLibPath).thenReturn('/path/to/alpha:/path/to/beta');
-      when(artifact2.dyLdLibPath).thenReturn('/path/to/gamma:/path/to/delta:/path/to/epsilon');
-      when(artifact3.dyLdLibPath).thenReturn(''); // Empty output
-      final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2, artifact3]);
+      final Cache cache = Cache(artifacts: const <CachedArtifact>[]);
+      cache.dyLdLibPath.add('/path/to/alpha:/path/to/beta');
+      cache.dyLdLibPath.add('/path/to/gamma:/path/to/delta:/path/to/epsilon');
+
       expect(cache.dyLdLibEntry.key, 'DYLD_LIBRARY_PATH');
       expect(
         cache.dyLdLibEntry.value,
@@ -156,6 +155,22 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
     });
+    
+    test('getter dyLdLibPath includes artifact directories from IosUsbArtifacts', () async {
+      final Cache cache = Cache(artifacts: const <CachedArtifact>[]);
+
+      IosUsbArtifacts('foo', cache);
+      IosUsbArtifacts('bar', cache);
+
+      expect(cache.dyLdLibEntry.key, 'DYLD_LIBRARY_PATH');
+
+      final Directory cacheDirectory = cache.getCacheArtifacts();
+      expect(
+        cache.dyLdLibEntry.value,
+        "${cacheDirectory.childDirectory('foo').path}:${cacheDirectory.childDirectory('bar').path}",
+      );
+    });
+
     testUsingContext('failed storage.googleapis.com download shows China warning', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
@@ -163,18 +178,20 @@ void main() {
       when(artifact2.isUpToDate()).thenReturn(false);
       final MockInternetAddress address = MockInternetAddress();
       when(address.host).thenReturn('storage.googleapis.com');
-      when(artifact1.update(<DevelopmentArtifact>{})).thenThrow(SocketException(
+      when(artifact1.update()).thenThrow(SocketException(
         'Connection reset by peer',
         address: address,
       ));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       try {
-        await cache.updateAll(<DevelopmentArtifact>{});
+        await cache.updateAll(<DevelopmentArtifact>{
+          null,
+        });
         fail('Mock thrown exception expected');
       } catch (e) {
-        verify(artifact1.update(<DevelopmentArtifact>{}));
+        verify(artifact1.update());
         // Don't continue when retrieval fails.
-        verifyNever(artifact2.update(<DevelopmentArtifact>{}));
+        verifyNever(artifact2.update());
         expect(
           testLogger.errorText,
           contains('https://flutter.dev/community/china'),
@@ -247,9 +264,7 @@ void main() {
   testUsingContext('throws tool exit on fs exception', () async {
     final FakeCachedArtifact fakeCachedArtifact = FakeCachedArtifact(
       cache: MockCache(),
-      requiredArtifacts: <DevelopmentArtifact>{
-        DevelopmentArtifact.android,
-      }
+      requiredArtifacts: DevelopmentArtifact.android_gen_snapshot,
     );
     final Directory mockDirectory = MockDirectory();
     when(fakeCachedArtifact.cache.getArtifactDirectory(any))
@@ -258,9 +273,7 @@ void main() {
     when(mockDirectory.createSync(recursive: true))
         .thenThrow(const FileSystemException());
 
-    expect(() => fakeCachedArtifact.update(<DevelopmentArtifact>{
-        DevelopmentArtifact.android,
-    }), throwsA(isInstanceOf<ToolExit>()));
+    expect(() => fakeCachedArtifact.update(), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
   });
@@ -270,11 +283,11 @@ class FakeCachedArtifact extends EngineCachedArtifact {
   FakeCachedArtifact({
     String stampName = 'STAMP',
     @required Cache cache,
-    Set<DevelopmentArtifact> requiredArtifacts = const <DevelopmentArtifact>{},
+    DevelopmentArtifact requiredArtifacts,
     this.binaryDirs = const <List<String>>[],
     this.licenseDirs = const <String>[],
     this.packageDirs = const <String>[],
-  }) : super(stampName, cache, requiredArtifacts);
+  }) : super(stampName, requiredArtifacts, cache);
 
   final List<List<String>> binaryDirs;
   final List<String> licenseDirs;
