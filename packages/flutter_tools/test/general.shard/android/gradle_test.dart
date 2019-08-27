@@ -155,7 +155,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in debug mode', () {
-      final GradleProject gradleProject = generateFakeAppBundle('debugFoo', 'app.aab');
+      final GradleProject gradleProject = generateFakeAppBundle('fooDebug', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.debug, 'foo'));
       expect(bundle, isNotNull);
       expect(bundle.path, '/fooDebug/app.aab');
