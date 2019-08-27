@@ -460,7 +460,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// [FocusTraversalPolicy].
   Iterable<FocusNode> get traversalChildren {
     return children.where(
-          (FocusNode node) => !node.skipTraversal && node.canRequestFocus,
+        (FocusNode node) => !node.skipTraversal && node.canRequestFocus,
     );
   }
 
@@ -574,7 +574,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   Size get size {
     assert(
     context != null,
-    "Tried to get the size of a focus node that didn't have its context set yet.\n"
+        "Tried to get the size of a focus node that didn't have its context set yet.\n"
         'The context needs to be set before trying to evaluate traversal policies. This '
         'is typically done with the attach method.');
     return context.findRenderObject().semanticBounds.size;
@@ -585,7 +585,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   Offset get offset {
     assert(
     context != null,
-    "Tried to get the offset of a focus node that didn't have its context set yet.\n"
+        "Tried to get the offset of a focus node that didn't have its context set yet.\n"
         'The context needs to be set before trying to evaluate traversal policies. This '
         'is typically done with the attach method.');
     final RenderObject object = context.findRenderObject();
@@ -597,7 +597,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   Rect get rect {
     assert(
     context != null,
-    "Tried to get the bounds of a focus node that didn't have its context set yet.\n"
+        "Tried to get the bounds of a focus node that didn't have its context set yet.\n"
         'The context needs to be set before trying to evaluate traversal policies. This '
         'is typically done with the attach method.');
     final RenderObject object = context.findRenderObject();

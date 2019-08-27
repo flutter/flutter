@@ -14,7 +14,11 @@ import 'asset_bundle.dart' as asset_bundle;
 class NetworkAssetBundle extends asset_bundle.AssetBundle implements asset_bundle.NetworkAssetBundle {
   /// Creates an network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
-  NetworkAssetBundle(this._baseUrl);
+  ///
+  /// Always throws an [UnsupportedError].
+  NetworkAssetBundle(this._baseUrl) {
+    throw UnsupportedError('NetworkAssetBundle is not suppored on the web');
+  }
 
   final Uri _baseUrl;
 
@@ -34,9 +38,6 @@ class NetworkAssetBundle extends asset_bundle.AssetBundle implements asset_bundl
     assert(parser != null);
     return parser(await loadString(key));
   }
-
-  // TODO(ianh): Once the underlying network logic learns about caching, we
-  // should implement evict().
 
   @override
   String toString() => '${describeIdentity(this)}($_baseUrl)';

@@ -100,7 +100,7 @@ class Image extends ImageBase {
     this.filterQuality = FilterQuality.low,
   }) : loadingBuilder = null,
        image = null {
-    throw UnsupportedError('Image.file is not supported on the web.');
+    throw UnsupportedError('Image.file is not supported on the web. Try using Use Image.memory instead.');
   }
 
   /// No doc.
