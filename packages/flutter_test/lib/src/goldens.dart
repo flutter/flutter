@@ -8,6 +8,9 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
+import '_goldens_io.dart'
+  if (dart.library.html) '_goldens_web.dart' as _goldens;
+
 /// Compares image pixels against a golden image file.
 ///
 /// Instances of this comparator will be used as the backend for
@@ -69,7 +72,7 @@ abstract class GoldenFileComparator {
   /// Returns whether the comparison was successful. to describe the pixel differential of the
   /// [test] and [master] image bytes provided.
   static bool compareLists(List<int> test, List<int> master) {
-    return compareLists(test, master);
+    return _goldens.compareLists(test, master);
   }
 }
 
