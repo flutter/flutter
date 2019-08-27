@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -20,6 +22,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/mocks.dart';
 import '../../src/pubspec_schema.dart';
 
 void main() {
@@ -865,6 +868,89 @@ flutter:
           throwsA(predicate<Exception>((Exception e) => e is ToolExit)));
     });
   });
+
+  group('gradle build', () {
+    MockAndroidSdk mockAndroidSdk;
+    MockLocalEngineArtifacts mockArtifacts;
+    MockProcessManager mockProcessManager;
+    FakePlatform android;
+    FileSystem fs;
+
+    setUp(() {
+      fs = MemoryFileSystem();
+      mockAndroidSdk = MockAndroidSdk();
+      mockArtifacts = MockLocalEngineArtifacts();
+      mockProcessManager = MockProcessManager();
+      android = fakePlatform('android');
+    });
+
+    testUsingContext('build aar uses selected local engine', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'android_arm'));
+
+      final File manifestFile = fs.file('path/to/project/pubspec.yaml');
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync('''
+        name: test
+        version: 1.0.0+1
+        dependencies:
+          flutter:
+            sdk: flutter
+        flutter:
+          module:
+            androidX: false
+            androidPackage: com.example.test
+            iosBundleIdentifier: com.example.test
+        '''
+      );
+
+      final File gradlew = fs.file('path/to/project/.android/gradlew');
+      gradlew.createSync(recursive: true);
+
+      when(mockProcessManager.run(
+          <String> ['/path/to/project/.android/gradlew', '-v'],
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+      )).thenAnswer(
+          (_) async => ProcessResult(1, 0, '5.1.1', ''),
+      );
+
+      // write schemaData otherwise pubspec.yaml file can't be loaded
+      writeEmptySchemaFile(fs);
+      fs.currentDirectory = 'path/to/project';
+
+      // Let any process start. Assert after.
+      when(mockProcessManager.start(
+        any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'))
+      ).thenAnswer((Invocation invocation) => Future<Process>.value(MockProcess()));
+      fs.directory('build/outputs/repo').createSync(recursive: true);
+
+      await buildGradleAar(
+        androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
+        project: FlutterProject.current(),
+        outputDir: 'build/',
+        target: ''
+      );
+
+      final List<String> actualGradlewCall = verify(mockProcessManager.start(
+        captureAny,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory')),
+      ).captured.single;
+
+      expect(actualGradlewCall, contains('/path/to/project/.android/gradlew'));
+      expect(actualGradlewCall, contains('-PlocalEngineOut=out/android_arm'));
+    }, overrides: <Type, Generator>{
+        AndroidSdk: () => mockAndroidSdk,
+        Artifacts: () => mockArtifacts,
+        ProcessManager: () => mockProcessManager,
+        Platform: () => android,
+        FileSystem: () => fs,
+      });
+  });
 }
 
 Platform fakePlatform(String name) {
@@ -875,3 +961,4 @@ class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockGradleProject extends Mock implements GradleProject {}
+class MockitoAndroidSdk extends Mock implements AndroidSdk {}

@@ -549,6 +549,12 @@ Future<void> buildGradleAar({
         .map(getPlatformNameForAndroidArch).join(',');
     command.add('-Ptarget-platform=$targetPlatforms');
   }
+  if (artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    printTrace('Using local engine: ${localEngineArtifacts.engineOutPath}');
+    command.add('-PlocalEngineOut=${localEngineArtifacts.engineOutPath}');
+  }
+
   command.add(aarTask);
 
   final Stopwatch sw = Stopwatch()..start();
