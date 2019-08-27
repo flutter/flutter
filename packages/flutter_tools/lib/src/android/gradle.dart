@@ -268,7 +268,6 @@ String _locateGradlewExecutable(Directory directory) {
   final File gradle = directory.childFile(
     platform.isWindows ? 'gradlew.bat' : 'gradlew',
   );
-
   if (gradle.existsSync()) {
     os.makeExecutable(gradle);
     return gradle.absolute.path;
