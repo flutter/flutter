@@ -64,7 +64,7 @@ class LocalFileComparator extends GoldenFileComparator {
       throw test_package.TestFailure('Could not be compared against non-existent file: "$golden"');
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
-    final ComparisonResult result = compareLists<Uint8List>(imageBytes, goldenBytes);
+    final ComparisonResult result = _compareLists(imageBytes, goldenBytes);
 
     if (!result.passed) {
       String additionalFeedback = '';
@@ -103,9 +103,14 @@ class LocalFileComparator extends GoldenFileComparator {
   }
 }
 
+/// Returns whether [test] and [master] are pixel by pixel identical.
+bool compareLists(List<int> test, List<int> master) {
+  return _compareLists(test, master).passed;
+}
+
 /// Returns a [ComparisonResult] to describe the pixel differential of the
 /// [test] and [master] image bytes provided.
-ComparisonResult compareLists<T>(List<int> test, List<int> master) {
+ComparisonResult _compareLists(List<int> test, List<int> master) {
   if (identical(test, master))
     return ComparisonResult(passed: true);
 

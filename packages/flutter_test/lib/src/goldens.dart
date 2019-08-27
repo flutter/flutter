@@ -65,6 +65,12 @@ abstract class GoldenFileComparator {
         .join() + '.' + version.toString() + extension
     );
   }
+
+  /// Returns whether the comparison was successful. to describe the pixel differential of the
+  /// [test] and [master] image bytes provided.
+  static bool compareLists(List<int> test, List<int> master) {
+    return compareLists(test, master);
+  }
 }
 
 /// Compares pixels against those of a golden image file.

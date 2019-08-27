@@ -19,3 +19,10 @@ class LocalFileComparator extends GoldenFileComparator {
   }
 }
 
+/// Returns whether [test] and [master] are pixel by pixel identical.
+///
+/// This method is not supported on the web and throws an [UnsupportedError]
+/// when called.
+bool compareLists(List<int> test, List<int> master) {
+  throw UnsupportedError('Golden testing is not supported on the web.');
+}
