@@ -123,6 +123,21 @@ void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> prop
   validatePropertyJsonSerializationHelper(json, property);
 }
 
+void validateIterableFlagsPropertyJsonSerialization(IterableFlagsProperty<Object> property) {
+  final Map<String, Object> json = simulateJsonSerialization(property);
+  if (property.value.isNotEmpty) {
+    expect(json['values'], equals(
+      property.value.entries
+        .where((MapEntry<String, Object> entry) => entry.value != null)
+        .map((MapEntry<String, Object> entry) => entry.key).toList(),
+    ));
+  } else {
+    expect(json.containsKey('values'), isFalse);
+  }
+
+  validatePropertyJsonSerializationHelper(json, property);
+}
+
 void validateIterablePropertyJsonSerialization(IterableProperty<Object> property) {
   final Map<String, Object> json = simulateJsonSerialization(property);
   if (property.value != null) {
@@ -1599,6 +1614,86 @@ void main() {
     expect(missing.isFiltered(DiagnosticLevel.info), isTrue);
     expect(missing.toString(), equals('onClick: null'));
     validateObjectFlagPropertyJsonSerialization(missing);
+  });
+
+  test('iterable flags property test', () {
+    // Normal property
+    {
+      final Function onClick = () { };
+      final Function onMove = () { };
+      final Map<String, Function> value = <String, Function>{
+        'click': onClick,
+        'move': onMove,
+      };
+      final IterableFlagsProperty<Function> flags = IterableFlagsProperty<Function>(
+        'listeners',
+        value,
+      );
+      expect(flags.name, equals('listeners'));
+      expect(flags.value, equals(value));
+      expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
+      expect(flags.toString(), equals('listeners: click, move'));
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
+
+    // Reversed-order property
+    {
+      final Function onClick = () { };
+      final Function onMove = () { };
+      final Map<String, Function> value = <String, Function>{
+        'move': onMove,
+        'click': onClick,
+      };
+      final IterableFlagsProperty<Function> flags = IterableFlagsProperty<Function>(
+        'listeners',
+        value,
+      );
+      expect(flags.toString(), equals('listeners: move, click'));
+      expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
+
+    // Partially empty property
+    {
+      final Function onClick = () { };
+      final Map<String, Function> value = <String, Function>{
+        'move': null,
+        'hover': null,
+        'click': onClick,
+      };
+      final IterableFlagsProperty<Function> flags = IterableFlagsProperty<Function>(
+        'listeners',
+        value,
+        ifEntryEmpty: <String, String>{ 'hover': 'MISSING HOVER' },
+      );
+      expect(flags.toString(), equals('listeners: MISSING HOVER, click'));
+      expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
+
+    // Empty property (without ifEmpty)
+    {
+      final Map<String, Function> value = <String, Function>{};
+      final IterableFlagsProperty<Function> flags = IterableFlagsProperty<Function>(
+        'listeners',
+        value,
+      );
+      expect(flags.isFiltered(DiagnosticLevel.info), isTrue);
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
+
+    // Empty property (without ifEmpty)
+    {
+      final Map<String, Function> value = <String, Function>{};
+      final IterableFlagsProperty<Function> flags = IterableFlagsProperty<Function>(
+        'listeners',
+        value,
+        ifEmpty: '<none>',
+      );
+      expect(flags.toString(), equals('listeners: <none>'));
+      expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
   });
 
   test('iterable property test', () {

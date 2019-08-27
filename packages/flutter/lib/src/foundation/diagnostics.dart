@@ -2415,6 +2415,113 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   }
 }
 
+/// A series of properties, where the important diagnostic information is
+/// primarily whether each member of [value] is present (non-null) or absent
+/// (null), rather than the actual value of the property itself.
+///
+/// The [ifPresent] and [ifNull] strings describe the property [value] when it
+/// is non-null and null respectively. If one of [ifPresent] or [ifNull] is
+/// omitted, that is taken to mean that [level] should be
+/// [DiagnosticLevel.hidden] when [value] is non-null or null respectively.
+///
+/// This kind of diagnostics property is typically used for values mostly opaque
+/// values, like closures, where presenting the actual object is of dubious
+/// value but where reporting the presence or absence of the value is much more
+/// useful.
+///
+/// If [style] is [DiagnosticsTreeStyle.singleLine], the iterable is described
+/// as a comma separated list, otherwise the iterable is described as a line
+/// break separated list.
+///
+/// See also:
+///
+///  * [FlagProperty], which provides similar functionality describing whether
+///    a [value] is true or false.
+class IterableFlagsProperty<T> extends DiagnosticsProperty<Map<String, T>> {
+  /// Create a diagnostics property for values that can be present (non-null) or
+  /// absent (null), but for which the exact value's [Object.toString]
+  /// representation is not very transparent (e.g. a callback).
+  ///
+  /// The [showName] and [level] arguments must not be null. Additionally, at
+  /// least one of [ifPresent] and [ifNull] must not be null.
+  IterableFlagsProperty(
+    String name,
+    Map<String, T> value, {
+    this.ifEntryEmpty,
+    String ifEmpty,
+    bool showName = true,
+    bool showSeparator = true,
+    DiagnosticLevel level  = DiagnosticLevel.info,
+  }) : assert(value != null),
+       assert(showName != null),
+       assert(showSeparator != null),
+       assert(level != null),
+       super(
+         name,
+         value,
+         ifEmpty: ifEmpty,
+         showName: showName,
+         showSeparator: showSeparator,
+         level: level,
+       );
+
+  final Map<String, String> ifEntryEmpty;
+
+  @override
+  String valueToString({TextTreeConfiguration parentConfiguration}) {
+    assert(value != null);
+    if (value.isEmpty && ifEmpty != null)
+      return ifEmpty;
+
+    final Iterable<String> formattedValues = _formattedValues(includeEmpty: true);
+    if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
+      // Always display the value as a single line and enclose the iterable
+      // value in brackets to avoid ambiguity.
+      return '[${formattedValues.join(', ')}]';
+    }
+
+    return formattedValues.join(_isSingleLine(style) ? ', ' : '\n');
+  }
+
+  /// Priority level of the diagnostic used to control which diagnostics should
+  /// be shown and filtered.
+  ///
+  /// If [ifEmpty] is null and the [value] is an empty [Iterable] then level
+  /// [DiagnosticLevel.fine] is returned in a similar way to how an
+  /// [ObjectFlagProperty] handles when [ifNull] is null and the [value] is
+  /// null.
+  @override
+  DiagnosticLevel get level {
+    if (value.isEmpty && ifEmpty == null)
+      return DiagnosticLevel.hidden;
+    return super.level;
+  }
+
+  @override
+  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
+    if (value.isNotEmpty)
+      json['values'] = _formattedValues(includeEmpty: false).toList();
+    return json;
+  }
+
+  Iterable<String> _formattedValues({@required bool includeEmpty}) sync* {
+    for (MapEntry<String, T> entry in value.entries) {
+      if (entry.value != null) {
+        yield entry.key;
+      } else {
+        if (!includeEmpty)
+          continue;
+        if (ifEntryEmpty != null) {
+          final String emptyValue = ifEntryEmpty[entry.key];
+          if (emptyValue != null)
+            yield emptyValue;
+        }
+      }
+    }
+  }
+}
+
 /// Signature for computing the value of a property.
 ///
 /// May throw exception if accessing the property would throw an exception
