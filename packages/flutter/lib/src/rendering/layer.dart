@@ -213,20 +213,22 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     parent?._removeChild(this);
   }
 
-  /// Returns the value of `S` that corresponds to the point described by
-  /// `localPosition`.
+  /// Returns the first annotation of type `S` that is found at the point
+  /// described by `localPosition`.
   ///
   /// Returns null if no matching region is found.
   ///
+  /// It is encouraged to override [findAnnotations] instead of this method.
   /// By default this method calls [findAnnotations] with `onlyFirst: true`
   /// and returns the first result.
-  /// It is encouraged to override [findAnnotations] instead of this method.
   ///
   /// The main way for a value to be found here is by pushing an
   /// [AnnotatedRegionLayer] into the layer tree.
   ///
   /// See also:
   ///
+  ///  * [findAll], which is similar but returns all annotations found at the
+  ///    given position.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   S find<S>(Offset localPosition) {
     final List<S> result = <S>[];
@@ -234,8 +236,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     return result.isEmpty ? null : result.first;
   }
 
-  /// Returns an iterable of `S` values that corresponds to the point described
-  /// by `localPosition` on all layers under the point.
+  /// Returns an iterable of annotation of type `S` that corresponds to the
+  /// point described by `localPosition` on all layers under the point.
   ///
   /// Returns an empty list if no matching region is found.
   ///
@@ -247,6 +249,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// See also:
   ///
+  ///  * [find], which is similar but returns the first annotation found at the
+  ///    given position.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   Iterable<S> findAll<S>(Offset localPosition) {
     final List<S> result = <S>[];
