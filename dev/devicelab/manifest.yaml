@@ -517,32 +517,18 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  smoke_catalina_start_up_ios:
-    description: >
-      A smoke test that runs on macOS Catalina, which is a clone of the Gallery startup latency test.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac-catalina/ios"]
-
-  smoke_catalina_hot_mode_dev_cycle_ios__benchmark:
-    description: >
-      A some test that runs on macOS Catalina, which is a clone of the Dart VM hot patching performance benchmarking.
-    stage: devicelab_ios
-    flaky: true
-    required_agent_capabilities: ["mac-catalina/ios"]
-
   smoke_catalina_start_up:
     description: >
       A smoke test that runs on macOS Catalina, which is a clone of the Gallery startup latency test.
-    stage: devicelab
-    flaky: true
-    required_agent_capabilities: ["mac-catalina/android"]
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac-catalina/ios"]
 
   smoke_catalina_hot_mode_dev_cycle__benchmark:
     description: >
       A some test that runs on macOS Catalina, which is a clone of the Dart VM hot patching performance benchmarking.
-    stage: devicelab
+    stage: devicelab_ios
     flaky: true
-    required_agent_capabilities: ["mac-catalina/android"]
+    required_agent_capabilities: ["mac-catalina/ios"]
 
   # Tests running on Windows host
 
