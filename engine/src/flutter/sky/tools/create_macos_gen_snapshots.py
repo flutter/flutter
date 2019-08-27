@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 
 import argparse
-import shutil
+import subprocess
 import sys
 import os
 
@@ -29,9 +29,10 @@ def main():
     print 'Cannot find i386 (armv7) gen_snapshot at', armv7_gen_snapshot
     return 1
 
-  shutil.copy(armv7_gen_snapshot, os.path.join(args.dst, 'gen_snapshot_armv7'))
-  shutil.copy(arm64_gen_snapshot, os.path.join(args.dst, 'gen_snapshot_arm64'))
-
+  subprocess.check_call(['xcrun', 'bitcode_strip', '-r', armv7_gen_snapshot,
+      '-o', os.path.join(args.dst, 'gen_snapshot_armv7')])
+  subprocess.check_call(['xcrun', 'bitcode_strip', '-r', arm64_gen_snapshot,
+      '-o', os.path.join(args.dst, 'gen_snapshot_arm64')])
 
 if __name__ == '__main__':
   sys.exit(main())
