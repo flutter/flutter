@@ -9,5 +9,6 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 
 Future<void> main() async {
+  deviceOperatingSystem = DeviceOperatingSystem.ios;
   await task(createHotModeTest());
 }
