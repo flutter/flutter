@@ -1664,7 +1664,7 @@ void main() {
       final IterableFlagsProperty<Function> flags = IterableFlagsProperty<Function>(
         'listeners',
         value,
-        ifEntryEmpty: <String, String>{ 'hover': 'MISSING HOVER' },
+        ifEntryNull: <String, String>{ 'hover': 'MISSING HOVER' },
       );
       expect(flags.toString(), equals('listeners: MISSING HOVER, click'));
       expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
@@ -1673,7 +1673,9 @@ void main() {
 
     // Empty property (without ifEmpty)
     {
-      final Map<String, Function> value = <String, Function>{};
+      final Map<String, Function> value = <String, Function>{
+        'enter': null,
+      };
       final IterableFlagsProperty<Function> flags = IterableFlagsProperty<Function>(
         'listeners',
         value,
@@ -1684,7 +1686,9 @@ void main() {
 
     // Empty property (without ifEmpty)
     {
-      final Map<String, Function> value = <String, Function>{};
+      final Map<String, Function> value = <String, Function>{
+        'enter': null,
+      };
       final IterableFlagsProperty<Function> flags = IterableFlagsProperty<Function>(
         'listeners',
         value,

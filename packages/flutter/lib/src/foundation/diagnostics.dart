@@ -2415,39 +2415,37 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   }
 }
 
-/// A series of properties, where the important diagnostic information is
-/// primarily whether each member of [value] is present (non-null) or absent
+/// A collection of properties, where the important diagnostic information is
+/// primarily whether each entry of [value] is present (non-null) or absent
 /// (null), rather than the actual value of the property itself.
 ///
-/// The [ifPresent] and [ifNull] strings describe the property [value] when it
-/// is non-null and null respectively. If one of [ifPresent] or [ifNull] is
-/// omitted, that is taken to mean that [level] should be
-/// [DiagnosticLevel.hidden] when [value] is non-null or null respectively.
+/// Each entry of [value] is described by its key. Each entry of [ifEntryNull]
+/// describes the entry with the same key in [value] that is null. The [ifEmpty]
+/// describes the entire collection of [value] when it contains no non-null
+/// entries. If [ifEmpty] is omitted, [level] will be [DiagnosticLevel.hidden]
+/// when [value] contains no non-null entries.
 ///
 /// This kind of diagnostics property is typically used for values mostly opaque
 /// values, like closures, where presenting the actual object is of dubious
 /// value but where reporting the presence or absence of the value is much more
 /// useful.
 ///
-/// If [style] is [DiagnosticsTreeStyle.singleLine], the iterable is described
-/// as a comma separated list, otherwise the iterable is described as a line
-/// break separated list.
-///
 /// See also:
 ///
-///  * [FlagProperty], which provides similar functionality describing whether
-///    a [value] is true or false.
+///  * [ObjectFlagProperty], which provides similar functionality describing
+///    whether a single object is present or absent.
+///  * [IterableProperty], which provides similar functionality describing
+///    the values a collection of objects.
 class IterableFlagsProperty<T> extends DiagnosticsProperty<Map<String, T>> {
   /// Create a diagnostics property for values that can be present (non-null) or
   /// absent (null), but for which the exact value's [Object.toString]
   /// representation is not very transparent (e.g. a callback).
   ///
-  /// The [showName] and [level] arguments must not be null. Additionally, at
-  /// least one of [ifPresent] and [ifNull] must not be null.
+  /// The [showName] and [level] arguments must not be null.
   IterableFlagsProperty(
     String name,
     Map<String, T> value, {
-    this.ifEntryEmpty,
+    this.ifEntryNull,
     String ifEmpty,
     bool showName = true,
     bool showSeparator = true,
@@ -2465,12 +2463,14 @@ class IterableFlagsProperty<T> extends DiagnosticsProperty<Map<String, T>> {
          level: level,
        );
 
-  final Map<String, String> ifEntryEmpty;
+  /// A collection of descriptions to use when the entry with the same key in
+  /// [value] is null.
+  final Map<String, String> ifEntryNull;
 
   @override
   String valueToString({TextTreeConfiguration parentConfiguration}) {
     assert(value != null);
-    if (value.isEmpty && ifEmpty != null)
+    if (!_hasNonNullEntry() && ifEmpty != null)
       return ifEmpty;
 
     final Iterable<String> formattedValues = _formattedValues(includeEmpty: true);
@@ -2486,13 +2486,11 @@ class IterableFlagsProperty<T> extends DiagnosticsProperty<Map<String, T>> {
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
   ///
-  /// If [ifEmpty] is null and the [value] is an empty [Iterable] then level
-  /// [DiagnosticLevel.fine] is returned in a similar way to how an
-  /// [ObjectFlagProperty] handles when [ifNull] is null and the [value] is
-  /// null.
+  /// If [ifEmpty] is null and the [value] contains no non-null entries, then
+  /// level [DiagnosticLevel.hidden] is returned.
   @override
   DiagnosticLevel get level {
-    if (value.isEmpty && ifEmpty == null)
+    if (!_hasNonNullEntry() && ifEmpty == null)
       return DiagnosticLevel.hidden;
     return super.level;
   }
@@ -2505,6 +2503,14 @@ class IterableFlagsProperty<T> extends DiagnosticsProperty<Map<String, T>> {
     return json;
   }
 
+  bool _hasNonNullEntry() => value.values.any((Object o) => o != null);
+
+  // An iterable of each entry's description in [value].
+  //
+  // For a non-null value, its description is its key.
+  //
+  // For a null value, it is omitted unless `includeEmtpy` is true and
+  // [ifEntryNull] contains a corresponding description.
   Iterable<String> _formattedValues({@required bool includeEmpty}) sync* {
     for (MapEntry<String, T> entry in value.entries) {
       if (entry.value != null) {
@@ -2512,8 +2518,8 @@ class IterableFlagsProperty<T> extends DiagnosticsProperty<Map<String, T>> {
       } else {
         if (!includeEmpty)
           continue;
-        if (ifEntryEmpty != null) {
-          final String emptyValue = ifEntryEmpty[entry.key];
+        if (ifEntryNull != null) {
+          final String emptyValue = ifEntryNull[entry.key];
           if (emptyValue != null)
             yield emptyValue;
         }
