@@ -9,6 +9,7 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<void> main() async {
+  deviceOperatingSystem = DeviceOperatingSystem.ios;
   // It's intended to use the Gallery startup test as a smoke test on macOS
   // Catalina.
   await task(createFlutterGalleryStartupTest());
