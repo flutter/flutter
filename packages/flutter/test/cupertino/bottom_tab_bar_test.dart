@@ -179,6 +179,21 @@ void main() {
       ],
     );
 
+    final CupertinoTabBar compactTabBar = CupertinoTabBar(
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: ImageIcon(TestImageProvider(24, 24)),
+          title: Text('Aka 2'),
+        ),
+        BottomNavigationBarItem(
+          icon: ImageIcon(TestImageProvider(24, 24)),
+          title: Text('Shiro 2'),
+        ),
+      ],
+      isWide: true,
+      isCompact: true,
+    );
+
     // Verify height with no bottom padding.
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),
@@ -191,9 +206,22 @@ void main() {
     ));
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, 50.0);
 
-    // Verify height with bottom padding.
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
+      data: const MediaQueryData(),
+      child: CupertinoTabScaffold(
+        tabBar: compactTabBar,
+        tabBuilder: (BuildContext context, int index) {
+          return const Placeholder();
+        },
+      ),
+    ));
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, 32.0);
+
+    // Verify height with bottom padding.
+    const double bottomPadding = 40.0;
+
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(padding: EdgeInsets.only(bottom: bottomPadding)),
       child: CupertinoTabScaffold(
         tabBar: tabBar,
         tabBuilder: (BuildContext context, int index) {
@@ -201,7 +229,46 @@ void main() {
         },
       ),
     ));
-    expect(tester.getSize(find.byType(CupertinoTabBar)).height, 90.0);
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, 50.0 + bottomPadding);
+
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(padding: EdgeInsets.only(bottom: bottomPadding)),
+      child: CupertinoTabScaffold(
+        tabBar: compactTabBar,
+        tabBuilder: (BuildContext context, int index) {
+          return const Placeholder();
+        },
+      ),
+    ));
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, 32.0 + bottomPadding);
+  });
+
+  testWidgets('Compact flag takes effect only when the wide flag is active as well', (WidgetTester tester) async {
+    final CupertinoTabBar falseCompactTabBar = CupertinoTabBar(
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: ImageIcon(TestImageProvider(24, 24)),
+          title: Text('Aka 2'),
+        ),
+        BottomNavigationBarItem(
+          icon: ImageIcon(TestImageProvider(24, 24)),
+          title: Text('Shiro 2'),
+        ),
+      ],
+      isWide: false,
+      isCompact: true,
+    );
+
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoTabScaffold(
+        tabBar: falseCompactTabBar,
+        tabBuilder: (BuildContext context, int index) {
+          return const Placeholder();
+        },
+      ),
+    ));
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, 50.0);
   });
 
   testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
