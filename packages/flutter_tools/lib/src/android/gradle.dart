@@ -269,11 +269,9 @@ String _locateGradlewExecutable(Directory directory) {
     platform.isWindows ? 'gradlew.bat' : 'gradlew',
   );
   if (gradle.existsSync()) {
-    os.makeExecutable(gradle);
     return gradle.absolute.path;
-  } else {
-    return null;
   }
+  return null;
 }
 
 Future<String> _ensureGradle(FlutterProject project) async {
@@ -309,7 +307,14 @@ void injectGradleWrapperIfNeeded(Directory directory) {
     shouldCopyFile: (File sourceFile, File destinationFile) {
       // Don't override the existing files in the project.
       return !destinationFile.existsSync();
-  });
+    },
+    onFileCopied: (File sourceFile, File destinationFile) {
+      final String modes = sourceFile.statSync().modeString();
+      if (modes != null && modes.contains('x')) {
+        os.makeExecutable(destinationFile);
+      }
+    },
+  );
   // Add the `gradle-wrapper.properties` file if it doesn't exist.
   final File propertiesFile = directory.childFile(
       fs.path.join('gradle', 'wrapper', 'gradle-wrapper.properties'));

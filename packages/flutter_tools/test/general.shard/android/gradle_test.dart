@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -877,7 +878,9 @@ flutter:
       gradleWrapperDirectory = memoryFileSystem.directory(
           memoryFileSystem.path.join(tempDir.path, 'bin/cache/artifacts/gradle_wrapper'));
       gradleWrapperDirectory.createSync(recursive: true);
-      gradleWrapperDirectory.childFile('gradlew').writeAsStringSync('irrelevant');
+      gradleWrapperDirectory
+          .childFile('gradlew')
+          .writeAsStringSync('irrelevant');
       gradleWrapperDirectory.childDirectory('gradle/wrapper').createSync(recursive: true);
       gradleWrapperDirectory
         .childDirectory('gradle')
@@ -959,6 +962,24 @@ flutter:
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
+    });
+
+    testUsingContext('Gives executable permission to gradle', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+
+      // Make gradlew in the wrapper executable.
+      os.makeExecutable(gradleWrapperDirectory.childFile('gradlew'));
+
+      injectGradleWrapperIfNeeded(sampleAppAndroid);
+
+      final File gradlew = sampleAppAndroid.childFile('gradlew');
+      expect(gradlew.existsSync(), isTrue);
+      expect(gradlew.statSync().modeString().contains('x'), isTrue);
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => memoryFileSystem,
+      OperatingSystemUtils: () => OperatingSystemUtils(),
     });
   });
 }
