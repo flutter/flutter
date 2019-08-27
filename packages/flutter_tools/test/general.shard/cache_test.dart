@@ -143,9 +143,13 @@ void main() {
       verify(artifact2.update());
     });
     testUsingContext('getter dyLdLibEntry concatenates the output of each artifact\'s dyLdLibEntry getter', () async {
-      final Cache cache = Cache(artifacts: const <CachedArtifact>[]);
-      cache.dyLdLibPath.add('/path/to/alpha:/path/to/beta');
-      cache.dyLdLibPath.add('/path/to/gamma:/path/to/delta:/path/to/epsilon');
+      final IosUsbArtifacts artifact1 = MockIosUsbArtifacts();
+      final IosUsbArtifacts artifact2 = MockIosUsbArtifacts();
+      final IosUsbArtifacts artifact3 = MockIosUsbArtifacts();
+      when(artifact1.dyLdLibPath).thenReturn('/path/to/alpha:/path/to/beta');
+      when(artifact2.dyLdLibPath).thenReturn('/path/to/gamma:/path/to/delta:/path/to/epsilon');
+      when(artifact3.dyLdLibPath).thenReturn(''); // Empty output
+      final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2, artifact3]);
 
       expect(cache.dyLdLibEntry.key, 'DYLD_LIBRARY_PATH');
       expect(
@@ -155,22 +159,6 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
     });
-
-    test('getter dyLdLibPath includes artifact directories from IosUsbArtifacts', () async {
-      final Cache cache = Cache(artifacts: const <CachedArtifact>[]);
-
-      IosUsbArtifacts('foo', cache);
-      IosUsbArtifacts('bar', cache);
-
-      expect(cache.dyLdLibEntry.key, 'DYLD_LIBRARY_PATH');
-
-      final Directory cacheDirectory = cache.getCacheArtifacts();
-      expect(
-        cache.dyLdLibEntry.value,
-        "${cacheDirectory.childDirectory('foo').path}:${cacheDirectory.childDirectory('bar').path}",
-      );
-    });
-
     testUsingContext('failed storage.googleapis.com download shows China warning', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
@@ -309,6 +297,7 @@ class MockDirectory extends Mock implements Directory {}
 
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 class MockCachedArtifact extends Mock implements CachedArtifact {}
+class MockIosUsbArtifacts extends Mock implements IosUsbArtifacts {}
 class MockInternetAddress extends Mock implements InternetAddress {}
 class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}

@@ -244,9 +244,18 @@ class Cache {
     return getCacheArtifacts().childDirectory(name);
   }
 
-  List<String> dyLdLibPath = <String>[];
-
   MapEntry<String, String> get dyLdLibEntry {
+    final List<String> dyLdLibPath = <String>[];
+    for (ArtifactSet artifact in _artifacts) {
+      if (!(artifact is IosUsbArtifacts)) {
+        continue;
+      }
+      final String path = (artifact as IosUsbArtifacts).dyLdLibPath;
+      if (path.isEmpty) {
+        continue;
+      }
+      dyLdLibPath.add(path);
+    }
     return MapEntry<String, String>('DYLD_LIBRARY_PATH', dyLdLibPath.join(':'));
   }
 
@@ -1048,9 +1057,7 @@ class IosUsbArtifacts extends CachedArtifact {
     // This is universal to ensure every command checks for them first
     DevelopmentArtifact.universal,
     cache,
-  ) {
-    cache.dyLdLibPath.add(cache.getArtifactDirectory(name).path);
-  }
+  );
 
   static const List<String> artifactNames = <String>[
     'libimobiledevice',
@@ -1060,6 +1067,10 @@ class IosUsbArtifacts extends CachedArtifact {
     'ideviceinstaller',
     'ios-deploy',
   ];
+
+  String get dyLdLibPath {
+    return cache.getArtifactDirectory(name).path;
+  }
 
   @override
   Future<void> updateInner() {
