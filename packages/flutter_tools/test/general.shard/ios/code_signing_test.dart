@@ -35,6 +35,7 @@ void main() {
         'For our purposes': 'a non-empty build settings map is valid',
       });
       testTerminal = TestTerminal();
+      testTerminal.usesTerminalUi = true;
       app = BuildableIOSApp(mockIosProject);
     });
 
@@ -296,6 +297,7 @@ void main() {
     });
 
     testUsingContext('Test multiple identity in machine mode works', () async {
+      testTerminal.usesTerminalUi = false;
       when(mockProcessManager.runSync(<String>['which', 'security']))
           .thenReturn(exitsHappy);
       when(mockProcessManager.runSync(<String>['which', 'openssl']))
@@ -347,7 +349,7 @@ void main() {
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
 
-      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: false);
+      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
       expect(
         testLogger.statusText,
