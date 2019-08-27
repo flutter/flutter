@@ -8,8 +8,10 @@ import 'package:file_testing/file_testing.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show InternetAddress, SocketException;
@@ -249,21 +251,56 @@ void main() {
     });
   });
 
-  testUsingContext('throws tool exit on fs exception', () async {
-    final FakeCachedArtifact fakeCachedArtifact = FakeCachedArtifact(
-      cache: MockCache(),
-      requiredArtifacts: DevelopmentArtifact.android_gen_snapshot,
-    );
-    final Directory mockDirectory = MockDirectory();
-    when(fakeCachedArtifact.cache.getArtifactDirectory(any))
-        .thenReturn(mockDirectory);
-    when(mockDirectory.existsSync()).thenReturn(false);
-    when(mockDirectory.createSync(recursive: true))
-        .thenThrow(const FileSystemException());
+  group('AndroidMavenDependencies', () {
+    MemoryFileSystem memoryFileSystem;
+    MockProcessManager processManager;
+    MockCache mockCache;
+    MockProcess mockProcess;
 
-    expect(() => fakeCachedArtifact.update(), throwsA(isInstanceOf<ToolExit>()));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+      processManager = MockProcessManager();
+      mockCache = MockCache();
+      mockProcess = MockProcess();
+    });
+
+    test('development artifact', () async {
+      final AndroidMavenDependencies mavenDependencies = AndroidMavenDependencies();
+      expect(mavenDependencies.developmentArtifact, DevelopmentArtifact.android_maven);
+    });
+
+    testUsingContext('udpdate', () async {
+      final AndroidMavenDependencies mavenDependencies = AndroidMavenDependencies();
+      expect(mavenDependencies.isUpToDate(), isFalse);
+
+      final Directory gradleWrapperDir = fs.systemTempDirectory.createTempSync('gradle_wrapper.');
+      when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
+
+      fs.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))
+          .createSync(recursive: true);
+      fs.file(fs.path.join(gradleWrapperDir.path, 'gradlew')).writeAsStringSync('irrelevant');
+      fs.file(fs.path.join(gradleWrapperDir.path, 'gradlew.bat')).writeAsStringSync('irrelevant');
+
+      when(processManager.start(any))
+          .thenAnswer((Invocation invocation){
+            final List<String> args = invocation.positionalArguments[0];
+            expect(args.length, 6);
+            expect(args[1], '-b');
+            expect(args[2].endsWith('resolve_dependencies.gradle'), isTrue);
+            expect(args[5], 'resolveDependencies');
+
+            return Future<Process>.value(mockProcess);
+          });
+      when(mockProcess.exitCode).thenAnswer((_) async => 0);
+
+      await mavenDependencies.update();
+
+      expect(mavenDependencies.isUpToDate(), isFalse);
+    }, overrides: <Type, Generator>{
+      Cache: ()=> mockCache,
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => processManager,
+    });
   });
 }
 
@@ -275,7 +312,7 @@ class FakeCachedArtifact extends EngineCachedArtifact {
     this.binaryDirs = const <List<String>>[],
     this.licenseDirs = const <String>[],
     this.packageDirs = const <String>[],
-  }) : super(stampName, requiredArtifacts, cache);
+  }) : super(stampName, cache, requiredArtifacts);
 
   final List<List<String>> binaryDirs;
   final List<String> licenseDirs;
@@ -291,6 +328,8 @@ class FakeCachedArtifact extends EngineCachedArtifact {
   List<String> getPackageDirs() => packageDirs;
 }
 
+class MockProcessManager extends Mock implements ProcessManager {}
+class MockProcess extends Mock implements Process {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockFile extends Mock implements File {}
 class MockDirectory extends Mock implements Directory {}

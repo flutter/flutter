@@ -80,10 +80,10 @@ class Cache {
   Cache({ Directory rootOverride, List<ArtifactSet> artifacts }) : _rootOverride = rootOverride {
     if (artifacts == null) {
       _artifacts.add(MaterialFonts(this));
+      _artifacts.add(GradleWrapper(this));
       _artifacts.add(AndroidMavenDependencies());
       _artifacts.add(AndroidGenSnapshotArtifacts(this));
       _artifacts.add(IOSEngineArtifacts(this));
-      _artifacts.add(GradleWrapper(this));
       _artifacts.add(FlutterWebSdk(this));
       _artifacts.add(FlutterSdk(this));
       _artifacts.add(WindowsEngineArtifacts(this));
@@ -364,12 +364,7 @@ class Cache {
 
 /// Representation of a set of artifacts used by the tool.
 abstract class ArtifactSet {
-  ArtifactSet(this.name, this.developmentArtifact) :
-    assert(name != null),
-    assert(developmentArtifact != null);
-
-  /// The canonical name of the artifact.
-  final String name;
+  ArtifactSet(this.developmentArtifact) : assert(developmentArtifact != null);
 
   /// The development artifact.
   final DevelopmentArtifact developmentArtifact;
@@ -384,12 +379,15 @@ abstract class ArtifactSet {
 /// An artifact set managed by the cache.
 abstract class CachedArtifact extends ArtifactSet {
   CachedArtifact(
-    String name,
-    DevelopmentArtifact developmentArtifact,
+    this.name,
     this.cache,
-  ) : super(name, developmentArtifact);
+    DevelopmentArtifact developmentArtifact,
+  ) : super(developmentArtifact);
 
   final Cache cache;
+
+  /// The canonical name of the artifact.
+  final String name;
 
   // The name of the stamp file. Defaults to the same as the
   // artifact name.
@@ -518,8 +516,8 @@ void _maybeWarnAboutStorageOverride(String overrideUrl) {
 class MaterialFonts extends CachedArtifact {
   MaterialFonts(Cache cache) : super(
     'material_fonts',
-    DevelopmentArtifact.universal,
     cache,
+    DevelopmentArtifact.universal,
   );
 
   @override
@@ -536,8 +534,8 @@ class MaterialFonts extends CachedArtifact {
 class FlutterWebSdk extends CachedArtifact {
   FlutterWebSdk(Cache cache) : super(
     'flutter_web_sdk',
-    DevelopmentArtifact.web,
     cache,
+    DevelopmentArtifact.web,
   );
 
   @override
@@ -577,9 +575,9 @@ class FlutterWebSdk extends CachedArtifact {
 abstract class EngineCachedArtifact extends CachedArtifact {
   EngineCachedArtifact(
     this.stampName,
-    DevelopmentArtifact developmentArtifact,
     Cache cache,
-  ) : super('engine', developmentArtifact, cache);
+    DevelopmentArtifact developmentArtifact,
+  ) : super('engine', cache, developmentArtifact);
 
   @override
   final String stampName;
@@ -699,8 +697,8 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 class FlutterSdk extends EngineCachedArtifact {
   FlutterSdk(Cache cache) : super(
     'flutter_sdk',
-    DevelopmentArtifact.universal,
     cache,
+    DevelopmentArtifact.universal,
   );
 
   @override
@@ -733,8 +731,8 @@ class FlutterSdk extends EngineCachedArtifact {
 class MacOSEngineArtifacts extends EngineCachedArtifact {
   MacOSEngineArtifacts(Cache cache) : super(
     'macos-sdk',
-    DevelopmentArtifact.macOS,
     cache,
+    DevelopmentArtifact.macOS,
   );
 
   @override
@@ -755,8 +753,8 @@ class MacOSEngineArtifacts extends EngineCachedArtifact {
 class WindowsEngineArtifacts extends EngineCachedArtifact {
   WindowsEngineArtifacts(Cache cache) : super(
     'windows-sdk',
-    DevelopmentArtifact.windows,
     cache,
+    DevelopmentArtifact.windows,
   );
 
   @override
@@ -777,8 +775,8 @@ class WindowsEngineArtifacts extends EngineCachedArtifact {
 class LinuxEngineArtifacts extends EngineCachedArtifact {
   LinuxEngineArtifacts(Cache cache) : super(
     'linux-sdk',
-    DevelopmentArtifact.linux,
     cache,
+    DevelopmentArtifact.linux,
   );
 
   @override
@@ -799,8 +797,8 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
 class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
   AndroidGenSnapshotArtifacts(Cache cache) : super(
     'android-sdk',
-    DevelopmentArtifact.android_gen_snapshot,
     cache,
+    DevelopmentArtifact.android_gen_snapshot,
   );
 
   @override
@@ -838,8 +836,8 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
 class IOSEngineArtifacts extends EngineCachedArtifact {
   IOSEngineArtifacts(Cache cache) : super(
     'ios-sdk',
-    DevelopmentArtifact.iOS,
     cache,
+    DevelopmentArtifact.iOS,
   );
 
   @override
@@ -871,8 +869,8 @@ class IOSEngineArtifacts extends EngineCachedArtifact {
 class GradleWrapper extends CachedArtifact {
   GradleWrapper(Cache cache) : super(
     'gradle_wrapper',
-    DevelopmentArtifact.universal,
     cache,
+    DevelopmentArtifact.universal,
   );
 
   List<String> get _gradleScripts => <String>['gradlew', 'gradlew.bat'];
@@ -910,10 +908,7 @@ class GradleWrapper extends CachedArtifact {
 
 /// A cached artifact containing the Maven dependencies used to build Android projects.
 class AndroidMavenDependencies extends ArtifactSet {
-  AndroidMavenDependencies() : super(
-    'android_maven_dependencies',
-    DevelopmentArtifact.android_gen_snapshot,
-  );
+  AndroidMavenDependencies() : super(DevelopmentArtifact.android_maven);
 
   void _initializeGradleWrapper(Directory directory) {
     final Directory gradleWrapper = cache.getArtifactDirectory('gradle_wrapper');
@@ -982,8 +977,8 @@ abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
     _path = 'fuchsia/sdk/core/$platform-amd64',
     super(
       'fuchsia-$platform',
-      DevelopmentArtifact.fuchsia,
       cache,
+      DevelopmentArtifact.fuchsia,
     );
 
   final String _path;
@@ -1002,8 +997,8 @@ abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
 class FlutterRunnerSDKArtifacts extends CachedArtifact {
   FlutterRunnerSDKArtifacts(Cache cache) : super(
     'flutter_runner',
-    DevelopmentArtifact.flutterRunner,
     cache,
+    DevelopmentArtifact.flutterRunner,
   );
 
   @override
@@ -1053,9 +1048,9 @@ class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
 class IosUsbArtifacts extends CachedArtifact {
   IosUsbArtifacts(String name, Cache cache) : super(
     name,
+    cache,
     // This is universal to ensure every command checks for them first
     DevelopmentArtifact.universal,
-    cache,
   );
 
   static const List<String> artifactNames = <String>[
