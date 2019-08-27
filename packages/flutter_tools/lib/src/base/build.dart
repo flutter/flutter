@@ -179,13 +179,14 @@ class AOTSnapshotter {
     // The DWARF section confuses Xcode tooling, so this strips it. Ideally,
     // gen_snapshot would provide an argument to do this automatically.
     if (platform == TargetPlatform.ios && bitcode) {
-      final IOSink sink = fs.file('$assembly.bitcode').openWrite();
+      final IOSink sink = fs.file('$assembly.stripped.S').openWrite();
       for (String line in fs.file(assembly).readAsLinesSync()) {
         if (line.startsWith('.section __DWARF')) {
           break;
         }
         sink.writeln(line);
       }
+      await sink.flush();
       await sink.close();
     }
 
@@ -199,7 +200,7 @@ class AOTSnapshotter {
     if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
       final RunResult result = await _buildFramework(
         appleArch: darwinArch,
-        assemblyPath: bitcode ? '$assembly.bitcode' : assembly,
+        assemblyPath: bitcode ? '$assembly.stripped.S' : assembly,
         outputPath: outputDir.path,
         bitcode: bitcode,
       );
@@ -225,20 +226,25 @@ class AOTSnapshotter {
         '-miphoneos-version-min=8.0',
     ];
 
+    final List<String> bitcodeArgs = <String>['-fembed-bitcode'];
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
     final RunResult compileResult = await xcode.cc(<String>[
-      ...commonBuildOptions,
+      '-arch', targetArch,
+      if (bitcode) ...bitcodeArgs,
       '-c',
       assemblyPath,
       '-o',
       assemblyO,
-      if (bitcode) '-fembed-bitcode',
     ]);
     if (compileResult.exitCode != 0) {
       printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
       return compileResult;
     }
 
+    if (bitcode) {
+      final String iPhoneSdk = await xcode.iPhoneSdkLocation();
+      bitcodeArgs.addAll(<String>['-isysroot', iPhoneSdk]);
+    }
     final String frameworkDir = fs.path.join(outputPath, 'App.framework');
     fs.directory(frameworkDir).createSync(recursive: true);
     final String appLib = fs.path.join(frameworkDir, 'App');
@@ -248,26 +254,15 @@ class AOTSnapshotter {
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
-      if (bitcode) '-fembed-bitcode',
+      if (bitcode) ...bitcodeArgs,
       '-o', appLib,
       assemblyO,
     ];
     final RunResult linkResult = await xcode.clang(linkArgs);
     if (linkResult.exitCode != 0) {
       printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
-      return linkResult;
     }
-    // See https://github.com/flutter/flutter/issues/22560
-    // These have to be placed in a .noindex folder to prevent Xcode from
-    // using Spotlight to find them and potentially attach the wrong ones.
-    final RunResult dsymResult = await xcode.dsymutil(<String>[
-      appLib,
-      '-o', fs.path.join(outputPath, 'App.framework.dSYM.noindex'),
-    ]);
-    if (dsymResult.exitCode != 0) {
-      printError('Failed to extract dSYM out of dynamic lib');
-    }
-    return dsymResult;
+    return linkResult;
   }
 
   /// Compiles a Dart file to kernel.
