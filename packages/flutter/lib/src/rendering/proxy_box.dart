@@ -1285,12 +1285,14 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] must not be null or [Clip.none].
   RenderClipRect({
     RenderBox child,
     CustomClipper<Rect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
+       super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   Rect get _defaultClip => Offset.zero & size;
@@ -1342,13 +1344,14 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   ///
   /// If [clipper] is non-null, then [borderRadius] is ignored.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipRRect({
     RenderBox child,
     BorderRadius borderRadius = BorderRadius.zero,
     CustomClipper<RRect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        _borderRadius = borderRadius,
        super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
     assert(_borderRadius != null || clipper != null);
@@ -1418,12 +1421,13 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipOval({
     RenderBox child,
     CustomClipper<Rect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect _cachedRect;
@@ -1496,12 +1500,13 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// consider using a [RenderClipRect], which can achieve the same effect more
   /// efficiently.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipPath({
     RenderBox child,
     CustomClipper<Path> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
@@ -1632,8 +1637,9 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   ///
   /// The [color] is required.
   ///
-  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
-  /// Additionally, the [elevation] must be non-negative.
+  /// The [shape], [elevation], [color], [clipBehavior], and [shadowColor]
+  /// arguments must not be null. Additionally, the [elevation] must be
+  /// non-negative.
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,

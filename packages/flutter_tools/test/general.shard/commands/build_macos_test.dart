@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -20,6 +21,17 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
 import '../../src/testbed.dart';
+
+class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
+  @override
+  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+    return XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['Debug', 'Profile', 'Release'],
+      <String>['Runner'],
+    );
+  }
+}
 
 void main() {
   MockProcessManager mockProcessManager;
@@ -51,6 +63,38 @@ void main() {
     when(notMacosPlatform.isMacOS).thenReturn(false);
   });
 
+  // Sets up the minimal mock project files necessary for macOS builds to succeed.
+  void createMinimalMockProjectFiles() {
+    fs.directory('macos').createSync();
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+  }
+
+  // Mocks the process manager to handle an xcodebuild call to build the app
+  // in the given configuration.
+  void setUpMockXcodeBuildHandler(String configuration) {
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.currentDirectory);
+    final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
+    when(mockProcessManager.start(<String>[
+      '/usr/bin/env',
+      'xcrun',
+      'xcodebuild',
+      '-workspace', flutterProject.macos.xcodeWorkspace.path,
+      '-configuration', configuration,
+      '-scheme', 'Runner',
+      '-derivedDataPath', flutterBuildDir.absolute.path,
+      'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+      'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+      'COMPILER_INDEX_STORE_ENABLE=NO',
+    ])).thenAnswer((Invocation invocation) async {
+      fs.file(fs.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('example.app');
+      return mockProcess;
+    });
+  }
+
   testUsingContext('macOS build fails when there is no macos project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
@@ -78,32 +122,44 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
-  testUsingContext('macOS build invokes xcode build', () async {
+  testUsingContext('macOS build invokes xcode build (debug)', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.directory('macos').createSync();
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.currentDirectory);
-    final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
-    when(mockProcessManager.start(<String>[
-      '/usr/bin/env',
-      'xcrun',
-      'xcodebuild',
-      '-workspace', flutterProject.macos.xcodeWorkspace.path,
-      '-configuration', 'Release',
-      '-scheme', 'Runner',
-      '-derivedDataPath', flutterBuildDir.absolute.path,
-      'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
-      'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
-      'COMPILER_INDEX_STORE_ENABLE=NO',
-    ])).thenAnswer((Invocation invocation) async {
-      fs.file(fs.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
-        ..createSync(recursive: true)
-        ..writeAsStringSync('example.app');
-      return mockProcess;
-    });
+    createMinimalMockProjectFiles();
+    setUpMockXcodeBuildHandler('Debug');
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'macos', '--debug']
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => memoryFilesystem,
+    ProcessManager: () => mockProcessManager,
+    Platform: () => macosPlatform,
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('macOS build invokes xcode build (profile)', () async {
+    final BuildCommand command = BuildCommand();
+    applyMocksToCommand(command);
+    createMinimalMockProjectFiles();
+    setUpMockXcodeBuildHandler('Profile');
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'macos', '--profile']
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => memoryFilesystem,
+    ProcessManager: () => mockProcessManager,
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithProfile(),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('macOS build invokes xcode build (release)', () async {
+    final BuildCommand command = BuildCommand();
+    applyMocksToCommand(command);
+    createMinimalMockProjectFiles();
+    setUpMockXcodeBuildHandler('Release');
 
     await createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--release']

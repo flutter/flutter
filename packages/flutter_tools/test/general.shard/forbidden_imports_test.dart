@@ -9,6 +9,33 @@ import '../src/common.dart';
 void main() {
   final String flutterTools = fs.path.join(getFlutterRoot(), 'packages', 'flutter_tools');
 
+  test('no imports of commands/* or test/* in lib/src/*', () {
+    final List<String> skippedPaths = <String> [
+      fs.path.join(flutterTools, 'lib', 'src', 'commands'),
+      fs.path.join(flutterTools, 'lib', 'src', 'test')
+    ];
+    bool _isNotSkipped(FileSystemEntity entity) => skippedPaths.every((String path) => !entity.path.startsWith(path));
+
+    final Iterable<File> files = fs.directory(fs.path.join(flutterTools, 'lib', 'src'))
+      .listSync(recursive: true)
+      .where(_isDartFile)
+      .where(_isNotSkipped)
+      .map(_asFile);
+    for (File file in files) {
+      for (String line in file.readAsLinesSync()) {
+        if (line.startsWith(RegExp(r'import.*package:'))) {
+          continue;
+        }
+        if (line.startsWith(RegExp(r'import.*commands/'))
+         || line.startsWith(RegExp(r'import.*test/'))) {
+          final String relativePath = fs.path.relative(file.path, from:flutterTools);
+          fail('$relativePath imports $line. This import introduces a layering violation. '
+               'Please find another way to access the information you are using.');
+        }
+      }
+    }
+  });
+
   test('no unauthorized imports of dart:io', () {
     final List<String> whitelistedPaths = <String>[
       fs.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),

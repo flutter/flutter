@@ -114,10 +114,18 @@ abstract class InheritedTheme extends InheritedWidget {
     assert(context != null);
 
     final List<InheritedTheme> themes = <InheritedTheme>[];
+    final Set<Type> themeTypes = <Type>{};
     context.visitAncestorElements((Element ancestor) {
       if (ancestor is InheritedElement && ancestor.widget is InheritedTheme) {
         final InheritedTheme theme = ancestor.widget;
-        themes.add(theme);
+        final Type themeType = theme.runtimeType;
+        // Only remember the first theme of any type. This assumes
+        // that inherited themes completely shadow ancestors of the
+        // the same type.
+        if (!themeTypes.contains(themeType)) {
+          themeTypes.add(themeType);
+          themes.add(theme);
+        }
       }
       return true;
     });

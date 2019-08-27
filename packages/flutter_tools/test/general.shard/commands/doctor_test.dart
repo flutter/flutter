@@ -329,6 +329,11 @@ void main() {
       ));
     }, overrides: noColorTerminalOverride);
 
+    testUsingContext('validate verbose output format contains trace for run with crash', () async {
+      expect(await FakeCrashingDoctor().diagnose(verbose: true), isFalse);
+      expect(testLogger.statusText, contains('#0      CrashingValidator.validate'));
+    }, overrides: noColorTerminalOverride);
+
     testUsingContext('validate non-verbose output format when only one category fails', () async {
       expect(await FakeSinglePassingDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
