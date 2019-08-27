@@ -2419,8 +2419,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
 /// primarily whether each entry of [value] is present (non-null) or absent
 /// (null), rather than the actual value of the property itself.
 ///
-/// Each entry of [value] is described by its key. Each entry of [ifEntryNull]
-/// describes the entry with the same key in [value] that is null. The [ifEmpty]
+/// Each entry of [value] is described by its key. The [ifEmpty]
 /// describes the entire collection of [value] when it contains no non-null
 /// entries. If [ifEmpty] is omitted, [level] will be [DiagnosticLevel.hidden]
 /// when [value] contains no non-null entries.
@@ -2445,7 +2444,6 @@ class IterableFlagsProperty<T> extends DiagnosticsProperty<Map<String, T>> {
   IterableFlagsProperty(
     String name,
     Map<String, T> value, {
-    this.ifEntryNull,
     String ifEmpty,
     bool showName = true,
     bool showSeparator = true,
@@ -2463,17 +2461,13 @@ class IterableFlagsProperty<T> extends DiagnosticsProperty<Map<String, T>> {
          level: level,
        );
 
-  /// A collection of descriptions to use when the entry with the same key in
-  /// [value] is null.
-  final Map<String, String> ifEntryNull;
-
   @override
   String valueToString({TextTreeConfiguration parentConfiguration}) {
     assert(value != null);
     if (!_hasNonNullEntry() && ifEmpty != null)
       return ifEmpty;
 
-    final Iterable<String> formattedValues = _formattedValues(includeEmpty: true);
+    final Iterable<String> formattedValues = _formattedValues();
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Always display the value as a single line and enclose the iterable
       // value in brackets to avoid ambiguity.
@@ -2499,7 +2493,7 @@ class IterableFlagsProperty<T> extends DiagnosticsProperty<Map<String, T>> {
   Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final Map<String, Object> json = super.toJsonMap(delegate);
     if (value.isNotEmpty)
-      json['values'] = _formattedValues(includeEmpty: false).toList();
+      json['values'] = _formattedValues().toList();
     return json;
   }
 
@@ -2511,18 +2505,10 @@ class IterableFlagsProperty<T> extends DiagnosticsProperty<Map<String, T>> {
   //
   // For a null value, it is omitted unless `includeEmtpy` is true and
   // [ifEntryNull] contains a corresponding description.
-  Iterable<String> _formattedValues({@required bool includeEmpty}) sync* {
+  Iterable<String> _formattedValues() sync* {
     for (MapEntry<String, T> entry in value.entries) {
       if (entry.value != null) {
         yield entry.key;
-      } else {
-        if (!includeEmpty)
-          continue;
-        if (ifEntryNull != null) {
-          final String emptyValue = ifEntryNull[entry.key];
-          if (emptyValue != null)
-            yield emptyValue;
-        }
       }
     }
   }

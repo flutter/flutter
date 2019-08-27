@@ -1658,15 +1658,13 @@ void main() {
       final Function onClick = () { };
       final Map<String, Function> value = <String, Function>{
         'move': null,
-        'hover': null,
         'click': onClick,
       };
       final IterableFlagsProperty<Function> flags = IterableFlagsProperty<Function>(
         'listeners',
         value,
-        ifEntryNull: <String, String>{ 'hover': 'MISSING HOVER' },
       );
-      expect(flags.toString(), equals('listeners: MISSING HOVER, click'));
+      expect(flags.toString(), equals('listeners: click'));
       expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
       validateIterableFlagsPropertyJsonSerialization(flags);
     }
