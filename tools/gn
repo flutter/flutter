@@ -89,7 +89,7 @@ def to_gn_args(args):
     if args.bitcode:
       if args.target_os != 'ios':
         raise Exception('Bitcode is only supported for iOS')
-      if runtime_mode == 'debug':
+      if runtime_mode != 'release':
         gn_args['bitcode_marker'] = True
 
     gn_args['enable_bitcode'] = args.bitcode
