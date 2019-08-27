@@ -27,12 +27,24 @@ void main() {
       final PrecacheCommand command = PrecacheCommand();
       applyMocksToCommand(command);
       await createTestCommandRunner(command).run(
-        const <String>['precache', '--ios', '--android', '--web', '--macos', '--linux', '--windows', '--fuchsia', '--flutter_runner']
+        const <String>[
+          'precache',
+          '--ios',
+          '--android_gen_snapshot',
+          '--android_maven',
+          '--web',
+          '--macos',
+          '--linux',
+          '--windows',
+          '--fuchsia',
+          '--flutter_runner',
+        ]
       );
       expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
         DevelopmentArtifact.iOS,
         DevelopmentArtifact.android_gen_snapshot,
+        DevelopmentArtifact.android_maven,
         DevelopmentArtifact.web,
         DevelopmentArtifact.macOS,
         DevelopmentArtifact.linux,
@@ -53,18 +65,29 @@ void main() {
       final PrecacheCommand command = PrecacheCommand();
       applyMocksToCommand(command);
       await createTestCommandRunner(command).run(
-       const <String>['precache', '--ios', '--android', '--web', '--macos', '--linux', '--windows', '--fuchsia', '--flutter_runner']
+        const <String>[
+         'precache',
+         '--ios',
+         '--android_gen_snapshot',
+         '--android_maven',
+         '--web',
+         '--macos',
+         '--linux',
+         '--windows',
+         '--fuchsia',
+         '--flutter_runner',
+        ]
       );
-     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
-       DevelopmentArtifact.universal,
-       DevelopmentArtifact.iOS,
-       DevelopmentArtifact.android_gen_snapshot,
-     }));
+      expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+        DevelopmentArtifact.iOS,
+        DevelopmentArtifact.android_gen_snapshot,
+        DevelopmentArtifact.android_maven,
+      }));
     }, overrides: <Type, Generator>{
       Cache: () => cache,
       FlutterVersion: () => flutterVersion,
     });
-
     testUsingContext('Downloads artifacts when --force is provided', () async {
       when(cache.isUpToDate()).thenReturn(true);
       // Release lock between test cases.
@@ -73,10 +96,11 @@ void main() {
       applyMocksToCommand(command);
       await createTestCommandRunner(command).run(const <String>['precache', '--force']);
       expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
-       DevelopmentArtifact.universal,
-       DevelopmentArtifact.iOS,
-       DevelopmentArtifact.android_gen_snapshot,
-     }));
+        DevelopmentArtifact.universal,
+        DevelopmentArtifact.iOS,
+        DevelopmentArtifact.android_gen_snapshot,
+        DevelopmentArtifact.android_maven,
+      }));
     }, overrides: <Type, Generator>{
       Cache: () => cache,
       FlutterVersion: () => flutterVersion,

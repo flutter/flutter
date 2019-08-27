@@ -233,6 +233,7 @@ void main() {
         binaryDirs: <List<String>>[
           <String>['bin_dir', 'unused_url_path'],
         ],
+        requiredArtifacts: DevelopmentArtifact.universal,
       );
       await artifact.updateInner();
       final Directory dir = memoryFileSystem.systemTempDirectory
