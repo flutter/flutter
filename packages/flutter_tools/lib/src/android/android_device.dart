@@ -203,8 +203,6 @@ class AndroidDevice extends Device {
           break;
       }
     }
-    print('PLATFORM: $_platform');
-
     return _platform;
   }
 
