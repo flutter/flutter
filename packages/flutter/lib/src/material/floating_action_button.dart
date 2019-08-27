@@ -122,7 +122,7 @@ class _DefaultHeroTag {
 class FloatingActionButton extends StatelessWidget {
   /// Creates a circular floating action button.
   ///
-  /// The [mini] and [clipBehavior] arguments must be non-null. Additionally,
+  /// The [mini] and [clipBehavior] arguments must not be null. Additionally,
   /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
   /// must be non-negative.
   const FloatingActionButton({
@@ -133,6 +133,7 @@ class FloatingActionButton extends StatelessWidget {
     this.backgroundColor,
     this.focusColor,
     this.hoverColor,
+    this.splashColor,
     this.heroTag = const _DefaultHeroTag(),
     this.elevation,
     this.focusElevation,
@@ -144,6 +145,7 @@ class FloatingActionButton extends StatelessWidget {
     this.shape,
     this.clipBehavior = Clip.none,
     this.focusNode,
+    this.autofocus = false,
     this.materialTapTargetSize,
     this.isExtended = false,
   }) : assert(elevation == null || elevation >= 0.0),
@@ -152,16 +154,18 @@ class FloatingActionButton extends StatelessWidget {
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
        assert(mini != null),
+       assert(clipBehavior != null),
        assert(isExtended != null),
+       assert(autofocus != null),
        _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
        super(key: key);
 
   /// Creates a wider [StadiumBorder]-shaped floating action button with
   /// an optional [icon] and a [label].
   ///
-  /// The [label] and [clipBehavior] arguments must non-null. Additionally,
-  /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
-  /// must be non-negative.
+  /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
+  /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
+  /// (if specified) must be non-negative.
   FloatingActionButton.extended({
     Key key,
     this.tooltip,
@@ -173,6 +177,7 @@ class FloatingActionButton extends StatelessWidget {
     this.elevation,
     this.focusElevation,
     this.hoverElevation,
+    this.splashColor,
     this.highlightElevation,
     this.disabledElevation,
     @required this.onPressed,
@@ -181,6 +186,7 @@ class FloatingActionButton extends StatelessWidget {
     this.materialTapTargetSize,
     this.clipBehavior = Clip.none,
     this.focusNode,
+    this.autofocus = false,
     Widget icon,
     @required Widget label,
   }) : assert(elevation == null || elevation >= 0.0),
@@ -189,6 +195,8 @@ class FloatingActionButton extends StatelessWidget {
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
        assert(isExtended != null),
+       assert(clipBehavior != null),
+       assert(autofocus != null),
        _sizeConstraints = _kExtendedSizeConstraints,
        mini = false,
        child = _ChildOverflowBox(
@@ -242,6 +250,12 @@ class FloatingActionButton extends StatelessWidget {
   ///
   /// Defaults to [ThemeData.hoverColor] for the current theme.
   final Color hoverColor;
+
+  /// The splash color for this [FloatingActionButton]'s [InkWell].
+  ///
+  /// If null, [FloatingActionButtonThemeData.splashColor] is used, if that is
+  /// null, [ThemeData.splashColor] is used.
+  final Color splashColor;
 
   /// The tag to apply to the button's [Hero] widget.
   ///
@@ -351,6 +365,8 @@ class FloatingActionButton extends StatelessWidget {
   final ShapeBorder shape;
 
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
   /// True if this is an "extended" floating action button.
@@ -364,13 +380,11 @@ class FloatingActionButton extends StatelessWidget {
   /// floating action buttons are scaled and faded in.
   final bool isExtended;
 
-  /// An optional focus node to use for requesting focus when pressed.
-  ///
-  /// If not supplied, the button will create and host its own [FocusNode].
-  ///
-  /// If supplied, the given focusNode will be _hosted_ by this widget. See
-  /// [FocusNode] for more information on what that implies.
+  /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
 
   /// Configures the minimum size of the tap target.
   ///
@@ -410,6 +424,9 @@ class FloatingActionButton extends StatelessWidget {
     final Color hoverColor = this.hoverColor
       ?? floatingActionButtonTheme.hoverColor
       ?? theme.hoverColor;
+    final Color splashColor = this.splashColor
+      ?? floatingActionButtonTheme.splashColor
+      ?? theme.splashColor;
     final double elevation = this.elevation
       ?? floatingActionButtonTheme.elevation
       ?? _defaultElevation;
@@ -447,10 +464,12 @@ class FloatingActionButton extends StatelessWidget {
       fillColor: backgroundColor,
       focusColor: focusColor,
       hoverColor: hoverColor,
+      splashColor: splashColor,
       textStyle: textStyle,
       shape: shape,
-      clipBehavior: clipBehavior ?? Clip.none,
+      clipBehavior: clipBehavior,
       focusNode: focusNode,
+      autofocus: autofocus,
       child: child,
     );
 
@@ -480,6 +499,7 @@ class FloatingActionButton extends StatelessWidget {
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
+    properties.add(ColorProperty('splashColor', splashColor, defaultValue: null));
     properties.add(ObjectFlagProperty<Object>('heroTag', heroTag, ifPresent: 'hero'));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DoubleProperty('focusElevation', focusElevation, defaultValue: null));

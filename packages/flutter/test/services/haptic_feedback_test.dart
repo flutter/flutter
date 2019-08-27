@@ -6,9 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  setUp(() {
-    TestWidgetsFlutterBinding.ensureInitialized();
-  });
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   test('Haptic feedback control test', () async {
     final List<MethodCall> log = <MethodCall>[];

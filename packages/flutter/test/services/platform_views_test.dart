@@ -10,10 +10,7 @@ import '../flutter_test_alternative.dart';
 import 'fake_platform_views.dart';
 
 void main() {
-
-  setUp(() {
-    TestWidgetsFlutterBinding.ensureInitialized();
-  });
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Android', () {
     FakeAndroidPlatformViewsController viewsController;

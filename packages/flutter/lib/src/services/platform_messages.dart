@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'binary_messenger.dart';
-import 'binding.dart' show ServicesBinding;
 import 'platform_channel.dart';
 
 /// Sends binary messages to and receives binary messages from platform plugins.
@@ -32,7 +31,7 @@ class BinaryMessages {
   BinaryMessages._();
 
   /// The messenger which sends the platform messages, not null.
-  static final BinaryMessenger _binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
+  static final BinaryMessenger _binaryMessenger = defaultBinaryMessenger;
 
   /// Calls the handler registered for the given channel.
   ///

@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'button_bar.dart';
-import 'button_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'dialog.dart';
@@ -986,19 +985,17 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Widget picker = _buildPicker();
-    final Widget actions = ButtonTheme.bar(
-      child: ButtonBar(
-        children: <Widget>[
-          FlatButton(
-            child: Text(localizations.cancelButtonLabel),
-            onPressed: _handleCancel,
-          ),
-          FlatButton(
-            child: Text(localizations.okButtonLabel),
-            onPressed: _handleOk,
-          ),
-        ],
-      ),
+    final Widget actions = ButtonBar(
+      children: <Widget>[
+        FlatButton(
+          child: Text(localizations.cancelButtonLabel),
+          onPressed: _handleCancel,
+        ),
+        FlatButton(
+          child: Text(localizations.okButtonLabel),
+          onPressed: _handleOk,
+        ),
+      ],
     );
 
     final Dialog dialog = Dialog(

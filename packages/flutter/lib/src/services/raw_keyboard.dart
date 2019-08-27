@@ -279,7 +279,7 @@ abstract class RawKeyEvent extends Diagnosticable {
       case 'linux':
         data = RawKeyEventDataLinux(
             keyHelper: KeyHelper(message['toolkit'] ?? ''),
-            codePoint: message['codePoint'] ?? 0,
+            unicodeScalarValues: message['unicodeScalarValues'] ?? 0,
             keyCode: message['keyCode'] ?? 0,
             scanCode: message['scanCode'] ?? 0,
             modifiers: message['modifiers'] ?? 0);

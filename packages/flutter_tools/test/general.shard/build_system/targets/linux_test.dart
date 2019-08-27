@@ -33,13 +33,13 @@ void main() {
       environment = Environment(
         projectDir: fs.currentDirectory,
       );
-      fs.file('bin/cache/artifacts/engine/linux-x64/libflutter_linux.so').createSync(recursive: true);
+      fs.file('bin/cache/artifacts/engine/linux-x64/libflutter_linux_glfw.so').createSync(recursive: true);
       fs.file('bin/cache/artifacts/engine/linux-x64/flutter_export.h').createSync();
       fs.file('bin/cache/artifacts/engine/linux-x64/flutter_messenger.h').createSync();
       fs.file('bin/cache/artifacts/engine/linux-x64/flutter_plugin_registrar.h').createSync();
       fs.file('bin/cache/artifacts/engine/linux-x64/flutter_glfw.h').createSync();
       fs.file('bin/cache/artifacts/engine/linux-x64/icudtl.dat').createSync();
-      fs.file('bin/cache/artifacts/engine/linux-x64/cpp_client_wrapper/foo').createSync(recursive: true);
+      fs.file('bin/cache/artifacts/engine/linux-x64/cpp_client_wrapper_glfw/foo').createSync(recursive: true);
       fs.file('packages/flutter_tools/lib/src/build_system/targets/linux.dart').createSync(recursive: true);
       fs.directory('linux').createSync();
     }, overrides: <Type, Generator>{
@@ -51,13 +51,13 @@ void main() {
     final BuildResult result = await buildSystem.build(const UnpackLinux(), environment);
 
     expect(result.hasException, false);
-    expect(fs.file('linux/flutter/libflutter_linux.so').existsSync(), true);
+    expect(fs.file('linux/flutter/libflutter_linux_glfw.so').existsSync(), true);
     expect(fs.file('linux/flutter/flutter_export.h').existsSync(), true);
     expect(fs.file('linux/flutter/flutter_messenger.h').existsSync(), true);
     expect(fs.file('linux/flutter/flutter_plugin_registrar.h').existsSync(), true);
     expect(fs.file('linux/flutter/flutter_glfw.h').existsSync(), true);
     expect(fs.file('linux/flutter/icudtl.dat').existsSync(), true);
-    expect(fs.file('linux/flutter/cpp_client_wrapper/foo').existsSync(), true);
+    expect(fs.file('linux/flutter/cpp_client_wrapper_glfw/foo').existsSync(), true);
   }));
 
   test('Does not re-copy files unecessarily', () => testbed.run(() async {
@@ -65,19 +65,19 @@ void main() {
     // Set a date in the far distant past to deal with the limited resolution
     // of the windows filesystem.
     final DateTime theDistantPast = DateTime(1991, 8, 23);
-    fs.file('linux/flutter/libflutter_linux.so').setLastModifiedSync(theDistantPast);
+    fs.file('linux/flutter/libflutter_linux_glfw.so').setLastModifiedSync(theDistantPast);
     await buildSystem.build(const UnpackLinux(), environment);
 
-    expect(fs.file('linux/flutter/libflutter_linux.so').statSync().modified, equals(theDistantPast));
+    expect(fs.file('linux/flutter/libflutter_linux_glfw.so').statSync().modified, equals(theDistantPast));
   }));
 
   test('Detects changes in input cache files', () => testbed.run(() async {
     await buildSystem.build(const UnpackLinux(), environment);
-    fs.file('bin/cache/artifacts/engine/linux-x64/libflutter_linux.so').writeAsStringSync('asd'); // modify cache.
+    fs.file('bin/cache/artifacts/engine/linux-x64/libflutter_linux_glfw.so').writeAsStringSync('asd'); // modify cache.
 
     await buildSystem.build(const UnpackLinux(), environment);
 
-    expect(fs.file('linux/flutter/libflutter_linux.so').readAsStringSync(), 'asd');
+    expect(fs.file('linux/flutter/libflutter_linux_glfw.so').readAsStringSync(), 'asd');
   }));
 }
 

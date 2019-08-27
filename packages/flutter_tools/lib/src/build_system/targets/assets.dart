@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
 import '../../asset.dart';
@@ -13,7 +14,9 @@ import '../build_system.dart';
 import '../groups.dart';
 
 class AssetsBuildPhase extends TargetGroup {
-  const AssetsBuildPhase();
+  const AssetsBuildPhase({@required this.outputPrefix});
+
+  final String outputPrefix;
 
   @override
   Future<List<Target>> plan(Environment environment) async {
@@ -22,9 +25,9 @@ class AssetsBuildPhase extends TargetGroup {
       const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     ];
     final List<Source> outputs = <Source>[
-      const Source.pattern('{BUILD_DIR}/flutter_assets/AssetManifest.json'),
-      const Source.pattern('{BUILD_DIR}/flutter_assets/FontManifest.json'),
-      const Source.pattern('{BUILD_DIR}/flutter_assets/LICENSE'),
+      Source.pattern('$outputPrefix/AssetManifest.json'),
+      Source.pattern('$outputPrefix/FontManifest.json'),
+      Source.pattern('$outputPrefix/LICENSE'),
     ];
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build(
@@ -39,8 +42,7 @@ class AssetsBuildPhase extends TargetGroup {
       inputs.add(Source.pattern(path));
     }
     for (String key in assetBundle.entries.keys) {
-      final String path = fs.path.join('flutter_assets', key);
-      outputs.add(Source.pattern('{BUILD_DIR}/$path'));
+      outputs.add(Source.pattern('$outputPrefix/$key'));
     }
 
     return <Target>[
@@ -63,6 +65,7 @@ class CopyAssets extends Target {
   const CopyAssets({
     this.inputs,
     this.outputs,
+    this.outputPrefix,
   });
 
   @override

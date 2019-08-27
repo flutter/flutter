@@ -13,19 +13,16 @@ final Map<String, BuildDefinition> kAllBuildDefinitions = <String, BuildDefiniti
   releaseMacOSApplication.name: releaseMacOSApplication,
 };
 
+const String kMacOSOutput = '{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/Versions/A/Resources/flutter_assets';
+
 /// The build definition for a debug macOS application.
 const BuildDefinition debugMacOSApplication = BuildDefinition(
   name: 'debug_macos_application',
   groups: <TargetGroup>[
-    AssetsBuildPhase(),
+    AssetsBuildPhase(outputPrefix: kMacOSOutput),
     TargetGroup.static(
-      name: 'unpack',
-      target: UnpackMacOS(),
-      dependencies: <String>[],
-    ),
-    TargetGroup.static(
-      name: 'dart',
-      target: CopyKernelDill(),
+      name: 'macos',
+      target: DebugMacOSBundleFlutterAssets(),
       dependencies: <String>[],
     ),
   ],
@@ -35,15 +32,10 @@ const BuildDefinition debugMacOSApplication = BuildDefinition(
 const BuildDefinition profileMacOSApplication = BuildDefinition(
   name: 'profile_macos_application',
   groups: <TargetGroup>[
-    AssetsBuildPhase(),
+    AssetsBuildPhase(outputPrefix: kMacOSOutput),
     TargetGroup.static(
-      name: 'unpack',
-      target: UnpackMacOS(),
-      dependencies: <String>[],
-    ),
-    TargetGroup.static(
-      name: 'dart',
-      target: CopyKernelDill(),
+      name: 'macos',
+      target: ProfileMacOSBundleFlutterAssets(),
       dependencies: <String>[],
     ),
   ],
@@ -53,15 +45,10 @@ const BuildDefinition profileMacOSApplication = BuildDefinition(
 const BuildDefinition releaseMacOSApplication = BuildDefinition(
   name: 'release_macos_application',
   groups: <TargetGroup>[
-    AssetsBuildPhase(),
+    AssetsBuildPhase(outputPrefix: kMacOSOutput),
     TargetGroup.static(
-      name: 'unpack',
-      target: UnpackMacOS(),
-      dependencies: <String>[],
-    ),
-    TargetGroup.static(
-      name: 'dart',
-      target: CopyKernelDill(),
+      name: 'macos',
+      target: ReleaseMacOSBundleFlutterAssets(),
       dependencies: <String>[],
     ),
   ],

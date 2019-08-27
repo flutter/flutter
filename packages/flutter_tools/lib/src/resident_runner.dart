@@ -747,7 +747,7 @@ abstract class ResidentRunner {
           }
         }
       }
-      final int sizeKB = (await outputFile.length()) ~/ 1024;
+      final int sizeKB = outputFile.lengthSync() ~/ 1024;
       status.stop();
       printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
     } catch (error) {
@@ -1116,7 +1116,10 @@ class TerminalHandler {
       lastReceivedCommand = command;
       await _commonTerminalInputHandler(command);
     } catch (error, st) {
-      printError('$error\n$st');
+      // Don't print stack traces for known error types.
+      if (error is! ToolExit) {
+        printError('$error\n$st');
+      }
       await _cleanUp(null);
       rethrow;
     } finally {
