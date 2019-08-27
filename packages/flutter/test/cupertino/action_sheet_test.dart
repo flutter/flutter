@@ -74,6 +74,15 @@ void main() {
     Brightness brightness = Brightness.light;
     StateSetter stateSetter;
 
+    TextStyle actionTextStyle(String text) {
+      return tester.widget<DefaultTextStyle>(
+        find.descendant(
+          of: find.widgetWithText(CupertinoActionSheetAction, text),
+          matching: find.byType(DefaultTextStyle),
+        )
+      ).style;
+    }
+
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         StatefulBuilder(
@@ -97,7 +106,7 @@ void main() {
     // Draw the overlay using the light variant.
     expect(find.byType(CupertinoActionSheet), paints..rect(color: const Color(0x66000000)));
     expect(
-      tester.firstWidget<DefaultTextStyle>(find.widgetWithText(DefaultTextStyle, 'action')).style.color.value,
+      actionTextStyle('action').color.value,
       CupertinoSystemColors.fallbackValues.systemBlue.color.value,
     );
 
@@ -107,7 +116,7 @@ void main() {
     // Draw the overlay using the dark variant.
     expect(find.byType(CupertinoActionSheet), paints..rect(color: const Color(0x99000000)));
     expect(
-      tester.firstWidget<DefaultTextStyle>(find.widgetWithText(DefaultTextStyle, 'action')).style.color.value,
+      actionTextStyle('action').color.value,
       CupertinoSystemColors.fallbackValues.systemBlue.darkColor.value,
     );
   });
