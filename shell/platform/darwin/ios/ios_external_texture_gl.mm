@@ -53,24 +53,17 @@ void IOSExternalTextureGL::CreateTextureFromPixelBuffer() {
   }
 }
 
-bool IOSExternalTextureGL::NeedUpdateTexture(bool freeze) {
-  // Update texture if `texture_ref_` is reset to `nullptr` when GrContext
-  // is destroied or new frame is ready.
-  return (!freeze && new_frame_ready_) || !texture_ref_;
-}
-
 void IOSExternalTextureGL::Paint(SkCanvas& canvas,
                                  const SkRect& bounds,
                                  bool freeze,
                                  GrContext* context) {
   EnsureTextureCacheExists();
-  if (NeedUpdateTexture(freeze)) {
+  if (!freeze) {
     auto pixelBuffer = [external_texture_ copyPixelBuffer];
     if (pixelBuffer) {
       buffer_ref_.Reset(pixelBuffer);
     }
     CreateTextureFromPixelBuffer();
-    new_frame_ready_ = false;
   }
   if (!texture_ref_) {
     return;
@@ -100,8 +93,6 @@ void IOSExternalTextureGL::OnGrContextDestroyed() {
   cache_ref_.Reset(nullptr);
 }
 
-void IOSExternalTextureGL::MarkNewFrameAvailable() {
-  new_frame_ready_ = true;
-}
+void IOSExternalTextureGL::MarkNewFrameAvailable() {}
 
 }  // namespace flutter

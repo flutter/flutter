@@ -31,7 +31,6 @@ class IOSExternalTextureGL : public flutter::Texture {
 
   void EnsureTextureCacheExists();
 
-  bool new_frame_ready_ = false;
   NSObject<FlutterTexture>* external_texture_;
   fml::CFRef<CVOpenGLESTextureCacheRef> cache_ref_;
   fml::CFRef<CVOpenGLESTextureRef> texture_ref_;
