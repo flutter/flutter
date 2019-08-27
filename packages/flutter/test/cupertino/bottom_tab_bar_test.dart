@@ -68,6 +68,80 @@ void main() {
     expect(actualActive.text.style.color, const Color(0xFF123456));
   });
 
+  testWidgets('Active and inactive colors dark mode', (WidgetTester tester) async {
+    final CupertinoDynamicColor dynamicActiveColor = CupertinoDynamicColor.withBrightness(
+      color: const Color(0xFF000000),
+      darkColor: const Color(0xFF000001),
+    );
+
+    final CupertinoDynamicColor dynamicInactiveColor = CupertinoDynamicColor.withBrightness(
+      color: const Color(0xFF000002),
+      darkColor: const Color(0xFF000003),
+    );
+
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoTabBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            title: Text('Tab 1'),
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            title: Text('Tab 2'),
+          ),
+        ],
+        currentIndex: 1,
+        activeColor: dynamicActiveColor,
+        inactiveColor: dynamicInactiveColor,
+      ),
+    ));
+
+    RichText actualInactive = tester.widget(find.descendant(
+      of: find.text('Tab 1'),
+      matching: find.byType(RichText),
+    ));
+    expect(actualInactive.text.style.color.value, 0xFF000002);
+
+    RichText actualActive = tester.widget(find.descendant(
+      of: find.text('Tab 2'),
+      matching: find.byType(RichText),
+    ));
+    expect(actualActive.text.style.color.value, 0xFF000000);
+
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+        data: const MediaQueryData(platformBrightness: Brightness.dark),
+        child: CupertinoTabBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: ImageIcon(TestImageProvider(24, 24)),
+              title: Text('Tab 1'),
+            ),
+            BottomNavigationBarItem(
+              icon: ImageIcon(TestImageProvider(24, 24)),
+              title: Text('Tab 2'),
+            ),
+          ],
+          currentIndex: 1,
+          activeColor: dynamicActiveColor,
+          inactiveColor: dynamicInactiveColor,
+        ),
+    ));
+
+    actualInactive = tester.widget(find.descendant(
+        of: find.text('Tab 1'),
+        matching: find.byType(RichText),
+    ));
+    expect(actualInactive.text.style.color.value, 0xFF000003);
+
+    actualActive = tester.widget(find.descendant(
+        of: find.text('Tab 2'),
+        matching: find.byType(RichText),
+    ));
+    expect(actualActive.text.style.color.value, 0xFF000001);
+  });
+
   testWidgets('Tabs respects themes', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -91,7 +165,7 @@ void main() {
       of: find.text('Tab 1'),
       matching: find.byType(RichText),
     ));
-    expect(actualInactive.text.style.color, CupertinoColors.inactiveGray);
+    expect(actualInactive.text.style.color.value, 0xFF999999);
 
     RichText actualActive = tester.widget(find.descendant(
       of: find.text('Tab 2'),
@@ -122,7 +196,7 @@ void main() {
       of: find.text('Tab 1'),
       matching: find.byType(RichText),
     ));
-    expect(actualInactive.text.style.color, CupertinoColors.inactiveGray);
+    expect(actualInactive.text.style.color.value, 0xFF757575);
 
     actualActive = tester.widget(find.descendant(
       of: find.text('Tab 2'),
