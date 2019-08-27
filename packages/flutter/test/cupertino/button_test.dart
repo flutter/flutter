@@ -228,6 +228,54 @@ void main() {
     expect(boxDecoration.color, const Color(0x0000FF00));
   });
 
+  testWidgets('Can specify dynamic colors', (WidgetTester tester) async {
+    final Color bgColor = CupertinoDynamicColor.withBrightness(
+      color: const Color(0xFF123456),
+      darkColor: const Color(0xFF654321),
+    );
+
+    final Color inactive = CupertinoDynamicColor.withBrightness(
+      color: const Color(0xFF111111),
+      darkColor: const Color(0xFF222222),
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(platformBrightness: Brightness.dark),
+        child: boilerplate(child: CupertinoButton(
+          child: const Text('Skeuomorph me'),
+          color: bgColor,
+          disabledColor: inactive,
+          onPressed: () { },
+        ))
+      ),
+    );
+
+    BoxDecoration boxDecoration = tester.widget<DecoratedBox>(
+      find.widgetWithText(DecoratedBox, 'Skeuomorph me')
+    ).decoration;
+
+    expect(boxDecoration.color.value, 0xFF654321);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(platformBrightness: Brightness.light),
+        child: boilerplate(child: CupertinoButton(
+          child: const Text('Skeuomorph me'),
+          color: bgColor,
+          disabledColor: inactive,
+          onPressed: null,
+        ))
+      ),
+    );
+
+    boxDecoration = tester.widget<DecoratedBox>(
+      find.widgetWithText(DecoratedBox, 'Skeuomorph me')
+    ).decoration;
+
+    expect(boxDecoration.color.value, 0xFF222222);
+  });
+
   testWidgets('Button respects themes', (WidgetTester tester) async {
     TextStyle textStyle;
 
