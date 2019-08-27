@@ -19,6 +19,7 @@ def main():
   parser.add_argument('--simulator-out-dir', type=str, required=True)
   parser.add_argument('--strip', action="store_true", default=False)
   parser.add_argument('--dsym', action="store_true", default=False)
+  parser.add_argument('--strip-bitcode', dest='strip_bitcode', action="store_true", default=False)
 
   args = parser.parse_args()
 
@@ -69,6 +70,9 @@ def main():
     '-output',
     linker_out
   ])
+
+  if args.strip_bitcode:
+    subprocess.check_call(['xcrun', 'bitcode_strip', '-m', linker_out, '-o', linker_out])
 
   if args.dsym:
     dsym_out = os.path.splitext(fat_framework)[0] + '.dSYM'
