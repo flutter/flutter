@@ -226,11 +226,11 @@ class AOTSnapshotter {
         '-miphoneos-version-min=8.0',
     ];
 
-    final List<String> bitcodeArgs = <String>['-fembed-bitcode'];
+    const String embedBitcodeArg = '-fembed-bitcode';
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
     final RunResult compileResult = await xcode.cc(<String>[
       '-arch', targetArch,
-      if (bitcode) ...bitcodeArgs,
+      if (bitcode) embedBitcodeArg,
       '-c',
       assemblyPath,
       '-o',
@@ -241,10 +241,6 @@ class AOTSnapshotter {
       return compileResult;
     }
 
-    if (bitcode) {
-      final String iPhoneSdk = await xcode.iPhoneSdkLocation();
-      bitcodeArgs.addAll(<String>['-isysroot', iPhoneSdk]);
-    }
     final String frameworkDir = fs.path.join(outputPath, 'App.framework');
     fs.directory(frameworkDir).createSync(recursive: true);
     final String appLib = fs.path.join(frameworkDir, 'App');
@@ -254,7 +250,7 @@ class AOTSnapshotter {
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
-      if (bitcode) ...bitcodeArgs,
+      if (bitcode) ...<String>[embedBitcodeArg, '-isysroot', await xcode.iPhoneSdkLocation()],
       '-o', appLib,
       assemblyO,
     ];

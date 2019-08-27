@@ -191,8 +191,7 @@ BuildApp() {
       --ios-arch="${archs}"                                                 \
       ${flutter_engine_flag}                                                \
       ${local_engine_flag}                                                  \
-      ${bitcode_flag}   \
-      --verbose
+      ${bitcode_flag}
 
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to build ${project_path}."
