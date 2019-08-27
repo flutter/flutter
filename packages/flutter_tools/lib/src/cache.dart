@@ -954,7 +954,6 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-4.10.2-all.zi
           gradleExecutable,
           '-b', fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle'),
           '--project-cache-dir', tempDir.path,
-          '-Pflutter-sdk=$flutterSdk',
           'resolveDependencies',
         ]);
       final int exitCode = await process.exitCode;

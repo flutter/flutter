@@ -8,7 +8,7 @@
 //
 // Command:
 //  gradle -b <flutter-sdk>packages/flutter_tools/gradle/resolve_dependencies.gradle
-//      -Pflutter-sdk=<flutter-sdk> resolveDependencies
+//      resolveDependencies
 //
 // This way, Gradle can run with the `--offline` flag later on to eliminate any
 // network request during the build process.
@@ -27,10 +27,8 @@ repositories {
     }
 }
 
-assert hasProperty("flutter-sdk")
-String flutterSdkPath = property("flutter-sdk")
+File flutterRoot = projectDir.parentFile.parentFile.parentFile
 
-File flutterRoot = project.file(flutterSdkPath)
 assert flutterRoot.isDirectory()
 String engineVersion = Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.version")
         .toFile().text.trim()
