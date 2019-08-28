@@ -83,6 +83,10 @@ void CompositorContext::OnSessionSizeChangeHint(float width_change_factor,
                                               height_change_factor);
 }
 
+void CompositorContext::OnWireframeEnabled(bool enabled) {
+  session_connection_.set_enable_wireframe(enabled);
+}
+
 CompositorContext::~CompositorContext() = default;
 
 std::unique_ptr<flutter::CompositorContext::ScopedFrame>

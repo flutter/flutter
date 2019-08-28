@@ -79,6 +79,11 @@ void SessionConnection::OnSessionSizeChangeHint(float width_change_factor,
                                              height_change_factor);
 }
 
+void SessionConnection::set_enable_wireframe(bool enable) {
+  session_wrapper_.Enqueue(
+      scenic::NewSetEnableDebugViewBoundsCmd(root_view_.id(), enable));
+}
+
 void SessionConnection::EnqueueClearOps() {
   // We are going to be sending down a fresh node hierarchy every frame. So just
   // enqueue a detach op on the imported root node.
