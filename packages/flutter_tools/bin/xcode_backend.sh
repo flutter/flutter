@@ -135,7 +135,6 @@ BuildApp() {
   local bitcode_flag=""
   if [[ $ENABLE_BITCODE == "YES" ]]; then
     bitcode_flag="--bitcode"
-    echo "Set Bitcode!"
   fi
 
   if [[ -e "${project_path}/.ios" ]]; then
@@ -239,6 +238,7 @@ BuildApp() {
 
     RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
         ${arch_flags} \
+        -fembed-bitcode-marker \
         -dynamiclib \
         -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
         -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \
