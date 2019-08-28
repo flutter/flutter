@@ -63,6 +63,9 @@ void testCanLaunchSecondaryIsolate() {
 @pragma('vm:entry-point')
 void testSkiaResourceCacheSendsResponse() {
   final PlatformMessageResponseCallback callback = (ByteData data) {
+    if (data == null) {
+      throw 'Response must not be null.';
+    }
     notifyNative();
   };
   const String json = '''{

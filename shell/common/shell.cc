@@ -959,7 +959,9 @@ void Shell::HandleEngineSkiaMessage(fml::RefPtr<PlatformMessage> message) {
                                                true);
         }
         if (response) {
-          response->CompleteEmpty();
+          std::vector<uint8_t> data = {1};
+          response->Complete(
+              std::make_unique<fml::DataMapping>(std::move(data)));
         }
       });
 }
