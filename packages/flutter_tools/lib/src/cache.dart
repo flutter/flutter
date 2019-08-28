@@ -903,7 +903,9 @@ class AndroidMavenArtifacts extends ArtifactSet {
 
   @override
   bool isUpToDate() {
-    // We don't know if the Gradle cache is warm at this point.
+    // The dependencies are downloaded and cached by Gradle.
+    // The tool doesn't know if the dependencies are already cached at this point.
+    // Therefore, call Gradle to figure this out.
     return false;
   }
 }
