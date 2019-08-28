@@ -16,6 +16,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -338,9 +339,12 @@ class EditableText extends StatefulWidget {
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
   ///
-  /// The [controller], [focusNode], [style], [cursorColor], [backgroundCursorColor],
-  /// [textAlign], [dragStartBehavior], [rendererIgnoresPointer] and [readOnly]
-  /// arguments must not be null.
+  /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
+  /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
+  /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
+  /// [paintCursorAboveText], [textAlign], [dragStartBehavior], [scrollPadding],
+  /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer], and
+  /// [readOnly] arguments must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -1282,6 +1286,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       caretStart = caretRect.top - caretOffset;
       caretEnd = caretRect.bottom + caretOffset;
     } else {
+      // Scrolls horizontally for single-line fields.
       caretStart = caretRect.left;
       caretEnd = caretRect.right;
     }
@@ -1292,6 +1297,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       scrollOffset += caretStart;
     } else if (caretEnd >= viewportExtent) { // cursor after end of bounds
       scrollOffset += caretEnd - viewportExtent;
+    }
+
+    if (_isMultiline) {
+      // Clamp the final results to prevent programmatically scrolling to
+      // out-of-paragraph-bounds positions when encountering tall fonts/scripts that
+      // extend past the ascent.
+      scrollOffset = scrollOffset.clamp(0.0, renderEditable.maxScrollExtent);
     }
     return scrollOffset;
   }
@@ -1446,7 +1458,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           .getHandleSize(renderEditable.preferredLineHeight).height;
         final double interactiveHandleHeight = math.max(
           handleHeight,
-          kMinInteractiveSize,
+          kMinInteractiveDimension,
         );
         final Offset anchor = _selectionOverlay.selectionControls
           .getHandleAnchor(

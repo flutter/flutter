@@ -391,13 +391,8 @@ class RenderEditable extends RenderBox {
   // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
   void _handleKeyEvent(RawKeyEvent keyEvent) {
     // Only handle key events on Android.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        break;
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-        return;
-    }
+    if (keyEvent.data is! RawKeyEventDataAndroid)
+      return;
 
     if (keyEvent is RawKeyUpEvent)
       return;
@@ -1017,6 +1012,14 @@ class RenderEditable extends RenderBox {
     return enableInteractiveSelection ?? !obscureText;
   }
 
+  /// The maximum amount the text is allowed to scroll.
+  ///
+  /// This value is only valid after layout and can change as additional
+  /// text is entered or removed in order to accommodate expanding when
+  /// [expands] is set to true.
+  double get maxScrollExtent => _maxScrollExtent;
+  double _maxScrollExtent = 0;
+
   double get _caretMargin => _kCaretGap + cursorWidth;
 
   @override
@@ -1228,8 +1231,6 @@ class RenderEditable extends RenderBox {
     }
     return null;
   }
-
-  double _maxScrollExtent = 0;
 
   // We need to check the paint offset here because during animation, the start of
   // the text may position outside the visible region even when the text fits.
@@ -1588,12 +1589,15 @@ class RenderEditable extends RenderBox {
   /// of the cursor for iOS is approximate and obtained through an eyeball
   /// comparison.
   Rect get _getCaretPrototype {
-    switch(defaultTargetPlatform){
+    assert(defaultTargetPlatform != null);
+    switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight + 2);
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
         return Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
     }
+    return null;
   }
   @override
   void performLayout() {
@@ -1641,10 +1645,11 @@ class RenderEditable extends RenderBox {
     if (_cursorOffset != null)
       caretRect = caretRect.shift(_cursorOffset);
 
-    if (_textPainter.getFullHeightForCaret(textPosition, _caretPrototype) != null) {
+    final double caretHeight = _textPainter.getFullHeightForCaret(textPosition, _caretPrototype);
+    if (caretHeight != null) {
       switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS: {
-          final double heightDiff = _textPainter.getFullHeightForCaret(textPosition, _caretPrototype) - caretRect.height;
+        case TargetPlatform.iOS:
+          final double heightDiff = caretHeight - caretRect.height;
           // Center the caret vertically along the text.
           caretRect = Rect.fromLTWH(
             caretRect.left,
@@ -1653,8 +1658,8 @@ class RenderEditable extends RenderBox {
             caretRect.height,
           );
           break;
-        }
-        default: {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
           // Override the height to take the full height of the glyph at the TextPosition
           // when not on iOS. iOS has special handling that creates a taller caret.
           // TODO(garyq): See the TODO for _getCaretPrototype.
@@ -1662,10 +1667,9 @@ class RenderEditable extends RenderBox {
             caretRect.left,
             caretRect.top - _kCaretHeightOffset,
             caretRect.width,
-            _textPainter.getFullHeightForCaret(textPosition, _caretPrototype),
+            caretHeight,
           );
           break;
-        }
       }
     }
 

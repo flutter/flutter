@@ -333,7 +333,7 @@ class RangeSlider extends StatefulWidget {
   final RangeSemanticFormatterCallback semanticFormatterCallback;
 
   // Touch width for the tap boundary of the slider thumbs.
-  static const double _minTouchTargetWidth = 48;
+  static const double _minTouchTargetWidth = kMinInteractiveDimension;
 
   @override
   _RangeSliderState createState() => _RangeSliderState();

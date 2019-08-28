@@ -8,7 +8,6 @@
 @interface AppDelegate : FlutterAppDelegate
 
 @property(nonatomic, strong) FlutterEngine* engine;
-@property(nonatomic, strong) UIWindow* window;
 @property(nonatomic, strong) FlutterBasicMessageChannel* reloadMessageChannel;
 
 @end

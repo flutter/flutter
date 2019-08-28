@@ -89,6 +89,16 @@ bool hasMultipleOccurrences(String text, Pattern pattern) {
   return text.indexOf(pattern) != text.lastIndexOf(pattern);
 }
 
+/// The Android home directory.
+String get _androidHome {
+  final String androidHome = Platform.environment['ANDROID_HOME'] ??
+      Platform.environment['ANDROID_SDK_ROOT'];
+  if (androidHome == null || androidHome.isEmpty) {
+    throw Exception('Unset env flag: `ANDROID_HOME` or `ANDROID_SDK_ROOT`.');
+  }
+  return androidHome;
+}
+
 /// Utility class to analyze the content inside an APK using dexdump,
 /// which is provided by the Android SDK.
 /// https://android.googlesource.com/platform/art/+/master/dexdump/dexdump.cc
@@ -117,18 +127,12 @@ class ApkExtractor {
 
   /// Returns the full path to the [dexdump] tool.
   Future<String> _findDexDump() async {
-    final String androidHome = Platform.environment['ANDROID_HOME'] ??
-        Platform.environment['ANDROID_SDK_ROOT'];
-
-    if (androidHome == null || androidHome.isEmpty) {
-      throw Exception('Unset env flag: `ANDROID_HOME` or `ANDROID_SDK_ROOT`.');
-    }
     String dexdumps;
     if (Platform.isWindows) {
       dexdumps = await eval('dir', <String>['/s/b', 'dexdump.exe'],
-          workingDirectory: androidHome);
+          workingDirectory: _androidHome);
     } else {
-      dexdumps = await eval('find', <String>[androidHome, '-name', 'dexdump']);
+      dexdumps = await eval('find', <String>[_androidHome, '-name', 'dexdump']);
     }
     if (dexdumps.isEmpty) {
       throw Exception('Couldn\'t find a dexdump executable.');
@@ -163,6 +167,13 @@ class ApkExtractor {
     }
     return classDescriptors.contains(className.replaceAll('.', '/'));
   }
+}
+
+/// Gets the content of the `AndroidManifest.xml`.
+Future<String> getAndroidManifest(String apk) {
+  final String apkAnalyzer = path.join(_androidHome, 'tools', 'bin', 'apkanalyzer');
+  return eval(apkAnalyzer, <String>['manifest', 'print', apk],
+      workingDirectory: _androidHome);
 }
 
  /// Checks that the classes are contained in the APK, throws otherwise.
@@ -369,3 +380,39 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
   );
 }
 
+class _Dependencies {
+  _Dependencies(String depfilePath) {
+    // Depfile format:
+    // outfile1 outfile2 : file1.dart file2.dart file3.dart file\ 4.dart
+    final String contents = File(depfilePath).readAsStringSync();
+    final List<String> colonSeparated = contents.split(': ');
+    targets = _processList(colonSeparated[0]);
+    dependencies = _processList(colonSeparated[1]);
+  }
+
+  final RegExp _separatorExpr = RegExp(r'([^\\]) ');
+  final RegExp _escapeExpr = RegExp(r'\\(.)');
+
+  Set<String> _processList(String rawText) {
+    return rawText
+    // Put every file on right-hand side on the separate line
+        .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
+        .split('\n')
+    // Expand escape sequences, so that '\ ', for example,ß becomes ' '
+        .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
+        .where((String path) => path.isNotEmpty)
+        .toSet();
+  }
+
+  Set<String> targets;
+  Set<String> dependencies;
+}
+
+/// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
+String validateSnapshotDependency(FlutterProject project, String expectedTarget) {
+  final _Dependencies deps = _Dependencies(
+      path.join(project.rootPath, 'build', 'app', 'intermediates',
+          'flutter', 'debug', 'android-arm', 'snapshot_blob.bin.d'));
+  return deps.targets.contains(expectedTarget) ? null :
+  'Dependency file should have $expectedTarget as target. Instead has ${deps.targets}';
+}

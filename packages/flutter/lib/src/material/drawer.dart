@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -13,6 +11,7 @@ import 'debug.dart';
 import 'list_tile.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'theme.dart';
 
 /// The possible alignments of a [Drawer].
 enum DrawerAlignment {
@@ -127,7 +126,7 @@ class Drawer extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     String label = semanticLabel;
-    switch (defaultTargetPlatform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
         label = semanticLabel;
         break;
@@ -182,6 +181,7 @@ class DrawerController extends StatefulWidget {
     this.drawerCallback,
     this.dragStartBehavior = DragStartBehavior.start,
     this.scrimColor,
+    this.edgeDragWidth,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
        assert(alignment != null),
@@ -227,6 +227,17 @@ class DrawerController extends StatefulWidget {
   ///
   /// By default, the color used is [Colors.black54]
   final Color scrimColor;
+
+  /// The width of the area within which a horizontal swipe will open the
+  /// drawer.
+  ///
+  /// By default, the value used is 20.0 added to the padding edge of
+  /// `MediaQuery.of(context).padding` that corresponds to [alignment].
+  /// This ensures that the drag area for notched devices is not obscured. For
+  /// example, if [alignment] is set to [DrawerAlignment.start] and
+  /// `TextDirection.of(context)` is set to [TextDirection.ltr],
+  /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
+  final double edgeDragWidth;
 
   @override
   DrawerControllerState createState() => DrawerControllerState();
@@ -427,12 +438,24 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   Widget _buildDrawer(BuildContext context) {
     final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
     final EdgeInsets padding = MediaQuery.of(context).padding;
-    double dragAreaWidth = drawerIsStart ? padding.left : padding.right;
+    final TextDirection textDirection = Directionality.of(context);
 
-    if (Directionality.of(context) == TextDirection.rtl)
-      dragAreaWidth = drawerIsStart ? padding.right : padding.left;
+    double dragAreaWidth = widget.edgeDragWidth;
+    if (widget.edgeDragWidth == null) {
+      switch (textDirection) {
+        case TextDirection.ltr: {
+          dragAreaWidth = _kEdgeDragWidth +
+            (drawerIsStart ? padding.left : padding.right);
+        }
+        break;
+        case TextDirection.rtl: {
+          dragAreaWidth = _kEdgeDragWidth +
+            (drawerIsStart ? padding.right : padding.left);
+        }
+        break;
+      }
+    }
 
-    dragAreaWidth = max(dragAreaWidth, _kEdgeDragWidth);
     if (_controller.status == AnimationStatus.dismissed) {
       return Align(
         alignment: _drawerOuterAlignment,
@@ -447,6 +470,17 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         ),
       );
     } else {
+      bool platformHasBackButton;
+      switch (Theme.of(context).platform) {
+        case TargetPlatform.android:
+          platformHasBackButton = true;
+          break;
+        case TargetPlatform.iOS:
+        case TargetPlatform.fuchsia:
+          platformHasBackButton = false;
+          break;
+      }
+      assert(platformHasBackButton != null);
       return GestureDetector(
         key: _gestureDetectorKey,
         onHorizontalDragDown: _handleDragDown,
@@ -461,7 +495,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
               BlockSemantics(
                 child: GestureDetector(
                   // On Android, the back button is used to dismiss a modal.
-                  excludeFromSemantics: defaultTargetPlatform == TargetPlatform.android,
+                  excludeFromSemantics: platformHasBackButton,
                   onTap: close,
                   child: Semantics(
                     label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,

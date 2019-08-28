@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
@@ -244,9 +244,11 @@ void main() {
     group('language', () {
       MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
       MemoryFileSystem fs;
+      FlutterProjectFactory flutterProjectFactory;
       setUp(() {
         fs = MemoryFileSystem();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+        flutterProjectFactory = FlutterProjectFactory();
       });
 
       testInMemory('default host app language', () async {
@@ -273,24 +275,28 @@ apply plugin: 'kotlin-android'
       }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
       });
     });
 
     group('product bundle identifier', () {
       MemoryFileSystem fs;
-      MockIOSWorkflow mockIOSWorkflow;
+      MockPlistUtils mockPlistUtils;
       MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+      FlutterProjectFactory flutterProjectFactory;
       setUp(() {
         fs = MemoryFileSystem();
-        mockIOSWorkflow = MockIOSWorkflow();
+        mockPlistUtils = MockPlistUtils();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+        flutterProjectFactory = FlutterProjectFactory();
       });
 
       void testWithMocks(String description, Future<void> testMethod()) {
         testUsingContext(description, testMethod, overrides: <Type, Generator>{
           FileSystem: () => fs,
-          IOSWorkflow: () => mockIOSWorkflow,
+          PlistParser: () => mockPlistUtils,
           XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
         });
       }
 
@@ -307,7 +313,7 @@ apply plugin: 'kotlin-android'
       });
       testWithMocks('from plist, if no variables', () async {
         final FlutterProject project = await someProject();
-        when(mockIOSWorkflow.getPlistValueFromFile(any, any)).thenReturn('io.flutter.someProject');
+        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('io.flutter.someProject');
         expect(project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
       testWithMocks('from pbxproj and plist, if default variable', () async {
@@ -315,7 +321,7 @@ apply plugin: 'kotlin-android'
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject');
         });
-        when(mockIOSWorkflow.getPlistValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER)');
+        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER)');
         expect(project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
       testWithMocks('from pbxproj and plist, by substitution', () async {
@@ -324,7 +330,7 @@ apply plugin: 'kotlin-android'
           'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
           'SUFFIX': 'suffix',
         });
-        when(mockIOSWorkflow.getPlistValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER).\$(SUFFIX)');
+        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER).\$(SUFFIX)');
         expect(project.ios.productBundleIdentifier, 'io.flutter.someProject.suffix');
       });
       testWithMocks('empty surrounded by quotes', () async {
@@ -425,9 +431,11 @@ apply plugin: 'kotlin-android'
 
   group('Regression test for invalid pubspec', () {
     Testbed testbed;
+    FlutterProjectFactory flutterProjectFactory;
 
     setUp(() {
       testbed = Testbed();
+      flutterProjectFactory = FlutterProjectFactory();
     });
 
     test('Handles asking for builders from an invalid pubspec', () => testbed.run(() {
@@ -439,6 +447,8 @@ apply plugin: 'kotlin-android'
       final FlutterProject flutterProject = FlutterProject.current();
 
       expect(flutterProject.builders, null);
+    }, overrides: <Type, Generator>{
+      FlutterProjectFactory: () => flutterProjectFactory,
     }));
 
     test('Handles asking for builders from a trivial pubspec', () => testbed.run(() {
@@ -451,6 +461,8 @@ name: foo_bar
       final FlutterProject flutterProject = FlutterProject.current();
 
       expect(flutterProject.builders, null);
+    }, overrides: <Type, Generator>{
+      FlutterProjectFactory: () => flutterProjectFactory,
     }));
   });
 }
@@ -510,12 +522,16 @@ void testInMemory(String description, Future<void> testMethod()) {
       .childDirectory('packages')
       .childDirectory('flutter_tools')
       .childDirectory('schema'), testFileSystem);
+
+  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory();
+
   testUsingContext(
     description,
     testMethod,
     overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       Cache: () => Cache(),
+      FlutterProjectFactory: () => flutterProjectFactory,
     },
   );
 }
@@ -636,7 +652,7 @@ File androidPluginRegistrant(Directory parent) {
     .childFile('GeneratedPluginRegistrant.java');
 }
 
-class MockIOSWorkflow extends Mock implements IOSWorkflow {}
+class MockPlistUtils extends Mock implements PlistParser {}
 
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {
   @override

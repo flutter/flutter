@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
@@ -13,17 +14,20 @@ import '../../src/context.dart';
 
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
+class MockPlatform extends Mock implements Platform {}
 
 void main() {
   group('Xcode', () {
     MockProcessManager mockProcessManager;
     Xcode xcode;
     MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+    MockPlatform mockPlatform;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
       mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
       xcode = Xcode();
+      mockPlatform = MockPlatform();
     });
 
     testUsingContext('xcodeSelectPath returns null when xcode-select is not installed', () {
@@ -87,6 +91,80 @@ void main() {
       expect(xcode.isVersionSatisfactory, isTrue);
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+    });
+
+    testUsingContext('isInstalledAndMeetsVersionCheck is false when not macOS', () {
+      when(mockPlatform.isMacOS).thenReturn(false);
+      expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
+    }, overrides: <Type, Generator>{
+      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+      Platform: () => mockPlatform,
+    });
+
+    testUsingContext('isInstalledAndMeetsVersionCheck is false when not installed', () {
+      when(mockPlatform.isMacOS).thenReturn(true);
+
+      const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
+        .thenReturn(ProcessResult(1, 0, xcodePath, ''));
+
+      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
+      expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
+    }, overrides: <Type, Generator>{
+      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+      Platform: () => mockPlatform,
+      ProcessManager: () => mockProcessManager
+    });
+
+    testUsingContext('isInstalledAndMeetsVersionCheck is false when no xcode-select', () {
+      when(mockPlatform.isMacOS).thenReturn(true);
+
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
+        .thenReturn(ProcessResult(1, 127, '', 'ERROR'));
+
+      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(1);
+
+      expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
+    }, overrides: <Type, Generator>{
+      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+      Platform: () => mockPlatform,
+      ProcessManager: () => mockProcessManager
+    });
+
+    testUsingContext('isInstalledAndMeetsVersionCheck is false when version not satisfied', () {
+      when(mockPlatform.isMacOS).thenReturn(true);
+
+      const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
+        .thenReturn(ProcessResult(1, 0, xcodePath, ''));
+
+      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(8);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+      expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
+    }, overrides: <Type, Generator>{
+      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+      Platform: () => mockPlatform,
+      ProcessManager: () => mockProcessManager
+    });
+
+    testUsingContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
+      when(mockPlatform.isMacOS).thenReturn(true);
+
+      const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
+        .thenReturn(ProcessResult(1, 0, xcodePath, ''));
+
+      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(1);
+      expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
+    }, overrides: <Type, Generator>{
+      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+      Platform: () => mockPlatform,
+      ProcessManager: () => mockProcessManager
     });
 
     testUsingContext('eulaSigned is false when clang is not installed', () {

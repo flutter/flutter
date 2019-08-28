@@ -24,28 +24,28 @@ const Map<TargetPlatform, String> flutterArtifactPlatformDirectory =
 // directory.
 const Map<TargetPlatform, List<String>> artifactFilesByPlatform = <TargetPlatform, List<String>>{
   TargetPlatform.linux_x64: <String>[
-    'libflutter_linux.so',
+    'libflutter_linux_glfw.so',
     'flutter_export.h',
     'flutter_messenger.h',
     'flutter_plugin_registrar.h',
     'flutter_glfw.h',
     'icudtl.dat',
-    'cpp_client_wrapper/',
+    'cpp_client_wrapper_glfw/',
   ],
   TargetPlatform.darwin_x64: <String>[
     'FlutterMacOS.framework',
   ],
   TargetPlatform.windows_x64: <String>[
-    'flutter_windows.dll',
-    'flutter_windows.dll.exp',
-    'flutter_windows.dll.lib',
-    'flutter_windows.dll.pdb',
+    'flutter_windows_glfw.dll',
+    'flutter_windows_glfw.dll.exp',
+    'flutter_windows_glfw.dll.lib',
+    'flutter_windows_glfw.dll.pdb',
     'flutter_export.h',
     'flutter_messenger.h',
     'flutter_plugin_registrar.h',
     'flutter_glfw.h',
     'icudtl.dat',
-    'cpp_client_wrapper/',
+    'cpp_client_wrapper_glfw/',
   ],
 };
 

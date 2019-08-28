@@ -129,13 +129,13 @@ class CreateCommand extends FlutterCommand {
     argParser.addOption(
       'ios-language',
       abbr: 'i',
-      defaultsTo: 'objc',
+      defaultsTo: 'swift',
       allowed: <String>['objc', 'swift'],
     );
     argParser.addOption(
       'android-language',
       abbr: 'a',
-      defaultsTo: 'java',
+      defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
     );
     argParser.addFlag(
@@ -407,7 +407,7 @@ class CreateCommand extends FlutterCommand {
         break;
     }
     if (sampleCode != null) {
-      generatedFileCount += await _applySample(relativeDir, sampleCode);
+      generatedFileCount += _applySample(relativeDir, sampleCode);
     }
     printStatus('Wrote $generatedFileCount files.');
     printStatus('\nAll done!');
@@ -566,13 +566,13 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   // documentation website in sampleCode.  Returns the difference in the number
   // of files after applying the sample, since it also deletes the application's
   // test directory (since the template's test doesn't apply to the sample).
-  Future<int> _applySample(Directory directory, String sampleCode) async {
+  int _applySample(Directory directory, String sampleCode) {
     final File mainDartFile = directory.childDirectory('lib').childFile('main.dart');
-    await mainDartFile.create(recursive: true);
-    await mainDartFile.writeAsString(sampleCode);
+    mainDartFile.createSync(recursive: true);
+    mainDartFile.writeAsStringSync(sampleCode);
     final Directory testDir = directory.childDirectory('test');
     final List<FileSystemEntity> files = testDir.listSync(recursive: true);
-    await testDir.delete(recursive: true);
+    testDir.deleteSync(recursive: true);
     return -files.length;
   }
 

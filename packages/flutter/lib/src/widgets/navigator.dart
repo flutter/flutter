@@ -9,6 +9,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -16,6 +17,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'overlay.dart';
+import 'route_notification_messages.dart';
 import 'routes.dart';
 import 'ticker_provider.dart';
 
@@ -65,6 +67,18 @@ enum RoutePopDisposition {
   /// by the [SystemNavigator], which will usually close the application.
   bubble,
 }
+
+/// Name for the method which is used for sending messages from framework to
+/// engine after a route is popped.
+const String _routePoppedMethod = 'routePopped';
+
+/// Name for the method which is used for sending messages from framework to
+/// engine after a route is pushed.
+const String _routePushedMethod = 'routePushed';
+
+/// Name for the method which is used for sending messages from framework to
+/// engine after a route is replaced.
+const String _routeReplacedMethod = 'routeReplaced';
 
 /// An abstraction for an entry managed by a [Navigator].
 ///
@@ -1761,6 +1775,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
     for (NavigatorObserver observer in widget.observers)
       observer.didPush(route, oldRoute);
+    RouteNotificationMessages.maybeNotifyRouteChange(_routePushedMethod, route, oldRoute);
     assert(() { _debugLocked = false; return true; }());
     _afterNavigation(route);
     return route.popped;
@@ -1854,6 +1869,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
     for (NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    RouteNotificationMessages.maybeNotifyRouteChange(_routeReplacedMethod, newRoute, oldRoute);
     assert(() { _debugLocked = false; return true; }());
     _afterNavigation(newRoute);
     return newRoute.popped;
@@ -1965,6 +1981,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
     for (NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    RouteNotificationMessages.maybeNotifyRouteChange(_routeReplacedMethod, newRoute, oldRoute);
     oldRoute.dispose();
     assert(() { _debugLocked = false; return true; }());
   }
@@ -2067,6 +2084,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         _history.last.didPopNext(route);
         for (NavigatorObserver observer in widget.observers)
           observer.didPop(route, _history.last);
+        RouteNotificationMessages.maybeNotifyRouteChange(_routePoppedMethod, route, _history.last);
       } else {
         assert(() { _debugLocked = false; return true; }());
         return false;

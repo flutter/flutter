@@ -114,8 +114,8 @@ class BundleBuilder {
       }
       kernelContent = DevFSFileContent(fs.file(compilerOutput.outputFilename));
 
-      await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
-          .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
+      fs.directory(getBuildDirectory()).childFile('frontend_server.d')
+          .writeAsStringSync('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
     }
 
     final AssetBundle assets = await buildAssets(
@@ -149,6 +149,7 @@ Future<void> buildWithAssemble({
 }) async {
   final Environment environment = Environment(
     projectDir: flutterProject.directory,
+    outputDir: fs.directory(outputDir),
     buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
     defines: <String, String>{
       kTargetFile: mainPath,
@@ -156,7 +157,7 @@ Future<void> buildWithAssemble({
       kTargetPlatform: getNameForTargetPlatform(targetPlatform),
     }
   );
-  final BuildResult result = await buildSystem.build(const _BundleTarget(), environment);
+  final BuildResult result = await buildSystem.build(const CopyFlutterBundle(), environment);
 
   if (!result.success) {
     for (ExceptionMeasurement measurement in result.exceptions.values) {
@@ -165,20 +166,17 @@ Future<void> buildWithAssemble({
     }
     throwToolExit('Failed to build bundle.');
   }
-  // Hack, we know where the cached version is so copy into expected output directory.
-  if (outputDir != null) {
-    final Directory outputDirectory = fs.directory(outputDir)..createSync(recursive: true);
-    final Directory assetInputDir = environment.buildDir.childDirectory('flutter_assets');
-    copyDirectorySync(assetInputDir, outputDirectory);
-    if (buildMode == BuildMode.debug) {
-      final File copiedDill = environment.buildDir.childFile('app.dill');
-      final File isolateSnapshotData = environment.buildDir.childFile('isolate_snapshot_data');
-      final File vmSnapshotData = environment.buildDir.childFile('vm_snapshot_data');
-      copiedDill.copySync(outputDirectory.childFile('kernel_blob.bin').path);
-      isolateSnapshotData.copySync(outputDirectory.childFile('isolate_snapshot_data').path);
-      vmSnapshotData.copySync(outputDirectory.childFile('vm_snapshot_data').path);
-    }
+
+  // Output depfile format:
+  final StringBuffer buffer = StringBuffer();
+  buffer.write(':');
+  for (File outputFile in result.outputFiles) {
+    buffer.write('${outputFile.path} ');
   }
+  for (File inputFile in result.inputFiles) {
+    buffer.write('${inputFile.path} ');
+  }
+  fs.file(fs.path.join(outputDir, 'snapshot_blob.bin.d'));
 }
 
 Future<AssetBundle> buildAssets({
@@ -253,28 +251,4 @@ Future<void> writeBundle(
         resource.release();
       }
     }));
-}
-
-// Synthetic target to combine copy assets and dill.
-class _BundleTarget extends Target {
-  const _BundleTarget();
-
-  @override
-  Future<void> build(List<File> inputFiles, Environment environment) async { }
-
-  @override
-  List<Target> get dependencies => const <Target>[
-    CopyAssets(),
-    KernelSnapshot(),
-    CopyPrecompiledRuntime(),
-  ];
-
-  @override
-  List<Source> get inputs => <Source>[];
-
-  @override
-  String get name => '_bundle_target';
-
-  @override
-  List<Source> get outputs => <Source>[];
 }
