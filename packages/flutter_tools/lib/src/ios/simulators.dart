@@ -24,7 +24,7 @@ import '../project.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
-import 'plist_utils.dart';
+import 'plist_parser.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
 const String iosSimulatorId = 'apple_ios_simulator';
@@ -329,14 +329,13 @@ class IOSSimulator extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
     if (!prebuiltApplication && package is BuildableIOSApp) {
       printTrace('Building ${package.name} for $id.');
 
       try {
-        await _setupUpdatedApplicationBundle(package, debuggingOptions.buildInfo, mainPath, usesTerminalUi);
+        await _setupUpdatedApplicationBundle(package, debuggingOptions.buildInfo, mainPath);
       } on ToolExit catch (e) {
         printError(e.message);
         return LaunchResult.failed();
@@ -379,7 +378,7 @@ class IOSSimulator extends Device {
       // parsing the xcodeproj or configuration files.
       // See https://github.com/flutter/flutter/issues/31037 for more information.
       final String plistPath = fs.path.join(package.simulatorBundlePath, 'Info.plist');
-      final String bundleIdentifier = iosWorkflow.getPlistValueFromFile(plistPath, kCFBundleIdentifierKey);
+      final String bundleIdentifier = PlistParser.instance.getValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
       await SimControl.instance.launch(id, bundleIdentifier, args);
     } catch (error) {
@@ -406,7 +405,7 @@ class IOSSimulator extends Device {
     }
   }
 
-  Future<void> _setupUpdatedApplicationBundle(covariant BuildableIOSApp app, BuildInfo buildInfo, String mainPath, bool usesTerminalUi) async {
+  Future<void> _setupUpdatedApplicationBundle(covariant BuildableIOSApp app, BuildInfo buildInfo, String mainPath) async {
     await _sideloadUpdatedAssetsForInstalledApplicationBundle(app, buildInfo, mainPath);
 
     // Step 1: Build the Xcode project.
@@ -422,7 +421,6 @@ class IOSSimulator extends Device {
       buildInfo: debugBuildInfo,
       targetOverride: mainPath,
       buildForDevice: false,
-      usesTerminalUi: usesTerminalUi,
     );
     if (!buildResult.success)
       throwToolExit('Could not build the application for the simulator.');

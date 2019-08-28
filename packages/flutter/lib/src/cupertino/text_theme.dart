@@ -213,6 +213,32 @@ class CupertinoTextThemeData extends Diagnosticable {
         (_isLight ? _kDefaultDateTimePickerLightTextStyle : _kDefaultDateTimePickerDarkTextStyle);
   }
 
+  /// Returns a copy of the current [CupertinoTextThemeData] with all the colors
+  /// resolved against the given [BuildContext].
+  CupertinoTextThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
+    Color convertColor(Color color) => color == null ? null : CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+
+    TextStyle resolveTextStyle(TextStyle textStyle) {
+      return textStyle?.copyWith(
+        color: convertColor(textStyle.color),
+        backgroundColor: convertColor(textStyle.backgroundColor),
+        decorationColor: convertColor(textStyle.decorationColor),
+      );
+    }
+
+    return copyWith(
+      primaryColor: convertColor(_primaryColor),
+      textStyle: resolveTextStyle(_textStyle),
+      actionTextStyle: resolveTextStyle(_actionTextStyle),
+      tabLabelTextStyle: resolveTextStyle(_tabLabelTextStyle),
+      navTitleTextStyle : resolveTextStyle(_navTitleTextStyle),
+      navLargeTitleTextStyle: resolveTextStyle(_navLargeTitleTextStyle),
+      navActionTextStyle: resolveTextStyle(_navActionTextStyle),
+      pickerTextStyle: resolveTextStyle(_pickerTextStyle),
+      dateTimePickerTextStyle: resolveTextStyle(_dateTimePickerTextStyle),
+    );
+  }
+
   /// Returns a copy of the current [CupertinoTextThemeData] instance with
   /// specified overrides.
   CupertinoTextThemeData copyWith({

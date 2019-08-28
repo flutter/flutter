@@ -65,6 +65,10 @@ class VersionCommand extends FlutterCommand {
 
     // check min supported version
     final Version targetVersion = Version.parse(version);
+    if (targetVersion == null) {
+      throwToolExit('Failed to parse version "$version"');
+    }
+
     bool withForce = false;
     if (targetVersion < minSupportedVersion) {
       if (!argResults['force']) {

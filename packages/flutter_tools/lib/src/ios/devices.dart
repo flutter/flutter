@@ -20,6 +20,7 @@ import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
+import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
@@ -185,6 +186,9 @@ class IOSDevice extends Device {
       } on IOSDeviceNotFoundError catch (error) {
         // Unable to find device with given udid. Possibly a network device.
         printTrace('Error getting attached iOS device: $error');
+      } on IOSDeviceNotTrustedError catch (error) {
+        printTrace('Error getting attached iOS device information: $error');
+        UsageEvent('device', 'ios-trust-failure').send();
       }
     }
     return devices;
@@ -226,7 +230,8 @@ class IOSDevice extends Device {
         ),
       );
       return true;
-    } on ProcessException {
+    } on ProcessException catch (error) {
+      printError(error.message);
       return false;
     }
   }
@@ -241,7 +246,8 @@ class IOSDevice extends Device {
         ),
       );
       return true;
-    } on ProcessException {
+    } on ProcessException catch (error) {
+      printError(error.message);
       return false;
     }
   }
@@ -257,7 +263,6 @@ class IOSDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
     if (!prebuiltApplication) {
@@ -265,7 +270,7 @@ class IOSDevice extends Device {
       printTrace('Building ${package.name} for $id');
 
       final String cpuArchitecture = await iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
-      final IOSArch iosArch = getIOSArchForName(cpuArchitecture);
+      final DarwinArch iosArch = getIOSArchForName(cpuArchitecture);
 
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
@@ -273,7 +278,6 @@ class IOSDevice extends Device {
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
           buildForDevice: true,
-          usesTerminalUi: usesTerminalUi,
           activeArch: iosArch,
       );
       if (!buildResult.success) {

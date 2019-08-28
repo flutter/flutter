@@ -583,12 +583,13 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 
 /// The parameters used to create a [PlatformViewController].
 ///
-/// See also [CreatePlatformViewController] which uses this object to create a [PlatformViewController].
+/// See also [CreatePlatformViewCallback] which uses this object to create a [PlatformViewController].
 class PlatformViewCreationParams {
 
   const PlatformViewCreationParams._({
     @required this.id,
-    @required this.onPlatformViewCreated
+    @required this.onPlatformViewCreated,
+    @required this.onFocusChanged,
   }) : assert(id != null),
        assert(onPlatformViewCreated != null);
 
@@ -599,6 +600,11 @@ class PlatformViewCreationParams {
 
   /// Callback invoked after the platform view has been created.
   final PlatformViewCreatedCallback onPlatformViewCreated;
+
+  /// Callback invoked when the platform view's focus is changed on the platform side.
+  ///
+  /// The value is true when the platform view gains focus and false when it loses focus.
+  final ValueChanged<bool> onFocusChanged;
 }
 
 /// A factory for a surface presenting a platform view as part of the widget hierarchy.
@@ -615,7 +621,7 @@ typedef PlatformViewSurfaceFactory = Widget Function(BuildContext context, Platf
 /// params [PlatformViewCreationParams.id] field.
 ///
 /// See also [PlatformViewLink.onCreate].
-typedef CreatePlatformViewController = PlatformViewController Function(PlatformViewCreationParams params);
+typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformViewCreationParams params);
 
 /// Links a platform view with the Flutter framework.
 ///
@@ -631,7 +637,7 @@ typedef CreatePlatformViewController = PlatformViewController Function(PlatformV
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return PlatformViewLink(
-///       createCallback: createFooWebView,
+///       onCreatePlatformView: createFooWebView,
 ///       surfaceFactory: (BuildContext context, PlatformViewController controller) {
 ///        return PlatformViewSurface(
 ///            gestureRecognizers: gestureRecognizers,
@@ -644,13 +650,13 @@ typedef CreatePlatformViewController = PlatformViewController Function(PlatformV
 /// }
 /// ```
 ///
-/// The `surfaceFactory` and the `createPlatformViewController` only take affect when the state of this widget is initialized.
-/// If the widget is rebuilt without losing its state, `surfaceFactory` and `createPlatformViewController` are ignored.
+/// The `surfaceFactory` and the `onCreatePlatformView` only take affect when the state of this widget is initialized.
+/// If the widget is rebuilt without losing its state, `surfaceFactory` and `onCreatePlatformView` are ignored.
 class PlatformViewLink extends StatefulWidget {
 
   /// Construct a [PlatformViewLink] widget.
   ///
-  /// The `surfaceFactory` and the `createPlatformViewController` must not be null.
+  /// The `surfaceFactory` and the `onCreatePlatformView` must not be null.
   ///
   /// See also:
   /// * [PlatformViewSurface] for details on the widget returned by `surfaceFactory`.
@@ -658,16 +664,16 @@ class PlatformViewLink extends StatefulWidget {
   const PlatformViewLink({
     Key key,
     @required PlatformViewSurfaceFactory surfaceFactory,
-    @required CreatePlatformViewController createPlatformViewController,
+    @required CreatePlatformViewCallback onCreatePlatformView,
     }) : assert(surfaceFactory != null),
-                                  assert(createPlatformViewController != null),
+                                  assert(onCreatePlatformView != null),
                                   _surfaceFactory = surfaceFactory,
-                                  _createPlatformViewController = createPlatformViewController,
+                                  _onCreatePlatformView = onCreatePlatformView,
                                   super(key: key);
 
 
   final PlatformViewSurfaceFactory _surfaceFactory;
-  final CreatePlatformViewController _createPlatformViewController;
+  final CreatePlatformViewCallback _onCreatePlatformView;
 
   @override
   State<StatefulWidget> createState() => _PlatformViewLinkState();
@@ -678,7 +684,8 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   int _id;
   PlatformViewController _controller;
   bool _platformViewCreated = false;
-  PlatformViewSurface _surface;
+  Widget _surface;
+  FocusNode _focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -686,27 +693,51 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
       return const SizedBox.expand();
     }
     _surface ??= widget._surfaceFactory(context, _controller);
-    return _surface;
+    return Focus(
+      focusNode: _focusNode,
+      onFocusChange: _handleFrameworkFocusChanged,
+      child: _surface,
+    );
   }
 
   @override
   void initState() {
+    _focusNode = FocusNode(debugLabel: 'PlatformView(id: $_id)',);
     _initialize();
     super.initState();
   }
 
   void _initialize() {
     _id = platformViewsRegistry.getNextPlatformViewId();
-    _controller = widget._createPlatformViewController(PlatformViewCreationParams._(id:_id, onPlatformViewCreated:_onPlatformViewCreated));
+    _controller = widget._onCreatePlatformView(
+      PlatformViewCreationParams._(
+        id:_id,
+        onPlatformViewCreated:_onPlatformViewCreated,
+        onFocusChanged:_handlePlatformFocusChanged
+      ),
+    );
   }
 
   void _onPlatformViewCreated(int id) {
     setState(() => _platformViewCreated = true);
   }
 
+  void _handleFrameworkFocusChanged(bool isFocused) {
+    if (!isFocused) {
+      _controller?.clearFocus();
+    }
+  }
+
+  void _handlePlatformFocusChanged(bool isFocused){
+    if (isFocused) {
+      _focusNode.requestFocus();
+    }
+  }
+
   @override
   void dispose() {
     _controller?.dispose();
+    _controller = null;
     super.dispose();
   }
 }

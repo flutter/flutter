@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'icons.dart';
+import 'interface_level.dart';
 import 'localizations.dart';
 import 'route.dart';
 import 'theme.dart';
@@ -268,45 +269,51 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
     return ScrollConfiguration(
       behavior: _AlwaysCupertinoScrollBehavior(),
-      child: CupertinoTheme(
-        data: effectiveThemeData,
-        child: WidgetsApp(
-          key: GlobalObjectKey(this),
-          navigatorKey: widget.navigatorKey,
-          navigatorObservers: _navigatorObservers,
-          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
-            CupertinoPageRoute<T>(settings: settings, builder: builder),
-          home: widget.home,
-          routes: widget.routes,
-          initialRoute: widget.initialRoute,
-          onGenerateRoute: widget.onGenerateRoute,
-          onUnknownRoute: widget.onUnknownRoute,
-          builder: widget.builder,
-          title: widget.title,
-          onGenerateTitle: widget.onGenerateTitle,
-          textStyle: effectiveThemeData.textTheme.textStyle,
-          color: widget.color ?? CupertinoColors.activeBlue,
-          locale: widget.locale,
-          localizationsDelegates: _localizationsDelegates,
-          localeResolutionCallback: widget.localeResolutionCallback,
-          localeListResolutionCallback: widget.localeListResolutionCallback,
-          supportedLocales: widget.supportedLocales,
-          showPerformanceOverlay: widget.showPerformanceOverlay,
-          checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-          checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-          showSemanticsDebugger: widget.showSemanticsDebugger,
-          debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-          inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-            return CupertinoButton.filled(
-              child: const Icon(
-                CupertinoIcons.search,
-                size: 28.0,
-                color: CupertinoColors.white,
-              ),
-              padding: EdgeInsets.zero,
-              onPressed: onPressed,
-            );
-          },
+      child: CupertinoUserInterfaceLevel(
+        data: CupertinoUserInterfaceLevelData.base,
+        child: CupertinoTheme(
+          data: effectiveThemeData,
+          child: CupertinoSystemColors(
+            data: CupertinoSystemColors.of(context, useFallbackValues: true),
+            child: WidgetsApp(
+              key: GlobalObjectKey(this),
+              navigatorKey: widget.navigatorKey,
+              navigatorObservers: _navigatorObservers,
+              pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
+                CupertinoPageRoute<T>(settings: settings, builder: builder),
+              home: widget.home,
+              routes: widget.routes,
+              initialRoute: widget.initialRoute,
+              onGenerateRoute: widget.onGenerateRoute,
+              onUnknownRoute: widget.onUnknownRoute,
+              builder: widget.builder,
+              title: widget.title,
+              onGenerateTitle: widget.onGenerateTitle,
+              textStyle: effectiveThemeData.textTheme.textStyle,
+              color: widget.color ?? CupertinoColors.activeBlue,
+              locale: widget.locale,
+              localizationsDelegates: _localizationsDelegates,
+              localeResolutionCallback: widget.localeResolutionCallback,
+              localeListResolutionCallback: widget.localeListResolutionCallback,
+              supportedLocales: widget.supportedLocales,
+              showPerformanceOverlay: widget.showPerformanceOverlay,
+              checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+              checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+              showSemanticsDebugger: widget.showSemanticsDebugger,
+              debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+              inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
+                return CupertinoButton.filled(
+                  child: const Icon(
+                    CupertinoIcons.search,
+                    size: 28.0,
+                    color: CupertinoColors.white,
+                  ),
+                  padding: EdgeInsets.zero,
+                  onPressed: onPressed,
+                );
+              },
+            ),
+          ),
         ),
       ),
     );

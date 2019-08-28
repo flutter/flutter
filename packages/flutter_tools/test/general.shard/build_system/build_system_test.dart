@@ -92,6 +92,7 @@ void main() {
     testbed = Testbed(
       setup: () {
         environment = Environment(
+          outputDir: fs.currentDirectory,
           projectDir: fs.currentDirectory,
         );
         fs.file('foo.dart')

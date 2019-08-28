@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -170,5 +171,20 @@ void main() {
 
     await tester.pumpWidget(const Card(clipBehavior: Clip.antiAlias));
     expect(tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.antiAlias);
+  });
+
+  testWidgets('Card clipBehavior property defers to theme when null', (WidgetTester tester) async {
+    await tester.pumpWidget(Builder(builder: (BuildContext context) {
+      final ThemeData themeData = Theme.of(context);
+      return Theme(
+        data: themeData.copyWith(
+          cardTheme: themeData.cardTheme.copyWith(
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+          ),
+        ),
+        child: const Card(clipBehavior: null),
+      );
+    }));
+    expect(tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.antiAliasWithSaveLayer);
   });
 }

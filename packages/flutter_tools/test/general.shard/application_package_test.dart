@@ -7,20 +7,19 @@ import 'dart:io' show ProcessResult;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/fuchsia/application_package.dart';
-import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
-
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/fuchsia/application_package.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/project.dart';
+import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
@@ -190,7 +189,7 @@ void main() {
   group('PrebuiltIOSApp', () {
     final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      IOSWorkflow: () => MockIosWorkFlow(),
+      PlistParser: () => MockPlistUtils(),
       Platform: _kNoColorTerminalPlatform,
       OperatingSystemUtils: () => MockOperatingSystemUtils(),
     };
@@ -587,9 +586,9 @@ const String _aaptDataWithDistNamespace =
 ''';
 
 
-class MockIosWorkFlow extends Mock implements IOSWorkflow {
+class MockPlistUtils extends Mock implements PlistParser {
   @override
-  String getPlistValueFromFile(String path, String key) {
+  String getValueFromFile(String path, String key) {
     final File file = fs.file(path);
     if (!file.existsSync()) {
       return null;

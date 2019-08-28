@@ -7,6 +7,7 @@ import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'inherited_theme.dart';
 import 'media_query.dart';
 
 // Examples can assume:
@@ -20,7 +21,7 @@ import 'media_query.dart';
 ///    smoothly over a given duration.
 ///  * [DefaultTextStyleTransition], which takes a provided [Animation] to
 ///    animate changes in text style smoothly over time.
-class DefaultTextStyle extends InheritedWidget {
+class DefaultTextStyle extends InheritedTheme {
   /// Creates a default text style for the given subtree.
   ///
   /// Consider using [DefaultTextStyle.merge] to inherit styling information
@@ -159,6 +160,20 @@ class DefaultTextStyle extends InheritedWidget {
         overflow != oldWidget.overflow ||
         maxLines != oldWidget.maxLines ||
         textWidthBasis != oldWidget.textWidthBasis;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final DefaultTextStyle defaultTextStyle = context.ancestorWidgetOfExactType(DefaultTextStyle);
+    return identical(this, defaultTextStyle) ? child : DefaultTextStyle(
+      style: style,
+      textAlign: textAlign,
+      softWrap: softWrap,
+      overflow: overflow,
+      maxLines: maxLines,
+      textWidthBasis: textWidthBasis,
+      child: child,
+    );
   }
 
   @override
