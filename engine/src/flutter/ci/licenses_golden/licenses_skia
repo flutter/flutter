@@ -1,4 +1,4 @@
-Signature: 0562bd9b68450b2a9eb8492d377f11f8
+Signature: 68c9f0e942ca2405115a6d1181f4ec75
 
 UNUSED LICENSES:
 
@@ -3385,6 +3385,8 @@ FILE: ../../../third_party/skia/src/gpu/effects/generated/GrOverrideInputFragmen
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCommandBuffer.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCommandBuffer.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlDepthStencil.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlSemaphore.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlSemaphore.mm
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSecondaryCBDrawContext.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSecondaryCBDrawContext.h
 FILE: ../../../third_party/skia/src/shaders/SkRTShader.cpp
