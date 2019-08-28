@@ -1096,7 +1096,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _openInputConnection();
     }
     if (widget.style != oldWidget.style) {
-      _textInputConnection?.setStyle(widget.style, _textDirection, widget.textAlign);
+      final TextStyle style = widget.style;
+      _textInputConnection?.setStyle(
+        fontFamily: style.fontFamily,
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+        textDirection: _textDirection,
+        textAlign: widget.textAlign,
+      );
     }
   }
 
@@ -1339,9 +1346,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               keyboardAppearance: widget.keyboardAppearance,
           ),
       );
+
       _updateTextLocation();
+      final TextStyle style = widget.style;
       _textInputConnection
-        ..setStyle(widget.style, _textDirection, widget.textAlign)
+        ..setStyle(
+          fontFamily: style.fontFamily,
+          fontSize: style.fontSize,
+          fontWeight: style.fontWeight,
+          textDirection: _textDirection,
+          textAlign: widget.textAlign,
+        )
         ..setEditingState(localValue);
     }
     _textInputConnection.show();
@@ -1678,7 +1693,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // toolbar: copy, paste, select, cut. It might also provide additional
     // functionality depending on the browser (such as translate). Due to this
     // we should not show a Flutter toolbar for the editable text elements.
-    if(kIsWeb) {
+    if (kIsWeb) {
       return false;
     }
 

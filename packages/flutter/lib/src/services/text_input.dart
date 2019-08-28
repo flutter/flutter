@@ -4,10 +4,16 @@
 
 import 'dart:async';
 import 'dart:io' show Platform;
-import 'dart:ui' show TextAffinity, hashValues, Offset;
+import 'dart:ui' show
+  FontWeight,
+  Offset,
+  Size,
+  TextAffinity,
+  TextAlign,
+  TextDirection,
+  hashValues;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'message_codec.dart';
@@ -689,15 +695,21 @@ class TextInputConnection with ChangeNotifier {
   /// This information is used by the Flutter Web Engine to change the style
   /// of the hidden native input's content. Hence, the content size will match
   /// to the size of the editable widget's content.
-  void setStyle(TextStyle textStyle, TextDirection textDirection, TextAlign textAlign) {
+  void setStyle({
+    @required String fontFamily,
+    @required double fontSize,
+    @required FontWeight fontWeight,
+    @required TextDirection textDirection,
+    @required TextAlign textAlign,
+  }) {
     assert(attached);
 
     SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setStyle',
       <String, dynamic>{
-        'fontFamily': textStyle.fontFamily,
-        'fontSize': textStyle.fontSize,
-        'fontWeightIndex': textStyle.fontWeight?.index,
+        'fontFamily': fontFamily,
+        'fontSize': fontSize,
+        'fontWeightIndex': fontWeight?.index,
         'textAlignIndex': textAlign.index,
         'textDirectionIndex': textDirection.index,
       },
