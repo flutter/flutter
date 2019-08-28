@@ -26,7 +26,8 @@ import 'text_style.dart';
 ///
 ///  * [WidgetSpan], a leaf node that represents an embedded inline widget.
 ///  * [TextSpan], a node that represents text in a [TextSpan] tree.
-///  * [Text], a widget for showing text.
+///  * [Text], a widget for showing uniformly-styled text.
+///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 abstract class PlaceholderSpan extends InlineSpan {
   /// Creates a [PlaceholderSpan] with the given values.

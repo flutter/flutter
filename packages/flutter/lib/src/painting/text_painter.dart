@@ -30,7 +30,7 @@ export 'package:flutter/services.dart' show TextRange, TextSelection;
 ///  * [WidgetSpan], a subclass of [InlineSpan] and [PlaceholderSpan] that
 ///    represents an inline widget embedded within text. The space this
 ///    widget takes is indicated by a placeholder.
-///  * [Text], a text widget that supports text inline widgets.
+///  * [RichText], a text widget that supports text inline widgets.
 @immutable
 class PlaceholderDimensions {
   /// Constructs a [PlaceholderDimensions] with the specified parameters.

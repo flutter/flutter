@@ -137,7 +137,8 @@ class InlineSpanSemanticsInformation {
 ///
 /// See also:
 ///
-///  * [Text], a widget for showing text.
+///  * [Text], a widget for showing uniformly-styled text.
+///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [InlineSpan] objects on a [Canvas].
 @immutable
 abstract class InlineSpan extends DiagnosticableTree {
