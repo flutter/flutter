@@ -830,7 +830,8 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   ///
   /// This can potentially return a large amount of data, so it is not recommended
-  /// to repeatedly call this. Instead, cache the results.
+  /// to repeatedly call this. Instead, cache the results. The cached results
+  /// should be invalidated upon sucessful [layout].
   List<ui.LineMetrics> computeLineMetrics() {
     assert(!_needsLayout);
     return _paragraph.computeLineMetrics();
