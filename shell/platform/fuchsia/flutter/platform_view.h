@@ -27,6 +27,7 @@ namespace flutter_runner {
 using OnMetricsUpdate = fit::function<void(const fuchsia::ui::gfx::Metrics&)>;
 using OnSizeChangeHint =
     fit::function<void(float width_change_factor, float height_change_factor)>;
+using OnEnableWireframe = fit::function<void(bool)>;
 
 // The per engine component residing on the platform thread is responsible for
 // all platform specific integrations.
@@ -48,6 +49,7 @@ class PlatformView final : public flutter::PlatformView,
                fit::closure on_session_listener_error_callback,
                OnMetricsUpdate session_metrics_did_change_callback,
                OnSizeChangeHint session_size_change_hint_callback,
+               OnEnableWireframe wireframe_enabled_callback,
                zx_handle_t vsync_event_handle);
   PlatformView(PlatformView::Delegate& delegate,
                std::string debug_label,
@@ -67,6 +69,7 @@ class PlatformView final : public flutter::PlatformView,
   fit::closure session_listener_error_callback_;
   OnMetricsUpdate metrics_changed_callback_;
   OnSizeChangeHint size_change_hint_callback_;
+  OnEnableWireframe wireframe_enabled_callback_;
 
   int current_text_input_client_ = 0;
   fidl::Binding<fuchsia::ui::input::InputMethodEditorClient> ime_client_;
@@ -158,6 +161,10 @@ class PlatformView final : public flutter::PlatformView,
 
   // Channel handler for kTextInputChannel
   void HandleFlutterTextInputChannelPlatformMessage(
+      fml::RefPtr<flutter::PlatformMessage> message);
+
+  // Channel handler for kPlatformViewsChannel.
+  void HandleFlutterPlatformViewsChannelPlatformMessage(
       fml::RefPtr<flutter::PlatformMessage> message);
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformView);

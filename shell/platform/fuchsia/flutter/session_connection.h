@@ -48,6 +48,8 @@ class SessionConnection final {
         fidl::MakeOptional(std::move(metrics_copy)));
   }
 
+  void set_enable_wireframe(bool enable);
+
   flutter::SceneUpdateContext& scene_update_context() {
     return scene_update_context_;
   }

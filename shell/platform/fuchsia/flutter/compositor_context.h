@@ -32,6 +32,8 @@ class CompositorContext final : public flutter::CompositorContext {
   void OnSessionSizeChangeHint(float width_change_factor,
                                float height_change_factor);
 
+  void OnWireframeEnabled(bool enabled);
+
  private:
   const std::string debug_label_;
   SessionConnection session_connection_;

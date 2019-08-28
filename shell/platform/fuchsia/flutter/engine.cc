@@ -87,6 +87,9 @@ Engine::Engine(Delegate& delegate,
       std::bind(&Engine::OnSessionSizeChangeHint, this, std::placeholders::_1,
                 std::placeholders::_2);
 
+  OnEnableWireframe on_enable_wireframe_callback = std::bind(
+      &Engine::OnDebugWireframeSettingsChanged, this, std::placeholders::_1);
+
   // SessionListener has a OnScenicError method; invoke this callback on the
   // platform thread when that happens. The Session itself should also be
   // disconnected when this happens, and it will also attempt to terminate.
@@ -113,6 +116,8 @@ Engine::Engine(Delegate& delegate,
                std::move(on_session_metrics_change_callback),
            on_session_size_change_hint_callback =
                std::move(on_session_size_change_hint_callback),
+           on_enable_wireframe_callback =
+               std::move(on_enable_wireframe_callback),
            vsync_handle = vsync_event_.get()](flutter::Shell& shell) mutable {
             return std::make_unique<flutter_runner::PlatformView>(
                 shell,                                           // delegate
@@ -123,6 +128,7 @@ Engine::Engine(Delegate& delegate,
                 std::move(on_session_listener_error_callback),
                 std::move(on_session_metrics_change_callback),
                 std::move(on_session_size_change_hint_callback),
+                std::move(on_enable_wireframe_callback),
                 vsync_handle  // vsync handle
             );
           });
@@ -408,6 +414,23 @@ void Engine::OnSessionMetricsDidChange(
                   rasterizer->compositor_context());
 
           compositor_context->OnSessionMetricsDidChange(metrics);
+        }
+      });
+}
+
+void Engine::OnDebugWireframeSettingsChanged(bool enabled) {
+  if (!shell_) {
+    return;
+  }
+
+  shell_->GetTaskRunners().GetGPUTaskRunner()->PostTask(
+      [rasterizer = shell_->GetRasterizer(), enabled]() {
+        if (rasterizer) {
+          auto compositor_context =
+              reinterpret_cast<flutter_runner::CompositorContext*>(
+                  rasterizer->compositor_context());
+
+          compositor_context->OnWireframeEnabled(enabled);
         }
       });
 }

@@ -67,6 +67,8 @@ class Engine final {
   void OnSessionSizeChangeHint(float width_change_factor,
                                float height_change_factor);
 
+  void OnDebugWireframeSettingsChanged(bool enabled);
+
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
 
