@@ -32,6 +32,7 @@ void main() {
           '--ios',
           '--android_gen_snapshot',
           '--android_maven',
+          '--android_internal_build',
           '--web',
           '--macos',
           '--linux',
@@ -45,6 +46,7 @@ void main() {
         DevelopmentArtifact.iOS,
         DevelopmentArtifact.android_gen_snapshot,
         DevelopmentArtifact.android_maven,
+        DevelopmentArtifact.android_internal_build,
         DevelopmentArtifact.web,
         DevelopmentArtifact.macOS,
         DevelopmentArtifact.linux,
@@ -70,6 +72,7 @@ void main() {
          '--ios',
          '--android_gen_snapshot',
          '--android_maven',
+         '--android_internal_build',
          '--web',
          '--macos',
          '--linux',
@@ -83,6 +86,7 @@ void main() {
         DevelopmentArtifact.iOS,
         DevelopmentArtifact.android_gen_snapshot,
         DevelopmentArtifact.android_maven,
+        DevelopmentArtifact.android_internal_build,
       }));
     }, overrides: <Type, Generator>{
       Cache: () => cache,

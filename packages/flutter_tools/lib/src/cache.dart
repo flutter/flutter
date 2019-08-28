@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -33,6 +34,9 @@ class DevelopmentArtifact {
   /// Artifacts required for Android development.
   static const DevelopmentArtifact android_gen_snapshot = DevelopmentArtifact._('android_gen_snapshot');
   static const DevelopmentArtifact android_maven = DevelopmentArtifact._('android_maven');
+  // Artifacts used for internal builds.
+  static const DevelopmentArtifact android_internal_build =
+      DevelopmentArtifact._('android_internal_build');
 
   /// Artifacts required for iOS development.
   static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios');
@@ -62,6 +66,7 @@ class DevelopmentArtifact {
   static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[
     android_gen_snapshot,
     android_maven,
+    android_internal_build,
     iOS,
     web,
     macOS,
@@ -80,9 +85,12 @@ class Cache {
   Cache({ Directory rootOverride, List<ArtifactSet> artifacts }) : _rootOverride = rootOverride {
     if (artifacts == null) {
       _artifacts.add(MaterialFonts(this));
+
       _artifacts.add(GradleWrapper(this));
-      _artifacts.add(AndroidMavenDependencies());
+      _artifacts.add(AndroidMavenArtifacts());
       _artifacts.add(AndroidGenSnapshotArtifacts(this));
+      _artifacts.add(AndroidInternalBuildArtifacts(this));
+
       _artifacts.add(IOSEngineArtifacts(this));
       _artifacts.add(FlutterWebSdk(this));
       _artifacts.add(FlutterSdk(this));
@@ -794,6 +802,7 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
   List<String> getLicenseDirs() => const <String>[];
 }
 
+/// The artifact used to generate snapshots for Android builds.
 class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
   AndroidGenSnapshotArtifacts(Cache cache) : super(
     'android-sdk',
@@ -831,6 +840,72 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
 
   @override
   List<String> getLicenseDirs() { return <String>[]; }
+}
+
+/// Artifacts used for internal builds. The flutter tool builds Android projects
+/// using the artifacts cached by [AndroidMavenArtifacts].
+class AndroidInternalBuildArtifacts extends EngineCachedArtifact {
+  AndroidInternalBuildArtifacts(Cache cache) : super(
+    'android-internal-build-artifacts',
+    cache,
+    DevelopmentArtifact.android_internal_build,
+  );
+
+  @override
+  List<String> getPackageDirs() => const <String>[];
+
+  @override
+  List<List<String>> getBinaryDirs() {
+    return _androidBinaryDirs;
+  }
+
+  @override
+  List<String> getLicenseDirs() { return <String>[]; }
+}
+
+/// A cached artifact containing the Maven dependencies used to build Android projects.
+class AndroidMavenArtifacts extends ArtifactSet {
+  AndroidMavenArtifacts() : super(DevelopmentArtifact.android_maven);
+
+  @override
+  Future<void> update() async {
+    final Directory tempDir =
+        fs.systemTempDirectory.createTempSync('gradle_wrapper.');
+    injectGradleWrapper(tempDir);
+
+    final Status status = logger.startProgress('Downloading Android Maven dependencies...',
+        timeout: timeoutConfiguration.slowOperation);
+    final File gradle = tempDir.childFile(
+        platform.isWindows ? 'gradlew.bat' : 'gradlew',
+      );
+    assert(gradle.existsSync());
+    os.makeExecutable(gradle);
+
+    try {
+      final String gradleExecutable = gradle.absolute.path;
+      final String flutterSdk = escapePath(Cache.flutterRoot);
+      final Process process = await runCommand(
+        <String>[
+          gradleExecutable,
+          '-b', fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle'),
+          '--project-cache-dir', tempDir.path,
+          'resolveDependencies',
+        ]);
+      final int exitCode = await process.exitCode;
+      if (exitCode != 0) {
+        printError('Failed to download the Android dependencies');
+      }
+    } finally {
+      status.stop();
+      tempDir.deleteSync(recursive: true);
+    }
+  }
+
+  @override
+  bool isUpToDate() {
+    // We don't know if the Gradle cache is warm at this point.
+    return false;
+  }
 }
 
 class IOSEngineArtifacts extends EngineCachedArtifact {
@@ -903,68 +978,6 @@ class GradleWrapper extends CachedArtifact {
     if (!gradleWrapperJar.existsSync())
       return false;
     return true;
-  }
-}
-
-/// A cached artifact containing the Maven dependencies used to build Android projects.
-class AndroidMavenDependencies extends ArtifactSet {
-  AndroidMavenDependencies() : super(DevelopmentArtifact.android_maven);
-
-  void _initializeGradleWrapper(Directory directory) {
-    final Directory gradleWrapper = cache.getArtifactDirectory('gradle_wrapper');
-    assert(gradleWrapper.existsSync());
-
-    copyDirectorySync(gradleWrapper, directory);
-    final File propertiesFile = directory
-        .childFile(fs.path.join('gradle', 'wrapper', 'gradle-wrapper.properties'));
-    propertiesFile.writeAsStringSync('''
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists
-distributionUrl=https\\://services.gradle.org/distributions/gradle-4.10.2-all.zip
-''', flush: true,
-      );
-  }
-
-  @override
-  Future<void> update() async {
-    final Directory tempDir =
-        fs.systemTempDirectory.createTempSync('gradle_wrapper.');
-    _initializeGradleWrapper(tempDir);
-
-    final Status status = logger.startProgress('Downloading Android Maven dependencies...',
-        timeout: timeoutConfiguration.slowOperation);
-    final File gradle = tempDir.childFile(
-        platform.isWindows ? 'gradlew.bat' : 'gradlew',
-      );
-    assert(gradle.existsSync());
-    os.makeExecutable(gradle);
-
-    try {
-      final String gradleExecutable = gradle.absolute.path;
-      final String flutterSdk = escapePath(Cache.flutterRoot);
-      final Process process = await runCommand(
-        <String>[
-          gradleExecutable,
-          '-b', fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle'),
-          '--project-cache-dir', tempDir.path,
-          'resolveDependencies',
-        ]);
-      final int exitCode = await process.exitCode;
-      if (exitCode != 0) {
-        printError('Failed to download the Android dependencies');
-      }
-    } finally {
-      status.stop();
-      tempDir.deleteSync(recursive: true);
-    }
-  }
-
-  @override
-  bool isUpToDate() {
-    // We don't know if the Gradle cache is warm at this point.
-    return false;
   }
 }
 
@@ -1175,6 +1188,17 @@ const List<List<String>> _iosBinaryDirs = <List<String>>[
   <String>['ios', 'ios/artifacts.zip'],
   <String>['ios-profile', 'ios-profile/artifacts.zip'],
   <String>['ios-release', 'ios-release/artifacts.zip'],
+];
+
+const List<List<String>> _androidBinaryDirs = <List<String>>[
+  <String>['android-x86', 'android-x86/artifacts.zip'],
+  <String>['android-x64', 'android-x64/artifacts.zip'],
+  <String>['android-arm', 'android-arm/artifacts.zip'],
+  <String>['android-arm-profile', 'android-arm-profile/artifacts.zip'],
+  <String>['android-arm-release', 'android-arm-release/artifacts.zip'],
+  <String>['android-arm64', 'android-arm64/artifacts.zip'],
+  <String>['android-arm64-profile', 'android-arm64-profile/artifacts.zip'],
+  <String>['android-arm64-release', 'android-arm64-release/artifacts.zip'],
 ];
 
 const List<List<String>> _dartSdks = <List<String>> [

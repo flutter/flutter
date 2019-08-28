@@ -19,6 +19,8 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache gen_snapshot for Android development.');
     argParser.addFlag('android_maven', negatable: true, defaultsTo: true,
         help: 'Precache Gradle dependencies for Android development.');
+    argParser.addFlag('android_internal_build', negatable: true, defaultsTo: false,
+        help: 'Precache dependencies for internal Android development.');
     argParser.addFlag('ios', negatable: true, defaultsTo: true,
         help: 'Precache artifacts for iOS development.');
     argParser.addFlag('web', negatable: true, defaultsTo: false,

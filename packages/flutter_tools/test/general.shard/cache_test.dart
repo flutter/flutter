@@ -252,7 +252,7 @@ void main() {
     });
   });
 
-  group('AndroidMavenDependencies', () {
+  group('AndroidMavenArtifacts', () {
     MemoryFileSystem memoryFileSystem;
     MockProcessManager processManager;
     MockCache mockCache;
@@ -266,13 +266,13 @@ void main() {
     });
 
     test('development artifact', () async {
-      final AndroidMavenDependencies mavenDependencies = AndroidMavenDependencies();
-      expect(mavenDependencies.developmentArtifact, DevelopmentArtifact.android_maven);
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts();
+      expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.android_maven);
     });
 
     testUsingContext('udpdate', () async {
-      final AndroidMavenDependencies mavenDependencies = AndroidMavenDependencies();
-      expect(mavenDependencies.isUpToDate(), isFalse);
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts();
+      expect(mavenArtifacts.isUpToDate(), isFalse);
 
       final Directory gradleWrapperDir = fs.systemTempDirectory.createTempSync('gradle_wrapper.');
       when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
@@ -294,9 +294,9 @@ void main() {
           });
       when(mockProcess.exitCode).thenAnswer((_) async => 0);
 
-      await mavenDependencies.update();
+      await mavenArtifacts.update();
 
-      expect(mavenDependencies.isUpToDate(), isFalse);
+      expect(mavenArtifacts.isUpToDate(), isFalse);
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
       FileSystem: () => memoryFileSystem,
