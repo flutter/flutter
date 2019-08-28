@@ -824,14 +824,14 @@ class TextPainter {
   /// For example, the first line is in the zeroth index.
   ///
   /// [LineMetrics] contains measurements such as ascent, descent, baseline, and
-  /// width for the line as a whole, and may be useful for aligning non-text
-  /// elements to a particular line.
+  /// width for the line as a whole, and may be useful for aligning additional
+  /// widgets to a particular line.
   ///
   /// Valid only after [layout] has been called.
   ///
   /// This can potentially return a large amount of data, so it is not recommended
   /// to repeatedly call this. Instead, cache the results. The cached results
-  /// should be invalidated upon sucessful [layout].
+  /// should be invalidated upon the next sucessful [layout].
   List<ui.LineMetrics> computeLineMetrics() {
     assert(!_needsLayout);
     return _paragraph.computeLineMetrics();
