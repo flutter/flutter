@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 
 # TODO(jonahwilliams): refactor this and xcode_backend.sh into one script
-# once macOS supports the same configuration as iOS.
+# once iOS is using 'assemble'.
 RunCommand() {
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
     echo "♦ $*"
