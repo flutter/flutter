@@ -148,9 +148,18 @@ void main() {
       final IosUsbArtifacts artifact1 = MockIosUsbArtifacts();
       final IosUsbArtifacts artifact2 = MockIosUsbArtifacts();
       final IosUsbArtifacts artifact3 = MockIosUsbArtifacts();
-      when(artifact1.dyLdLibPath).thenReturn('/path/to/alpha:/path/to/beta');
-      when(artifact2.dyLdLibPath).thenReturn('/path/to/gamma:/path/to/delta:/path/to/epsilon');
-      when(artifact3.dyLdLibPath).thenReturn(''); // Empty output
+      when(artifact1.environment)
+          .thenReturn(<String, String>{
+            'DYLD_LIBRARY_PATH': '/path/to/alpha:/path/to/beta',
+          });
+      when(artifact2.environment)
+          .thenReturn(<String, String>{
+            'DYLD_LIBRARY_PATH': '/path/to/gamma:/path/to/delta:/path/to/epsilon',
+          });
+      when(artifact3.environment)
+          .thenReturn(<String, String>{
+            'DYLD_LIBRARY_PATH': '',
+          });
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2, artifact3]);
 
       expect(cache.dyLdLibEntry.key, 'DYLD_LIBRARY_PATH');

@@ -255,18 +255,19 @@ class Cache {
     if (_dyLdLibEntry != null) {
       return _dyLdLibEntry;
     }
-    final List<String> dyLdLibPath = <String>[];
+    final List<String> paths = <String>[];
     for (ArtifactSet artifact in _artifacts) {
-      if (!(artifact is IosUsbArtifacts)) {
+      final Map<String, String> env = artifact.environment;
+      if (env == null || !env.containsKey('DYLD_LIBRARY_PATH')) {
         continue;
       }
-      final String path = (artifact as IosUsbArtifacts).dyLdLibPath;
+      final String path = env['DYLD_LIBRARY_PATH'];
       if (path.isEmpty) {
         continue;
       }
-      dyLdLibPath.add(path);
+      paths.add(path);
     }
-    _dyLdLibEntry = MapEntry<String, String>('DYLD_LIBRARY_PATH', dyLdLibPath.join(':'));
+    _dyLdLibEntry = MapEntry<String, String>('DYLD_LIBRARY_PATH', paths.join(':'));
     return _dyLdLibEntry;
   }
   MapEntry<String, String> _dyLdLibEntry;
@@ -383,6 +384,11 @@ abstract class ArtifactSet {
 
   /// [true] if the artifact is up to date.
   bool isUpToDate();
+
+  /// The environment variables (if any) required to consume the artifacts.
+  Map<String, String> get environment {
+    return const <String, String>{};
+  }
 
   /// Updates the artifact.
   Future<void> update();
@@ -1081,8 +1087,11 @@ class IosUsbArtifacts extends CachedArtifact {
     'ios-deploy',
   ];
 
-  String get dyLdLibPath {
-    return cache.getArtifactDirectory(name).path;
+  @override
+  Map<String, String> get environment {
+    return <String, String>{
+      'DYLD_LIBRARY_PATH': cache.getArtifactDirectory(name).path,
+    };
   }
 
   @override
