@@ -390,10 +390,10 @@ flutter:
 name: test
 flutter:
     plugin:
-    platforms:
-      android:
-        package: com.example
-        pluginClass: TestPlugin
+      platforms:
+        android:
+          package: com.example
+          pluginClass: TestPlugin
 ''';
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isPlugin, true);
