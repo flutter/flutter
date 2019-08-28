@@ -1524,7 +1524,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           plannedInitialRoutes.add(_routeNamed<dynamic>(routeName, allowNull: true, arguments: null));
         }
       }
-      if (plannedInitialRoutes.contains(null)) {
+      if (_shouldAbandonInitialRoute(plannedInitialRoutes)) {
         assert(() {
           FlutterError.reportError(
             FlutterErrorDetails(
@@ -1543,7 +1543,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         }());
         push(_routeNamed<Object>(Navigator.defaultRouteName, arguments: null));
       } else {
-        plannedInitialRoutes.forEach(push);
+        plannedInitialRoutes.where((Route<dynamic> route) => route != null).forEach(push);
       }
     } else {
       Route<Object> route;
@@ -1599,6 +1599,25 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   }
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
+
+  bool _shouldAbandonInitialRoute(List<Route<dynamic>> plannedInitialRoutes) {
+    assert(plannedInitialRoutes.isNotEmpty);
+
+    // The last route has to match something in order for it to work.
+    if (plannedInitialRoutes.last == null) {
+      return true;
+    }
+
+    // In web, we don't care if there are gaps in the initial route.
+    // if (kIsWeb) {
+    //   return false;
+    // }
+
+    // Other than web, we check that there's no gaps in the initial route.
+    // return plannedInitialRoutes.contains(null);
+
+    return false;
+  }
 
   Route<T> _routeNamed<T>(String name, { @required Object arguments, bool allowNull = false }) {
     assert(!_debugLocked);
