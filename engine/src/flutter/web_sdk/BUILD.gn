@@ -103,7 +103,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk_outline") {
     "//third_party/dart/utils/dartdevc:dartdevc_sdk_patch_stamp",
   ]
 
-  inputs = []
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
 
   outputs = [
     sdk_dill,
@@ -144,7 +144,7 @@ prebuilt_dart_action("flutter_dartdevc_kernel_sdk") {
     "//third_party/dart/utils/dartdevc:dartdevc_sdk_patch_stamp",
   ]
 
-  inputs = []
+  inputs = [ "sdk_rewriter.dart" ] + web_ui_sources + web_engine_sources
 
   packages = "//third_party/dart/.packages"
 
