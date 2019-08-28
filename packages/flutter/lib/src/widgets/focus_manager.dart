@@ -460,7 +460,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// [FocusTraversalPolicy].
   Iterable<FocusNode> get traversalChildren {
     return children.where(
-        (FocusNode node) => !node.skipTraversal && node.canRequestFocus,
+      (FocusNode node) => !node.skipTraversal && node.canRequestFocus,
     );
   }
 

@@ -4,28 +4,18 @@
 
 import 'package:flutter/foundation.dart';
 
+import '_debug_io.dart'
+  if (dart.library.html) '_debug_web.dart';
+
+export '_debug_io.dart'
+  if (dart.library.html) '_debug_web.dart';
+
 /// Whether to replace all shadows with solid color blocks.
 ///
 /// This is useful when writing golden file tests (see [matchesGoldenFile]) since
 /// the rendering of shadows is not guaranteed to be pixel-for-pixel identical from
 /// version to version (or even from run to run).
 bool debugDisableShadows = false;
-
-/// Signature for a method that returns an [HttpClient].
-///
-/// Used by [debugNetworkImageHttpClientProvider].
-typedef HttpClientProvider = Object Function();
-
-/// Provider from which [NetworkImage] will get its [HttpClient] in debug builds.
-///
-/// If this value is unset, [NetworkImage] will use its own internally-managed
-/// [HttpClient].
-///
-/// This setting can be overridden for testing to ensure that each test receives
-/// a mock client that hasn't been affected by other tests.
-///
-/// This value is ignored in non-debug builds.
-HttpClientProvider debugNetworkImageHttpClientProvider;
 
 /// Returns true if none of the painting library debug variables have been changed.
 ///
