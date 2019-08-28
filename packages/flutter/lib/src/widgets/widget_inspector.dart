@@ -1093,12 +1093,12 @@ mixin WidgetInspectorService {
       name: 'getDetailsSubtree',
       callback: (Map<String, String> parameters) async {
         assert(parameters.containsKey('objectGroup'));
-        final int subtreeDepth = int.parse(parameters['subtreeDepth'] ?? '2');
+        final String subtreeDepth = parameters['subtreeDepth'];
         return <String, Object>{
           'result': _getDetailsSubtree(
             parameters['arg'],
             parameters['objectGroup'],
-            subtreeDepth,
+            subtreeDepth != null ? int.parse(subtreeDepth) : 2,
           ),
         };
       },
@@ -1613,8 +1613,9 @@ mixin WidgetInspectorService {
   /// [DiagnosticsNode] object that `diagnosticsNodeId` references providing
   /// information needed for the details subtree view.
   ///
-  /// [subtreeDepth] - the number of levels of the subtree that should be
-  /// returned. This value defaults to 2 for backwards compatibility.
+  /// The number of levels of the subtree that should be returned is specified
+  /// by the [subtreeDepth] parameter. This value defaults to 2 for backwards
+  /// compatibility.
   ///
   /// See also:
   ///
