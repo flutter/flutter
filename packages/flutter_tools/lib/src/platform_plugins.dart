@@ -6,8 +6,8 @@ import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 /// Marker interface for all platform specific plugin config impls.
-abstract class PlatformPlugin {
-  const PlatformPlugin();
+abstract class PluginPlatform {
+  const PluginPlatform();
 
   Map<String, dynamic> toMap();
 }
@@ -16,15 +16,22 @@ abstract class PlatformPlugin {
 ///
 /// The required fields include: [name] of the plugin, [package] of the plugin and
 /// the [pluginClass] that will be the entry point to the plugin's native code.
-class AndroidPlugin extends PlatformPlugin {
+class AndroidPlugin extends PluginPlatform {
   const AndroidPlugin({
     @required this.name,
     @required this.package,
     @required this.pluginClass,
   });
 
+  static bool validate(YamlMap yaml) {
+    if (yaml == null) {
+      return false;
+    }
+    return yaml['package'] is String && yaml['pluginClass'] is String;
+  }
+
   factory AndroidPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(yaml != null);
+    assert(validate(yaml));
     return AndroidPlugin(
       name: name,
       package: yaml['package'],
@@ -53,15 +60,22 @@ class AndroidPlugin extends PlatformPlugin {
 /// The required fields include: [name] of the plugin, the [pluginClass] that
 /// will be the entry point to the plugin's native code. [classPrefix] is required
 /// if the plugin is using Objective-C, it is not required for Swift based iOS plugins.
-class IOSPlugin extends PlatformPlugin {
+class IOSPlugin extends PluginPlatform {
   const IOSPlugin({
     @required this.name,
     this.classPrefix,
     @required this.pluginClass,
   });
 
+  static bool validate(YamlMap yaml) {
+    if (yaml == null) {
+      return false;
+    }
+    return yaml['classPrefix'] is String && yaml['pluginClass'] is String;
+  }
+
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(yaml != null);
+    assert(validate(yaml));
     return IOSPlugin(
       name: name,
       classPrefix: yaml['classPrefix'],
@@ -89,14 +103,21 @@ class IOSPlugin extends PlatformPlugin {
 ///
 /// The required fields include: [name] of the plugin, and [pluginClass] that will
 /// be the entry point to the plugin's native code.
-class MacOSPlugin extends PlatformPlugin {
+class MacOSPlugin extends PluginPlatform {
   const MacOSPlugin({
     @required this.name,
     @required this.pluginClass,
   });
 
+  static bool validate(YamlMap yaml) {
+    if (yaml == null) {
+      return false;
+    }
+    return yaml['pluginClass'] is String;
+  }
+
   factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(yaml != null);
+    assert(validate(yaml));
     return MacOSPlugin(
       name: name,
       pluginClass: yaml['pluginClass'],

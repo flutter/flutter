@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:mustache/mustache.dart' as mustache;
 import 'package:yaml/yaml.dart';
 
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
@@ -27,8 +28,23 @@ class Plugin {
   Plugin({
     this.name,
     this.path,
-    this.platformPlugins,
+    this.platforms,
   });
+
+  static List<String> validatePluginYaml(YamlMap yaml) {
+    if (yaml.containsKey('platforms')) {
+      final int numKeys = yaml.keys.toSet().length;
+      if (numKeys != 1) {
+        return [
+          'Invalid plugin specification. There must be only one key: "platforms", found multiple: ${yaml.keys.join(',')}'
+        ];
+      } else {
+        return _validateMultiPlatformYaml(yaml['platforms']);
+      }
+    } else {
+      return _validateLegacyYaml(yaml);
+    }
+  }
 
   /// Parses [Plugin] specification from the provided pluginYaml.
   ///
@@ -53,7 +69,10 @@ class Plugin {
   ///      macos:
   ///        pluginClass: SamplePlugin
   factory Plugin.fromYaml(String name, String path, dynamic pluginYaml) {
-    // TODO(kaushikiska): Fail if both old and new formats are present.
+    final List<String> errors = validatePluginYaml(pluginYaml);
+    if (errors.isNotEmpty) {
+      throwToolExit('Invalid plugin specification.\n${errors.join('\n')}');
+    }
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
       return Plugin._fromMultiPlatformYaml(name, path, pluginYaml);
     } else {
@@ -61,44 +80,80 @@ class Plugin {
     }
   }
 
+  static List<String> _validateMultiPlatformYaml(YamlMap yaml) {
+    final List<String> errors = <String>[];
+    if (yaml.containsKey(AndroidPlugin.kConfigKey) &&
+        !AndroidPlugin.validate(yaml[AndroidPlugin.kConfigKey])) {
+      errors.add('Invalid "android" plugin specification.');
+    }
+    if (yaml.containsKey(IOSPlugin.kConfigKey) &&
+        !IOSPlugin.validate(yaml[IOSPlugin.kConfigKey])) {
+      errors.add('Invalid "ios" plugin specification.');
+    }
+    if (yaml.containsKey(MacOSPlugin.kConfigKey) &&
+        !MacOSPlugin.validate(yaml[MacOSPlugin.kConfigKey])) {
+      errors.add('Invalid "macos" plugin specification.');
+    }
+    return errors;
+  }
+
   factory Plugin._fromMultiPlatformYaml(String name, String path, dynamic pluginYaml) {
     assert (pluginYaml != null && pluginYaml['platforms'] != null,
             'Invalid multi-platform plugin specification.');
-    final dynamic platforms = pluginYaml['platforms'];
+    final dynamic platformsYaml = pluginYaml['platforms'];
 
-    final Map<String, PlatformPlugin> platformPlugins = <String, PlatformPlugin>{};
+    assert (_validateMultiPlatformYaml(platformsYaml).isEmpty,
+            'Invalid multi-platform plugin specification.');
+
+    final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
 
     if (platforms[AndroidPlugin.kConfigKey] != null) {
-      platformPlugins[AndroidPlugin.kConfigKey] =
-          AndroidPlugin.fromYaml(name, platforms[AndroidPlugin.kConfigKey]);
+      platforms[AndroidPlugin.kConfigKey] =
+          AndroidPlugin.fromYaml(name, platformsYaml[AndroidPlugin.kConfigKey]);
     }
 
     if (platforms[IOSPlugin.kConfigKey] != null) {
-      platformPlugins[IOSPlugin.kConfigKey] =
-          IOSPlugin.fromYaml(name, platforms[IOSPlugin.kConfigKey]);
+      platforms[IOSPlugin.kConfigKey] =
+          IOSPlugin.fromYaml(name, platformsYaml[IOSPlugin.kConfigKey]);
     }
 
     if (platforms[MacOSPlugin.kConfigKey] != null) {
-      platformPlugins[MacOSPlugin.kConfigKey] =
-          MacOSPlugin.fromYaml(name, platforms[MacOSPlugin.kConfigKey]);
+      platforms[MacOSPlugin.kConfigKey] =
+          MacOSPlugin.fromYaml(name, platformsYaml[MacOSPlugin.kConfigKey]);
     }
 
     return Plugin(
       name: name,
       path: path,
-      platformPlugins: platformPlugins,
+      platforms: platforms,
     );
   }
 
+  static List<String> _validateLegacyYaml(YamlMap yaml) {
+    final List<String> errors = <String>[];
+    if (yaml['androidPackage'] != null && yaml['androidPackage'] is! String) {
+      errors.add('The "androidPackage" must either be null or a string.');
+    }
+    if (yaml['iosPrefix'] != null && yaml['iosPrefix'] is! String) {
+      errors.add('The "iosPrefix" must either be null or a string.');
+    }
+    if (yaml['macosPrefix'] != null && yaml['macosPrefix'] is! String) {
+      errors.add('The "macosPrefix" must either be null or a string.');
+    }
+    if (yaml['pluginClass'] != null && yaml['pluginClass'] is! String) {
+      errors.add('The "pluginClass" must either be null or a string..');
+    }
+    return errors;
+  }
 
   @deprecated
   factory Plugin._fromLegacyYaml(String name, String path, dynamic pluginYaml) {
-    final Map<String, PlatformPlugin> platformPlugins = <String, PlatformPlugin>{};
+    final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
     final String pluginClass = pluginYaml['pluginClass'];
     if (pluginYaml != null && pluginClass != null) {
       final String androidPackage = pluginYaml['androidPackage'];
       if (androidPackage != null) {
-        platformPlugins[AndroidPlugin.kConfigKey] =
+        platforms[AndroidPlugin.kConfigKey] =
             AndroidPlugin(
               name: name,
               package: pluginYaml['androidPackage'],
@@ -107,7 +162,7 @@ class Plugin {
       }
 
       final String iosPrefix = pluginYaml['iosPrefix'] ?? '';
-      platformPlugins[IOSPlugin.kConfigKey] =
+      platforms[IOSPlugin.kConfigKey] =
           IOSPlugin(
             name: name,
             classPrefix: iosPrefix,
@@ -117,13 +172,15 @@ class Plugin {
     return Plugin(
       name: name,
       path: path,
-      platformPlugins: platformPlugins,
+      platforms: platforms,
     );
   }
 
   final String name;
   final String path;
-  final Map<String, PlatformPlugin> platformPlugins;
+
+  /// This is a mapping from platform config key to the plugin platform spec.
+  final Map<String, PluginPlatform> platforms;
 }
 
 Plugin _pluginFromPubspec(String name, Uri packageRoot) {
@@ -216,10 +273,10 @@ public final class GeneratedPluginRegistrant {
 }
 ''';
 
-List<Map<String, dynamic>> _filterPlugins(List<Plugin> plugins, String type) {
+List<Map<String, dynamic>> _extractPlatformMaps(List<Plugin> plugins, String type) {
   final List<Map<String, dynamic>> pluginConfigs = <Map<String, dynamic>>[];
   for (Plugin p in plugins) {
-    final PlatformPlugin platformPlugin = p.platformPlugins[type];
+    final PluginPlatform platformPlugin = p.platforms[type];
     if (platformPlugin != null) {
       pluginConfigs.add(platformPlugin.toMap());
     }
@@ -228,7 +285,7 @@ List<Map<String, dynamic>> _filterPlugins(List<Plugin> plugins, String type) {
 }
 
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, dynamic>> androidPlugins = _filterPlugins(plugins, AndroidPlugin.kConfigKey);
+  final List<Map<String, dynamic>> androidPlugins = _extractPlatformMaps(plugins, AndroidPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': androidPlugins,
   };
@@ -329,7 +386,7 @@ end
 ''';
 
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, dynamic>> iosPlugins = _filterPlugins(plugins, IOSPlugin.kConfigKey);
+  final List<Map<String, dynamic>> iosPlugins = _extractPlatformMaps(plugins, IOSPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'ios',
     'deploymentTarget': '8.0',
@@ -369,7 +426,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
 }
 
 Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, dynamic>> macosPlugins = _filterPlugins(plugins, MacOSPlugin.kConfigKey);
+  final List<Map<String, dynamic>> macosPlugins = _extractPlatformMaps(plugins, MacOSPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'macos',
     'framework': 'FlutterMacOS',

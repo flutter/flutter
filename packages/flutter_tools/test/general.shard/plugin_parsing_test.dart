@@ -23,8 +23,8 @@ void main() {
           Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml);
 
       final AndroidPlugin androidPlugin =
-          plugin.platformPlugins[AndroidPlugin.kConfigKey];
-      final IOSPlugin iosPlugin = plugin.platformPlugins[IOSPlugin.kConfigKey];
+          plugin.platforms[AndroidPlugin.kConfigKey];
+      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey];
       final String androidPluginClass = androidPlugin.pluginClass;
       final String iosPluginClass = iosPlugin.pluginClass;
 
@@ -50,10 +50,10 @@ void main() {
           Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml);
 
       final AndroidPlugin androidPlugin =
-          plugin.platformPlugins[AndroidPlugin.kConfigKey];
+          plugin.platforms[AndroidPlugin.kConfigKey];
       final MacOSPlugin macOSPlugin =
-          plugin.platformPlugins[MacOSPlugin.kConfigKey];
-      final IOSPlugin iosPlugin = plugin.platformPlugins[IOSPlugin.kConfigKey];
+          plugin.platforms[MacOSPlugin.kConfigKey];
+      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey];
       final String androidPluginClass = androidPlugin.pluginClass;
       final String iosPluginClass = iosPlugin.pluginClass;
 
