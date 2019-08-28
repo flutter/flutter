@@ -492,7 +492,6 @@ flutter:
         package: com.example
         pluginClass: MyPlugin
       ios:
-        prefix: FLT
         pluginClass: MyPlugin
       macos:
         pluginClass: MyPlugin
