@@ -2575,7 +2575,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IterableFlagsProperty<Function>(
+    properties.add(FlagsSummary<Function>(
       'listeners',
       <String, Function>{
         'down': onPointerDown,
@@ -2769,7 +2769,7 @@ class RenderMouseRegion extends RenderProxyBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IterableFlagsProperty<Function>(
+    properties.add(FlagsSummary<Function>(
       'listeners',
       <String, Function>{
         'enter': onEnter,

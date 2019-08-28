@@ -123,7 +123,7 @@ void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> prop
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validateIterableFlagsPropertyJsonSerialization(IterableFlagsProperty<Object> property) {
+void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object> property) {
   final Map<String, Object> json = simulateJsonSerialization(property);
   if (property.value.isNotEmpty) {
     expect(json['values'], equals(
@@ -1625,7 +1625,7 @@ void main() {
         'click': onClick,
         'move': onMove,
       };
-      final IterableFlagsProperty<Function> flags = IterableFlagsProperty<Function>(
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
         'listeners',
         value,
       );
@@ -1644,7 +1644,7 @@ void main() {
         'move': onMove,
         'click': onClick,
       };
-      final IterableFlagsProperty<Function> flags = IterableFlagsProperty<Function>(
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
         'listeners',
         value,
       );
@@ -1660,7 +1660,7 @@ void main() {
         'move': null,
         'click': onClick,
       };
-      final IterableFlagsProperty<Function> flags = IterableFlagsProperty<Function>(
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
         'listeners',
         value,
       );
@@ -1674,7 +1674,7 @@ void main() {
       final Map<String, Function> value = <String, Function>{
         'enter': null,
       };
-      final IterableFlagsProperty<Function> flags = IterableFlagsProperty<Function>(
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
         'listeners',
         value,
       );
@@ -1687,7 +1687,7 @@ void main() {
       final Map<String, Function> value = <String, Function>{
         'enter': null,
       };
-      final IterableFlagsProperty<Function> flags = IterableFlagsProperty<Function>(
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
         'listeners',
         value,
         ifEmpty: '<none>',
