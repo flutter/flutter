@@ -31,21 +31,6 @@ class Plugin {
     this.platforms,
   });
 
-  static List<String> validatePluginYaml(YamlMap yaml) {
-    if (yaml.containsKey('platforms')) {
-      final int numKeys = yaml.keys.toSet().length;
-      if (numKeys != 1) {
-        return [
-          'Invalid plugin specification. There must be only one key: "platforms", found multiple: ${yaml.keys.join(',')}'
-        ];
-      } else {
-        return _validateMultiPlatformYaml(yaml['platforms']);
-      }
-    } else {
-      return _validateLegacyYaml(yaml);
-    }
-  }
-
   /// Parses [Plugin] specification from the provided pluginYaml.
   ///
   /// This currently supports two formats. Legacy and Multi-platform.
@@ -77,23 +62,6 @@ class Plugin {
     } else {
       return Plugin._fromLegacyYaml(name, path, pluginYaml); // ignore: deprecated_member_use_from_same_package
     }
-  }
-
-  static List<String> _validateMultiPlatformYaml(YamlMap yaml) {
-    final List<String> errors = <String>[];
-    if (yaml.containsKey(AndroidPlugin.kConfigKey) &&
-        !AndroidPlugin.validate(yaml[AndroidPlugin.kConfigKey])) {
-      errors.add('Invalid "android" plugin specification.');
-    }
-    if (yaml.containsKey(IOSPlugin.kConfigKey) &&
-        !IOSPlugin.validate(yaml[IOSPlugin.kConfigKey])) {
-      errors.add('Invalid "ios" plugin specification.');
-    }
-    if (yaml.containsKey(MacOSPlugin.kConfigKey) &&
-        !MacOSPlugin.validate(yaml[MacOSPlugin.kConfigKey])) {
-      errors.add('Invalid "macos" plugin specification.');
-    }
-    return errors;
   }
 
   factory Plugin._fromMultiPlatformYaml(String name, String path, dynamic pluginYaml) {
@@ -128,23 +96,6 @@ class Plugin {
     );
   }
 
-  static List<String> _validateLegacyYaml(YamlMap yaml) {
-    final List<String> errors = <String>[];
-    if (yaml['androidPackage'] != null && yaml['androidPackage'] is! String) {
-      errors.add('The "androidPackage" must either be null or a string.');
-    }
-    if (yaml['iosPrefix'] != null && yaml['iosPrefix'] is! String) {
-      errors.add('The "iosPrefix" must either be null or a string.');
-    }
-    if (yaml['macosPrefix'] != null && yaml['macosPrefix'] is! String) {
-      errors.add('The "macosPrefix" must either be null or a string.');
-    }
-    if (yaml['pluginClass'] != null && yaml['pluginClass'] is! String) {
-      errors.add('The "pluginClass" must either be null or a string..');
-    }
-    return errors;
-  }
-
   @deprecated
   factory Plugin._fromLegacyYaml(String name, String path, dynamic pluginYaml) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
@@ -173,6 +124,55 @@ class Plugin {
       path: path,
       platforms: platforms,
     );
+  }
+
+  static List<String> validatePluginYaml(YamlMap yaml) {
+    if (yaml.containsKey('platforms')) {
+      final int numKeys = yaml.keys.toSet().length;
+      if (numKeys != 1) {
+        return <String>[
+          'Invalid plugin specification. There must be only one key: "platforms", found multiple: ${yaml.keys.join(',')}'
+        ];
+      } else {
+        return _validateMultiPlatformYaml(yaml['platforms']);
+      }
+    } else {
+      return _validateLegacyYaml(yaml);
+    }
+  }
+
+  static List<String> _validateMultiPlatformYaml(YamlMap yaml) {
+    final List<String> errors = <String>[];
+    if (yaml.containsKey(AndroidPlugin.kConfigKey) &&
+        !AndroidPlugin.validate(yaml[AndroidPlugin.kConfigKey])) {
+      errors.add('Invalid "android" plugin specification.');
+    }
+    if (yaml.containsKey(IOSPlugin.kConfigKey) &&
+        !IOSPlugin.validate(yaml[IOSPlugin.kConfigKey])) {
+      errors.add('Invalid "ios" plugin specification.');
+    }
+    if (yaml.containsKey(MacOSPlugin.kConfigKey) &&
+        !MacOSPlugin.validate(yaml[MacOSPlugin.kConfigKey])) {
+      errors.add('Invalid "macos" plugin specification.');
+    }
+    return errors;
+  }
+
+  static List<String> _validateLegacyYaml(YamlMap yaml) {
+    final List<String> errors = <String>[];
+    if (yaml['androidPackage'] != null && yaml['androidPackage'] is! String) {
+      errors.add('The "androidPackage" must either be null or a string.');
+    }
+    if (yaml['iosPrefix'] != null && yaml['iosPrefix'] is! String) {
+      errors.add('The "iosPrefix" must either be null or a string.');
+    }
+    if (yaml['macosPrefix'] != null && yaml['macosPrefix'] is! String) {
+      errors.add('The "macosPrefix" must either be null or a string.');
+    }
+    if (yaml['pluginClass'] != null && yaml['pluginClass'] is! String) {
+      errors.add('The "pluginClass" must either be null or a string..');
+    }
+    return errors;
   }
 
   final String name;

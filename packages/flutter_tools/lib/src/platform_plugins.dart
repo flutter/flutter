@@ -23,13 +23,6 @@ class AndroidPlugin extends PluginPlatform {
     @required this.pluginClass,
   });
 
-  static bool validate(YamlMap yaml) {
-    if (yaml == null) {
-      return false;
-    }
-    return yaml['package'] is String && yaml['pluginClass'] is String;
-  }
-
   factory AndroidPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     return AndroidPlugin(
@@ -37,6 +30,13 @@ class AndroidPlugin extends PluginPlatform {
       package: yaml['package'],
       pluginClass: yaml['pluginClass'],
     );
+  }
+
+  static bool validate(YamlMap yaml) {
+    if (yaml == null) {
+      return false;
+    }
+    return yaml['package'] is String && yaml['pluginClass'] is String;
   }
 
   static const String kConfigKey = 'android';
@@ -66,13 +66,6 @@ class IOSPlugin extends PluginPlatform {
     @required this.pluginClass,
   });
 
-  static bool validate(YamlMap yaml) {
-    if (yaml == null) {
-      return false;
-    }
-    return yaml['pluginClass'] is String;
-  }
-
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     return IOSPlugin(
@@ -80,6 +73,13 @@ class IOSPlugin extends PluginPlatform {
       classPrefix: '',
       pluginClass: yaml['pluginClass'],
     );
+  }
+
+  static bool validate(YamlMap yaml) {
+    if (yaml == null) {
+      return false;
+    }
+    return yaml['pluginClass'] is String;
   }
 
   static const String kConfigKey = 'ios';
@@ -111,19 +111,19 @@ class MacOSPlugin extends PluginPlatform {
     @required this.pluginClass,
   });
 
-  static bool validate(YamlMap yaml) {
-    if (yaml == null) {
-      return false;
-    }
-    return yaml['pluginClass'] is String;
-  }
-
   factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     return MacOSPlugin(
       name: name,
       pluginClass: yaml['pluginClass'],
     );
+  }
+
+  static bool validate(YamlMap yaml) {
+    if (yaml == null) {
+      return false;
+    }
+    return yaml['pluginClass'] is String;
   }
 
   static const String kConfigKey = 'macos';
