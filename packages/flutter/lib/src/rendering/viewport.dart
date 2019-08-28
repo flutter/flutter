@@ -1136,7 +1136,9 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     markNeedsLayout();
   }
 
-  /// The first child in the [GrowthDirection.forward] growth direction.
+  /// The first child in the [GrowthDirection.forward] growth direction and the
+  /// child that will be at the position defined by [anchor] when the
+  /// [offset.pixels] is 0.
   ///
   /// Children after [center] will be placed in the [axisDirection] relative to
   /// the [center]. Children before [center] will be placed in the opposite of
