@@ -270,7 +270,7 @@ void main() {
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.android_maven);
     });
 
-    testUsingContext('udpdate', () async {
+    testUsingContext('update', () async {
       final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts();
       expect(mavenArtifacts.isUpToDate(), isFalse);
 
