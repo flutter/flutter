@@ -248,12 +248,14 @@ flutter_tools:lib/''');
 
     when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
     when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
+    when(mockXcode.dsymutil(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
 
     final BuildResult result = await buildSystem.build(const AotAssemblyProfile(), iosEnvironment);
 
     expect(result.success, true);
     verify(mockXcode.cc(argThat(contains('-fembed-bitcode')))).called(1);
     verify(mockXcode.clang(argThat(contains('-fembed-bitcode')))).called(1);
+    verify(mockXcode.dsymutil(any)).called(1);
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
@@ -276,12 +278,14 @@ flutter_tools:lib/''');
 
     when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
     when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
+    when(mockXcode.dsymutil(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
 
     final BuildResult result = await buildSystem.build(const AotAssemblyProfile(), iosEnvironment);
 
     expect(result.success, true);
     verify(mockXcode.cc(argThat(contains('-fembed-bitcode')))).called(2);
     verify(mockXcode.clang(argThat(contains('-fembed-bitcode')))).called(2);
+    verify(mockXcode.dsymutil(any)).called(2);
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
