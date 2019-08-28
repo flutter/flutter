@@ -658,10 +658,8 @@ typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformVie
 /// }
 /// ```
 ///
-/// The `surfaceFactory` and the `onCreatePlatformView` are called when the
+/// The `surfaceFactory` and the `onCreatePlatformView` are only called when the
 /// state of this widget is initialized, or when the `viewType` changes.
-/// If the widget is rebuilt without losing its state,
-/// `surfaceFactory` and `onCreatePlatformView` are only called if the `viewType` changes.
 class PlatformViewLink extends StatefulWidget {
 
   /// Construct a [PlatformViewLink] widget.
