@@ -30,13 +30,13 @@ Future<void> main(List<String> args) async {
     print('The analyze.dart script must be run with --enable-asserts.');
     exit(1);
   }
-//  await _verifyNoMissingLicense(flutterRoot);
-//  await _verifyNoTestImports(flutterRoot);
-//  await _verifyNoTestPackageImports(flutterRoot);
-//  await _verifyGeneratedPluginRegistrants(flutterRoot);
-//  await _verifyNoBadImportsInFlutter(flutterRoot);
-//  await _verifyNoBadImportsInFlutterTools(flutterRoot);
-//  await _verifyInternationalizations();
+  await _verifyNoMissingLicense(flutterRoot);
+  await _verifyNoTestImports(flutterRoot);
+  await _verifyNoTestPackageImports(flutterRoot);
+  await _verifyGeneratedPluginRegistrants(flutterRoot);
+  await _verifyNoBadImportsInFlutter(flutterRoot);
+  await _verifyNoBadImportsInFlutterTools(flutterRoot);
+  await _verifyInternationalizations();
   await _verifyNoUnsupportedWebImportsInFlutter(flutterRoot);
 
   {
