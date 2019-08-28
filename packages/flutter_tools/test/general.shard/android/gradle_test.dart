@@ -119,14 +119,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in release mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('foo_barRelease');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('foo_barRelease', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.release, 'foo_bar'));
       expect(bundle, isNotNull);
       expect(bundle.path, '/foo_barRelease/app.aab');
@@ -135,14 +128,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in release mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('fooRelease');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('fooRelease', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.release, 'foo'));
       expect(bundle, isNotNull);
       expect(bundle.path, '/fooRelease/app.aab');
@@ -151,14 +137,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when no flavor is used in release mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('release');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('release', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.release, null));
       expect(bundle, isNotNull);
       expect(bundle.path, '/release/app.aab');
@@ -167,14 +146,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in debug mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('foo_barDebug');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('foo_barDebug', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.debug, 'foo_bar'));
       expect(bundle, isNotNull);
       expect(bundle.path, '/foo_barDebug/app.aab');
@@ -183,14 +155,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in debug mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('fooDebug');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('fooDebug', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.debug, 'foo'));
       expect(bundle, isNotNull);
       expect(bundle.path, '/fooDebug/app.aab');
@@ -199,14 +164,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when no flavor is used in debug mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('debug');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('debug', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.debug, null));
       expect(bundle, isNotNull);
       expect(bundle.path, '/debug/app.aab');
@@ -215,14 +173,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in profile mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('foo_barProfile');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('foo_barProfile', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.profile, 'foo_bar'));
       expect(bundle, isNotNull);
       expect(bundle.path, '/foo_barProfile/app.aab');
@@ -231,14 +182,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in profile mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('fooProfile');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('fooProfile', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.profile, 'foo'));
       expect(bundle, isNotNull);
       expect(bundle.path, '/fooProfile/app.aab');
@@ -247,17 +191,64 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when no flavor is used in profile mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('profile');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('profile', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.profile, null));
       expect(bundle, isNotNull);
       expect(bundle.path, '/profile/app.aab');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('Finds app bundle in release mode - Gradle 3.5', () {
+      final GradleProject gradleProject = generateFakeAppBundle('release', 'app-release.aab');
+      final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.release, null));
+      expect(bundle, isNotNull);
+      expect(bundle.path, '/release/app-release.aab');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('Finds app bundle in profile mode - Gradle 3.5', () {
+      final GradleProject gradleProject = generateFakeAppBundle('profile', 'app-profile.aab');
+      final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.profile, null));
+      expect(bundle, isNotNull);
+      expect(bundle.path, '/profile/app-profile.aab');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('Finds app bundle in debug mode - Gradle 3.5', () {
+      final GradleProject gradleProject = generateFakeAppBundle('debug', 'app-debug.aab');
+      final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.debug, null));
+      expect(bundle, isNotNull);
+      expect(bundle.path, '/debug/app-debug.aab');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('Finds app bundle when flavor contains underscores in release mode - Gradle 3.5', () {
+      final GradleProject gradleProject = generateFakeAppBundle('foo_barRelease', 'app-foo_bar-release.aab');
+      final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.release, 'foo_bar'));
+      expect(bundle, isNotNull);
+      expect(bundle.path, '/foo_barRelease/app-foo_bar-release.aab');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('Finds app bundle when flavor contains underscores in profile mode - Gradle 3.5', () {
+      final GradleProject gradleProject = generateFakeAppBundle('foo_barProfile', 'app-foo_bar-profile.aab');
+      final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.profile, 'foo_bar'));
+      expect(bundle, isNotNull);
+      expect(bundle.path, '/foo_barProfile/app-foo_bar-profile.aab');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('Finds app bundle when flavor contains underscores in debug mode - Gradle 3.5', () {
+      final GradleProject gradleProject = generateFakeAppBundle('foo_barDebug', 'app-foo_bar-debug.aab');
+      final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.debug, 'foo_bar'));
+      expect(bundle, isNotNull);
+      expect(bundle.path, '/foo_barDebug/app-foo_bar-debug.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
     });
@@ -411,19 +402,6 @@ someOtherTask
               ]
             )
           ).isEmpty, isTrue);
-    });
-    test('should provide bundle file name for default build types', () {
-      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], '/some/dir');
-      expect(project.bundleFileFor(BuildInfo.debug), 'app.aab');
-      expect(project.bundleFileFor(BuildInfo.profile), 'app.aab');
-      expect(project.bundleFileFor(BuildInfo.release), 'app.aab');
-      expect(project.bundleFileFor(const BuildInfo(BuildMode.release, 'unknown')), 'app.aab');
-    });
-    test('should provide bundle file name for flavored build types', () {
-      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], '/some/dir');
-      expect(project.bundleFileFor(const BuildInfo(BuildMode.debug, 'free')), 'app.aab');
-      expect(project.bundleFileFor(const BuildInfo(BuildMode.release, 'paid')), 'app.aab');
-      expect(project.bundleFileFor(const BuildInfo(BuildMode.release, 'unknown')), 'app.aab');
     });
     test('should provide assemble task name for default build types', () {
       final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], '/some/dir');
@@ -865,6 +843,17 @@ flutter:
           throwsA(predicate<Exception>((Exception e) => e is ToolExit)));
     });
   });
+}
+
+/// Generates a fake app bundle at the location [directoryName]/[fileName].
+GradleProject generateFakeAppBundle(String directoryName, String fileName) {
+  final GradleProject gradleProject = MockGradleProject();
+  when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
+
+  final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory(directoryName);
+  fs.directory(aabDirectory).createSync(recursive: true);
+  fs.file(fs.path.join(aabDirectory.path, fileName)).writeAsStringSync('irrelevant');
+  return gradleProject;
 }
 
 Platform fakePlatform(String name) {
