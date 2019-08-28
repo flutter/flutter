@@ -60,12 +60,15 @@ class ResidentWebRunner extends ResidentRunner {
           target: target,
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
-          usesTerminalUi: true,
           stayResident: true,
         );
 
   final Device device;
   final FlutterProject flutterProject;
+
+  // Only the debug builds of the web support the service protocol.
+  @override
+  bool get supportsServiceProtocol => isRunningDebug;
 
   WebFs _webFs;
   DebugConnection _debugConnection;
