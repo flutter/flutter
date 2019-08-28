@@ -123,7 +123,6 @@ class ChromeDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, Object> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
