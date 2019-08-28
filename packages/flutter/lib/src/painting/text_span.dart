@@ -28,8 +28,7 @@ import 'text_style.dart';
 /// tree with a list of children.
 ///
 /// To paint a [TextSpan] on a [Canvas], use a [TextPainter]. To display a text
-/// span in a widget, use a [RichText]. For text with a single style, consider
-/// using the [Text] widget.
+/// span in a widget, use a [Text] widget.
 ///
 /// {@tool sample}
 ///
@@ -57,8 +56,7 @@ import 'text_style.dart';
 ///    in an [InlineSpan] tree. Specify a widget within the [children]
 ///    list by wrapping the widget with a [WidgetSpan]. The widget will be
 ///    laid out inline within the paragraph.
-///  * [Text], a widget for showing uniformly-styled text.
-///  * [RichText], a widget for finer control of text rendering.
+///  * [Text], a widget for showing text.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 @immutable
 class TextSpan extends InlineSpan {
@@ -102,9 +100,10 @@ class TextSpan extends InlineSpan {
   /// object that manages the [InlineSpan] painting is also responsible for
   /// dispatching events. In the rendering library, that is the
   /// [RenderParagraph] object, which corresponds to the [RichText] widget in
-  /// the widgets layer; these objects do not bubble events in [InlineSpan]s, so a
-  /// [recognizer] is only effective for events that directly hit the [text] of
-  /// that [InlineSpan], not any of its [children].
+  /// the widgets layer (generally used via the [Text] widget); these objects do
+  /// not bubble events in [InlineSpan]s, so a [recognizer] is only effective
+  /// for events that directly hit the [text] of that [InlineSpan], not any of
+  /// its [children].
   ///
   /// [InlineSpan] also does not manage the lifetime of the gesture recognizer.
   /// The code that owns the [GestureRecognizer] object must call
@@ -113,10 +112,11 @@ class TextSpan extends InlineSpan {
   /// {@tool sample}
   ///
   /// This example shows how to manage the lifetime of a gesture recognizer
-  /// provided to an [InlineSpan] object. It defines a `BuzzingText` widget which
-  /// uses the [HapticFeedback] class to vibrate the device when the user
+  /// provided to an [InlineSpan] object. It defines a `BuzzingText` widget
+  /// which uses the [HapticFeedback] class to vibrate the device when the user
   /// long-presses the "find the" span, which is underlined in wavy green. The
-  /// hit-testing is handled by the [RichText] widget.
+  /// hit-testing is handled by the [RichText] widget which underpins the [Text]
+  /// widget's implementation.
   ///
   /// ```dart
   /// class BuzzingText extends StatefulWidget {

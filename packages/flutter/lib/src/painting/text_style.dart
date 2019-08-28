@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow, FontFeature;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow;
 
 import 'package:flutter/foundation.dart';
 
@@ -23,7 +23,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 
 /// An immutable style in which paint text.
 ///
-/// ### Bold
+/// ## Bold
 ///
 /// {@tool sample}
 /// Here, a single line of text in a [Text] widget is given a specific style
@@ -40,11 +40,10 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 ///
-/// ### Italics
+/// ## Italics
 ///
 /// {@tool sample}
-/// As in the previous example, the [Text] widget is given a specific style
-/// override which is implicitly mixed with the ambient [DefaultTextStyle].
+/// In this example, the font style is adjusted to select italics.
 ///
 /// ![An example using TextStyle to create italic text](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_italics.png)
 ///
@@ -56,28 +55,23 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 ///
-/// ### Opacity and Color
+/// ## Opacity and Color
 ///
-/// Each line here is progressively more opaque. The base color is
-/// [material.Colors.black], and [Color.withOpacity] is used to create a
-/// derivative color with the desired opacity. The root [TextSpan] for this
-/// [RichText] widget is explicitly given the ambient [DefaultTextStyle], since
-/// [RichText] does not do that automatically. The inner [TextStyle] objects are
-/// implicitly mixed with the parent [TextSpan]'s [TextSpan.style].
-///
-/// If [color] is specified, [foreground] must be null and vice versa. [color] is
-/// treated as a shorthand for `Paint()..color = color`.
+/// If [color] is specified, [foreground] must be null and vice versa. The
+/// [color] property is treated as a shorthand for `Paint()..color = color`.
 ///
 /// If [backgroundColor] is specified, [background] must be null and vice versa.
 /// The [backgroundColor] is treated as a shorthand for
 /// `background: Paint()..color = backgroundColor`.
 ///
-/// ![An example using TextStyle to change the text opacity and color](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_opacity_and_color.png)
+/// {@tool sample}
+/// Each line in this example is progressively more opaque. The base color is
+/// [material.Colors.black], and [Color.withOpacity] is used to create a
+/// derivative color with the desired opacity.
 ///
 /// ```dart
-/// RichText(
-///   text: TextSpan(
-///     style: DefaultTextStyle.of(context).style,
+/// Text.rich(
+///   TextSpan(
 ///     children: <TextSpan>[
 ///       TextSpan(
 ///         text: 'You don\'t have the votes.\n',
@@ -96,7 +90,10 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// )
 /// ```
 ///
-/// ### Size
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_opacity_and_color.png)
+/// {@end-tool}
+///
+/// ## Size
 ///
 /// {@tool sample}
 /// In this example, the ambient [DefaultTextStyle] is explicitly manipulated to
@@ -112,7 +109,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 ///
-/// ### Line height
+/// ## Line height
 ///
 /// By default, text will layout with line height as defined by the font.
 /// Font-metrics defined line height may be taller or shorter than the font size.
@@ -140,24 +137,21 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// Examples of the resulting heights from different values of `TextStyle.height`:
 ///
-/// ![Text height comparison diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
+/// ![For Roboto, with a fontSize of 50 pixels, if the height is set to null, the line ends up 59 pixels high. Setting the height to 1.0, on the other hand, changes the line's actual height to 50 pixels. Setting the height to 2.0 changes the line's actual height to 100 pixels.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
 ///
 /// See [StrutStyle] for further control of line height at the paragraph level.
 ///
-/// ### Wavy red underline with black text
+/// ## Wavy red underline with black text
 ///
 /// {@tool sample}
 /// Styles can be combined. In this example, the misspelt word is drawn in black
-/// text and underlined with a wavy red line to indicate a spelling error. (The
-/// remainder is styled according to the Flutter default text styles, not the
-/// ambient [DefaultTextStyle], since no explicit style is given and [RichText]
-/// does not automatically use the ambient [DefaultTextStyle].)
+/// text and underlined with a wavy red line to indicate a spelling error.
 ///
 /// ![An example using TextStyle to highlight a word with a red wavy underline](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_wavy_red_underline.png)
 ///
 /// ```dart
-/// RichText(
-///   text: TextSpan(
+/// Text.rich(
+///   TextSpan(
 ///     text: 'Don\'t tax the South ',
 ///     children: <TextSpan>[
 ///       TextSpan(
@@ -178,7 +172,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 ///
-/// ### Borders and stroke (Foreground)
+/// ## Borders and stroke (Foreground)
 ///
 /// {@tool sample}
 /// To create bordered text, a [Paint] with [Paint.style] set to [PaintingStyle.stroke]
@@ -214,7 +208,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 ///
-/// ### Gradients (Foreground)
+/// ## Gradients (Foreground)
 ///
 /// {@tool sample}
 /// The [foreground] property also allows effects such as gradients to be
@@ -242,7 +236,31 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 ///
-/// ### Custom Fonts
+/// ## Font features
+///
+/// Some fonts can be configured in quite fine detail. To provide access to
+/// these configuration options, [FontFeature] tags can be specified using the
+/// [fontFeatures] property.
+///
+/// {@tool sample}
+/// In this example, the fictional font "JeffersonCombined" is known to contain
+/// both roman and italics characters, and the italics characters are selected
+/// using the `ital` font feature.
+///
+/// ```dart
+/// Text.rich(
+///   TextSpan(
+///     text: 'In Virginia, we plant seeds in the ground',
+///     style: TextStyle(
+///       fontFamily: 'JeffersonCombined',
+///       fontFeatures: [const FontFeature.enable('ital')],
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// ## Custom Fonts
 ///
 /// Custom fonts can be declared in the `pubspec.yaml` file as shown below:
 ///
@@ -288,9 +306,11 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// `pubspec.yaml` of a package named `my_package` which the app depends on.
 /// Then creating the TextStyle is done as follows:
 ///
+/// {@tool sample}
 /// ```dart
 /// const TextStyle(fontFamily: 'Raleway', package: 'my_package')
 /// ```
+/// {@end-tool}
 ///
 /// If the package internally uses the font it defines, it should still specify
 /// the `package` argument when creating the text style as in the example above.
@@ -381,14 +401,12 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// See also:
 ///
-///  * [Text], the widget for showing text in a single style.
+///  * [Text], the widget for showing text.
 ///  * [DefaultTextStyle], the widget that specifies the default text styles for
 ///    [Text] widgets, configured using a [TextStyle].
-///  * [RichText], the widget for showing a paragraph of mix-style text.
 ///  * [TextSpan], the class that wraps a [TextStyle] for the purposes of
-///    passing it to a [RichText].
-///  * [TextStyle](https://api.flutter.dev/flutter/dart-ui/TextStyle-class.html), the class in the [dart:ui] library.
-///
+///    passing it to the [Text.rich] constructor.
+///  * [ui.TextStyle], the class in the [dart:ui] library.
 @immutable
 class TextStyle extends Diagnosticable {
   /// Creates a text style.
@@ -682,7 +700,12 @@ class TextStyle extends Diagnosticable {
   /// tabular numbers, or it might offer versions of the zero digit with
   /// and without slashes.  [FontFeature]s can be used to select which of
   /// these variants will be used for rendering.
-  final List<ui.FontFeature> fontFeatures;
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/featurelist>,
+  ///    which lists the standard font features.
+  final List<FontFeature> fontFeatures;
 
   /// Creates a copy of this text style but with the given fields replaced with
   /// the new values.
@@ -710,7 +733,7 @@ class TextStyle extends Diagnosticable {
     Paint foreground,
     Paint background,
     List<ui.Shadow> shadows,
-    List<ui.FontFeature> fontFeatures,
+    List<FontFeature> fontFeatures,
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,
