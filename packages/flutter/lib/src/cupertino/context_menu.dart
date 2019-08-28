@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart' show kMinFlingVelocity;
 import 'package:flutter/physics.dart' show FrictionSimulation;
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'colors.dart';
 
@@ -83,6 +84,8 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   }
 
   void _openContextMenu(Rect childRectEnd) {
+    HapticFeedback.selectionClick();
+
     setState(() {
       _childOpacity = 0.0;
     });
