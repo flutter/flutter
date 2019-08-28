@@ -58,8 +58,7 @@ class AndroidPlugin extends PluginPlatform {
 /// Contains the parameters to template an iOS plugin.
 ///
 /// The required fields include: [name] of the plugin, the [pluginClass] that
-/// will be the entry point to the plugin's native code. [classPrefix] is required
-/// if the plugin is using Objective-C, it is not required for Swift based iOS plugins.
+/// will be the entry point to the plugin's native code.
 class IOSPlugin extends PluginPlatform {
   const IOSPlugin({
     @required this.name,
@@ -71,14 +70,14 @@ class IOSPlugin extends PluginPlatform {
     if (yaml == null) {
       return false;
     }
-    return yaml['classPrefix'] is String && yaml['pluginClass'] is String;
+    return yaml['pluginClass'] is String;
   }
 
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     return IOSPlugin(
       name: name,
-      classPrefix: yaml['classPrefix'],
+      classPrefix: '',
       pluginClass: yaml['pluginClass'],
     );
   }
@@ -86,6 +85,9 @@ class IOSPlugin extends PluginPlatform {
   static const String kConfigKey = 'ios';
 
   final String name;
+
+  /// Note, this is here only for legacy reasons. Multi-platform format
+  /// always sets it to empty String.
   final String classPrefix;
   final String pluginClass;
 

@@ -42,7 +42,6 @@ void main() {
           '  package: com.flutter.dev\n'
           '  pluginClass: ASamplePlugin\n'
           ' ios:\n'
-          '  classPrefix: FLT\n'
           '  pluginClass: ISamplePlugin\n';
 
       final dynamic pluginYaml = loadYaml(pluginYamlRaw);
@@ -59,7 +58,7 @@ void main() {
 
       expect(iosPluginClass, 'ISamplePlugin');
       expect(androidPluginClass, 'ASamplePlugin');
-      expect(iosPlugin.classPrefix, 'FLT');
+      expect(iosPlugin.classPrefix, '');
       expect(androidPlugin.package, 'com.flutter.dev');
       expect(macOSPlugin.pluginClass, 'MSamplePlugin');
     });

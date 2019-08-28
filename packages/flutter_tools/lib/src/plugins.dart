@@ -64,7 +64,6 @@ class Plugin {
   ///        package: io.flutter.plugins.sample
   ///        pluginClass: SamplePlugin
   ///      ios:
-  ///        classPrefix: FLT
   ///        pluginClass: SamplePlugin
   ///      macos:
   ///        pluginClass: SamplePlugin
@@ -107,17 +106,17 @@ class Plugin {
 
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
 
-    if (platforms[AndroidPlugin.kConfigKey] != null) {
+    if (platformsYaml[AndroidPlugin.kConfigKey] != null) {
       platforms[AndroidPlugin.kConfigKey] =
           AndroidPlugin.fromYaml(name, platformsYaml[AndroidPlugin.kConfigKey]);
     }
 
-    if (platforms[IOSPlugin.kConfigKey] != null) {
+    if (platformsYaml[IOSPlugin.kConfigKey] != null) {
       platforms[IOSPlugin.kConfigKey] =
           IOSPlugin.fromYaml(name, platformsYaml[IOSPlugin.kConfigKey]);
     }
 
-    if (platforms[MacOSPlugin.kConfigKey] != null) {
+    if (platformsYaml[MacOSPlugin.kConfigKey] != null) {
       platforms[MacOSPlugin.kConfigKey] =
           MacOSPlugin.fromYaml(name, platformsYaml[MacOSPlugin.kConfigKey]);
     }

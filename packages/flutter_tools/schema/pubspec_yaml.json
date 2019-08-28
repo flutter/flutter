@@ -73,7 +73,6 @@
                                     "type": "object",
                                     "additionalProperties": false,
                                     "properties": {
-                                        "classPrefix": {"type": "string"},
                                         "pluginClass": {"type": "string"}
                                     }
                                 },
