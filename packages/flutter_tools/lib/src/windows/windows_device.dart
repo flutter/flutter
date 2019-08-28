@@ -78,7 +78,6 @@ class WindowsDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
     if (!prebuiltApplication) {

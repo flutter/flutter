@@ -74,6 +74,18 @@ void main() {
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
   }
 
+  test('profile does not supportsServiceProtocol', () => testbed.run(() {
+    final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
+      MockWebDevice(),
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+      ipv6: true,
+    );
+
+    expect(profileResidentWebRunner.supportsServiceProtocol, false);
+    expect(residentWebRunner.supportsServiceProtocol, true);
+  }));
+
   test('Exits on run if application does not support the web', () => testbed.run(() async {
     fs.file('pubspec.yaml').createSync();
     final BufferLogger bufferLogger = logger;

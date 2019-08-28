@@ -10,6 +10,7 @@ import '../artifacts.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -249,6 +250,8 @@ class XcodeProjectInterpreter {
     return _minorVersion;
   }
 
+  /// Synchronously retrieve xcode build settings. Prefer using the async
+  /// version below.
   Map<String, String> getBuildSettings(String projectPath, String target) {
     try {
       final String out = runCheckedSync(<String>[
@@ -263,6 +266,41 @@ class XcodeProjectInterpreter {
     } catch(error) {
       printTrace('Unexpected failure to get the build settings: $error.');
       return const <String, String>{};
+    }
+  }
+
+  /// Asynchronously retrieve xcode build settings. This one is preferred for
+  /// new call-sites.
+  Future<Map<String, String>> getBuildSettingsAsync(
+      String projectPath, String target, {
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
+    final Status status = Status.withSpinner(
+      timeout: timeoutConfiguration.fastOperation,
+    );
+    try {
+      // showBuildSettings is reported to ocassionally timeout. Here, we give it
+      // a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
+      // When there is a timeout, we retry once.
+      final RunResult result = await runCheckedAsync(<String>[
+          _executable,
+          '-project',
+          fs.path.absolute(projectPath),
+          '-target',
+          target,
+          '-showBuildSettings',
+        ],
+        workingDirectory: projectPath,
+        timeout: timeout,
+        timeoutRetries: 1,
+      );
+      final String out = result.stdout.trim();
+      return parseXcodeBuildSettings(out);
+    } catch(error) {
+      printTrace('Unexpected failure to get the build settings: $error.');
+      return const <String, String>{};
+    } finally {
+      status.stop();
     }
   }
 
