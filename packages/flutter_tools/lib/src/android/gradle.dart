@@ -819,28 +819,36 @@ Iterable<File> findApkFiles(GradleProject project, AndroidBuildInfo androidBuild
 
 @visibleForTesting
 File findBundleFile(GradleProject project, BuildInfo buildInfo) {
-  final String bundleFileName = project.bundleFileFor(buildInfo);
-  if (bundleFileName == null) {
-    return null;
+  final List<File> fileCandidates = <File>[
+    project.bundleDirectory
+      .childDirectory(camelCase(buildInfo.modeName))
+      .childFile('app.aab'),
+    project.bundleDirectory
+      .childDirectory(camelCase(buildInfo.modeName))
+      .childFile('app-${buildInfo.modeName}.aab'),
+  ];
+
+  if (buildInfo.flavor != null) {
+    // The Android Gradle plugin 3.0.0 adds the flavor name to the path.
+    // For example: In release mode, if the flavor name is `foo_bar`, then
+    // the directory name is `foo_barRelease`.
+    fileCandidates.add(
+      project.bundleDirectory
+        .childDirectory('${buildInfo.flavor}${camelCase('_' + buildInfo.modeName)}')
+        .childFile('app.aab'));
+
+    // The Android Gradle plugin 3.5.0 adds the flavor name to file name.
+    // For example: In release mode, if the flavor name is `foo_bar`, then
+    // the file name name is `app-foo_bar-release.aab`.
+    fileCandidates.add(
+      project.bundleDirectory
+        .childDirectory('${buildInfo.flavor}${camelCase('_' + buildInfo.modeName)}')
+        .childFile('app-${buildInfo.flavor}-${buildInfo.modeName}.aab'));
   }
-  File bundleFile = project.bundleDirectory
-    .childDirectory(camelCase(buildInfo.modeName))
-    .childFile(bundleFileName);
-  if (bundleFile.existsSync()) {
-    return bundleFile;
-  }
-  if (buildInfo.flavor == null) {
-    return null;
-  }
-  // Android Studio Gradle plugin v3 adds the flavor to the path. For the bundle the
-  // folder name is the flavor plus the mode name. On Windows, filenames aren't case sensitive.
-  // For example: foo_barRelease where `foo_bar` is the flavor and `Release` the mode name.
-  final String childDirName = '${buildInfo.flavor}${camelCase('_' + buildInfo.modeName)}';
-  bundleFile = project.bundleDirectory
-      .childDirectory(childDirName)
-      .childFile(bundleFileName);
-  if (bundleFile.existsSync()) {
-    return bundleFile;
+  for (final File bundleFile in fileCandidates) {
+    if (bundleFile.existsSync()) {
+      return bundleFile;
+    }
   }
   return null;
 }
@@ -983,11 +991,5 @@ class GradleProject {
     if (buildType == null || productFlavor == null)
       return null;
     return 'assembleAar${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
-  }
-
-  String bundleFileFor(BuildInfo buildInfo) {
-    // For app bundle all bundle names are called as app.aab. Product flavors
-    // & build types are differentiated as folders, where the aab will be added.
-    return 'app.aab';
   }
 }
