@@ -224,6 +224,9 @@ class CupertinoDynamicColor extends Color {
       assert(highContrastElevatedColor != null),
       assert(darkHighContrastElevatedColor != null),
       assert(_effectiveColor != null),
+      // The super constructor has to be called with a dummy value in order to mark
+      // this constructor const.
+      // The field `value` is overriden in the class implementation.
       super(0);
 
   final Color _effectiveColor;
@@ -401,6 +404,7 @@ class CupertinoDynamicColor extends Color {
             break;
           case CupertinoUserInterfaceLevelData.elevated:
             resolved = isHighContrastEnabled ? highContrastElevatedColor : elevatedColor;
+            break;
         }
         break;
       case Brightness.dark:
@@ -415,19 +419,17 @@ class CupertinoDynamicColor extends Color {
     }
 
     assert(resolved != null);
-    return resolved.value == value
-      ? this
-      : CupertinoDynamicColor._(
-          resolved,
-          color,
-          darkColor,
-          highContrastColor,
-          darkHighContrastColor,
-          elevatedColor,
-          darkElevatedColor,
-          highContrastElevatedColor,
-          darkHighContrastElevatedColor,
-      );
+    return CupertinoDynamicColor._(
+      resolved,
+      color,
+      darkColor,
+      highContrastColor,
+      darkHighContrastColor,
+      elevatedColor,
+      darkElevatedColor,
+      highContrastElevatedColor,
+      darkHighContrastElevatedColor,
+    );
   }
 
   @override

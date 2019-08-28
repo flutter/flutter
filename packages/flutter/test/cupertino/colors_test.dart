@@ -191,7 +191,7 @@ void main() {
         darkColor: color1,
         highContrastColor: color2,
         darkHighContrastColor: color3,
-      )
+      ),
     );
   });
 
