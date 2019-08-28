@@ -147,18 +147,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  tiles_scroll_perf_ios__timeline_summary:
-    description: >
-      Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone 6.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
-  tiles_scroll_perf_iphonexs__timeline_summary:
-    description: >
-      Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone XS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/iphonexs"]
-
   home_scroll_perf__timeline_summary:
     description: >
       Measures the runtime performance of scrolling the material page in the
@@ -388,6 +376,31 @@ tasks:
     required_agent_capabilities: ["linux/android"]
 
   # iOS on-device tests
+
+  tiles_scroll_perf_ios__timeline_summary:
+    description: >
+      Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone 6.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  tiles_scroll_perf_iphonexs__timeline_summary:
+    description: >
+      Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone XS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/iphonexs"]
+
+  flutter_gallery_ios32__start_up:
+    description: >
+      Measures the startup time of the Flutter Gallery app on 32-bit iOS (iPhone 4S).
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios32"]
+
+  flutter_gallery_ios32__transition_perf:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      32-bit iOS (iPhone 4S).
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios32"]
 
   flavors_test_ios:
     description: >
@@ -648,19 +661,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
     flaky: true
-
-  flutter_gallery_ios32__start_up:
-    description: >
-      Measures the startup time of the Flutter Gallery app on 32-bit iOS (iPhone 4S).
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios32"]
-
-  flutter_gallery_ios32__transition_perf:
-    description: >
-      Measures the performance of screen transitions in Flutter Gallery on
-      32-bit iOS (iPhone 4S).
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios32"]
 
   run_without_leak_mac:
     description: >
