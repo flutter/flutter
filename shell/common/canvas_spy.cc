@@ -234,8 +234,8 @@ void DidDrawCanvas::onDrawAnnotation(const SkRect& rect,
 
 void DidDrawCanvas::onDrawEdgeAAQuad(const SkRect& rect,
                                      const SkPoint clip[4],
-                                     QuadAAFlags aa,
-                                     SkColor color,
+                                     SkCanvas::QuadAAFlags aa,
+                                     const SkColor4f& color,
                                      SkBlendMode mode) {
   did_draw_ = true;
 }
