@@ -12,6 +12,7 @@ import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
+import 'viewport.dart';
 import 'viewport_offset.dart';
 
 // CORE TYPES FOR SLIVERS
@@ -175,9 +176,7 @@ class SliverConstraints extends Constraints {
   /// away from there.)
   ///
   /// Normally, the absolute zero offset is determined by the viewport's
-  /// [center](https://master-api.flutter.dev/flutter/rendering/RenderViewport/center.html)
-  /// and [anchor]https://master-api.flutter.dev/flutter/rendering/RenderViewport/anchor.html
-  /// properties.
+  /// [RenderViewport.center] and [RenderViewport.anchor] properties.
   final GrowthDirection growthDirection;
 
   /// The direction in which the user is attempting to scroll, relative to the
