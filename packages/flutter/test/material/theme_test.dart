@@ -720,7 +720,7 @@ class _TextStyleProxy implements TextStyle {
   @override
   List<Shadow> get shadows => _delegate.shadows;
   @override
-  List<ui.FontFeature> get fontFeatures => _delegate.fontFeatures;
+  List<FontFeature> get fontFeatures => _delegate.fontFeatures;
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) =>
@@ -783,7 +783,7 @@ class _TextStyleProxy implements TextStyle {
     ui.Paint foreground,
     ui.Paint background,
     List<Shadow> shadows,
-    List<ui.FontFeature> fontFeatures,
+    List<FontFeature> fontFeatures,
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,
