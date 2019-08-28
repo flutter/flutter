@@ -31,10 +31,13 @@ Dart_Handle DartConverter<flutter::LineMetrics>::ToDart(
 
   Dart_Handle argv[argc] = {
       tonic::ToDart(*val.hard_break), tonic::ToDart(*val.ascent),
-      tonic::ToDart(*val.descent),    tonic::ToDart(*val.unscaled_ascent),
-      tonic::ToDart(*val.height),     tonic::ToDart(*val.width),
-      tonic::ToDart(*val.left),       tonic::ToDart(*val.baseline),
-      tonic::ToDart(*val.line_number)};
+      tonic::ToDart(*val.descent), tonic::ToDart(*val.unscaled_ascent),
+      // We add then round to get the height. The
+      // definition of height here is different
+      // than the one in LibTxt.
+      tonic::ToDart(round(*val.ascent + *val.descent)),
+      tonic::ToDart(*val.width), tonic::ToDart(*val.left),
+      tonic::ToDart(*val.baseline), tonic::ToDart(*val.line_number)};
   return Dart_New(GetLineMetricsType(), tonic::ToDart("_"), argc, argv);
 }
 

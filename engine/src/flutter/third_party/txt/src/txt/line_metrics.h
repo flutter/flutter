@@ -48,7 +48,9 @@ class LineMetrics {
   double ascent = 0.0;
   double descent = 0.0;
   double unscaled_ascent = 0.0;
-  // Height of the line.
+  // Total height of the paragraph including the current line.
+  //
+  // The height of the current line is `round(ascent + descent)`.
   double height = 0.0;
   // Width of the line.
   double width = 0.0;
