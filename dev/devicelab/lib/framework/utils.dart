@@ -644,6 +644,7 @@ Future<void> _execAndCheck(String executable, List<String> args) async {
 // ```
 Future<Map<String, dynamic>> measureIosCpuGpu({
     Duration duration = const Duration(seconds: 10),
+    String deviceId,
 }) async {
   final String basePath = '${flutterDirectory.path}/bin/cache/pkg';
   await inDirectory('$basePath', () async {
@@ -670,6 +671,7 @@ Future<Map<String, dynamic>> measureIosCpuGpu({
       'resources/TraceUtility',
       '-t',
       'resources/CpuGpuTemplate.tracetemplate',
+      if (deviceId != null) ...<String>['-w', deviceId],
       '-l',
       '${duration.inMilliseconds}',
     ]);

@@ -219,7 +219,7 @@ class PerfTest {
       }
 
       if (needsMeasureCpuGPu) {
-        data.addAll(await measureIosCpuGpu());
+        data.addAll(await measureIosCpuGpu(deviceId: deviceId));
       }
 
       return TaskResult.success(data, benchmarkScoreKeys: <String>[
