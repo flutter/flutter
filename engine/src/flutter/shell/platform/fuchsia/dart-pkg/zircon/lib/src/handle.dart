@@ -39,3 +39,17 @@ class Handle extends NativeFieldWrapperClass2 {
 
   Handle duplicate(int rights) native 'Handle_Duplicate';
 }
+
+@pragma('vm:entry-point')
+class _OnWaitCompleteClosure {  // ignore: unused_element
+  // No public constructor - this can only be created from native code.
+  @pragma('vm:entry-point')
+  _OnWaitCompleteClosure(this._callback, this._arg1, this._arg2);
+
+  Function _callback;
+  Object _arg1;
+  Object _arg2;
+
+  @pragma('vm:entry-point')
+  Function get _closure => () => _callback(_arg1, _arg2); // ignore: unused_element
+}
