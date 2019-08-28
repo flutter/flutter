@@ -116,6 +116,13 @@ void main() {
         when(mockArtifacts.getArtifactPath(Artifact.snapshotDart,
             platform: anyNamed('platform'), mode: mode)).thenReturn(kSnapshotDart);
       }
+
+      when(mockXcode.dsymutil(any)).thenAnswer((_) => Future<RunResult>.value(
+        RunResult(
+          ProcessResult(1, 0, '', ''),
+          <String>['command name', 'arguments...']),
+        ),
+      );
     });
 
     final Map<Type, Generator> contextOverrides = <Type, Generator>{
@@ -203,9 +210,14 @@ void main() {
 
       verify(xcode.cc(argThat(contains('-fembed-bitcode')))).called(1);
       verify(xcode.clang(argThat(contains('-fembed-bitcode')))).called(1);
+      verify(xcode.dsymutil(<String>[
+        'build/foo/App.framework/App',
+        '-o',
+        'build/foo/App.framework.dSYM.noindex',
+      ])).called(1);
 
       final File assemblyFile = fs.file(assembly);
-      final File assemblyBitcodeFile = fs.file('$assembly.stripped.S');
+      final File assemblyBitcodeFile = fs.file('$assembly.bitcode');
       expect(assemblyFile.existsSync(), true);
       expect(assemblyBitcodeFile.existsSync(), true);
       expect(assemblyFile.readAsStringSync().contains('.section __DWARF'), true);
@@ -251,6 +263,7 @@ void main() {
       ]);
       verifyNever(xcode.cc(argThat(contains('-fembed-bitcode'))));
       verifyNever(xcode.clang(argThat(contains('-fembed-bitcode'))));
+      verify(xcode.dsymutil(any)).called(1);
 
       final File assemblyFile = fs.file(assembly);
       final File assemblyBitcodeFile = fs.file('$assembly.bitcode');
