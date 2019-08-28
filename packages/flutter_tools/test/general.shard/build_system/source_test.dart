@@ -53,7 +53,7 @@ void main() {
     const Source fooSource = Source.pattern('{OUTPUT_DIR}/foo');
     fooSource.accept(visitor);
 
-    expect(visitor.sources.single.path, fs.path.absolute(fs.path.join('outputs, foo')));
+    expect(visitor.sources.single.path, fs.path.absolute(fs.path.join('outputs', 'foo')));
   }));
 
 
