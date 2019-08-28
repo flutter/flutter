@@ -1076,7 +1076,7 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
   @override
   void didChange(T value) {
     super.didChange(value);
-    assert(widget.onChanged!=null);
+    assert(widget.onChanged != null);
     widget.onChanged(value);
   }
 }
