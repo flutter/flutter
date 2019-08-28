@@ -63,8 +63,6 @@ final DartPlatform flutterWebPlatform =
   // Flutter web specific libraries.
   'ui',
   '_engine',
-  'io',
-  'isolate',
 ]);
 
 /// The builders required to compile a Flutter application to the web.
@@ -124,7 +122,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               sdkKernelPath: path.join('kernel', 'flutter_ddc_sdk.dill'),
               outputExtension: ddcKernelExtension,
               platform: flutterWebPlatform,
-              librariesPath: 'libraries.json',
+              librariesPath: path.absolute(path.join(builderOptions.config['flutterWebSdk'], 'libraries.json')),
               kernelTargetName: 'ddc',
             ),
         (BuilderOptions builderOptions) => DevCompilerBuilder(
@@ -132,7 +130,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               platform: flutterWebPlatform,
               platformSdk: builderOptions.config['flutterWebSdk'],
               sdkKernelPath: path.url.join('kernel', 'flutter_ddc_sdk.dill'),
-              librariesPath: 'libraries.json',
+              librariesPath: path.absolute(path.join(builderOptions.config['flutterWebSdk'], 'libraries.json')),
             ),
       ],
       core.toAllPackages(),
