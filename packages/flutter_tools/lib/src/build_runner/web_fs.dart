@@ -353,7 +353,25 @@ class BuildDaemonCreator {
         '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
       ],
       logHandler: (ServerLog serverLog) {
-        printTrace(serverLog.message);
+        switch (serverLog.level) {
+          case Level.SEVERE:
+          case Level.SHOUT:
+            // This message is always returned once since we're running the
+            // build script from source.
+            if (serverLog.message.contains('Warning: Interpreting this as package URI')) {
+              return;
+            }
+            printError(serverLog.message);
+            if (serverLog.error != null) {
+              printError(serverLog.error);
+            }
+            if (serverLog.stackTrace != null) {
+              printTrace(serverLog.stackTrace);
+            }
+            break;
+          default:
+            printTrace(serverLog.message);
+        }
       },
       buildMode: daemon.BuildMode.Manual,
     );
