@@ -2162,7 +2162,7 @@ void main() {
           textDirection: TextDirection.rtl,
           controller: controller,
           focusNode: FocusNode(),
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 20.0,
             fontFamily: 'Roboto',
             fontWeight: FontWeight.w600,
@@ -2189,12 +2189,12 @@ void main() {
   testWidgets('text styling info is sent on style update', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
     StateSetter setState;
-    final TextStyle textStyle1 = TextStyle(
+    const TextStyle textStyle1 = TextStyle(
       fontSize: 20.0,
       fontFamily: 'RobotoMono',
       fontWeight: FontWeight.w600,
     );
-    final TextStyle textStyle2 = TextStyle(
+    const TextStyle textStyle2 = TextStyle(
       fontSize: 20.0,
       fontFamily: 'Raleway',
       fontWeight: FontWeight.w700,
