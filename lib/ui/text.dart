@@ -1641,7 +1641,9 @@ class LineMetrics {
 
   /// Total height of the line from the top edge to the bottom edge.
   ///
-  /// This is equivalent to `ascent + descent`
+  /// This is equivalent to `round(ascent + descent)`. This value is provided
+  /// separately due to rounding causing sub-pixel differences from the unrounded
+  /// values.
   final double height;
 
   /// Width of the line from the left edge of the leftmost glyph to the right
@@ -1661,6 +1663,9 @@ class LineMetrics {
   final double left;
 
   /// The y coordinate of the baseline for this line from the top of the paragraph.
+  ///
+  /// The bottom edge of the paragraph up to and including this line may be obtained
+  /// through `baseline + descent`.
   final double baseline;
 
   /// The number of this line in the overall paragraph, with the first line being
