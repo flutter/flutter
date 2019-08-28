@@ -622,3 +622,58 @@ void checkFileExists(String file) {
     throw FileSystemException('Expected file to exit.', file);
   }
 }
+
+void _checkExitCode(int code) {
+  if (code != 0) {
+    throw Exception(
+      'Unexpected exit code = $code!',
+    );
+  }
+}
+
+Future<void> _execAndCheck(String executable, List<String> args) async {
+  _checkExitCode(await exec(executable, args));
+}
+
+// Measure the CPU/GPU percentage for [duration] while a Flutter app is running
+// on an iOS device (e.g., right after a Flutter driver test has finished, which
+// doesn't close the Flutter app, and the Flutter app has an indefinite
+// animation). The return should have a format like the following json
+// ```
+// {"gpu_percentage":12.6,"cpu_percentage":18.15}
+// ```
+Future<Map<String, dynamic>> measureIosCpuGpu({
+    Duration duration = const Duration(seconds: 10),
+}) async {
+  final String basePath = '${flutterDirectory.path}/bin/cache/pkg';
+  await inDirectory('$basePath', () async {
+    // We can do this more elegantly in the future (e.g., only delete and clone
+    // the repo if there isn't a clean one with the expected version hash).
+    // For now, this takes less than 1 second so we'll use brute-force to pull
+    // everything every time.
+    final Directory measureDir = dir('$basePath/measure').absolute;
+    if (exists(measureDir)) {
+      await measureDir.delete(recursive: true);
+    }
+    await _execAndCheck('git', <String>[
+      'clone',
+      'https://github.com/liyuqian/measure.git',
+    ]);
+  });
+  return await inDirectory<Map<String,dynamic>>('$basePath/measure', () async {
+    await _execAndCheck('pub', <String>['get']);
+    final int code = await dart(<String>[
+      'bin/main.dart',
+      'ioscpugpu',
+      'new',
+      '-u',
+      'resources/TraceUtility',
+      '-t',
+      'resources/CpuGpuTemplate.tracetemplate',
+      '-l',
+      '${duration.inMilliseconds}',
+    ]);
+    _checkExitCode(code);
+    return json.decode(File('$basePath/measure/result.json').readAsStringSync());
+  });
+}
