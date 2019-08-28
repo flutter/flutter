@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:pool/pool.dart';
 
 import '../../artifacts.dart';
@@ -18,6 +17,7 @@ import '../../globals.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
+import 'assets.dart';
 
 /// The define to pass a [BuildMode].
 const String kBuildMode= 'BuildMode';
