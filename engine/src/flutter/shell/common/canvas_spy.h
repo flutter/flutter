@@ -220,8 +220,8 @@ class DidDrawCanvas final : public SkCanvasVirtualEnforcer<SkNoDrawCanvas> {
   // |SkCanvasVirtualEnforcer<SkNoDrawCanvas>|
   void onDrawEdgeAAQuad(const SkRect&,
                         const SkPoint[4],
-                        QuadAAFlags,
-                        SkColor,
+                        SkCanvas::QuadAAFlags,
+                        const SkColor4f&,
                         SkBlendMode) override;
 
   // |SkCanvasVirtualEnforcer<SkNoDrawCanvas>|
