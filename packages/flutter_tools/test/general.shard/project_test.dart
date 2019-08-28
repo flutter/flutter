@@ -244,9 +244,11 @@ void main() {
     group('language', () {
       MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
       MemoryFileSystem fs;
+      FlutterProjectFactory flutterProjectFactory;
       setUp(() {
         fs = MemoryFileSystem();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+        flutterProjectFactory = FlutterProjectFactory();
       });
 
       testInMemory('default host app language', () async {
@@ -273,6 +275,7 @@ apply plugin: 'kotlin-android'
       }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
       });
     });
 
@@ -280,10 +283,12 @@ apply plugin: 'kotlin-android'
       MemoryFileSystem fs;
       MockPlistUtils mockPlistUtils;
       MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+      FlutterProjectFactory flutterProjectFactory;
       setUp(() {
         fs = MemoryFileSystem();
         mockPlistUtils = MockPlistUtils();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+        flutterProjectFactory = FlutterProjectFactory();
       });
 
       void testWithMocks(String description, Future<void> testMethod()) {
@@ -291,6 +296,7 @@ apply plugin: 'kotlin-android'
           FileSystem: () => fs,
           PlistParser: () => mockPlistUtils,
           XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
         });
       }
 
@@ -425,9 +431,11 @@ apply plugin: 'kotlin-android'
 
   group('Regression test for invalid pubspec', () {
     Testbed testbed;
+    FlutterProjectFactory flutterProjectFactory;
 
     setUp(() {
       testbed = Testbed();
+      flutterProjectFactory = FlutterProjectFactory();
     });
 
     test('Handles asking for builders from an invalid pubspec', () => testbed.run(() {
@@ -439,6 +447,8 @@ apply plugin: 'kotlin-android'
       final FlutterProject flutterProject = FlutterProject.current();
 
       expect(flutterProject.builders, null);
+    }, overrides: <Type, Generator>{
+      FlutterProjectFactory: () => flutterProjectFactory,
     }));
 
     test('Handles asking for builders from a trivial pubspec', () => testbed.run(() {
@@ -451,6 +461,8 @@ name: foo_bar
       final FlutterProject flutterProject = FlutterProject.current();
 
       expect(flutterProject.builders, null);
+    }, overrides: <Type, Generator>{
+      FlutterProjectFactory: () => flutterProjectFactory,
     }));
   });
 }
@@ -510,12 +522,16 @@ void testInMemory(String description, Future<void> testMethod()) {
       .childDirectory('packages')
       .childDirectory('flutter_tools')
       .childDirectory('schema'), testFileSystem);
+
+  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory();
+
   testUsingContext(
     description,
     testMethod,
     overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       Cache: () => Cache(),
+      FlutterProjectFactory: () => flutterProjectFactory,
     },
   );
 }
