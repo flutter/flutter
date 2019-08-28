@@ -808,7 +808,7 @@ class TextPainter {
   /// part of a word, such as spaces, symbols, and punctuation, have word breaks
   /// on both sides. In such cases, this method will return a text range that
   /// contains the given text position.
-  ///
+  ///ddd
   /// Word boundaries are defined more precisely in Unicode Standard Annex #29
   /// <http://www.unicode.org/reports/tr29/#Word_Boundaries>.
   TextRange getWordBoundary(TextPosition position) {
@@ -820,7 +820,14 @@ class TextPainter {
   /// Returns the full list of [LineMetrics] that describe in detail the various
   /// metrics of each laid out line.
   ///
-  /// Not valid until after layout.
+  /// The [LineMetrics] list is presented in the order of the lines they represent.
+  /// For example, the first line is in the zeroth index.
+  ///
+  /// [LineMetrics] contains measurements such as ascent, descent, baseline, and
+  /// width for the line as a whole, and may be useful for aligning non-text
+  /// elements to a particular line.
+  ///
+  /// Valid only after [layout] has been called.
   ///
   /// This can potentially return a large amount of data, so it is not recommended
   /// to repeatedly call this. Instead, cache the results.
