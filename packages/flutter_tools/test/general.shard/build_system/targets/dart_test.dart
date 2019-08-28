@@ -39,6 +39,7 @@ void main() {
     mockProcessManager = MockProcessManager();
     testbed = Testbed(setup: () {
       androidEnvironment = Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
         defines: <String, String>{
           kBuildMode: getNameForBuildMode(BuildMode.profile),
@@ -46,6 +47,7 @@ void main() {
         }
       );
       iosEnvironment = Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
         defines: <String, String>{
           kBuildMode: getNameForBuildMode(BuildMode.profile),
@@ -158,6 +160,7 @@ flutter_tools:lib/''');
     });
 
     await const KernelSnapshot().build(<File>[], Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
         defines: <String, String>{
       kBuildMode: 'debug',
