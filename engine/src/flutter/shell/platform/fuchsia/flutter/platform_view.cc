@@ -627,7 +627,7 @@ void PlatformView::HandleFlutterPlatformChannelPlatformMessage(
       writer.StartArray();
       writer.StartObject();
       writer.Key("text");
-      writer.String(text.get());
+      writer.String(text.value_or(""));
       writer.EndObject();
       writer.EndArray();
       std::string result = json_buffer.GetString();

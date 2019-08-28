@@ -92,8 +92,8 @@ Application::Application(
 
   // LaunchInfo::arguments optional.
   if (auto& arguments = launch_info.arguments) {
-    settings_ = flutter::SettingsFromCommandLine(
-        fml::CommandLineFromIterators(arguments->begin(), arguments->end()));
+    settings_ = flutter::SettingsFromCommandLine(fml::CommandLineFromIterators(
+        arguments.value().begin(), arguments.value().end()));
   }
 
   // Determine /pkg/data directory from StartupInfo.
@@ -257,6 +257,9 @@ Application::Application(
   settings_.enable_observatory = false;
 #else
   settings_.enable_observatory = true;
+
+  // TODO(cbracken): pass this in as a param to allow 0.0.0.0, ::1, etc.
+  settings_.observatory_host = "127.0.0.1";
 #endif
 
   settings_.icu_data_path = "";

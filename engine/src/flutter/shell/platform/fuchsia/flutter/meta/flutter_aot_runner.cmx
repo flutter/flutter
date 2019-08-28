@@ -5,14 +5,17 @@
     "sandbox": {
         "features": [
             "root-ssl-certificates",
-            "vulkan",
-            "deprecated-ambient-replace-as-executable"
+            "deprecated-ambient-replace-as-executable",
+            "vulkan"
         ],
         "services": [
-            "fuchsia.crash.Analyzer",
+            "fuchsia.accessibility.SettingsManager",
+            "fuchsia.accessibility.semantics.SemanticsManager",
+            "fuchsia.device.NameProvider",
+            "fuchsia.feedback.CrashReporter",
             "fuchsia.fonts.Provider",
-            "fuchsia.net.NameLookup",
             "fuchsia.posix.socket.Provider",
+            "fuchsia.net.NameLookup",
             "fuchsia.sysmem.Allocator",
             "fuchsia.timezone.Timezone",
             "fuchsia.tracing.provider.Registry",
