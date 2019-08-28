@@ -83,7 +83,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       if (platform != TargetPlatform.ios) {
         throwToolExit('Bitcode is only supported on iOS (TargetPlatform is $targetPlatform).');
       }
-      await validateBitcode();
+      await validateBitcode(buildMode, platform);
     }
 
     Status status;
@@ -150,14 +150,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
             '-create',
             '-output', fs.path.join(outputPath, 'App.framework', 'App'),
           ]);
-          final Iterable<String> dSYMs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework.dSYM.noindex'));
-          fs.directory(fs.path.join(outputPath, 'App.framework.dSYM.noindex', 'Contents', 'Resources', 'DWARF'))..createSync(recursive: true);
-          await runCheckedAsync(<String>[
-            'lipo',
-            '-create',
-            '-output', fs.path.join(outputPath, 'App.framework.dSYM.noindex', 'Contents', 'Resources', 'DWARF', 'App'),
-            ...dSYMs.map((String path) => fs.path.join(path, 'Contents', 'Resources', 'DWARF', 'App'))
-          ]);
         } else {
           status?.cancel();
           exitCodes.forEach((DarwinArch iosArch, Future<int> exitCodeFuture) async {
@@ -202,24 +194,18 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
   }
 }
 
-Future<void> validateBitcode() async {
+Future<void> validateBitcode(BuildMode buildMode, TargetPlatform targetPlatform) async {
   final Artifacts artifacts = Artifacts.instance;
-  if (artifacts is! LocalEngineArtifacts) {
-    throwToolExit('Bitcode is only supported with a local engine built with --bitcode.');
-  }
-  final String flutterFrameworkPath = artifacts.getArtifactPath(Artifact.flutterFramework);
+  final String flutterFrameworkPath = artifacts.getArtifactPath(
+    Artifact.flutterFramework,
+    mode: buildMode,
+    platform: targetPlatform,
+  );
   if (!fs.isDirectorySync(flutterFrameworkPath)) {
     throwToolExit('Flutter.framework not found at $flutterFrameworkPath');
   }
   final Xcode xcode = context.get<Xcode>();
 
-  // Check for bitcode in Flutter binary.
-  final RunResult otoolResult = await xcode.otool(<String>[
-    '-l', fs.path.join(flutterFrameworkPath, 'Flutter'),
-  ]);
-  if (!otoolResult.stdout.contains('__LLVM')) {
-    throwToolExit('The Flutter.framework at $flutterFrameworkPath does not contain bitcode.');
-  }
   final RunResult clangResult = await xcode.clang(<String>['--version']);
   final String clangVersion = clangResult.stdout.split('\n').first;
   final String engineClangVersion = PlistParser.instance.getValueFromFile(
