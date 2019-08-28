@@ -267,7 +267,7 @@ void main() {
 
     test('development artifact', () async {
       final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts();
-      expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.android_maven);
+      expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
     testUsingContext('update', () async {

@@ -32,11 +32,10 @@ class DevelopmentArtifact {
   final bool unstable;
 
   /// Artifacts required for Android development.
-  static const DevelopmentArtifact android_gen_snapshot = DevelopmentArtifact._('android_gen_snapshot');
-  static const DevelopmentArtifact android_maven = DevelopmentArtifact._('android_maven');
+  static const DevelopmentArtifact androidGenSnapshot = DevelopmentArtifact._('android_gen_snapshot');
+  static const DevelopmentArtifact androidMaven = DevelopmentArtifact._('android_maven');
   // Artifacts used for internal builds.
-  static const DevelopmentArtifact android_internal_build =
-      DevelopmentArtifact._('android_internal_build');
+  static const DevelopmentArtifact androidInternalBuild = DevelopmentArtifact._('android_internal_build');
 
   /// Artifacts required for iOS development.
   static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios');
@@ -64,9 +63,9 @@ class DevelopmentArtifact {
 
   /// The values of DevelopmentArtifacts.
   static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[
-    android_gen_snapshot,
-    android_maven,
-    android_internal_build,
+    androidGenSnapshot,
+    androidMaven,
+    androidInternalBuild,
     iOS,
     web,
     macOS,
@@ -253,6 +252,9 @@ class Cache {
   }
 
   MapEntry<String, String> get dyLdLibEntry {
+    if (_dyLdLibEntry != null) {
+      return _dyLdLibEntry;
+    }
     final List<String> dyLdLibPath = <String>[];
     for (ArtifactSet artifact in _artifacts) {
       if (!(artifact is IosUsbArtifacts)) {
@@ -264,8 +266,10 @@ class Cache {
       }
       dyLdLibPath.add(path);
     }
-    return MapEntry<String, String>('DYLD_LIBRARY_PATH', dyLdLibPath.join(':'));
+    _dyLdLibEntry = MapEntry<String, String>('DYLD_LIBRARY_PATH', dyLdLibPath.join(':'));
+    return _dyLdLibEntry;
   }
+  MapEntry<String, String> _dyLdLibEntry;
 
   /// The web sdk has to be co-located with the dart-sdk so that they can share source
   /// code.
@@ -807,7 +811,7 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
   AndroidGenSnapshotArtifacts(Cache cache) : super(
     'android-sdk',
     cache,
-    DevelopmentArtifact.android_gen_snapshot,
+    DevelopmentArtifact.androidGenSnapshot,
   );
 
   @override
@@ -848,7 +852,7 @@ class AndroidInternalBuildArtifacts extends EngineCachedArtifact {
   AndroidInternalBuildArtifacts(Cache cache) : super(
     'android-internal-build-artifacts',
     cache,
-    DevelopmentArtifact.android_internal_build,
+    DevelopmentArtifact.androidInternalBuild,
   );
 
   @override
@@ -865,7 +869,7 @@ class AndroidInternalBuildArtifacts extends EngineCachedArtifact {
 
 /// A cached artifact containing the Maven dependencies used to build Android projects.
 class AndroidMavenArtifacts extends ArtifactSet {
-  AndroidMavenArtifacts() : super(DevelopmentArtifact.android_maven);
+  AndroidMavenArtifacts() : super(DevelopmentArtifact.androidMaven);
 
   @override
   Future<void> update() async {
