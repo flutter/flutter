@@ -628,7 +628,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     copyDirectorySync(
       cache.getArtifactDirectory('gradle_wrapper'),
       project.android.hostAppGradleRoot,
-      (File sourceFile, File destinationFile) {
+      onFileCopied: (File sourceFile, File destinationFile) {
         filesCreated++;
         final String modes = sourceFile.statSync().modeString();
         if (modes != null && modes.contains('x')) {
