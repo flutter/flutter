@@ -179,9 +179,6 @@ void main() {
     when(xcode.clang(any)).thenAnswer((Invocation invocation) {
       return Future<RunResult>.value(RunResult(FakeProcessResult()..exitCode = 0, <String>['test']));
     });
-    when(xcode.dsymutil(any)).thenAnswer((Invocation invocation) {
-      return Future<RunResult>.value(RunResult(FakeProcessResult()..exitCode = 0, <String>['test']));
-    });
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
     fs.file('.packages')
       ..createSync()
