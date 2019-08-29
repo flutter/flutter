@@ -579,10 +579,11 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   void _onPanEnd(DragEndDetails details) {
     // If flung, animate a bit before handling the potential dismiss.
     if (details.velocity.pixelsPerSecond.dy.abs() >= kMinFlingVelocity) {
-      final FrictionSimulation frictionSimulation = FrictionSimulation(
-        0.135,
+      final FrictionSimulation frictionSimulation = FrictionSimulation.through(
         _moveAnimation.value.dy,
+        _moveAnimation.value.dy + 100.0,
         details.velocity.pixelsPerSecond.dy,
+        0.0,
       );
       final bool flingIsAway = details.velocity.pixelsPerSecond.dy > 0;
       final double end = flingIsAway ? frictionSimulation.finalX : 0.0;
@@ -591,14 +592,11 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         end: Offset(0.0, end),
       ).animate(_moveController);
       _moveController.reset();
-      _moveController.fling();
-      _moveController.addStatusListener(_flingStatusListener);
-      // The fastest possible velocity is 8000 px/s. Limit the longest animation
-      // to 500ms and scale the duration so fast velocities animate for longer.
-      _moveController.duration = Duration(
-        milliseconds: details.velocity.pixelsPerSecond.distance ~/ 16,
+      _moveController.duration = const Duration(
+        milliseconds: 64,
       );
-      _moveController.fling();
+      _moveController.forward();
+      _moveController.addStatusListener(_flingStatusListener);
 
       return;
     }
