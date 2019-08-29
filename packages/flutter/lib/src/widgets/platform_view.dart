@@ -296,7 +296,7 @@ class UiKitView extends StatefulWidget {
   State<UiKitView> createState() => _UiKitViewState();
 }
 
-/// Embeds arbitrary HTML in the Widget hierarchy in Flutter Web.
+/// Embeds an HTML element in the Widget hierarchy in Flutter Web.
 ///
 /// *NOTE*: This only works in Flutter Web. To embed web content on other
 /// platforms, consider using the `flutter_webview` plugin.
@@ -329,15 +329,15 @@ class UiKitView extends StatefulWidget {
 /// may cause difficulty for users trying to enable accessibility.
 ///
 /// {@macro flutter.widgets.platformViews.lifetime}
-class HtmlView extends StatelessWidget {
+class HtmlElementView extends StatelessWidget {
   /// Creates a platform view for Flutter Web.
   ///
   /// `viewType` identifies the type of platform view to create.
-  const HtmlView({
+  const HtmlElementView({
     Key key,
     @required this.viewType,
   }) : assert(viewType != null),
-       assert(kIsWeb, '$HtmlView is only available on Flutter Web'),
+       assert(kIsWeb, 'HtmlElementView is only available on Flutter Web.'),
        super(key: key);
 
   /// The unique identifier for the HTML view type to be embedded by this widget.
@@ -349,7 +349,7 @@ class HtmlView extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlatformViewLink(
       viewType: viewType,
-      onCreatePlatformView: _createHtmlView,
+      onCreatePlatformView: _createHtmlElementView,
       surfaceFactory: (BuildContext context, PlatformViewController controller) {
         return PlatformViewSurface(
           controller: controller,
@@ -361,15 +361,15 @@ class HtmlView extends StatelessWidget {
   }
 
   /// Creates the controller and kicks off its initialization.
-  _HtmlViewController _createHtmlView(PlatformViewCreationParams params) {
-    final _HtmlViewController controller = _HtmlViewController(params.id, viewType);
+  _HtmlElementViewController _createHtmlElementView(PlatformViewCreationParams params) {
+    final _HtmlElementViewController controller = _HtmlElementViewController(params.id, viewType);
     controller._initialize().then((_) { params.onPlatformViewCreated(params.id); });
     return controller;
   }
 }
 
-class _HtmlViewController extends PlatformViewController {
-  _HtmlViewController(
+class _HtmlElementViewController extends PlatformViewController {
+  _HtmlElementViewController(
     this.viewId,
     this.viewType,
   );
