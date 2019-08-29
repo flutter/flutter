@@ -213,7 +213,14 @@ class WebFs {
     cascade = cascade.add(_assetHandler(flutterProject));
     final HttpServer server = await httpMultiServerFactory(_kHostName, port);
     shelf_io.serveRequests(server, cascade.handler);
-    final Chrome chrome = await chromeLauncher.launch('http://$_kHostName:$port/');
+    Chrome chrome;
+    final String chromeUrl = 'http://$_kHostName:$port/';
+    try {
+      chrome = await chromeLauncher.launch(chromeUrl);
+    } on SocketException {
+      // This seems to only happen on Windows but there is no clear repro yet.
+      throwToolExit('Failed to connect to Chrome at $chromeUrl.');
+    }
     return WebFs(
       client,
       server,

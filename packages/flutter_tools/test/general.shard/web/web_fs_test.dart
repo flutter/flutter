@@ -5,7 +5,9 @@
 import 'package:build_daemon/client.dart';
 import 'package:build_daemon/data/build_status.dart';
 import 'package:dwds/dwds.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -83,6 +85,16 @@ void main() {
 
     // Chrome is launched based on port from above.
     verify(mockChromeLauncher.launch('http://localhost:1234/')).called(1);
+  }));
+
+  test('Throws a tool exit when Chrome fails to launch', () => testbed.run(() async {
+    when(mockChromeLauncher.launch('http://localhost:1234/')).thenThrow(const SocketException(''));
+
+    expect(WebFs.start(
+      target: fs.path.join('lib', 'main.dart'),
+      buildInfo: BuildInfo.debug,
+      flutterProject: FlutterProject.current(),
+    ), throwsA(isInstanceOf<ToolExit>()));
   }));
 }
 
