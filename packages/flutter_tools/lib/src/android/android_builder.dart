@@ -16,7 +16,7 @@ import 'android_sdk.dart';
 import 'gradle.dart';
 
 /// The builder in the current context.
-AndroidBuilder get androidBuilder => context.get<AndroidBuilder>() ?? AndroidBuilderImpl();
+AndroidBuilder get androidBuilder => context.get<AndroidBuilder>() ?? _AndroidBuilderImpl();
 
 /// Provides the methods to build Android artifacts.
 abstract class AndroidBuilder {
@@ -44,8 +44,8 @@ abstract class AndroidBuilder {
 }
 
 /// Default implementation of [AarBuilder].
-class AndroidBuilderImpl extends AndroidBuilder {
-  AndroidBuilderImpl();
+class _AndroidBuilderImpl extends AndroidBuilder {
+  _AndroidBuilderImpl();
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
