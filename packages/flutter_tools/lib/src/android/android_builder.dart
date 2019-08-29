@@ -57,7 +57,7 @@ class AndroidBuilderImpl extends AndroidBuilder {
   }) async {
     if (!project.android.isUsingGradle) {
       throwToolExit(
-          'The build process for Android has changed, and the current project configuration\n'
+          'The build process for Android has changed, and the current project configuration '
               'is no longer valid. Please consult\n\n'
               '  https://github.com/flutter/flutter/wiki/Upgrading-Flutter-projects-to-build-with-gradle\n\n'
               'for details on how to upgrade the project.'
@@ -88,7 +88,7 @@ class AndroidBuilderImpl extends AndroidBuilder {
   }) async {
      if (!project.android.isUsingGradle) {
       throwToolExit(
-          'The build process for Android has changed, and the current project configuration\n'
+          'The build process for Android has changed, and the current project configuration '
               'is no longer valid. Please consult\n\n'
               '  https://github.com/flutter/flutter/wiki/Upgrading-Flutter-projects-to-build-with-gradle\n\n'
               'for details on how to upgrade the project.'
@@ -116,7 +116,7 @@ class AndroidBuilderImpl extends AndroidBuilder {
   }) async {
     if (!project.android.isUsingGradle) {
       throwToolExit(
-          'The build process for Android has changed, and the current project configuration\n'
+          'The build process for Android has changed, and the current project configuration '
           'is no longer valid. Please consult\n\n'
           'https://github.com/flutter/flutter/wiki/Upgrading-Flutter-projects-to-build-with-gradle\n\n'
           'for details on how to upgrade the project.'
