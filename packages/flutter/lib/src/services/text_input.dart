@@ -670,22 +670,20 @@ class TextInputConnection with ChangeNotifier {
 
   /// Send the size and transform of the editable text to engine.
   ///
-  /// The values are taken from the size of the render box.
+  /// The values are sent as platform messages so they can be used on web for
+  /// example to correctly position and size the html input field.
   ///
-  /// 1. [renderBoxSize]: size of the render editable box.
+  /// 1. [editableBoxSize]: size of the render editable box.
   ///
   /// 2. [transform]: a matrix that maps the local paint coordinate system
   ///                 to the [PipelineOwner.rootNode].
-  void setEditableSizeAndTransform(Size renderBoxSize, Matrix4 transform) {
-    final List<double> transformList = List<double>(16);
-    transform.copyIntoArray(transformList);
-
+  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
     SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setEditableSizeAndTransform',
       <String, dynamic>{
-        'width': renderBoxSize.width,
-        'height': renderBoxSize.height,
-        'transform': transformList,
+        'width': editableBoxSize.width,
+        'height': editableBoxSize.height,
+        'transform': transform.storage,
       },
     );
   }
