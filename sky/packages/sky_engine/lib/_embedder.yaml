@@ -5,6 +5,7 @@ embedded_libs:
   "dart:core": "core/core.dart"
   "dart:developer": "developer/developer.dart"
   "dart:ffi": "ffi/ffi.dart"
+  "dart:wasm": "wasm/wasm.dart"
   "dart:io": "io/io.dart"
   "dart:isolate": "isolate/isolate.dart"
   "dart:math": "math/math.dart"

@@ -72,6 +72,14 @@
       "nativewrappers": {
         "uri": "../../../third_party/dart/sdk/lib/html/dartium/nativewrappers.dart"
       },
+      "mirrors": {
+        "patches": [
+          "../../../third_party/dart/runtime/lib/mirrors_patch.dart",
+          "../../../third_party/dart/runtime/lib/mirrors_impl.dart",
+          "../../../third_party/dart/runtime/lib/mirror_reference.dart"
+        ],
+        "uri": "../../../third_party/dart/sdk/lib/mirrors/mirrors.dart"
+      },
       "developer": {
         "patches": [
           "../../../third_party/dart/runtime/lib/developer.dart",
@@ -87,16 +95,14 @@
         ],
         "uri": "../../../third_party/dart/sdk/lib/isolate/isolate.dart"
       },
-      "mirrors": {
-        "patches": [
-          "../../../third_party/dart/runtime/lib/mirrors_patch.dart",
-          "../../../third_party/dart/runtime/lib/mirrors_impl.dart",
-          "../../../third_party/dart/runtime/lib/mirror_reference.dart"
-        ],
-        "uri": "../../../third_party/dart/sdk/lib/mirrors/mirrors.dart"
-      },
       "_vmservice": {
         "uri": "../../../third_party/dart/sdk/lib/vmservice/vmservice.dart"
+      },
+      "wasm": {
+        "patches": [
+          "../../../third_party/dart/runtime/lib/wasm_patch.dart"
+        ],
+        "uri": "../../../third_party/dart/sdk/lib/wasm/wasm.dart"
       },
       "io": {
         "patches": [

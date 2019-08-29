@@ -1,6 +1,6 @@
 {
   "comment:0": "NOTE: THIS FILE IS GENERATED. DO NOT EDIT.",
-  "comment:1": "Instead modify 'kernel/libraries.yaml' and follow the instructions therein.",
+  "comment:1": "Instead modify 'shell/platform/fuchsia/flutter/kernel/libraries.yaml' and follow the instructions therein.",
   "flutter_runner": {
     "libraries": {
       "_builtin": {
@@ -75,6 +75,14 @@
       "nativewrappers": {
         "uri": "../../../../../../third_party/dart/sdk/lib/html/dartium/nativewrappers.dart"
       },
+      "mirrors": {
+        "patches": [
+          "../../../../../../third_party/dart/runtime/lib/mirrors_patch.dart",
+          "../../../../../../third_party/dart/runtime/lib/mirrors_impl.dart",
+          "../../../../../../third_party/dart/runtime/lib/mirror_reference.dart"
+        ],
+        "uri": "../../../../../../third_party/dart/sdk/lib/mirrors/mirrors.dart"
+      },
       "developer": {
         "patches": [
           "../../../../../../third_party/dart/runtime/lib/developer.dart",
@@ -90,16 +98,14 @@
         ],
         "uri": "../../../../../../third_party/dart/sdk/lib/isolate/isolate.dart"
       },
-      "mirrors": {
-        "patches": [
-          "../../../../../../third_party/dart/runtime/lib/mirrors_patch.dart",
-          "../../../../../../third_party/dart/runtime/lib/mirrors_impl.dart",
-          "../../../../../../third_party/dart/runtime/lib/mirror_reference.dart"
-        ],
-        "uri": "../../../../../../third_party/dart/sdk/lib/mirrors/mirrors.dart"
-      },
       "_vmservice": {
         "uri": "../../../../../../third_party/dart/sdk/lib/vmservice/vmservice.dart"
+      },
+      "wasm": {
+        "patches": [
+          "../../../../../../third_party/dart/runtime/lib/wasm_patch.dart"
+        ],
+        "uri": "../../../../../../third_party/dart/sdk/lib/wasm/wasm.dart"
       },
       "io": {
         "patches": [

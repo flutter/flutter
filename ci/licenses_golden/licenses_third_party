@@ -1,4 +1,4 @@
-Signature: 742116b952b7acf5cf98fe3e4d537e83
+Signature: 29342bb1ee5e5375db5f5c9f613ac7a5
 
 UNUSED LICENSES:
 
@@ -7431,6 +7431,8 @@ FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library.cc
 FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library_patch.dart
 FILE: ../../../third_party/dart/runtime/lib/ffi_native_type_patch.dart
 FILE: ../../../third_party/dart/runtime/lib/ffi_patch.dart
+FILE: ../../../third_party/dart/runtime/lib/wasm.cc
+FILE: ../../../third_party/dart/runtime/lib/wasm_patch.dart
 FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/bit.h
 FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/main.cc
 FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/test.cc
@@ -7544,6 +7546,7 @@ FILE: ../../../third_party/dart/sdk/lib/ffi/dynamic_library.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/ffi.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/native_type.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/struct.dart
+FILE: ../../../third_party/dart/sdk/lib/wasm/wasm.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.

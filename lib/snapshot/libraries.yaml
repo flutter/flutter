@@ -91,6 +91,11 @@ flutter:
         - "../../../third_party/dart/runtime/lib/ffi_native_type_patch.dart"
         - "../../../third_party/dart/runtime/lib/ffi_patch.dart"
 
+    wasm:
+      uri: "../../../third_party/dart/sdk/lib/wasm/wasm.dart"
+      patches:
+        - "../../../third_party/dart/runtime/lib/wasm_patch.dart"
+
     _http:
       uri: "../../../third_party/dart/sdk/lib/_http/http.dart"
 
