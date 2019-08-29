@@ -517,13 +517,6 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  macos_chrome_dev_mode:
-    description: >
-      Run flutter web on the devicelab and hot restart.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-    flaky: true # marekd as flaky while infra is under heavy development
-
   build_benchmark_ios:
     description: >
       Measures iOS build performance across config changes.
