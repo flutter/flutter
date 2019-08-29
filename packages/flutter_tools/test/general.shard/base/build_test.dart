@@ -258,7 +258,6 @@ void main() {
       expect(assemblyBitcodeFile.readAsStringSync().contains('.section __DWARF'), false);
     }, overrides: contextOverrides);
 
-
     testUsingContext('builds iOS armv7 profile AOT snapshot', () async {
       fs.file('main.dill').writeAsStringSync('binary magic');
 
