@@ -176,7 +176,6 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       for (_DownloadRequest pendingRequest in _pendingLoadRequests) {
         // [sendPort] being null indicates that worker has been idle and exited.
         // That should not happen if there are pending download requests.
-        assert(sendPort != null);
         sendPort.send(pendingRequest);
       }
       _pendingLoadRequests.clear();
