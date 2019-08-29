@@ -357,7 +357,10 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   final RectTween _rectTween = RectTween();
   final RectTween _rectTweenReverse = RectTween();
   final RectTween _sheetRectTween = RectTween();
+  final Tween<double> _sheetScaleTween = Tween<double>();
   final Tween<double> _opacityTween = Tween<double>(begin: 0.0, end: 1.0);
+  Animation<double> _sheetOpacity;
+  Animation<double> _sheetScale;
 
   final GlobalKey _childGlobalKey = GlobalKey();
   final GlobalKey _sheetGlobalKey = GlobalKey();
@@ -377,13 +380,6 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
     return offsetScaled & sizeScaled;
   }
 
-  void _onDismiss(BuildContext context, double scale, double opacity) {
-    _scale = scale;
-    _opacityTween.end = opacity;
-    // TODO(justinmc): Also scale down context menu as it dismisses.
-    Navigator.of(context).pop();
-  }
-
   @override
   final String barrierLabel;
 
@@ -399,6 +395,18 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
+  void _onDismiss(BuildContext context, double scale, double opacity) {
+    _scale = scale;
+    _opacityTween.end = opacity;
+    _sheetOpacity = _opacityTween.animate(CurvedAnimation(
+      parent: animation,
+      curve: Interval(0.9, 1.0),
+    ));
+    // TODO(justinmc): The fadeout animation is not perfectly seamless, should
+    // continue at the same speed as the drag-to-dismiss animation.
+    Navigator.of(context).pop();
+  }
+
   void _updateTweenRects() {
     final Rect childRect = _scale == null
       ? _getRect(_childGlobalKey)
@@ -410,6 +418,8 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
     final Rect sheetRect = _getRect(_sheetGlobalKey);
     _sheetRectTween.begin = _previousChildRect.topLeft & sheetRect.size;
     _sheetRectTween.end = sheetRect;
+    _sheetScaleTween.begin = 0.0;
+    _sheetScaleTween.end = _scale;
 
     // When opening, the transition happens from the end of the child's bounce
     // animation to the final state. When closing, it goes from the final state
@@ -457,10 +467,19 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
 
   @override
   Animation<double> createAnimation() {
-    return CurvedAnimation(
+    final CurvedAnimation animation = CurvedAnimation(
       parent: super.createAnimation(),
       curve: Curves.linearToEaseOut,
     );
+    _sheetOpacity = _opacityTween.animate(CurvedAnimation(
+      parent: animation,
+      curve: Curves.linear,
+    ));
+    _sheetScale = _sheetScaleTween.animate(CurvedAnimation(
+      parent: animation,
+      curve: Curves.linear,
+    ));
+    return animation;
   }
 
   @override
@@ -490,10 +509,15 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
           Positioned.fromRect(
             rect: _sheetRectTween.evaluate(animation),
             child: Opacity(
-              opacity: _opacityTween.evaluate(animation),
-              child: _ContextMenuSheet(
-                key: _sheetGlobalKey,
-                actions: _actions,
+              opacity: _sheetOpacity.value,
+              child: Transform.scale(
+                // TODO(justinmc): alignment should adapt based on side of screen.
+                alignment: AlignmentDirectional.topStart,
+                scale: _sheetScale.value,
+                child: _ContextMenuSheet(
+                  key: _sheetGlobalKey,
+                  actions: _actions,
+                ),
               ),
             ),
           ),
@@ -748,6 +772,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   // Build the animation for the ContextMenuSheet.
   Widget _buildSheetAnimation(BuildContext context, Widget child) {
     return Transform.scale(
+      // TODO(justinmc): Should adapt based on side of screen.
       alignment: AlignmentDirectional.topStart,
       scale: _sheetScaleAnimation.value,
       child: Opacity(
