@@ -123,7 +123,8 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
   final TransferableTypedData bytes = await getHttpClientResponseBytes(
     response,
     autoUncompress: autoUncompress,
-    onBytesReceived: onBytesReceived);
+    onBytesReceived: onBytesReceived
+  );
   return bytes.materialize().asUint8List();
 }
 

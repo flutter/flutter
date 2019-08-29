@@ -40,7 +40,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
   @override
   ImageStreamCompleter load(image_provider.NetworkImage key) {
-    // Ownership of this controller is handed off to [_loadAsyncOnDesignatedIsolate];
+    // Ownership of this controller is handed off to [_loadAsync];
     // it is that method's responsibility to close the controller's stream when
     // the image has been loaded or an error is thrown.
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
@@ -63,7 +63,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   // added to the list of pending load requests [_pendingLoadRequests].
   static Future<void> _pendingLoader;
   static RawReceivePort _loaderErrorHandler;
-  static List<_PendingLoadRequest> _pendingLoadRequests;
+  static List<_DownloadRequest> _pendingLoadRequests;
   static SendPort _requestPort;
 
   Future<ui.Codec> _loadAsync(
@@ -99,8 +99,12 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       HttpClientProvider httpClientProvider;
       assert(() { httpClientProvider = debugNetworkImageHttpClientProvider; return true; }());
 
-      final _DownloadRequest downloadRequest = _DownloadRequest(downloadResponseHandler.sendPort,
-          resolved, headers, httpClientProvider);
+      final _DownloadRequest downloadRequest = _DownloadRequest(
+          downloadResponseHandler.sendPort,
+          resolved,
+          headers,
+          httpClientProvider
+      );
       if (_requestPort != null) {
         // If worker isolate is properly set up ([_requestPort] is holding
         // initialized [SendPort]), then just send download request down to it.
@@ -110,7 +114,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
           // If worker isolate creation was not started, start creation now.
           assert(_pendingLoadRequests == null);
           assert(_loaderErrorHandler == null);
-          _pendingLoadRequests = <_PendingLoadRequest>[];
+          _pendingLoadRequests = <_DownloadRequest>[];
           _pendingLoader = _setupIsolate()..then((Isolate isolate) {
             _loaderErrorHandler = RawReceivePort((List<dynamic> errorAndStackTrace) {
               _cleanupDueToError(errorAndStackTrace[0]);
@@ -122,10 +126,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
           });
         }
         // Record download request so it can either send a request when isolate is ready or handle errors.
-        _pendingLoadRequests.add(_PendingLoadRequest(
-            (SendPort sendPort) { sendPort.send(downloadRequest); },
-            (dynamic error) { downloadRequest.sendPort.send(_DownloadResponse.error(error)); },
-        ));
+        _pendingLoadRequests.add(downloadRequest);
       }
 
       final TransferableTypedData transferable = await bytesCompleter.future;
@@ -134,15 +135,15 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       if (bytes.isEmpty)
         throw Exception('NetworkImage is an empty file: $resolved');
 
-      return await PaintingBinding.instance.instantiateImageCodec(bytes);
+      return PaintingBinding.instance.instantiateImageCodec(bytes);
     } finally {
       chunkEvents.close();
-      downloadResponseHandler.close();
+      downloadResponseHandler?.close();
     }
   }
 
   void _cleanupDueToError(dynamic error) {
-    for (_PendingLoadRequest request in _pendingLoadRequests) {
+    for (_DownloadRequest request in _pendingLoadRequests) {
       request.handleError(error);
     }
     _pendingLoadRequests = null;
@@ -156,7 +157,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     // This is used to get _requestPort [SendPort] that can be used to
     // communicate with worker isolate: when isolate is spawned it will send
     // it's [SendPort] over via this [RawReceivePort].
-    // Received [sendPort] can also be [null], which indicates that worker
+    // Received `sendPort` can also be null, which indicates that worker
     // isolate exited after being idle.
     final RawReceivePort receivePort = RawReceivePort((SendPort sendPort) {
       _requestPort = sendPort;
@@ -172,10 +173,11 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       // When we received [SendPort] for the worker isolate, we send all
       // pending requests that were accumulated before worker isolate provided
       // it's port (before [_requestPort] was populated).
-      for (_PendingLoadRequest pendingRequest in _pendingLoadRequests) {
+      for (_DownloadRequest pendingRequest in _pendingLoadRequests) {
         // [sendPort] being null indicates that worker has been idle and exited.
         // That should not happen if there are pending download requests.
-        pendingRequest.sendRequest(sendPort);
+        assert(sendPort != null);
+        sendPort.send(pendingRequest);
       }
       _pendingLoadRequests.clear();
     });
@@ -209,25 +211,17 @@ class _DownloadResponse {
   final dynamic error;
 }
 
-typedef _RequestHandler = void Function(SendPort sendPort);
-typedef _ErrorHandler = void Function(dynamic error);
-
-@immutable
-class _PendingLoadRequest {
-  const _PendingLoadRequest(this.sendRequest, this.handleError);
-
-  final _RequestHandler sendRequest;
-  final _ErrorHandler handleError;
-}
-
 @immutable
 class _DownloadRequest {
-  const _DownloadRequest(this.sendPort, this.uri, this.headers, this.httpClientProvider);
+  const _DownloadRequest(this.sendPort, this.uri, this.headers, this.httpClientProvider) :
+      assert(sendPort != null), assert(uri != null);
 
   final SendPort sendPort;
   final Uri uri;
   final Map<String, String> headers;
   final HttpClientProvider httpClientProvider;
+
+  void handleError(dynamic error) { sendPort.send(_DownloadResponse.error(error)); }
 }
 
 // We set `autoUncompress` to false to ensure that we can trust the value of
@@ -259,7 +253,8 @@ void _initializeWorkerIsolate(SendPort mainIsolateSendPort) {
       if (response.statusCode != HttpStatus.ok)
         throw image_provider.NetworkImageLoadException(
             statusCode: response?.statusCode,
-            uri: downloadRequest.uri);
+            uri: downloadRequest.uri
+        );
       final TransferableTypedData transferable = await getHttpClientResponseBytes(
           response,
           onBytesReceived: (int cumulative, int total) {
@@ -267,7 +262,8 @@ void _initializeWorkerIsolate(SendPort mainIsolateSendPort) {
                  ImageChunkEvent(
                      cumulativeBytesLoaded: cumulative,
                      expectedTotalBytes: total,
-                 )));
+                 )
+             ));
           });
       downloadRequest.sendPort.send(_DownloadResponse.bytes(transferable));
     } catch (error) {
