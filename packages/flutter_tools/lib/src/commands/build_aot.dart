@@ -226,19 +226,20 @@ Future<void> validateBitcode(BuildMode buildMode, TargetPlatform targetPlatform)
 }
 
 Version _parseVersionFromClang(String clangVersion) {
-  const String prefix = 'Apple LLVM version ';
+  final RegExp pattern = RegExp(r'Apple (LLVM|clang) version (\d+\.\d+\.\d+) ');
   void _invalid() {
     throwToolExit('Unable to parse Clang version from "$clangVersion". '
-                  'Expected a string like "$prefix #.#.# (clang-####.#.##.#)".');
+                  'Expected a string like "Apple (LLVM|clang) #.#.# (clang-####.#.##.#)".');
   }
-  if (clangVersion == null || clangVersion.length <= prefix.length || !clangVersion.startsWith(prefix)) {
+
+  if (clangVersion == null || clangVersion.isEmpty) {
     _invalid();
   }
-  final int lastSpace = clangVersion.lastIndexOf(' ');
-  if (lastSpace == -1) {
+  final RegExpMatch match = pattern.firstMatch(clangVersion);
+  if (match == null || match.groupCount != 2) {
     _invalid();
   }
-  final Version version = Version.parse(clangVersion.substring(prefix.length, lastSpace));
+  final Version version = Version.parse(match.group(2));
   if (version == null) {
     _invalid();
   }
