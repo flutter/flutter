@@ -330,6 +330,9 @@ class UiKitView extends StatefulWidget {
 ///
 /// {@macro flutter.widgets.platformViews.lifetime}
 class HtmlView extends StatelessWidget {
+  /// Creates a platform view for Flutter Web.
+  ///
+  /// `viewType` identifies the type of platform view to create.
   const HtmlView({
     Key key,
     @required this.viewType,
