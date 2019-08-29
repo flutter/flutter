@@ -336,6 +336,19 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
+  Future<Map<String, String>> getBuildSettingsAsync(
+    String projectPath,
+    String target, {
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
+    return <String, String>{};
+  }
+
+  @override
+  void cleanWorkspace(String workspacePath, String scheme) {
+  }
+
+  @override
   Future<XcodeProjectInfo> getInfo(String projectPath) async {
     return XcodeProjectInfo(
       <String>['Runner'],

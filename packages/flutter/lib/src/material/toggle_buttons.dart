@@ -165,6 +165,7 @@ class ToggleButtons extends StatelessWidget {
     @required this.children,
     @required this.isSelected,
     this.onPressed,
+    this.textStyle,
     this.color,
     this.selectedColor,
     this.disabledColor,
@@ -214,6 +215,13 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// When the callback is null, all toggle buttons will be disabled.
   final void Function(int index) onPressed;
+
+  /// The [TextStyle] to apply to any text in these toggle buttons.
+  ///
+  /// [TextStyle.color] will be ignored and substituted by [color],
+  /// [selectedColor] or [disabledColor] depending on whether the buttons
+  /// are active, selected, or disabled.
+  final TextStyle textStyle;
 
   /// The color for descendant [Text] and [Icon] widgets if the button is
   /// enabled and not selected.
@@ -569,6 +577,7 @@ class ToggleButtons extends StatelessWidget {
 
           return _ToggleButton(
             selected: isSelected[index],
+            textStyle: textStyle,
             color: color,
             selectedColor: selectedColor,
             disabledColor: disabledColor,
@@ -603,6 +612,7 @@ class ToggleButtons extends StatelessWidget {
       ifTrue: 'Buttons are disabled',
       ifFalse: 'Buttons are enabled',
     ));
+    textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
@@ -634,6 +644,7 @@ class _ToggleButton extends StatelessWidget {
   const _ToggleButton({
     Key key,
     this.selected = false,
+    this.textStyle,
     this.color,
     this.selectedColor,
     this.disabledColor,
@@ -656,6 +667,9 @@ class _ToggleButton extends StatelessWidget {
 
   /// Determines if the button is displayed as active/selected or enabled.
   final bool selected;
+
+  /// The [TextStyle] to apply to any text that appears in this button.
+  final TextStyle textStyle;
 
   /// The color for [Text] and [Icon] widgets if the button is enabled.
   ///
@@ -769,10 +783,12 @@ class _ToggleButton extends StatelessWidget {
       currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
     }
 
+    final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.body1;
+
     final Widget result = ClipRRect(
       borderRadius: clipRadius,
       child: RawMaterialButton(
-        textStyle: TextStyle(
+        textStyle: currentTextStyle.copyWith(
           color: currentColor,
         ),
         elevation: 0.0,

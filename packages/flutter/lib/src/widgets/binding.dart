@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback;
+import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -251,6 +251,10 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   void initInstances() {
     super.initInstances();
     _instance = this;
+    // Initialization of [_buildOwner] has to be done after
+    // [super.initInstances] is called, as it requires [ServicesBinding] to
+    // properly setup the [defaultBinaryMessenger] instance.
+    _buildOwner = BuildOwner();
     buildOwner.onBuildScheduled = _handleBuildScheduled;
     window.onLocaleChanged = handleLocaleChanged;
     window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
@@ -371,7 +375,10 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// The [BuildOwner] in charge of executing the build pipeline for the
   /// widget tree rooted at this binding.
   BuildOwner get buildOwner => _buildOwner;
-  final BuildOwner _buildOwner = BuildOwner();
+  // Initialization of [_buildOwner] has to be done within the [initInstances]
+  // method, as it requires [ServicesBinding] to properly setup the
+  // [defaultBinaryMessenger] instance.
+  BuildOwner _buildOwner;
 
   /// The object in charge of the focus tree.
   ///
@@ -740,25 +747,13 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 
     if (_needToReportFirstFrame && _reportFirstFrame) {
       assert(!_firstFrameCompleter.isCompleted);
-      // TODO(liyuqian): use a broadcast stream approach
-      // use frameTimings. https://github.com/flutter/flutter/issues/38838
-      // ignore: deprecated_member_use
-      final TimingsCallback oldCallback = WidgetsBinding.instance.window.onReportTimings;
-      // use frameTimings. https://github.com/flutter/flutter/issues/38838
-      // ignore: deprecated_member_use
-      WidgetsBinding.instance.window.onReportTimings = (List<FrameTiming> timings) {
+      WidgetsBinding.instance.window.frameTimings.first.then((FrameTiming _) {
         if (!kReleaseMode) {
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         }
-        if (oldCallback != null) {
-          oldCallback(timings);
-        }
-        // use frameTimings. https://github.com/flutter/flutter/issues/38838
-        // ignore: deprecated_member_use
-        WidgetsBinding.instance.window.onReportTimings = oldCallback;
         _firstFrameCompleter.complete();
-      };
+      });
     }
 
     try {

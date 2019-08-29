@@ -434,12 +434,12 @@ Could not build the precompiled application for the device.''',
 
       when(project.xcodeProjectInfoFile).thenReturn(pbxprojFile);
       when(project.hostAppBundleName).thenReturn('UnitTestRunner.app');
-      when(pbxprojFile.readAsLines())
-          .thenAnswer((_) => Future<List<String>>.value(flutterAssetPbxProjLines));
-      when(pbxprojFile.exists())
-          .thenAnswer((_) => Future<bool>.value(true));
+      when(pbxprojFile.readAsLinesSync())
+          .thenAnswer((_) => flutterAssetPbxProjLines);
+      when(pbxprojFile.existsSync())
+          .thenAnswer((_) => true);
 
-      bool result = await upgradePbxProjWithFlutterAssets(project);
+      bool result = upgradePbxProjWithFlutterAssets(project);
       expect(result, true);
       expect(
         testLogger.statusText,
@@ -447,9 +447,9 @@ Could not build the precompiled application for the device.''',
       );
       testLogger.clear();
 
-      when(pbxprojFile.readAsLines())
-          .thenAnswer((_) => Future<List<String>>.value(appFlxPbxProjLines));
-      result = await upgradePbxProjWithFlutterAssets(project);
+      when(pbxprojFile.readAsLinesSync())
+          .thenAnswer((_) => appFlxPbxProjLines);
+      result = upgradePbxProjWithFlutterAssets(project);
       expect(result, true);
       expect(
         testLogger.statusText,
@@ -457,9 +457,9 @@ Could not build the precompiled application for the device.''',
       );
       testLogger.clear();
 
-      when(pbxprojFile.readAsLines())
-          .thenAnswer((_) => Future<List<String>>.value(cleanPbxProjLines));
-      result = await upgradePbxProjWithFlutterAssets(project);
+      when(pbxprojFile.readAsLinesSync())
+          .thenAnswer((_) => cleanPbxProjLines);
+      result = upgradePbxProjWithFlutterAssets(project);
       expect(result, true);
       expect(
         testLogger.statusText,

@@ -44,6 +44,8 @@ class CrashReportSender {
 
   static CrashReportSender get instance => _instance ?? CrashReportSender._(http.Client());
 
+  bool _crashReportSent = false;
+
   /// Overrides the default [http.Client] with [client] for testing purposes.
   @visibleForTesting
   static void initializeWith(http.Client client) {
@@ -76,6 +78,10 @@ class CrashReportSender {
     @required String getFlutterVersion(),
     @required String command,
   }) async {
+    // Only send one crash report per run.
+    if (_crashReportSent) {
+      return;
+    }
     try {
       final String flutterVersion = getFlutterVersion();
 
@@ -116,11 +122,12 @@ class CrashReportSender {
         final String reportId = await http.ByteStream(resp.stream)
             .bytesToString();
         printStatus('Crash report sent (report ID: $reportId)');
+        _crashReportSent = true;
       } else {
         printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
       }
     } catch (sendError, sendStackTrace) {
-      if (sendError is SocketException) {
+      if (sendError is SocketException || sendError is HttpException) {
         printError('Failed to send crash report due to a network error: $sendError');
       } else {
         // If the sender itself crashes, just print. We did our best.

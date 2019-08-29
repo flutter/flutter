@@ -4,6 +4,7 @@
 
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
+import '../../build_info.dart';
 import '../../globals.dart';
 import '../build_system.dart';
 
@@ -17,18 +18,18 @@ class UnpackLinux extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
-    Source.artifact(Artifact.linuxDesktopPath),
+    Source.artifact(Artifact.linuxDesktopPath, mode: BuildMode.debug),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/linux/flutter/libflutter_linux.so'),
+    Source.pattern('{PROJECT_DIR}/linux/flutter/libflutter_linux_glfw.so'),
     Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_export.h'),
     Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_messenger.h'),
     Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_plugin_registrar.h'),
     Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_glfw.h'),
     Source.pattern('{PROJECT_DIR}/linux/flutter/icudtl.dat'),
-    Source.pattern('{PROJECT_DIR}/linux/flutter/cpp_client_wrapper/*'),
+    Source.pattern('{PROJECT_DIR}/linux/flutter/cpp_client_wrapper_glfw/*'),
   ];
 
   @override

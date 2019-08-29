@@ -588,7 +588,9 @@ class PlatformViewCreationParams {
 
   const PlatformViewCreationParams._({
     @required this.id,
-    @required this.onPlatformViewCreated
+    @required this.viewType,
+    @required this.onPlatformViewCreated,
+    @required this.onFocusChanged,
   }) : assert(id != null),
        assert(onPlatformViewCreated != null);
 
@@ -597,8 +599,19 @@ class PlatformViewCreationParams {
   /// [PlatformViewController.viewId] should match this id.
   final int id;
 
+  /// The unique identifier for the type of platform view to be embedded.
+  ///
+  /// This viewType is used to tell the platform which type of view to
+  /// associate with the [id].
+  final String viewType;
+
   /// Callback invoked after the platform view has been created.
   final PlatformViewCreatedCallback onPlatformViewCreated;
+
+  /// Callback invoked when the platform view's focus is changed on the platform side.
+  ///
+  /// The value is true when the platform view gains focus and false when it loses focus.
+  final ValueChanged<bool> onFocusChanged;
 }
 
 /// A factory for a surface presenting a platform view as part of the widget hierarchy.
@@ -631,6 +644,7 @@ typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformVie
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return PlatformViewLink(
+///       viewType: 'webview',
 ///       onCreatePlatformView: createFooWebView,
 ///       surfaceFactory: (BuildContext context, PlatformViewController controller) {
 ///        return PlatformViewSurface(
@@ -644,8 +658,8 @@ typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformVie
 /// }
 /// ```
 ///
-/// The `surfaceFactory` and the `onCreatePlatformView` only take affect when the state of this widget is initialized.
-/// If the widget is rebuilt without losing its state, `surfaceFactory` and `onCreatePlatformView` are ignored.
+/// The `surfaceFactory` and the `onCreatePlatformView` are only called when the
+/// state of this widget is initialized, or when the `viewType` changes.
 class PlatformViewLink extends StatefulWidget {
 
   /// Construct a [PlatformViewLink] widget.
@@ -659,15 +673,22 @@ class PlatformViewLink extends StatefulWidget {
     Key key,
     @required PlatformViewSurfaceFactory surfaceFactory,
     @required CreatePlatformViewCallback onCreatePlatformView,
+    @required this.viewType,
     }) : assert(surfaceFactory != null),
-                                  assert(onCreatePlatformView != null),
-                                  _surfaceFactory = surfaceFactory,
-                                  _onCreatePlatformView = onCreatePlatformView,
-                                  super(key: key);
+         assert(onCreatePlatformView != null),
+         assert(viewType != null),
+         _surfaceFactory = surfaceFactory,
+         _onCreatePlatformView = onCreatePlatformView,
+         super(key: key);
 
 
   final PlatformViewSurfaceFactory _surfaceFactory;
   final CreatePlatformViewCallback _onCreatePlatformView;
+
+  /// The unique identifier for the view type to be embedded.
+  ///
+  /// Typically, this viewType has already been registered on the platform side.
+  final String viewType;
 
   @override
   State<StatefulWidget> createState() => _PlatformViewLinkState();
@@ -679,6 +700,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   PlatformViewController _controller;
   bool _platformViewCreated = false;
   Widget _surface;
+  FocusNode _focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -686,27 +708,65 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
       return const SizedBox.expand();
     }
     _surface ??= widget._surfaceFactory(context, _controller);
-    return _surface;
+    return Focus(
+      focusNode: _focusNode,
+      onFocusChange: _handleFrameworkFocusChanged,
+      child: _surface,
+    );
   }
 
   @override
   void initState() {
+    _focusNode = FocusNode(debugLabel: 'PlatformView(id: $_id)',);
     _initialize();
     super.initState();
   }
 
+  @override
+  void didUpdateWidget(PlatformViewLink oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.viewType != oldWidget.viewType) {
+      _controller?.dispose();
+
+      // We are about to create a new platform view.
+      _platformViewCreated = false;
+      _initialize();
+    }
+  }
+
   void _initialize() {
     _id = platformViewsRegistry.getNextPlatformViewId();
-    _controller = widget._onCreatePlatformView(PlatformViewCreationParams._(id:_id, onPlatformViewCreated:_onPlatformViewCreated));
+    _controller = widget._onCreatePlatformView(
+      PlatformViewCreationParams._(
+        id: _id,
+        viewType: widget.viewType,
+        onPlatformViewCreated: _onPlatformViewCreated,
+        onFocusChanged: _handlePlatformFocusChanged,
+      ),
+    );
   }
 
   void _onPlatformViewCreated(int id) {
-    setState(() => _platformViewCreated = true);
+    setState(() { _platformViewCreated = true; });
+  }
+
+  void _handleFrameworkFocusChanged(bool isFocused) {
+    if (!isFocused) {
+      _controller?.clearFocus();
+    }
+  }
+
+  void _handlePlatformFocusChanged(bool isFocused){
+    if (isFocused) {
+      _focusNode.requestFocus();
+    }
   }
 
   @override
   void dispose() {
     _controller?.dispose();
+    _controller = null;
     super.dispose();
   }
 }

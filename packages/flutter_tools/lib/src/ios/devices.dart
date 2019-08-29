@@ -230,7 +230,8 @@ class IOSDevice extends Device {
         ),
       );
       return true;
-    } on ProcessException {
+    } on ProcessException catch (error) {
+      printError(error.message);
       return false;
     }
   }
@@ -245,7 +246,8 @@ class IOSDevice extends Device {
         ),
       );
       return true;
-    } on ProcessException {
+    } on ProcessException catch (error) {
+      printError(error.message);
       return false;
     }
   }
@@ -261,7 +263,6 @@ class IOSDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
     if (!prebuiltApplication) {
@@ -277,7 +278,6 @@ class IOSDevice extends Device {
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
           buildForDevice: true,
-          usesTerminalUi: usesTerminalUi,
           activeArch: iosArch,
       );
       if (!buildResult.success) {

@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
 import '../flutter_test_alternative.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('TextInputConfiguration', () {
     test('sets expected defaults', () {
       const TextInputConfiguration configuration = TextInputConfiguration();
@@ -103,7 +106,7 @@ void main() {
             'method': 'TextInputClient.onConnectionClosed',
           }
       );
-      defaultBinaryMessenger.handlePlatformMessage(
+      ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
         (ByteData _) {},

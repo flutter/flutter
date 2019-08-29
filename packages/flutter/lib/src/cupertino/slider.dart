@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'theme.dart';
 import 'thumb_painter.dart';
 
@@ -228,7 +229,10 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
     return _CupertinoSliderRenderObjectWidget(
       value: (widget.value - widget.min) / (widget.max - widget.min),
       divisions: widget.divisions,
-      activeColor: widget.activeColor ?? CupertinoTheme.of(context).primaryColor,
+      activeColor: CupertinoDynamicColor.resolve(
+        widget.activeColor ?? CupertinoTheme.of(context).primaryColor,
+        context
+      ),
       onChanged: widget.onChanged != null ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
@@ -257,12 +261,14 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<double> onChangeEnd;
   final TickerProvider vsync;
 
+
   @override
   _RenderCupertinoSlider createRenderObject(BuildContext context) {
     return _RenderCupertinoSlider(
       value: value,
       divisions: divisions,
       activeColor: activeColor,
+      trackColor: CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).systemFill, context),
       onChanged: onChanged,
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
@@ -277,6 +283,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = value
       ..divisions = divisions
       ..activeColor = activeColor
+      ..trackColor = CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).systemFill, context)
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
@@ -287,7 +294,6 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 const double _kPadding = 8.0;
-const Color _kTrackColor = Color(0xFFB5B5B5);
 const double _kSliderHeight = 2.0 * (CupertinoThumbPainter.radius + _kPadding);
 const double _kSliderWidth = 176.0; // Matches Material Design slider.
 const Duration _kDiscreteTransitionDuration = Duration(milliseconds: 500);
@@ -299,6 +305,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     @required double value,
     int divisions,
     Color activeColor,
+    Color trackColor,
     ValueChanged<double> onChanged,
     this.onChangeStart,
     this.onChangeEnd,
@@ -309,6 +316,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
        _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
+       _trackColor = trackColor,
        _onChanged = onChanged,
        _textDirection = textDirection,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSliderWidth, height: _kSliderHeight)) {
@@ -352,6 +360,15 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     if (value == _activeColor)
       return;
     _activeColor = value;
+    markNeedsPaint();
+  }
+
+  Color get trackColor => _trackColor;
+  Color _trackColor;
+  set trackColor(Color value) {
+    if (value == _trackColor)
+      return;
+    _trackColor = value;
     markNeedsPaint();
   }
 
@@ -468,11 +485,11 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
       case TextDirection.rtl:
         visualPosition = 1.0 - _position.value;
         leftColor = _activeColor;
-        rightColor = _kTrackColor;
+        rightColor = trackColor;
         break;
       case TextDirection.ltr:
         visualPosition = _position.value;
-        leftColor = _kTrackColor;
+        leftColor = trackColor;
         rightColor = _activeColor;
         break;
     }
