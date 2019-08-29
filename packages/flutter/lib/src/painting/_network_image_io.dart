@@ -176,11 +176,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       // When we received [SendPort] for the worker isolate, we send all
       // pending requests that were accumulated before worker isolate provided
       // it's port (before [_requestPort] was populated).
-      for (_DownloadRequest pendingRequest in _pendingLoadRequests) {
-        // [sendPort] being null indicates that worker has been idle and exited.
-        // That should not happen if there are pending download requests.
-        sendPort.send(pendingRequest);
-      }
+      _pendingLoadRequests.forEach(sendPort.send);
       _pendingLoadRequests.clear();
     });
 
