@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show utf8;
+import 'dart:convert' show utf8, json;
 import 'dart:isolate';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -66,15 +66,20 @@ void testSkiaResourceCacheSendsResponse() {
     if (data == null) {
       throw 'Response must not be null.';
     }
+    final String response = utf8.decode(data.buffer.asUint8List());
+    final List<bool> jsonResponse = json.decode(response).cast<bool>();
+    if (jsonResponse[0] != true) {
+      throw 'Response was not true';
+    }
     notifyNative();
   };
-  const String json = '''{
+  const String jsonRequest = '''{
                             "method": "Skia.setResourceCacheMaxBytes",
                             "args": 10000
                           }''';
   window.sendPlatformMessage(
     'flutter/skia',
-    Uint8List.fromList(utf8.encode(json)).buffer.asByteData(),
+    Uint8List.fromList(utf8.encode(jsonRequest)).buffer.asByteData(),
     callback,
   );
 }

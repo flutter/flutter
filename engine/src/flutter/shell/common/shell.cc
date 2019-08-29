@@ -959,7 +959,9 @@ void Shell::HandleEngineSkiaMessage(fml::RefPtr<PlatformMessage> message) {
                                                true);
         }
         if (response) {
-          std::vector<uint8_t> data = {1};
+          // The framework side expects this to be valid json encoded as a list.
+          // Return `[true]` to signal success.
+          std::vector<uint8_t> data = {'[', 't', 'r', 'u', 'e', ']'};
           response->Complete(
               std::make_unique<fml::DataMapping>(std::move(data)));
         }
