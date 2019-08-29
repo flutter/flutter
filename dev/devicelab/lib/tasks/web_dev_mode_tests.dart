@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../framework/framework.dart';
+import '../framework/running_processes.dart';
 import '../framework/utils.dart';
 
 final Directory _editedFlutterGalleryDir = dir(path.join(Directory.systemTemp.path, 'edited_flutter_gallery'));
@@ -20,7 +21,17 @@ TaskFunction createWebDevModeTest() {
       '--hot', '-d', 'chrome', '--verbose', '--resident', '--target=lib/main.dart',
     ];
     int hotRestartCount = 0;
-    final Set<String> beforeChromeProcesses = await _collectChromeProccesses();
+    String chromeProcessName;
+    if (Platform.isMacOS) {
+      chromeProcessName = 'Chrome';
+    } else if (Platform.isLinux) {
+      chromeProcessName = 'chrome';
+    } else if (Platform.isWindows) {
+      chromeProcessName = 'chrome.exe';
+    }
+    final Set<String> beforeChromeProcesses = await getRunningProcesses(processName: chromeProcessName)
+      .map((RunningProcessInfo info) => info.pid)
+      .toSet();
     try {
       await inDirectory<void>(flutterDirectory, () async {
         rmTree(_editedFlutterGalleryDir);
@@ -136,10 +147,12 @@ TaskFunction createWebDevModeTest() {
         });
       });
     } finally {
-      final Set<String> afterChromeProcesses = await _collectChromeProccesses();
+      final Set<String> afterChromeProcesses = await getRunningProcesses(processName: chromeProcessName)
+        .map((RunningProcessInfo info) => info.pid)
+        .toSet();
       final Set<String> newProcesses = afterChromeProcesses.difference(beforeChromeProcesses);
       for (String processId in newProcesses) {
-        await Process.run('kill', <String>[processId, '-9']);
+        await killProcess(processId);
       }
     }
     if (hotRestartCount != 1) {
@@ -147,24 +160,4 @@ TaskFunction createWebDevModeTest() {
     }
     return TaskResult.success(null);
   };
-}
-
-/// Collect chrome processes so the test doesn't leak if it exists prematurely.
-Future<Set<String>> _collectChromeProccesses() async {
-  final Set<String> result = <String>{};
-  if (Platform.isMacOS || Platform.isLinux) {
-    final Process ps = await Process.start('ps', <String>['aux']);
-    final Process grep = await Process.start('grep', <String>[Platform.isMacOS ? 'Chrome' : 'chrome']);
-    final Process awk = await Process.start('awk', <String>['{ print \$2 }']);
-    grep.stdout.pipe(awk.stdin);
-    ps.stdout.pipe(grep.stdin);
-    awk.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(result.add);
-    await awk.exitCode;
-  } else if (Platform.isWindows) {
-    // TODO(jonahwilliams): collect windows processes.
-  }
-  return result;
 }
