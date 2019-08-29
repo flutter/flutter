@@ -124,6 +124,11 @@ void recursiveCopy(Directory source, Directory target) {
     else if (entity is File) {
       final File dest = File(path.join(target.path, name));
       dest.writeAsBytesSync(entity.readAsBytesSync());
+      // Preserve executable bit
+      final String modes = entity.statSync().modeString();
+      if (modes != null && modes.contains('x')) {
+        makeExecutable(dest);
+      }
     }
   }
 }
@@ -132,6 +137,23 @@ FileSystemEntity move(FileSystemEntity whatToMove,
     {Directory to, String name}) {
   return whatToMove
       .renameSync(path.join(to.path, name ?? path.basename(whatToMove.path)));
+}
+
+/// Equivalent of `chmod a+x file`
+void makeExecutable(File file) {
+  final ProcessResult result = _processManager.runSync(<String>[
+    'chmod',
+    'a+x',
+    file.path,
+  ]);
+
+  if (result.exitCode != 0) {
+    throw FileSystemException(
+      'Error making ${file.path} executable.\n'
+      '${result.stderr}',
+      file.path,
+    );
+  }
 }
 
 /// Equivalent of `mkdir directory`.
