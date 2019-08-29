@@ -17,19 +17,20 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/mocks.dart' as mocks;
 import '../../src/pubspec_schema.dart';
 
 const String xcodebuild = '/usr/bin/xcodebuild';
 
 void main() {
   group('xcodebuild versioning', () {
-    MockProcessManager mockProcessManager;
+    mocks.MockProcessManager mockProcessManager;
     XcodeProjectInterpreter xcodeProjectInterpreter;
     FakePlatform macOS;
     FileSystem fs;
 
     setUp(() {
-      mockProcessManager = MockProcessManager();
+      mockProcessManager = mocks.MockProcessManager();
       xcodeProjectInterpreter = XcodeProjectInterpreter();
       macOS = fakePlatform('macos');
       fs = MemoryFileSystem();
@@ -148,6 +149,23 @@ void main() {
       when(mockProcessManager.runSync(argThat(contains(xcodebuild))))
           .thenReturn(ProcessResult(0, 1, '', ''));
       expect(xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
+    });
+
+    testUsingContext('build settings flakes', () async {
+      const Duration delay = Duration(seconds: 1);
+      mockProcessManager.processFactory =
+          mocks.flakyProcessFactory(1, delay: delay + const Duration(seconds: 1));
+      expect(await xcodeProjectInterpreter.getBuildSettingsAsync(
+                 '', '', timeout: delay),
+             const <String, String>{});
+      // build settings times out and is killed once, then succeeds.
+      verify(mockProcessManager.killPid(any)).called(1);
+      // The verbose logs should tell us something timed out.
+      expect(testLogger.traceText, contains('timed out'));
+    }, overrides: <Type, Generator>{
+      Platform: () => macOS,
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
     });
   });
   group('Xcode project properties', () {

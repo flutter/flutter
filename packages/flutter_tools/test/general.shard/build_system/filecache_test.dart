@@ -18,6 +18,7 @@ void main() {
     testbed = Testbed(setup: () {
       fs.directory('build').createSync();
       environment = Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
       );
       environment.buildDir.createSync(recursive: true);

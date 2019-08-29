@@ -286,15 +286,7 @@ class TestWindow implements Window {
   }
 
   @override
-  // use frameTimings. https://github.com/flutter/flutter/issues/38838
-  // ignore: deprecated_member_use
-  TimingsCallback get onReportTimings => _window.onReportTimings;
-  @override
-  set onReportTimings(TimingsCallback callback) {
-    // use frameTimings. https://github.com/flutter/flutter/issues/38838
-    // ignore: deprecated_member_use
-    _window.onReportTimings = callback;
-  }
+  Stream<FrameTiming> get frameTimings => _window.frameTimings;
 
   @override
   PointerDataPacketCallback get onPointerDataPacket => _window.onPointerDataPacket;

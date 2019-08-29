@@ -17,6 +17,7 @@ void main() {
   setUp(() {
     testbed = Testbed(setup: () {
       environment = Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
       );
       fs.file(fs.path.join('packages', 'flutter_tools', 'lib', 'src',
@@ -71,6 +72,7 @@ flutter:
       ..writeAsStringSync('name: foo\ndependencies:\n  foo: any\n');
 
     await const FlutterPlugins().build(<File>[], Environment(
+      outputDir: fs.currentDirectory,
       projectDir: fs.currentDirectory,
     ));
 

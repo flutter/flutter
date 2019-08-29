@@ -64,11 +64,18 @@ void ensureDirectoryExists(String filePath) {
   }
 }
 
-/// Recursively copies `srcDir` to `destDir`, invoking [onFileCopied] if
-/// specified for each source/destination file pair.
+/// Creates `destDir` if needed, then recursively copies `srcDir` to `destDir`,
+/// invoking [onFileCopied], if specified, for each source/destination file pair.
 ///
-/// Creates `destDir` if needed.
-void copyDirectorySync(Directory srcDir, Directory destDir, [ void onFileCopied(File srcFile, File destFile) ]) {
+/// Skips files if [shouldCopyFile] returns `false`.
+void copyDirectorySync(
+  Directory srcDir,
+  Directory destDir,
+  {
+    bool shouldCopyFile(File srcFile, File destFile),
+    void onFileCopied(File srcFile, File destFile),
+  }
+) {
   if (!srcDir.existsSync())
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
 
@@ -79,11 +86,18 @@ void copyDirectorySync(Directory srcDir, Directory destDir, [ void onFileCopied(
     final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
     if (entity is File) {
       final File newFile = destDir.fileSystem.file(newPath);
+      if (shouldCopyFile != null && !shouldCopyFile(entity, newFile)) {
+        continue;
+      }
       newFile.writeAsBytesSync(entity.readAsBytesSync());
       onFileCopied?.call(entity, newFile);
     } else if (entity is Directory) {
       copyDirectorySync(
-        entity, destDir.fileSystem.directory(newPath));
+        entity,
+        destDir.fileSystem.directory(newPath),
+        shouldCopyFile: shouldCopyFile,
+        onFileCopied: onFileCopied,
+      );
     } else {
       throw Exception('${entity.path} is neither File nor Directory');
     }
