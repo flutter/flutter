@@ -26,11 +26,10 @@ void main() {
   test('Copies assets to expected directory after building', () => testbed.run(() async {
     when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
       final Environment environment = invocation.positionalArguments[1];
-      environment.buildDir.childFile('app.dill').createSync(recursive: true);
-      environment.buildDir.childFile('isolate_snapshot_data').createSync();
-      environment.buildDir.childFile('vm_snapshot_data').createSync();
-      environment.buildDir.childDirectory('flutter_assets')
-          .childFile('LICENSE').createSync(recursive: true);
+      environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
+      environment.outputDir.childFile('isolate_snapshot_data').createSync();
+      environment.outputDir.childFile('vm_snapshot_data').createSync();
+      environment.outputDir.childFile('LICENSE').createSync(recursive: true);
       return BuildResult(success: true);
     });
     await buildWithAssemble(
@@ -43,6 +42,7 @@ void main() {
     );
     expect(fs.file(fs.path.join('example', 'kernel_blob.bin')).existsSync(), true);
     expect(fs.file(fs.path.join('example', 'LICENSE')).existsSync(), true);
+    expect(fs.file(fs.path.join('example.d')).existsSync(), true);
   }));
 
   test('Handles build system failure', () => testbed.run(() {
