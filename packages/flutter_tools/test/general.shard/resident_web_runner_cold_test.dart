@@ -52,7 +52,7 @@ void main() {
     fs.file('pubspec.yaml').createSync();
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
-    when(mockWebFs.runAndDebug()).thenThrow(StateError('debugging not supported'));
+    when(mockWebFs.runAndDebug(false)).thenThrow(StateError('debugging not supported'));
   }
 
   test('Can successfully run and connect without vmservice', () => testbed.run(() async {
