@@ -2312,12 +2312,13 @@ class EnumProperty<T> extends DiagnosticsProperty<T> {
 /// values, like closures, where presenting the actual object is of dubious
 /// value but where reporting the presence or absence of the value is much more
 /// useful.
-/// 
-/// If there are multiple such values that can fit into a same category (such
-/// as "listeners"), consider using [FlagsSummary].
 ///
 /// See also:
 ///
+///
+///  * [FlagsSummary], which provides similar functionality but accepts multiple
+///    flags under the same name, and is preferred if there are multiple such
+///    values that can fit into a same category (such as "listeners").
 ///  * [FlagProperty], which provides similar functionality describing whether
 ///    a [value] is true or false.
 class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
@@ -2418,31 +2419,33 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   }
 }
 
-/// A summary of multiple properties, showing whether each of them is present
+/// A summary of multiple properties, indicating whether each of them is present
 /// (non-null) or absent (null).
 ///
-/// Each entry of [value] is described by its key. The [ifEmpty]
-/// describes the entire collection of [value] when it contains no non-null
-/// entries. If [ifEmpty] is omitted, [level] will be [DiagnosticLevel.hidden]
-/// when [value] contains no non-null entries.
+/// Each entry of [value] is described by its key. The eventual description will
+/// be a list of keys of non-null entries.
+///
+/// The [ifEmpty] describes the entire collection of [value] when it contains no
+/// non-null entries. If [ifEmpty] is omitted, [level] will be
+/// [DiagnosticLevel.hidden] when [value] contains no non-null entries.
 ///
 /// This kind of diagnostics property is typically used for opaque
 /// values, like closures, where presenting the actual object is of dubious
 /// value but where reporting the presence or absence of the value is much more
 /// useful.
-/// 
-/// If there is only one of such value, consider using [ObjectFlagProperty].
 ///
 /// See also:
 ///
+///  * [ObjectFlagSummary], which provides similar functionality but accepts
+///    only one flag, and is preferred if there is only one entry.
 ///  * [IterableProperty], which provides similar functionality describing
 ///    the values a collection of objects.
 class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
-  /// Create a diagnostics property for values that can be present (non-null) or
-  /// absent (null), but for which the exact value's [Object.toString]
-  /// representation is not very transparent (e.g. a callback).
+  /// Create a summary for multiple properties, indicating whether each of them
+  /// is present (non-null) or absent (null).
   ///
-  /// The [showName] and [level] arguments must not be null.
+  /// The [value], [showName], [showSeparator] and [level] arguments must not be
+  /// null.
   FlagsSummary(
     String name,
     Map<String, T> value, {
