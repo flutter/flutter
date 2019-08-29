@@ -386,8 +386,8 @@ class _Dependencies {
     // outfile1 outfile2 : file1.dart file2.dart file3.dart file\ 4.dart
     final String contents = File(depfilePath).readAsStringSync();
     final List<String> colonSeparated = contents.split(': ');
-    targets = _processList(colonSeparated[0]);
-    dependencies = _processList(colonSeparated[1]);
+    targets = _processList(colonSeparated[0].trim());
+    dependencies = _processList(colonSeparated[1].trim());
   }
 
   final RegExp _separatorExpr = RegExp(r'([^\\]) ');
