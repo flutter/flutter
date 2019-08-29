@@ -34,7 +34,9 @@ import 'package:test_api/test_api.dart' as test_package show TestFailure;
 /// prevent unintended changes as you develop by testing against them.
 ///
 /// Here, a minor code change has altered the appearance of a widget. A golden
-/// file test has identified the change, preventing unintended modifications.
+/// file test has compared the image generated at the time of the test to the
+/// golden master file that was generated earlier. The test has identified the
+/// change, preventing unintended modifications.
 ///
 /// |  Sample     |  Image |
 /// |-------------|--------|
