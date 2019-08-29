@@ -752,6 +752,8 @@ class _ContextMenuSheet extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
+        // TODO(justinmc): Rearrange the Flexible and the spacer based on what
+        // side of the screen the original child was in
         Flexible(
           fit: FlexFit.tight,
           flex: 2,
@@ -774,6 +776,10 @@ class _ContextMenuSheet extends StatelessWidget {
 }
 
 /// A button in a _ContextMenuSheet.
+///
+/// A typical use case is to pass a [Text] as the [child] here, but be sure to
+/// use [TextOverflow.ellipsis] for the [Text.overflow] field if the text may be
+/// long, as without it the text will wrap to the next line.
 class ContextMenuSheetAction extends StatefulWidget {
   /// Construct a ContextMenuSheetAction.
   const ContextMenuSheetAction({
@@ -896,7 +902,9 @@ class _ContextMenuSheetActionState extends State<ContextMenuSheetAction> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  widget.child,
+                  Flexible(
+                    child: widget.child,
+                  ),
                   if (widget.trailingIcon != null)
                     Icon(
                       widget.trailingIcon,
