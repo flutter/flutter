@@ -112,18 +112,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       } else {
         if (_pendingLoader == null) {
           // If worker isolate creation was not started, start creation now.
-          assert(_pendingLoadRequests == null);
-          assert(_loaderErrorHandler == null);
-          _pendingLoadRequests = <_DownloadRequest>[];
-          _pendingLoader = _setupIsolate()..then((Isolate isolate) {
-            _loaderErrorHandler = RawReceivePort((List<dynamic> errorAndStackTrace) {
-              _cleanupDueToError(errorAndStackTrace[0]);
-            });
-            isolate.addErrorListener(_loaderErrorHandler.sendPort);
-            isolate.resume(isolate.pauseCapability);
-          }).catchError((dynamic error, StackTrace stackTrace) {
-            _cleanupDueToError(error);
-          });
+          _spawnAndSetupIsolate();
         }
         // Record download request so it can either send a request when isolate is ready or handle errors.
         _pendingLoadRequests.add(downloadRequest);
@@ -142,6 +131,21 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     }
   }
 
+  void _spawnAndSetupIsolate() {
+    assert(_pendingLoadRequests == null);
+    assert(_loaderErrorHandler == null);
+    _pendingLoadRequests = <_DownloadRequest>[];
+    _pendingLoader = _spawnIsolate()..then((Isolate isolate) {
+      _loaderErrorHandler = RawReceivePort((List<dynamic> errorAndStackTrace) {
+        _cleanupDueToError(errorAndStackTrace[0]);
+      });
+      isolate.addErrorListener(_loaderErrorHandler.sendPort);
+      isolate.resume(isolate.pauseCapability);
+    }).catchError((dynamic error, StackTrace stackTrace) {
+      _cleanupDueToError(error);
+    });
+  }
+
   void _cleanupDueToError(dynamic error) {
     for (_DownloadRequest request in _pendingLoadRequests) {
       request.handleError(error);
@@ -152,8 +156,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     _loaderErrorHandler = null;
   }
 
-
-  Future<Isolate> _setupIsolate() {
+  Future<Isolate> _spawnIsolate() {
     // This is used to get _requestPort [SendPort] that can be used to
     // communicate with worker isolate: when isolate is spawned it will send
     // it's [SendPort] over via this [RawReceivePort].
