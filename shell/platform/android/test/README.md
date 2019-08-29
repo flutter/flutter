@@ -18,7 +18,7 @@ integration tests in other repos.
 3. Add your class to the `@SuiteClasses` annotation in `FlutterTestSuite.java`.
    This makes sure the test is actually executed at run time.
 4. Write your test.
-5. Build and run with `testing/run_tests.py [--type=java] [filter=<test_class_name>]`.
+5. Build and run with `testing/run_tests.py [--type=java] [--java-filter=<test_class_name>]`.
 
 ## Q&A
 
@@ -84,7 +84,7 @@ Tags:
  robolectric_version:<robolectric_version>
 ```
 
-Then update the `DEPS` file (located at /src/flutter/DEPS) to use the new version by pointing to 
+Then update the `DEPS` file (located at /src/flutter/DEPS) to use the new version by pointing to
 your new `last_updated_at` tag.
 
 ```
