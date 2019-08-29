@@ -5,8 +5,10 @@
 package io.flutter.embedding.engine.systemchannels;
 
 import android.content.pm.ActivityInfo;
+import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,129 +34,9 @@ public class PlatformChannel {
   public final MethodChannel channel;
   @Nullable
   private PlatformMessageHandler platformMessageHandler;
-
-  private final MethodChannel.MethodCallHandler parsingMethodCallHandler = new MethodChannel.MethodCallHandler() {
-    @Override
-    public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-      if (platformMessageHandler == null) {
-        // If no explicit PlatformMessageHandler has been registered then we don't
-        // need to forward this call to an API. Return.
-        return;
-      }
-
-      String method = call.method;
-      Object arguments = call.arguments;
-      Log.v(TAG, "Received '" + method + "' message.");
-      try {
-        switch (method) {
-          case "SystemSound.play":
-            try {
-              SoundType soundType = SoundType.fromValue((String) arguments);
-              platformMessageHandler.playSystemSound(soundType);
-              result.success(null);
-            } catch (NoSuchFieldException exception) {
-              // The desired sound type does not exist.
-              result.error("error", exception.getMessage(), null);
-            }
-            break;
-          case "HapticFeedback.vibrate":
-            try {
-              HapticFeedbackType feedbackType = HapticFeedbackType.fromValue((String) arguments);
-              platformMessageHandler.vibrateHapticFeedback(feedbackType);
-              result.success(null);
-            } catch (NoSuchFieldException exception) {
-              // The desired feedback type does not exist.
-              result.error("error", exception.getMessage(), null);
-            }
-            break;
-          case "SystemChrome.setPreferredOrientations":
-            try {
-              int androidOrientation = decodeOrientations((JSONArray) arguments);
-              platformMessageHandler.setPreferredOrientations(androidOrientation);
-              result.success(null);
-            } catch (JSONException | NoSuchFieldException exception) {
-              // JSONException: One or more expected fields were either omitted or referenced an invalid type.
-              // NoSuchFieldException: One or more expected fields were either omitted or referenced an invalid type.
-              result.error("error", exception.getMessage(), null);
-            }
-            break;
-          case "SystemChrome.setApplicationSwitcherDescription":
-            try {
-              AppSwitcherDescription description = decodeAppSwitcherDescription((JSONObject) arguments);
-              platformMessageHandler.setApplicationSwitcherDescription(description);
-              result.success(null);
-            } catch (JSONException exception) {
-              // One or more expected fields were either omitted or referenced an invalid type.
-              result.error("error", exception.getMessage(), null);
-            }
-            break;
-          case "SystemChrome.setEnabledSystemUIOverlays":
-            try {
-              List<SystemUiOverlay> overlays = decodeSystemUiOverlays((JSONArray) arguments);
-              platformMessageHandler.showSystemOverlays(overlays);
-              result.success(null);
-            } catch (JSONException | NoSuchFieldException exception) {
-              // JSONException: One or more expected fields were either omitted or referenced an invalid type.
-              // NoSuchFieldException: One or more of the overlay names are invalid.
-              result.error("error", exception.getMessage(), null);
-            }
-            break;
-          case "SystemChrome.restoreSystemUIOverlays":
-            platformMessageHandler.restoreSystemUiOverlays();
-            result.success(null);
-            break;
-          case "SystemChrome.setSystemUIOverlayStyle":
-            try {
-              SystemChromeStyle systemChromeStyle = decodeSystemChromeStyle((JSONObject) arguments);
-              platformMessageHandler.setSystemUiOverlayStyle(systemChromeStyle);
-              result.success(null);
-            } catch (JSONException | NoSuchFieldException exception) {
-              // JSONException: One or more expected fields were either omitted or referenced an invalid type.
-              // NoSuchFieldException: One or more of the brightness names are invalid.
-              result.error("error", exception.getMessage(), null);
-            }
-            break;
-          case "SystemNavigator.pop":
-            platformMessageHandler.popSystemNavigator();
-            result.success(null);
-            break;
-          case "Clipboard.getData": {
-            String contentFormatName = (String) arguments;
-            ClipboardContentFormat clipboardFormat = null;
-            if (contentFormatName != null) {
-              try {
-                clipboardFormat = ClipboardContentFormat.fromValue(contentFormatName);
-              } catch (NoSuchFieldException exception) {
-                // An unsupported content format was requested. Return failure.
-                result.error("error", "No such clipboard content format: " + contentFormatName, null);
-              }
-            }
-
-            CharSequence clipboardContent = platformMessageHandler.getClipboardData(clipboardFormat);
-            if (clipboardContent != null) {
-              JSONObject response = new JSONObject();
-              response.put("text", clipboardContent);
-              result.success(response);
-            } else {
-              result.success(null);
-            }
-            break;
-          }
-          case "Clipboard.setData": {
-            String clipboardContent = ((JSONObject) arguments).getString("text");
-            platformMessageHandler.setClipboardData(clipboardContent);
-            result.success(null);
-            break;
-          }
-          default:
-            result.notImplemented();
-            break;
-        }
-      } catch (JSONException e) {
-        result.error("error", "JSON error: " + e.getMessage(), null);
-      }
-    }
-  };
+  @NonNull
+  @VisibleForTesting
+  protected final PlatformMethodCallHandler parsingMethodCallHandler = new PlatformMethodCallHandler();
 
   /**
    * Constructs a {@code PlatformChannel} that connects Android to the Dart code
@@ -255,6 +137,40 @@ public class PlatformChannel {
     // Execution should never get this far, but if it does then we default
     // to a portrait orientation.
     return ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+  }
+
+  /**
+   * Decodes a JSONArray of rectangle data into an ArrayList<Rect>.
+   *
+   * @throws JSONException if {@code inputRects} does not contain expected keys and value types.
+   */
+  @NonNull
+  private ArrayList<Rect> decodeRects(@NonNull JSONArray inputRects) throws JSONException {
+    ArrayList<Rect> exclusionRects = new ArrayList<Rect>();
+    for (int i = 0; i < inputRects.length(); i++) {
+      JSONObject rect = inputRects.getJSONObject(i);
+      int top;
+      int right;
+      int bottom;
+      int left;
+
+      try {
+        top = rect.getInt("top");
+        right = rect.getInt("right");
+        bottom = rect.getInt("bottom");
+        left = rect.getInt("left");
+      } catch (JSONException exception) {
+        throw new JSONException(
+          "Incorrect JSON data shape. To set system gesture exclusion rects, \n" +
+          "a JSONObject with top, right, bottom and left values need to be set to int values."
+        );
+      }
+
+      Rect gestureRect = new Rect(left, top, right, bottom);
+      exclusionRects.add(gestureRect);
+    }
+
+    return exclusionRects;
   }
 
   @NonNull
@@ -420,6 +336,12 @@ public class PlatformChannel {
      * clipboard to the given {@code text}.
      */
     void setClipboardData(@NonNull String text);
+
+    /**
+     * The Flutter application would like to set the system gesture exclusion
+     * rects through the given {@code rects}.
+     */
+    void setSystemGestureExclusionRects(@NonNull ArrayList<Rect> rects);
   }
 
   /**
@@ -578,6 +500,147 @@ public class PlatformChannel {
       this.systemNavigationBarColor = systemNavigationBarColor;
       this.systemNavigationBarIconBrightness = systemNavigationBarIconBrightness;
       this.systemNavigationBarDividerColor = systemNavigationBarDividerColor;
+    }
+  }
+
+  /**
+   * A handler of incoming platform channel method calls received from Flutter.
+   * It first determines the platform's API to be called. If it exists, it then
+   * decodes incoming arguments, if needed, into a format that is necessary for the API.
+   */
+  @VisibleForTesting
+  protected class PlatformMethodCallHandler implements MethodChannel.MethodCallHandler {
+    @Override
+    public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+      if (platformMessageHandler == null) {
+        // If no explicit PlatformMessageHandler has been registered then we don't
+        // need to forward this call to an API. Return.
+        return;
+      }
+
+      String method = call.method;
+      Object arguments = call.arguments;
+      Log.v(TAG, "Received '" + method + "' message.");
+      try {
+        switch (method) {
+          case "SystemSound.play":
+            try {
+              SoundType soundType = SoundType.fromValue((String) arguments);
+              platformMessageHandler.playSystemSound(soundType);
+              result.success(null);
+            } catch (NoSuchFieldException exception) {
+              // The desired sound type does not exist.
+              result.error("error", exception.getMessage(), null);
+            }
+            break;
+          case "HapticFeedback.vibrate":
+            try {
+              HapticFeedbackType feedbackType = HapticFeedbackType.fromValue((String) arguments);
+              platformMessageHandler.vibrateHapticFeedback(feedbackType);
+              result.success(null);
+            } catch (NoSuchFieldException exception) {
+              // The desired feedback type does not exist.
+              result.error("error", exception.getMessage(), null);
+            }
+            break;
+          case "SystemChrome.setPreferredOrientations":
+            try {
+              int androidOrientation = decodeOrientations((JSONArray) arguments);
+              platformMessageHandler.setPreferredOrientations(androidOrientation);
+              result.success(null);
+            } catch (JSONException | NoSuchFieldException exception) {
+              // JSONException: One or more expected fields were either omitted or referenced an invalid type.
+              // NoSuchFieldException: One or more expected fields were either omitted or referenced an invalid type.
+              result.error("error", exception.getMessage(), null);
+            }
+            break;
+          case "SystemChrome.setApplicationSwitcherDescription":
+            try {
+              AppSwitcherDescription description = decodeAppSwitcherDescription((JSONObject) arguments);
+              platformMessageHandler.setApplicationSwitcherDescription(description);
+              result.success(null);
+            } catch (JSONException exception) {
+              // One or more expected fields were either omitted or referenced an invalid type.
+              result.error("error", exception.getMessage(), null);
+            }
+            break;
+          case "SystemChrome.setEnabledSystemUIOverlays":
+            try {
+              List<SystemUiOverlay> overlays = decodeSystemUiOverlays((JSONArray) arguments);
+              platformMessageHandler.showSystemOverlays(overlays);
+              result.success(null);
+            } catch (JSONException | NoSuchFieldException exception) {
+              // JSONException: One or more expected fields were either omitted or referenced an invalid type.
+              // NoSuchFieldException: One or more of the overlay names are invalid.
+              result.error("error", exception.getMessage(), null);
+            }
+            break;
+          case "SystemChrome.restoreSystemUIOverlays":
+            platformMessageHandler.restoreSystemUiOverlays();
+            result.success(null);
+            break;
+          case "SystemChrome.setSystemUIOverlayStyle":
+            try {
+              SystemChromeStyle systemChromeStyle = decodeSystemChromeStyle((JSONObject) arguments);
+              platformMessageHandler.setSystemUiOverlayStyle(systemChromeStyle);
+              result.success(null);
+            } catch (JSONException | NoSuchFieldException exception) {
+              // JSONException: One or more expected fields were either omitted or referenced an invalid type.
+              // NoSuchFieldException: One or more of the brightness names are invalid.
+              result.error("error", exception.getMessage(), null);
+            }
+            break;
+          case "SystemNavigator.pop":
+            platformMessageHandler.popSystemNavigator();
+            result.success(null);
+            break;
+          case "SystemGestures.setSystemGestureExclusionRects":
+            if (!(arguments instanceof JSONArray)) {
+              String inputTypeError = "Input type is incorrect. Ensure that a List<Map<String, int>> is passed as the input for SystemGestureExclusionRects.setSystemGestureExclusionRects.";
+              result.error("inputTypeError", inputTypeError, null);
+              break;
+            }
+
+            JSONArray inputRects = (JSONArray) arguments;
+            ArrayList<Rect> decodedRects = decodeRects(inputRects);
+            platformMessageHandler.setSystemGestureExclusionRects(decodedRects);
+            result.success(null);
+            break;
+          case "Clipboard.getData": {
+            String contentFormatName = (String) arguments;
+            ClipboardContentFormat clipboardFormat = null;
+            if (contentFormatName != null) {
+              try {
+                clipboardFormat = ClipboardContentFormat.fromValue(contentFormatName);
+              } catch (NoSuchFieldException exception) {
+                // An unsupported content format was requested. Return failure.
+                result.error("error", "No such clipboard content format: " + contentFormatName, null);
+              }
+            }
+
+            CharSequence clipboardContent = platformMessageHandler.getClipboardData(clipboardFormat);
+            if (clipboardContent != null) {
+              JSONObject response = new JSONObject();
+              response.put("text", clipboardContent);
+              result.success(response);
+            } else {
+              result.success(null);
+            }
+            break;
+          }
+          case "Clipboard.setData": {
+            String clipboardContent = ((JSONObject) arguments).getString("text");
+            platformMessageHandler.setClipboardData(clipboardContent);
+            result.success(null);
+            break;
+          }
+          default:
+            result.notImplemented();
+            break;
+        }
+      } catch (JSONException e) {
+        result.error("error", "JSON error: " + e.getMessage(), null);
+      }
     }
   }
 
