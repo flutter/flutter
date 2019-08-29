@@ -5,10 +5,10 @@
 package io.flutter.plugin.editing;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.Layout;
+import android.text.Layout.Directions;
 import android.text.Selection;
 import android.text.TextPaint;
 import android.view.KeyEvent;
@@ -19,49 +19,35 @@ import android.view.inputmethod.InputMethodManager;
 
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.Log;
+import io.flutter.plugin.common.ErrorLogResult;
+import io.flutter.plugin.common.MethodChannel;
 
 class InputConnectionAdaptor extends BaseInputConnection {
-    @NonNull
     private final View mFlutterView;
     private final int mClient;
-    @NonNull
     private final TextInputChannel textInputChannel;
-    @NonNull
     private final Editable mEditable;
-    @NonNull
-    private final Runnable onConnectionClosed;
     private int mBatchCount;
-    @NonNull
     private InputMethodManager mImm;
-    @NonNull
     private final Layout mLayout;
 
     @SuppressWarnings("deprecation")
     public InputConnectionAdaptor(
-        @NonNull View view,
+        View view,
         int client,
-        @NonNull TextInputChannel textInputChannel,
-        @NonNull Editable editable,
-        @NonNull Runnable onConnectionClosed
+        TextInputChannel textInputChannel,
+        Editable editable
     ) {
         super(view, true);
         mFlutterView = view;
         mClient = client;
         this.textInputChannel = textInputChannel;
         mEditable = editable;
-        this.onConnectionClosed = onConnectionClosed;
         mBatchCount = 0;
         // We create a dummy Layout with max width so that the selection
         // shifting acts as if all text were in one line.
         mLayout = new DynamicLayout(mEditable, new TextPaint(), Integer.MAX_VALUE, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         mImm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-    }
-
-    @Override
-    public void closeConnection() {
-        super.closeConnection();
-        textInputChannel.onConnectionClosed(mClient);
-        onConnectionClosed.run();
     }
 
     // Send the current state of the editable to Flutter.

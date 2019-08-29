@@ -46,13 +46,6 @@ public class TextInputPlugin {
     // target is a platform view. See the comments on lockPlatformViewInputConnection for more details.
     private boolean isInputConnectionLocked;
 
-    private final Runnable onInputConnectionClosed = new Runnable() {
-        @Override
-        public void run() {
-            clearTextInputClient();
-        }
-    };
-
     public TextInputPlugin(View view, @NonNull DartExecutor dartExecutor, @NonNull PlatformViewsController platformViewsController) {
         mView = view;
         mImm = (InputMethodManager) view.getContext().getSystemService(
@@ -226,8 +219,7 @@ public class TextInputPlugin {
             view,
             inputTarget.id,
             textInputChannel,
-            mEditable,
-            onInputConnectionClosed
+            mEditable
         );
         outAttrs.initialSelStart = Selection.getSelectionStart(mEditable);
         outAttrs.initialSelEnd = Selection.getSelectionEnd(mEditable);
