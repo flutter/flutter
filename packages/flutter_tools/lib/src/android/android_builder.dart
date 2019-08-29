@@ -94,12 +94,10 @@ class AndroidBuilderImpl extends AndroidBuilder {
               'for details on how to upgrade the project.'
       );
     }
-
     // Validate that we can find an android sdk.
     if (androidSdk == null) {
       throwToolExit('No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.');
     }
-
     await buildGradleProject(
       project: project,
       androidBuildInfo: androidBuildInfo,
@@ -124,12 +122,10 @@ class AndroidBuilderImpl extends AndroidBuilder {
           'for details on how to upgrade the project.'
       );
     }
-
     // Validate that we can find an android sdk.
     if (androidSdk == null) {
       throwToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
     }
-
     final List<String> validationResult = androidSdk.validateSdkWellFormed();
     if (validationResult.isNotEmpty) {
       for (String message in validationResult) {
@@ -137,7 +133,6 @@ class AndroidBuilderImpl extends AndroidBuilder {
       }
       throwToolExit('Try re-installing or updating your Android SDK.');
     }
-
     return buildGradleProject(
       project: project,
       androidBuildInfo: androidBuildInfo,
