@@ -36,12 +36,7 @@ class IOSDeploy {
     @required List<String> launchArguments,
   }) async {
     final String iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
-    // TODO(fujino): remove fallback once g3 updated
-    const List<String> fallbackIosDeployPath = <String>[
-      '/usr/bin/env',
-      'ios-deploy',
-    ];
-    final List<String> commandList = iosDeployPath != null ? <String>[iosDeployPath] : fallbackIosDeployPath;
+    final List<String> commandList = <String>[iosDeployPath];
     final List<String> launchCommand = <String>[
       ...commandList,
       '--id',
@@ -132,11 +127,11 @@ class IOSDevice extends Device {
     _installerPath = artifacts.getArtifactPath(
       Artifact.ideviceinstaller,
       platform: TargetPlatform.ios,
-    ) ?? 'ideviceinstaller'; // TODO(fujino): remove fallback once g3 updated
+    );
     _iproxyPath = artifacts.getArtifactPath(
       Artifact.iproxy,
       platform: TargetPlatform.ios
-    ) ?? 'iproxy'; // TODO(fujino): remove fallback once g3 updated
+    );
   }
 
   String _installerPath;
