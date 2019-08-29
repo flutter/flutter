@@ -262,6 +262,18 @@ void main() {
         await driver.waitForCondition(const NoPendingFrame(), timeout: _kTestTimeout);
       });
 
+      test('sends the wait for NoPendingPlatformMessages command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'waitForCondition',
+            'timeout': _kSerializedTestTimeout,
+            'conditionName': 'NoPendingPlatformMessagesCondition',
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        await driver.waitForCondition(const NoPendingPlatformMessages(), timeout: _kTestTimeout);
+      });
+
       test('sends the waitForCondition of combined conditions command', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, dynamic>{

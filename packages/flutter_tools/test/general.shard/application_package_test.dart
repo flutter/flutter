@@ -39,17 +39,20 @@ void main() {
     AndroidSdk sdk;
     ProcessManager mockProcessManager;
     MemoryFileSystem fs;
+    Cache mockCache;
     File gradle;
     final Map<Type, Generator> overrides = <Type, Generator>{
       AndroidSdk: () => sdk,
       ProcessManager: () => mockProcessManager,
       FileSystem: () => fs,
+      Cache: () => mockCache,
     };
 
     setUp(() async {
       sdk = MockitoAndroidSdk();
       mockProcessManager = MockitoProcessManager();
       fs = MemoryFileSystem();
+      mockCache = MockCache();
       Cache.flutterRoot = '../..';
       when(sdk.licensesAvailable).thenReturn(true);
       when(mockProcessManager.canRun(any)).thenReturn(true);
@@ -99,6 +102,14 @@ void main() {
       final File gradle = project.android.hostAppGradleRoot.childFile(
         platform.isWindows ? 'gradlew.bat' : 'gradlew',
       )..createSync(recursive: true);
+
+      final Directory gradleWrapperDir = fs.systemTempDirectory.createTempSync('gradle_wrapper.');
+      when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
+
+      fs.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))
+          .createSync(recursive: true);
+      fs.file(fs.path.join(gradleWrapperDir.path, 'gradlew')).writeAsStringSync('irrelevant');
+      fs.file(fs.path.join(gradleWrapperDir.path, 'gradlew.bat')).writeAsStringSync('irrelevant');
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
@@ -606,4 +617,5 @@ const String plistData = '''
 {"CFBundleIdentifier": "fooBundleId"}
 ''';
 
+class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils { }

@@ -66,6 +66,10 @@ class ResidentWebRunner extends ResidentRunner {
   final Device device;
   final FlutterProject flutterProject;
 
+  // Only the debug builds of the web support the service protocol.
+  @override
+  bool get supportsServiceProtocol => isRunningDebug;
+
   WebFs _webFs;
   DebugConnection _debugConnection;
   StreamSubscription<vmservice.Event> _stdOutSub;
