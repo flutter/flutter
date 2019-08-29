@@ -337,6 +337,7 @@ class HtmlView extends StatelessWidget {
     Key key,
     @required this.viewType,
   }) : assert(viewType != null),
+       assert(kIsWeb, '$HtmlView is only available on Flutter Web'),
        super(key: key);
 
   /// The unique identifier for the HTML view type to be embedded by this widget.
@@ -362,7 +363,7 @@ class HtmlView extends StatelessWidget {
   /// Creates the controller and kicks off its initialization.
   _HtmlViewController _createHtmlView(PlatformViewCreationParams params) {
     final _HtmlViewController controller = _HtmlViewController(params.id, viewType);
-    controller._initialize().then((_) => params.onPlatformViewCreated(params.id));
+    controller._initialize().then((_) { params.onPlatformViewCreated(params.id); });
     return controller;
   }
 }
@@ -395,7 +396,7 @@ class _HtmlViewController extends PlatformViewController {
   @override
   void clearFocus() {
     // Currently this does nothing on Flutter Web.
-    // TODO(het): Implement this.
+    // TODO(het): Implement this. See https://github.com/flutter/flutter/issues/39496
   }
 
   @override
