@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_gallery/demo/material/text_form_field_demo.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,8 +17,15 @@ void main() {
     final Finder nameField = find.widgetWithText(TextFormField, 'Name *');
     expect(nameField, findsOneWidget);
 
+    final Finder phoneNumberField = find.widgetWithText(TextFormField, 'Phone Number *');
+    expect(phoneNumberField, findsOneWidget);
+
     final Finder passwordField = find.widgetWithText(TextFormField, 'Password *');
     expect(passwordField, findsOneWidget);
+
+    await tester.enterText(phoneNumberField, '1234567890');
+    await tester.pumpAndSettle();
+    expect(find.text('(123) 456-7890'), findsOneWidget);
 
     await tester.enterText(nameField, '');
     await tester.pumpAndSettle();
