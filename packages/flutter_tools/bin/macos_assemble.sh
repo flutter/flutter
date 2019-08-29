@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 
 # TODO(jonahwilliams): refactor this and xcode_backend.sh into one script
-# once macOS supports the same configuration as iOS.
+# once iOS is using 'assemble'.
 RunCommand() {
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
     echo "♦ $*"
@@ -72,4 +72,5 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     -dBuildMode="${build_mode}"                                             \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
+    --output="${ephemeral_dir}"                                             \
    "${build_mode}_macos_bundle_flutter_assets"
