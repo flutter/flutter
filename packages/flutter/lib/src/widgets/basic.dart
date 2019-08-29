@@ -1184,7 +1184,7 @@ class Transform extends SingleChildRenderObjectWidget {
   ///   child: Container(
   ///     padding: const EdgeInsets.all(8.0),
   ///     color: const Color(0xFFE8581C),
-  ///     child: const Text('Tiny'),
+  ///     child: const Text('Bad Idea Bears'),
   ///   ),
   /// )
   /// ```
