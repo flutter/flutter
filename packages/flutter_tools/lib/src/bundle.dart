@@ -87,6 +87,7 @@ class BundleBuilder {
         mainPath: mainPath,
         flutterProject: flutterProject,
         outputDir: assetDirPath,
+        depfilePath: depfilePath,
       );
       return;
     }
@@ -145,6 +146,7 @@ Future<void> buildWithAssemble({
   @required TargetPlatform targetPlatform,
   @required String mainPath,
   @required String outputDir,
+  @required String depfilePath,
 }) async {
   final Environment environment = Environment(
     projectDir: flutterProject.directory,
@@ -171,14 +173,14 @@ Future<void> buildWithAssemble({
 
   // Output depfile format:
   final StringBuffer buffer = StringBuffer();
-  buffer.write(':');
   for (File outputFile in result.outputFiles) {
     buffer.write('${outputFile.path} ');
   }
+  buffer.write(':');
   for (File inputFile in result.inputFiles) {
     buffer.write('${inputFile.path} ');
   }
-  fs.file(fs.path.join(outputDir, 'snapshot_blob.bin.d'));
+  fs.file(depfilePath).writeAsStringSync(buffer.toString());
 }
 
 Future<AssetBundle> buildAssets({
