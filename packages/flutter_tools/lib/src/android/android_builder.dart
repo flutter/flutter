@@ -35,7 +35,7 @@ abstract class AndroidBuilder {
     @required String target,
   });
 
-  /// Builds an AAB artifact.
+  /// Builds an App Bundle artifact.
   Future<void> buildAab({
     @required FlutterProject project,
     @required AndroidBuildInfo androidBuildInfo,
