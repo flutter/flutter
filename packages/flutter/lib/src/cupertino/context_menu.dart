@@ -68,6 +68,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
   final GlobalKey _childGlobalKey = GlobalKey();
   AnimationController _dummyController;
+  Rect _dummyChildEndRect;
 
   OverlayEntry _lastOverlayEntry;
   double _childOpacity = 1.0;
@@ -96,7 +97,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         sigmaX: 5.0,
         sigmaY: 5.0,
       ),
-      previousChildGlobalKey: _childGlobalKey,
+      previousChildRect: _dummyChildEndRect,
       actions: widget.actions,
       onTap: widget.onTap,
       builder: (BuildContext context) {
@@ -111,7 +112,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   // original position in this widget.
   OverlayEntry get _overlayEntry {
     final Rect childRect = _getRect(_childGlobalKey);
-    final Rect endRect = Rect.fromCenter(
+    _dummyChildEndRect = Rect.fromCenter(
       center: childRect.center,
       width: childRect.width * _kOpenScale,
       height: childRect.height * _kOpenScale,
@@ -124,7 +125,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
           beginRect: childRect,
           child: widget.child,
           controller: _dummyController,
-          endRect: endRect,
+          endRect: _dummyChildEndRect,
         );
       },
     );
@@ -329,13 +330,13 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
     WidgetBuilder builder,
     ui.ImageFilter filter,
     RouteSettings settings,
-    GlobalKey previousChildGlobalKey,
+    Rect previousChildRect,
     VoidCallback onTap,
   }) : assert(actions != null && actions.isNotEmpty),
        _actions = actions,
        _builder = builder,
        _onTap = onTap,
-       _previousChildGlobalKey = previousChildGlobalKey,
+       _previousChildRect = previousChildRect,
        super(
          filter: filter,
          settings: settings,
@@ -346,8 +347,8 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   // possible to get the full screen size in createAnimation? Problem is that
   // this widget hasn't built yet by the time createAnimation is called.
 
-  // The GlobalKey for the child in the previous route.
-  final GlobalKey _previousChildGlobalKey;
+  // The Rect of the child at the moment that the ContextMenu opens.
+  final Rect _previousChildRect;
 
   // Barrier color for a Cupertino modal barrier.
   static const Color _kModalBarrierColor = Color(0x6604040F);
@@ -395,21 +396,20 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
     // position.
     final Rect childRect = _getRect(_childGlobalKey);
 
-    final Rect previousChildRect = _getRect(_previousChildGlobalKey);
-    _rectTween.begin = previousChildRect;
+    _rectTween.begin = _previousChildRect;
     _rectTween.end = childRect;
 
     final Rect sheetRect = _getRect(_sheetGlobalKey);
-    _sheetRectTween.begin = previousChildRect.topLeft & sheetRect.size;
+    _sheetRectTween.begin = _previousChildRect.topLeft & sheetRect.size;
     _sheetRectTween.end = sheetRect;
 
     // When opening, the transition happens from the end of the child's bounce
     // animation to the final state. When closing, it goes from the final state
     // to the original position before the bounce.
     final Rect childRectOriginal = Rect.fromCenter(
-      center: previousChildRect.center,
-      width: previousChildRect.width / _kOpenScale,
-      height: previousChildRect.height / _kOpenScale,
+      center: _previousChildRect.center,
+      width: _previousChildRect.width / _kOpenScale,
+      height: _previousChildRect.height / _kOpenScale,
     );
     _rectTweenReverse.begin = childRectOriginal;
     _rectTweenReverse.end = childRect;
@@ -476,7 +476,7 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
     // While the animation is running, render everything in a Stack so that
     // they're movable.
     if (!animation.isCompleted) {
-      // TODO(justinmc): Use _DummyRect here?
+      // TODO(justinmc): Use _DummyChild here?
       return Stack(
         children: <Widget>[
           Positioned.fromRect(
@@ -490,14 +490,11 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
             ),
           ),
           Positioned.fromRect(
+            key: _childGlobalKey,
             rect: rect,
-            child: Transform.scale(
-              key: _childGlobalKey,
-              scale: _scale,
-              child: FittedBox(
-                fit: BoxFit.cover,
-                child: _builder(context),
-              ),
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: _builder(context),
             ),
           ),
         ],
