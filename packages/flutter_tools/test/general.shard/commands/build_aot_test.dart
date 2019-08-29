@@ -43,6 +43,80 @@ void main() {
     FileSystem: () => memoryFileSystem,
   });
 
+  testUsingContext('build aot prints error if Clang version invalid', () async {
+    final Directory flutterFramework = memoryFileSystem.directory('ios_profile/Flutter.framework')
+      ..createSync(recursive: true);
+    flutterFramework.childFile('Flutter').createSync();
+    final File infoPlist = flutterFramework.childFile('Info.plist')..createSync();
+
+    final RunResult clangResult = RunResult(
+      FakeProcessResult(stdout: 'Apple pie version 10.1.0 (clang-4567.1.1.1)\nBlahBlah\n', stderr: ''),
+      const <String>['foo'],
+    );
+    when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(clangResult));
+    when(mockPlistUtils.getValueFromFile(infoPlist.path, 'ClangVersion')).thenReturn('Apple LLVM version 10.0.1 (clang-1234.1.12.1)');
+
+    await expectToolExitLater(
+      validateBitcode(BuildMode.profile, TargetPlatform.ios),
+      equals('Unable to parse Clang version from "Apple pie version 10.1.0 (clang-4567.1.1.1)". '
+             'Expected a string like "Apple (LLVM|clang) #.#.# (clang-####.#.##.#)".'),
+    );
+  }, overrides: <Type, Generator>{
+    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
+    FileSystem: () => memoryFileSystem,
+    ProcessManager: () => mockProcessManager,
+    Xcode: () => mockXcode,
+    Logger: () => bufferLogger,
+    PlistParser: () => mockPlistUtils,
+  });
+
+  testUsingContext('build aot can parse valid Xcode Clang version (10)', () async {
+    final Directory flutterFramework = memoryFileSystem.directory('ios_profile/Flutter.framework')
+      ..createSync(recursive: true);
+    flutterFramework.childFile('Flutter').createSync();
+    final File infoPlist = flutterFramework.childFile('Info.plist')..createSync();
+
+    final RunResult clangResult = RunResult(
+      FakeProcessResult(stdout: 'Apple LLVM version 10.1.0 (clang-4567.1.1.1)\nBlahBlah\n', stderr: ''),
+      const <String>['foo'],
+    );
+    when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(clangResult));
+    when(mockPlistUtils.getValueFromFile(infoPlist.path, 'ClangVersion')).thenReturn('Apple LLVM version 10.0.1 (clang-1234.1.12.1)');
+
+    await validateBitcode(BuildMode.profile, TargetPlatform.ios);
+
+  }, overrides: <Type, Generator>{
+    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
+    FileSystem: () => memoryFileSystem,
+    ProcessManager: () => mockProcessManager,
+    Xcode: () => mockXcode,
+    Logger: () => bufferLogger,
+    PlistParser: () => mockPlistUtils,
+  });
+
+  testUsingContext('build aot can parse valid Xcode Clang version (11)', () async {
+    final Directory flutterFramework = memoryFileSystem.directory('ios_profile/Flutter.framework')
+      ..createSync(recursive: true);
+    flutterFramework.childFile('Flutter').createSync();
+    final File infoPlist = flutterFramework.childFile('Info.plist')..createSync();
+
+    final RunResult clangResult = RunResult(
+      FakeProcessResult(stdout: 'Apple clang version 11.0.0 (clang-4567.1.1.1)\nBlahBlah\n', stderr: ''),
+      const <String>['foo'],
+    );
+    when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(clangResult));
+    when(mockPlistUtils.getValueFromFile(infoPlist.path, 'ClangVersion')).thenReturn('Apple LLVM version 10.0.1 (clang-1234.1.12.1)');
+
+    await validateBitcode(BuildMode.profile, TargetPlatform.ios);
+  }, overrides: <Type, Generator>{
+    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
+    FileSystem: () => memoryFileSystem,
+    ProcessManager: () => mockProcessManager,
+    Xcode: () => mockXcode,
+    Logger: () => bufferLogger,
+    PlistParser: () => mockPlistUtils,
+  });
+
   testUsingContext('build aot validates Flutter.framework/Flutter was built with same toolchain', () async {
     final Directory flutterFramework = memoryFileSystem.directory('ios_profile/Flutter.framework')
       ..createSync(recursive: true);
