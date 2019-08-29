@@ -484,6 +484,7 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
             child: Opacity(
               opacity: _opacityTween.evaluate(animation),
               child: _ContextMenuSheet(
+                key: _sheetGlobalKey,
                 actions: _actions,
               ),
             ),
@@ -491,6 +492,7 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
           Positioned.fromRect(
             rect: rect,
             child: Transform.scale(
+              key: _childGlobalKey,
               scale: _scale,
               child: FittedBox(
                 fit: BoxFit.cover,
