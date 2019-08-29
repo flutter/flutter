@@ -9,7 +9,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 
 import io.flutter.Log;
@@ -220,17 +219,6 @@ public class TextInputChannel {
     channel.invokeMethod(
         "TextInputClient.performAction",
         Arrays.asList(inputClientId, "TextInputAction.unspecified")
-    );
-  }
-
-  /**
-   * Instructs Flutter to clear the current input client, which ends the text
-   * input interaction with the given input control.
-   */
-  public void onConnectionClosed(int inputClientId) {
-    channel.invokeMethod(
-        "TextInputClient.onConnectionClosed",
-        Collections.singletonList(inputClientId)
     );
   }
 

@@ -413,7 +413,6 @@ action("robolectric_tests") {
     "test/io/flutter/embedding/android/FlutterFragmentTest.java",
     "test/io/flutter/embedding/engine/FlutterEngineCacheTest.java",
     "test/io/flutter/embedding/engine/systemchannels/PlatformChannelTest.java",
-    "test/io/flutter/embedding/engine/systemchannels/TextInputChannelTest.java",
     "test/io/flutter/util/PreconditionsTest.java",
   ]
 
