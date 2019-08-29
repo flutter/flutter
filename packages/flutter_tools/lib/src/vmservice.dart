@@ -20,6 +20,7 @@ import 'base/io.dart' as io;
 import 'base/utils.dart';
 import 'convert.dart' show base64;
 import 'globals.dart';
+import 'version.dart';
 import 'vmservice_record_replay.dart';
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
@@ -171,6 +172,17 @@ class VMService {
         'alias': 'Flutter Tools',
       });
     }
+
+    _peer.registerMethod('getFlutterVersion', (rpc.Parameters params) async {
+      return FlutterVersion().toJson();
+    });
+
+    // If the Flutter Engine doesn't support service registration this will
+    // have no effect
+    _peer.sendNotification('registerService', <String, String>{
+      'service': 'getFlutterVersion',
+      'alias': 'Flutter Tools',
+    });
 
     if (compileExpression != null) {
       _peer.registerMethod('compileExpression', (rpc.Parameters params) async {
