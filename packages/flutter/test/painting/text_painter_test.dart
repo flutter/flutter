@@ -741,7 +741,7 @@ void main() {
 
     painter.layout(maxWidth: 300);
 
-    List<ui.LineMetrics> lines = painter.computeLineMetrics();
+    final List<ui.LineMetrics> lines = painter.computeLineMetrics();
 
     expect(lines.length, 4);
 
