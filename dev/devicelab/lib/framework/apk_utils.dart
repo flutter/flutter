@@ -385,7 +385,7 @@ class _Dependencies {
     // Depfile format:
     // outfile1 outfile2 : file1.dart file2.dart file3.dart file\ 4.dart
     final String contents = File(depfilePath).readAsStringSync();
-    final List<String> colonSeparated = contents.split(': ');
+    final List<String> colonSeparated = contents.split(':');
     targets = _processList(colonSeparated[0].trim());
     dependencies = _processList(colonSeparated[1].trim());
   }
@@ -413,6 +413,6 @@ String validateSnapshotDependency(FlutterProject project, String expectedTarget)
   final _Dependencies deps = _Dependencies(
       path.join(project.rootPath, 'build', 'app', 'intermediates',
           'flutter', 'debug', 'android-arm', 'snapshot_blob.bin.d'));
-  return deps.targets.contains(expectedTarget) ? null :
+  return deps.targets.any((String target) => target.contains(expectedTarget)) ? null :
   'Dependency file should have $expectedTarget as target. Instead has ${deps.targets}';
 }
