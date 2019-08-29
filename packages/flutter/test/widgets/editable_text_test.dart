@@ -1006,22 +1006,22 @@ void main() {
     await tester.pumpWidget(builder());
     await tester.pump(); // An extra pump to allow focus request to go through.
 
-    await tester.showKeyboard(find.byType(EditableText));
-
-    // Verify TextInput.setEditingState and TextInput.setEditableSizeAndTransform are
-    // both fired with updated text when controller is replaced.
     final List<MethodCall> log = <MethodCall>[];
     SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
+
+    await tester.showKeyboard(find.byType(EditableText));
+
+    // Verify TextInput.setEditingState and TextInput.setEditableSizeAndTransform are
+    // both fired with updated text when controller is replaced.
     setState(() {
       currentController = controller2;
     });
     await tester.pump();
 
-    expect(log, hasLength(2));
     expect(
-      log.first,
+      log.lastWhere((MethodCall m) => m.method == 'TextInput.setEditingState'),
       isMethodCall(
         'TextInput.setEditingState',
         arguments: const <String, dynamic>{
@@ -1036,13 +1036,13 @@ void main() {
       ),
     );
     expect(
-      log.last,
+      log.lastWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform'),
       isMethodCall(
         'TextInput.setEditableSizeAndTransform',
-        arguments: const <String, dynamic>{
+        arguments: <String, dynamic>{
           'width': 800,
           'height': 14,
-          'transform': <double>[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 293.0, 0.0, 1.0],
+          'transform': Matrix4.translationValues(0.0, 293.0, 0.0).storage.toList(),
         },
       ),
     );
@@ -2139,13 +2139,56 @@ void main() {
 
     await tester.showKeyboard(find.byType(EditableText));
     final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
-    expect(methodCall, isNotNull);
-    final Map<String, dynamic> arguments = methodCall.arguments;
-    expect(arguments, <String, dynamic>{
-      'width': 800,
-      'height': 600,
-      'transform': <double>[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
+        'width': 800,
+        'height': 600,
+        'transform': Matrix4.identity().storage.toList(),
+      }),
+    );
+  });
+
+  testWidgets('size and transform are sent when they change', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
     });
+
+    const Offset offset = Offset(10.0, 20.0);
+    const Key transformButtonKey = Key('transformButton');
+    await tester.pumpWidget(
+      const TransformedEditableText(
+        offset: offset,
+        transformButtonKey: transformButtonKey,
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
+        'width': 800,
+        'height': 14,
+        'transform': Matrix4.identity().storage.toList(),
+      }),
+    );
+
+    log.clear();
+    await tester.tap(find.byKey(transformButtonKey));
+    await tester.pumpAndSettle();
+
+    // There should be a new platform message updating the transform.
+    methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
+    expect(
+      methodCall,
+      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
+        'width': 800,
+        'height': 14,
+        'transform': Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage.toList(),
+      }),
+    );
   });
 
   testWidgets('text styling info is sent on show keyboard', (WidgetTester tester) async {
@@ -2175,15 +2218,16 @@ void main() {
 
     await tester.showKeyboard(find.byType(EditableText));
     final MethodCall setStyle = log.firstWhere((MethodCall m) => m.method == 'TextInput.setStyle');
-    expect(setStyle, isNotNull);
-    final Map<String, dynamic> style = setStyle.arguments;
-    expect(style, <String, dynamic>{
-      'fontSize': 20.0,
-      'fontFamily': 'Roboto',
-      'fontWeightIndex': 5,
-      'textAlignIndex': 4,
-      'textDirectionIndex': 0,
-    });
+    expect(
+      setStyle,
+      isMethodCall('TextInput.setStyle', arguments: <String, dynamic>{
+        'fontSize': 20.0,
+        'fontFamily': 'Roboto',
+        'fontWeightIndex': 5,
+        'textAlignIndex': 4,
+        'textDirectionIndex': 0,
+      })
+    );
   });
 
   testWidgets('text styling info is sent on style update', (WidgetTester tester) async {
@@ -2246,15 +2290,16 @@ void main() {
 
     // Updated styling information should be sent via TextInput.setStyle method.
     final MethodCall setStyle = log.firstWhere((MethodCall m) => m.method == 'TextInput.setStyle');
-    expect(setStyle, isNotNull);
-    final Map<String, dynamic> style = setStyle.arguments;
-    expect(style, <String, dynamic>{
-      'fontSize': 20.0,
-      'fontFamily': 'Raleway',
-      'fontWeightIndex': 6,
-      'textAlignIndex': 4,
-      'textDirectionIndex': 1,
-    });
+    expect(
+      setStyle,
+      isMethodCall('TextInput.setStyle', arguments: <String, dynamic>{
+        'fontSize': 20.0,
+        'fontFamily': 'Raleway',
+        'fontWeightIndex': 6,
+        'textAlignIndex': 4,
+        'textDirectionIndex': 1,
+      }),
+    );
   });
 
   testWidgets('custom keyboardAppearance is respected', (WidgetTester tester) async {
@@ -2820,6 +2865,57 @@ class CustomStyleEditableTextState extends EditableTextState {
     return TextSpan(
       style: const TextStyle(fontStyle: FontStyle.italic),
       text: widget.controller.value.text,
+    );
+  }
+}
+
+class TransformedEditableText extends StatefulWidget {
+  const TransformedEditableText({ this.offset, this.transformButtonKey });
+
+  final Offset offset;
+  final Key transformButtonKey;
+
+  @override
+  _TransformedEditableTextState createState() => _TransformedEditableTextState();
+}
+
+class _TransformedEditableTextState extends State<TransformedEditableText> {
+  bool _isTransformed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: const MediaQueryData(
+          devicePixelRatio: 1.0
+      ),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Transform.translate(
+              offset: _isTransformed ? widget.offset : Offset.zero,
+              child: EditableText(
+                controller: TextEditingController(),
+                focusNode: FocusNode(),
+                style: Typography(platform: TargetPlatform.android).black.subhead,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+              ),
+            ),
+            RaisedButton(
+              key: widget.transformButtonKey,
+              onPressed: () {
+                setState(() {
+                  _isTransformed = !_isTransformed;
+                });
+              },
+              child: const Text('Toggle Transform'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

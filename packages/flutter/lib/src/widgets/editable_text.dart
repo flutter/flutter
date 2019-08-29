@@ -1347,7 +1347,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           ),
       );
 
-      _updateTextLocation();
+      _updateSizeAndTransform();
       final TextStyle style = widget.style;
       _textInputConnection
         ..setStyle(
@@ -1648,12 +1648,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     updateKeepAlive();
   }
 
-  void _updateTextLocation() {
-    // TODO(mdebbar): Skip the update if nothing has changed since the last paint.
-    _textInputConnection?.setEditableSizeAndTransform(
-      renderEditable.size,
-      renderEditable.getTransformTo(null),
-    );
+  Size _lastSize;
+  Matrix4 _lastTransform;
+
+  void _updateSizeAndTransform() {
+    if (_hasInputConnection) {
+      final Size size = renderEditable.size;
+      final Matrix4 transform = renderEditable.getTransformTo(null);
+      if (size != _lastSize || transform != _lastTransform) {
+        _lastSize = size;
+        _lastTransform = transform;
+        _textInputConnection.setEditableSizeAndTransform(size, transform);
+      }
+      SchedulerBinding.instance
+          .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
+    }
   }
 
   TextDirection get _textDirection {
@@ -1795,7 +1804,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
               devicePixelRatio: _devicePixelRatio,
-              onPaint: _updateTextLocation,
             ),
           ),
         );
@@ -1861,7 +1869,6 @@ class _Editable extends LeafRenderObjectWidget {
     this.textSelectionDelegate,
     this.paintCursorAboveText,
     this.devicePixelRatio,
-    this.onPaint,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);
@@ -1899,7 +1906,6 @@ class _Editable extends LeafRenderObjectWidget {
   final TextSelectionDelegate textSelectionDelegate;
   final double devicePixelRatio;
   final bool paintCursorAboveText;
-  final VoidCallback onPaint;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -1936,7 +1942,7 @@ class _Editable extends LeafRenderObjectWidget {
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
       devicePixelRatio: devicePixelRatio,
-    )..onPaint = onPaint;
+    );
   }
 
   @override
@@ -1971,8 +1977,6 @@ class _Editable extends LeafRenderObjectWidget {
       ..cursorOffset = cursorOffset
       ..textSelectionDelegate = textSelectionDelegate
       ..devicePixelRatio = devicePixelRatio
-      ..paintCursorAboveText = paintCursorAboveText
-      ..onPaint = onPaint
-    ;
+      ..paintCursorAboveText = paintCursorAboveText;
   }
 }

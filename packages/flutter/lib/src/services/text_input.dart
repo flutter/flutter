@@ -672,7 +672,7 @@ class TextInputConnection with ChangeNotifier {
   ///
   /// The values are taken from the size of the render box.
   ///
-  /// 1. [renderBoxSize]: size of the render box.
+  /// 1. [renderBoxSize]: size of the render editable box.
   ///
   /// 2. [transform]: a matrix that maps the local paint coordinate system
   ///                 to the [PipelineOwner.rootNode].

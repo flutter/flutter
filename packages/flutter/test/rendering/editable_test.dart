@@ -104,33 +104,6 @@ void main() {
     );
   });
 
-  test('onPaint method called during paint', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
-    final RenderEditable editable = RenderEditable(
-      text: const TextSpan(
-        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
-        text: 'A',
-      ),
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
-      selection: delegate.textEditingValue.selection,
-      textAlign: TextAlign.start,
-      textDirection: TextDirection.ltr,
-      locale: const Locale('en', 'US'),
-      offset: ViewportOffset.fixed(10.0),
-      textSelectionDelegate: delegate,
-    );
-
-    final List<String> log = <String>[];
-    editable.onPaint = () { log.add('callback'); };
-
-    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
-    expect((Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
-      paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0)),
-    );
-    expect(log, hasLength(1));
-  });
-
   test('Can change cursor color, radius, visibility', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);

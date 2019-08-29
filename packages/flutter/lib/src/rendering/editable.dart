@@ -239,13 +239,6 @@ class RenderEditable extends RenderBox {
   /// Character used to obscure text if [obscureText] is true.
   static const String obscuringCharacter = '•';
 
-  /// Called on the start of paint operation.
-  ///
-  /// This method is called in the beginning of the paint operation. It informs
-  /// the caller that the paint has started. To be used for platform inputs.
-  /// For example, web engine used native input elements for text inputs.
-  VoidCallback onPaint;
-
   /// Called when the selection changes.
   SelectionChangedHandler onSelectionChanged;
 
@@ -1881,9 +1874,6 @@ class RenderEditable extends RenderBox {
   }
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (onPaint != null) {
-      onPaint();
-    }
     _layoutText(constraints.maxWidth);
     if (_hasVisualOverflow)
       context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents);
