@@ -85,7 +85,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   }
 
   void _openContextMenu(Rect childRectEnd) {
-    HapticFeedback.selectionClick();
+    HapticFeedback.lightImpact();
 
     setState(() {
       _childOpacity = 0.0;
