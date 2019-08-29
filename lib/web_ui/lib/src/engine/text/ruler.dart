@@ -86,7 +86,7 @@ class ParagraphGeometricStyle {
       result.write(DomRenderer.defaultFontSize);
     }
     result.write(' ');
-    result.write(effectiveFontFamily);
+    result.write("'$effectiveFontFamily'");
 
     return result.toString();
   }
@@ -227,7 +227,7 @@ class TextDimensions {
   void applyStyle(ParagraphGeometricStyle style) {
     _element.style
       ..fontSize = style.fontSize != null ? '${style.fontSize.floor()}px' : null
-      ..fontFamily = style.effectiveFontFamily
+      ..fontFamily = "'${style.effectiveFontFamily}'"
       ..fontWeight =
           style.fontWeight != null ? fontWeightToCss(style.fontWeight) : null
       ..fontStyle = style.fontStyle != null
