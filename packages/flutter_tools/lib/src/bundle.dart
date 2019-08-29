@@ -13,7 +13,6 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
-import 'build_system/targets/assets.dart';
 import 'build_system/targets/dart.dart';
 import 'compile.dart';
 import 'dart/package_map.dart';
@@ -157,7 +156,10 @@ Future<void> buildWithAssemble({
       kTargetPlatform: getNameForTargetPlatform(targetPlatform),
     }
   );
-  final BuildResult result = await buildSystem.build(const CopyFlutterBundle(), environment);
+  final Target target = buildMode == BuildMode.debug
+    ? const CopyFlutterBundle()
+    : const ReleaseCopyFlutterBundle();
+  final BuildResult result = await buildSystem.build(target, environment);
 
   if (!result.success) {
     for (ExceptionMeasurement measurement in result.exceptions.values) {

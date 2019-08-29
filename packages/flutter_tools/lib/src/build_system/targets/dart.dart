@@ -135,6 +135,31 @@ class CopyFlutterBundle extends Target {
   ];
 }
 
+/// Copies the prebuilt flutter bundle for release mode.
+class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
+  const ReleaseCopyFlutterBundle();
+
+  @override
+  String get name => 'release_flutter_bundle';
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.behavior(AssetOutputBehavior())
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/AssetManifest.json'),
+    Source.pattern('{OUTPUT_DIR}/FontManifest.json'),
+    Source.pattern('{OUTPUT_DIR}/LICENSE'),
+    Source.behavior(AssetOutputBehavior())
+  ];
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+}
+
+
 /// Generate a snapshot of the dart code used in the program.
 class KernelSnapshot extends Target {
   const KernelSnapshot();
@@ -171,7 +196,8 @@ class KernelSnapshot extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
     final String packagesPath = environment.projectDir.childFile('.packages').path;
-    final PackageUriMapper packageUriMapper = PackageUriMapper(targetFile,
+    final String fileUri = fs.file(targetFile).absolute.uri.toFilePath(windows: platform.isWindows);
+    final PackageUriMapper packageUriMapper = PackageUriMapper(fileUri,
         packagesPath, null, null);
 
     final CompilerOutput output = await compiler.compile(
@@ -183,7 +209,7 @@ class KernelSnapshot extends Target {
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
       linkPlatformKernelIn: buildMode == BuildMode.release,
-      mainPath: packageUriMapper.map(targetFile)?.toString() ?? targetFile,
+      mainPath: packageUriMapper.map(fileUri)?.toString() ?? targetFile,
     );
     if (output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');
