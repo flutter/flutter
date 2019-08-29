@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart' show kMinFlingVelocity;
 import 'package:flutter/physics.dart' show FrictionSimulation;
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -14,7 +15,7 @@ import 'colors.dart';
 // The scale of the child at the time that the ContextMenu opens.
 const double _kOpenScale = 1.2;
 
-typedef void _DismissCallback(BuildContext context, double scale);
+typedef void _DismissCallback(BuildContext context, double scale, double opacity);
 
 // Given a GlobalKey, return the Rect of the corresponding RenderBox's
 // paintBounds.
@@ -210,8 +211,6 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      //onLongPressEnd: _onLongPressEnd,
-      //onLongPressStart: _onLongPressStart,
       onTapCancel: _onTapCancel,
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
@@ -342,11 +341,6 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
          settings: settings,
        );
 
-  // A rect that indicates the space available to position the child.
-  // TODO(justinmc): I don't like the idea of needing to pass this in. Is it
-  // possible to get the full screen size in createAnimation? Problem is that
-  // this widget hasn't built yet by the time createAnimation is called.
-
   // The Rect of the child at the moment that the ContextMenu opens.
   final Rect _previousChildRect;
 
@@ -371,8 +365,22 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   bool _externalOffstage = false;
   bool _internalOffstage = false;
 
-  void _onDismiss(BuildContext context, double scale) {
+  // Getting the RenderBox doesn't include the scale from the Transform.scale,
+  // so it's manually accounted for here.
+  static Rect _getScaledRect(GlobalKey globalKey, double scale) {
+    final Rect childRect = _getRect(globalKey);
+    final Size sizeScaled = childRect.size * scale;
+    final Offset offsetScaled = Offset(
+      childRect.left + (childRect.size.width - sizeScaled.width) / 2,
+      childRect.top + (childRect.size.height - sizeScaled.height) / 2,
+    );
+    return offsetScaled & sizeScaled;
+  }
+
+  void _onDismiss(BuildContext context, double scale, double opacity) {
     _scale = scale;
+    _opacityTween.end = opacity;
+    // TODO(justinmc): Also scale down context menu as it dismisses.
     Navigator.of(context).pop();
   }
 
@@ -392,9 +400,9 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
   void _updateTweenRects() {
-    // The final Rect of the child where it has finished animating to its static
-    // position.
-    final Rect childRect = _getRect(_childGlobalKey);
+    final Rect childRect = _scale == null
+      ? _getRect(_childGlobalKey)
+      : _getScaledRect(_childGlobalKey, _scale);
 
     _rectTween.begin = _previousChildRect;
     _rectTween.end = childRect;
@@ -514,11 +522,13 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   }
 }
 
+// The final state of the ContextMenuRoute after animating in and before
+// animating out.
 class _ContextMenuRouteStatic extends StatefulWidget {
   const _ContextMenuRouteStatic({
     Key key,
     this.actions,
-    this.child,
+    @required this.child,
     this.childGlobalKey,
     this.onDismiss,
     this.onTap,
@@ -542,17 +552,22 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   static const double _kMinScale = 0.8;
   static const double _kPadding = 20.0;
 
-  Offset _dragOffset;
-  double _lastScale;
-  AnimationController _moveController;
-  Animation<Offset> _moveAnimation;
-  Animation<double> _scaleAnimation;
+  final GlobalKey _childGlobalKey = GlobalKey();
 
+  Offset _dragOffset;
+  double _lastScale = 1.0;
+  AnimationController _moveController;
+  AnimationController _sheetController;
+  Animation<Offset> _moveAnimation;
+  Animation<double> _sheetScaleAnimation;
+  Animation<double> _sheetOpacityAnimation;
+
+  // The scale of the child changes as a function of the distance it is dragged.
   static double _getScale(Orientation orientation, double maxDragDistance, double dy) {
     if (orientation != Orientation.portrait) {
       return 1.0;
     }
-    if (dy <= 0) {
+    if (dy <= 0.0) {
       // Scale much more slowly when dragging in opposite direction of dismiss.
       final double maxDragDistanceReverse = maxDragDistance * 8;
       return math.max(
@@ -564,6 +579,14 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       _kMinScale,
       (maxDragDistance - dy) / maxDragDistance,
     );
+  }
+
+  // The ContextMenuSheet fades out with distance dragged.
+  static double _getOpacity(double maxDragDistance, double dy) {
+    if (dy <= 0.0) {
+      return 1.0;
+    }
+    return math.max(0.0, (maxDragDistance - dy * 4.0) / maxDragDistance);
   }
 
   void _onPanStart(DragStartDetails details) {
@@ -587,6 +610,12 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         return;
       }
 
+      if (flingIsAway && _sheetController.status != AnimationStatus.forward) {
+        _sheetController.forward();
+      } else if (!flingIsAway && _sheetController.status != AnimationStatus.reverse) {
+        _sheetController.reverse();
+      }
+
       final FrictionSimulation frictionSimulation = FrictionSimulation.through(
         _moveAnimation.value.dy,
         finalPosition,
@@ -608,12 +637,11 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
     // Dismiss if the drag is enough to scale down all the way.
     if (_lastScale == _kMinScale) {
-      widget.onDismiss(context, _lastScale);
+      widget.onDismiss(context, _lastScale, _sheetOpacityAnimation.value);
       return;
     }
 
     // Otherwise animate back home.
-    //_setDragOffset(_moveAnimation.value);
     _moveController.reverse();
   }
 
@@ -627,7 +655,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     if (_moveAnimation.value.dy == 0.0) {
       return;
     }
-    widget.onDismiss(context, _lastScale);
+    widget.onDismiss(context, _lastScale, _sheetOpacityAnimation.value);
   }
 
   void _setDragOffset(Offset dragOffset) {
@@ -646,17 +674,30 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
           curve: Curves.elasticIn,
         ),
       );
+
+      // Fade the ContextMenuSheet out or in, if needed.
+      if (_lastScale == _kMinScale
+          && _sheetController.status != AnimationStatus.forward
+          && _sheetScaleAnimation.value != 0.0) {
+        _sheetController.forward();
+      } else if (_lastScale > _kMinScale
+          && _sheetController.status != AnimationStatus.reverse
+          && _sheetScaleAnimation.value != 1.0) {
+        _sheetController.reverse();
+      }
     });
   }
 
+  // Build the animation for the overall draggable dismissable content.
   Widget _buildAnimation(BuildContext context, Widget child) {
     return Transform.translate(
       offset: _moveAnimation.value,
       child: OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
+          final double maxDragDistance = MediaQuery.of(context).size.height;
           _lastScale = _getScale(
             orientation,
-            MediaQuery.of(context).size.height,
+            maxDragDistance,
             _moveAnimation.value.dy,
           );
           final List<Widget> children =  <Widget>[
@@ -668,8 +709,8 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
                   behavior: HitTestBehavior.opaque,
                   onTap: widget.onTap,
                   child: Transform.scale(
-                    scale: _lastScale,
                     key: widget.childGlobalKey,
+                    scale: _lastScale,
                     child: FittedBox(
                       fit: BoxFit.cover,
                       child: widget.child,
@@ -684,9 +725,9 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
               height: _kPadding,
             ),
             Expanded(
-              child: _ContextMenuSheet(
-                key: widget.sheetGlobalKey,
-                actions: widget.actions,
+              child: AnimatedBuilder(
+                animation: _sheetController,
+                builder: _buildSheetAnimation,
               ),
             ),
           ];
@@ -704,6 +745,21 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     );
   }
 
+  // Build the animation for the ContextMenuSheet.
+  Widget _buildSheetAnimation(BuildContext context, Widget child) {
+    return Transform.scale(
+      alignment: AlignmentDirectional.topStart,
+      scale: _sheetScaleAnimation.value,
+      child: Opacity(
+        opacity: _sheetOpacityAnimation.value,
+        child: _ContextMenuSheet(
+          key: widget.sheetGlobalKey,
+          actions: widget.actions,
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -712,6 +768,25 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       value: 1.0,
       vsync: this,
     );
+    _sheetController = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _sheetScaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _sheetController,
+        curve: Curves.linear,
+        reverseCurve: Curves.easeInBack,
+      ),
+    );
+    _sheetOpacityAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(_sheetController);
     _setDragOffset(Offset.zero);
   }
 
@@ -739,6 +814,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   @override
   void dispose() {
     _moveController.dispose();
+    _sheetController.dispose();
     super.dispose();
   }
 }
