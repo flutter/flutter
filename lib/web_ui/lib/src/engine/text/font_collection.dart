@@ -123,14 +123,27 @@ class _FontManager {
     String asset,
     Map<String, String> descriptors,
   ) {
-    final html.FontFace fontFace = html.FontFace(family, asset, descriptors);
-    _fontLoadingFutures.add(fontFace
-        .load()
-        .then((_) => html.document.fonts.add(fontFace), onError: (dynamic e) {
+    // Safari crashes if you create a [html.FontFace] with a font family that
+    // is not correct CSS syntax. To ensure the font family is accepted on
+    // Safari, wrap it in quotes.
+    // See: https://drafts.csswg.org/css-fonts-3/#font-family-prop
+    if (browserEngine == BrowserEngine.webkit) {
+      family = "'$family'";
+    }
+    // try/catch because `new FontFace` can crash with an improper font family.
+    try {
+      final html.FontFace fontFace = html.FontFace(family, asset, descriptors);
+      _fontLoadingFutures.add(fontFace
+          .load()
+          .then((_) => html.document.fonts.add(fontFace), onError: (dynamic e) {
+        html.window.console
+            .warn('Error while trying to load font family "$family":\n$e');
+        return null;
+      }));
+    } catch (e) {
       html.window.console
-          .warn('Error while trying to load font family "$family":\n$e');
-      return null;
-    }));
+          .warn('Error while loading font family "$family":\n$e');
+    }
   }
 
   /// Returns a [Future] that completes when all fonts that have been
