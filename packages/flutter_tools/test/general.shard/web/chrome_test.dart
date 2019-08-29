@@ -38,7 +38,7 @@ void main() {
     });
     when(processManager.start(<String>[
       'example_chrome',
-      '--user-data-dir=.dart_tool',
+      '--user-data-dir=.dart_tool/chrome_profile',
       '--remote-debugging-port=1234',
       '--disable-background-timer-throttling',
       '--disable-extensions',

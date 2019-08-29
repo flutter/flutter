@@ -79,7 +79,11 @@ class ChromeLauncher {
   /// `skipCheck` does not attempt to make a devtools connection before returning.
   Future<Chrome> launch(String url, { bool headless = false, bool skipCheck = false }) async {
     final String chromeExecutable = findChromeExecutable();
-    final Directory dataDir = fs.directory('.dart_tool');
+    final Directory dataDir = fs.directory('.dart_tool')
+      .childDirectory('chrome_profile');
+    if (!dataDir.existsSync()) {
+      dataDir.createSync(recursive: true);
+    }
     final int port = await os.findFreePort();
     final List<String> args = <String>[
       chromeExecutable,
