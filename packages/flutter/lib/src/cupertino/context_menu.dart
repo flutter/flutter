@@ -578,17 +578,24 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   void _onPanEnd(DragEndDetails details) {
     // If flung, animate a bit before handling the potential dismiss.
     if (details.velocity.pixelsPerSecond.dy.abs() >= kMinFlingVelocity) {
+      final bool flingIsAway = details.velocity.pixelsPerSecond.dy > 0;
+      final double finalPosition = flingIsAway
+        ? _moveAnimation.value.dy + 100.0
+        : 0.0;
+      // If already at the finalPosition, no need to animate anywhere.
+      if (_moveAnimation.value.dy == finalPosition) {
+        return;
+      }
+
       final FrictionSimulation frictionSimulation = FrictionSimulation.through(
         _moveAnimation.value.dy,
-        _moveAnimation.value.dy + 100.0,
+        finalPosition,
         details.velocity.pixelsPerSecond.dy,
         0.0,
       );
-      final bool flingIsAway = details.velocity.pixelsPerSecond.dy > 0;
-      final double end = flingIsAway ? frictionSimulation.finalX : 0.0;
       _moveAnimation = Tween<Offset>(
         begin: Offset(0.0, _moveAnimation.value.dy),
-        end: Offset(0.0, end),
+        end: Offset(0.0, finalPosition),
       ).animate(_moveController);
       _moveController.reset();
       _moveController.duration = const Duration(
@@ -596,7 +603,6 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       );
       _moveController.forward();
       _moveController.addStatusListener(_flingStatusListener);
-
       return;
     }
 
