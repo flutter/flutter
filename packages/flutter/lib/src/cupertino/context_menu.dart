@@ -154,6 +154,8 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       height: childRect.height * _kOpenScale,
     );
 
+    // TODO(justinmc): This overlay pops above things like the appbar when it
+    // shouldn't. Can be solved for Route in the by fading in/out, but not here.
     return OverlayEntry(
       opaque: false,
       builder: (BuildContext context) {
@@ -254,7 +256,8 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       child: Opacity(
         opacity: _childOpacity,
         key: _childGlobalKey,
-        // TODO(justinmc): Round corners of child?
+        // TODO(justinmc): Round corners of child? No, I think provide a
+        // parameter where the user can specify the preview widget.
         child: widget.child,
       ),
     );
@@ -353,8 +356,6 @@ class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin 
   }
 }
 
-// TODO(justinmc): In native, dragging on the menu or the child animates and
-// eventually dismisses.
 /// The open ContextMenu modal.
 @visibleForTesting
 class ContextMenuRoute<T> extends PopupRoute<T> {
@@ -384,6 +385,7 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   final Rect _previousChildRect;
 
   final _ContextMenuOrientation _contextMenuOrientation;
+  Orientation _lastOrientation;
 
   // Barrier color for a Cupertino modal barrier.
   static const Color _kModalBarrierColor = Color(0x6604040F);
@@ -409,18 +411,6 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   bool _externalOffstage = false;
   bool _internalOffstage = false;
 
-  // Getting the RenderBox doesn't include the scale from the Transform.scale,
-  // so it's manually accounted for here.
-  static Rect _getScaledRect(GlobalKey globalKey, double scale) {
-    final Rect childRect = _getRect(globalKey);
-    final Size sizeScaled = childRect.size * scale;
-    final Offset offsetScaled = Offset(
-      childRect.left + (childRect.size.width - sizeScaled.width) / 2,
-      childRect.top + (childRect.size.height - sizeScaled.height) / 2,
-    );
-    return offsetScaled & sizeScaled;
-  }
-
   @override
   final String barrierLabel;
 
@@ -436,6 +426,53 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
+  // Getting the RenderBox doesn't include the scale from the Transform.scale,
+  // so it's manually accounted for here.
+  static Rect _getScaledRect(GlobalKey globalKey, double scale) {
+    final Rect childRect = _getRect(globalKey);
+    final Size sizeScaled = childRect.size * scale;
+    final Offset offsetScaled = Offset(
+      childRect.left + (childRect.size.width - sizeScaled.width) / 2,
+      childRect.top + (childRect.size.height - sizeScaled.height) / 2,
+    );
+    return offsetScaled & sizeScaled;
+  }
+
+  // Get the alignment for the ContextMenuSheet's Transform.scale based on the
+  // ContextMenuOrientation.
+  static AlignmentDirectional _getSheetAlignment(_ContextMenuOrientation contextMenuOrientation) {
+    switch (contextMenuOrientation) {
+      case (_ContextMenuOrientation.center):
+        return AlignmentDirectional.topCenter;
+      case (_ContextMenuOrientation.left):
+        return AlignmentDirectional.topStart;
+      case (_ContextMenuOrientation.right):
+        return AlignmentDirectional.topEnd;
+    }
+  }
+
+  // The place to start the sheetRect animation from.
+  static Rect _getSheetRectBegin(Orientation orientation, _ContextMenuOrientation contextMenuOrientation, Rect childRect, Rect sheetRect) {
+    switch (contextMenuOrientation) {
+      case (_ContextMenuOrientation.center):
+        final Offset target = orientation == Orientation.portrait
+          ? childRect.bottomCenter
+          : childRect.topCenter;
+        final Offset centered = target - Offset(sheetRect.width / 2, 0.0);
+        return centered & sheetRect.size;
+      case (_ContextMenuOrientation.left):
+        final Offset target = orientation == Orientation.portrait
+          ? childRect.bottomLeft
+          : childRect.topLeft;
+        return target & sheetRect.size;
+      case (_ContextMenuOrientation.right):
+        final Offset target = orientation == Orientation.portrait
+          ? childRect.bottomRight
+          : childRect.topRight;
+        return (target - Offset(sheetRect.width, 0.0)) & sheetRect.size;
+    }
+  }
+
   void _onDismiss(BuildContext context, double scale, double opacity) {
     _scale = scale;
     _opacityTween.end = opacity;
@@ -448,19 +485,14 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
     Navigator.of(context).pop();
   }
 
+  // Take measurements on the child and ContextMenuSheet and update the
+  // animation tweens to match.
   void _updateTweenRects() {
     final Rect childRect = _scale == null
       ? _getRect(_childGlobalKey)
       : _getScaledRect(_childGlobalKey, _scale);
-
     _rectTween.begin = _previousChildRect;
     _rectTween.end = childRect;
-
-    final Rect sheetRect = _getRect(_sheetGlobalKey);
-    _sheetRectTween.begin = _previousChildRect.topLeft & sheetRect.size;
-    _sheetRectTween.end = sheetRect;
-    _sheetScaleTween.begin = 0.0;
-    _sheetScaleTween.end = _scale;
 
     // When opening, the transition happens from the end of the child's bounce
     // animation to the final state. When closing, it goes from the final state
@@ -470,6 +502,19 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
       width: _previousChildRect.width / _kOpenScale,
       height: _previousChildRect.height / _kOpenScale,
     );
+
+    final Rect sheetRect = _getRect(_sheetGlobalKey);
+    final Rect sheetRectBegin = _getSheetRectBegin(
+      _lastOrientation,
+      _contextMenuOrientation,
+      childRectOriginal,
+      sheetRect,
+    );
+    _sheetRectTween.begin = sheetRectBegin;
+    _sheetRectTween.end = sheetRect;
+    _sheetScaleTween.begin = 0.0;
+    _sheetScaleTween.end = _scale;
+
     _rectTweenReverse.begin = childRectOriginal;
     _rectTweenReverse.end = childRect;
   }
@@ -498,6 +543,8 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
     _internalOffstage = true;
     _setOffstageInternally();
 
+    // Render one frame offstage in the final position so that we can take
+    // measurements of its layout and then animate to them.
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _updateTweenRects();
       _internalOffstage = false;
@@ -535,10 +582,14 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    // TODO(justinmc): Is it bad to put this OrientationBuilder so high in the
+    // tree? Better way?
     return OrientationBuilder(
       builder: (BuildContext context, Orientation orientation) {
+        _lastOrientation = orientation;
         final bool reverse = animation.status == AnimationStatus.reverse;
         final Rect rect = reverse ? _rectTweenReverse.evaluate(animation) : _rectTween.evaluate(animation);
+        final Rect sheetRect = _sheetRectTween.evaluate(animation);
 
         // TODO(justinmc): Try various types of children in the app. Things
         // contained in a SizedBox, a SizedBox itself, some Text, etc.
@@ -550,12 +601,11 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
           return Stack(
             children: <Widget>[
               Positioned.fromRect(
-                rect: _sheetRectTween.evaluate(animation),
+                rect: sheetRect,
                 child: Opacity(
                   opacity: _sheetOpacity.value,
                   child: Transform.scale(
-                    // TODO(justinmc): alignment should adapt based on side of screen.
-                    alignment: AlignmentDirectional.topStart,
+                    alignment: _getSheetAlignment(_contextMenuOrientation),
                     scale: _sheetScale.value,
                     child: _ContextMenuSheet(
                       key: _sheetGlobalKey,
