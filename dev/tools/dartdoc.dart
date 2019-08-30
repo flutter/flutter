@@ -187,6 +187,7 @@ Future<void> main(List<String> arguments) async {
       'utf',
       'watcher',
       'yaml',
+      'wasm',
     ].join(','),
     '--exclude',
     <String>[
