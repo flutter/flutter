@@ -26,6 +26,14 @@ Rect _getRect(GlobalKey globalKey) {
   return containerOffset & renderBoxContainer.paintBounds.size;
 }
 
+// The context menu arranges itself slightly differently based on the location
+// on the screen of the original child.
+enum _ContextMenuOrientation {
+  center,
+  left,
+  right,
+}
+
 /// A full-screen menu that can be activated for the given child.
 ///
 /// Long pressing or 3d touching on the child will open in up in a full-screen
@@ -85,6 +93,30 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     _dummyController.addStatusListener(_onDummyAnimationStatusChange);
   }
 
+  // Determine the _ContextMenuOrientation based on the location of the original
+  // child in the screen.
+  _ContextMenuOrientation get _contextMenuOrientation {
+    final Rect childRect = _getRect(_childGlobalKey);
+    final double screenWidth = MediaQuery.of(context).size.width;
+
+    final double center = screenWidth / 2;
+    final bool centerDividesChild = childRect.left < center && childRect.right > center;
+    final double minCenterWidth = screenWidth / 4;
+    final double maxCenterWidth = screenWidth / 3;
+    final bool isCenterWidth = childRect.width >= minCenterWidth
+      && childRect.width <= maxCenterWidth;
+    if (centerDividesChild && isCenterWidth) {
+      return _ContextMenuOrientation.center;
+    }
+
+    if (childRect.center.dx > center) {
+      return _ContextMenuOrientation.right;
+    }
+
+    return _ContextMenuOrientation.left;
+  }
+
+  // Push the new route and open the ContextMenu overlay.
   void _openContextMenu(Rect childRectEnd) {
     HapticFeedback.lightImpact();
 
@@ -92,15 +124,18 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       _childOpacity = 0.0;
     });
 
+    final Rect childRect = _getRect(_childGlobalKey);
+
     _route = ContextMenuRoute<void>(
+      actions: widget.actions,
       barrierLabel: 'Dismiss',
       filter: ui.ImageFilter.blur(
         sigmaX: 5.0,
         sigmaY: 5.0,
       ),
-      previousChildRect: _dummyChildEndRect,
-      actions: widget.actions,
       onTap: widget.onTap,
+      contextMenuOrientation: _contextMenuOrientation,
+      previousChildRect: _dummyChildEndRect,
       builder: (BuildContext context) {
         return widget.child;
       },
@@ -328,13 +363,16 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
     @required List<ContextMenuSheetAction> actions,
     WidgetBuilder builder,
     ui.ImageFilter filter,
-    RouteSettings settings,
-    Rect previousChildRect,
     VoidCallback onTap,
+    @required _ContextMenuOrientation contextMenuOrientation,
+    Rect previousChildRect,
+    RouteSettings settings,
   }) : assert(actions != null && actions.isNotEmpty),
+       assert(contextMenuOrientation != null),
        _actions = actions,
        _builder = builder,
        _onTap = onTap,
+       _contextMenuOrientation = contextMenuOrientation,
        _previousChildRect = previousChildRect,
        super(
          filter: filter,
@@ -343,6 +381,8 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
 
   // The Rect of the child at the moment that the ContextMenu opens.
   final Rect _previousChildRect;
+
+  final _ContextMenuOrientation _contextMenuOrientation;
 
   // Barrier color for a Cupertino modal barrier.
   static const Color _kModalBarrierColor = Color(0x6604040F);
@@ -494,54 +534,62 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    final bool reverse = animation.status == AnimationStatus.reverse;
-    final Rect rect = reverse ? _rectTweenReverse.evaluate(animation) : _rectTween.evaluate(animation);
+    return OrientationBuilder(
+      builder: (BuildContext context, Orientation orientation) {
+        final bool reverse = animation.status == AnimationStatus.reverse;
+        final Rect rect = reverse ? _rectTweenReverse.evaluate(animation) : _rectTween.evaluate(animation);
 
-    // TODO(justinmc): Try various types of children in the app. Things
-    // contained in a SizedBox, a SizedBox itself, some Text, etc.
+        // TODO(justinmc): Try various types of children in the app. Things
+        // contained in a SizedBox, a SizedBox itself, some Text, etc.
 
-    // While the animation is running, render everything in a Stack so that
-    // they're movable.
-    if (!animation.isCompleted) {
-      // TODO(justinmc): Use _DummyChild here?
-      return Stack(
-        children: <Widget>[
-          Positioned.fromRect(
-            rect: _sheetRectTween.evaluate(animation),
-            child: Opacity(
-              opacity: _sheetOpacity.value,
-              child: Transform.scale(
-                // TODO(justinmc): alignment should adapt based on side of screen.
-                alignment: AlignmentDirectional.topStart,
-                scale: _sheetScale.value,
-                child: _ContextMenuSheet(
-                  key: _sheetGlobalKey,
-                  actions: _actions,
+        // While the animation is running, render everything in a Stack so that
+        // they're movable.
+        if (!animation.isCompleted) {
+          // TODO(justinmc): Use _DummyChild here?
+          return Stack(
+            children: <Widget>[
+              Positioned.fromRect(
+                rect: _sheetRectTween.evaluate(animation),
+                child: Opacity(
+                  opacity: _sheetOpacity.value,
+                  child: Transform.scale(
+                    // TODO(justinmc): alignment should adapt based on side of screen.
+                    alignment: AlignmentDirectional.topStart,
+                    scale: _sheetScale.value,
+                    child: _ContextMenuSheet(
+                      key: _sheetGlobalKey,
+                      actions: _actions,
+                      contextMenuOrientation: _contextMenuOrientation,
+                      orientation: orientation,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          Positioned.fromRect(
-            key: _childGlobalKey,
-            rect: rect,
-            child: FittedBox(
-              fit: BoxFit.cover,
-              child: _builder(context),
-            ),
-          ),
-        ],
-      );
-    }
+              Positioned.fromRect(
+                key: _childGlobalKey,
+                rect: rect,
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: _builder(context),
+                ),
+              ),
+            ],
+          );
+        }
 
-    // When the animation is done, just render everything in a static layout in
-    // the final position.
-    return _ContextMenuRouteStatic(
-      actions: _actions,
-      child: _builder(context),
-      childGlobalKey: _childGlobalKey,
-      onDismiss: _onDismiss,
-      onTap: _onTap,
-      sheetGlobalKey: _sheetGlobalKey,
+        // When the animation is done, just render everything in a static layout in
+        // the final position.
+        return _ContextMenuRouteStatic(
+          actions: _actions,
+          child: _builder(context),
+          childGlobalKey: _childGlobalKey,
+          contextMenuOrientation: _contextMenuOrientation,
+          onDismiss: _onDismiss,
+          onTap: _onTap,
+          orientation: orientation,
+          sheetGlobalKey: _sheetGlobalKey,
+        );
+      },
     );
   }
 }
@@ -554,16 +602,22 @@ class _ContextMenuRouteStatic extends StatefulWidget {
     this.actions,
     @required this.child,
     this.childGlobalKey,
+    @required this.contextMenuOrientation,
     this.onDismiss,
     this.onTap,
+    @required this.orientation,
     this.sheetGlobalKey,
-  }) : super(key: key);
+  }) : assert(contextMenuOrientation != null),
+       assert(orientation != null),
+       super(key: key);
 
   final List<ContextMenuSheetAction> actions;
   final Widget child;
   final GlobalKey childGlobalKey;
+  final _ContextMenuOrientation contextMenuOrientation;
   final _DismissCallback onDismiss;
   final VoidCallback onTap;
+  final Orientation orientation;
   final GlobalKey sheetGlobalKey;
 
   @override
@@ -682,6 +736,76 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     widget.onDismiss(context, _lastScale, _sheetOpacityAnimation.value);
   }
 
+  Alignment _getChildAlignment(Orientation orientation, _ContextMenuOrientation contextMenuOrientation) {
+    switch (contextMenuOrientation) {
+      case (_ContextMenuOrientation.center):
+        return orientation == Orientation.portrait
+          ? Alignment.bottomCenter
+          : Alignment.topRight;
+      case (_ContextMenuOrientation.left):
+        return orientation == Orientation.portrait
+          ? Alignment.bottomCenter
+          : Alignment.topRight;
+      case (_ContextMenuOrientation.right):
+        return orientation == Orientation.portrait
+          ? Alignment.bottomCenter
+          : Alignment.topLeft;
+    }
+  }
+
+  // The order and alignment of the ContextMenuSheet and the child depend on
+  // both the orientation of the screen as well as the position on the screen of
+  // the original child.
+  List<Widget> _getChildren(Orientation orientation, _ContextMenuOrientation contextMenuOrientation) {
+    final Expanded child = Expanded(
+      child: Align(
+        alignment: _getChildAlignment(
+          widget.orientation,
+          widget.contextMenuOrientation,
+        ),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: Transform.scale(
+            key: widget.childGlobalKey,
+            scale: _lastScale,
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: widget.child,
+            ),
+          ),
+        ),
+      ),
+    );
+    final Container spacer = Container(
+      width: _kPadding,
+      height: _kPadding,
+    );
+    final Expanded sheet = Expanded(
+      child: AnimatedBuilder(
+        animation: _sheetController,
+        builder: _buildSheetAnimation,
+        child: _ContextMenuSheet(
+          key: widget.sheetGlobalKey,
+          actions: widget.actions,
+          contextMenuOrientation: widget.contextMenuOrientation,
+          orientation: widget.orientation,
+        ),
+      ),
+    );
+
+    switch (contextMenuOrientation) {
+      case (_ContextMenuOrientation.center):
+        return <Widget>[child, spacer, sheet];
+      case (_ContextMenuOrientation.left):
+        return <Widget>[child, spacer, sheet];
+      case (_ContextMenuOrientation.right):
+        return orientation == Orientation.portrait
+          ? <Widget>[child, spacer, sheet]
+          : <Widget>[sheet, spacer, child];
+    }
+  }
+
   void _setDragOffset(Offset dragOffset) {
     final double endX = _kPadding * dragOffset.dx / 400.0;
     setState(() {
@@ -714,59 +838,27 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
   // Build the animation for the overall draggable dismissable content.
   Widget _buildAnimation(BuildContext context, Widget child) {
+    final double maxDragDistance = MediaQuery.of(context).size.height;
+    _lastScale = _getScale(
+      widget.orientation,
+      maxDragDistance,
+      _moveAnimation.value.dy,
+    );
+    final List<Widget> children = _getChildren(
+      widget.orientation,
+      widget.contextMenuOrientation,
+    );
+
     return Transform.translate(
       offset: _moveAnimation.value,
-      child: OrientationBuilder(
-        builder: (BuildContext context, Orientation orientation) {
-          final double maxDragDistance = MediaQuery.of(context).size.height;
-          _lastScale = _getScale(
-            orientation,
-            maxDragDistance,
-            _moveAnimation.value.dy,
-          );
-          final List<Widget> children =  <Widget>[
-            Expanded(
-              child: Align(
-                alignment: orientation == Orientation.portrait
-                  ? Alignment.bottomCenter
-                  : Alignment.topRight,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: widget.onTap,
-                  child: Transform.scale(
-                    key: widget.childGlobalKey,
-                    scale: _lastScale,
-                    child: FittedBox(
-                      fit: BoxFit.cover,
-                      child: widget.child,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // Create space between items in both Row and Column.
-            Container(
-              width: _kPadding,
-              height: _kPadding,
-            ),
-            Expanded(
-              child: AnimatedBuilder(
-                animation: _sheetController,
-                builder: _buildSheetAnimation,
-              ),
-            ),
-          ];
-
-          return orientation == Orientation.portrait ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: children,
-            )
-            : Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: children,
-            );
-        },
-      ),
+      child: widget.orientation == Orientation.portrait ? Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
+        )
+        : Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
+        ),
     );
   }
 
@@ -774,14 +866,11 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   Widget _buildSheetAnimation(BuildContext context, Widget child) {
     return Transform.scale(
       // TODO(justinmc): Should adapt based on side of screen.
-      alignment: AlignmentDirectional.topStart,
+      alignment: AlignmentDirectional.topEnd,
       scale: _sheetScaleAnimation.value,
       child: Opacity(
         opacity: _sheetOpacityAnimation.value,
-        child: _ContextMenuSheet(
-          key: widget.sheetGlobalKey,
-          actions: widget.actions,
-        ),
+        child: child,
       ),
     );
   }
@@ -850,35 +939,76 @@ class _ContextMenuSheet extends StatelessWidget {
   _ContextMenuSheet({
     Key key,
     @required this.actions,
+    @required _ContextMenuOrientation contextMenuOrientation,
+    @required Orientation orientation,
   }) : assert(actions != null && actions.isNotEmpty),
+       assert(contextMenuOrientation != null),
+       assert(orientation != null),
+       _contextMenuOrientation = contextMenuOrientation,
+       _orientation = orientation,
        super(key: key);
 
   final List<ContextMenuSheetAction> actions;
+  final _ContextMenuOrientation _contextMenuOrientation;
+  final Orientation _orientation;
+
+  // Get the children, whose order depends on orientation and
+  // contextMenuOrientation.
+  List<Widget> get children {
+    final Flexible menu = Flexible(
+      fit: FlexFit.tight,
+      flex: 2,
+      child: IntrinsicHeight(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: actions,
+          ),
+        ),
+      ),
+    );
+
+    switch (_contextMenuOrientation) {
+      case (_ContextMenuOrientation.left):
+        return <Widget>[
+          menu,
+          const Spacer(
+            flex: 1,
+          ),
+        ];
+      case (_ContextMenuOrientation.right):
+        return <Widget>[
+          const Spacer(
+            flex: 1,
+          ),
+          menu,
+        ];
+      case (_ContextMenuOrientation.center):
+        return _orientation == Orientation.portrait
+          ? <Widget>[
+            const Spacer(
+              flex: 1,
+            ),
+            menu,
+            const Spacer(
+              flex: 1,
+            ),
+          ]
+        : <Widget>[
+            menu,
+            const Spacer(
+              flex: 1,
+            ),
+          ];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        // TODO(justinmc): Rearrange the Flexible and the spacer based on what
-        // side of the screen the original child was in
-        Flexible(
-          fit: FlexFit.tight,
-          flex: 2,
-          child: IntrinsicHeight(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: actions,
-              ),
-            ),
-          ),
-        ),
-        const Spacer(
-          flex: 1,
-        ),
-      ],
+      children: children,
     );
   }
 }
