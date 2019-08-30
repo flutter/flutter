@@ -414,9 +414,14 @@ class ArchiveCreator {
   }
 
   /// Create a zip archive from the directory source.
-  Future<String> _createZipArchive(File output, Directory source) {
+  Future<String> _createZipArchive(File output, Directory source) async {
     List<String> commandLine;
     if (platform.isWindows) {
+      // Unhide the .git folder, https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/attrib.
+      await _processRunner.runProcess(
+        <String>['attrib', '-h', '.git'],
+        workingDirectory: Directory(source.absolute.path),
+      );
       commandLine = <String>[
         '7za',
         'a',

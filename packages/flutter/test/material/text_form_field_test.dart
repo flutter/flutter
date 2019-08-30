@@ -32,6 +32,28 @@ void main() {
     expect(textFieldWidget.textAlign, alignment);
   });
 
+  testWidgets('Passes textAlignVertical to underlying TextField', (WidgetTester tester) async {
+    const TextAlignVertical textAlignVertical = TextAlignVertical.bottom;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              textAlignVertical: textAlignVertical,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.textAlignVertical, textAlignVertical);
+  });
+
   testWidgets('Passes textInputAction to underlying TextField', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

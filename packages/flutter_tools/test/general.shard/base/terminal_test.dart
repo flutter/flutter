@@ -123,7 +123,15 @@ void main() {
       terminalUnderTest = TestTerminal();
     });
 
+    testUsingContext('character prompt throws if usesTerminalUi is false', () async {
+      expect(terminalUnderTest.promptForCharInput(
+        <String>['a', 'b', 'c'],
+        prompt: 'Please choose something',
+      ), throwsA(isInstanceOf<StateError>()));
+    });
+
     testUsingContext('character prompt', () async {
+      terminalUnderTest.usesTerminalUi = true;
       mockStdInStream = Stream<String>.fromFutures(<Future<String>>[
         Future<String>.value('d'), // Not in accepted list.
         Future<String>.value('\n'), // Not in accepted list
@@ -143,6 +151,7 @@ void main() {
     });
 
     testUsingContext('default character choice without displayAcceptedCharacters', () async {
+       terminalUnderTest.usesTerminalUi = true;
       mockStdInStream = Stream<String>.fromFutures(<Future<String>>[
         Future<String>.value('\n'), // Not in accepted list
       ]).asBroadcastStream();
