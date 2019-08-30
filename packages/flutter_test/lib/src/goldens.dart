@@ -38,11 +38,11 @@ import 'package:test_api/test_api.dart' as test_package show TestFailure;
 /// golden master file that was generated earlier. The test has identified the
 /// change, preventing unintended modifications.
 ///
-/// |  Sample     |  Image |
-/// |-------------|--------|
-/// |  Golden Master Image     | ![A golden master image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_masterImage.png)  |
-/// |  Difference | ![The pixel difference](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_isolatedDiff.png)  |
-/// |  Test image after modification       | ![Test image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_testImage.png) |
+/// |  Sample                        |  Image |
+/// |--------------------------------|--------|
+/// |  Golden Master Image           | ![A golden master image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_masterImage.png)  |
+/// |  Difference                    | ![The pixel difference](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_isolatedDiff.png)  |
+/// |  Test image after modification | ![Test image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_testImage.png) |
 ///
 /// See also:
 ///
