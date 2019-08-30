@@ -170,12 +170,13 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   void _onDummyAnimationStatusChange(AnimationStatus animationStatus) {
     switch (animationStatus) {
       case AnimationStatus.dismissed:
-        setState(() {
-          _childOpacity = 1.0;
-        });
+        if (_route == null) {
+          setState(() {
+            _childOpacity = 1.0;
+          });
+        }
         _lastOverlayEntry?.remove();
         _lastOverlayEntry = null;
-        _dummyController.reset();
         break;
 
       case AnimationStatus.completed:
