@@ -190,6 +190,12 @@ class DeviceManager {
           if (isDeviceSupportedForProject(device, flutterProject))
             device
       ];
+    } else if (devices.length == 1 &&
+             !hasSpecifiedDeviceId &&
+             !isDeviceSupportedForProject(devices.single, flutterProject)) {
+      // If there is only a single device but it is not supported, then return
+      // early.
+      return <Device>[];
     }
 
     // If there are still multiple devices and the user did not specify to run
