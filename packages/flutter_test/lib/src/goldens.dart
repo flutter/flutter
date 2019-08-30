@@ -40,9 +40,9 @@ import 'package:test_api/test_api.dart' as test_package show TestFailure;
 ///
 /// |  Sample     |  Image |
 /// |-------------|--------|
-/// |  Master     | ![A golden master image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_masterImage.png)  |
+/// |  Golden Master Image     | ![A golden master image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_masterImage.png)  |
 /// |  Difference | ![The pixel difference](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_isolatedDiff.png)  |
-/// |  Test       | ![Test image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_testImage.png) |
+/// |  Test image after modification       | ![Test image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_testImage.png) |
 ///
 /// See also:
 ///
