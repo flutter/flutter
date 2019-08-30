@@ -1361,7 +1361,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       onNeedPaint: _handleViewNeedsPaint,
       window: window,
     );
-    renderView.scheduleInitialFrame();
+    renderView.prepareInitialFrame();
   }
 
   @override
