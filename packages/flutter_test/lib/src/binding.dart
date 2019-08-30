@@ -834,8 +834,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
     super.initInstances();
-    window.onBeginFrame = null;
-    window.onDrawFrame = null;
+    window.onBeginFrame = (Duration _) {};
+    window.onDrawFrame = () {};
     _mockFlutterAssets();
   }
 
