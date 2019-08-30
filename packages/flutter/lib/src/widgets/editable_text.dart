@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
+import 'dart:ui' as ui hide TextStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -1095,6 +1095,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (oldWidget.readOnly && _hasFocus)
         _openInputConnection();
     }
+    if (widget.style != oldWidget.style) {
+      final TextStyle style = widget.style;
+      _textInputConnection?.setStyle(
+        fontFamily: style.fontFamily,
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+        textDirection: _textDirection,
+        textAlign: widget.textAlign,
+      );
+    }
   }
 
   @override
@@ -1335,7 +1345,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textCapitalization: widget.textCapitalization,
               keyboardAppearance: widget.keyboardAppearance,
           ),
-      )..setEditingState(localValue);
+      );
+
+      _updateSizeAndTransform();
+      final TextStyle style = widget.style;
+      _textInputConnection
+        ..setStyle(
+          fontFamily: style.fontFamily,
+          fontSize: style.fontSize,
+          fontWeight: style.fontWeight,
+          textDirection: _textDirection,
+          textAlign: widget.textAlign,
+        )
+        ..setEditingState(localValue);
     }
     _textInputConnection.show();
   }
@@ -1626,6 +1648,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     updateKeepAlive();
   }
 
+  Size _lastSize;
+  Matrix4 _lastTransform;
+
+  void _updateSizeAndTransform() {
+    if (_hasInputConnection) {
+      final Size size = renderEditable.size;
+      final Matrix4 transform = renderEditable.getTransformTo(null);
+      if (size != _lastSize || transform != _lastTransform) {
+        _lastSize = size;
+        _lastTransform = transform;
+        _textInputConnection.setEditableSizeAndTransform(size, transform);
+      }
+      SchedulerBinding.instance
+          .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
+    }
+  }
+
   TextDirection get _textDirection {
     final TextDirection result = widget.textDirection ?? Directionality.of(context);
     assert(result != null, '$runtimeType created without a textDirection and with no ambient Directionality.');
@@ -1659,6 +1698,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Returns `false` if a toolbar couldn't be shown, such as when the toolbar
   /// is already shown, or when no text selection currently exists.
   bool showToolbar() {
+    // Web is using native dom elements to enable clipboard functionality of the
+    // toolbar: copy, paste, select, cut. It might also provide additional
+    // functionality depending on the browser (such as translate). Due to this
+    // we should not show a Flutter toolbar for the editable text elements.
+    if (kIsWeb) {
+      return false;
+    }
+
     if (_selectionOverlay == null || _selectionOverlay.toolbarIsVisible) {
       return false;
     }
