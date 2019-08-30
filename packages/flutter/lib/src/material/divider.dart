@@ -117,9 +117,20 @@ class Divider extends StatelessWidget {
   /// ```
   /// {@end-tool}
   static BorderSide createBorderSide(BuildContext context, { Color color, double width }) {
+    final Color themeColor = context != null ? (DividerTheme.of(context).color ?? Theme.of(context).dividerColor) : null;
+    final double themeWidth = context != null ? DividerTheme.of(context).thickness : null;
+    final double resolvedWidth = width ?? themeWidth ?? 0.0;
+
+    // Prevent assertion since it is possible that context is null and no color
+    // is specified.
+    if (color == null && themeColor == null) {
+      return BorderSide(
+        width: resolvedWidth,
+      );
+    }
     return BorderSide(
-      color: color ?? DividerTheme.of(context).color ?? Theme.of(context).dividerColor,
-      width: width ?? DividerTheme.of(context).thickness ?? 0.0,
+      color: color ?? themeColor,
+      width: resolvedWidth,
     );
   }
 
