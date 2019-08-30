@@ -363,8 +363,8 @@ bool DartComponentController::Main() {
 
   tonic::DartMicrotaskQueue::StartForCurrentThread();
 
-  std::vector<std::string> arguments =
-      std::move(startup_info_.launch_info.arguments);
+  std::vector<std::string> arguments = std::move(
+      startup_info_.launch_info.arguments.value_or(std::vector<std::string>()));
 
   stdoutfd_ = SetupFileDescriptor(std::move(startup_info_.launch_info.out));
   stderrfd_ = SetupFileDescriptor(std::move(startup_info_.launch_info.err));

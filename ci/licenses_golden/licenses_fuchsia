@@ -1,4 +1,4 @@
-Signature: 9dbdb1d3d162d9adf9fb3793d1e63831
+Signature: fbe6e9df1f96968ffc57a0eb657384ac
 
 UNUSED LICENSES:
 
@@ -10,12 +10,13 @@ USED LICENSES:
 LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/COPYRIGHT.musl
 TYPE: LicenseType.mit
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_object_lifetimes.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_stateless_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_thread_safety.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_image_pipe_swapchain.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_object_tracker.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_parameter_validation.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_threading.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
@@ -25,6 +26,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
@@ -217,12 +219,13 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_object_lifetimes.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_stateless_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_thread_safety.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_image_pipe_swapchain.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_object_tracker.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_parameter_validation.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_threading.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
@@ -232,6 +235,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
@@ -452,6 +456,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2.hal/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castauth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
@@ -459,6 +465,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.crash/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.ethernet/meta.json
@@ -475,7 +482,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/meta.json
@@ -515,6 +521,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async/meta.json
@@ -544,10 +551,10 @@ FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_core_validation.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_image_pipe_swapchain.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_object_tracker.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_parameter_validation.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_standard_validation.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_threading.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_khronos_validation.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_object_lifetimes.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_stateless_validation.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_thread_safety.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_unique_objects.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/meta.json
@@ -683,688 +690,15 @@ obstacle to adoption, that text has been removed.
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
-ORIGIN: ../../../fuchsia/sdk/linux/COPYRIGHT.vulkan
-TYPE: LicenseType.vulkan
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_core_validation.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_image_pipe_swapchain.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_object_tracker.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_parameter_validation.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_threading.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_unique_objects.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmemfs.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/alloca.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/ar.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/ftp.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/inet.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/nameser.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/nameser_compat.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/telnet.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/tftp.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/endian.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/ipc.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/reg.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/aarch64/stat.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/endian.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/errno.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/fenv.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/io.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/ipc.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/limits.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/msg.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/posix.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/reg.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/sem.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/shm.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/socket.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/stat.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/statfs.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/endian.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/io.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/ipc.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/reg.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/bits/x86_64/stat.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/byteswap.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/complex.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/cpio.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/crypt.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/ctype.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/dirent.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/dlfcn.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/elf.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/endian.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/err.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/errno.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/features.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fmtmsg.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/fnmatch.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/getopt.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/glob.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/grp.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/iconv.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/ifaddrs.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/inttypes.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/iso646.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/langinfo.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/libgen.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/limits.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/link.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/locale.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/malloc.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/math.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/memory.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/monetary.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/net/ethernet.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/net/if.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/net/if_arp.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/net/route.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/netdb.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/netinet/ether.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/netinet/icmp6.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/netinet/if_ether.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/netinet/igmp.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/netinet/in.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/netinet/in_systm.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/netinet/ip.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/netinet/ip6.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/netinet/ip_icmp.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/netinet/tcp.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/netinet/udp.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/netpacket/packet.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/nl_types.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/paths.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/poll.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/pthread.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/pwd.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/regex.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/resolv.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/search.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/semaphore.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/spawn.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/stdio.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/stdlib.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/string.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/strings.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/stropts.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/acct.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/auxv.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/dir.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/errno.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/eventfd.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/fsuid.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/io.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/klog.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/mman.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/mount.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/msg.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/mtio.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/personality.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/quota.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/reboot.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/reg.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/select.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/sem.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/shm.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/signalfd.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/socket.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/stat.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/statfs.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/statvfs.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/swap.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/syslog.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/termios.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/time.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/timeb.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/timerfd.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/timex.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ttydefaults.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/types.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/uio.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/un.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/utsname.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/vfs.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sys/wait.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/sysexits.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/syslog.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/tar.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/termios.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/threads.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/time.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/uchar.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/unistd.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/utime.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/values.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/wait.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/wchar.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/wctype.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/wordexp.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/Scrt1.o
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libc.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libdl.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libm.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libpthread.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/librt.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_core_validation.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_image_pipe_swapchain.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_object_tracker.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_parameter_validation.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_threading.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_unique_objects.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmemfs.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsyslog.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-engine.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-provider-so.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libvulkan.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/alloca.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/ar.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/ftp.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/inet.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/nameser.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/nameser_compat.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/telnet.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/tftp.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/assert.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/endian.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/ipc.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/reg.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/aarch64/stat.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/alltypes.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/endian.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/errno.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/fenv.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/io.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/ipc.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/limits.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/msg.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/posix.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/reg.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/sem.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/shm.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/socket.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/stat.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/statfs.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/termios.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/endian.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/fenv.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/io.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/ipc.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/reg.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/bits/x86_64/stat.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/byteswap.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/complex.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/cpio.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/crypt.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/ctype.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/dirent.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/dlfcn.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/elf.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/endian.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/err.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/errno.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/features.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fenv.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fmtmsg.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/fnmatch.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/getopt.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/glob.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/grp.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/iconv.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/ifaddrs.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/inttypes.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/iso646.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/langinfo.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/libgen.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/limits.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/link.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/locale.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/malloc.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/math.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/memory.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/monetary.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/net/ethernet.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/net/if.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/net/if_arp.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/net/route.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/netdb.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/netinet/ether.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/netinet/icmp6.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/netinet/if_ether.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/netinet/igmp.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/netinet/in.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/netinet/in_systm.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/netinet/ip.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/netinet/ip6.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/netinet/ip_icmp.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/netinet/tcp.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/netinet/udp.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/netpacket/packet.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/nl_types.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/paths.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/poll.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/pthread.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/pwd.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/regex.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/resolv.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sched.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/search.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/semaphore.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/setjmp.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/spawn.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/stdio.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/stdlib.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/string.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/strings.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/stropts.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/acct.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/auxv.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/dir.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/errno.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/eventfd.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/fcntl.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/file.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/fsuid.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/io.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ioctl.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ipc.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/klog.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/mman.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/mount.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/msg.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/mtio.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/param.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/personality.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/poll.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/quota.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/random.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/reboot.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/reg.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/select.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/sem.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/shm.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/signal.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/signalfd.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/socket.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/stat.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/statfs.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/statvfs.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/stropts.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/swap.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/syslog.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/termios.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/time.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/timeb.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/timerfd.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/times.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/timex.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ttydefaults.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/types.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/uio.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/un.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/utsname.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/vfs.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sys/wait.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/sysexits.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/syslog.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/tar.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/termios.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/threads.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/time.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/uchar.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/ucontext.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/unistd.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/utime.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/values.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/wait.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/wchar.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/wctype.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/wordexp.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/Scrt1.o
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libc.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libdl.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libm.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libpthread.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/librt.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/layout_logic/_layout_logic.dart
-FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fidl/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_media/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular_testing/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/sl4f/meta.json
-FILE: ../../../fuchsia/sdk/linux/dart/zircon/meta.json
-FILE: ../../../fuchsia/sdk/linux/device/generic-arm64.json
-FILE: ../../../fuchsia/sdk/linux/device/generic-x64.json
-FILE: ../../../fuchsia/sdk/linux/device/qemu-arm64.json
-FILE: ../../../fuchsia/sdk/linux/device/qemu-x64.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera.common/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castauth/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.crash/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.ethernet/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.address.space/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.control/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.pipe/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ledger/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.auth/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.testing/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.netstack/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.posix.socket/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.simplecamera/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.speech/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/async/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fdio/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl-async/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/memfs/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/svc/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/sync/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/trace/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_core_validation.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_image_pipe_swapchain.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_object_tracker.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_parameter_validation.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_standard_validation.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_threading.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_unique_objects.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/zx/meta.json
-----------------------------------------------------------------------------------------------------
-This file contains other licenses and their copyrights that appear in this
-repository besides Apache 2.0 license.
-
-===================================================
-
-  Copyright (c) 2009 Dave Gamble
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
-
-===================================================
-
-    Copyright Kevlin Henney, 1997, 2003, 2012. All rights reserved.
-
-    Permission to use, copy, modify, and distribute this software and its
-    documentation for any purpose is hereby granted without fee, provided
-    that this copyright and permissions notice appear in all copies and
-    derivatives.
-
-    This software is supplied "as is" without express or implied warranty.
-
-    But that said, if there are any problems please get in touch.
-
-===================================================
-Copyright 2008, Google Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-===================================================
-Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-* Redistributions of source code must retain the above copyright
-  notice, this list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright
-  notice, this list of conditions and the following disclaimer in the
-  documentation and/or other materials provided with the distribution.
-
-* Neither the names of Kitware, Inc., the Insight Software Consortium,
-  nor the names of their contributors may be used to endorse or promote
-  products derived from this software without specific prior written
-  permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-===================================================
-Copyright (c) 2011 Fredrik Höglund <fredrik@kde.org>
-Copyright (c) 2008 Helio Chissini de Castro, <helio@kde.org>
-Copyright (c) 2007 Matthias Kretz, <kretz@kde.org>
-
-Redistribution and use is allowed according to the terms of the BSD license.
-
-===================================================
-/// Copyright (c) 2005 - 2014 G-Truc Creation (www.g-truc.net)
-/// Permission is hereby granted, free of charge, to any person obtaining a copy
-/// of this software and associated documentation files (the "Software"), to deal
-/// in the Software without restriction, including without limitation the rights
-/// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-/// copies of the Software, and to permit persons to whom the Software is
-/// furnished to do so, subject to the following conditions:
-
-/// The above copyright notice and this permission notice shall be included in
-/// all copies or substantial portions of the Software.
-
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-/// THE SOFTWARE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_object_lifetimes.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_stateless_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_thread_safety.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_image_pipe_swapchain.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_object_tracker.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_parameter_validation.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_threading.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
@@ -1374,6 +708,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
@@ -1568,12 +903,13 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_object_lifetimes.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_stateless_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_thread_safety.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_image_pipe_swapchain.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_object_tracker.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_parameter_validation.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_threading.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
@@ -1583,6 +919,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
@@ -1851,6 +1188,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/setui.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/sl4f_client.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/ssh.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/storage.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/test.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/webdriver.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/zircon/meta.json
@@ -1871,6 +1209,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/peer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/address.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/appearance.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/device_class.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/id.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/uuid.fidl
@@ -1878,6 +1217,11 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera.common/common.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera.common/virtual.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2.hal/hal.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2.hal/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/manager.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/stream.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castauth/cast_auth.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castauth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/cast_setup.fidl
@@ -1890,11 +1234,14 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/deprecated_time
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/deprecated_time_zone.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/factory.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/annotation.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/attachment.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/crash_reporter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/styles.fidl
@@ -1914,6 +1261,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ledger/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/volume_control.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/content_decryption.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/error.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/license_session.fidl
@@ -1921,8 +1269,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/provisioning.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/services.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions/image.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/discovery.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/images.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/meta.json
@@ -1951,12 +1297,14 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.posix.socket/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.posix.socket/socket.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/accessibility.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/audio.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/display.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/do_not_disturb.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/intl.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/privacy.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/settings.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/setup.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/system.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.simplecamera/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.speech/meta.json
@@ -1976,6 +1324,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/keys.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/layout.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/modifiers.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
@@ -1986,18 +1335,24 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_token.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/context.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/cookie.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/debug.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/frame.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/navigation.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/url_request_rewrite_rules.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/executor.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/executor.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-default/include/lib/async-loop/default.h
+FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async/meta.json
@@ -2026,6 +1381,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/barrier.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/constructors_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/in_place_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/storage_internal.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/string_view.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/utility_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
@@ -2100,10 +1456,10 @@ FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/vmo_file.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_core_validation.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_image_pipe_swapchain.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_object_tracker.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_parameter_validation.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_standard_validation.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_threading.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_khronos_validation.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_object_lifetimes.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_stateless_validation.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_thread_safety.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_unique_objects.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/clock.h
@@ -2145,12 +1501,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/LICENSE.vulkan
 TYPE: LicenseType.apache
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_object_lifetimes.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_stateless_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_thread_safety.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_image_pipe_swapchain.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_object_tracker.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_parameter_validation.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_threading.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
@@ -2160,6 +1517,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
@@ -2352,12 +1710,13 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libm.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libzircon.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_object_lifetimes.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_stateless_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_thread_safety.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_image_pipe_swapchain.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_object_tracker.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_parameter_validation.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_threading.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
@@ -2367,6 +1726,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
@@ -2587,6 +1947,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2.hal/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castauth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
@@ -2594,6 +1956,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.crash/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.ethernet/meta.json
@@ -2610,7 +1973,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/meta.json
@@ -2650,6 +2012,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async/meta.json
@@ -2679,183 +2042,221 @@ FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_core_validation.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_image_pipe_swapchain.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_object_tracker.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_parameter_validation.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_standard_validation.json
-FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_threading.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_khronos_validation.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_object_lifetimes.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_stateless_validation.json
+FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_thread_safety.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_unique_objects.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/meta.json
 ----------------------------------------------------------------------------------------------------
-Apache License
+The majority of files in this project use the Apache 2.0 License.
+There are a few exceptions and their license can be found in the source.
+Any license deviations from Apache 2.0 are "more permissive" licenses.
 
-Version 2.0, January 2004
+===========================================================================================
 
-http://www.apache.org/licenses
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses
 
-TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
-1. Definitions.
+   1. Definitions.
 
-"License" shall mean the terms and conditions for use, reproduction, and distribution as
-defined by Sections 1 through 9 of this document.
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
 
-"Licensor" shall mean the copyright owner or entity authorized by the copyright owner
-that is granting the License.
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
 
-"Legal Entity" shall mean the union of the acting entity and all other entities that
-control, are controlled by, or are under common control with that entity. For the
-purposes of this definition, "control" means (i) the power, direct or indirect, to
-cause the direction or management of such entity, whether by contract or otherwise,
-or (ii) ownership of fifty percent (50%) or more of the outstanding shares, or
-(iii) beneficial ownership of such entity.
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
 
-"You" (or "Your") shall mean an individual or Legal Entity exercising permissions
-granted by this License.
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
 
-"Source" form shall mean the preferred form for making modifications, including but not
-limited to software source code, documentation source, and configuration files.
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
 
-"Object" form shall mean any form resulting from mechanical transformation or
-translation of a Source form, including but not limited to compiled object code,
-generated documentation, and conversions to other media types.
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
 
-"Work" shall mean the work of authorship, whether in Source or Object form, made
-available under the License, as indicated by a copyright notice that is included in or
-attached to the work (an example is provided in the Appendix below).
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
 
-"Derivative Works" shall mean any work, whether in Source or Object form, that is based
-on (or derived from) the Work and for which the editorial revisions, annotations,
-elaborations, or other modifications represent, as a whole, an original work of
-authorship. For the purposes of this License, Derivative Works shall not include works
-that remain separable from, or merely link (or bind by name) to the interfaces of, the
-Work and Derivative Works thereof.
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
 
-"Contribution" shall mean any work of authorship, including the original version of the
-Work and any modifications or additions to that Work or Derivative Works thereof, that
-is intentionally submitted to Licensor for inclusion in the Work by the copyright owner
-or by an individual or Legal Entity authorized to submit on behalf of the copyright owner.
-For the purposes of this definition, "submitted" means any form of electronic, verbal,
-or written communication sent to the Licensor or its representatives, including but not
-limited to communication on electronic mailing lists, source code control systems, and
-issue tracking systems that are managed by, or on behalf of, the Licensor for the purpose
-of discussing and improving the Work, but excluding communication that is conspicuously
-marked or otherwise designated in writing by the copyright owner as "Not a Contribution."
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
 
-"Contributor" shall mean Licensor and any individual or Legal Entity on behalf of whom a
-Contribution has been received by Licensor and subsequently incorporated within the Work.
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
 
-2. Grant of Copyright License. Subject to the terms and conditions of this License, each
-Contributor hereby grants to You a perpetual, worldwide, non-exclusive, no-charge,
-royalty-free, irrevocable copyright license to reproduce, prepare Derivative Works of,
-publicly display, publicly perform, sublicense, and distribute the Work and such
-Derivative Works in Source or Object form.
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
 
-3. Grant of Patent License. Subject to the terms and conditions of this License, each
-Contributor hereby grants to You a perpetual, worldwide, non-exclusive, no-charge,
-royalty-free, irrevocable (except as stated in this section) patent license to make,
-have made, use, offer to sell, sell, import, and otherwise transfer the Work, where such
-license applies only to those patent claims licensable by such Contributor that are
-necessarily infringed by their Contribution(s) alone or by combination of their
-Contribution(s) with the Work to which such Contribution(s) was submitted. If You
-institute patent litigation against any entity (including a cross-claim or counterclaim
-in a lawsuit) alleging that the Work or a Contribution incorporated within the Work
-constitutes direct or contributory patent infringement, then any patent licenses granted
-to You under this License for that Work shall terminate as of the date such litigation
-is filed.
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
 
-4. Redistribution. You may reproduce and distribute copies of the Work or Derivative
-Works thereof in any medium, with or without modifications, and in Source or Object form,
-provided that You meet the following conditions:
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
 
-You must give any other recipients of the Work or Derivative Works a copy of this
-License; and
-You must cause any modified files to carry prominent notices stating that You changed
-the files; and
-You must retain, in the Source form of any Derivative Works that You distribute, all
-copyright, patent, trademark, and attribution notices from the Source form of the Work,
-excluding those notices that do not pertain to any part of the Derivative Works; and
-If the Work includes a "NOTICE" text file as part of its distribution, then any
-Derivative Works that You distribute must include a readable copy of the attribution
-notices contained within such NOTICE file, excluding those notices that do not pertain
-to any part of the Derivative Works, in at least one of the following places: within a
-NOTICE text file distributed as part of the Derivative Works; within the Source form or
-documentation, if provided along with the Derivative Works; or, within a display
-generated by the Derivative Works, if and wherever such third-party notices normally
-appear. The contents of the NOTICE file are for informational purposes only and do not
-modify the License. You may add Your own attribution notices within Derivative Works
-that You distribute, alongside or as an addendum to the NOTICE text from the Work,
-provided that such additional attribution notices cannot be construed as modifying
-the License.
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
 
-You may add Your own copyright statement to Your modifications and may provide
-additional or different license terms and conditions for use, reproduction, or
-distribution of Your modifications, or for any such Derivative Works as a whole,
-provided Your use, reproduction, and distribution of the Work otherwise complies with
-the conditions stated in this License.
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
 
-5. Submission of Contributions. Unless You explicitly state otherwise, any Contribution
-intentionally submitted for inclusion in the Work by You to the Licensor shall be under
-the terms and conditions of this License, without any additional terms or conditions.
-Notwithstanding the above, nothing herein shall supersede or modify the terms of any
-separate license agreement you may have executed with Licensor regarding such
-Contributions.
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
 
-6. Trademarks. This License does not grant permission to use the trade names,
-trademarks, service marks, or product names of the Licensor, except as required for
-reasonable and customary use in describing the origin of the Work and reproducing the
-content of the NOTICE file.
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
 
-7. Disclaimer of Warranty. Unless required by applicable law or agreed to in writing,
-Licensor provides the Work (and each Contributor provides its Contributions) on an
-"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied,
- including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT,
- MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for
- determining the appropriateness of using or redistributing the Work and assume any
- risks associated with Your exercise of permissions under this License.
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
 
-8. Limitation of Liability. In no event and under no legal theory, whether in tort
-(including negligence), contract, or otherwise, unless required by applicable law (such
-as deliberate and grossly negligent acts) or agreed to in writing, shall any Contributor
-be liable to You for damages, including any direct, indirect, special, incidental, or
-consequential damages of any character arising as a result of this License or out of the
-use or inability to use the Work (including but not limited to damages for loss of
-goodwill, work stoppage, computer failure or malfunction, or any and all other
-commercial damages or losses), even if such Contributor has been advised of the
-possibility of such damages.
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
 
-9. Accepting Warranty or Additional Liability. While redistributing the Work or
-Derivative Works thereof, You may choose to offer, and charge a fee for, acceptance of
-support, warranty, indemnity, or other liability obligations and/or rights consistent
-with this License. However, in accepting such obligations, You may act only on Your own
-behalf and on Your sole responsibility, not on behalf of any other Contributor, and only
-if You agree to indemnify, defend, and hold each Contributor harmless for any liability
-incurred by, or claims asserted against, such Contributor by reason of your accepting
-any such warranty or additional liability.
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
 
-END OF TERMS AND CONDITIONS
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
 
-APPENDIX: HOW TO APPLY THE APACHE LICENSE TO YOUR WORK
-To apply the Apache License to your work, attach the following boilerplate notice, with
-the fields enclosed by brackets "[]" replaced with your own identifying information.
-(Don't include the brackets!) The text should be enclosed in the appropriate comment
-syntax for the file format. We also recommend that a file or class name and description
-of purpose be included on the same "printed page" as the copyright notice for easier
-identification within third-party archives.
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
 
-Copyright [yyyy] [name of copyright owner]
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+   END OF TERMS AND CONDITIONS
 
-    http://www.apache.org/licenses/LICENSE-2.0
+   APPENDIX: How to apply the Apache License to your work.
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
 ====================================================================================================
 
 ====================================================================================================
@@ -2994,10 +2395,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/logger.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/gain_control.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/player.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/source_manager.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions/playback_capabilities.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions/playback_status.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions/service.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions/session.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_device_enumerator.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_renderer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/metadata.fidl
@@ -3016,7 +2413,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story/story_visibility_sta
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/client.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/connectivity.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/net.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/socket.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/launcher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/resolver.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.simplecamera/simple_camera.fidl
@@ -3040,7 +2436,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/commands.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/scenic.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/session.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/snapshooter.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/snapshot.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/commands.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/commands.fidl
@@ -3259,9 +2655,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/clipboard/clipboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/component/component_context.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/component/message_queue.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/config/config.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/context/context_engine.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/context/debug.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/context/metadata.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/entity/entity.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/entity/entity_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/entity/entity_reference_factory.fidl
@@ -3278,8 +2671,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story/story_shell.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story/story_state.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/surface/container.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/surface/surface.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/user_intelligence/intelligence_services.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/user_intelligence/scope.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/user_intelligence/user_intelligence_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/mdns.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.speech/speech_to_text.fidl
@@ -3583,7 +2974,6 @@ LIBRARY: fuchsia_sdk
 ORIGIN: ../../../third_party/tonic/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/assert.h
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/boot/bootdata.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/boot/netboot.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/compiler.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/device/ioctl-wrapper.h
@@ -3612,7 +3002,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/reso
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/types.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/types.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/assert.h
-FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/boot/bootdata.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/boot/netboot.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/compiler.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/device/ioctl-wrapper.h
@@ -3649,10 +3038,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/seeking_reader.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/basemgr/base_shell.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/basemgr/user_provider.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/context/context_reader.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/context/context_writer.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/context/value.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/context/value_type.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module/module_context.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module/module_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/session/focus.fidl
@@ -3729,4 +3114,4 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
-Total license count: 13
+Total license count: 12
