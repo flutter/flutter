@@ -72,7 +72,7 @@ def main():
   ])
 
   if args.strip_bitcode:
-    subprocess.check_call(['xcrun', 'bitcode_strip', '-m', linker_out, '-o', linker_out])
+    subprocess.check_call(['xcrun', 'bitcode_strip', '-r', linker_out, '-o', linker_out])
 
   if args.dsym:
     dsym_out = os.path.splitext(fat_framework)[0] + '.dSYM'
