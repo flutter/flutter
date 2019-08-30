@@ -265,6 +265,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.shape,
     this.clipBehavior,
     this.isScrollControlled = false,
+    this.enableDrag,
   }) : assert(isScrollControlled != null),
        super(key: key);
 
@@ -274,6 +275,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   final double elevation;
   final ShapeBorder shape;
   final Clip clipBehavior;
+  final bool enableDrag;
 
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
@@ -314,6 +316,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
             child: CustomSingleChildLayout(
               delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
               child: BottomSheet(
+                enableDrag: widget.enableDrag ?? true,
                 animationController: widget.route._animationController,
                 onClosing: () {
                   if (widget.route.isCurrent) {
@@ -343,6 +346,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.elevation,
     this.shape,
     this.clipBehavior,
+    this.enableDrag,
     @required this.isScrollControlled,
     RouteSettings settings,
   }) : assert(isScrollControlled != null),
@@ -355,6 +359,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final double elevation;
   final ShapeBorder shape;
   final Clip clipBehavior;
+  final bool enableDrag;
 
   @override
   Duration get transitionDuration => _bottomSheetDuration;
@@ -391,7 +396,8 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
         elevation: elevation,
         shape: shape,
         clipBehavior: clipBehavior,
-        isScrollControlled: isScrollControlled
+        isScrollControlled: isScrollControlled,
+        enableDrag: enableDrag,
       ),
     );
     if (theme != null)
@@ -448,6 +454,7 @@ Future<T> showModalBottomSheet<T>({
   Clip clipBehavior,
   bool isScrollControlled = false,
   bool useRootNavigator = false,
+  bool enableDrag = true,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -465,6 +472,7 @@ Future<T> showModalBottomSheet<T>({
     elevation: elevation ?? Theme.of(context).bottomSheetTheme.modalElevation,
     shape: shape,
     clipBehavior: clipBehavior,
+    enableDrag: enableDrag,
   ));
 }
 
