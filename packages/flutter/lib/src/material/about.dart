@@ -39,7 +39,7 @@ import 'theme.dart';
 /// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
 ///
 /// ```dart
-///class AboutDialogSample extends StatelessWidget {
+///
 ///  final String _applicationVersion = 'August 2019';
 ///  final String _applicationLegalese = '© 2019 The Chromium Authors';
 ///  final String _applicationName ='Show About Example';
@@ -103,7 +103,7 @@ import 'theme.dart';
 ///      )
 ///    ];
 ///  }
-///}
+///
 /// ```
 /// {@end-tool}
 ///
