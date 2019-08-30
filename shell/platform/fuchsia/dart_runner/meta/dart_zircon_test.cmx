@@ -4,8 +4,8 @@
     },
     "sandbox": {
         "features": [
+            "deprecated-ambient-replace-as-executable",
             "root-ssl-certificates"
-            "deprecated-ambient-replace-as-executable"
         ],
         "services": [
             "fuchsia.sys.Environment"

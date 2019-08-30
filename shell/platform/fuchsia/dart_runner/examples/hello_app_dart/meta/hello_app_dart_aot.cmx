@@ -3,9 +3,7 @@
         "data": "data/hello_app_dart_aot"
     },
     "sandbox": {
-        "features": [
-            "deprecated-ambient-replace-as-executable"
-        ],
+        "features": [],
         "services": [
             "fuchsia.sys.Environment"
         ]

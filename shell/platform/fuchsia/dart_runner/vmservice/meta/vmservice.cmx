@@ -3,14 +3,12 @@
         "data": "data/vmservice"
     },
     "sandbox": {
-        "features": [
-            "deprecated-ambient-replace-as-executable"
-        ],
         "services": [
             "fuchsia.cobalt.LoggerFactory",
             "fuchsia.fonts.Provider",
             "fuchsia.logger.LogSink",
             "fuchsia.modular.Clipboard",
+            "fuchsia.modular.ContextWriter",
             "fuchsia.modular.ModuleContext",
             "fuchsia.netstack.Netstack",
             "fuchsia.sys.Environment",

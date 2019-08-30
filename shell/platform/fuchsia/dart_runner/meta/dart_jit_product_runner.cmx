@@ -8,10 +8,10 @@
             "deprecated-ambient-replace-as-executable"
         ],
         "services": [
-            "fuchsia.crash.Analyzer",
+            "fuchsia.feedback.CrashReporter",
             "fuchsia.logger.LogSink",
-            "fuchsia.net.NameLookup",
             "fuchsia.posix.socket.Provider",
+            "fuchsia.net.NameLookup",
             "fuchsia.process.Launcher",
             "fuchsia.process.Resolver",
             "fuchsia.timezone.Timezone",
