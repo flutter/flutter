@@ -49,14 +49,10 @@ class BottomSheetThemeData extends Diagnosticable {
 
   /// Value for [BottomSheet.backgroundColor] when the Bottom sheet is presented
   /// as a modal bottom sheet.
-  ///
-  /// If null, [BottomSheet.backgroundColor] defaults to [backgroundColor].
   final Color modalBackgroundColor;
 
   /// Value for [BottomSheet.elevation] when the Bottom sheet is presented as a
   /// modal bottom sheet.
-  ///
-  /// If null, [BottomSheet.elevation] defaults to [elevation].
   final double modalElevation;
 
   /// Default value for [BottomSheet.shape].
