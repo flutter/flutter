@@ -57,6 +57,9 @@ void main() {
     });
 
     testUsingContext('Expands android artifacts when the android flag is used', () async {
+      // Release lock between test cases.
+      Cache.releaseLockEarly();
+
       final PrecacheCommand command = PrecacheCommand();
       applyMocksToCommand(command);
       await createTestCommandRunner(command).run(
@@ -77,6 +80,9 @@ void main() {
     });
 
     testUsingContext('Adds artifact flags to requested android artifacts', () async {
+      // Release lock between test cases.
+      Cache.releaseLockEarly();
+
       final PrecacheCommand command = PrecacheCommand();
       applyMocksToCommand(command);
       await createTestCommandRunner(command).run(
