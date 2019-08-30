@@ -36,9 +36,8 @@ class IOSDeploy {
     @required List<String> launchArguments,
   }) async {
     final String iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
-    final List<String> commandList = <String>[iosDeployPath];
     final List<String> launchCommand = <String>[
-      ...commandList,
+      iosDeployPath,
       '--id',
       deviceId,
       '--bundle',
