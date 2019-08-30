@@ -1464,29 +1464,28 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     // label on top of it.
 
     List<Widget> columns;
-    double totalWidth;
+    const double paddingValue = _kPickerWidth - 2 * _kTimerPickerColumnIntrinsicWidth - 2 * _kTimerPickerHalfColumnPadding;
+    // The default totalWidth for 2-column modes.
+    double totalWidth = _kPickerWidth;
+    assert(paddingValue >= 0);
 
     switch (widget.mode) {
       case CupertinoTimerPickerMode.hm:
-        totalWidth = _kPickerWidth;
         // Pad the widget to make it as wide as `_kPickerWidth`.
-        final double paddingValue = math.max(0, totalWidth - 2 * _kTimerPickerColumnIntrinsicWidth - 2 * _kTimerPickerHalfColumnPadding);
         columns = <Widget>[
-          _buildHourColumn(EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
-          _buildMinuteColumn(EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2))
+          _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
+          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2))
         ];
         break;
       case CupertinoTimerPickerMode.ms:
-        totalWidth = _kPickerWidth;
         // Pad the widget to make it as wide as `_kPickerWidth`.
-        final double paddingValue = math.max(0, totalWidth - 2 * _kTimerPickerColumnIntrinsicWidth - 2 * _kTimerPickerHalfColumnPadding);
         columns = <Widget>[
-          _buildMinuteColumn(EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
-          _buildSecondColumn(EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2))
+          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
+          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2))
         ];
         break;
       case CupertinoTimerPickerMode.hms:
-      const double paddingValue = _kTimerPickerHalfColumnPadding * 2;
+        const double paddingValue = _kTimerPickerHalfColumnPadding * 2;
         totalWidth = _kTimerPickerColumnIntrinsicWidth * 3 + 4 * _kTimerPickerHalfColumnPadding + paddingValue;
         columns = <Widget>[
           _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
