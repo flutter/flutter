@@ -10,9 +10,9 @@ import 'colors.dart';
 
 const double _kDefaultIndicatorRadius = 10.0;
 // Extracted from the large activity indicators in https://developer.apple.com/design/resources/.
-final Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
-  color: const Color(0x99606067),
-  darkColor: const Color(0x99EBEBF5),
+const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x99606067),
+  darkColor: Color(0x99EBEBF5),
 );
 
 /// An iOS-style activity indicator that spins clockwise.

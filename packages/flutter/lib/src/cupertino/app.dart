@@ -282,7 +282,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
                   navigatorKey: widget.navigatorKey,
                   navigatorObservers: _navigatorObservers,
                   pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
-                  CupertinoPageRoute<T>(settings: settings, builder: builder),
+                    CupertinoPageRoute<T>(settings: settings, builder: builder),
                   home: widget.home,
                   routes: widget.routes,
                   initialRoute: widget.initialRoute,
