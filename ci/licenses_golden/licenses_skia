@@ -1,4 +1,4 @@
-Signature: cedad58d101f4e9f4dac42ecbe15ac6d
+Signature: 6e8d31a1ee7314c039cad1d4aba7991a
 
 UNUSED LICENSES:
 
@@ -4849,6 +4849,7 @@ FILE: ../../../third_party/skia/experimental/xform/SkXform.cpp
 FILE: ../../../third_party/skia/experimental/xform/SkXform.h
 FILE: ../../../third_party/skia/experimental/xform/XContext.cpp
 FILE: ../../../third_party/skia/gm/crbug_918512.cpp
+FILE: ../../../third_party/skia/gm/fpcoordinateoverride.cpp
 FILE: ../../../third_party/skia/gm/labyrinth.cpp
 FILE: ../../../third_party/skia/gm/preservefillrule.cpp
 FILE: ../../../third_party/skia/gm/tilemodes_alpha.cpp
@@ -4877,6 +4878,7 @@ FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFType1Font.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFType1Font.h
+FILE: ../../../third_party/skia/src/sksl/SkSLSectionAndParameterHelper.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google LLC.
 
@@ -4982,12 +4984,14 @@ FILE: ../../../third_party/skia/modules/canvaskit/WasmAliases.h
 FILE: ../../../third_party/skia/modules/canvaskit/particles_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/skottie_bindings.cpp
 FILE: ../../../third_party/skia/modules/particles/include/SkCurve.h
+FILE: ../../../third_party/skia/modules/particles/include/SkParticleBinding.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleData.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleDrawable.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleEffect.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleSerialization.h
 FILE: ../../../third_party/skia/modules/particles/include/SkReflected.h
 FILE: ../../../third_party/skia/modules/particles/src/SkCurve.cpp
+FILE: ../../../third_party/skia/modules/particles/src/SkParticleBinding.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleDrawable.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
