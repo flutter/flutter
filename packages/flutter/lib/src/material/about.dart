@@ -39,48 +39,71 @@ import 'theme.dart';
 /// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
 ///
 /// ```dart
-/// Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: Text('Show About Example'),
-///       ),
-///       drawer: Drawer(
-///         child: ListView(
-///           children: <Widget>[
-///             AboutListTile(
-///               icon: Icon(Icons.info),
-///               applicationIcon: FlutterLogo(),
-///               applicationName: 'Show About Example',
-///               applicationVersion: 'V1.0.1',
-///               applicationLegalese: 'This is a Show About Example',
-///               aboutBoxChildren: <Widget>[
-///                 Text('Extra 1'),
-///                 Text('Extra 2'),
-///               ],
-///             )
-///           ],
-///         ),
-///       ),
-///       body: Center(
-///         child: RaisedButton(
-///           child: Text('Show About Example'),
-///           onPressed: () {
+///class AboutDialogSample extends StatelessWidget {
+///  final String _applicationVersion = 'August 2019';
+///  final String _applicationLegalese = '© 2019 The Chromium Authors';
+///  final String _applicationName ='Show About Example';
+///  @override
+///  Widget build(BuildContext context) {
+///    return Scaffold(
+///      appBar: AppBar(
+///        title: Text('Show About Example'),
+///      ),
+///      drawer: Drawer(
+///        child: ListView(
+///          children: <Widget>[
+///            AboutListTile(
+///              icon: Icon(Icons.info),
+///              applicationIcon: FlutterLogo(),
+///              applicationName: _applicationName,
+///              applicationVersion: _applicationVersion,
+///              applicationLegalese: _applicationLegalese,
+///              aboutBoxChildren: _aboutBoxChildren(context),
+///            )
+///          ],
+///        ),
+///      ),
+///      body: Center(
+///        child: RaisedButton(
+///          child: Text(_applicationName),
+///          onPressed: () {
 ///            showAboutDialog(
 ///              context: context,
 ///              applicationIcon: FlutterLogo(),
-///              applicationName: 'Show About Example',
-///              applicationVersion: 'V1.0.1',
-///              applicationLegalese: 'This is a Show About Example',
-///              children: <Widget>[
-///                Text('Widget 1'),
-///                Text('Widget 2'),
-///              ],
+///              applicationName: _applicationName,
+///              applicationVersion: _applicationVersion,
+///              applicationLegalese: _applicationLegalese,
+///              children: _aboutBoxChildren(context),
 ///            );
 ///          },
-///         ),
-///       ),
-///     );
-///   }
+///        ),
+///      ),
+///    );
+///  }
+///
+///  _aboutBoxChildren(BuildContext context) {
+///    return <Widget>[
+///      Padding(
+///        padding: EdgeInsets.only(top: 24.0),
+///        child: RichText(
+///          text: TextSpan(children: <TextSpan>[
+///            TextSpan(
+///                style: Theme.of(context).textTheme.body1,
+///                text: 'Flutter is Google’s UI toolkit for building beautiful, '
+///                    'natively compiled applications for mobile, web, and desktop '
+///                    'from a single codebase. Learn more about Flutter at '),
+///            TextSpan(
+///                style: Theme.of(context)
+///                    .textTheme
+///                    .body1
+///                    .copyWith(color: Theme.of(context).accentColor),
+///                text: 'https://flutter.dev'),
+///          ]),
+///        ),
+///      )
+///    ];
+///  }
+///}
 /// ```
 /// {@end-tool}
 ///
