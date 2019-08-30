@@ -227,10 +227,12 @@ class CupertinoDatePicker extends StatefulWidget {
     this.maximumYear,
     this.minuteInterval = 1,
     this.use24hFormat = false,
+    this.backgroundColor = _kBackgroundColor
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(mode != null),
        assert(onDateTimeChanged != null),
        assert(minimumYear != null),
+       assert(backgroundColor != null),
        assert(
          minuteInterval > 0 && 60 % minuteInterval == 0,
          'minute interval is not a positive integer factor of 60',
@@ -297,6 +299,11 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Callback called when the selected date and/or time changes. Must not be
   /// null.
   final ValueChanged<DateTime> onDateTimeChanged;
+
+  /// Background color of date picker.
+  ///
+  /// Defaults to [CupertinoColors.white] when null.
+  final Color backgroundColor;
 
   @override
   State<StatefulWidget> createState() {
@@ -517,7 +524,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       itemExtent: _kItemExtent,
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
-      backgroundColor: _kBackgroundColor,
+      backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedDayFromInitial = index;
@@ -562,7 +569,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       itemExtent: _kItemExtent,
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
-      backgroundColor: _kBackgroundColor,
+      backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         if (widget.use24hFormat) {
@@ -616,7 +623,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       itemExtent: _kItemExtent,
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
-      backgroundColor: _kBackgroundColor,
+      backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedMinute = index * widget.minuteInterval;
@@ -644,7 +651,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       itemExtent: _kItemExtent,
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
-      backgroundColor: _kBackgroundColor,
+      backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedAmPm = index;
@@ -809,7 +816,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       itemExtent: _kItemExtent,
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
-      backgroundColor: _kBackgroundColor,
+      backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedDay = index + 1;
@@ -840,7 +847,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       itemExtent: _kItemExtent,
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
-      backgroundColor: _kBackgroundColor,
+      backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedMonth = index + 1;
@@ -867,7 +874,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       offAxisFraction: offAxisFraction,
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
-      backgroundColor: _kBackgroundColor,
+      backgroundColor: widget.backgroundColor,
       onSelectedItemChanged: (int index) {
         selectedYear = index;
         if (DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
@@ -1078,6 +1085,7 @@ class CupertinoTimerPicker extends StatefulWidget {
     this.minuteInterval = 1,
     this.secondInterval = 1,
     this.alignment = Alignment.center,
+    this.backgroundColor = _kBackgroundColor,
     @required this.onTimerDurationChanged,
   }) : assert(mode != null),
        assert(onTimerDurationChanged != null),
@@ -1087,6 +1095,7 @@ class CupertinoTimerPicker extends StatefulWidget {
        assert(secondInterval > 0 && 60 % secondInterval == 0),
        assert(initialTimerDuration.inMinutes % minuteInterval == 0),
        assert(initialTimerDuration.inSeconds % secondInterval == 0),
+       assert(backgroundColor != null),
        assert(alignment != null),
        super(key: key);
 
@@ -1111,6 +1120,11 @@ class CupertinoTimerPicker extends StatefulWidget {
   ///
   /// This property must not be null. It defaults to [Alignment.center].
   final AlignmentGeometry alignment;
+
+  /// Background color of timer picker.
+  ///
+  /// Defaults to [CupertinoColors.white] when null.
+  final Color backgroundColor;
 
   @override
   State<StatefulWidget> createState() => _CupertinoTimerPickerState();
@@ -1268,7 +1282,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       scrollController: FixedExtentScrollController(initialItem: selectedHour),
       offAxisFraction: -0.5 * textDirectionFactor,
       itemExtent: _kItemExtent,
-      backgroundColor: _kBackgroundColor,
+      backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         setState(() {
@@ -1331,7 +1345,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       ),
       offAxisFraction: offAxisFraction,
       itemExtent: _kItemExtent,
-      backgroundColor: _kBackgroundColor,
+      backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       looping: true,
       onSelectedItemChanged: (int index) {
@@ -1387,7 +1401,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       ),
       offAxisFraction: offAxisFraction,
       itemExtent: _kItemExtent,
-      backgroundColor: _kBackgroundColor,
+      backgroundColor: widget.backgroundColor,
       squeeze: _kSqueeze,
       looping: true,
       onSelectedItemChanged: (int index) {

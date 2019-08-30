@@ -467,7 +467,7 @@ class DevFS {
       outputPath:  dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
       packagesFilePath : _packagesFilePath,
     );
-    if (compilerOutput == null) {
+    if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
     }
     // list of sources that needs to be monitored are in [compilerOutput.sources]

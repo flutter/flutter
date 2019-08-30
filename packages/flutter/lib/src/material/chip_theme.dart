@@ -40,7 +40,7 @@ import 'theme_data.dart';
 ///    theme.
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class ChipTheme extends InheritedWidget {
+class ChipTheme extends InheritedTheme {
   /// Applies the given theme [data] to [child].
   ///
   /// The [data] and [child] arguments must not be null.
@@ -87,6 +87,12 @@ class ChipTheme extends InheritedWidget {
   static ChipThemeData of(BuildContext context) {
     final ChipTheme inheritedTheme = context.inheritFromWidgetOfExactType(ChipTheme);
     return inheritedTheme?.data ?? Theme.of(context).chipTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final ChipTheme ancestorTheme = context.ancestorWidgetOfExactType(ChipTheme);
+    return identical(this, ancestorTheme) ? child : ChipTheme(data: data, child: child);
   }
 
   @override

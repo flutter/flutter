@@ -297,7 +297,7 @@ void main() {
       ),
     );
     await tester.tap(find.text('PUSH'));
-    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 3);
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
     expect(find.text('PUSH'), findsNothing);
     expect(find.text('HELLO'), findsOneWidget);
     final Offset helloPosition1 = tester.getCenter(find.text('HELLO'));
@@ -342,7 +342,7 @@ void main() {
     expect(helloPosition3.dy, helloPosition4.dy);
     await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
-    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 3);
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
     expect(find.text('PUSH'), findsOneWidget);
     expect(find.text('HELLO'), findsNothing);
   });

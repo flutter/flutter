@@ -23,13 +23,11 @@ class ColdRunner extends ResidentRunner {
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
     bool ipv6 = false,
-    bool usesTerminalUi = false,
     bool stayResident = true,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
              hotMode: false,
-             usesTerminalUi: usesTerminalUi,
              stayResident: stayResident,
              ipv6: ipv6);
 
@@ -49,7 +47,6 @@ class ColdRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild = true,
   }) async {
     final bool prebuiltMode = applicationBinary != null;
     if (!prebuiltMode) {
@@ -66,7 +63,6 @@ class ColdRunner extends ResidentRunner {
       final int result = await device.runCold(
         coldRunner: this,
         route: route,
-        shouldBuild: shouldBuild,
       );
       if (result != 0)
         return result;

@@ -80,6 +80,67 @@ enum TestBindingEventSource {
 
 const Size _kDefaultTestViewportSize = Size(800.0, 600.0);
 
+/// A [BinaryMessenger] subclass that is used as the default binary messenger
+/// under testing environment.
+///
+/// It tracks status of data sent across the Flutter platform barrier, which is
+/// useful for testing frameworks to monitor and synchronize against the
+/// platform messages.
+class TestDefaultBinaryMessenger extends BinaryMessenger {
+  /// Creates a [TestDefaultBinaryMessenger] instance.
+  ///
+  /// The [delegate] instance must not be null.
+  TestDefaultBinaryMessenger(this.delegate): assert(delegate != null);
+
+  /// The delegate [BinaryMessenger].
+  final BinaryMessenger delegate;
+
+  final List<Future<ByteData>> _pendingMessages = <Future<ByteData>>[];
+
+  /// The number of incomplete/pending calls sent to the platform channels.
+  int get pendingMessageCount => _pendingMessages.length;
+
+  @override
+  Future<ByteData> send(String channel, ByteData message) {
+    final Future<ByteData> resultFuture = delegate.send(channel, message);
+    // Removes the future itself from the [_pendingMessages] list when it
+    // completes.
+    if (resultFuture != null) {
+      _pendingMessages.add(resultFuture);
+      resultFuture.whenComplete(() => _pendingMessages.remove(resultFuture));
+    }
+    return resultFuture;
+  }
+
+  /// Returns a Future that completes after all the platform calls are finished.
+  ///
+  /// If a new platform message is sent after this method is called, this new
+  /// message is not tracked. Use with [pendingMessageCount] to guarantee no
+  /// pending message calls.
+  Future<void> get platformMessagesFinished {
+    return Future.wait<void>(_pendingMessages);
+  }
+
+  @override
+  Future<void> handlePlatformMessage(
+      String channel,
+      ByteData data,
+      ui.PlatformMessageResponseCallback callback,
+  ) {
+    return delegate.handlePlatformMessage(channel, data, callback);
+  }
+
+  @override
+  void setMessageHandler(String channel, MessageHandler handler) {
+    delegate.setMessageHandler(channel, handler);
+  }
+
+  @override
+  void setMockMessageHandler(String channel, MessageHandler handler) {
+    delegate.setMockMessageHandler(channel, handler);
+  }
+}
+
 /// Base class for bindings used by widgets library tests.
 ///
 /// The [ensureInitialized] method creates (if necessary) and returns
@@ -207,10 +268,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   void initInstances() {
+    super.initInstances();
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
     HttpOverrides.global = _MockHttpOverrides();
     _testTextInput = TestTextInput(onCleared: _resetFocusedEditable)..register();
-    super.initInstances();
   }
 
   @override
@@ -218,6 +279,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void initLicenses() {
     // Do not include any licenses, because we're a test, and the LICENSE file
     // doesn't get generated for tests.
+  }
+
+  @override
+  BinaryMessenger createBinaryMessenger() {
+    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
   }
 
   /// Whether there is currently a test executing.
@@ -808,7 +874,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     final String assetFolderPath = Platform.environment['UNIT_TEST_ASSETS'];
     final String prefix =  'packages/${Platform.environment['APP_NAME']}/';
 
-    defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) {
+    /// Navigation related actions (pop, push, replace) broadcasts these actions via
+    /// platform messages.
+    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {});
+
+    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) {
       String key = utf8.decode(message.buffer.asUint8List());
       File asset = File(path.join(assetFolderPath, key));
 
@@ -1044,14 +1114,29 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void _verifyInvariants() {
     super._verifyInvariants();
-    assert(
-      _currentFakeAsync.periodicTimerCount == 0,
-      'A periodic Timer is still running even after the widget tree was disposed.'
-    );
-    assert(
-      _currentFakeAsync.nonPeriodicTimerCount == 0,
-      'A Timer is still pending even after the widget tree was disposed.'
-    );
+
+    assert(() {
+      if (   _currentFakeAsync.periodicTimerCount == 0
+          && _currentFakeAsync.nonPeriodicTimerCount == 0) {
+        return true;
+      }
+
+      debugPrint('Pending timers:');
+      for (String timerInfo in _currentFakeAsync.pendingTimersDebugInfo) {
+        final int firstLineEnd = timerInfo.indexOf('\n');
+        assert(firstLineEnd != -1);
+
+        // No need to include the newline.
+        final String firstLine = timerInfo.substring(0, firstLineEnd);
+        final String stackTrace = timerInfo.substring(firstLineEnd + 1);
+
+        debugPrint(firstLine);
+        debugPrintStack(stackTrace: StackTrace.fromString(stackTrace));
+        debugPrint('');
+      }
+      return false;
+    }(), 'A Timer is still pending even after the widget tree was disposed.');
+
     assert(_currentFakeAsync.microtaskCount == 0); // Shouldn't be possible.
   }
 

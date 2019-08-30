@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_bar.dart';
-import 'button_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'dialog.dart';
@@ -204,8 +203,13 @@ class _DayPeriodControl extends StatelessWidget {
     if (fragmentContext.selectedTime.period == DayPeriod.am) {
       return;
     }
-    if (fragmentContext.targetPlatform == TargetPlatform.android) {
-      _announceToAccessibility(context, MaterialLocalizations.of(context).anteMeridiemAbbreviation);
+    switch (fragmentContext.targetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        _announceToAccessibility(context, MaterialLocalizations.of(context).anteMeridiemAbbreviation);
+        break;
+      case TargetPlatform.iOS:
+        break;
     }
     _togglePeriod();
   }
@@ -214,8 +218,13 @@ class _DayPeriodControl extends StatelessWidget {
     if (fragmentContext.selectedTime.period == DayPeriod.pm) {
       return;
     }
-    if (fragmentContext.targetPlatform == TargetPlatform.android) {
-      _announceToAccessibility(context, MaterialLocalizations.of(context).postMeridiemAbbreviation);
+    switch (fragmentContext.targetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        _announceToAccessibility(context, MaterialLocalizations.of(context).postMeridiemAbbreviation);
+        break;
+      case TargetPlatform.iOS:
+        break;
     }
     _togglePeriod();
   }
@@ -1613,19 +1622,17 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
       ),
     );
 
-    final Widget actions = ButtonTheme.bar(
-      child: ButtonBar(
-        children: <Widget>[
-          FlatButton(
-            child: Text(localizations.cancelButtonLabel),
-            onPressed: _handleCancel,
-          ),
-          FlatButton(
-            child: Text(localizations.okButtonLabel),
-            onPressed: _handleOk,
-          ),
-        ],
-      ),
+    final Widget actions = ButtonBar(
+      children: <Widget>[
+        FlatButton(
+          child: Text(localizations.cancelButtonLabel),
+          onPressed: _handleCancel,
+        ),
+        FlatButton(
+          child: Text(localizations.okButtonLabel),
+          onPressed: _handleOk,
+        ),
+      ],
     );
 
     final Dialog dialog = Dialog(

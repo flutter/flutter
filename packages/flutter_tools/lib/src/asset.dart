@@ -235,7 +235,7 @@ class _ManifestAssetBundle implements AssetBundle {
     entries[_fontManifestJson] = DevFSStringContent(json.encode(fonts));
 
     // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
-    entries[_license] = await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
+    entries[_license] = _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
 
     return 0;
   }
@@ -325,11 +325,11 @@ List<_Asset> _getMaterialAssets(String fontSet) {
 final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
 
 /// Returns a DevFSContent representing the license file.
-Future<DevFSContent> _obtainLicenses(
+DevFSContent _obtainLicenses(
   PackageMap packageMap,
   String assetBase, {
   bool reportPackages,
-}) async {
+}) {
   // Read the LICENSE file from each package in the .packages file, splitting
   // each one into each component license (so that we can de-dupe if possible).
   //
@@ -347,30 +347,32 @@ Future<DevFSContent> _obtainLicenses(
   final Set<String> allPackages = <String>{};
   for (String packageName in packageMap.map.keys) {
     final Uri package = packageMap.map[packageName];
-    if (package != null && package.scheme == 'file') {
-      final File file = fs.file(package.resolve('../LICENSE'));
-      if (file.existsSync()) {
-        final List<String> rawLicenses =
-            (await file.readAsString()).split(_licenseSeparator);
-        for (String rawLicense in rawLicenses) {
-          List<String> packageNames;
-          String licenseText;
-          if (rawLicenses.length > 1) {
-            final int split = rawLicense.indexOf('\n\n');
-            if (split >= 0) {
-              packageNames = rawLicense.substring(0, split).split('\n');
-              licenseText = rawLicense.substring(split + 2);
-            }
-          }
-          if (licenseText == null) {
-            packageNames = <String>[packageName];
-            licenseText = rawLicense;
-          }
-          packageLicenses.putIfAbsent(licenseText, () => <String>{})
-            ..addAll(packageNames);
-          allPackages.addAll(packageNames);
+    if (package == null || package.scheme != 'file') {
+      continue;
+    }
+    final File file = fs.file(package.resolve('../LICENSE'));
+    if (!file.existsSync()) {
+      continue;
+    }
+    final List<String> rawLicenses =
+        file.readAsStringSync().split(_licenseSeparator);
+    for (String rawLicense in rawLicenses) {
+      List<String> packageNames;
+      String licenseText;
+      if (rawLicenses.length > 1) {
+        final int split = rawLicense.indexOf('\n\n');
+        if (split >= 0) {
+          packageNames = rawLicense.substring(0, split).split('\n');
+          licenseText = rawLicense.substring(split + 2);
         }
       }
+      if (licenseText == null) {
+        packageNames = <String>[packageName];
+        licenseText = rawLicense;
+      }
+      packageLicenses.putIfAbsent(licenseText, () => <String>{})
+        ..addAll(packageNames);
+      allPackages.addAll(packageNames);
     }
   }
 

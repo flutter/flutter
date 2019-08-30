@@ -88,7 +88,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   /// Dispatch a [PointerCancelEvent] for the given pointer soon.
   ///
-  /// The pointer event will be dispatch before the next pointer event and
+  /// The pointer event will be dispatched before the next pointer event and
   /// before the end of the microtask but not within this function call.
   void cancelPointer(int pointer) {
     if (_pendingPointerEvents.isEmpty && !locked)

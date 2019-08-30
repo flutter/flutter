@@ -10,8 +10,9 @@ Specifically:
 * Listen. Consider and acknowledge people's points before responding.
 
 Should you experience anything that makes you feel unwelcome in Flutter's
-community, please contact someone on the team, for instance
-[Ian](mailto:ian@hixie.ch) or [Tim](mailto:timsneath@google.com). We will
+community, please contact [conduct@flutter.dev](mailto:conduct@flutter.dev)
+or, if you prefer, directly contact someone on the team, for instance
+[Hixie](mailto:ian@hixie.ch) or [Tim](mailto:timsneath@google.com). We will
 not tolerate harassment from anyone in Flutter's community, even outside
 of Flutter's public communication channels.
 
@@ -43,4 +44,6 @@ an expert in all the systems. Once you find the answer, document it in
 the first place you looked. That way, the next person will be brought
 up to speed even quicker.
 
-[!["I try not to make fun of people for admitting they don't know things, because for each thing 'everyone knows' by the time they're adults, every day there are, on average, 10,000 people in the US hearing about it for the first time. If I make fun of people, I train them not to tell me when they have those moments. And I miss out on the fun." "Diet coke and mentos thing? What's that?" "Oh man! We're going to the grocery store." "Why?" "You're one of today's lucky 10,000." (xkcd, May 2012)](https://imgs.xkcd.com/comics/ten_thousand.png)](https://xkcd.com/1053/)
+!["I try not to make fun of people for admitting they don't know things, because for each thing 'everyone knows' by the time they're adults, every day there are, on average, 10,000 people in the US hearing about it for the first time. If I make fun of people, I train them not to tell me when they have those moments. And I miss out on the fun." "Diet coke and mentos thing? What's that?" "Oh man! We're going to the grocery store." "Why?" "You're one of today's lucky 10,000."](https://imgs.xkcd.com/comics/ten_thousand.png)
+
+Source: _[xkcd, May 2012](https://xkcd.com/1053/)_
