@@ -356,13 +356,13 @@ class FlutterWebShellBuilder implements Builder {
     await buildStep.writeAsString(outputId, '''
 import 'dart:ui' as ui;
 
-import 'package:flutter_web_shell/flutter_web_shell.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 import 'generated_registrant.dart';
 import "${path.url.basename(buildStep.inputId.path)}" as entrypoint;
 
 Future<void> main() async {
-  registerPlugins(shellPluginRegistry);
+  registerPlugins(webPluginRegistry);
   await ui.webOnlyInitializePlatform();
   entrypoint.main();
 }

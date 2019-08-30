@@ -7,11 +7,13 @@ import 'dart:async';
 import 'package:mustache/mustache.dart' as mustache;
 import 'package:yaml/yaml.dart';
 
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'globals.dart';
 import 'macos/cocoapods.dart';
+import 'platform_plugins.dart';
 import 'project.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
@@ -85,6 +87,11 @@ class Plugin {
     if (platformsYaml[MacOSPlugin.kConfigKey] != null) {
       platforms[MacOSPlugin.kConfigKey] =
           MacOSPlugin.fromYaml(name, platformsYaml[MacOSPlugin.kConfigKey]);
+    }
+
+    if (platformsYaml[WebPlugin.kConfigKey] != null) {
+      platforms[WebPlugin.kConfigKey] =
+          WebPlugin.fromYaml(name, platformsYaml[WebPlugin.kConfigKey]);
     }
 
     return Plugin(
@@ -391,7 +398,7 @@ import 'dart:ui';
 import 'package:{{name}}/{{file}}';
 {{/plugins}}
 
-import 'package:flutter_web_shell/flutter_web_shell.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 void registerPlugins(PluginRegistry registry) {
 {{#plugins}}
@@ -457,13 +464,7 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
 }
 
 Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, dynamic>> webPlugins = plugins
-      .where((Plugin p) => p.pluginClass != null && p.webFilename != null)
-      .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
-    'name': p.name,
-    'class': p.pluginClass,
-    'file': p.webFilename,
-  }).toList();
+  final List<Map<String, dynamic>> webPlugins = _extractPlatformMaps(plugins, WebPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': webPlugins,
   };

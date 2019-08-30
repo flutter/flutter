@@ -1,0 +1,11 @@
+name: flutter_web_plugins
+author: Flutter Authors <flutter-dev@googlegroups.com>
+version: 0.0.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+environment:
+  sdk: ">=2.0.0-dev.28.0 <3.0.0"
+  flutter: ">=1.5.0 <2.0.0"
