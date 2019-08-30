@@ -288,8 +288,13 @@ void Engine::DispatchPlatformMessage(fml::RefPtr<PlatformMessage> message) {
   }
 
   // If there's no runtime_, we may still need to set the initial route.
-  if (message->channel() == kNavigationChannel)
+  if (message->channel() == kNavigationChannel) {
     HandleNavigationPlatformMessage(std::move(message));
+    return;
+  }
+
+  FML_DLOG(WARNING) << "Dropping platform message on channel: "
+                    << message->channel();
 }
 
 bool Engine::HandleLifecyclePlatformMessage(PlatformMessage* message) {
