@@ -30,9 +30,7 @@ void main() {
         const <String>[
           'precache',
           '--ios',
-          '--android_gen_snapshot',
-          '--android_maven',
-          '--android_internal_build',
+          '--android',
           '--web',
           '--macos',
           '--linux',
@@ -53,6 +51,48 @@ void main() {
         DevelopmentArtifact.windows,
         DevelopmentArtifact.fuchsia,
         DevelopmentArtifact.flutterRunner,
+      }));
+    }, overrides: <Type, Generator>{
+      Cache: () => cache,
+    });
+
+    testUsingContext('Expands android artifacts when the android flag is used', () async {
+      final PrecacheCommand command = PrecacheCommand();
+      applyMocksToCommand(command);
+      await createTestCommandRunner(command).run(
+        const <String>[
+          'precache',
+          '--no-ios',
+          '--android',
+        ]
+      );
+      expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+        DevelopmentArtifact.androidGenSnapshot,
+        DevelopmentArtifact.androidMaven,
+        DevelopmentArtifact.androidInternalBuild,
+      }));
+    }, overrides: <Type, Generator>{
+      Cache: () => cache,
+    });
+
+    testUsingContext('Adds artifact flags to requested android artifacts', () async {
+      final PrecacheCommand command = PrecacheCommand();
+      applyMocksToCommand(command);
+      await createTestCommandRunner(command).run(
+        const <String>[
+          'precache',
+          '--no-ios',
+          '--android_gen_snapshot',
+          '--android_maven',
+          '--android_internal_build',
+        ]
+      );
+      expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+        DevelopmentArtifact.androidGenSnapshot,
+        DevelopmentArtifact.androidMaven,
+        DevelopmentArtifact.androidInternalBuild,
       }));
     }, overrides: <Type, Generator>{
       Cache: () => cache,
@@ -104,6 +144,7 @@ void main() {
         DevelopmentArtifact.iOS,
         DevelopmentArtifact.androidGenSnapshot,
         DevelopmentArtifact.androidMaven,
+        DevelopmentArtifact.androidInternalBuild,
       }));
     }, overrides: <Type, Generator>{
       Cache: () => cache,
