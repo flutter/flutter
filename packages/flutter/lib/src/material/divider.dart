@@ -101,7 +101,7 @@ class Divider extends StatelessWidget {
   ///
   /// If [context] is null, the default color of [BorderSide] is used and the
   /// default width of 0.0 is used.
-  /// 
+  ///
   /// {@tool sample}
   ///
   /// This example uses this method to create a box that has a divider above and
