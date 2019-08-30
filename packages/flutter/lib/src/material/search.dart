@@ -532,7 +532,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
 }
 
 class _ThemedPreferredSizeWidget extends StatelessWidget implements PreferredSizeWidget {
-  const _ThemedPreferredSizeWidget({this.theme, this.child});
+  const _ThemedPreferredSizeWidget({ this.theme, this.child });
 
   final ThemeData theme;
   final PreferredSizeWidget child;
