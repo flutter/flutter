@@ -261,13 +261,21 @@ void Window::UpdateAccessibilityFeatures(int32_t values) {
 
 void Window::DispatchPlatformMessage(fml::RefPtr<PlatformMessage> message) {
   std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
-  if (!dart_state)
+  if (!dart_state) {
+    FML_DLOG(WARNING)
+        << "Dropping platform message for lack of DartState on channel: "
+        << message->channel();
     return;
+  }
   tonic::DartState::Scope scope(dart_state);
   Dart_Handle data_handle =
       (message->hasData()) ? ToByteData(message->data()) : Dart_Null();
-  if (Dart_IsError(data_handle))
+  if (Dart_IsError(data_handle)) {
+    FML_DLOG(WARNING)
+        << "Dropping platform message because of a Dart error on channel: "
+        << message->channel();
     return;
+  }
 
   int response_id = 0;
   if (auto response = message->response()) {
