@@ -727,6 +727,28 @@ class HeroController extends NavigatorObserver {
     _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, true);
   }
 
+  @override
+  void didStopUserGesture() {
+    if (navigator.userGestureInProgress)
+      return;
+
+    bool isStaleGesture(_HeroFlight flight) {
+      return flight.manifest.isUserGestureTransition
+          && flight.manifest.type == HeroFlightDirection.pop
+          && flight._proxyAnimation.value == 0
+          && flight._proxyAnimation.status == AnimationStatus.dismissed;
+    }
+
+    final List<_HeroFlight> invalidFlights = _flights.values
+      .where(isStaleGesture)
+      .toList(growable: false);
+
+    // Treat these invalidated flights as dismissed.
+    for (_HeroFlight flight in invalidFlights) {
+      flight._handleAnimationUpdate(AnimationStatus.dismissed);
+    }
+  }
+
   // If we're transitioning between different page routes, start a hero transition
   // after the toRoute has been laid out with its animation's value at 1.0.
   void _maybeStartHeroTransition(
