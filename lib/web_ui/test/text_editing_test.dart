@@ -471,21 +471,22 @@ void main() {
           'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
       textEditing.handleTextInput(codec.encodeMethodCall(setClient));
 
-      const MethodCall setLocationSize =
-          MethodCall('TextInput.setEditingLocationSize', <String, dynamic>{
-        'top': 0,
-        'left': 0,
+      final MethodCall setSizeAndTransform =
+          MethodCall('TextInput.setEditableSizeAndTransform', <String, dynamic>{
         'width': 150,
         'height': 50,
+        'transform':
+            Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList()
       });
-      textEditing.handleTextInput(codec.encodeMethodCall(setLocationSize));
+      textEditing.handleTextInput(codec.encodeMethodCall(setSizeAndTransform));
 
       const MethodCall setStyle =
           MethodCall('TextInput.setStyle', <String, dynamic>{
         'fontSize': 12,
         'fontFamily': 'sans-serif',
         'textAlignIndex': 4,
-        'fontWeightValue': 4,
+        'fontWeightIndex': 4,
+        'textDirectionIndex': 1,
       });
       textEditing.handleTextInput(codec.encodeMethodCall(setStyle));
 
@@ -500,14 +501,17 @@ void main() {
       const MethodCall show = MethodCall('TextInput.show');
       textEditing.handleTextInput(codec.encodeMethodCall(show));
 
-      checkInputEditingState(
-          textEditing.editingElement.domElement, 'abcd', 2, 3);
+      final HtmlElement domElement = textEditing.editingElement.domElement;
+
+      checkInputEditingState(domElement, 'abcd', 2, 3);
 
       // Check if the location and styling is correct.
       expect(
-          textEditing.editingElement.domElement.getBoundingClientRect(),
-          Rectangle<double>.fromPoints(
-              const Point<double>(0.0, 0.0), const Point<double>(150.0, 50.0)));
+          domElement.getBoundingClientRect(),
+          Rectangle<double>.fromPoints(const Point<double>(10.0, 20.0),
+              const Point<double>(160.0, 70.0)));
+      expect(domElement.style.transform,
+          'matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 10, 20, 30, 1)');
       expect(textEditing.editingElement.domElement.style.font,
           '500 12px sans-serif');
 

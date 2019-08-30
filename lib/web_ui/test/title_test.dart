@@ -16,6 +16,7 @@ void main() {
       // Run the unit test without emulating Flutter tester environment.
       ui.debugEmulateFlutterTesterEnvironment = false;
 
+      // TODO(yjbanov): https://github.com/flutter/flutter/issues/39159
       document.title = '';
       expect(document.title, '');
 

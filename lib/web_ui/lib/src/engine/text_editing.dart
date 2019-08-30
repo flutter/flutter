@@ -14,30 +14,31 @@ void _emptyCallback(dynamic _) {}
 ///
 /// They are assigned once during the creation of the dom element.
 void _setStaticStyleAttributes(html.HtmlElement domElement) {
-  domElement.style
+  final html.CssStyleDeclaration elementStyle = domElement.style;
+  elementStyle
     ..whiteSpace = 'pre'
     ..alignContent = 'center'
     ..position = 'absolute'
+    ..top = '0'
+    ..left = '0'
     ..padding = '0'
-    ..opacity = '1';
-  if (_debugVisibleTextEditing) {
-    domElement.style
-      ..color = 'purple'
-      ..backgroundColor = 'pink';
-  } else {
-    domElement.style
-      ..color = 'transparent'
-      ..backgroundColor = 'transparent'
-      ..background = 'transparent'
-      ..border = 'none'
-      ..resize = 'none'
-      ..cursor = 'none'
-      ..textShadow = 'transparent'
-      ..outline = 'none';
+    ..opacity = '1'
+    ..color = 'transparent'
+    ..backgroundColor = 'transparent'
+    ..background = 'transparent'
+    ..outline = 'none'
+    ..border = 'none'
+    ..resize = 'none'
+    ..textShadow = 'transparent'
+    ..transformOrigin = '0 0 0';
 
-    /// This property makes the cursor transparent in mobile browsers where
-    /// cursor = 'none' does not work.
-    domElement.style.setProperty('caret-color', 'transparent');
+  /// This property makes the input's blinking cursor transparent.
+  elementStyle.setProperty('caret-color', 'transparent');
+
+  if (_debugVisibleTextEditing) {
+    elementStyle
+      ..color = 'purple'
+      ..outline = '1px solid purple';
   }
 }
 
@@ -479,6 +480,7 @@ class PersistentTextEditingElement extends TextEditingElement {
   })  : _onDomElementSwap = onDomElementSwap,
         super(owner) {
     // Make sure the dom element is of a type that we support for text editing.
+    // TODO(yjbanov): move into initializer list when https://github.com/dart-lang/sdk/issues/37881 is fixed.
     assert(_getTypeFromElement(domElement) != null);
     this.domElement = domElement;
   }
@@ -611,7 +613,7 @@ class HybridTextEditing {
         }
         break;
 
-      case 'TextInput.setEditingLocationSize':
+      case 'TextInput.setEditableSizeAndTransform':
         _setLocation(call.arguments);
         break;
 
@@ -656,41 +658,41 @@ class HybridTextEditing {
     assert(style.containsKey('fontSize'));
     assert(style.containsKey('fontFamily'));
     assert(style.containsKey('textAlignIndex'));
+    assert(style.containsKey('textDirectionIndex'));
 
-    final int textAlignIndex = style.remove('textAlignIndex');
+    final int textAlignIndex = style['textAlignIndex'];
+    final int textDirectionIndex = style['textDirectionIndex'];
 
-    /// Converts integer value coming as fontWeightValue from TextInput.setStyle
+    /// Converts integer value coming as fontWeightIndex from TextInput.setStyle
     /// to its CSS equivalent value.
     /// Converts index of TextAlign to enum value.
     _editingStyle = _EditingStyle(
-      textDirection: style.containsKey('textDirection')
-          ? style.remove('textDirection')
-          : ui.TextDirection.ltr,
-      fontSize: style.remove('fontSize'),
+      textDirection: ui.TextDirection.values[textDirectionIndex],
+      fontSize: style['fontSize'],
       textAlign: ui.TextAlign.values[textAlignIndex],
-      fontFamily: style.remove('fontFamily'),
-      fontWeight: fontWeightIndexToCss(
-          fontWeightIndex: style.remove('fontWeightValue')),
+      fontFamily: style['fontFamily'],
+      fontWeight:
+          fontWeightIndexToCss(fontWeightIndex: style['fontWeightIndex']),
     );
   }
 
-  /// Location of the editable text on the page as a rectangle.
-  // TODO(flutter_web): investigate if transform matrix can be used instead of
-  // a rectangle.
-  _EditingLocationAndSize _editingLocationAndSize;
-  _EditingLocationAndSize get editingLocationAndSize => _editingLocationAndSize;
+  /// Size and transform of the editable text on the page.
+  _EditableSizeAndTransform _editingLocationAndSize;
+  _EditableSizeAndTransform get editingLocationAndSize =>
+      _editingLocationAndSize;
 
   void _setLocation(Map<String, dynamic> editingLocationAndSize) {
-    assert(editingLocationAndSize.containsKey('top'));
-    assert(editingLocationAndSize.containsKey('left'));
     assert(editingLocationAndSize.containsKey('width'));
     assert(editingLocationAndSize.containsKey('height'));
+    assert(editingLocationAndSize.containsKey('transform'));
 
-    _editingLocationAndSize = _EditingLocationAndSize(
-        top: editingLocationAndSize.remove('top'),
-        left: editingLocationAndSize.remove('left'),
-        width: editingLocationAndSize.remove('width'),
-        height: editingLocationAndSize.remove('height'));
+    final List<double> transformList =
+        List<double>.from(editingLocationAndSize['transform']);
+    _editingLocationAndSize = _EditableSizeAndTransform(
+      width: editingLocationAndSize['width'],
+      height: editingLocationAndSize['height'],
+      transform: Float64List.fromList(transformList),
+    );
 
     if (editingElement.domElement != null) {
       _setDynamicStyleAttributes(editingElement.domElement);
@@ -714,7 +716,7 @@ class HybridTextEditing {
   /// element.
   ///
   /// They are changed depending on the messages coming from method calls:
-  /// "TextInput.setStyle", "TextInput.setEditingLocationSize".
+  /// "TextInput.setStyle", "TextInput.setEditableSizeAndTransform".
   void _setDynamicStyleAttributes(html.HtmlElement domElement) {
     if (_editingLocationAndSize != null &&
         !(browserEngine == BrowserEngine.webkit &&
@@ -731,18 +733,14 @@ class HybridTextEditing {
   /// Users can interact with the element and use the functionalities of the
   /// right-click menu. Such as copy,paste, cut, select, translate...
   void setStyle(html.HtmlElement domElement) {
+    final String transformCss =
+        float64ListToCssTransform(_editingLocationAndSize.transform);
     domElement.style
-      ..top = '${_editingLocationAndSize.top}px'
-      ..left = '${_editingLocationAndSize.left}px'
       ..width = '${_editingLocationAndSize.width}px'
-      ..height = '${_editingLocationAndSize.height}px';
-    if (_debugVisibleTextEditing) {
-      domElement.style.font = '24px sans-serif';
-    } else {
-      domElement.style
-        ..textAlign = _editingStyle.align
-        ..font = font();
-    }
+      ..height = '${_editingLocationAndSize.height}px'
+      ..textAlign = _editingStyle.align
+      ..font = font()
+      ..transform = transformCss;
   }
 
   html.InputElement createInputElement() {
@@ -785,19 +783,18 @@ class _EditingStyle {
 
 /// Information on the location and size of the editing element.
 ///
-/// This information is received via "TextInput.setEditingLocationSize"
+/// This information is received via "TextInput.setEditableSizeAndTransform"
 /// message. Framework currently sends this information on paint.
 // TODO(flutter_web): send the location during the scroll for more frequent
 // updates from the framework.
-class _EditingLocationAndSize {
-  _EditingLocationAndSize(
-      {@required this.top,
-      @required this.left,
-      @required this.width,
-      @required this.height});
+class _EditableSizeAndTransform {
+  _EditableSizeAndTransform({
+    @required this.width,
+    @required this.height,
+    @required this.transform,
+  });
 
-  final double top;
-  final double left;
   final double width;
   final double height;
+  final Float64List transform;
 }

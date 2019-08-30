@@ -13,6 +13,9 @@ enum BrowserEngine {
   /// The engine that powers Safari.
   webkit,
 
+  /// The engine that powers Firefox.
+  firefox,
+
   /// We were unable to detect the current browser engine.
   unknown,
 }
@@ -31,6 +34,10 @@ BrowserEngine _detectBrowserEngine() {
     return BrowserEngine.blink;
   } else if (vendor == 'Apple Computer, Inc.') {
     return BrowserEngine.webkit;
+  } else if (vendor == '') {
+    // An empty string means firefox:
+    // https://developer.mozilla.org/en-US/docs/Web/API/Navigator/vendor
+    return BrowserEngine.firefox;
   }
 
   // Assume blink otherwise, but issue a warning.

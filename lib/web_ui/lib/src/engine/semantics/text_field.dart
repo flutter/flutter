@@ -62,6 +62,7 @@ class TextField extends RoleManager {
 
     switch (browserEngine) {
       case BrowserEngine.blink:
+      case BrowserEngine.firefox:
       case BrowserEngine.unknown:
         _initializeForBlink();
         break;
