@@ -42,7 +42,7 @@ import 'theme.dart';
 /// Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       appBar: AppBar(
-///         title: Text("Show About Example"),
+///         title: Text('Show About Example'),
 ///       ),
 ///       drawer: Drawer(
 ///         child: ListView(
@@ -50,9 +50,9 @@ import 'theme.dart';
 ///             AboutListTile(
 ///               icon: Icon(Icons.info),
 ///               applicationIcon: FlutterLogo(),
-///               applicationName: "Show About Example",
-///               applicationVersion: "V1.0.1",
-///               applicationLegalese: "This is a Show About Example",
+///               applicationName: 'Show About Example',
+///               applicationVersion: 'V1.0.1',
+///               applicationLegalese: 'This is a Show About Example',
 ///               aboutBoxChildren: <Widget>[
 ///                 Text('Extra 1'),
 ///                 Text('Extra 2'),
@@ -63,13 +63,13 @@ import 'theme.dart';
 ///       ),
 ///       body: Center(
 ///         child: RaisedButton(
-///           child: Text("Show About Example"),
+///           child: Text('Show About Example'),
 ///           onPressed: () => showAboutDialog(
 ///             context: context,
 ///             applicationIcon: FlutterLogo(),
-///             applicationName: "Show About Example",
-///             applicationVersion: "V1.0.1",
-///             applicationLegalese: "This is a Show About Example",
+///             applicationName: 'Show About Example',
+///             applicationVersion: 'V1.0.1',
+///             applicationLegalese: 'This is a Show About Example',
 ///             children: <Widget>[
 ///               Text('Widget 1'),
 ///               Text('Widget 2'),
