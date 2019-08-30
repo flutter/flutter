@@ -218,8 +218,9 @@ void Engine::ReportTimings(std::vector<int64_t> timings) {
 }
 
 void Engine::NotifyIdle(int64_t deadline) {
+  auto trace_event = std::to_string(deadline - Dart_TimelineGetMicros());
   TRACE_EVENT1("flutter", "Engine::NotifyIdle", "deadline_now_delta",
-               std::to_string(deadline - Dart_TimelineGetMicros()).c_str());
+               trace_event.c_str());
   runtime_controller_->NotifyIdle(deadline);
 }
 
