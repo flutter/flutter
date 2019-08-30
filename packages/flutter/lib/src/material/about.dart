@@ -64,17 +64,19 @@ import 'theme.dart';
 ///       body: Center(
 ///         child: RaisedButton(
 ///           child: Text('Show About Example'),
-///           onPressed: () => showAboutDialog(
-///             context: context,
-///             applicationIcon: FlutterLogo(),
-///             applicationName: 'Show About Example',
-///             applicationVersion: 'V1.0.1',
-///             applicationLegalese: 'This is a Show About Example',
-///             children: <Widget>[
-///               Text('Widget 1'),
-///               Text('Widget 2'),
-///             ],
-///           ),
+///           onPressed: () {
+///            showAboutDialog(
+///              context: context,
+///              applicationIcon: FlutterLogo(),
+///              applicationName: 'Show About Example',
+///              applicationVersion: 'V1.0.1',
+///              applicationLegalese: 'This is a Show About Example',
+///              children: <Widget>[
+///                Text('Widget 1'),
+///                Text('Widget 2'),
+///              ],
+///            );
+///          },
 ///         ),
 ///       ),
 ///     );
