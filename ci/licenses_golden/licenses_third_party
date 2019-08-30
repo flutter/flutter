@@ -1,4 +1,4 @@
-Signature: f52f7c65ec79034b2042cf6fa927074e
+Signature: fce6d5c82855c75228e1292d55d0ffcf
 
 UNUSED LICENSES:
 
@@ -7438,6 +7438,7 @@ FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/main.cc
 FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/test.cc
 FILE: ../../../third_party/dart/runtime/llvm_codegen/codegen/main.cc
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_api_table.dart
+FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_ffiapi.dart
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/gen_api_table.dart
 FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.html
 FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.js
