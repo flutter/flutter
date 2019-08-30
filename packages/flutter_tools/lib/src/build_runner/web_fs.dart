@@ -140,6 +140,10 @@ class WebFs {
     @required FlutterProject flutterProject,
     @required BuildInfo buildInfo
   }) async {
+    // workaround for https://github.com/flutter/flutter/issues/38290
+    if (!flutterProject.dartTool.existsSync()) {
+      flutterProject.dartTool.createSync(recursive: true);
+    }
     // Start the build daemon and run an initial build.
     final BuildDaemonClient client = await buildDaemonCreator
       .startBuildDaemon(fs.currentDirectory.path, release: buildInfo.isRelease, profile: buildInfo.isProfile);
