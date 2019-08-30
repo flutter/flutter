@@ -268,13 +268,10 @@ String _locateGradlewExecutable(Directory directory) {
   final File gradle = directory.childFile(
     platform.isWindows ? 'gradlew.bat' : 'gradlew',
   );
-
   if (gradle.existsSync()) {
-    os.makeExecutable(gradle);
     return gradle.absolute.path;
-  } else {
-    return null;
   }
+  return null;
 }
 
 Future<String> _ensureGradle(FlutterProject project) async {
@@ -286,12 +283,12 @@ Future<String> _ensureGradle(FlutterProject project) async {
 // of validating the Gradle executable. This may take several seconds.
 Future<String> _initializeGradle(FlutterProject project) async {
   final Directory android = project.android.hostAppGradleRoot;
-  final Status status = logger.startProgress('Initializing gradle...', timeout: timeoutConfiguration.slowOperation);
-  String gradle = _locateGradlewExecutable(android);
-  if (gradle == null) {
-    injectGradleWrapper(android);
-    gradle = _locateGradlewExecutable(android);
-  }
+  final Status status = logger.startProgress('Initializing gradle...',
+      timeout: timeoutConfiguration.slowOperation);
+
+  injectGradleWrapperIfNeeded(android);
+
+  final String gradle = _locateGradlewExecutable(android);
   if (gradle == null)
     throwToolExit('Unable to locate gradlew script');
   printTrace('Using gradle from $gradle.');
@@ -302,11 +299,25 @@ Future<String> _initializeGradle(FlutterProject project) async {
   return gradle;
 }
 
-/// Injects the Gradle wrapper into the specified directory.
-void injectGradleWrapper(Directory directory) {
-  copyDirectorySync(cache.getArtifactDirectory('gradle_wrapper'), directory);
-  _locateGradlewExecutable(directory);
-  final File propertiesFile = directory.childFile(fs.path.join('gradle', 'wrapper', 'gradle-wrapper.properties'));
+/// Injects the Gradle wrapper files if any of these files don't exist in [directory].
+void injectGradleWrapperIfNeeded(Directory directory) {
+  copyDirectorySync(
+    cache.getArtifactDirectory('gradle_wrapper'),
+    directory,
+    shouldCopyFile: (File sourceFile, File destinationFile) {
+      // Don't override the existing files in the project.
+      return !destinationFile.existsSync();
+    },
+    onFileCopied: (File sourceFile, File destinationFile) {
+      final String modes = sourceFile.statSync().modeString();
+      if (modes != null && modes.contains('x')) {
+        os.makeExecutable(destinationFile);
+      }
+    },
+  );
+  // Add the `gradle-wrapper.properties` file if it doesn't exist.
+  final File propertiesFile = directory.childFile(
+      fs.path.join('gradle', 'wrapper', 'gradle-wrapper.properties'));
   if (!propertiesFile.existsSync()) {
     final String gradleVersion = getGradleVersionForAndroidPlugin(directory);
     propertiesFile.writeAsStringSync('''

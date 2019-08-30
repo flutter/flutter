@@ -4,11 +4,12 @@
 
 import 'dart:async';
 
-import '../android/apk.dart';
+import '../android/android_builder.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
@@ -46,6 +47,28 @@ class BuildApkCommand extends BuildSubCommand {
     'suitable for deploying to app stores.';
 
   @override
+  Future<Map<CustomDimensions, String>> get usageValues async {
+    final Map<CustomDimensions, String> usage = <CustomDimensions, String>{};
+
+    usage[CustomDimensions.commandBuildApkTargetPlatform] =
+        (argResults['target-platform'] as List<String>).join(',');
+    usage[CustomDimensions.commandBuildApkSplitPerAbi] =
+        argResults['split-per-abi'].toString();
+
+    if (argResults['release']) {
+      usage[CustomDimensions.commandBuildApkBuildMode] = 'release';
+    } else if (argResults['debug']) {
+      usage[CustomDimensions.commandBuildApkBuildMode] = 'debug';
+    } else if (argResults['profile']) {
+      usage[CustomDimensions.commandBuildApkBuildMode] = 'profile';
+    } else {
+      // The build defaults to release.
+      usage[CustomDimensions.commandBuildApkBuildMode] = 'release';
+    }
+    return usage;
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = getBuildInfo();
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(buildInfo,
@@ -70,7 +93,7 @@ class BuildApkCommand extends BuildSubCommand {
                   '--split-per-abi', indent: 8);
       printStatus('Learn more on:  https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',indent: 8);
     }
-    await buildApk(
+    await androidBuilder.buildApk(
       project: FlutterProject.current(),
       target: targetFile,
       androidBuildInfo: androidBuildInfo,

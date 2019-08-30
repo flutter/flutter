@@ -57,6 +57,34 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "platforms": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "android": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "package": {"type": "string"},
+                                        "pluginClass": {"type": "string"}
+                                    }
+                                },
+                                "ios": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "pluginClass": {"type": "string"}
+                                    }
+                                },
+                                "macos": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "pluginClass": {"type": "string"}
+                                    }
+                                }
+                            }
+                        },
                         "androidPackage": { "type": "string" },
                         "iosPrefix": { "type": "string" },
                         "macosPrefix": { "type": "string" },
