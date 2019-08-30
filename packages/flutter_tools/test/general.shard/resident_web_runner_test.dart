@@ -17,7 +17,7 @@ import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/build_runner/web_fs.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/testbed.dart';
@@ -61,12 +61,30 @@ void main() {
     when(mockWebFs.runAndDebug()).thenAnswer((Invocation _) async {
       return mockDebugConnection;
     });
+    when(mockWebFs.recompile()).thenAnswer((Invocation _) {
+      return Future<bool>.value(false);
+    });
     when(mockDebugConnection.vmService).thenReturn(mockVmService);
+    when(mockDebugConnection.onDone).thenAnswer((Invocation invocation) {
+      return Completer<void>().future;
+    });
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
-    when(mockDebugConnection.wsUri).thenReturn('ws://127.0.0.1/abcd/');
+    when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
   }
+
+  test('profile does not supportsServiceProtocol', () => testbed.run(() {
+    final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
+      MockWebDevice(),
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+      ipv6: true,
+    );
+
+    expect(profileResidentWebRunner.supportsServiceProtocol, false);
+    expect(residentWebRunner.supportsServiceProtocol, true);
+  }));
 
   test('Exits on run if application does not support the web', () => testbed.run(() async {
     fs.file('pubspec.yaml').createSync();
@@ -88,12 +106,14 @@ void main() {
 
   test('Can successfully run and connect to vmservice', () => testbed.run(() async {
     _setupMocks();
+    final BufferLogger bufferLogger = logger;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
 
+    expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
   }));
 
@@ -161,6 +181,23 @@ void main() {
 
     expect(result.code, 1);
     expect(result.message, contains('Failed'));
+  }));
+
+  test('Fails on vmservice RpcError', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
+      return true;
+    });
+    when(mockVmService.callServiceExtension('hotRestart')).thenThrow(RPCError('', 2, '123'));
+    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+
+    expect(result.code, 1);
+    expect(result.message, contains('Page requires full reload'));
   }));
 
   test('printHelp without details is spoopy', () => testbed.run(() async {

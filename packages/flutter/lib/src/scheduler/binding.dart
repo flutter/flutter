@@ -150,7 +150,7 @@ enum SchedulerPhase {
   /// Microtasks scheduled during the processing of transient callbacks are
   /// current executing.
   ///
-  /// This may include, for instance, callbacks from futures resulted during the
+  /// This may include, for instance, callbacks from futures resolved during the
   /// [transientCallbacks] phase.
   midFrameMicrotasks,
 
@@ -202,12 +202,10 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     if (!kReleaseMode) {
       int frameNumber = 0;
 
-      window.onReportTimings = (List<FrameTiming> timings) {
-        for (FrameTiming frameTiming in timings) {
-          frameNumber += 1;
-          _profileFramePostEvent(frameNumber, frameTiming);
-        }
-      };
+      window.frameTimings.listen((FrameTiming frameTiming) {
+        frameNumber += 1;
+        _profileFramePostEvent(frameNumber, frameTiming);
+      });
     }
   }
 

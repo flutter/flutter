@@ -36,7 +36,7 @@ enum ListTileStyle {
 ///
 /// The [Drawer] widget specifies a tile theme for its children which sets
 /// [style] to [ListTileStyle.drawer].
-class ListTileTheme extends InheritedWidget {
+class ListTileTheme extends InheritedTheme {
   /// Creates a list tile theme that controls the color and style parameters for
   /// [ListTile]s.
   const ListTileTheme({
@@ -113,6 +113,20 @@ class ListTileTheme extends InheritedWidget {
   static ListTileTheme of(BuildContext context) {
     final ListTileTheme result = context.inheritFromWidgetOfExactType(ListTileTheme);
     return result ?? const ListTileTheme();
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final ListTileTheme ancestorTheme = context.ancestorWidgetOfExactType(ListTileTheme);
+    return identical(this, ancestorTheme) ? child : ListTileTheme(
+      dense: dense,
+      style: style,
+      selectedColor: selectedColor,
+      iconColor: iconColor,
+      textColor: textColor,
+      contentPadding: contentPadding,
+      child: child,
+    );
   }
 
   @override

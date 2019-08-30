@@ -63,7 +63,7 @@ enum ButtonBarLayoutBehavior {
 ///    based on the ambient button theme.
 ///  * [RawMaterialButton], which can be used to configure a button that doesn't
 ///    depend on any inherited themes.
-class ButtonTheme extends InheritedWidget {
+class ButtonTheme extends InheritedTheme {
   /// Creates a button theme.
   ///
   /// The [textTheme], [minWidth], [height], and [colorScheme] arguments
@@ -120,20 +120,51 @@ class ButtonTheme extends InheritedWidget {
   }) : assert(data != null),
        super(key: key, child: child);
 
+  // TODO(darrenaustin): remove after this deprecation warning has been on
+  // stable for a couple of releases.
+  // See https://github.com/flutter/flutter/issues/37333
+  //
   /// Creates a button theme that is appropriate for button bars, as used in
   /// dialog footers and in the headers of data tables.
   ///
-  /// This theme is denser, with a smaller [minWidth] and [padding], than the
-  /// default theme. Also, this theme uses [ButtonTextTheme.accent] rather than
-  /// [ButtonTextTheme.normal].
+  /// Deprecated. Please use [ButtonBarTheme] instead which offers more
+  /// flexibility to configure [ButtonBar] widgets.
   ///
-  /// For best effect, the label of the button at the edge of the container
-  /// should have text that ends up wider than 64.0 pixels. This ensures that
-  /// the alignment of the text matches the alignment of the edge of the
-  /// container.
+  /// To migrate instances of code that were just wrapping a [ButtonBar]:
   ///
-  /// For example, buttons at the bottom of [Dialog] or [Card] widgets use this
-  /// button theme.
+  /// ```dart
+  /// ButtonTheme.bar(
+  ///   child: ButtonBar(...)
+  /// );
+  /// ```
+  ///
+  /// you can just remove the `ButtonTheme.bar` as the defaults are now handled
+  /// by [ButtonBar] directly.
+  ///
+  /// If you have more complicated usages of `ButtonTheme.bar` like:
+  ///
+  /// ```dart
+  /// ButtonTheme.bar(
+  ///   padding: EdgeInsets.symmetric(horizontal: 10.0),
+  ///   textTheme: ButtonTextTheme.accent,
+  ///   child: ButtonBar(...),
+  /// );
+  /// ```
+  ///
+  /// you can remove the `ButtonTheme.bar` and move the parameters to the
+  /// [ButtonBar] instance directly:
+  ///
+  /// ```dart
+  /// ButtonBar(
+  ///   padding: EdgeInsets.symmetric(horizontal: 10.0),
+  ///   textTheme: ButtonTextTheme.accent,
+  ///   ...
+  /// );
+  /// ```
+  ///
+  /// You can also replace the defaults for all [ButtonBar] widgets by updating
+  /// [ThemeData.buttonBarTheme] for your app.
+  @Deprecated('use ButtonBarTheme instead')
   ButtonTheme.bar({
     Key key,
     ButtonTextTheme textTheme = ButtonTextTheme.accent,
@@ -197,6 +228,12 @@ class ButtonTheme extends InheritedWidget {
       }
     }
     return buttonTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final ButtonTheme ancestorTheme = context.ancestorWidgetOfExactType(ButtonTheme);
+    return identical(this, ancestorTheme) ? child : ButtonTheme.fromButtonThemeData(data: data, child: child);
   }
 
   @override

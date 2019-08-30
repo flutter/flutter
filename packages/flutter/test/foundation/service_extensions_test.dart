@@ -79,8 +79,11 @@ class TestServiceExtensionsBinding extends BindingBase
     await flushMicrotasks();
     if (ui.window.onDrawFrame != null)
       ui.window.onDrawFrame();
-    if (ui.window.onReportTimings != null)
-      ui.window.onReportTimings(<ui.FrameTiming>[]);
+    final Future<ui.FrameTiming> firstFrameEventFired = window.frameTimings.first;
+    ui.window.debugReportTimings(<ui.FrameTiming>[
+      ui.FrameTiming(List<int>.filled(ui.FramePhase.values.length, 0)),
+    ]);
+    await firstFrameEventFired;
   }
 
   @override
@@ -429,7 +432,7 @@ void main() {
     bool completed;
 
     completed = false;
-    defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) async {
+    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) async {
       expect(utf8.decode(message.buffer.asUint8List()), 'test');
       completed = true;
       return ByteData(5); // 0x0000000000
@@ -448,7 +451,7 @@ void main() {
     data = await rootBundle.loadStructuredData<bool>('test', (String value) async { expect(value, '\x00\x00\x00\x00\x00'); return false; });
     expect(data, isFalse);
     expect(completed, isTrue);
-    defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
+    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
   });
 
   test('Service extensions - exit', () async {

@@ -94,7 +94,6 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-z
 /// project has a development team set in the project's build settings.
 Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   BuildableIOSApp iosApp,
-  bool usesTerminalUi = true,
 }) async {
   final Map<String, String> buildSettings = iosApp.project.buildSettings;
   if (buildSettings == null)
@@ -140,7 +139,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
       .toSet() // Unique.
       .toList();
 
-  final String signingIdentity = await _chooseSigningIdentity(validCodeSigningIdentities, usesTerminalUi);
+  final String signingIdentity = await _chooseSigningIdentity(validCodeSigningIdentities);
 
   // If none are chosen, return null.
   if (signingIdentity == null)
@@ -185,7 +184,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   };
 }
 
-Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, bool usesTerminalUi) async {
+Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) async {
   // The user has no valid code signing identities.
   if (validCodeSigningIdentities.isEmpty) {
     printError(noCertificatesInstruction, emphasis: true);
@@ -209,7 +208,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, b
 
     // If terminal UI can't be used, just attempt with the first valid certificate
     // since we can't ask the user.
-    if (!usesTerminalUi)
+    if (!terminal.usesTerminalUi)
       return validCodeSigningIdentities.first;
 
     final int count = validCodeSigningIdentities.length;

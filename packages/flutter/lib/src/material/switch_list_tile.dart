@@ -279,6 +279,7 @@ class SwitchListTile extends StatelessWidget {
     this.subtitle,
     this.isThreeLine = false,
     this.dense,
+    this.contentPadding,
     this.secondary,
     this.selected = false,
   }) : _switchListTileType = _SwitchListTileType.material,
@@ -310,6 +311,7 @@ class SwitchListTile extends StatelessWidget {
     this.subtitle,
     this.isThreeLine = false,
     this.dense,
+    this.contentPadding,
     this.secondary,
     this.selected = false,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
@@ -409,6 +411,15 @@ class SwitchListTile extends StatelessWidget {
   /// If this property is null then its value is based on [ListTileTheme.dense].
   final bool dense;
 
+  /// The tile's internal padding.
+  ///
+  /// Insets a [SwitchListTile]'s contents: its [title], [subtitle],
+  /// [secondary], and [Switch] widgets.
+  ///
+  /// If null, [ListTile]'s default of `EdgeInsets.symmetric(horizontal: 16.0)`
+  /// is used.
+  final EdgeInsetsGeometry contentPadding;
+
   /// Whether to render icons and text in the [activeColor].
   ///
   /// No effort is made to automatically coordinate the [selected] state and the
@@ -462,6 +473,7 @@ class SwitchListTile extends StatelessWidget {
           trailing: control,
           isThreeLine: isThreeLine,
           dense: dense,
+          contentPadding: contentPadding,
           enabled: onChanged != null,
           onTap: onChanged != null ? () { onChanged(!value); } : null,
           selected: selected,

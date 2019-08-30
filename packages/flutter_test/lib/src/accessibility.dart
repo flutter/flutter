@@ -196,7 +196,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   Future<Evaluation> evaluate(WidgetTester tester) async {
     final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
     final RenderView renderView = tester.binding.renderView;
-    final OffsetLayer layer = renderView.layer;
+    final OffsetLayer layer = renderView.debugLayer;
     ui.Image image;
     final ByteData byteData = await tester.binding.runAsync<ByteData>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the

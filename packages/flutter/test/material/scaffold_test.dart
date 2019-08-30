@@ -732,6 +732,102 @@ void main() {
       expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
       expect(mediaQueryBottom, 0.0);
     });
+
+    testWidgets('body size with extendBodyBehindAppBar', (WidgetTester tester) async {
+      final Key appBarKey = UniqueKey();
+      final Key bodyKey = UniqueKey();
+
+      const double appBarHeight = 100;
+      const double windowPaddingTop = 24;
+      bool fixedHeightAppBar;
+      double mediaQueryTop;
+
+      Widget buildFrame({ bool extendBodyBehindAppBar, bool hasAppBar }) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(top: windowPaddingTop),
+            ),
+            child: Builder(
+              builder: (BuildContext context) {
+                return Scaffold(
+                  extendBodyBehindAppBar: extendBodyBehindAppBar,
+                  appBar: !hasAppBar ? null : PreferredSize(
+                    key: appBarKey,
+                    preferredSize: const Size.fromHeight(appBarHeight),
+                    child: Container(
+                      constraints: BoxConstraints(
+                        minHeight: appBarHeight,
+                        maxHeight: fixedHeightAppBar ? appBarHeight : double.infinity,
+                      ),
+                    ),
+                  ),
+                  body: Builder(
+                    builder: (BuildContext context) {
+                      mediaQueryTop = MediaQuery.of(context).padding.top;
+                      return Container(key: bodyKey);
+                    }
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      }
+
+      fixedHeightAppBar = false;
+
+      // When an appbar is provided, the Scaffold's body is built within a
+      // MediaQuery with padding.top = 0, and the appBar's maxHeight is
+      // constrained to its preferredSize.height + the original MediaQuery
+      // padding.top. When extendBodyBehindAppBar is true, an additional
+      // inner MediaQuery is added around the Scaffold's body with padding.top
+      // equal to the overall height of the appBar. See _BodyBuilder in
+      // material/scaffold.dart.
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: true, hasAppBar: true));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+      expect(tester.getSize(find.byKey(appBarKey)), const Size(800.0, appBarHeight + windowPaddingTop));
+      expect(mediaQueryTop, appBarHeight + windowPaddingTop);
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: true, hasAppBar: false));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+      expect(find.byKey(appBarKey), findsNothing);
+      expect(mediaQueryTop, windowPaddingTop);
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: false, hasAppBar: true));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0 - appBarHeight - windowPaddingTop));
+      expect(tester.getSize(find.byKey(appBarKey)), const Size(800.0, appBarHeight + windowPaddingTop));
+      expect(mediaQueryTop, 0.0);
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: false, hasAppBar: false));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+      expect(find.byKey(appBarKey), findsNothing);
+      expect(mediaQueryTop, windowPaddingTop);
+
+      fixedHeightAppBar = true;
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: true, hasAppBar: true));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+      expect(tester.getSize(find.byKey(appBarKey)), const Size(800.0, appBarHeight));
+      expect(mediaQueryTop, appBarHeight);
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: true, hasAppBar: false));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+      expect(find.byKey(appBarKey), findsNothing);
+      expect(mediaQueryTop, windowPaddingTop);
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: false, hasAppBar: true));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0 - appBarHeight));
+      expect(tester.getSize(find.byKey(appBarKey)), const Size(800.0, appBarHeight));
+      expect(mediaQueryTop, 0.0);
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: false, hasAppBar: false));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+      expect(find.byKey(appBarKey), findsNothing);
+      expect(mediaQueryTop, windowPaddingTop);
+    });
   });
 
   testWidgets('Open drawer hides underlying semantics tree', (WidgetTester tester) async {
@@ -1345,16 +1441,15 @@ void main() {
       expect(find.text('drawer'), findsOneWidget);
     });
 
-    testWidgets('Drawer opens correctly with padding from MediaQuery', (WidgetTester tester) async {
-      // The padding described by MediaQuery is larger than the default
-      // drawer drag zone width which is 20.
+    testWidgets('Drawer opens correctly with padding from MediaQuery (LTR)', (WidgetTester tester) async {
+      const double simulatedNotchSize = 40.0;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             drawer: const Drawer(
-              child: Text('drawer'),
+              child: Text('Drawer'),
             ),
-            body: const Text('scaffold body'),
+            body: const Text('Scaffold Body'),
             appBar: AppBar(
               centerTitle: true,
               title: const Text('Title'),
@@ -1364,25 +1459,23 @@ void main() {
       );
 
       ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
-
       expect(scaffoldState.isDrawerOpen, false);
 
-      await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
+      await tester.dragFrom(const Offset(simulatedNotchSize + 15.0, 100), const Offset(300, 0));
       await tester.pumpAndSettle();
-
       expect(scaffoldState.isDrawerOpen, false);
 
       await tester.pumpWidget(
         MaterialApp(
           home: MediaQuery(
             data: const MediaQueryData(
-              padding: EdgeInsets.fromLTRB(40, 0, 0, 0)
+              padding: EdgeInsets.fromLTRB(simulatedNotchSize, 0, 0, 0),
             ),
             child: Scaffold(
               drawer: const Drawer(
-                child: Text('drawer'),
+                child: Text('Drawer'),
               ),
-              body: const Text('scaffold body'),
+              body: const Text('Scaffold Body'),
               appBar: AppBar(
                 centerTitle: true,
                 title: const Text('Title'),
@@ -1391,33 +1484,60 @@ void main() {
           ),
         ),
       );
-
       scaffoldState = tester.state(find.byType(Scaffold));
-
       expect(scaffoldState.isDrawerOpen, false);
 
-      await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
+      await tester.dragFrom(
+        const Offset(simulatedNotchSize + 15.0, 100),
+        const Offset(300, 0),
+      );
       await tester.pumpAndSettle();
-
       expect(scaffoldState.isDrawerOpen, true);
     });
 
-    testWidgets('Drawer opens correctly with padding from MediaQuer (RTL)', (WidgetTester tester) async {
-      // The padding described by MediaQuery is larger than the default
-      // drawer drag zone width which is 20.
+    testWidgets('Drawer opens correctly with padding from MediaQuery (RTL)', (WidgetTester tester) async {
+      const double simulatedNotchSize = 40.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            drawer: const Drawer(
+              child: Text('Drawer'),
+            ),
+            body: const Text('Scaffold Body'),
+            appBar: AppBar(
+              centerTitle: true,
+              title: const Text('Title'),
+            ),
+          ),
+        ),
+      );
+
+      final double scaffoldWidth = tester.renderObject<RenderBox>(
+        find.byType(Scaffold),
+      ).size.width;
+      ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+      expect(scaffoldState.isDrawerOpen, false);
+
+      await tester.dragFrom(
+        Offset(scaffoldWidth - simulatedNotchSize - 15.0, 100),
+        const Offset(-300, 0),
+      );
+      await tester.pumpAndSettle();
+      expect(scaffoldState.isDrawerOpen, false);
+
       await tester.pumpWidget(
         MaterialApp(
           home: MediaQuery(
             data: const MediaQueryData(
-              padding: EdgeInsets.fromLTRB(0, 0, 40, 0)
+              padding: EdgeInsets.fromLTRB(0, 0, simulatedNotchSize, 0),
             ),
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: Scaffold(
                 drawer: const Drawer(
-                  child: Text('drawer'),
+                  child: Text('Drawer'),
                 ),
-                body: const Text('scaffold body'),
+                body: const Text('Scaffold body'),
                 appBar: AppBar(
                   centerTitle: true,
                   title: const Text('Title'),
@@ -1427,21 +1547,66 @@ void main() {
           ),
         ),
       );
-
-      final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
-
+      scaffoldState = tester.state(find.byType(Scaffold));
       expect(scaffoldState.isDrawerOpen, false);
 
-      await tester.dragFrom(const Offset(765, 100), const Offset(-300, 0));
+      await tester.dragFrom(
+        Offset(scaffoldWidth - simulatedNotchSize - 15.0, 100),
+        const Offset(-300, 0),
+      );
       await tester.pumpAndSettle();
-
       expect(scaffoldState.isDrawerOpen, true);
     });
   });
 
+    testWidgets('Drawer opens correctly with custom edgeDragWidth', (WidgetTester tester) async {
+      // The default edge drag width is 20.0.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            drawer: const Drawer(
+              child: Text('Drawer'),
+            ),
+            body: const Text('Scaffold body'),
+            appBar: AppBar(
+              centerTitle: true,
+              title: const Text('Title'),
+            ),
+          ),
+        ),
+      );
+      ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+      expect(scaffoldState.isDrawerOpen, false);
+
+      await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
+      await tester.pumpAndSettle();
+      expect(scaffoldState.isDrawerOpen, false);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            drawer: const Drawer(
+              child: Text('Drawer'),
+            ),
+            drawerEdgeDragWidth: 40.0,
+            body: const Text('Scaffold Body'),
+            appBar: AppBar(
+              centerTitle: true,
+              title: const Text('Title'),
+            ),
+          ),
+        ),
+      );
+      scaffoldState = tester.state(find.byType(Scaffold));
+      expect(scaffoldState.isDrawerOpen, false);
+
+      await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
+      await tester.pumpAndSettle();
+      expect(scaffoldState.isDrawerOpen, true);
+    });
+
   testWidgets('Nested scaffold body insets', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/20295
-
     final Key bodyKey = UniqueKey();
 
     Widget buildFrame(bool innerResizeToAvoidBottomInset, bool outerResizeToAvoidBottomInset) {

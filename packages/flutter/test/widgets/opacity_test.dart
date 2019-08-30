@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
@@ -191,6 +192,7 @@ void main() {
     final Element element = find.byType(RepaintBoundary).first.evaluate().single;
     // The following line will send the layer to engine and cause crash if an
     // empty opacity layer is sent.
-    await element.renderObject.layer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
+    final OffsetLayer offsetLayer = element.renderObject.debugLayer;
+    await offsetLayer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
   }, skip: isBrowser);
 }

@@ -104,7 +104,7 @@ class Checkbox extends StatefulWidget {
   /// Defaults to [ThemeData.toggleableActiveColor].
   final Color activeColor;
 
-  /// The color to use for the check icon when this checkbox is checked
+  /// The color to use for the check icon when this checkbox is checked.
   ///
   /// Defaults to Color(0xFFFFFFFF)
   final Color checkColor;
@@ -281,8 +281,8 @@ class _RenderCheckbox extends RenderToggleable {
   }
 
   // White stroke used to paint the check and dash.
-  void _initStrokePaint(Paint paint) {
-    paint
+  Paint _createStrokePaint() {
+    return Paint()
       ..color = checkColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = _kStrokeWidth;
@@ -336,6 +336,7 @@ class _RenderCheckbox extends RenderToggleable {
     final Canvas canvas = context.canvas;
     paintRadialReaction(canvas, offset, size.center(Offset.zero));
 
+    final Paint strokePaint = _createStrokePaint();
     final Offset origin = offset + (size / 2.0 - const Size.square(_kEdgeSize) / 2.0);
     final AnimationStatus status = position.status;
     final double tNormalized = status == AnimationStatus.forward || status == AnimationStatus.completed
@@ -353,31 +354,29 @@ class _RenderCheckbox extends RenderToggleable {
       } else {
         canvas.drawRRect(outer, paint);
 
-        _initStrokePaint(paint);
         final double tShrink = (t - 0.5) * 2.0;
         if (_oldValue == null || value == null)
-          _drawDash(canvas, origin, tShrink, paint);
+          _drawDash(canvas, origin, tShrink, strokePaint);
         else
-          _drawCheck(canvas, origin, tShrink, paint);
+          _drawCheck(canvas, origin, tShrink, strokePaint);
       }
     } else { // Two cases: null to true, true to null
       final RRect outer = _outerRectAt(origin, 1.0);
       final Paint paint = Paint() ..color = _colorAt(1.0);
       canvas.drawRRect(outer, paint);
 
-      _initStrokePaint(paint);
       if (tNormalized <= 0.5) {
         final double tShrink = 1.0 - tNormalized * 2.0;
         if (_oldValue == true)
-          _drawCheck(canvas, origin, tShrink, paint);
+          _drawCheck(canvas, origin, tShrink, strokePaint);
         else
-          _drawDash(canvas, origin, tShrink, paint);
+          _drawDash(canvas, origin, tShrink, strokePaint);
       } else {
         final double tExpand = (tNormalized - 0.5) * 2.0;
         if (value == true)
-          _drawCheck(canvas, origin, tExpand, paint);
+          _drawCheck(canvas, origin, tExpand, strokePaint);
         else
-          _drawDash(canvas, origin, tExpand, paint);
+          _drawDash(canvas, origin, tExpand, strokePaint);
       }
     }
   }

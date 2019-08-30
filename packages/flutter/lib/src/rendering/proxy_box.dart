@@ -789,14 +789,18 @@ class RenderOpacity extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       if (_alpha == 0) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
         return;
       }
       if (_alpha == 255) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
         context.paintChild(child, offset);
         return;
       }
       assert(needsCompositing);
-      context.pushOpacity(offset, _alpha, super.paint);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer);
     }
   }
 
@@ -904,14 +908,19 @@ class RenderAnimatedOpacity extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      if (_alpha == 0)
+      if (_alpha == 0) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
         return;
+      }
       if (_alpha == 255) {
+        // No need to keep the layer. We'll create a new one if necessary.
+        layer = null;
         context.paintChild(child, offset);
         return;
       }
       assert(needsCompositing);
-      context.pushOpacity(offset, _alpha, super.paint);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer);
     }
   }
 
@@ -952,6 +961,9 @@ class RenderShaderMask extends RenderProxyBox {
        _blendMode = blendMode,
        super(child);
 
+  @override
+  ShaderMaskLayer get layer => super.layer;
+
   /// Called to creates the [Shader] that generates the mask.
   ///
   /// The shader callback is called with the current size of the child so that
@@ -989,15 +1001,14 @@ class RenderShaderMask extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      context.pushLayer(
-        ShaderMaskLayer(
-          shader: _shaderCallback(offset & size),
-          maskRect: offset & size,
-          blendMode: _blendMode,
-        ),
-        super.paint,
-        offset,
-      );
+      layer ??= ShaderMaskLayer();
+      layer
+        ..shader = _shaderCallback(offset & size)
+        ..maskRect = offset & size
+        ..blendMode = _blendMode;
+      context.pushLayer(layer, super.paint, offset);
+    } else {
+      layer = null;
     }
   }
 }
@@ -1014,6 +1025,9 @@ class RenderBackdropFilter extends RenderProxyBox {
     : assert(filter != null),
       _filter = filter,
       super(child);
+
+  @override
+  BackdropFilterLayer get layer => super.layer;
 
   /// The image filter to apply to the existing painted content before painting
   /// the child.
@@ -1037,7 +1051,11 @@ class RenderBackdropFilter extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      context.pushLayer(BackdropFilterLayer(filter: _filter), super.paint, offset);
+      layer ??= BackdropFilterLayer();
+      layer.filter = _filter;
+      context.pushLayer(layer, super.paint, offset);
+    } else {
+      layer = null;
     }
   }
 }
@@ -1267,12 +1285,14 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] must not be null or [Clip.none].
   RenderClipRect({
     RenderBox child,
     CustomClipper<Rect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
+       super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   Rect get _defaultClip => Offset.zero & size;
@@ -1292,7 +1312,9 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipRect(needsCompositing, offset, _clip, super.paint, clipBehavior: clipBehavior);
+      layer = context.pushClipRect(needsCompositing, offset, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+    } else {
+      layer = null;
     }
   }
 
@@ -1322,13 +1344,14 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   ///
   /// If [clipper] is non-null, then [borderRadius] is ignored.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipRRect({
     RenderBox child,
     BorderRadius borderRadius = BorderRadius.zero,
     CustomClipper<RRect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        _borderRadius = borderRadius,
        super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
     assert(_borderRadius != null || clipper != null);
@@ -1368,7 +1391,9 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint, clipBehavior: clipBehavior);
+      layer = context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+    } else {
+      layer = null;
     }
   }
 
@@ -1396,12 +1421,13 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipOval({
     RenderBox child,
     CustomClipper<Rect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect _cachedRect;
@@ -1436,7 +1462,9 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint, clipBehavior: clipBehavior);
+      layer = context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+    } else {
+      layer = null;
     }
   }
 
@@ -1472,12 +1500,13 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// consider using a [RenderClipRect], which can achieve the same effect more
   /// efficiently.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipPath({
     RenderBox child,
     CustomClipper<Path> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
@@ -1498,7 +1527,9 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint, clipBehavior: clipBehavior);
+      layer = context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+    } else {
+      layer = null;
     }
   }
 
@@ -1606,8 +1637,9 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   ///
   /// The [color] is required.
   ///
-  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
-  /// Additionally, the [elevation] must be non-negative.
+  /// The [shape], [elevation], [color], [clipBehavior], and [shadowColor]
+  /// arguments must not be null. Additionally, the [elevation] must be
+  /// non-negative.
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,
@@ -1630,6 +1662,9 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
          color: color,
          shadowColor: shadowColor
        );
+
+  @override
+  PhysicalModelLayer get layer => super.layer;
 
   /// The shape of the layer.
   ///
@@ -1710,18 +1745,20 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         }
         return true;
       }());
-      final PhysicalModelLayer physicalModel = PhysicalModelLayer(
-        clipPath: offsetRRectAsPath,
-        clipBehavior: clipBehavior,
-        elevation: paintShadows ? elevation : 0.0,
-        color: color,
-        shadowColor: shadowColor,
-      );
+      layer ??= PhysicalModelLayer();
+      layer
+        ..clipPath = offsetRRectAsPath
+        ..clipBehavior = clipBehavior
+        ..elevation = paintShadows ? elevation : 0.0
+        ..color = color
+        ..shadowColor = shadowColor;
+      context.pushLayer(layer, super.paint, offset, childPaintBounds: offsetBounds);
       assert(() {
-        physicalModel.debugCreator = debugCreator;
+        layer.debugCreator = debugCreator;
         return true;
       }());
-      context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
+    } else {
+      layer = null;
     }
   }
 
@@ -1769,6 +1806,9 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
        );
 
   @override
+  PhysicalModelLayer get layer => super.layer;
+
+  @override
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
 
   @override
@@ -1804,18 +1844,20 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
         }
         return true;
       }());
-      final PhysicalModelLayer physicalModel = PhysicalModelLayer(
-        clipPath: offsetPath,
-        clipBehavior: clipBehavior,
-        elevation: paintShadows ? elevation : 0.0,
-        color: color,
-        shadowColor: shadowColor,
-      );
+      layer ??= PhysicalModelLayer();
+      layer
+        ..clipPath = offsetPath
+        ..clipBehavior = clipBehavior
+        ..elevation = paintShadows ? elevation : 0.0
+        ..color = color
+        ..shadowColor = shadowColor;
+      context.pushLayer(layer, super.paint, offset, childPaintBounds: offsetBounds);
       assert(() {
-        physicalModel.debugCreator = debugCreator;
+        layer.debugCreator = debugCreator;
         return true;
       }());
-      context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
+    } else {
+      layer = null;
     }
   }
 
@@ -2145,10 +2187,12 @@ class RenderTransform extends RenderProxyBox {
     if (child != null) {
       final Matrix4 transform = _effectiveTransform;
       final Offset childOffset = MatrixUtils.getAsTranslation(transform);
-      if (childOffset == null)
-        context.pushTransform(needsCompositing, offset, transform, super.paint);
-      else
+      if (childOffset == null) {
+        layer = context.pushTransform(needsCompositing, offset, transform, super.paint, oldLayer: layer);
+      } else {
         super.paint(context, offset + childOffset);
+        layer = null;
+      }
     }
   }
 
@@ -2288,12 +2332,14 @@ class RenderFittedBox extends RenderProxyBox {
     }
   }
 
-  void _paintChildWithTransform(PaintingContext context, Offset offset) {
+  TransformLayer _paintChildWithTransform(PaintingContext context, Offset offset) {
     final Offset childOffset = MatrixUtils.getAsTranslation(_transform);
     if (childOffset == null)
-      context.pushTransform(needsCompositing, offset, _transform, super.paint);
+      return context.pushTransform(needsCompositing, offset, _transform, super.paint,
+          oldLayer: layer is TransformLayer ? layer : null);
     else
       super.paint(context, offset + childOffset);
+    return null;
   }
 
   @override
@@ -2303,9 +2349,10 @@ class RenderFittedBox extends RenderProxyBox {
     _updatePaintData();
     if (child != null) {
       if (_hasVisualOverflow)
-        context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform);
+        layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
+            oldLayer: layer is ClipRectLayer ? layer : null);
       else
-        _paintChildWithTransform(context, offset);
+        layer = _paintChildWithTransform(context, offset);
     }
   }
 
@@ -2528,21 +2575,17 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> listeners = <String>[];
-    if (onPointerDown != null)
-      listeners.add('down');
-    if (onPointerMove != null)
-      listeners.add('move');
-    if (onPointerUp != null)
-      listeners.add('up');
-    if (onPointerCancel != null)
-      listeners.add('cancel');
-    if (onPointerSignal != null)
-      listeners.add('signal');
-    if (listeners.isEmpty)
-      listeners.add('<none>');
-    properties.add(IterableProperty<String>('listeners', listeners));
-    // TODO(jacobr): add raw listeners to the diagnostics data.
+    properties.add(FlagsSummary<Function>(
+      'listeners',
+      <String, Function>{
+        'down': onPointerDown,
+        'move': onPointerMove,
+        'up': onPointerUp,
+        'cancel': onPointerCancel,
+        'signal': onPointerSignal,
+      },
+      ifEmpty: '<none>',
+    ));
   }
 }
 
@@ -2706,6 +2749,7 @@ class RenderMouseRegion extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_annotationIsActive) {
+      // Annotated region layers are not retained because they do not create engine layers.
       final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
         _hoverAnnotation,
         size: size,
@@ -2725,17 +2769,15 @@ class RenderMouseRegion extends RenderProxyBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> listeners = <String>[];
-    if (onEnter != null)
-      listeners.add('enter');
-    if (onHover != null)
-      listeners.add('hover');
-    if (onExit != null)
-      listeners.add('exit');
-    if (listeners.isEmpty)
-      listeners.add('<none>');
-    properties.add(IterableProperty<String>('listeners', listeners));
-    // TODO(jacobr): add raw listeners to the diagnostics data.
+    properties.add(FlagsSummary<Function>(
+      'listeners',
+      <String, Function>{
+        'enter': onEnter,
+        'hover': onHover,
+        'exit': onExit,
+      },
+      ifEmpty: '<none>',
+    ));
   }
 }
 
@@ -2832,7 +2874,8 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage({ double pixelRatio = 1.0 }) {
     assert(!debugNeedsPaint);
-    return layer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
+    final OffsetLayer offsetLayer = layer;
+    return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
 
 
@@ -4657,7 +4700,16 @@ class RenderLeaderLayer extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.pushLayer(LeaderLayer(link: link, offset: offset), super.paint, Offset.zero);
+    if (layer == null) {
+      layer = LeaderLayer(link: link, offset: offset);
+    } else {
+      final LeaderLayer leaderLayer = layer;
+      leaderLayer
+        ..link = link
+        ..offset = offset;
+    }
+    context.pushLayer(layer, super.paint, Offset.zero);
+    assert(layer != null);
   }
 
   @override
@@ -4743,7 +4795,7 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   @override
   void detach() {
-    _layer = null;
+    layer = null;
     super.detach();
   }
 
@@ -4751,7 +4803,8 @@ class RenderFollowerLayer extends RenderProxyBox {
   bool get alwaysNeedsCompositing => true;
 
   /// The layer we created when we were last painted.
-  FollowerLayer _layer;
+  @override
+  FollowerLayer get layer => super.layer;
 
   /// Return the transform that was used in the last composition phase, if any.
   ///
@@ -4760,7 +4813,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   /// [FollowerLayer.getLastTransform]), this returns the identity matrix (see
   /// [new Matrix4.identity].
   Matrix4 getCurrentTransform() {
-    return _layer?.getLastTransform() ?? Matrix4.identity();
+    return layer?.getLastTransform() ?? Matrix4.identity();
   }
 
   @override
@@ -4786,14 +4839,22 @@ class RenderFollowerLayer extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(showWhenUnlinked != null);
-    _layer = FollowerLayer(
-      link: link,
-      showWhenUnlinked: showWhenUnlinked,
-      linkedOffset: this.offset,
-      unlinkedOffset: offset,
-    );
+    if (layer == null) {
+      layer = FollowerLayer(
+        link: link,
+        showWhenUnlinked: showWhenUnlinked,
+        linkedOffset: this.offset,
+        unlinkedOffset: offset,
+      );
+    } else {
+      layer
+        ..link = link
+        ..showWhenUnlinked = showWhenUnlinked
+        ..linkedOffset = this.offset
+        ..unlinkedOffset = offset;
+    }
     context.pushLayer(
-      _layer,
+      layer,
       super.paint,
       Offset.zero,
       childPaintBounds: const Rect.fromLTRB(
@@ -4871,6 +4932,7 @@ class RenderAnnotatedRegion<T> extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    // Annotated region layers are not retained because they do not create engine layers.
     final AnnotatedRegionLayer<T> layer = AnnotatedRegionLayer<T>(
       value,
       size: sized ? size : null,
