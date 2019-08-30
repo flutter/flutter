@@ -103,7 +103,10 @@ void main() {
       // MockProcessManager has an implementation of start() that returns the
       // result of processFactory.
       flakyProcessManager = MockProcessManager();
-      flakyProcessManager.processFactory = flakyProcessFactory(1, delay: delay);
+      flakyProcessManager.processFactory = flakyProcessFactory(
+        flakes: 1,
+        delay: delay,
+      );
     });
 
     testUsingContext('flaky process fails without retry', () async {
