@@ -206,7 +206,8 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/39533
   testWidgets('createBorderSide does not throw exception with null context', (WidgetTester tester) async {
-    Divider.createBorderSide(null);
     // Passing a null context used to throw an exception but no longer does.
+    expect(() => Divider.createBorderSide(null), isNot(throwsAssertionError));
+    expect(() => Divider.createBorderSide(null), isNot(throwsNoSuchMethodError));
   });
 }
