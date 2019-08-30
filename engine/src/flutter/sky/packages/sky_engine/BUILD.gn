@@ -15,6 +15,7 @@ import("//third_party/dart/sdk/lib/io/io_sources.gni")
 import("//third_party/dart/sdk/lib/isolate/isolate_sources.gni")
 import("//third_party/dart/sdk/lib/math/math_sources.gni")
 import("//third_party/dart/sdk/lib/typed_data/typed_data_sources.gni")
+import("//third_party/dart/sdk/lib/wasm/wasm_sources.gni")
 import("$flutter_root/build/dart/rules.gni")
 import("$flutter_root/lib/ui/dart_ui.gni")
 
@@ -128,6 +129,14 @@ copy("typed_data") {
   ]
 }
 
+copy("wasm") {
+  lib_path = rebase_path("wasm", "", dart_sdk_lib_path)
+  sources = rebase_path(wasm_sdk_sources, "", lib_path)
+  outputs = [
+    "$root_gen_dir/dart-pkg/sky_engine/lib/wasm/{{source_file_part}}",
+  ]
+}
+
 copy("copy_dart_ui") {
   sources = dart_ui_files
 
@@ -150,6 +159,7 @@ group("copy_dart_sdk") {
     ":isolate",
     ":math",
     ":typed_data",
+    ":wasm",
   ]
 }
 
