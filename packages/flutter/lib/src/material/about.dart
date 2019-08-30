@@ -40,9 +40,6 @@ import 'theme.dart';
 ///
 /// ```dart
 ///
-///  final String _applicationVersion = 'August 2019';
-///  final String _applicationLegalese = '© 2019 The Chromium Authors';
-///  final String _applicationName ='Show About Example';
 ///  @override
 ///  Widget build(BuildContext context) {
 ///    return Scaffold(
@@ -55,9 +52,9 @@ import 'theme.dart';
 ///            AboutListTile(
 ///              icon: Icon(Icons.info),
 ///              applicationIcon: FlutterLogo(),
-///              applicationName: _applicationName,
-///              applicationVersion: _applicationVersion,
-///              applicationLegalese: _applicationLegalese,
+///              applicationName: 'Show About Example',
+///              applicationVersion: 'August 2019',
+///              applicationLegalese: '© 2019 The Chromium Authors',
 ///              aboutBoxChildren: _aboutBoxChildren(context),
 ///            )
 ///          ],
@@ -65,14 +62,14 @@ import 'theme.dart';
 ///      ),
 ///      body: Center(
 ///        child: RaisedButton(
-///          child: Text(_applicationName),
+///          child: Text('Show About Example'),
 ///          onPressed: () {
 ///            showAboutDialog(
 ///              context: context,
 ///              applicationIcon: FlutterLogo(),
-///              applicationName: _applicationName,
-///              applicationVersion: _applicationVersion,
-///              applicationLegalese: _applicationLegalese,
+///              applicationName: 'Show About Example',
+///              applicationVersion: 'August 2019',
+///              applicationLegalese: '© 2019 The Chromium Authors',
 ///              children: _aboutBoxChildren(context),
 ///            );
 ///          },
