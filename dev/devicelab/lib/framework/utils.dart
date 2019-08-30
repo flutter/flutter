@@ -141,6 +141,10 @@ FileSystemEntity move(FileSystemEntity whatToMove,
 
 /// Equivalent of `chmod a+x file`
 void makeExecutable(File file) {
+  // Windows files do not have an executable bit
+  if (Platform.isWindows) {
+    return;
+  }
   final ProcessResult result = _processManager.runSync(<String>[
     'chmod',
     'a+x',
