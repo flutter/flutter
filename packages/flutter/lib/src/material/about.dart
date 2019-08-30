@@ -36,7 +36,7 @@ import 'theme.dart';
 /// {@tool snippet --template=stateless_widget_material}
 ///
 /// This sample shows two ways to open [AboutDialog]. The first one
-/// using a [AboutListTile], while the second one is by clicking a [RaisedButton].
+/// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
