@@ -63,6 +63,33 @@ void main() {
     expect(widget.style.color.withAlpha(255), CupertinoColors.destructiveRed);
   });
 
+  testWidgets('Dialog dark theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: MediaQuery(
+          data: MediaQueryData(platformBrightness: Brightness.dark),
+          child: CupertinoAlertDialog(
+            title: Text('The Title'),
+            content: Text('Content'),
+            actions: <Widget>[
+              CupertinoDialogAction(child: Text('Cancel'), isDefaultAction: true),
+              CupertinoDialogAction(child: Text('OK')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RichText cancelText =  tester.widget<RichText>(
+      find.descendant(of: find.text('Cancel'), matching: find.byType(RichText)),
+    );
+
+    expect(
+      cancelText.text.style.color.value,
+      0xFFFFFFFF, // dark elevated color
+    );
+  });
+
   testWidgets('Has semantic annotations', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(const MaterialApp(home: Material(
