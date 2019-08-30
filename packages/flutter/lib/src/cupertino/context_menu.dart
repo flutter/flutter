@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart' show kMinFlingVelocity;
-import 'package:flutter/physics.dart' show FrictionSimulation;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -678,6 +677,8 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   // The child is scaled down as it is dragged down until it hits this minimum
   // value.
   static const double _kMinScale = 0.8;
+  // The ContextMenuSheet disappears at this scale.
+  static const double _kSheetScaleThreshold = 0.9;
   static const double _kPadding = 20.0;
 
   final GlobalKey _childGlobalKey = GlobalKey();
@@ -730,10 +731,6 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       final double finalPosition = flingIsAway
         ? _moveAnimation.value.dy + 100.0
         : 0.0;
-      // If already at the finalPosition, no need to animate anywhere.
-      if (_moveAnimation.value.dy == finalPosition) {
-        return;
-      }
 
       if (flingIsAway && _sheetController.status != AnimationStatus.forward) {
         _sheetController.forward();
@@ -741,12 +738,6 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         _sheetController.reverse();
       }
 
-      final FrictionSimulation frictionSimulation = FrictionSimulation.through(
-        _moveAnimation.value.dy,
-        finalPosition,
-        details.velocity.pixelsPerSecond.dy,
-        0.0,
-      );
       _moveAnimation = Tween<Offset>(
         begin: Offset(0.0, _moveAnimation.value.dy),
         end: Offset(0.0, finalPosition),
@@ -767,7 +758,18 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     }
 
     // Otherwise animate back home.
+    _moveController.addListener(_moveListener);
     _moveController.reverse();
+  }
+
+  void _moveListener() {
+    // When the scale passes the threshold, animate the sheet back in.
+    if (_lastScale > _kSheetScaleThreshold) {
+      _moveController.removeListener(_moveListener);
+      if (_sheetController.status != AnimationStatus.dismissed) {
+        _sheetController.reverse();
+      }
+    }
   }
 
   void _flingStatusListener(AnimationStatus status) {
@@ -800,6 +802,38 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     }
   }
 
+  void _setDragOffset(Offset dragOffset) {
+    // Allow horizontal movement but damp it.
+    final double endX = _kPadding * dragOffset.dx / 400.0;
+    setState(() {
+      _dragOffset = dragOffset;
+      _moveAnimation = Tween<Offset>(
+        begin: Offset.zero,
+        end: Offset(
+          endX.clamp(-_kPadding, _kPadding),
+          // TODO(justinmc): Allow reverse dragging but also make it damped.
+          math.max(0.0, dragOffset.dy),
+        ),
+      ).animate(
+        CurvedAnimation(
+          parent: _moveController,
+          curve: Curves.elasticIn,
+        ),
+      );
+
+      // Fade the ContextMenuSheet out or in, if needed.
+      if (_lastScale <= _kSheetScaleThreshold
+          && _sheetController.status != AnimationStatus.forward
+          && _sheetScaleAnimation.value != 0.0) {
+        _sheetController.forward();
+      } else if (_lastScale > _kSheetScaleThreshold
+          && _sheetController.status != AnimationStatus.reverse
+          && _sheetScaleAnimation.value != 1.0) {
+        _sheetController.reverse();
+      }
+    });
+  }
+
   // The order and alignment of the ContextMenuSheet and the child depend on
   // both the orientation of the screen as well as the position on the screen of
   // the original child.
@@ -813,9 +847,9 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: widget.onTap,
-          child: Transform.scale(
-            key: widget.childGlobalKey,
-            scale: _lastScale,
+          child: AnimatedBuilder(
+            animation: _moveController,
+            builder: _buildChildAnimation,
             child: FittedBox(
               fit: BoxFit.cover,
               child: widget.child,
@@ -853,44 +887,6 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     }
   }
 
-  void _setDragOffset(Offset dragOffset) {
-    final double endX = _kPadding * dragOffset.dx / 400.0;
-    setState(() {
-      _dragOffset = dragOffset;
-      _moveAnimation = Tween<Offset>(
-        begin: Offset.zero,
-        end: Offset(
-          endX.clamp(-_kPadding, _kPadding),
-          math.max(0.0, dragOffset.dy),
-        ),
-      ).animate(
-        CurvedAnimation(
-          parent: _moveController,
-          curve: Curves.elasticIn,
-        ),
-      );
-
-      // Fade the ContextMenuSheet out or in, if needed.
-      if (_lastScale == _kMinScale
-          && _sheetController.status != AnimationStatus.forward
-          && _sheetScaleAnimation.value != 0.0) {
-        _sheetController.forward();
-      } else if (_lastScale > _kMinScale
-          && _sheetController.status != AnimationStatus.reverse
-          && _sheetScaleAnimation.value != 1.0) {
-        _sheetController.reverse();
-      }
-    });
-  }
-
-  // Build the animation for the overall draggable dismissable content.
-  Widget _buildAnimation(BuildContext context, Widget child) {
-    return Transform.translate(
-      offset: _moveAnimation.value,
-      child: child,
-    );
-  }
-
   // Build the animation for the ContextMenuSheet.
   Widget _buildSheetAnimation(BuildContext context, Widget child) {
     return Transform.scale(
@@ -900,6 +896,28 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         opacity: _sheetOpacityAnimation.value,
         child: child,
       ),
+    );
+  }
+
+  // Build the animation for the child.
+  Widget _buildChildAnimation(BuildContext context, Widget child) {
+    _lastScale = _getScale(
+      widget.orientation,
+      MediaQuery.of(context).size.height,
+      _moveAnimation.value.dy,
+    );
+    return Transform.scale(
+      key: widget.childGlobalKey,
+      scale: _lastScale,
+      child: child,
+    );
+  }
+
+  // Build the animation for the overall draggable dismissable content.
+  Widget _buildAnimation(BuildContext context, Widget child) {
+    return Transform.translate(
+      offset: _moveAnimation.value,
+      child: child,
     );
   }
 
@@ -935,11 +953,6 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
   @override
   Widget build(BuildContext context) {
-    _lastScale = _getScale(
-      widget.orientation,
-      MediaQuery.of(context).size.height,
-      _moveAnimation.value.dy,
-    );
     final List<Widget> children = _getChildren(
       widget.orientation,
       widget.contextMenuOrientation,
