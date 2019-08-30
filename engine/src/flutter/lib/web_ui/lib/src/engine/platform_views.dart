@@ -59,15 +59,20 @@ void _createPlatformView(
   final Map<dynamic, dynamic> args = methodCall.arguments;
   final int id = args['id'];
   final String viewType = args['viewType'];
+  const MethodCodec codec = StandardMethodCodec();
+
   // TODO(het): Use 'direction', 'width', and 'height'.
   if (!platformViewRegistry._registeredFactories.containsKey(viewType)) {
-    // TODO(het): Do we have a way of nicely reporting errors during platform
-    // channel calls?
-    callback(null);
+    callback(codec.encodeErrorEnvelope(
+      code: 'Unregistered factory',
+      message: "No factory registered for viewtype '$viewType'",
+    ));
+    return;
   }
   // TODO(het): Use creation parameters.
   final html.Element element =
       platformViewRegistry._registeredFactories[viewType](id);
 
   platformViewRegistry._createdViews[id] = element;
+  callback(codec.encodeSuccessEnvelope(null));
 }
