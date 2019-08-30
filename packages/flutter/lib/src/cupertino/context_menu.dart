@@ -81,7 +81,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
   OverlayEntry _lastOverlayEntry;
   double _childOpacity = 1.0;
-  ContextMenuRoute<void> _route;
+  _ContextMenuRoute<void> _route;
 
   @override
   void initState() {
@@ -126,7 +126,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
     final Rect childRect = _getRect(_childGlobalKey);
 
-    _route = ContextMenuRoute<void>(
+    _route = _ContextMenuRoute<void>(
       actions: widget.actions,
       barrierLabel: 'Dismiss',
       filter: ui.ImageFilter.blur(
@@ -207,7 +207,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     }
   }
 
-  // Watch for when ContextMenuRoute is closed.
+  // Watch for when _ContextMenuRoute is closed.
   void _routeAnimationStatusListener(AnimationStatus status) {
     if (status != AnimationStatus.dismissed) {
       return;
@@ -357,10 +357,9 @@ class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin 
 }
 
 /// The open ContextMenu modal.
-@visibleForTesting
-class ContextMenuRoute<T> extends PopupRoute<T> {
-  /// Build a ContextMenuRoute.
-  ContextMenuRoute({
+class _ContextMenuRoute<T> extends PopupRoute<T> {
+  /// Build a _ContextMenuRoute.
+  _ContextMenuRoute({
     this.barrierLabel,
     @required List<ContextMenuSheetAction> actions,
     WidgetBuilder builder,
@@ -440,7 +439,7 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
 
   // Get the alignment for the ContextMenuSheet's Transform.scale based on the
   // ContextMenuOrientation.
-  static AlignmentDirectional _getSheetAlignment(_ContextMenuOrientation contextMenuOrientation) {
+  static AlignmentDirectional getSheetAlignment(_ContextMenuOrientation contextMenuOrientation) {
     switch (contextMenuOrientation) {
       case (_ContextMenuOrientation.center):
         return AlignmentDirectional.topCenter;
@@ -574,7 +573,7 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     // This is usually used to build the "page", which is then passed to
     // buildTransitions as child, the idea being that buildTransitions will
-    // animate the entire page into the scene. In the case of ContextMenuRoute,
+    // animate the entire page into the scene. In the case of _ContextMenuRoute,
     // two individual pieces of the page are animated into the scene in
     // buildTransitions, and null is returned here.
     return null;
@@ -605,7 +604,7 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
                 child: Opacity(
                   opacity: _sheetOpacity.value,
                   child: Transform.scale(
-                    alignment: _getSheetAlignment(_contextMenuOrientation),
+                    alignment: getSheetAlignment(_contextMenuOrientation),
                     scale: _sheetScale.value,
                     child: _ContextMenuSheet(
                       key: _sheetGlobalKey,
@@ -889,35 +888,16 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
   // Build the animation for the overall draggable dismissable content.
   Widget _buildAnimation(BuildContext context, Widget child) {
-    final double maxDragDistance = MediaQuery.of(context).size.height;
-    _lastScale = _getScale(
-      widget.orientation,
-      maxDragDistance,
-      _moveAnimation.value.dy,
-    );
-    final List<Widget> children = _getChildren(
-      widget.orientation,
-      widget.contextMenuOrientation,
-    );
-
     return Transform.translate(
       offset: _moveAnimation.value,
-      child: widget.orientation == Orientation.portrait ? Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: children,
-        )
-        : Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: children,
-        ),
+      child: child,
     );
   }
 
   // Build the animation for the ContextMenuSheet.
   Widget _buildSheetAnimation(BuildContext context, Widget child) {
     return Transform.scale(
-      // TODO(justinmc): Should adapt based on side of screen.
-      alignment: AlignmentDirectional.topEnd,
+      alignment: _ContextMenuRoute.getSheetAlignment(widget.contextMenuOrientation),
       scale: _sheetScaleAnimation.value,
       child: Opacity(
         opacity: _sheetOpacityAnimation.value,
@@ -958,6 +938,16 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
   @override
   Widget build(BuildContext context) {
+    _lastScale = _getScale(
+      widget.orientation,
+      MediaQuery.of(context).size.height,
+      _moveAnimation.value.dy,
+    );
+    final List<Widget> children = _getChildren(
+      widget.orientation,
+      widget.contextMenuOrientation,
+    );
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(_kPadding),
@@ -970,6 +960,14 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
             child: AnimatedBuilder(
               animation: _moveController,
               builder: _buildAnimation,
+              child: widget.orientation == Orientation.portrait ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: children,
+                )
+                : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: children,
+                ),
             ),
           ),
         ),
