@@ -196,8 +196,8 @@ class KernelSnapshot extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
     final String packagesPath = environment.projectDir.childFile('.packages').path;
-    final String fileUri = fs.file(targetFile).absolute.uri.toFilePath(windows: platform.isWindows);
-    final PackageUriMapper packageUriMapper = PackageUriMapper(fileUri,
+    // TODO(jonahwilliams): use a full file uri to remove Dart complaint about entrypoint.
+    final PackageUriMapper packageUriMapper = PackageUriMapper(targetFile,
         packagesPath, null, null);
 
     final CompilerOutput output = await compiler.compile(
@@ -209,7 +209,7 @@ class KernelSnapshot extends Target {
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
       linkPlatformKernelIn: buildMode == BuildMode.release,
-      mainPath: packageUriMapper.map(fileUri)?.toString() ?? targetFile,
+      mainPath: packageUriMapper.map(targetFile)?.toString() ?? targetFile,
     );
     if (output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');
