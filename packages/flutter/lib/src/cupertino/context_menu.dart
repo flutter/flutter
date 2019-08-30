@@ -727,8 +727,9 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
           final List<Widget> children =  <Widget>[
             Expanded(
               child: Align(
-                // TODO(justinmc): Is alignment right when landscape?
-                alignment: Alignment.bottomCenter,
+                alignment: orientation == Orientation.portrait
+                  ? Alignment.bottomCenter
+                  : Alignment.topRight,
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: widget.onTap,
