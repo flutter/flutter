@@ -651,11 +651,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   }
 
   @protected
-  void registerFrameCallbacks() {
-    assert(window.onBeginFrame == null);
-    assert(window.onDrawFrame == null);
-    window.onBeginFrame = _handleBeginFrame;
-    window.onDrawFrame = _handleDrawFrame;
+  void ensureFrameCallbacksRegistered() {
+    window.onBeginFrame ??= _handleBeginFrame;
+    window.onDrawFrame ??= _handleDrawFrame;
   }
 
   /// Schedules a new frame using [scheduleFrame] if this object is not
@@ -719,9 +717,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         debugPrintStack(label: 'scheduleFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    if (window.onBeginFrame == null) {
-      registerFrameCallbacks();
-    }
+    ensureFrameCallbacksRegistered();
     window.scheduleFrame();
     _hasScheduledFrame = true;
   }

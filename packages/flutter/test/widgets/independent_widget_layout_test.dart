@@ -24,7 +24,7 @@ class OffscreenWidgetTree {
   OffscreenWidgetTree() {
     renderView.attach(pipelineOwner);
     renderView.prepareInitialFrame();
-    renderView.owner.requestVisualUpdate();
+    pipelineOwner.requestVisualUpdate();
   }
 
   final RenderView renderView = OffscreenRenderView();

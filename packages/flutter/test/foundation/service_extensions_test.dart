@@ -70,9 +70,7 @@ class TestServiceExtensionsBinding extends BindingBase
   bool frameScheduled = false;
   @override
   void scheduleFrame() {
-    if (ui.window.onBeginFrame == null) {
-      registerFrameCallbacks();
-    }
+    ensureFrameCallbacksRegistered();
     frameScheduled = true;
   }
   Future<void> doFrame() async {

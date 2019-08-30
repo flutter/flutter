@@ -834,8 +834,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
     super.initInstances();
-    window.onBeginFrame = (Duration _) {};
-    window.onDrawFrame = () {};
     _mockFlutterAssets();
   }
 
@@ -976,6 +974,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         _pendingAsyncTasks = null;
       });
     });
+  }
+
+  @override
+  void ensureFrameCallbacksRegistered() {
+    // Leave Window alone, do nothing.
   }
 
   @override

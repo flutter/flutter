@@ -49,7 +49,7 @@ void main() {
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
     renderView.prepareInitialFrame();
-    renderView.owner.requestVisualUpdate();
+    pipelineOwner.requestVisualUpdate();
     // Lay out the onscreen in the default binding
     layout(onscreen.root, phase: EnginePhase.paint);
     expect(onscreen.child.hasSize, isTrue);
@@ -79,7 +79,7 @@ void main() {
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
     renderView.prepareInitialFrame();
-    renderView.owner.requestVisualUpdate();
+    pipelineOwner.requestVisualUpdate();
     // Lay out the offscreen
     pipelineOwner.flushLayout();
     expect(offscreen.child.hasSize, isTrue);
