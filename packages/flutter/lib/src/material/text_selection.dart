@@ -115,7 +115,7 @@ class __TextSelectionToolbarState extends State<_TextSelectionToolbar> {
             onPressed: widget.handleSelectAll,
           ),
           IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               setState(() {
                 flipToMenu = false;
