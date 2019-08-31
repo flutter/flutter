@@ -6,31 +6,68 @@ import 'package:flutter/services.dart';
 
 typedef _MessageHandler = Future<ByteData> Function(ByteData);
 
+/// This class registers web platform plugins.
 class PluginRegistry {
   final BinaryMessenger _binaryMessenger;
 
+  /// Creates a plugin registry.
   PluginRegistry(this._binaryMessenger);
 
+  /// Creates a registrar for the given plugin implementation class.
   Registrar registrarFor(Type key) => Registrar(_binaryMessenger);
 
+  /// Registers this plugin handler with the engine, so that unrecognized
+  /// platform messages are forwarded to the registry, where they can be
+  /// correctly dispatched to one of the registered plugins.
   void registerMessageHandler() {
     ui.webOnlySetPluginHandler(_binaryMessenger.handlePlatformMessage);
   }
 }
 
+/// A registrar for a particular plugin.
+///
+/// Gives access to a [BinaryMessenger] which has been configured to receive
+/// platform messages from the framework side.
 class Registrar {
+  /// A [BinaryMessenger] configured to receive platform messages from the
+  /// framework side.
+  ///
+  /// Use this [BinaryMessenger] when creating platform channels in order for
+  /// them to receive messages from the platform side. For example:
+  ///
+  /// 
+  ///     class MyPlugin {
+  ///       static void registerWith(Registrar registrar) {
+  ///         final MethodChannel channel = MethodChannel(
+  ///             'com.my_plugin/my_plugin',
+  ///             const StandardMethodCodec(),
+  ///             registrar.messenger);
+  ///         final MyPlugin instance = MyPlugin();
+  ///         channel.setMethodCallHandler(instance.handleMethodCall);
+  ///       }
+  ///       ...
+  ///     }
   final BinaryMessenger messenger;
 
+  /// Creates a registrar with the given [BinaryMessenger].
   Registrar(this.messenger);
 }
 
+/// The default plugin registry for the web.
 final webPluginRegistry = PluginRegistry(_platformBinaryMessenger);
 
+/// A [BinaryMessenger] which does the inverse of the default framework
+/// messenger.
+///
+/// Instead of sending messages from the framework to the engine, this
+/// receives messages from the framework and dispatches them to registered
+/// plugins.
 class _PlatformBinaryMessenger extends BinaryMessenger {
   final Map<String, _MessageHandler> _handlers = <String, _MessageHandler>{};
   final Map<String, _MessageHandler> _mockHandlers =
       <String, _MessageHandler>{};
 
+  /// Receives a platform message from the framework.
   @override
   Future<void> handlePlatformMessage(String channel, ByteData data,
       ui.PlatformMessageResponseCallback callback) async {
@@ -55,8 +92,7 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
   /// Sends a platform message from the platform side back to the framework.
   @override
   Future<ByteData> send(String channel, ByteData message) {
-    // TODO: implement send
-    return null;
+    throw FlutterError('Cannot send messages from the platform side to the framework.');
   }
 
   @override
