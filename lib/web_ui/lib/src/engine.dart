@@ -53,6 +53,7 @@ part 'engine/keyboard.dart';
 part 'engine/onscreen_logging.dart';
 part 'engine/path_to_svg.dart';
 part 'engine/platform_views.dart';
+part 'engine/plugins.dart';
 part 'engine/pointer_binding.dart';
 part 'engine/recording_canvas.dart';
 part 'engine/semantics/accessibility.dart';
