@@ -42,22 +42,47 @@ import 'theme.dart';
 ///
 ///  @override
 ///  Widget build(BuildContext context) {
+///    final TextStyle textStyle = Theme.of(context).textTheme.body1;
+///    final List<Widget> aboutBoxChildren = <Widget>[
+///      SizedBox(height: 24),
+///      RichText(
+///        text: TextSpan(
+///          children: <TextSpan>[
+///            TextSpan(
+///              style: textStyle,
+///              text: 'Flutter is Google’s UI toolkit for building beautiful, '
+///              'natively compiled applications for mobile, web, and desktop '
+///              'from a single codebase. Learn more about Flutter at '
+///            ),
+///            TextSpan(
+///              style: textStyle.copyWith(color: Theme.of(context).accentColor),
+///              text: 'https://flutter.dev'
+///            ),
+///            TextSpan(
+///              style: textStyle,
+///              text: '.'
+///            ),
+///          ],
+///        ),
+///      ),
+///    ];
+///
 ///    return Scaffold(
 ///      appBar: AppBar(
 ///        title: Text('Show About Example'),
 ///      ),
 ///      drawer: Drawer(
-///        child: ListView(
-///          children: <Widget>[
-///            AboutListTile(
+///        child: SingleChildScrollView(
+///          child: SafeArea(
+///            child: AboutListTile(
 ///              icon: Icon(Icons.info),
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
 ///              applicationLegalese: '© 2019 The Chromium Authors',
-///              aboutBoxChildren: _aboutBoxChildren(context),
-///            )
-///          ],
+///              aboutBoxChildren: aboutBoxChildren,
+///            ),
+///          ),
 ///        ),
 ///      ),
 ///      body: Center(
@@ -70,36 +95,12 @@ import 'theme.dart';
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
 ///              applicationLegalese: '© 2019 The Chromium Authors',
-///              children: _aboutBoxChildren(context),
+///              children: aboutBoxChildren,
 ///            );
 ///          },
 ///        ),
 ///      ),
 ///    );
-///  }
-///
-///  _aboutBoxChildren(BuildContext context) {
-///    return <Widget>[
-///      Padding(
-///        padding: EdgeInsets.only(top: 24.0),
-///        child: RichText(
-///          text: TextSpan(children: <TextSpan>[
-///            TextSpan(
-///                style: Theme.of(context).textTheme.body1,
-///                text: 'Flutter is Google’s UI toolkit for building beautiful, '
-///                    'natively compiled applications for mobile, web, and desktop '
-///                    'from a single codebase. Learn more about Flutter at '),
-///            TextSpan(
-///                style: Theme.of(context)
-///                    .textTheme
-///                    .body1
-///                    .copyWith(color: Theme.of(context).accentColor),
-///                text: 'https://flutter.dev'),
-///          ]),
-///        ),
-///      )
-///    ];
-///  }
 ///
 /// ```
 /// {@end-tool}
