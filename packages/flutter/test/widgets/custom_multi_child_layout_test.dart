@@ -182,11 +182,13 @@ void main() {
   testWidgets('Can use listener for relayout', (WidgetTester tester) async {
     final ValueNotifier<Size> size = ValueNotifier<Size>(const Size(100.0, 200.0));
 
-    await tester.pumpWidget(Center(
-      child: CustomMultiChildLayout(
-        delegate: NotifierLayoutDelegate(size),
+    await tester.pumpWidget(
+      Center(
+        child: CustomMultiChildLayout(
+          delegate: NotifierLayoutDelegate(size),
+        ),
       ),
-    ));
+    );
 
     RenderBox box = tester.renderObject(find.byType(CustomMultiChildLayout));
     expect(box.size, equals(const Size(100.0, 200.0)));

@@ -20,7 +20,7 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 
 /// A delegate that controls the layout of multiple children.
 ///
-/// Used with [CustomMultiChildLayout] (in the widgets library) and 
+/// Used with [CustomMultiChildLayout] (in the widgets library) and
 /// [RenderCustomMultiChildLayoutBox] (in the rendering library).
 ///
 /// Delegates must be idempotent. Specifically, if two delegates are equal, then
@@ -41,10 +41,11 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 /// Override [shouldRelayout] to determine when the layout of the children needs
 /// to be recomputed when the delegate changes.
 ///
-/// The most efficient way to trigger a relayout is to supply a relayout
+/// The most efficient way to trigger a relayout is to supply a `relayout`
 /// argument to the constructor of the [MultiChildLayoutDelegate]. The custom
-/// object will listen to this value and relayout whenever the animation
-/// ticks, avoiding the build phase of the pipeline.
+/// layout will listen to this value and relayout whenever the Listenable
+/// notifies its listeners, such as when an Animation ticks. This allows
+/// the custom layout to avoid the build phase of the pipeline.
 ///
 /// Each child must be wrapped in a [LayoutId] widget to assign the id that
 /// identifies it to the delegate. The [LayoutId.id] needs to be unique among
@@ -99,6 +100,12 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 /// The leader and follower widget will paint in the order they appear in the
 /// child list, regardless of the order in which [layoutChild] is called on
 /// them.
+///
+/// See also:
+///
+///  * [CustomMultiChildLayout], the widget that uses this delegate.
+///  * [RenderCustomMultiChildLayoutBox], render object that uses this
+///    delegate.
 abstract class MultiChildLayoutDelegate {
   /// Creates a layout delegate.
   ///
