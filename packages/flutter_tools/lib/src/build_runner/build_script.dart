@@ -87,7 +87,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     'flutter_tools:shell',
     <BuilderFactory>[
       (BuilderOptions options) {
-        bool hasPlugins = options.config['hasPlugins'] == true;
+        final bool hasPlugins = options.config['hasPlugins'] == true;
         return FlutterWebShellBuilder(hasPlugins: hasPlugins);
       }
     ],

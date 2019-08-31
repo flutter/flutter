@@ -8,10 +8,10 @@ typedef _MessageHandler = Future<ByteData> Function(ByteData);
 
 /// This class registers web platform plugins.
 class PluginRegistry {
-  final BinaryMessenger _binaryMessenger;
-
   /// Creates a plugin registry.
   PluginRegistry(this._binaryMessenger);
+
+  final BinaryMessenger _binaryMessenger;
 
   /// Creates a registrar for the given plugin implementation class.
   Registrar registrarFor(Type key) => Registrar(_binaryMessenger);
@@ -20,6 +20,8 @@ class PluginRegistry {
   /// platform messages are forwarded to the registry, where they can be
   /// correctly dispatched to one of the registered plugins.
   void registerMessageHandler() {
+    // The function below is only defined in the Web dart:ui.
+    // ignore: undefined_function
     ui.webOnlySetPluginHandler(_binaryMessenger.handlePlatformMessage);
   }
 }
@@ -29,6 +31,9 @@ class PluginRegistry {
 /// Gives access to a [BinaryMessenger] which has been configured to receive
 /// platform messages from the framework side.
 class Registrar {
+  /// Creates a registrar with the given [BinaryMessenger].
+  Registrar(this.messenger);
+
   /// A [BinaryMessenger] configured to receive platform messages from the
   /// framework side.
   ///
@@ -48,13 +53,10 @@ class Registrar {
   ///       ...
   ///     }
   final BinaryMessenger messenger;
-
-  /// Creates a registrar with the given [BinaryMessenger].
-  Registrar(this.messenger);
 }
 
 /// The default plugin registry for the web.
-final webPluginRegistry = PluginRegistry(_platformBinaryMessenger);
+final PluginRegistry webPluginRegistry = PluginRegistry(_platformBinaryMessenger);
 
 /// A [BinaryMessenger] which does the inverse of the default framework
 /// messenger.
