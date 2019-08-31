@@ -170,4 +170,18 @@ void main() {
     expect(theme.applyElevationOverlayColor, isTrue);
   });
 
+  testWidgets('ThemeData.toString has less than 200 characters output for dark color scheme', (WidgetTester tester) async {
+    const ColorScheme darkColors = ColorScheme.dark();
+    final ThemeData theme = ThemeData.from(colorScheme: darkColors);
+
+    expect(theme.toString().length < 200, true);
+  });
+
+  testWidgets('ThemeData.toString has less than 200 characters output for light color scheme', (WidgetTester tester) async {
+    const ColorScheme darkColors = ColorScheme.light();
+    final ThemeData theme = ThemeData.from(colorScheme: darkColors);
+
+    expect(theme.toString().length < 200, true);
+  });
+
 }
