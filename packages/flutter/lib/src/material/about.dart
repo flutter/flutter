@@ -40,7 +40,6 @@ import 'theme.dart';
 ///
 /// ```dart
 ///
-///  @override
 ///  Widget build(BuildContext context) {
 ///    final TextStyle textStyle = Theme.of(context).textTheme.body1;
 ///    final List<Widget> aboutBoxChildren = <Widget>[
@@ -101,7 +100,7 @@ import 'theme.dart';
 ///        ),
 ///      ),
 ///    );
-///
+///}
 /// ```
 /// {@end-tool}
 ///
