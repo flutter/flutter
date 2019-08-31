@@ -146,7 +146,12 @@ class EngineWindow extends ui.Window {
       case 'flutter/accessibility':
         // In widget tests we want to bypass processing of platform messages.
         accessibilityAnnouncements.handleMessage(data);
-        break;
+        return;
+    }
+
+    if (pluginMessageCallHandler != null) {
+      pluginMessageCallHandler(name, data, callback);
+      return;
     }
 
     // TODO(flutter_web): Some Flutter widgets send platform messages that we
