@@ -18,6 +18,7 @@ void main() {
     ));
     expect(theme.alignedDropdown, false);
     expect(theme.layoutBehavior, ButtonBarLayoutBehavior.padded);
+    expect(theme.colorScheme, const ColorScheme.light());
   });
 
   test('ButtonThemeData default overrides', () {
@@ -28,12 +29,14 @@ void main() {
       padding: EdgeInsets.zero,
       shape: RoundedRectangleBorder(),
       alignedDropdown: true,
+      colorScheme: ColorScheme.dark()
     );
     expect(theme.textTheme, ButtonTextTheme.primary);
     expect(theme.constraints, const BoxConstraints(minWidth: 100.0, minHeight: 200.0));
     expect(theme.padding, EdgeInsets.zero);
     expect(theme.shape, const RoundedRectangleBorder());
     expect(theme.alignedDropdown, true);
+    expect(theme.colorScheme, const ColorScheme.dark());
   });
 
   testWidgets('ButtonTheme defaults', (WidgetTester tester) async {
@@ -80,7 +83,7 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(2.0)),
     ));
     expect(alignedDropdown, false);
-    expect(colorScheme, ThemeData.light().colorScheme);
+    expect(colorScheme, const ColorScheme.light());
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
     expect(tester.getSize(find.byType(Material)), const Size(88.0, 36.0));
   });
@@ -95,7 +98,7 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(2.0)),
     ));
     expect(theme.alignedDropdown, false);
-    expect(theme.colorScheme, null);
+    expect(theme.colorScheme, const ColorScheme.light());
 
     theme = const ButtonThemeData().copyWith(
       textTheme: ButtonTextTheme.primary,
