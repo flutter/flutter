@@ -181,7 +181,7 @@ def EnsureDebugUnoptSkyPackagesAreBuilt():
   variant_out_dir = os.path.join(out_dir, 'host_debug_unopt')
 
   ninja_command = [
-    'ninja',
+    'autoninja',
     '-C',
     variant_out_dir,
     'flutter/sky/packages'
@@ -206,7 +206,7 @@ def EnsureDebugUnoptSkyPackagesAreBuilt():
 
 def EnsureJavaTestsAreBuilt(android_out_dir):
   ninja_command = [
-    'ninja',
+    'autoninja',
     '-C',
     android_out_dir,
     'flutter/shell/platform/android:robolectric_tests'
