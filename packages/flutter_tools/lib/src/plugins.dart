@@ -469,11 +469,21 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
     'plugins': webPlugins,
   };
   final String registryDirectory = project.web.libDirectory.path;
-  _renderTemplateToFile(
-    _dartPluginRegistryTemplate,
-    context,
-    fs.path.join(registryDirectory, 'generated_registrant.dart'),
-  );
+  final String filePath = fs.path.join(registryDirectory, 'generated_plugin_registrant.dart');
+  if (webPlugins.isEmpty) {
+    final File file = fs.file(filePath);
+    file.createSync(recursive: true);
+    file.writeAsStringSync('''
+// Generated file. Intentionally left empty due to no web plugins registered.
+void registerPlugins(ignored) {}
+''');
+  } else {
+    _renderTemplateToFile(
+      _dartPluginRegistryTemplate,
+      context,
+      filePath,
+    );
+  }
 }
 
 /// Rewrites the `.flutter-plugins` file of [project] based on the plugin

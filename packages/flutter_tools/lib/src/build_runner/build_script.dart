@@ -86,7 +86,10 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
   core.apply(
     'flutter_tools:shell',
     <BuilderFactory>[
-      (BuilderOptions options) => const FlutterWebShellBuilder(),
+      (BuilderOptions options) {
+        bool hasPlugins = options.config['hasPlugins'] == true;
+        return FlutterWebShellBuilder(hasPlugins: hasPlugins);
+      }
     ],
     core.toRoot(),
     hideOutput: true,
@@ -342,7 +345,9 @@ void setStackTraceMapper(StackTraceMapper mapper) {
 
 /// A shell builder which generates the web specific entrypoint.
 class FlutterWebShellBuilder implements Builder {
-  const FlutterWebShellBuilder();
+  const FlutterWebShellBuilder({this.hasPlugins = false});
+
+  final bool hasPlugins;
 
   @override
   Future<void> build(BuildStep buildStep) async {
@@ -353,12 +358,13 @@ class FlutterWebShellBuilder implements Builder {
     }
     print('generating the entrypoint');
     final AssetId outputId = buildStep.inputId.changeExtension('_web_entrypoint.dart');
-    await buildStep.writeAsString(outputId, '''
+    if (hasPlugins) {
+      await buildStep.writeAsString(outputId, '''
 import 'dart:ui' as ui;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-import 'generated_registrant.dart';
+import 'generated_plugin_registrant.dart';
 import "${path.url.basename(buildStep.inputId.path)}" as entrypoint;
 
 Future<void> main() async {
@@ -367,6 +373,18 @@ Future<void> main() async {
   entrypoint.main();
 }
 ''');
+    } else {
+      await buildStep.writeAsString(outputId, '''
+import 'dart:ui' as ui;
+
+import "${path.url.basename(buildStep.inputId.path)}" as entrypoint;
+
+Future<void> main() async {
+  await ui.webOnlyInitializePlatform();
+  entrypoint.main();
+}
+''');
+    }
   }
 
   @override

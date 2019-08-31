@@ -59,14 +59,6 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         path.absolute('lib/main.dart'), PackageMap.globalPackagesPath, null, null);
     _packageGraph = core.PackageGraph.forPath(projectDirectory.path);
 
-    // Inject the `flutter_web_plugins` package dependency.
-    if (_packageGraph.allPackages.containsKey('flutter_web_plugins')) {
-      final String pluginsPackageDir = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_web_plugins');
-      final core.PackageNode pluginPackage = core.PackageNode('flutter_web_plugins', pluginsPackageDir, core.DependencyType.path);
-      _packageGraph.allPackages['flutter_web_plugins'] = pluginPackage;
-      _packageGraph.root.dependencies.add(pluginPackage);
-    }
-
     final core.BuildEnvironment buildEnvironment = core.OverrideableEnvironment(
         core.IOEnvironment(_packageGraph), onLog: (LogRecord record) {
       if (record.level == Level.SEVERE || record.level == Level.SHOUT) {
