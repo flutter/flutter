@@ -48,7 +48,8 @@ class BackButtonIcon extends StatelessWidget {
 ///
 /// A [BackButton] is an [IconButton] with a "back" icon appropriate for the
 /// current [TargetPlatform]. When pressed, the back button calls
-/// [Navigator.maybePop] to return to the previous route.
+/// [Navigator.maybePop] to return to the previous route unless a custom
+/// [onPressed] callback is provided.
 ///
 /// When deciding to display a [BackButton], consider using
 /// `ModalRoute.of(context)?.canPop` to check whether the current route can be
@@ -72,13 +73,22 @@ class BackButtonIcon extends StatelessWidget {
 class BackButton extends StatelessWidget {
   /// Creates an [IconButton] with the appropriate "back" icon for the current
   /// target platform.
-  const BackButton({ Key key, this.color }) : super(key: key);
+  const BackButton({ Key key, this.color, this.onPressed }) : super(key: key);
 
   /// The color to use for the icon.
   ///
   /// Defaults to the [IconThemeData.color] specified in the ambient [IconTheme],
   /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
   final Color color;
+
+  /// An override callback to perform instead of the default behavior which is
+  /// to pop the [Navigator].
+  ///
+  /// It can, for instance, be used to pop the platform's navigation stack
+  /// instead of Flutter's [Navigator].
+  ///
+  /// Defaults to null.
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +98,11 @@ class BackButton extends StatelessWidget {
       color: color,
       tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () {
-        Navigator.maybePop(context);
+        if (onPressed != null) {
+          onPressed();
+        } else {
+          Navigator.maybePop(context);
+        }
       },
     );
   }
