@@ -61,5 +61,17 @@ void main() {
       ));
       expect(materialTextSelectionControls.canSelectAll(key.currentState), false);
     });
+
+    testWidgets('should return true if render overflow error occurs', (WidgetTester tester) async {
+      final GlobalKey<EditableTextState> key = GlobalKey();
+
+      expect(() async {
+        await tester.pumpWidget(createEditableText(
+          key: key,
+          text: '123 456',
+          selection: const TextSelection(baseOffset: 0, extentOffset: 3),
+        ));
+      }, throwsException);
+    });
   });
 }
