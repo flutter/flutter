@@ -1547,4 +1547,36 @@ void main() {
     final RenderBox renderObject = tester.renderObject<RenderBox>(find.byType(Slider));
     expect(renderObject.size.height, 200);
   });
+
+  //DiagnosticsProperties Tests
+  testWidgets(
+      'Slider implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    const Slider(
+      value: 10.0,
+      min: 0.0,
+      max: 100.0,
+      activeColor: Colors.blue,
+      inactiveColor: Colors.blue,
+      label: 'Set a value',
+      onChanged: null,
+    ).debugFillProperties(builder);
+
+    print(Slider);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString()).toList();
+
+    expect(description, <String>[
+      'value: 10.0',
+      'min: 1.0',
+      'max: 100.0',
+      'activeColor: Colors.blue',
+      'inactiveColor: Colors.blue',
+      'label: "Set a value"',
+      'OnChanged: null',
+    ]);
+  });
 }
