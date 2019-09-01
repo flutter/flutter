@@ -1,4 +1,4 @@
-Signature: e307336222b180a652f923c9908fdae7
+Signature: 639fa872d741fe92c81dd41cebe37a48
 
 UNUSED LICENSES:
 
@@ -1410,12 +1410,12 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/component_context_provider.
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/service_directory_provider.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service.h
-FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service_directory.h
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service_aggregate.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service_handler.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service_watcher.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_directory.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_aggregate.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_watcher.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
