@@ -118,7 +118,7 @@ abstract class Target {
   /// Collect hashes for all inputs to determine if any have changed.
   ///
   /// Returns whether this target can be skipped.
-  Future<bool> computeChanges(
+  Future<_ChangeResult> _computeChanges(
     List<File> inputs,
     Environment environment,
     FileHashStore fileHashStore,
@@ -204,7 +204,7 @@ abstract class Target {
         canSkip = false;
       }
     }
-    return canSkip;
+    return _ChangeResult(previousOutputs, canSkip);
   }
 
   /// Invoke to remove the stamp file if the [buildAction] threw an exception;
@@ -559,7 +559,7 @@ class _BuildInstance {
     bool skipped = false;
     try {
       final List<File> inputs = target.resolveInputs(environment);
-      final bool canSkip = await target.computeChanges(inputs, environment, fileCache);
+      final _ChangeResult changeResult = await target._computeChanges(inputs, environment, fileCache);
       for (File input in inputs) {
         // The build system should produce a list of aggregate input and output
         // files for the overall build. The goal is to provide this to a hosting
@@ -576,7 +576,7 @@ class _BuildInstance {
         }
         inputFiles[resolvedPath] = input;
       }
-      if (canSkip) {
+      if (changeResult.canSkip) {
         skipped = true;
         printStatus('Skipping target: ${target.name}');
         final List<File> outputs = target.resolveOutputs(environment, implicit: true);
@@ -594,6 +594,12 @@ class _BuildInstance {
         target._writeStamp(inputs, outputs, environment);
         for (File output in outputs) {
           outputFiles[output.resolveSymbolicLinksSync()] = output;
+        }
+        // Delete outputs from previous stages that are no longer a part of the build.
+        for (String previousOutput in changeResult.previousOutputs) {
+          if (!outputFiles.containsKey(previousOutput)) {
+            fs.file(previousOutput).deleteSync();
+          }
         }
       }
     } catch (exception, stackTrace) {
@@ -670,3 +676,12 @@ void verifyOutputDirectories(List<File> outputs, Environment environment, Target
     throw MissingOutputException(missingOutputs, target.name);
   }
 }
+
+/// Helper class used when computing whether a target has changed.
+class _ChangeResult {
+  const _ChangeResult(this.previousOutputs, this.canSkip);
+
+  final List<String>  previousOutputs;
+  final bool canSkip;
+}
+
