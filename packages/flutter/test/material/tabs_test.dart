@@ -219,6 +219,28 @@ class TestScrollPhysics extends ScrollPhysics {
   SpringDescription get spring => _kDefaultSpring;
 }
 
+class CallbackOnInitStateWidget extends StatefulWidget {
+  const CallbackOnInitStateWidget({Key key, this.onInitState}) : super(key: key);
+
+  final Function onInitState;
+
+  @override
+  _CallbackOnInitStateWidgetState createState() => _CallbackOnInitStateWidgetState();
+}
+
+class _CallbackOnInitStateWidgetState extends State<CallbackOnInitStateWidget> {
+  @override
+  void initState() {
+    super.initState();
+
+    widget.onInitState();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
+}
+
+
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -2349,5 +2371,50 @@ void main() {
     expect(find.text('Tab0'), findsOneWidget);
     expect(find.text('Tab1'), findsOneWidget);
     expect(find.text('Tab2'), findsOneWidget);
+  });
+
+
+  testWidgets('Making sure that the keepChildreAlive boolean works as intended', (WidgetTester tester) async {
+
+    final TabController controller = TabController(vsync: const TestVSync(), length: 4);
+
+    int initStateCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              appBar: AppBar(
+                bottom: TabBar(
+                  controller: controller,
+                  tabs: List<Widget>.generate(controller.length, (int index) => Tab(text: 'Tab$index')),
+                ),
+              ),
+              body: TabBarView(
+                keepChildrenAlive: true,
+                controller: controller,
+                children: List<Widget>.generate(controller.length, (int _) => CallbackOnInitStateWidget(onInitState: () => initStateCount++)),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Tab0'), findsOneWidget);
+    expect(find.text('Tab1'), findsOneWidget);
+    expect(find.text('Tab2'), findsOneWidget);
+    expect(find.text('Tab3'), findsOneWidget);
+
+    await tester.tap(find.text('Tab1'));
+    await tester.tap(find.text('Tab2'));
+    await tester.tap(find.text('Tab3'));
+    await tester.tap(find.text('Tab0'));
+    await tester.tap(find.text('Tab1'));
+    await tester.tap(find.text('Tab2'));
+    await tester.tap(find.text('Tab3'));
+
+    expect(initStateCount, 4);
   });
 }
