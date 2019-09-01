@@ -1104,6 +1104,28 @@ class _TabBarState extends State<TabBar> {
   }
 }
 
+class _KeepChildAlive extends StatefulWidget {
+  const _KeepChildAlive({Key key, this.child}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  _KeepChildAliveState createState() => _KeepChildAliveState();
+}
+
+class _KeepChildAliveState extends State<_KeepChildAlive> with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+
+
+
 /// A page view that displays the widget which corresponds to the currently
 /// selected tab.
 ///
@@ -1125,9 +1147,11 @@ class TabBarView extends StatefulWidget {
     @required this.children,
     this.controller,
     this.physics,
+    this.keepChildrenAlive = false,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(children != null),
        assert(dragStartBehavior != null),
+       assert(keepChildrenAlive != null),
        super(key: key);
 
   /// This widget's selection and animation state.
@@ -1152,6 +1176,12 @@ class TabBarView extends StatefulWidget {
   ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics physics;
+
+  /// Whether or not children should be kept alive.
+  ///
+  /// If true, the state of the children will be kept in memory by wrapping them
+  /// inside a [_KeepChildAlive]
+  final bool keepChildrenAlive;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
@@ -1233,8 +1263,17 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   void _updateChildren() {
-    _children = widget.children;
-    _childrenWithKey = KeyedSubtree.ensureUniqueKeysForList(widget.children);
+    if (widget.keepChildrenAlive) {
+      _children = List<Widget>.generate(
+          widget.children.length,
+              (int index) => _KeepChildAlive(child: widget.children[index])
+      );
+    }
+    else {
+      _children = widget.children;
+    }
+
+    _childrenWithKey = KeyedSubtree.ensureUniqueKeysForList(_children);
   }
 
   void _handleTabControllerAnimationTick() {
