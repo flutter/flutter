@@ -211,6 +211,38 @@ void main() {
     expect(shared, 1);
   }));
 
+  test('Automatically cleans old outputs when dag changes', () => testbed.run(() async {
+    // TODO(jonahwilliams): use build planning to remove all dynamic behavior from
+    // sources. Because the Source object is not generally serializable, there is no
+    // way to tell when an output is updated in the description of a Target object,
+    // unless the rule itself is also listed as an input.
+    // A concrete example of this failure is the requirement to update the contents
+    // of the source file below. It should be expected that only changing the defined
+    // output is sufficient to trigger a rerun.
+    final TestTarget testTarget = TestTarget((List<File> inputs, Environment envionment) async {
+      environment.buildDir.childFile('foo.out').createSync();
+    })
+      ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
+      ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/foo.out')];
+    fs.file('foo.dart').createSync();
+
+    await buildSystem.build(testTarget, environment);
+
+    expect(environment.buildDir.childFile('foo.out').existsSync(), true);
+
+    fs.file('foo.dart').writeAsStringSync('abc');
+    final TestTarget testTarget2 = TestTarget((List<File> inputs, Environment envionment) async {
+      environment.buildDir.childFile('bar.out').createSync();
+    })
+      ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
+      ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/bar.out')];
+
+    await buildSystem.build(testTarget2, environment);
+
+    expect(environment.buildDir.childFile('bar.out').existsSync(), true);
+    expect(environment.buildDir.childFile('foo.out').existsSync(), false);
+  }));
+
 
   test('handles a throwing build action', () => testbed.run(() async {
     final BuildResult result = await buildSystem.build(fizzTarget, environment);

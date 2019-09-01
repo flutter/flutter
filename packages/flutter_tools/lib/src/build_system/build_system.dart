@@ -123,6 +123,10 @@ abstract class Target {
     Environment environment,
     FileHashStore fileHashStore,
   ) async {
+    // TODO(jonahwilliams): this logic would be much simpler if the targets delt with
+    // files only instead of paths/Source/files. Due to the presence of arbitary functions
+    // and behaviors we can't tell when only the output file changes, since we don't
+    // know what the file is until after we invoke the target.
     final File stamp = _findStampFile(environment);
     final Set<String> previousInputs = <String>{};
     final List<String> previousOutputs = <String>[];
