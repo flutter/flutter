@@ -301,6 +301,11 @@ class WebFs {
 class BuildDaemonCreator {
   const BuildDaemonCreator();
 
+  // TODO(jonahwilliams): find a way to get build checks working for flutter for web.
+  static const String _ignoredLine1 = 'Warning: Interpreting this as package URI';
+  static const String _ignoredLine2 = 'build_script.dart was not found in the asset graph, incremental builds will not work';
+  static const String _ignoredLine3 = 'have your dependencies specified fully in your pubspec.yaml';
+
   /// Start a build daemon and register the web targets.
   Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {bool release = false, bool profile = false }) async {
     try {
@@ -360,9 +365,10 @@ class BuildDaemonCreator {
         switch (serverLog.level) {
           case Level.SEVERE:
           case Level.SHOUT:
-            // This message is always returned once since we're running the
-            // build script from source.
-            if (serverLog.message.contains('Warning: Interpreting this as package URI')) {
+            // Ignore certain non-actionable messages on startup.
+            if (serverLog.message.contains(_ignoredLine1) ||
+                serverLog.message.contains(_ignoredLine2) ||
+                serverLog.message.contains(_ignoredLine3)) {
               return;
             }
             printError(serverLog.message);
