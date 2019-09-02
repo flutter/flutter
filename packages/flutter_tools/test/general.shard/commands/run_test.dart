@@ -138,7 +138,7 @@ void main() {
 
       expect(await RunCommand().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
-        DevelopmentArtifact.android,
+        DevelopmentArtifact.androidGenSnapshot,
       }));
 
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
@@ -162,7 +162,7 @@ void main() {
       expect(await RunCommand().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
         DevelopmentArtifact.iOS,
-        DevelopmentArtifact.android,
+        DevelopmentArtifact.androidGenSnapshot,
       }));
 
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
