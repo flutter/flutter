@@ -1,4 +1,4 @@
-Signature: 62042680b78a593b08d2ffd91184c598
+Signature: c371bc5e0af5af73c04717585643e19b
 
 UNUSED LICENSES:
 
@@ -3258,6 +3258,7 @@ FILE: ../../../third_party/skia/gm/compositor_quads.cpp
 FILE: ../../../third_party/skia/gm/crbug_913349.cpp
 FILE: ../../../third_party/skia/gm/crbug_938592.cpp
 FILE: ../../../third_party/skia/gm/crbug_947055.cpp
+FILE: ../../../third_party/skia/gm/crbug_996140.cpp
 FILE: ../../../third_party/skia/gm/fiddle.cpp
 FILE: ../../../third_party/skia/gm/mac_aa_explorer.cpp
 FILE: ../../../third_party/skia/gm/mixercolorfilter.cpp
