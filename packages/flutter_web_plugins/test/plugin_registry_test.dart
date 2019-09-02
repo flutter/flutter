@@ -28,19 +28,22 @@ class TestPlugin {
 
 void main() {
   group('Plugin Registry', () {
-    test('Can register a plugin', () {
+    setUp(() {
       TestWidgetsFlutterBinding.ensureInitialized();
       webPluginRegistry.registerMessageHandler();
+    });
+
+    test('Can register a plugin', () {
       TestPlugin.calledMethods.clear();
 
       final Registrar registrar = webPluginRegistry.registrarFor(TestPlugin);
       TestPlugin.registerWith(registrar);
 
       final MethodChannel frameworkChannel =
-          MethodChannel('test_plugin', const StandardMethodCodec());
+          const MethodChannel('test_plugin', const StandardMethodCodec());
       frameworkChannel.invokeMethod<void>('test1');
 
-      expect(TestPlugin.calledMethods, ['test1']);
+      expect(TestPlugin.calledMethods, <String>['test1']);
     });
 
     test('Throws when trying to send a platform message to the framework', () {
