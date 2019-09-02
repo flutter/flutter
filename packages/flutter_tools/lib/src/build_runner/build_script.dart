@@ -356,7 +356,6 @@ class FlutterWebShellBuilder implements Builder {
     if (!isAppEntrypoint) {
       return;
     }
-    print('generating the entrypoint');
     final AssetId outputId = buildStep.inputId.changeExtension('_web_entrypoint.dart');
     if (hasPlugins) {
       await buildStep.writeAsString(outputId, '''
