@@ -415,7 +415,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       if (!currentVersion.existsSync()) {
         final String linkPath = fs.path.relative(outputDirectory.path,
             from: outputDirectory.parent.path);
-        currentVersion.createSync('$linkPath${fs.path.separator}');
+        currentVersion.createSync(linkPath);
       }
       // Create symlink to current resources.
       final Link currentResources = frameworkRootDirectory
