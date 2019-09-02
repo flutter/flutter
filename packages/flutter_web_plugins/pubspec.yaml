@@ -1,9 +1,14 @@
 name: flutter_web_plugins
+description: Library to register Flutter Web plugins
 author: Flutter Authors <flutter-dev@googlegroups.com>
-version: 0.0.1
+homepage: http://flutter.dev
 
 dependencies:
   flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
     sdk: flutter
 
 environment:

@@ -44,7 +44,7 @@ class Registrar {
   /// Use this [BinaryMessenger] when creating platform channels in order for
   /// them to receive messages from the platform side. For example:
   ///
-  /// 
+  ///
   ///     class MyPlugin {
   ///       static void registerWith(Registrar registrar) {
   ///         final MethodChannel channel = MethodChannel(
@@ -60,7 +60,7 @@ class Registrar {
 }
 
 /// The default plugin registry for the web.
-final PluginRegistry webPluginRegistry = PluginRegistry(_platformBinaryMessenger);
+final PluginRegistry webPluginRegistry = PluginRegistry(pluginBinaryMessenger);
 
 /// A [BinaryMessenger] which does the inverse of the default framework
 /// messenger.
@@ -70,8 +70,6 @@ final PluginRegistry webPluginRegistry = PluginRegistry(_platformBinaryMessenger
 /// plugins.
 class _PlatformBinaryMessenger extends BinaryMessenger {
   final Map<String, _MessageHandler> _handlers = <String, _MessageHandler>{};
-  final Map<String, _MessageHandler> _mockHandlers =
-      <String, _MessageHandler>{};
 
   /// Receives a platform message from the framework.
   @override
@@ -98,7 +96,8 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
   /// Sends a platform message from the platform side back to the framework.
   @override
   Future<ByteData> send(String channel, ByteData message) {
-    throw FlutterError('Cannot send messages from the platform side to the framework.');
+    throw FlutterError(
+        'Cannot send messages from the platform side to the framework.');
   }
 
   @override
@@ -113,12 +112,10 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
   @override
   void setMockMessageHandler(
       String channel, Future<ByteData> Function(ByteData message) handler) {
-    if (handler == null)
-      _mockHandlers.remove(channel);
-    else
-      _mockHandlers[channel] = handler;
+    throw FlutterError(
+        'Setting mock handlers is not supported on the platform side.');
   }
 }
 
-final _PlatformBinaryMessenger _platformBinaryMessenger =
-    _PlatformBinaryMessenger();
+/// The default [BinaryMessenger] for Flutter Web plugins.
+final BinaryMessenger pluginBinaryMessenger = _PlatformBinaryMessenger();
