@@ -39,8 +39,8 @@ void main() {
       final Registrar registrar = webPluginRegistry.registrarFor(TestPlugin);
       TestPlugin.registerWith(registrar);
 
-      final MethodChannel frameworkChannel =
-          const MethodChannel('test_plugin', const StandardMethodCodec());
+      const MethodChannel frameworkChannel =
+          MethodChannel('test_plugin', StandardMethodCodec());
       frameworkChannel.invokeMethod<void>('test1');
 
       expect(TestPlugin.calledMethods, <String>['test1']);
