@@ -57,5 +57,5 @@ void main() {
               'test', (ByteData data) async => ByteData(0)),
           throwsFlutterError);
     });
-  }, skip: 'Tests will fail until 57f4ea from flutter/engine is pulled into the framework.');
+  });
 }
