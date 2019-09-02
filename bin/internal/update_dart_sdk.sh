@@ -50,6 +50,10 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
       DART_ZIP_NAME="dart-sdk-linux-x64.zip"
       IS_USER_EXECUTABLE="-perm /u+x"
       ;;
+    MINGW32*)
+      DART_ZIP_NAME="dart-sdk-windows-x64.zip"
+      IS_USER_EXECUTABLE="-perm /u+x"
+      ;;
     *)
       echo "Unknown operating system. Cannot install Dart SDK."
       exit 1
