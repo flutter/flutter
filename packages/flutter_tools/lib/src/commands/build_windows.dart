@@ -36,7 +36,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   final String name = 'windows';
 
   @override
-  bool hidden = true;
+  bool get hidden => !featureFlags.isWindowsEnabled || !platform.isWindows;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{

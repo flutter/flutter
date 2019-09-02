@@ -31,7 +31,7 @@ class BuildWebCommand extends BuildSubCommand {
   final String name = 'web';
 
   @override
-  bool get hidden => true;
+  bool get hidden => !featureFlags.isWebEnabled;
 
   @override
   final String description = 'build a web application bundle.';
