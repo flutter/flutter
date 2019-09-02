@@ -76,12 +76,13 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  codegen_integration_win:
-    description: >
-      Runs codegeneration and verifies that it can execute
-      correctly.
-    stage: devicelab_win
-    required_agent_capabilities: ["windows/android"]
+  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
+  # codegen_integration_win:
+  #   description: >
+  #     Runs codegeneration and verifies that it can execute
+  #     correctly.
+  #   stage: devicelab_win
+  #   required_agent_capabilities: ["windows/android"]
 
   codegen_integration_mac:
     description: >
@@ -127,12 +128,13 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  windows_chrome_dev_mode:
-    description: >
-      Run flutter web on the devicelab and hot restart.
-    stage: devicelab_win
-    required_agent_capabilities: ["windows/android"]
-    flaky: true
+  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
+  # windows_chrome_dev_mode:
+  #   description: >
+  #     Run flutter web on the devicelab and hot restart.
+  #   stage: devicelab_win
+  #   required_agent_capabilities: ["windows/android"]
+  #   flaky: true
 
   # Android on-device tests
 
