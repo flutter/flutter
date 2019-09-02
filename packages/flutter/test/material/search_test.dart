@@ -100,9 +100,13 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final TextField textField = tester.widget<TextField>(find.byType(TextField));
-    final Color hintColor = textField.decoration.hintStyle.color;
-    expect(hintColor, delegate.hintTextColor);
+    expect(tester.widget<RichText>(
+      find.descendant(
+        of: find.byType(TextField),
+        matching: find.byType(RichText),
+      )).text.style.color,
+      Colors.green,
+    );
   });
 
   testWidgets('Requests suggestions', (WidgetTester tester) async {
@@ -638,6 +642,49 @@ void main() {
       semantics.dispose();
     });
   });
+
+  testWidgets('delegate appBarTheme is applied to the AppBar color on the search page', (WidgetTester tester) async {
+    final _AppBarThemeTestDelegate delegate = _AppBarThemeTestDelegate(
+      appBarColor: Colors.green,
+    );
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+
+    // Open the search page.
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<Material>(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(Material),
+      )).color,
+      Colors.green,
+    );
+  });
+
+  testWidgets('delegate appBarTheme is applied to the enabledBorder of the TextField on the search page', (WidgetTester tester) async {
+    final _AppBarThemeTestDelegate delegate = _AppBarThemeTestDelegate(
+      enabledBorder: InputBorder.none,
+    );
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+
+    // Open the search page.
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'abc');
+
+    expect(tester.widget<InputDecorator>(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(InputDecorator),
+      )).decoration.enabledBorder,
+      InputBorder.none,
+    );
+  });
 }
 
 class TestHomePage extends StatelessWidget {
@@ -746,5 +793,26 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   @override
   List<Widget> buildActions(BuildContext context) {
     return actions;
+  }
+}
+
+class _AppBarThemeTestDelegate extends _TestSearchDelegate {
+  _AppBarThemeTestDelegate({this.appBarColor, this.enabledBorder});
+
+  final Color appBarColor;
+  final InputBorder enabledBorder;
+
+  @override
+  ThemeData appBarTheme(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return theme.copyWith(
+      primaryColor: appBarColor,
+      appBarTheme: theme.appBarTheme.copyWith(
+        color: appBarColor,
+      ),
+      inputDecorationTheme: theme.inputDecorationTheme.copyWith(
+        enabledBorder: enabledBorder,
+      ),
+    );
   }
 }
