@@ -1518,9 +1518,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     if (initialRouteName.startsWith('/') && initialRouteName.length > 1) {
       initialRouteName = initialRouteName.substring(1); // strip leading '/'
       assert(Navigator.defaultRouteName == '/');
-      final List<String> plannedInitialRouteNames = <String>[
-        Navigator.defaultRouteName,
-      ];
       final List<Route<dynamic>> plannedInitialRoutes = <Route<dynamic>>[
         _routeNamed<dynamic>(Navigator.defaultRouteName, allowNull: true, arguments: null),
       ];
@@ -1529,7 +1526,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         String routeName = '';
         for (String part in routeParts) {
           routeName += '/$part';
-          plannedInitialRouteNames.add(routeName);
           plannedInitialRoutes.add(_routeNamed<dynamic>(routeName, allowNull: true, arguments: null));
         }
       }
