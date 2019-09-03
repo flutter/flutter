@@ -31,6 +31,8 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../platform_plugins.dart';
+import '../plugins.dart';
 import '../project.dart';
 import '../web/chrome.dart';
 
@@ -38,7 +40,7 @@ import '../web/chrome.dart';
 const String kBuildTargetName = 'web';
 
 /// A factory for creating a [Dwds] instance.
-DwdsFactory get dwdsFactpory => context.get<DwdsFactory>() ?? Dwds.start;
+DwdsFactory get dwdsFactory => context.get<DwdsFactory>() ?? Dwds.start;
 
 /// The [BuildDaemonCreator] instance.
 BuildDaemonCreator get buildDaemonCreator => context.get<BuildDaemonCreator>() ?? const BuildDaemonCreator();
@@ -49,10 +51,10 @@ WebFsFactory get webFsFactory => context.get<WebFsFactory>() ?? WebFs.start;
 /// A factory for creating an [HttpMultiServer] instance.
 HttpMultiServerFactory get httpMultiServerFactory => context.get<HttpMultiServerFactory>() ?? HttpMultiServer.bind;
 
-/// A function with the same signature as [HttpMultiServier.bind].
+/// A function with the same signature as [HttpMultiServer.bind].
 typedef HttpMultiServerFactory = Future<HttpServer> Function(dynamic address, int port);
 
-/// A function with the same signatire as [Dwds.start].
+/// A function with the same signature as [Dwds.start].
 typedef DwdsFactory = Future<Dwds> Function({
   @required int applicationPort,
   @required int assetServerPort,
@@ -119,6 +121,12 @@ class WebFs {
 
   /// Recompile the web application and return whether this was successful.
   Future<bool> recompile() async {
+    // TODO(jonahwilliams): build_daemon is still watching for sources, which means we can
+    // easily miss changes when hot restart is triggered by IDEs. Until we fix this, add a
+    // delay to allow filesystem watches to gather all required source files. This duration
+    // was chosen arbitrarily.
+    // See https://github.com/flutter/flutter/issues/39696
+    await Future<void>.delayed(const Duration(milliseconds: 150));
     _client.startBuild();
     await for (BuildResults results in _client.buildResults) {
       final BuildResult result = results.results.firstWhere((BuildResult result) {
@@ -140,9 +148,15 @@ class WebFs {
     @required FlutterProject flutterProject,
     @required BuildInfo buildInfo
   }) async {
+    // workaround for https://github.com/flutter/flutter/issues/38290
+    if (!flutterProject.dartTool.existsSync()) {
+      flutterProject.dartTool.createSync(recursive: true);
+    }
+
+    final bool hasWebPlugins = findPlugins(flutterProject).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     // Start the build daemon and run an initial build.
     final BuildDaemonClient client = await buildDaemonCreator
-      .startBuildDaemon(fs.currentDirectory.path, release: buildInfo.isRelease, profile: buildInfo.isProfile);
+      .startBuildDaemon(fs.currentDirectory.path, release: buildInfo.isRelease, profile: buildInfo.isProfile, hasPlugins: hasWebPlugins);
     client.startBuild();
     // Only provide relevant build results
     final Stream<BuildResult> filteredBuildResults = client.buildResults
@@ -159,7 +173,7 @@ class WebFs {
 
     // Initialize the dwds server.
     final int port = await os.findFreePort();
-    final Dwds dwds = await dwdsFactpory(
+    final Dwds dwds = await dwdsFactory(
       hostname: _kHostName,
       applicationPort: port,
       applicationTarget: kBuildTargetName,
@@ -297,13 +311,19 @@ class WebFs {
 class BuildDaemonCreator {
   const BuildDaemonCreator();
 
+  // TODO(jonahwilliams): find a way to get build checks working for flutter for web.
+  static const String _ignoredLine1 = 'Warning: Interpreting this as package URI';
+  static const String _ignoredLine2 = 'build_script.dart was not found in the asset graph, incremental builds will not work';
+  static const String _ignoredLine3 = 'have your dependencies specified fully in your pubspec.yaml';
+
   /// Start a build daemon and register the web targets.
-  Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {bool release = false, bool profile = false }) async {
+  Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {bool release = false, bool profile = false, bool hasPlugins = false}) async {
     try {
       final BuildDaemonClient client = await _connectClient(
         workingDirectory,
         release: release,
         profile: profile,
+        hasPlugins: hasPlugins,
       );
       _registerBuildTargets(client);
       return client;
@@ -330,7 +350,7 @@ class BuildDaemonCreator {
 
   Future<BuildDaemonClient> _connectClient(
     String workingDirectory,
-    { bool release, bool profile }
+    { bool release, bool profile, bool hasPlugins }
   ) {
     final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
     final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
@@ -351,14 +371,16 @@ class BuildDaemonCreator {
         '--define', 'flutter_tools:entrypoint=release=$release',
         '--define', 'flutter_tools:entrypoint=profile=$profile',
         '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
+        '--define', 'flutter_tools:shell=hasPlugins=$hasPlugins',
       ],
       logHandler: (ServerLog serverLog) {
         switch (serverLog.level) {
           case Level.SEVERE:
           case Level.SHOUT:
-            // This message is always returned once since we're running the
-            // build script from source.
-            if (serverLog.message.contains('Warning: Interpreting this as package URI')) {
+            // Ignore certain non-actionable messages on startup.
+            if (serverLog.message.contains(_ignoredLine1) ||
+                serverLog.message.contains(_ignoredLine2) ||
+                serverLog.message.contains(_ignoredLine3)) {
               return;
             }
             printError(serverLog.message);

@@ -12,6 +12,7 @@ import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
+import 'viewport.dart';
 import 'viewport_offset.dart';
 
 // CORE TYPES FOR SLIVERS
@@ -27,17 +28,16 @@ import 'viewport_offset.dart';
 /// vertical alphabetical list that is going [AxisDirection.down] with a
 /// [GrowthDirection.reverse] would have the Z at the top (at scroll offset
 /// zero) and the A below it.
+///
+/// The direction in which the scroll offset increases is given by
+/// [applyGrowthDirectionToAxisDirection].
 enum GrowthDirection {
-  /// This sliver's contents are ordered so that the first item is at the lowest
-  /// scroll offset, and later items are at greater scroll offsets. The
-  /// direction in which the scroll offset increases is given by the
-  /// [AxisDirection] of the sliver.
+  /// This sliver's contents are ordered in the same direction as the
+  /// [AxisDirection].
   forward,
 
-  /// This sliver's contents are ordered so that the last item is at the lowest
-  /// scroll offset, and earlier items are at greater scroll offsets. The
-  /// direction in which the scroll offset increases is given by the
-  /// [AxisDirection] of the sliver.
+  /// This sliver's contents are ordered in the opposite direction of the
+  /// [AxisDirection].
   reverse,
 }
 
@@ -165,12 +165,6 @@ class SliverConstraints extends Constraints {
   /// top, with the bottom of the A at scroll offset zero, and the top of the Z
   /// at the highest scroll offset.
   ///
-  /// On the other hand, if the [axisDirection] is [AxisDirection.up] but the
-  /// [growthDirection] is [GrowthDirection.reverse], then an alphabetical list
-  /// will have A at the top, then B, then C, and so forth, with Z at the
-  /// bottom, with the bottom of the Z at scroll offset zero, and the top of the
-  /// A at the highest scroll offset.
-  ///
   /// If a viewport has an overall [AxisDirection] of [AxisDirection.down], then
   /// slivers above the absolute zero offset will have an axis of
   /// [AxisDirection.up] and a growth direction of [GrowthDirection.reverse],
@@ -181,9 +175,8 @@ class SliverConstraints extends Constraints {
   /// well, with zero at the absolute zero point, and positive numbers going
   /// away from there.)
   ///
-  /// In general, lists grow only in the positive scroll offset direction, so
-  /// the only growth direction that is commonly seen is
-  /// [GrowthDirection.forward].
+  /// Normally, the absolute zero offset is determined by the viewport's
+  /// [RenderViewport.center] and [RenderViewport.anchor] properties.
   final GrowthDirection growthDirection;
 
   /// The direction in which the user is attempting to scroll, relative to the
@@ -205,12 +198,13 @@ class SliverConstraints extends Constraints {
   final ScrollDirection userScrollDirection;
 
   /// The scroll offset, in this sliver's coordinate system, that corresponds to
-  /// the earliest visible part of this sliver in the [AxisDirection].
+  /// the earliest visible part of this sliver in the [AxisDirection] if
+  /// [growthDirection] is [GrowthDirection.forward] or in the opposite
+  /// [AxisDirection] direction if [growthDirection] is [GrowthDirection.reverse].
   ///
-  /// For example, if [AxisDirection] is [AxisDirection.down], then this is the
-  /// scroll offset at the top of the visible portion of the sliver or
-  /// equivalently the amount the top of the sliver has been scrolled past the
-  /// top of the viewport.
+  /// For example, if [AxisDirection] is [AxisDirection.down] and [growthDirection]
+  /// is [GrowthDirection.forward], then scroll offset is the amount the top of
+  /// the sliver has been scrolled past the top of the viewport.
   ///
   /// This value is typically used to compute whether this sliver should still
   /// protrude into the viewport via [SliverGeometry.paintExtent] and
@@ -218,8 +212,10 @@ class SliverConstraints extends Constraints {
   /// sliver is above the beginning of the viewport.
   ///
   /// For slivers whose top is not past the top of the viewport, the
-  /// [scrollOffset] is `0` when [AxisDirection] is [AxisDirection.down]. This
-  /// includes all the slivers that are below the bottom of the viewport.
+  /// [scrollOffset] is `0` when [AxisDirection] is [AxisDirection.down] and
+  /// [growthDirection] is [GrowthDirection.forward]. The set of slivers with
+  /// [scrollOffset] `0` includes all the slivers that are below the bottom of the
+  /// viewport.
   ///
   /// [SliverConstraints.remainingPaintExtent] is typically used to accomplish
   /// the same goal of computing whether scrolled out slivers should still

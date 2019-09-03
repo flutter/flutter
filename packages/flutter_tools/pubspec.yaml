@@ -15,7 +15,7 @@ dependencies:
   completion: 0.2.1+1
   coverage: 0.13.2
   crypto: 2.1.2
-  file: 5.0.8+1
+  file: 5.0.10
   http: 0.12.0+2
   intl: 0.15.8
   json_rpc_2: 2.1.0
@@ -134,4 +134,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: fb35
+# PUBSPEC CHECKSUM: 0702
