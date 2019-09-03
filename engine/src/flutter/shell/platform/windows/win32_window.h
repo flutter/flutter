@@ -17,22 +17,23 @@ namespace flutter {
 
 // A class abstraction for a high DPI aware Win32 Window.  Intended to be
 // inherited from by classes that wish to specialize with custom
-// rendering and input handling
+// rendering and input handling.
 class Win32Window {
  public:
   Win32Window();
   ~Win32Window();
 
-  // Initializes and shows window with |title| and position and size using |x|,
-  // |y|, |width| and |height|
-  void Initialize(const char* title,
-                  const unsigned int x,
-                  const unsigned int y,
-                  const unsigned int width,
-                  const unsigned int height);
+  // Initializes as a child window with size using |width| and |height| and
+  // |title| to identify the windowclass.  Does not show window, window must be
+  // parented into window hierarchy by caller.
+  void InitializeChild(const char* title,
+                       unsigned int width,
+                       unsigned int height);
 
   // Release OS resources asociated with window.
   virtual void Destroy();
+
+  HWND GetWindowHandle();
 
  protected:
   // Converts a c string to a wide unicode string.
@@ -61,10 +62,12 @@ class Win32Window {
                  WPARAM const wparam,
                  LPARAM const lparam) noexcept;
 
-  // When WM_DPICHANGE resizes the window to the new suggested
-  // size and notifies inheriting class.
+  // When WM_DPICHANGE process it using |hWnd|, |wParam|.  If
+  // |top_level| is set, extract the suggested new size from |lParam| and resize
+  // the window to the new suggested size.  If |top_level| is not set, the
+  // |lParam| will not contain a suggested size hence ignore it.
   LRESULT
-  HandleDpiChange(HWND hWnd, WPARAM wParam, LPARAM lParam);
+  HandleDpiChange(HWND hWnd, WPARAM wParam, LPARAM lParam, bool top_level);
 
   // Called when the DPI changes either when a
   // user drags the window between monitors of differing DPI or when the user
@@ -103,8 +106,6 @@ class Win32Window {
 
   UINT GetCurrentHeight();
 
-  HWND GetWindowHandle();
-
  private:
   // Stores new width and height and calls |OnResize| to notify inheritors
   void HandleResize(UINT width, UINT height);
@@ -114,6 +115,10 @@ class Win32Window {
   int current_dpi_ = 0;
   int current_width_ = 0;
   int current_height_ = 0;
+
+  // WM_DPICHANGED_BEFOREPARENT defined in more recent Windows
+  // SDK
+  const static long kWmDpiChangedBeforeParent = 0x02E2;
 
   // Member variable to hold window handle.
   HWND window_handle_ = nullptr;

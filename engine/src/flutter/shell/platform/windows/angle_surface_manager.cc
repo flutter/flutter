@@ -153,6 +153,10 @@ EGLSurface AngleSurfaceManager::CreateSurface(HWND window) {
   surface = eglCreateWindowSurface(egl_display_, egl_config_,
                                    static_cast<EGLNativeWindowType>(window),
                                    surfaceAttributes);
+  if (surface == EGL_NO_SURFACE) {
+    OutputDebugString(L"Surface creation failed.");
+  }
+
   return surface;
 }
 

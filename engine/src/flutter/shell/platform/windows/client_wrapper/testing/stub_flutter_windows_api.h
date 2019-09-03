@@ -29,17 +29,10 @@ class StubFlutterWindowsApi {
 
   virtual ~StubFlutterWindowsApi() {}
 
-  // Called for FlutterDesktopInit.
-  virtual bool Init() { return true; }
-
-  // Called for FlutterDesktopTerminate.
-  virtual void Terminate() {}
-
-  // Called for FlutterDesktopCreateWindow.
-  virtual FlutterDesktopWindowControllerRef CreateWindow(
+  // Called for FlutterDesktopCreateView.
+  virtual FlutterDesktopViewControllerRef CreateViewController(
       int initial_width,
       int initial_height,
-      const char* title,
       const char* assets_path,
       const char* icu_data_path,
       const char** arguments,
@@ -47,20 +40,14 @@ class StubFlutterWindowsApi {
     return nullptr;
   }
 
-  // Called for FlutterDesktopDestroyWindow.
-  virtual void DestroyWindow() {}
+  // Called for FlutterDesktopDestroyView.
+  virtual void DestroyViewController() {}
 
-  // Called for FlutterDesktopSetHoverEnabled.
-  virtual void SetHoverEnabled(bool enabled) {}
+  // Called for FlutterDesktopProcessMessages
+  virtual void FlutterDesktopProcessMessages() {}
 
-  // Called for FlutterDesktopSetWindowTitle.
-  virtual void SetWindowTitle(const char* title) {}
-
-  //  Called for FlutterDesktopSetWindowIcon.
-  virtual void SetWindowIcon(uint8_t* pixel_data, int width, int height) {}
-
-  // Called for FlutterDesktopRunWindowLoop.
-  virtual void RunWindowLoop() {}
+  // Called for FlutterDesktopProcessMessages
+  virtual HWND FlutterDesktopGetHWND() { return reinterpret_cast<HWND>(1); }
 
   // Called for FlutterDesktopRunEngine.
   virtual FlutterDesktopEngineRef RunEngine(const char* assets_path,

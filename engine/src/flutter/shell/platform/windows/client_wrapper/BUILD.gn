@@ -5,9 +5,9 @@
 import("$flutter_root/shell/platform/common/cpp/client_wrapper/publish.gni")
 import("$flutter_root/testing/testing.gni")
 
-_wrapper_includes = [ "include/flutter/flutter_window_controller.h" ]
+_wrapper_includes = [ "include/flutter/flutter_view_controller.h" ]
 
-_wrapper_sources = [ "flutter_window_controller.cc" ]
+_wrapper_sources = [ "flutter_view_controller.cc" ]
 
 # This code will be merged into .../common/cpp/client_wrapper for client use,
 # so uses header paths that assume the merged state. Include the header
@@ -68,7 +68,7 @@ executable("client_wrapper_windows_unittests") {
 
   # TODO: Add more unit tests.
   sources = [
-    "flutter_window_controller_unittests.cc",
+    "flutter_view_controller_unittests.cc",
   ]
 
   deps = [
