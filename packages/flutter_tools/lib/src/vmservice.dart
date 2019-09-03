@@ -139,8 +139,6 @@ class VMService {
         }
       });
 
-      // If the Flutter Engine doesn't support service registration this will
-      // have no effect
       _peer.sendNotification('registerService', <String, String>{
         'service': 'reloadSources',
         'alias': 'Flutter Tools',
@@ -165,15 +163,13 @@ class VMService {
         }
       });
 
-      // If the Flutter Engine doesn't support service registration this will
-      // have no effect
       _peer.sendNotification('registerService', <String, String>{
         'service': 'hotRestart',
         'alias': 'Flutter Tools',
       });
     }
 
-    _peer.registerMethod('getFlutterVersion', (rpc.Parameters params) async {
+    _peer.registerMethod('flutterVersion', (rpc.Parameters params) async {
       final FlutterVersion version = FlutterVersion();
       final Map<String, Object> versionJson = version.toJson();
       versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
@@ -181,10 +177,8 @@ class VMService {
       return versionJson;
     });
 
-    // If the Flutter Engine doesn't support service registration this will
-    // have no effect
     _peer.sendNotification('registerService', <String, String>{
-      'service': 'getFlutterVersion',
+      'service': 'flutterVersion',
       'alias': 'Flutter Tools',
     });
 
