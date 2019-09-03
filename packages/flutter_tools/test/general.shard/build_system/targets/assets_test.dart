@@ -71,7 +71,7 @@ flutter:
     fs.file('pubspec.yaml')
       ..writeAsStringSync('name: foo\ndependencies:\n  foo: any\n');
 
-    await const FlutterPlugins().build(Environment(
+    await const FlutterPlugins().build(<File>[], Environment(
       outputDir: fs.currentDirectory,
       projectDir: fs.currentDirectory,
     ));

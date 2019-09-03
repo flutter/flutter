@@ -64,10 +64,10 @@ void main() {
 class TestTarget extends Target {
   TestTarget([this._build]);
 
-  final Future<void> Function(Environment environment) _build;
+  final Future<void> Function(List<File> inputFiles, Environment environment) _build;
 
   @override
-  Future<void> build(Environment environment) => _build(environment);
+  Future<void> build(List<File> inputFiles, Environment environment) => _build(inputFiles, environment);
 
   @override
   List<Target> dependencies = <Target>[];
