@@ -28,12 +28,13 @@ void main() {
   ResidentWebRunner residentWebRunner;
   MockDebugConnection mockDebugConnection;
   MockVmService mockVmService;
+  MockWebDevice mockWebDevice;
 
   setUp(() {
     mockWebFs = MockFlutterWebFs();
     mockDebugConnection = MockDebugConnection();
     mockVmService = MockVmService();
-    final MockWebDevice mockWebDevice = MockWebDevice();
+    mockWebDevice = MockWebDevice();
     testbed = Testbed(
       setup: () {
         residentWebRunner = ResidentWebRunner(
@@ -356,6 +357,20 @@ void main() {
 
     await residentWebRunner.exit();
     await residentWebRunner.exit();
+  }));
+
+  test('Prints target and device name on run', () => testbed.run(() async {
+    _setupMocks();
+    when(mockWebDevice.name).thenReturn('Chromez');
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+     unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    final BufferLogger bufferLogger = logger;
+
+    expect(bufferLogger.statusText, contains('Launching ${fs.path.join('lib', 'main.dart')} on Chromez in debug mode'));
   }));
 }
 
