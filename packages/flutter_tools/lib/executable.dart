@@ -84,7 +84,7 @@ Future<void> main(List<String> args) async {
     LogsCommand(),
     MakeHostAppEditableCommand(),
     PackagesCommand(),
-    PrecacheCommand(verboseHelp: verboseHelp),
+    PrecacheCommand(),
     RunCommand(verboseHelp: verboseHelp),
     ScreenshotCommand(),
     ShellCompletionCommand(),
