@@ -141,7 +141,7 @@ void main() {
     expect(material.clipBehavior, clipBehavior);
   });
 
-  testWidgets('Modal bottom sheet-specific parameters take priority over general bottom sheet parameters for modal bottom sheets', (WidgetTester tester) async {
+  testWidgets('Modal bottom sheet-specific parameters are used for modal bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;

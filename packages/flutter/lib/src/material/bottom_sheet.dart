@@ -456,13 +456,15 @@ Future<T> showModalBottomSheet<T>({
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
+  final BottomSheetThemeData theme = Theme.of(context).bottomSheetTheme;
+
   return Navigator.of(context, rootNavigator: useRootNavigator).push(_ModalBottomSheetRoute<T>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     isScrollControlled: isScrollControlled,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    backgroundColor: backgroundColor ?? Theme.of(context).bottomSheetTheme.modalBackgroundColor,
-    elevation: elevation ?? Theme.of(context).bottomSheetTheme.modalElevation,
+    backgroundColor: backgroundColor ?? theme?.modalBackgroundColor ?? theme?.backgroundColor,
+    elevation: elevation ?? theme?.modalElevation ?? theme?.elevation,
     shape: shape,
     clipBehavior: clipBehavior,
   ));
