@@ -8,6 +8,7 @@ import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -164,19 +165,56 @@ class SkiaGoldClient {//}extends GoldensClient {
   }
 
   /// Doc
-  List<int>getMasterBytes(String testName) {
+  Future<List<int>>getMasterBytes(String testName) async {
     io.HttpOverrides.global = SkiaGoldHttpOverrides();
 
-    String requestForTest = 'https://flutter-gold.skia.org/json/search?'
-      'fdiffmax=-1&fref=false&frgbamax=255&frgbamin=0&head=true&include=false'
-      '&limit=50&master=false&match=name&metric=combined&neg=false&offset=0'
-      '&pos=true'
-      '&query=Platform%3D${platform.operatingSystem}%26'
-      'name%3D$testName%26'
-      'source_type%3Dflutter&sort=desc&unt=true';
+    final Uri requestForDigest = Uri.http(
+      'https://flutter-gold.skia.org',
+      '/json/search?'
+        'fdiffmax=-1&fref=false&frgbamax=255&frgbamin=0&head=true&include=false'
+        '&limit=50&master=false&match=name&metric=combined&neg=false&offset=0'
+        '&pos=true&query=Platform%3D${platform.operatingSystem}%26name%3D$testName%26'
+        'source_type%3Dflutter&sort=desc&unt=true',
+    );
+    final io.HttpClient client = io.HttpClient();
+    SkiaGoldDigest masterDigest;
+    try {
+      await client.getUrl(requestForDigest)
+        .then((io.HttpClientRequest request) => request.close())
+        .then((io.HttpClientResponse response) async {
+        final String responseBody = await response.transform(utf8.decoder).join();
+        final Map<String, dynamic> digests = jsonDecode(responseBody);
+        if (digests.length > 1) {
+          print('Triage breakdown!'); // Throw with guidance
+        }
+        masterDigest = SkiaGoldDigest.fromJson(digests[0]);
+      });
+    } catch(_) {
+      print('Request Failed.');
+    }
 
+    if (!masterDigest.isValid(platform, testName)) {
+      // Throw with guidance
+    }
 
-
+    final Uri requestForImage = Uri.http(
+      'https://flutter-gold.skia.org',
+      '/img/images/${master.imageHash}.png',
+    );
+    List<int> masterImageBytes;
+    try {
+      await client.getUrl(requestForImage)
+        .then((io.HttpClientRequest request) => request.close())
+        .then((io.HttpClientResponse response) async {
+        response.listen((List<int> bytes) {
+          masterImageBytes = bytes;
+        });
+      });
+    } catch(_) {
+      print('RequestFailed');
+    }
+    print(masterImageBytes);
+    return masterImageBytes;
   }
 
   /// Returns the current commit hash of the Flutter repository.
@@ -226,13 +264,13 @@ class SkiaGoldHttpOverrides extends io.HttpOverrides {
   }
 }
 
-// check digests.size from response, should be 1, then pass digests[0] to constructor
 class SkiaGoldDigest {
 
   const SkiaGoldDigest({
     this.imageHash,
-    this.status,
     this.paramSet,
+    this.testName,
+    this.status,
   });
 
   factory SkiaGoldDigest.fromJson(Map<String, dynamic> json) {
@@ -241,19 +279,31 @@ class SkiaGoldDigest {
 
     return SkiaGoldDigest(
       imageHash: json['digest'],
-      status: json['status'],
       paramSet: json['paramset'],
+      status: json['status'],
+      testName: json['test'],
     );
   }
 
   /// Unique identifier for the image associated with the digest.
   final String imageHash;
 
-  /// Status of the given digest, e.g. positive or untriaged.
-  final bool status;
-
   /// Parameter set for the given test, e.g. platform : Windows.
   final Map<String, String> paramSet;
+
+  /// Status of the given digest, e.g. positive or untriaged.
+  final String testName;
+
+  /// Status of the given digest, e.g. positive or untriaged.
+  final String status;
+
+  /// Doc
+  bool isValid(Platform platform, String name) {
+    return imageHash != null
+      && paramSet['Platform'].contains(platform.operatingSystem)
+      && testName == name
+      && status == 'positive';
+  }
 }
 
 /// Exception that signals a process' exit with a non-zero exit code.
