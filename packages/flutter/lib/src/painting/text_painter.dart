@@ -323,7 +323,9 @@ class TextPainter {
     _needsLayout = true;
   }
 
+  /// {@template flutter.painting.textPainter.textWidthBasis}
   /// Defines how to measure the width of the rendered text.
+  /// {@endtemplate}
   TextWidthBasis get textWidthBasis => _textWidthBasis;
   TextWidthBasis _textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {

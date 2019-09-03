@@ -411,7 +411,7 @@ class Text extends StatelessWidget {
   /// ```
   final String semanticsLabel;
 
-  /// Defines how to measure the width of the rendered text.
+  /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
   @override
