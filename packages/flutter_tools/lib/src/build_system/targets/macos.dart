@@ -113,7 +113,7 @@ abstract class UnpackMacOS extends Target {
   List<Target> get dependencies => <Target>[];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(List<File> inputFiles, Environment environment) async {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
@@ -191,7 +191,7 @@ class DebugMacOSFramework extends Target {
   String get name => 'debug_macos_framework';
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(List<File> inputFiles, Environment environment) async {
     final File outputFile = fs.file(fs.path.join(
         environment.buildDir.path, 'App.framework', 'App'));
     outputFile.createSync(recursive: true);
@@ -236,7 +236,7 @@ class CompileMacOSFramework extends Target {
   String get name => 'compile_macos_framework';
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(List<File> inputFiles, Environment environment) async {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
@@ -302,7 +302,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(List<File> inputFiles, Environment environment) async {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
