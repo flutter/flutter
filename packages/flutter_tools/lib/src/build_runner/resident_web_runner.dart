@@ -146,7 +146,7 @@ class ResidentWebRunner extends ResidentRunner {
     );
     if (package == null) {
       printError('No application found for TargetPlatform.web_javascript.');
-      printError('To add web support to a project, run `flutter create --web .`.');
+      printError('To add web support to a project, run `flutter create .`.');
       return 1;
     }
     if (!fs.isFileSync(mainPath)) {
