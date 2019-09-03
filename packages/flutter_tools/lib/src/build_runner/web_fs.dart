@@ -281,14 +281,13 @@ class WebFs {
         ));
         return Response.ok(file.readAsBytesSync());
       } else if (request.url.path.endsWith('.dart')) {
-        print(request.url.path);
         // This is likely a sourcemap request. The first segment is the
         // package name, and the rest is the path to the file relative to
         // the package uri. For example, `foo/bar.dart` would represent a
         // file at a path like `foo/lib/bar.dart`. If there is no leading
         // segment, then we assume it is from the current package.
 
-        // Handle sdk requests have mangled urls from engine build.
+        // Handle sdk requests that have mangled urls from engine build.
         if (request.url.path.contains('flutter_web_sdk')) {
           // Note: the request is a uri and not a file path, so they always use `/`.
           final String sdkPath = fs.path.joinAll(request.url.path.split('flutter_web_sdk/').last.split('/'));
