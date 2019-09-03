@@ -107,8 +107,9 @@ class WebFs {
     final Completer<DebugConnection> firstConnection = Completer<DebugConnection>();
     _connectedApps =  _dwds.connectedApps.listen((AppConnection appConnection) async {
       appConnection.runMain();
+      final DebugConnection debugConnection = await _dwds.debugConnection(appConnection);
       if (!firstConnection.isCompleted) {
-        firstConnection.complete(await _dwds.debugConnection(appConnection));
+        firstConnection.complete(debugConnection);
       }
     });
     return firstConnection.future;
