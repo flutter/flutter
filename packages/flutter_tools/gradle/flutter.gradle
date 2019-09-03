@@ -273,8 +273,15 @@ class FlutterPlugin implements Plugin<Project> {
         Closure addEmbeddingCompileOnlyDependency = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
             // Add the embedding as a compile only dependency to the plugin.
-            addFlutterJarCompileOnlyDependency(pluginProject, buildType.name,
-                    flutterJar ?: "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion")
+            def dependency;
+            if (flutterJar) {
+                dependency = project.files {
+                    flutterJar
+                }
+            } else {
+                dependency = "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion"
+            }
+            addCompileOnlyDependency(pluginProject, buildType.name, dependency)
         }
         pluginProject.afterEvaluate {
             pluginProject.android.buildTypes {
@@ -445,7 +452,7 @@ class FlutterPlugin implements Plugin<Project> {
         return System.getProperty('build-plugins-as-aars') == 'true'
     }
 
-    private void addFlutterJarCompileOnlyDependency(Project project, String variantName, Object dependency) {
+    private void addCompileOnlyDependency(Project project, String variantName, Object dependency) {
         if (project.state.failure) {
             return
         }
