@@ -12,30 +12,39 @@ import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-import 'package:flutter_goldens_client/client.dart';
-
 // If you are here trying to figure out how to use golden files in the Flutter
 // repo itself, consider reading this wiki page:
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
 
-// TODO(Piinks): This file will replace ./client.dart when transition to Skia
-// Gold testing is complete
-
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 
-/// An extension of the [GoldensClient] class that interfaces with Skia Gold
-/// for golden file testing.
-class SkiaGoldClient extends GoldensClient {
+/// Doc
+class SkiaGoldClient {//}extends GoldensClient {
   SkiaGoldClient({
-    FileSystem fs = const LocalFileSystem(),
-    ProcessManager process = const LocalProcessManager(),
-    Platform platform = const LocalPlatform(),
-  }) : super(
-    fs: fs,
-    process: process,
-    platform: platform,
-  );
+    this.fs = const LocalFileSystem(),
+    this.process = const LocalProcessManager(),
+    this.platform = const LocalPlatform(),
+  });
+
+  /// The file system to use for storing the local clone of the repository.
+  ///
+  /// This is useful in tests, where a local file system (the default) can
+  /// be replaced by a memory file system.
+  final FileSystem fs;
+
+  /// A wrapper for the [dart:io.Platform] API.
+  ///
+  /// This is useful in tests, where the system platform (the default) can
+  /// be replaced by a mock platform instance.
+  final Platform platform;
+
+  /// A controller for launching subprocesses.
+  ///
+  /// This is useful in tests, where the real process manager (the default)
+  /// can be replaced by a mock process manager that doesn't really create
+  /// sub-processes.
+  final ProcessManager process;
 
   /// The local [Directory] within the [comparisonRoot] for the current test
   /// context. In this directory, the client will create image and json files
@@ -55,9 +64,6 @@ class SkiaGoldClient extends GoldensClient {
   ///
   /// Uses the [platform] environment in this implementation.
   String get _serviceAccount => platform.environment[_kServiceAccountKey];
-
-  @override
-  Directory get comparisonRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'skia_goldens'));
 
   /// Prepares the local work space for golden file testing and calls the
   /// goldctl `auth` command.
@@ -89,19 +95,10 @@ class SkiaGoldClient extends GoldensClient {
       '--work-dir', _workDirectory.childDirectory('temp').path,
     ];
 
-    // final io.ProcessResult authResults =
     await io.Process.run(
       _goldctl,
       authArguments,
     );
-    // TODO(Piinks): Re-enable after Gold flakes are resolved, https://github.com/flutter/flutter/pull/36103
-    // if (authResults.exitCode != 0) {
-    //   final StringBuffer buf = StringBuffer()
-    //     ..writeln('Flutter + Skia Gold auth failed.')
-    //     ..writeln('stdout: ${authResults.stdout}')
-    //     ..writeln('stderr: ${authResults.stderr}');
-    //   throw NonZeroExitCode(authResults.exitCode, buf.toString());
-    // }
   }
 
   /// Executes the `imgtest init` command in the goldctl tool.
@@ -133,20 +130,10 @@ class SkiaGoldClient extends GoldensClient {
       throw NonZeroExitCode(1, buf.toString());
     }
 
-    // final io.ProcessResult imgtestInitResult =
     await io.Process.run(
       _goldctl,
       imgtestInitArguments,
     );
-
-    // TODO(Piinks): Re-enable after Gold flakes are resolved, https://github.com/flutter/flutter/pull/36103
-    // if (imgtestInitResult.exitCode != 0) {
-    //   final StringBuffer buf = StringBuffer()
-    //     ..writeln('Flutter + Skia Gold imgtest init failed.')
-    //     ..writeln('stdout: ${imgtestInitResult.stdout}')
-    //     ..writeln('stderr: ${imgtestInitResult.stderr}');
-    //   throw NonZeroExitCode(imgtestInitResult.exitCode, buf.toString());
-    // }
   }
 
   /// Executes the `imgtest add` command in the goldctl tool.
@@ -173,13 +160,23 @@ class SkiaGoldClient extends GoldensClient {
       _goldctl,
       imgtestArguments,
     );
-
-    // TODO(Piinks): Comment on PR if triage is needed, https://github.com/flutter/flutter/issues/34673
-    // So as not to turn the tree red in this initial implementation, this will
-    // return true for now.
-    // The ProcessResult that returns from line 157 contains the pass/fail
-    // result of the test & links to the dashboard and diffs.
     return true;
+  }
+
+  /// Doc
+  List<int>getMasterBytes(String testName) {
+    io.HttpOverrides.global = SkiaGoldHttpOverrides();
+
+    String requestForTest = 'https://flutter-gold.skia.org/json/search?'
+      'fdiffmax=-1&fref=false&frgbamax=255&frgbamin=0&head=true&include=false'
+      '&limit=50&master=false&match=name&metric=combined&neg=false&offset=0'
+      '&pos=true'
+      '&query=Platform%3D${platform.operatingSystem}%26'
+      'name%3D$testName%26'
+      'source_type%3Dflutter&sort=desc&unt=true';
+
+
+
   }
 
   /// Returns the current commit hash of the Flutter repository.
@@ -213,10 +210,69 @@ class SkiaGoldClient extends GoldensClient {
   /// Returns a boolean value to prevent the client from re-authorizing itself
   /// for multiple tests.
   bool _clientIsAuthorized() {
-    final File authFile = _workDirectory?.childFile(super.fs.path.join(
+    final File authFile = _workDirectory?.childFile(fs.path.join(
       'temp',
       'auth_opt.json',
     ));
     return authFile.existsSync();
+  }
+}
+
+class SkiaGoldHttpOverrides extends io.HttpOverrides {
+  @override
+  io.HttpClient createHttpClient(io.SecurityContext context){
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (io.X509Certificate cert, String host, int port)=> true;
+  }
+}
+
+// check digests.size from response, should be 1, then pass digests[0] to constructor
+class SkiaGoldDigest {
+
+  const SkiaGoldDigest({
+    this.imageHash,
+    this.status,
+    this.paramSet,
+  });
+
+  factory SkiaGoldDigest.fromJson(Map<String, dynamic> json) {
+    if (json == null)
+      return null;
+
+    return SkiaGoldDigest(
+      imageHash: json['digest'],
+      status: json['status'],
+      paramSet: json['paramset'],
+    );
+  }
+
+  /// Unique identifier for the image associated with the digest.
+  final String imageHash;
+
+  /// Status of the given digest, e.g. positive or untriaged.
+  final bool status;
+
+  /// Parameter set for the given test, e.g. platform : Windows.
+  final Map<String, String> paramSet;
+}
+
+/// Exception that signals a process' exit with a non-zero exit code.
+class NonZeroExitCode implements Exception {
+  /// Create an exception that represents a non-zero exit code.
+  ///
+  /// The first argument must be non-zero.
+  const NonZeroExitCode(this.exitCode, this.stderr) : assert(exitCode != 0);
+
+  /// The code that the process will signal to the operating system.
+  ///
+  /// By definition, this is not zero.
+  final int exitCode;
+
+  /// The message to show on standard error.
+  final String stderr;
+
+  @override
+  String toString() {
+    return 'Exit code $exitCode: $stderr';
   }
 }
