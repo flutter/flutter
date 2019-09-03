@@ -783,6 +783,15 @@ class Navigator extends StatefulWidget {
   /// then the [Navigator] would push the following routes on startup: `/`,
   /// `/stocks`, `/stocks/HOOLI`. This enables deep linking while allowing the
   /// application to maintain a predictable route history.
+  ///
+  /// If any of the intermediate routes doesn't exist, it'll simply be skipped.
+  /// In the example above, if `/stocks` doesn't have a corresponding route in
+  /// the app, it'll be skipped and only `/` and `/stocks/HOOLI` will be pushed.
+  ///
+  /// That said, the full route has to map to something in the app in order for
+  /// this to work. In our example, `/stocks/HOOLI` has to map to a route in the
+  /// app. Otherwise, [initialRoute] will be ignored and [defaultRouteName] will
+  /// be used instead.
   final String initialRoute;
 
   /// Called to generate a route for a given [RouteSettings].
@@ -1524,18 +1533,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           plannedInitialRoutes.add(_routeNamed<dynamic>(routeName, allowNull: true, arguments: null));
         }
       }
-      if (_shouldAbandonInitialRoute(plannedInitialRoutes)) {
+      if (plannedInitialRoutes.last == null) {
         assert(() {
           FlutterError.reportError(
             FlutterErrorDetails(
               exception:
                 'Could not navigate to initial route.\n'
                 'The requested route name was: "/$initialRouteName"\n'
-                'The following routes were therefore attempted:\n'
-                ' * ${plannedInitialRouteNames.join("\n * ")}\n'
-                'This resulted in the following objects:\n'
-                ' * ${plannedInitialRoutes.join("\n * ")}\n'
-                'One or more of those objects was null, and therefore the initial route specified will be '
+                'There was no corresponding route in the app, and therefore the initial route specified will be '
                 'ignored and "${Navigator.defaultRouteName}" will be used instead.'
             ),
           );
@@ -1599,25 +1604,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   }
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
-
-  bool _shouldAbandonInitialRoute(List<Route<dynamic>> plannedInitialRoutes) {
-    assert(plannedInitialRoutes.isNotEmpty);
-
-    // The last route has to match something in order for it to work.
-    if (plannedInitialRoutes.last == null) {
-      return true;
-    }
-
-    // In web, we don't care if there are gaps in the initial route.
-    // if (kIsWeb) {
-    //   return false;
-    // }
-
-    // Other than web, we check that there's no gaps in the initial route.
-    // return plannedInitialRoutes.contains(null);
-
-    return false;
-  }
 
   Route<T> _routeNamed<T>(String name, { @required Object arguments, bool allowNull = false }) {
     assert(!_debugLocked);
