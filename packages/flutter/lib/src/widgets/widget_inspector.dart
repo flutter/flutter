@@ -60,10 +60,10 @@ class _ProxyLayer extends Layer {
   @protected
   bool findAnnotations<S>(
     AnnotationResult<S> result,
-    Offset regionOffset, {
+    Offset localPosition, {
     @required bool onlyFirst,
   }) {
-    return _layer.findAnnotations(result, regionOffset, onlyFirst: onlyFirst);
+    return _layer.findAnnotations(result, localPosition, onlyFirst: onlyFirst);
   }
 }
 
@@ -2667,7 +2667,7 @@ class _InspectorOverlayLayer extends Layer {
   @protected
   bool findAnnotations<S>(
     AnnotationResult<S> result,
-    Offset regionOffset, {
+    Offset localPosition, {
     bool onlyFirst,
   }) {
     return false;

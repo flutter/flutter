@@ -35,10 +35,15 @@ class AnnotationEntry<T> {
   /// The target location described by the local coordinate space of the layer
   /// that contains the annotation.
   final Offset localPosition;
+
+  @override
+  String toString() {
+    return '$runtimeType(annotation: $annotation, localPostion: $localPosition)';
+  }
 }
 
-/// Information collected about multiple annotations that are found in the layer
-/// tree.
+/// Information collected about a list of annotations that are found in the
+/// layer tree.
 ///
 /// See also:
 ///
