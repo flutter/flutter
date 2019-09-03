@@ -411,7 +411,7 @@ class Text extends StatelessWidget {
   /// ```
   final String semanticsLabel;
 
-  /// Defines how to consider the width of the rendered text.
+  /// Defines how to measure the width of the rendered text.
   final TextWidthBasis textWidthBasis;
 
   @override

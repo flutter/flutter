@@ -79,7 +79,7 @@ class PlaceholderDimensions {
   }
 }
 
-/// The different ways of considering the width of one or more lines of text.
+/// The different ways of measuring the width of one or more lines of text.
 ///
 /// See [Text.textWidthBasis], for example.
 enum TextWidthBasis {
@@ -323,7 +323,7 @@ class TextPainter {
     _needsLayout = true;
   }
 
-  /// Defines how to consider the width of the rendered text.
+  /// Defines how to measure the width of the rendered text.
   TextWidthBasis get textWidthBasis => _textWidthBasis;
   TextWidthBasis _textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {

@@ -374,7 +374,7 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.edtiableText.scrollPhysics}
   final ScrollPhysics scrollPhysics;
 
-  /// Defines how to consider the width of the rendered text.
+  /// Defines how to measure the width of the rendered text.
   final TextWidthBasis textWidthBasis;
 
   @override
