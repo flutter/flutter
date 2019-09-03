@@ -152,9 +152,9 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     );
 
     BorderSide resolveBorderSide(BorderSide side) {
-      if (side == BorderSide.none)
-      return side;
-      return side.copyWith(color: CupertinoDynamicColor.resolve(side.color, context));
+      return side == BorderSide.none
+        ? side
+        : side.copyWith(color: CupertinoDynamicColor.resolve(side.color, context));
     }
 
     // Return the border as is when it's a subclass.
