@@ -411,7 +411,7 @@ class Text extends StatelessWidget {
   /// ```
   final String semanticsLabel;
 
-  /// {@macro flutter.dart:ui.Text.TextWidthBasis}
+  /// Defines how to consider the width of the rendered text.
   final TextWidthBasis textWidthBasis;
 
   @override
