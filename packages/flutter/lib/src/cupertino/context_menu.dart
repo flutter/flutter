@@ -86,8 +86,8 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   static const Color _masklessColor = Color(0xFFFFFFFF);
 
   final GlobalKey _childGlobalKey = GlobalKey();
-  AnimationController _dummyController;
-  Rect _dummyChildEndRect;
+  AnimationController _decoyController;
+  Rect _decoyChildEndRect;
 
   OverlayEntry _lastOverlayEntry;
   double _childOpacity = 1.0;
@@ -96,11 +96,11 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _dummyController = AnimationController(
+    _decoyController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    _dummyController.addStatusListener(_onDummyAnimationStatusChange);
+    _decoyController.addStatusListener(_onDecoyAnimationStatusChange);
   }
 
   // Determine the _ContextMenuOrientation based on the location of the original
@@ -145,7 +145,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       ),
       onTap: widget.onTap,
       contextMenuOrientation: _contextMenuOrientation,
-      previousChildRect: _dummyChildEndRect,
+      previousChildRect: _decoyChildEndRect,
       builder: (BuildContext context) {
         return widget.preview ?? widget.child;
       },
@@ -158,7 +158,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   // original position in this widget.
   OverlayEntry get _overlayEntry {
     final Rect childRect = _getRect(_childGlobalKey);
-    _dummyChildEndRect = Rect.fromCenter(
+    _decoyChildEndRect = Rect.fromCenter(
       center: childRect.center,
       width: childRect.width * _kOpenScale,
       height: childRect.height * _kOpenScale,
@@ -169,17 +169,17 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     return OverlayEntry(
       opaque: false,
       builder: (BuildContext context) {
-        return _DummyChild(
+        return _DecoyChild(
           beginRect: childRect,
           child: widget.child,
-          controller: _dummyController,
-          endRect: _dummyChildEndRect,
+          controller: _decoyController,
+          endRect: _decoyChildEndRect,
         );
       },
     );
   }
 
-  void _onDummyAnimationStatusChange(AnimationStatus animationStatus) {
+  void _onDecoyAnimationStatusChange(AnimationStatus animationStatus) {
     switch (animationStatus) {
       case AnimationStatus.dismissed:
         if (_route == null) {
@@ -208,7 +208,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         Future<void>.delayed(const Duration(milliseconds: 1)).then((_) {
           _lastOverlayEntry?.remove();
           _lastOverlayEntry = null;
-          _dummyController.reset();
+          _decoyController.reset();
         });
         break;
 
@@ -230,20 +230,20 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   }
 
   void _onTap() {
-    if (_dummyController.isAnimating) {
-      _dummyController.reverse();
+    if (_decoyController.isAnimating) {
+      _decoyController.reverse();
     }
   }
 
   void _onTapCancel() {
-    if (_dummyController.isAnimating) {
-      _dummyController.reverse();
+    if (_decoyController.isAnimating) {
+      _decoyController.reverse();
     }
   }
 
   void _onTapUp(TapUpDetails details) {
-    if (_dummyController.isAnimating) {
-      _dummyController.reverse();
+    if (_decoyController.isAnimating) {
+      _decoyController.reverse();
     }
   }
 
@@ -253,7 +253,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     });
     _lastOverlayEntry = _overlayEntry;
     Overlay.of(context).insert(_lastOverlayEntry);
-    _dummyController.forward();
+    _decoyController.forward();
   }
 
   @override
@@ -273,14 +273,14 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
   @override
   void dispose() {
-    _dummyController.dispose();
+    _decoyController.dispose();
     super.dispose();
   }
 }
 
 // A floating copy of the child.
-class _DummyChild extends StatefulWidget {
-  const _DummyChild({
+class _DecoyChild extends StatefulWidget {
+  const _DecoyChild({
     Key key,
     this.beginRect,
     this.child,
@@ -294,10 +294,10 @@ class _DummyChild extends StatefulWidget {
   final Rect endRect;
 
   @override
-  _DummyChildState createState() => _DummyChildState();
+  _DecoyChildState createState() => _DecoyChildState();
 }
 
-class _DummyChildState extends State<_DummyChild> with TickerProviderStateMixin {
+class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin {
   // TODO(justinmc): Replace with real system colors when dark mode is
   // supported for iOS.
   //static const Color _darkModeMaskColor = Color(0xAAFFFFFF);
@@ -604,7 +604,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
         // While the animation is running, render everything in a Stack so that
         // they're movable.
         if (!animation.isCompleted) {
-          // TODO(justinmc): Use _DummyChild here?
+          // TODO(justinmc): Use _DecoyChild here?
           return Stack(
             children: <Widget>[
               Positioned.fromRect(
