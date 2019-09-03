@@ -59,7 +59,7 @@ class _ProxyLayer extends Layer {
   @override
   @protected
   bool findAnnotations<S>(
-    List<S> result,
+    List<AnnotationEntry<S>> result,
     Offset regionOffset, {
     @required bool onlyFirst,
   }) {
@@ -2665,7 +2665,11 @@ class _InspectorOverlayLayer extends Layer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, { bool onlyFirst }) {
+  bool findAnnotations<S>(
+    List<AnnotationEntry<S>> result,
+    Offset regionOffset, {
+    bool onlyFirst,
+  }) {
     return false;
   }
 }

@@ -568,14 +568,18 @@ class _TestAnnotatedLayer extends Layer {
   // [offset] & [size]. If it is hit, it adds [value] to result and returns
   // [opaque]; otherwise it directly returns false.
   @override
-  bool findAnnotations<S>(List<S> result, Offset regionOffset, {bool onlyFirst}) {
+  bool findAnnotations<S>(
+    List<AnnotationEntry<S>> result,
+    Offset regionOffset, {
+    bool onlyFirst,
+  }) {
     if (S != int)
       return false;
     if (size != null && !(offset & size).contains(regionOffset))
       return false;
     final Object untypedValue = value;
     final S typedValue = untypedValue;
-    result.add(typedValue);
+    result.add(AnnotationEntry<S>(annotation: typedValue, localPosition: Offset.zero));
     return opaque;
   }
 }

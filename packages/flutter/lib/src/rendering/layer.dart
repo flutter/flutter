@@ -14,6 +14,21 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
 
+/// TODOC
+@immutable
+class AnnotationEntry<T> {
+  /// TODOC
+  const AnnotationEntry({
+    @required this.annotation,
+    @required this.localPosition,
+  }) : assert(localPosition != null);
+
+  /// TODOC
+  final T annotation;
+  /// TODOC
+  final Offset localPosition;
+}
+
 /// A composited layer.
 ///
 /// During painting, the render tree generates a tree of composited layers that
@@ -230,8 +245,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///  * [findAll], which is similar but returns all annotations found at the
   ///    given position.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  S find<S>(Offset localPosition) {
-    final List<S> result = <S>[];
+  AnnotationEntry<S> find<S>(Offset localPosition) {
+    final List<AnnotationEntry<S>> result = <AnnotationEntry<S>>[];
     findAnnotations<S>(result, localPosition, onlyFirst: true);
     return result.isEmpty ? null : result.first;
   }
@@ -252,8 +267,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///  * [find], which is similar but returns the first annotation found at the
   ///    given position.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  Iterable<S> findAll<S>(Offset localPosition) {
-    final List<S> result = <S>[];
+  Iterable<AnnotationEntry<S>> findAll<S>(Offset localPosition) {
+    final List<AnnotationEntry<S>> result = <AnnotationEntry<S>>[];
     findAnnotations<S>(result, localPosition, onlyFirst: false);
     return result;
   }
@@ -276,7 +291,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// this method to customize behaviors related to annotations.
   @protected
   bool findAnnotations<S>(
-    List<S> result,
+    List<AnnotationEntry<S>> result,
     Offset localPosition, {
     @required bool onlyFirst,
   });
@@ -402,7 +417,7 @@ class PictureLayer extends Layer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<AnnotationEntry<S>> result, Offset localPosition, { @required bool onlyFirst }) {
     return false;
   }
 }
@@ -473,7 +488,7 @@ class TextureLayer extends Layer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<AnnotationEntry<S>> result, Offset localPosition, { @required bool onlyFirst }) {
     return false;
   }
 }
@@ -511,7 +526,7 @@ class PlatformViewLayer extends Layer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<AnnotationEntry<S>> result, Offset localPosition, { @required bool onlyFirst }) {
     return false;
   }
 }
@@ -587,7 +602,7 @@ class PerformanceOverlayLayer extends Layer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<AnnotationEntry<S>> result, Offset localPosition, { @required bool onlyFirst }) {
     return false;
   }
 }
@@ -771,7 +786,7 @@ class ContainerLayer extends Layer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<AnnotationEntry<S>> result, Offset localPosition, { @required bool onlyFirst }) {
     for (Layer child = lastChild; child != null; child = child.previousSibling) {
       final bool isAbsorbed = child.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
       if (isAbsorbed)
@@ -1002,7 +1017,7 @@ class OffsetLayer extends ContainerLayer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<AnnotationEntry<S>> result, Offset localPosition, { @required bool onlyFirst }) {
     return super.findAnnotations<S>(result, localPosition - offset, onlyFirst: onlyFirst);
   }
 
@@ -1126,7 +1141,7 @@ class ClipRectLayer extends ContainerLayer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<AnnotationEntry<S>> result, Offset localPosition, { @required bool onlyFirst }) {
     if (!clipRect.contains(localPosition))
       return false;
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
@@ -1206,7 +1221,7 @@ class ClipRRectLayer extends ContainerLayer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<AnnotationEntry<S>> result, Offset localPosition, { @required bool onlyFirst }) {
     if (!clipRRect.contains(localPosition))
       return false;
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
@@ -1286,7 +1301,7 @@ class ClipPathLayer extends ContainerLayer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<AnnotationEntry<S>> result, Offset localPosition, { @required bool onlyFirst }) {
     if (!clipPath.contains(localPosition))
       return false;
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
@@ -1421,7 +1436,7 @@ class TransformLayer extends OffsetLayer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<AnnotationEntry<S>> result, Offset localPosition, { @required bool onlyFirst }) {
     final Offset transformedOffset = _transformOffset(localPosition);
     if (transformedOffset == null)
       return false;
@@ -1734,7 +1749,7 @@ class PhysicalModelLayer extends ContainerLayer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<AnnotationEntry<S>> result, Offset localPosition, { @required bool onlyFirst }) {
     if (!clipPath.contains(localPosition))
       return false;
     return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
@@ -1864,7 +1879,7 @@ class LeaderLayer extends ContainerLayer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<AnnotationEntry<S>> result, Offset localPosition, { @required bool onlyFirst }) {
     return super.findAnnotations<S>(result, localPosition - offset, onlyFirst: onlyFirst);
   }
 
@@ -1998,7 +2013,7 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<AnnotationEntry<S>> result, Offset localPosition, { @required bool onlyFirst }) {
     if (link.leader == null) {
       if (showWhenUnlinked)
         return super.findAnnotations(result, localPosition - unlinkedOffset, onlyFirst: onlyFirst);
@@ -2217,7 +2232,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// annotation is added and [opaque] is true.
   @override
   @protected
-  bool findAnnotations<S>(List<S> result, Offset localPosition, { @required bool onlyFirst }) {
+  bool findAnnotations<S>(List<AnnotationEntry<S>> result, Offset localPosition, { @required bool onlyFirst }) {
     bool isAbsorbed = super.findAnnotations(result, localPosition, onlyFirst: onlyFirst);
     if (result.isNotEmpty && onlyFirst)
       return isAbsorbed;
@@ -2227,8 +2242,11 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
     if (T == S) {
       isAbsorbed = isAbsorbed || opaque;
       final Object untypedValue = value;
-      final S typedEntry = untypedValue;
-      result.add(typedEntry);
+      final S typedValue = untypedValue;
+      result.add(AnnotationEntry<S>(
+        annotation: typedValue,
+        localPosition: localPosition,
+      ));
     }
     return isAbsorbed;
   }
