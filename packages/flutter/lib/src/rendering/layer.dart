@@ -14,33 +14,58 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
 
-/// TODOC
+/// Information collected for an annotation that is found in the layer tree.
+///
+/// See also:
+///
+///  * [Layer.find], [Layer.findAll], and [Layer.findAnnotations], which create
+///    and use objects of this class.
 @immutable
 class AnnotationEntry<T> {
-  /// TODOC
+  /// Create an entry of found annotation by providing the oject and related
+  /// information.
   const AnnotationEntry({
     @required this.annotation,
     @required this.localPosition,
   }) : assert(localPosition != null);
 
-  /// TODOC
+  /// The annotation object that is found.
   final T annotation;
-  /// TODOC
+
+  /// The target location described by the local coordinate space of the layer
+  /// that contains the annotation.
   final Offset localPosition;
 }
 
-/// TODOC
+/// Information collected about multiple annotations that are found in the layer
+/// tree.
+///
+/// See also:
+///
+///  * [AnnotationEntry], which are members of this class.
+///  * [Layer.findAll], and [Layer.findAnnotations], which create and use an
+///    object of this class.
 class AnnotationResult<T> {
-  /// TODOC
   final List<AnnotationEntry<T>> _entries = <AnnotationEntry<T>>[];
 
-  /// TODOC
+  /// Add a new entry to the end of the result.
+  ///
+  /// Usually, entries should be added in order from most specific to least
+  /// specific, typically during an upward walk of the tree.
   void add(AnnotationEntry<T> entry) => _entries.add(entry);
 
-  /// TODOC
+  /// An unmodifiable list of [AnnotationEntry] objects recorded.
+  ///
+  /// The first entry is the most specific, typically the one at the leaf of
+  /// tree.
   Iterable<AnnotationEntry<T>> get entries => _entries;
 
-  /// TODOC
+  /// An unmodifiable list of annotations recorded.
+  ///
+  /// The first entry is the most specific, typically the one at the leaf of
+  /// tree.
+  ///
+  /// It is similar to [entries] but does not contain other information.
   Iterable<T> get annotations sync* {
     for (AnnotationEntry<T> entry in _entries)
       yield entry.annotation;
