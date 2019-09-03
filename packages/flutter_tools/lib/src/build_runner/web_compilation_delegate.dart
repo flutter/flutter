@@ -57,6 +57,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     _packageUriMapper = PackageUriMapper(
         path.absolute('lib/main.dart'), PackageMap.globalPackagesPath, null, null);
     _packageGraph = core.PackageGraph.forPath(projectDirectory.path);
+
     final core.BuildEnvironment buildEnvironment = core.OverrideableEnvironment(
         core.IOEnvironment(_packageGraph), onLog: (LogRecord record) {
       if (record.level == Level.SEVERE || record.level == Level.SHOUT) {

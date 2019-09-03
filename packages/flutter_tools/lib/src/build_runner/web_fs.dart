@@ -31,6 +31,8 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../platform_plugins.dart';
+import '../plugins.dart';
 import '../project.dart';
 import '../web/chrome.dart';
 
@@ -38,7 +40,7 @@ import '../web/chrome.dart';
 const String kBuildTargetName = 'web';
 
 /// A factory for creating a [Dwds] instance.
-DwdsFactory get dwdsFactpory => context.get<DwdsFactory>() ?? Dwds.start;
+DwdsFactory get dwdsFactory => context.get<DwdsFactory>() ?? Dwds.start;
 
 /// The [BuildDaemonCreator] instance.
 BuildDaemonCreator get buildDaemonCreator => context.get<BuildDaemonCreator>() ?? const BuildDaemonCreator();
@@ -49,10 +51,10 @@ WebFsFactory get webFsFactory => context.get<WebFsFactory>() ?? WebFs.start;
 /// A factory for creating an [HttpMultiServer] instance.
 HttpMultiServerFactory get httpMultiServerFactory => context.get<HttpMultiServerFactory>() ?? HttpMultiServer.bind;
 
-/// A function with the same signature as [HttpMultiServier.bind].
+/// A function with the same signature as [HttpMultiServer.bind].
 typedef HttpMultiServerFactory = Future<HttpServer> Function(dynamic address, int port);
 
-/// A function with the same signatire as [Dwds.start].
+/// A function with the same signature as [Dwds.start].
 typedef DwdsFactory = Future<Dwds> Function({
   @required int applicationPort,
   @required int assetServerPort,
@@ -144,9 +146,11 @@ class WebFs {
     if (!flutterProject.dartTool.existsSync()) {
       flutterProject.dartTool.createSync(recursive: true);
     }
+
+    final bool hasWebPlugins = findPlugins(flutterProject).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     // Start the build daemon and run an initial build.
     final BuildDaemonClient client = await buildDaemonCreator
-      .startBuildDaemon(fs.currentDirectory.path, release: buildInfo.isRelease, profile: buildInfo.isProfile);
+      .startBuildDaemon(fs.currentDirectory.path, release: buildInfo.isRelease, profile: buildInfo.isProfile, hasPlugins: hasWebPlugins);
     client.startBuild();
     // Only provide relevant build results
     final Stream<BuildResult> filteredBuildResults = client.buildResults
@@ -163,7 +167,7 @@ class WebFs {
 
     // Initialize the dwds server.
     final int port = await os.findFreePort();
-    final Dwds dwds = await dwdsFactpory(
+    final Dwds dwds = await dwdsFactory(
       hostname: _kHostName,
       applicationPort: port,
       applicationTarget: kBuildTargetName,
@@ -307,12 +311,13 @@ class BuildDaemonCreator {
   static const String _ignoredLine3 = 'have your dependencies specified fully in your pubspec.yaml';
 
   /// Start a build daemon and register the web targets.
-  Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {bool release = false, bool profile = false }) async {
+  Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {bool release = false, bool profile = false, bool hasPlugins = false}) async {
     try {
       final BuildDaemonClient client = await _connectClient(
         workingDirectory,
         release: release,
         profile: profile,
+        hasPlugins: hasPlugins,
       );
       _registerBuildTargets(client);
       return client;
@@ -339,7 +344,7 @@ class BuildDaemonCreator {
 
   Future<BuildDaemonClient> _connectClient(
     String workingDirectory,
-    { bool release, bool profile }
+    { bool release, bool profile, bool hasPlugins }
   ) {
     final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
     final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
@@ -360,6 +365,7 @@ class BuildDaemonCreator {
         '--define', 'flutter_tools:entrypoint=release=$release',
         '--define', 'flutter_tools:entrypoint=profile=$profile',
         '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
+        '--define', 'flutter_tools:shell=hasPlugins=$hasPlugins',
       ],
       logHandler: (ServerLog serverLog) {
         switch (serverLog.level) {

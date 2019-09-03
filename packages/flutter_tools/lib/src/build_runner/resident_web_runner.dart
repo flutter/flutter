@@ -73,6 +73,7 @@ class ResidentWebRunner extends ResidentRunner {
   WebFs _webFs;
   DebugConnection _debugConnection;
   StreamSubscription<vmservice.Event> _stdOutSub;
+  bool _exited = false;
 
   vmservice.VmService get _vmService => _debugConnection.vmService;
 
@@ -101,9 +102,13 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   Future<void> _cleanup() async {
+    if (_exited) {
+      return;
+    }
     await _debugConnection?.close();
     await _stdOutSub?.cancel();
     await _webFs?.stop();
+    _exited = true;
   }
 
   @override
