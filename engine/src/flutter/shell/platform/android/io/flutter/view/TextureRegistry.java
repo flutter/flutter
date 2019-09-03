@@ -6,6 +6,7 @@ package io.flutter.view;
 
 import android.graphics.SurfaceTexture;
 
+// TODO(mattcarroll): re-evalute docs in this class and add nullability annotations.
 /**
  * Registry of backend textures used with a single {@link FlutterView} instance.
  * Entries may be embedded into the Flutter view using the

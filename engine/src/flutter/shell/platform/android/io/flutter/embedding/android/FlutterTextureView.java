@@ -12,12 +12,9 @@ import android.util.AttributeSet;
 import android.view.Surface;
 import android.view.TextureView;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import io.flutter.Log;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
-import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
+import io.flutter.embedding.engine.renderer.RenderSurface;
 
 /**
  * Paints a Flutter UI on a {@link SurfaceTexture}.
@@ -34,15 +31,13 @@ import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
  * desired, consider using a {@link FlutterView} which provides all of these behaviors and
  * utilizes a {@code FlutterTextureView} internally.
  */
-public class FlutterTextureView extends TextureView implements FlutterRenderer.RenderSurface {
+public class FlutterTextureView extends TextureView implements RenderSurface {
   private static final String TAG = "FlutterTextureView";
 
   private boolean isSurfaceAvailableForRendering = false;
   private boolean isAttachedToFlutterRenderer = false;
   @Nullable
   private FlutterRenderer flutterRenderer;
-  @NonNull
-  private Set<OnFirstFrameRenderedListener> onFirstFrameRenderedListeners = new HashSet<>();
 
   // Connects the {@code SurfaceTexture} beneath this {@code TextureView} with Flutter's native code.
   // Callbacks are received by this Object and then those messages are forwarded to our
@@ -111,6 +106,12 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
     setSurfaceTextureListener(surfaceTextureListener);
   }
 
+  @Nullable
+  @Override
+  public FlutterRenderer getAttachedRenderer() {
+    return flutterRenderer;
+  }
+
   /**
    * Invoked by the owner of this {@code FlutterTextureView} when it wants to begin rendering
    * a Flutter UI to this {@code FlutterTextureView}.
@@ -128,7 +129,7 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
     Log.v(TAG, "Attaching to FlutterRenderer.");
     if (this.flutterRenderer != null) {
       Log.v(TAG, "Already connected to a FlutterRenderer. Detaching from old one and attaching to new one.");
-      this.flutterRenderer.detachFromRenderSurface();
+      this.flutterRenderer.stopRenderingToSurface();
     }
 
     this.flutterRenderer = flutterRenderer;
@@ -171,7 +172,7 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
       throw new IllegalStateException("connectSurfaceToRenderer() should only be called when flutterRenderer and getSurfaceTexture() are non-null.");
     }
 
-    flutterRenderer.surfaceCreated(new Surface(getSurfaceTexture()));
+    flutterRenderer.startRenderingToSurface(new Surface(getSurfaceTexture()));
   }
 
   // FlutterRenderer must be non-null.
@@ -190,34 +191,6 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
       throw new IllegalStateException("disconnectSurfaceFromRenderer() should only be called when flutterRenderer is non-null.");
     }
 
-    flutterRenderer.surfaceDestroyed();
-  }
-
-  /**
-   * Adds the given {@code listener} to this {@code FlutterTextureView}, to be notified upon Flutter's
-   * first rendered frame.
-   */
-  @Override
-  public void addOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
-    onFirstFrameRenderedListeners.add(listener);
-  }
-
-  /**
-   * Removes the given {@code listener}, which was previously added with
-   * {@link #addOnFirstFrameRenderedListener(OnFirstFrameRenderedListener)}.
-   */
-  @Override
-  public void removeOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
-    onFirstFrameRenderedListeners.remove(listener);
-  }
-
-  @Override
-  public void onFirstFrameRendered() {
-    // TODO(mattcarroll): decide where this method should live and what it needs to do.
-    Log.v(TAG, "onFirstFrameRendered()");
-
-    for (OnFirstFrameRenderedListener listener : onFirstFrameRenderedListeners) {
-      listener.onFirstFrameRendered();
-    }
+    flutterRenderer.stopRenderingToSurface();
   }
 }

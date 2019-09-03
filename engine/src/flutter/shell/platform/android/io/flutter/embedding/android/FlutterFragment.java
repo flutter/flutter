@@ -21,7 +21,7 @@ import android.view.ViewGroup;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
-import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
+import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.view.FlutterMain;
 
@@ -567,21 +567,6 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   // implementation for details about why it exists.
   private FlutterActivityAndFragmentDelegate delegate;
 
-  private final OnFirstFrameRenderedListener onFirstFrameRenderedListener = new OnFirstFrameRenderedListener() {
-    @Override
-    public void onFirstFrameRendered() {
-      // Notify our subclasses that the first frame has been rendered.
-      FlutterFragment.this.onFirstFrameRendered();
-
-      // Notify our owning Activity that the first frame has been rendered.
-      FragmentActivity fragmentActivity = getActivity();
-      if (fragmentActivity instanceof OnFirstFrameRenderedListener) {
-        OnFirstFrameRenderedListener activityAsListener = (OnFirstFrameRenderedListener) fragmentActivity;
-        activityAsListener.onFirstFrameRendered();
-      }
-    }
-  };
-
   public FlutterFragment() {
     // Ensure that we at least have an empty Bundle of arguments so that we don't
     // need to continually check for null arguments before grabbing one.
@@ -951,21 +936,40 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   }
 
   /**
-   * Invoked after the {@link FlutterView} within this {@code FlutterFragment} renders its first
-   * frame.
+   * Invoked after the {@link FlutterView} within this {@code FlutterFragment} starts rendering
+   * pixels to the screen.
    * <p>
-   * This method forwards {@code onFirstFrameRendered()} to its attached {@code Activity}, if
-   * the attached {@code Activity} implements {@link OnFirstFrameRenderedListener}.
+   * This method forwards {@code onFlutterUiDisplayed()} to its attached {@code Activity}, if
+   * the attached {@code Activity} implements {@link FlutterUiDisplayListener}.
    * <p>
    * Subclasses that override this method must call through to the {@code super} method.
    * <p>
    * Used by this {@code FlutterFragment}'s {@link FlutterActivityAndFragmentDelegate.Host}
    */
   @Override
-  public void onFirstFrameRendered() {
+  public void onFlutterUiDisplayed() {
     FragmentActivity attachedActivity = getActivity();
-    if (attachedActivity instanceof OnFirstFrameRenderedListener) {
-      ((OnFirstFrameRenderedListener) attachedActivity).onFirstFrameRendered();
+    if (attachedActivity instanceof FlutterUiDisplayListener) {
+      ((FlutterUiDisplayListener) attachedActivity).onFlutterUiDisplayed();
+    }
+  }
+
+  /**
+   * Invoked after the {@link FlutterView} within this {@code FlutterFragment} stops rendering
+   * pixels to the screen.
+   * <p>
+   * This method forwards {@code onFlutterUiNoLongerDisplayed()} to its attached {@code Activity},
+   * if the attached {@code Activity} implements {@link FlutterUiDisplayListener}.
+   * <p>
+   * Subclasses that override this method must call through to the {@code super} method.
+   * <p>
+   * Used by this {@code FlutterFragment}'s {@link FlutterActivityAndFragmentDelegate.Host}
+   */
+  @Override
+  public void onFlutterUiNoLongerDisplayed() {
+    FragmentActivity attachedActivity = getActivity();
+    if (attachedActivity instanceof FlutterUiDisplayListener) {
+      ((FlutterUiDisplayListener) attachedActivity).onFlutterUiNoLongerDisplayed();
     }
   }
 

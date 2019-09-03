@@ -12,18 +12,19 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
+import android.support.annotation.VisibleForTesting;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import java.nio.ByteBuffer;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
 import io.flutter.embedding.engine.dart.PlatformMessageHandler;
-import io.flutter.embedding.engine.renderer.FlutterRenderer;
-import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
+import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
+import io.flutter.embedding.engine.renderer.RenderSurface;
 import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.FlutterCallbackInformation;
@@ -72,13 +73,13 @@ import io.flutter.view.FlutterCallbackInformation;
  * }
  *
  * To provide a visual, interactive surface for Flutter rendering and touch events, register a
- * {@link FlutterRenderer.RenderSurface} with {@link #setRenderSurface(FlutterRenderer.RenderSurface)}
+ * {@link RenderSurface} with {@link #setRenderSurface(RenderSurface)}
  *
  * To receive callbacks for certain events that occur on the native side, register listeners:
  *
  * <ol>
  *   <li>{@link #addEngineLifecycleListener(EngineLifecycleListener)}</li>
- *   <li>{@link #addOnFirstFrameRenderedListener(OnFirstFrameRenderedListener)}</li>
+ *   <li>{@link #addIsDisplayingFlutterUiListener(FlutterUiDisplayListener)}</li>
  * </ol>
  *
  * To facilitate platform messages between Java and Dart running in Flutter, register a handler:
@@ -155,15 +156,13 @@ public class FlutterJNI {
   @Nullable
   private Long nativePlatformViewId;
   @Nullable
-  private FlutterRenderer.RenderSurface renderSurface;
-  @Nullable
   private AccessibilityDelegate accessibilityDelegate;
   @Nullable
   private PlatformMessageHandler platformMessageHandler;
   @NonNull
-  private final Set<EngineLifecycleListener> engineLifecycleListeners = new HashSet<>();
+  private final Set<EngineLifecycleListener> engineLifecycleListeners = new CopyOnWriteArraySet<>();
   @NonNull
-  private final Set<OnFirstFrameRenderedListener> firstFrameListeners = new HashSet<>();
+  private final Set<FlutterUiDisplayListener> flutterUiDisplayListeners = new CopyOnWriteArraySet<>();
   @NonNull
   private final Looper mainLooper; // cached to avoid synchronization on repeat access.
 
@@ -233,58 +232,46 @@ public class FlutterJNI {
 
   //----- Start Render Surface Support -----
   /**
-   * Sets the {@link FlutterRenderer.RenderSurface} delegate for the attached Flutter context.
-   * <p>
-   * Flutter expects a user interface to exist on the platform side (Android), and that interface
-   * is expected to offer some capabilities that Flutter depends upon. The {@link FlutterRenderer.RenderSurface}
-   * interface represents those expectations.
-   * <p>
-   * If an app includes a user interface that renders a Flutter UI then a {@link FlutterRenderer.RenderSurface}
-   * should be set (this is the typical Flutter scenario). If no UI is being rendered, such as a
-   * Flutter app that is running Dart code in the background, then no registration may be necessary.
-   * <p>
-   * If no {@link FlutterRenderer.RenderSurface} is registered, then related messages coming from
-   * Flutter will be dropped (ignored).
+   * Adds a {@link FlutterUiDisplayListener}, which receives a callback when Flutter's
+   * engine notifies {@code FlutterJNI} that Flutter is painting pixels to the {@link Surface} that
+   * was provided to Flutter.
    */
   @UiThread
-  public void setRenderSurface(@Nullable FlutterRenderer.RenderSurface renderSurface) {
+  public void addIsDisplayingFlutterUiListener(@NonNull FlutterUiDisplayListener listener) {
     ensureRunningOnMainThread();
-    this.renderSurface = renderSurface;
+    flutterUiDisplayListeners.add(listener);
   }
 
   /**
-   * Adds a {@link OnFirstFrameRenderedListener}, which receives a callback when Flutter's
-   * engine notifies {@code FlutterJNI} that the first frame of a Flutter UI has been rendered
-   * to the {@link Surface} that was provided to Flutter.
+   * Removes a {@link FlutterUiDisplayListener} that was added with
+   * {@link #addIsDisplayingFlutterUiListener(FlutterUiDisplayListener)}.
    */
   @UiThread
-  public void addOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
+  public void removeIsDisplayingFlutterUiListener(@NonNull FlutterUiDisplayListener listener) {
     ensureRunningOnMainThread();
-    firstFrameListeners.add(listener);
-  }
-
-  /**
-   * Removes a {@link OnFirstFrameRenderedListener} that was added with
-   * {@link #addOnFirstFrameRenderedListener(OnFirstFrameRenderedListener)}.
-   */
-  @UiThread
-  public void removeOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
-    ensureRunningOnMainThread();
-    firstFrameListeners.remove(listener);
+    flutterUiDisplayListeners.remove(listener);
   }
 
   // Called by native to notify first Flutter frame rendered.
   @SuppressWarnings("unused")
+  @VisibleForTesting
   @UiThread
-  private void onFirstFrame() {
+  void onFirstFrame() {
     ensureRunningOnMainThread();
-    if (renderSurface != null) {
-      renderSurface.onFirstFrameRendered();
-    }
-    // TODO(mattcarroll): log dropped messages when in debug mode (https://github.com/flutter/flutter/issues/25391)
 
-    for (OnFirstFrameRenderedListener listener : firstFrameListeners) {
-      listener.onFirstFrameRendered();
+    for (FlutterUiDisplayListener listener : flutterUiDisplayListeners) {
+      listener.onFlutterUiDisplayed();
+    }
+  }
+
+  // TODO(mattcarroll): get native to call this when rendering stops.
+  @VisibleForTesting
+  @UiThread
+  void onRenderingStopped() {
+    ensureRunningOnMainThread();
+
+    for (FlutterUiDisplayListener listener : flutterUiDisplayListeners) {
+      listener.onFlutterUiNoLongerDisplayed();
     }
   }
 
@@ -331,6 +318,7 @@ public class FlutterJNI {
   public void onSurfaceDestroyed() {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
+    onRenderingStopped();
     nativeSurfaceDestroyed(nativePlatformViewId);
   }
 
@@ -431,7 +419,6 @@ public class FlutterJNI {
    * See {@link AccessibilityBridge} for an example of an {@link AccessibilityDelegate} and the
    * surrounding responsibilities.
    */
-  // TODO(mattcarroll): move AccessibilityDelegate definition into FlutterJNI. FlutterJNI should be the basis of dependencies, not the other way round.
   @UiThread
   public void setAccessibilityDelegate(@Nullable AccessibilityDelegate accessibilityDelegate) {
     ensureRunningOnMainThread();
@@ -772,7 +759,7 @@ public class FlutterJNI {
 
   /**
    * Removes the given {@code engineLifecycleListener}, which was previously added using
-   * {@link #addOnFirstFrameRenderedListener(OnFirstFrameRenderedListener)}.
+   * {@link #addIsDisplayingFlutterUiListener(FlutterUiDisplayListener)}.
    */
   @UiThread
   public void removeEngineLifecycleListener(@NonNull EngineLifecycleListener engineLifecycleListener) {

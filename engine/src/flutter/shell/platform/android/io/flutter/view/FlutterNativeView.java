@@ -13,16 +13,9 @@ import io.flutter.app.FlutterPluginRegistry;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
 import io.flutter.embedding.engine.dart.DartExecutor;
-import io.flutter.embedding.engine.renderer.FlutterRenderer;
-import io.flutter.embedding.engine.renderer.FlutterRenderer.RenderSurface;
-import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
+import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.common.*;
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.HashMap;
-import java.util.Map;
-
-import io.flutter.embedding.engine.dart.PlatformMessageHandler;
 
 public class FlutterNativeView implements BinaryMessenger {
     private static final String TAG = "FlutterNativeView";
@@ -34,6 +27,21 @@ public class FlutterNativeView implements BinaryMessenger {
     private final Context mContext;
     private boolean applicationIsRunning;
 
+    private final FlutterUiDisplayListener flutterUiDisplayListener = new FlutterUiDisplayListener() {
+        @Override
+        public void onFlutterUiDisplayed() {
+            if (mFlutterView == null) {
+                return;
+            }
+            mFlutterView.onFirstFrame();
+        }
+
+        @Override
+        public void onFlutterUiNoLongerDisplayed() {
+            // no-op
+        }
+    };
+
     public FlutterNativeView(@NonNull Context context) {
         this(context, false);
     }
@@ -42,7 +50,7 @@ public class FlutterNativeView implements BinaryMessenger {
         mContext = context;
         mPluginRegistry = new FlutterPluginRegistry(this, context);
         mFlutterJNI = new FlutterJNI();
-        mFlutterJNI.setRenderSurface(new RenderSurfaceImpl());
+        mFlutterJNI.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);
         this.dartExecutor = new DartExecutor(mFlutterJNI, context.getAssets());
         mFlutterJNI.addEngineLifecycleListener(new EngineLifecycleListenerImpl());
         attach(this, isBackgroundView);
@@ -58,6 +66,7 @@ public class FlutterNativeView implements BinaryMessenger {
         mPluginRegistry.destroy();
         dartExecutor.onDetachedFromJNI();
         mFlutterView = null;
+        mFlutterJNI.removeIsDisplayingFlutterUiListener(flutterUiDisplayListener);
         mFlutterJNI.detachFromNativeAndReleaseResources();
         applicationIsRunning = false;
     }
@@ -141,48 +150,6 @@ public class FlutterNativeView implements BinaryMessenger {
     private void attach(FlutterNativeView view, boolean isBackgroundView) {
         mFlutterJNI.attachToNative(isBackgroundView);
         dartExecutor.onAttachedToJNI();
-    }
-
-    private final class RenderSurfaceImpl implements RenderSurface {
-        @Override
-        public void attachToRenderer(@NonNull FlutterRenderer renderer) {
-            // Not relevant for v1 embedding.
-        }
-
-        @Override
-        public void detachFromRenderer() {
-            // Not relevant for v1 embedding.
-        }
-
-        // Called by native to update the semantics/accessibility tree.
-        public void updateSemantics(ByteBuffer buffer, String[] strings) {
-            if (mFlutterView == null) {
-                return;
-            }
-            mFlutterView.updateSemantics(buffer, strings);
-        }
-
-        // Called by native to update the custom accessibility actions.
-        public void updateCustomAccessibilityActions(ByteBuffer buffer, String[] strings) {
-            if (mFlutterView == null) {
-                return;
-            }
-            mFlutterView.updateCustomAccessibilityActions(buffer, strings);
-        }
-
-        // Called by native to notify first Flutter frame rendered.
-        public void onFirstFrameRendered() {
-            if (mFlutterView == null) {
-                return;
-            }
-            mFlutterView.onFirstFrame();
-        }
-
-        @Override
-        public void addOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {}
-
-        @Override
-        public void removeOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {}
     }
 
     private final class EngineLifecycleListenerImpl implements EngineLifecycleListener {
