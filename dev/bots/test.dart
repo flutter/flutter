@@ -474,6 +474,7 @@ Future<void> _runWebTests() async {
     // 'test/widgets/',
     // 'test/material/',
   ]);
+  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter_web_plugins'), tests: <String>['test']);
 }
 
 Future<void> _runCoverage() async {
