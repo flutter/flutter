@@ -57,7 +57,7 @@ class ResidentWebRunner extends ResidentRunner {
     @required DebuggingOptions debuggingOptions,
   }) : super(
           <FlutterDevice>[],
-          target: target,
+          target: target ?? fs.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: true,
@@ -158,6 +158,8 @@ class ResidentWebRunner extends ResidentRunner {
       printError(message);
       return 1;
     }
+    final String modeName = debuggingOptions.buildInfo.friendlyModeName;
+    printStatus('Launching ${getDisplayPath(target)} on ${device.name} in $modeName mode...');
     Status buildStatus;
     try {
       buildStatus = logger.startProgress('Building application for the web...', timeout: null);
