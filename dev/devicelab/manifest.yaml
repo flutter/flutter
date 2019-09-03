@@ -627,7 +627,6 @@ tasks:
       Measures the performance of screen transitions in Flutter Gallery on
       Android.
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   flutter_gallery__transition_perf_with_semantics:
