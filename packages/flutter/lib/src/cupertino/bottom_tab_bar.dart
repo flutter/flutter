@@ -12,14 +12,13 @@ import 'theme.dart';
 // Standard iOS 10 tab bar height.
 const double _kTabBarHeight = 50.0;
 
-// TODO(LongCatIsLooong): this needs to be converted to a dynamic color. Its dark
-// variant is Color(0x29000000). Currently CupertinoDynamicColor can't be declared
-// as a const value, but we need to use this value to construct the default value
-// of `CupertinoTabBar.border`.
-const Color _kDefaultTabBarBorderColor = Color(0x4C000000);
-final Color _kDefaultTabBarInactiveColor = CupertinoDynamicColor.withBrightness(
-  color: const Color(0xFF999999),
-  darkColor: const Color(0xFF757575),
+const Color _kDefaultTabBarBorderColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x4C000000),
+  darkColor: Color(0x29000000),
+);
+const Color _kDefaultTabBarInactiveColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFF999999),
+  darkColor: Color(0xFF757575),
 );
 
 /// An iOS-styled bottom navigation tab bar.
@@ -60,7 +59,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.currentIndex = 0,
     this.backgroundColor,
     this.activeColor,
-    this.inactiveColor,
+    this.inactiveColor = _kDefaultTabBarInactiveColor,
     this.iconSize = 30.0,
     this.border = const Border(
       top: BorderSide(
@@ -77,6 +76,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
        assert(currentIndex != null),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
+       assert(inactiveColor != null),
        super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
@@ -113,8 +113,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// The foreground color of the icon and title for the [BottomNavigationBarItem]s
   /// in the unselected state.
   ///
-  /// When set to null the [CupertinoTabBar] uses a [CupertinoDynamicColor] that
-  /// matches the disabled foreground color of the native `UITabBar` component.
+  /// Defaults to a [CupertinoDynamicColor] that matches the disabled foreground
+  /// color of the native `UITabBar` component. Cannot be null.
   final Color inactiveColor;
 
   /// The size of all of the [BottomNavigationBarItem] icons.
@@ -151,10 +151,26 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       context,
     );
 
-    final Color inactive = CupertinoDynamicColor.resolve(inactiveColor ?? _kDefaultTabBarInactiveColor, context);
+    BorderSide resolveBorderSide(BorderSide side) {
+      if (side == BorderSide.none)
+      return side;
+      return side.copyWith(color: CupertinoDynamicColor.resolve(side.color, context));
+    }
+
+    // Return the border as is when it's a subclass.
+    final Border resolvedBorder = border == null || border.runtimeType != Border
+      ? border
+      : Border(
+        top: resolveBorderSide(border.top),
+        left: resolveBorderSide(border.left),
+        bottom: resolveBorderSide(border.bottom),
+        right: resolveBorderSide(border.right),
+      );
+
+    final Color inactive = CupertinoDynamicColor.resolve(inactiveColor, context);
     Widget result = DecoratedBox(
       decoration: BoxDecoration(
-        border: border,
+        border: resolvedBorder,
         color: backgroundColor,
       ),
       child: SizedBox(

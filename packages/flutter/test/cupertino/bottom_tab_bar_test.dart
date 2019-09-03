@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
@@ -69,14 +70,14 @@ void main() {
   });
 
   testWidgets('Active and inactive colors dark mode', (WidgetTester tester) async {
-    final CupertinoDynamicColor dynamicActiveColor = CupertinoDynamicColor.withBrightness(
-      color: const Color(0xFF000000),
-      darkColor: const Color(0xFF000001),
+    const CupertinoDynamicColor dynamicActiveColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFF000000),
+      darkColor: Color(0xFF000001),
     );
 
-    final CupertinoDynamicColor dynamicInactiveColor = CupertinoDynamicColor.withBrightness(
-      color: const Color(0xFF000002),
-      darkColor: const Color(0xFF000003),
+    const CupertinoDynamicColor dynamicInactiveColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFF000002),
+      darkColor: Color(0xFF000003),
     );
 
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
@@ -110,6 +111,16 @@ void main() {
     ));
     expect(actualActive.text.style.color.value, 0xFF000000);
 
+    final RenderDecoratedBox renderDecoratedBox = tester.renderObject(find.descendant(
+      of: find.byType(BackdropFilter),
+      matching: find.byType(DecoratedBox),
+    ));
+
+    // Border color is resolved correctly.
+    final BoxDecoration decoration1 = renderDecoratedBox.decoration;
+    expect(decoration1.border.top.color.value, 0x4C000000);
+
+    // Switch to dark mode.
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
         data: const MediaQueryData(platformBrightness: Brightness.dark),
         child: CupertinoTabBar(
@@ -140,6 +151,10 @@ void main() {
         matching: find.byType(RichText),
     ));
     expect(actualActive.text.style.color.value, 0xFF000001);
+
+    // Border color is resolved correctly.
+    final BoxDecoration decoration2 = renderDecoratedBox.decoration;
+    expect(decoration2.border.top.color.value, 0x29000000);
   });
 
   testWidgets('Tabs respects themes', (WidgetTester tester) async {
