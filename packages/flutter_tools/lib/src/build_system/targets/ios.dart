@@ -20,7 +20,7 @@ abstract class AotAssemblyBase extends Target {
   const AotAssemblyBase();
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
     final String outputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {

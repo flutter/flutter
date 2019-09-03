@@ -36,12 +36,11 @@ class UnpackLinux extends Target {
   List<Target> get dependencies => <Target>[];
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     final String basePath = artifacts.getArtifactPath(Artifact.linuxDesktopPath);
-    for (File input in inputFiles) {
-      if (fs.path.basename(input.path) == 'linux.dart') {
-        continue;
-      }
+    for (File input in fs.directory(basePath)
+        .listSync(recursive: true)
+        .whereType<File>()) {
       final String outputPath = fs.path.join(
         environment.projectDir.path,
         'linux',
