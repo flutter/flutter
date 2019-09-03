@@ -486,7 +486,7 @@ static void InvokePlatformMessageEmptyResponseCallback(JNIEnv* env,
 
 bool RegisterApi(JNIEnv* env) {
   static const JNINativeMethod flutter_jni_methods[] = {
-      // Start of methods from FlutterNativeView
+      // Start of methods from FlutterJNI
       {
           .name = "nativeAttach",
           .signature = "(Lio/flutter/embedding/engine/FlutterJNI;Z)J",

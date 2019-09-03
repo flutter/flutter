@@ -16,7 +16,7 @@ import android.widget.FrameLayout;
 
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
-import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
+import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 
 /**
  * {@code View} that displays a {@link SplashScreen} until a given {@link FlutterView}
@@ -51,12 +51,17 @@ import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
   };
 
   @NonNull
-  private final OnFirstFrameRenderedListener onFirstFrameRenderedListener = new OnFirstFrameRenderedListener() {
+  private final FlutterUiDisplayListener flutterUiDisplayListener = new FlutterUiDisplayListener() {
     @Override
-    public void onFirstFrameRendered() {
+    public void onFlutterUiDisplayed() {
       if (splashScreen != null) {
         transitionToFlutter();
       }
+    }
+
+    @Override
+    public void onFlutterUiNoLongerDisplayed() {
+      // no-op
     }
   };
 
@@ -114,7 +119,7 @@ import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
   ) {
     // If we were displaying a previous FlutterView, remove it.
     if (this.flutterView != null) {
-      this.flutterView.removeOnFirstFrameRenderedListener(onFirstFrameRenderedListener);
+      this.flutterView.removeOnFirstFrameRenderedListener(flutterUiDisplayListener);
       removeView(this.flutterView);
     }
     // If we were displaying a previous splash screen View, remove it.
@@ -136,7 +141,7 @@ import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
         // waiting for the first frame to render. Show a splash UI until that happens.
         splashScreenView = splashScreen.createSplashView(getContext(), splashScreenState);
         addView(this.splashScreenView);
-        flutterView.addOnFirstFrameRenderedListener(onFirstFrameRenderedListener);
+        flutterView.addOnFirstFrameRenderedListener(flutterUiDisplayListener);
       } else if (isSplashScreenTransitionNeededNow()) {
         Log.v(TAG, "Showing an immediate splash transition to Flutter due to previously interrupted transition.");
         splashScreenView = splashScreen.createSplashView(getContext(), splashScreenState);

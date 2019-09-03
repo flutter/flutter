@@ -25,7 +25,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
-import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
+import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.view.FlutterMain;
 
@@ -83,10 +83,15 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
   private boolean isFlutterEngineFromHost;
 
   @NonNull
-  private final OnFirstFrameRenderedListener onFirstFrameRenderedListener = new OnFirstFrameRenderedListener() {
+  private final FlutterUiDisplayListener flutterUiDisplayListener = new FlutterUiDisplayListener() {
     @Override
-    public void onFirstFrameRendered() {
-      host.onFirstFrameRendered();
+    public void onFlutterUiDisplayed() {
+      host.onFlutterUiDisplayed();
+    }
+
+    @Override
+    public void onFlutterUiNoLongerDisplayed() {
+      host.onFlutterUiNoLongerDisplayed();
     }
   };
 
@@ -228,7 +233,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
    * <p>
    * {@code inflater} and {@code container} may be null when invoked from an {@code Activity}.
    * <p>
-   * This method creates a new {@link FlutterView}, adds a {@link OnFirstFrameRenderedListener} to
+   * This method creates a new {@link FlutterView}, adds a {@link FlutterUiDisplayListener} to
    * it, and then returns it.
    */
   @NonNull
@@ -236,7 +241,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
     Log.v(TAG, "Creating FlutterView.");
     ensureAlive();
     flutterView = new FlutterView(host.getActivity(), host.getRenderMode(), host.getTransparencyMode());
-    flutterView.addOnFirstFrameRenderedListener(onFirstFrameRenderedListener);
+    flutterView.addOnFirstFrameRenderedListener(flutterUiDisplayListener);
 
     flutterSplashView = new FlutterSplashView(host.getContext());
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -391,12 +396,12 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
   /**
    * Invoke this from {@code Activity#onDestroy()} or {@code Fragment#onDestroyView()}.
    * <p>
-   * This method removes this delegate's {@link FlutterView}'s {@link OnFirstFrameRenderedListener}.
+   * This method removes this delegate's {@link FlutterView}'s {@link FlutterUiDisplayListener}.
    */
   void onDestroyView() {
     Log.v(TAG, "onDestroyView()");
     ensureAlive();
-    flutterView.removeOnFirstFrameRenderedListener(onFirstFrameRenderedListener);
+    flutterView.removeOnFirstFrameRenderedListener(flutterUiDisplayListener);
   }
 
   /**
@@ -695,9 +700,13 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
     boolean shouldAttachEngineToActivity();
 
     /**
-     * Invoked by this delegate when its {@link FlutterView} has rendered its first Flutter
-     * frame.
+     * Invoked by this delegate when its {@link FlutterView} starts painting pixels.
      */
-    void onFirstFrameRendered();
+    void onFlutterUiDisplayed();
+
+    /**
+     * Invoked by this delegate when its {@link FlutterView} stops painting pixels.
+     */
+    void onFlutterUiNoLongerDisplayed();
   }
 }
