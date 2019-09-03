@@ -22,9 +22,9 @@ void main() {
         i += 1;
       }
 
-      expect(containerLayer.find<int>(const Offset(0.0, 1.0)), 0);
-      expect(containerLayer.find<int>(const Offset(0.0, 101.0)), 1);
-      expect(containerLayer.find<int>(const Offset(0.0, 201.0)), 2);
+      expect(containerLayer.find<int>(const Offset(0.0, 1.0)).annotation, 0);
+      expect(containerLayer.find<int>(const Offset(0.0, 101.0)).annotation, 1);
+      expect(containerLayer.find<int>(const Offset(0.0, 201.0)).annotation, 2);
     });
 
     test('finds a value within the clip in a ClipRectLayer', () {
@@ -41,9 +41,9 @@ void main() {
         i += 1;
       }
 
-      expect(containerLayer.find<int>(const Offset(0.0, 1.0)), 0);
-      expect(containerLayer.find<int>(const Offset(0.0, 101.0)), 1);
-      expect(containerLayer.find<int>(const Offset(0.0, 201.0)), 2);
+      expect(containerLayer.find<int>(const Offset(0.0, 1.0)).annotation, 0);
+      expect(containerLayer.find<int>(const Offset(0.0, 101.0)).annotation, 1);
+      expect(containerLayer.find<int>(const Offset(0.0, 201.0)).annotation, 2);
     });
 
 
@@ -61,9 +61,9 @@ void main() {
         i += 1;
       }
 
-      expect(containerLayer.find<int>(const Offset(5.0, 5.0)), 0);
-      expect(containerLayer.find<int>(const Offset(5.0, 105.0)), 1);
-      expect(containerLayer.find<int>(const Offset(5.0, 205.0)), 2);
+      expect(containerLayer.find<int>(const Offset(5.0, 5.0)).annotation, 0);
+      expect(containerLayer.find<int>(const Offset(5.0, 105.0)).annotation, 1);
+      expect(containerLayer.find<int>(const Offset(5.0, 205.0)).annotation, 2);
     });
 
     test('finds a value under a TransformLayer', () {
@@ -87,11 +87,11 @@ void main() {
         i += 1;
       }
 
-      expect(transformLayer.find<int>(const Offset(0.0, 100.0)), 0);
-      expect(transformLayer.find<int>(const Offset(0.0, 200.0)), 0);
-      expect(transformLayer.find<int>(const Offset(0.0, 270.0)), 1);
-      expect(transformLayer.find<int>(const Offset(0.0, 400.0)), 1);
-      expect(transformLayer.find<int>(const Offset(0.0, 530.0)), 2);
+      expect(transformLayer.find<int>(const Offset(0.0, 100.0)).annotation, 0);
+      expect(transformLayer.find<int>(const Offset(0.0, 200.0)).annotation, 0);
+      expect(transformLayer.find<int>(const Offset(0.0, 270.0)).annotation, 1);
+      expect(transformLayer.find<int>(const Offset(0.0, 400.0)).annotation, 1);
+      expect(transformLayer.find<int>(const Offset(0.0, 530.0)).annotation, 2);
     });
 
     test('looks for child AnnotatedRegions before parents', () {
@@ -101,7 +101,7 @@ void main() {
       parent.append(child);
       layer.append(parent);
 
-      expect(parent.find<int>(Offset.zero), 2);
+      expect(parent.find<int>(Offset.zero).annotation, 2);
     });
 
     test('looks for correct type', () {
@@ -111,7 +111,7 @@ void main() {
       layer.append(child2);
       layer.append(child1);
 
-      expect(layer.find<String>(Offset.zero), 'hello');
+      expect(layer.find<String>(Offset.zero).annotation, 'hello');
     });
 
     test('does not clip Layer.find on an AnnotatedRegion with an unrelated type', () {
@@ -121,7 +121,7 @@ void main() {
       parent.append(child);
       layer.append(parent);
 
-      expect(layer.find<int>(const Offset(100.0, 100.0)), 1);
+      expect(layer.find<int>(const Offset(100.0, 100.0)).annotation, 1);
     });
 
     test('handles non-invertable transforms', () {
@@ -133,7 +133,7 @@ void main() {
 
       parent.transform = Matrix4.diagonal3Values(1.0, 1.0, 1.0);
 
-      expect(parent.find<int>(const Offset(0.0, 0.0)), 1);
+      expect(parent.find<int>(const Offset(0.0, 0.0)).annotation, 1);
     });
   });
   group('$AnnotatedRegion findAll', () {
@@ -151,9 +151,9 @@ void main() {
         i += 1;
       }
 
-      expect(containerLayer.findAll<int>(const Offset(0.0, 1.0)), equals(<int>[0]));
-      expect(containerLayer.findAll<int>(const Offset(0.0, 101.0)),equals(<int>[1]));
-      expect(containerLayer.findAll<int>(const Offset(0.0, 201.0)), equals(<int>[2]));
+      expect(containerLayer.findAll<int>(const Offset(0.0, 1.0)).annotations.toList(), equals(<int>[0]));
+      expect(containerLayer.findAll<int>(const Offset(0.0, 101.0)).annotations.toList(), equals(<int>[1]));
+      expect(containerLayer.findAll<int>(const Offset(0.0, 201.0)).annotations.toList(), equals(<int>[2]));
     });
 
     test('finds a value within the clip in a ClipRectLayer', () {
@@ -170,9 +170,9 @@ void main() {
         i += 1;
       }
 
-      expect(containerLayer.findAll<int>(const Offset(0.0, 1.0)), equals(<int>[0]));
-      expect(containerLayer.findAll<int>(const Offset(0.0, 101.0)), equals(<int>[1]));
-      expect(containerLayer.findAll<int>(const Offset(0.0, 201.0)), equals(<int>[2]));
+      expect(containerLayer.findAll<int>(const Offset(0.0, 1.0)).annotations.toList(), equals(<int>[0]));
+      expect(containerLayer.findAll<int>(const Offset(0.0, 101.0)).annotations.toList(), equals(<int>[1]));
+      expect(containerLayer.findAll<int>(const Offset(0.0, 201.0)).annotations.toList(), equals(<int>[2]));
     });
 
 
@@ -190,9 +190,9 @@ void main() {
         i += 1;
       }
 
-      expect(containerLayer.findAll<int>(const Offset(5.0, 5.0)), equals(<int>[0]));
-      expect(containerLayer.findAll<int>(const Offset(5.0, 105.0)), equals(<int>[1]));
-      expect(containerLayer.findAll<int>(const Offset(5.0, 205.0)), equals(<int>[2]));
+      expect(containerLayer.findAll<int>(const Offset(5.0, 5.0)).annotations.toList(), equals(<int>[0]));
+      expect(containerLayer.findAll<int>(const Offset(5.0, 105.0)).annotations.toList(), equals(<int>[1]));
+      expect(containerLayer.findAll<int>(const Offset(5.0, 205.0)).annotations.toList(), equals(<int>[2]));
     });
 
     test('finds a value under a TransformLayer', () {
@@ -216,11 +216,11 @@ void main() {
         i += 1;
       }
 
-      expect(transformLayer.findAll<int>(const Offset(0.0, 100.0)), equals(<int>[0]));
-      expect(transformLayer.findAll<int>(const Offset(0.0, 200.0)), equals(<int>[0]));
-      expect(transformLayer.findAll<int>(const Offset(0.0, 270.0)), equals(<int>[1]));
-      expect(transformLayer.findAll<int>(const Offset(0.0, 400.0)), equals(<int>[1]));
-      expect(transformLayer.findAll<int>(const Offset(0.0, 530.0)), equals(<int>[2]));
+      expect(transformLayer.findAll<int>(const Offset(0.0, 100.0)).annotations.toList(), equals(<int>[0]));
+      expect(transformLayer.findAll<int>(const Offset(0.0, 200.0)).annotations.toList(), equals(<int>[0]));
+      expect(transformLayer.findAll<int>(const Offset(0.0, 270.0)).annotations.toList(), equals(<int>[1]));
+      expect(transformLayer.findAll<int>(const Offset(0.0, 400.0)).annotations.toList(), equals(<int>[1]));
+      expect(transformLayer.findAll<int>(const Offset(0.0, 530.0)).annotations.toList(), equals(<int>[2]));
     });
 
     test('finds multiple nested, overlapping regions', () {
@@ -237,7 +237,7 @@ void main() {
         parent.append(layer);
       }
 
-      expect(parent.findAll<int>(const Offset(0.0, 0.0)), equals(<int>[3, 1, 2, 0,]));
+      expect(parent.findAll<int>(const Offset(0.0, 0.0)).annotations.toList(), equals(<int>[3, 1, 2, 0,]));
     });
 
     test('looks for child AnnotatedRegions before parents', () {
@@ -251,7 +251,7 @@ void main() {
       parent.append(child3);
       layer.append(parent);
 
-      expect(parent.findAll<int>(Offset.zero), equals(<int>[4, 3, 2, 1]));
+      expect(parent.findAll<int>(Offset.zero).annotations.toList(), equals(<int>[4, 3, 2, 1]));
     });
 
     test('looks for correct type', () {
@@ -261,7 +261,7 @@ void main() {
       layer.append(child2);
       layer.append(child1);
 
-      expect(layer.findAll<String>(Offset.zero), equals(<String>['hello']));
+      expect(layer.findAll<String>(Offset.zero).annotations.toList(), equals(<String>['hello']));
     });
 
     test('does not clip Layer.find on an AnnotatedRegion with an unrelated type', () {
@@ -271,7 +271,7 @@ void main() {
       parent.append(child);
       layer.append(parent);
 
-      expect(layer.findAll<int>(const Offset(100.0, 100.0)), equals(<int>[1]));
+      expect(layer.findAll<int>(const Offset(100.0, 100.0)).annotations.toList(), equals(<int>[1]));
     });
 
     test('handles non-invertable transforms', () {
@@ -279,11 +279,11 @@ void main() {
       final TransformLayer parent = TransformLayer(transform: Matrix4.diagonal3Values(0.0, 1.0, 1.0));
       parent.append(child);
 
-      expect(parent.findAll<int>(const Offset(0.0, 0.0)), equals(<int>[]));
+      expect(parent.findAll<int>(const Offset(0.0, 0.0)).annotations.toList(), equals(<int>[]));
 
       parent.transform = Matrix4.diagonal3Values(1.0, 1.0, 1.0);
 
-      expect(parent.findAll<int>(const Offset(0.0, 0.0)), equals(<int>[1]));
+      expect(parent.findAll<int>(const Offset(0.0, 0.0)).annotations.toList(), equals(<int>[1]));
     });
   });
 }
