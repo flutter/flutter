@@ -121,6 +121,12 @@ class WebFs {
 
   /// Recompile the web application and return whether this was successful.
   Future<bool> recompile() async {
+    // TODO(jonahwilliams): build_daemon is still watching for sources, which means we can
+    // easily miss changes when hot restart is triggered by IDEs. Until we fix this, add a
+    // delay to allow filesystem watches to gather all required source files. This duration
+    // was chosen arbitrarily.
+    // See https://github.com/flutter/flutter/issues/39696
+    await Future<void>.delayed(const Duration(milliseconds: 150));
     _client.startBuild();
     await for (BuildResults results in _client.buildResults) {
       final BuildResult result = results.results.firstWhere((BuildResult result) {
