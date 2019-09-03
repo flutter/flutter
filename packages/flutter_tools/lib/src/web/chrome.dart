@@ -140,7 +140,6 @@ class ChromeLauncher {
         await chrome.chromeConnection.getTabs();
       } catch (e) {
         await chrome.close();
-        print('here');
         throwToolExit(
             'Unable to connect to Chrome debug port: ${chrome.debugPort}\n $e');
       }
