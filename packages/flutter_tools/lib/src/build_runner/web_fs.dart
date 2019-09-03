@@ -290,7 +290,8 @@ class WebFs {
 
         // Handle sdk requests have mangled urls from engine build.
         if (request.url.path.contains('flutter_web_sdk')) {
-          final String sdkPath = request.url.path.split('flutter_web_sdk/').last;
+          // Note: the request is a uri and not a file path, so they always use `/`.
+          final String sdkPath = fs.path.joinAll(request.url.path.split('flutter_web_sdk/').last.split('/'));
           final String webSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
           return Response.ok(fs.file(fs.path.join(webSdkPath, sdkPath)).readAsBytesSync());
         }
