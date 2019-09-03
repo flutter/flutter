@@ -136,6 +136,7 @@ class ParagraphTxt : public Paragraph {
   FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, CenterAlignParagraph);
   FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, JustifyAlignParagraph);
   FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, JustifyRTL);
+  FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, JustifyRTLNewLine);
   FRIEND_TEST(ParagraphTest, DecorationsParagraph);
   FRIEND_TEST(ParagraphTest, ItalicsParagraph);
   FRIEND_TEST(ParagraphTest, ChineseParagraph);
@@ -362,7 +363,7 @@ class ParagraphTxt : public Paragraph {
   // alignment.
   double GetLineXOffset(double line_total_advance,
                         size_t line_number,
-                        size_t line_limit);
+                        bool justify_line);
 
   // Creates and draws the decorations onto the canvas.
   void PaintDecorations(SkCanvas* canvas,
