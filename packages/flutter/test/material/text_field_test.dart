@@ -3391,6 +3391,83 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('TextField loses focus when disabled', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'TextField');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              focusNode: focusNode,
+              autofocus: true,
+              maxLength: 10,
+              enabled: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              focusNode: focusNode,
+              autofocus: true,
+              maxLength: 10,
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets("Disabled TextField can't be traversed to when disabled.", (WidgetTester tester) async {
+    final FocusNode focusNode1 = FocusNode(debugLabel: 'TextField 1');
+    final FocusNode focusNode2 = FocusNode(debugLabel: 'TextField 2');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  focusNode: focusNode1,
+                  autofocus: true,
+                  maxLength: 10,
+                  enabled: true,
+                ),
+                TextField(
+                  focusNode: focusNode2,
+                  maxLength: 10,
+                  enabled: false,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(focusNode1.hasPrimaryFocus, isTrue);
+    expect(focusNode2.hasPrimaryFocus, isFalse);
+
+    expect(focusNode1.nextFocus(), isTrue);
+    await tester.pump();
+
+    expect(focusNode1.hasPrimaryFocus, isTrue);
+    expect(focusNode2.hasPrimaryFocus, isFalse);
+  });
+
   void sendFakeKeyEvent(Map<String, dynamic> data) {
     ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.keyEvent.name,

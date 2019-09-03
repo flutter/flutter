@@ -332,13 +332,81 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('IconButton loses focus when disabled.', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'IconButton');
+    await tester.pumpWidget(
+      wrap(
+        child: IconButton(
+          focusNode: focusNode,
+          autofocus: true,
+          onPressed: () {},
+          icon: const Icon(Icons.link),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await tester.pumpWidget(
+      wrap(
+        child: IconButton(
+          focusNode: focusNode,
+          autofocus: true,
+          onPressed: null,
+          icon: const Icon(Icons.link),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets("Disabled IconButton can't be traversed to when disabled.", (WidgetTester tester) async {
+    final FocusNode focusNode1 = FocusNode(debugLabel: 'IconButton 1');
+    final FocusNode focusNode2 = FocusNode(debugLabel: 'IconButton 2');
+
+    await tester.pumpWidget(
+      wrap(
+        child: Column(
+          children: <Widget>[
+            IconButton(
+              focusNode: focusNode1,
+              autofocus: true,
+              onPressed: () {},
+              icon: const Icon(Icons.link),
+            ),
+            IconButton(
+              focusNode: focusNode2,
+              onPressed: null,
+              icon: const Icon(Icons.link),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(focusNode1.hasPrimaryFocus, isTrue);
+    expect(focusNode2.hasPrimaryFocus, isFalse);
+
+    expect(focusNode1.nextFocus(), isTrue);
+    await tester.pump();
+
+    expect(focusNode1.hasPrimaryFocus, isTrue);
+    expect(focusNode2.hasPrimaryFocus, isFalse);
+  });
 }
 
 Widget wrap({ Widget child }) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: Material(
-      child: Center(child: child),
+  return DefaultFocusTraversal(
+    policy: ReadingOrderTraversalPolicy(),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(child: child),
+      ),
     ),
   );
 }
