@@ -374,7 +374,7 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.edtiableText.scrollPhysics}
   final ScrollPhysics scrollPhysics;
 
-  /// {@macro flutter.dart:ui.text.TextWidthBasis}
+  /// {@macro flutter.dart:ui.Text.TextWidthBasis}
   final TextWidthBasis textWidthBasis;
 
   @override

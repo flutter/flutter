@@ -81,7 +81,7 @@ class PlaceholderDimensions {
 
 /// The different ways of considering the width of one or more lines of text.
 ///
-/// See [Text.widthType].
+/// See [Text.textWidthBasis].
 enum TextWidthBasis {
   /// Multiline text will take up the full width given by the parent. For single
   /// line text, only the minimum amount of width needed to contain the text
@@ -323,7 +323,7 @@ class TextPainter {
     _needsLayout = true;
   }
 
-  /// {@macro flutter.dart:ui.text.TextWidthBasis}
+  /// {@macro flutter.dart:ui.Text.TextWidthBasis}
   TextWidthBasis get textWidthBasis => _textWidthBasis;
   TextWidthBasis _textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
