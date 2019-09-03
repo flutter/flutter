@@ -338,6 +338,25 @@ void main() {
     verify(mockVmService.callServiceExtension('ext.flutter.profileWidgetBuilds',
         args: <String, Object>{'enabled': true})).called(1);
   }));
+
+  test('cleanup of resources is safe to call multiple times', () => testbed.run(() async {
+    _setupMocks();
+    bool debugClosed = false;
+    when(mockDebugConnection.close()).thenAnswer((Invocation invocation) async {
+      if (debugClosed) {
+        throw StateError('debug connection closed twice');
+      }
+      debugClosed = true;
+    });
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+     unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    await residentWebRunner.exit();
+    await residentWebRunner.exit();
+  }));
 }
 
 
