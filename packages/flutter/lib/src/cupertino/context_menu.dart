@@ -41,11 +41,12 @@ class ContextMenu extends StatefulWidget {
   /// Create a context menu.
   ContextMenu({
     Key key,
+    @required this.actions,
     // TODO(justinmc): Use a builder instead of child so that it's easier to
     // make duplicates?
     @required this.child,
-    @required this.actions,
     this.onTap,
+    this.preview,
   }) : assert(actions != null && actions.isNotEmpty),
        assert(child != null),
        super(key: key);
@@ -62,6 +63,16 @@ class ContextMenu extends StatefulWidget {
   /// The callback to call when tapping on the child when the ContextMenu is
   /// open.
   final VoidCallback onTap;
+
+  /// The widget to show when the ContextMenu is open.
+  ///
+  /// If not specified, [child] will be shown.
+  ///
+  /// This can be used to shown an entirely different widget than the preview,
+  /// but it can also show a slight variation of the child. As a simple example,
+  /// the child could be given rounded corners in the preview but have sharp
+  /// corners when in the page.
+  final Widget preview;
 
   @override
   _ContextMenuState createState() => _ContextMenuState();
@@ -136,7 +147,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       contextMenuOrientation: _contextMenuOrientation,
       previousChildRect: _dummyChildEndRect,
       builder: (BuildContext context) {
-        return widget.child;
+        return widget.preview ?? widget.child;
       },
     );
     Navigator.of(context, rootNavigator: true).push<void>(_route);
@@ -255,8 +266,6 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       child: Opacity(
         opacity: _childOpacity,
         key: _childGlobalKey,
-        // TODO(justinmc): Round corners of child? No, I think provide a
-        // parameter where the user can specify the preview widget.
         child: widget.child,
       ),
     );
