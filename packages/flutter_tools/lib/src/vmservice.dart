@@ -106,8 +106,9 @@ class VMService {
     this.wsAddress,
     ReloadSources reloadSources,
     Restart restart,
-    CompileExpression compileExpression,
-  ) {
+    CompileExpression compileExpression, {
+    bool sendPeerNotifications = true,
+  }) {
     _vm = VM._empty(this);
     _peer.listen().catchError(_connectionError.completeError);
 
@@ -139,10 +140,12 @@ class VMService {
         }
       });
 
-      _peer.sendNotification('registerService', <String, String>{
-        'service': 'reloadSources',
-        'alias': 'Flutter Tools',
-      });
+      if (sendPeerNotifications) {
+        _peer.sendNotification('registerService', <String, String>{
+          'service': 'reloadSources',
+          'alias': 'Flutter Tools',
+        });
+      }
     }
 
     if (restart != null) {
@@ -163,10 +166,12 @@ class VMService {
         }
       });
 
-      _peer.sendNotification('registerService', <String, String>{
-        'service': 'hotRestart',
-        'alias': 'Flutter Tools',
-      });
+      if (sendPeerNotifications) {
+        _peer.sendNotification('registerService', <String, String>{
+          'service': 'hotRestart',
+          'alias': 'Flutter Tools',
+        });
+      }
     }
 
     _peer.registerMethod('flutterVersion', (rpc.Parameters params) async {
@@ -177,10 +182,12 @@ class VMService {
       return versionJson;
     });
 
-    _peer.sendNotification('registerService', <String, String>{
-      'service': 'flutterVersion',
-      'alias': 'Flutter Tools',
-    });
+    if (sendPeerNotifications) {
+      _peer.sendNotification('registerService', <String, String>{
+        'service': 'flutterVersion',
+        'alias': 'Flutter Tools',
+      });
+    }
 
     if (compileExpression != null) {
       _peer.registerMethod('compileExpression', (rpc.Parameters params) async {
@@ -214,10 +221,12 @@ class VMService {
         }
       });
 
-      _peer.sendNotification('registerService', <String, String>{
-        'service': 'compileExpression',
-        'alias': 'Flutter Tools',
-      });
+      if (sendPeerNotifications) {
+        _peer.sendNotification('registerService', <String, String>{
+          'service': 'compileExpression',
+          'alias': 'Flutter Tools',
+        });
+      }
     }
   }
 

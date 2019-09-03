@@ -191,7 +191,7 @@ void main() {
         bool done = false;
         final MockPeer mockPeer = MockPeer();
         expect(mockPeer.returnedFromSendRequest, 0);
-        final VMService vmService = VMService(mockPeer, null, null, null, null, null);
+        final VMService vmService = VMService(mockPeer, null, null, null, null, null, sendPeerNotifications: false);
         vmService.getVM().then((void value) { done = true; });
         expect(done, isFalse);
         expect(mockPeer.returnedFromSendRequest, 0);
