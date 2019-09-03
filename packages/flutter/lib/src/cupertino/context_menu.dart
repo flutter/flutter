@@ -694,17 +694,10 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
   // The scale of the child changes as a function of the distance it is dragged.
   static double _getScale(Orientation orientation, double maxDragDistance, double dy) {
-    if (dy <= 0.0) {
-      // Scale much more slowly when dragging in opposite direction of dismiss.
-      final double maxDragDistanceReverse = maxDragDistance * 8;
-      return math.max(
-        _kMinScale,
-        (maxDragDistanceReverse + dy) / maxDragDistanceReverse,
-      );
-    }
+    final dyDirectional = dy <= 0.0 ? dy : -dy;
     return math.max(
       _kMinScale,
-      (maxDragDistance - dy) / maxDragDistance,
+      (maxDragDistance + dyDirectional) / maxDragDistance,
     );
   }
 
