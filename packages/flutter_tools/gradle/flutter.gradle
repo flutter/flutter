@@ -28,7 +28,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath "com.android.tools.build:gradle:3.2.1"
     }
 }
 
@@ -42,6 +42,8 @@ android {
 apply plugin: FlutterPlugin
 
 class FlutterPlugin implements Plugin<Project> {
+    private static final String MAVEN_REPO      = "http://download.flutter.io";
+
     // The platforms that can be passed to the `--Ptarget-platform` flag.
     private static final String PLATFORM_ARM32  = "android-arm";
     private static final String PLATFORM_ARM64  = "android-arm64";
@@ -85,6 +87,7 @@ class FlutterPlugin implements Plugin<Project> {
     // to match.
     static final String FLUTTER_BUILD_PREFIX = "flutterBuild"
 
+    private Project project
     private Map baseJar = [:]
     private File flutterRoot
     private File flutterExecutable
@@ -92,16 +95,18 @@ class FlutterPlugin implements Plugin<Project> {
     private String localEngineSrcPath
     private Properties localProperties
     private File flutterJar
+    private String engineVersion
 
     @Override
     void apply(Project project) {
+        this.project = project
+
         project.extensions.create("flutter", FlutterExtension)
         project.afterEvaluate this.&addFlutterTasks
-
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
         // Configuring split per ABI allows to generate separate APKs for each abi.
         // This is a noop when building a bundle.
-        if (splitPerAbi(project)) {
+        if (shouldSplitPerAbi()) {
             project.android {
                 splits {
                     abi {
@@ -115,14 +120,10 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-        getTargetPlatforms(project).each { targetArch ->
+        getTargetPlatforms().each { targetArch ->
             String abiValue = PLATFORM_ARCH_MAP[targetArch]
             project.android {
-                packagingOptions {
-                    // Prevent the ELF library from getting corrupted.
-                    doNotStrip "*/${abiValue}/libapp.so"
-                }
-                if (splitPerAbi(project)) {
+                if (shouldSplitPerAbi()) {
                     splits {
                         abi {
                             include abiValue
@@ -131,7 +132,6 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-
         // Add custom build types
         project.android.buildTypes {
             profile {
@@ -141,8 +141,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-
-        String flutterRootPath = resolveProperty(project, "flutter.sdk", System.env.FLUTTER_ROOT)
+        String flutterRootPath = resolveProperty("flutter.sdk", System.env.FLUTTER_ROOT)
         if (flutterRootPath == null) {
             throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file or with a FLUTTER_ROOT environment variable.")
         }
@@ -151,12 +150,14 @@ class FlutterPlugin implements Plugin<Project> {
             throw new GradleException("flutter.sdk must point to the Flutter SDK directory")
         }
 
+        engineVersion = Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.version")
+                .toFile().text.trim()
+
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
 
-        if (useLocalEngine(project)) {
-            String engineOutPath = project.property('localEngineOut')
-            File engineOut = project.file(engineOutPath)
+        if (useLocalEngine()) {
+            File engineOut = project.file(project.property('localEngineOut'))
             if (!engineOut.isDirectory()) {
                 throw new GradleException('localEngineOut must point to a local engine build')
             }
@@ -175,45 +176,48 @@ class FlutterPlugin implements Plugin<Project> {
                 })
             }
         } else {
-            String basePlatformArch = getBasePlatform(project)
-            // This is meant to include the compiled classes only, however it will include `libflutter.so` as well.
-            Path baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
-            File debugJar = baseEnginePath.resolve("${basePlatformArch}").resolve("flutter.jar").toFile()
-            baseJar["debug"] = debugJar
-            if (!debugJar.isFile()) {
-                project.exec {
-                    executable flutterExecutable.absolutePath
-                    args "--suppress-analytics"
-                    args "precache"
-                }
-                if (!debugJar.isFile()) {
-                    throw new GradleException("Unable to find flutter.jar in SDK: ${debugJar}")
-                }
-            }
-            baseJar["profile"] = baseEnginePath.resolve("${basePlatformArch}-profile").resolve("flutter.jar").toFile()
-            baseJar["release"] = baseEnginePath.resolve("${basePlatformArch}-release").resolve("flutter.jar").toFile()
+            project.android.buildTypes.each this.&addFlutterDependencies
+            project.android.buildTypes.whenObjectAdded this.&addFlutterDependencies
+        }
+    }
 
-            // Add flutter.jar dependencies to all <buildType>Api configurations, including custom ones
-            // added after applying the Flutter plugin.
-            project.android.buildTypes.each {
-                def buildMode = buildModeFor(it)
-                addApiDependencies(project, it.name, project.files {
-                    baseJar[buildMode]
-                })
+    /**
+     * Adds the dependencies required by the Flutter project.
+     * This includes:
+     *    1. The embedding
+     *    2. libflutter.so
+     */
+    void addFlutterDependencies(buildType) {
+        project.rootProject.allprojects {
+            repositories {
+                maven {
+                    url MAVEN_REPO
+                }
             }
-            project.android.buildTypes.whenObjectAdded {
-                def buildMode = buildModeFor(it)
-                addApiDependencies(project, it.name, project.files {
-                    baseJar[buildMode]
-                })
-            }
+        }
+        String flutterBuildMode = buildModeFor(buildType)
+        // Add the embedding dependency.
+        addApiDependencies(project, buildType.name,
+                "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion")
+
+        List<String> platforms = getTargetPlatforms().collect()
+        // Debug mode includes x86 and x64, which are commonly used in emulators.
+        if (flutterBuildMode == "debug") {
+            platforms.add("android-x86")
+            platforms.add("android-x64")
+        }
+        platforms.each { platform ->
+            String arch = PLATFORM_ARCH_MAP[platform].replace("-", "_")
+            // Add the `libflutter.so` dependency.
+            addApiDependencies(project, buildType.name,
+                    "io.flutter:${arch}_$flutterBuildMode:1.0.0-$engineVersion")
         }
     }
 
     /**
      * Returns the directory where the plugins are built.
      */
-    private File getPluginBuildDir(Project project) {
+    private File getPluginBuildDir() {
         // Module projects specify this flag to include plugins in the same repo as the module project.
         if (project.ext.has("pluginBuildDir")) {
             return project.ext.get("pluginBuildDir")
@@ -221,13 +225,75 @@ class FlutterPlugin implements Plugin<Project> {
         return project.buildDir
     }
 
-    private Properties getPluginList(Project project) {
+    /**
+     * Configures the Flutter plugin dependencies.
+     *
+     * The plugins are added to pubspec.yaml. Then, upon running `flutter pub get`,
+     * the tool generates a `.flutter-plugins` file, which contains a 1:1 map to each plugin location.
+     * Finally, the project's `settings.gradle` loads each plugin's android directory as a subproject.
+     */
+    private void configurePlugins() {
+        if (!buildPluginAsAar()) {
+            getPluginList().each this.&configurePlugin
+            return
+        }
+        addPluginTasks()
+        List<String> tasksToExecute = project.gradle.startParameter.taskNames
+        Set buildTypes = getBuildTypesForTasks(tasksToExecute)
+        if (tasksToExecute.contains("clean")) {
+            // Because the plugins are built during configuration, the task "clean"
+            // cannot run in conjunction with an assembly task.
+            if (!buildTypes.empty) {
+                throw new GradleException("Can't run the clean task along with other assemble tasks")
+            }
+        }
+        // Build plugins when a task "assembly*" will be called later.
+        if (!buildTypes.empty) {
+            // Build the plugin during configuration.
+            // This is required when Jetifier is enabled, otherwise the implementation dependency
+            // cannot be added.
+            buildAarPlugins(buildTypes)
+        }
+    }
+
+    private void configurePlugin(String name, String _) {
+        Project pluginProject = project.rootProject.findProject(":$name")
+        if (pluginProject == null) {
+            project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
+            return
+        }
+        // Add plugin dependency to the app project.
+        project.dependencies {
+            if (project.getConfigurations().findByName("implementation")) {
+                implementation pluginProject
+            } else {
+                compile pluginProject
+            }
+        }
+        Closure addEmbeddingCompileOnlyDependency = { buildType ->
+            String flutterBuildMode = buildModeFor(buildType)
+            // Add the embedding as a compile only dependency to the plugin.
+            addFlutterJarCompileOnlyDependency(pluginProject, buildType.name,
+                    flutterJar ?: "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion")
+        }
+        pluginProject.afterEvaluate {
+            pluginProject.android.buildTypes {
+                profile {
+                    initWith debug
+                }
+            }
+            pluginProject.android.buildTypes.each addEmbeddingCompileOnlyDependency
+            pluginProject.android.buildTypes.whenObjectAdded addEmbeddingCompileOnlyDependency
+        }
+    }
+
+    private Properties getPluginList() {
         File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
         return readPropertiesIfExist(pluginsFile)
     }
 
-    private void addPluginTasks(Project project) {
-        Properties plugins = getPluginList(project)
+    private void addPluginTasks() {
+        Properties plugins = getPluginList()
         project.android.buildTypes.each { buildType ->
             plugins.each { name, path ->
                 String buildModeValue = buildType.debuggable ? "debug" : "release"
@@ -240,17 +306,17 @@ class FlutterPlugin implements Plugin<Project> {
                     project.tasks.create(name: taskName, type: FlutterPluginTask) {
                         flutterExecutable this.flutterExecutable
                         buildMode buildModeValue
-                        verbose isVerbose(project)
+                        verbose isVerbose()
                         pluginDir project.file(path)
                         sourceDir project.file(project.flutter.source)
-                        intermediateDir getPluginBuildDir(project)
+                        intermediateDir getPluginBuildDir()
                     }
                 }
             }
         }
     }
 
-    private void buildPlugins(Project project, Set buildTypes) {
+    private void buildAarPlugins(Set buildTypes) {
         List<Project> projects = [project]
         // Module projects set the `hostProjects` extra property in `include_flutter.groovy`.
         // This is required to set the local repository in each host app project.
@@ -260,7 +326,7 @@ class FlutterPlugin implements Plugin<Project> {
         projects.each { hostProject ->
             hostProject.repositories {
                 maven {
-                    url "${getPluginBuildDir(project)}/outputs/repo"
+                    url "${getPluginBuildDir()}/outputs/repo"
                 }
             }
         }
@@ -295,7 +361,7 @@ class FlutterPlugin implements Plugin<Project> {
      * Returns a set with the build type names that apply to the given list of tasks
      * required to configure the plugin dependencies.
      */
-    private Set getBuildTypesForTasks(Project project, List<String> tasksToExecute) {
+    private Set getBuildTypesForTasks(List<String> tasksToExecute) {
         Set buildTypes = []
         tasksToExecute.each { task ->
             project.android.buildTypes.each { buildType ->
@@ -320,7 +386,7 @@ class FlutterPlugin implements Plugin<Project> {
         return "${parts[0]}${parts[1..-1].collect { it.capitalize() }.join('')}"
     }
 
-    private String resolveProperty(Project project, String name, String defaultValue) {
+    private String resolveProperty(String name, String defaultValue) {
         if (localProperties == null) {
             localProperties = readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
         }
@@ -345,7 +411,7 @@ class FlutterPlugin implements Plugin<Project> {
         return result
     }
 
-    private static List<String> getTargetPlatforms(Project project) {
+    private List<String> getTargetPlatforms() {
         if (!project.hasProperty('target-platform')) {
             return DEFAULT_PLATFORMS
         }
@@ -357,18 +423,18 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    private static Boolean splitPerAbi(Project project) {
+    private Boolean shouldSplitPerAbi() {
         if (project.hasProperty('split-per-abi')) {
             return project.property('split-per-abi').toBoolean()
         }
         return false;
     }
 
-    private static Boolean useLocalEngine(Project project) {
+    private Boolean useLocalEngine() {
         return project.hasProperty('localEngineOut')
     }
 
-    private static Boolean isVerbose(Project project) {
+    private Boolean isVerbose() {
         if (project.hasProperty('verbose')) {
             return project.property('verbose').toBoolean()
         }
@@ -379,20 +445,7 @@ class FlutterPlugin implements Plugin<Project> {
         return System.getProperty('build-plugins-as-aars') == 'true'
     }
 
-    /**
-     * Returns the platform that is used to extract the `libflutter.so` and the .class files.
-     *
-     * Note: This is only needed to add the .class files.
-     * Unfortunately, the engine artifacts include the .class and libflutter.so files.
-     */
-    private static String getBasePlatform(Project project) {
-        if (PLATFORM_ARM64 in getTargetPlatforms(project)) {
-            return PLATFORM_ARM64;
-        }
-        return PLATFORM_ARM32;
-    }
-
-    private void addFlutterJarCompileOnlyDependency(Project project, String variantName, FileCollection files) {
+    private void addFlutterJarCompileOnlyDependency(Project project, String variantName, Object dependency) {
         if (project.state.failure) {
             return
         }
@@ -402,7 +455,7 @@ class FlutterPlugin implements Plugin<Project> {
         } else {
             configuration = "${variantName}Provided";
         }
-        project.dependencies.add(configuration, files)
+        project.dependencies.add(configuration, dependency)
     }
 
     private static void addApiDependencies(Project project, String variantName, Object dependency, Closure config = null) {
@@ -455,7 +508,6 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('target')) {
             target = project.property('target')
         }
-
         String[] fileSystemRootsValue = null
         if (project.hasProperty('filesystem-roots')) {
             fileSystemRootsValue = project.property('filesystem-roots').split('\\|')
@@ -492,10 +544,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('extra-gen-snapshot-options')) {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
-
-        def targetPlatforms = getTargetPlatforms(project)
+        def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
-            if (splitPerAbi(project)) {
+            if (shouldSplitPerAbi()) {
                 variant.outputs.each { output ->
                     // Assigns the new version code to versionCodeOverride, which changes the version code
                     // for only the output APK, not for the variant itself. Skipping this step simply
@@ -508,31 +559,17 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-
-            String flutterBuildMode = buildModeFor(variant.buildType)
-            if (flutterBuildMode == 'debug' && project.tasks.findByName("${FLUTTER_BUILD_PREFIX}X86Jar")) {
-                Task task = project.tasks.findByName("compile${variant.name.capitalize()}JavaWithJavac")
-                if (task) {
-                    task.dependsOn project.flutterBuildX86Jar
-                }
-                task = project.tasks.findByName("compile${variant.name.capitalize()}Kotlin")
-                if (task) {
-                    task.dependsOn project.flutterBuildX86Jar
-                }
-            }
-
             def compileTasks = targetPlatforms.collect { targetArch ->
-                String abiValue = PLATFORM_ARCH_MAP[targetArch]
                 String taskName = toCammelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name, targetArch.replace('android-', '')])
-                FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
+                project.tasks.create(name: taskName, type: FlutterTask) {
                     flutterRoot this.flutterRoot
                     flutterExecutable this.flutterExecutable
-                    buildMode flutterBuildMode
+                    buildMode buildModeFor(variant.buildType)
                     localEngine this.localEngine
                     localEngineSrcPath this.localEngineSrcPath
-                    abi abiValue
+                    abi PLATFORM_ARCH_MAP[targetArch]
                     targetPath target
-                    verbose isVerbose(project)
+                    verbose isVerbose()
                     fileSystemRoots fileSystemRootsValue
                     fileSystemScheme fileSystemSchemeValue
                     trackWidgetCreation trackWidgetCreationValue
@@ -547,51 +584,24 @@ class FlutterPlugin implements Plugin<Project> {
                     extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 }
             }
-
             def libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
-            def libFlutterPlatforms = targetPlatforms.collect()
-            // x86/x86_64 native library used for debugging only, for now.
-            if (flutterBuildMode == 'debug') {
-                libFlutterPlatforms.add('android-x86')
-                libFlutterPlatforms.add('android-x64')
-            }
-            Task packFlutterSnapshotsAndLibsTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
+            Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name
-                libFlutterPlatforms.each { targetArch ->
-                    // This check prevents including `libflutter.so` twice, since it's included in the base platform jar.
-                    // Unfortunately, the `pickFirst` setting in `packagingOptions` does not work when the project `:flutter`
-                    // is included as an implementation dependency, which causes duplicated `libflutter.so`.
-                    if (getBasePlatform(project) == targetArch) {
-                        return
-                    }
-                    // Don't include `libflutter.so` for other architectures when a local engine is specified.
-                    if (useLocalEngine(project)) {
-                        return
-                    }
-                    def engineArtifactSubdir = getEngineArtifactDirName(variant.buildType, targetArch);
-                    // Include `libflutter.so`.
-                    // TODO(blasten): The libs should be outside `flutter.jar` when the artifacts are downloaded.
-                    from(project.zipTree("${flutterRoot}/bin/cache/artifacts/engine/${engineArtifactSubdir}/flutter.jar")) {
-                        include 'lib/**'
-                    }
-                }
                 dependsOn compileTasks
-                // Add the ELF library.
                 compileTasks.each { compileTask ->
                     from(compileTask.intermediateDir) {
                         include '*.so'
+                        // Move `app.so` to `lib/<abi>/libapp.so`
                         rename { String filename ->
                             return "lib/${compileTask.abi}/lib${filename}"
                         }
                     }
                 }
             }
-            // Include the snapshots and libflutter.so in `lib/`.
             addApiDependencies(project, variant.name, project.files {
-                packFlutterSnapshotsAndLibsTask
+                packFlutterAppAotTask
             })
-
             // We know that the flutter app is a subproject in another Android app when these tasks exist.
             Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
             Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
@@ -618,57 +628,7 @@ class FlutterPlugin implements Plugin<Project> {
         } else {
             project.android.libraryVariants.all addFlutterDeps
         }
-
-        if (buildPluginAsAar()) {
-            addPluginTasks(project)
-
-            List<String> tasksToExecute = project.gradle.startParameter.taskNames
-            Set buildTypes = getBuildTypesForTasks(project, tasksToExecute)
-            if (tasksToExecute.contains("clean")) {
-                // Because the plugins are built during configuration, the task "clean"
-                // cannot run in conjunction with an assembly task.
-                if (!buildTypes.empty) {
-                    throw new GradleException("Can't run the clean task along with other assemble tasks")
-                }
-            }
-            // Build plugins when a task "assembly*" will be called later.
-            if (!buildTypes.empty) {
-                // Build the plugin during configuration.
-                // This is required when Jetifier is enabled, otherwise the implementation dependency
-                // cannot be added.
-                buildPlugins(project, buildTypes)
-            }
-        } else {
-            getPluginList(project).each { name, _ ->
-                def pluginProject = project.rootProject.findProject(":$name")
-                if (pluginProject != null) {
-                    project.dependencies {
-                        if (project.getConfigurations().findByName("implementation")) {
-                            implementation pluginProject
-                        } else {
-                            compile pluginProject
-                        }
-                    }
-                    pluginProject.afterEvaluate {
-                        pluginProject.android.buildTypes {
-                            profile {
-                                initWith debug
-                            }
-                        }
-                        pluginProject.android.buildTypes.each {
-                            def buildMode = buildModeFor(it)
-                            addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))
-                        }
-                        pluginProject.android.buildTypes.whenObjectAdded {
-                            def buildMode = buildModeFor(it)
-                            addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))
-                        }
-                    }
-                } else {
-                    project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
-                }
-            }
-        }
+        configurePlugins()
     }
 }
 
