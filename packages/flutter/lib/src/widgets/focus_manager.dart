@@ -391,7 +391,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   set skipTraversal(bool value) {
     if (value != _skipTraversal) {
       _skipTraversal = value;
-      _notify();
+      _manager?._dirtyNodes?.add(this);
+      _manager?._markNeedsUpdate();
     }
   }
 
@@ -423,7 +424,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       if (!_canRequestFocus) {
         unfocus();
       }
-      _notify();
+      _manager?._dirtyNodes?.add(this);
+      _manager?._markNeedsUpdate();
     }
   }
 

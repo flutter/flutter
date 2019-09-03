@@ -25,9 +25,11 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
+import '../dart/package_map.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../web/chrome.dart';
@@ -138,6 +140,10 @@ class WebFs {
     @required FlutterProject flutterProject,
     @required BuildInfo buildInfo
   }) async {
+    // workaround for https://github.com/flutter/flutter/issues/38290
+    if (!flutterProject.dartTool.existsSync()) {
+      flutterProject.dartTool.createSync(recursive: true);
+    }
     // Start the build daemon and run an initial build.
     final BuildDaemonClient client = await buildDaemonCreator
       .startBuildDaemon(fs.currentDirectory.path, release: buildInfo.isRelease, profile: buildInfo.isProfile);
@@ -178,6 +184,8 @@ class WebFs {
     final Map<String, String> mappedUrls = <String, String>{
       'main.dart.js': 'packages/${flutterProject.manifest.appName}/'
         '${targetBaseName}_web_entrypoint.dart.js',
+      '${targetBaseName}_web_entrypoint.dart.js.map': 'packages/${flutterProject.manifest.appName}/'
+        '${targetBaseName}_web_entrypoint.dart.js.map',
       '${targetBaseName}_web_entrypoint.dart.bootstrap.js': 'packages/${flutterProject.manifest.appName}/'
         '${targetBaseName}_web_entrypoint.dart.bootstrap.js',
       '${targetBaseName}_web_entrypoint.digests': 'packages/${flutterProject.manifest.appName}/'
@@ -206,7 +214,7 @@ class WebFs {
       .addHandler(dwds.handler);
     Cascade cascade = Cascade();
     cascade = cascade.add(handler);
-    cascade = cascade.add(_assetHandler);
+    cascade = cascade.add(_assetHandler(flutterProject));
     final HttpServer server = await httpMultiServerFactory(_kHostName, port);
     shelf_io.serveRequests(server, cascade.handler);
     final Chrome chrome = await chromeLauncher.launch('http://$_kHostName:$port/');
@@ -218,52 +226,85 @@ class WebFs {
     );
   }
 
-  static Future<Response> _assetHandler(Request request) async {
-    if (request.url.path.contains('stack_trace_mapper')) {
-      final File file = fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-        'lib',
-        'dev_compiler',
-        'web',
-        'dart_stack_trace_mapper.js'
-      ));
-      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': 'text/javascript',
-      });
-    } else if (request.url.path.contains('require.js')) {
-      final File file = fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-        'lib',
-        'dev_compiler',
-        'kernel',
-        'amd',
-        'require.js'
-      ));
-      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': 'text/javascript',
-      });
-    } else if (request.url.path.contains('dart_sdk')) {
-      final File file = fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.flutterWebSdk),
-        'kernel',
-        'amd',
-        'dart_sdk.js',
-      ));
-      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': 'text/javascript',
-      });
-    } else if (request.url.path.contains('assets')) {
-      final String assetPath = request.url.path.replaceFirst('assets/', '');
-      final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));
-      return Response.ok(file.readAsBytesSync());
-    }
-    return Response.notFound('');
+  static Future<Response> Function(Request request) _assetHandler(FlutterProject flutterProject) {
+    final PackageMap packageMap = PackageMap(PackageMap.globalPackagesPath);
+    return (Request request) async {
+      if (request.url.path.contains('stack_trace_mapper')) {
+        final File file = fs.file(fs.path.join(
+          artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+          'lib',
+          'dev_compiler',
+          'web',
+          'dart_stack_trace_mapper.js'
+        ));
+        return Response.ok(file.readAsBytesSync(), headers: <String, String>{
+          'Content-Type': 'text/javascript',
+        });
+      } else if (request.url.path.contains('require.js')) {
+        final File file = fs.file(fs.path.join(
+          artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+          'lib',
+          'dev_compiler',
+          'kernel',
+          'amd',
+          'require.js'
+        ));
+        return Response.ok(file.readAsBytesSync(), headers: <String, String>{
+          'Content-Type': 'text/javascript',
+        });
+      } else if (request.url.path.contains('dart_sdk')) {
+        final File file = fs.file(fs.path.join(
+          artifacts.getArtifactPath(Artifact.flutterWebSdk),
+          'kernel',
+          'amd',
+          'dart_sdk.js',
+        ));
+        return Response.ok(file.readAsBytesSync(), headers: <String, String>{
+          'Content-Type': 'text/javascript',
+        });
+      } else if (request.url.path.endsWith('.dart')) {
+        // This is likely a sourcemap request. The first segment is the
+        // package name, and the rest is the path to the file relative to
+        // the package uri. For example, `foo/bar.dart` would represent a
+        // file at a path like `foo/lib/bar.dart`. If there is no leading
+        // segment, then we assume it is from the current package.
+        final String packageName = request.url.pathSegments.length == 1
+          ? flutterProject.manifest.appName
+          : request.url.pathSegments.first;
+        String filePath = fs.path.joinAll(request.url.pathSegments.length == 1
+          ? request.url.pathSegments
+          : request.url.pathSegments.skip(1));
+        String packagePath = packageMap.map[packageName]?.toFilePath(windows: platform.isWindows);
+        // If the package isn't found, then we have an issue with relative
+        // paths within the main project.
+        if (packagePath == null) {
+          packagePath = packageMap.map[flutterProject.manifest.appName]
+            .toFilePath(windows: platform.isWindows);
+          filePath = request.url.path;
+        }
+        final File file = fs.file(fs.path.join(packagePath, filePath));
+        if (file.existsSync()) {
+          return Response.ok(file.readAsBytesSync());
+        }
+        return Response.notFound('');
+      } else if (request.url.path.contains('assets')) {
+        final String assetPath = request.url.path.replaceFirst('assets/', '');
+        final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));
+        return Response.ok(file.readAsBytesSync());
+      }
+      return Response.notFound('');
+    };
   }
 }
 
 /// A testable interface for starting a build daemon.
 class BuildDaemonCreator {
   const BuildDaemonCreator();
+
+  // TODO(jonahwilliams): find a way to get build checks working for flutter for web.
+  static const String _ignoredLine1 = 'Warning: Interpreting this as package URI';
+  static const String _ignoredLine2 = 'build_script.dart was not found in the asset graph, incremental builds will not work';
+  static const String _ignoredLine3 = 'have your dependencies specified fully in your pubspec.yaml';
 
   /// Start a build daemon and register the web targets.
   Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {bool release = false, bool profile = false }) async {
@@ -321,7 +362,26 @@ class BuildDaemonCreator {
         '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
       ],
       logHandler: (ServerLog serverLog) {
-        printTrace(serverLog.message);
+        switch (serverLog.level) {
+          case Level.SEVERE:
+          case Level.SHOUT:
+            // Ignore certain non-actionable messages on startup.
+            if (serverLog.message.contains(_ignoredLine1) ||
+                serverLog.message.contains(_ignoredLine2) ||
+                serverLog.message.contains(_ignoredLine3)) {
+              return;
+            }
+            printError(serverLog.message);
+            if (serverLog.error != null) {
+              printError(serverLog.error);
+            }
+            if (serverLog.stackTrace != null) {
+              printTrace(serverLog.stackTrace);
+            }
+            break;
+          default:
+            printTrace(serverLog.message);
+        }
       },
       buildMode: daemon.BuildMode.Manual,
     );

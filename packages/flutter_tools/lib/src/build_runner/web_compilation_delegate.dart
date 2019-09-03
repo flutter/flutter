@@ -22,6 +22,7 @@ import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../build_info.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
@@ -41,7 +42,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   Future<bool> initialize({
     Directory projectDirectory,
     String testOutputDir,
-    bool release = false,
+    BuildMode mode,
   }) async {
     // Create the .dart_tool directory if it doesn't exist.
     projectDirectory.childDirectory('.dart_tool').createSync();
@@ -92,7 +93,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       result = await _runBuilder(
         buildEnvironment,
         buildOptions,
-        release,
+        mode,
         buildDirs,
       );
       return result.status == core.BuildStatus.success;
@@ -101,7 +102,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       result = await _runBuilder(
         buildEnvironment,
         buildOptions,
-        release,
+        mode,
         buildDirs,
       );
       return result.status == core.BuildStatus.success;
@@ -110,7 +111,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       result = await _runBuilder(
         buildEnvironment,
         buildOptions,
-        release,
+        mode,
         buildDirs,
       );
       return result.status == core.BuildStatus.success;
@@ -135,7 +136,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     return result.status == core.BuildStatus.success;
   }
 
-  Future<core.BuildResult> _runBuilder(core.BuildEnvironment buildEnvironment, BuildOptions buildOptions, bool release, Set<core.BuildDirectory> buildDirs) async {
+  Future<core.BuildResult> _runBuilder(core.BuildEnvironment buildEnvironment, BuildOptions buildOptions, BuildMode buildMode, Set<core.BuildDirectory> buildDirs) async {
     _builder = await BuildImpl.create(
       buildOptions,
       buildEnvironment,
@@ -145,11 +146,13 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
           'flutterWebSdk': artifacts.getArtifactPath(Artifact.flutterWebSdk),
         },
         'flutter_tools:entrypoint': <String, dynamic>{
-          'release': release,
+          'release': buildMode == BuildMode.release,
           'flutterWebSdk': artifacts.getArtifactPath(Artifact.flutterWebSdk),
+          'profile': buildMode == BuildMode.profile,
         },
         'flutter_tools:test_entrypoint': <String, dynamic>{
-          'release': release,
+          'release': buildMode == BuildMode.release,
+          'profile': buildMode == BuildMode.profile,
         },
       },
       isReleaseBuild: false,

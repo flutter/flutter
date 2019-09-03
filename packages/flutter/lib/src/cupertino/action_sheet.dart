@@ -42,9 +42,9 @@ const BoxDecoration _kAlertBlurOverlayDecoration = BoxDecoration(
 
 // Color of the overlay.
 // Extracted from https://developer.apple.com/design/resources/.
-final Color _kAlertBlurOverlayColor = CupertinoDynamicColor.withBrightness(
-  color: const Color(0x66000000),
-  darkColor: const Color(0x99000000),
+const Color _kAlertBlurOverlayColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x66000000),
+  darkColor: Color(0x99000000),
 );
 
 // Translucent, very light gray that is painted on top of the blurred backdrop
@@ -52,22 +52,22 @@ final Color _kAlertBlurOverlayColor = CupertinoDynamicColor.withBrightness(
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/39272. Use
 // System Materials once we have them.
 // Extracted from https://developer.apple.com/design/resources/.
-final Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
-  color: const Color(0xC7F9F9F9),
-  darkColor: const Color(0xC7252525),
+const Color _kBackgroundColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xC7F9F9F9),
+  darkColor: Color(0xC7252525),
 );
 
 // Translucent, light gray that is painted on top of the blurred backdrop as
 // the background color of a pressed button.
 // Eye-balled from iOS 13 beta simulator.
-final Color _kPressedColor = CupertinoDynamicColor.withBrightness(
-  color: const Color(0xFFE1E1E1),
-  darkColor: const Color(0xFF2E2E2E),
+const Color _kPressedColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFE1E1E1),
+  darkColor: Color(0xFF2E2E2E),
 );
 
-final Color _kCancelPressedColor = CupertinoDynamicColor.withBrightness(
-  color: const Color(0xFFECECEC),
-  darkColor: const Color(0xFF49494B),
+const Color _kCancelPressedColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFECECEC),
+  darkColor: Color(0xFF49494B),
 );
 
 // The gray color used for text that appears in the title area.

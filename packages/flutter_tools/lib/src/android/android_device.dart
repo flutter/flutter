@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
-import '../android/apk.dart';
 import '../application_package.dart';
 import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
@@ -448,7 +448,6 @@ class AndroidDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    bool usesTerminalUi = true,
   }) async {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return LaunchResult.failed();
@@ -483,7 +482,7 @@ class AndroidDevice extends Device {
     if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
       printTrace('Building APK');
       final FlutterProject project = FlutterProject.current();
-      await buildApk(
+      await androidBuilder.buildApk(
           project: project,
           target: mainPath,
           androidBuildInfo: AndroidBuildInfo(debuggingOptions.buildInfo,

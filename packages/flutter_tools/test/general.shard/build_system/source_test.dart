@@ -21,7 +21,10 @@ void main() {
   setUp(() {
     testbed = Testbed(setup: () {
       fs.directory('cache').createSync();
+      final Directory outputs = fs.directory('outputs')
+          ..createSync();
       environment = Environment(
+        outputDir: outputs,
         projectDir: fs.currentDirectory,
         buildDir: fs.directory('build'),
       );
@@ -44,6 +47,15 @@ void main() {
 
     expect(visitor.sources.single.path, fs.path.absolute('foo'));
   }));
+
+  test('can substitute {OUTPUT_DIR}/foo', () => testbed.run(() {
+    fs.file('foo').createSync();
+    const Source fooSource = Source.pattern('{OUTPUT_DIR}/foo');
+    fooSource.accept(visitor);
+
+    expect(visitor.sources.single.path, fs.path.absolute(fs.path.join('outputs', 'foo')));
+  }));
+
 
   test('can substitute {BUILD_DIR}/bar', () => testbed.run(() {
     final String path = fs.path.join(environment.buildDir.path, 'bar');

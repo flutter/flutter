@@ -62,7 +62,12 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.widgetWithText(DefaultTextStyle, 'Ok'));
 
-    expect(widget.style.color, CupertinoSystemColors.fallbackValues.systemRed);
+    expect(widget.style.color, const CupertinoDynamicColor.withBrightnessAndContrast(
+      color: Color.fromARGB(255, 255, 59, 48),
+      darkColor: Color.fromARGB(255, 255, 69, 58),
+      highContrastColor: Color.fromARGB(255, 215, 0, 21),
+      darkHighContrastColor: Color.fromARGB(255, 255, 105, 97),
+    ));
   });
 
   testWidgets('Action sheet dark mode', (WidgetTester tester) async {
@@ -91,7 +96,12 @@ void main() {
             return CupertinoTheme(
               data: CupertinoThemeData(
                 brightness: brightness,
-                primaryColor: CupertinoSystemColors.fallbackValues.systemBlue,
+                primaryColor: const CupertinoDynamicColor.withBrightnessAndContrast(
+                  color: Color.fromARGB(255, 0, 122, 255),
+                  darkColor: Color.fromARGB(255, 10, 132, 255),
+                  highContrastColor: Color.fromARGB(255, 0, 64, 221),
+                  darkHighContrastColor: Color.fromARGB(255, 64, 156, 255),
+                ),
               ),
               child: CupertinoActionSheet(actions: <Widget>[action]),
             );
@@ -107,7 +117,7 @@ void main() {
     expect(find.byType(CupertinoActionSheet), paints..rect(color: const Color(0x66000000)));
     expect(
       actionTextStyle('action').color.value,
-      CupertinoSystemColors.fallbackValues.systemBlue.color.value,
+      const Color.fromARGB(255, 0, 122, 255),
     );
 
     stateSetter(() { brightness = Brightness.dark; });
@@ -117,7 +127,7 @@ void main() {
     expect(find.byType(CupertinoActionSheet), paints..rect(color: const Color(0x99000000)));
     expect(
       actionTextStyle('action').color.value,
-      CupertinoSystemColors.fallbackValues.systemBlue.darkColor.value,
+      const Color.fromARGB(255, 10, 132, 255),
     );
   });
 

@@ -41,9 +41,7 @@ def pubspec_supports_macos(file)
     return false;
   end
   File.foreach(file_abs_path) { |line|
-    # TODO(stuartmorgan): Use formal platform declaration once it exists,
-    # see https://github.com/flutter/flutter/issues/33597.
-    return true if line =~ /^\s*macosPrefix:/
+    return true if line =~ /^\s*macos:/
   }
   return false
 end

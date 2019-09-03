@@ -6,14 +6,16 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/io.dart' show SocketException;
+import 'base/io.dart' show Process, SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/process.dart';
 import 'globals.dart';
 
 /// A tag for a set of development artifacts that need to be cached.
@@ -30,7 +32,10 @@ class DevelopmentArtifact {
   final bool unstable;
 
   /// Artifacts required for Android development.
-  static const DevelopmentArtifact android = DevelopmentArtifact._('android');
+  static const DevelopmentArtifact androidGenSnapshot = DevelopmentArtifact._('android_gen_snapshot');
+  static const DevelopmentArtifact androidMaven = DevelopmentArtifact._('android_maven');
+  // Artifacts used for internal builds.
+  static const DevelopmentArtifact androidInternalBuild = DevelopmentArtifact._('android_internal_build');
 
   /// Artifacts required for iOS development.
   static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios');
@@ -58,7 +63,9 @@ class DevelopmentArtifact {
 
   /// The values of DevelopmentArtifacts.
   static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[
-    android,
+    androidGenSnapshot,
+    androidMaven,
+    androidInternalBuild,
     iOS,
     web,
     macOS,
@@ -74,12 +81,16 @@ class DevelopmentArtifact {
 class Cache {
   /// [rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
-  Cache({ Directory rootOverride, List<CachedArtifact> artifacts }) : _rootOverride = rootOverride {
+  Cache({ Directory rootOverride, List<ArtifactSet> artifacts }) : _rootOverride = rootOverride {
     if (artifacts == null) {
       _artifacts.add(MaterialFonts(this));
-      _artifacts.add(AndroidEngineArtifacts(this));
-      _artifacts.add(IOSEngineArtifacts(this));
+
       _artifacts.add(GradleWrapper(this));
+      _artifacts.add(AndroidMavenArtifacts());
+      _artifacts.add(AndroidGenSnapshotArtifacts(this));
+      _artifacts.add(AndroidInternalBuildArtifacts(this));
+
+      _artifacts.add(IOSEngineArtifacts(this));
       _artifacts.add(FlutterWebSdk(this));
       _artifacts.add(FlutterSdk(this));
       _artifacts.add(WindowsEngineArtifacts(this));
@@ -101,7 +112,7 @@ class Cache {
   ];
 
   final Directory _rootOverride;
-  final List<CachedArtifact> _artifacts = <CachedArtifact>[];
+  final List<ArtifactSet> _artifacts = <ArtifactSet>[];
 
   // Initialized by FlutterCommandRunner on startup.
   static String flutterRoot;
@@ -245,11 +256,16 @@ class Cache {
       return _dyLdLibEntry;
     }
     final List<String> paths = <String>[];
-    for (CachedArtifact artifact in _artifacts) {
-      final String currentPath = artifact.dyLdLibPath;
-      if (currentPath.isNotEmpty) {
-        paths.add(currentPath);
+    for (ArtifactSet artifact in _artifacts) {
+      final Map<String, String> env = artifact.environment;
+      if (env == null || !env.containsKey('DYLD_LIBRARY_PATH')) {
+        continue;
       }
+      final String path = env['DYLD_LIBRARY_PATH'];
+      if (path.isEmpty) {
+        continue;
+      }
+      paths.add(path);
     }
     _dyLdLibEntry = MapEntry<String, String>('DYLD_LIBRARY_PATH', paths.join(':'));
     return _dyLdLibEntry;
@@ -289,7 +305,7 @@ class Cache {
     return isOlderThanReference(entity: entity, referenceFile: flutterToolsStamp);
   }
 
-  bool isUpToDate() => _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate());
+  bool isUpToDate() => _artifacts.every((ArtifactSet artifact) => artifact.isUpToDate());
 
   Future<String> getThirdPartyFile(String urlStr, String serviceName) async {
     final Uri url = Uri.parse(urlStr);
@@ -318,22 +334,27 @@ class Cache {
     if (!_lockEnabled) {
       return;
     }
-    try {
-      for (CachedArtifact artifact in _artifacts) {
-        if (!artifact.isUpToDate()) {
-          await artifact.update(requiredArtifacts);
+    for (ArtifactSet artifact in _artifacts) {
+      if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
+        printTrace('Artifact $artifact is not required, skipping update.');
+        continue;
+      }
+      if (artifact.isUpToDate()) {
+        continue;
+      }
+      try {
+        await artifact.update();
+      } on SocketException catch (e) {
+        if (_hostsBlockedInChina.contains(e.address?.host)) {
+          printError(
+            'Failed to retrieve Flutter tool dependencies: ${e.message}.\n'
+            'If you\'re in China, please see this page: '
+            'https://flutter.dev/community/china',
+            emphasis: true,
+          );
         }
+        rethrow;
       }
-    } on SocketException catch (e) {
-      if (_hostsBlockedInChina.contains(e.address?.host)) {
-        printError(
-          'Failed to retrieve Flutter tool dependencies: ${e.message}.\n'
-          'If you\'re in China, please see this page: '
-          'https://flutter.dev/community/china',
-          emphasis: true,
-        );
-      }
-      rethrow;
     }
   }
 
@@ -354,22 +375,41 @@ class Cache {
   }
 }
 
-/// An artifact managed by the cache.
-abstract class CachedArtifact {
-  CachedArtifact(this.name, this.cache, this.developmentArtifacts);
+/// Representation of a set of artifacts used by the tool.
+abstract class ArtifactSet {
+  ArtifactSet(this.developmentArtifact) : assert(developmentArtifact != null);
 
-  final String name;
+  /// The development artifact.
+  final DevelopmentArtifact developmentArtifact;
+
+  /// [true] if the artifact is up to date.
+  bool isUpToDate();
+
+  /// The environment variables (if any) required to consume the artifacts.
+  Map<String, String> get environment {
+    return const <String, String>{};
+  }
+
+  /// Updates the artifact.
+  Future<void> update();
+}
+
+/// An artifact set managed by the cache.
+abstract class CachedArtifact extends ArtifactSet {
+  CachedArtifact(
+    this.name,
+    this.cache,
+    DevelopmentArtifact developmentArtifact,
+  ) : super(developmentArtifact);
+
   final Cache cache;
+
+  /// The canonical name of the artifact.
+  final String name;
 
   // The name of the stamp file. Defaults to the same as the
   // artifact name.
   String get stampName => name;
-
-  /// Returns a string to be set as environment DYLD_LIBARY_PATH variable
-  String get dyLdLibPath => '';
-
-  /// All development artifacts this cache provides.
-  final Set<DevelopmentArtifact> developmentArtifacts;
 
   Directory get location => cache.getArtifactDirectory(name);
   String get version => cache.getVersionFor(name);
@@ -380,6 +420,7 @@ abstract class CachedArtifact {
   /// starting from scratch.
   final List<File> _downloadedFiles = <File>[];
 
+  @override
   bool isUpToDate() {
     if (!location.existsSync()) {
       return false;
@@ -390,13 +431,8 @@ abstract class CachedArtifact {
     return isUpToDateInner();
   }
 
-  Future<void> update(Set<DevelopmentArtifact> requiredArtifacts) async {
-    // If the set of required artifacts does not include any from this cache,
-    // then we can claim we are up to date to skip downloading.
-    if (!requiredArtifacts.any(developmentArtifacts.contains)) {
-      printTrace('Artifact $this is not required, skipping update.');
-      return;
-    }
+  @override
+  Future<void> update() async {
     if (!location.existsSync()) {
       try {
         location.createSync(recursive: true);
@@ -499,7 +535,7 @@ class MaterialFonts extends CachedArtifact {
   MaterialFonts(Cache cache) : super(
     'material_fonts',
     cache,
-    const <DevelopmentArtifact>{ DevelopmentArtifact.universal },
+    DevelopmentArtifact.universal,
   );
 
   @override
@@ -517,7 +553,7 @@ class FlutterWebSdk extends CachedArtifact {
   FlutterWebSdk(Cache cache) : super(
     'flutter_web_sdk',
     cache,
-    const <DevelopmentArtifact>{ DevelopmentArtifact.web },
+    DevelopmentArtifact.web,
   );
 
   @override
@@ -558,8 +594,8 @@ abstract class EngineCachedArtifact extends CachedArtifact {
   EngineCachedArtifact(
     this.stampName,
     Cache cache,
-    Set<DevelopmentArtifact> requiredArtifacts,
-  ) : super('engine', cache, requiredArtifacts);
+    DevelopmentArtifact developmentArtifact,
+  ) : super('engine', cache, developmentArtifact);
 
   @override
   final String stampName;
@@ -680,7 +716,7 @@ class FlutterSdk extends EngineCachedArtifact {
   FlutterSdk(Cache cache) : super(
     'flutter_sdk',
     cache,
-    const <DevelopmentArtifact>{ DevelopmentArtifact.universal },
+    DevelopmentArtifact.universal,
   );
 
   @override
@@ -714,7 +750,7 @@ class MacOSEngineArtifacts extends EngineCachedArtifact {
   MacOSEngineArtifacts(Cache cache) : super(
     'macos-sdk',
     cache,
-    const <DevelopmentArtifact> { DevelopmentArtifact.macOS },
+    DevelopmentArtifact.macOS,
   );
 
   @override
@@ -736,7 +772,7 @@ class WindowsEngineArtifacts extends EngineCachedArtifact {
   WindowsEngineArtifacts(Cache cache) : super(
     'windows-sdk',
     cache,
-    const <DevelopmentArtifact> { DevelopmentArtifact.windows },
+    DevelopmentArtifact.windows,
   );
 
   @override
@@ -758,7 +794,7 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
   LinuxEngineArtifacts(Cache cache) : super(
     'linux-sdk',
     cache,
-    const <DevelopmentArtifact> { DevelopmentArtifact.linux },
+    DevelopmentArtifact.linux,
   );
 
   @override
@@ -776,11 +812,12 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
   List<String> getLicenseDirs() => const <String>[];
 }
 
-class AndroidEngineArtifacts extends EngineCachedArtifact {
-  AndroidEngineArtifacts(Cache cache) : super(
+/// The artifact used to generate snapshots for Android builds.
+class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
+  AndroidGenSnapshotArtifacts(Cache cache) : super(
     'android-sdk',
     cache,
-    const <DevelopmentArtifact>{ DevelopmentArtifact.android },
+    DevelopmentArtifact.androidGenSnapshot,
   );
 
   @override
@@ -794,23 +831,19 @@ class AndroidEngineArtifacts extends EngineCachedArtifact {
           ..._osxBinaryDirs,
           ..._linuxBinaryDirs,
           ..._windowsBinaryDirs,
-          ..._androidBinaryDirs,
           ..._dartSdks,
         ]
       else if (platform.isWindows)
         ...<List<String>>[
           ..._windowsBinaryDirs,
-          ..._androidBinaryDirs,
         ]
       else if (platform.isMacOS)
         ...<List<String>>[
           ..._osxBinaryDirs,
-          ..._androidBinaryDirs,
         ]
       else if (platform.isLinux)
         ...<List<String>>[
           ..._linuxBinaryDirs,
-          ..._androidBinaryDirs,
         ]
     ];
   }
@@ -819,11 +852,79 @@ class AndroidEngineArtifacts extends EngineCachedArtifact {
   List<String> getLicenseDirs() { return <String>[]; }
 }
 
+/// Artifacts used for internal builds. The flutter tool builds Android projects
+/// using the artifacts cached by [AndroidMavenArtifacts].
+class AndroidInternalBuildArtifacts extends EngineCachedArtifact {
+  AndroidInternalBuildArtifacts(Cache cache) : super(
+    'android-internal-build-artifacts',
+    cache,
+    DevelopmentArtifact.androidInternalBuild,
+  );
+
+  @override
+  List<String> getPackageDirs() => const <String>[];
+
+  @override
+  List<List<String>> getBinaryDirs() {
+    return _androidBinaryDirs;
+  }
+
+  @override
+  List<String> getLicenseDirs() { return <String>[]; }
+}
+
+/// A cached artifact containing the Maven dependencies used to build Android projects.
+class AndroidMavenArtifacts extends ArtifactSet {
+  AndroidMavenArtifacts() : super(DevelopmentArtifact.androidMaven);
+
+  @override
+  Future<void> update() async {
+    final Directory tempDir =
+        fs.systemTempDirectory.createTempSync('gradle_wrapper.');
+    injectGradleWrapperIfNeeded(tempDir);
+
+    final Status status = logger.startProgress('Downloading Android Maven dependencies...',
+        timeout: timeoutConfiguration.slowOperation);
+    final File gradle = tempDir.childFile(
+        platform.isWindows ? 'gradlew.bat' : 'gradlew',
+      );
+    assert(gradle.existsSync());
+    os.makeExecutable(gradle);
+
+    try {
+      final String gradleExecutable = gradle.absolute.path;
+      final String flutterSdk = escapePath(Cache.flutterRoot);
+      final Process process = await runCommand(
+        <String>[
+          gradleExecutable,
+          '-b', fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle'),
+          '--project-cache-dir', tempDir.path,
+          'resolveDependencies',
+        ]);
+      final int exitCode = await process.exitCode;
+      if (exitCode != 0) {
+        printError('Failed to download the Android dependencies');
+      }
+    } finally {
+      status.stop();
+      tempDir.deleteSync(recursive: true);
+    }
+  }
+
+  @override
+  bool isUpToDate() {
+    // The dependencies are downloaded and cached by Gradle.
+    // The tool doesn't know if the dependencies are already cached at this point.
+    // Therefore, call Gradle to figure this out.
+    return false;
+  }
+}
+
 class IOSEngineArtifacts extends EngineCachedArtifact {
   IOSEngineArtifacts(Cache cache) : super(
     'ios-sdk',
     cache,
-    <DevelopmentArtifact>{ DevelopmentArtifact.iOS },
+    DevelopmentArtifact.iOS,
   );
 
   @override
@@ -856,7 +957,7 @@ class GradleWrapper extends CachedArtifact {
   GradleWrapper(Cache cache) : super(
     'gradle_wrapper',
     cache,
-    const <DevelopmentArtifact>{ DevelopmentArtifact.universal },
+    DevelopmentArtifact.universal,
   );
 
   List<String> get _gradleScripts => <String>['gradlew', 'gradlew.bat'];
@@ -897,11 +998,13 @@ class GradleWrapper extends CachedArtifact {
 
 /// Common functionality for pulling Fuchsia SDKs.
 abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
-  _FuchsiaSDKArtifacts(Cache cache, String platform)
-      :_path = 'fuchsia/sdk/core/$platform-amd64',
-       super('fuchsia-$platform', cache, const <DevelopmentArtifact> {
-    DevelopmentArtifact.fuchsia,
-  });
+  _FuchsiaSDKArtifacts(Cache cache, String platform) :
+    _path = 'fuchsia/sdk/core/$platform-amd64',
+    super(
+      'fuchsia-$platform',
+      cache,
+      DevelopmentArtifact.fuchsia,
+    );
 
   final String _path;
 
@@ -917,10 +1020,11 @@ abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
 
 /// The pre-built flutter runner for Fuchsia development.
 class FlutterRunnerSDKArtifacts extends CachedArtifact {
-  FlutterRunnerSDKArtifacts(Cache cache)
-      : super('flutter_runner', cache, const <DevelopmentArtifact>{
+  FlutterRunnerSDKArtifacts(Cache cache) : super(
+    'flutter_runner',
+    cache,
     DevelopmentArtifact.flutterRunner,
-  });
+  );
 
   @override
   Directory get location => cache.getArtifactDirectory('flutter_runner');
@@ -971,7 +1075,7 @@ class IosUsbArtifacts extends CachedArtifact {
     name,
     cache,
     // This is universal to ensure every command checks for them first
-    const <DevelopmentArtifact>{ DevelopmentArtifact.universal },
+    DevelopmentArtifact.universal,
   );
 
   static const List<String> artifactNames = <String>[
@@ -984,8 +1088,10 @@ class IosUsbArtifacts extends CachedArtifact {
   ];
 
   @override
-  String get dyLdLibPath {
-    return cache.getArtifactDirectory(name).path;
+  Map<String, String> get environment {
+    return <String, String>{
+      'DYLD_LIBRARY_PATH': cache.getArtifactDirectory(name).path,
+    };
   }
 
   @override
@@ -1093,6 +1199,12 @@ const List<List<String>> _windowsBinaryDirs = <List<String>>[
   <String>['android-arm64-release/windows-x64', 'android-arm64-release/windows-x64.zip'],
 ];
 
+const List<List<String>> _iosBinaryDirs = <List<String>>[
+  <String>['ios', 'ios/artifacts.zip'],
+  <String>['ios-profile', 'ios-profile/artifacts.zip'],
+  <String>['ios-release', 'ios-release/artifacts.zip'],
+];
+
 const List<List<String>> _androidBinaryDirs = <List<String>>[
   <String>['android-x86', 'android-x86/artifacts.zip'],
   <String>['android-x64', 'android-x64/artifacts.zip'],
@@ -1102,12 +1214,6 @@ const List<List<String>> _androidBinaryDirs = <List<String>>[
   <String>['android-arm64', 'android-arm64/artifacts.zip'],
   <String>['android-arm64-profile', 'android-arm64-profile/artifacts.zip'],
   <String>['android-arm64-release', 'android-arm64-release/artifacts.zip'],
-];
-
-const List<List<String>> _iosBinaryDirs = <List<String>>[
-  <String>['ios', 'ios/artifacts.zip'],
-  <String>['ios-profile', 'ios-profile/artifacts.zip'],
-  <String>['ios-release', 'ios-release/artifacts.zip'],
 ];
 
 const List<List<String>> _dartSdks = <List<String>> [
