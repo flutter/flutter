@@ -2242,6 +2242,91 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(JustifyRTL)) {
   }
 }
 
+TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(JustifyRTLNewLine)) {
+  const char* text =
+      "אאא בּבּבּבּ אאאא\nבּבּ אאא בּבּבּ אאאאא בּבּבּבּ אאאא בּבּבּבּבּ "
+      "אאאאא בּבּבּבּבּ אאאבּבּבּבּבּבּאאאאא בּבּבּבּבּבּאאאאאבּבּבּבּבּבּ אאאאא בּבּבּבּבּ "
+      "אאאאא בּבּבּבּבּבּ אאאאא בּבּבּבּבּבּ אאאאא בּבּבּבּבּבּ אאאאא בּבּבּבּבּבּ אאאאא בּבּבּבּבּבּ";
+
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 14;
+  paragraph_style.text_align = TextAlign::justify;
+  paragraph_style.text_direction = TextDirection::rtl;
+  txt::ParagraphBuilderTxt builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.font_families = std::vector<std::string>(1, "Ahem");
+  text_style.font_size = 26;
+  text_style.color = SK_ColorBLACK;
+  text_style.height = 1;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = BuildParagraph(builder);
+  size_t paragraph_width = GetTestCanvasWidth() - 100;
+  paragraph->Layout(paragraph_width);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  auto glyph_line_width = [&paragraph](int index) {
+    size_t second_to_last_position_index =
+        paragraph->glyph_lines_[index].positions.size() - 1;
+    return paragraph->glyph_lines_[index]
+        .positions[second_to_last_position_index]
+        .x_pos.end;
+  };
+
+  SkPaint paint;
+  paint.setStyle(SkPaint::kStroke_Style);
+  paint.setAntiAlias(true);
+  paint.setStrokeWidth(1);
+
+  ASSERT_TRUE(Snapshot());
+
+  // Tests for GetRectsForRange()
+  Paragraph::RectHeightStyle rect_height_style =
+      Paragraph::RectHeightStyle::kMax;
+  Paragraph::RectWidthStyle rect_width_style =
+      Paragraph::RectWidthStyle::kTight;
+  paint.setColor(SK_ColorRED);
+  std::vector<txt::Paragraph::TextBox> boxes =
+      paragraph->GetRectsForRange(0, 30, rect_height_style, rect_width_style);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  ASSERT_EQ(boxes.size(), 2ull);
+  EXPECT_FLOAT_EQ(boxes[0].rect.left(), 562);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), -1.4305115e-06);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 900);
+  EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 26);
+
+  paint.setColor(SK_ColorBLUE);
+  boxes = paragraph->GetRectsForRange(240, 250, rect_height_style,
+                                      rect_width_style);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  ASSERT_EQ(boxes.size(), 1ull);
+  EXPECT_FLOAT_EQ(boxes[0].rect.left(), 68);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 130);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 120);
+  EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 156);
+  ASSERT_TRUE(Snapshot());
+
+  // All lines should be justified to the width of the
+  // paragraph.
+  for (size_t i = 0; i < paragraph->glyph_lines_.size(); ++i) {
+    ASSERT_EQ(glyph_line_width(i), paragraph_width);
+  }
+}
+
 TEST_F(ParagraphTest, DecorationsParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
