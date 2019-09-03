@@ -65,11 +65,26 @@ void main() {
       return Future<bool>.value(false);
     });
     when(mockDebugConnection.vmService).thenReturn(mockVmService);
+    when(mockDebugConnection.onDone).thenAnswer((Invocation invocation) {
+      return Completer<void>().future;
+    });
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
   }
+
+  test('profile does not supportsServiceProtocol', () => testbed.run(() {
+    final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
+      MockWebDevice(),
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+      ipv6: true,
+    );
+
+    expect(profileResidentWebRunner.supportsServiceProtocol, false);
+    expect(residentWebRunner.supportsServiceProtocol, true);
+  }));
 
   test('Exits on run if application does not support the web', () => testbed.run(() async {
     fs.file('pubspec.yaml').createSync();

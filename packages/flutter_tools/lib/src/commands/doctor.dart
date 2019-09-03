@@ -37,7 +37,7 @@ class DoctorCommand extends FlutterCommand {
       // This is required because we use gen_snapshot to check if the host
       // machine can execute the provided artifacts. See `_genSnapshotRuns`
       // in `doctor.dart`.
-      DevelopmentArtifact.android,
+      DevelopmentArtifact.androidGenSnapshot,
     };
   }
 

@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/common/diagnostics_tree.dart';
@@ -237,6 +238,207 @@ void main() {
 
       // NOW we should receive the result.
       await tester.pump();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waiting for NoPendingPlatformMessages returns immediately when there\'re no platform messages', (WidgetTester tester) async {
+      extension
+          .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      await tester.idle();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waiting for NoPendingPlatformMessages returns until a single method channel call returns', (WidgetTester tester) async {
+      const MethodChannel channel = MethodChannel('helloChannel', JSONMethodCodec());
+      const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          'helloChannel', (ByteData message) {
+            return Future<ByteData>.delayed(
+                const Duration(milliseconds: 10),
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+          });
+      channel.invokeMethod<String>('sayHello', 'hello');
+
+      extension
+          .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // The channel message are delayed for 10 milliseconds, so nothing happens yet.
+      await tester.pump(const Duration(milliseconds: 5));
+      expect(result, isNull);
+
+      // Now we receive the result.
+      await tester.pump(const Duration(milliseconds: 5));
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waiting for NoPendingPlatformMessages returns until both method channel calls return', (WidgetTester tester) async {
+      const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
+      // Configures channel 1
+      const MethodChannel channel1 = MethodChannel('helloChannel1', JSONMethodCodec());
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          'helloChannel1', (ByteData message) {
+            return Future<ByteData>.delayed(
+                const Duration(milliseconds: 10),
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+          });
+
+      // Configures channel 2
+      const MethodChannel channel2 = MethodChannel('helloChannel2', JSONMethodCodec());
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          'helloChannel2', (ByteData message) {
+            return Future<ByteData>.delayed(
+                const Duration(milliseconds: 20),
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+          });
+
+      channel1.invokeMethod<String>('sayHello', 'hello');
+      channel2.invokeMethod<String>('sayHello', 'hello');
+
+      extension
+          .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // Neither of the channel responses is received, so nothing happens yet.
+      await tester.pump(const Duration(milliseconds: 5));
+      expect(result, isNull);
+
+      // Result of channel 1 is received, but channel 2 is still pending, so still waiting.
+      await tester.pump(const Duration(milliseconds: 10));
+      expect(result, isNull);
+
+      // Both of the results are received. Now we receive the result.
+      await tester.pump(const Duration(milliseconds: 30));
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waiting for NoPendingPlatformMessages returns until new method channel call returns', (WidgetTester tester) async {
+      const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
+      // Configures channel 1
+      const MethodChannel channel1 = MethodChannel('helloChannel1', JSONMethodCodec());
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          'helloChannel1', (ByteData message) {
+            return Future<ByteData>.delayed(
+                const Duration(milliseconds: 10),
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+          });
+
+      // Configures channel 2
+      const MethodChannel channel2 = MethodChannel('helloChannel2', JSONMethodCodec());
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          'helloChannel2', (ByteData message) {
+            return Future<ByteData>.delayed(
+                const Duration(milliseconds: 20),
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+          });
+
+      channel1.invokeMethod<String>('sayHello', 'hello');
+
+      // Calls the waiting API before the second channel message is sent.
+      extension
+          .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // The first channel message is not received, so nothing happens yet.
+      await tester.pump(const Duration(milliseconds: 5));
+      expect(result, isNull);
+
+      channel2.invokeMethod<String>('sayHello', 'hello');
+
+      // Result of channel 1 is received, but channel 2 is still pending, so still waiting.
+      await tester.pump(const Duration(milliseconds: 15));
+      expect(result, isNull);
+
+      // Both of the results are received. Now we receive the result.
+      await tester.pump(const Duration(milliseconds: 10));
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waiting for NoPendingPlatformMessages returns until both old and new method channel calls return', (WidgetTester tester) async {
+      const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
+      // Configures channel 1
+      const MethodChannel channel1 = MethodChannel('helloChannel1', JSONMethodCodec());
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          'helloChannel1', (ByteData message) {
+            return Future<ByteData>.delayed(
+                const Duration(milliseconds: 20),
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+          });
+
+      // Configures channel 2
+      const MethodChannel channel2 = MethodChannel('helloChannel2', JSONMethodCodec());
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          'helloChannel2', (ByteData message) {
+            return Future<ByteData>.delayed(
+                const Duration(milliseconds: 10),
+                () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+          });
+
+      channel1.invokeMethod<String>('sayHello', 'hello');
+
+      extension
+          .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // The first channel message is not received, so nothing happens yet.
+      await tester.pump(const Duration(milliseconds: 5));
+      expect(result, isNull);
+
+      channel2.invokeMethod<String>('sayHello', 'hello');
+
+      // Result of channel 2 is received, but channel 1 is still pending, so still waiting.
+      await tester.pump(const Duration(milliseconds: 10));
+      expect(result, isNull);
+
+      // Now we receive the result.
+      await tester.pump(const Duration(milliseconds: 5));
       expect(
         result,
         <String, dynamic>{

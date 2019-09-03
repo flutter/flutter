@@ -22,24 +22,29 @@ import 'ios/xcodeproj.dart' as xcode;
 import 'plugins.dart';
 import 'template.dart';
 
-FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>() ?? const FlutterProjectFactory();
+FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>() ?? FlutterProjectFactory();
 
 class FlutterProjectFactory {
-  const FlutterProjectFactory();
+  FlutterProjectFactory();
+
+  final Map<String, FlutterProject> _projects =
+      <String, FlutterProject>{};
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject fromDirectory(Directory directory) {
     assert(directory != null);
-    final FlutterManifest manifest = FlutterProject._readManifest(
-      directory.childFile(bundle.defaultManifestPath).path,
-    );
-    final FlutterManifest exampleManifest = FlutterProject._readManifest(
-      FlutterProject._exampleDirectory(directory)
-          .childFile(bundle.defaultManifestPath)
-          .path,
-    );
-    return FlutterProject(directory, manifest, exampleManifest);
+    return _projects.putIfAbsent(directory.path, /* ifAbsent */ () {
+      final FlutterManifest manifest = FlutterProject._readManifest(
+        directory.childFile(bundle.defaultManifestPath).path,
+      );
+      final FlutterManifest exampleManifest = FlutterProject._readManifest(
+        FlutterProject._exampleDirectory(directory)
+            .childFile(bundle.defaultManifestPath)
+            .path,
+      );
+      return FlutterProject(directory, manifest, exampleManifest);
+    });
   }
 }
 
@@ -394,8 +399,13 @@ class IosProject implements XcodeBasedProject {
   Map<String, String> get buildSettings {
     if (!xcode.xcodeProjectInterpreter.isInstalled)
       return null;
-    return xcode.xcodeProjectInterpreter.getBuildSettings(xcodeProject.path, _hostAppBundleName);
+    _buildSettings ??=
+        xcode.xcodeProjectInterpreter.getBuildSettings(xcodeProject.path,
+                                                       _hostAppBundleName);
+    return _buildSettings;
   }
+
+  Map<String, String> _buildSettings;
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     _regenerateFromTemplateIfNeeded();
@@ -570,7 +580,7 @@ class AndroidProject {
     _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
-    gradle.injectGradleWrapper(_editableHostAppDirectory);
+    gradle.injectGradleWrapperIfNeeded(_editableHostAppDirectory);
     gradle.writeLocalProperties(_editableHostAppDirectory.childFile('local.properties'));
     await injectPlugins(parent);
   }
@@ -583,7 +593,7 @@ class AndroidProject {
     _deleteIfExistsSync(ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'library'), ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
-    gradle.injectGradleWrapper(ephemeralDirectory);
+    gradle.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
   void _overwriteFromTemplate(String path, Directory target) {

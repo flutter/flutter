@@ -32,6 +32,7 @@ void main() {
     when(platform.pathSeparator).thenReturn(r'\');
     testbed = Testbed(setup: () {
       environment = Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
       );
       fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_export.h').createSync(recursive: true);
