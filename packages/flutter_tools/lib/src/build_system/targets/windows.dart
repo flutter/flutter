@@ -39,13 +39,12 @@ class UnpackWindows extends Target {
   List<Target> get dependencies => const <Target>[];
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     // This path needs to match the prefix in the rule below.
     final String basePath = artifacts.getArtifactPath(Artifact.windowsDesktopPath);
-    for (File input in inputFiles) {
-      if (fs.path.basename(input.path) == 'windows.dart') {
-        continue;
-      }
+    for (File input in fs.directory(basePath)
+        .listSync(recursive: true)
+        .whereType<File>()) {
       final String outputPath = fs.path.join(
         environment.projectDir.path,
         'windows',
