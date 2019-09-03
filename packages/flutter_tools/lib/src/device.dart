@@ -190,6 +190,12 @@ class DeviceManager {
           if (isDeviceSupportedForProject(device, flutterProject))
             device
       ];
+    } else if (devices.length == 1 &&
+             !hasSpecifiedDeviceId &&
+             !isDeviceSupportedForProject(devices.single, flutterProject)) {
+      // If there is only a single device but it is not supported, then return
+      // early.
+      return <Device>[];
     }
 
     // If there are still multiple devices and the user did not specify to run
@@ -381,11 +387,6 @@ abstract class Device {
   ///
   /// [platformArgs] allows callers to pass platform-specific arguments to the
   /// start call. The build mode is not used by all platforms.
-  ///
-  /// If [usesTerminalUi] is true, Flutter Tools may attempt to prompt the
-  /// user to resolve fixable issues such as selecting a signing certificate
-  /// for iOS device deployment. Set to false if stdin cannot be read from while
-  /// attempting to start the app.
   Future<LaunchResult> startApp(
     ApplicationPackage package, {
     String mainPath,
@@ -394,7 +395,6 @@ abstract class Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    bool usesTerminalUi = true,
   });
 
   /// Whether this device implements support for hot reload.

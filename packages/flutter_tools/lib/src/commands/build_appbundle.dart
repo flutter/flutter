@@ -4,9 +4,10 @@
 
 import 'dart:async';
 
-import '../android/app_bundle.dart';
+import '../android/android_builder.dart';
 import '../build_info.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
@@ -40,11 +41,31 @@ class BuildAppBundleCommand extends BuildSubCommand {
       'suitable for deploying to app stores. \n app bundle improves your app size';
 
   @override
+  Future<Map<CustomDimensions, String>> get usageValues async {
+    final Map<CustomDimensions, String> usage = <CustomDimensions, String>{};
+
+    usage[CustomDimensions.commandBuildAppBundleTargetPlatform] =
+        (argResults['target-platform'] as List<String>).join(',');
+
+    if (argResults['release']) {
+      usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'release';
+    } else if (argResults['debug']) {
+      usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'debug';
+    } else if (argResults['profile']) {
+      usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'profile';
+    } else {
+      // The build defaults to release.
+      usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'release';
+    }
+    return usage;
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(getBuildInfo(),
       targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName)
     );
-    await buildAppBundle(
+    await androidBuilder.buildAab(
       project: FlutterProject.current(),
       target: targetFile,
       androidBuildInfo: androidBuildInfo,

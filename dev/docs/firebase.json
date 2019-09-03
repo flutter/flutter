@@ -6,6 +6,17 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "snippets/**",
+        "headers": [
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "https://dartpad.dev"
+          }
+        ]
+      }
     ]
   }
 }

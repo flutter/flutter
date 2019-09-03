@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -100,16 +101,14 @@ class Xcode {
     return runCheckedAsync(<String>['xcrun', 'clang', ...args]);
   }
 
-  Future<RunResult> dsymutil(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'dsymutil', ...args]);
-  }
-
-  Future<RunResult> strip(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'strip', ...args]);
-  }
-
-  Future<RunResult> otool(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'otool', ...args]);
+  Future<String> iPhoneSdkLocation() async {
+    final RunResult runResult = await runCheckedAsync(
+      <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'],
+    );
+    if (runResult.exitCode != 0) {
+      throwToolExit('Could not find iPhone SDK location: ${runResult.stderr}');
+    }
+    return runResult.stdout.trim();
   }
 
   String getSimulatorPath() {

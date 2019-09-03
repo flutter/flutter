@@ -201,6 +201,26 @@ class FirstFrameRasterized extends SerializableWaitCondition {
   String get conditionName => 'FirstFrameRasterizedCondition';
 }
 
+/// A condition that waits until there are no pending platform messages.
+class NoPendingPlatformMessages extends SerializableWaitCondition {
+  /// Creates a [NoPendingPlatformMessages] condition.
+  const NoPendingPlatformMessages();
+
+  /// Factory constructor to parse a [NoPendingPlatformMessages] instance from the
+  /// given JSON map.
+  ///
+  /// The [json] argument must not be null.
+  factory NoPendingPlatformMessages.deserialize(Map<String, dynamic> json) {
+    assert(json != null);
+    if (json['conditionName'] != 'NoPendingPlatformMessagesCondition')
+      throw SerializationException('Error occurred during deserializing the NoPendingPlatformMessagesCondition JSON string: $json');
+    return const NoPendingPlatformMessages();
+  }
+
+  @override
+  String get conditionName => 'NoPendingPlatformMessagesCondition';
+}
+
 /// A combined condition that waits until all the given [conditions] are met.
 class CombinedCondition extends SerializableWaitCondition {
   /// Creates a [CombinedCondition] condition.
@@ -260,6 +280,8 @@ SerializableWaitCondition _deserialize(Map<String, dynamic> json) {
       return NoPendingFrame.deserialize(json);
     case 'FirstFrameRasterizedCondition':
       return FirstFrameRasterized.deserialize(json);
+    case 'NoPendingPlatformMessagesCondition':
+      return NoPendingPlatformMessages.deserialize(json);
     case 'CombinedCondition':
       return CombinedCondition.deserialize(json);
   }

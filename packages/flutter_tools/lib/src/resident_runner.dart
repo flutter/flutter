@@ -382,7 +382,6 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      usesTerminalUi: hotRunner.usesTerminalUi,
       ipv6: hotRunner.ipv6,
     );
 
@@ -443,7 +442,6 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      usesTerminalUi: coldRunner.usesTerminalUi,
       ipv6: coldRunner.ipv6,
     );
 
@@ -536,7 +534,6 @@ abstract class ResidentRunner {
     String projectRootPath,
     String packagesFilePath,
     this.ipv6,
-    this.usesTerminalUi = true,
     this.stayResident = true,
     this.hotMode = true,
     this.dillOutputPath,
@@ -563,7 +560,6 @@ abstract class ResidentRunner {
   final List<FlutterDevice> flutterDevices;
   final String target;
   final DebuggingOptions debuggingOptions;
-  final bool usesTerminalUi;
   final bool stayResident;
   final bool ipv6;
   final Completer<int> _finished = Completer<int>();
