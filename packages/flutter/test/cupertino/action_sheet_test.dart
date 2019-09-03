@@ -117,7 +117,7 @@ void main() {
     expect(find.byType(CupertinoActionSheet), paints..rect(color: const Color(0x66000000)));
     expect(
       actionTextStyle('action').color.value,
-      const Color.fromARGB(255, 0, 122, 255),
+      const Color.fromARGB(255, 0, 122, 255).value,
     );
 
     stateSetter(() { brightness = Brightness.dark; });
@@ -127,7 +127,7 @@ void main() {
     expect(find.byType(CupertinoActionSheet), paints..rect(color: const Color(0x99000000)));
     expect(
       actionTextStyle('action').color.value,
-      const Color.fromARGB(255, 10, 132, 255),
+      const Color.fromARGB(255, 10, 132, 255).value,
     );
   });
 
