@@ -113,7 +113,7 @@ abstract class Target {
   List<Source> get outputs;
 
   /// The action which performs this build step.
-  Future<void> build(Environment environment);
+  Future<void> build(List<File> inputFiles, Environment environment);
 
   /// Collect hashes for all inputs to determine if any have changed.
   ///
@@ -585,7 +585,7 @@ class _BuildInstance {
         }
       } else {
         printStatus('${target.name}: Starting');
-        await target.build(environment);
+        await target.build(inputs, environment);
         printStatus('${target.name}: Complete');
 
         final List<File> outputs = target.resolveOutputs(environment, implicit: true);

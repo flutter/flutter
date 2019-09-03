@@ -40,7 +40,7 @@ void main() {
     when(mockPlatform.isWindows).thenReturn(false);
 
     /// Create various testing targets.
-    fooTarget = TestTarget((Environment environment) async {
+    fooTarget = TestTarget((List<File> inputFiles, Environment environment) async {
       environment
         .buildDir
         .childFile('out')
@@ -56,7 +56,7 @@ void main() {
         Source.pattern('{BUILD_DIR}/out'),
       ]
       ..dependencies = <Target>[];
-    barTarget = TestTarget((Environment environment) async {
+    barTarget = TestTarget((List<File> inputFiles, Environment environment) async {
       environment.buildDir
         .childFile('bar')
         ..createSync(recursive: true)
@@ -71,7 +71,7 @@ void main() {
         Source.pattern('{BUILD_DIR}/bar'),
       ]
       ..dependencies = <Target>[];
-    fizzTarget = TestTarget((Environment environment) async {
+    fizzTarget = TestTarget((List<File> inputFiles, Environment environment) async {
       throw Exception('something bad happens');
     })
       ..name = 'fizz'
@@ -82,7 +82,7 @@ void main() {
         Source.pattern('{BUILD_DIR}/fizz'),
       ]
       ..dependencies = <Target>[fooTarget];
-    sharedTarget = TestTarget((Environment environment) async {
+    sharedTarget = TestTarget((List<File> inputFiles, Environment environment) async {
       shared += 1;
     })
       ..name = 'shared'
@@ -116,7 +116,7 @@ void main() {
   }));
 
   test('Throws exception if it does not produce a specified output', () => testbed.run(() async {
-    final Target badTarget = TestTarget((Environment environment) async {})
+    final Target badTarget = TestTarget((List<File> inputFiles, Environment environment) async {})
       ..inputs = const <Source>[
         Source.pattern('{PROJECT_DIR}/foo.dart'),
       ]
@@ -251,10 +251,10 @@ T nonconst<T>(T input) => input;
 class TestTarget extends Target {
   TestTarget([this._build]);
 
-  final Future<void> Function(Environment environment) _build;
+  final Future<void> Function(List<File> inputFiles, Environment environment) _build;
 
   @override
-  Future<void> build(Environment environment) => _build(environment);
+  Future<void> build(List<File> inputFiles, Environment environment) => _build(inputFiles, environment);
 
   @override
   List<Target> dependencies = <Target>[];
