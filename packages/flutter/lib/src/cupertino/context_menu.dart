@@ -680,6 +680,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   // The ContextMenuSheet disappears at this scale.
   static const double _kSheetScaleThreshold = 0.9;
   static const double _kPadding = 20.0;
+  static const double _kDamping = 400.0;
 
   final GlobalKey _childGlobalKey = GlobalKey();
 
@@ -803,16 +804,18 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   }
 
   void _setDragOffset(Offset dragOffset) {
-    // Allow horizontal movement but damp it.
-    final double endX = _kPadding * dragOffset.dx / 400.0;
+    // Allow horizontal and negative vertical movement, but damp it.
+    final double endX = _kPadding * dragOffset.dx / _kDamping;
+    final double endY = dragOffset.dy >= 0.0
+      ? dragOffset.dy
+      : _kPadding * dragOffset.dy / _kDamping;
     setState(() {
       _dragOffset = dragOffset;
       _moveAnimation = Tween<Offset>(
         begin: Offset.zero,
         end: Offset(
           endX.clamp(-_kPadding, _kPadding),
-          // TODO(justinmc): Allow reverse dragging but also make it damped.
-          math.max(0.0, dragOffset.dy),
+          endY,
         ),
       ).animate(
         CurvedAnimation(
