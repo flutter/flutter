@@ -20,7 +20,7 @@ void main() {
       ]
     ).build();
 
-    final List<int> result = root.findAll<int>(Offset.zero);
+    final List<int> result = root.findAll<int>(Offset.zero).annotations.toList();
     expect(result, <int>[3, 2, 1]);
   });
 
@@ -34,7 +34,7 @@ void main() {
       ]
     ).build();
 
-    final int result = root.find<int>(Offset.zero);
+    final int result = root.find<int>(Offset.zero).annotation;
     expect(result, 3);
   });
 
@@ -48,7 +48,7 @@ void main() {
       ]
     ).build();
 
-    final List<double> result = root.findAll<double>(Offset.zero);
+    final List<double> result = root.findAll<double>(Offset.zero).annotations.toList();
     expect(result, <int>[]);
   });
 
@@ -62,7 +62,7 @@ void main() {
       ]
     ).build();
 
-    final double result = root.find<double>(Offset.zero);
+    final double result = root.find<double>(Offset.zero).annotation;
     expect(result, isNull);
   });
 
@@ -76,7 +76,7 @@ void main() {
       ]
     ).build();
 
-    final List<int> result = root.findAll<int>(Offset.zero);
+    final List<int> result = root.findAll<int>(Offset.zero).annotations.toList();
     expect(result, <int>[3, 2]);
   });
 
@@ -90,7 +90,7 @@ void main() {
       ).build(),
     );
 
-    final List<int> result = root.findAll<int>(Offset.zero);
+    final List<int> result = root.findAll<int>(Offset.zero).annotations.toList();
     expect(result, <int>[2]);
   });
 
@@ -104,7 +104,7 @@ void main() {
       ).build(),
     );
 
-    final List<int> result = root.findAll<int>(Offset.zero);
+    final List<int> result = root.findAll<int>(Offset.zero).annotations.toList();
     expect(result, <int>[2, 1000]);
   });
 
@@ -118,7 +118,7 @@ void main() {
       ).build(),
     );
 
-    final List<int> result = root.findAll<int>(Offset.zero);
+    final List<int> result = root.findAll<int>(Offset.zero).annotations.toList();
     expect(result, <int>[1000]);
   });
 
@@ -135,8 +135,8 @@ void main() {
       ).build(),
     );
 
-    expect(root.findAll<int>(insidePosition), <int>[1]);
-    expect(root.findAll<int>(outsidePosition), <int>[1000]);
+    expect(root.findAll<int>(insidePosition).annotations.toList(), <int>[1]);
+    expect(root.findAll<int>(outsidePosition).annotations.toList(), <int>[1000]);
   });
 
   test('ClipRectLayer.findAll respects clipRect', () {
@@ -157,8 +157,8 @@ void main() {
       ).build(),
     );
 
-    expect(root.findAll<int>(insidePosition), <int>[1]);
-    expect(root.findAll<int>(outsidePosition), <int>[1000]);
+    expect(root.findAll<int>(insidePosition).annotations.toList(), <int>[1]);
+    expect(root.findAll<int>(outsidePosition).annotations.toList(), <int>[1000]);
   });
 
   test('ClipRRectLayer.findAll respects clipRRect', () {
@@ -186,8 +186,8 @@ void main() {
       ).build(),
     );
 
-    expect(root.findAll<int>(insidePosition), <int>[1]);
-    expect(root.findAll<int>(outsidePosition), <int>[1000]);
+    expect(root.findAll<int>(insidePosition).annotations.toList(), <int>[1]);
+    expect(root.findAll<int>(outsidePosition).annotations.toList(), <int>[1000]);
   });
 
   test('ClipPathLayer.findAll respects clipPath', () {
@@ -220,8 +220,8 @@ void main() {
       ).build(),
     );
 
-    expect(root.findAll<int>(insidePosition), <int>[1]);
-    expect(root.findAll<int>(outsidePosition), <int>[1000]);
+    expect(root.findAll<int>(insidePosition).annotations.toList(), <int>[1]);
+    expect(root.findAll<int>(outsidePosition).annotations.toList(), <int>[1000]);
   });
 
   test('TransformLayer.findAll respects transform', () {
@@ -248,8 +248,8 @@ void main() {
       ).build(),
     );
 
-    expect(root.findAll<int>(insidePosition), <int>[1]);
-    expect(root.findAll<int>(outsidePosition), <int>[1000]);
+    expect(root.findAll<int>(insidePosition).annotations.toList(), <int>[1]);
+    expect(root.findAll<int>(outsidePosition).annotations.toList(), <int>[1000]);
   });
 
   test('TransformLayer.findAll skips when transform is irreversible', () {
@@ -264,7 +264,7 @@ void main() {
       ).build(),
     );
 
-    expect(root.findAll<int>(Offset.zero), <int>[1000]);
+    expect(root.findAll<int>(Offset.zero).annotations.toList(), <int>[1000]);
   });
 
   test('PhysicalModelLayer.findAll respects clipPath', () {
@@ -302,8 +302,8 @@ void main() {
       ).build(),
     );
 
-    expect(root.findAll<int>(insidePosition), <int>[1]);
-    expect(root.findAll<int>(outsidePosition), <int>[1000]);
+    expect(root.findAll<int>(insidePosition).annotations.toList(), <int>[1]);
+    expect(root.findAll<int>(outsidePosition).annotations.toList(), <int>[1000]);
   });
 
 
@@ -323,8 +323,8 @@ void main() {
       ).build(),
     );
 
-    expect(root.findAll<int>(insidePosition), <int>[1]);
-    expect(root.findAll<int>(outsidePosition), <int>[1000]);
+    expect(root.findAll<int>(insidePosition).annotations.toList(), <int>[1]);
+    expect(root.findAll<int>(outsidePosition).annotations.toList(), <int>[1000]);
   });
 
   test('AnnotatedRegionLayer.findAll should append to the list '
@@ -340,7 +340,7 @@ void main() {
       ).build(),
     );
 
-    final List<int> result = root.findAll<int>(position);
+    final List<int> result = root.findAll<int>(position).annotations.toList();
     expect(result, <int>[2, 1, 1000]);
   });
 
@@ -357,7 +357,7 @@ void main() {
       ).build(),
     );
 
-    final List<int> result = root.findAll<int>(position);
+    final List<int> result = root.findAll<int>(position).annotations.toList();
     expect(result, <int>[2, 1]);
   });
 
@@ -373,7 +373,7 @@ void main() {
       ).build(),
     );
 
-    final List<int> result = root.findAll<int>(position);
+    final List<int> result = root.findAll<int>(position).annotations.toList();
     expect(result, <int>[2, 1, 1000]);
   });
 
@@ -390,7 +390,7 @@ void main() {
       ).build(),
     );
 
-    final List<int> result = root.findAll<int>(position);
+    final List<int> result = root.findAll<int>(position).annotations.toList();
     expect(result, <int>[2, 1000]);
   });
 
@@ -407,7 +407,7 @@ void main() {
       ).build()
     );
 
-    final List<int> result = root.findAll<int>(position);
+    final List<int> result = root.findAll<int>(position).annotations.toList();
     expect(result, <int>[2]);
   });
 
@@ -424,7 +424,7 @@ void main() {
       ).build()
     );
 
-    final List<int> result = root.findAll<int>(position);
+    final List<int> result = root.findAll<int>(position).annotations.toList();
     expect(result, <int>[2, 1000]);
   });
 
@@ -453,7 +453,7 @@ void main() {
       ).build()
     );
 
-    final List<int> result = root.findAll<int>(position);
+    final List<int> result = root.findAll<int>(position).annotations.toList();
     expect(result, <int>[2, 1, 1000]);
   });
 
@@ -475,7 +475,7 @@ void main() {
       ).build()
     );
 
-    final List<int> result = root.findAll<int>(position);
+    final List<int> result = root.findAll<int>(position).annotations.toList();
     expect(result, <int>[2, 1000]);
   });
 }
@@ -569,7 +569,7 @@ class _TestAnnotatedLayer extends Layer {
   // [opaque]; otherwise it directly returns false.
   @override
   bool findAnnotations<S>(
-    List<AnnotationEntry<S>> result,
+    AnnotationResult<S> result,
     Offset regionOffset, {
     bool onlyFirst,
   }) {

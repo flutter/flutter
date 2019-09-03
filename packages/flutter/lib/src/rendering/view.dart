@@ -186,9 +186,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // here.
     return layer.findAll<MouseTrackerAnnotation>(
       position * configuration.devicePixelRatio
-    ).map<MouseTrackerAnnotation>((AnnotationEntry<MouseTrackerAnnotation> entry) {
-      return entry.annotation;
-    });
+    ).annotations;
   }
 
   @override
