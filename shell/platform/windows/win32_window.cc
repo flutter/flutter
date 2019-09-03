@@ -15,39 +15,35 @@ Win32Window::Win32Window() {
   // Per-Monitor V1, Windows 7: System See
   // https://docs.microsoft.com/en-us/windows/win32/hidpi/high-dpi-desktop-application-development-on-windows
   // for more information.
-
-  // TODO the calling applicaiton should participate in setting the DPI.
-  // Currently dpi_helper is asserting per-monitor V2.  There are two problems
-  // with this: 1) it is advised that the awareness mode is set using manifest,
-  // not programatically.  2) The calling executable should be responsible for
-  // setting an appropriate scaling mode, not a library.  This will be
-  // particularly important once there is a means of hosting Flutter content in
-  // an existing app.
-
-  BOOL result = dpi_helper_->SetProcessDpiAwarenessContext(
-      DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-
-  if (result != TRUE) {
-    OutputDebugString(L"Failed to set PMV2");
-  }
 }
 Win32Window::~Win32Window() {
   Destroy();
 }
 
-void Win32Window::Initialize(const char* title,
-                             const unsigned int x,
-                             const unsigned int y,
-                             const unsigned int width,
-                             const unsigned int height) {
+void Win32Window::InitializeChild(const char* title,
+                                  unsigned int width,
+                                  unsigned int height) {
   Destroy();
   std::wstring converted_title = NarrowToWide(title);
 
   WNDCLASS window_class = ResgisterWindowClass(converted_title);
 
-  CreateWindow(window_class.lpszClassName, converted_title.c_str(),
-               WS_OVERLAPPEDWINDOW | WS_VISIBLE, x, y, width, height, nullptr,
-               nullptr, window_class.hInstance, this);
+  auto* result = CreateWindowEx(
+      0, window_class.lpszClassName, converted_title.c_str(),
+      WS_CHILD | WS_VISIBLE, CW_DEFAULT, CW_DEFAULT, width, height,
+      HWND_MESSAGE, nullptr, window_class.hInstance, this);
+
+  if (result == nullptr) {
+    auto error = GetLastError();
+    LPWSTR message = nullptr;
+    size_t size = FormatMessageW(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        reinterpret_cast<LPWSTR>(&message), 0, NULL);
+    OutputDebugString(message);
+    LocalFree(message);
+  }
 }
 
 std::wstring Win32Window::NarrowToWide(const char* source) {
@@ -115,9 +111,11 @@ Win32Window::MessageHandler(HWND hwnd,
   if (window != nullptr) {
     switch (message) {
       case WM_DPICHANGED:
-        return HandleDpiChange(window_handle_, wparam, lparam);
+        return HandleDpiChange(window_handle_, wparam, lparam, true);
         break;
-
+      case kWmDpiChangedBeforeParent:
+        return HandleDpiChange(window_handle_, wparam, lparam, false);
+        break;
       case WM_DESTROY:
         window->OnClose();
         return 0;
@@ -206,22 +204,34 @@ void Win32Window::Destroy() {
 
 // DPI Change handler. on WM_DPICHANGE resize the window
 LRESULT
-Win32Window::HandleDpiChange(HWND hwnd, WPARAM wparam, LPARAM lparam) {
+Win32Window::HandleDpiChange(HWND hwnd,
+                             WPARAM wparam,
+                             LPARAM lparam,
+                             bool toplevel) {
   if (hwnd != nullptr) {
     auto window =
         reinterpret_cast<Win32Window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 
     UINT uDpi = HIWORD(wparam);
+
+    // The DPI is only passed for DPI change messages on top level windows,
+    // hence call function to get DPI if needed.
+    if (uDpi == 0) {
+      uDpi = dpi_helper_->GetDpiForWindow(hwnd);
+    }
     current_dpi_ = uDpi;
     window->OnDpiScale(uDpi);
 
-    // Resize the window
-    auto lprcNewScale = reinterpret_cast<RECT*>(lparam);
-    LONG newWidth = lprcNewScale->right - lprcNewScale->left;
-    LONG newHeight = lprcNewScale->bottom - lprcNewScale->top;
+    if (toplevel) {
+      // Resize the window only for toplevel windows which have a suggested
+      // size.
+      auto lprcNewScale = reinterpret_cast<RECT*>(lparam);
+      LONG newWidth = lprcNewScale->right - lprcNewScale->left;
+      LONG newHeight = lprcNewScale->bottom - lprcNewScale->top;
 
-    SetWindowPos(hwnd, nullptr, lprcNewScale->left, lprcNewScale->top, newWidth,
-                 newHeight, SWP_NOZORDER | SWP_NOACTIVATE);
+      SetWindowPos(hwnd, nullptr, lprcNewScale->left, lprcNewScale->top,
+                   newWidth, newHeight, SWP_NOZORDER | SWP_NOACTIVATE);
+    }
   }
   return 0;
 }

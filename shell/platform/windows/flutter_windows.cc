@@ -49,7 +49,7 @@ static FLUTTER_API_SYMBOL(FlutterEngine)
 
   FlutterRendererConfig config = {};
 
-  // Provide the necessary callbacks for rendering within a win32 window.
+  // Provide the necessary callbacks for rendering within a win32 child window.
   config.type = kOpenGL;
   config.open_gl.struct_size = sizeof(config.open_gl);
   config.open_gl.make_current = [](void* user_data) -> bool {
@@ -97,84 +97,52 @@ static FLUTTER_API_SYMBOL(FlutterEngine)
   return engine;
 }
 
-bool FlutterDesktopInit() {
-  return true;
-}
-
-void FlutterDesktopTerminate() {}
-
-FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
+FlutterDesktopViewControllerRef FlutterDesktopCreateViewController(
     int initial_width,
     int initial_height,
-    const char* title,
     const char* assets_path,
     const char* icu_data_path,
     const char** arguments,
     size_t argument_count) {
-  FlutterDesktopWindowControllerRef state =
-      flutter::Win32FlutterWindow::CreateWin32FlutterWindow(
-          title, 10, 10, initial_width, initial_height);
+  FlutterDesktopViewControllerRef state =
+      flutter::Win32FlutterWindow::CreateWin32FlutterWindow(initial_width,
+                                                            initial_height);
 
-  auto engine = RunFlutterEngine(state->window.get(), assets_path,
-                                 icu_data_path, arguments, argument_count);
+  auto engine = RunFlutterEngine(state->view.get(), assets_path, icu_data_path,
+                                 arguments, argument_count);
 
   if (engine == nullptr) {
     return nullptr;
   }
 
-  state->window->SetState(engine);
-
-  // Trigger an initial size callback to send size information to Flutter.
-  state->window->SendWindowMetrics();
+  state->view->SetState(engine);
+  state->engine = engine;
 
   return state;
 }
 
-void FlutterDesktopDestroyWindow(FlutterDesktopWindowControllerRef controller) {
+void FlutterDesktopProcessMessages() {
+  __FlutterEngineFlushPendingTasksNow();
+}
+
+HWND FlutterDesktopGetHWND(FlutterDesktopViewControllerRef controller) {
+  return (controller)->view->GetWindowHandle();
+}
+
+void FlutterDesktopDestroyViewController(
+    FlutterDesktopViewControllerRef controller) {
   FlutterEngineShutdown(controller->engine);
   delete controller;
 }
 
-void FlutterDesktopWindowSetHoverEnabled(FlutterDesktopWindowRef flutter_window,
-                                         bool enabled) {
-  // todo either implement or remove once embedder project has moved
-}
-
-void FlutterDesktopWindowSetTitle(FlutterDesktopWindowRef flutter_window,
-                                  const char* title) {
-  // todo either implement or remove
-}
-
-void FlutterDesktopWindowSetIcon(FlutterDesktopWindowRef flutter_window,
-                                 uint8_t* pixel_data,
-                                 int width,
-                                 int height) {
-  // todo either implement or remove
-}
-
-void FlutterDesktopRunWindowLoop(FlutterDesktopWindowControllerRef controller) {
-  controller->window->FlutterMessageLoop();
-
-  FlutterDesktopDestroyWindow(controller);
-}
-
-FlutterDesktopWindowRef FlutterDesktopGetWindow(
-    FlutterDesktopWindowControllerRef controller) {
-  // Currently, one registrar acts as the registrar for all plugins, so the
-  // name is ignored. It is part of the API to reduce churn in the future when
-  // aligning more closely with the Flutter registrar system.
-
-  return controller->window_wrapper.get();
-}
-
 FlutterDesktopPluginRegistrarRef FlutterDesktopGetPluginRegistrar(
-    FlutterDesktopWindowControllerRef controller,
+    FlutterDesktopViewControllerRef controller,
     const char* plugin_name) {
   // Currently, one registrar acts as the registrar for all plugins, so the
   // name is ignored. It is part of the API to reduce churn in the future when
   // aligning more closely with the Flutter registrar system.
 
-  return controller->window->GetRegistrar();
+  return controller->view->GetRegistrar();
 }
 
 FlutterDesktopEngineRef FlutterDesktopRunEngine(const char* assets_path,

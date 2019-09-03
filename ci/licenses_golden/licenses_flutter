@@ -994,10 +994,9 @@ FILE: ../../../flutter/shell/platform/glfw/text_input_plugin.cc
 FILE: ../../../flutter/shell/platform/glfw/text_input_plugin.h
 FILE: ../../../flutter/shell/platform/windows/angle_surface_manager.cc
 FILE: ../../../flutter/shell/platform/windows/angle_surface_manager.h
-FILE: ../../../flutter/shell/platform/windows/client_wrapper/flutter_window_controller.cc
-FILE: ../../../flutter/shell/platform/windows/client_wrapper/flutter_window_controller_unittests.cc
-FILE: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_window.h
-FILE: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_window_controller.h
+FILE: ../../../flutter/shell/platform/windows/client_wrapper/flutter_view_controller.cc
+FILE: ../../../flutter/shell/platform/windows/client_wrapper/flutter_view_controller_unittests.cc
+FILE: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_view_controller.h
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/include/flutter/plugin_registrar_windows.h
 FILE: ../../../flutter/shell/platform/windows/flutter_windows.cc
 FILE: ../../../flutter/shell/platform/windows/key_event_handler.cc
