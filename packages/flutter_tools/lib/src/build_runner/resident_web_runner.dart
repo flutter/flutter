@@ -66,7 +66,8 @@ class ResidentWebRunner extends ResidentRunner {
   bool get supportsServiceProtocol => isRunningDebug;
 
   WebFs _webFs;
-  DebugConnection _debugConnection;
+  WebFsResult _webFsResult;
+  DebugConnection get _debugConnection => _webFsResult.debugConnection;
   StreamSubscription<vmservice.Event> _stdOutSub;
 
   vmservice.VmService get _vmService => _debugConnection.vmService;
@@ -157,7 +158,7 @@ class ResidentWebRunner extends ResidentRunner {
         buildInfo: debuggingOptions.buildInfo,
       );
       if (supportsServiceProtocol) {
-        _debugConnection = await _webFs.runAndDebug(debuggingOptions.startPaused);
+        _webFsResult = await _webFs.runAndDebug(debuggingOptions.startPaused);
         unawaited(_debugConnection.onDone.whenComplete(exit));
       }
     } catch (err, stackTrace) {
@@ -190,6 +191,15 @@ class ResidentWebRunner extends ResidentRunner {
       await _debugConnection?.vmService?.streamListen('Stdout');
     } on vmservice.RPCError  {
       // Ignore this specific error.
+    }
+    if (debuggingOptions.startPaused) {
+      StreamSubscription<void> resumeSubscription;
+      resumeSubscription = _debugConnection.vmService.onDebugEvent.listen((vmservice.Event event) {
+        if (event.type == vmservice.EventKind.kResume) {
+          _webFsResult.appConnection.runMain();
+          resumeSubscription.cancel();
+        }
+      });
     }
     Uri websocketUri;
     if (supportsServiceProtocol) {

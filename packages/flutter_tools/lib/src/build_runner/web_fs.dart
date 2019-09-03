@@ -99,12 +99,12 @@ class WebFs {
   }
 
   /// Retrieve the [DebugConnection] for the current application.
-  Future<DebugConnection> runAndDebug(bool startPaused) async {
+  Future<WebFsResult> runAndDebug(bool startPaused) async {
     final AppConnection appConnection = await _dwds.connectedApps.first;
     if (!startPaused) {
       appConnection.runMain();
     }
-    return _dwds.debugConnection(appConnection);
+    return WebFsResult(await _dwds.debugConnection(appConnection), appConnection);
   }
 
   /// Perform a hard refresh of all connected browser tabs.
@@ -394,4 +394,11 @@ class BuildDaemonCreator {
     final String portFilePath = fs.path.join(daemonWorkspace(workingDirectory.path), '.asset_server_port');
     return int.tryParse(fs.file(portFilePath).readAsStringSync());
   }
+}
+
+class WebFsResult {
+  const WebFsResult(this.debugConnection, this.appConnection);
+
+  final DebugConnection debugConnection;
+  final AppConnection appConnection;
 }
