@@ -8,7 +8,6 @@ import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
-import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -17,12 +16,14 @@ import 'package:process/process.dart';
 // repo itself, consider reading this wiki page:
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
 
+const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 
 /// Doc
-class SkiaGoldClient {//}extends GoldensClient {
-  SkiaGoldClient({
+class SkiaGoldClient {
+  SkiaGoldClient(
+    this.workDirectory, {
     this.fs = const LocalFileSystem(),
     this.process = const LocalProcessManager(),
     this.platform = const LocalPlatform(),
@@ -53,7 +54,10 @@ class SkiaGoldClient {//}extends GoldensClient {
   ///
   /// This is informed by the [FlutterGoldenFileComparator] [basedir]. It cannot
   /// be null.
-  Directory _workDirectory;
+  final Directory workDirectory;
+
+  /// Doc
+  Directory get _flutterRoot => fs.directory(platform.environment[_kFlutterRootKey]);
 
   /// The path to the local [Directory] where the goldctl tool is hosted.
   ///
@@ -76,9 +80,7 @@ class SkiaGoldClient {//}extends GoldensClient {
   /// The [workDirectory] parameter specifies the current directory that golden
   /// tests are executing in, relative to the library of the given test. It is
   /// informed by the basedir of the [FlutterSkiaGoldFileComparator].
-  Future<void> auth(Directory workDirectory) async {
-    assert(workDirectory != null);
-    _workDirectory = workDirectory;
+  Future<void> auth() async {
     if (_clientIsAuthorized())
       return;
 
@@ -87,13 +89,13 @@ class SkiaGoldClient {//}extends GoldensClient {
       throw NonZeroExitCode(1, buf.toString());
     }
 
-    final File authorization = _workDirectory.childFile('serviceAccount.json');
+    final File authorization = workDirectory.childFile('serviceAccount.json');
     await authorization.writeAsString(_serviceAccount);
 
     final List<String> authArguments = <String>[
       'auth',
       '--service-account', authorization.path,
-      '--work-dir', _workDirectory.childDirectory('temp').path,
+      '--work-dir', workDirectory.childDirectory('temp').path,
     ];
 
     await io.Process.run(
@@ -107,8 +109,8 @@ class SkiaGoldClient {//}extends GoldensClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the current test.
   Future<void> imgtestInit() async {
-    final File keys = _workDirectory.childFile('keys.json');
-    final File failures = _workDirectory.childFile('failures.json');
+    final File keys = workDirectory.childFile('keys.json');
+    final File failures = workDirectory.childFile('failures.json');
 
     await keys.writeAsString(_getKeysJSON());
     await failures.create();
@@ -117,7 +119,7 @@ class SkiaGoldClient {//}extends GoldensClient {
     final List<String> imgtestInitArguments = <String>[
       'imgtest', 'init',
       '--instance', 'flutter',
-      '--work-dir', _workDirectory.childDirectory('temp').path,
+      '--work-dir', workDirectory.childDirectory('temp').path,
       '--commit', commitHash,
       '--keys-file', keys.path,
       '--failure-file', failures.path,
@@ -152,8 +154,8 @@ class SkiaGoldClient {//}extends GoldensClient {
 
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
-      '--work-dir', _workDirectory.childDirectory('temp').path,
-      '--test-name', testName.split(path.extension(testName.toString()))[0],
+      '--work-dir', workDirectory.childDirectory('temp').path,
+      '--test-name', _cleanTestName(testName),
       '--png-file', goldenFile.path,
     ];
 
@@ -167,7 +169,9 @@ class SkiaGoldClient {//}extends GoldensClient {
   /// Doc
   Future<List<int>>getMasterBytes(String testName) async {
     io.HttpOverrides.global = SkiaGoldHttpOverrides();
+    final io.HttpClient client = io.HttpClient();
 
+    testName = _cleanTestName(testName);
     final Uri requestForDigest = Uri.http(
       'https://flutter-gold.skia.org',
       '/json/search?'
@@ -176,8 +180,8 @@ class SkiaGoldClient {//}extends GoldensClient {
         '&pos=true&query=Platform%3D${platform.operatingSystem}%26name%3D$testName%26'
         'source_type%3Dflutter&sort=desc&unt=true',
     );
-    final io.HttpClient client = io.HttpClient();
     SkiaGoldDigest masterDigest;
+
     try {
       await client.getUrl(requestForDigest)
         .then((io.HttpClientRequest request) => request.close())
@@ -185,23 +189,28 @@ class SkiaGoldClient {//}extends GoldensClient {
         final String responseBody = await response.transform(utf8.decoder).join();
         final Map<String, dynamic> digests = jsonDecode(responseBody);
         if (digests.length > 1) {
-          print('Triage breakdown!'); // Throw with guidance
+          print('Triage breakdown!');
+          // TODO(Piinks): Throw with guidance
         }
         masterDigest = SkiaGoldDigest.fromJson(digests[0]);
       });
     } catch(_) {
       print('Request Failed.');
+      // TODO(Piinks): Output similar to skip, network connection may be
+      //  unavailable, i.e. airplane mode
     }
 
     if (!masterDigest.isValid(platform, testName)) {
-      // Throw with guidance
+      print('Invalid digest!');
+      // TODO(Piinks): Throw with guidance
     }
 
     final Uri requestForImage = Uri.http(
       'https://flutter-gold.skia.org',
-      '/img/images/${master.imageHash}.png',
+      '/img/images/${masterDigest.imageHash}.png',
     );
     List<int> masterImageBytes;
+
     try {
       await client.getUrl(requestForImage)
         .then((io.HttpClientRequest request) => request.close())
@@ -219,14 +228,14 @@ class SkiaGoldClient {//}extends GoldensClient {
 
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
-    if (!flutterRoot.existsSync()) {
+    if (!_flutterRoot.existsSync()) {
       final StringBuffer buf = StringBuffer()
-        ..writeln('Flutter root could not be found: $flutterRoot');
+        ..writeln('Flutter root could not be found: $_flutterRoot');
       throw NonZeroExitCode(1, buf.toString());
     } else {
       final io.ProcessResult revParse = await process.run(
         <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: flutterRoot.path,
+        workingDirectory: _flutterRoot.path,
       );
       return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
     }
@@ -245,10 +254,14 @@ class SkiaGoldClient {//}extends GoldensClient {
     );
   }
 
+  String _cleanTestName(String fileName) {
+    return fileName.split(path.extension(fileName.toString()))[0];
+  }
+
   /// Returns a boolean value to prevent the client from re-authorizing itself
   /// for multiple tests.
   bool _clientIsAuthorized() {
-    final File authFile = _workDirectory?.childFile(fs.path.join(
+    final File authFile = workDirectory?.childFile(fs.path.join(
       'temp',
       'auth_opt.json',
     ));
@@ -260,7 +273,7 @@ class SkiaGoldHttpOverrides extends io.HttpOverrides {
   @override
   io.HttpClient createHttpClient(io.SecurityContext context){
     return super.createHttpClient(context)
-      ..badCertificateCallback = (io.X509Certificate cert, String host, int port)=> true;
+      ..badCertificateCallback = (io.X509Certificate cert, String host, int port) => true;
   }
 }
 
@@ -280,18 +293,18 @@ class SkiaGoldDigest {
     return SkiaGoldDigest(
       imageHash: json['digest'],
       paramSet: json['paramset'],
-      status: json['status'],
       testName: json['test'],
+      status: json['status'],
     );
   }
 
   /// Unique identifier for the image associated with the digest.
   final String imageHash;
 
-  /// Parameter set for the given test, e.g. platform : Windows.
+  /// Parameter set for the given test, e.g. Platform : Windows.
   final Map<String, String> paramSet;
 
-  /// Status of the given digest, e.g. positive or untriaged.
+  /// Test name associated with the digest, e.g. positive or untriaged.
   final String testName;
 
   /// Status of the given digest, e.g. positive or untriaged.

@@ -323,7 +323,7 @@ class TrivialComparator implements GoldenFileComparator {
 ///   implements.
 ///   * [matchesGoldenFile], the function from [flutter_test] that invokes the
 ///    comparator.
-class LocalFileComparator extends GoldenFileComparator {
+class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutput {
   /// Creates a new [LocalFileComparator] for the specified [testFile].
   ///
   /// Golden file keys will be interpreted as file paths relative to the
@@ -366,17 +366,7 @@ class LocalFileComparator extends GoldenFileComparator {
     final ComparisonResult result = GoldenFileComparator.compareLists<Uint8List>(imageBytes, goldenBytes);
 
     if (!result.passed) {
-      String additionalFeedback = '';
-      if (result.diffs != null) {
-        additionalFeedback = '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
-        final Map<String, Image> diffs = result.diffs;
-        diffs.forEach((String name, Image image) {
-          final File output = _getFailureFile(name, golden);
-          output.parent.createSync(recursive: true);
-          output.writeAsBytesSync(encodePng(image));
-        });
-      }
-      throw test_package.TestFailure('Golden "$golden": ${result.error}$additionalFeedback');
+      generateFailureOutput(result, golden, basedir);
     }
     return result.passed;
   }
@@ -391,13 +381,32 @@ class LocalFileComparator extends GoldenFileComparator {
   File _getGoldenFile(Uri golden) {
     return File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
   }
+}
 
-  File _getFailureFile(String failure, Uri golden) {
+/// Doc
+class LocalComparisonOutput {
+  /// Doc
+  void generateFailureOutput(ComparisonResult result, Uri golden, Uri basedir) {
+    String additionalFeedback = '';
+    if (result.diffs != null) {
+      additionalFeedback = '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
+      final Map<String, Image> diffs = result.diffs;
+      diffs.forEach((String name, Image image) {
+        final File output = getFailureFile(name, golden);
+        output.parent.createSync(recursive: true);
+        output.writeAsBytesSync(encodePng(image));
+      });
+    }
+    throw test_package.TestFailure('Golden "$golden": ${result.error}$additionalFeedback');
+  }
+
+  /// Doc
+  File getFailureFile(String failure, Uri golden) {
     final String fileName = golden.pathSegments[0];
     final String testName = fileName.split(path.extension(fileName))[0]
       + '_'
       + failure
       + '.png';
-    return File(_path.join('failures', testName));
+    return File(path.join('failures', testName));
   }
 }
