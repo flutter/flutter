@@ -900,7 +900,8 @@ class AndroidMavenArtifacts extends ArtifactSet {
           '-b', fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle'),
           '--project-cache-dir', tempDir.path,
           'resolveDependencies',
-        ]);
+        ],
+        environment: gradleEnv);
       final int exitCode = await process.exitCode;
       if (exitCode != 0) {
         printError('Failed to download the Android dependencies');

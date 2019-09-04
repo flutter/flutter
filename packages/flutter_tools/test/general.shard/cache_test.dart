@@ -11,6 +11,8 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import 'package:flutter_tools/src/base/common.dart';
+
+import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -291,13 +293,14 @@ void main() {
       fs.file(fs.path.join(gradleWrapperDir.path, 'gradlew')).writeAsStringSync('irrelevant');
       fs.file(fs.path.join(gradleWrapperDir.path, 'gradlew.bat')).writeAsStringSync('irrelevant');
 
-      when(processManager.start(any))
+      when(processManager.start(any, environment: captureAnyNamed('environment')))
           .thenAnswer((Invocation invocation){
             final List<String> args = invocation.positionalArguments[0];
             expect(args.length, 6);
             expect(args[1], '-b');
             expect(args[2].endsWith('resolve_dependencies.gradle'), isTrue);
             expect(args[5], 'resolveDependencies');
+            expect(invocation.namedArguments[#environment], gradleEnv);
 
             return Future<Process>.value(mockProcess);
           });
