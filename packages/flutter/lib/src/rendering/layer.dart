@@ -302,7 +302,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Returns an iterable of annotation of type `S` that corresponds to the
   /// point described by `localPosition` on all layers under the point.
   ///
-  /// Returns an empty list if no matching region is found.
+  /// Returns a result with empty entries if no matching region is found.
   ///
   /// By default this method calls [findAnnotations] and returns its result.
   /// It is encouraged to override [findAnnotations] instead of this method.
