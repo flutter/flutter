@@ -1,6 +1,6 @@
 {
     "program": {
-        "binary": "test/flutter_runner_tests"
+        "binary": "bin/app"
     },
     "sandbox": {
         "features": [

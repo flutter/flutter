@@ -366,6 +366,8 @@ package_dir("flutter_runner_tests") {
 
   meta_dir = "$flutter_root/shell/platform/fuchsia/flutter/meta"
 
+  libraries = common_libs
+
   meta = [
     {
       path = "meta/$target_name.cmx"
