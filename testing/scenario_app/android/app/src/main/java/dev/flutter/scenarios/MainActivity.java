@@ -19,11 +19,10 @@ import io.flutter.embedding.android.FlutterFragment;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
-import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
 import io.flutter.plugin.common.BasicMessageChannel;
 import io.flutter.plugin.common.BinaryCodec;
 
-public class MainActivity extends FlutterActivity implements OnFirstFrameRenderedListener {
+public class MainActivity extends FlutterActivity {
   final static String TAG = "Scenarios";
 
   @Override
@@ -37,12 +36,6 @@ public class MainActivity extends FlutterActivity implements OnFirstFrameRendere
       // Run for one minute, get the timeline data, write it, and finish.
       final Uri logFileUri = launchIntent.getData();
       new Handler().postDelayed(() -> writeTimelineData(logFileUri), 20000);
-    }
-  }
-
-  public void onFirstFrameRendered() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      reportFullyDrawn();
     }
   }
 
