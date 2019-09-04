@@ -15,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import io.flutter.Log;
@@ -145,7 +146,7 @@ public class PlatformChannel {
    * @throws JSONException if {@code inputRects} does not contain expected keys and value types.
    */
   @NonNull
-  private ArrayList<Rect> decodeRects(@NonNull JSONArray inputRects) throws JSONException {
+  private ArrayList<Rect> decodeExclusionRects(@NonNull JSONArray inputRects) throws JSONException {
     ArrayList<Rect> exclusionRects = new ArrayList<Rect>();
     for (int i = 0; i < inputRects.length(); i++) {
       JSONObject rect = inputRects.getJSONObject(i);
@@ -171,6 +172,31 @@ public class PlatformChannel {
     }
 
     return exclusionRects;
+  }
+
+  /**
+   * Encodes a List<Rect> provided by the Android host into an
+   * ArrayList<HashMap<String, Integer>>.
+   *
+   * Since View.getSystemGestureExclusionRects returns a list of Rects, these
+   * Rects need to be transformed into UTF-8 encoded JSON messages to be
+   * properly decoded by the Flutter framework.
+   *
+   * This method is used by the SystemGestures.getSystemGestureExclusionRects
+   * platform channel.
+   */
+  private ArrayList<HashMap<String, Integer>> encodeExclusionRects(List<Rect> exclusionRects) {
+    ArrayList<HashMap<String, Integer>> encodedExclusionRects = new ArrayList<HashMap<String, Integer>>();
+    for (Rect rect : exclusionRects) {
+      HashMap<String, Integer> rectMap = new HashMap<String, Integer>();
+      rectMap.put("top", rect.top);
+      rectMap.put("right", rect.right);
+      rectMap.put("bottom", rect.bottom);
+      rectMap.put("left", rect.left);
+      encodedExclusionRects.add(rectMap);
+    }
+
+    return encodedExclusionRects;
   }
 
   @NonNull
@@ -336,6 +362,12 @@ public class PlatformChannel {
      * clipboard to the given {@code text}.
      */
     void setClipboardData(@NonNull String text);
+
+    /**
+     * The Flutter application would like to get the system gesture exclusion
+     * rects.
+     */
+    List<Rect> getSystemGestureExclusionRects();
 
     /**
      * The Flutter application would like to set the system gesture exclusion
@@ -594,18 +626,6 @@ public class PlatformChannel {
             platformMessageHandler.popSystemNavigator();
             result.success(null);
             break;
-          case "SystemGestures.setSystemGestureExclusionRects":
-            if (!(arguments instanceof JSONArray)) {
-              String inputTypeError = "Input type is incorrect. Ensure that a List<Map<String, int>> is passed as the input for SystemGestureExclusionRects.setSystemGestureExclusionRects.";
-              result.error("inputTypeError", inputTypeError, null);
-              break;
-            }
-
-            JSONArray inputRects = (JSONArray) arguments;
-            ArrayList<Rect> decodedRects = decodeRects(inputRects);
-            platformMessageHandler.setSystemGestureExclusionRects(decodedRects);
-            result.success(null);
-            break;
           case "Clipboard.getData": {
             String contentFormatName = (String) arguments;
             ClipboardContentFormat clipboardFormat = null;
@@ -632,6 +652,30 @@ public class PlatformChannel {
             String clipboardContent = ((JSONObject) arguments).getString("text");
             platformMessageHandler.setClipboardData(clipboardContent);
             result.success(null);
+            break;
+          }
+          case "SystemGestures.setSystemGestureExclusionRects":
+            if (!(arguments instanceof JSONArray)) {
+              String inputTypeError = "Input type is incorrect. Ensure that a List<Map<String, int>> is passed as the input for SystemGestureExclusionRects.setSystemGestureExclusionRects.";
+              result.error("inputTypeError", inputTypeError, null);
+              break;
+            }
+
+            JSONArray inputRects = (JSONArray) arguments;
+            ArrayList<Rect> decodedRects = decodeExclusionRects(inputRects);
+            platformMessageHandler.setSystemGestureExclusionRects(decodedRects);
+            result.success(null);
+            break;
+          case "SystemGestures.getSystemGestureExclusionRects": {
+            List<Rect> exclusionRects = platformMessageHandler.getSystemGestureExclusionRects();
+            if (exclusionRects == null) {
+              String incorrectApiLevel = "Exclusion rects only exist for Android API 29+.";
+              result.error("error", incorrectApiLevel, null);
+              break;
+            }
+
+            ArrayList<HashMap<String, Integer>> encodedExclusionRects = encodeExclusionRects(exclusionRects);
+            result.success(encodedExclusionRects);
             break;
           }
           default:
