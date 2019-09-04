@@ -215,6 +215,7 @@ void main() {
     const Key key = Key('test');
     const Color focusColor = Color(0xff00ff00);
 
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -313,6 +314,7 @@ void main() {
     const Key key = Key('test');
     const Color hoverColor = Color(0xff00ff00);
 
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
