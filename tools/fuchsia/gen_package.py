@@ -13,6 +13,8 @@ import os
 import subprocess
 import sys
 
+from gather_flutter_runner_artifacts import CreateMetaPackage
+
 
 # Generates the manifest and returns the file.
 def GenerateManifest(package_dir):
@@ -57,23 +59,35 @@ def main():
   parser.add_argument(
       '--signing-key', dest='signing_key', action='store', required=True)
   parser.add_argument(
-      '--manifest-file', dest='manifest_file', action='store', required=True)
+      '--manifest-file', dest='manifest_file', action='store', required=False)
+  parser.add_argument(
+      '--far-name', dest='far_name', action='store', required=False)
 
   args = parser.parse_args()
 
   assert os.path.exists(args.pm_bin)
   assert os.path.exists(args.package_dir)
   assert os.path.exists(args.signing_key)
-  assert os.path.exists(args.manifest_file)
+
+  pkg_dir = args.package_dir
+  if not os.path.exists(os.path.join(pkg_dir, 'meta', 'package')):
+    CreateMetaPackage(pkg_dir, args.far_name)
+
+  manifest_file = None
+  if args.manifest_file is not None:
+    assert os.path.exists(args.manifest_file)
+    manifest_file = args.manifest_file
+  else:
+    manifest_file = GenerateManifest(args.package_dir)
 
   pm_command_base = [
       args.pm_bin,
       '-o',
-      args.package_dir,
+      os.path.abspath(os.path.join(pkg_dir, os.pardir)),
       '-k',
       args.signing_key,
       '-m',
-      args.manifest_file,
+      manifest_file,
   ]
 
   # Build the package

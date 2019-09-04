@@ -9,6 +9,7 @@ template("package_dir") {
   assert(defined(invoker.binary), "package must define binary")
   assert(defined(invoker.meta_dir), "package must define meta_dir")
 
+  pkg_testonly = defined(invoker.testonly) && invoker.testonly
   pkg_target_name = target_name
   pkg = {
     package_version = "0"  # placeholder
@@ -72,5 +73,6 @@ template("package_dir") {
     deps = pkg.deps + [ ":$cmx_target" ]
     args = [ "--file-list={{response_file_name}}" ]
     outputs = copy_outputs
+    testonly = pkg_testonly
   }
 }
