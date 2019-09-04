@@ -74,4 +74,5 @@ builders:
 flutter:
   uses-material-design: true
 
+
 # PUBSPEC CHECKSUM: 1d9b

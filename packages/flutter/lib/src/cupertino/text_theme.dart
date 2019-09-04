@@ -104,22 +104,22 @@ const TextStyle _kDefaultPickerDarkTextStyle = TextStyle(
 );
 
 // Eyeballed value since it's not documented in https://developer.apple.com/design/resources/.
+// Inspected on iOS 13 simulator with "Debug View Hierarchy".
 const TextStyle _kDefaultDateTimePickerLightTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Display',
   fontSize: 21,
-  fontWeight: FontWeight.w300,
-  letterSpacing: -1.05,
+  fontWeight: FontWeight.normal,
   color: CupertinoColors.black,
 );
 
 // Eyeballed value since it's not documented in https://developer.apple.com/design/resources/.
+// Inspected on iOS 13 simulator with "Debug View Hierarchy".
 const TextStyle _kDefaultDateTimePickerDarkTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Display',
   fontSize: 21,
-  fontWeight: FontWeight.w300,
-  letterSpacing: -1.05,
+  fontWeight: FontWeight.normal,
   color: CupertinoColors.white,
 );
 

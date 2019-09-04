@@ -10,7 +10,7 @@ import '../build_info.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
@@ -67,6 +67,12 @@ class BuildApkCommand extends BuildSubCommand {
     }
     return usage;
   }
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.android,
+  };
 
   @override
   Future<FlutterCommandResult> runCommand() async {

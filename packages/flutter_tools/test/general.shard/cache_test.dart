@@ -8,10 +8,8 @@ import 'package:file_testing/file_testing.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
-import 'package:process/process.dart';
 
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show InternetAddress, SocketException;
@@ -138,30 +136,18 @@ void main() {
       when(artifact1.isUpToDate()).thenReturn(true);
       when(artifact2.isUpToDate()).thenReturn(false);
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
-      await cache.updateAll(<DevelopmentArtifact>{
-        null,
-      });
-      verifyNever(artifact1.update());
-      verify(artifact2.update());
+      await cache.updateAll(<DevelopmentArtifact>{});
+      verifyNever(artifact1.update(<DevelopmentArtifact>{}));
+      verify(artifact2.update(<DevelopmentArtifact>{}));
     });
     testUsingContext('getter dyLdLibEntry concatenates the output of each artifact\'s dyLdLibEntry getter', () async {
-      final IosUsbArtifacts artifact1 = MockIosUsbArtifacts();
-      final IosUsbArtifacts artifact2 = MockIosUsbArtifacts();
-      final IosUsbArtifacts artifact3 = MockIosUsbArtifacts();
-      when(artifact1.environment)
-          .thenReturn(<String, String>{
-            'DYLD_LIBRARY_PATH': '/path/to/alpha:/path/to/beta',
-          });
-      when(artifact2.environment)
-          .thenReturn(<String, String>{
-            'DYLD_LIBRARY_PATH': '/path/to/gamma:/path/to/delta:/path/to/epsilon',
-          });
-      when(artifact3.environment)
-          .thenReturn(<String, String>{
-            'DYLD_LIBRARY_PATH': '',
-          });
+      final CachedArtifact artifact1 = MockCachedArtifact();
+      final CachedArtifact artifact2 = MockCachedArtifact();
+      final CachedArtifact artifact3 = MockCachedArtifact();
+      when(artifact1.dyLdLibPath).thenReturn('/path/to/alpha:/path/to/beta');
+      when(artifact2.dyLdLibPath).thenReturn('/path/to/gamma:/path/to/delta:/path/to/epsilon');
+      when(artifact3.dyLdLibPath).thenReturn(''); // Empty output
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2, artifact3]);
-
       expect(cache.dyLdLibEntry.key, 'DYLD_LIBRARY_PATH');
       expect(
         cache.dyLdLibEntry.value,
@@ -177,20 +163,18 @@ void main() {
       when(artifact2.isUpToDate()).thenReturn(false);
       final MockInternetAddress address = MockInternetAddress();
       when(address.host).thenReturn('storage.googleapis.com');
-      when(artifact1.update()).thenThrow(SocketException(
+      when(artifact1.update(<DevelopmentArtifact>{})).thenThrow(SocketException(
         'Connection reset by peer',
         address: address,
       ));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       try {
-        await cache.updateAll(<DevelopmentArtifact>{
-          null,
-        });
+        await cache.updateAll(<DevelopmentArtifact>{});
         fail('Mock thrown exception expected');
       } catch (e) {
-        verify(artifact1.update());
+        verify(artifact1.update(<DevelopmentArtifact>{}));
         // Don't continue when retrieval fails.
-        verifyNever(artifact2.update());
+        verifyNever(artifact2.update(<DevelopmentArtifact>{}));
         expect(
           testLogger.errorText,
           contains('https://flutter.dev/community/china'),
@@ -242,7 +226,6 @@ void main() {
         binaryDirs: <List<String>>[
           <String>['bin_dir', 'unused_url_path'],
         ],
-        requiredArtifacts: DevelopmentArtifact.universal,
       );
       await artifact.updateInner();
       final Directory dir = memoryFileSystem.systemTempDirectory
@@ -261,56 +244,25 @@ void main() {
     });
   });
 
-  group('AndroidMavenArtifacts', () {
-    MemoryFileSystem memoryFileSystem;
-    MockProcessManager processManager;
-    MockCache mockCache;
-    MockProcess mockProcess;
+  testUsingContext('throws tool exit on fs exception', () async {
+    final FakeCachedArtifact fakeCachedArtifact = FakeCachedArtifact(
+      cache: MockCache(),
+      requiredArtifacts: <DevelopmentArtifact>{
+        DevelopmentArtifact.android,
+      }
+    );
+    final Directory mockDirectory = MockDirectory();
+    when(fakeCachedArtifact.cache.getArtifactDirectory(any))
+        .thenReturn(mockDirectory);
+    when(mockDirectory.existsSync()).thenReturn(false);
+    when(mockDirectory.createSync(recursive: true))
+        .thenThrow(const FileSystemException());
 
-    setUp(() {
-      memoryFileSystem = MemoryFileSystem();
-      processManager = MockProcessManager();
-      mockCache = MockCache();
-      mockProcess = MockProcess();
-    });
-
-    test('development artifact', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts();
-      expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
-    });
-
-    testUsingContext('update', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts();
-      expect(mavenArtifacts.isUpToDate(), isFalse);
-
-      final Directory gradleWrapperDir = fs.systemTempDirectory.createTempSync('gradle_wrapper.');
-      when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
-
-      fs.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))
-          .createSync(recursive: true);
-      fs.file(fs.path.join(gradleWrapperDir.path, 'gradlew')).writeAsStringSync('irrelevant');
-      fs.file(fs.path.join(gradleWrapperDir.path, 'gradlew.bat')).writeAsStringSync('irrelevant');
-
-      when(processManager.start(any))
-          .thenAnswer((Invocation invocation){
-            final List<String> args = invocation.positionalArguments[0];
-            expect(args.length, 6);
-            expect(args[1], '-b');
-            expect(args[2].endsWith('resolve_dependencies.gradle'), isTrue);
-            expect(args[5], 'resolveDependencies');
-
-            return Future<Process>.value(mockProcess);
-          });
-      when(mockProcess.exitCode).thenAnswer((_) async => 0);
-
-      await mavenArtifacts.update();
-
-      expect(mavenArtifacts.isUpToDate(), isFalse);
-    }, overrides: <Type, Generator>{
-      Cache: ()=> mockCache,
-      FileSystem: () => memoryFileSystem,
-      ProcessManager: () => processManager,
-    });
+    expect(() => fakeCachedArtifact.update(<DevelopmentArtifact>{
+        DevelopmentArtifact.android,
+    }), throwsA(isInstanceOf<ToolExit>()));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
   });
 }
 
@@ -318,7 +270,7 @@ class FakeCachedArtifact extends EngineCachedArtifact {
   FakeCachedArtifact({
     String stampName = 'STAMP',
     @required Cache cache,
-    DevelopmentArtifact requiredArtifacts,
+    Set<DevelopmentArtifact> requiredArtifacts = const <DevelopmentArtifact>{},
     this.binaryDirs = const <List<String>>[],
     this.licenseDirs = const <String>[],
     this.packageDirs = const <String>[],
@@ -338,15 +290,12 @@ class FakeCachedArtifact extends EngineCachedArtifact {
   List<String> getPackageDirs() => packageDirs;
 }
 
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcess extends Mock implements Process {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockFile extends Mock implements File {}
 class MockDirectory extends Mock implements Directory {}
 
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 class MockCachedArtifact extends Mock implements CachedArtifact {}
-class MockIosUsbArtifacts extends Mock implements IosUsbArtifacts {}
 class MockInternetAddress extends Mock implements InternetAddress {}
 class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
