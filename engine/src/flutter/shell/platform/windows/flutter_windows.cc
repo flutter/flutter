@@ -69,6 +69,10 @@ static FLUTTER_API_SYMBOL(FlutterEngine)
                                        const char* what) -> void* {
     return eglGetProcAddress(what);
   };
+  config.open_gl.make_resource_current = [](void* user_data) -> bool {
+    auto host = static_cast<flutter::Win32FlutterWindow*>(user_data);
+    return host->MakeResourceCurrent();
+  };
 
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);

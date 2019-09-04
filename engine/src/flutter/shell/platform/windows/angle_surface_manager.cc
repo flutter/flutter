@@ -126,13 +126,37 @@ bool AngleSurfaceManager::Initialize() {
     return false;
   }
 
+  egl_resource_context_ = eglCreateContext(
+      egl_display_, egl_config_, egl_context_, display_context_attributes);
+
+  if (egl_resource_context_ == EGL_NO_CONTEXT) {
+    OutputDebugString(L"EGL: Failed to create EGL resource context");
+    return false;
+  }
+
   return true;
 }
 
 void AngleSurfaceManager::CleanUp() {
+  EGLBoolean result = EGL_FALSE;
+
   if (egl_display_ != EGL_NO_DISPLAY && egl_context_ != EGL_NO_CONTEXT) {
-    eglDestroyContext(egl_display_, egl_context_);
+    result = eglDestroyContext(egl_display_, egl_context_);
     egl_context_ = EGL_NO_CONTEXT;
+
+    if (result == EGL_FALSE) {
+      OutputDebugString(L"EGL: Failed to destroy context");
+    }
+  }
+
+  if (egl_display_ != EGL_NO_DISPLAY &&
+      egl_resource_context_ != EGL_NO_CONTEXT) {
+    result = eglDestroyContext(egl_display_, egl_resource_context_);
+    egl_resource_context_ = EGL_NO_CONTEXT;
+
+    if (result == EGL_FALSE) {
+      OutputDebugString(L"EGL: Failed to destroy resource context");
+    }
   }
 
   if (egl_display_ != EGL_NO_DISPLAY) {
@@ -182,6 +206,11 @@ void AngleSurfaceManager::DestroySurface(const EGLSurface surface) {
 bool AngleSurfaceManager::MakeCurrent(const EGLSurface surface) {
   return (eglMakeCurrent(egl_display_, surface, surface, egl_context_) ==
           EGL_TRUE);
+}
+
+bool AngleSurfaceManager::MakeResourceCurrent() {
+  return (eglMakeCurrent(egl_display_, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                         egl_resource_context_) == EGL_TRUE);
 }
 
 EGLBoolean AngleSurfaceManager::SwapBuffers(const EGLSurface surface) {
