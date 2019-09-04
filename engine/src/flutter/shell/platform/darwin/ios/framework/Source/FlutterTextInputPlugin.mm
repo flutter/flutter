@@ -634,17 +634,19 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
   // because it is the expected behavior of Thai input.
   // https://github.com/flutter/flutter/issues/24203
   // https://github.com/flutter/flutter/issues/21745
+  // https://github.com/flutter/flutter/issues/39399
   //
   // This is needed for correct handling of the deletion of Thai vowel input.
   // TODO(cbracken): Get a good understanding of expected behavior of Thai
   // input and ensure that this is the correct solution.
   // https://github.com/flutter/flutter/issues/28962
   if (_selectedTextRange.isEmpty && [self hasText]) {
-    NSRange oldRange = ((FlutterTextRange*)_selectedTextRange).range;
+    UITextRange* oldSelectedRange = _selectedTextRange;
+    NSRange oldRange = ((FlutterTextRange*)oldSelectedRange).range;
     if (oldRange.location > 0) {
       NSRange newRange = NSMakeRange(oldRange.location - 1, 1);
-      [self setSelectedTextRange:[FlutterTextRange rangeWithNSRange:newRange]
-              updateEditingState:false];
+      _selectedTextRange = [[FlutterTextRange rangeWithNSRange:newRange] copy];
+      [oldSelectedRange release];
     }
   }
 
