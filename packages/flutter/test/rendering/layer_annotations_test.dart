@@ -22,7 +22,7 @@ void main() {
 
     expect(
       root.findAll<int>(Offset.zero).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 3, localPosition: Offset.zero),
         const AnnotationEntry<int>(annotation: 2, localPosition: Offset.zero),
         const AnnotationEntry<int>(annotation: 1, localPosition: Offset.zero),
@@ -83,7 +83,7 @@ void main() {
 
     expect(
       root.findAll<int>(Offset.zero).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 3, localPosition: Offset(0, 0)),
         const AnnotationEntry<int>(annotation: 2, localPosition: Offset(0, 0)),
       ]),
@@ -102,7 +102,7 @@ void main() {
 
     expect(
       root.findAll<int>(Offset.zero).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: Offset(0, 0)),
       ]),
     );
@@ -120,7 +120,7 @@ void main() {
 
     expect(
       root.findAll<int>(Offset.zero).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: Offset(0, 0)),
         const AnnotationEntry<int>(annotation: 1000, localPosition: Offset(0, 0)),
       ]),
@@ -139,7 +139,7 @@ void main() {
 
     expect(
       root.findAll<int>(Offset.zero).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: Offset(0, 0)),
       ]),
     );
@@ -160,13 +160,13 @@ void main() {
 
     expect(
       root.findAll<int>(insidePosition).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1, localPosition: Offset(5, 5)),
       ]),
     );
     expect(
       root.findAll<int>(outsidePosition).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: Offset(5, 5)),
       ]),
     );
@@ -192,13 +192,13 @@ void main() {
 
     expect(
       root.findAll<int>(insidePosition).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1, localPosition: insidePosition),
       ]),
     );
     expect(
       root.findAll<int>(outsidePosition).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
       ]),
     );
@@ -231,13 +231,13 @@ void main() {
 
     expect(
       root.findAll<int>(insidePosition).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1, localPosition: insidePosition),
       ]),
     );
     expect(
       root.findAll<int>(outsidePosition).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
       ]),
     );
@@ -275,13 +275,13 @@ void main() {
 
     expect(
       root.findAll<int>(insidePosition).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1, localPosition: insidePosition),
       ]),
     );
     expect(
       root.findAll<int>(outsidePosition).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
       ]),
     );
@@ -313,13 +313,13 @@ void main() {
 
     expect(
       root.findAll<int>(insidePosition).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1, localPosition: Offset(15, 15)),
       ]),
     );
     expect(
       root.findAll<int>(outsidePosition).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
       ]),
     );
@@ -339,7 +339,7 @@ void main() {
 
     expect(
       root.findAll<int>(Offset.zero).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: Offset.zero),
       ]),
     );
@@ -382,13 +382,13 @@ void main() {
 
     expect(
       root.findAll<int>(insidePosition).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1, localPosition: insidePosition),
       ]),
     );
     expect(
       root.findAll<int>(outsidePosition).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
       ]),
     );
@@ -413,13 +413,13 @@ void main() {
 
     expect(
       root.findAll<int>(insidePosition).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1, localPosition: Offset(5, 5)),
       ]),
     );
     expect(
       root.findAll<int>(outsidePosition).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 1000, localPosition: outsidePosition),
       ]),
     );
@@ -440,7 +440,7 @@ void main() {
 
     expect(
       root.findAll<int>(position).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1, localPosition: position),
         const AnnotationEntry<int>(annotation: 1000, localPosition: position),
@@ -463,7 +463,7 @@ void main() {
 
     expect(
       root.findAll<int>(position).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1, localPosition: position),
       ]),
@@ -484,7 +484,7 @@ void main() {
 
     expect(
       root.findAll<int>(position).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1, localPosition: position),
         const AnnotationEntry<int>(annotation: 1000, localPosition: position),
@@ -507,7 +507,7 @@ void main() {
 
     expect(
       root.findAll<int>(position).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1000, localPosition: position),
       ]),
@@ -529,7 +529,7 @@ void main() {
 
     expect(
       root.findAll<int>(position).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
       ]),
     );
@@ -550,7 +550,7 @@ void main() {
 
     expect(
       root.findAll<int>(position).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1, localPosition: position),
         const AnnotationEntry<int>(annotation: 1000, localPosition: position),
@@ -573,7 +573,7 @@ void main() {
 
     expect(
       root.findAll<int>(position).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1, localPosition: position),
       ]),
@@ -607,7 +607,7 @@ void main() {
 
     expect(
       root.findAll<int>(position).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1, localPosition: position),
         const AnnotationEntry<int>(annotation: 1000, localPosition: position),
@@ -635,7 +635,7 @@ void main() {
 
     expect(
       root.findAll<int>(position).entries.toList(),
-      equalToAnnotationResult<int>(<AnnotationEntry<int>>[
+      _equalToAnnotationResult<int>(<AnnotationEntry<int>>[
         const AnnotationEntry<int>(annotation: 2, localPosition: position),
         const AnnotationEntry<int>(annotation: 1000, localPosition: position),
       ]),
@@ -747,7 +747,7 @@ class _TestAnnotatedLayer extends Layer {
   }
 }
 
-Matcher equalToAnnotationResult<T>(List<AnnotationEntry<int>> list) {
+Matcher _equalToAnnotationResult<T>(List<AnnotationEntry<int>> list) {
   return pairwiseCompare<AnnotationEntry<int>, AnnotationEntry<int>>(
     list,
     (AnnotationEntry<int> a, AnnotationEntry<int> b) {
