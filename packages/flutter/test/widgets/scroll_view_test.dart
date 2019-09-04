@@ -549,7 +549,7 @@ void main() {
     expect(finder, findsOneWidget);
   });
 
-  testWidgets('ScrollDirection in same direction as increasing scroll offset',
+  testWidgets('ScrollDirection is forward for increasing scroll offset',
           (WidgetTester tester) async {
     const double cellHeight = 20.0;
     final ScrollController scrollController = ScrollController();
