@@ -429,7 +429,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     if (direction == ScrollDirection.forward && _effectiveScrollOffset >= maxExtent)
       return;
 
-    final TickerProvider vsync = snapConfiguration.vsync;;
+    final TickerProvider vsync = snapConfiguration.vsync;
     final Duration duration = snapConfiguration.duration;
     _controller ??= AnimationController(vsync: vsync, duration: duration)
       ..addListener(() {
