@@ -163,7 +163,8 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     // reason that I do this in an Overlay is that it needs to sit on top of
     // widgets adjacent to it.
     // Also, I noticed that I'm having the same theme problem where a widget in
-    // the Overlay might not be themed the same as it is otherwise.
+    // the Overlay might not be themed the same as it is otherwise. Sizing can
+    // also potentially be a problem if the child was sized by its parent before.
     return OverlayEntry(
       opaque: false,
       builder: (BuildContext context) {
@@ -316,8 +317,6 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
     ).animate(
       CurvedAnimation(
         parent: widget.controller,
-        // TODO(justinmc): I need to take another pass at making this feel the
-        // same as native.
         curve: Curves.easeInBack,
       ),
     );
@@ -441,34 +440,34 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   // ContextMenuOrientation.
   static AlignmentDirectional getSheetAlignment(_ContextMenuOrientation contextMenuOrientation) {
     switch (contextMenuOrientation) {
-      case (_ContextMenuOrientation.center):
+      case _ContextMenuOrientation.center:
         return AlignmentDirectional.topCenter;
-      case (_ContextMenuOrientation.left):
-        return AlignmentDirectional.topStart;
-      case (_ContextMenuOrientation.right):
+      case _ContextMenuOrientation.right:
         return AlignmentDirectional.topEnd;
+      default:
+        return AlignmentDirectional.topStart;
     }
   }
 
   // The place to start the sheetRect animation from.
   static Rect _getSheetRectBegin(Orientation orientation, _ContextMenuOrientation contextMenuOrientation, Rect childRect, Rect sheetRect) {
     switch (contextMenuOrientation) {
-      case (_ContextMenuOrientation.center):
+      case _ContextMenuOrientation.center:
         final Offset target = orientation == Orientation.portrait
           ? childRect.bottomCenter
           : childRect.topCenter;
         final Offset centered = target - Offset(sheetRect.width / 2, 0.0);
         return centered & sheetRect.size;
-      case (_ContextMenuOrientation.left):
-        final Offset target = orientation == Orientation.portrait
-          ? childRect.bottomLeft
-          : childRect.topLeft;
-        return target & sheetRect.size;
-      case (_ContextMenuOrientation.right):
+      case _ContextMenuOrientation.right:
         final Offset target = orientation == Orientation.portrait
           ? childRect.bottomRight
           : childRect.topRight;
         return (target - Offset(sheetRect.width, 0.0)) & sheetRect.size;
+      default:
+        final Offset target = orientation == Orientation.portrait
+          ? childRect.bottomLeft
+          : childRect.topLeft;
+        return target & sheetRect.size;
     }
   }
 
@@ -580,7 +579,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     // TODO(justinmc): Is it bad to put this OrientationBuilder so high in the
-    // tree? Better way?
+    // tree and pass orientation around like this? I could also get it from
+    // context or use multiple OrientationBuilders.
     return OrientationBuilder(
       builder: (BuildContext context, Orientation orientation) {
         _lastOrientation = orientation;
@@ -588,13 +588,9 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
         final Rect rect = reverse ? _rectTweenReverse.evaluate(animation) : _rectTween.evaluate(animation);
         final Rect sheetRect = _sheetRectTween.evaluate(animation);
 
-        // TODO(justinmc): Try various types of children in the app. Things
-        // contained in a SizedBox, a SizedBox itself, some Text, etc.
-
         // While the animation is running, render everything in a Stack so that
         // they're movable.
         if (!animation.isCompleted) {
-          // TODO(justinmc): Use _DecoyChild here?
           return Stack(
             children: <Widget>[
               Positioned.fromRect(
@@ -693,19 +689,11 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
   // The scale of the child changes as a function of the distance it is dragged.
   static double _getScale(Orientation orientation, double maxDragDistance, double dy) {
-    final dyDirectional = dy <= 0.0 ? dy : -dy;
+    final double dyDirectional = dy <= 0.0 ? dy : -dy;
     return math.max(
       _kMinScale,
       (maxDragDistance + dyDirectional) / maxDragDistance,
     );
-  }
-
-  // The ContextMenuSheet fades out with distance dragged.
-  static double _getOpacity(double maxDragDistance, double dy) {
-    if (dy <= 0.0) {
-      return 1.0;
-    }
-    return math.max(0.0, (maxDragDistance - dy * 4.0) / maxDragDistance);
   }
 
   void _onPanStart(DragStartDetails details) {
@@ -780,18 +768,18 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
 
   Alignment _getChildAlignment(Orientation orientation, _ContextMenuOrientation contextMenuOrientation) {
     switch (contextMenuOrientation) {
-      case (_ContextMenuOrientation.center):
+      case _ContextMenuOrientation.center:
         return orientation == Orientation.portrait
           ? Alignment.bottomCenter
           : Alignment.topRight;
-      case (_ContextMenuOrientation.left):
-        return orientation == Orientation.portrait
-          ? Alignment.bottomCenter
-          : Alignment.topRight;
-      case (_ContextMenuOrientation.right):
+      case _ContextMenuOrientation.right:
         return orientation == Orientation.portrait
           ? Alignment.bottomCenter
           : Alignment.topLeft;
+      default:
+        return orientation == Orientation.portrait
+          ? Alignment.bottomCenter
+          : Alignment.topRight;
     }
   }
 
@@ -871,14 +859,14 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     );
 
     switch (contextMenuOrientation) {
-      case (_ContextMenuOrientation.center):
+      case _ContextMenuOrientation.center:
         return <Widget>[child, spacer, sheet];
-      case (_ContextMenuOrientation.left):
-        return <Widget>[child, spacer, sheet];
-      case (_ContextMenuOrientation.right):
+      case _ContextMenuOrientation.right:
         return orientation == Orientation.portrait
           ? <Widget>[child, spacer, sheet]
           : <Widget>[sheet, spacer, child];
+      default:
+        return <Widget>[child, spacer, sheet];
     }
   }
 
@@ -1024,21 +1012,7 @@ class _ContextMenuSheet extends StatelessWidget {
     );
 
     switch (_contextMenuOrientation) {
-      case (_ContextMenuOrientation.left):
-        return <Widget>[
-          menu,
-          const Spacer(
-            flex: 1,
-          ),
-        ];
-      case (_ContextMenuOrientation.right):
-        return <Widget>[
-          const Spacer(
-            flex: 1,
-          ),
-          menu,
-        ];
-      case (_ContextMenuOrientation.center):
+      case _ContextMenuOrientation.center:
         return _orientation == Orientation.portrait
           ? <Widget>[
             const Spacer(
@@ -1055,6 +1029,20 @@ class _ContextMenuSheet extends StatelessWidget {
               flex: 1,
             ),
           ];
+      case _ContextMenuOrientation.right:
+        return <Widget>[
+          const Spacer(
+            flex: 1,
+          ),
+          menu,
+        ];
+      default:
+        return <Widget>[
+          menu,
+          const Spacer(
+            flex: 1,
+          ),
+        ];
     }
   }
 
