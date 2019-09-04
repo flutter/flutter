@@ -37,16 +37,16 @@ void main() {
       );
       fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_export.h').createSync(recursive: true);
       fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_messenger.h').createSync();
-      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows_glfw.dll').createSync();
-      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows_glfw.dll.exp').createSync();
-      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows_glfw.dll.lib').createSync();
-      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows_glfw.dll.pdb').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.exp').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.lib').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.pdb').createSync();
       fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\lutter_export.h').createSync();
       fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_messenger.h').createSync();
       fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_plugin_registrar.h').createSync();
-      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_glfw.h').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.h').createSync();
       fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\icudtl.dat').createSync();
-      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\cpp_client_wrapper_glfw\foo').createSync(recursive: true);
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\cpp_client_wrapper\foo').createSync(recursive: true);
       fs.file(r'C:\packages\flutter_tools\lib\src\build_system\targets\windows.dart').createSync(recursive: true);
       fs.directory('windows').createSync();
     }, overrides: <Type, Generator>{
@@ -60,16 +60,16 @@ void main() {
 
     expect(fs.file(r'C:\windows\flutter\flutter_export.h').existsSync(), true);
     expect(fs.file(r'C:\windows\flutter\flutter_messenger.h').existsSync(), true);
-    expect(fs.file(r'C:\windows\flutter\flutter_windows_glfw.dll').existsSync(), true);
-    expect(fs.file(r'C:\windows\flutter\flutter_windows_glfw.dll.exp').existsSync(), true);
-    expect(fs.file(r'C:\windows\flutter\flutter_windows_glfw.dll.lib').existsSync(), true);
-    expect(fs.file(r'C:\windows\flutter\flutter_windows_glfw.dll.pdb').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\flutter_windows.dll').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\flutter_windows.dll.exp').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\flutter_windows.dll.lib').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\flutter_windows.dll.pdb').existsSync(), true);
     expect(fs.file(r'C:\windows\flutter\flutter_export.h').existsSync(), true);
     expect(fs.file(r'C:\windows\flutter\flutter_messenger.h').existsSync(), true);
     expect(fs.file(r'C:\windows\flutter\flutter_plugin_registrar.h').existsSync(), true);
-    expect(fs.file(r'C:\windows\flutter\flutter_glfw.h').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\flutter_windows.h').existsSync(), true);
     expect(fs.file(r'C:\windows\flutter\icudtl.dat').existsSync(), true);
-    expect(fs.file(r'C:\windows\flutter\cpp_client_wrapper_glfw\foo').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\cpp_client_wrapper\foo').existsSync(), true);
   }));
 
   test('Does not re-copy files unecessarily', () => testbed.run(() async {
