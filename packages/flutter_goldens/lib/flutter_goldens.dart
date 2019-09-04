@@ -81,10 +81,20 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   static Directory getBaseDirectory(LocalFileComparator defaultComparator, Platform platform) {
     const FileSystem fs = LocalFileSystem();
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
-    final Directory comparisonRoot = flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'skia_goldens'));
+    final Directory comparisonRoot = flutterRoot.childDirectory(
+      fs.path.join(
+        'bin',
+        'cache',
+        'pkg',
+        'skia_goldens',
+      )
+    );
 
     final Directory testDirectory = fs.directory(defaultComparator.basedir);
-    final String testDirectoryRelativePath = fs.path.relative(testDirectory.path, from: flutterRoot.path);
+    final String testDirectoryRelativePath = fs.path.relative(
+      testDirectory.path,
+      from: flutterRoot.path,
+    );
     return comparisonRoot.childDirectory(testDirectoryRelativePath);
   }
 

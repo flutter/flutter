@@ -168,64 +168,64 @@ class SkiaGoldClient {
 
   /// Doc
   Future<List<int>>getMasterBytes(String testName) async {
-    final io.HttpOverrides restoreOverrides = io.HttpOverrides.current;
-    io.HttpOverrides.global = SkiaGoldHttpOverrides();
-    final io.HttpClient client = io.HttpClient();
-
-    testName = _cleanTestName(testName);
-    final Uri requestForDigest = Uri.parse(
-      'https://flutter-gold.skia.org/json/search?'
-        'fdiffmax=-1&fref=false&frgbamax=255&frgbamin=0&head=true&include=false'
-        '&limit=50&master=false&match=name&metric=combined&neg=false&offset=0'
-        '&pos=true&query=Platform%3D${platform.operatingSystem}%26name%3D$testName%26'
-        'source_type%3Dflutter&sort=desc&unt=true',
-    );
-    SkiaGoldDigest masterDigest;
-
-    try {
-      await client.getUrl(requestForDigest)
-        .then((io.HttpClientRequest request) => request.close())
-        .then((io.HttpClientResponse response) async {
-          final String responseBody = await response.transform(utf8.decoder).join();
-          final Map<String,dynamic> skiaJson = json.decode(responseBody);//['digests'];
-
-          if (skiaJson['digests'].length > 1) {
-            print('Triage breakdown!');
-            // TODO(Piinks): Throw with guidance
-
-          }
-          masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
-        });
-    } catch(_) {
-      print('Digest Request Failed.');
-      // TODO(Piinks): Output similar to skip, network connection may be
-      //  unavailable, i.e. airplane mode
-    }
-
-    if (!masterDigest.isValid(platform, testName)) {
-      print('Invalid digest!');
-      // TODO(Piinks): Throw with guidance
-    }
-
-    final Uri requestForImage = Uri.parse(
-      'https://flutter-gold.skia.org/img/images/${masterDigest.imageHash}.png',
-    );
     List<int> masterImageBytes;
+    await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
 
-    try {
-      await client.getUrl(requestForImage)
-        .then((io.HttpClientRequest request) => request.close())
-        .then((io.HttpClientResponse response) async {
-          final List<List<int>> byteList = await response.toList();
-          masterImageBytes = byteList.expand((List<int> x) => x).toList();
+      final io.HttpClient client = io.HttpClient();
 
-        });
-    } catch(_) {
-      print('Image Request Failed');
-      // TODO(Piinks): Output similar to skip, network connection may be
-      //  unavailable, i.e. airplane mode
-    }
-    io.HttpOverrides.global = restoreOverrides;
+      testName = _cleanTestName(testName);
+      final Uri requestForDigest = Uri.parse(
+        'https://flutter-gold.skia.org/json/search?'
+          'fdiffmax=-1&fref=false&frgbamax=255&frgbamin=0&head=true&include=false'
+          '&limit=50&master=false&match=name&metric=combined&neg=false&offset=0'
+          '&pos=true&query=Platform%3D${platform.operatingSystem}%26name%3D$testName%26'
+          'source_type%3Dflutter&sort=desc&unt=true',
+      );
+      SkiaGoldDigest masterDigest;
+
+      try {
+        await client.getUrl(requestForDigest)
+          .then((io.HttpClientRequest request) => request.close())
+          .then((io.HttpClientResponse response) async {
+            final String responseBody = await response.transform(utf8.decoder).join();
+            final Map<String,dynamic> skiaJson = json.decode(responseBody);
+
+            if (skiaJson['digests'].length > 1) {
+              print('Triage breakdown!');
+              // TODO(Piinks): Throw with guidance
+            }
+            masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
+          });
+      } catch(_) {
+        print('Digest Request Failed.');
+        // TODO(Piinks): Output similar to skip, network connection may be
+        //  unavailable, i.e. airplane mode
+      }
+
+      if (!masterDigest.isValid(platform, testName)) {
+        print('Invalid digest!');
+        // TODO(Piinks): Throw with guidance
+      }
+
+      final Uri requestForImage = Uri.parse(
+        'https://flutter-gold.skia.org/img/images/${masterDigest.imageHash}.png',
+      );
+
+      try {
+        await client.getUrl(requestForImage)
+          .then((io.HttpClientRequest request) => request.close())
+          .then((io.HttpClientResponse response) async {
+            final List<List<int>> byteList = await response.toList();
+            masterImageBytes = byteList.expand((List<int> x) => x).toList();
+          });
+        } catch(_) {
+          print('Image Request Failed');
+          // TODO(Piinks): Output similar to skip, network connection may be
+          //  unavailable, i.e. airplane mode
+        }
+      },
+      SkiaGoldHttpOverrides(),
+    );
     return masterImageBytes;
   }
 
@@ -272,13 +272,9 @@ class SkiaGoldClient {
   }
 }
 
-class SkiaGoldHttpOverrides extends io.HttpOverrides {
-  @override
-  io.HttpClient createHttpClient(io.SecurityContext context){
-    return super.createHttpClient(context)
-      ..badCertificateCallback = (io.X509Certificate cert, String host, int port) => true;
-  }
-}
+/// Doc
+class SkiaGoldHttpOverrides extends io.HttpOverrides {}
+
 /// Doc
 class SkiaGoldDigest {
   /// Doc
