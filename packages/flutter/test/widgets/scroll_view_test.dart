@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
@@ -546,5 +547,57 @@ void main() {
     await tester.pumpWidget(buildFrame(true));
     expect(tester.takeException(), isInstanceOf<Exception>());
     expect(finder, findsOneWidget);
+  });
+
+  testWidgets('ScrollDirection in same direction as increasing scroll offset',
+          (WidgetTester tester) async {
+    const double cellHeight = 20.0;
+    final ScrollController scrollController = ScrollController();
+    ScrollDirection notificationScrollDirection;
+    bool notificationCallback(UserScrollNotification notification) {
+      if (notification.direction == ScrollDirection.reverse || notification.direction == ScrollDirection.forward) {
+        notificationScrollDirection = notification.direction;
+      }
+      return true;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: NotificationListener<UserScrollNotification>(
+            onNotification: notificationCallback,
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: <Widget>[
+                SliverList(
+                  delegate: SliverChildListDelegate(
+                    List<Widget>.generate(
+                      200,
+                          (int i) => ConstrainedBox(
+                        constraints:
+                        const BoxConstraints.tightFor(height: cellHeight),
+                        child: Text('Item $i'),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderViewport renderViewport = tester.element(find.byType(Viewport)).renderObject;
+    ScrollDirection scrollDirection;
+
+    renderViewport.offset.addListener(() => scrollDirection = renderViewport.offset.userScrollDirection);
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -cellHeight));
+    await tester.pump();
+
+    expect(scrollController.offset, greaterThan(0));
+    expect(scrollDirection, ScrollDirection.forward);
+    expect(scrollDirection, notificationScrollDirection);
   });
 }

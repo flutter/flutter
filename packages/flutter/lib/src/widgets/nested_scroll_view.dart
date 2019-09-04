@@ -790,7 +790,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   @override
   void applyUserOffset(double delta) {
-    updateUserScrollDirection(delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
+    updateUserScrollDirection(delta > 0.0 ? ScrollDirection.reverse : ScrollDirection.forward);
     assert(delta != 0.0);
     if (_innerPositions.isEmpty) {
       _outerPosition.applyFullDragUpdate(delta);

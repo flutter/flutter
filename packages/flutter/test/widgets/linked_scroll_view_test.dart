@@ -143,7 +143,7 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
 
   @override
   void applyUserOffset(double delta) {
-    updateUserScrollDirection(delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
+    updateUserScrollDirection(delta > 0.0 ? ScrollDirection.reverse : ScrollDirection.forward);
     final double value = pixels - physics.applyPhysicsToUserOffset(this, delta);
 
     if (value == pixels)

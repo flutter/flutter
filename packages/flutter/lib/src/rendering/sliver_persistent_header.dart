@@ -424,12 +424,12 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   void maybeStartSnapAnimation(ScrollDirection direction) {
     if (snapConfiguration == null)
       return;
-    if (direction == ScrollDirection.forward && _effectiveScrollOffset <= 0.0)
+    if (direction == ScrollDirection.reverse && _effectiveScrollOffset <= 0.0)
       return;
-    if (direction == ScrollDirection.reverse && _effectiveScrollOffset >= maxExtent)
+    if (direction == ScrollDirection.forward && _effectiveScrollOffset >= maxExtent)
       return;
 
-    final TickerProvider vsync = snapConfiguration.vsync;
+    final TickerProvider vsync = snapConfiguration.vsync;;
     final Duration duration = snapConfiguration.duration;
     _controller ??= AnimationController(vsync: vsync, duration: duration)
       ..addListener(() {
@@ -442,7 +442,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     _animation = _controller.drive(
       Tween<double>(
         begin: _effectiveScrollOffset,
-        end: direction == ScrollDirection.forward ? 0.0 : maxExtent,
+        end: direction == ScrollDirection.reverse ? 0.0 : maxExtent,
       ).chain(CurveTween(
         curve: snapConfiguration.curve,
       )),
@@ -463,7 +463,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         ((constraints.scrollOffset < _lastActualScrollOffset) || // we are scrolling back, so should reveal, or
          (_effectiveScrollOffset < maxExtent))) { // some part of it is visible, so should shrink or reveal as appropriate.
       double delta = _lastActualScrollOffset - constraints.scrollOffset;
-      final bool allowFloatingExpansion = constraints.userScrollDirection == ScrollDirection.forward;
+      final bool allowFloatingExpansion = constraints.userScrollDirection == ScrollDirection.reverse;
       if (allowFloatingExpansion) {
         if (_effectiveScrollOffset > maxExtent) // We're scrolled off-screen, but should reveal, so
           _effectiveScrollOffset = maxExtent; // pretend we're just at the limit.
