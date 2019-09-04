@@ -1254,17 +1254,17 @@ Future<void> main() async {
 
     await tester.pump(duration * 0.25);
     actualHeroCenter = tester.getCenter(find.byKey(firstKey));
-    predictedHeroCenter = popCenterTween.lerp(curve.flipped.transform(0.25));
+    predictedHeroCenter = popCenterTween.lerp(curve.transform(0.25));
     expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pump(duration * 0.25);
     actualHeroCenter = tester.getCenter(find.byKey(firstKey));
-    predictedHeroCenter = popCenterTween.lerp(curve.flipped.transform(0.5));
+    predictedHeroCenter = popCenterTween.lerp(curve.transform(0.5));
     expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pump(duration * 0.25);
     actualHeroCenter = tester.getCenter(find.byKey(firstKey));
-    predictedHeroCenter = popCenterTween.lerp(curve.flipped.transform(0.75));
+    predictedHeroCenter = popCenterTween.lerp(curve.transform(0.75));
     expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pumpAndSettle();
@@ -1375,17 +1375,17 @@ Future<void> main() async {
 
     await tester.pump(duration * 0.25);
     actualHeroRect = tester.getRect(find.byKey(firstKey));
-    predictedHeroRect = popRectTween.lerp(curve.flipped.transform(0.25));
+    predictedHeroRect = popRectTween.lerp(curve.transform(0.25));
     expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
 
     await tester.pump(duration * 0.25);
     actualHeroRect = tester.getRect(find.byKey(firstKey));
-    predictedHeroRect = popRectTween.lerp(curve.flipped.transform(0.5));
+    predictedHeroRect = popRectTween.lerp(curve.transform(0.5));
     expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
 
     await tester.pump(duration * 0.25);
     actualHeroRect = tester.getRect(find.byKey(firstKey));
-    predictedHeroRect = popRectTween.lerp(curve.flipped.transform(0.75));
+    predictedHeroRect = popRectTween.lerp(curve.transform(0.75));
     expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
 
     await tester.pumpAndSettle();
@@ -2254,5 +2254,84 @@ Future<void> main() async {
       tester.getTopRight(find.byKey(imageKey1, skipOffstage: false)).dx,
       moreOrLessEquals(tester.getTopLeft(find.text('1')).dx, epsilon: 0.01)
     );
+  });
+
+  testWidgets('popped hero uses fastOutSlowIn curve', (WidgetTester tester) async {
+    final Key container1 = UniqueKey();
+    final Key container2 = UniqueKey();
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+
+    final Animatable<Size> tween = SizeTween(
+      begin: const Size(200, 200),
+      end: const Size(100, 100),
+    ).chain(CurveTween(curve: Curves.fastOutSlowIn));
+
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        home: Scaffold(
+          body: Center(
+            child: Hero(
+              tag: 'test',
+              createRectTween: (Rect begin, Rect end) {
+                return RectTween(begin: begin, end: end);
+              },
+              child: Container(
+                key: container1,
+                height: 100,
+                width: 100,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final Size originalSize = tester.getSize(find.byKey(container1));
+    expect(originalSize, const Size(100, 100));
+
+    navigator.currentState.push(MaterialPageRoute<void>(builder: (BuildContext context) {
+      return Scaffold(
+        body: Center(
+          child: Hero(
+            tag: 'test',
+            createRectTween: (Rect begin, Rect end) {
+              return RectTween(begin: begin, end: end);
+            },
+            child: Container(
+              key: container2,
+              height: 200,
+              width: 200,
+            ),
+          ),
+        ),
+      );
+    }));
+    await tester.pumpAndSettle();
+    final Size newSize = tester.getSize(find.byKey(container2));
+    expect(newSize, const Size(200, 200));
+
+    navigator.currentState.pop();
+    await tester.pump();
+
+    // Jump 25% into the transition (total length = 300ms)
+    await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
+    Size heroSize = tester.getSize(find.byKey(container1));
+    expect(heroSize, tween.transform(0.25));
+
+    // Jump to 50% into the transition.
+    await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
+    heroSize = tester.getSize(find.byKey(container1));
+    expect(heroSize, tween.transform(0.50));
+
+    // Jump to 75% into the transition.
+    await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
+    heroSize = tester.getSize(find.byKey(container1));
+    expect(heroSize, tween.transform(0.75));
+
+    // Jump to 100% into the transition.
+    await tester.pump(const Duration(milliseconds: 75)); // 25% of 300ms
+    heroSize = tester.getSize(find.byKey(container1));
+    expect(heroSize, tween.transform(1.0));
   });
 }
