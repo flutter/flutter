@@ -164,8 +164,10 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       height: childRect.height * _kOpenScale,
     );
 
-    // TODO(justinmc): This overlay pops above things like the appbar when it
-    // shouldn't. Can be solved for Route in the by fading in/out, but not here.
+    // TODO(justinmc): Using Overlay.of(context) means that this pops on top of
+    // the AppBar, but it doesn't natively. Is there any way around this? The
+    // reason that I do this in an Overlay is that it needs to sit on top of
+    // widgets adjacent to it.
     return OverlayEntry(
       opaque: false,
       builder: (BuildContext context) {
@@ -196,8 +198,9 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
           _childOpacity = 0.0;
         });
         _openContextMenu();
-        // TODO(justinmc): Without this, flashes white. I think due to rendering 1
-        // frame offscreen?
+        // TODO(justinmc): I have to keep this on the screen for 1 frame because
+        // otherwise I see a white flash. I think it's because I have to render
+        // one frame offscreen. Any better way to do this?
         Future<void>.delayed(const Duration(milliseconds: 1)).then((_) {
           _lastOverlayEntry?.remove();
           _lastOverlayEntry = null;
@@ -317,8 +320,8 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
     ).animate(
       CurvedAnimation(
         parent: widget.controller,
-        // TODO(justinmc): This curve is close but not quite right. Should I
-        // hack some delay and amplitude changes, or write a new curve?
+        // TODO(justinmc): I need to take another pass at making this feel the
+        // same as native.
         curve: Curves.easeInBack,
       ),
     );
