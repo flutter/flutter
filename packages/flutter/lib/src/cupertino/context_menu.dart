@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'colors.dart';
+import 'context_menu_sheet_action.dart';
 
 // The scale of the child at the time that the ContextMenu opens.
 const double _kOpenScale = 1.2;
@@ -81,12 +81,6 @@ class ContextMenu extends StatefulWidget {
 }
 
 class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin {
-  // TODO(justinmc): Replace with real system colors when dark mode is
-  // supported for iOS.
-  //static const Color _darkModeMaskColor = Color(0xAAFFFFFF);
-  static const Color _lightModeMaskColor = Color(0xAAAAAAAA);
-  static const Color _masklessColor = Color(0xFFFFFFFF);
-
   final GlobalKey _childGlobalKey = GlobalKey();
   AnimationController _decoyController;
   Rect _decoyChildEndRect;
@@ -165,9 +159,11 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     );
 
     // TODO(justinmc): Using Overlay.of(context) means that this pops on top of
-    // the AppBar, but it doesn't natively. Is there any way around this? The
+    // the AppBar, but it doesn't on native. Is there any way around this? The
     // reason that I do this in an Overlay is that it needs to sit on top of
     // widgets adjacent to it.
+    // Also, I noticed that I'm having the same theme problem where a widget in
+    // the Overlay might not be themed the same as it is otherwise.
     return OverlayEntry(
       opaque: false,
       builder: (BuildContext context) {
@@ -483,8 +479,6 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
       parent: animation,
       curve: Interval(0.9, 1.0),
     ));
-    // TODO(justinmc): The fadeout animation is not perfectly seamless, should
-    // continue at the same speed as the drag-to-dismiss animation.
     Navigator.of(context).pop();
   }
 
@@ -1069,151 +1063,6 @@ class _ContextMenuSheet extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: children,
-    );
-  }
-}
-
-/// A button in a _ContextMenuSheet.
-///
-/// A typical use case is to pass a [Text] as the [child] here, but be sure to
-/// use [TextOverflow.ellipsis] for the [Text.overflow] field if the text may be
-/// long, as without it the text will wrap to the next line.
-class ContextMenuSheetAction extends StatefulWidget {
-  /// Construct a ContextMenuSheetAction.
-  const ContextMenuSheetAction({
-    Key key,
-    @required this.child,
-    this.isDefaultAction = false,
-    this.isDestructiveAction = false,
-    this.onPressed,
-    this.trailingIcon,
-  }) : assert(child != null),
-       assert(isDefaultAction != null),
-       assert(isDestructiveAction != null),
-       super(key: key);
-
-  /// The widget that will be placed inside the action.
-  final Widget child;
-
-  /// Indicates whether this action should receive the style of an emphasized,
-  /// default action.
-  final bool isDefaultAction;
-
-  /// Indicates whether this action should receive the style of a destructive
-  /// action.
-  final bool isDestructiveAction;
-
-  /// Called when the action is pressed.
-  final VoidCallback onPressed;
-
-  // TODO(justinmc): Is this in the spirit how we usually do things like this in
-  // Flutter? All Apple examples I've seen of ContextMenus feature icons, so
-  // this seemed like a nice way to encourage that. However, it's also totally
-  // possible for the user to do this without this field.
-  /// An optional icon to display to the right of the child.
-  ///
-  /// Will be colored in the same way as the [TextStyle] used for [child] (for
-  /// example, if using [isDestructiveAction]).
-  final IconData trailingIcon;
-
-  @override
-  _ContextMenuSheetActionState createState() => _ContextMenuSheetActionState();
-}
-
-class _ContextMenuSheetActionState extends State<ContextMenuSheetAction> {
-  static const Color _kBackgroundColor = Color(0xFFEEEEEE);
-  static const Color _kBackgroundColorPressed = Color(0xFFDDDDDD);
-  static const double _kButtonHeight = 56.0;
-  static const TextStyle _kActionSheetActionStyle = TextStyle(
-    fontFamily: '.SF UI Text',
-    inherit: false,
-    fontSize: 20.0,
-    fontWeight: FontWeight.w400,
-    color: CupertinoColors.black,
-    textBaseline: TextBaseline.alphabetic,
-  );
-
-  final GlobalKey _globalKey = GlobalKey();
-  bool _isPressed = false;
-
-  void onTapDown(TapDownDetails details) {
-    setState(() {
-      _isPressed = true;
-    });
-  }
-
-  void onTapUp(TapUpDetails details) {
-    setState(() {
-      _isPressed = false;
-    });
-  }
-
-  void onTapCancel() {
-    setState(() {
-      _isPressed = false;
-    });
-  }
-
-  TextStyle get _textStyle {
-    if (widget.isDefaultAction) {
-      return _kActionSheetActionStyle.copyWith(
-        fontWeight: FontWeight.w600,
-      );
-    }
-    if (widget.isDestructiveAction) {
-      return _kActionSheetActionStyle.copyWith(
-        color: CupertinoColors.destructiveRed,
-      );
-    }
-    return _kActionSheetActionStyle;
-  }
-
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      key: _globalKey,
-      onTapDown: onTapDown,
-      onTapUp: onTapUp,
-      onTapCancel: onTapCancel,
-      onTap: widget.onPressed,
-      behavior: HitTestBehavior.opaque,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minHeight: _kButtonHeight,
-        ),
-        child: Semantics(
-          button: true,
-          child: Container(
-            decoration: BoxDecoration(
-              color: _isPressed ? _kBackgroundColorPressed : _kBackgroundColor,
-              border: const Border(
-                bottom: BorderSide(width: 1.0, color: _kBackgroundColorPressed),
-              ),
-            ),
-            padding: const EdgeInsets.symmetric(
-              vertical: 16.0,
-              horizontal: 10.0,
-            ),
-            child: DefaultTextStyle(
-              style: _textStyle,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Flexible(
-                    child: widget.child,
-                  ),
-                  if (widget.trailingIcon != null)
-                    Icon(
-                      widget.trailingIcon,
-                      color: CupertinoColors.destructiveRed,
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
