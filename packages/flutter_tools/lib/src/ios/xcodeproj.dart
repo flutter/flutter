@@ -320,7 +320,7 @@ class XcodeProjectInterpreter {
     final RunResult result = await runCheckedAsync(<String>[
       _executable,
       '-list',
-      if (projectFilename != null) ...['-project', projectFilename],
+      if (projectFilename != null) ...<String>['-project', projectFilename],
     ], workingDirectory: projectPath);
     return XcodeProjectInfo.fromXcodeBuildOutput(result.toString());
   }
