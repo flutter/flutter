@@ -476,6 +476,10 @@ Future<T> showModalBottomSheet<T>({
 /// Returns a controller that can be used to close and otherwise manipulate the
 /// bottom sheet.
 ///
+/// The optional [backgroundColor], [elevation], [shape], and [clipBehavior]
+/// parameters can be passed in to customize the appearance and behavior of
+/// persistent bottom sheets.
+///
 /// To rebuild the bottom sheet (e.g. if it is stateful), call
 /// [PersistentBottomSheetController.setState] on the controller returned by
 /// this method.
