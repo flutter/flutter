@@ -36,7 +36,7 @@ class ManifestTask {
     @required this.description,
     @required this.stage,
     @required this.requiredAgentCapabilities,
-    @required this.isFlaky,
+    @required this.isFailing,
     @required this.timeoutInMinutes,
   }) {
     final String taskName = 'task "$name"';
@@ -58,10 +58,16 @@ class ManifestTask {
   /// Capabilities required of the build agent to be able to perform this task.
   final List<String> requiredAgentCapabilities;
 
-  /// Whether this test is flaky.
+  /// Whether this test might be failing.
   ///
-  /// Flaky tests are not considered when deciding if the build is broken.
-  final bool isFlaky;
+  /// Failing tests are not considered when deciding if the build is broken.
+  ///
+  /// This should only be set for new tests or tests that have gone through some
+  /// major modifications so we're not sure whether they will pass or fail.
+  ///
+  /// If a test is just flaky, it should not set this to true. And we should fix
+  /// the flaky test instead of just ignoring it.
+  final bool isFailing;
 
   /// An optional custom timeout specified in minutes.
   final int timeoutInMinutes;
@@ -111,13 +117,13 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
     'description',
     'stage',
     'required_agent_capabilities',
-    'flaky',
+    'failing',
     'timeout_in_minutes',
   ]);
 
-  final dynamic isFlaky = taskYaml['flaky'];
-  if (isFlaky != null) {
-    _checkType(isFlaky is bool, isFlaky, 'flaky', 'boolean');
+  final dynamic isFailing = taskYaml['failing'];
+  if (isFailing != null) {
+    _checkType(isFailing is bool, isFailing, 'failing', 'boolean');
   }
 
   final dynamic timeoutInMinutes = taskYaml['timeout_in_minutes'];
@@ -131,7 +137,7 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
     description: taskYaml['description'],
     stage: taskYaml['stage'],
     requiredAgentCapabilities: capabilities,
-    isFlaky: isFlaky ?? false,
+    isFailing: isFailing ?? false,
     timeoutInMinutes: timeoutInMinutes,
   );
 }

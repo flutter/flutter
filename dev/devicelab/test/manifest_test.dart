@@ -54,7 +54,7 @@ tasks:
       expect(manifest.tasks.single.description, 'Description is mandatory.');
       expect(manifest.tasks.single.stage, 'stage_is_mandatory_too');
       expect(manifest.tasks.single.requiredAgentCapabilities, <String>['so-is-capability']);
-      expect(manifest.tasks.single.isFlaky, false);
+      expect(manifest.tasks.single.isFailing, false);
       expect(manifest.tasks.single.timeoutInMinutes, null);
     });
 
@@ -188,7 +188,7 @@ tasks:
 ''');
 
       expect(manifest.tasks.single.name, 'flaky_task');
-      expect(manifest.tasks.single.isFlaky, isTrue);
+      expect(manifest.tasks.single.isFailing, isTrue);
     });
 
     test('accepts custom timeout_in_minutes option', () {
