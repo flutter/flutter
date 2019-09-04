@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -196,8 +197,7 @@ class SkiaGoldClient {
           }
           masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
         });
-    } catch(e) {
-      print(e);
+    } catch(_) {
       print('1st Request Failed.');
       // TODO(Piinks): Output similar to skip, network connection may be
       //  unavailable, i.e. airplane mode
@@ -217,17 +217,15 @@ class SkiaGoldClient {
       await client.getUrl(requestForImage)
         .then((io.HttpClientRequest request) => request.close())
         .then((io.HttpClientResponse response) async {
-          response.listen((List<int> bytes) {
-            masterImageBytes = json.decode(bytes);
-          });
+          final List<List<int>> byteList = await response.toList();
+          masterImageBytes = byteList.expand((List<int> x) => x).toList();
+
         });
-    } catch(e) {
-      print(e);
+    } catch(_) {
       print('2nd RequestFailed');
       // TODO(Piinks): Output similar to skip, network connection may be
       //  unavailable, i.e. airplane mode
     }
-    //print(masterImageBytes);
     io.HttpOverrides.global = restoreOverrides;
     return masterImageBytes;
   }
