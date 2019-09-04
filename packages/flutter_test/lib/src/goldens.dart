@@ -111,8 +111,16 @@ abstract class GoldenFileComparator {
       );
     }
 
+    print(test.length);
+    print(master.length);
+
+
+    //print(master);
+
     final Image testImage = decodePng(test);
     final Image masterImage = decodePng(master);
+
+    //print(masterImage);
 
     assert(testImage != null);
     assert(masterImage != null);

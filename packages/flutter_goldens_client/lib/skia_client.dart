@@ -168,13 +168,13 @@ class SkiaGoldClient {
 
   /// Doc
   Future<List<int>>getMasterBytes(String testName) async {
+    final io.HttpOverrides restoreOverrides = io.HttpOverrides.current;
     io.HttpOverrides.global = SkiaGoldHttpOverrides();
     final io.HttpClient client = io.HttpClient();
 
     testName = _cleanTestName(testName);
-    final Uri requestForDigest = Uri.http(
-      'https://flutter-gold.skia.org',
-      '/json/search?'
+    final Uri requestForDigest = Uri.parse(
+      'https://flutter-gold.skia.org/json/search?'
         'fdiffmax=-1&fref=false&frgbamax=255&frgbamin=0&head=true&include=false'
         '&limit=50&master=false&match=name&metric=combined&neg=false&offset=0'
         '&pos=true&query=Platform%3D${platform.operatingSystem}%26name%3D$testName%26'
@@ -186,16 +186,19 @@ class SkiaGoldClient {
       await client.getUrl(requestForDigest)
         .then((io.HttpClientRequest request) => request.close())
         .then((io.HttpClientResponse response) async {
-        final String responseBody = await response.transform(utf8.decoder).join();
-        final Map<String, dynamic> digests = jsonDecode(responseBody);
-        if (digests.length > 1) {
-          print('Triage breakdown!');
-          // TODO(Piinks): Throw with guidance
-        }
-        masterDigest = SkiaGoldDigest.fromJson(digests[0]);
-      });
-    } catch(_) {
-      print('Request Failed.');
+          final String responseBody = await response.transform(utf8.decoder).join();
+          final Map<String,dynamic> skiaJson = json.decode(responseBody);//['digests'];
+
+          if (skiaJson['digests'].length > 1) {
+            print('Triage breakdown!');
+            // TODO(Piinks): Throw with guidance
+
+          }
+          masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
+        });
+    } catch(e) {
+      print(e);
+      print('1st Request Failed.');
       // TODO(Piinks): Output similar to skip, network connection may be
       //  unavailable, i.e. airplane mode
     }
@@ -205,9 +208,8 @@ class SkiaGoldClient {
       // TODO(Piinks): Throw with guidance
     }
 
-    final Uri requestForImage = Uri.http(
-      'https://flutter-gold.skia.org',
-      '/img/images/${masterDigest.imageHash}.png',
+    final Uri requestForImage = Uri.parse(
+      'https://flutter-gold.skia.org/img/images/${masterDigest.imageHash}.png',
     );
     List<int> masterImageBytes;
 
@@ -215,14 +217,18 @@ class SkiaGoldClient {
       await client.getUrl(requestForImage)
         .then((io.HttpClientRequest request) => request.close())
         .then((io.HttpClientResponse response) async {
-        response.listen((List<int> bytes) {
-          masterImageBytes = bytes;
+          response.listen((List<int> bytes) {
+            masterImageBytes = json.decode(bytes);
+          });
         });
-      });
-    } catch(_) {
-      print('RequestFailed');
+    } catch(e) {
+      print(e);
+      print('2nd RequestFailed');
+      // TODO(Piinks): Output similar to skip, network connection may be
+      //  unavailable, i.e. airplane mode
     }
-    print(masterImageBytes);
+    //print(masterImageBytes);
+    io.HttpOverrides.global = restoreOverrides;
     return masterImageBytes;
   }
 
@@ -292,7 +298,7 @@ class SkiaGoldDigest {
 
     return SkiaGoldDigest(
       imageHash: json['digest'],
-      paramSet: json['paramset'],
+      paramSet: Map<String, dynamic>.from(json['paramset']),
       testName: json['test'],
       status: json['status'],
     );
@@ -302,7 +308,7 @@ class SkiaGoldDigest {
   final String imageHash;
 
   /// Parameter set for the given test, e.g. Platform : Windows.
-  final Map<String, String> paramSet;
+  final Map<String, dynamic> paramSet;
 
   /// Test name associated with the digest, e.g. positive or untriaged.
   final String testName;

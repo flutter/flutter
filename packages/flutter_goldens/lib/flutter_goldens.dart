@@ -72,6 +72,9 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
     await goldenFile.writeAsBytes(imageBytes, flush: true);
   }
 
+  @override
+  Uri getTestUri(Uri key, int version) => key;
+
   /// Calculate the appropriate basedir for the current test context.
   @protected
   @visibleForTesting
@@ -168,9 +171,6 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
     return await skiaClient.imgtestAdd(golden.path, goldenFile);
   }
 
-  @override
-  Uri getTestUri(Uri key, int version) => key;
-
   /// Decides based on the current environment whether goldens tests should be
   /// performed against Skia Gold.
   static bool isAvailableForEnvironment(Platform platform) {
@@ -263,6 +263,8 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       LocalFileComparator defaultComparator,
     }) async {
 
+    print('FlutterLocalFileComparator');
+
     defaultComparator ??= goldenFileComparator;
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(defaultComparator, platform);
     if (!baseDirectory.existsSync())
@@ -279,7 +281,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     final ComparisonResult result = GoldenFileComparator.compareLists<Uint8List>(imageBytes, goldenBytes);
 
     if (!result.passed) {
-      generateComparisonOutput(result, golden, basedir);
+      generateFailureOutput(result, golden, basedir);
     }
     return result.passed;
 
