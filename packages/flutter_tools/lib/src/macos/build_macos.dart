@@ -46,7 +46,7 @@ Future<void> buildMacOS({
 
   final Directory xcodeProject = flutterProject.macos.xcodeProject;
 
-  final XcodeProjectInfo projectInfo =await xcodeProjectInterpreter.getInfo(
+  final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(
     xcodeProject.parent.path,
     projectFilename: xcodeProject.basename,
   );
