@@ -83,6 +83,7 @@ void main() {
   });
 
   group('LocalFileComparator', () {
+    // TODO(Piinks): Add tests for LocalComparisonOutput
     LocalFileComparator comparator;
 
     setUp(() {

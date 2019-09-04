@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
-import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -198,7 +197,7 @@ class SkiaGoldClient {
           masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
         });
     } catch(_) {
-      print('1st Request Failed.');
+      print('Digest Request Failed.');
       // TODO(Piinks): Output similar to skip, network connection may be
       //  unavailable, i.e. airplane mode
     }
@@ -222,7 +221,7 @@ class SkiaGoldClient {
 
         });
     } catch(_) {
-      print('2nd RequestFailed');
+      print('Image Request Failed');
       // TODO(Piinks): Output similar to skip, network connection may be
       //  unavailable, i.e. airplane mode
     }
@@ -280,9 +279,9 @@ class SkiaGoldHttpOverrides extends io.HttpOverrides {
       ..badCertificateCallback = (io.X509Certificate cert, String host, int port) => true;
   }
 }
-
+/// Doc
 class SkiaGoldDigest {
-
+  /// Doc
   const SkiaGoldDigest({
     this.imageHash,
     this.paramSet,
@@ -290,6 +289,7 @@ class SkiaGoldDigest {
     this.status,
   });
 
+  /// Doc
   factory SkiaGoldDigest.fromJson(Map<String, dynamic> json) {
     if (json == null)
       return null;

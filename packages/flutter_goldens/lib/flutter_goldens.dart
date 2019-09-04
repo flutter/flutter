@@ -263,8 +263,6 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       LocalFileComparator defaultComparator,
     }) async {
 
-    print('FlutterLocalFileComparator');
-
     defaultComparator ??= goldenFileComparator;
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(defaultComparator, platform);
     if (!baseDirectory.existsSync())

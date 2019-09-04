@@ -33,6 +33,8 @@ void main() {
     fs.file(_kVersionFile).writeAsStringSync(_kGoldensVersion);
   });
 
+  // TODO(Piinks): Clean-up needed here
+
   group('GoldensClient', () {
     GoldensRepositoryClient goldens;
 
