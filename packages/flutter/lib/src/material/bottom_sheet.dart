@@ -427,6 +427,10 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// that a modal [BottomSheet] needs to be displayed above all other content
 /// but the caller is inside another [Navigator].
 ///
+/// The optional [backgroundColor], [elevation], [shape], and [clipBehavior]
+/// parameters can be passed in to customize the appearance and behavior of
+/// persistent bottom sheets.
+///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
