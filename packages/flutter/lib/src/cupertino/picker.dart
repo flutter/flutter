@@ -7,11 +7,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'theme.dart';
 
 /// Color of the 'magnifier' lens border.
-const Color _kHighlighterBorder = Color(0xFF7F7F7F);
-const Color _kDefaultBackground = Color(0xFFD2D4DB);
+const Color _kHighlighterBorder = CupertinoDynamicColor.withBrightness(
+  color: Color(0x33000000),
+  darkColor: Color(0x33FFFFFF),
+);
 // Eyeballed values comparing with a native picker to produce the right
 // curvatures and densities.
 const double _kDefaultDiameterRatio = 1.07;
@@ -61,7 +64,7 @@ class CupertinoPicker extends StatefulWidget {
   CupertinoPicker({
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
-    this.backgroundColor = _kDefaultBackground,
+    this.backgroundColor,
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
     this.magnification = 1.0,
@@ -104,7 +107,7 @@ class CupertinoPicker extends StatefulWidget {
   CupertinoPicker.builder({
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
-    this.backgroundColor = _kDefaultBackground,
+    this.backgroundColor,
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
     this.magnification = 1.0,
@@ -241,14 +244,17 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
   /// Makes the fade to [CupertinoPicker.backgroundColor] edge gradients.
   Widget _buildGradientScreen() {
+    final Color resolved = widget.backgroundColor == null
+      ? null
+      : CupertinoDynamicColor.resolve(widget.backgroundColor, context);
     // Because BlendMode.dstOut doesn't work correctly with BoxDecoration we
     // have to just do a color blend. And a due to the way we are layering
     // the magnifier and the gradient on the background, using a transparent
     // background color makes the picker look odd.
-    if (widget.backgroundColor != null && widget.backgroundColor.alpha < 255)
+    if (resolved == null || resolved.alpha < 255)
       return Container();
 
-    final Color widgetBackgroundColor = widget.backgroundColor ?? const Color(0xFFFFFFFF);
+    final Color widgetBackgroundColor = resolved ?? const Color(0xFF000000);
     return Positioned.fill(
       child: IgnorePointer(
         child: Container(
@@ -279,42 +285,44 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   /// Makes the magnifier lens look so that the colors are normal through
   /// the lens and partially grayed out around it.
   Widget _buildMagnifierScreen() {
-    final Color foreground = widget.backgroundColor?.withAlpha(
-      (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt()
+    final Color resolved = widget.backgroundColor == null
+      ? null
+      : CupertinoDynamicColor.resolve(widget.backgroundColor, context);
+
+    final Color foreground = resolved?.withAlpha(
+      (resolved.alpha * _kForegroundScreenOpacityFraction).toInt()
     );
+
+    final Color resolvedBorderColor = CupertinoDynamicColor.resolve(_kHighlighterBorder, context);
 
     return IgnorePointer(
       child: Column(
         children: <Widget>[
-          Expanded(
-            child: Container(
-              color: foreground,
-            ),
-          ),
+          Expanded(child: Container(color: foreground)),
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
-                top: BorderSide(width: 0.0, color: _kHighlighterBorder),
-                bottom: BorderSide(width: 0.0, color: _kHighlighterBorder),
+                top: BorderSide(width: 0.0, color: resolvedBorderColor),
+                bottom: BorderSide(width: 0.0, color: resolvedBorderColor),
               ),
             ),
             constraints: BoxConstraints.expand(
-                height: widget.itemExtent * widget.magnification,
+              height: widget.itemExtent * widget.magnification,
             ),
           ),
-          Expanded(
-            child: Container(
-              color: foreground,
-            ),
-          ),
+          Expanded(child: Container(color: foreground)),
         ],
       ),
     );
   }
 
   Widget _buildUnderMagnifierScreen() {
-    final Color foreground = widget.backgroundColor?.withAlpha(
-        (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt()
+    final Color resolved = widget.backgroundColor == null
+      ? null
+      : CupertinoDynamicColor.resolve(widget.backgroundColor, context);
+
+    final Color foreground = resolved?.withAlpha(
+      (resolved.alpha * _kForegroundScreenOpacityFraction).toInt()
     );
 
     return Column(
@@ -332,10 +340,12 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   }
 
   Widget _addBackgroundToChild(Widget child) {
+    final Color resolved = widget.backgroundColor == null
+      ? null
+      : CupertinoDynamicColor.resolve(widget.backgroundColor, context);
+
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: widget.backgroundColor,
-      ),
+      decoration: BoxDecoration(color: resolved),
       child: child,
     );
   }
