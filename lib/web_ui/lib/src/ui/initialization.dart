@@ -9,7 +9,7 @@ Future<void> webOnlyInitializePlatform({
   engine.AssetManager assetManager,
 }) async {
   if (!debugEmulateFlutterTesterEnvironment) {
-    engine.window.webOnlyLocationStrategy = const engine.HashLocationStrategy();
+    engine.window.locationStrategy = const engine.HashLocationStrategy();
   }
 
   engine.webOnlyInitializeEngine();

@@ -24,12 +24,6 @@ Future<dynamic> ensureTestPlatformInitializedThenRunTest(
   return _testPlatformInitializedFuture.then<dynamic>((_) => body());
 }
 
-/// This setter is used by [WebNavigatorObserver] to update the url to
-/// reflect the [Navigator]'s current route name.
-set webOnlyRouteName(String routeName) {
-  engine.window.webOnlyRouteName = routeName;
-}
-
 /// Used to track when the platform is initialized. This ensures the test fonts
 /// are available.
 Future<void> _platformInitializedFuture;
