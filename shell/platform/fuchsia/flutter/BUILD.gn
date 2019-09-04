@@ -336,3 +336,40 @@ jit_runner("flutter_jit_runner") {
 jit_runner("flutter_jit_product_runner") {
   product = true
 }
+
+executable("flutter_runner_unittests") {
+  testonly = true
+
+  output_name = "flutter_runner_tests"
+
+  sources = [
+    "sample_unittests.cc",
+  ]
+
+  # This is needed for //third_party/googletest for linking zircon
+  # symbols.
+  libs = [ "//fuchsia/sdk/$host_os/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+
+  deps = [
+    "//flutter/testing",
+  ]
+}
+
+package_dir("flutter_runner_tests") {
+  testonly = true
+
+  deps = [
+    ":flutter_runner_unittests",
+  ]
+
+  binary = "$target_name"
+
+  meta_dir = "$flutter_root/shell/platform/fuchsia/flutter/meta"
+
+  meta = [
+    {
+      path = "meta/$target_name.cmx"
+      dest = "$target_name.cmx"
+    },
+  ]
+}

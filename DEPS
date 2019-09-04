@@ -152,7 +152,7 @@ deps = {
    Var('fuchsia_git') + '/third_party/benchmark' + '@' + 'a779ffce872b4c811beef482e18bd0b63626aa42',
 
   'src/third_party/googletest':
-   Var('fuchsia_git') + '/third_party/googletest' + '@' + '46d66506083fc3333d84c260e7bd2eb3816a917a',
+   Var('fuchsia_git') + '/third_party/googletest' + '@' + 'd8827ca8e397b725a3039b19cc116e309c47815e',
 
   'src/third_party/rapidjson':
    Var('fuchsia_git') + '/third_party/rapidjson' + '@' + '32d07c55db1bb6c2ae17cba4033491a667647753',

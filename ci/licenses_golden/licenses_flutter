@@ -942,6 +942,7 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_context.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_context.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/sample_unittests.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/service_provider_dir.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/service_provider_dir.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/session_connection.cc
