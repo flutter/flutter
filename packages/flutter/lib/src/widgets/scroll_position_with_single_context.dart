@@ -129,6 +129,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   void goIdle() {
     beginActivity(IdleScrollActivity(this));
+  }
 
   /// Start a physics-driven simulation that settles the [pixels] position,
   /// starting at a particular velocity.
