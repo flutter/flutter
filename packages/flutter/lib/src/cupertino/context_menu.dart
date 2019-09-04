@@ -14,7 +14,11 @@ import 'colors.dart';
 // The scale of the child at the time that the ContextMenu opens.
 const double _kOpenScale = 1.2;
 
-typedef void _DismissCallback(BuildContext context, double scale, double opacity);
+typedef _DismissCallback = void Function(
+  BuildContext context,
+  double scale,
+  double opacity,
+);
 
 // Given a GlobalKey, return the Rect of the corresponding RenderBox's
 // paintBounds.
@@ -42,8 +46,6 @@ class ContextMenu extends StatefulWidget {
   ContextMenu({
     Key key,
     @required this.actions,
-    // TODO(justinmc): Use a builder instead of child so that it's easier to
-    // make duplicates?
     @required this.child,
     this.onTap,
     this.preview,
@@ -127,14 +129,12 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   }
 
   // Push the new route and open the ContextMenu overlay.
-  void _openContextMenu(Rect childRectEnd) {
+  void _openContextMenu() {
     HapticFeedback.lightImpact();
 
     setState(() {
       _childOpacity = 0.0;
     });
-
-    final Rect childRect = _getRect(_childGlobalKey);
 
     _route = _ContextMenuRoute<void>(
       actions: widget.actions,
@@ -195,14 +195,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         setState(() {
           _childOpacity = 0.0;
         });
-        // TODO(justinmc): Maybe cache these instead of recalculating.
-        final Rect childRect = _getRect(_childGlobalKey);
-        final Rect endRect = Rect.fromCenter(
-          center: childRect.center,
-          width: childRect.width * _kOpenScale,
-          height: childRect.height * _kOpenScale,
-        );
-        _openContextMenu(endRect);
+        _openContextMenu();
         // TODO(justinmc): Without this, flashes white. I think due to rendering 1
         // frame offscreen?
         Future<void>.delayed(const Duration(milliseconds: 1)).then((_) {
