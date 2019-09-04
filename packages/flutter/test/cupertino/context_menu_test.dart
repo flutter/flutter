@@ -41,10 +41,17 @@ void main() {
   }
 
   // Finds the child widget rendered inside of _ContextMenuRouteStatic.
-  Finder _findContextMenuRouteStatic() {
+  Finder _findStatic() {
     return find.descendant(
       of: find.byType(CupertinoApp),
       matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ContextMenuRouteStatic'),
+    );
+  }
+
+  Finder _findStaticChild(Widget child) {
+    return find.descendant(
+      of: _findStatic(),
+      matching: find.byWidgetPredicate((Widget w) => w == child),
     );
   }
 
@@ -98,7 +105,7 @@ void main() {
       await tester.pumpAndSettle();
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(_findContextMenuRouteStatic(), findsOneWidget);
+      expect(_findStatic(), findsOneWidget);
     });
   });
 
@@ -112,12 +119,77 @@ void main() {
       await tester.pumpAndSettle();
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(_findContextMenuRouteStatic(), findsOneWidget);
+      expect(_findStatic(), findsOneWidget);
 
       // Tap and ensure that the ContextMenu is closed.
       await tester.tapAt(const Offset(1.0, 1.0));
       await tester.pumpAndSettle();
-      expect(_findContextMenuRouteStatic(), findsNothing);
+      expect(_findStatic(), findsNothing);
+    });
+
+    testWidgets('Can close ContextMenu by dragging down', (WidgetTester tester) async {
+      await tester.pumpWidget(_getContextMenu());
+
+      // Open the ContextMenu
+      final Rect childRect = tester.getRect(find.byKey(childKey));
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(_findStatic(), findsOneWidget);
+
+      // Drag down not far enough and it bounces back and doesn't close.
+      expect(_findStaticChild(child), findsOneWidget);
+      Offset staticChildCenter = tester.getCenter(_findStaticChild(child));
+      TestGesture swipeGesture = await tester.startGesture(staticChildCenter);
+      await swipeGesture.moveBy(
+        const Offset(0.0, 100.0),
+        timeStamp: const Duration(milliseconds: 100),
+      );
+      await tester.pump();
+      await swipeGesture.up();
+      await tester.pump();
+      expect(tester.getCenter(_findStaticChild(child)).dy, greaterThan(staticChildCenter.dy));
+      await tester.pumpAndSettle();
+      expect(tester.getCenter(_findStaticChild(child)), equals(staticChildCenter));
+      expect(_findStatic(), findsOneWidget);
+
+      // Drag down far enough and it does close.
+      expect(_findStaticChild(child), findsOneWidget);
+      staticChildCenter = tester.getCenter(_findStaticChild(child));
+      swipeGesture = await tester.startGesture(staticChildCenter);
+      await swipeGesture.moveBy(
+        const Offset(0.0, 200.0),
+        timeStamp: const Duration(milliseconds: 100),
+      );
+      await tester.pump();
+      await swipeGesture.up();
+      await tester.pumpAndSettle();
+      expect(_findStatic(), findsNothing);
+    });
+
+    testWidgets('Can close ContextMenu by flinging down', (WidgetTester tester) async {
+      await tester.pumpWidget(_getContextMenu());
+
+      // Open the ContextMenu
+      final Rect childRect = tester.getRect(find.byKey(childKey));
+      final TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(_findStatic(), findsOneWidget);
+
+      // Fling up and nothing happens.
+      expect(_findStaticChild(child), findsOneWidget);
+      await tester.fling(_findStaticChild(child), const Offset(0.0, -100.0), 1000.0);
+      await tester.pumpAndSettle();
+      expect(_findStaticChild(child), findsOneWidget);
+
+      // Fling down to close the menu.
+      expect(_findStaticChild(child), findsOneWidget);
+      await tester.fling(_findStaticChild(child), const Offset(0.0, 100.0), 1000.0);
+      await tester.pumpAndSettle();
+      expect(_findStatic(), findsNothing);
     });
   });
 }
