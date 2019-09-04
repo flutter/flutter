@@ -66,7 +66,9 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
           advisory_script_entrypoint,   // advisory entrypoint
           nullptr,                      // child isolate preparer
           isolate_create_callback,      // isolate create callback
-          isolate_shutdown_callback     // isolate shutdown callback
+          isolate_shutdown_callback,    // isolate shutdown callback,
+          true,                         // is_root_isolate
+          true                          // is_group_root_isolate
           ));
 
   std::tie(vm_isolate, embedder_isolate) = CreateDartVMAndEmbedderObjectPair(
@@ -110,7 +112,9 @@ DartIsolate::DartIsolate(const Settings& settings,
                          std::string advisory_script_entrypoint,
                          ChildIsolatePreparer child_isolate_preparer,
                          fml::closure isolate_create_callback,
-                         fml::closure isolate_shutdown_callback)
+                         fml::closure isolate_shutdown_callback,
+                         bool is_root_isolate,
+                         bool is_group_root_isolate)
     : UIDartState(std::move(task_runners),
                   settings.task_observer_add,
                   settings.task_observer_remove,
@@ -126,7 +130,9 @@ DartIsolate::DartIsolate(const Settings& settings,
       shared_snapshot_(std::move(shared_snapshot)),
       child_isolate_preparer_(std::move(child_isolate_preparer)),
       isolate_create_callback_(isolate_create_callback),
-      isolate_shutdown_callback_(isolate_shutdown_callback) {
+      isolate_shutdown_callback_(isolate_shutdown_callback),
+      is_root_isolate_(is_root_isolate),
+      is_group_root_isolate_(is_group_root_isolate) {
   FML_DCHECK(isolate_snapshot_) << "Must contain a valid isolate snapshot.";
   phase_ = Phase::Uninitialized;
 }
@@ -148,7 +154,7 @@ std::string DartIsolate::GetServiceId() {
   return service_id;
 }
 
-bool DartIsolate::Initialize(Dart_Isolate dart_isolate, bool is_root_isolate) {
+bool DartIsolate::Initialize(Dart_Isolate dart_isolate) {
   TRACE_EVENT0("flutter", "DartIsolate::Initialize");
   if (phase_ != Phase::Uninitialized) {
     return false;
@@ -159,12 +165,6 @@ bool DartIsolate::Initialize(Dart_Isolate dart_isolate, bool is_root_isolate) {
   }
 
   if (Dart_CurrentIsolate() != dart_isolate) {
-    return false;
-  }
-
-  auto* isolate_data = static_cast<std::shared_ptr<DartIsolate>*>(
-      Dart_IsolateGroupData(dart_isolate));
-  if (isolate_data->get() != this) {
     return false;
   }
 
@@ -179,8 +179,7 @@ bool DartIsolate::Initialize(Dart_Isolate dart_isolate, bool is_root_isolate) {
 
   tonic::DartIsolateScope scope(isolate());
 
-  SetMessageHandlingTaskRunner(GetTaskRunners().GetUITaskRunner(),
-                               is_root_isolate);
+  SetMessageHandlingTaskRunner(GetTaskRunners().GetUITaskRunner());
 
   if (tonic::LogIfError(
           Dart_SetLibraryTagHandler(tonic::DartState::HandleLibraryTag))) {
@@ -200,9 +199,8 @@ fml::RefPtr<fml::TaskRunner> DartIsolate::GetMessageHandlingTaskRunner() const {
 }
 
 void DartIsolate::SetMessageHandlingTaskRunner(
-    fml::RefPtr<fml::TaskRunner> runner,
-    bool is_root_isolate) {
-  if (!is_root_isolate || !runner) {
+    fml::RefPtr<fml::TaskRunner> runner) {
+  if (!IsRootIsolate() || !runner) {
     return;
   }
 
@@ -251,7 +249,7 @@ bool DartIsolate::UpdateThreadPoolNames() const {
   return true;
 }
 
-bool DartIsolate::LoadLibraries(bool is_root_isolate) {
+bool DartIsolate::LoadLibraries() {
   TRACE_EVENT0("flutter", "DartIsolate::LoadLibraries");
   if (phase_ != Phase::Initialized) {
     return false;
@@ -261,11 +259,11 @@ bool DartIsolate::LoadLibraries(bool is_root_isolate) {
 
   DartIO::InitForIsolate();
 
-  DartUI::InitForIsolate(is_root_isolate);
+  DartUI::InitForIsolate(IsRootIsolate());
 
   const bool is_service_isolate = Dart_IsServiceIsolate(isolate());
 
-  DartRuntimeHooks::Install(is_root_isolate && !is_service_isolate,
+  DartRuntimeHooks::Install(IsRootIsolate() && !is_service_isolate,
                             GetAdvisoryScriptURI());
 
   if (!is_service_isolate) {
@@ -645,6 +643,7 @@ Dart_Isolate DartIsolate::DartIsolateGroupCreateCallback(
     Dart_IsolateFlags* flags,
     std::shared_ptr<DartIsolate>* parent_embedder_isolate,
     char** error) {
+  TRACE_EVENT0("flutter", "DartIsolate::DartIsolateGroupCreateCallback");
   if (parent_embedder_isolate == nullptr &&
       strcmp(advisory_script_uri, DART_VM_SERVICE_ISOLATE_NAME) == 0) {
     // The VM attempts to start the VM service for us on |Dart_Initialize|. In
@@ -670,6 +669,58 @@ Dart_Isolate DartIsolate::DartIsolateGroupCreateCallback(
              error                        // error
              )
       .first;
+}
+
+// |Dart_IsolateInitializeCallback|
+bool DartIsolate::DartIsolateInitializeCallback(void** child_callback_data,
+                                                char** error) {
+  TRACE_EVENT0("flutter", "DartIsolate::DartIsolateInitializeCallback");
+  Dart_Isolate isolate = Dart_CurrentIsolate();
+  if (isolate == nullptr) {
+    *error = strdup("Isolate should be available in initialize callback.");
+    FML_DLOG(ERROR) << *error;
+    return false;
+  }
+
+  auto* root_embedder_isolate = static_cast<std::shared_ptr<DartIsolate>*>(
+      Dart_CurrentIsolateGroupData());
+
+  TaskRunners null_task_runners(
+      (*root_embedder_isolate)->GetAdvisoryScriptURI(),
+      /* platform= */ nullptr, /* gpu= */ nullptr,
+      /* ui= */ nullptr,
+      /* io= */ nullptr);
+
+  auto embedder_isolate = std::make_unique<std::shared_ptr<DartIsolate>>(
+      std::make_shared<DartIsolate>(
+          (*root_embedder_isolate)->GetSettings(),         // settings
+          (*root_embedder_isolate)->GetIsolateSnapshot(),  // isolate_snapshot
+          (*root_embedder_isolate)->GetSharedSnapshot(),   // shared_snapshot
+          null_task_runners,                               // task_runners
+          fml::WeakPtr<IOManager>{},                       // io_manager
+          fml::WeakPtr<ImageDecoder>{},                    // io_manager
+          (*root_embedder_isolate)
+              ->GetAdvisoryScriptURI(),  // advisory_script_uri
+          (*root_embedder_isolate)
+              ->GetAdvisoryScriptEntrypoint(),  // advisory_script_entrypoint
+          (*root_embedder_isolate)->child_isolate_preparer_,     // preparer
+          (*root_embedder_isolate)->isolate_create_callback_,    // on create
+          (*root_embedder_isolate)->isolate_shutdown_callback_,  // on shutdown
+          false,    // is_root_isolate
+          false));  // is_group_root_isolate
+
+  // root isolate should have been created via CreateRootIsolate and
+  // CreateDartVMAndEmbedderObjectPair
+  if (!InitializeIsolate(*embedder_isolate, isolate, error)) {
+    return false;
+  }
+
+  // The ownership of the embedder object is controlled by the Dart VM. So the
+  // only reference returned to the caller is weak.
+  *child_callback_data = embedder_isolate.release();
+
+  Dart_EnterIsolate(isolate);
+  return true;
 }
 
 std::pair<Dart_Isolate, std::weak_ptr<DartIsolate>>
@@ -711,12 +762,11 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
             fml::WeakPtr<ImageDecoder>{},                   // io_manager
             advisory_script_uri,         // advisory_script_uri
             advisory_script_entrypoint,  // advisory_script_entrypoint
-            (*raw_embedder_isolate)->child_isolate_preparer_,    // preparer
-            (*raw_embedder_isolate)->isolate_create_callback_,   // on create
-            (*raw_embedder_isolate)->isolate_shutdown_callback_  // on shutdown
-            )
-
-    );
+            (*raw_embedder_isolate)->child_isolate_preparer_,     // preparer
+            (*raw_embedder_isolate)->isolate_create_callback_,    // on create
+            (*raw_embedder_isolate)->isolate_shutdown_callback_,  // on shutdown
+            is_root_isolate,
+            true));  // is_root_group_isolate
   }
 
   // Create the Dart VM isolate and give it the embedder object as the baton.
@@ -736,33 +786,15 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
     return {nullptr, {}};
   }
 
-  if (!(*embedder_isolate)->Initialize(isolate, is_root_isolate)) {
-    *error = strdup("Embedder could not initialize the Dart isolate.");
-    FML_DLOG(ERROR) << *error;
+  if (!InitializeIsolate(*embedder_isolate, isolate, error)) {
     return {nullptr, {}};
   }
 
-  if (!(*embedder_isolate)->LoadLibraries(is_root_isolate)) {
-    *error =
-        strdup("Embedder could not load libraries in the new Dart isolate.");
-    FML_DLOG(ERROR) << *error;
-    return {nullptr, {}};
-  }
+  auto* isolate_data = static_cast<std::shared_ptr<DartIsolate>*>(
+      Dart_IsolateGroupData(isolate));
+  FML_DCHECK(isolate_data->get() == embedder_isolate->get());
 
   auto weak_embedder_isolate = (*embedder_isolate)->GetWeakIsolatePtr();
-
-  // Root isolates will be setup by the engine and the service isolate (which is
-  // also a root isolate) by the utility routines in the VM. However, secondary
-  // isolates will be run by the VM if they are marked as runnable.
-  if (!is_root_isolate) {
-    FML_DCHECK((*embedder_isolate)->child_isolate_preparer_);
-    if (!(*embedder_isolate)
-             ->child_isolate_preparer_((*embedder_isolate).get())) {
-      *error = strdup("Could not prepare the child isolate to run.");
-      FML_DLOG(ERROR) << *error;
-      return {nullptr, {}};
-    }
-  }
 
   // The ownership of the embedder object is controlled by the Dart VM. So the
   // only reference returned to the caller is weak.
@@ -770,16 +802,84 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
   return {isolate, weak_embedder_isolate};
 }
 
+bool DartIsolate::InitializeIsolate(
+    std::shared_ptr<DartIsolate> embedder_isolate,
+    Dart_Isolate isolate,
+    char** error) {
+  TRACE_EVENT0("flutter", "DartIsolate::InitializeIsolate");
+  if (!embedder_isolate->Initialize(isolate)) {
+    *error = strdup("Embedder could not initialize the Dart isolate.");
+    FML_DLOG(ERROR) << *error;
+    return false;
+  }
+
+  if (!embedder_isolate->LoadLibraries()) {
+    *error =
+        strdup("Embedder could not load libraries in the new Dart isolate.");
+    FML_DLOG(ERROR) << *error;
+    return false;
+  }
+
+  // Root isolates will be setup by the engine and the service isolate (which is
+  // also a root isolate) by the utility routines in the VM. However, secondary
+  // isolates will be run by the VM if they are marked as runnable.
+  if (!embedder_isolate->IsRootIsolate()) {
+    FML_DCHECK(embedder_isolate->child_isolate_preparer_);
+    if (!embedder_isolate->child_isolate_preparer_(embedder_isolate.get())) {
+      *error = strdup("Could not prepare the child isolate to run.");
+      FML_DLOG(ERROR) << *error;
+      return false;
+    }
+  }
+
+  return true;
+}
+
 // |Dart_IsolateShutdownCallback|
 void DartIsolate::DartIsolateShutdownCallback(
     std::shared_ptr<DartIsolate>* isolate_group_data,
     std::shared_ptr<DartIsolate>* isolate_data) {
+  TRACE_EVENT0("flutter", "DartIsolate::DartIsolateShutdownCallback");
   isolate_group_data->get()->OnShutdownCallback();
 }
 
 // |Dart_IsolateGroupCleanupCallback|
 void DartIsolate::DartIsolateGroupCleanupCallback(
     std::shared_ptr<DartIsolate>* isolate_data) {
+  TRACE_EVENT0("flutter", "DartIsolate::DartIsolateGroupCleanupCallback");
+  FML_DLOG(INFO) << "DartIsolateGroupCleanupCallback isolate_data "
+                 << isolate_data;
+
+  delete isolate_data;
+}
+
+// |Dart_IsolateCleanupCallback|
+void DartIsolate::DartIsolateCleanupCallback(
+    std::shared_ptr<DartIsolate>* isolate_group_data,
+    std::shared_ptr<DartIsolate>* isolate_data) {
+  TRACE_EVENT0("flutter", "DartIsolate::DartIsolateCleanupCallback");
+
+  if ((*isolate_data)->IsRootIsolate()) {
+    // isolate_data will be cleaned up as part of IsolateGroup cleanup
+    FML_DLOG(INFO)
+        << "DartIsolateCleanupCallback no-op for root isolate isolate_data "
+        << isolate_data;
+    return;
+  }
+  if ((*isolate_data)->IsGroupRootIsolate()) {
+    // Even if isolate was not a root isolate(i.e. was spawned),
+    // it might have IsolateGroup created for it (when
+    // --no-enable-isolate-groups dart vm flag is used).
+    // Then its isolate_data will be cleaned up as part of IsolateGroup
+    // cleanup as well.
+    FML_DLOG(INFO) << "DartIsolateCleanupCallback no-op for group root isolate "
+                      "isolate_data "
+                   << isolate_data;
+    return;
+  }
+
+  FML_DLOG(INFO) << "DartIsolateCleanupCallback cleaned up isolate_data "
+                 << isolate_data;
   delete isolate_data;
 }
 
