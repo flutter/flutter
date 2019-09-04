@@ -1572,7 +1572,7 @@ void main() {
 
     expect(description, <String>[
       'value: 50.0',
-      'onChanged: disabled',
+      'disabled',
       'onChangeStart: null',
       'onChangeEnd: null',
       'min: 0.0',
