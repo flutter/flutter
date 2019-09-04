@@ -85,6 +85,7 @@ class Win32FlutterWindow : public Win32Window {
   // Callbacks for clearing context, settings context and swapping buffers.
   bool ClearContext();
   bool MakeCurrent();
+  bool MakeResourceCurrent();
   bool SwapBuffers();
 
   // Sends a window metrics update to the Flutter engine using current window

@@ -279,6 +279,10 @@ bool Win32FlutterWindow::MakeCurrent() {
   return surface_manager->MakeCurrent(render_surface);
 }
 
+bool Win32FlutterWindow::MakeResourceCurrent() {
+  return surface_manager->MakeResourceCurrent();
+}
+
 bool Win32FlutterWindow::ClearContext() {
   return surface_manager->MakeCurrent(nullptr);
 }

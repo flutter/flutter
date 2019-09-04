@@ -46,6 +46,10 @@ class AngleSurfaceManager {
   // surfaces returning a boolean result reflecting success.
   bool MakeCurrent(const EGLSurface surface);
 
+  // Binds egl_resource_context_ to the current rendering thread and to the draw
+  // and read surfaces returning a boolean result reflecting success.
+  bool MakeResourceCurrent();
+
   // Swaps the front and back buffers of the DX11 swapchain backing surface if
   // not null.
   EGLBoolean SwapBuffers(const EGLSurface surface);
@@ -55,13 +59,17 @@ class AngleSurfaceManager {
   void CleanUp();
 
  private:
-  // EGL representation of native display
+  // EGL representation of native display.
   EGLDisplay egl_display_;
 
-  // EGL representation of current rendering context
+  // EGL representation of current rendering context.
   EGLContext egl_context_;
 
-  // current frame buffer configuration
+  // EGL representation of current rendering context used for async texture
+  // uploads.
+  EGLContext egl_resource_context_;
+
+  // current frame buffer configuration.
   EGLConfig egl_config_;
 
   // State representing success or failure of display initialization used when
