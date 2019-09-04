@@ -20,6 +20,7 @@ const String _kOutputOption = 'output';
 const String _kPackageOption = 'package';
 const String _kTemplateOption = 'template';
 const String _kTypeOption = 'type';
+const String _kShowDartPad = 'dartpad';
 
 /// Generates snippet dartdoc output for a given input, and creates any sample
 /// applications needed by the snippet.
@@ -87,6 +88,11 @@ void main(List<String> argList) {
     negatable: false,
     help: 'Prints help documentation for this command',
   );
+  parser.addFlag(
+    _kShowDartPad,
+    defaultsTo: false,
+    negatable: false,
+  );
 
   final ArgResults args = parser.parse(argList);
 
@@ -151,6 +157,7 @@ void main(List<String> argList) {
   stdout.write(generator.generate(
     input,
     snippetType,
+    showDartPad: args[_kShowDartPad],
     template: template,
     output: args[_kOutputOption] != null ? File(args[_kOutputOption]) : null,
     metadata: <String, Object>{

@@ -67,8 +67,9 @@ class Configuration {
   /// dartdoc.
   Directory get templatesDirectory => Directory(path.join(configDirectory.path, 'templates'));
 
-  /// Gets the skeleton file to use for the given [SnippetType].
-  File getHtmlSkeletonFile(SnippetType type) {
-    return File(path.join(skeletonsDirectory.path, '${getEnumName(type)}.html'));
+  /// Gets the skeleton file to use for the given [SnippetType] and DartPad preference.
+  File getHtmlSkeletonFile(SnippetType type, bool useDartPad) {
+    final String filename = useDartPad ? 'dartpad.html' : '${getEnumName(type)}.html';
+    return File(path.join(skeletonsDirectory.path, filename));
   }
 }
