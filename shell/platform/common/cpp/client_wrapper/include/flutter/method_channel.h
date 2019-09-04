@@ -48,11 +48,18 @@ class MethodChannel {
     MethodCall<T> method_call(method, std::move(arguments));
     std::unique_ptr<std::vector<uint8_t>> message =
         codec_->EncodeMethodCall(method_call);
-    messenger_->Send(name_, message->data(), message->size());
+    messenger_->Send(name_, message->data(), message->size(), nullptr);
   }
 
-  // TODO: Add support for a version of InvokeMethod expecting a reply once
-  // https://github.com/flutter/flutter/issues/18852 is fixed.
+  // Sends a message to the Flutter engine on this channel expecting a reply.
+  void InvokeMethod(const std::string& method,
+                    std::unique_ptr<T> arguments,
+                    flutter::BinaryReply reply) {
+    MethodCall<T> method_call(method, std::move(arguments));
+    std::unique_ptr<std::vector<uint8_t>> message =
+        codec_->EncodeMethodCall(method_call);
+    messenger_->Send(name_, message->data(), message->size(), reply);
+  }
 
   // Registers a handler that should be called any time a method call is
   // received on this channel.

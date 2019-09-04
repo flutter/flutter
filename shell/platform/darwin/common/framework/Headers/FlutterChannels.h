@@ -234,11 +234,7 @@ FLUTTER_EXPORT
  */
 - (void)invokeMethod:(NSString*)method
            arguments:(id _Nullable)arguments
-              result:(FlutterResult _Nullable)callback
-    // TODO: Add macOS support for replies once
-    // https://github.com/flutter/flutter/issues/18852 is fixed.
-    API_UNAVAILABLE(macos);
-
+              result:(FlutterResult _Nullable)callback;
 /**
  * Registers a handler for method calls from the Flutter side.
  *
