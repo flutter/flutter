@@ -44,7 +44,7 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 /// The most efficient way to trigger a relayout is to supply a `relayout`
 /// argument to the constructor of the [MultiChildLayoutDelegate]. The custom
 /// layout will listen to this value and relayout whenever the Listenable
-/// notifies its listeners, such as when an Animation ticks. This allows
+/// notifies its listeners, such as when an [Animation] ticks. This allows
 /// the custom layout to avoid the build phase of the pipeline.
 ///
 /// Each child must be wrapped in a [LayoutId] widget to assign the id that
@@ -113,7 +113,7 @@ abstract class MultiChildLayoutDelegate {
   MultiChildLayoutDelegate({ Listenable relayout }) : _relayout = relayout;
 
   final Listenable _relayout;
-  
+
   Map<Object, RenderBox> _idToChild;
   Set<RenderBox> _debugChildrenNeedingLayout;
 
