@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/toolchain/clang.gni")
 import("//build/toolchain/goma.gni")
 
 if (use_goma) {
