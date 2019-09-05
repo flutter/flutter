@@ -93,7 +93,6 @@
   _pluginPublications = [NSMutableDictionary new];
   _platformViewsController.reset(new flutter::FlutterPlatformViewsController());
 
-  [self setupChannels];
   _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
 
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];

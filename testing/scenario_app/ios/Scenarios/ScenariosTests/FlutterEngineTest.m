@@ -28,4 +28,23 @@
   XCTAssertNil(engine.isolateId);
 }
 
+- (void)testChannelSetup {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  XCTAssertNil(engine.navigationChannel);
+  XCTAssertNil(engine.platformChannel);
+  XCTAssertNil(engine.lifecycleChannel);
+
+  XCTAssertTrue([engine runWithEntrypoint:nil]);
+
+  XCTAssertNotNil(engine.navigationChannel);
+  XCTAssertNotNil(engine.platformChannel);
+  XCTAssertNotNil(engine.lifecycleChannel);
+
+  [engine destroyContext];
+
+  XCTAssertNil(engine.navigationChannel);
+  XCTAssertNil(engine.platformChannel);
+  XCTAssertNil(engine.lifecycleChannel);
+}
+
 @end
