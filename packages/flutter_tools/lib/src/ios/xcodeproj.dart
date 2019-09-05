@@ -324,9 +324,11 @@ class XcodeProjectInterpreter {
     ], workingDirectory: fs.currentDirectory.path);
   }
 
-  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
     final RunResult result = await runCheckedAsync(<String>[
-      _executable, '-list',
+      _executable,
+      '-list',
+      if (projectFilename != null) ...<String>['-project', projectFilename],
     ], workingDirectory: projectPath);
     return XcodeProjectInfo.fromXcodeBuildOutput(result.toString());
   }
