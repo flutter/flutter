@@ -184,8 +184,8 @@ class _FocusDemoState extends State<FocusDemo> {
                         decoration: InputDecoration(labelText: 'Enter Text', filled: true),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
                       child: TextField(
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
