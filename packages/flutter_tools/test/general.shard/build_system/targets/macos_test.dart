@@ -102,7 +102,7 @@ void main() {
       }
       return FakeProcessResult()..exitCode = 0;
     });
-    await const DebugUnpackMacOS().build(<File>[], environment);
+    await const DebugUnpackMacOS().build(environment);
 
     expect(fs.directory('$_kOutputPrefix').existsSync(), true);
     for (File file in inputs) {
@@ -116,7 +116,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('testing');
 
-    expect(() async => await const DebugMacOSBundleFlutterAssets().build(<File>[], environment),
+    expect(() async => await const DebugMacOSBundleFlutterAssets().build(environment),
         throwsA(isInstanceOf<Exception>()));
   }));
 
@@ -137,7 +137,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('testing');
 
-    await const DebugMacOSBundleFlutterAssets().build(<File>[], environment);
+    await const DebugMacOSBundleFlutterAssets().build(environment);
 
     expect(fs.file(outputKernel).readAsStringSync(), 'testing');
     expect(fs.file(outputPlist).readAsStringSync(), contains('io.flutter.flutter.app'));
@@ -156,7 +156,7 @@ void main() {
         'flutter_assets', 'vm_snapshot_data');
     final String precompiledIsolate = fs.path.join('App.framework', 'Resources',
         'flutter_assets', 'isolate_snapshot_data');
-    await const ProfileMacOSBundleFlutterAssets().build(<File>[], environment..defines[kBuildMode] = 'profile');
+    await const ProfileMacOSBundleFlutterAssets().build(environment..defines[kBuildMode] = 'profile');
 
     expect(fs.file(outputKernel).existsSync(), false);
     expect(fs.file(precompiledVm).existsSync(), false);
@@ -186,7 +186,7 @@ void main() {
 # Generated
 sky_engine:file:///bin/cache/pkg/sky_engine/lib/
 flutter_tools:lib/''');
-    await const CompileMacOSFramework().build(<File>[], environment..defines[kBuildMode] = 'release');
+    await const CompileMacOSFramework().build(environment..defines[kBuildMode] = 'release');
   }, overrides: <Type, Generator>{
     GenSnapshot: () => MockGenSnapshot(),
     Xcode: () => MockXCode(),
