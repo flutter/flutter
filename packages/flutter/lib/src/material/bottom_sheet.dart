@@ -429,7 +429,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 ///
 /// The optional [backgroundColor], [elevation], [shape], and [clipBehavior]
 /// parameters can be passed in to customize the appearance and behavior of
-/// persistent bottom sheets.
+/// modal bottom sheets.
 ///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
