@@ -476,7 +476,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     _opacityTween.end = opacity;
     _sheetOpacity = _opacityTween.animate(CurvedAnimation(
       parent: animation,
-      curve: Interval(0.9, 1.0),
+      curve: const Interval(0.9, 1.0),
     ));
     Navigator.of(context).pop();
   }

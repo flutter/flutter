@@ -14,7 +14,7 @@ void main() {
     final UniqueKey actionKey = UniqueKey();
     final ContextMenuSheetAction action = ContextMenuSheetAction(
       key: actionKey,
-      child: Text('I am a ContextMenuSheetAction'),
+      child: const Text('I am a ContextMenuSheetAction'),
       onPressed: onPressed,
     );
 
@@ -28,7 +28,7 @@ void main() {
   }
 
   BoxDecoration _getDecoration(WidgetTester tester) {
-    Finder finder = find.descendant(
+    final Finder finder = find.descendant(
       of: find.byType(ContextMenuSheetAction),
       matching: find.byType(Container),
     );

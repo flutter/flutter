@@ -20,9 +20,9 @@ void main() {
       home: CupertinoPageScaffold(
         child: Center(
           child: ContextMenu(
-            actions: <ContextMenuSheetAction>[
+            actions: const <ContextMenuSheetAction>[
               ContextMenuSheetAction(
-                child: const Text('ContextMenuSheetAction'),
+                child: Text('ContextMenuSheetAction'),
               ),
             ],
             child: child,
