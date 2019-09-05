@@ -142,13 +142,11 @@ BuildApp() {
     mkdir "${derived_dir}/engine"
     RunCommand cp -r -- "${flutter_podspec}" "${derived_dir}/engine"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}/engine"
-    # Make non-binary files read-only to discourage editing headers, but allow binary code-signing.
-    RunCommand find "${derived_dir}/engine/Flutter.framework" -type f -exec grep -Il '.' {} \; | xargs chmod a-w
+    RunCommand find "${derived_dir}/engine/Flutter.framework" -type f -exec chmod a-w "{}" \;
   else
     RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}"
-    # Make non-binary files read-only to discourage editing headers, but allow binary code-signing.
-    RunCommand find "${derived_dir}/Flutter.framework" -type f -exec grep -Il '.' {} \; | xargs chmod a-w
+    RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
   fi
 
   RunCommand pushd "${project_path}" > /dev/null
