@@ -282,7 +282,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   /// the lens and partially grayed out around it.
   Widget _buildMagnifierScreen(Color resolved) {
     final Color foreground = resolved?.withAlpha(
-      (resolved.alpha * _kForegroundScreenOpacityFraction).toInt()
+      (resolved.alpha * _kForegroundScreenOpacityFraction).toInt(),
     );
 
     final Color resolvedBorderColor = CupertinoDynamicColor.resolve(_kHighlighterBorder, context);
@@ -310,7 +310,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
   Widget _buildUnderMagnifierScreen(Color resolved) {
     final Color foreground = resolved?.withAlpha(
-      (resolved.alpha * _kForegroundScreenOpacityFraction).toInt()
+      (resolved.alpha * _kForegroundScreenOpacityFraction).toInt(),
     );
 
     return Column(
