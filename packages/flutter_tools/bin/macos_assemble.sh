@@ -64,7 +64,7 @@ build_outputs_path="${ephemeral_dir}/FlutterOutputs.xcfilelist"
 
 # Unconditionally touch a tripwire file. This can be listed as an input to
 # ensure that the flutter tool always has a chance to use its own cache.
-# Removeing this file as an input requires a separate xcode scheme per
+# Removing this file as an input requires a separate xcode scheme per
 # each build mode (debug/profile/release) and target file.
 touch "${ephemeral_dir}/tripwire"
 
