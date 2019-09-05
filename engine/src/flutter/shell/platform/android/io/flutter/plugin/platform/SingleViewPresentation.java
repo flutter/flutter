@@ -12,6 +12,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Keep;
 import android.util.Log;
 import android.view.*;
 import android.view.accessibility.AccessibilityEvent;
@@ -38,6 +39,7 @@ import static android.view.View.OnFocusChangeListener;
  *      |
  *   EmbeddedView
  */
+@Keep
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 class SingleViewPresentation extends Presentation {
 

@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -41,6 +42,7 @@ import java.util.Map;
  * for the virtual accessibility node IDs in the platform view's tree. Internally this class maintains a bidirectional
  * mapping between `flutterId`s and the corresponding platform view and `originId`.
  */
+@Keep
 final class AccessibilityViewEmbedder {
     private static final String TAG = "AccessibilityBridge";
 

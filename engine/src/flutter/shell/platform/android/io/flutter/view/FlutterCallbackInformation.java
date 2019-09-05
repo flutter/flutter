@@ -4,6 +4,7 @@
 
 package io.flutter.view;
 
+import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 
 import io.flutter.embedding.engine.FlutterJNI;
@@ -12,6 +13,7 @@ import io.flutter.embedding.engine.FlutterJNI;
  * A class representing information for a callback registered using
  * `PluginUtilities` from `dart:ui`.
  */
+@Keep
 public final class FlutterCallbackInformation {
   final public String callbackName;
   final public String callbackClassName;
