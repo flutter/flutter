@@ -4,8 +4,9 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart' show ChangeNotifier, visibleForTesting;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 
 import 'events.dart';
 import 'pointer_router.dart';
@@ -25,6 +26,24 @@ typedef PointerExitEventListener = void Function(PointerExitEvent event);
 /// Used by [MouseTrackerAnnotation], [Listener] and [RenderPointerListener].
 typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 
+/// The information related to an event that might cause a cursor change.
+@immutable
+class MouseCursorContext {
+  /// Create a [MouseCursorContext] by assigning all properties.
+  const MouseCursorContext({
+    this.localPosition,
+    this.globalPosition,
+  });
+
+  /// The current cursor position in global coordinate system.
+  final Offset globalPosition;
+
+  /// The current cursor position in the local coordinate system of the layer.
+  final Offset localPosition;
+}
+
+typedef MouseCursorDesignator = int Function(MouseCursorContext context);
+
 /// The annotation object used to annotate layers that are interested in mouse
 /// movements.
 ///
@@ -32,7 +51,12 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 class MouseTrackerAnnotation {
   /// Creates an annotation that can be used to find layers interested in mouse
   /// movements.
-  const MouseTrackerAnnotation({this.onEnter, this.onHover, this.onExit});
+  const MouseTrackerAnnotation({
+    this.onEnter,
+    this.onHover,
+    this.onExit,
+    this.cursor,
+  });
 
   /// Triggered when a pointer has entered the bounding box of the annotated
   /// layer.
@@ -45,6 +69,18 @@ class MouseTrackerAnnotation {
   /// Triggered when a pointer has exited the bounding box of the annotated
   /// layer.
   final PointerExitEventListener onExit;
+
+  /// Returns the cursor that a mouse pointer should change to if it enters
+  /// or is hovering the layer that is annotated with this object.
+  ///
+  /// If it is null or returns null, then the layers visually behind it will
+  /// take the control.
+  ///
+  /// See also:
+  ///
+  ///  * [MouseCursors], which is a collection of system cursors of all
+  ///    platforms.
+  final MouseCursorDesignator cursor;
 
   @override
   String toString() {
@@ -103,7 +139,12 @@ class MouseTracker extends ChangeNotifier {
 
   // The collection of annotations that are currently being tracked. They may or
   // may not be active, depending on the value of _TrackedAnnotation.active.
-  final Map<MouseTrackerAnnotation, _TrackedAnnotation> _trackedAnnotations = <MouseTrackerAnnotation, _TrackedAnnotation>{};
+  final Map<MouseTrackerAnnotation, _TrackedAnnotation> _trackedAnnotations =
+    <MouseTrackerAnnotation, _TrackedAnnotation>{};
+
+  final MouseCursorManager _cursorManager = MouseCursorManager(
+    channel: SystemChannels.mouseCursor,
+  );
 
   /// Track an annotation so that if the mouse enters it, we send it events.
   ///
@@ -162,6 +203,7 @@ class MouseTracker extends ChangeNotifier {
     }
     if (event is PointerRemovedEvent) {
       _removeMouseEvent(deviceId, event);
+      _cursorManager.onDeviceDisconnected(event.device);
       // If the mouse was removed, then we need to schedule one more check to
       // exit any annotations that were active.
       _scheduleMousePositionCheck();
@@ -234,6 +276,7 @@ class MouseTracker extends ChangeNotifier {
         return;
       }
 
+      final Map<int, int> cursorForDevices = <int, int>{};
       for (int deviceId in _lastMouseEvent.keys) {
         final PointerEvent lastEvent = _lastMouseEvent[deviceId];
         final Iterable<MouseTrackerAnnotation> hits = annotationFinder(lastEvent.position);
@@ -249,6 +292,7 @@ class MouseTracker extends ChangeNotifier {
         }
 
         final Set<_TrackedAnnotation> hitAnnotations = hits.map<_TrackedAnnotation>((MouseTrackerAnnotation hit) => _findAnnotation(hit)).toSet();
+        int firstCursor;
         for (_TrackedAnnotation hitAnnotation in hitAnnotations) {
           if (!hitAnnotation.activeDevices.contains(deviceId)) {
             // A tracked annotation that just became active and needs to have an enter
@@ -275,7 +319,15 @@ class MouseTracker extends ChangeNotifier {
               trackedAnnotation.activeDevices.remove(deviceId);
             }
           }
+          firstCursor ??= hitAnnotation.annotation.cursor(
+            MouseCursorContext(
+              localPosition: lastEvent.localPosition,
+              globalPosition: lastEvent.position,
+            ),
+          );
         }
+        cursorForDevices[deviceId] = firstCursor ?? MouseCursors.basic;
+        _cursorManager.onChangeCursor(cursorForDevices);
       }
     } finally {
       _pendingRemovals.clear();

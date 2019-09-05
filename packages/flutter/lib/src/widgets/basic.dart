@@ -5823,6 +5823,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     this.onEnter,
     this.onExit,
     this.onHover,
+    this.cursor,
     Widget child,
   }) : super(key: key, child: child);
 
@@ -5840,6 +5841,25 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// the pointer.
   final PointerExitEventListener onExit;
 
+  /// The mouse cursor for a pointer if it enters this region.
+  ///
+  /// The cursor for a mouse pointer will be determined by the front-most
+  /// region that contains the pointer, taking opacity into account.
+  /// If the front-most region does not define a cursor (null), then the next
+  /// ones on the path will be used, or fall back to the base cursor eventually.
+  ///
+  /// It defaults to null.
+  ///
+  /// See also:
+  ///
+  ///  * [MouseCursors], which is a collection of system cursors of all
+  ///    platforms.
+  final int cursor;
+
+  int _designateCursor(MouseCursorContext _) {
+    return cursor;
+  }
+
   @override
   _ListenerElement createElement() => _ListenerElement(this);
 
@@ -5849,6 +5869,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
       onEnter: onEnter,
       onHover: onHover,
       onExit: onExit,
+      cursor: _designateCursor,
     );
   }
 
@@ -5871,6 +5892,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     if (onHover != null)
       listeners.add('hover');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
+    // TODO(dkwingsmt): Add property for cursor
   }
 }
 

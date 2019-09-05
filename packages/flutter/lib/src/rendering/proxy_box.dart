@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -2607,16 +2608,19 @@ class RenderMouseRegion extends RenderProxyBox {
     PointerEnterEventListener onEnter,
     PointerHoverEventListener onHover,
     PointerExitEventListener onExit,
+    MouseCursorDesignator cursor,
     RenderBox child,
   }) : _onEnter = onEnter,
        _onHover = onHover,
        _onExit = onExit,
+       _cursor = cursor,
        _annotationIsActive = false,
        super(child) {
     _hoverAnnotation = MouseTrackerAnnotation(
       onEnter: _handleEnter,
       onHover: _handleHover,
       onExit: _handleExit,
+      cursor: _handleMouseCursorDesignation,
     );
   }
 
@@ -2669,6 +2673,33 @@ class RenderMouseRegion extends RenderProxyBox {
   void _handleExit(PointerExitEvent event) {
     if (_onExit != null)
       _onExit(event);
+  }
+
+  /// Returns the cursor that a mouse pointer should change to if it enters
+  /// or is hovering this object.
+  ///
+  /// If it is null or returns null, then the objects visually behind it will
+  /// take the control.
+  ///
+  /// Called when an event that might change mouse cursors happens, for example,
+  /// when a cursor moves or on a new frame.
+  ///
+  /// See also:
+  ///
+  ///  * [MouseCursors], which is a collection of system cursors of all
+  ///    platforms.
+  MouseCursorDesignator get cursor => _cursor;
+  set cursor(MouseCursorDesignator value) {
+    if (_cursor != value) {
+      _cursor = value;
+      _updateAnnotations();
+    }
+  }
+  MouseCursorDesignator _cursor;
+  int _handleMouseCursorDesignation(MouseCursorContext context) {
+    if (_cursor != null)
+      _cursor(context);
+    return null;
   }
 
   // Object used for annotation of the layer used for hover hit detection.
