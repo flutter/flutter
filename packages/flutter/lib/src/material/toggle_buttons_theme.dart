@@ -29,6 +29,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
   /// [ToggleButtons].
   const ToggleButtonsThemeData({
     this.textStyle,
+    this.constraints,
     this.color,
     this.selectedColor,
     this.disabledColor,
