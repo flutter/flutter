@@ -548,7 +548,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/clang/mac-amd64',
-        'version': 'CGYQgli6H-WLIw2OAh_ki6f3Hv1OS6pj7VgczzVeUZ0C'
+        'version': 'XAazIY5FgukviOaGlyMv4dkvaGdilUC1-4EBty-uajgC'
        }
      ],
      'condition': 'host_os == "mac"',
