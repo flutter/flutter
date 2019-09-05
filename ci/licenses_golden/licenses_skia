@@ -1,4 +1,4 @@
-Signature: 3cfc3670e3ecbfb7be58d87e171b00e8
+Signature: 28c88ecdd37a24cb3ce0e0b52d8ac467
 
 UNUSED LICENSES:
 
@@ -2023,6 +2023,7 @@ FILE: ../../../third_party/skia/src/effects/SkTableMaskFilter.cpp
 FILE: ../../../third_party/skia/src/gpu/GrContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrGpu.h
 FILE: ../../../third_party/skia/src/gpu/GrGpuResource.cpp
+FILE: ../../../third_party/skia/src/gpu/GrNativeRect.h
 FILE: ../../../third_party/skia/src/gpu/GrPaint.h
 FILE: ../../../third_party/skia/src/gpu/GrPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrPathRenderer.h
@@ -2043,7 +2044,6 @@ FILE: ../../../third_party/skia/src/gpu/gl/GrGLGLSL.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLGpu.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLGpu.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLGpuProgramCache.cpp
-FILE: ../../../third_party/skia/src/gpu/gl/GrGLIRect.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLInterfaceAutogen.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLMakeNativeInterface_none.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLProgram.cpp
@@ -4995,6 +4995,7 @@ FILE: ../../../third_party/skia/modules/particles/src/SkParticleBinding.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleDrawable.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
+FILE: ../../../third_party/skia/samplecode/SampleBackdropBounds.cpp
 FILE: ../../../third_party/skia/samplecode/SampleImageFilterDAG.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
 FILE: ../../../third_party/skia/src/core/SkImageFilterTypes.h
