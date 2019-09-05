@@ -160,6 +160,10 @@ void main() {
     );
   });
 
+  test('can resolve null color', () {
+    expect(CupertinoDynamicColor.resolve(null, null), isNull);
+  });
+
   test('withVibrancy constructor creates colors that may depend on vibrancy', () {
     expect(vibrancyDependentColor1, const CupertinoDynamicColor.withBrightness(
       color: color1,
