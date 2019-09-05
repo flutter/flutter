@@ -18,10 +18,7 @@ void main() {
     );
     await expectLater(
       find.byType(ColorFiltered),
-      matchesGoldenFile(
-        'color_filter_red.png',
-        version: 1,
-      ),
+      matchesGoldenFile('color_filter_red.png'),
     );
   });
 
@@ -59,10 +56,7 @@ void main() {
     );
     await expectLater(
       find.byType(ColorFiltered),
-      matchesGoldenFile(
-        'color_filter_sepia.png',
-        version: 1,
-      ),
+      matchesGoldenFile('color_filter_sepia.png'),
     );
   });
 
