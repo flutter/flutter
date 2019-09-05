@@ -325,7 +325,7 @@ class CupertinoDynamicColor extends Color {
   /// Resolves the given [Color] by calling [resolveFrom].
   ///
   /// If the given color is already a concrete [Color], it will be returned as is.
-  /// If the given color is null, returns null for convenience.
+  /// If the given color is null, returns null.
   /// If the given color is a [CupertinoDynamicColor], but the given [BuildContext]
   /// lacks the dependencies required to the color resolution, the default trait
   /// value will be used ([Brightness.light] platform brightness, normal contrast,
