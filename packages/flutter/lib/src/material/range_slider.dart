@@ -1270,6 +1270,7 @@ class _RenderRangeSlider extends RenderBox {
       textDirection: textDirection,
       sliderTheme: _sliderTheme,
       thumb: bottomThumb,
+      values: _values
     );
 
     if (shouldPaintValueIndicators) {
@@ -1325,6 +1326,7 @@ class _RenderRangeSlider extends RenderBox {
       textDirection: textDirection,
       sliderTheme: _sliderTheme,
       thumb: topThumb,
+      values: _values
     );
   }
 

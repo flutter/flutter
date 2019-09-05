@@ -1215,6 +1215,7 @@ abstract class RangeSliderThumbShape {
     TextDirection textDirection,
     SliderThemeData sliderTheme,
     Thumb thumb,
+    RangeValues values
   });
 }
 
