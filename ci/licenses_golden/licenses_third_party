@@ -1,4 +1,4 @@
-Signature: 1e81037d2d91d5f0962e5ed40a1d41a8
+Signature: 9f33c0d3cda1948828ac6e8bcecd5d9a
 
 UNUSED LICENSES:
 
@@ -7344,6 +7344,7 @@ FILE: ../../../third_party/dart/PATENT_GRANT
 FILE: ../../../third_party/dart/client/idea/.idea/.name
 FILE: ../../../third_party/dart/client/idea/.idea/inspectionProfiles/Project_Default.xml
 FILE: ../../../third_party/dart/client/idea/.idea/vcs.xml
+FILE: ../../../third_party/dart/runtime/.clang-tidy
 FILE: ../../../third_party/dart/runtime/CPPLINT.cfg
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/clobber_arm.S
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/clobber_arm64.S
