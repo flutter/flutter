@@ -757,6 +757,12 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     if (status != AnimationStatus.completed) {
       return;
     }
+
+    // Reset the duration back to its original value.
+    _moveController.duration = const Duration(
+      milliseconds: 600,
+    );
+
     _moveController.removeStatusListener(_flingStatusListener);
     // If it was a fling back to the start, it has reset itself, and it should
     // not be dismissed.
