@@ -87,6 +87,17 @@ void main() {
       ]);
     });
 
+    testUsingContext('Removes a single unsupported device', () async {
+      final List<Device> devices = <Device>[
+        unsupported,
+      ];
+
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
+
+      expect(filtered, <Device>[]);
+    });
+
     testUsingContext('Removes web and fuchsia from --all', () async {
       final List<Device> devices = <Device>[
         webDevice,

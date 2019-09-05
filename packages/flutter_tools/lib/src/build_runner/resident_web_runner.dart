@@ -57,19 +57,23 @@ class ResidentWebRunner extends ResidentRunner {
     @required DebuggingOptions debuggingOptions,
   }) : super(
           <FlutterDevice>[],
-          target: target,
+          target: target ?? fs.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
-          usesTerminalUi: true,
           stayResident: true,
         );
 
   final Device device;
   final FlutterProject flutterProject;
 
+  // Only the debug builds of the web support the service protocol.
+  @override
+  bool get supportsServiceProtocol => isRunningDebug;
+
   WebFs _webFs;
   DebugConnection _debugConnection;
   StreamSubscription<vmservice.Event> _stdOutSub;
+  bool _exited = false;
 
   vmservice.VmService get _vmService => _debugConnection.vmService;
 
@@ -98,9 +102,13 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   Future<void> _cleanup() async {
+    if (_exited) {
+      return;
+    }
     await _debugConnection?.close();
     await _stdOutSub?.cancel();
     await _webFs?.stop();
+    _exited = true;
   }
 
   @override
@@ -138,7 +146,7 @@ class ResidentWebRunner extends ResidentRunner {
     );
     if (package == null) {
       printError('No application found for TargetPlatform.web_javascript.');
-      printError('To add web support to a project, run `flutter create --web .`.');
+      printError('To add web support to a project, run `flutter create .`.');
       return 1;
     }
     if (!fs.isFileSync(mainPath)) {
@@ -150,6 +158,8 @@ class ResidentWebRunner extends ResidentRunner {
       printError(message);
       return 1;
     }
+    final String modeName = debuggingOptions.buildInfo.friendlyModeName;
+    printStatus('Launching ${getDisplayPath(target)} on ${device.name} in $modeName mode...');
     Status buildStatus;
     try {
       buildStatus = logger.startProgress('Building application for the web...', timeout: null);
@@ -160,6 +170,7 @@ class ResidentWebRunner extends ResidentRunner {
       );
       if (supportsServiceProtocol) {
         _debugConnection = await _webFs.runAndDebug();
+        unawaited(_debugConnection.onDone.whenComplete(exit));
       }
     } catch (err, stackTrace) {
       printError(err.toString());
@@ -204,7 +215,7 @@ class ResidentWebRunner extends ResidentRunner {
       websocketUri = Uri.parse(_debugConnection.uri);
     }
     if (websocketUri != null) {
-      printStatus('Debug service listening on $websocketUri.');
+      printStatus('Debug service listening on $websocketUri');
     }
     connectionInfoCompleter?.complete(
       DebugConnectionInfo(wsUri: websocketUri)

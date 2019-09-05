@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -35,10 +36,30 @@ void main() {
       return BuildResult(success: true);
     });
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
-    await commandRunner.run(<String>['assemble', 'unpack_macos']);
+    await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
     final BufferLogger bufferLogger = logger;
 
     expect(bufferLogger.statusText.trim(), 'build succeeded.');
+  }));
+
+  test('Throws ToolExit if not provided with output', () => testbed.run(() async {
+    when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+        .thenAnswer((Invocation invocation) async {
+      return BuildResult(success: true);
+    });
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
+
+    expect(commandRunner.run(<String>['assemble', 'debug_macos_bundle_flutter_assets']), throwsA(isInstanceOf<ToolExit>()));
+  }));
+
+  test('Throws ToolExit if called with non-existent rule', () => testbed.run(() async {
+    when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+        .thenAnswer((Invocation invocation) async {
+      return BuildResult(success: true);
+    });
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
+
+    expect(commandRunner.run(<String>['assemble', '-o Output', 'undefined']), throwsA(isInstanceOf<ToolExit>()));
   }));
 
   test('Only writes input and output files when the values change', () => testbed.run(() async {
@@ -52,7 +73,7 @@ void main() {
     });
 
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
-    await commandRunner.run(<String>['assemble', '--build-outputs=outputs', '--build-inputs=inputs', 'unpack_macos']);
+    await commandRunner.run(<String>['assemble', '-o Output', '--build-outputs=outputs', '--build-inputs=inputs', 'debug_macos_bundle_flutter_assets']);
 
     final File inputs = fs.file('inputs');
     final File outputs = fs.file('outputs');
@@ -62,7 +83,7 @@ void main() {
     final DateTime theDistantPast = DateTime(1991, 8, 23);
     inputs.setLastModifiedSync(theDistantPast);
     outputs.setLastModifiedSync(theDistantPast);
-    await commandRunner.run(<String>['assemble', '--build-outputs=outputs', '--build-inputs=inputs', 'unpack_macos']);
+    await commandRunner.run(<String>['assemble', '-o Output', '--build-outputs=outputs', '--build-inputs=inputs', 'debug_macos_bundle_flutter_assets']);
 
     expect(inputs.lastModifiedSync(), theDistantPast);
     expect(outputs.lastModifiedSync(), theDistantPast);
@@ -75,7 +96,7 @@ void main() {
         inputFiles: <File>[fs.file('foo'), fs.file('fizz')..createSync()],
         outputFiles: <File>[fs.file('bar'), fs.file(fs.path.join('.dart_tool', 'fizz2'))..createSync(recursive: true)]);
     });
-    await commandRunner.run(<String>['assemble', '--build-outputs=outputs', '--build-inputs=inputs', 'unpack_macos']);
+    await commandRunner.run(<String>['assemble', '-o Output', '--build-outputs=outputs', '--build-inputs=inputs', 'debug_macos_bundle_flutter_assets']);
 
     expect(inputs.readAsStringSync(), contains('foo'));
     expect(inputs.readAsStringSync(), contains('fizz'));

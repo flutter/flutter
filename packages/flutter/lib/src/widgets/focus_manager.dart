@@ -7,8 +7,8 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'binding.dart';
@@ -393,7 +393,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   set skipTraversal(bool value) {
     if (value != _skipTraversal) {
       _skipTraversal = value;
-      _notify();
+      _manager?._dirtyNodes?.add(this);
+      _manager?._markNeedsUpdate();
     }
   }
 
@@ -425,7 +426,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       if (!_canRequestFocus) {
         unfocus();
       }
-      _notify();
+      _manager?._dirtyNodes?.add(this);
+      _manager?._markNeedsUpdate();
     }
   }
 
@@ -1069,7 +1071,7 @@ class FocusManager with DiagnosticableTreeMixin {
   FocusManager() {
     rootScope._manager = this;
     RawKeyboard.instance.addListener(_handleRawKeyEvent);
-    RendererBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
   bool _lastInteractionWasTouch = true;
@@ -1152,44 +1154,40 @@ class FocusManager with DiagnosticableTreeMixin {
   }
 
   // The list of listeners for [highlightMode] state changes.
-  ObserverList<ValueChanged<FocusHighlightMode>> _listeners;
+  final HashedObserverList<ValueChanged<FocusHighlightMode>> _listeners = HashedObserverList<ValueChanged<FocusHighlightMode>>();
 
   /// Register a closure to be called when the [FocusManager] notifies its listeners
   /// that the value of [highlightMode] has changed.
-  void addHighlightModeListener(ValueChanged<FocusHighlightMode> listener) {
-    _listeners ??= ObserverList<ValueChanged<FocusHighlightMode>>();
-    _listeners.add(listener);
-  }
+  void addHighlightModeListener(ValueChanged<FocusHighlightMode> listener) => _listeners.add(listener);
 
   /// Remove a previously registered closure from the list of closures that the
   /// [FocusManager] notifies.
-  void removeHighlightModeListener(ValueChanged<FocusHighlightMode> listener) {
-    _listeners?.remove(listener);
-  }
+  void removeHighlightModeListener(ValueChanged<FocusHighlightMode> listener) => _listeners?.remove(listener);
 
   void _notifyHighlightModeListeners() {
-    if (_listeners != null) {
-      final List<ValueChanged<FocusHighlightMode>> localListeners = List<ValueChanged<FocusHighlightMode>>.from(_listeners);
-      for (ValueChanged<FocusHighlightMode> listener in localListeners) {
-        try {
-          if (_listeners.contains(listener)) {
-            listener(_highlightMode);
-          }
-        } catch (exception, stack) {
-          FlutterError.reportError(FlutterErrorDetails(
-            exception: exception,
-            stack: stack,
-            library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for $runtimeType'),
-            informationCollector: () sync* {
-              yield DiagnosticsProperty<FocusManager>(
-                'The $runtimeType sending notification was',
-                this,
-                style: DiagnosticsTreeStyle.errorProperty,
-              );
-            },
-          ));
+    if (_listeners.isEmpty) {
+      return;
+    }
+    final List<ValueChanged<FocusHighlightMode>> localListeners = List<ValueChanged<FocusHighlightMode>>.from(_listeners);
+    for (ValueChanged<FocusHighlightMode> listener in localListeners) {
+      try {
+        if (_listeners.contains(listener)) {
+          listener(_highlightMode);
         }
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while dispatching notifications for $runtimeType'),
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<FocusManager>(
+              'The $runtimeType sending notification was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          },
+        ));
       }
     }
   }
@@ -1201,27 +1199,27 @@ class FocusManager with DiagnosticableTreeMixin {
   final FocusScopeNode rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
 
   void _handlePointerEvent(PointerEvent event) {
-    bool newState;
+    bool currentInteractionIsTouch;
     switch (event.kind) {
       case PointerDeviceKind.touch:
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
-        newState = true;
+        currentInteractionIsTouch = true;
         break;
       case PointerDeviceKind.mouse:
       case PointerDeviceKind.unknown:
-        newState = false;
+        currentInteractionIsTouch = false;
         break;
     }
-    if (_lastInteractionWasTouch != newState) {
-      _lastInteractionWasTouch = newState;
+    if (_lastInteractionWasTouch != currentInteractionIsTouch) {
+      _lastInteractionWasTouch = currentInteractionIsTouch;
       _updateHighlightMode();
     }
   }
 
   void _handleRawKeyEvent(RawKeyEvent event) {
-    // Update this first, since things responding to the keys might look at the
-    // highlight mode, and it should be accurate.
+    // Update highlightMode first, since things responding to the keys might
+    // look at the highlight mode, and it should be accurate.
     if (_lastInteractionWasTouch) {
       _lastInteractionWasTouch = false;
       _updateHighlightMode();

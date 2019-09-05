@@ -96,6 +96,8 @@ abstract class ChipAttributes {
   ShapeBorder get shape;
 
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
   Clip get clipBehavior;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -1227,6 +1229,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.elevation,
     this.shadowColor,
   }) : assert(label != null),
+       assert(clipBehavior != null),
        assert(autofocus != null),
        assert(
          onPressed != null,
@@ -1725,6 +1728,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       onFocusChange: _handleFocus,
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
+      canRequestFocus: widget.isEnabled,
       child: Material(
         elevation: isTapping ? pressElevation : elevation,
         shadowColor: widget.selected ? selectedShadowColor : shadowColor,

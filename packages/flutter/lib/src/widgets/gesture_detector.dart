@@ -930,8 +930,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }
   }
 
-  /// This method can be called outside of the build phase to filter the list of
-  /// available semantic actions.
+  /// This method can be called to filter the list of available semantic actions,
+  /// after the render object was created.
   ///
   /// The actual filtering is happening in the next frame and a frame will be
   /// scheduled if non is pending.
@@ -942,20 +942,21 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   /// If this is never called, then the actions are not filtered. If the list of
   /// actions to filter changes, it must be called again.
   void replaceSemanticsActions(Set<SemanticsAction> actions) {
+    if (widget.excludeFromSemantics)
+      return;
+
+    final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
     assert(() {
-      final Element element = context;
-      if (element.owner.debugBuilding) {
+      if (semanticsGestureHandler == null) {
         throw FlutterError(
           'Unexpected call to replaceSemanticsActions() method of RawGestureDetectorState.\n'
-          'The replaceSemanticsActions() method can only be called outside of the build phase.'
+          'The replaceSemanticsActions() method can only be called after the RenderSemanticsGestureHandler has been created.'
         );
       }
       return true;
     }());
-    if (!widget.excludeFromSemantics) {
-      final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
-      semanticsGestureHandler.validActions = actions; // will call _markNeedsSemanticsUpdate(), if required.
-    }
+
+    semanticsGestureHandler.validActions = actions; // will call _markNeedsSemanticsUpdate(), if required.
   }
 
   @override

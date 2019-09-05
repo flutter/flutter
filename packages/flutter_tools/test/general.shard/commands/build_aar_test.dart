@@ -3,12 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/android/aar.dart';
+import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -18,16 +17,9 @@ void main() {
 
   group('getUsage', () {
     Directory tempDir;
-    AarBuilder mockAarBuilder;
 
     setUp(() {
       tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
-      mockAarBuilder = MockAarBuilder();
-      when(mockAarBuilder.build(
-          project: anyNamed('project'),
-          androidBuildInfo: anyNamed('androidBuildInfo'),
-          target: anyNamed('target'),
-          outputDir: anyNamed('outputDir'))).thenAnswer((_) => Future<void>.value());
     });
 
     tearDown(() {
@@ -54,7 +46,7 @@ void main() {
           containsPair(CustomDimensions.commandBuildAarProjectType, 'module'));
 
     }, overrides: <Type, Generator>{
-      AarBuilder: () => mockAarBuilder,
+      AndroidBuilder: () => FakeAndroidBuilder(),
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('indicate that project is a plugin', () async {
@@ -66,7 +58,7 @@ void main() {
           containsPair(CustomDimensions.commandBuildAarProjectType, 'plugin'));
 
     }, overrides: <Type, Generator>{
-      AarBuilder: () => mockAarBuilder,
+      AndroidBuilder: () => FakeAndroidBuilder(),
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('indicate the target platform', () async {
@@ -79,9 +71,7 @@ void main() {
           containsPair(CustomDimensions.commandBuildAarTargetPlatform, 'android-arm'));
 
     }, overrides: <Type, Generator>{
-      AarBuilder: () => mockAarBuilder,
+      AndroidBuilder: () => FakeAndroidBuilder(),
     }, timeout: allowForCreateFlutterProject);
   });
 }
-
-class MockAarBuilder extends Mock implements AarBuilder {}

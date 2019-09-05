@@ -178,14 +178,16 @@ class AOTSnapshotter {
     // is resolved.
     // The DWARF section confuses Xcode tooling, so this strips it. Ideally,
     // gen_snapshot would provide an argument to do this automatically.
-    if (platform == TargetPlatform.ios && bitcode) {
-      final IOSink sink = fs.file('$assembly.bitcode').openWrite();
+    final bool stripSymbols = platform == TargetPlatform.ios && buildMode == BuildMode.release && bitcode;
+    if (stripSymbols) {
+      final IOSink sink = fs.file('$assembly.stripped.S').openWrite();
       for (String line in fs.file(assembly).readAsLinesSync()) {
         if (line.startsWith('.section __DWARF')) {
           break;
         }
         sink.writeln(line);
       }
+      await sink.flush();
       await sink.close();
     }
 
@@ -194,17 +196,19 @@ class AOTSnapshotter {
     final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
     outputDir.childFile('gen_snapshot.d').writeAsStringSync('gen_snapshot.d: $genSnapshotPath\n');
 
-    // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
+    // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
     if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
       final RunResult result = await _buildFramework(
         appleArch: darwinArch,
-        assemblyPath: bitcode ? '$assembly.bitcode' : assembly,
+        isIOS: platform == TargetPlatform.ios,
+        assemblyPath: stripSymbols ? '$assembly.stripped.S' : assembly,
         outputPath: outputDir.path,
         bitcode: bitcode,
       );
-      if (result.exitCode != 0)
+      if (result.exitCode != 0) {
         return result.exitCode;
+      }
     }
     return 0;
   }
@@ -213,26 +217,29 @@ class AOTSnapshotter {
   /// source at [assemblyPath].
   Future<RunResult> _buildFramework({
     @required DarwinArch appleArch,
+    @required bool isIOS,
     @required String assemblyPath,
     @required String outputPath,
     @required bool bitcode,
   }) async {
     final String targetArch = getNameForDarwinArch(appleArch);
     printStatus('Building App.framework for $targetArch...');
+
     final List<String> commonBuildOptions = <String>[
       '-arch', targetArch,
-      if (appleArch == DarwinArch.arm64 || appleArch == DarwinArch.armv7)
+      if (isIOS)
         '-miphoneos-version-min=8.0',
     ];
 
+    const String embedBitcodeArg = '-fembed-bitcode';
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
     final RunResult compileResult = await xcode.cc(<String>[
-      ...commonBuildOptions,
+      '-arch', targetArch,
+      if (bitcode) embedBitcodeArg,
       '-c',
       assemblyPath,
       '-o',
       assemblyO,
-      if (bitcode) '-fembed-bitcode',
     ]);
     if (compileResult.exitCode != 0) {
       printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
@@ -248,26 +255,16 @@ class AOTSnapshotter {
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
-      if (bitcode) '-fembed-bitcode',
+      if (bitcode) embedBitcodeArg,
+      if (bitcode && isIOS) ...<String>[embedBitcodeArg, '-isysroot', await xcode.iPhoneSdkLocation()],
       '-o', appLib,
       assemblyO,
     ];
     final RunResult linkResult = await xcode.clang(linkArgs);
     if (linkResult.exitCode != 0) {
       printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
-      return linkResult;
     }
-    // See https://github.com/flutter/flutter/issues/22560
-    // These have to be placed in a .noindex folder to prevent Xcode from
-    // using Spotlight to find them and potentially attach the wrong ones.
-    final RunResult dsymResult = await xcode.dsymutil(<String>[
-      appLib,
-      '-o', fs.path.join(outputPath, 'App.framework.dSYM.noindex'),
-    ]);
-    if (dsymResult.exitCode != 0) {
-      printError('Failed to extract dSYM out of dynamic lib');
-    }
-    return dsymResult;
+    return linkResult;
   }
 
   /// Compiles a Dart file to kernel.

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_driver/src/common/error.dart';
 import 'package:flutter_driver/src/common/health.dart';
+import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -248,16 +249,71 @@ void main() {
       });
     });
 
+    group('waitForCondition', () {
+      test('sends the wait for NoPendingFrameCondition command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'waitForCondition',
+            'timeout': _kSerializedTestTimeout,
+            'conditionName': 'NoPendingFrameCondition',
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        await driver.waitForCondition(const NoPendingFrame(), timeout: _kTestTimeout);
+      });
+
+      test('sends the wait for NoPendingPlatformMessages command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'waitForCondition',
+            'timeout': _kSerializedTestTimeout,
+            'conditionName': 'NoPendingPlatformMessagesCondition',
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        await driver.waitForCondition(const NoPendingPlatformMessages(), timeout: _kTestTimeout);
+      });
+
+      test('sends the waitForCondition of combined conditions command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'waitForCondition',
+            'timeout': _kSerializedTestTimeout,
+            'conditionName': 'CombinedCondition',
+            'conditions': '[{"conditionName":"NoPendingFrameCondition"},{"conditionName":"NoTransientCallbacksCondition"}]',
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        const SerializableWaitCondition combinedCondition =
+            CombinedCondition(<SerializableWaitCondition>[NoPendingFrame(), NoTransientCallbacks()]);
+        await driver.waitForCondition(combinedCondition, timeout: _kTestTimeout);
+      });
+    });
+
     group('waitUntilNoTransientCallbacks', () {
       test('sends the waitUntilNoTransientCallbacks command', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, dynamic>{
-            'command': 'waitUntilNoTransientCallbacks',
+            'command': 'waitForCondition',
             'timeout': _kSerializedTestTimeout,
+            'conditionName': 'NoTransientCallbacksCondition',
           });
           return makeMockResponse(<String, dynamic>{});
         });
         await driver.waitUntilNoTransientCallbacks(timeout: _kTestTimeout);
+      });
+    });
+
+    group('waitUntilFirstFrameRasterized', () {
+      test('sends the waitUntilFirstFrameRasterized command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'waitForCondition',
+            'conditionName': 'FirstFrameRasterizedCondition',
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        await driver.waitUntilFirstFrameRasterized();
       });
     });
 

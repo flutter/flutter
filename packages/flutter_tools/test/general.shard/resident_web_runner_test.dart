@@ -28,12 +28,13 @@ void main() {
   ResidentWebRunner residentWebRunner;
   MockDebugConnection mockDebugConnection;
   MockVmService mockVmService;
+  MockWebDevice mockWebDevice;
 
   setUp(() {
     mockWebFs = MockFlutterWebFs();
     mockDebugConnection = MockDebugConnection();
     mockVmService = MockVmService();
-    final MockWebDevice mockWebDevice = MockWebDevice();
+    mockWebDevice = MockWebDevice();
     testbed = Testbed(
       setup: () {
         residentWebRunner = ResidentWebRunner(
@@ -65,11 +66,26 @@ void main() {
       return Future<bool>.value(false);
     });
     when(mockDebugConnection.vmService).thenReturn(mockVmService);
+    when(mockDebugConnection.onDone).thenAnswer((Invocation invocation) {
+      return Completer<void>().future;
+    });
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
   }
+
+  test('profile does not supportsServiceProtocol', () => testbed.run(() {
+    final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
+      MockWebDevice(),
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+      ipv6: true,
+    );
+
+    expect(profileResidentWebRunner.supportsServiceProtocol, false);
+    expect(residentWebRunner.supportsServiceProtocol, true);
+  }));
 
   test('Exits on run if application does not support the web', () => testbed.run(() async {
     fs.file('pubspec.yaml').createSync();
@@ -322,6 +338,39 @@ void main() {
 
     verify(mockVmService.callServiceExtension('ext.flutter.profileWidgetBuilds',
         args: <String, Object>{'enabled': true})).called(1);
+  }));
+
+  test('cleanup of resources is safe to call multiple times', () => testbed.run(() async {
+    _setupMocks();
+    bool debugClosed = false;
+    when(mockDebugConnection.close()).thenAnswer((Invocation invocation) async {
+      if (debugClosed) {
+        throw StateError('debug connection closed twice');
+      }
+      debugClosed = true;
+    });
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+     unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    await residentWebRunner.exit();
+    await residentWebRunner.exit();
+  }));
+
+  test('Prints target and device name on run', () => testbed.run(() async {
+    _setupMocks();
+    when(mockWebDevice.name).thenReturn('Chromez');
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+     unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    final BufferLogger bufferLogger = logger;
+
+    expect(bufferLogger.statusText, contains('Launching ${fs.path.join('lib', 'main.dart')} on Chromez in debug mode'));
   }));
 }
 

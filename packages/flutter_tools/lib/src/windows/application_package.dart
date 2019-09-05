@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../project.dart';
 
@@ -66,7 +67,7 @@ class BuildableWindowsApp extends WindowsApp {
     return fs.path.join(
         getWindowsBuildDirectory(),
         'x64',
-        buildMode == BuildMode.debug ? 'Debug' : 'Release',
+        toTitleCase(getNameForBuildMode(buildMode)),
         'Runner',
         exeNameFile.readAsStringSync().trim());
   }

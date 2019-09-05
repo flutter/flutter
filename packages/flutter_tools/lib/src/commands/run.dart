@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -15,7 +16,6 @@ import '../cache.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart';
-import '../macos/xcode.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -237,19 +237,6 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  void printNoConnectedDevices() {
-    super.printNoConnectedDevices();
-    if (getCurrentHostPlatform() == HostPlatform.darwin_x64 &&
-        xcode.isInstalledAndMeetsVersionCheck) {
-      printStatus('');
-      printStatus("Run 'flutter emulators' to list and start any available device emulators.");
-      printStatus('');
-      printStatus('If you expected your device to be detected, please run "flutter doctor" to diagnose');
-      printStatus('potential issues, or visit https://flutter.dev/setup/ for troubleshooting tips.');
-    }
-  }
-
-  @override
   bool get shouldRunPub {
     // If we are running with a prebuilt application, do not run pub.
     if (runningWithPrebuiltApplication)
@@ -348,6 +335,7 @@ class RunCommand extends RunCommandBase {
         endTimeOverride: appStartedTime,
       );
     }
+    terminal.usesTerminalUi = true;
 
     if (argResults['dart-flags'] != null && !FlutterVersion.instance.isMaster) {
       throw UsageException('--dart-flags is not available on the stable '

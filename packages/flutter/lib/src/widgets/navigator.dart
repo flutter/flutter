@@ -783,6 +783,15 @@ class Navigator extends StatefulWidget {
   /// then the [Navigator] would push the following routes on startup: `/`,
   /// `/stocks`, `/stocks/HOOLI`. This enables deep linking while allowing the
   /// application to maintain a predictable route history.
+  ///
+  /// If any of the intermediate routes doesn't exist, it'll simply be skipped.
+  /// In the example above, if `/stocks` doesn't have a corresponding route in
+  /// the app, it'll be skipped and only `/` and `/stocks/HOOLI` will be pushed.
+  ///
+  /// That said, the full route has to map to something in the app in order for
+  /// this to work. In our example, `/stocks/HOOLI` has to map to a route in the
+  /// app. Otherwise, [initialRoute] will be ignored and [defaultRouteName] will
+  /// be used instead.
   final String initialRoute;
 
   /// Called to generate a route for a given [RouteSettings].
@@ -1509,9 +1518,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     if (initialRouteName.startsWith('/') && initialRouteName.length > 1) {
       initialRouteName = initialRouteName.substring(1); // strip leading '/'
       assert(Navigator.defaultRouteName == '/');
-      final List<String> plannedInitialRouteNames = <String>[
-        Navigator.defaultRouteName,
-      ];
       final List<Route<dynamic>> plannedInitialRoutes = <Route<dynamic>>[
         _routeNamed<dynamic>(Navigator.defaultRouteName, allowNull: true, arguments: null),
       ];
@@ -1520,22 +1526,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         String routeName = '';
         for (String part in routeParts) {
           routeName += '/$part';
-          plannedInitialRouteNames.add(routeName);
           plannedInitialRoutes.add(_routeNamed<dynamic>(routeName, allowNull: true, arguments: null));
         }
       }
-      if (plannedInitialRoutes.contains(null)) {
+      if (plannedInitialRoutes.last == null) {
         assert(() {
           FlutterError.reportError(
             FlutterErrorDetails(
               exception:
                 'Could not navigate to initial route.\n'
                 'The requested route name was: "/$initialRouteName"\n'
-                'The following routes were therefore attempted:\n'
-                ' * ${plannedInitialRouteNames.join("\n * ")}\n'
-                'This resulted in the following objects:\n'
-                ' * ${plannedInitialRoutes.join("\n * ")}\n'
-                'One or more of those objects was null, and therefore the initial route specified will be '
+                'There was no corresponding route in the app, and therefore the initial route specified will be '
                 'ignored and "${Navigator.defaultRouteName}" will be used instead.'
             ),
           );
@@ -1543,7 +1544,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         }());
         push(_routeNamed<Object>(Navigator.defaultRouteName, arguments: null));
       } else {
-        plannedInitialRoutes.forEach(push);
+        plannedInitialRoutes.where((Route<dynamic> route) => route != null).forEach(push);
       }
     } else {
       Route<Object> route;
