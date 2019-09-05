@@ -92,6 +92,9 @@ void main(List<String> argList) {
     _kShowDartPad,
     defaultsTo: false,
     negatable: false,
+    help: 'Indicates whether DartPad should included in the snippet\'s final '
+        'HTML output. This flag only applies when the type parameter is '
+        '"application".',
   );
 
   final ArgResults args = parser.parse(argList);
