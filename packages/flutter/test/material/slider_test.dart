@@ -1573,15 +1573,12 @@ void main() {
     expect(description, <String>[
       'value: 50.0',
       'disabled',
-      'onChangeStart: null',
-      'onChangeEnd: null',
       'min: 0.0',
       'max: 100.0',
       'divisions: 10',
       'label: "Set a value"',
       'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
       'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
-      'semanticFormatterCallback: null',
     ]);
   });
 }
