@@ -90,6 +90,7 @@ class WebFs {
   final Dwds _dwds;
   final Chrome _chrome;
   final BuildDaemonClient _client;
+  StreamSubscription<void> _connectedApps;
 
   static const String _kHostName = 'localhost';
 
@@ -98,13 +99,20 @@ class WebFs {
     await _dwds.stop();
     await _server.close(force: true);
     await _chrome.close();
+    await _connectedApps?.cancel();
   }
 
   /// Retrieve the [DebugConnection] for the current application.
   Future<DebugConnection> runAndDebug() async {
-    final AppConnection appConnection = await _dwds.connectedApps.first;
-    appConnection.runMain();
-    return _dwds.debugConnection(appConnection);
+    final Completer<DebugConnection> firstConnection = Completer<DebugConnection>();
+    _connectedApps =  _dwds.connectedApps.listen((AppConnection appConnection) async {
+      appConnection.runMain();
+      final DebugConnection debugConnection = await _dwds.debugConnection(appConnection);
+      if (!firstConnection.isCompleted) {
+        firstConnection.complete(debugConnection);
+      }
+    });
+    return firstConnection.future;
   }
 
   /// Perform a hard refresh of all connected browser tabs.
