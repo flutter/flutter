@@ -154,30 +154,45 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   void zip(Directory data, File zipFile) {
-    runSync(<String>['zip', '-r', '-q', zipFile.path, '.'], workingDirectory: data.path);
+    processUtils.runSync(
+      <String>['zip', '-r', '-q', zipFile.path, '.'],
+      workingDirectory: data.path,
+      throwOnError: true,
+    );
   }
 
   // unzip -o -q zipfile -d dest
   @override
   void unzip(File file, Directory targetDirectory) {
-    runSync(<String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path]);
+    processUtils.runSync(
+      <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
+      throwOnError: true,
+    );
   }
 
   @override
-  bool verifyZip(File zipFile) => exitsHappy(<String>['zip', '-T', zipFile.path]);
+  bool verifyZip(File zipFile) =>
+      processUtils.exitsHappySync(<String>['zip', '-T', zipFile.path]);
 
   // tar -xzf tarball -C dest
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
-    runSync(<String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path]);
+    processUtils.runSync(
+      <String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path],
+      throwOnError: true,
+    );
   }
 
   @override
-  bool verifyGzip(File gzippedFile) => exitsHappy(<String>['gzip', '-t', gzippedFile.path]);
+  bool verifyGzip(File gzippedFile) =>
+      processUtils.exitsHappySync(<String>['gzip', '-t', gzippedFile.path]);
 
   @override
   File makePipe(String path) {
-    runSync(<String>['mkfifo', path]);
+    processUtils.runSync(
+      <String>['mkfifo', path],
+      throwOnError: true,
+    );
     return fs.file(path);
   }
 
@@ -187,12 +202,12 @@ class _PosixUtils extends OperatingSystemUtils {
   String get name {
     if (_name == null) {
       if (platform.isMacOS) {
-        final List<ProcessResult> results = <ProcessResult>[
-          processManager.runSync(<String>['sw_vers', '-productName']),
-          processManager.runSync(<String>['sw_vers', '-productVersion']),
-          processManager.runSync(<String>['sw_vers', '-buildVersion']),
+        final List<RunResult> results = <RunResult>[
+          processUtils.runSync(<String>['sw_vers', '-productName']),
+          processUtils.runSync(<String>['sw_vers', '-productVersion']),
+          processUtils.runSync(<String>['sw_vers', '-buildVersion']),
         ];
-        if (results.every((ProcessResult result) => result.exitCode == 0)) {
+        if (results.every((RunResult result) => result.exitCode == 0)) {
           _name = '${results[0].stdout.trim()} ${results[1].stdout
               .trim()} ${results[2].stdout.trim()}';
         }

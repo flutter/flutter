@@ -26,18 +26,23 @@ void main() {
 
     when(notWindows.isWindows).thenReturn(false);
     when(notWindows.environment).thenReturn(const <String, String>{});
-    when(mockProcessManager.runSync(<String>[
-      'powershell', '-script="Get-CimInstance Win32_Process"'
-    ])).thenAnswer((Invocation invocation) {
+    when(mockProcessManager.runSync(
+      <String>['powershell', '-script="Get-CimInstance Win32_Process"'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenAnswer((Invocation invocation) {
       // The flutter tool process is returned as output to the powershell script
       final MockProcessResult result = MockProcessResult();
       when(result.exitCode).thenReturn(0);
       when<String>(result.stdout).thenReturn('$pid  $flutterToolBinary');
+      when<String>(result.stderr).thenReturn('');
       return result;
     });
-    when(mockProcessManager.run(<String>[
-      'Taskkill', '/PID', '$pid', '/F'
-    ])).thenThrow(Exception('Flutter tool process has been killed'));
+    when(mockProcessManager.run(
+      <String>['Taskkill', '/PID', '$pid', '/F'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenThrow(Exception('Flutter tool process has been killed'));
 
     testUsingContext('defaults', () async {
       final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: 'foo');

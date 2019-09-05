@@ -13,6 +13,7 @@ import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/os.dart' show os;
 import 'base/process.dart';
 import 'base/user_messages.dart';
@@ -115,14 +116,17 @@ class AndroidApk extends ApplicationPackage {
 
     String apptStdout;
     try {
-      apptStdout = runCheckedSync(<String>[
-        aaptPath,
-        'dump',
-        'xmltree',
-        apk.path,
-        'AndroidManifest.xml',
-      ]);
-    } catch (error) {
+      apptStdout = processUtils.runSync(
+        <String>[
+          aaptPath,
+          'dump',
+          'xmltree',
+          apk.path,
+          'AndroidManifest.xml',
+        ],
+        throwOnError: true,
+      ).stdout.trim();
+    } on ProcessException catch (error) {
       printError('Failed to extract manifest from APK: $error.');
       return null;
     }

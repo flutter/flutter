@@ -142,10 +142,13 @@ void main() {
         final MockDirectory directory = MockDirectory();
         when(mockFileSystem.directory(bundlePath)).thenReturn(directory);
         when(directory.existsSync()).thenReturn(true);
-        when(mockProcessManager.run(installArgs, environment: env))
-            .thenAnswer(
-                (_) => Future<ProcessResult>.value(ProcessResult(1, 0, '', ''))
-            );
+        when(mockProcessManager.run(
+          installArgs,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: env
+        )).thenAnswer(
+          (_) => Future<ProcessResult>.value(ProcessResult(1, 0, '', ''))
+        );
 
         when(mockIMobileDevice.getInfoForDevice(any, 'CPUArchitecture'))
             .thenAnswer((_) => Future<String>.value('arm64'));
@@ -258,6 +261,21 @@ void main() {
           )).thenAnswer((Invocation inv) {
             return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
           });
+
+          when(mockProcessManager.run(
+            argThat(contains('find-identity')),
+            environment: anyNamed('environment'),
+            workingDirectory: anyNamed('workingDirectory'),
+          )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(
+                1, // pid
+                0, // exitCode
+                '''
+    1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
+    2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
+    3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
+        3 valid identities found''',
+                '',
+          )));
 
           // Deploy works.
           when(mockIosDeploy.runApp(

@@ -10,7 +10,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/process_manager.dart';
 import '../ios/xcodeproj.dart';
 
 const int kXcodeRequiredVersionMajor = 9;
@@ -25,7 +24,9 @@ class Xcode {
   String get xcodeSelectPath {
     if (_xcodeSelectPath == null) {
       try {
-        _xcodeSelectPath = processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
+        _xcodeSelectPath = processUtils.runSync(
+          <String>['/usr/bin/xcode-select', '--print-path'],
+        ).stdout.trim();
       } on ProcessException {
         // Ignored, return null below.
       } on ArgumentError {
@@ -52,13 +53,16 @@ class Xcode {
   bool get eulaSigned {
     if (_eulaSigned == null) {
       try {
-        final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'clang']);
-        if (result.stdout != null && result.stdout.contains('license'))
+        final RunResult result = processUtils.runSync(
+          <String>['/usr/bin/xcrun', 'clang'],
+        );
+        if (result.stdout != null && result.stdout.contains('license')) {
           _eulaSigned = false;
-        else if (result.stderr != null && result.stderr.contains('license'))
+        } else if (result.stderr != null && result.stderr.contains('license')) {
           _eulaSigned = false;
-        else
+        } else {
           _eulaSigned = true;
+        }
       } on ProcessException {
         _eulaSigned = false;
       }
@@ -74,7 +78,9 @@ class Xcode {
       try {
         // This command will error if additional components need to be installed in
         // xcode 9.2 and above.
-        final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'simctl', 'list']);
+        final RunResult result = processUtils.runSync(
+          <String>['/usr/bin/xcrun', 'simctl', 'list'],
+        );
         _isSimctlInstalled = result.stderr == null || result.stderr == '';
       } on ProcessException {
         _isSimctlInstalled = false;
@@ -94,16 +100,23 @@ class Xcode {
   }
 
   Future<RunResult> cc(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'cc', ...args]);
+    return processUtils.run(
+      <String>['xcrun', 'cc', ...args],
+      throwOnError: true,
+    );
   }
 
   Future<RunResult> clang(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'clang', ...args]);
+    return processUtils.run(
+      <String>['xcrun', 'clang', ...args],
+      throwOnError: true,
+    );
   }
 
   Future<String> iPhoneSdkLocation() async {
-    final RunResult runResult = await runCheckedAsync(
+    final RunResult runResult = await processUtils.run(
       <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'],
+      throwOnError: true,
     );
     if (runResult.exitCode != 0) {
       throwToolExit('Could not find iPhone SDK location: ${runResult.stderr}');

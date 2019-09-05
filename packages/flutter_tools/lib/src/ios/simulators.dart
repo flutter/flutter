@@ -130,7 +130,7 @@ class SimControl {
   }
 
   Future<bool> isInstalled(String deviceId, String appId) {
-    return exitsHappyAsync(<String>[
+    return processUtils.exitsHappy(<String>[
       _xcrunPath,
       'simctl',
       'get_app_container',
@@ -142,7 +142,10 @@ class SimControl {
   Future<RunResult> install(String deviceId, String appPath) {
     Future<RunResult> result;
     try {
-      result = runCheckedAsync(<String>[_xcrunPath, 'simctl', 'install', deviceId, appPath]);
+      result = processUtils.run(
+        <String>[_xcrunPath, 'simctl', 'install', deviceId, appPath],
+        throwOnError: true,
+      );
     } on ProcessException catch (exception) {
       throwToolExit('Unable to install $appPath on $deviceId:\n$exception');
     }
@@ -152,7 +155,10 @@ class SimControl {
   Future<RunResult> uninstall(String deviceId, String appId) {
     Future<RunResult> result;
     try {
-      result = runCheckedAsync(<String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId]);
+      result = processUtils.run(
+        <String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId],
+        throwOnError: true,
+      );
     } on ProcessException catch (exception) {
       throwToolExit('Unable to uninstall $appId from $deviceId:\n$exception');
     }
@@ -162,14 +168,17 @@ class SimControl {
   Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String> launchArgs ]) {
     Future<RunResult> result;
     try {
-      result = runCheckedAsync(<String>[
-        _xcrunPath,
-        'simctl',
-        'launch',
-        deviceId,
-        appIdentifier,
-        ...?launchArgs,
-      ]);
+      result = processUtils.run(
+        <String>[
+          _xcrunPath,
+          'simctl',
+          'launch',
+          deviceId,
+          appIdentifier,
+          ...?launchArgs,
+        ],
+        throwOnError: true,
+      );
     } on ProcessException catch (exception) {
       throwToolExit('Unable to launch $appIdentifier on $deviceId:\n$exception');
     }
@@ -178,7 +187,10 @@ class SimControl {
 
   Future<void> takeScreenshot(String deviceId, String outputPath) async {
     try {
-      await runCheckedAsync(<String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath]);
+      await processUtils.run(
+        <String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath],
+        throwOnError: true,
+      );
     } on ProcessException catch (exception) {
       throwToolExit('Unable to take screenshot of $deviceId:\n$exception');
     }
@@ -518,20 +530,22 @@ class IOSSimulator extends Device {
 /// Launches the device log reader process on the host.
 Future<Process> launchDeviceLogTool(IOSSimulator device) async {
   // Versions of iOS prior to iOS 11 log to the simulator syslog file.
-  if (await device.sdkMajorVersion < 11)
-    return runCommand(<String>['tail', '-n', '0', '-F', device.logFilePath]);
+  if (await device.sdkMajorVersion < 11) {
+    return processUtils.start(<String>['tail', '-n', '0', '-F', device.logFilePath]);
+  }
 
   // For iOS 11 and above, use /usr/bin/log to tail process logs.
   // Run in interactive mode (via script), otherwise /usr/bin/log buffers in 4k chunks. (radar: 34420207)
-  return runCommand(<String>[
+  return processUtils.start(<String>[
     'script', '/dev/null', '/usr/bin/log', 'stream', '--style', 'syslog', '--predicate', 'processImagePath CONTAINS "${device.id}"',
   ]);
 }
 
 Future<Process> launchSystemLogTool(IOSSimulator device) async {
   // Versions of iOS prior to 11 tail the simulator syslog file.
-  if (await device.sdkMajorVersion < 11)
-    return runCommand(<String>['tail', '-n', '0', '-F', '/private/var/log/system.log']);
+  if (await device.sdkMajorVersion < 11) {
+    return processUtils.start(<String>['tail', '-n', '0', '-F', '/private/var/log/system.log']);
+  }
 
   // For iOS 11 and later, all relevant detail is in the device log.
   return null;

@@ -5,8 +5,8 @@
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
 import '../globals.dart';
@@ -290,7 +290,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (!processManager.canRun(javaExecutable)) {
       _validationMessages.add('Unable to find bundled Java version.');
     } else {
-      final ProcessResult result = processManager.runSync(<String>[javaExecutable, '-version']);
+      final RunResult result = processUtils.runSync(<String>[javaExecutable, '-version']);
       if (result.exitCode == 0) {
         final List<String> versionLines = result.stderr.split('\n');
         final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
