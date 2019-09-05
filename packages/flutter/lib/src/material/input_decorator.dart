@@ -2443,7 +2443,11 @@ class InputDecoration {
   /// to a single line with [TextOverflow.ellipsis].
   ///
   /// This value is passed along to the [Text.maxLines] attribute
-  /// of the [Text] widget used to display the error.
+  /// of the [Text] widget used to display the helper.
+  /// 
+  /// See also:
+  ///
+  ///  * [errorMaxLines], the equivalent but for the [errorText].
   final int helperMaxLines;
 
   /// Text that suggests what sort of input the field accepts.
@@ -2495,6 +2499,10 @@ class InputDecoration {
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
+  /// 
+  /// See also:
+  ///
+  ///  * [helperMaxLines], the equivalent but for the [helperText].
   final int errorMaxLines;
 
   /// Whether the label floats on focus.
@@ -3304,7 +3312,11 @@ class InputDecorationTheme extends Diagnosticable {
   /// to a single line with [TextOverflow.ellipsis].
   ///
   /// This value is passed along to the [Text.maxLines] attribute
-  /// of the [Text] widget used to display the error.
+  /// of the [Text] widget used to display the helper.
+  /// 
+  /// See also:
+  ///
+  ///  * [errorMaxLines], the equivalent but for the [errorText].
   final int helperMaxLines;
 
   /// The style to use for the [InputDecoration.hintText].
@@ -3330,6 +3342,10 @@ class InputDecorationTheme extends Diagnosticable {
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
+  /// 
+  /// See also:
+  ///
+  ///  * [helperMaxLines], the equivalent but for the [helperText].
   final int errorMaxLines;
 
   /// Whether the placeholder text floats to become a label on focus.
