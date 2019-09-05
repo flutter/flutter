@@ -235,6 +235,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     golden = addPrefix(golden);
     final List<int> goldenBytes = await skiaClient.getMasterBytes(golden.path);
     final ComparisonResult result = GoldenFileComparator.compareLists<Uint8List>(imageBytes, goldenBytes);
+    // TODO(Piinks): If !result.passed return skiaClient.testIsIgnoredForPR
     return result.passed;
   }
 
