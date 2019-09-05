@@ -979,6 +979,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void ensureFrameCallbacksRegistered() {
     // Leave Window alone, do nothing.
+    assert(window.onDrawFrame == null);
+    assert(window.onBeginFrame == null);
   }
 
   @override
