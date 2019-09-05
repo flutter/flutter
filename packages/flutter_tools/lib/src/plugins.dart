@@ -475,7 +475,7 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
     file.createSync(recursive: true);
     file.writeAsStringSync('''
 // Generated file. Intentionally left empty due to no web plugins registered.
-void registerPlugins(ignored) {}
+void registerPlugins(dynamic ignored) {}
 ''');
   } else {
     _renderTemplateToFile(
