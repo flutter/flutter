@@ -36,7 +36,7 @@ class ManifestTask {
     @required this.description,
     @required this.stage,
     @required this.requiredAgentCapabilities,
-    @required this.isFailing,
+    @required this.isNew,
     @required this.timeoutInMinutes,
   }) {
     final String taskName = 'task "$name"';
@@ -58,16 +58,13 @@ class ManifestTask {
   /// Capabilities required of the build agent to be able to perform this task.
   final List<String> requiredAgentCapabilities;
 
-  /// Whether this test might be failing.
+  /// Whether this test new.
   ///
-  /// Failing tests are not considered when deciding if the build is broken.
-  ///
-  /// This should only be set for new tests or tests that have gone through some
-  /// major modifications so we're not sure whether they will pass or fail.
+  /// New tests are not considered when deciding if the build is broken.
   ///
   /// If a test is just flaky, it should not set this to true. And we should fix
   /// the flaky test instead of just ignoring it.
-  final bool isFailing;
+  final bool isNew;
 
   /// An optional custom timeout specified in minutes.
   final int timeoutInMinutes;
@@ -117,13 +114,13 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
     'description',
     'stage',
     'required_agent_capabilities',
-    'failing',
+    'new',
     'timeout_in_minutes',
   ]);
 
-  final dynamic isFailing = taskYaml['failing'];
-  if (isFailing != null) {
-    _checkType(isFailing is bool, isFailing, 'failing', 'boolean');
+  final dynamic isNew = taskYaml['new'];
+  if (isNew != null) {
+    _checkType(isNew is bool, isNew, 'new', 'boolean');
   }
 
   final dynamic timeoutInMinutes = taskYaml['timeout_in_minutes'];
@@ -137,7 +134,7 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
     description: taskYaml['description'],
     stage: taskYaml['stage'],
     requiredAgentCapabilities: capabilities,
-    isFailing: isFailing ?? false,
+    isNew: isNew ?? false,
     timeoutInMinutes: timeoutInMinutes,
   );
 }

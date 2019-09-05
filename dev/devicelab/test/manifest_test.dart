@@ -54,7 +54,7 @@ tasks:
       expect(manifest.tasks.single.description, 'Description is mandatory.');
       expect(manifest.tasks.single.stage, 'stage_is_mandatory_too');
       expect(manifest.tasks.single.requiredAgentCapabilities, <String>['so-is-capability']);
-      expect(manifest.tasks.single.isFailing, false);
+      expect(manifest.tasks.single.isNew, false);
       expect(manifest.tasks.single.timeoutInMinutes, null);
     });
 
@@ -103,7 +103,7 @@ tasks:
 
     testManifestError(
       'invalid task property',
-      'Unrecognized property "bar" in Value of task "foo". Allowed properties: description, stage, required_agent_capabilities, flaky, timeout_in_minutes',
+      'Unrecognized property "bar" in Value of task "foo". Allowed properties: description, stage, required_agent_capabilities, new, timeout_in_minutes',
       '''
       tasks:
         foo:
@@ -165,30 +165,30 @@ tasks:
     );
 
     testManifestError(
-      'bad flaky type',
-      'flaky must be a boolean but was String: not-a-boolean',
+      'bad new type',
+      'new must be a boolean but was String: not-a-boolean',
       '''
       tasks:
         foo:
           description: b
           stage: c
           required_agent_capabilities: ["a"]
-          flaky: not-a-boolean
+          new: not-a-boolean
       ''',
     );
 
-    test('accepts boolean flaky option', () {
+    test('accepts boolean new option', () {
       final Manifest manifest = loadTaskManifest('''
 tasks:
-  flaky_task:
+  new_task:
     description: d
     stage: s
     required_agent_capabilities: ["c"]
-    flaky: true
+    new: true
 ''');
 
-      expect(manifest.tasks.single.name, 'flaky_task');
-      expect(manifest.tasks.single.isFailing, isTrue);
+      expect(manifest.tasks.single.name, 'new_task');
+      expect(manifest.tasks.single.isNew, isTrue);
     });
 
     test('accepts custom timeout_in_minutes option', () {

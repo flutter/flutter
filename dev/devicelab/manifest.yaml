@@ -23,9 +23,9 @@
 #
 # Optional properties:
 #
-# * failing: boolean true or false
-#       whether the task might be failing; the result of running a failing task does not affect
-#       the overall build status. Tests should be marked failing when newly added, until they have
+# * new: boolean true or false
+#       whether the task is new; the result of running a new task does not affect
+#       the overall build status. Tests should be marked new when newly added, until they have
 #       been proved for a few cycles.
 #
 #       If a test is just flaky, it should not set this to true. And we should fix the flaky test
@@ -137,7 +137,7 @@ tasks:
   #     Run flutter web on the devicelab and hot restart.
   #   stage: devicelab_win
   #   required_agent_capabilities: ["windows/android"]
-  #   failing: true
+  #   new: true
 
   # Android on-device tests
 
@@ -337,7 +337,7 @@ tasks:
       test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    failing: true
+    new: true
 
   flutter_attach_test:
     description: >
@@ -357,7 +357,7 @@ tasks:
   #     Run flutter web on the devicelab and hot restart.
   #   stage: devicelab
   #   required_agent_capabilities: ["linux/android"]
-  #   failing: true
+  #   new: true
 
   # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
   # web_size__compile_test:
@@ -459,7 +459,7 @@ tasks:
       Measures the runtime performance of backdrop filter blurs on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    failing: true
+    new: true
 
   complex_layout_scroll_perf_ios__timeline_summary:
     description: >
@@ -504,7 +504,7 @@ tasks:
     description: >
       Verifies that Flutter View can be used from an iOS project.
     stage: devicelab_ios
-    failing: true
+    new: true
     required_agent_capabilities: ["mac/ios"]
 
   integration_ui_ios:
@@ -532,7 +532,7 @@ tasks:
       Run flutter web on the devicelab and hot restart.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    failing: true # marked as flaky while infra is under heavy development
+    new: true # marked as new while infra is under heavy development
 
   build_benchmark_ios:
     description: >
@@ -634,7 +634,7 @@ tasks:
       Measures the delta in performance of screen transitions without and
       with semantics enabled.
     stage: devicelab
-    failing: true
+    new: true
     required_agent_capabilities: ["linux/android"]
 
   flutter_gallery__memory_nav:
@@ -666,18 +666,18 @@ tasks:
       Checks that `flutter run` does not leak dart on Linux.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    failing: true
+    new: true
 
   run_without_leak_mac:
     description: >
       Checks that `flutter run` does not leak dart on macOS.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    failing: true
+    new: true
 
   android_splash_screen_integration_test:
     description: >
       Runs end-to-end test of Flutter's Android splash behavior.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    failing: true
+    new: true
