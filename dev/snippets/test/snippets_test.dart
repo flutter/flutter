@@ -51,7 +51,7 @@ main() {
 ''');
       configuration.getHtmlSkeletonFile(SnippetType.application, true).writeAsStringSync('''
 <div>HTML Bits (DartPad-style)</div>
-<iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&sample_id={{id}}"></iframe>
+<iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id={{id}}"></iframe>
 <div>More HTML Bits</div>
 ''');
       generator = SnippetGenerator(configuration: configuration);
@@ -151,7 +151,7 @@ void main() {
       );
       expect(html, contains('<div>HTML Bits (DartPad-style)</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
-      expect(html, contains('<iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&sample_id=id"></iframe>'));
+      expect(html, contains('<iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id=id"></iframe>'));
     });
 
     test('generates snippet application metadata', () async {
