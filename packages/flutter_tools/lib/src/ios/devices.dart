@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -27,6 +28,8 @@ import 'mac.dart';
 
 class IOSDeploy {
   const IOSDeploy();
+
+  static IOSDeploy get instance => context.get<IOSDeploy>();
 
   /// Installs and runs the specified app bundle using ios-deploy, then returns
   /// the exit code.
@@ -365,7 +368,7 @@ class IOSDevice extends Device {
         );
       }
 
-      final int installationResult = await const IOSDeploy().runApp(
+      final int installationResult = await IOSDeploy.instance.runApp(
         deviceId: id,
         bundlePath: bundle.path,
         launchArguments: launchArguments,

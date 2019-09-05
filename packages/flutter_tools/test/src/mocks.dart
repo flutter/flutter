@@ -185,11 +185,26 @@ class MockProcessManager extends Mock implements ProcessManager {
 /// A function that generates a process factory that gives processes that fail
 /// a given number of times before succeeding. The returned processes will
 /// fail after a delay if one is supplied.
-ProcessFactory flakyProcessFactory(int flakes, {Duration delay}) {
+ProcessFactory flakyProcessFactory({
+    int flakes,
+    bool Function(List<String> command) filter,
+    Duration delay,
+    Stream<List<int>> Function() stdout,
+    Stream<List<int>> Function() stderr,
+  }) {
   int flakesLeft = flakes;
+  stdout ??= () => const Stream<List<int>>.empty();
+  stderr ??= () => const Stream<List<int>>.empty();
   return (List<String> command) {
+    if (filter != null && !filter(command)) {
+      return MockProcess();
+    }
     if (flakesLeft == 0) {
-      return MockProcess(exitCode: Future<int>.value(0));
+      return MockProcess(
+        exitCode: Future<int>.value(0),
+        stdout: stdout(),
+        stderr: stderr(),
+      );
     }
     flakesLeft = flakesLeft - 1;
     Future<int> exitFuture;
@@ -198,7 +213,11 @@ ProcessFactory flakyProcessFactory(int flakes, {Duration delay}) {
     } else {
       exitFuture = Future<int>.delayed(delay, () => Future<int>.value(-9));
     }
-    return MockProcess(exitCode: exitFuture);
+    return MockProcess(
+      exitCode: exitFuture,
+      stdout: stdout(),
+      stderr: stderr(),
+    );
   };
 }
 
