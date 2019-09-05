@@ -7,6 +7,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 void main() {
   testWidgets('Picker respects theme styling', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -203,6 +205,58 @@ void main() {
       final BoxDecoration boxDecoration = container.decoration;
       expect(boxDecoration, isNull);
     });
+  });
+
+  testWidgets('picker dark mode', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            height: 300.0,
+            width: 300.0,
+            child: CupertinoPicker(
+              backgroundColor: const CupertinoDynamicColor.withBrightness(
+                color: Color(0xFF123456), // Set alpha channel to FF to disable under magnifier painting.
+                darkColor: Color(0xFF654321),
+              ),
+              itemExtent: 15.0,
+              children: const <Widget>[Text('1'), Text('1')],
+              onSelectedItemChanged: (int i) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoPicker), paints..path(color: const Color(0x33000000), style: PaintingStyle.stroke));
+    expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF123456)));
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            height: 300.0,
+            width: 300.0,
+            child: CupertinoPicker(
+              backgroundColor: const CupertinoDynamicColor.withBrightness(
+                color: Color(0xFF123456),
+                darkColor: Color(0xFF654321),
+              ),
+              itemExtent: 15.0,
+              children: const <Widget>[Text('1'), Text('1')],
+              onSelectedItemChanged: (int i) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoPicker), paints..path(color: const Color(0x33FFFFFF), style: PaintingStyle.stroke));
+    expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF654321)));
   });
 
   group('scroll', () {

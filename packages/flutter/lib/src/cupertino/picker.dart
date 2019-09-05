@@ -251,21 +251,20 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     if (resolved == null || resolved.alpha < 255)
       return Container();
 
-    final Color widgetBackgroundColor = resolved ?? const Color(0xFF000000);
     return Positioned.fill(
       child: IgnorePointer(
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: <Color>[
-                widgetBackgroundColor,
-                widgetBackgroundColor.withAlpha(0xF2),
-                widgetBackgroundColor.withAlpha(0xDD),
-                widgetBackgroundColor.withAlpha(0),
-                widgetBackgroundColor.withAlpha(0),
-                widgetBackgroundColor.withAlpha(0xDD),
-                widgetBackgroundColor.withAlpha(0xF2),
-                widgetBackgroundColor,
+                resolved,
+                resolved.withAlpha(0xF2),
+                resolved.withAlpha(0xDD),
+                resolved.withAlpha(0),
+                resolved.withAlpha(0),
+                resolved.withAlpha(0xDD),
+                resolved.withAlpha(0xF2),
+                resolved,
               ],
               stops: const <double>[
                 0.0, 0.05, 0.09, 0.22, 0.78, 0.91, 0.95, 1.0,

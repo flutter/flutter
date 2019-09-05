@@ -938,7 +938,7 @@ void main() {
         find.byType(CupertinoDatePicker),
         matchesGoldenFile(
           'date_picker_test.datetime.drag.png',
-          version: 2,
+          version: 3,
         ),
       );
     });
@@ -987,7 +987,7 @@ void main() {
       find.byType(CupertinoTimerPicker),
       matchesGoldenFile(
         'timer_picker_test.datetime.drag.png',
-        version: 1,
+        version: 2,
       ),
     );
   });
