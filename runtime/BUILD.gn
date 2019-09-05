@@ -87,6 +87,28 @@ source_set("runtime") {
     "//third_party/tonic",
   ]
 
+  # On Windows the engine finds the Dart snapshot data through symbols
+  # that are statically linked into the executable. On other platforms this
+  # data is obtained by a dynamic symbol lookup.
+  # The current Windows platform uses static-link instead of dynamic lookups.
+  # Because:
+  #  1. The size of the executable on Windows is not as concerned as on mobile
+  #     platforms.
+  #  2. If it is a dynamic lookup method, you need to modify the properties of
+  #     the memory page after the *.bin is dynamically loaded at runtime and
+  #     mark it as executable. This is feasible (similar to V8 on Windows), but
+  #     this increases the complexity of the implementation(These operations
+  #     involve the use of some system file/memory privilege APIs and there is
+  #     a risk of failure).
+  #  3. In the executable can enjoy the advantages of the windows preload
+  #     mechanism, speed up I/O.
+  if (is_win) {
+    if (flutter_runtime_mode == "profile" ||
+        flutter_runtime_mode == "release") {
+      deps += [ "$flutter_root/lib/snapshot" ]
+    }
+  }
+
   public_deps = [
     "//third_party/rapidjson",
   ]
