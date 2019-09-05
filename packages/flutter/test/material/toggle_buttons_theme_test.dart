@@ -25,6 +25,7 @@ void main() {
   test('ToggleButtonsThemeData defaults', () {
     const ToggleButtonsThemeData themeData = ToggleButtonsThemeData();
     expect(themeData.textStyle, null);
+    expect(themeData.constraints, null);
     expect(themeData.color, null);
     expect(themeData.selectedColor, null);
     expect(themeData.disabledColor, null);
@@ -41,6 +42,7 @@ void main() {
 
     const ToggleButtonsTheme theme = ToggleButtonsTheme(data: ToggleButtonsThemeData());
     expect(theme.data.textStyle, null);
+    expect(theme.data.constraints, null);
     expect(theme.data.color, null);
     expect(theme.data.selectedColor, null);
     expect(theme.data.disabledColor, null);
@@ -72,6 +74,7 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData(
       textStyle: TextStyle(fontSize: 10),
+      constraints: BoxConstraints(minHeight: 10.0, maxHeight: 20.0),
       color: Color(0xfffffff0),
       selectedColor: Color(0xfffffff1),
       disabledColor: Color(0xfffffff2),
@@ -95,6 +98,7 @@ void main() {
      expect(description, <String>[
       'textStyle.inherit: true',
       'textStyle.size: 10.0',
+      'constraints: BoxConstraints(0.0<=w<=Infinity, 10.0<=h<=20.0)',
       'color: Color(0xfffffff0)',
       'selectedColor: Color(0xfffffff1)',
       'disabledColor: Color(0xfffffff2)',
@@ -152,6 +156,78 @@ void main() {
     expect(textStyle.textBaseline, TextBaseline.ideographic);
     expect(textStyle.fontSize, 20.0);
     expect(textStyle.color, isNot(Colors.orange));
+  });
+
+  testWidgets('Custom BoxConstraints', (WidgetTester tester) async {
+    // Test for minimum constraints
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtonsTheme(
+            data: const ToggleButtonsThemeData(
+              constraints: BoxConstraints(
+                minWidth: 50.0,
+                minHeight: 60.0,
+              ),
+            ),
+            child: ToggleButtons(
+              isSelected: const <bool>[false, false, false],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Icon(Icons.check),
+                Icon(Icons.access_alarm),
+                Icon(Icons.cake),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Rect firstRect = tester.getRect(find.byType(RawMaterialButton).at(0));
+    expect(firstRect.width, 50.0);
+    expect(firstRect.height, 60.0);
+    Rect secondRect = tester.getRect(find.byType(RawMaterialButton).at(1));
+    expect(secondRect.width, 50.0);
+    expect(secondRect.height, 60.0);
+    Rect thirdRect = tester.getRect(find.byType(RawMaterialButton).at(2));
+    expect(thirdRect.width, 50.0);
+    expect(thirdRect.height, 60.0);
+
+    // Test for maximum constraints
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtonsTheme(
+            data: const ToggleButtonsThemeData(
+              constraints: BoxConstraints(
+                maxWidth: 20.0,
+                maxHeight: 10.0,
+              ),
+            ),
+            child: ToggleButtons(
+              isSelected: const <bool>[false, false, false],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Icon(Icons.check),
+                Icon(Icons.access_alarm),
+                Icon(Icons.cake),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    firstRect = tester.getRect(find.byType(RawMaterialButton).at(0));
+    expect(firstRect.width, 20.0);
+    expect(firstRect.height, 10.0);
+    secondRect = tester.getRect(find.byType(RawMaterialButton).at(1));
+    expect(secondRect.width, 20.0);
+    expect(secondRect.height, 10.0);
+    thirdRect = tester.getRect(find.byType(RawMaterialButton).at(2));
+    expect(thirdRect.width, 20.0);
+    expect(thirdRect.height, 10.0);
   });
 
   testWidgets(

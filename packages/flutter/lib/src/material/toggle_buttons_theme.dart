@@ -217,8 +217,8 @@ class ToggleButtonsThemeData extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
-    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
     properties.add(ColorProperty('fillColor', fillColor, defaultValue: null));
