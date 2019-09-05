@@ -196,8 +196,6 @@ def BuildTarget(runtime_mode, arch, product):
   out_dir = 'fuchsia_%s_%s' % (runtime_mode, arch)
   flags = [
       '--fuchsia',
-      # The source does not require LTO and LTO is not wired up for targets.
-      '--no-lto',
       '--fuchsia-cpu',
       arch,
       '--runtime-mode',
