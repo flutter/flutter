@@ -202,10 +202,14 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     if (!kReleaseMode) {
       int frameNumber = 0;
 
-      window.frameTimings.listen((FrameTiming frameTiming) {
-        frameNumber += 1;
-        _profileFramePostEvent(frameNumber, frameTiming);
-      });
+      // use frameTimings. https://github.com/flutter/flutter/issues/38838
+      // ignore: deprecated_member_use
+      window.onReportTimings = (List<FrameTiming> timings) {
+        for (FrameTiming frameTiming in timings) {
+          frameNumber += 1;
+          _profileFramePostEvent(frameNumber, frameTiming);
+        }
+      };
     }
   }
 
