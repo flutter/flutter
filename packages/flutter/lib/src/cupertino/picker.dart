@@ -243,10 +243,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   }
 
   /// Makes the fade to [CupertinoPicker.backgroundColor] edge gradients.
-  Widget _buildGradientScreen() {
-    final Color resolved = widget.backgroundColor == null
-      ? null
-      : CupertinoDynamicColor.resolve(widget.backgroundColor, context);
+  Widget _buildGradientScreen(Color resolved) {
     // Because BlendMode.dstOut doesn't work correctly with BoxDecoration we
     // have to just do a color blend. And a due to the way we are layering
     // the magnifier and the gradient on the background, using a transparent
@@ -284,11 +281,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
   /// Makes the magnifier lens look so that the colors are normal through
   /// the lens and partially grayed out around it.
-  Widget _buildMagnifierScreen() {
-    final Color resolved = widget.backgroundColor == null
-      ? null
-      : CupertinoDynamicColor.resolve(widget.backgroundColor, context);
-
+  Widget _buildMagnifierScreen(Color resolved) {
     final Color foreground = resolved?.withAlpha(
       (resolved.alpha * _kForegroundScreenOpacityFraction).toInt()
     );
@@ -316,11 +309,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     );
   }
 
-  Widget _buildUnderMagnifierScreen() {
-    final Color resolved = widget.backgroundColor == null
-      ? null
-      : CupertinoDynamicColor.resolve(widget.backgroundColor, context);
-
+  Widget _buildUnderMagnifierScreen(Color resolved) {
     final Color foreground = resolved?.withAlpha(
       (resolved.alpha * _kForegroundScreenOpacityFraction).toInt()
     );
@@ -339,20 +328,13 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     );
   }
 
-  Widget _addBackgroundToChild(Widget child) {
-    final Color resolved = widget.backgroundColor == null
+  @override
+  Widget build(BuildContext context) {
+    final Color resolvedBackgroundColor = widget.backgroundColor == null
       ? null
       : CupertinoDynamicColor.resolve(widget.backgroundColor, context);
 
-    return DecoratedBox(
-      decoration: BoxDecoration(color: resolved),
-      child: child,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Widget result = DefaultTextStyle(
+    final Widget result = DefaultTextStyle(
       style: CupertinoTheme.of(context).textTheme.pickerTextStyle,
       child: Stack(
         children: <Widget>[
@@ -374,24 +356,24 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               ),
             ),
           ),
-          _buildGradientScreen(),
-          _buildMagnifierScreen(),
+          _buildGradientScreen(resolvedBackgroundColor),
+          _buildMagnifierScreen(resolvedBackgroundColor),
         ],
       ),
     );
     // Adds the appropriate opacity under the magnifier if the background
     // color is transparent.
-    if (widget.backgroundColor != null && widget.backgroundColor.alpha < 255) {
-      result = Stack(
-        children: <Widget> [
-          _buildUnderMagnifierScreen(),
-          _addBackgroundToChild(result),
-        ],
-      );
-    } else {
-      result = _addBackgroundToChild(result);
-    }
-    return result;
+    final bool shouldBuildUnderMagnifier = resolvedBackgroundColor != null
+                                        && resolvedBackgroundColor.alpha < 255;
+    return Stack(
+      children: <Widget> [
+        if (shouldBuildUnderMagnifier) _buildUnderMagnifierScreen(resolvedBackgroundColor),
+        DecoratedBox(
+          decoration: BoxDecoration(color: resolvedBackgroundColor),
+          child: result,
+        ),
+      ],
+    );
   }
 }
 
