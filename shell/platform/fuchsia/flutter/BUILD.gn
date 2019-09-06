@@ -10,6 +10,7 @@ import("$flutter_root/shell/gpu/gpu.gni")
 import("$flutter_root/tools/fuchsia/common_libs.gni")
 import("$flutter_root/tools/fuchsia/dart.gni")
 import("$flutter_root/tools/fuchsia/package_dir.gni")
+import("engine_flutter_runner.gni")
 
 shell_gpu_configuration("fuchsia_gpu_configuration") {
   enable_software = false
@@ -18,149 +19,19 @@ shell_gpu_configuration("fuchsia_gpu_configuration") {
   enable_metal = false
 }
 
-# Builds a flutter_runner
-#
-# Parameters:
-#
-#  output_name (required):
-#    The name of the resulting binary.
-#
-#  extra_deps (required):
-#    Any additional dependencies.
-#  extra_defines (optional):
-#    Any additional preprocessor defines.
-template("flutter_runner") {
-  assert(defined(invoker.output_name), "flutter_runner must define output_name")
-  assert(defined(invoker.extra_deps), "flutter_runner must define extra_deps")
-  assert(defined(invoker.product), "flutter_runner must define product")
-
-  invoker_output_name = invoker.output_name
-  extra_deps = invoker.extra_deps
-
-  extra_defines = []
-  if (defined(invoker.extra_defines)) {
-    extra_defines += invoker.extra_defines
-  }
-
-  executable(target_name) {
-    output_name = invoker_output_name
-
-    defines = extra_defines
-
-    libs = []
-
-    sources = [
-      "component.cc",
-      "component.h",
-      "compositor_context.cc",
-      "compositor_context.h",
-      "engine.cc",
-      "engine.h",
-      "isolate_configurator.cc",
-      "isolate_configurator.h",
-      "logging.h",
-      "loop.cc",
-      "loop.h",
-      "main.cc",
-      "platform_view.cc",
-      "platform_view.h",
-      "runner.cc",
-      "runner.h",
-      "runner_context.cc",
-      "runner_context.h",
-      "service_provider_dir.cc",
-      "service_provider_dir.h",
-      "session_connection.cc",
-      "session_connection.h",
-      "surface.cc",
-      "surface.h",
-      "task_observers.cc",
-      "task_observers.h",
-      "task_runner_adapter.cc",
-      "task_runner_adapter.h",
-      "thread.cc",
-      "thread.h",
-      "unique_fdio_ns.h",
-      "vsync_recorder.cc",
-      "vsync_recorder.h",
-      "vsync_waiter.cc",
-      "vsync_waiter.h",
-      "vulkan_surface.cc",
-      "vulkan_surface.h",
-      "vulkan_surface_pool.cc",
-      "vulkan_surface_pool.h",
-      "vulkan_surface_producer.cc",
-      "vulkan_surface_producer.h",
-    ]
-
-    deps = [
-             ":fuchsia_gpu_configuration",
-             "$flutter_root/common",
-             "$flutter_root/flow",
-             "$flutter_root/fml",
-             "$flutter_root/lib/ui",
-             "$flutter_root/runtime",
-             "$flutter_root/runtime:libdart",
-             "$flutter_root/shell/common",
-             "$flutter_root/shell/platform/fuchsia/dart-pkg/fuchsia",
-             "$flutter_root/shell/platform/fuchsia/dart-pkg/zircon",
-             "$flutter_root/shell/platform/fuchsia/runtime/dart/utils",
-             "$flutter_root/vulkan",
-             "$fuchsia_sdk_root/fidl:fuchsia.fonts",
-             "$fuchsia_sdk_root/fidl:fuchsia.images",
-             "$fuchsia_sdk_root/fidl:fuchsia.io",
-             "$fuchsia_sdk_root/fidl:fuchsia.modular",
-             "$fuchsia_sdk_root/fidl:fuchsia.sys",
-             "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
-             "$fuchsia_sdk_root/fidl:fuchsia.ui.scenic",
-             "$fuchsia_sdk_root/pkg:async-cpp",
-             "$fuchsia_sdk_root/pkg:async-loop",
-             "$fuchsia_sdk_root/pkg:async-loop-cpp",
-             "$fuchsia_sdk_root/pkg:fdio",
-             "$fuchsia_sdk_root/pkg:fidl_cpp",
-             "$fuchsia_sdk_root/pkg:scenic_cpp",
-             "$fuchsia_sdk_root/pkg:syslog",
-             "$fuchsia_sdk_root/pkg:trace",
-             "$fuchsia_sdk_root/pkg:trace-engine",
-             "$fuchsia_sdk_root/pkg:trace-provider-so",
-             "$fuchsia_sdk_root/pkg:zx",
-             "$fuchsia_sdk_root/pkg/lib/sys/cpp",
-             "$fuchsia_sdk_root/pkg/lib/vfs/cpp",
-             "//third_party/skia",
-             "//third_party/tonic",
-           ] + extra_deps
-
-    # The flags below are needed so that Dart's CPU profiler can walk the
-    # C++ stack.
-    cflags = [ "-fno-omit-frame-pointer" ]
-
-    if (!invoker.product) {
-      # This flag is needed so that the call to dladdr() in Dart's native symbol
-      # resolver can report good symbol information for the CPU profiler.
-      ldflags = [ "-rdynamic" ]
-    }
-  }
-}
-
 # Things that explicitly being excluded:
-# 1. flutter_profile flag.
-# 2. Injecting flutter tool specific stuff.
-# 3. Product mode is going to be false for now.
-# 4. Kernel snapshot: framework and product.
-# 5. Observatoory stuff.
-# 6. Profiler symbols.
-# 7. framework and product!! (_framework snapshots and dilp files.)
-# 8. CMX files are also ignored.
+# 1. Kernel snapshot framework mode.
+# 2. Profiler symbols.
 
-flutter_runner("jit_product") {
-  output_name = "flutter_jit_product_runner"
-  product = true
-  extra_defines = [ "DART_PRODUCT" ]
-
-  extra_deps = [
-    "//third_party/dart/runtime:libdart_jit_product",
-    "//third_party/dart/runtime/platform:libdart_platform_jit_product",
-  ]
+# Dependencies for flutter tooling
+#
+# While not required to run a flutter mod, these allow interacting
+# with flutter via the fx tool and need to be built.
+#
+# This is only for builds in topaz tree.
+flutter_tool_deps = []
+if (!using_fuchsia_sdk) {
+  flutter_tool_deps += [ "//third_party/dart-pkg/git/flutter/packages/flutter_tools:fuchsia_attach($host_toolchain)" ]
 }
 
 flutter_runner("jit") {
@@ -171,8 +42,19 @@ flutter_runner("jit") {
   }
 
   extra_deps = [
-    "//third_party/dart/runtime:libdart_jit",
-    "//third_party/dart/runtime/platform:libdart_platform_jit",
+                 "//third_party/dart/runtime:libdart_jit",
+                 "//third_party/dart/runtime/platform:libdart_platform_jit",
+               ] + flutter_tool_deps
+}
+
+flutter_runner("jit_product") {
+  output_name = "flutter_jit_product_runner"
+  product = true
+  extra_defines = [ "DART_PRODUCT" ]
+
+  extra_deps = [
+    "//third_party/dart/runtime:libdart_jit_product",
+    "//third_party/dart/runtime/platform:libdart_platform_jit_product",
   ]
 }
 
@@ -208,12 +90,12 @@ template("jit_runner") {
   }
 
   package_dir(target_name) {
-    snapshot_gen_dir =
-        "$root_build_dir/gen/flutter/shell/platform/fuchsia/flutter/kernel"
+    snapshot_label = "kernel:kernel_core_snapshot${product_suffix}"
+    snapshot_gen_dir = get_label_info(snapshot_label, "target_gen_dir")
 
     deps = [
       ":jit${product_suffix}",
-      "kernel:kernel_core_snapshot${product_suffix}",
+      snapshot_label,
     ]
 
     if (!product) {
@@ -346,8 +228,7 @@ executable("flutter_runner_unittests") {
     "sample_unittests.cc",
   ]
 
-  # This is needed for //third_party/googletest for linking zircon
-  # symbols.
+  # This is needed for //third_party/googletest for linking zircon symbols.
   libs = [ "//fuchsia/sdk/$host_os/arch/$target_cpu/sysroot/lib/libzircon.so" ]
 
   deps = [
