@@ -79,6 +79,7 @@ void main() {
   test('Can create webFs from mocked interfaces', () => testbed.run(() async {
     final FlutterProject flutterProject = FlutterProject.current();
     await WebFs.start(
+      skipDwds: false,
       target: fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
