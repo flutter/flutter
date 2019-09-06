@@ -1,4 +1,4 @@
-Signature: cc6abe52509f7875a69d648023c1dbad
+Signature: 2c668a8ae65b5189de71c2e56979e785
 
 UNUSED LICENSES:
 
@@ -7446,8 +7446,6 @@ FILE: ../../../third_party/dart/runtime/tools/dartfuzz/gen_api_table.dart
 FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.html
 FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.js
 FILE: ../../../third_party/dart/runtime/tools/run_clang_tidy.dart
-FILE: ../../../third_party/dart/runtime/vm/bss_relocs.cc
-FILE: ../../../third_party/dart/runtime/vm/bss_relocs.h
 FILE: ../../../third_party/dart/runtime/vm/catch_entry_moves_test.cc
 FILE: ../../../third_party/dart/runtime/vm/class_id.h
 FILE: ../../../third_party/dart/runtime/vm/code_comments.cc
