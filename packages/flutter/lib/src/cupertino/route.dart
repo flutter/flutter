@@ -800,6 +800,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   _CupertinoModalPopupRoute({
     this.builder,
     this.barrierLabel,
+    this.barrierColor,
     RouteSettings settings,
   }) : super(settings: settings);
 
@@ -809,7 +810,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   final String barrierLabel;
 
   @override
-  Color get barrierColor => _kActionSheetModelBarrierColor;
+  final Color barrierColor;
 
   @override
   bool get barrierDismissible => true;
@@ -891,6 +892,7 @@ Future<T> showCupertinoModalPopup<T>({
     _CupertinoModalPopupRoute<T>(
       builder: builder,
       barrierLabel: 'Dismiss',
+      barrierColor: CupertinoDynamicColor.resolve(_kActionSheetModelBarrierColor, context),
     ),
   );
 }
