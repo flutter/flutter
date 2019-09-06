@@ -244,9 +244,6 @@ Future<RunResult> runAsync(
       workingDirectory: workingDirectory,
       environment: _environment(allowReentrantFlutter, environment),
     );
-    print('Hello World');
-    print(cmd);
-    print('PID is ${results.pid}');
     final RunResult runResults = RunResult(results, cmd);
     printTrace(runResults.toString());
     return runResults;

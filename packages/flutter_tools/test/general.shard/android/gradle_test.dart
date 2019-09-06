@@ -860,7 +860,7 @@ flutter:
       fs = MemoryFileSystem();
       tempDir = fs.systemTempDirectory.createTempSync('artifacts_test.');
       gradleWrapperDirectory = fs.directory(
-          fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper'));
+        fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper'));
       gradleWrapperDirectory.createSync(recursive: true);
       gradleWrapperDirectory
         .childFile('gradlew')
@@ -880,11 +880,11 @@ flutter:
     });
 
     testUsingContext('throws toolExit if gradle fails while downloading', () async {
-      const List<String> cmd = <String>['/android/gradlew', '-v']; // TODO
-      const ProcessException exception = ProcessException(
-        'gradlew',
-        <String>['-v'],
-        '''
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', 'gradlew'),
+        '-v',
+      ];
+      const String errorMessage = '''
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
 at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1872)
 at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1474)
@@ -896,7 +896,11 @@ at org.gradle.wrapper.Install\$1.call(Install.java:48)
 at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
 at org.gradle.wrapper.Install.createDist(Install.java:48)
 at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
-at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''',
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      const ProcessException exception = ProcessException(
+        'gradlew',
+        <String>['-v'],
+        errorMessage,
         1,
       );
       when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
@@ -908,6 +912,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''',
       }
       // Ensure that we throw a meaningful ToolExit
       expect(shouldBeToolExit, isToolExit);
+      expect((shouldBeToolExit as ToolExit).message, contains(errorMessage));
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => fs,
@@ -915,7 +920,10 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''',
     });
 
     testUsingContext('throw toolExit if gradle fails downloading with proxy error', () async {
-      const List<String> cmd = <String>['/android/gradlew', '-v']; // TODO
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', 'gradlew'),
+        '-v',
+      ];
       const String errorMessage = '''
 Exception in thread "main" java.io.IOException: Unable to tunnel through proxy. Proxy returns "HTTP/1.1 400 Bad Request"
 at sun.net.www.protocol.http.HttpURLConnection.doTunneling(HttpURLConnection.java:2124)
@@ -946,6 +954,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       }
       // Ensure that we throw a meaningful ToolExit instead of a general crash.
       expect(shouldBeToolExit, isToolExit);
+      expect((shouldBeToolExit as ToolExit).message, contains(errorMessage));
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => fs,
