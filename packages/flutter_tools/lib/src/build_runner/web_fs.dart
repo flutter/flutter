@@ -105,7 +105,7 @@ class WebFs {
   }
 
   /// Retrieve the [DebugConnection] for the current application.
-  Future<DebugConnection> runAndDebug() async {
+  Future<DebugConnection> runAndDebug() {
     final Completer<DebugConnection> firstConnection = Completer<DebugConnection>();
     _connectedApps =  _dwds.connectedApps.listen((AppConnection appConnection) async {
       appConnection.runMain();
