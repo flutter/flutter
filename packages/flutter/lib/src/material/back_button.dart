@@ -85,7 +85,8 @@ class BackButton extends StatelessWidget {
   /// to pop the [Navigator].
   ///
   /// It can, for instance, be used to pop the platform's navigation stack
-  /// instead of Flutter's [Navigator].
+  /// via [SytemNavigator] instead of Flutter's [Navigator] in add-to-app
+  /// situations.
   ///
   /// Defaults to null.
   final VoidCallback onPressed;
