@@ -191,31 +191,6 @@ class SystemChannels {
       JSONMessageCodec(),
   );
 
-  /// A JSON [BasicMessageChannel] for keyboard events.
-  ///
-  /// Each incoming message received on this channel (registered using
-  /// [BasicMessageChannel.setMessageHandler]) consists of a [Map] with
-  /// platform-specific data, plus a `type` field which is either `keydown`, or
-  /// `keyup`.
-  ///
-  /// On Android, the available fields are those described by
-  /// [RawKeyEventDataAndroid]'s properties.
-  ///
-  /// On Fuchsia, the available fields are those described by
-  /// [RawKeyEventDataFuchsia]'s properties.
-  ///
-  /// No messages are sent on other platforms currently.
-  ///
-  /// See also:
-  ///
-  ///  * [RawKeyboard], which uses this channel to expose key data.
-  ///  * [new RawKeyEvent.fromMessage], which can decode this data into the [RawKeyEvent]
-  ///    subclasses mentioned above.
-  static const BasicMessageChannel<dynamic> keyEvent = BasicMessageChannel<dynamic>(
-      'flutter/keyevent',
-      JSONMessageCodec(),
-  );
-
   /// A string [BasicMessageChannel] for lifecycle events.
   ///
   /// Valid messages are string representations of the values of the
@@ -284,7 +259,7 @@ class SystemChannels {
   /// The following outgoing methods are defined for this channel (invoked using
   /// [OptionalMethodChannel.invokeMethod]):
   ///
-  ///  * `MouseCursor.setIcons`: Request to set the cursors of multiple pointer
+  ///  * `MouseCursor.setCursors`: Request to set the cursors of multiple pointer
   ///    devices. The argument is a `Map<int, int>` that maps from device to
   ///    cursor. See [MouseCursors] for a list of system cursors.
   static const MethodChannel mouseCursor = OptionalMethodChannel(

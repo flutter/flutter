@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Offset;
-
-import 'package:flutter/foundation.dart';
-import 'message_codecs.dart';
 import 'platform_channel.dart';
 
 // We ignore this warning because mouse cursor has a lot of enum-like constants,
@@ -24,19 +20,35 @@ import 'platform_channel.dart';
 /// to pick values, as long as the result does not collide with existing
 /// values and is consistent between platforms and the framework.
 class MouseCursors {
-  /// A special value to display no cursor at the pointer.
-  static const int none = 0x334c4a4c;
-
-  /// A special value to release the control of cursors.
+  /// A special value that tells Flutter to release the control of cursors.
   ///
-  /// Setting a region with this value means that Flutter will not actively
-  /// change the cursor when the pointer enters or is hovering this region.
-  /// Typically used on a platform view or other regions that manages the cursor
+  /// Annotating a layer with this value means that Flutter will not actively
+  /// change the cursor when the pointer enters or is hovering this layer.
+  /// Typically used on a platform view or other layers that manages the cursor
   /// by itself.
   ///
   /// This constant is only used by [MouseCursorManager] and should not be sent
   /// to the platforms via the channel.
-  static const int renounced = 0x795c0b0a;
+  static const int releaseControl = 0xc3c7870d;
+
+  /// A special value that tells Flutter to check the value of the layer behind
+  /// it.
+  ///
+  /// Annotating a layer with this value means that, although this layer will
+  /// absorb the mouse pointer, it is not opinionated about selecting a cursor,
+  /// and Flutter should continue to the region behind it that also contains the
+  /// pointer to get a cursor. This process can keep going if the next region
+  /// also chooses to fall through. If all regions choose to fall through, then
+  /// the result will default to [MouseCursors.basic].
+  ///
+  /// This constant is the default behavior of an opaque [MouseRegion].
+  ///
+  /// This constant is only used by [MouseCursorManager] and should not be sent
+  /// to the platforms via the channel.
+  static const int fallThrough = 0xcac463d2;
+
+  /// Displays no cursor at the pointer.
+  static const int none = 0x334c4a4c;
 
   /// The platform-dependent basic cursor. Typically an arrow.
   static const int basic = 0xf17aaabc;
@@ -72,7 +84,7 @@ class _DeviceCursorState {
   int _cursor;
 
   bool changeCursor(int cursor) {
-    if (cursor == MouseCursors.renounced)
+    if (cursor == MouseCursors.releaseControl)
       return false;
     if (cursor != _cursor) {
       _cursor = cursor;
@@ -117,7 +129,7 @@ class MouseCursorManager {
     if (filteredEntries.isEmpty) {
       return true;
     }
-    return _requestSetIcons(Map<int, int>.fromEntries(filteredEntries));
+    return _requestSetCursors(Map<int, int>.fromEntries(filteredEntries));
   }
 
   /// Called when a device is disconnected.
@@ -128,13 +140,12 @@ class MouseCursorManager {
     _deviceStates.remove(device);
   }
 
-  Future<bool> _requestSetIcons(Map<int, int> cursorForDevices) {
+  Future<bool> _requestSetCursors(Map<int, int> cursorForDevices) {
     assert(cursorForDevices.isNotEmpty);
-    return _channel.invokeMethod<bool>(
-      'setIcons',
-      <String, dynamic>{
-        'cursorForDevices': cursorForDevices,
-      },
-    );
+    assert(!cursorForDevices.values.any((int cursor) {
+      return cursor == MouseCursors.releaseControl ||
+             cursor == MouseCursors.fallThrough;
+    }));
+    return _channel.invokeMethod<bool>('setCursors', cursorForDevices);
   }
 }

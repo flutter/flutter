@@ -5841,24 +5841,21 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// the pointer.
   final PointerExitEventListener onExit;
 
-  /// The mouse cursor for a pointer if it enters this region.
+  /// The mouse cursor for a pointer if it enters or is hovering this region.
   ///
-  /// The cursor for a mouse pointer will be determined by the front-most
-  /// region that contains the pointer, taking opacity into account.
-  /// If the front-most region does not define a cursor (null), then the next
-  /// ones on the path will be used, or fall back to the base cursor eventually.
+  /// This cursor will be set to a mouse pointer if this region is the
+  /// front-most widget that contains the pointer, taking opacity into account.
   ///
-  /// It defaults to null.
+  /// It defaults to [MouseCursors.fallThrough] if [opaque] is true, or `null`
+  /// otherwise. A value of `null` behaves almost identically as
+  /// [MouseCursors.fallThrough], except for a slight internal difference since
+  /// a layer will not be created if all handlers and the cursor are `null`.
   ///
   /// See also:
   ///
   ///  * [MouseCursors], which is a collection of system cursors of all
   ///    platforms.
   final int cursor;
-
-  int _designateCursor(MouseCursorContext _) {
-    return cursor;
-  }
 
   @override
   _ListenerElement createElement() => _ListenerElement(this);
@@ -5869,7 +5866,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
       onEnter: onEnter,
       onHover: onHover,
       onExit: onExit,
-      cursor: _designateCursor,
+      cursor: cursor,
     );
   }
 
@@ -5878,7 +5875,8 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     renderObject
       ..onEnter = onEnter
       ..onHover = onHover
-      ..onExit = onExit;
+      ..onExit = onExit
+      ..cursor = cursor;
   }
 
   @override

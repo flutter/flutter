@@ -26,24 +26,6 @@ typedef PointerExitEventListener = void Function(PointerExitEvent event);
 /// Used by [MouseTrackerAnnotation], [Listener] and [RenderPointerListener].
 typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 
-/// The information related to an event that might cause a cursor change.
-@immutable
-class MouseCursorContext {
-  /// Create a [MouseCursorContext] by assigning all properties.
-  const MouseCursorContext({
-    this.localPosition,
-    this.globalPosition,
-  });
-
-  /// The current cursor position in global coordinate system.
-  final Offset globalPosition;
-
-  /// The current cursor position in the local coordinate system of the layer.
-  final Offset localPosition;
-}
-
-typedef MouseCursorDesignator = int Function(MouseCursorContext context);
-
 /// The annotation object used to annotate layers that are interested in mouse
 /// movements.
 ///
@@ -73,14 +55,13 @@ class MouseTrackerAnnotation {
   /// Returns the cursor that a mouse pointer should change to if it enters
   /// or is hovering the layer that is annotated with this object.
   ///
-  /// If it is null or returns null, then the layers visually behind it will
-  /// take the control.
+  /// Returning null is equivalent to [MouseCursors.fallThrough .
   ///
   /// See also:
   ///
   ///  * [MouseCursors], which is a collection of system cursors of all
   ///    platforms.
-  final MouseCursorDesignator cursor;
+  final int Function() cursor;
 
   @override
   String toString() {
@@ -89,6 +70,7 @@ class MouseTrackerAnnotation {
         '${onEnter == null ? '' : ' onEnter'}'
         '${onHover == null ? '' : ' onHover'}'
         '${onExit == null ? '' : ' onExit'}]';
+    // TODO(dkwingsmt): Add property for cursor
   }
 }
 
@@ -319,12 +301,11 @@ class MouseTracker extends ChangeNotifier {
               trackedAnnotation.activeDevices.remove(deviceId);
             }
           }
-          firstCursor ??= hitAnnotation.annotation.cursor(
-            MouseCursorContext(
-              localPosition: lastEvent.localPosition,
-              globalPosition: lastEvent.position,
-            ),
-          );
+          if (firstCursor == null) {
+            final int thisCursor = hitAnnotation.annotation.cursor();
+            if (thisCursor != null && thisCursor != MouseCursors.fallThrough)
+              firstCursor = thisCursor;
+          }
         }
         cursorForDevices[deviceId] = firstCursor ?? MouseCursors.basic;
         _cursorManager.onChangeCursor(cursorForDevices);

@@ -2608,7 +2608,7 @@ class RenderMouseRegion extends RenderProxyBox {
     PointerEnterEventListener onEnter,
     PointerHoverEventListener onHover,
     PointerExitEventListener onExit,
-    MouseCursorDesignator cursor,
+    int cursor,
     RenderBox child,
   }) : _onEnter = onEnter,
        _onHover = onHover,
@@ -2620,7 +2620,7 @@ class RenderMouseRegion extends RenderProxyBox {
       onEnter: _handleEnter,
       onHover: _handleHover,
       onExit: _handleExit,
-      cursor: _handleMouseCursorDesignation,
+      cursor: _getCursor,
     );
   }
 
@@ -2675,32 +2675,29 @@ class RenderMouseRegion extends RenderProxyBox {
       _onExit(event);
   }
 
-  /// Returns the cursor that a mouse pointer should change to if it enters
-  /// or is hovering this object.
+  /// The mouse cursor for a pointer if it enters or is hovering this object.
   ///
-  /// If it is null or returns null, then the objects visually behind it will
-  /// take the control.
+  /// This cursor will be set to a mouse pointer if this object is the
+  /// front-most object that contains the pointer, taking opacity into account.
   ///
-  /// Called when an event that might change mouse cursors happens, for example,
-  /// when a cursor moves or on a new frame.
+  /// It defaults to [MouseCursors.fallThrough] if [opaque] is true, or `null`
+  /// otherwise. A value of `null` behaves almost identically as
+  /// [MouseCursors.fallThrough], except for a slight internal difference since
+  /// a layer will not be created if all handlers and the cursor are `null`.
   ///
   /// See also:
   ///
   ///  * [MouseCursors], which is a collection of system cursors of all
   ///    platforms.
-  MouseCursorDesignator get cursor => _cursor;
-  set cursor(MouseCursorDesignator value) {
+  int get cursor => _cursor;
+  set cursor(int value) {
     if (_cursor != value) {
       _cursor = value;
       _updateAnnotations();
     }
   }
-  MouseCursorDesignator _cursor;
-  int _handleMouseCursorDesignation(MouseCursorContext context) {
-    if (_cursor != null)
-      _cursor(context);
-    return null;
-  }
+  int _cursor;
+  int _getCursor() => _cursor;
 
   // Object used for annotation of the layer used for hover hit detection.
   MouseTrackerAnnotation _hoverAnnotation;
@@ -2717,7 +2714,8 @@ class RenderMouseRegion extends RenderProxyBox {
     final bool annotationWillBeActive = (
         _onEnter != null ||
         _onHover != null ||
-        _onExit != null
+        _onExit != null ||
+        _cursor != null
       ) &&
       RendererBinding.instance.mouseTracker.mouseIsConnected;
     if (annotationWasActive != annotationWillBeActive) {
