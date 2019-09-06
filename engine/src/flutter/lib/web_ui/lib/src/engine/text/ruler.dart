@@ -759,8 +759,13 @@ class ParagraphRuler {
 
   MeasurementResult cacheLookup(
       EngineParagraph paragraph, ui.ParagraphConstraints constraints) {
+    final String plainText = paragraph._plainText;
+    if (plainText == null) {
+      // Multi span paragraph, do not use cache item.
+      return null;
+    }
     final List<MeasurementResult> constraintCache =
-        _measurementCache[paragraph._plainText];
+    _measurementCache[plainText];
     if (constraintCache == null) {
       return null;
     }
