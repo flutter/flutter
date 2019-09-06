@@ -32,6 +32,12 @@ const Color _kModalBarrierColor = CupertinoDynamicColor.withBrightness(
   darkColor: Color(0x99000000),
 );
 
+const Color _kActionSheetModelBarrierColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x33000000),
+  darkColor: Color(0x7A000000),
+);
+
+
 // The duration of the transition used when a modal popup is shown.
 const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
@@ -803,7 +809,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   final String barrierLabel;
 
   @override
-  Color get barrierColor => _kModalBarrierColor;
+  Color get barrierColor => _kActionSheetModelBarrierColor;
 
   @override
   bool get barrierDismissible => true;
