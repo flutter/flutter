@@ -57,6 +57,9 @@ def main():
   pom_dependencies = ''
   if args.include_embedding_dependencies:
     for dependency in dependencies:
+      if not dependency['provides']:
+        # Don't include transitive dependencies since they aren't used by the embedding.
+        continue
       group_id, artifact_id, version = dependency['maven_dependency'].split(':')
       pom_dependencies += POM_DEPENDENCY.format(group_id, artifact_id, version)
 
