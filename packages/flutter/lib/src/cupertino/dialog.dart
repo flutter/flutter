@@ -78,9 +78,9 @@ const Color _kDialogColor = CupertinoDynamicColor.withBrightness(
 
 // Translucent light gray that is painted on top of the blurred backdrop as the
 // background color of a pressed button.
-final Color _kDialogPressedColor = CupertinoDynamicColor.withBrightness(
-  color: const Color(0xFFE1E1E1),
-  darkColor: const Color(0xFF2E2E2E),
+const Color _kDialogPressedColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFE1E1E1),
+  darkColor: Color(0xFF2E2E2E),
 );
 
 // The alert dialog layout policy changes depending on whether the user is using
