@@ -51,6 +51,7 @@ const Set<String> skipPlatformCheckPackages = <String>{
   'flutter_goldens_client',
   'flutter_gallery',
   'connectivity',
+  'video_player',
 };
 
 final DartPlatform flutterWebPlatform =
@@ -75,6 +76,8 @@ final DartPlatform flutterWebPlatform =
   // Flutter web specific libraries.
   'ui',
   '_engine',
+  'io',
+  'isolate',
 ]);
 
 /// The builders required to compile a Flutter application to the web.
@@ -211,7 +214,8 @@ class FlutterWebTestEntrypointBuilder implements Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
     log.info('building for target ${buildStep.inputId.path}');
-    await bootstrapDdc(buildStep, platform: flutterWebPlatform, skipPlatformCheckPackages: skipPlatformCheckPackages);
+    await bootstrapDdc(buildStep, platform: flutterWebPlatform,
+        skipPlatformCheckPackages: skipPlatformCheckPackages);
   }
 }
 
@@ -239,7 +243,8 @@ class FlutterWebEntrypointBuilder implements Builder {
     if (release || profile) {
       await bootstrapDart2Js(buildStep, flutterWebSdk, profile);
     } else {
-      await bootstrapDdc(buildStep, platform: flutterWebPlatform, skipPlatformCheckPackages: skipPlatformCheckPackages);
+      await bootstrapDdc(buildStep, platform: flutterWebPlatform,
+          skipPlatformCheckPackages: skipPlatformCheckPackages);
     }
   }
 }
