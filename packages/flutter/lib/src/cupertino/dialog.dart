@@ -43,16 +43,6 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
   textBaseline: TextBaseline.alphabetic,
 );
 
-// This decoration is applied to the blurred backdrop to lighten the blurred
-// image. Brightening is done to counteract the dark modal barrier that
-// appears behind the alert. The overlay blend mode does the brightening.
-// The white color doesn't paint any white, it's a placeholder and is going to be
-// replaced by the resolved color of _kAlertBlurOverlayColor.
-const BoxDecoration _kAlertBlurOverlayDecoration = BoxDecoration(
-  color: CupertinoColors.white,
-  backgroundBlendMode: BlendMode.overlay,
-);
-
 // iOS dialogs have a normal display width and another display width that is
 // used when the device is in accessibility mode. Each of these widths are
 // listed below.
@@ -342,11 +332,8 @@ class CupertinoPopupSurface extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
         child: Container(
-          decoration: _kAlertBlurOverlayDecoration,
-          child: Container(
-            color: isSurfacePainted ? CupertinoDynamicColor.resolve(_kDialogColor, context) : null,
-            child: child,
-          ),
+          color: isSurfacePainted ? CupertinoDynamicColor.resolve(_kDialogColor, context) : null,
+          child: child,
         ),
       ),
     );
