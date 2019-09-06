@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:dwds/dwds.dart';
+import 'package:flutter_tools/src/base/common.dart' as prefix0;
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 
@@ -212,6 +213,8 @@ class ResidentWebRunner extends ResidentRunner {
           printStatus(message);
         }
       });
+      //prefix0.unawaited(future)
+      unawaited(_debugConnection.vmService.registerService('reloadSources', 'FlutterTools'));
       websocketUri = Uri.parse(_debugConnection.uri);
     }
     if (websocketUri != null) {
@@ -232,9 +235,6 @@ class ResidentWebRunner extends ResidentRunner {
     String reason,
     bool benchmarkMode = false,
   }) async {
-    if (!fullRestart) {
-      return OperationResult(1, 'hot reload not supported on the web.');
-    }
     final Stopwatch timer = Stopwatch()..start();
     final Status status = logger.startProgress(
       'Performing hot restart...',
