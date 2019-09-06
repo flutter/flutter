@@ -94,17 +94,12 @@ class LockdownReturnCode {
 
 class IMobileDevice {
   IMobileDevice()
-      : _ideviceIdPath = artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios)
-          ?? 'idevice_id', // TODO(fujino): remove fallback once g3 updated
-        _ideviceinfoPath = artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios)
-          ?? 'ideviceinfo', // TODO(fujino): remove fallback once g3 updated
-        _idevicenamePath = artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios)
-          ?? 'idevicename', // TODO(fujino): remove fallback once g3 updated
-        _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios)
-          ?? 'idevicesyslog', // TODO(fujino): remove fallback once g3 updated
-        _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios)
-          ?? 'idevicescreenshot' { // TODO(fujino): remove fallback once g3 updated
-        }
+      : _ideviceIdPath = artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios),
+        _ideviceinfoPath = artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
+        _idevicenamePath = artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios),
+        _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
+        _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios);
+
   final String _ideviceIdPath;
   final String _ideviceinfoPath;
   final String _idevicenamePath;
