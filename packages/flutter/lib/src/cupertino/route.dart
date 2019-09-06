@@ -28,15 +28,9 @@ const int _kMaxPageBackAnimationTime = 300; // Milliseconds.
 // Barrier color for a Cupertino modal barrier.
 // Extracted from https://developer.apple.com/design/resources/.
 const Color _kModalBarrierColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0x66000000),
-  darkColor: Color(0x99000000),
-);
-
-const Color _kActionSheetModelBarrierColor = CupertinoDynamicColor.withBrightness(
   color: Color(0x33000000),
   darkColor: Color(0x7A000000),
 );
-
 
 // The duration of the transition used when a modal popup is shown.
 const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
@@ -892,7 +886,7 @@ Future<T> showCupertinoModalPopup<T>({
     _CupertinoModalPopupRoute<T>(
       builder: builder,
       barrierLabel: 'Dismiss',
-      barrierColor: CupertinoDynamicColor.resolve(_kActionSheetModelBarrierColor, context),
+      barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
     ),
   );
 }
