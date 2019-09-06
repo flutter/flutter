@@ -417,7 +417,11 @@ class BuildDaemonCreator {
             }
             break;
           default:
-            printTrace(serverLog.message);
+            if (serverLog.message.contains('Skipping compiling')) {
+              printError(serverLog.message);
+            } else {
+              printTrace(serverLog.message);
+            }
         }
       },
       buildMode: daemon.BuildMode.Manual,
