@@ -12,6 +12,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/animation.dart' show Curves;
 
+import 'colors.dart';
+
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
 
@@ -24,7 +26,11 @@ const int _kMaxDroppedSwipePageForwardAnimationTime = 800; // Milliseconds.
 const int _kMaxPageBackAnimationTime = 300; // Milliseconds.
 
 // Barrier color for a Cupertino modal barrier.
-const Color _kModalBarrierColor = Color(0x6604040F);
+// Extracted from https://developer.apple.com/design/resources/.
+const Color _kModalBarrierColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x66000000),
+  darkColor: Color(0x99000000),
+);
 
 // The duration of the transition used when a modal popup is shown.
 const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
@@ -947,7 +953,7 @@ Future<T> showCupertinoDialog<T>({
   return showGeneralDialog(
     context: context,
     barrierDismissible: false,
-    barrierColor: _kModalBarrierColor,
+    barrierColor: CupertinoDynamicColor.resolve(_kModalBarrierColor, context),
     // This transition duration was eyeballed comparing with iOS
     transitionDuration: const Duration(milliseconds: 250),
     pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {

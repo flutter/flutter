@@ -227,25 +227,15 @@ class CupertinoActionSheet extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.0),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-          child: Container(
-            decoration: _kAlertBlurOverlayDecoration.copyWith(
-              color: CupertinoDynamicColor.resolve(_kAlertBlurOverlayColor, context),
-            ),
-            child: _CupertinoAlertRenderWidget(
-              contentSection: Builder(builder: _buildContent),
-              actionsSection: _buildActions(),
-            ),
+          child: _CupertinoAlertRenderWidget(
+            contentSection: Builder(builder: _buildContent),
+            actionsSection: _buildActions(),
           ),
         ),
       ),
       ),
+      if (cancelButton != null) _buildCancelButton(),
     ];
-
-    if (cancelButton != null) {
-      children.add(
-        _buildCancelButton(),
-      );
-    }
 
     final Orientation orientation = MediaQuery.of(context).orientation;
     double actionSheetWidth;

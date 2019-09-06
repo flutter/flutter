@@ -5,12 +5,12 @@
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'interface_level.dart';
 import 'localizations.dart';
 import 'scrollbar.dart';
 
@@ -238,8 +238,8 @@ class CupertinoAlertDialog extends StatelessWidget {
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: _kEdgePadding),
                 width: isInAccessibilityMode
-                ? _kAccessibilityCupertinoDialogWidth
-                : _kCupertinoDialogWidth,
+                  ? _kAccessibilityCupertinoDialogWidth
+                  : _kCupertinoDialogWidth,
                 child: CupertinoPopupSurface(
                   isSurfacePainted: false,
                   child: Semantics(
