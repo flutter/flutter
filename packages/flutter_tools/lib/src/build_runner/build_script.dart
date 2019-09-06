@@ -41,6 +41,16 @@ const String jsSourceMapExtension = '.ddc.js.map';
 const String kReleaseFlag = 'release';
 const String kProfileFlag = 'profile';
 
+const Set<String> skipPlatformCheckPackages = <String>{
+  'flutter',
+  'flutter_test',
+  'flutter_driver',
+  'flutter_goldens',
+  'flutter_goldens_client',
+  'flutter_gallery',
+  'connectivity',
+};
+
 final DartPlatform flutterWebPlatform =
     DartPlatform.register('flutter_web', <String>[
   'async',
@@ -63,8 +73,6 @@ final DartPlatform flutterWebPlatform =
   // Flutter web specific libraries.
   'ui',
   '_engine',
-  'io',
-  'isolate',
 ]);
 
 /// The builders required to compile a Flutter application to the web.
@@ -127,7 +135,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               sdkKernelPath: path.join('kernel', 'flutter_ddc_sdk.dill'),
               outputExtension: ddcKernelExtension,
               platform: flutterWebPlatform,
-              librariesPath: 'libraries.json',
+              librariesPath: path.absolute(path.join(builderOptions.config['flutterWebSdk'], 'libraries.json')),
               kernelTargetName: 'ddc',
             ),
         (BuilderOptions builderOptions) => DevCompilerBuilder(
@@ -135,7 +143,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               platform: flutterWebPlatform,
               platformSdk: builderOptions.config['flutterWebSdk'],
               sdkKernelPath: path.url.join('kernel', 'flutter_ddc_sdk.dill'),
-              librariesPath: 'libraries.json',
+              librariesPath: path.absolute(path.join(builderOptions.config['flutterWebSdk'], 'libraries.json')),
             ),
       ],
       core.toAllPackages(),
@@ -201,7 +209,7 @@ class FlutterWebTestEntrypointBuilder implements Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
     log.info('building for target ${buildStep.inputId.path}');
-    await bootstrapDdc(buildStep, platform: flutterWebPlatform);
+    await bootstrapDdc(buildStep, platform: flutterWebPlatform, skipPlatformCheckPackages: skipPlatformCheckPackages);
   }
 }
 
@@ -229,7 +237,7 @@ class FlutterWebEntrypointBuilder implements Builder {
     if (release || profile) {
       await bootstrapDart2Js(buildStep, flutterWebSdk, profile);
     } else {
-      await bootstrapDdc(buildStep, platform: flutterWebPlatform);
+      await bootstrapDdc(buildStep, platform: flutterWebPlatform, skipPlatformCheckPackages: skipPlatformCheckPackages);
     }
   }
 }
