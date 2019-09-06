@@ -169,6 +169,12 @@ class BoxDecoration extends Decoration {
   /// A list of shadows cast by this box behind the box.
   ///
   /// The shadow follows the [shape] of the box.
+  ///
+  /// See also:
+  ///
+  ///  * [kElevationToShadow], for some predefined shadows used in Material
+  ///    Design.
+  ///  * [PhysicalModel], a widget for showing shadows.
   final List<BoxShadow> boxShadow;
 
   /// A gradient to use when filling the box.

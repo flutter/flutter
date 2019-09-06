@@ -279,6 +279,9 @@ class BufferLogger extends Logger {
   String get traceText => _trace.toString();
 
   @override
+  bool get hasTerminal => false;
+
+  @override
   void printError(
     String message, {
     StackTrace stackTrace,

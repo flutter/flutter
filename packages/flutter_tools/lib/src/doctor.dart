@@ -143,8 +143,15 @@ class Doctor {
   List<ValidatorTask> startValidatorTasks() {
     final List<ValidatorTask> tasks = <ValidatorTask>[];
     for (DoctorValidator validator in validators) {
+      // We use an asyncGuard() here to be absolutely certain that
+      // DoctorValidators do not result in an uncaught exception. Since the
+      // Future returned by the asyncGuard() is not awaited, we pass an
+      // onError callback to it and translate errors into ValidationResults.
       final Future<ValidationResult> result =
-          asyncGuard<ValidationResult>(() => validator.validate());
+          asyncGuard<ValidationResult>(validator.validate,
+            onError: (Object exception, StackTrace stackTrace) {
+              return ValidationResult.crash(exception, stackTrace);
+            });
       tasks.add(ValidatorTask(validator, result));
     }
     return tasks;

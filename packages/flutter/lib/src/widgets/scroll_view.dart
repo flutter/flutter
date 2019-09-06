@@ -768,8 +768,8 @@ abstract class BoxScrollView extends ScrollView {
 /// [new ListView] constructor's `children` argument corresponds to the
 /// [childrenDelegate] being a [SliverChildListDelegate] with that same
 /// argument. The [new ListView.builder] constructor's `itemBuilder` and
-/// `childCount` arguments correspond to the [childrenDelegate] being a
-/// [SliverChildBuilderDelegate] with the matching arguments.
+/// `itemCount` arguments correspond to the [childrenDelegate] being a
+/// [SliverChildBuilderDelegate] with the equivalent arguments.
 ///
 /// The [padding] property corresponds to having a [SliverPadding] in the
 /// [CustomScrollView.slivers] property instead of the list itself, and having

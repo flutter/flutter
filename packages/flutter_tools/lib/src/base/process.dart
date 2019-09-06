@@ -231,16 +231,88 @@ Future<RunResult> runAsync(
   String workingDirectory,
   bool allowReentrantFlutter = false,
   Map<String, String> environment,
+  Duration timeout,
+  int timeoutRetries = 0,
 }) async {
   _traceCommand(cmd, workingDirectory: workingDirectory);
-  final ProcessResult results = await processManager.run(
-    cmd,
-    workingDirectory: workingDirectory,
-    environment: _environment(allowReentrantFlutter, environment),
-  );
-  final RunResult runResults = RunResult(results, cmd);
-  printTrace(runResults.toString());
-  return runResults;
+
+  // When there is no timeout, there's no need to kill a running process, so
+  // we can just use processManager.run().
+  if (timeout == null) {
+    final ProcessResult results = await processManager.run(
+      cmd,
+      workingDirectory: workingDirectory,
+      environment: _environment(allowReentrantFlutter, environment),
+    );
+    final RunResult runResults = RunResult(results, cmd);
+    printTrace(runResults.toString());
+    return runResults;
+  }
+
+  // When there is a timeout, we have to kill the running process, so we have
+  // to use processManager.start() through runCommand() above.
+  while (true) {
+    assert(timeoutRetries >= 0);
+    timeoutRetries = timeoutRetries - 1;
+
+    final Process process = await runCommand(
+        cmd,
+        workingDirectory: workingDirectory,
+        allowReentrantFlutter: allowReentrantFlutter,
+        environment: environment,
+    );
+
+    final StringBuffer stdoutBuffer = StringBuffer();
+    final StringBuffer stderrBuffer = StringBuffer();
+    final Future<void> stdoutFuture = process.stdout
+        .transform<String>(const Utf8Decoder(reportErrors: false))
+        .listen(stdoutBuffer.write)
+        .asFuture<void>(null);
+    final Future<void> stderrFuture = process.stderr
+        .transform<String>(const Utf8Decoder(reportErrors: false))
+        .listen(stderrBuffer.write)
+        .asFuture<void>(null);
+
+    int exitCode;
+    exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
+      return null;
+    });
+
+    String stdoutString;
+    String stderrString;
+    try {
+      await Future.wait<void>(<Future<void>>[stdoutFuture, stderrFuture]);
+    } catch (_) {
+      // Ignore errors on the process' stdout and stderr streams. Just capture
+      // whatever we got, and use the exit code
+    }
+    stdoutString = stdoutBuffer.toString();
+    stderrString = stderrBuffer.toString();
+
+    final ProcessResult result = ProcessResult(
+        process.pid, exitCode ?? -1, stdoutString, stderrString);
+    final RunResult runResult = RunResult(result, cmd);
+
+    // If the process did not timeout. We are done.
+    if (exitCode != null) {
+      printTrace(runResult.toString());
+      return runResult;
+    }
+
+    // The process timed out. Kill it.
+    processManager.killPid(process.pid);
+
+    // If we are out of timeoutRetries, throw a ProcessException.
+    if (timeoutRetries < 0) {
+      throw ProcessException(cmd[0], cmd.sublist(1),
+          'Process "${cmd[0]}" timed out: $runResult', exitCode);
+    }
+
+    // Log the timeout with a trace message in verbose mode.
+    printTrace('Process "${cmd[0]}" timed out. $timeoutRetries attempts left: $runResult');
+  }
+
+  // Unreachable.
 }
 
 typedef RunResultChecker = bool Function(int);
@@ -251,12 +323,16 @@ Future<RunResult> runCheckedAsync(
   bool allowReentrantFlutter = false,
   Map<String, String> environment,
   RunResultChecker whiteListFailures,
+  Duration timeout,
+  int timeoutRetries = 0,
 }) async {
   final RunResult result = await runAsync(
     cmd,
     workingDirectory: workingDirectory,
     allowReentrantFlutter: allowReentrantFlutter,
     environment: environment,
+    timeout: timeout,
+    timeoutRetries: timeoutRetries,
   );
   if (result.exitCode != 0) {
     if (whiteListFailures == null || !whiteListFailures(result.exitCode)) {

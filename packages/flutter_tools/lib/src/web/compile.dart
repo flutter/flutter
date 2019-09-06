@@ -30,7 +30,7 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
   try {
     result = await webCompilationProxy.initialize(
       projectDirectory: FlutterProject.current().directory,
-      release: buildInfo.isRelease,
+      mode: buildInfo.mode,
     );
     if (result) {
       // Places assets adjacent to the web stuff.
@@ -81,7 +81,7 @@ class WebCompilationProxy {
   Future<bool> initialize({
     @required Directory projectDirectory,
     String testOutputDir,
-    bool release,
+    BuildMode mode,
   }) async {
     throw UnimplementedError();
   }

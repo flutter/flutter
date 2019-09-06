@@ -11,6 +11,7 @@ import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
 import 'globals.dart';
+import 'plugins.dart';
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
@@ -151,8 +152,14 @@ class FlutterManifest {
   String get androidPackage {
     if (isModule)
       return _flutterDescriptor['module']['androidPackage'];
-    if (isPlugin)
-      return _flutterDescriptor['plugin']['androidPackage'];
+    if (isPlugin) {
+      final YamlMap plugin = _flutterDescriptor['plugin'];
+      if (plugin.containsKey('platforms')) {
+        return plugin['platforms']['android']['package'];
+      } else {
+        return plugin['androidPackage'];
+      }
+    }
     return null;
   }
 
@@ -378,18 +385,8 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
         if (kvp.value is! YamlMap) {
           errors.add('Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }
-        if (kvp.value['androidPackage'] != null && kvp.value['androidPackage'] is! String) {
-          errors.add('The "androidPackage" must either be null or a string.');
-        }
-        if (kvp.value['iosPrefix'] != null && kvp.value['iosPrefix'] is! String) {
-          errors.add('The "iosPrefix" must either be null or a string.');
-        }
-        if (kvp.value['macosPrefix'] != null && kvp.value['macosPrefix'] is! String) {
-          errors.add('The "macosPrefix" must either be null or a string.');
-        }
-        if (kvp.value['pluginClass'] != null && kvp.value['pluginClass'] is! String) {
-          errors.add('The "pluginClass" must either be null or a string..');
-        }
+        final List<String> pluginErrors = Plugin.validatePluginYaml(kvp.value);
+        errors.addAll(pluginErrors);
         break;
       default:
         errors.add('Unexpected child "${kvp.key}" found under "flutter".');
