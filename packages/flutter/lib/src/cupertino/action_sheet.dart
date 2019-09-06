@@ -40,13 +40,6 @@ const BoxDecoration _kAlertBlurOverlayDecoration = BoxDecoration(
   backgroundBlendMode: BlendMode.overlay,
 );
 
-// Color of the overlay.
-// Extracted from https://developer.apple.com/design/resources/.
-const Color _kAlertBlurOverlayColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0x66000000),
-  darkColor: Color(0x99000000),
-);
-
 // Translucent, very light gray that is painted on top of the blurred backdrop
 // as the action sheet's background color.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/39272. Use
@@ -227,9 +220,12 @@ class CupertinoActionSheet extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.0),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-          child: _CupertinoAlertRenderWidget(
-            contentSection: Builder(builder: _buildContent),
-            actionsSection: _buildActions(),
+          child: Container(
+            decoration: _kAlertBlurOverlayDecoration,
+            child: _CupertinoAlertRenderWidget(
+              contentSection: Builder(builder: _buildContent),
+              actionsSection: _buildActions(),
+            ),
           ),
         ),
       ),
@@ -410,14 +406,14 @@ class _CupertinoAlertRenderWidget extends RenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     return _RenderCupertinoAlert(
       dividerThickness: _kDividerThickness / MediaQuery.of(context).devicePixelRatio,
-      dividerColor: _kButtonDividerColor,
+      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context),
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoAlert renderObject) {
     super.updateRenderObject(context, renderObject);
-    renderObject.dividerColor = _kButtonDividerColor;
+    renderObject.dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context);
   }
 
   @override
@@ -1024,7 +1020,7 @@ class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     return _RenderCupertinoAlertActions(
       dividerThickness: _dividerThickness,
-      dividerColor: _kButtonDividerColor,
+      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context),
       hasCancelButton: _hasCancelButton,
       backgroundColor: CupertinoDynamicColor.resolve(_kBackgroundColor, context),
       pressedColor: CupertinoDynamicColor.resolve(_kPressedColor, context),
@@ -1035,7 +1031,7 @@ class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderCupertinoAlertActions renderObject) {
     renderObject
       ..dividerThickness = _dividerThickness
-      ..dividerColor = _kButtonDividerColor
+      ..dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context)
       ..hasCancelButton = _hasCancelButton
       ..backgroundColor = CupertinoDynamicColor.resolve(_kBackgroundColor, context)
       ..pressedColor = CupertinoDynamicColor.resolve(_kPressedColor, context);
