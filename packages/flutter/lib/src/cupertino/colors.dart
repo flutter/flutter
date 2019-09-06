@@ -83,6 +83,12 @@ class CupertinoColors {
   /// This is SystemGrayColor in the iOS palette.
   static const Color inactiveGray = Color(0xFF8E8E93);
 
+  /// Used in iOS 13 for the "off" label when accessibility switch labels are
+  /// enabled.
+  ///
+  /// Value derived from a screenshot of a switch with on/off labeling.
+  static const Color contrastingGray = Color(0xFFB8B8B8);
+
   /// Used for iOS 10 for destructive actions such as the delete actions in
   /// table view cells and dialogs.
   ///

@@ -144,6 +144,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         onChanged: widget.onChanged,
         vsync: this,
         dragStartBehavior: widget.dragStartBehavior,
+        enableOnOffLabels: MediaQuery.onOffSwitchLabelsEnabled(context)
       ),
     );
   }
@@ -157,6 +158,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.onChanged,
     this.vsync,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.enableOnOffLabels,
   }) : super(key: key);
 
   final bool value;
@@ -164,6 +166,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<bool> onChanged;
   final TickerProvider vsync;
   final DragStartBehavior dragStartBehavior;
+  final bool enableOnOffLabels;
 
   @override
   _RenderCupertinoSwitch createRenderObject(BuildContext context) {
@@ -174,6 +177,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       textDirection: Directionality.of(context),
       vsync: vsync,
       dragStartBehavior: dragStartBehavior,
+      enableOnOffLabels: enableOnOffLabels,
     );
   }
 
@@ -185,7 +189,8 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChanged = onChanged
       ..textDirection = Directionality.of(context)
       ..vsync = vsync
-      ..dragStartBehavior = dragStartBehavior;
+      ..dragStartBehavior = dragStartBehavior
+      ..enableOnOffLabels = enableOnOffLabels;
   }
 }
 
@@ -197,6 +202,10 @@ const double _kTrackInnerEnd = _kTrackWidth - _kTrackInnerStart;
 const double _kTrackInnerLength = _kTrackInnerEnd - _kTrackInnerStart;
 const double _kSwitchWidth = 59.0;
 const double _kSwitchHeight = 39.0;
+const double _kSwitchLabelRadius = 5.0;
+const double _kSwitchLabelOffset = 12.0;
+const Color _kSwitchLabelActiveColor = CupertinoColors.white;
+const Color _kSwitchLabelInactiveColor = CupertinoColors.contrastingGray;
 // Opacity of a disabled switch, as eye-balled from iOS Simulator on Mac.
 const double _kCupertinoSwitchDisabledOpacity = 0.5;
 
@@ -212,6 +221,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     @required TextDirection textDirection,
     @required TickerProvider vsync,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
+    bool enableOnOffLabels = false,
   }) : assert(value != null),
        assert(activeColor != null),
        assert(vsync != null),
@@ -219,6 +229,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
        _activeColor = activeColor,
        _onChanged = onChanged,
        _textDirection = textDirection,
+       _enableOnOffLabels = enableOnOffLabels,
        _vsync = vsync,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
     _tap = TapGestureRecognizer()
@@ -324,6 +335,16 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     if (_drag.dragStartBehavior == value)
       return;
     _drag.dragStartBehavior = value;
+  }
+
+  bool get enableOnOffLabels => _enableOnOffLabels;
+  bool _enableOnOffLabels;
+  set enableOnOffLabels(bool value) {
+    assert(value != null);
+    if (_enableOnOffLabels == value)
+      return;
+    _enableOnOffLabels = value;
+    markNeedsPaint();
   }
 
   bool get isInteractive => onChanged != null;
@@ -488,6 +509,30 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     );
     final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     canvas.drawRRect(trackRRect, paint);
+
+    if (_enableOnOffLabels) {
+      final Paint activePaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.25
+        ..color = Color.lerp(_kTrackColor, _kSwitchLabelActiveColor, currentValue);
+      final Paint inactivePaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.25
+        ..color = Color.lerp(_kSwitchLabelInactiveColor, activeColor, currentValue);
+      final Offset labelLeft = trackRect.centerLeft.translate(_kSwitchLabelOffset, 0);
+      final Offset labelRight = trackRect.centerRight.translate(-_kSwitchLabelOffset, 0);
+      final Offset labelRadiusOffset = Offset(0, _kSwitchLabelRadius);
+      switch (textDirection) {
+        case TextDirection.rtl:
+          canvas.drawLine(labelRight - labelRadiusOffset, labelRight + labelRadiusOffset, activePaint);
+          canvas.drawCircle(labelLeft, _kSwitchLabelRadius, inactivePaint);
+          break;
+        case TextDirection.ltr:
+          canvas.drawLine(labelLeft - labelRadiusOffset, labelLeft + labelRadiusOffset, activePaint);
+          canvas.drawCircle(labelRight, _kSwitchLabelRadius, inactivePaint);
+          break;
+      }
+    }
 
     final double currentThumbExtension = CupertinoThumbPainter.extension * currentReactionValue;
     final double thumbLeft = lerpDouble(
