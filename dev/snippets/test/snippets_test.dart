@@ -36,20 +36,20 @@ main() {
   {{code}}
 }
 ''');
-      configuration.getHtmlSkeletonFile(SnippetType.application, false).writeAsStringSync('''
+      configuration.getHtmlSkeletonFile(SnippetType.application).writeAsStringSync('''
 <div>HTML Bits</div>
 {{description}}
 <pre>{{code}}</pre>
 <pre>{{app}}</pre>
 <div>More HTML Bits</div>
 ''');
-      configuration.getHtmlSkeletonFile(SnippetType.sample, false).writeAsStringSync('''
+      configuration.getHtmlSkeletonFile(SnippetType.sample).writeAsStringSync('''
 <div>HTML Bits</div>
 {{description}}
 <pre>{{code}}</pre>
 <div>More HTML Bits</div>
 ''');
-      configuration.getHtmlSkeletonFile(SnippetType.application, true).writeAsStringSync('''
+      configuration.getHtmlSkeletonFile(SnippetType.application, showDartPad: true).writeAsStringSync('''
 <div>HTML Bits (DartPad-style)</div>
 <iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id={{id}}"></iframe>
 <div>More HTML Bits</div>

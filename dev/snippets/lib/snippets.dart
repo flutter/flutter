@@ -273,7 +273,7 @@ class SnippetGenerator {
         break;
     }
     final String skeleton =
-        _loadFileAsUtf8(configuration.getHtmlSkeletonFile(type, showDartPad));
+        _loadFileAsUtf8(configuration.getHtmlSkeletonFile(type, showDartPad: showDartPad));
     return interpolateSkeleton(type, snippetData, skeleton, metadata);
   }
 }

@@ -68,8 +68,8 @@ class Configuration {
   Directory get templatesDirectory => Directory(path.join(configDirectory.path, 'templates'));
 
   /// Gets the skeleton file to use for the given [SnippetType] and DartPad preference.
-  File getHtmlSkeletonFile(SnippetType type, bool useDartPad) {
-    final String filename = useDartPad ? 'dartpad.html' : '${getEnumName(type)}.html';
+  File getHtmlSkeletonFile(SnippetType type, {bool showDartPad = false}) {
+    final String filename = showDartPad ? 'dartpad.html' : '${getEnumName(type)}.html';
     return File(path.join(skeletonsDirectory.path, filename));
   }
 }
