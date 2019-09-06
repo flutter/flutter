@@ -1,4 +1,4 @@
-Signature: 0ee48ead8920a09cf49fc18c062b1e33
+Signature: 58a80744af6eb32a6f31de73dc0a21c7
 
 UNUSED LICENSES:
 
@@ -3672,8 +3672,6 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUtil.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUtil.mm
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDebugMarkerOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrSemaphoreOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrSemaphoreOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelper.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrStencilPathOp.cpp
@@ -5016,6 +5014,8 @@ FILE: ../../../third_party/skia/src/gpu/GrTextureResolveRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrTransferFromRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTransferFromRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrUtil.h
+FILE: ../../../third_party/skia/src/gpu/GrWaitRenderTask.cpp
+FILE: ../../../third_party/skia/src/gpu/GrWaitRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrColorMatrixFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrColorMatrixFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrColorMatrixFragmentProcessor.h
