@@ -1,0 +1,147 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_fuchsia)
+
+import("//build/fuchsia/sdk.gni")
+
+# Builds a flutter_runner
+#
+# Parameters:
+#
+#  output_name (required):
+#    The name of the resulting binary.
+#
+#  extra_deps (required):
+#    Any additional dependencies.
+#
+#  product (required):
+#    Whether to link against a Product mode Dart VM.
+#
+#  extra_defines (optional):
+#    Any additional preprocessor defines.
+template("flutter_runner") {
+  assert(defined(invoker.output_name), "flutter_runner must define output_name")
+  assert(defined(invoker.extra_deps), "flutter_runner must define extra_deps")
+  assert(defined(invoker.product), "flutter_runner must define product")
+
+  invoker_output_name = invoker.output_name
+  extra_deps = invoker.extra_deps
+
+  extra_defines = []
+  if (defined(invoker.extra_defines)) {
+    extra_defines += invoker.extra_defines
+  }
+
+  executable(target_name) {
+    output_name = invoker_output_name
+
+    defines = extra_defines
+
+    libs = []
+
+    sources = [
+      "component.cc",
+      "component.h",
+      "compositor_context.cc",
+      "compositor_context.h",
+      "engine.cc",
+      "engine.h",
+      "isolate_configurator.cc",
+      "isolate_configurator.h",
+      "logging.h",
+      "loop.cc",
+      "loop.h",
+      "main.cc",
+      "platform_view.cc",
+      "platform_view.h",
+      "runner.cc",
+      "runner.h",
+      "runner_context.cc",
+      "runner_context.h",
+      "service_provider_dir.cc",
+      "service_provider_dir.h",
+      "session_connection.cc",
+      "session_connection.h",
+      "surface.cc",
+      "surface.h",
+      "task_observers.cc",
+      "task_observers.h",
+      "task_runner_adapter.cc",
+      "task_runner_adapter.h",
+      "thread.cc",
+      "thread.h",
+      "unique_fdio_ns.h",
+      "vsync_recorder.cc",
+      "vsync_recorder.h",
+      "vsync_waiter.cc",
+      "vsync_waiter.h",
+      "vulkan_surface.cc",
+      "vulkan_surface.h",
+      "vulkan_surface_pool.cc",
+      "vulkan_surface_pool.h",
+      "vulkan_surface_producer.cc",
+      "vulkan_surface_producer.h",
+    ]
+
+    # The use of these dependencies is temporary and will be moved behind the
+    # embedder API.
+    flutter_deps = [
+      "../flutter:fuchsia_gpu_configuration",
+      "$flutter_root/assets",
+      "$flutter_root/common",
+      "$flutter_root/flow",
+      "$flutter_root/lib/ui",
+      "$flutter_root/runtime",
+      "$flutter_root/third_party/txt",
+      "$flutter_root/vulkan",
+      "$flutter_root/fml",
+      "$flutter_root/shell/common",
+    ]
+
+    _fuchsia_platform = "$flutter_root/shell/platform/fuchsia"
+
+    # TODO(kaushikiska) evaluate if all of these are needed.
+    fuchsia_deps = [
+      "${_fuchsia_platform}/dart-pkg/fuchsia",
+      "${_fuchsia_platform}/dart-pkg/zircon",
+      "${_fuchsia_platform}/runtime/dart/utils",
+    ]
+
+    deps = [
+             "$fuchsia_sdk_root/fidl:fuchsia.fonts",
+             "$fuchsia_sdk_root/fidl:fuchsia.images",
+             "$fuchsia_sdk_root/fidl:fuchsia.io",
+             "$fuchsia_sdk_root/fidl:fuchsia.modular",
+             "$fuchsia_sdk_root/fidl:fuchsia.sys",
+             "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
+             "$fuchsia_sdk_root/fidl:fuchsia.ui.scenic",
+             "$fuchsia_sdk_root/pkg:async-cpp",
+             "$fuchsia_sdk_root/pkg:async-loop",
+             "$fuchsia_sdk_root/pkg:async-loop-cpp",
+             "$fuchsia_sdk_root/pkg:fdio",
+             "$fuchsia_sdk_root/pkg:fidl_cpp",
+             "$fuchsia_sdk_root/pkg:scenic_cpp",
+             "$fuchsia_sdk_root/pkg:syslog",
+             "$fuchsia_sdk_root/pkg:trace",
+             "$fuchsia_sdk_root/pkg:trace-engine",
+             "$fuchsia_sdk_root/pkg:trace-provider-so",
+             "$fuchsia_sdk_root/pkg:zx",
+             "$fuchsia_sdk_root/pkg/lib/sys/cpp",
+             "$fuchsia_sdk_root/pkg/lib/vfs/cpp",
+             "//third_party/skia",
+             "//third_party/tonic",
+           ] + fuchsia_deps + flutter_deps + extra_deps
+
+    # The flags below are needed so that Dart's CPU profiler can walk the
+    # C++ stack.
+    cflags = [ "-fno-omit-frame-pointer" ]
+
+    if (!invoker.product) {
+      # This flag is needed so that the call to dladdr() in Dart's native symbol
+      # resolver can report good symbol information for the CPU profiler.
+      ldflags = [ "-rdynamic" ]
+    }
+  }
+}
