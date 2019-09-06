@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:dwds/dwds.dart';
-import 'package:flutter_tools/src/base/common.dart' as prefix0;
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 
@@ -43,11 +42,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     );
   }
 }
-
-// TODO(jonahwilliams): remove this constant when the error message is removed.
-// The web engine is currently spamming this message on certain pages. Filter it out
-// until we remove it entirely. See flutter/flutter##37625.
-const String _kBadError = 'WARNING: 3D transformation matrix was passed to BitmapCanvas.';
 
 /// A hot-runner which handles browser specific delegation.
 class ResidentWebRunner extends ResidentRunner {
@@ -208,12 +202,8 @@ class ResidentWebRunner extends ResidentRunner {
     if (supportsServiceProtocol) {
       _stdOutSub = _debugConnection.vmService.onStdoutEvent.listen((vmservice.Event log) {
         final String message = utf8.decode(base64.decode(log.bytes)).trim();
-        // TODO(jonahwilliams): remove this error once it is gone from the engine #37625.
-        if (!message.contains(_kBadError)) {
-          printStatus(message);
-        }
+        printStatus(message);
       });
-      //prefix0.unawaited(future)
       unawaited(_debugConnection.vmService.registerService('reloadSources', 'FlutterTools'));
       websocketUri = Uri.parse(_debugConnection.uri);
     }
