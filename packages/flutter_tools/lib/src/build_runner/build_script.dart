@@ -41,6 +41,8 @@ const String jsSourceMapExtension = '.ddc.js.map';
 const String kReleaseFlag = 'release';
 const String kProfileFlag = 'profile';
 
+// A minimum set of libraries to skip checks for to keep the examples compiling
+// until we make a decision on dart:io.
 const Set<String> skipPlatformCheckPackages = <String>{
   'flutter',
   'flutter_test',
