@@ -8,7 +8,7 @@ dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   flutter_test:
     sdk: flutter
-  file: 5.0.8+1
+  file: 5.0.10
   meta: 1.1.7
   platform: 2.2.1
   process: 3.0.11
@@ -43,4 +43,4 @@ dependencies:
 dev_dependencies:
   mockito: 4.1.0
 
-# PUBSPEC CHECKSUM: 8060
+# PUBSPEC CHECKSUM: 012d

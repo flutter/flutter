@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/commands/build_windows.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
@@ -172,6 +173,24 @@ void main() {
     Platform: () => windowsPlatform,
     VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('hidden when not enabled on Windows host', () {
+    when(platform.isWindows).thenReturn(true);
+
+    expect(BuildWindowsCommand().hidden, true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
+     Platform: () => MockPlatform(),
+  });
+
+  testUsingContext('Not hidden when enabled and on Windows host', () {
+    when(platform.isWindows).thenReturn(true);
+
+    expect(BuildWindowsCommand().hidden, false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    Platform: () => MockPlatform(),
   });
 }
 

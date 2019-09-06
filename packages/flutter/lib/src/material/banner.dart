@@ -143,7 +143,7 @@ class MaterialBanner extends StatelessWidget {
                     padding: leadingPadding,
                     child: leading,
                   ),
-                Flexible(
+                Expanded(
                   child: DefaultTextStyle(
                     style: textStyle,
                     child: content,

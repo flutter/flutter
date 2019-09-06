@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
@@ -391,7 +393,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   set skipTraversal(bool value) {
     if (value != _skipTraversal) {
       _skipTraversal = value;
-      _notify();
+      _manager?._dirtyNodes?.add(this);
+      _manager?._markNeedsUpdate();
     }
   }
 
@@ -423,7 +426,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       if (!_canRequestFocus) {
         unfocus();
       }
-      _notify();
+      _manager?._dirtyNodes?.add(this);
+      _manager?._markNeedsUpdate();
     }
   }
 
@@ -549,6 +553,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// This object notifies its listeners whenever this value changes.
   bool get hasPrimaryFocus => _manager?.primaryFocus == this;
+
+  /// Returns the [FocusHighlightMode] that is currently in effect for this node.
+  FocusHighlightMode get highlightMode => WidgetsBinding.instance.focusManager.highlightMode;
 
   /// Returns the nearest enclosing scope node above this node, including
   /// this node, if it's a scope.
@@ -992,6 +999,40 @@ class FocusScopeNode extends FocusNode {
   }
 }
 
+/// An enum to describe which kind of focus highlight behavior to use when
+/// displaying focus information.
+enum FocusHighlightMode {
+  /// Touch interfaces will not show the focus highlight except for controls
+  /// which bring up the soft keyboard.
+  ///
+  /// If a device that uses a traditional mouse and keyboard has a touch screen
+  /// attached, it can also enter `touch` mode if the user is using the touch
+  /// screen.
+  touch,
+
+  /// Traditional interfaces (keyboard and mouse) will show the currently
+  /// focused control via a focus highlight of some sort.
+  ///
+  /// If a touch device (like a mobile phone) has a keyboard and/or mouse
+  /// attached, it also can enter `traditional` mode if the user is using these
+  /// input devices.
+  traditional,
+}
+
+/// An enum to describe how the current value of [FocusManager.highlightMode] is
+/// determined. The strategy is set on [FocusManager.highlightStrategy].
+enum FocusHighlightStrategy {
+  /// Automatic switches between the various highlight modes based on the last
+  /// kind of input that was received. This is the default.
+  automatic,
+
+  /// [FocusManager.highlightMode] always returns [FocusHighlightMode.touch].
+  alwaysTouch,
+
+  /// [FocusManager.highlightMode] always returns [FocusHighlightMode.traditional].
+  alwaysTraditional,
+}
+
 /// Manages the focus tree.
 ///
 /// The focus tree keeps track of which [FocusNode] is the user's current
@@ -1030,6 +1071,125 @@ class FocusManager with DiagnosticableTreeMixin {
   FocusManager() {
     rootScope._manager = this;
     RawKeyboard.instance.addListener(_handleRawKeyEvent);
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+  }
+
+  bool _lastInteractionWasTouch = true;
+
+  /// Sets the strategy by which [highlightMode] is determined.
+  ///
+  /// If set to [FocusHighlightStrategy.automatic], then the highlight mode will
+  /// change depending upon the interaction mode used last. For instance, if the
+  /// last interaction was a touch interaction, then [highlightMode] will return
+  /// [FocusHighlightMode.touch], and focus highlights will only appear on
+  /// widgets that bring up a soft keyboard. If the last interaction was a
+  /// non-touch interaction (hardware keyboard press, mouse click, etc.), then
+  /// [highlightMode] will return [FocusHighlightMode.traditional], and focus
+  /// highlights will appear on all widgets.
+  ///
+  /// If set to [FocusHighlightStrategy.alwaysTouch] or
+  /// [FocusHighlightStrategy.alwaysTraditional], then [highlightMode] will
+  /// always return [FocusHighlightMode.touch] or
+  /// [FocusHighlightMode.traditional], respectively, regardless of the last UI
+  /// interaction type.
+  ///
+  /// The initial value of [highlightMode] depends upon the value of
+  /// [defaultTargetPlatform] and
+  /// [RendererBinding.instance.mouseTracker.mouseIsConnected], making a guess
+  /// about which interaction is most appropriate for the initial interaction
+  /// mode.
+  ///
+  /// Defaults to [FocusHighlightStrategy.automatic].
+  FocusHighlightStrategy get highlightStrategy => _highlightStrategy;
+  FocusHighlightStrategy _highlightStrategy = FocusHighlightStrategy.automatic;
+  set highlightStrategy(FocusHighlightStrategy highlightStrategy) {
+    _highlightStrategy = highlightStrategy;
+    _updateHighlightMode();
+  }
+
+  /// Indicates the current interaction mode for focus highlights.
+  ///
+  /// The value returned depends upon the [highlightStrategy] used, and possibly
+  /// (depending on the value of [highlightStrategy]) the most recent
+  /// interaction mode that they user used.
+  ///
+  /// If [highlightMode] returns [FocusHighlightMode.touch], then widgets should
+  /// not draw their focus highlight unless they perform text entry.
+  ///
+  /// If [highlightMode] returns [FocusHighlightMode.traditional], then widgets should
+  /// draw their focus highlight whenever they are focused.
+  FocusHighlightMode get highlightMode => _highlightMode;
+  FocusHighlightMode _highlightMode = FocusHighlightMode.touch;
+
+  // Update function to be called whenever the state relating to highlightMode
+  // changes.
+  void _updateHighlightMode() {
+    // Assume that if we're on one of these mobile platforms, or if there's no
+    // mouse connected, that the initial interaction will be touch-based, and
+    // that it's traditional mouse and keyboard on all others.
+    //
+    // This only affects the initial value: the ongoing value is updated as soon
+    // as any input events are received.
+    _lastInteractionWasTouch ??= Platform.isAndroid || Platform.isIOS || !WidgetsBinding.instance.mouseTracker.mouseIsConnected;
+    FocusHighlightMode newMode;
+    switch (highlightStrategy) {
+      case FocusHighlightStrategy.automatic:
+        if (_lastInteractionWasTouch) {
+          newMode = FocusHighlightMode.touch;
+        } else {
+          newMode = FocusHighlightMode.traditional;
+        }
+        break;
+      case FocusHighlightStrategy.alwaysTouch:
+        newMode = FocusHighlightMode.touch;
+        break;
+      case FocusHighlightStrategy.alwaysTraditional:
+        newMode = FocusHighlightMode.traditional;
+        break;
+    }
+    if (newMode != _highlightMode) {
+      _highlightMode = newMode;
+      _notifyHighlightModeListeners();
+    }
+  }
+
+  // The list of listeners for [highlightMode] state changes.
+  final HashedObserverList<ValueChanged<FocusHighlightMode>> _listeners = HashedObserverList<ValueChanged<FocusHighlightMode>>();
+
+  /// Register a closure to be called when the [FocusManager] notifies its listeners
+  /// that the value of [highlightMode] has changed.
+  void addHighlightModeListener(ValueChanged<FocusHighlightMode> listener) => _listeners.add(listener);
+
+  /// Remove a previously registered closure from the list of closures that the
+  /// [FocusManager] notifies.
+  void removeHighlightModeListener(ValueChanged<FocusHighlightMode> listener) => _listeners?.remove(listener);
+
+  void _notifyHighlightModeListeners() {
+    if (_listeners.isEmpty) {
+      return;
+    }
+    final List<ValueChanged<FocusHighlightMode>> localListeners = List<ValueChanged<FocusHighlightMode>>.from(_listeners);
+    for (ValueChanged<FocusHighlightMode> listener in localListeners) {
+      try {
+        if (_listeners.contains(listener)) {
+          listener(_highlightMode);
+        }
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while dispatching notifications for $runtimeType'),
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<FocusManager>(
+              'The $runtimeType sending notification was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          },
+        ));
+      }
+    }
   }
 
   /// The root [FocusScopeNode] in the focus tree.
@@ -1038,7 +1198,33 @@ class FocusManager with DiagnosticableTreeMixin {
   /// for a given [FocusNode], call [FocusNode.nearestScope].
   final FocusScopeNode rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
 
+  void _handlePointerEvent(PointerEvent event) {
+    bool currentInteractionIsTouch;
+    switch (event.kind) {
+      case PointerDeviceKind.touch:
+      case PointerDeviceKind.stylus:
+      case PointerDeviceKind.invertedStylus:
+        currentInteractionIsTouch = true;
+        break;
+      case PointerDeviceKind.mouse:
+      case PointerDeviceKind.unknown:
+        currentInteractionIsTouch = false;
+        break;
+    }
+    if (_lastInteractionWasTouch != currentInteractionIsTouch) {
+      _lastInteractionWasTouch = currentInteractionIsTouch;
+      _updateHighlightMode();
+    }
+  }
+
   void _handleRawKeyEvent(RawKeyEvent event) {
+    // Update highlightMode first, since things responding to the keys might
+    // look at the highlight mode, and it should be accurate.
+    if (_lastInteractionWasTouch) {
+      _lastInteractionWasTouch = false;
+      _updateHighlightMode();
+    }
+
     // Walk the current focus from the leaf to the root, calling each one's
     // onKey on the way up, and if one responds that they handled it, stop.
     if (_primaryFocus == null) {

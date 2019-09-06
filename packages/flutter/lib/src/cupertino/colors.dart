@@ -326,9 +326,11 @@ class CupertinoDynamicColor extends Color {
   ///
   /// If the given color is already a concrete [Color], it will be returned as is.
   /// If the given color is a [CupertinoDynamicColor], but the given [BuildContext]
-  /// lacks the dependencies essential to the color resolution, an exception will
-  /// be thrown, unless [nullOk] is set to true.
-  static Color resolve(Color resolvable, BuildContext context, { bool nullOk = false }) {
+  /// lacks the dependencies required to the color resolution, the default trait
+  /// value will be used ([Brightness.light] platform brightness, normal contrast,
+  /// [CupertinoUserInterfaceLevelData.base] elevation level), unless [nullOk] is
+  /// set to false, in which case an exception will be thrown.
+  static Color resolve(Color resolvable, BuildContext context, { bool nullOk = true }) {
     assert(resolvable != null);
     assert(context != null);
     return (resolvable is CupertinoDynamicColor)
@@ -380,8 +382,11 @@ class CupertinoDynamicColor extends Color {
   /// from the previous [CupertinoTheme.of] call, in an effort to determine the
   /// brightness value.
   ///
-  /// If any of the required dependecies are missing from the given context, an exception
-  /// will be thrown unless [nullOk] is set to `true`.
+  /// If any of the required dependecies are missing from the given context, the
+  /// default value of that trait will be used ([Brightness.light] platform
+  /// brightness, normal contrast, [CupertinoUserInterfaceLevelData.base] elevation
+  /// level), unless [nullOk] is set to false, in which case an exception will be
+  /// thrown.
   CupertinoDynamicColor resolveFrom(BuildContext context, { bool nullOk = false }) {
     final Brightness brightness = _isPlatformBrightnessDependent
       ? CupertinoTheme.brightnessOf(context, nullOk: nullOk) ?? Brightness.light
@@ -1084,14 +1089,14 @@ const CupertinoSystemColorsData _kSystemColorsFallback = CupertinoSystemColorsDa
     darkHighContrastElevatedColor: Color.fromARGB(255, 36, 36, 38),
   ),
   secondarySystemGroupedBackground: CupertinoDynamicColor(
-    color: Color.fromARGB(255, 242, 242, 247),
-    darkColor: Color.fromARGB(255, 0, 0, 0),
-    highContrastColor: Color.fromARGB(255, 235, 235, 240),
-    darkHighContrastColor: Color.fromARGB(255, 0, 0, 0),
-    elevatedColor: Color.fromARGB(255, 242, 242, 247),
-    darkElevatedColor: Color.fromARGB(255, 28, 28, 30),
-    highContrastElevatedColor: Color.fromARGB(255, 235, 235, 240),
-    darkHighContrastElevatedColor: Color.fromARGB(255, 36, 36, 38),
+    color: Color.fromARGB(255, 255, 255, 255),
+    darkColor: Color.fromARGB(255, 28, 28, 30),
+    highContrastColor: Color.fromARGB(255, 255, 255, 255),
+    darkHighContrastColor: Color.fromARGB(255, 36, 36, 38),
+    elevatedColor: Color.fromARGB(255, 255, 255, 255),
+    darkElevatedColor: Color.fromARGB(255, 44, 44, 46),
+    highContrastElevatedColor: Color.fromARGB(255, 255, 255, 255),
+    darkHighContrastElevatedColor: Color.fromARGB(255, 54, 54, 56),
   ),
   tertiarySystemGroupedBackground: CupertinoDynamicColor(
     color: Color.fromARGB(255, 242, 242, 247),
