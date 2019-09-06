@@ -11,6 +11,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
@@ -89,16 +90,13 @@ class AttachCommand extends FlutterCommand {
         'project-root',
         hide: !verboseHelp,
         help: 'Normally used only in run target',
-      )..addFlag('track-widget-creation',
-        hide: !verboseHelp,
-        help: 'Track widget creation locations.',
-        defaultsTo: false,
       )..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
         help: 'Handle machine structured JSON command input and provide output '
               'and progress in machine friendly format.',
       );
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
     hotRunnerFactory ??= HotRunnerFactory();
   }
 
@@ -246,6 +244,8 @@ class AttachCommand extends FlutterCommand {
           // Determine ipv6 status from the scanned logs.
           usesIpv6 = observatoryDiscovery.ipv6;
           printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
+        } catch (error) {
+          throwToolExit('Failed to establish a debug connection with ${device.name}: $error');
         } finally {
           await observatoryDiscovery?.cancel();
         }
@@ -260,7 +260,6 @@ class AttachCommand extends FlutterCommand {
         device,
         flutterProject: flutterProject,
         trackWidgetCreation: argResults['track-widget-creation'],
-        dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
@@ -271,13 +270,13 @@ class AttachCommand extends FlutterCommand {
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
       final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
+      terminal.usesTerminalUi = daemon == null;
       final ResidentRunner runner = useHot ?
           hotRunnerFactory.build(
             flutterDevices,
             target: targetFile,
             debuggingOptions: debuggingOptions,
             packagesFilePath: globalResults['packages'],
-            usesTerminalUI: daemon == null,
             projectRootPath: argResults['project-root'],
             dillOutputPath: argResults['output-dill'],
             ipv6: usesIpv6,
@@ -312,7 +311,15 @@ class AttachCommand extends FlutterCommand {
         result = await app.runner.waitForAppToFinish();
         assert(result != null);
       } else {
-        result = await runner.attach();
+        final Completer<void> onAppStart = Completer<void>.sync();
+        unawaited(onAppStart.future.whenComplete(() {
+          TerminalHandler(runner)
+            ..setupTerminal()
+            ..registerSignalHandlers();
+        }));
+        result = await runner.attach(
+          appStartedCompleter: onAppStart,
+        );
         assert(result != null);
       }
       if (result != 0) {
@@ -350,7 +357,6 @@ class HotRunnerFactory {
     List<FlutterDevice> devices, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI = true,
     bool benchmarkMode = false,
     File applicationBinary,
     bool hostIsIde = false,
@@ -364,7 +370,6 @@ class HotRunnerFactory {
     devices,
     target: target,
     debuggingOptions: debuggingOptions,
-    usesTerminalUI: usesTerminalUI,
     benchmarkMode: benchmarkMode,
     applicationBinary: applicationBinary,
     hostIsIde: hostIsIde,

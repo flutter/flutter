@@ -92,7 +92,7 @@ void main() {
     final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
 
     expect(content.text.style, Typography().white.subhead);
-    expect(material.color, const Color(0xFF323232));
+    expect(material.color, const Color(0xFF333333));
     expect(material.elevation, 6.0);
     expect(material.shape, null);
   });

@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:test_api/test_api.dart' show TypeMatcher;
 
 import '../rendering/rendering_tester.dart';
 import 'image_data.dart';
@@ -44,11 +45,19 @@ void main() {
         final ImageCache otherCache = ImageCache();
         final Uint8List bytes = Uint8List.fromList(kTransparentImage);
         final MemoryImage imageProvider = MemoryImage(bytes);
-        otherCache.putIfAbsent(imageProvider, () => imageProvider.load(imageProvider));
+        final ImageStreamCompleter cacheStream = otherCache.putIfAbsent(
+          imageProvider, () => imageProvider.load(imageProvider),
+        );
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
         final Completer<void> completer = Completer<void>();
-        stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete()));
-        await completer.future;
+        final Completer<void> cacheCompleter = Completer<void>();
+        stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+          completer.complete();
+        }));
+        cacheStream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+          cacheCompleter.complete();
+        }));
+        await Future.wait(<Future<void>>[completer.future, cacheCompleter.future]);
 
         expect(otherCache.currentSize, 1);
         expect(imageCache.currentSize, 1);
@@ -144,6 +153,32 @@ void main() {
 
       tearDown(() {
         debugNetworkImageHttpClientProvider = null;
+      });
+
+      test('Expect thrown exception with statusCode', () async {
+        final int errorStatusCode = HttpStatus.notFound;
+        const String requestUrl = 'foo-url';
+
+        final MockHttpClientRequest request = MockHttpClientRequest();
+        final MockHttpClientResponse response = MockHttpClientResponse();
+        when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
+        when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
+        when(response.statusCode).thenReturn(errorStatusCode);
+
+        final Completer<dynamic> caughtError = Completer<dynamic>();
+
+        final ImageProvider imageProvider = NetworkImage(nonconst(requestUrl));
+        final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+        result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+        }, onError: (dynamic error, StackTrace stackTrace) {
+          caughtError.complete(error);
+        }));
+
+        final dynamic err = await caughtError.future;
+        expect(err, const TypeMatcher<NetworkImageLoadException>()
+            .having((NetworkImageLoadException e) => e.statusCode, 'statusCode', errorStatusCode)
+            .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl))
+        );
       });
 
       test('Disallows null urls', () {

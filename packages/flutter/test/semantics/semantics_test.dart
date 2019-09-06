@@ -435,6 +435,7 @@ void main() {
       '   isMergedIntoParent: false\n'
       '   mergeAllDescendantsIntoThisNode: false\n'
       '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+      '   tags: null\n'
       '   actions: []\n'
       '   customActions: []\n'
       '   flags: []\n'
@@ -530,6 +531,7 @@ void main() {
       '   isMergedIntoParent: false\n'
       '   mergeAllDescendantsIntoThisNode: false\n'
       '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+      '   tags: null\n'
       '   actions: customAction\n'
       '   customActions: action1, action2, action3\n'
       '   flags: []\n'
@@ -551,7 +553,16 @@ void main() {
       '   elevation: 0.0\n'
       '   thickness: 0.0\n',
     );
+  });
 
+  test('Tags show up in debug properties', () {
+    final SemanticsNode actionNode = SemanticsNode()
+      ..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
+
+    expect(
+      actionNode.toStringDeep(),
+      contains('\n   tags: RenderViewport.twoPane\n'),
+    );
   });
 
   test('SemanticsConfiguration getter/setter', () {

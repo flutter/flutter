@@ -799,5 +799,55 @@ void main() {
       expect(policy.findFirstFocusInDirection(scope, TraversalDirection.left), equals(upperRightNode));
       expect(policy.findFirstFocusInDirection(scope, TraversalDirection.right), equals(upperLeftNode));
     });
+    testWidgets('Can find focus when policy data dirty', (WidgetTester tester) async {
+      final FocusNode focusTop = FocusNode(debugLabel: 'top');
+      final FocusNode focusCenter = FocusNode(debugLabel: 'center');
+      final FocusNode focusBottom = FocusNode(debugLabel: 'bottom');
+
+      final FocusTraversalPolicy policy = ReadingOrderTraversalPolicy();
+      await tester.pumpWidget(DefaultFocusTraversal(
+        policy: policy,
+        child: FocusScope(
+          debugLabel: 'Scope',
+          child: Column(
+            children: <Widget>[
+              Focus(focusNode: focusTop, child: Container(width: 100, height: 100)),
+              Focus(focusNode: focusCenter, child: Container(width: 100, height: 100)),
+              Focus(focusNode: focusBottom, child: Container(width: 100, height: 100)),
+            ],
+          ),
+        ),
+      ));
+
+      focusTop.requestFocus();
+      final FocusNode scope = focusTop.enclosingScope;
+
+      scope.focusInDirection(TraversalDirection.down);
+      scope.focusInDirection(TraversalDirection.down);
+
+      await tester.pump();
+      expect(focusBottom.hasFocus, isTrue);
+
+      // Remove center focus node.
+      await tester.pumpWidget(DefaultFocusTraversal(
+        policy: policy,
+        child: FocusScope(
+          debugLabel: 'Scope',
+          child: Column(
+            children: <Widget>[
+              Focus(focusNode: focusTop, child: Container(width: 100, height: 100)),
+              Focus(focusNode: focusBottom, child: Container(width: 100, height: 100)),
+            ],
+          ),
+        ),
+      ));
+
+      expect(focusBottom.hasFocus, isTrue);
+      scope.focusInDirection(TraversalDirection.up);
+      await tester.pump();
+
+      expect(focusCenter.hasFocus, isFalse);
+      expect(focusTop.hasFocus, isTrue);
+    });
   });
 }

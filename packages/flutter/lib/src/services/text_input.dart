@@ -4,9 +4,17 @@
 
 import 'dart:async';
 import 'dart:io' show Platform;
-import 'dart:ui' show TextAffinity, hashValues, Offset;
+import 'dart:ui' show
+  FontWeight,
+  Offset,
+  Size,
+  TextAffinity,
+  TextAlign,
+  TextDirection,
+  hashValues;
 
 import 'package:flutter/foundation.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'message_codec.dart';
 import 'system_channels.dart';
@@ -96,14 +104,19 @@ class TextInputType {
   /// Requests a keyboard with ready access to the "/" and "." keys.
   static const TextInputType url = TextInputType._(6);
 
+  /// Optimize for passwords that are visible to the user.
+  ///
+  /// Requests a keyboard with ready access to both letters and numbers.
+  static const TextInputType visiblePassword = TextInputType._(7);
+
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
-    text, multiline, number, phone, datetime, emailAddress, url,
+    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword,
   ];
 
   // Corresponding string name for each of the [values].
   static const List<String> _names = <String>[
-    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url',
+    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
@@ -652,6 +665,52 @@ class TextInputConnection {
     SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setEditingState',
       value.toJSON(),
+    );
+  }
+
+  /// Send the size and transform of the editable text to engine.
+  ///
+  /// The values are sent as platform messages so they can be used on web for
+  /// example to correctly position and size the html input field.
+  ///
+  /// 1. [editableBoxSize]: size of the render editable box.
+  ///
+  /// 2. [transform]: a matrix that maps the local paint coordinate system
+  ///                 to the [PipelineOwner.rootNode].
+  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setEditableSizeAndTransform',
+      <String, dynamic>{
+        'width': editableBoxSize.width,
+        'height': editableBoxSize.height,
+        'transform': transform.storage,
+      },
+    );
+  }
+
+  /// Send text styling information.
+  ///
+  /// This information is used by the Flutter Web Engine to change the style
+  /// of the hidden native input's content. Hence, the content size will match
+  /// to the size of the editable widget's content.
+  void setStyle({
+    @required String fontFamily,
+    @required double fontSize,
+    @required FontWeight fontWeight,
+    @required TextDirection textDirection,
+    @required TextAlign textAlign,
+  }) {
+    assert(attached);
+
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setStyle',
+      <String, dynamic>{
+        'fontFamily': fontFamily,
+        'fontSize': fontSize,
+        'fontWeightIndex': fontWeight?.index,
+        'textAlignIndex': textAlign.index,
+        'textDirectionIndex': textDirection.index,
+      },
     );
   }
 

@@ -4,7 +4,9 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../build_info.dart';
+import '../features.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult;
@@ -29,16 +31,16 @@ class BuildWebCommand extends BuildSubCommand {
   final String name = 'web';
 
   @override
-  bool get hidden => true;
+  bool get hidden => !featureFlags.isWebEnabled;
 
   @override
-  bool get isExperimental => true;
-
-  @override
-  final String description = '(EXPERIMENTAL) build a web application bundle.';
+  final String description = 'build a web application bundle.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (!featureFlags.isWebEnabled) {
+      throwToolExit('"build web" is not currently supported.');
+    }
     final FlutterProject flutterProject = FlutterProject.current();
     final String target = argResults['target'];
     final BuildInfo buildInfo = getBuildInfo();

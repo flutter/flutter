@@ -83,6 +83,26 @@
   font-family: courier, lucidia;
 }
 
+.anchor-container {
+  position: relative;
+}
+
+.anchor-button-overlay {
+  position: absolute;
+  top: 0px;
+  right: 5px;
+  height: 28px;
+  width: 28px;
+  transition: .3s ease;
+  background-color: #2372a3;
+}
+
+.anchor-button {
+  border-style: none;
+  background: none;
+  cursor: pointer;
+}
+
 /* Styles for the copy-to-clipboard button */
 .copyable-container {
   position: relative;

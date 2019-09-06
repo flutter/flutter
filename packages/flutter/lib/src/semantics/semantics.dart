@@ -570,6 +570,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.inMutuallyExclusiveGroup,
     this.hidden,
     this.obscured,
+    this.multiline,
     this.scopesRoute,
     this.namesRoute,
     this.image,
@@ -699,6 +700,15 @@ class SemanticsProperties extends DiagnosticableTree {
   /// that the text field contains a password (or other sensitive information).
   /// Doing so instructs screen readers to not read out the [value].
   final bool obscured;
+
+  /// Whether the [value] is coming from a field that supports multi-line text
+  /// editing.
+  ///
+  /// This option is only meaningful when [textField] is true to indicate
+  /// whether it's a single-line or multi-line text field.
+  ///
+  /// This option is null when [textField] is false.
+  final bool multiline;
 
   /// If non-null, whether the node corresponds to the root of a subtree for
   /// which a route name should be announced.
@@ -1654,6 +1664,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   TextSelection get textSelection => _textSelection;
   TextSelection _textSelection;
 
+  /// If this node represents a text field, this indicates whether or not it's
+  /// a multi-line text field.
+  bool get isMultiline => _isMultiline;
+  bool _isMultiline;
+
   /// The total number of scrollable children that contribute to semantics.
   ///
   /// If the number of children are unknown or unbounded, this value will be
@@ -1677,7 +1692,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///  * [ScrollPosition.pixels], from where this value is usually taken.
   double get scrollPosition => _scrollPosition;
   double _scrollPosition;
-
 
   /// Indicates the maximum in-range value for [scrollPosition] if the node is
   /// scrollable.
@@ -1756,6 +1770,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _customSemanticsActions = Map<CustomSemanticsAction, VoidCallback>.from(config._customSemanticsActions);
     _actionsAsBits = config._actionsAsBits;
     _textSelection = config._textSelection;
+    _isMultiline = config.isMultiline;
     _scrollPosition = config._scrollPosition;
     _scrollExtentMax = config._scrollExtentMax;
     _scrollExtentMin = config._scrollExtentMin;
@@ -2082,6 +2097,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
       properties.add(DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
+    properties.add(IterableProperty<String>('tags', tags?.map((SemanticsTag tag) => tag.name), defaultValue: null));
     final List<String> actions = _actions.keys.map<String>((SemanticsAction action) => describeEnum(action)).toList()..sort();
     final List<String> customSemanticsActions = _customSemanticsActions.keys
       .map<String>((CustomSemanticsAction action) => action.label)
@@ -2280,12 +2296,9 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
       horizontalGroups = horizontalGroups.reversed.toList();
     }
 
-    final List<SemanticsNode> result = <SemanticsNode>[];
-    for (_SemanticsSortGroup group in horizontalGroups) {
-      final List<SemanticsNode> sortedKnotNodes = group.sortedWithinKnot();
-      result.addAll(sortedKnotNodes);
-    }
-    return result;
+    return horizontalGroups
+      .expand((_SemanticsSortGroup group) => group.sortedWithinKnot())
+      .toList();
   }
 
   /// Sorts [nodes] where nodes intersect both vertically and horizontally.
@@ -2423,12 +2436,9 @@ List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDi
   }
   verticalGroups.sort();
 
-  final List<SemanticsNode> result = <SemanticsNode>[];
-  for (_SemanticsSortGroup group in verticalGroups) {
-    final List<SemanticsNode> sortedGroupNodes = group.sortedWithinVerticalGroup();
-    result.addAll(sortedGroupNodes);
-  }
-  return result;
+  return verticalGroups
+    .expand((_SemanticsSortGroup group) => group.sortedWithinVerticalGroup())
+    .toList();
 }
 
 /// The implementation of [Comparable] that implements the ordering of
@@ -3534,6 +3544,15 @@ class SemanticsConfiguration {
   bool get isObscured => _hasFlag(SemanticsFlag.isObscured);
   set isObscured(bool value) {
     _setFlag(SemanticsFlag.isObscured, value);
+  }
+
+  /// Whether the text field is multi-line.
+  ///
+  /// This option is usually set in combination with [textField] to indicate
+  /// that the text field is configured to be multi-line.
+  bool get isMultiline => _hasFlag(SemanticsFlag.isMultiline);
+  set isMultiline(bool value) {
+    _setFlag(SemanticsFlag.isMultiline, value);
   }
 
   /// Whether the platform can scroll the semantics node when the user attempts

@@ -11,6 +11,7 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../features.dart';
 import '../project.dart';
 import 'chrome.dart';
 import 'workflow.dart';
@@ -35,6 +36,8 @@ class ChromeDevice extends Device {
       ephemeral: false,
   );
 
+  // TODO(jonahwilliams): this is technically false, but requires some refactoring
+  // to allow hot mode restart only devices.
   @override
   bool get supportsHotReload => true;
 
@@ -74,7 +77,7 @@ class ChromeDevice extends Device {
   Future<String> get emulatorId async => null;
 
   @override
-  bool isSupported() => flutterWebEnabled && canFindChrome();
+  bool isSupported() =>  featureFlags.isWebEnabled && canFindChrome();
 
   @override
   String get name => 'Chrome';
@@ -120,7 +123,6 @@ class ChromeDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, Object> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
@@ -151,7 +153,7 @@ class WebDevices extends PollingDeviceDiscovery {
   final ChromeDevice _webDevice = ChromeDevice();
 
   @override
-  bool get canListAnything => flutterWebEnabled;
+  bool get canListAnything => featureFlags.isWebEnabled;
 
   @override
   Future<List<Device>> pollingGetDevices() async {
@@ -161,7 +163,7 @@ class WebDevices extends PollingDeviceDiscovery {
   }
 
   @override
-  bool get supportsPlatform => flutterWebEnabled;
+  bool get supportsPlatform =>  featureFlags.isWebEnabled;
 }
 
 @visibleForTesting

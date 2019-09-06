@@ -3547,6 +3547,121 @@ class InputDecorationTheme extends Diagnosticable {
   /// behavior of aligning the label with the center of the [TextField].
   final bool alignLabelWithHint;
 
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
+  InputDecorationTheme copyWith({
+    TextStyle labelStyle,
+    TextStyle helperStyle,
+    TextStyle hintStyle,
+    TextStyle errorStyle,
+    int errorMaxLines,
+    bool hasFloatingPlaceholder,
+    bool isDense,
+    EdgeInsetsGeometry contentPadding,
+    bool isCollapsed,
+    TextStyle prefixStyle,
+    TextStyle suffixStyle,
+    TextStyle counterStyle,
+    bool filled,
+    Color fillColor,
+    Color focusColor,
+    Color hoverColor,
+    InputBorder errorBorder,
+    InputBorder focusedBorder,
+    InputBorder focusedErrorBorder,
+    InputBorder disabledBorder,
+    InputBorder enabledBorder,
+    InputBorder border,
+    bool alignLabelWithHint,
+  }) {
+    return InputDecorationTheme(
+      labelStyle: labelStyle ?? this.labelStyle,
+      helperStyle: helperStyle ?? this.helperStyle,
+      hintStyle: hintStyle ?? this.hintStyle,
+      errorStyle: errorStyle ?? this.errorStyle,
+      errorMaxLines: errorMaxLines ?? this.errorMaxLines,
+      hasFloatingPlaceholder: hasFloatingPlaceholder ?? this.hasFloatingPlaceholder,
+      isDense: isDense ?? this.isDense,
+      contentPadding: contentPadding ?? this.contentPadding,
+      isCollapsed: isCollapsed ?? this.isCollapsed,
+      prefixStyle: prefixStyle ?? this.prefixStyle,
+      suffixStyle: suffixStyle ?? this.suffixStyle,
+      counterStyle: counterStyle ?? this.counterStyle,
+      filled: filled ?? this.filled,
+      fillColor: fillColor ?? this.fillColor,
+      focusColor: focusColor ?? this.focusColor,
+      hoverColor: hoverColor ?? this.hoverColor,
+      errorBorder: errorBorder ?? this.errorBorder,
+      focusedBorder: focusedBorder ?? this.focusedBorder,
+      focusedErrorBorder: focusedErrorBorder ?? this.focusedErrorBorder,
+      disabledBorder: disabledBorder ?? this.disabledBorder,
+      enabledBorder: enabledBorder ?? this.enabledBorder,
+      border: border ?? this.border,
+      alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
+    );
+  }
+
+  @override
+  int get hashCode {
+    return hashList(<dynamic>[
+      labelStyle,
+      helperStyle,
+      hintStyle,
+      errorStyle,
+      errorMaxLines,
+      hasFloatingPlaceholder,
+      isDense,
+      contentPadding,
+      isCollapsed,
+      prefixStyle,
+      suffixStyle,
+      counterStyle,
+      filled,
+      fillColor,
+      focusColor,
+      hoverColor,
+      errorBorder,
+      focusedBorder,
+      focusedErrorBorder,
+      disabledBorder,
+      enabledBorder,
+      border,
+      alignLabelWithHint,
+    ]);
+  }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    final InputDecorationTheme typedOther = other;
+    return typedOther.labelStyle == labelStyle
+        && typedOther.helperStyle == helperStyle
+        && typedOther.hintStyle == hintStyle
+        && typedOther.errorStyle == errorStyle
+        && typedOther.errorMaxLines == errorMaxLines
+        && typedOther.isDense == isDense
+        && typedOther.contentPadding == contentPadding
+        && typedOther.isCollapsed == isCollapsed
+        && typedOther.prefixStyle == prefixStyle
+        && typedOther.suffixStyle == suffixStyle
+        && typedOther.counterStyle == counterStyle
+        && typedOther.filled == filled
+        && typedOther.fillColor == fillColor
+        && typedOther.focusColor == focusColor
+        && typedOther.hoverColor == hoverColor
+        && typedOther.errorBorder == errorBorder
+        && typedOther.focusedBorder == focusedBorder
+        && typedOther.focusedErrorBorder == focusedErrorBorder
+        && typedOther.disabledBorder == disabledBorder
+        && typedOther.enabledBorder == enabledBorder
+        && typedOther.border == border
+        && typedOther.alignLabelWithHint == alignLabelWithHint
+        && typedOther.disabledBorder == disabledBorder;
+  }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -3555,7 +3670,7 @@ class InputDecorationTheme extends Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
     properties.add(DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
     properties.add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
-    properties.add(DiagnosticsProperty<int>('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
+    properties.add(IntProperty('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
     properties.add(DiagnosticsProperty<bool>('hasFloatingPlaceholder', hasFloatingPlaceholder, defaultValue: defaultTheme.hasFloatingPlaceholder));
     properties.add(DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
@@ -3574,44 +3689,5 @@ class InputDecorationTheme extends Diagnosticable {
     properties.add(DiagnosticsProperty<InputBorder>('enabledBorder', enabledBorder, defaultValue: defaultTheme.enabledBorder));
     properties.add(DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
     properties.add(DiagnosticsProperty<bool>('alignLabelWithHint', alignLabelWithHint, defaultValue: defaultTheme.alignLabelWithHint));
-  }
-}
-
-/// The vertical alignment of text within an input.
-///
-/// A single [y] value that can range from -1.0 to 1.0. -1.0 aligns to the top
-/// of the input so that the top of the first line of text fits within the input
-/// and its padding. 0.0 aligns to the center of the input. 1.0 aligns so that
-/// the bottom of the last line of text aligns with the bottom interior edge of
-/// the input.
-///
-/// See also:
-///
-///  * [TextField.textAlignVertical], which is passed on to the [InputDecorator].
-///  * [InputDecorator.textAlignVertical], which defines the alignment of
-///    prefix, input, and suffix, within the [InputDecorator].
-class TextAlignVertical {
-  /// Construct TextAlignVertical from any given y value.
-  const TextAlignVertical({
-    @required this.y,
-  }) : assert(y != null),
-       assert(y >= -1.0 && y <= 1.0);
-
-  /// A value ranging from -1.0 to 1.0 that defines the topmost and bottommost
-  /// locations of the top and bottom of the input text box.
-  final double y;
-
-  /// Aligns a TextField's input Text with the topmost location within the
-  /// TextField.
-  static const TextAlignVertical top = TextAlignVertical(y: -1.0);
-  /// Aligns a TextField's input Text to the center of the TextField.
-  static const TextAlignVertical center = TextAlignVertical(y: 0.0);
-  /// Aligns a TextField's input Text with the bottommost location within the
-  /// TextField.
-  static const TextAlignVertical bottom = TextAlignVertical(y: 1.0);
-
-  @override
-  String toString() {
-    return '$runtimeType(y: $y)';
   }
 }

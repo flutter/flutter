@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
 import 'ink_well.dart';
@@ -15,8 +16,8 @@ import 'theme.dart';
 import 'tooltip.dart';
 
 // Minimum logical pixel size of the IconButton.
-// See: <https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size>
-const double _kMinButtonSize = 48.0;
+// See: <https://material.io/design/usability/accessibility.html#layout-typography>.
+const double _kMinButtonSize = kMinInteractiveDimension;
 
 /// A material design icon button.
 ///
@@ -31,9 +32,9 @@ const double _kMinButtonSize = 48.0;
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// The hit region of an icon button will, if possible, be at least 48.0 pixels
-/// in size, regardless of the actual [iconSize], to satisfy the [touch target
-/// size](https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size)
+/// The hit region of an icon button will, if possible, be at least
+/// kMinInteractiveDimension pixels in size, regardless of the actual
+/// [iconSize], to satisfy the [touch target size](https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size)
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
 ///
@@ -130,8 +131,8 @@ class IconButton extends StatelessWidget {
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   ///
-  /// The [iconSize], [padding], and [alignment] arguments must not be null (though
-  /// they each have default values).
+  /// The [iconSize], [padding], [autofocus], and [alignment] arguments must not
+  /// be null (though they each have default values).
   ///
   /// The [icon] argument must be specified, and is typically either an [Icon]
   /// or an [ImageIcon].
@@ -149,10 +150,12 @@ class IconButton extends StatelessWidget {
     this.disabledColor,
     @required this.onPressed,
     this.focusNode,
+    this.autofocus = false,
     this.tooltip,
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),
+       assert(autofocus != null),
        assert(icon != null),
        super(key: key);
 
@@ -255,13 +258,11 @@ class IconButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// An optional focus node to use for requesting focus when pressed.
-  ///
-  /// If not supplied, the button will create and host its own [FocusNode].
-  ///
-  /// If supplied, the given focusNode will be _hosted_ by this widget. See
-  /// [FocusNode] for more information on what that implies.
+  /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
 
   /// Text that describes the action that will occur when the button is pressed.
   ///
@@ -311,6 +312,8 @@ class IconButton extends StatelessWidget {
       enabled: onPressed != null,
       child: Focus(
         focusNode: focusNode,
+        autofocus: autofocus,
+        canRequestFocus: onPressed != null,
         child: InkResponse(
           onTap: onPressed,
           child: result,

@@ -22,9 +22,11 @@ import '../runner/flutter_command.dart';
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
   'flutter_gallery_assets': '0.1.9+2', // See //examples/flutter_gallery/pubspec.yaml
-  'test': '1.6.3',     //  | Tests are timing out at 1.6.4 https://github.com/flutter/flutter/issues/33823
-  'test_api': '0.2.5', //  |
-  'test_core': '0.2.5' //  |
+  'mockito': '^4.1.0',  // Prevent mockito from downgrading to 4.0.0
+  'test': '1.6.3',         //  | Tests are timing out at 1.6.4
+  'test_api': '0.2.5',     //  |
+  'test_core': '0.2.5',    //  |
+  'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -76,9 +78,6 @@ class UpdatePackagesCommand extends FlutterCommand {
         negatable: false,
       );
   }
-
-  @override
-  bool get isExperimental => true;
 
   @override
   final String name = 'update-packages';
@@ -252,7 +251,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         fakePackage.createSync();
         fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values));
         // First we run "pub upgrade" on this generated package:
-        await pubGet(context: PubContext.updatePackages, directory: tempDir.path, upgrade: true, checkLastModified: false);
+        await pubGet(
+          context: PubContext.updatePackages,
+          directory: tempDir.path,
+          upgrade: true,
+          checkLastModified: false,
+        );
         // Then we run "pub deps --style=compact" on the result. We pipe all the
         // output to tree.fill(), which parses it so that it can create a graph
         // of all the dependencies so that we can figure out the transitive
@@ -728,9 +732,11 @@ class PubspecYaml {
     // Merge the lists of dependencies we've seen in this file from dependencies, dev dependencies,
     // and the dependencies we know this file mentions that are already pinned
     // (and which didn't get special processing above).
-    final Set<String> implied = Set<String>.from(directDependencies)
-      ..addAll(specialDependencies)
-      ..addAll(devDependencies);
+    final Set<String> implied = <String>{
+      ...directDependencies,
+      ...specialDependencies,
+      ...devDependencies,
+    };
 
     // Create a new set to hold the list of packages we've already processed, so
     // that we don't redundantly process them multiple times.
@@ -751,12 +757,12 @@ class PubspecYaml {
       transitiveDevDependencyOutput.add('  $package: ${versions.versionFor(package)} $kTransitiveMagicString');
 
     // Build a sorted list of all dependencies for the checksum.
-    final Set<String> checksumDependencies = <String>{}
-      ..addAll(directDependencies)
-      ..addAll(devDependencies)
-      ..addAll(transitiveDependenciesAsList)
-      ..addAll(transitiveDevDependenciesAsList);
-    checksumDependencies.removeAll(specialDependencies);
+    final Set<String> checksumDependencies = <String>{
+      ...directDependencies,
+      ...devDependencies,
+      ...transitiveDependenciesAsList,
+      ...transitiveDevDependenciesAsList,
+    }..removeAll(specialDependencies);
 
     // Add a blank line before and after each section to keep the resulting output clean.
     transitiveDependencyOutput

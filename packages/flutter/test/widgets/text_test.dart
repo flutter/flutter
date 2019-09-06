@@ -116,6 +116,37 @@ void main() {
     expect(text.text.style.fontSize, 20.0);
   });
 
+  testWidgets('inline widgets works with ellipsis', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/35869
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      Text.rich(
+        TextSpan(
+          children: <InlineSpan>[
+            const TextSpan(text: 'a very very very very very very very very very very long line'),
+            WidgetSpan(
+              child: SizedBox(
+                width: 20,
+                height: 40,
+                child: Card(
+                  child: RichText(
+                    text: const TextSpan(text: 'widget should be truncated'),
+                    textDirection: TextDirection.rtl,
+                  ),
+                ),
+              ),
+            ),
+          ],
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
@@ -137,6 +168,44 @@ void main() {
         child: Text('\$\$', semanticsLabel: 'Double dollars')),
     );
 
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    semantics.dispose();
+  });
+
+  testWidgets('semanticsLabel can be shorter than text', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: RichText(
+        text: TextSpan(
+        children: <InlineSpan>[
+          const TextSpan(
+            text: 'Some Text',
+            semanticsLabel: '',
+          ),
+          TextSpan(
+            text: 'Clickable',
+            recognizer: TapGestureRecognizer()..onTap = () { },
+          ),
+        ]),
+      ),
+    ));
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              label: 'Clickable',
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              textDirection: TextDirection.ltr,
+            ),
+          ],
+        ),
+      ],
+    );
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
     semantics.dispose();
   });

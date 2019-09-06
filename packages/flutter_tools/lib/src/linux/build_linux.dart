@@ -13,7 +13,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../usage.dart';
+import '../reporting/reporting.dart';
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
@@ -37,6 +37,15 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   linuxProject.cacheDirectory.childFile('generated_config')
     ..createSync(recursive: true)
     ..writeAsStringSync(buffer.toString());
+
+  if (!buildInfo.isDebug) {
+    const String warning = '🚧 ';
+    printStatus(warning * 20);
+    printStatus('Warning: Only debug is currently implemented for Linux. This is effectively a debug build.');
+    printStatus('See https://github.com/flutter/flutter/issues/38478 for details and updates.');
+    printStatus(warning * 20);
+    printStatus('');
+  }
 
   // Invoke make.
   final Stopwatch sw = Stopwatch()..start();

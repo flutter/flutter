@@ -207,6 +207,31 @@ typedef ImageLoadingBuilder = Widget Function(
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
 ///
+/// {@tool sample}
+/// The default constructor can be used with any [ImageProvider], such as a
+/// [NetworkImage], to display an image from the internet.
+///
+/// ![An image of an owl displayed by the image widget](https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg)
+///
+/// ```dart
+/// const Image(
+///   image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// The [Image] Widget also provides several constructors to display different
+/// types of images for convenience. In this example, use the [Image.network]
+/// constructor to display an image from the internet.
+///
+/// ![An image of an owl displayed by the image widget using the shortcut constructor](https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg)
+///
+/// ```dart
+/// Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg')
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Icon], which shows an image from a font.
@@ -507,6 +532,10 @@ class Image extends StatefulWidget {
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
   ///
   /// The [bytes], [scale], and [repeat] arguments must not be null.
+  ///
+  /// This only accepts compressed image formats (e.g. PNG). Uncompressed
+  /// formats like rawRgba (the default format of [ui.Image.toByteData]) will
+  /// lead to exceptions.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.

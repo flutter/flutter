@@ -14,9 +14,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'desktop.dart';
 import 'fuchsia/fuchsia_device.dart';
-
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
@@ -25,7 +23,6 @@ import 'macos/macos_device.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
-import 'web/workflow.dart';
 import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context.get<DeviceManager>();
@@ -74,23 +71,11 @@ class DeviceManager {
     IOSSimulators(),
     FuchsiaDevices(),
     FlutterTesterDevices(),
-  ] + _conditionalDesktopDevices + _conditionalWebDevices);
-
-  /// Only add desktop devices if the flag is enabled.
-  static List<DeviceDiscovery> get _conditionalDesktopDevices {
-    return flutterDesktopEnabled ? <DeviceDiscovery>[
-      MacOSDevices(),
-      LinuxDevices(),
-      WindowsDevices(),
-    ] : <DeviceDiscovery>[];
-  }
-
-  /// Only add web devices if the flag is enabled.
-  static List<DeviceDiscovery> get _conditionalWebDevices {
-    return flutterWebEnabled ? <DeviceDiscovery>[
-      WebDevices(),
-    ] : <DeviceDiscovery>[];
-  }
+    MacOSDevices(),
+    LinuxDevices(),
+    WindowsDevices(),
+    WebDevices(),
+  ]);
 
   String _specifiedDeviceId;
 
@@ -161,26 +146,63 @@ class DeviceManager {
 
   /// Get diagnostics about issues with any connected devices.
   Future<List<String>> getDeviceDiagnostics() async {
-    final List<String> diagnostics = <String>[];
-    for (DeviceDiscovery discoverer in _platformDiscoverers) {
-      diagnostics.addAll(await discoverer.getDiagnostics());
-    }
-    return diagnostics;
+    return <String>[
+      for (DeviceDiscovery discoverer in _platformDiscoverers)
+        ...await discoverer.getDiagnostics(),
+    ];
   }
 
   /// Find and return a list of devices based on the current project and environment.
   ///
-  /// Returns a list of deviecs specified by the user. If the user has not specified
-  /// all devices and has multiple connected then filter the list by those supported
-  /// in the current project and remove non-ephemeral device types.
+  /// Returns a list of deviecs specified by the user.
+  ///
+  /// * If the user specified '-d all', then return all connected devices which
+  /// support the current project, except for fuchsia and web.
+  ///
+  /// * If the user specified a device id, then do nothing as the list is already
+  /// filtered by [getDevices].
+  ///
+  /// * If the user did not specify a device id and there is more than one
+  /// device connected, then filter out unsupported devices and prioritize
+  /// ephemeral devices.
   Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
     List<Device> devices = await getDevices().toList();
 
-    if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices && !deviceManager.hasSpecifiedDeviceId) {
-      devices = devices
-          .where((Device device) => isDeviceSupportedForProject(device, flutterProject))
-          .toList();
+    // Always remove web and fuchsia devices from `--all`. This setting
+    // currently requires devices to share a frontend_server and resident
+    // runnner instance. Both web and fuchsia require differently configured
+    // compilers, and web requires an entirely different resident runner.
+    if (hasSpecifiedAllDevices) {
+      devices = <Device>[
+        for (Device device in devices)
+          if (await device.targetPlatform != TargetPlatform.fuchsia &&
+              await device.targetPlatform != TargetPlatform.web_javascript)
+            device
+      ];
+    }
 
+    // If there is no specified device, the remove all devices which are not
+    // supported by the current application. For example, if there was no
+    // 'android' folder then don't attempt to launch with an Android device.
+    if (devices.length > 1 && !hasSpecifiedDeviceId) {
+      devices = <Device>[
+        for (Device device in devices)
+          if (isDeviceSupportedForProject(device, flutterProject))
+            device
+      ];
+    } else if (devices.length == 1 &&
+             !hasSpecifiedDeviceId &&
+             !isDeviceSupportedForProject(devices.single, flutterProject)) {
+      // If there is only a single device but it is not supported, then return
+      // early.
+      return <Device>[];
+    }
+
+    // If there are still multiple devices and the user did not specify to run
+    // all, then attempt to prioritize ephemeral devices. For example, if the
+    // use only typed 'flutter run' and both an Android device and desktop
+    // device are availible, choose the Android device.
+    if (devices.length > 1 && !hasSpecifiedAllDevices) {
       // Note: ephemeral is nullable for device types where this is not well
       // defined.
       if (devices.any((Device device) => device.ephemeral == true)) {
@@ -193,6 +215,8 @@ class DeviceManager {
   }
 
   /// Returns whether the device is supported for the project.
+  ///
+  /// This exists to allow the check to be overriden for google3 clients.
   bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
     return device.isSupportedForProject(flutterProject);
   }
@@ -363,11 +387,6 @@ abstract class Device {
   ///
   /// [platformArgs] allows callers to pass platform-specific arguments to the
   /// start call. The build mode is not used by all platforms.
-  ///
-  /// If [usesTerminalUi] is true, Flutter Tools may attempt to prompt the
-  /// user to resolve fixable issues such as selecting a signing certificate
-  /// for iOS device deployment. Set to false if stdin cannot be read from while
-  /// attempting to start the app.
   Future<LaunchResult> startApp(
     ApplicationPackage package, {
     String mainPath,
@@ -375,7 +394,6 @@ abstract class Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
   });
 

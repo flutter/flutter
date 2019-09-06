@@ -10,6 +10,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../flutter_test_alternative.dart';
+import 'scheduler_tester.dart';
 
 class TestSchedulerBinding extends BindingBase with ServicesBinding, SchedulerBinding {
   final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
@@ -131,6 +132,8 @@ void main() {
   });
 
   test('Flutter.Frame event fired', () async {
+    // use frameTimings. https://github.com/flutter/flutter/issues/38838
+    // ignore: deprecated_member_use
     window.onReportTimings(<FrameTiming>[FrameTiming(<int>[
       // build start, build finish
       10000, 15000,
@@ -147,5 +150,37 @@ void main() {
     expect(event['elapsed'], 10000);
     expect(event['build'], 5000);
     expect(event['raster'], 4000);
+  });
+
+  test('currentSystemFrameTimeStamp is the raw timestamp', () {
+    Duration lastTimeStamp;
+    Duration lastSystemTimeStamp;
+
+    void frameCallback(Duration timeStamp) {
+      expect(timeStamp, scheduler.currentFrameTimeStamp);
+      lastTimeStamp = scheduler.currentFrameTimeStamp;
+      lastSystemTimeStamp = scheduler.currentSystemFrameTimeStamp;
+    }
+
+    scheduler.scheduleFrameCallback(frameCallback);
+    tick(const Duration(seconds: 2));
+    expect(lastTimeStamp, Duration.zero);
+    expect(lastSystemTimeStamp, const Duration(seconds: 2));
+
+    scheduler.scheduleFrameCallback(frameCallback);
+    tick(const Duration(seconds: 4));
+    expect(lastTimeStamp, const Duration(seconds: 2));
+    expect(lastSystemTimeStamp, const Duration(seconds: 4));
+
+    timeDilation = 2;
+    scheduler.scheduleFrameCallback(frameCallback);
+    tick(const Duration(seconds: 6));
+    expect(lastTimeStamp, const Duration(seconds: 2)); // timeDilation calls SchedulerBinding.resetEpoch
+    expect(lastSystemTimeStamp, const Duration(seconds: 6));
+
+    scheduler.scheduleFrameCallback(frameCallback);
+    tick(const Duration(seconds: 8));
+    expect(lastTimeStamp, const Duration(seconds: 3)); // 2s + (8 - 6)s / 2
+    expect(lastSystemTimeStamp, const Duration(seconds: 8));
   });
 }

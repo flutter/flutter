@@ -12,6 +12,9 @@ import 'print.dart';
 /// Signature for [FlutterError.onError] handler.
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
 
+/// Signature for [DiagnosticPropertiesBuilder] transformer.
+typedef DiagnosticPropertiesTransformer = Iterable<DiagnosticsNode> Function(Iterable<DiagnosticsNode> properties);
+
 /// Signature for [FlutterErrorDetails.informationCollector] callback
 /// and other callbacks that collect information describing an error.
 typedef InformationCollector = Iterable<DiagnosticsNode> Function();
@@ -212,6 +215,20 @@ class FlutterErrorDetails extends Diagnosticable {
     this.silent = false,
   });
 
+  /// Transformers to transform [DiagnosticsNode] in [DiagnosticPropertiesBuilder]
+  /// into a more descriptive form.
+  ///
+  /// There are layers that attach certain [DiagnosticsNode] into
+  /// [FlutterErrorDetails] that require knowledge from other layers to parse.
+  /// To correctly interpret those [DiagnosticsNode], register transformers in
+  /// the layers that possess the knowledge.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBinding.initInstances], which registers its transformer.
+  static final List<DiagnosticPropertiesTransformer> propertiesTransformers =
+    <DiagnosticPropertiesTransformer>[];
+
   /// The exception. Often this will be an [AssertionError], maybe specifically
   /// a [FlutterError]. However, this could be any value at all.
   final dynamic exception;
@@ -394,7 +411,7 @@ class FlutterErrorDetails extends Diagnosticable {
         String message = exceptionAsString();
         if (message.startsWith(prefix))
           message = message.substring(prefix.length);
-        properties.add(ErrorDescription('$message'));
+        properties.add(ErrorSummary('$message'));
       }
     }
 
@@ -442,12 +459,21 @@ class FlutterErrorDetails extends Diagnosticable {
 
   @override
   String toStringShort() {
-    return library != null ? 'Exception Caught By $library' : 'Exception Caught';
+    return library != null ? 'Exception caught by $library' : 'Exception caught';
   }
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
     return toDiagnosticsNode(style: DiagnosticsTreeStyle.error).toStringDeep(minLevel: minLevel);
+  }
+
+  @override
+  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
+    return _FlutterErrorDetailsNode(
+      name: name,
+      value: this,
+      style: style,
+    );
   }
 }
 
@@ -477,12 +503,10 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// using [ErrorHint]s or other [DiagnosticsNode]s.
   factory FlutterError(String message) {
     final List<String> lines = message.split('\n');
-    final List<DiagnosticsNode> parts = <DiagnosticsNode>[];
-    parts.add(ErrorSummary(lines.first));
-    if (lines.length > 1)  {
-      parts.addAll(lines.skip(1).map<DiagnosticsNode>((String line) => ErrorDescription(line)));
-    }
-    return FlutterError.fromParts(parts);
+    return FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary(lines.first),
+      ...lines.skip(1).map<DiagnosticsNode>((String line) => ErrorDescription(line)),
+    ]);
   }
 
   /// Create an error message from a list of [DiagnosticsNode]s.
@@ -713,19 +737,31 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   }
 }
 
-/// Dump the current stack to the console using [debugPrint] and
+/// Dump the stack to the console using [debugPrint] and
 /// [FlutterError.defaultStackFilter].
 ///
-/// The current stack is obtained using [StackTrace.current].
+/// If the `stackTrace` parameter is null, the [StackTrace.current] is used to
+/// obtain the stack.
 ///
 /// The `maxFrames` argument can be given to limit the stack to the given number
-/// of lines. By default, all non-filtered stack lines are shown.
+/// of lines before filtering is applied. By default, all stack lines are
+/// included.
 ///
 /// The `label` argument, if present, will be printed before the stack.
-void debugPrintStack({ String label, int maxFrames }) {
+void debugPrintStack({StackTrace stackTrace, String label, int maxFrames}) {
   if (label != null)
     debugPrint(label);
-  Iterable<String> lines = StackTrace.current.toString().trimRight().split('\n');
+  stackTrace ??= StackTrace.current;
+  Iterable<String> lines = stackTrace.toString().trimRight().split('\n');
+  if (kIsWeb && lines.isNotEmpty) {
+    // Remove extra call to StackTrace.current for web platform.
+    // TODO(ferhat): remove when https://github.com/flutter/flutter/issues/37635
+    // is addressed.
+    lines = lines.skipWhile((String line) {
+      return line.contains('StackTrace.current') ||
+             line.contains('dart:sdk_internal');
+    });
+  }
   if (maxFrames != null)
     lines = lines.take(maxFrames);
   debugPrint(FlutterError.defaultStackFilter(lines).join('\n'));
@@ -777,5 +813,30 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
 
   static DiagnosticsNode _createStackFrame(String frame) {
     return DiagnosticsNode.message(frame, allowWrap: false);
+  }
+}
+
+class _FlutterErrorDetailsNode extends DiagnosticableNode<FlutterErrorDetails> {
+  _FlutterErrorDetailsNode({
+    String name,
+    @required FlutterErrorDetails value,
+    @required DiagnosticsTreeStyle style,
+  }) : super(
+    name: name,
+    value: value,
+    style: style,
+  );
+
+  @override
+  DiagnosticPropertiesBuilder get builder {
+    final DiagnosticPropertiesBuilder builder = super.builder;
+    if (builder == null){
+      return null;
+    }
+    Iterable<DiagnosticsNode> properties = builder.properties;
+    for (DiagnosticPropertiesTransformer transformer in FlutterErrorDetails.propertiesTransformers) {
+      properties = transformer(properties);
+    }
+    return DiagnosticPropertiesBuilder.fromProperties(properties.toList());
   }
 }

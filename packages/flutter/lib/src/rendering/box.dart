@@ -498,13 +498,11 @@ class BoxConstraints extends Constraints {
   }) {
     assert(() {
       void throwError(DiagnosticsNode message) {
-        final List<DiagnosticsNode> information = <DiagnosticsNode>[message];
-        if (informationCollector != null) {
-          information.addAll(informationCollector());
-        }
-
-        information.add(DiagnosticsProperty<BoxConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.errorProperty));
-        throw FlutterError.fromParts(information);
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          message,
+          if (informationCollector != null) ...informationCollector(),
+          DiagnosticsProperty<BoxConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.errorProperty),
+        ]);
       }
       if (minWidth.isNaN || maxWidth.isNaN || minHeight.isNaN || maxHeight.isNaN) {
         final List<String> affectedFieldsList = <String>[];
@@ -1144,7 +1142,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// [constraints] given by the parent to the child were tight constraints.)
 ///
 /// For [RenderBox] classes that do not inherit from [RenderProxyBox], once they
-/// have laid out their children, should also position them, by setting the
+/// have laid out their children, they should also position them, by setting the
 /// [BoxParentData.offset] field of each child's [parentData] object.
 ///
 /// #### Layout of non-RenderBox children
@@ -1952,12 +1950,12 @@ abstract class RenderBox extends RenderObject {
 
           information.add(node.describeForError('The nearest ancestor providing an unbounded height constraint is'));
         }
-        final List<DiagnosticsNode> errorParts = <DiagnosticsNode>[];
-        errorParts.addAll(information);
-        errorParts.add(DiagnosticsProperty<BoxConstraints>('The constraints that applied to the $runtimeType were', constraints, style: DiagnosticsTreeStyle.errorProperty));
-        errorParts.add(DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty));
-        errorParts.add(ErrorHint('See https://flutter.dev/docs/development/ui/layout/box-constraints for more information.'));
-        throw FlutterError.fromParts(errorParts);
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ...information,
+          DiagnosticsProperty<BoxConstraints>('The constraints that applied to the $runtimeType were', constraints, style: DiagnosticsTreeStyle.errorProperty),
+          DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty),
+          ErrorHint('See https://flutter.dev/docs/development/ui/layout/box-constraints for more information.'),
+        ]);
      }
       // verify that the size is within the constraints
       if (!constraints.isSatisfiedBy(_size)) {
@@ -2078,11 +2076,11 @@ abstract class RenderBox extends RenderObject {
   /// This [RenderBox] is responsible for checking whether the given position is
   /// within its bounds.
   ///
-  /// If transforming is necessary, [HitTestResult.addWithPaintTransform],
-  /// [HitTestResult.addWithPaintOffset], or [HitTestResult.addWithRawTransform] need
-  /// to be invoked by the caller to record the required transform operations
-  /// in the [HitTestResult]. These methods will also help with applying the
-  /// transform to `position`.
+  /// If transforming is necessary, [BoxHitTestResult.addWithPaintTransform],
+  /// [BoxHitTestResult.addWithPaintOffset], or
+  /// [BoxHitTestResult.addWithRawTransform] need to be invoked by the caller
+  /// to record the required transform operations in the [HitTestResult]. These
+  /// methods will also help with applying the transform to `position`.
   ///
   /// Hit testing requires layout to be up-to-date but does not require painting
   /// to be up-to-date. That means a render object can rely upon [performLayout]

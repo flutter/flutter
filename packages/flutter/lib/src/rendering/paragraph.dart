@@ -318,7 +318,12 @@ class RenderParagraph extends RenderBox
     assert(constraints != null);
     assert(constraints.debugAssertIsValid());
     _layoutTextWithConstraints(constraints);
-    return _textPainter.computeDistanceToActualBaseline(baseline);
+    // TODO(garyq): Since our metric for ideographic baseline is currently inacurrate
+    // and the non-alphabetic baselines are based off of the alphabetic baseline, we
+    // use the alphabetic for now to produce correct layouts. We should eventually change
+    // this back to pass the `baseline` property when the ideographic baseline is properly
+    // implemented (https://github.com/flutter/flutter/issues/22625).
+    return _textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }
 
   // Intrinsics cannot be calculated without a full layout for
@@ -508,7 +513,7 @@ class RenderParagraph extends RenderBox
   void _setParentData() {
     RenderBox child = firstChild;
     int childIndex = 0;
-    while (child != null) {
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
       final TextParentData textParentData = child.parentData;
       textParentData.offset = Offset(
         _textPainter.inlinePlaceholderBoxes[childIndex].left,
@@ -635,8 +640,11 @@ class RenderParagraph extends RenderBox
 
     RenderBox child = firstChild;
     int childIndex = 0;
-    while (child != null) {
-      assert(childIndex < _textPainter.inlinePlaceholderBoxes.length);
+    // childIndex might be out of index of placeholder boxes. This can happen
+    // if engine truncates children due to ellipsis. Sadly, we would not know
+    // it until we finish layout, and RenderObject is in immutable state at
+    // this point.
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
       final TextParentData textParentData = child.parentData;
 
       final double scale = textParentData.scale;
@@ -726,49 +734,83 @@ class RenderParagraph extends RenderBox
     return _textPainter.size;
   }
 
-  // The offsets for each span that requires custom semantics.
-  final List<int> _inlineSemanticsOffsets = <int>[];
-  // Holds either [GestureRecognizer] or null (for placeholders) to generate
-  // proper semnatics configurations.
-  final List<dynamic> _inlineSemanticsElements = <dynamic>[];
+  /// Collected during [describeSemanticsConfiguration], used by
+  /// [assembleSemanticsNode] and [_combineSemanticsInfo].
+  List<InlineSpanSemanticsInformation> _semanticsInfo;
+
+  /// Combines _semanticsInfo entries where permissible, determined by
+  /// [InlineSpanSemanticsInformation.requiresOwnNode].
+  List<InlineSpanSemanticsInformation> _combineSemanticsInfo() {
+    assert(_semanticsInfo != null);
+    final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
+    String workingText = '';
+    String workingLabel;
+    for (InlineSpanSemanticsInformation info in _semanticsInfo) {
+      if (info.requiresOwnNode) {
+        if (workingText != null) {
+          combined.add(InlineSpanSemanticsInformation(
+            workingText,
+            semanticsLabel: workingLabel ?? workingText,
+          ));
+          workingText = '';
+          workingLabel = null;
+        }
+        combined.add(info);
+      } else {
+        workingText += info.text;
+        workingLabel ??= '';
+        if (info.semanticsLabel != null) {
+          workingLabel += info.semanticsLabel;
+        } else {
+          workingLabel += info.text;
+        }
+      }
+    }
+    if (workingText != null) {
+      combined.add(InlineSpanSemanticsInformation(
+        workingText,
+        semanticsLabel: workingLabel,
+      ));
+    } else {
+      assert(workingLabel != null);
+    }
+    return combined;
+  }
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    _inlineSemanticsOffsets.clear();
-    _inlineSemanticsElements.clear();
-    final Accumulator offset = Accumulator();
-    text.visitChildren((InlineSpan span) {
-      span.describeSemantics(offset, _inlineSemanticsOffsets, _inlineSemanticsElements);
-      return true;
-    });
-    if (_inlineSemanticsOffsets.isNotEmpty) {
+    _semanticsInfo = text.getSemanticsInformation();
+
+    if (_semanticsInfo.any((InlineSpanSemanticsInformation info) => info.recognizer != null)) {
       config.explicitChildNodes = true;
       config.isSemanticBoundary = true;
     } else {
-      config.label = text.toPlainText();
+      final StringBuffer buffer = StringBuffer();
+      for (InlineSpanSemanticsInformation info in _semanticsInfo) {
+        buffer.write(info.semanticsLabel ?? info.text);
+      }
+      config.label = buffer.toString();
       config.textDirection = textDirection;
     }
   }
 
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
-    assert(_inlineSemanticsOffsets.isNotEmpty);
-    assert(_inlineSemanticsOffsets.length.isEven);
-    assert(_inlineSemanticsElements.isNotEmpty);
+    assert(_semanticsInfo != null && _semanticsInfo.isNotEmpty);
     final List<SemanticsNode> newChildren = <SemanticsNode>[];
-    final String rawLabel = text.toPlainText();
-    int current = 0;
-    double order = -1.0;
     TextDirection currentDirection = textDirection;
     Rect currentRect;
-
-    SemanticsConfiguration buildSemanticsConfig(int start, int end) {
+    double ordinal = 0.0;
+    int start = 0;
+    int placeholderIndex = 0;
+    RenderBox child = firstChild;
+    for (InlineSpanSemanticsInformation info in _combineSemanticsInfo()) {
       final TextDirection initialDirection = currentDirection;
-      final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
+      final TextSelection selection = TextSelection(baseOffset: start, extentOffset: start + info.text.length);
       final List<ui.TextBox> rects = getBoxesForSelection(selection);
       if (rects.isEmpty) {
-        return null;
+        continue;
       }
       Rect rect = rects.first.toRect();
       currentDirection = rects.first.direction;
@@ -786,64 +828,15 @@ class RenderParagraph extends RenderBox
       );
       // round the current rectangle to make this API testable and add some
       // padding so that the accessibility rects do not overlap with the text.
-      // TODO(jonahwilliams): implement this for all text accessibility rects.
       currentRect = Rect.fromLTRB(
         rect.left.floorToDouble() - 4.0,
         rect.top.floorToDouble() - 4.0,
         rect.right.ceilToDouble() + 4.0,
         rect.bottom.ceilToDouble() + 4.0,
       );
-      order += 1;
-      final SemanticsConfiguration configuration = SemanticsConfiguration()
-        ..sortKey = OrdinalSortKey(order)
-        ..textDirection = initialDirection
-        ..label = rawLabel.substring(start, end);
-      return configuration;
-    }
 
-    int childIndex = 0;
-    RenderBox child = firstChild;
-    for (int i = 0, j = 0; i < _inlineSemanticsOffsets.length; i += 2, j++) {
-      final int start = _inlineSemanticsOffsets[i];
-      final int end = _inlineSemanticsOffsets[i + 1];
-      // Add semantics for any text between the previous recognizer/widget and this one.
-      if (current != start) {
-        final SemanticsNode node = SemanticsNode();
-        final SemanticsConfiguration configuration = buildSemanticsConfig(current, start);
-        if (configuration == null) {
-          continue;
-        }
-        node.updateWith(config: configuration);
-        node.rect = currentRect;
-        newChildren.add(node);
-      }
-      final dynamic inlineElement = _inlineSemanticsElements[j];
-      final SemanticsConfiguration configuration = buildSemanticsConfig(start, end);
-      if (configuration == null) {
-        continue;
-      }
-      if (inlineElement != null) {
-        // Add semantics for this recognizer.
-        final SemanticsNode node = SemanticsNode();
-        if (inlineElement is TapGestureRecognizer) {
-          final TapGestureRecognizer recognizer = inlineElement;
-          configuration.onTap = recognizer.onTap;
-        } else if (inlineElement is LongPressGestureRecognizer) {
-          final LongPressGestureRecognizer recognizer = inlineElement;
-          configuration.onLongPress = recognizer.onLongPress;
-        } else {
-          assert(false);
-        }
-        node.updateWith(config: configuration);
-        node.rect = currentRect;
-        newChildren.add(node);
-      } else if (childIndex < children.length) {
-        // Add semantics for this placeholder. Semantics are precomputed in the children
-        // argument.
-        // Placeholders should not get a label, which would come through as an
-        // object replacement character.
-        configuration.label = '';
-        final SemanticsNode childNode = children.elementAt(childIndex);
+      if (info.isPlaceholder) {
+        final SemanticsNode childNode = children.elementAt(placeholderIndex++);
         final TextParentData parentData = child.parentData;
         childNode.rect = Rect.fromLTWH(
           childNode.rect.left,
@@ -851,20 +844,31 @@ class RenderParagraph extends RenderBox
           childNode.rect.width * parentData.scale,
           childNode.rect.height * parentData.scale,
         );
-        newChildren.add(children.elementAt(childIndex));
-        childIndex += 1;
+        newChildren.add(childNode);
         child = childAfter(child);
+      } else {
+        final SemanticsConfiguration configuration = SemanticsConfiguration()
+          ..sortKey = OrdinalSortKey(ordinal++)
+          ..textDirection = initialDirection
+          ..label = info.semanticsLabel ?? info.text;
+        if (info.recognizer != null) {
+          if (info.recognizer is TapGestureRecognizer) {
+            final TapGestureRecognizer recognizer = info.recognizer;
+            configuration.onTap = recognizer.onTap;
+          } else if (info.recognizer is LongPressGestureRecognizer) {
+            final LongPressGestureRecognizer recognizer = info.recognizer;
+            configuration.onLongPress = recognizer.onLongPress;
+          } else {
+            assert(false);
+          }
+        }
+        newChildren.add(
+          SemanticsNode()
+            ..updateWith(config: configuration)
+            ..rect = currentRect,
+        );
       }
-      current = end;
-    }
-    if (current < rawLabel.length) {
-      final SemanticsNode node = SemanticsNode();
-      final SemanticsConfiguration configuration = buildSemanticsConfig(current, rawLabel.length);
-      if (configuration != null) {
-        node.updateWith(config: configuration);
-        node.rect = currentRect;
-        newChildren.add(node);
-      }
+      start += info.text.length;
     }
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
   }

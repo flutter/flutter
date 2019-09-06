@@ -24,7 +24,7 @@ const String _kData = 'data';
 class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
   RecordingVMServiceChannel(StreamChannel<String> delegate, Directory location)
       : super(delegate) {
-    addShutdownHook(() async {
+    addShutdownHook(() {
       // Sort the messages such that they are ordered
       // `[request1, response1, request2, response2, ...]`. This serves no
       // purpose other than to make the serialized format more human-readable.
@@ -32,7 +32,7 @@ class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
 
       final File file = _getManifest(location);
       final String json = const JsonEncoder.withIndent('  ').convert(_messages);
-      await file.writeAsString(json, flush: true);
+      file.writeAsStringSync(json, flush: true);
     }, ShutdownStage.SERIALIZE_RECORDING);
   }
 

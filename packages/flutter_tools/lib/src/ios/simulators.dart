@@ -24,7 +24,7 @@ import '../project.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
-import 'plist_utils.dart';
+import 'plist_parser.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
 const String iosSimulatorId = 'apple_ios_simulator';
@@ -46,11 +46,12 @@ class IOSSimulatorUtils {
   /// Returns [IOSSimulatorUtils] active in the current app context (i.e. zone).
   static IOSSimulatorUtils get instance => context.get<IOSSimulatorUtils>();
 
-  List<IOSSimulator> getAttachedDevices() {
+  Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!xcode.isInstalledAndMeetsVersionCheck)
       return <IOSSimulator>[];
 
-    return SimControl.instance.getConnectedDevices().map<IOSSimulator>((SimDevice device) {
+    final List<SimDevice> connected = await SimControl.instance.getConnectedDevices();
+    return connected.map<IOSSimulator>((SimDevice device) {
       return IOSSimulator(device.udid, name: device.name, simulatorCategory: device.category);
     }).toList();
   }
@@ -63,7 +64,7 @@ class SimControl {
 
   /// Runs `simctl list --json` and returns the JSON of the corresponding
   /// [section].
-  Map<String, dynamic> _list(SimControlListSection section) {
+  Future<Map<String, dynamic>> _list(SimControlListSection section) async {
     // Sample output from `simctl list --json`:
     //
     // {
@@ -83,25 +84,39 @@ class SimControl {
 
     final List<String> command = <String>[_xcrunPath, 'simctl', 'list', '--json', section.name];
     printTrace(command.join(' '));
-    final ProcessResult results = processManager.runSync(command);
+    final ProcessResult results = await processManager.run(command);
     if (results.exitCode != 0) {
       printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
       return <String, Map<String, dynamic>>{};
     }
-
-    return json.decode(results.stdout)[section.name];
+    try {
+      final Object decodeResult = json.decode(results.stdout?.toString())[section.name];
+      if (decodeResult is Map<String, dynamic>) {
+        return decodeResult;
+      }
+      printError('simctl returned unexpected JSON response: ${results.stdout}');
+      return <String, dynamic>{};
+    } on FormatException {
+      // We failed to parse the simctl output, or it returned junk.
+      // One known message is "Install Started" isn't valid JSON but is
+      // returned sometimes.
+      printError('simctl returned non-JSON response: ${results.stdout}');
+      return <String, dynamic>{};
+    }
   }
 
   /// Returns a list of all available devices, both potential and connected.
-  List<SimDevice> getDevices() {
+  Future<List<SimDevice>> getDevices() async {
     final List<SimDevice> devices = <SimDevice>[];
 
-    final Map<String, dynamic> devicesSection = _list(SimControlListSection.devices);
+    final Map<String, dynamic> devicesSection = await _list(SimControlListSection.devices);
 
     for (String deviceCategory in devicesSection.keys) {
-      final List<dynamic> devicesData = devicesSection[deviceCategory];
-      for (Map<String, dynamic> data in devicesData.map<Map<String, dynamic>>(castStringKeyedMap)) {
-        devices.add(SimDevice(deviceCategory, data));
+      final Object devicesData = devicesSection[deviceCategory];
+      if (devicesData != null && devicesData is List<dynamic>) {
+        for (Map<String, dynamic> data in devicesData.map<Map<String, dynamic>>(castStringKeyedMap)) {
+          devices.add(SimDevice(deviceCategory, data));
+        }
       }
     }
 
@@ -109,8 +124,9 @@ class SimControl {
   }
 
   /// Returns all the connected simulator devices.
-  List<SimDevice> getConnectedDevices() {
-    return getDevices().where((SimDevice device) => device.isBooted).toList();
+  Future<List<SimDevice>> getConnectedDevices() async {
+    final List<SimDevice> simDevices = await getDevices();
+    return simDevices.where((SimDevice device) => device.isBooted).toList();
   }
 
   Future<bool> isInstalled(String deviceId, String appId) {
@@ -144,12 +160,16 @@ class SimControl {
   }
 
   Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String> launchArgs ]) {
-    final List<String> args = <String>[_xcrunPath, 'simctl', 'launch', deviceId, appIdentifier];
-    if (launchArgs != null)
-      args.addAll(launchArgs);
     Future<RunResult> result;
     try {
-      result = runCheckedAsync(args);
+      result = runCheckedAsync(<String>[
+        _xcrunPath,
+        'simctl',
+        'launch',
+        deviceId,
+        appIdentifier,
+        ...?launchArgs,
+      ]);
     } on ProcessException catch (exception) {
       throwToolExit('Unable to launch $appIdentifier on $deviceId:\n$exception');
     }
@@ -207,10 +227,10 @@ class SimDevice {
   final String category;
   final Map<String, dynamic> data;
 
-  String get state => data['state'];
-  String get availability => data['availability'];
-  String get name => data['name'];
-  String get udid => data['udid'];
+  String get state => data['state']?.toString();
+  String get availability => data['availability']?.toString();
+  String get name => data['name']?.toString();
+  String get udid => data['udid']?.toString();
 
   bool get isBooted => state == 'Booted';
 }
@@ -254,7 +274,7 @@ class IOSSimulator extends Device {
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  Future<bool> installApp(ApplicationPackage app) async {
+  Future<bool> installApp(covariant IOSApp app) async {
     try {
       final IOSApp iosApp = app;
       await SimControl.instance.install(id, iosApp.simulatorBundlePath);
@@ -303,20 +323,19 @@ class IOSSimulator extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    covariant IOSApp package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
-    if (!prebuiltApplication) {
+    if (!prebuiltApplication && package is BuildableIOSApp) {
       printTrace('Building ${package.name} for $id.');
 
       try {
-        await _setupUpdatedApplicationBundle(package, debuggingOptions.buildInfo, mainPath, usesTerminalUi);
+        await _setupUpdatedApplicationBundle(package, debuggingOptions.buildInfo, mainPath);
       } on ToolExit catch (e) {
         printError(e.message);
         return LaunchResult.failed();
@@ -358,9 +377,8 @@ class IOSSimulator extends Device {
       // which should always yield the correct value and does not require
       // parsing the xcodeproj or configuration files.
       // See https://github.com/flutter/flutter/issues/31037 for more information.
-      final IOSApp iosApp = package;
-      final String plistPath = fs.path.join(iosApp.simulatorBundlePath, 'Info.plist');
-      final String bundleIdentifier = iosWorkflow.getPlistValueFromFile(plistPath, kCFBundleIdentifierKey);
+      final String plistPath = fs.path.join(package.simulatorBundlePath, 'Info.plist');
+      final String bundleIdentifier = PlistParser.instance.getValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
       await SimControl.instance.launch(id, bundleIdentifier, args);
     } catch (error) {
@@ -387,7 +405,7 @@ class IOSSimulator extends Device {
     }
   }
 
-  Future<void> _setupUpdatedApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath, bool usesTerminalUi) async {
+  Future<void> _setupUpdatedApplicationBundle(covariant BuildableIOSApp app, BuildInfo buildInfo, String mainPath) async {
     await _sideloadUpdatedAssetsForInstalledApplicationBundle(app, buildInfo, mainPath);
 
     // Step 1: Build the Xcode project.
@@ -403,14 +421,12 @@ class IOSSimulator extends Device {
       buildInfo: debugBuildInfo,
       targetOverride: mainPath,
       buildForDevice: false,
-      usesTerminalUi: usesTerminalUi,
     );
     if (!buildResult.success)
       throwToolExit('Could not build the application for the simulator.');
 
     // Step 2: Assert that the Xcode project was successfully built.
-    final IOSApp iosApp = app;
-    final Directory bundle = fs.directory(iosApp.simulatorBundlePath);
+    final Directory bundle = fs.directory(app.simulatorBundlePath);
     final bool bundleExists = bundle.existsSync();
     if (!bundleExists)
       throwToolExit('Could not find the built application bundle at ${bundle.path}.');
@@ -450,11 +466,11 @@ class IOSSimulator extends Device {
 
   Future<int> get sdkMajorVersion async {
     final Match sdkMatch = _iosSdkRegExp.firstMatch(await sdkNameAndVersion);
-    return int.parse(sdkMatch?.group(2) ?? 11);
+    return int.parse(sdkMatch?.group(2) ?? '11');
   }
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) {
+  DeviceLogReader getLogReader({ covariant IOSApp app }) {
     assert(app is IOSApp);
     _logReaders ??= <ApplicationPackage, _IOSSimulatorLogReader>{};
     return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));

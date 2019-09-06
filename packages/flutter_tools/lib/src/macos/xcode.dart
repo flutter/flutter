@@ -4,9 +4,11 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../ios/xcodeproj.dart';
@@ -17,7 +19,7 @@ const int kXcodeRequiredVersionMinor = 0;
 Xcode get xcode => context.get<Xcode>();
 
 class Xcode {
-  bool get isInstalledAndMeetsVersionCheck => isInstalled && isVersionSatisfactory;
+  bool get isInstalledAndMeetsVersionCheck => platform.isMacOS && isInstalled && isVersionSatisfactory;
 
   String _xcodeSelectPath;
   String get xcodeSelectPath {
@@ -25,6 +27,8 @@ class Xcode {
       try {
         _xcodeSelectPath = processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
       } on ProcessException {
+        // Ignored, return null below.
+      } on ArgumentError {
         // Ignored, return null below.
       }
     }
@@ -95,6 +99,16 @@ class Xcode {
 
   Future<RunResult> clang(List<String> args) {
     return runCheckedAsync(<String>['xcrun', 'clang', ...args]);
+  }
+
+  Future<String> iPhoneSdkLocation() async {
+    final RunResult runResult = await runCheckedAsync(
+      <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'],
+    );
+    if (runResult.exitCode != 0) {
+      throwToolExit('Could not find iPhone SDK location: ${runResult.stderr}');
+    }
+    return runResult.stdout.trim();
   }
 
   String getSimulatorPath() {

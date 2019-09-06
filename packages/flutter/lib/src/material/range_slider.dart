@@ -333,7 +333,7 @@ class RangeSlider extends StatefulWidget {
   final RangeSemanticFormatterCallback semanticFormatterCallback;
 
   // Touch width for the tap boundary of the slider thumbs.
-  static const double _minTouchTargetWidth = 48;
+  static const double _minTouchTargetWidth = kMinInteractiveDimension;
 
   @override
   _RangeSliderState createState() => _RangeSliderState();
@@ -1241,8 +1241,9 @@ class _RenderRangeSlider extends RenderBox {
     final TextPainter topLabelPainter = isLastThumbStart ? _startLabelPainter : _endLabelPainter;
     final double bottomValue = isLastThumbStart ? endValue : startValue;
     final double topValue = isLastThumbStart ? startValue : endValue;
+    final bool shouldPaintValueIndicators = isEnabled && labels != null && !_valueIndicatorAnimation.isDismissed && showValueIndicator;
 
-    if (isEnabled && labels != null && !_valueIndicatorAnimation.isDismissed && showValueIndicator) {
+    if (shouldPaintValueIndicators) {
       _sliderTheme.rangeValueIndicatorShape.paint(
         context,
         bottomThumbCenter,
@@ -1257,20 +1258,6 @@ class _RenderRangeSlider extends RenderBox {
         thumb: bottomThumb,
         value: bottomValue,
       );
-      _sliderTheme.rangeValueIndicatorShape.paint(
-        context,
-        topThumbCenter,
-        activationAnimation: _valueIndicatorAnimation,
-        enableAnimation: _enableAnimation,
-        isDiscrete: isDiscrete,
-        isOnTop: thumbDelta < sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: topLabelPainter).width,
-        labelPainter: topLabelPainter,
-        parentBox: this,
-        sliderTheme: _sliderTheme,
-        textDirection: _textDirection,
-        thumb: topThumb,
-        value: topValue,
-      );
     }
 
     _sliderTheme.rangeThumbShape.paint(
@@ -1284,6 +1271,50 @@ class _RenderRangeSlider extends RenderBox {
       sliderTheme: _sliderTheme,
       thumb: bottomThumb,
     );
+
+    if (shouldPaintValueIndicators) {
+      final double startOffset = sliderTheme.rangeValueIndicatorShape.getHorizontalShift(
+        parentBox: this,
+        center: startThumbCenter,
+        labelPainter: _startLabelPainter,
+        activationAnimation: _valueIndicatorAnimation,
+      );
+      final double endOffset = sliderTheme.rangeValueIndicatorShape.getHorizontalShift(
+        parentBox: this,
+        center: endThumbCenter,
+        labelPainter: _endLabelPainter,
+        activationAnimation: _valueIndicatorAnimation,
+      );
+      final double startHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: _startLabelPainter).width / 2;
+      final double endHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: _endLabelPainter).width / 2;
+      double innerOverflow = startHalfWidth + endHalfWidth;
+      switch (textDirection) {
+        case TextDirection.ltr:
+          innerOverflow += startOffset;
+          innerOverflow -= endOffset;
+          break;
+        case TextDirection.rtl:
+          innerOverflow -= startOffset;
+          innerOverflow += endOffset;
+          break;
+      }
+
+      _sliderTheme.rangeValueIndicatorShape.paint(
+        context,
+        topThumbCenter,
+        activationAnimation: _valueIndicatorAnimation,
+        enableAnimation: _enableAnimation,
+        isDiscrete: isDiscrete,
+        isOnTop: thumbDelta < innerOverflow,
+        labelPainter: topLabelPainter,
+        parentBox: this,
+        sliderTheme: _sliderTheme,
+        textDirection: _textDirection,
+        thumb: topThumb,
+        value: topValue,
+      );
+    }
+
     _sliderTheme.rangeThumbShape.paint(
       context,
       topThumbCenter,

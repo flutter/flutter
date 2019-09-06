@@ -45,19 +45,49 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   // Whether this layer has any changes since its last call to [addToScene].
   //
-  // Initialized to true as a new layer has never called [addToScene].
+  // Initialized to true as a new layer has never called [addToScene], and is
+  // set to false after calling [addToScene]. The value can become true again
+  // if [markNeedsAddToScene] is called, or when [updateSubtreeNeedsAddToScene]
+  // is called on this layer or on an ancestor layer.
+  //
+  // The values of [_needsAddToScene] in a tree of layers are said to be
+  // _consistent_ if every layer in the tree satisfies the following:
+  //
+  // - If [alwaysNeedsAddToScene] is true, then [_needsAddToScene] is also true.
+  // - If [_needsAddToScene] is true and [parent] is not null, then
+  //   `parent._needsAddToScene` is true.
+  //
+  // Typically, this value is set during the paint phase and during compositing.
+  // During the paint phase render objects create new layers and call
+  // [markNeedsAddToScene] on existing layers, causing this value to become
+  // true. After the paint phase the tree may be in an inconsistent state.
+  // During compositing [ContainerLayer.buildScene] first calls
+  // [updateSubtreeNeedsAddToScene] to bring this tree to a consistent state,
+  // then it calls [addToScene], and finally sets this field to false.
   bool _needsAddToScene = true;
 
   /// Mark that this layer has changed and [addToScene] needs to be called.
   @protected
   @visibleForTesting
   void markNeedsAddToScene() {
+    assert(
+      !alwaysNeedsAddToScene,
+      '$runtimeType with alwaysNeedsAddToScene set called markNeedsAddToScene.\n'
+      'The layer\'s alwaysNeedsAddToScene is set to true, and therefore it should not call markNeedsAddToScene.',
+    );
+
+    // Already marked. Short-circuit.
+    if (_needsAddToScene) {
+      return;
+    }
+
     _needsAddToScene = true;
   }
 
   /// Mark that this layer is in sync with engine.
   ///
-  /// This is only for debug and test purpose only.
+  /// This is for debugging and testing purposes only. In release builds
+  /// this method has no effect.
   @visibleForTesting
   void debugMarkClean() {
     assert(() {
@@ -70,9 +100,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @protected
   bool get alwaysNeedsAddToScene => false;
 
-  bool _subtreeNeedsAddToScene;
-
-  /// Whether any layer in the subtree needs [addToScene].
+  /// Whether this or any descendant layer in the subtree needs [addToScene].
   ///
   /// This is for debug and test purpose only. It only becomes valid after
   /// calling [updateSubtreeNeedsAddToScene].
@@ -80,22 +108,77 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   bool get debugSubtreeNeedsAddToScene {
     bool result;
     assert(() {
-      result = _subtreeNeedsAddToScene;
+      result = _needsAddToScene;
       return true;
     }());
     return result;
   }
 
+  /// Stores the engine layer created for this layer in order to reuse engine
+  /// resources across frames for better app performance.
+  ///
+  /// This value may be passed to [ui.SceneBuilder.addRetained] to communicate
+  /// to the engine that nothing in this layer or any of its descendants
+  /// changed. The native engine could, for example, reuse the texture rendered
+  /// in a previous frame. The web engine could, for example, reuse the HTML
+  /// DOM nodes created for a previous frame.
+  ///
+  /// This value may be passed as `oldLayer` argument to a "push" method to
+  /// communicate to the engine that a layer is updating a previously rendered
+  /// layer. The web engine could, for example, update the properties of
+  /// previously rendered HTML DOM nodes rather than creating new nodes.
+  @protected
+  ui.EngineLayer get engineLayer => _engineLayer;
+
+  /// Sets the engine layer used to render this layer.
+  ///
+  /// Typically this field is set to the value returned by [addToScene], which
+  /// in turn returns the engine layer produced by one of [ui.SceneBuilder]'s
+  /// "push" methods, such as [ui.SceneBuilder.pushOpacity].
+  @protected
+  set engineLayer(ui.EngineLayer value) {
+    _engineLayer = value;
+    if (!alwaysNeedsAddToScene) {
+      // The parent must construct a new engine layer to add this layer to, and
+      // so we mark it as needing [addToScene].
+      //
+      // This is designed to handle two situations:
+      //
+      // 1. When rendering the complete layer tree as normal. In this case we
+      // call child `addToScene` methods first, then we call `set engineLayer`
+      // for the parent. The children will call `markNeedsAddToScene` on the
+      // parent to signal that they produced new engine layers and therefore
+      // the parent needs to update. In this case, the parent is already adding
+      // itself to the scene via [addToScene], and so after it's done, its
+      // `set engineLayer` is called and it clears the `_needsAddToScene` flag.
+      //
+      // 2. When rendering an interior layer (e.g. `OffsetLayer.toImage`). In
+      // this case we call `addToScene` for one of the children but not the
+      // parent, i.e. we produce new engine layers for children but not for the
+      // parent. Here the children will mark the parent as needing
+      // `addToScene`, but the parent does not clear the flag until some future
+      // frame decides to render it, at which point the parent knows that it
+      // cannot retain its engine layer and will call `addToScene` again.
+      if (parent != null && !parent.alwaysNeedsAddToScene) {
+        parent.markNeedsAddToScene();
+      }
+    }
+  }
   ui.EngineLayer _engineLayer;
 
-  /// Traverse the layer tree and compute if any subtree needs [addToScene].
+  /// Traverses the layer subtree starting from this layer and determines whether it needs [addToScene].
   ///
-  /// A subtree needs [addToScene] if any of its layer needs [addToScene].
-  /// The [ContainerLayer] will override this to respect its children.
+  /// A layer needs [addToScene] if any of the following is true:
+  ///
+  /// - [alwaysNeedsAddToScene] is true.
+  /// - [markNeedsAddToScene] has been called.
+  /// - Any of its descendants need [addToScene].
+  ///
+  /// [ContainerLayer] overrides this method to recursively call it on its children.
   @protected
   @visibleForTesting
   void updateSubtreeNeedsAddToScene() {
-    _subtreeNeedsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
+    _needsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
   }
 
   /// This layer's next sibling in the parent layer's child list.
@@ -108,13 +191,17 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   @override
   void dropChild(AbstractNode child) {
-    markNeedsAddToScene();
+    if (!alwaysNeedsAddToScene) {
+      markNeedsAddToScene();
+    }
     super.dropChild(child);
   }
 
   @override
   void adoptChild(AbstractNode child) {
-    markNeedsAddToScene();
+    if (!alwaysNeedsAddToScene) {
+      markNeedsAddToScene();
+    }
     super.adoptChild(child);
   }
 
@@ -157,23 +244,26 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Return the engine layer for retained rendering. When there's no
   /// corresponding engine layer, null is returned.
   @protected
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]);
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]);
 
   void _addToSceneWithRetainedRendering(ui.SceneBuilder builder) {
     // There can't be a loop by adding a retained layer subtree whose
-    // _subtreeNeedsAddToScene is false.
+    // _needsAddToScene is false.
     //
     // Proof by contradiction:
     //
     // If we introduce a loop, this retained layer must be appended to one of
     // its descendant layers, say A. That means the child structure of A has
     // changed so A's _needsAddToScene is true. This contradicts
-    // _subtreeNeedsAddToScene being false.
-    if (!_subtreeNeedsAddToScene && _engineLayer != null) {
+    // _needsAddToScene being false.
+    if (!_needsAddToScene && _engineLayer != null) {
       builder.addRetained(_engineLayer);
       return;
     }
-    _engineLayer = addToScene(builder);
+    addToScene(builder);
+    // Clearing the flag _after_ calling `addToScene`, not _before_. This is
+    // because `addToScene` calls children's `addToScene` methods, which may
+    // mark this layer as dirty.
     _needsAddToScene = false;
   }
 
@@ -218,7 +308,7 @@ class PictureLayer extends Layer {
   ui.Picture get picture => _picture;
   ui.Picture _picture;
   set picture(ui.Picture picture) {
-    _needsAddToScene = true;
+    markNeedsAddToScene();
     _picture = picture;
   }
 
@@ -258,9 +348,8 @@ class PictureLayer extends Layer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     builder.addPicture(layerOffset, picture, isComplexHint: isComplexHint, willChangeHint: willChangeHint);
-    return null; // this does not return an engine layer yet.
   }
 
   @override
@@ -329,7 +418,7 @@ class TextureLayer extends Layer {
   final bool freeze;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
     builder.addTexture(
       textureId,
@@ -338,7 +427,6 @@ class TextureLayer extends Layer {
       height: shiftedRect.height,
       freeze: freeze,
     );
-    return null; // this does not return an engine layer yet.
   }
 
   @override
@@ -369,7 +457,7 @@ class PlatformViewLayer extends Layer {
   final int viewId;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
     builder.addPlatformView(
       viewId,
@@ -377,7 +465,6 @@ class PlatformViewLayer extends Layer {
       width: shiftedRect.width,
       height: shiftedRect.height,
     );
-    return null;
   }
 
   @override
@@ -447,14 +534,13 @@ class PerformanceOverlayLayer extends Layer {
   final bool checkerboardOffscreenLayers;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(optionsMask != null);
     final Rect shiftedOverlayRect = layerOffset == Offset.zero ? overlayRect : overlayRect.shift(layerOffset);
     builder.addPerformanceOverlay(optionsMask, shiftedOverlayRect);
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
     builder.setCheckerboardRasterCacheImages(checkerboardRasterCacheImages);
     builder.setCheckerboardOffscreenLayers(checkerboardOffscreenLayers);
-    return null; // this does not return an engine layer yet.
   }
 
   @override
@@ -477,6 +563,44 @@ class ContainerLayer extends Layer {
   /// The last composited layer in this layer's child list.
   Layer get lastChild => _lastChild;
   Layer _lastChild;
+
+  /// Returns whether this layer has at least one child layer.
+  bool get hasChildren => _firstChild != null;
+
+  /// Consider this layer as the root and build a scene (a tree of layers)
+  /// in the engine.
+  // The reason this method is in the `ContainerLayer` class rather than
+  // `PipelineOwner` or other singleton level is because this method can be used
+  // both to render the whole layer tree (e.g. a normal application frame) and
+  // to render a subtree (e.g. `OffsetLayer.toImage`).
+  ui.Scene buildScene(ui.SceneBuilder builder) {
+    List<PictureLayer> temporaryLayers;
+    assert(() {
+      if (debugCheckElevationsEnabled) {
+        temporaryLayers = _debugCheckElevations();
+      }
+      return true;
+    }());
+    updateSubtreeNeedsAddToScene();
+    addToScene(builder);
+    // Clearing the flag _after_ calling `addToScene`, not _before_. This is
+    // because `addToScene` calls children's `addToScene` methods, which may
+    // mark this layer as dirty.
+    _needsAddToScene = false;
+    final ui.Scene scene = builder.build();
+    assert(() {
+      // We should remove any layers that got added to highlight the incorrect
+      // PhysicalModelLayers. If we don't, we'll end up adding duplicate layers
+      // or continuing to render stale outlines.
+      if (temporaryLayers != null) {
+        for (PictureLayer temporaryLayer in temporaryLayers) {
+          temporaryLayer.remove();
+        }
+      }
+      return true;
+    }());
+    return scene;
+  }
 
   bool _debugUltimatePreviousSiblingOf(Layer child, { Layer equals }) {
     assert(child.attached == attached);
@@ -524,10 +648,12 @@ class ContainerLayer extends Layer {
                               'for more details.'),
       library: 'rendering library',
       context: ErrorDescription('during compositing'),
-      informationCollector: () sync* {
-        yield child.toDiagnosticsNode(name: 'Attempted to composite layer', style: DiagnosticsTreeStyle.errorProperty);
-        yield predecessor.toDiagnosticsNode(name: 'after layer', style: DiagnosticsTreeStyle.errorProperty);
-        yield ErrorDescription('which occupies the same area at a higher elevation.');
+      informationCollector: () {
+        return <DiagnosticsNode>[
+          child.toDiagnosticsNode(name: 'Attempted to composite layer', style: DiagnosticsTreeStyle.errorProperty),
+          predecessor.toDiagnosticsNode(name: 'after layer', style: DiagnosticsTreeStyle.errorProperty),
+          ErrorDescription('which occupies the same area at a higher elevation.'),
+        ];
       }
     ));
     return <PictureLayer>[
@@ -596,7 +722,7 @@ class ContainerLayer extends Layer {
     Layer child = firstChild;
     while (child != null) {
       child.updateSubtreeNeedsAddToScene();
-      _subtreeNeedsAddToScene = _subtreeNeedsAddToScene || child._subtreeNeedsAddToScene;
+      _needsAddToScene = _needsAddToScene || child._needsAddToScene;
       child = child.nextSibling;
     }
   }
@@ -615,16 +741,18 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    Iterable<S> result = Iterable<S>.empty();
     if (firstChild == null)
-      return;
+      return result;
     Layer child = lastChild;
     while (true) {
-      yield* child.findAll<S>(regionOffset);
+      result = result.followedBy(child.findAll<S>(regionOffset));
       if (child == firstChild)
         break;
       child = child.previousSibling;
     }
+    return result;
   }
 
   @override
@@ -717,9 +845,8 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     addChildrenToScene(builder, layerOffset);
-    return null; // ContainerLayer does not have a corresponding engine layer
   }
 
   /// Uploads all of this layer's children to the engine.
@@ -863,45 +990,16 @@ class OffsetLayer extends ContainerLayer {
     transform.multiply(Matrix4.translationValues(offset.dx, offset.dy, 0.0));
   }
 
-  /// Consider this layer as the root and build a scene (a tree of layers)
-  /// in the engine.
-  ui.Scene buildScene(ui.SceneBuilder builder) {
-    List<PictureLayer> temporaryLayers;
-    assert(() {
-      if (debugCheckElevationsEnabled) {
-        temporaryLayers = _debugCheckElevations();
-      }
-      return true;
-    }());
-    updateSubtreeNeedsAddToScene();
-    addToScene(builder);
-    final ui.Scene scene = builder.build();
-    assert(() {
-      // We should remove any layers that got added to highlight the incorrect
-      // PhysicalModelLayers. If we don't, we'll end up adding duplicate layers
-      // or potentially leaving a physical model that is now correct highlighted
-      // in red.
-      if (temporaryLayers != null) {
-        for (PictureLayer temporaryLayer in temporaryLayers) {
-          temporaryLayer.remove();
-        }
-      }
-      return true;
-    }());
-    return scene;
-  }
-
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     // Skia has a fast path for concatenating scale/translation only matrices.
     // Hence pushing a translation-only transform layer should be fast. For
     // retained rendering, we don't want to push the offset down to each leaf
     // node. Otherwise, changing an offset layer on the very high level could
     // cascade the change to too many leaves.
-    final ui.EngineLayer engineLayer = builder.pushOffset(layerOffset.dx + offset.dx, layerOffset.dy + offset.dy);
+    engineLayer = builder.pushOffset(layerOffset.dx + offset.dx, layerOffset.dy + offset.dy, oldLayer: _engineLayer);
     addChildrenToScene(builder);
     builder.pop();
-    return engineLayer;
   }
 
   @override
@@ -938,6 +1036,7 @@ class OffsetLayer extends ContainerLayer {
     transform.scale(pixelRatio, pixelRatio);
     builder.pushTransform(transform.storage);
     final ui.Scene scene = buildScene(builder);
+
     try {
       // Size is rounded up to the next pixel to make sure we don't clip off
       // anything.
@@ -959,10 +1058,12 @@ class OffsetLayer extends ContainerLayer {
 class ClipRectLayer extends ContainerLayer {
   /// Creates a layer with a rectangular clip.
   ///
-  /// The [clipRect] property must be non-null before the compositing phase of
+  /// The [clipRect] argument must not be null before the compositing phase of
   /// the pipeline.
+  ///
+  /// The [clipBehavior] argument must not be null, and must not be [Clip.none].
   ClipRectLayer({
-    @required Rect clipRect,
+    Rect clipRect,
     Clip clipBehavior = Clip.hardEdge,
   }) : _clipRect = clipRect,
        _clipBehavior = clipBehavior,
@@ -983,10 +1084,12 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   /// {@template flutter.clipper.clipBehavior}
-  /// Controls how to clip (defaults to [Clip.hardEdge]).
+  /// Controls how to clip.
   ///
-  /// [Clip.none] is not allowed here.
+  /// Must not be set to null or [Clip.none].
   /// {@endtemplate}
+  ///
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
@@ -1006,14 +1109,16 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipRect.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(clipRect != null);
+    assert(clipBehavior != null);
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1021,12 +1126,13 @@ class ClipRectLayer extends ContainerLayer {
     }());
     if (enabled) {
       final Rect shiftedClipRect = layerOffset == Offset.zero ? clipRect : clipRect.shift(layerOffset);
-      builder.pushClipRect(shiftedClipRect, clipBehavior: clipBehavior);
+      engineLayer = builder.pushClipRect(shiftedClipRect, clipBehavior: clipBehavior, oldLayer: _engineLayer);
+    } else {
+      engineLayer = null;
     }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
-    return null; // this does not return an engine layer yet.
   }
 
   @override
@@ -1044,10 +1150,10 @@ class ClipRectLayer extends ContainerLayer {
 class ClipRRectLayer extends ContainerLayer {
   /// Creates a layer with a rounded-rectangular clip.
   ///
-  /// The [clipRRect] property must be non-null before the compositing phase of
-  /// the pipeline.
+  /// The [clipRRect] and [clipBehavior] properties must be non-null before the
+  /// compositing phase of the pipeline.
   ClipRRectLayer({
-    @required RRect clipRRect,
+    RRect clipRRect,
     Clip clipBehavior = Clip.antiAlias,
   }) : _clipRRect = clipRRect,
        _clipBehavior = clipBehavior,
@@ -1068,6 +1174,8 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   /// {@macro flutter.clipper.clipBehavior}
+  ///
+  /// Defaults to [Clip.antiAlias].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
@@ -1087,14 +1195,16 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipRRect.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(clipRRect != null);
+    assert(clipBehavior != null);
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1102,12 +1212,13 @@ class ClipRRectLayer extends ContainerLayer {
     }());
     if (enabled) {
       final RRect shiftedClipRRect = layerOffset == Offset.zero ? clipRRect : clipRRect.shift(layerOffset);
-      builder.pushClipRRect(shiftedClipRRect, clipBehavior: clipBehavior);
+      engineLayer = builder.pushClipRRect(shiftedClipRRect, clipBehavior: clipBehavior, oldLayer: _engineLayer);
+    } else {
+      engineLayer = null;
     }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
-    return null; // this does not return an engine layer yet.
   }
 
   @override
@@ -1125,10 +1236,10 @@ class ClipRRectLayer extends ContainerLayer {
 class ClipPathLayer extends ContainerLayer {
   /// Creates a layer with a path-based clip.
   ///
-  /// The [clipPath] property must be non-null before the compositing phase of
-  /// the pipeline.
+  /// The [clipPath] and [clipBehavior] properties must be non-null before the
+  /// compositing phase of the pipeline.
   ClipPathLayer({
-    @required Path clipPath,
+    Path clipPath,
     Clip clipBehavior = Clip.antiAlias,
   }) : _clipPath = clipPath,
        _clipBehavior = clipBehavior,
@@ -1149,6 +1260,8 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   /// {@macro flutter.clipper.clipBehavior}
+  ///
+  /// Defaults to [Clip.antiAlias].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
@@ -1168,14 +1281,16 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipPath.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(clipPath != null);
+    assert(clipBehavior != null);
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1183,12 +1298,52 @@ class ClipPathLayer extends ContainerLayer {
     }());
     if (enabled) {
       final Path shiftedPath = layerOffset == Offset.zero ? clipPath : clipPath.shift(layerOffset);
-      builder.pushClipPath(shiftedPath, clipBehavior: clipBehavior);
+      engineLayer = builder.pushClipPath(shiftedPath, clipBehavior: clipBehavior, oldLayer: _engineLayer);
+    } else {
+      engineLayer = null;
     }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
-    return null; // this does not return an engine layer yet.
+  }
+}
+
+/// A composite layer that applies a [ColorFilter] to its children.
+class ColorFilterLayer extends ContainerLayer {
+  /// Creates a layer that applies a [ColorFilter] to its children.
+  ///
+  /// The [colorFilter] property must be non-null before the compositing phase
+  /// of the pipeline.
+  ColorFilterLayer({
+    ColorFilter colorFilter,
+  }) : _colorFilter = colorFilter;
+
+  /// The color filter to apply to children.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  ColorFilter get colorFilter => _colorFilter;
+  ColorFilter _colorFilter;
+  set colorFilter(ColorFilter value) {
+    assert(value != null);
+    if (value != _colorFilter) {
+      _colorFilter = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  @override
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(colorFilter != null);
+    engineLayer = builder.pushColorFilter(colorFilter, oldLayer: _engineLayer);
+    addChildrenToScene(builder, layerOffset);
+    builder.pop();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ColorFilter>('colorFilter', colorFilter));
   }
 }
 
@@ -1203,8 +1358,7 @@ class TransformLayer extends OffsetLayer {
   /// The [transform] and [offset] properties must be non-null before the
   /// compositing phase of the pipeline.
   TransformLayer({ Matrix4 transform, Offset offset = Offset.zero })
-    : assert(transform.storage.every((double value) => value.isFinite)),
-      _transform = transform,
+    : _transform = transform,
       super(offset: offset);
 
   /// The matrix to apply.
@@ -1219,10 +1373,13 @@ class TransformLayer extends OffsetLayer {
   Matrix4 get transform => _transform;
   Matrix4 _transform;
   set transform(Matrix4 value) {
+    assert(value != null);
+    assert(value.storage.every((double component) => component.isFinite));
     if (value == _transform)
       return;
     _transform = value;
     _inverseDirty = true;
+    markNeedsAddToScene();
   }
 
   Matrix4 _lastEffectiveTransform;
@@ -1230,17 +1387,17 @@ class TransformLayer extends OffsetLayer {
   bool _inverseDirty = true;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(transform != null);
     _lastEffectiveTransform = transform;
     final Offset totalOffset = offset + layerOffset;
     if (totalOffset != Offset.zero) {
       _lastEffectiveTransform = Matrix4.translationValues(totalOffset.dx, totalOffset.dy, 0.0)
         ..multiply(_lastEffectiveTransform);
     }
-    builder.pushTransform(_lastEffectiveTransform.storage);
+    engineLayer = builder.pushTransform(_lastEffectiveTransform.storage, oldLayer: _engineLayer);
     addChildrenToScene(builder);
     builder.pop();
-    return null; // this does not return an engine layer yet.
   }
 
   Offset _transformOffset(Offset regionOffset) {
@@ -1264,12 +1421,12 @@ class TransformLayer extends OffsetLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     final Offset transformedOffset = _transformOffset(regionOffset);
     if (transformedOffset == null) {
-      return;
+      return Iterable<S>.empty();
     }
-    yield* super.findAll<S>(transformedOffset);
+    return super.findAll<S>(transformedOffset);
   }
 
   @override
@@ -1305,7 +1462,7 @@ class OpacityLayer extends ContainerLayer {
   /// The [alpha] property must be non-null before the compositing phase of
   /// the pipeline.
   OpacityLayer({
-    @required int alpha,
+    int alpha,
     Offset offset = Offset.zero,
   }) : _alpha = alpha,
        _offset = offset;
@@ -1320,6 +1477,7 @@ class OpacityLayer extends ContainerLayer {
   int get alpha => _alpha;
   int _alpha;
   set alpha(int value) {
+    assert(value != null);
     if (value != _alpha) {
       _alpha = value;
       markNeedsAddToScene();
@@ -1344,18 +1502,21 @@ class OpacityLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(alpha != null);
     bool enabled = firstChild != null;  // don't add this layer if there's no child
     assert(() {
       enabled = enabled && !debugDisableOpacityLayers;
       return true;
     }());
+
     if (enabled)
-      builder.pushOpacity(alpha, offset: offset + layerOffset);
+      engineLayer = builder.pushOpacity(alpha, offset: offset + layerOffset, oldLayer: _engineLayer);
+    else
+      engineLayer = null;
     addChildrenToScene(builder);
     if (enabled)
       builder.pop();
-    return null; // this does not return an engine layer yet.
   }
 
   @override
@@ -1373,9 +1534,9 @@ class ShaderMaskLayer extends ContainerLayer {
   /// The [shader], [maskRect], and [blendMode] properties must be non-null
   /// before the compositing phase of the pipeline.
   ShaderMaskLayer({
-    @required Shader shader,
-    @required Rect maskRect,
-    @required BlendMode blendMode,
+    Shader shader,
+    Rect maskRect,
+    BlendMode blendMode,
   }) : _shader = shader,
        _maskRect = maskRect,
        _blendMode = blendMode;
@@ -1420,12 +1581,14 @@ class ShaderMaskLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(shader != null);
+    assert(maskRect != null);
+    assert(blendMode != null);
     final Rect shiftedMaskRect = layerOffset == Offset.zero ? maskRect : maskRect.shift(layerOffset);
-    builder.pushShaderMask(shader, shiftedMaskRect, blendMode);
+    engineLayer = builder.pushShaderMask(shader, shiftedMaskRect, blendMode, oldLayer: _engineLayer);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
-    return null; // this does not return an engine layer yet.
   }
 
   @override
@@ -1443,7 +1606,7 @@ class BackdropFilterLayer extends ContainerLayer {
   ///
   /// The [filter] property must be non-null before the compositing phase of the
   /// pipeline.
-  BackdropFilterLayer({ @required ui.ImageFilter filter }) : _filter = filter;
+  BackdropFilterLayer({ ui.ImageFilter filter }) : _filter = filter;
 
   /// The filter to apply to the existing contents of the scene.
   ///
@@ -1459,11 +1622,11 @@ class BackdropFilterLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    builder.pushBackdropFilter(filter);
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(filter != null);
+    engineLayer = builder.pushBackdropFilter(filter, oldLayer: _engineLayer);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
-    return null; // this does not return an engine layer yet.
   }
 }
 
@@ -1480,19 +1643,15 @@ class PhysicalModelLayer extends ContainerLayer {
   /// Creates a composited layer that uses a physical model to producing
   /// lighting effects.
   ///
-  /// The [clipPath], [elevation], and [color] arguments must not be null.
+  /// The [clipPath], [clipBehavior], [elevation], [color], and [shadowColor]
+  /// arguments must be non-null before the compositing phase of the pipeline.
   PhysicalModelLayer({
-    @required Path clipPath,
+    Path clipPath,
     Clip clipBehavior = Clip.none,
-    @required double elevation,
-    @required Color color,
-    @required Color shadowColor,
-  }) : assert(clipPath != null),
-       assert(clipBehavior != null),
-       assert(elevation != null),
-       assert(color != null),
-       assert(shadowColor != null),
-       _clipPath = clipPath,
+    double elevation,
+    Color color,
+    Color shadowColor,
+  }) : _clipPath = clipPath,
        _clipBehavior = clipBehavior,
        _elevation = elevation,
        _color = color,
@@ -1582,15 +1741,20 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipPath.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    ui.EngineLayer engineLayer;
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(clipPath != null);
+    assert(clipBehavior != null);
+    assert(elevation != null);
+    assert(color != null);
+    assert(shadowColor != null);
+
     bool enabled = true;
     assert(() {
       enabled = !debugDisablePhysicalShapeLayers;
@@ -1603,12 +1767,14 @@ class PhysicalModelLayer extends ContainerLayer {
         color: color,
         shadowColor: shadowColor,
         clipBehavior: clipBehavior,
+        oldLayer: _engineLayer,
       );
+    } else {
+      engineLayer = null;
     }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
-    return engineLayer;
   }
 
   @override
@@ -1654,13 +1820,18 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  LeaderLayer({ @required this.link, this.offset = Offset.zero }) : assert(link != null);
+  LeaderLayer({ @required LayerLink link, this.offset = Offset.zero }) : assert(link != null), _link = link;
 
   /// The object with which this layer should register.
   ///
   /// The link will be established when this layer is [attach]ed, and will be
   /// cleared when this layer is [detach]ed.
-  final LayerLink link;
+  LayerLink get link => _link;
+  set link(LayerLink value) {
+    assert(value != null);
+    _link = value;
+  }
+  LayerLink _link;
 
   /// Offset from parent in the parent's coordinate system.
   ///
@@ -1705,15 +1876,14 @@ class LeaderLayer extends ContainerLayer {
   Iterable<S> findAll<S>(Offset regionOffset) => super.findAll<S>(regionOffset - offset);
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(offset != null);
     _lastOffset = offset + layerOffset;
     if (_lastOffset != Offset.zero)
-      builder.pushTransform(Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage);
+      engineLayer = builder.pushTransform(Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage, oldLayer: _engineLayer);
     addChildrenToScene(builder);
     if (_lastOffset != Offset.zero)
       builder.pop();
-    return null; // this does not have an engine layer.
   }
 
   /// Applies the transform that would be applied when compositing the given
@@ -1756,18 +1926,23 @@ class FollowerLayer extends ContainerLayer {
   /// The [unlinkedOffset], [linkedOffset], and [showWhenUnlinked] properties
   /// must be non-null before the compositing phase of the pipeline.
   FollowerLayer({
-    @required this.link,
+    @required LayerLink link,
     this.showWhenUnlinked = true,
     this.unlinkedOffset = Offset.zero,
     this.linkedOffset = Offset.zero,
-  }) : assert(link != null);
+  }) : assert(link != null), _link = link;
 
   /// The link to the [LeaderLayer].
   ///
   /// The same object should be provided to a [LeaderLayer] that is earlier in
   /// the layer tree. When this layer is composited, it will apply a transform
   /// that moves its children to match the position of the [LeaderLayer].
-  final LayerLink link;
+  LayerLink get link => _link;
+  set link(LayerLink value) {
+    assert(value != null);
+    _link = value;
+  }
+  LayerLink _link;
 
   /// Whether to show the layer's contents when the [link] does not point to a
   /// [LeaderLayer].
@@ -1927,43 +2102,43 @@ class FollowerLayer extends ContainerLayer {
   }
 
   /// {@template flutter.leaderFollower.alwaysNeedsAddToScene}
-  /// This disables retained rendering for Leader/FollowerLayer.
+  /// This disables retained rendering.
   ///
-  /// A FollowerLayer copies changes from a LeaderLayer that could be anywhere
-  /// in the Layer tree, and that LeaderLayer could change without notifying the
-  /// FollowerLayer. Therefore we have to always call a FollowerLayer's
-  /// [addToScene]. In order to call FollowerLayer's [addToScene], LeaderLayer's
-  /// [addToScene] must be called first so LeaderLayer must also be considered
+  /// A [FollowerLayer] copies changes from a [LeaderLayer] that could be anywhere
+  /// in the Layer tree, and that leader layer could change without notifying the
+  /// follower layer. Therefore we have to always call a follower layer's
+  /// [addToScene]. In order to call follower layer's [addToScene], leader layer's
+  /// [addToScene] must be called first so leader layer must also be considered
   /// as [alwaysNeedsAddToScene].
   /// {@endtemplate}
   @override
   bool get alwaysNeedsAddToScene => true;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(link != null);
     assert(showWhenUnlinked != null);
     if (link.leader == null && !showWhenUnlinked) {
       _lastTransform = null;
       _lastOffset = null;
       _inverseDirty = true;
-      return null; // this does not have an engine layer.
+      engineLayer = null;
+      return;
     }
     _establishTransform();
     if (_lastTransform != null) {
-      builder.pushTransform(_lastTransform.storage);
+      engineLayer = builder.pushTransform(_lastTransform.storage, oldLayer: _engineLayer);
       addChildrenToScene(builder);
       builder.pop();
       _lastOffset = unlinkedOffset + layerOffset;
     } else {
       _lastOffset = null;
       final Matrix4 matrix = Matrix4.translationValues(unlinkedOffset.dx, unlinkedOffset.dy, .0);
-      builder.pushTransform(matrix.storage);
+      engineLayer = builder.pushTransform(matrix.storage, oldLayer: _engineLayer);
       addChildrenToScene(builder);
       builder.pop();
     }
     _inverseDirty = true;
-    return null; // this does not have an engine layer.
   }
 
   @override
@@ -2031,20 +2206,21 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
       final S typedResult = untypedResult;
       return typedResult;
     }
-    return super.find<S>(regionOffset);
+    return null;
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
-    yield* super.findAll<S>(regionOffset);
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    final Iterable<S> childResults = super.findAll<S>(regionOffset);
     if (size != null && !(offset & size).contains(regionOffset)) {
-      return;
+      return childResults;
     }
     if (T == S) {
       final Object untypedResult = value;
       final S typedResult = untypedResult;
-      yield typedResult;
+      return childResults.followedBy(<S>[typedResult]);
     }
+    return childResults;
   }
 
   @override

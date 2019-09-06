@@ -97,7 +97,8 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(title),
-          actions: (actions ?? <Widget>[])..add(
+          actions: <Widget>[
+            ...?actions,
             Builder(
               builder: (BuildContext context) {
                 return IconButton(
@@ -106,17 +107,17 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                 );
               },
             ),
-          )..addAll(showExampleCodeAction ? <Widget>[
-            Builder(
-              builder: (BuildContext context) {
-                return IconButton(
-                  icon: const Icon(Icons.code),
-                  tooltip: 'Show example code',
-                  onPressed: () => _showExampleCode(context),
-                );
-              },
-            ),
-          ] : <Widget>[]),
+            if (showExampleCodeAction)
+              Builder(
+                builder: (BuildContext context) {
+                  return IconButton(
+                    icon: const Icon(Icons.code),
+                    tooltip: 'Show example code',
+                    onPressed: () => _showExampleCode(context),
+                  );
+                },
+              ),
+          ],
           bottom: TabBar(
             isScrollable: isScrollable,
             tabs: demos.map<Widget>((ComponentDemoTabData data) => Tab(text: data.tabName)).toList(),

@@ -377,13 +377,12 @@ class ArchiveUnpublisher {
     if (dest.endsWith('.json')) {
       mimeType = 'application/json';
     }
-    final List<String> args = <String>[];
-    // Use our preferred MIME type for the files we care about
-    // and let gsutil figure it out for anything else.
-    if (mimeType != null) {
-      args.addAll(<String>['-h', 'Content-Type:$mimeType']);
-    }
-    args.addAll(<String>['cp', src, dest]);
+    final List<String> args = <String>[
+      // Use our preferred MIME type for the files we care about
+      // and let gsutil figure it out for anything else.
+      if (mimeType != null) ...<String>['-h', 'Content-Type:$mimeType'],
+      ...<String>['cp', src, dest],
+    ];
     return await _runGsUtil(args, confirm: confirmed);
   }
 }

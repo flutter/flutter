@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'constants.dart';
 import 'expand_icon.dart';
 import 'ink_well.dart';
 import 'material_localizations.dart';
@@ -14,7 +15,7 @@ import 'theme.dart';
 // Examples can assume:
 // void setState(VoidCallback fn) { }
 
-const double _kPanelHeaderCollapsedHeight = 48.0;
+const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
 const double _kPanelHeaderExpandedHeight = 64.0;
 
 class _SaltedKey<S, V> extends LocalKey {

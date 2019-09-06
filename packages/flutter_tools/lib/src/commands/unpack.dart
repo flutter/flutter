@@ -24,13 +24,13 @@ const Map<TargetPlatform, String> flutterArtifactPlatformDirectory =
 // directory.
 const Map<TargetPlatform, List<String>> artifactFilesByPlatform = <TargetPlatform, List<String>>{
   TargetPlatform.linux_x64: <String>[
-    'libflutter_linux.so',
+    'libflutter_linux_glfw.so',
     'flutter_export.h',
     'flutter_messenger.h',
     'flutter_plugin_registrar.h',
     'flutter_glfw.h',
     'icudtl.dat',
-    'cpp_client_wrapper/',
+    'cpp_client_wrapper_glfw/',
   ],
   TargetPlatform.darwin_x64: <String>[
     'FlutterMacOS.framework',
@@ -43,7 +43,7 @@ const Map<TargetPlatform, List<String>> artifactFilesByPlatform = <TargetPlatfor
     'flutter_export.h',
     'flutter_messenger.h',
     'flutter_plugin_registrar.h',
-    'flutter_glfw.h',
+    'flutter_windows.h',
     'icudtl.dat',
     'cpp_client_wrapper/',
   ],
@@ -68,9 +68,6 @@ class UnpackCommand extends FlutterCommand {
 
   @override
   bool get hidden => true;
-
-  @override
-  bool get isExperimental => true;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {

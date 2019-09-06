@@ -34,6 +34,7 @@ Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject
   }
 }
 
+/// Returns the list of files inside an Android Package Kit.
 Future<Iterable<String>> getFilesInApk(String apk) async {
   if (!File(apk).existsSync())
     throw TaskResult.failure(
@@ -50,9 +51,14 @@ Future<Iterable<String>> getFilesInApk(String apk) async {
       .map((String line) => line.split(' ').last)
       .toList();
 }
-
+/// Returns the list of files inside an Android App Bundle.
 Future<Iterable<String>> getFilesInAppBundle(String bundle) {
   return getFilesInApk(bundle);
+}
+
+/// Returns the list of files inside an Android Archive.
+Future<Iterable<String>> getFilesInAar(String aar) {
+  return getFilesInApk(aar);
 }
 
 void checkItContains<T>(Iterable<T> values, Iterable<T> collection) {
@@ -81,6 +87,104 @@ TaskResult failure(String message, ProcessResult result) {
 
 bool hasMultipleOccurrences(String text, Pattern pattern) {
   return text.indexOf(pattern) != text.lastIndexOf(pattern);
+}
+
+/// The Android home directory.
+String get _androidHome {
+  final String androidHome = Platform.environment['ANDROID_HOME'] ??
+      Platform.environment['ANDROID_SDK_ROOT'];
+  if (androidHome == null || androidHome.isEmpty) {
+    throw Exception('Unset env flag: `ANDROID_HOME` or `ANDROID_SDK_ROOT`.');
+  }
+  return androidHome;
+}
+
+/// Utility class to analyze the content inside an APK using dexdump,
+/// which is provided by the Android SDK.
+/// https://android.googlesource.com/platform/art/+/master/dexdump/dexdump.cc
+class ApkExtractor {
+  ApkExtractor(this.apkFile);
+
+  /// The APK.
+  final File apkFile;
+
+  bool _extracted = false;
+
+  Directory _outputDir;
+
+  Future<void> _extractApk() async {
+    if (_extracted) {
+      return;
+    }
+    _outputDir = apkFile.parent.createTempSync('apk');
+    if (Platform.isWindows) {
+      await eval('7za', <String>['x', apkFile.path], workingDirectory: _outputDir.path);
+    } else {
+      await eval('unzip', <String>[apkFile.path], workingDirectory: _outputDir.path);
+    }
+    _extracted = true;
+  }
+
+  /// Returns the full path to the [dexdump] tool.
+  Future<String> _findDexDump() async {
+    String dexdumps;
+    if (Platform.isWindows) {
+      dexdumps = await eval('dir', <String>['/s/b', 'dexdump.exe'],
+          workingDirectory: _androidHome);
+    } else {
+      dexdumps = await eval('find', <String>[_androidHome, '-name', 'dexdump']);
+    }
+    if (dexdumps.isEmpty) {
+      throw Exception('Couldn\'t find a dexdump executable.');
+    }
+    return dexdumps.split('\n').first;
+  }
+
+  // Removes any temporary directory.
+  void dispose() {
+    if (!_extracted) {
+      return;
+    }
+    rmTree(_outputDir);
+    _extracted = true;
+  }
+
+  /// Returns true if the APK contains a given class.
+  Future<bool> containsClass(String className) async {
+    await _extractApk();
+
+    final String dexDump = await _findDexDump();
+    final String classesDex = path.join(_outputDir.path, 'classes.dex');
+
+    if (!File(classesDex).existsSync()) {
+      throw Exception('Couldn\'t find classes.dex in the APK.');
+    }
+    final String classDescriptors = await eval(dexDump,
+        <String>[classesDex], printStdout: false);
+
+    if (classDescriptors.isEmpty) {
+      throw Exception('No descriptors found in classes.dex.');
+    }
+    return classDescriptors.contains(className.replaceAll('.', '/'));
+  }
+}
+
+/// Gets the content of the `AndroidManifest.xml`.
+Future<String> getAndroidManifest(String apk) {
+  final String apkAnalyzer = path.join(_androidHome, 'tools', 'bin', 'apkanalyzer');
+  return eval(apkAnalyzer, <String>['manifest', 'print', apk],
+      workingDirectory: _androidHome);
+}
+
+ /// Checks that the classes are contained in the APK, throws otherwise.
+Future<void> checkApkContainsClasses(File apk, List<String> classes) async {
+  final ApkExtractor extractor = ApkExtractor(apk);
+  for (String className in classes) {
+    if (!(await extractor.containsClass(className))) {
+      throw Exception('APK doesn\'t contain class `$className`.');
+    }
+  }
+  extractor.dispose();
 }
 
 class FlutterProject {
@@ -252,13 +356,22 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
 
   print('\nUsing JAVA_HOME=$javaHome');
 
-  final List<String> args = <String>['app:$task'];
-  if (options != null) {
-    args.addAll(options);
-  }
-  final String gradle = Platform.isWindows ? 'gradlew.bat' : './gradlew';
-  print('Running Gradle: ${path.join(workingDirectory, gradle)} ${args.join(' ')}');
-  print(File(path.join(workingDirectory, gradle)).readAsStringSync());
+  final List<String> args = <String>[
+    'app:$task',
+    ...?options,
+  ];
+  final String gradle = path.join(workingDirectory, Platform.isWindows ? 'gradlew.bat' : './gradlew');
+  print('┌── $gradle');
+  print('│ ' + File(path.join(workingDirectory, gradle)).readAsLinesSync().join('\n│ '));
+  print('└─────────────────────────────────────────────────────────────────────────────────────');
+  print(
+    'Running Gradle:\n'
+    '  Executable: $gradle\n'
+    '  Arguments: ${args.join(' ')}\n'
+    '  Working directory: $workingDirectory\n'
+    '  JAVA_HOME: $javaHome\n'
+    ''
+  );
   return Process.run(
     gradle,
     args,

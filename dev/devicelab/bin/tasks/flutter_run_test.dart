@@ -36,11 +36,10 @@ Future<TaskResult> createFlutterRunTask() async {
   final List<String> options = <String>[
     '-t', runTestSource.absolute.path, '-d', device.deviceId,
   ];
-  setLocalEngineOptionIfNecessary(options);
   await inDirectory<void>(flutterGalleryDir, () async {
     startProcess(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
-      <String>['run', ...options],
+      flutterCommandArgs('run', options),
       environment: null,
     );
     final Completer<void> finished = Completer<void>();

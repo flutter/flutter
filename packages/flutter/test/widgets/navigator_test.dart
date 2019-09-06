@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
+import 'observer_tester.dart';
 import 'semantics_tester.dart';
 
 class FirstWidget extends StatelessWidget {
@@ -87,48 +88,6 @@ class OnTapPage extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-typedef OnObservation = void Function(Route<dynamic> route, Route<dynamic> previousRoute);
-
-class TestObserver extends NavigatorObserver {
-  OnObservation onPushed;
-  OnObservation onPopped;
-  OnObservation onRemoved;
-  OnObservation onReplaced;
-  OnObservation onStartUserGesture;
-
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
-    if (onPushed != null) {
-      onPushed(route, previousRoute);
-    }
-  }
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
-    if (onPopped != null) {
-      onPopped(route, previousRoute);
-    }
-  }
-
-  @override
-  void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) {
-    if (onRemoved != null)
-      onRemoved(route, previousRoute);
-  }
-
-  @override
-  void didReplace({ Route<dynamic> oldRoute, Route<dynamic> newRoute }) {
-    if (onReplaced != null)
-      onReplaced(newRoute, oldRoute);
-  }
-
-  @override
-  void didStartUserGesture(Route<dynamic> route, Route<dynamic> previousRoute) {
-    if (onStartUserGesture != null)
-      onStartUserGesture(route, previousRoute);
   }
 }
 
@@ -1013,5 +972,65 @@ void main() {
     expect(find.text('/D'), findsOneWidget);
     expect(arguments.single, 'pushReplacementNamed');
     arguments.clear();
+  });
+
+  testWidgets('Initial route can have gaps', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> keyNav = GlobalKey<NavigatorState>();
+    const Key keyRoot = Key('Root');
+    const Key keyA = Key('A');
+    const Key keyABC = Key('ABC');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: keyNav,
+        initialRoute: '/A/B/C',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => Container(key: keyRoot),
+          '/A': (BuildContext context) => Container(key: keyA),
+          // The route /A/B is intentionally left out.
+          '/A/B/C': (BuildContext context) => Container(key: keyABC),
+        },
+      ),
+    );
+
+    // The initial route /A/B/C should've been pushed successfully.
+    expect(find.byKey(keyRoot), findsOneWidget);
+    expect(find.byKey(keyA), findsOneWidget);
+    expect(find.byKey(keyABC), findsOneWidget);
+
+    keyNav.currentState.pop();
+    await tester.pumpAndSettle();
+    expect(find.byKey(keyRoot), findsOneWidget);
+    expect(find.byKey(keyA), findsOneWidget);
+    expect(find.byKey(keyABC), findsNothing);
+  });
+
+  testWidgets('The full initial route has to be matched', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> keyNav = GlobalKey<NavigatorState>();
+    const Key keyRoot = Key('Root');
+    const Key keyA = Key('A');
+    const Key keyAB = Key('AB');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: keyNav,
+        initialRoute: '/A/B/C',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => Container(key: keyRoot),
+          '/A': (BuildContext context) => Container(key: keyA),
+          '/A/B': (BuildContext context) => Container(key: keyAB),
+          // The route /A/B/C is intentionally left out.
+        },
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception is String, isTrue);
+    expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
+
+    // Only the root route should've been pushed.
+    expect(find.byKey(keyRoot), findsOneWidget);
+    expect(find.byKey(keyA), findsNothing);
+    expect(find.byKey(keyAB), findsNothing);
   });
 }

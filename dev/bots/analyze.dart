@@ -40,9 +40,10 @@ Future<void> main(List<String> args) async {
 
   {
     // Analyze all the Dart code in the repo.
-    final List<String> options = <String>['--flutter-repo'];
-    options.addAll(args);
-    await _runFlutterAnalyze(flutterRoot, options: options);
+    await _runFlutterAnalyze(flutterRoot, options: <String>[
+      '--flutter-repo',
+      ...args,
+    ]);
   }
 
   // Ensure that all package dependencies are in sync.
@@ -59,9 +60,12 @@ Future<void> main(List<String> args) async {
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
   {
-    final List<String> options = <String>['--flutter-repo', '--watch', '--benchmark'];
-    options.addAll(args);
-    await _runFlutterAnalyze(flutterRoot, options: options);
+    await _runFlutterAnalyze(flutterRoot, options: <String>[
+      '--flutter-repo',
+      '--watch',
+      '--benchmark',
+      ...args,
+    ]);
   }
 
   await _checkForTrailingSpaces();
@@ -79,9 +83,11 @@ Future<void> main(List<String> args) async {
       workingDirectory: flutterRoot,
     );
     {
-      final List<String> options = <String>['--watch', '--benchmark'];
-      options.addAll(args);
-      await _runFlutterAnalyze(outDir.path, options: options);
+      await _runFlutterAnalyze(outDir.path, options: <String>[
+        '--watch',
+        '--benchmark',
+        ...args,
+      ]);
     }
   } finally {
     outDir.deleteSync(recursive: true);
@@ -225,7 +231,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   }
   printProgress('RUNNING', relativeWorkingDir, commandDescription);
 
-  final DateTime start = DateTime.now();
+  final Stopwatch time = Stopwatch()..start();
   final Process process = await Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
@@ -240,7 +246,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
     exitCode: exitCode,
   );
 
-  print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
+  print('$clock ELAPSED TIME: $bold${prettyPrintDuration(time.elapsed)}$reset for $commandDescription in $relativeWorkingDir');
 
   if (exitCode != 0 && !allowNonZeroExit) {
     stderr.write(result.stderr);
@@ -579,7 +585,7 @@ Future<void> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
     }
     await runCommand(flutter, <String>['inject-plugins'],
       workingDirectory: package,
-      printOutput: false,
+      outputMode: OutputMode.discard,
     );
     for (File registrant in fileToContent.keys) {
       if (registrant.readAsStringSync() != fileToContent[registrant]) {

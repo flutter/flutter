@@ -1541,61 +1541,46 @@ abstract class DiagnosticsNode {
     if (kReleaseMode) {
       return <String, Object>{};
     }
-    final Map<String, Object> data = <String, Object>{
+    final bool hasChildren = getChildren().isNotEmpty;
+    return <String, Object>{
       'description': toDescription(),
       'type': runtimeType.toString(),
+      if (name != null)
+        'name': name,
+      if (!showSeparator)
+        'showSeparator': showSeparator,
+      if (level != DiagnosticLevel.info)
+        'level': describeEnum(level),
+      if (showName == false)
+        'showName': showName,
+      if (emptyBodyDescription != null)
+        'emptyBodyDescription': emptyBodyDescription,
+      if (style != DiagnosticsTreeStyle.sparse)
+        'style': describeEnum(style),
+      if (allowTruncate)
+        'allowTruncate': allowTruncate,
+      if (hasChildren)
+        'hasChildren': hasChildren,
+      if (linePrefix?.isNotEmpty == true)
+        'linePrefix': linePrefix,
+      if (!allowWrap)
+        'allowWrap': allowWrap,
+      if (allowNameWrap)
+        'allowNameWrap': allowNameWrap,
+      ...delegate.additionalNodeProperties(this),
+      if (delegate.includeProperties)
+        'properties': toJsonList(
+          delegate.filterProperties(getProperties(), this),
+          this,
+          delegate,
+        ),
+      if (delegate.subtreeDepth > 0)
+        'children': toJsonList(
+          delegate.filterChildren(getChildren(), this),
+          this,
+          delegate,
+        ),
     };
-    if (name != null)
-      data['name'] = name;
-
-    if (!showSeparator)
-      data['showSeparator'] = showSeparator;
-    if (level != DiagnosticLevel.info)
-      data['level'] = describeEnum(level);
-    if (showName == false)
-      data['showName'] = showName;
-    if (emptyBodyDescription != null)
-      data['emptyBodyDescription'] = emptyBodyDescription;
-    if (style != DiagnosticsTreeStyle.sparse)
-      data['style'] = describeEnum(style);
-
-    if (allowTruncate)
-      data['allowTruncate'] = allowTruncate;
-
-    final bool hasChildren = getChildren().isNotEmpty;
-    if (hasChildren)
-      data['hasChildren'] = hasChildren;
-
-    if (linePrefix?.isNotEmpty == true)
-      data['linePrefix'] = linePrefix;
-
-    if (!allowWrap)
-      data['allowWrap'] = allowWrap;
-
-    if (allowNameWrap)
-      data['allowNameWrap'] = allowNameWrap;
-
-    data.addAll(delegate.additionalNodeProperties(this));
-
-    if (delegate.includeProperties) {
-      final List<DiagnosticsNode> properties = getProperties();
-      data['properties'] = toJsonList(
-        delegate.filterProperties(properties, this),
-        this,
-        delegate,
-      );
-    }
-
-    if (delegate.subtreeDepth > 0) {
-      final List<DiagnosticsNode> children = getChildren();
-      data['children'] = toJsonList(
-        delegate.filterChildren(children, this),
-        this,
-        delegate,
-      );
-    }
-
-    return data;
   }
 
   /// Serializes a [List] of [DiagnosticsNode]s to a JSON list according to
@@ -2232,20 +2217,28 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   );
 
   @override
-  String valueToString({ TextTreeConfiguration parentConfiguration }) {
+  String valueToString({TextTreeConfiguration parentConfiguration}) {
     if (value == null)
       return value.toString();
 
     if (value.isEmpty)
       return ifEmpty ?? '[]';
 
+    final Iterable<String> formattedValues = value.map((T v) {
+      if (T == double && v is double) {
+        return debugFormatDouble(v);
+      } else {
+        return v.toString();
+      }
+    });
+
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Always display the value as a single line and enclose the iterable
       // value in brackets to avoid ambiguity.
-      return '[${value.join(', ')}]';
+      return '[${formattedValues.join(', ')}]';
     }
 
-    return value.join(_isSingleLine(style) ? ', ' : '\n');
+    return formattedValues.join(_isSingleLine(style) ? ', ' : '\n');
   }
 
   /// Priority level of the diagnostic used to control which diagnostics should
@@ -2315,13 +2308,17 @@ class EnumProperty<T> extends DiagnosticsProperty<T> {
 /// omitted, that is taken to mean that [level] should be
 /// [DiagnosticLevel.hidden] when [value] is non-null or null respectively.
 ///
-/// This kind of diagnostics property is typically used for values mostly opaque
+/// This kind of diagnostics property is typically used for opaque
 /// values, like closures, where presenting the actual object is of dubious
 /// value but where reporting the presence or absence of the value is much more
 /// useful.
 ///
 /// See also:
 ///
+///
+///  * [FlagsSummary], which provides similar functionality but accepts multiple
+///    flags under the same name, and is preferred if there are multiple such
+///    values that can fit into a same category (such as "listeners").
 ///  * [FlagProperty], which provides similar functionality describing whether
 ///    a [value] is true or false.
 class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
@@ -2419,6 +2416,106 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
     if (ifPresent != null)
       json['ifPresent'] = ifPresent;
     return json;
+  }
+}
+
+/// A summary of multiple properties, indicating whether each of them is present
+/// (non-null) or absent (null).
+///
+/// Each entry of [value] is described by its key. The eventual description will
+/// be a list of keys of non-null entries.
+///
+/// The [ifEmpty] describes the entire collection of [value] when it contains no
+/// non-null entries. If [ifEmpty] is omitted, [level] will be
+/// [DiagnosticLevel.hidden] when [value] contains no non-null entries.
+///
+/// This kind of diagnostics property is typically used for opaque
+/// values, like closures, where presenting the actual object is of dubious
+/// value but where reporting the presence or absence of the value is much more
+/// useful.
+///
+/// See also:
+///
+///  * [ObjectFlagSummary], which provides similar functionality but accepts
+///    only one flag, and is preferred if there is only one entry.
+///  * [IterableProperty], which provides similar functionality describing
+///    the values a collection of objects.
+class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
+  /// Create a summary for multiple properties, indicating whether each of them
+  /// is present (non-null) or absent (null).
+  ///
+  /// The [value], [showName], [showSeparator] and [level] arguments must not be
+  /// null.
+  FlagsSummary(
+    String name,
+    Map<String, T> value, {
+    String ifEmpty,
+    bool showName = true,
+    bool showSeparator = true,
+    DiagnosticLevel level  = DiagnosticLevel.info,
+  }) : assert(value != null),
+       assert(showName != null),
+       assert(showSeparator != null),
+       assert(level != null),
+       super(
+         name,
+         value,
+         ifEmpty: ifEmpty,
+         showName: showName,
+         showSeparator: showSeparator,
+         level: level,
+       );
+
+  @override
+  String valueToString({TextTreeConfiguration parentConfiguration}) {
+    assert(value != null);
+    if (!_hasNonNullEntry() && ifEmpty != null)
+      return ifEmpty;
+
+    final Iterable<String> formattedValues = _formattedValues();
+    if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
+      // Always display the value as a single line and enclose the iterable
+      // value in brackets to avoid ambiguity.
+      return '[${formattedValues.join(', ')}]';
+    }
+
+    return formattedValues.join(_isSingleLine(style) ? ', ' : '\n');
+  }
+
+  /// Priority level of the diagnostic used to control which diagnostics should
+  /// be shown and filtered.
+  ///
+  /// If [ifEmpty] is null and the [value] contains no non-null entries, then
+  /// level [DiagnosticLevel.hidden] is returned.
+  @override
+  DiagnosticLevel get level {
+    if (!_hasNonNullEntry() && ifEmpty == null)
+      return DiagnosticLevel.hidden;
+    return super.level;
+  }
+
+  @override
+  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
+    if (value.isNotEmpty)
+      json['values'] = _formattedValues().toList();
+    return json;
+  }
+
+  bool _hasNonNullEntry() => value.values.any((Object o) => o != null);
+
+  // An iterable of each entry's description in [value].
+  //
+  // For a non-null value, its description is its key.
+  //
+  // For a null value, it is omitted unless `includeEmtpy` is true and
+  // [ifEntryNull] contains a corresponding description.
+  Iterable<String> _formattedValues() sync* {
+    for (MapEntry<String, T> entry in value.entries) {
+      if (entry.value != null) {
+        yield entry.key;
+      }
+    }
   }
 }
 
@@ -2789,7 +2886,10 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 
   DiagnosticPropertiesBuilder _cachedBuilder;
 
-  DiagnosticPropertiesBuilder get _builder {
+  /// Retrieve the [DiagnosticPropertiesBuilder] of current node.
+  ///
+  /// It will cache the result to prevent duplicate operation.
+  DiagnosticPropertiesBuilder get builder {
     if (kReleaseMode)
       return null;
     if (_cachedBuilder == null) {
@@ -2801,14 +2901,14 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 
   @override
   DiagnosticsTreeStyle get style {
-    return kReleaseMode ? DiagnosticsTreeStyle.none : super.style ?? _builder.defaultDiagnosticsTreeStyle;
+    return kReleaseMode ? DiagnosticsTreeStyle.none : super.style ?? builder.defaultDiagnosticsTreeStyle;
   }
 
   @override
-  String get emptyBodyDescription => kReleaseMode ? '' : _builder.emptyBodyDescription;
+  String get emptyBodyDescription => kReleaseMode ? '' : builder.emptyBodyDescription;
 
   @override
-  List<DiagnosticsNode> getProperties() => kReleaseMode ? const <DiagnosticsNode>[] : _builder.properties;
+  List<DiagnosticsNode> getProperties() => kReleaseMode ? const <DiagnosticsNode>[] : builder.properties;
 
   @override
   List<DiagnosticsNode> getChildren() {
@@ -2890,6 +2990,13 @@ String describeEnum(Object enumEntry) {
 /// Builder to accumulate properties and configuration used to assemble a
 /// [DiagnosticsNode] from a [Diagnosticable] object.
 class DiagnosticPropertiesBuilder {
+  /// Creates a [DiagnosticPropertiesBuilder] with [properties] initialize to
+  /// an empty array.
+  DiagnosticPropertiesBuilder() : properties = <DiagnosticsNode>[];
+
+  /// Creates a [DiagnosticPropertiesBuilder] with a given [properties].
+  DiagnosticPropertiesBuilder.fromProperties(this.properties);
+
   /// Add a property to the list of properties.
   void add(DiagnosticsNode property) {
     if (!kReleaseMode) {
@@ -2898,7 +3005,7 @@ class DiagnosticPropertiesBuilder {
   }
 
   /// List of properties accumulated so far.
-  final List<DiagnosticsNode> properties = <DiagnosticsNode>[];
+  final List<DiagnosticsNode> properties;
 
   /// Default style to use for the [DiagnosticsNode] if no style is specified.
   DiagnosticsTreeStyle defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.sparse;

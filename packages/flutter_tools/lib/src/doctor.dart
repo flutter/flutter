@@ -7,6 +7,7 @@ import 'dart:async';
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
+import 'base/async_guard.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -19,21 +20,20 @@ import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
-import 'desktop.dart';
 import 'device.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
-import 'ios/plist_utils.dart';
+import 'ios/plist_parser.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
+import 'reporting/reporting.dart';
 import 'tester/flutter_tester.dart';
-import 'usage.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
 import 'web/web_validator.dart';
@@ -59,47 +59,37 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   @override
   List<DoctorValidator> get validators {
-    if (_validators == null) {
-      _validators = <DoctorValidator>[];
-      _validators.add(FlutterValidator());
-
-      if (androidWorkflow.appliesToHostPlatform)
-        _validators.add(GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]));
-
-      if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        _validators.add(GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]));
-
-      if (iosWorkflow.appliesToHostPlatform)
-        _validators.add(iosValidator);
-
-      if (webWorkflow.appliesToHostPlatform)
-        _validators.add(const WebValidator());
-
-      // Add desktop doctors to workflow if the flag is enabled.
-      if (flutterDesktopEnabled) {
-        if (linuxWorkflow.appliesToHostPlatform) {
-          _validators.add(LinuxDoctorValidator());
-        }
-        if (windowsWorkflow.appliesToHostPlatform) {
-          _validators.add(visualStudioValidator);
-        }
-      }
-
-      final List<DoctorValidator> ideValidators = <DoctorValidator>[];
-      ideValidators.addAll(AndroidStudioValidator.allValidators);
-      ideValidators.addAll(IntelliJValidator.installedValidators);
-      ideValidators.addAll(VsCodeValidator.installedValidators);
-      if (ideValidators.isNotEmpty)
-        _validators.addAll(ideValidators);
-      else
-        _validators.add(NoIdeValidator());
-
-      if (ProxyValidator.shouldShow)
-        _validators.add(ProxyValidator());
-
-      if (deviceManager.canListAnything)
-        _validators.add(DeviceValidator());
+    if (_validators != null) {
+      return _validators;
     }
+
+    final List<DoctorValidator> ideValidators = <DoctorValidator>[
+      ...AndroidStudioValidator.allValidators,
+      ...IntelliJValidator.installedValidators,
+      ...VsCodeValidator.installedValidators,
+    ];
+
+    _validators = <DoctorValidator>[
+      FlutterValidator(),
+      if (androidWorkflow.appliesToHostPlatform)
+        GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
+      if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
+        GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
+      if (webWorkflow.appliesToHostPlatform)
+        const WebValidator(),
+      if (linuxWorkflow.appliesToHostPlatform)
+        LinuxDoctorValidator(),
+      if (windowsWorkflow.appliesToHostPlatform)
+        visualStudioValidator,
+      if (ideValidators.isNotEmpty)
+        ...ideValidators
+      else
+        NoIdeValidator(),
+      if (ProxyValidator.shouldShow)
+        ProxyValidator(),
+      if (deviceManager.canListAnything)
+        DeviceValidator(),
+    ];
     return _validators;
   }
 
@@ -126,6 +116,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (windowsWorkflow.appliesToHostPlatform)
         _workflows.add(windowsWorkflow);
 
+      if (webWorkflow.appliesToHostPlatform)
+        _workflows.add(webWorkflow);
+
     }
     return _workflows;
   }
@@ -150,7 +143,16 @@ class Doctor {
   List<ValidatorTask> startValidatorTasks() {
     final List<ValidatorTask> tasks = <ValidatorTask>[];
     for (DoctorValidator validator in validators) {
-      tasks.add(ValidatorTask(validator, validator.validate()));
+      // We use an asyncGuard() here to be absolutely certain that
+      // DoctorValidators do not result in an uncaught exception. Since the
+      // Future returned by the asyncGuard() is not awaited, we pass an
+      // onError callback to it and translate errors into ValidationResults.
+      final Future<ValidationResult> result =
+          asyncGuard<ValidationResult>(validator.validate,
+            onError: (Object exception, StackTrace stackTrace) {
+              return ValidationResult.crash(exception, stackTrace);
+            });
+      tasks.add(ValidatorTask(validator, result));
     }
     return tasks;
   }
@@ -161,44 +163,62 @@ class Doctor {
 
   /// Print a summary of the state of the tooling, as well as how to get more info.
   Future<void> summary() async {
-    printStatus(await summaryText);
+    printStatus(await _summaryText());
   }
 
-  Future<String> get summaryText async {
+  Future<String> _summaryText() async {
     final StringBuffer buffer = StringBuffer();
 
-    bool allGood = true;
+    bool missingComponent = false;
+    bool sawACrash = false;
 
     for (DoctorValidator validator in validators) {
       final StringBuffer lineBuffer = StringBuffer();
-      final ValidationResult result = await validator.validate();
-      lineBuffer.write('${result.coloredLeadingBox} ${validator.title} is ');
+      ValidationResult result;
+      try {
+        result = await asyncGuard<ValidationResult>(() => validator.validate());
+      } catch (exception) {
+        // We're generating a summary, so drop the stack trace.
+        result = ValidationResult.crash(exception);
+      }
+      lineBuffer.write('${result.coloredLeadingBox} ${validator.title}: ');
       switch (result.type) {
+        case ValidationType.crash:
+          lineBuffer.write('the doctor check crashed without a result.');
+          sawACrash = true;
+          break;
         case ValidationType.missing:
-          lineBuffer.write('not installed.');
+          lineBuffer.write('is not installed.');
           break;
         case ValidationType.partial:
-          lineBuffer.write('partially installed; more components are available.');
+          lineBuffer.write('is partially installed; more components are available.');
           break;
         case ValidationType.notAvailable:
-          lineBuffer.write('not available.');
+          lineBuffer.write('is not available.');
           break;
         case ValidationType.installed:
-          lineBuffer.write('fully installed.');
+          lineBuffer.write('is fully installed.');
           break;
       }
 
-      if (result.statusInfo != null)
+      if (result.statusInfo != null) {
         lineBuffer.write(' (${result.statusInfo})');
+      }
 
       buffer.write(wrapText(lineBuffer.toString(), hangingIndent: result.leadingBox.length + 1));
       buffer.writeln();
 
-      if (result.type != ValidationType.installed)
-        allGood = false;
+      if (result.type != ValidationType.installed) {
+        missingComponent = true;
+      }
     }
 
-    if (!allGood) {
+    if (sawACrash) {
+      buffer.writeln();
+      buffer.writeln('Run "flutter doctor" for information about why a doctor check crashed.');
+    }
+
+    if (missingComponent) {
       buffer.writeln();
       buffer.writeln('Run "flutter doctor" for information about installing additional components.');
     }
@@ -230,13 +250,17 @@ class Doctor {
       ValidationResult result;
       try {
         result = await validatorTask.result;
-      } catch (exception) {
-        status.cancel();
-        rethrow;
+      } catch (exception, stackTrace) {
+        result = ValidationResult.crash(exception, stackTrace);
+      } finally {
+        status.stop();
       }
-      status.stop();
 
       switch (result.type) {
+        case ValidationType.crash:
+          doctorResult = false;
+          issues += 1;
+          break;
         case ValidationType.missing:
           doctorResult = false;
           issues += 1;
@@ -249,7 +273,7 @@ class Doctor {
           break;
       }
 
-      flutterUsage.sendEvent('doctorResult.${validator.runtimeType.toString()}', result.typeStr);
+      DoctorResultEvent(validator: validator, result: result).send();
 
       if (result.statusInfo != null) {
         printStatus('${result.coloredLeadingBox} ${validator.title} (${result.statusInfo})',
@@ -271,13 +295,15 @@ class Doctor {
           }
         }
       }
-      if (verbose)
+      if (verbose) {
         printStatus('');
+      }
     }
 
     // Make sure there's always one line before the summary even when not verbose.
-    if (!verbose)
+    if (!verbose) {
       printStatus('');
+    }
 
     if (issues > 0) {
       printStatus('${terminal.color('!', TerminalColor.yellow)} Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.', hangingIndent: 2);
@@ -315,6 +341,7 @@ abstract class Workflow {
 }
 
 enum ValidationType {
+  crash,
   missing,
   partial,
   notAvailable,
@@ -347,6 +374,15 @@ class GroupedValidator extends DoctorValidator {
 
   final List<DoctorValidator> subValidators;
 
+  List<ValidationResult> _subResults;
+
+  /// Subvalidator results.
+  ///
+  /// To avoid losing information when results are merged, the subresults are
+  /// cached on this field when they are available. The results are in the same
+  /// order as the subvalidator list.
+  List<ValidationResult> get subResults => _subResults;
+
   @override
   String get slowWarning => _currentSlowWarning;
   String _currentSlowWarning = 'Initializing...';
@@ -355,13 +391,19 @@ class GroupedValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidatorTask> tasks = <ValidatorTask>[];
     for (DoctorValidator validator in subValidators) {
-      tasks.add(ValidatorTask(validator, validator.validate()));
+      final Future<ValidationResult> result =
+          asyncGuard<ValidationResult>(() => validator.validate());
+      tasks.add(ValidatorTask(validator, result));
     }
 
     final List<ValidationResult> results = <ValidationResult>[];
     for (ValidatorTask subValidator in tasks) {
       _currentSlowWarning = subValidator.validator.slowWarning;
-      results.add(await subValidator.result);
+      try {
+        results.add(await subValidator.result);
+      } catch (exception, stackTrace) {
+        results.add(ValidationResult.crash(exception, stackTrace));
+      }
     }
     _currentSlowWarning = 'Merging results...';
     return _mergeValidationResults(results);
@@ -369,6 +411,7 @@ class GroupedValidator extends DoctorValidator {
 
   ValidationResult _mergeValidationResults(List<ValidationResult> results) {
     assert(results.isNotEmpty, 'Validation results should not be empty');
+    _subResults = results;
     ValidationType mergedType = results[0].type;
     final List<ValidationMessage> mergedMessages = <ValidationMessage>[];
     String statusInfo;
@@ -385,6 +428,7 @@ class GroupedValidator extends DoctorValidator {
         case ValidationType.partial:
           mergedType = ValidationType.partial;
           break;
+        case ValidationType.crash:
         case ValidationType.missing:
           if (mergedType == ValidationType.installed) {
             mergedType = ValidationType.partial;
@@ -406,6 +450,19 @@ class ValidationResult {
   /// if no [messages] are hints or errors.
   ValidationResult(this.type, this.messages, { this.statusInfo });
 
+  factory ValidationResult.crash(Object error, [StackTrace stackTrace]) {
+    return ValidationResult(ValidationType.crash, <ValidationMessage>[
+      ValidationMessage.error(
+          'Due to an error, the doctor check did not complete. '
+          'If the error message below is not helpful, '
+          'please let us know about this issue at https://github.com/flutter/flutter/issues.'),
+      ValidationMessage.error('$error'),
+      if (stackTrace != null)
+          // Stacktrace is informational. Printed in verbose mode only.
+          ValidationMessage('$stackTrace'),
+    ], statusInfo: 'the doctor check crashed');
+  }
+
   final ValidationType type;
   // A short message about the status.
   final String statusInfo;
@@ -414,6 +471,8 @@ class ValidationResult {
   String get leadingBox {
     assert(type != null);
     switch (type) {
+      case ValidationType.crash:
+        return '[☠]';
       case ValidationType.missing:
         return '[✗]';
       case ValidationType.installed:
@@ -428,6 +487,8 @@ class ValidationResult {
   String get coloredLeadingBox {
     assert(type != null);
     switch (type) {
+      case ValidationType.crash:
+        return terminal.color(leadingBox, TerminalColor.red);
       case ValidationType.missing:
         return terminal.color(leadingBox, TerminalColor.red);
       case ValidationType.installed:
@@ -443,6 +504,8 @@ class ValidationResult {
   String get typeStr {
     assert(type != null);
     switch (type) {
+      case ValidationType.crash:
+        return 'crash';
       case ValidationType.missing:
         return 'missing';
       case ValidationType.installed:
@@ -734,9 +797,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   String get version {
     if (_version == null) {
       final String plistFile = fs.path.join(installPath, 'Contents', 'Info.plist');
-      _version = iosWorkflow.getPlistValueFromFile(
+      _version = PlistParser.instance.getValueFromFile(
         plistFile,
-        kCFBundleShortVersionStringKey,
+        PlistParser.kCFBundleShortVersionStringKey,
       ) ?? 'unknown';
     }
     return _version;

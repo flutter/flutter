@@ -13,6 +13,7 @@ import '../dart/package_map.dart';
 import '../dart/sdk.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'run.dart';
@@ -84,6 +85,8 @@ class DriveCommand extends RunCommandBase {
   Device get device => _device;
   bool get shouldBuild => argResults['build'];
 
+  bool get verboseSystemLogs => argResults['verbose-system-logs'];
+
   /// Subscription to log messages printed on the device or simulator.
   // ignore: cancel_subscriptions
   StreamSubscription<String> _deviceLogSubscription;
@@ -94,7 +97,7 @@ class DriveCommand extends RunCommandBase {
     if (testFile == null)
       throwToolExit(null);
 
-    _device = await targetDeviceFinder();
+    _device = await findTargetDevice();
     if (device == null)
       throwToolExit(null);
 
@@ -187,15 +190,8 @@ class DriveCommand extends RunCommandBase {
   }
 }
 
-/// Finds a device to test on. May launch a simulator, if necessary.
-typedef TargetDeviceFinder = Future<Device> Function();
-TargetDeviceFinder targetDeviceFinder = findTargetDevice;
-void restoreTargetDeviceFinder() {
-  targetDeviceFinder = findTargetDevice;
-}
-
 Future<Device> findTargetDevice() async {
-  final List<Device> devices = await deviceManager.getDevices().toList();
+  final List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
 
   if (deviceManager.hasSpecifiedDeviceId) {
     if (devices.isEmpty) {
@@ -215,7 +211,7 @@ Future<Device> findTargetDevice() async {
     return null;
   } else if (devices.length > 1) {
     printStatus('Found multiple connected devices:');
-    printStatus(devices.map<String>((Device d) => '  - ${d.name}\n').join(''));
+    await Device.printDevices(devices);
   }
   printStatus('Using device ${devices.first.name}.');
   return devices.first;
@@ -270,10 +266,10 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
       command.getBuildInfo(),
       startPaused: true,
       observatoryPort: command.observatoryPort,
+      verboseSystemLogs: command.verboseSystemLogs
     ),
     platformArgs: platformArgs,
     prebuiltApplication: !command.shouldBuild,
-    usesTerminalUi: false,
   );
 
   if (!result.started) {

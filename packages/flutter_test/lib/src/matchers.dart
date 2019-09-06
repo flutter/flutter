@@ -84,7 +84,7 @@ const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
 
-/// Asserts that the [Finder] locates the a single widget that has at
+/// Asserts that the [Finder] locates a single widget that has at
 /// least one [Offstage] widget ancestor.
 ///
 /// It's important to use a full finder, since by default finders exclude
@@ -101,7 +101,7 @@ Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
 ///  * [isOnstage], the opposite.
 const Matcher isOffstage = _IsOffstage();
 
-/// Asserts that the [Finder] locates the a single widget that has no
+/// Asserts that the [Finder] locates a single widget that has no
 /// [Offstage] widget ancestors.
 ///
 /// See also:
@@ -109,7 +109,7 @@ const Matcher isOffstage = _IsOffstage();
 ///  * [isOffstage], the opposite.
 const Matcher isOnstage = _IsOnstage();
 
-/// Asserts that the [Finder] locates the a single widget that has at
+/// Asserts that the [Finder] locates a single widget that has at
 /// least one [Card] widget ancestor.
 ///
 /// See also:
@@ -117,7 +117,7 @@ const Matcher isOnstage = _IsOnstage();
 ///  * [isNotInCard], the opposite.
 const Matcher isInCard = _IsInCard();
 
-/// Asserts that the [Finder] locates the a single widget that has no
+/// Asserts that the [Finder] locates a single widget that has no
 /// [Card] widget ancestors.
 ///
 /// This is equivalent to `isNot(isInCard)`.
@@ -297,33 +297,60 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 ///
 /// For the case of a [Finder], the [Finder] must match exactly one widget and
 /// the rendered image of the first [RepaintBoundary] ancestor of the widget is
-/// treated as the image for the widget.
+/// treated as the image for the widget. As such, you may choose to wrap a test
+/// widget in a [RepaintBoundary] to specify a particular focus for the test.
 ///
-/// [key] may be either a [Uri] or a [String] representation of a URI.
+/// The [key] may be either a [Uri] or a [String] representation of a URI.
 ///
-/// [version] is a number that can be used to differentiate historical golden
-/// files. This parameter is optional. Version numbers are used in golden file
-/// tests for package:flutter. You can learn more about these tests [here]
-/// (https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
+/// The [version] is a number that can be used to differentiate historical
+/// golden files. This parameter is optional. Version numbers are used in golden
+/// file tests for package:flutter. You can learn more about these tests
+/// [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
 ///
 /// This is an asynchronous matcher, meaning that callers should use
 /// [expectLater] when using this matcher and await the future returned by
 /// [expectLater].
 ///
-/// ## Sample code
+/// ## Golden File Testing
+///
+/// The term __golden file__ refers to a master image that is considered the true
+/// rendering of a given widget, state, application, or other visual
+/// representation you have chosen to capture.
+///
+/// The master golden image files that are tested against can be created or
+/// updated by running `flutter test --update-goldens` on the test.
+///
+/// {@tool sample}
+/// Sample invocations of [matchesGoldenFile].
 ///
 /// ```dart
-/// await expectLater(find.text('Save'), matchesGoldenFile('save.png'));
-/// await expectLater(image, matchesGoldenFile('save.png'));
-/// await expectLater(imageFuture, matchesGoldenFile('save.png'));
-/// ```
+/// await expectLater(
+///   find.text('Save'),
+///   matchesGoldenFile('save.png'),
+/// );
 ///
-/// Golden image files can be created or updated by running `flutter test
-/// --update-goldens` on the test.
+/// await expectLater(
+///   image,
+///   matchesGoldenFile('save.png'),
+/// );
+///
+/// await expectLater(
+///   imageFuture,
+///   matchesGoldenFile('save.png'),
+///  );
+///
+/// await expectLater(
+///   find.byType(MyWidget),
+///   matchesGoldenFile('goldens/myWidget.png'),
+/// );
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
-///  * [goldenFileComparator], which acts as the backend for this matcher.
+///  * [GoldenFileComparator], which acts as the backend for this matcher.
+///  * [LocalFileComparator], which is the default [GoldenFileComparator]
+///    implementation for `flutter test`.
 ///  * [matchesReferenceImage], which should be used instead if you want to
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
@@ -419,6 +446,7 @@ Matcher matchesSemantics({
   bool isInMutuallyExclusiveGroup = false,
   bool isHeader = false,
   bool isObscured = false,
+  bool isMultiline = false,
   bool namesRoute = false,
   bool scopesRoute = false,
   bool isHidden = false,
@@ -479,6 +507,8 @@ Matcher matchesSemantics({
     flags.add(SemanticsFlag.isHeader);
   if (isObscured)
     flags.add(SemanticsFlag.isObscured);
+  if (isMultiline)
+    flags.add(SemanticsFlag.isMultiline);
   if (namesRoute)
     flags.add(SemanticsFlag.namesRoute);
   if (scopesRoute)
@@ -1617,7 +1647,7 @@ Future<ui.Image> _captureImage(Element element) {
     assert(renderObject != null);
   }
   assert(!renderObject.debugNeedsPaint);
-  final OffsetLayer layer = renderObject.layer;
+  final OffsetLayer layer = renderObject.debugLayer;
   return layer.toImage(renderObject.paintBounds);
 }
 
@@ -1712,7 +1742,7 @@ class _MatchesGoldenFile extends AsyncMatcher {
       imageFuture = _captureImage(elements.single);
     }
 
-    final Uri testNameUri = _getTestNameUri(key, version);
+    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
@@ -1734,19 +1764,9 @@ class _MatchesGoldenFile extends AsyncMatcher {
   }
 
   @override
-  Description describe(Description description) =>
-      description.add('one widget whose rasterized image matches golden image "${_getTestNameUri(key, version)}"');
-
-  Uri _getTestNameUri(Uri key, int version) {
-    return version == null ? key : Uri.parse(
-      key
-        .toString()
-        .splitMapJoin(
-          RegExp(r'.png'),
-          onMatch: (Match m) => '${'.' + version.toString() + m.group(0)}',
-          onNonMatch: (String n) => '$n'
-        )
-    );
+  Description describe(Description description) {
+    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
+    return description.add('one widget whose rasterized image matches golden image "$testNameUri"');
   }
 }
 

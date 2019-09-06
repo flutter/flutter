@@ -19,8 +19,7 @@ import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'fuchsia/application_package.dart';
 import 'globals.dart';
-import 'ios/ios_workflow.dart';
-import 'ios/plist_utils.dart' as plist;
+import 'ios/plist_parser.dart';
 import 'linux/application_package.dart';
 import 'macos/application_package.dart';
 import 'project.dart';
@@ -114,16 +113,21 @@ class AndroidApk extends ApplicationPackage {
       return null;
     }
 
-    final List<String> aaptArgs = <String>[
-       aaptPath,
-      'dump',
-      'xmltree',
-      apk.path,
-      'AndroidManifest.xml',
-    ];
+    String apptStdout;
+    try {
+      apptStdout = runCheckedSync(<String>[
+        aaptPath,
+        'dump',
+        'xmltree',
+        apk.path,
+        'AndroidManifest.xml',
+      ]);
+    } catch (error) {
+      printError('Failed to extract manifest from APK: $error.');
+      return null;
+    }
 
-    final ApkManifestData data = ApkManifestData
-        .parseFromXmlDump(runCheckedSync(aaptArgs));
+    final ApkManifestData data = ApkManifestData.parseFromXmlDump(apptStdout);
 
     if (data == null) {
       printError('Unable to read manifest info from ${apk.path}.');
@@ -304,9 +308,9 @@ abstract class IOSApp extends ApplicationPackage {
       printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
       return null;
     }
-    final String id = iosWorkflow.getPlistValueFromFile(
+    final String id = PlistParser.instance.getValueFromFile(
       plistPath,
-      plist.kCFBundleIdentifierKey,
+      PlistParser.kCFBundleIdentifierKey,
     );
     if (id == null) {
       printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');

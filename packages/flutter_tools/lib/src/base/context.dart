@@ -142,6 +142,7 @@ class AppContext {
     String name,
     Map<Type, Generator> overrides,
     Map<Type, Generator> fallbacks,
+    ZoneSpecification zoneSpecification,
   }) async {
     final AppContext child = AppContext._(
       this,
@@ -152,6 +153,7 @@ class AppContext {
     return await runZoned<Future<V>>(
       () async => await body(),
       zoneValues: <_Key, AppContext>{_Key.key: child},
+      zoneSpecification: zoneSpecification,
     );
   }
 

@@ -11,12 +11,10 @@ import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/fingerprint.dart';
 import 'base/io.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
 import 'base/terminal.dart';
-import 'cache.dart';
 import 'codegen.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
@@ -51,6 +49,8 @@ class TargetModel {
         return flutter;
       case 'flutter_runner':
         return flutterRunner;
+      case 'vm':
+        return vm;
     }
     assert(false);
     return null;
@@ -63,6 +63,9 @@ class TargetModel {
 
   /// The fuchsia patched SDK.
   static const TargetModel flutterRunner = TargetModel._('flutter_runner');
+
+  /// The Dart vm.
+  static const TargetModel vm = TargetModel._('vm');
 
   final String _value;
 
@@ -95,12 +98,43 @@ class StdoutHandler {
 
   bool _suppressCompilerMessages;
   bool _expectSources;
+  bool _badState = false;
 
   void handler(String message) {
     printTrace('-> $message');
+    if (_badState) {
+      return;
+    }
     const String kResultPrefix = 'result ';
     if (boundaryKey == null && message.startsWith(kResultPrefix)) {
       boundaryKey = message.substring(kResultPrefix.length);
+      return;
+    }
+    // Invalid state, see commented issue below for more information.
+    // NB: both the completeError and _badState flags are required to avoid
+    // filling the console with exceptions.
+    if (boundaryKey == null) {
+      // Throwing a synchronous exception via throwToolExit will fail to cancel
+      // the stream. Instead use completeError so that the error is returned
+      // from the awaited future that the compiler consumers are expecting.
+      compilerOutput.completeError(ToolExit(
+        'The Dart compiler encountered an internal problem. '
+        'The Flutter team would greatly appreciate if you could leave a '
+        'comment on the issue https://github.com/flutter/flutter/issues/35924 '
+        'describing what you were doing when the crash happened.\n\n'
+        'Additional debugging information:\n'
+        '  StdoutState: $state\n'
+        '  compilerMessageReceived: $compilerMessageReceived\n'
+        '  _expectSources: $_expectSources\n'
+        '  sources: $sources\n'
+      ));
+      // There are several event turns before the tool actually exits from a
+      // tool exception. Normally, the stream should be cancelled to prevent
+      // more events from entering the bad state, but because the error
+      // is coming from handler itself, there is no clean way to pipe this
+      // through. Instead, we set a flag to prevent more messages from
+      // registering.
+      _badState = true;
       return;
     }
     if (message.startsWith(boundaryKey)) {
@@ -218,49 +252,20 @@ class KernelCompiler {
     bool aot = false,
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
-    String incrementalCompilerByteStorePath,
     String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     bool targetProductVm = false,
     String initializeFromDill,
+    String platformDill,
   }) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
-    FlutterProject flutterProject;
-    if (fs.file('pubspec.yaml').existsSync()) {
-      flutterProject = FlutterProject.current();
-    }
-
-    // TODO(cbracken): eliminate pathFilter.
-    // Currently the compiler emits buildbot paths for the core libs in the
-    // depfile. None of these are available on the local host.
-    Fingerprinter fingerprinter;
-    if (depFilePath != null) {
-      fingerprinter = Fingerprinter(
-        fingerprintPath: '$depFilePath.fingerprint',
-        paths: <String>[mainPath],
-        properties: <String, String>{
-          'entryPoint': mainPath,
-          'trackWidgetCreation': trackWidgetCreation.toString(),
-          'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
-          'engineHash': Cache.instance.engineRevision,
-          'buildersUsed': '${flutterProject != null && flutterProject.hasBuilders}',
-        },
-        depfilePaths: <String>[depFilePath],
-        pathFilter: (String path) => !path.startsWith('/b/build/slave/'),
-      );
-
-      if (await fingerprinter.doesFingerprintMatch()) {
-        printTrace('Skipping kernel compilation. Fingerprint match.');
-        return CompilerOutput(outputFilePath, 0, /* sources */ null);
-      }
-    }
-
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
-    if (!sdkRoot.endsWith('/'))
+    if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
+    }
     final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     if (!processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
@@ -288,9 +293,6 @@ class KernelCompiler {
     } else if (aot) {
       command.add('-Ddart.vm.profile=true');
     }
-    if (incrementalCompilerByteStorePath != null) {
-      command.add('--incremental');
-    }
     Uri mainUri;
     if (packagesPath != null) {
       command.addAll(<String>['--packages', packagesPath]);
@@ -312,6 +314,9 @@ class KernelCompiler {
     }
     if (initializeFromDill != null) {
       command.addAll(<String>['--initialize-from-dill', initializeFromDill]);
+    }
+    if (platformDill != null) {
+      command.addAll(<String>[ '--platform', platformDill]);
     }
 
     if (extraFrontEndOptions != null)
@@ -337,9 +342,6 @@ class KernelCompiler {
       .listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
-      if (fingerprinter != null) {
-        await fingerprinter.writeFingerprint();
-      }
       return _stdoutHandler.compilerOutput.future;
     }
     return null;
@@ -598,6 +600,7 @@ class ResidentCompiler {
           // process has died unexpectedly.
           if (!_stdoutHandler.compilerOutput.isCompleted) {
             _stdoutHandler.compilerOutput.complete(null);
+            throwToolExit('the Dart compiler exited unexpectedly.');
           }
         });
 
@@ -605,6 +608,12 @@ class ResidentCompiler {
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String message) { printError(message); });
+
+    unawaited(_server.exitCode.then((int code) {
+      if (code != 0) {
+        throwToolExit('the Dart compiler exited unexpectedly.');
+      }
+    }));
 
     _server.stdin.writeln('compile $scriptUri');
     printTrace('<- compile $scriptUri');
@@ -682,7 +691,7 @@ class ResidentCompiler {
     if (!_compileRequestNeedsConfirmation) {
       return Future<CompilerOutput>.value(null);
     }
-    _stdoutHandler.reset();
+    _stdoutHandler.reset(expectSources: false);
     _server.stdin.writeln('reject');
     printTrace('<- reject');
     _compileRequestNeedsConfirmation = false;

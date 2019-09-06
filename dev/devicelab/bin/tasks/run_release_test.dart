@@ -58,6 +58,11 @@ void main() {
         stdout.removeAt(0);
       if (stdout.first.startsWith('Initializing gradle...'))
         stdout.removeAt(0);
+      // TODO(blasten): Remove this and the one below once the migration to AAR is completed.
+      if (stdout.first.contains('settings_aar.gradle'))
+        stdout.removeAt(0);
+      if (stdout.first.contains('settings_aar.gradle'))
+        stdout.removeAt(0);
       if (stdout.first.startsWith('Resolving dependencies...'))
         stdout.removeAt(0);
       if (!(stdout.first.startsWith('Launching lib/main.dart on ') && stdout.first.endsWith(' in release mode...')))

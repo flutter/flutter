@@ -29,12 +29,17 @@ const String unknownCocoaPodsConsequence = '''
   Flutter is unable to determine the installed CocoaPods's version.
   Ensure that the output of 'pod --version' contains only digits and . to be recognized by Flutter.''';
 
+const String brokenCocoaPodsConsequence = '''
+  You appear to have CocoaPods installed but it is not working.
+  This can happen if the version of Ruby that CocoaPods was installed with is different from the one being used to invoke it.
+  This can usually be fixed by re-installing CocoaPods. For more info, see https://github.com/flutter/flutter/issues/14293.''';
+
 const String cocoaPodsInstallInstructions = '''
-  brew install cocoapods
+  sudo gem install cocoapods
   pod setup''';
 
 const String cocoaPodsUpgradeInstructions = '''
-  brew upgrade cocoapods
+  sudo gem install cocoapods
   pod setup''';
 
 CocoaPods get cocoaPods => context.get<CocoaPods>();
@@ -52,6 +57,8 @@ enum CocoaPodsStatus {
   belowRecommendedVersion,
   /// Everything should be fine.
   recommended,
+  /// iOS plugins will not work, re-install required.
+  brokenInstall,
 }
 
 class CocoaPods {
@@ -59,6 +66,8 @@ class CocoaPods {
 
   String get cocoaPodsMinimumVersion => '1.6.0';
   String get cocoaPodsRecommendedVersion => '1.6.0';
+
+  Future<bool> get isInstalled => exitsHappyAsync(<String>['which', 'pod']);
 
   Future<String> get cocoaPodsVersionText {
     _versionText ??= runAsync(<String>['pod', '--version']).then<String>((RunResult result) {
@@ -68,9 +77,13 @@ class CocoaPods {
   }
 
   Future<CocoaPodsStatus> get evaluateCocoaPodsInstallation async {
-    final String versionText = await cocoaPodsVersionText;
-    if (versionText == null)
+    if (!(await isInstalled)) {
       return CocoaPodsStatus.notInstalled;
+    }
+    final String versionText = await cocoaPodsVersionText;
+    if (versionText == null) {
+      return CocoaPodsStatus.brokenInstall;
+    }
     try {
       final Version installedVersion = Version.parse(versionText);
       if (installedVersion == null)
@@ -106,7 +119,7 @@ class CocoaPods {
     bool isSwift = false,
     bool dependenciesChanged = true,
   }) async {
-    if (!(await xcodeProject.podfile.exists())) {
+    if (!xcodeProject.podfile.existsSync()) {
       throwToolExit('Podfile missing');
     }
     if (await _checkPodCondition()) {
@@ -179,7 +192,7 @@ class CocoaPods {
   /// Ensures the given Xcode-based sub-project of a parent Flutter project
   /// contains a suitable `Podfile` and that its `Flutter/Xxx.xcconfig` files
   /// include pods configuration.
-  void setupPodfile(XcodeBasedProject xcodeProject) {
+  Future<void> setupPodfile(XcodeBasedProject xcodeProject) async {
     if (!xcodeProjectInterpreter.isInstalled) {
       // Don't do anything for iOS when host platform doesn't support it.
       return;
@@ -189,27 +202,29 @@ class CocoaPods {
       return;
     }
     final File podfile = xcodeProject.podfile;
-    if (!podfile.existsSync()) {
-      String podfileTemplateName;
-      if (xcodeProject is MacOSProject) {
-        podfileTemplateName = 'Podfile-macos';
-      } else {
-        final bool isSwift = xcodeProjectInterpreter.getBuildSettings(
-          runnerProject.path,
-          'Runner',
-        ).containsKey('SWIFT_VERSION');
-        podfileTemplateName = isSwift ? 'Podfile-ios-swift' : 'Podfile-ios-objc';
-      }
-      final File podfileTemplate = fs.file(fs.path.join(
-        Cache.flutterRoot,
-        'packages',
-        'flutter_tools',
-        'templates',
-        'cocoapods',
-        podfileTemplateName,
-      ));
-      podfileTemplate.copySync(podfile.path);
+    if (podfile.existsSync()) {
+      addPodsDependencyToFlutterXcconfig(xcodeProject);
+      return;
     }
+    String podfileTemplateName;
+    if (xcodeProject is MacOSProject) {
+      podfileTemplateName = 'Podfile-macos';
+    } else {
+      final bool isSwift = (await xcodeProjectInterpreter.getBuildSettingsAsync(
+        runnerProject.path,
+        'Runner',
+      )).containsKey('SWIFT_VERSION');
+      podfileTemplateName = isSwift ? 'Podfile-ios-swift' : 'Podfile-ios-objc';
+    }
+    final File podfileTemplate = fs.file(fs.path.join(
+      Cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+      'templates',
+      'cocoapods',
+      podfileTemplateName,
+    ));
+    podfileTemplate.copySync(podfile.path);
     addPodsDependencyToFlutterXcconfig(xcodeProject);
   }
 

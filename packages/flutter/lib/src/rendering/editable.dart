@@ -11,6 +11,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'box.dart';
+import 'layer.dart';
 import 'object.dart';
 import 'viewport_offset.dart';
 
@@ -143,6 +144,8 @@ class RenderEditable extends RenderBox {
     Color backgroundCursorColor,
     ValueNotifier<bool> showCursor,
     bool hasFocus,
+    @required LayerLink startHandleLayerLink,
+    @required LayerLink endHandleLayerLink,
     int maxLines = 1,
     int minLines,
     bool expands = false,
@@ -154,6 +157,9 @@ class RenderEditable extends RenderBox {
     this.onSelectionChanged,
     this.onCaretChanged,
     this.ignorePointer = false,
+    bool readOnly = false,
+    bool forceLine = true,
+    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     bool obscureText = false,
     Locale locale,
     double cursorWidth = 1.0,
@@ -168,6 +174,8 @@ class RenderEditable extends RenderBox {
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
+       assert(startHandleLayerLink != null),
+       assert(endHandleLayerLink != null),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
          'minLines can\'t be greater than maxLines',
@@ -180,11 +188,14 @@ class RenderEditable extends RenderBox {
        assert(textScaleFactor != null),
        assert(offset != null),
        assert(ignorePointer != null),
+       assert(textWidthBasis != null),
        assert(paintCursorAboveText != null),
        assert(obscureText != null),
        assert(textSelectionDelegate != null),
        assert(cursorWidth != null && cursorWidth >= 0.0),
-        assert(devicePixelRatio != null),
+       assert(readOnly != null),
+       assert(forceLine != null),
+       assert(devicePixelRatio != null),
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -192,6 +203,7 @@ class RenderEditable extends RenderBox {
          textScaleFactor: textScaleFactor,
          locale: locale,
          strutStyle: strutStyle,
+         textWidthBasis: textWidthBasis,
        ),
        _cursorColor = cursorColor,
        _backgroundCursorColor = backgroundCursorColor,
@@ -209,7 +221,11 @@ class RenderEditable extends RenderBox {
        _floatingCursorAddedMargin = floatingCursorAddedMargin,
        _enableInteractiveSelection = enableInteractiveSelection,
        _devicePixelRatio = devicePixelRatio,
-       _obscureText = obscureText {
+       _startHandleLayerLink = startHandleLayerLink,
+       _endHandleLayerLink = endHandleLayerLink,
+       _obscureText = obscureText,
+       _readOnly = readOnly,
+       _forceLine = forceLine {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
     this.hasFocus = hasFocus ?? false;
@@ -238,12 +254,15 @@ class RenderEditable extends RenderBox {
   /// The default value of this property is false.
   bool ignorePointer;
 
-  /// Whether text is composed.
-  ///
-  /// Text is composed when user selects it for editing. The [TextSpan] will have
-  /// children with composing effect and leave text property to be null.
-  @visibleForTesting
-  bool get isComposingText => text.text == null;
+  /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
+  TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
+  set textWidthBasis(TextWidthBasis value) {
+    assert(value != null);
+    if (_textPainter.textWidthBasis == value)
+      return;
+    _textPainter.textWidthBasis = value;
+    markNeedsTextLayout();
+  }
 
   /// The pixel ratio of the current device.
   ///
@@ -372,13 +391,8 @@ class RenderEditable extends RenderBox {
   // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
   void _handleKeyEvent(RawKeyEvent keyEvent) {
     // Only handle key events on Android.
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        break;
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-        return;
-    }
+    if (keyEvent.data is! RawKeyEventDataAndroid)
+      return;
 
     if (keyEvent is RawKeyUpEvent)
       return;
@@ -437,7 +451,7 @@ class RenderEditable extends RenderBox {
     if (leftArrow && _extentOffset > 2) {
       final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: _extentOffset - 2));
       newOffset = textSelection.baseOffset + 1;
-    } else if (rightArrow && _extentOffset < text.text.length - 2) {
+    } else if (rightArrow && _extentOffset < text.toPlainText().length - 2) {
       final TextSelection textSelection = _selectWordAtOffset(TextPosition(offset: _extentOffset + 1));
       newOffset = textSelection.extentOffset - 1;
     }
@@ -480,7 +494,7 @@ class RenderEditable extends RenderBox {
     // case that the user wants to unhighlight some text.
     if (position.offset == _extentOffset) {
       if (downArrow)
-        newOffset = text.text.length;
+        newOffset = text.toPlainText().length;
       else if (upArrow)
         newOffset = 0;
       _resetCursor = shift;
@@ -547,16 +561,16 @@ class RenderEditable extends RenderBox {
       case _kCKeyCode:
         if (!selection.isCollapsed) {
           Clipboard.setData(
-            ClipboardData(text: selection.textInside(text.text)));
+            ClipboardData(text: selection.textInside(text.toPlainText())));
         }
         break;
       case _kXKeyCode:
         if (!selection.isCollapsed) {
           Clipboard.setData(
-            ClipboardData(text: selection.textInside(text.text)));
+            ClipboardData(text: selection.textInside(text.toPlainText())));
           textSelectionDelegate.textEditingValue = TextEditingValue(
-            text: selection.textBefore(text.text)
-              + selection.textAfter(text.text),
+            text: selection.textBefore(text.toPlainText())
+              + selection.textAfter(text.toPlainText()),
             selection: TextSelection.collapsed(offset: selection.start),
           );
         }
@@ -594,15 +608,15 @@ class RenderEditable extends RenderBox {
   }
 
   void _handleDelete() {
-    if (selection.textAfter(text.text).isNotEmpty) {
+    if (selection.textAfter(text.toPlainText()).isNotEmpty) {
       textSelectionDelegate.textEditingValue = TextEditingValue(
-        text: selection.textBefore(text.text)
-          + selection.textAfter(text.text).substring(1),
+        text: selection.textBefore(text.toPlainText())
+          + selection.textAfter(text.toPlainText()).substring(1),
         selection: TextSelection.collapsed(offset: selection.start),
       );
     } else {
       textSelectionDelegate.textEditingValue = TextEditingValue(
-        text: selection.textBefore(text.text),
+        text: selection.textBefore(text.toPlainText()),
         selection: TextSelection.collapsed(offset: selection.start),
       );
     }
@@ -748,6 +762,28 @@ class RenderEditable extends RenderBox {
       RawKeyboard.instance.removeListener(_handleKeyEvent);
       _listenerAttached = false;
     }
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Whether this rendering object will take a full line regardless the text width.
+  bool get forceLine => _forceLine;
+  bool _forceLine = false;
+  set forceLine(bool value) {
+    assert(value != null);
+    if (_forceLine == value)
+      return;
+    _forceLine = value;
+    markNeedsLayout();
+  }
+
+  /// Whether this rendering object is read only.
+  bool get readOnly => _readOnly;
+  bool _readOnly = false;
+  set readOnly(bool value) {
+    assert(value != null);
+    if (_readOnly == value)
+      return;
+    _readOnly = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -903,6 +939,32 @@ class RenderEditable extends RenderBox {
     markNeedsPaint();
   }
 
+  /// The [LayerLink] of start selection handle.
+  ///
+  /// [RenderEditable] is responsible for calculating the [Offset] of this
+  /// [LayerLink], which will be used as [CompositedTransformTarget] of start handle.
+  LayerLink get startHandleLayerLink => _startHandleLayerLink;
+  LayerLink _startHandleLayerLink;
+  set startHandleLayerLink(LayerLink value) {
+    if (_startHandleLayerLink == value)
+      return;
+    _startHandleLayerLink = value;
+    markNeedsPaint();
+  }
+
+  /// The [LayerLink] of end selection handle.
+  ///
+  /// [RenderEditable] is responsible for calculating the [Offset] of this
+  /// [LayerLink], which will be used as [CompositedTransformTarget] of end handle.
+  LayerLink get endHandleLayerLink => _endHandleLayerLink;
+  LayerLink _endHandleLayerLink;
+  set endHandleLayerLink(LayerLink value) {
+    if (_endHandleLayerLink == value)
+      return;
+    _endHandleLayerLink = value;
+    markNeedsPaint();
+  }
+
   /// The padding applied to text field. Used to determine the bounds when
   /// moving the floating cursor.
   ///
@@ -950,6 +1012,16 @@ class RenderEditable extends RenderBox {
     return enableInteractiveSelection ?? !obscureText;
   }
 
+  /// The maximum amount the text is allowed to scroll.
+  ///
+  /// This value is only valid after layout and can change as additional
+  /// text is entered or removed in order to accommodate expanding when
+  /// [expands] is set to true.
+  double get maxScrollExtent => _maxScrollExtent;
+  double _maxScrollExtent = 0;
+
+  double get _caretMargin => _kCaretGap + cursorWidth;
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -959,9 +1031,11 @@ class RenderEditable extends RenderBox {
           ? obscuringCharacter * text.toPlainText().length
           : text.toPlainText()
       ..isObscured = obscureText
+      ..isMultiline = _isMultiline
       ..textDirection = textDirection
       ..isFocused = hasFocus
-      ..isTextField = true;
+      ..isTextField = true
+      ..isReadOnly = readOnly;
 
     if (hasFocus && selectionEnabled)
       config.onSetSelection = _handleSetSelection;
@@ -1158,8 +1232,6 @@ class RenderEditable extends RenderBox {
     return null;
   }
 
-  double _maxScrollExtent = 0;
-
   // We need to check the paint offset here because during animation, the start of
   // the text may position outside the visible region even when the text fits.
   bool get _hasVisualOverflow => _maxScrollExtent > 0 || _paintOffset != Offset.zero;
@@ -1252,7 +1324,7 @@ class RenderEditable extends RenderBox {
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
-    // Lock height to maxLines if needed
+    // Lock height to maxLines if needed.
     final bool lockedMax = maxLines != null && minLines == null;
     final bool lockedBoth = minLines != null && minLines == maxLines;
     final bool singleLine = maxLines == 1;
@@ -1260,7 +1332,7 @@ class RenderEditable extends RenderBox {
       return preferredLineHeight * maxLines;
     }
 
-    // Clamp height to minLines or maxLines if needed
+    // Clamp height to minLines or maxLines if needed.
     final bool minLimited = minLines != null && minLines > 1;
     final bool maxLimited = maxLines != null;
     if (minLimited || maxLimited) {
@@ -1273,7 +1345,7 @@ class RenderEditable extends RenderBox {
       }
     }
 
-    // Set the height based on the content
+    // Set the height based on the content.
     if (width == double.infinity) {
       final String text = _textPainter.text.toPlainText();
       int lines = 1;
@@ -1483,6 +1555,10 @@ class RenderEditable extends RenderBox {
     // When long-pressing past the end of the text, we want a collapsed cursor.
     if (position.offset >= word.end)
       return TextSelection.fromPosition(position);
+    // If text is obscured, the entire sentence should be treated as one word.
+    if (obscureText) {
+      return TextSelection(baseOffset: 0, extentOffset: text.toPlainText().length);
+    }
     return TextSelection(baseOffset: word.start, extentOffset: word.end);
   }
 
@@ -1492,10 +1568,12 @@ class RenderEditable extends RenderBox {
     assert(constraintWidth != null);
     if (_textLayoutLastWidth == constraintWidth)
       return;
-    final double caretMargin = _kCaretGap + cursorWidth;
-    final double availableWidth = math.max(0.0, constraintWidth - caretMargin);
+    final double availableWidth = math.max(0.0, constraintWidth - _caretMargin);
     final double maxWidth = _isMultiline ? availableWidth : double.infinity;
-    _textPainter.layout(minWidth: availableWidth, maxWidth: maxWidth);
+    _textPainter.layout(
+        minWidth: forceLine ? availableWidth : 0,
+        maxWidth: maxWidth,
+    );
     _textLayoutLastWidth = constraintWidth;
   }
 
@@ -1511,12 +1589,15 @@ class RenderEditable extends RenderBox {
   /// of the cursor for iOS is approximate and obtained through an eyeball
   /// comparison.
   Rect get _getCaretPrototype {
-    switch(defaultTargetPlatform){
+    assert(defaultTargetPlatform != null);
+    switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight + 2);
-      default:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
         return Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
     }
+    return null;
   }
   @override
   void performLayout() {
@@ -1532,8 +1613,10 @@ class RenderEditable extends RenderBox {
     // though we currently don't use those here.
     // See also RenderParagraph which has a similar issue.
     final Size textPainterSize = _textPainter.size;
-    size = Size(constraints.maxWidth, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
-    final Size contentSize = Size(textPainterSize.width + _kCaretGap + cursorWidth, textPainterSize.height);
+    final double width = forceLine ? constraints.maxWidth : constraints
+        .constrainWidth(_textPainter.size.width + _caretMargin);
+    size = Size(width, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
+    final Size contentSize = Size(textPainterSize.width + _caretMargin, textPainterSize.height);
     _maxScrollExtent = _getMaxScrollExtent(contentSize);
     offset.applyViewportDimension(_viewportExtent);
     offset.applyContentDimensions(0.0, _maxScrollExtent);
@@ -1562,10 +1645,11 @@ class RenderEditable extends RenderBox {
     if (_cursorOffset != null)
       caretRect = caretRect.shift(_cursorOffset);
 
-    if (_textPainter.getFullHeightForCaret(textPosition, _caretPrototype) != null) {
+    final double caretHeight = _textPainter.getFullHeightForCaret(textPosition, _caretPrototype);
+    if (caretHeight != null) {
       switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS: {
-          final double heightDiff = _textPainter.getFullHeightForCaret(textPosition, _caretPrototype) - caretRect.height;
+        case TargetPlatform.iOS:
+          final double heightDiff = caretHeight - caretRect.height;
           // Center the caret vertically along the text.
           caretRect = Rect.fromLTWH(
             caretRect.left,
@@ -1574,8 +1658,8 @@ class RenderEditable extends RenderBox {
             caretRect.height,
           );
           break;
-        }
-        default: {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
           // Override the height to take the full height of the glyph at the TextPosition
           // when not on iOS. iOS has special handling that creates a taller caret.
           // TODO(garyq): See the TODO for _getCaretPrototype.
@@ -1583,10 +1667,9 @@ class RenderEditable extends RenderBox {
             caretRect.left,
             caretRect.top - _kCaretHeightOffset,
             caretRect.width,
-            _textPainter.getFullHeightForCaret(textPosition, _caretPrototype),
+            caretHeight,
           );
           break;
-        }
       }
     }
 
@@ -1765,6 +1848,30 @@ class RenderEditable extends RenderBox {
     }
   }
 
+  void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints) {
+    Offset startPoint = endpoints[0].point;
+    startPoint = Offset(
+      startPoint.dx.clamp(0.0, size.width),
+      startPoint.dy.clamp(0.0, size.height),
+    );
+    context.pushLayer(
+      LeaderLayer(link: startHandleLayerLink, offset: startPoint),
+      super.paint,
+      Offset.zero,
+    );
+    if (endpoints.length == 2) {
+      Offset endPoint = endpoints[1].point;
+      endPoint = Offset(
+        endPoint.dx.clamp(0.0, size.width),
+        endPoint.dy.clamp(0.0, size.height),
+      );
+      context.pushLayer(
+        LeaderLayer(link: endHandleLayerLink, offset: endPoint),
+        super.paint,
+        Offset.zero,
+      );
+    }
+  }
   @override
   void paint(PaintingContext context, Offset offset) {
     _layoutText(constraints.maxWidth);
@@ -1772,6 +1879,7 @@ class RenderEditable extends RenderBox {
       context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents);
     else
       _paintContents(context, offset);
+    _paintHandleLayers(context, getEndpointsForSelection(selection));
   }
 
   @override

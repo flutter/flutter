@@ -152,13 +152,13 @@ void main(List<String> argList) {
     input,
     snippetType,
     template: template,
-    id: id.join('.'),
     output: args[_kOutputOption] != null ? File(args[_kOutputOption]) : null,
     metadata: <String, Object>{
       'sourcePath': environment['SOURCE_PATH'],
       'sourceLine': environment['SOURCE_LINE'] != null
           ? int.tryParse(environment['SOURCE_LINE'])
           : null,
+      'id': id.join('.'),
       'serial': serial,
       'package': packageName,
       'library': libraryName,

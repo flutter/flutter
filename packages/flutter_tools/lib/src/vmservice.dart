@@ -20,6 +20,7 @@ import 'base/io.dart' as io;
 import 'base/utils.dart';
 import 'convert.dart' show base64;
 import 'globals.dart';
+import 'version.dart';
 import 'vmservice_record_replay.dart';
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
@@ -138,9 +139,7 @@ class VMService {
         }
       });
 
-      // If the Flutter Engine doesn't support service registration this will
-      // have no effect
-      _peer.sendNotification('_registerService', <String, String>{
+      _peer.sendNotification('registerService', <String, String>{
         'service': 'reloadSources',
         'alias': 'Flutter Tools',
       });
@@ -164,13 +163,24 @@ class VMService {
         }
       });
 
-      // If the Flutter Engine doesn't support service registration this will
-      // have no effect
-      _peer.sendNotification('_registerService', <String, String>{
+      _peer.sendNotification('registerService', <String, String>{
         'service': 'hotRestart',
         'alias': 'Flutter Tools',
       });
     }
+
+    _peer.registerMethod('flutterVersion', (rpc.Parameters params) async {
+      final FlutterVersion version = FlutterVersion();
+      final Map<String, Object> versionJson = version.toJson();
+      versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
+      versionJson['engineRevisionShort'] = version.engineRevisionShort;
+      return versionJson;
+    });
+
+    _peer.sendNotification('registerService', <String, String>{
+      'service': 'flutterVersion',
+      'alias': 'Flutter Tools',
+    });
 
     if (compileExpression != null) {
       _peer.registerMethod('compileExpression', (rpc.Parameters params) async {
@@ -204,7 +214,7 @@ class VMService {
         }
       });
 
-      _peer.sendNotification('_registerService', <String, String>{
+      _peer.sendNotification('registerService', <String, String>{
         'service': 'compileExpression',
         'alias': 'Flutter Tools',
       });
@@ -313,8 +323,8 @@ class VMService {
     Map<String, dynamic> params,
   ) {
     return Future.any<Map<String, dynamic>>(<Future<Map<String, dynamic>>>[
-      _peer.sendRequest(method, params).then<Map<String, dynamic>>(castStringKeyedMap),
-      _connectionError.future,
+        _peer.sendRequest(method, params).then<Map<String, dynamic>>(castStringKeyedMap),
+        _connectionError.future,
     ]);
   }
 
@@ -948,13 +958,13 @@ class VM extends ServiceObjectOwner {
   }
 
   Future<Map<String, dynamic>> clearVMTimeline() {
-    return invokeRpcRaw('_clearVMTimeline');
+    return invokeRpcRaw('clearVMTimeline');
   }
 
   Future<Map<String, dynamic>> setVMTimelineFlags(List<String> recordedStreams) {
     assert(recordedStreams != null);
     return invokeRpcRaw(
-      '_setVMTimelineFlags',
+      'setVMTimelineFlags',
       params: <String, dynamic>{
         'recordedStreams': recordedStreams,
       },
@@ -962,7 +972,7 @@ class VM extends ServiceObjectOwner {
   }
 
   Future<Map<String, dynamic>> getVMTimeline() {
-    return invokeRpcRaw('_getVMTimeline');
+    return invokeRpcRaw('getVMTimeline');
   }
 
   Future<void> refreshViews({ bool waitForViews = false }) async {
@@ -1177,7 +1187,7 @@ class Isolate extends ServiceObjectOwner {
       final Map<String, dynamic> response = await invokeRpcRaw('_reloadSources', params: arguments);
       return response;
     } on rpc.RpcException catch (e) {
-      return Future<Map<String, dynamic>>.error(<String, dynamic>{
+      return Future<Map<String, dynamic>>.value(<String, dynamic>{
         'code': e.code,
         'message': e.message,
         'data': e.data,
@@ -1313,7 +1323,7 @@ class Isolate extends ServiceObjectOwner {
   }
 
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame() async {
-    final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw('ext.flutter.didSendFirstFrameEvent');
+    final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw('ext.flutter.didSendFirstFrameRasterizedEvent');
     // result might be null when the service extension is not initialized
     return result != null && result['enabled'] == 'true';
   }
@@ -1468,6 +1478,16 @@ class FlutterView extends ServiceObject {
           'isolateId': _uiIsolate.id,
           'viewId': id,
           'assetDirectory': assetsDirectory.toFilePath(windows: false),
+        });
+  }
+
+  Future<void> setSemanticsEnabled(bool enabled) async {
+    assert(enabled != null);
+    await owner.vmService.vm.invokeRpc<ServiceObject>('_flutter.setSemanticsEnabled',
+        params: <String, dynamic>{
+          'isolateId': _uiIsolate.id,
+          'viewId': id,
+          'enabled': enabled,
         });
   }
 

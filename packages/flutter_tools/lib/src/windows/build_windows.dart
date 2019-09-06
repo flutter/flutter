@@ -13,18 +13,21 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../usage.dart';
+import '../reporting/reporting.dart';
+
 import 'msbuild_utils.dart';
 import 'visual_studio.dart';
 
 /// Builds the Windows project using msbuild.
-Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
+Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {String target}) async {
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot,
-    'FLUTTER_TARGET': target,
     'PROJECT_DIR': windowsProject.project.directory.path,
     'TRACK_WIDGET_CREATION': (buildInfo?.trackWidgetCreation == true).toString(),
   };
+  if (target != null) {
+    environment['FLUTTER_TARGET'] = target;
+  }
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
@@ -37,6 +40,15 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
   if (vcvarsScript == null) {
     throwToolExit('Unable to find suitable Visual Studio toolchain. '
         'Please run `flutter doctor` for more details.');
+  }
+
+  if (!buildInfo.isDebug) {
+    const String warning = '🚧 ';
+    printStatus(warning * 20);
+    printStatus('Warning: Only debug is currently implemented for Windows. This is effectively a debug build.');
+    printStatus('See https://github.com/flutter/flutter/issues/38477 for details and updates.');
+    printStatus(warning * 20);
+    printStatus('');
   }
 
   final String buildScript = fs.path.join(
@@ -78,7 +90,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
     status.cancel();
   }
   if (result != 0) {
-    throwToolExit('Build process failed');
+    throwToolExit('Build process failed. To view the stack trace, please run `flutter run -d windows -v`.');
   }
   flutterUsage.sendTiming('build', 'vs_build', Duration(milliseconds: sw.elapsedMilliseconds));
 }
