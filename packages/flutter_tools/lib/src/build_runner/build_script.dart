@@ -49,7 +49,6 @@ const Set<String> skipPlatformCheckPackages = <String>{
   'flutter_goldens_client',
   'flutter_gallery',
   'connectivity',
-  'video_player',
 };
 
 final DartPlatform flutterWebPlatform =
