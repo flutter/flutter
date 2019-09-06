@@ -424,7 +424,8 @@ class _IndicatorPainter extends CustomPainter {
     // could enter this state. Tab offsets are defined at layout,
     // which should happen before paint is first called. However, it seems
     // like shouldRepaint is being called before layout. In reality, we should
-    // avoid this state from occuring and write a regression test against it.
+    // avoid this state from occuring and fix the underlying cause. Once a
+    // regression test has been written, these checks should be removed.
     //
     // See https://github.com/flutter/flutter/issues/35997 for more details.
     if (a == null || b == null || a.length != b.length)
