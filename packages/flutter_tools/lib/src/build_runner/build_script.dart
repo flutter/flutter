@@ -41,6 +41,17 @@ const String jsSourceMapExtension = '.ddc.js.map';
 const String kReleaseFlag = 'release';
 const String kProfileFlag = 'profile';
 
+const Set<String> skipPlatformCheckPackages = <String>{
+  'flutter',
+  'flutter_test',
+  'flutter_driver',
+  'flutter_goldens',
+  'flutter_goldens_client',
+  'flutter_gallery',
+  'connectivity',
+  'video_player',
+};
+
 final DartPlatform flutterWebPlatform =
     DartPlatform.register('flutter_web', <String>[
   'async',
@@ -199,7 +210,7 @@ class FlutterWebTestEntrypointBuilder implements Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
     log.info('building for target ${buildStep.inputId.path}');
-    await bootstrapDdc(buildStep, platform: flutterWebPlatform);
+    await bootstrapDdc(buildStep, platform: flutterWebPlatform, skipPlatformCheckPackages: skipPlatformCheckPackages);
   }
 }
 
@@ -227,7 +238,7 @@ class FlutterWebEntrypointBuilder implements Builder {
     if (release || profile) {
       await bootstrapDart2Js(buildStep, flutterWebSdk, profile);
     } else {
-      await bootstrapDdc(buildStep, platform: flutterWebPlatform);
+      await bootstrapDdc(buildStep, platform: flutterWebPlatform, skipPlatformCheckPackages: skipPlatformCheckPackages);
     }
   }
 }
