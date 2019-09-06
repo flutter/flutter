@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
+import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -92,13 +93,11 @@ void main() {
 
   group('Flags', () {
     Directory tempDir;
-    FakeFlutterProjectFactory flutterProjectFactory;
     ProcessManager mockProcessManager;
     String gradlew;
 
     setUp(() {
       tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
-      flutterProjectFactory = FakeFlutterProjectFactory(tempDir);
 
       mockProcessManager = MockProcessManager();
       gradlew = fs.path.join(tempDir.path, 'flutter_project', 'android', 'gradlew');
@@ -155,8 +154,9 @@ void main() {
       )).called(1);
     },
     overrides: <Type, Generator>{
+      GradleUtils: () => GradleUtils(),
       ProcessManager: () => mockProcessManager,
-      FlutterProjectFactory: () => flutterProjectFactory,
+      FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
     },
     timeout: allowForCreateFlutterProject);
 
@@ -186,8 +186,9 @@ void main() {
       )).called(1);
     },
     overrides: <Type, Generator>{
+      GradleUtils: () => GradleUtils(),
       ProcessManager: () => mockProcessManager,
-      FlutterProjectFactory: () => flutterProjectFactory,
+      FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
     },
     timeout: allowForCreateFlutterProject);
   });

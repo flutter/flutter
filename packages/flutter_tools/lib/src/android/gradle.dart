@@ -30,38 +30,36 @@ import 'android_sdk.dart';
 import 'android_studio.dart';
 
 /// Gradle utils in the current [AppContext].
-GradleUtils get gradleUtils => context.get<GradleUtils>() ?? _GradleUtilsImpl();
-
-abstract class GradleUtils {
-  /// Gets the Gradle executable path.
-  /// This is the `gradlew` or `gradlew.bat` script in the `android/` directory.
-  Future<String> getExecutable(FlutterProject project);
-
-  /// Gets the [GradleProject] for the current [FlutterProject] if built as an app.
-  Future<GradleProject> get appProject;
-
-  /// Gets the [GradleProject] for the current [FlutterProject] if built as a library.
-  Future<GradleProject> get libraryProject;
-}
+GradleUtils get gradleUtils => context.get<GradleUtils>() ?? GradleUtils.singleton();
 
 /// The implementation of Gradle Utils.
-class _GradleUtilsImpl extends GradleUtils {
+@visibleForTesting
+class GradleUtils {
+  GradleUtils();
+
+  factory GradleUtils.singleton() {
+    return _instance ??= GradleUtils();
+  }
+
+  static GradleUtils _instance;
+
   String _cachedExecutable;
-  @override
+  /// Gets the Gradle executable path.
+  /// This is the `gradlew` or `gradlew.bat` script in the `android/` directory.
   Future<String> getExecutable(FlutterProject project) async {
     _cachedExecutable ??= await _initializeGradle(project);
     return _cachedExecutable;
   }
 
   GradleProject _cachedAppProject;
-  @override
+  /// Gets the [GradleProject] for the current [FlutterProject] if built as an app.
   Future<GradleProject> get appProject async {
     _cachedAppProject ??= await _readGradleProject(isLibrary: false);
     return _cachedAppProject;
   }
 
   GradleProject _cachedLibraryProject;
-  @override
+  /// Gets the [GradleProject] for the current [FlutterProject] if built as a library.
   Future<GradleProject> get libraryProject async {
     _cachedLibraryProject ??= await _readGradleProject(isLibrary: true);
     return _cachedLibraryProject;
