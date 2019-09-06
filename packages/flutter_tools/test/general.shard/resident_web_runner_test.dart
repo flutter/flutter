@@ -114,21 +114,27 @@ void main() {
     ));
     final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
 
+    verify(mockVmService.registerService('reloadSources', 'FlutterTools')).called(1);
     expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
   }));
 
-  test('Can not hot reload after attaching', () => testbed.run(() async {
-    _setupMocks();
+  test('Can hot reload after attaching', () => testbed.run(() async {
+  _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
      unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
+    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
+      return true;
+    });
+    when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
+      return Response.parse(<String, Object>{'type': 'Success'});
+    });
     final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
-    expect(result.code, 1);
-    expect(result.message, contains('hot reload not supported on the web.'));
+    expect(result.code, 0);
   }));
 
   test('Can hot restart after attaching', () => testbed.run(() async {
@@ -373,7 +379,6 @@ void main() {
     expect(bufferLogger.statusText, contains('Launching ${fs.path.join('lib', 'main.dart')} on Chromez in debug mode'));
   }));
 }
-
 
 class MockWebDevice extends Mock implements Device {}
 class MockBuildDaemonCreator extends Mock implements BuildDaemonCreator {}
