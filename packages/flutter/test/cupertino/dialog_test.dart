@@ -65,15 +65,15 @@ void main() {
 
   testWidgets('Dialog dark theme', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const CupertinoApp(
+      CupertinoApp(
         home: MediaQuery(
-          data: MediaQueryData(platformBrightness: Brightness.dark),
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
           child: CupertinoAlertDialog(
-            title: Text('The Title'),
-            content: Text('Content'),
+            title: const Text('The Title'),
+            content: const Text('Content'),
             actions: <Widget>[
-              CupertinoDialogAction(child: Text('Cancel'), isDefaultAction: true),
-              CupertinoDialogAction(child: Text('OK')),
+              CupertinoDialogAction(child: const Text('Cancel'), isDefaultAction: true, onPressed: () {}),
+              const CupertinoDialogAction(child: Text('OK')),
             ],
           ),
         ),
@@ -86,7 +86,12 @@ void main() {
 
     expect(
       cancelText.text.style.color.value,
-      0xFFFFFFFF, // dark elevated color
+      0xFF0A84FF, // dark elevated color of systemBlue.
+    );
+
+    expect(
+      find.byType(CupertinoAlertDialog),
+      paints..rect(color: const Color(0xBF1E1E1E)),
     );
   });
 
@@ -766,8 +771,8 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    const Color normalButtonBackgroundColor = Color(0xc0ffffff);
-    const Color pressedButtonBackgroundColor = Color(0x90ffffff);
+    const Color normalButtonBackgroundColor = Color(0xCCF2F2F2);
+    const Color pressedButtonBackgroundColor = Color(0xFFE1E1E1);
     final RenderBox firstButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');
     final RenderBox secondButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 2');
     final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
