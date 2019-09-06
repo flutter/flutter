@@ -217,7 +217,7 @@ template("jit_runner") {
     ]
 
     if (!product) {
-      deps += [ observatory_target ]
+      deps += [ engine_observatory_target ]
     }
 
     binary = "flutter_jit${product_suffix}_runner"
@@ -234,7 +234,7 @@ template("jit_runner") {
     if (!product) {
       resources += [
         {
-          path = rebase_path(observatory_archive_file)
+          path = rebase_path(engine_observatory_archive_file)
           dest = "observatory.tar"
         },
       ]
@@ -287,7 +287,7 @@ template("aot_runner") {
     ]
 
     if (!product) {
-      deps += [ observatory_target ]
+      deps += [ engine_observatory_target ]
     }
 
     meta_dir = "$flutter_root/shell/platform/fuchsia/flutter/meta"
@@ -304,7 +304,7 @@ template("aot_runner") {
     if (!product) {
       resources += [
         {
-          path = rebase_path(observatory_archive_file)
+          path = rebase_path(engine_observatory_archive_file)
           dest = "observatory.tar"
         },
       ]

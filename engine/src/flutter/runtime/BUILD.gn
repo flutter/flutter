@@ -29,8 +29,7 @@ group("libdart") {
   public_deps = []
 
   if (!(is_fuchsia && using_fuchsia_sdk)) {
-    if (flutter_runtime_mode == "profile" ||
-        flutter_runtime_mode == "release") {
+    if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") {
       public_deps +=
           [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]
     } else {
@@ -103,8 +102,7 @@ source_set("runtime") {
   #  3. In the executable can enjoy the advantages of the windows preload
   #     mechanism, speed up I/O.
   if (is_win) {
-    if (flutter_runtime_mode == "profile" ||
-        flutter_runtime_mode == "release") {
+    if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") {
       deps += [ "$flutter_root/lib/snapshot" ]
     }
   }

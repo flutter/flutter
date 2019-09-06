@@ -104,7 +104,7 @@ template("jit_runner_package") {
     ]
 
     if (!invoker.product) {
-      deps += [ observatory_target ]
+      deps += [ engine_observatory_target ]
     }
 
     binary = "dart_jit${product_suffix}_runner"
@@ -139,7 +139,7 @@ template("jit_runner_package") {
     if (!invoker.product) {
       resources += [
         {
-          path = rebase_path(observatory_archive_file)
+          path = rebase_path(engine_observatory_archive_file)
           dest = "observatory.tar"
         },
       ]

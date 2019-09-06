@@ -25,7 +25,7 @@ def main():
   parser = argparse.ArgumentParser();
 
   parser.add_argument('--gn-binary', dest='gn_binary', required=True, type=str)
-  parser.add_argument('--dry-run', dest='dry_run', required=True, type=bool)
+  parser.add_argument('--dry-run', dest='dry_run', default=True, type=str)
   parser.add_argument('--root-directory', dest='root_directory', required=True, type=str)
 
   args = parser.parse_args()
@@ -35,7 +35,7 @@ def main():
 
   gn_command = [ gn_binary, 'format']
 
-  if args.dry_run:
+  if args.dry_run == 'false':
     gn_command.append('--dry-run')
 
 
