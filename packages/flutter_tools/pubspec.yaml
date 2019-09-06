@@ -47,7 +47,7 @@ dependencies:
   test_core: 0.2.5
 
   # Code generation dependencies
-  build_runner_core: 3.0.9
+  build_runner_core: 3.1.0
   dart_style: 1.2.9
   code_builder: 3.2.0
   build: 1.1.6
@@ -124,7 +124,7 @@ dev_dependencies:
   mockito: 4.1.1
   file_testing: 2.1.0
   test: 1.6.3
-  build_runner: 1.6.7
+  build_runner: 1.6.8
   build_vm_compilers: 1.0.3
   build_test: 0.10.8
 
@@ -136,4 +136,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 9ea0
+# PUBSPEC CHECKSUM: 1699
