@@ -834,8 +834,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
     super.initInstances();
-    window.onBeginFrame = null;
-    window.onDrawFrame = null;
     _mockFlutterAssets();
   }
 
@@ -976,6 +974,13 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         _pendingAsyncTasks = null;
       });
     });
+  }
+
+  @override
+  void ensureFrameCallbacksRegistered() {
+    // Leave Window alone, do nothing.
+    assert(window.onDrawFrame == null);
+    assert(window.onBeginFrame == null);
   }
 
   @override
@@ -1361,7 +1366,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       onNeedPaint: _handleViewNeedsPaint,
       window: window,
     );
-    renderView.scheduleInitialFrame();
+    renderView.prepareInitialFrame();
   }
 
   @override
