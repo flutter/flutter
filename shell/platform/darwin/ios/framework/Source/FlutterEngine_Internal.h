@@ -36,8 +36,6 @@
 
 - (fml::WeakPtr<flutter::PlatformView>)platformView;
 
-- (flutter::PlatformViewIOS*)iosPlatformView;
-
 - (flutter::Rasterizer::Screenshot)screenshot:(flutter::Rasterizer::ScreenshotType)type
                                  base64Encode:(bool)base64Encode;
 

@@ -44,12 +44,10 @@ class PlatformViewIOS final : public PlatformView {
   // |PlatformView|
   void SetSemanticsEnabled(bool enabled) override;
 
-  bool HasOnscreenSurface() const;
-
  private:
   fml::WeakPtr<FlutterViewController> owner_controller_;
   std::unique_ptr<IOSSurface> ios_surface_;
-  std::unique_ptr<IOSGLContext> resource_gl_context_;
+  std::shared_ptr<IOSGLContext> gl_context_;
   PlatformMessageRouter platform_message_router_;
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
   fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin_;
@@ -76,8 +74,6 @@ class PlatformViewIOS final : public PlatformView {
 
   // |PlatformView|
   void OnPreEngineRestart() const override;
-
-  void NotifyDestroyed() override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
 };
