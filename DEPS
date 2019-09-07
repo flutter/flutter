@@ -136,7 +136,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'a636978c4b3bc48d20898f8b9ba6c194c6c12fd2',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'b20950ca00bb709252d55e9b3ca3b6a5cea78c4e',
 
    # Fuchsia compatibility
    #
@@ -568,7 +568,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/clang/linux-amd64',
-        'version': '-mnHlaPaPgvt5sKjF7jhV88hKIn7NDHU6Bh4YZX7u_8C'
+        'version': 'VoYNWWBg5lSr3spub0JiLnqCVkd9V8vRCImmELC7yccC'
        }
      ],
      'condition': 'host_os == "linux"',
