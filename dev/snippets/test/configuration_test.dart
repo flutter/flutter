@@ -47,7 +47,7 @@ void main() {
       expect(
           config.getHtmlSkeletonFile(SnippetType.application, showDartPad: true).path,
           matches(RegExp(
-              r'[/\\]flutter sdk[/\\]dev[/\\]snippets[/\\]config[/\\]skeletons[/\\]dartpad.html')));
+              r'[/\\]flutter sdk[/\\]dev[/\\]snippets[/\\]config[/\\]skeletons[/\\]dartpad-application.html')));
     });
   });
 }

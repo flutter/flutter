@@ -145,8 +145,9 @@ void main() {
 
       final String html = generator.generate(
         inputFile,
-        SnippetType.sample,
+        SnippetType.application,
         showDartPad: true,
+        template: 'template',
         metadata: <String, Object>{'id': 'id'},
       );
       expect(html, contains('<div>HTML Bits (DartPad-style)</div>'));

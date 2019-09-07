@@ -69,7 +69,10 @@ class Configuration {
 
   /// Gets the skeleton file to use for the given [SnippetType] and DartPad preference.
   File getHtmlSkeletonFile(SnippetType type, {bool showDartPad = false}) {
-    final String filename = showDartPad ? 'dartpad.html' : '${getEnumName(type)}.html';
+    assert(!showDartPad || type == SnippetType.application,
+        'Only application snippets work with dartpad.');
+    final String filename =
+        '${showDartPad ? 'dartpad-' : ''}${getEnumName(type)}.html';
     return File(path.join(skeletonsDirectory.path, filename));
   }
 }

@@ -108,6 +108,11 @@ void main(List<String> argList) {
       .firstWhere((SnippetType type) => getEnumName(type) == args[_kTypeOption], orElse: () => null);
   assert(snippetType != null, "Unable to find '${args[_kTypeOption]}' in SnippetType enum.");
 
+  if (args[_kShowDartPad] == true && snippetType != SnippetType.application) {
+    errorExit('$snippetType was selected, but the --dartpad flag is only valid '
+      'application snippets.');
+  }
+
   if (args[_kInputOption] == null) {
     stderr.writeln(parser.usage);
     errorExit('The --$_kInputOption option must be specified, either on the command '

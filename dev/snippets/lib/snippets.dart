@@ -225,6 +225,8 @@ class SnippetGenerator {
     assert(template != null || type != SnippetType.application);
     assert(metadata != null && metadata['id'] != null);
     assert(input != null);
+    assert(!showDartPad || type == SnippetType.application,
+        'Only application snippets work with dartpad.');
     final List<_ComponentTuple> snippetData = parseInput(_loadFileAsUtf8(input));
     switch (type) {
       case SnippetType.application:
