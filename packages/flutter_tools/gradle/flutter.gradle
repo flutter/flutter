@@ -144,7 +144,7 @@ class FlutterPlugin implements Plugin<Project> {
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
 
-        // Add custom build types
+        // Add custom build types.
         project.android.buildTypes {
             profile {
                 initWith debug
@@ -161,8 +161,8 @@ class FlutterPlugin implements Plugin<Project> {
                 release {
                     minifyEnabled true
                     useProguard true
-                    // Fallback to `android/app/proguard-rules.pro` within an app project.
-                    // This way, custom Proguard rules can be configured if needed.
+                    // Fallback to `android/app/proguard-rules.pro`.
+                    // This way, custom Proguard rules can be configured as needed.
                     proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"
                 }
             }

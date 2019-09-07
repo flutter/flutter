@@ -189,7 +189,10 @@ void main() {
   });
 }
 
-Future<BuildApkCommand> runBuildApkCommand(String target, { List<String> arguments }) async {
+Future<BuildApkCommand> runBuildApkCommand(
+  String target,
+  { List<String> arguments }
+) async {
   final BuildApkCommand command = BuildApkCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
