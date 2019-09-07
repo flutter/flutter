@@ -419,18 +419,8 @@ class _IndicatorPainter extends CustomPainter {
   }
 
   static bool _tabOffsetsEqual(List<double> a, List<double> b) {
-    // TODO(shihaohong): Null checks were added because of crashes in apps
-    // where a and/or b become null.
-    //
-    // Tab offsets are defined at layout, which should happen before paint
-    // is first called. However, it seems like shouldRepaint is being called
-    // before layout. It is unclear how an app could enter this state, but
-    // it proved difficult to effectively reproduce this issue. In reality,
-    // this state should never occur and the underlying cause should be fixed.
-    // Once a clear reproduction can be created and a regression test is
-    // written, these checks should be removed.
-    //
-    // See https://github.com/flutter/flutter/issues/40014 for more details.
+    // TODO(shihaohong): The following null check should be replaced when a fix
+    // for https://github.com/flutter/flutter/issues/40014 is available.
     if (a == null || b == null || a.length != b.length)
       return false;
     for (int i = 0; i < a.length; i += 1) {
