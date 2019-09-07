@@ -430,7 +430,7 @@ class _IndicatorPainter extends CustomPainter {
     // Once a clear reproduction can be created and a regression test is
     // written, these checks should be removed.
     //
-    // See https://github.com/flutter/flutter/issues/35997 for more details.
+    // See https://github.com/flutter/flutter/issues/40014 for more details.
     if (a == null || b == null || a.length != b.length)
       return false;
     for (int i = 0; i < a.length; i += 1) {
