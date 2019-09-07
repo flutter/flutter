@@ -12,16 +12,15 @@
 
 namespace flutter {
 
-IOSGLContext::IOSGLContext() : IOSGLContext(nullptr) {}
-
-IOSGLContext::IOSGLContext(EAGLSharegroup* sharegroup)
-    : weak_factory_(std::make_unique<fml::WeakPtrFactory<IOSGLContext>>(this)) {
-  context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3
-                                       sharegroup:sharegroup]);
-
-  if (!context_) {
+IOSGLContext::IOSGLContext() {
+  resource_context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3]);
+  if (resource_context_ != nullptr) {
+    context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3
+                                         sharegroup:resource_context_.get().sharegroup]);
+  } else {
+    resource_context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2]);
     context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2
-                                         sharegroup:sharegroup]);
+                                         sharegroup:resource_context_.get().sharegroup]);
   }
 
   // TODO:
@@ -45,22 +44,20 @@ IOSGLContext::IOSGLContext(EAGLSharegroup* sharegroup)
   }
 }
 
-fml::WeakPtr<IOSGLContext> IOSGLContext::GetWeakPtr() {
-  return weak_factory_->GetWeakPtr();
-}
-
-bool IOSGLContext::BindRenderbufferStorage(fml::scoped_nsobject<CAEAGLLayer> layer) {
-  return [context_.get() renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer.get()];
-}
-
 IOSGLContext::~IOSGLContext() = default;
+
+std::unique_ptr<IOSGLRenderTarget> IOSGLContext::CreateRenderTarget(
+    fml::scoped_nsobject<CAEAGLLayer> layer) {
+  return std::make_unique<IOSGLRenderTarget>(std::move(layer), context_.get(),
+                                             resource_context_.get());
+}
 
 bool IOSGLContext::MakeCurrent() {
   return [EAGLContext setCurrentContext:context_.get()];
 }
 
-std::unique_ptr<IOSGLContext> IOSGLContext::MakeSharedContext() {
-  return std::make_unique<IOSGLContext>(context_.get().sharegroup);
+bool IOSGLContext::ResourceMakeCurrent() {
+  return [EAGLContext setCurrentContext:resource_context_.get()];
 }
 
 }  // namespace flutter
