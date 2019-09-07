@@ -133,7 +133,7 @@ void main() {
 
       await expectLater(() async {
         await runBuildApkCommand(projectPath);
-      }, throwsToolExit());
+      }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
 
       verify(mockProcessManager.start(
         <String>[
@@ -165,7 +165,7 @@ void main() {
           projectPath,
           arguments: <String>['--no-proguard'],
         );
-      }, throwsToolExit());
+      }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
 
       verify(mockProcessManager.start(
         <String>[

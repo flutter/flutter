@@ -122,7 +122,7 @@ void main() {
 
       await expectLater(() async {
         await runBuildAppBundleCommand(projectPath);
-      }, throwsToolExit());
+      }, throwsToolExit(message: 'Gradle task bundleRelease failed with exit code 1'));
 
       verify(mockProcessManager.start(
         <String>[
@@ -157,7 +157,7 @@ void main() {
           projectPath,
           arguments: <String>['--no-proguard'],
         );
-      }, throwsToolExit());
+      }, throwsToolExit(message: 'Gradle task bundleRelease failed with exit code 1'));
 
       verify(mockProcessManager.start(
         <String>[
