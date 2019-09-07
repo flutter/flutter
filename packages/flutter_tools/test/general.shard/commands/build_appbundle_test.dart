@@ -108,6 +108,7 @@ void main() {
 
       mockAndroidSdk = MockAndroidSdk();
       when(mockAndroidSdk.validateSdkWellFormed()).thenReturn(const <String>[]);
+      when(mockAndroidSdk.directory).thenReturn('irrelevant');
     });
 
     tearDown(() {

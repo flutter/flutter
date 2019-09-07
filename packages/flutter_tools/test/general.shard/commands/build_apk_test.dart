@@ -95,6 +95,7 @@ void main() {
     Directory tempDir;
     ProcessManager mockProcessManager;
     String gradlew;
+    AndroidSdk mockAndroidSdk;
 
     setUp(() {
       tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
@@ -122,6 +123,9 @@ void main() {
           environment: anyNamed('environment')))
         .thenAnswer((_) => Future<Process>.value(process));
       when(mockProcessManager.canRun(any)).thenReturn(false);
+
+      mockAndroidSdk = MockAndroidSdk();
+      when(mockAndroidSdk.directory).thenReturn('irrelevant');
     });
 
     tearDown(() {
@@ -151,7 +155,7 @@ void main() {
       )).called(1);
     },
     overrides: <Type, Generator>{
-      AndroidSdk: () => MockAndroidSdk(),
+      AndroidSdk: () => mockAndroidSdk,
       GradleUtils: () => GradleUtils(),
       ProcessManager: () => mockProcessManager,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
@@ -183,7 +187,7 @@ void main() {
       )).called(1);
     },
     overrides: <Type, Generator>{
-      AndroidSdk: () => MockAndroidSdk(),
+      AndroidSdk: () => mockAndroidSdk,
       GradleUtils: () => GradleUtils(),
       ProcessManager: () => mockProcessManager,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
