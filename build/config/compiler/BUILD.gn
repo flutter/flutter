@@ -645,7 +645,7 @@ if (is_win) {
   default_warning_flags += [
     # Enables.
     "-Wendif-labels",  # Weird old-style text after an #endif.
-    "-Werror", # Warnings as errors.
+    "-Werror",  # Warnings as errors.
 
     # Disables.
     "-Wno-missing-field-initializers",  # "struct foo f = {0};"
@@ -657,6 +657,13 @@ if (is_win) {
     # availability is newer than the deployment target. This is not
     # required when compiling Chrome for iOS.
     default_warning_flags += [ "-Wunguarded-availability" ]
+  }
+
+  if (is_fuchsia) {
+    default_warning_flags += [
+      "-Wno-c99-designator",
+      "-Wno-reorder-init-list",
+    ]
   }
 
   if (allow_deprecated_api_calls) {
