@@ -106,6 +106,11 @@ abstract class ScrollActivity {
     ScrollEndNotification(metrics: metrics, context: context).dispatch(context);
   }
 
+  /// Dispatch a [ScrollDragEndNotification] with the given metrics.
+  void dispatchScrollDragEndNotification(ScrollMetrics metrics, BuildContext context) {
+    ScrollDragEndNotification(metrics: metrics, context: context).dispatch(context);
+  }
+
   /// Called when the scroll view that is performing this activity changes its metrics.
   void applyNewDimensions() { }
 
@@ -461,6 +466,16 @@ class DragScrollActivity extends ScrollActivity {
     ).dispatch(context);
   }
 
+  @override
+  void dispatchScrollDragEndNotification(ScrollMetrics metrics, BuildContext context){
+      final dynamic lastDetails = _controller.lastDetails;
+      ScrollDragEndNotification(
+          metrics: metrics,
+          context: context,
+          dragDetails: lastDetails is DragEndDetails ? lastDetails : null,
+      ).dispatch(context);
+  }
+  
   @override
   bool get shouldIgnorePointer => true;
 

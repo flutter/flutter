@@ -278,6 +278,39 @@ class UserScrollNotification extends ScrollNotification {
   }
 }
 
+/// A notification that is dispatched as soon as pointer is no longer in
+/// contact with the screen i.e drag has been ended in [Scrollable] widget.
+///
+/// See also:
+///
+///  * [ScrollEndNotification], which indicates that scrolling has been ended
+///  * [ScrollEndNotification.dragDetails], null if residualVelocity
+///  causes ballistic simulation, otherwise not null
+///
+/// After [ScrollDragEndNotification], [ScrollEndNotification]
+/// will be dispatched immediately or after some delay(depending on the
+/// residual velocity causes ballistic animation or not)
+///
+class ScrollDragEndNotification extends ScrollNotification {
+  /// Creates a notification that drag in a [Scrollable] widget has been stopped.0
+  ScrollDragEndNotification({
+      @required ScrollMetrics metrics,
+      @required BuildContext context,
+      this.dragDetails,
+}) : super(metrics: metrics, context: context);
+
+  /// If the drag in [Scrollable] ends, and pointer is no longer in contact,
+  /// the details about that drag end.
+  final DragEndDetails dragDetails;
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (dragDetails != null)
+      description.add('$dragDetails');
+  }
+}
+
 /// A predicate for [ScrollNotification], used to customize widgets that
 /// listen to notifications from their children.
 typedef ScrollNotificationPredicate = bool Function(ScrollNotification notification);

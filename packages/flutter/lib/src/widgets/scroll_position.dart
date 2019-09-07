@@ -633,6 +633,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       return;
     bool wasScrolling, oldIgnorePointer;
     if (_activity != null) {
+      if (_activity is DragScrollActivity)
+        didEndScrollDrag(); //notifies drag has ended while scrolling
       oldIgnorePointer = _activity.shouldIgnorePointer;
       wasScrolling = _activity.isScrolling;
       if (wasScrolling && !newActivity.isScrolling)
@@ -670,6 +672,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     activity.dispatchScrollEndNotification(copyWith(), context.notificationContext);
     if (keepScrollOffset)
       saveScrollOffset();
+  }
+  
+  /// Called by [beginActivity] to report when an scroll drag has been ended.
+  void didEndScrollDrag() {
+    activity.dispatchScrollDragEndNotification(copyWith(), context.notificationContext);
   }
 
   /// Called by [setPixels] to report overscroll when an attempt is made to
