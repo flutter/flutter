@@ -88,7 +88,7 @@ class CopyFlutterBundle extends Target {
   ];
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'copy_flutter_bundle');
     }
