@@ -4,6 +4,8 @@
 
 import 'dart:ui' show Color;
 
+import '../../widgets.dart';
+
 /// Interactive states that some of the Material widgets can take on when
 /// receiving input from the user.
 ///
@@ -65,6 +67,100 @@ enum MaterialState {
 /// Signature for the function that returns a value of type `T` based on a given
 /// set of states.
 typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
+
+/// A widget that uses [builder] to obtain it's child widget.
+///
+/// [MaterialStateBuilder] will listen for hover, focus, and press changes and
+/// call [builder] with the current `Set<MaterialState>`.
+///
+/// Additionally, [MaterialStateBuilder] will listen for changes to the given
+/// [disabled], [selected], and [error] parameters, and call [builder] any time
+/// they are updated.
+class MaterialStateBuilder extends StatefulWidget {
+  /// Creates a widget that listens for changes in states and delegates its
+  /// build to a callback.
+  ///
+  /// The [builder], [disabled], [selected], and [error] arguments must be
+  /// non-null.
+  const MaterialStateBuilder({
+    Key key,
+    @required this.builder,
+    this.disabled = false,
+    this.selected = false,
+    this.error = false,
+  }) : assert(builder != null),
+       assert(disabled != null),
+       assert(selected != null),
+       assert(error != null),
+       super(key: key);
+
+  /// The callback that returns the child of this widget based on the current
+  /// `Set<MaterialState>`.
+  final MaterialPropertyResolver<Widget> builder;
+
+  /// Whether or not the child of this widget is considered to be
+  /// [MaterialState.disabled].
+  final bool disabled;
+
+  /// Whether or not the child of this widget is considered to be
+  /// [MaterialState.selected].
+  final bool selected;
+
+  /// Whether or not the child of this widget is considered to be
+  /// [MaterialState.error].
+  final bool error;
+
+  @override
+  _MaterialStateBuilderState createState() => _MaterialStateBuilderState();
+}
+
+class _MaterialStateBuilderState extends State<MaterialStateBuilder> {
+  final Set<MaterialState> _states = <MaterialState>{};
+
+  void _updateState(MaterialState state, bool value) {
+    if (_states.contains(state) != value) {
+      setState(() {
+        value ? _states.add(state) : _states.remove(state);
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _updateState(MaterialState.disabled, widget.disabled);
+    _updateState(MaterialState.selected, widget.selected);
+    _updateState(MaterialState.error, widget.error);
+  }
+
+  @override
+  void didUpdateWidget(MaterialStateBuilder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateState(MaterialState.disabled, widget.disabled);
+    _updateState(MaterialState.selected, widget.selected);
+    _updateState(MaterialState.error, widget.error);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => _updateState(MaterialState.hovered, true),
+      onExit: (_) => _updateState(MaterialState.hovered, false),
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTapDown: (_) => _updateState(MaterialState.pressed, true),
+        onTapCancel: () => _updateState(MaterialState.pressed, false),
+        onTapUp: (_) => _updateState(MaterialState.pressed, false),
+        excludeFromSemantics: true,
+        child: Focus(
+          skipTraversal: true,
+          onFocusChange: (bool value) => _updateState(MaterialState.focused, value),
+          child: widget.builder(_states),
+        ),
+      ),
+    );
+  }
+}
 
 /// Defines a [Color] whose value depends on a set of [MaterialState]s which
 /// represent the interactive state of a component.
