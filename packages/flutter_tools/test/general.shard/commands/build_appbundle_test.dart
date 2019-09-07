@@ -8,7 +8,6 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
@@ -38,7 +37,7 @@ void main() {
     testUsingContext('indicate the default target platforms', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
-      final BuildAppBundleCommand command = await runCommandIn(projectPath);
+      final BuildAppBundleCommand command = await runBuildAppBundleCommand(projectPath);
 
       expect(await command.usageValues,
           containsPair(CustomDimensions.commandBuildAppBundleTargetPlatform, 'android-arm,android-arm64'));
@@ -51,21 +50,21 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
 
-      final BuildAppBundleCommand commandDefault = await runCommandIn(projectPath);
+      final BuildAppBundleCommand commandDefault = await runBuildAppBundleCommand(projectPath);
       expect(await commandDefault.usageValues,
           containsPair(CustomDimensions.commandBuildAppBundleBuildMode, 'release'));
 
-      final BuildAppBundleCommand commandInRelease = await runCommandIn(projectPath,
+      final BuildAppBundleCommand commandInRelease = await runBuildAppBundleCommand(projectPath,
           arguments: <String>['--release']);
       expect(await commandInRelease.usageValues,
           containsPair(CustomDimensions.commandBuildAppBundleBuildMode, 'release'));
 
-      final BuildAppBundleCommand commandInDebug = await runCommandIn(projectPath,
+      final BuildAppBundleCommand commandInDebug = await runBuildAppBundleCommand(projectPath,
           arguments: <String>['--debug']);
       expect(await commandInDebug.usageValues,
           containsPair(CustomDimensions.commandBuildAppBundleBuildMode, 'debug'));
 
-      final BuildAppBundleCommand commandInProfile = await runCommandIn(projectPath,
+      final BuildAppBundleCommand commandInProfile = await runBuildAppBundleCommand(projectPath,
           arguments: <String>['--profile']);
       expect(await commandInProfile.usageValues,
           containsPair(CustomDimensions.commandBuildAppBundleBuildMode, 'profile'));
@@ -116,15 +115,14 @@ void main() {
     });
 
     testUsingContext('proguard is enabled by default on release mode', () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
 
-      try {
-        await runCommandIn(projectPath);
-        assert(false);
-      } catch (exception) {
-        expect(exception is ToolExit, isTrue);
-      }
+      await expectLater(() async {
+        await runBuildAppBundleCommand(projectPath);
+      }, throwsToolExit());
 
       verify(mockProcessManager.start(
         <String>[
@@ -149,16 +147,17 @@ void main() {
     timeout: allowForCreateFlutterProject);
 
     testUsingContext('proguard is disabled when --no-proguard is passed', () async {
-      final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--template=app']);
+      final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
 
-      try {
-        await runCommandIn(projectPath,
-          arguments: <String>['--no-proguard']);
-        assert(false);
-      } catch (exception) {
-        expect(exception is ToolExit, isTrue);
-      }
+      await expectLater(() async {
+        await runBuildAppBundleCommand(
+          projectPath,
+          arguments: <String>['--no-proguard'],
+        );
+      }, throwsToolExit());
 
       verify(mockProcessManager.start(
         <String>[
@@ -183,7 +182,10 @@ void main() {
   });
 }
 
-Future<BuildAppBundleCommand> runCommandIn(String target, { List<String> arguments }) async {
+Future<BuildAppBundleCommand> runBuildAppBundleCommand(
+  String target,
+  { List<String> arguments }
+) async {
   final BuildAppBundleCommand command = BuildAppBundleCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[

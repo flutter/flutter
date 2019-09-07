@@ -7,7 +7,6 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
@@ -37,7 +36,7 @@ void main() {
     testUsingContext('indicate the default target platforms', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
-      final BuildApkCommand command = await runCommandIn(projectPath);
+      final BuildApkCommand command = await runBuildApkCommand(projectPath);
 
       expect(await command.usageValues,
           containsPair(CustomDimensions.commandBuildApkTargetPlatform, 'android-arm,android-arm64'));
@@ -50,12 +49,12 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
 
-      final BuildApkCommand commandWithFlag = await runCommandIn(projectPath,
+      final BuildApkCommand commandWithFlag = await runBuildApkCommand(projectPath,
           arguments: <String>['--split-per-abi']);
       expect(await commandWithFlag.usageValues,
           containsPair(CustomDimensions.commandBuildApkSplitPerAbi, 'true'));
 
-      final BuildApkCommand commandWithoutFlag = await runCommandIn(projectPath);
+      final BuildApkCommand commandWithoutFlag = await runBuildApkCommand(projectPath);
       expect(await commandWithoutFlag.usageValues,
           containsPair(CustomDimensions.commandBuildApkSplitPerAbi, 'false'));
 
@@ -67,21 +66,21 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
 
-      final BuildApkCommand commandDefault = await runCommandIn(projectPath);
+      final BuildApkCommand commandDefault = await runBuildApkCommand(projectPath);
       expect(await commandDefault.usageValues,
           containsPair(CustomDimensions.commandBuildApkBuildMode, 'release'));
 
-      final BuildApkCommand commandInRelease = await runCommandIn(projectPath,
+      final BuildApkCommand commandInRelease = await runBuildApkCommand(projectPath,
           arguments: <String>['--release']);
       expect(await commandInRelease.usageValues,
           containsPair(CustomDimensions.commandBuildApkBuildMode, 'release'));
 
-      final BuildApkCommand commandInDebug = await runCommandIn(projectPath,
+      final BuildApkCommand commandInDebug = await runBuildApkCommand(projectPath,
           arguments: <String>['--debug']);
       expect(await commandInDebug.usageValues,
           containsPair(CustomDimensions.commandBuildApkBuildMode, 'debug'));
 
-      final BuildApkCommand commandInProfile = await runCommandIn(projectPath,
+      final BuildApkCommand commandInProfile = await runBuildApkCommand(projectPath,
           arguments: <String>['--profile']);
       expect(await commandInProfile.usageValues,
           containsPair(CustomDimensions.commandBuildApkBuildMode, 'profile'));
@@ -132,12 +131,9 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
 
-      try {
-        await runCommandIn(projectPath);
-        assert(false);
-      } catch (exception) {
-        expect(exception is ToolExit, isTrue);
-      }
+      await expectLater(() async {
+        await runBuildApkCommand(projectPath);
+      }, throwsToolExit());
 
       verify(mockProcessManager.start(
         <String>[
@@ -164,13 +160,12 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
 
-      try {
-        await runCommandIn(projectPath,
-          arguments: <String>['--no-proguard']);
-        assert(false);
-      } catch (exception) {
-        expect(exception is ToolExit, isTrue);
-      }
+      await expectLater(() async {
+        await runBuildApkCommand(
+          projectPath,
+          arguments: <String>['--no-proguard'],
+        );
+      }, throwsToolExit());
 
       verify(mockProcessManager.start(
         <String>[
@@ -194,7 +189,7 @@ void main() {
   });
 }
 
-Future<BuildApkCommand> runCommandIn(String target, { List<String> arguments }) async {
+Future<BuildApkCommand> runBuildApkCommand(String target, { List<String> arguments }) async {
   final BuildApkCommand command = BuildApkCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
