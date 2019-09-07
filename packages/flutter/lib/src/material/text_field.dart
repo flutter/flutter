@@ -198,7 +198,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///    [TextField]. The [EditableText] widget is rarely used directly unless
 ///    you are implementing an entirely different design language, such as
 ///    Cupertino.
-///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
+///  * Learn how to use a [TextEditingController] in one of our
+///    [cookbook recipe](https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)s.
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
@@ -538,7 +539,8 @@ class TextField extends StatefulWidget {
 
   /// The color to use when painting the cursor.
   ///
-  /// Defaults to the theme's `cursorColor` when null.
+  /// Defaults to [ThemeData.cursorColor] or [CupertinoTheme.primaryColor]
+  /// depending on [ThemeData.platform].
   final Color cursorColor;
 
   /// The appearance of the keyboard.
@@ -684,6 +686,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   bool get selectionEnabled => widget.selectionEnabled;
   // End of API for TextSelectionGestureDetectorBuilderDelegate.
 
+  bool get _isEnabled =>  widget.enabled ?? widget.decoration?.enabled ?? true;
+
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData themeData = Theme.of(context);
@@ -753,8 +757,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   void initState() {
     super.initState();
     _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(state: this);
-    if (widget.controller == null)
+    if (widget.controller == null) {
       _controller = TextEditingController();
+    }
+    _effectiveFocusNode.canRequestFocus = _isEnabled;
   }
 
   @override
@@ -764,11 +770,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       _controller = TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
-    final bool isEnabled = widget.enabled ?? widget.decoration?.enabled ?? true;
-    final bool wasEnabled = oldWidget.enabled ?? oldWidget.decoration?.enabled ?? true;
-    if (wasEnabled && !isEnabled) {
-      _effectiveFocusNode.unfocus();
-    }
+    _effectiveFocusNode.canRequestFocus = _isEnabled;
     if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly) {
       if(_effectiveController.selection.isCollapsed) {
         _showSelectionHandles = !widget.readOnly;
@@ -1043,7 +1045,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onEnter: _handleMouseEnter,
         onExit: _handleMouseExit,
         child: IgnorePointer(
-          ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
+          ignoring: !_isEnabled,
           child: _selectionGestureDetectorBuilder.buildGestureDetector(
             behavior: HitTestBehavior.translucent,
             child: child,

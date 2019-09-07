@@ -11,6 +11,9 @@ import 'device.dart';
 
 /// Kills a process on linux or macOS.
 Future<bool> killProcess(String executable) async {
+  if (executable == null) {
+    return false;
+  }
   final RegExp whitespace = RegExp(r'\s+');
   bool succeeded = true;
   try {
@@ -29,9 +32,15 @@ Future<bool> killProcess(String executable) async {
       if (values.length < 2) {
         continue;
       }
-      final String pid = values[1];
+      final String processPid = values[1];
+      final String currentRunningProcessPid = pid.toString();
+      // Don't kill the flutter tool process
+      if (processPid == currentRunningProcessPid) {
+        continue;
+      }
+
       final ProcessResult killResult = await processManager.run(<String>[
-        'kill', pid,
+        'kill', processPid,
       ]);
       succeeded &= killResult.exitCode == 0;
     }

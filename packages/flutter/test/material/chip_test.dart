@@ -1168,7 +1168,7 @@ void main() {
                 deleteIcon: deleteIcon,
                 isEnabled: isSelectable || isPressable,
                 shape: chipTheme.shape,
-                selected: isSelectable ? value : null,
+                selected: isSelectable && value,
                 label: Text('$value'),
                 onSelected: isSelectable
                     ? (bool newValue) {
@@ -1738,6 +1738,20 @@ void main() {
     expect(find.byType(InkWell), findsOneWidget);
   });
 
+  testWidgets('RawChip.selected can not be null', (WidgetTester tester) async {
+    expect(() async {
+      MaterialApp(
+        home: Material(
+          child: RawChip(
+            onPressed: () { },
+            selected: null,
+            label: const Text('Chip'),
+          ),
+        ),
+      );
+    }, throwsAssertionError);
+  });
+
   testWidgets('Chip uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
@@ -1822,5 +1836,72 @@ void main() {
 
     // Teardown.
     await gesture.removePointer();
+  });
+
+  testWidgets('loses focus when disabled', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'InputChip');
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: InputChip(
+          focusNode: focusNode,
+          autofocus: true,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+          avatar: const CircleAvatar(child: Text('A')),
+          label: const Text('Chip A'),
+          onPressed: () { },
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: InputChip(
+          focusNode: focusNode,
+          autofocus: true,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+          avatar: const CircleAvatar(child: Text('A')),
+          label: const Text('Chip A'),
+          onPressed: null,
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('cannot be traversed to when disabled', (WidgetTester tester) async {
+    final FocusNode focusNode1 = FocusNode(debugLabel: 'InputChip 1');
+    final FocusNode focusNode2 = FocusNode(debugLabel: 'InputChip 2');
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: Column(
+          children: <Widget>[
+            InputChip(
+              focusNode: focusNode1,
+              autofocus: true,
+              label: const Text('Chip A'),
+              onPressed: () { },
+            ),
+            InputChip(
+              focusNode: focusNode2,
+              autofocus: true,
+              label: const Text('Chip B'),
+              onPressed: null,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(focusNode1.hasPrimaryFocus, isTrue);
+    expect(focusNode2.hasPrimaryFocus, isFalse);
+
+    expect(focusNode1.nextFocus(), isTrue);
+
+    await tester.pump();
+    expect(focusNode1.hasPrimaryFocus, isTrue);
+    expect(focusNode2.hasPrimaryFocus, isFalse);
   });
 }

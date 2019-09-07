@@ -187,6 +187,15 @@ Future<void> main() async {
         return TaskResult.failure('Failed to build ephemeral host .app with CocoaPods');
       }
 
+      final File podfileLockFile = File(path.join(projectDir.path, '.ios', 'Podfile.lock'));
+      final String podfileLockOutput = podfileLockFile.readAsStringSync();
+      if (!podfileLockOutput.contains(':path: Flutter/engine')
+        || !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant')
+        || !podfileLockOutput.contains(':path: Flutter/.symlinks/device_info/ios')
+        || !podfileLockOutput.contains(':path: Flutter/.symlinks/package_info/ios')) {
+        return TaskResult.failure('Building ephemeral host app Podfile.lock does not contain expected pods');
+      }
+
       section('Clean build');
 
       await inDirectory(projectDir, () async {
@@ -250,6 +259,7 @@ Future<void> main() async {
             'CODE_SIGN_IDENTITY=-',
             'EXPANDED_CODE_SIGN_IDENTITY=-',
             'CONFIGURATION_BUILD_DIR=${tempDir.path}',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           environment: <String, String> {
             'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
@@ -294,6 +304,7 @@ Future<void> main() async {
             'CODE_SIGN_IDENTITY=-',
             'EXPANDED_CODE_SIGN_IDENTITY=-',
             'CONFIGURATION_BUILD_DIR=${tempDir.path}',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           canFail: true
         );

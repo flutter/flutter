@@ -199,8 +199,10 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     }
 
     if (widget.title != null) {
+      final ThemeData theme = Theme.of(context);
+
       Widget title;
-      switch (defaultTargetPlatform) {
+      switch (theme.platform) {
         case TargetPlatform.iOS:
           title = widget.title;
           break;
@@ -212,7 +214,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           );
       }
 
-      final ThemeData theme = Theme.of(context);
       final double opacity = settings.toolbarOpacity;
       if (opacity > 0.0) {
         TextStyle titleStyle = theme.primaryTextTheme.title;

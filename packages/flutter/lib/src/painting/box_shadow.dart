@@ -12,8 +12,6 @@ import 'debug.dart';
 
 /// A shadow cast by a box.
 ///
-/// Inherits from [Shadow]
-///
 /// [BoxShadow] can cast non-rectangular shadows if the box is non-rectangular
 /// (e.g., has a border radius or a circular shape).
 ///
@@ -22,6 +20,9 @@ import 'debug.dart';
 /// See also:
 ///
 ///  * [Canvas.drawShadow], which is a more efficient way to draw shadows.
+///  * [PhysicalModel], a widget for showing shadows.
+///  * [kElevationToShadow], for some predefined shadows used in Material
+///    Design.
 ///  * [Shadow], which is the parent class that lacks [spreadRadius].
 @immutable
 class BoxShadow extends ui.Shadow {

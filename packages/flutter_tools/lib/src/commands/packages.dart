@@ -17,8 +17,8 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesGetCommand('get', false));
     addSubcommand(PackagesGetCommand('upgrade', true));
     addSubcommand(PackagesTestCommand());
+    addSubcommand(PackagesPublishCommand());
     addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dev', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache'));
@@ -79,9 +79,9 @@ class PackagesGetCommand extends FlutterCommand {
       return usageValues;
     }
     final FlutterProject rootProject = FlutterProject.fromPath(target);
-    final bool hasPlugins = await rootProject.flutterPluginsFile.exists();
+    final bool hasPlugins = rootProject.flutterPluginsFile.existsSync();
     if (hasPlugins) {
-      final int numberOfPlugins = (await rootProject.flutterPluginsFile.readAsLines()).length;
+      final int numberOfPlugins = (rootProject.flutterPluginsFile.readAsLinesSync()).length;
       usageValues[CustomDimensions.commandPackagesNumberPlugins] = '$numberOfPlugins';
     } else {
       usageValues[CustomDimensions.commandPackagesNumberPlugins] = '0';
@@ -170,6 +170,47 @@ class PackagesTestCommand extends FlutterCommand {
   }
 }
 
+class PackagesPublishCommand extends FlutterCommand {
+  PackagesPublishCommand() {
+    requiresPubspecYaml();
+    argParser.addFlag('dry-run',
+      abbr: 'n',
+      negatable: false,
+      help: 'Validate but do not publish the package.',
+    );
+    argParser.addFlag('force',
+      abbr: 'f',
+      negatable: false,
+      help: 'Publish without confirmation if there are no errors.',
+    );
+  }
+
+  @override
+  String get name => 'publish';
+
+  @override
+  String get description {
+    return 'Publish the current package to pub.dev';
+  }
+
+  @override
+  String get invocation {
+    return '${runner.executableName} pub publish [--dry-run]';
+  }
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    final List<String> args = <String>[
+      ...argResults.rest,
+      if (argResults['dry-run']) '--dry-run',
+      if (argResults['force']) '--force',
+    ];
+    Cache.releaseLockEarly();
+    await pubInteractively(<String>['publish', ...args]);
+    return null;
+  }
+}
+
 class PackagesForwardCommand extends FlutterCommand {
   PackagesForwardCommand(this._commandName, this._description, {bool requiresPubspec = false}) {
     if (requiresPubspec) {
@@ -196,7 +237,7 @@ class PackagesForwardCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
-    await pub(<String>[_commandName, ...argResults.rest], context: PubContext.pubForward, retry: false);
+    await pubInteractively(<String>[_commandName, ...argResults.rest]);
     return null;
   }
 

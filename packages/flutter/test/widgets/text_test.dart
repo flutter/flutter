@@ -116,6 +116,37 @@ void main() {
     expect(text.text.style.fontSize, 20.0);
   });
 
+  testWidgets('inline widgets works with ellipsis', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/35869
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      Text.rich(
+        TextSpan(
+          children: <InlineSpan>[
+            const TextSpan(text: 'a very very very very very very very very very very long line'),
+            WidgetSpan(
+              child: SizedBox(
+                width: 20,
+                height: 40,
+                child: Card(
+                  child: RichText(
+                    text: const TextSpan(text: 'widget should be truncated'),
+                    textDirection: TextDirection.rtl,
+                  ),
+                ),
+              ),
+            ),
+          ],
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(

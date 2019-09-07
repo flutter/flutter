@@ -76,7 +76,6 @@ class LinuxDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
     _lastBuiltMode = debuggingOptions.buildInfo.mode;

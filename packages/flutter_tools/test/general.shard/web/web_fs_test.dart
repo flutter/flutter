@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
-import 'package:flutter_tools/src/web/web_fs.dart';
+import 'package:flutter_tools/src/build_runner/web_fs.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
@@ -46,6 +46,11 @@ void main() {
     });
     when(mockBuildDaemonCreator.assetServerPort(any)).thenReturn(4321);
     testbed = Testbed(
+      setup: () {
+        // Create an empty .packages file so we can read it when we check for
+        // plugins on WebFs.start()
+        fs.file('.packages').createSync();
+      },
       overrides: <Type, Generator>{
         OperatingSystemUtils: () => mockOperatingSystemUtils,
         BuildDaemonCreator: () => mockBuildDaemonCreator,
@@ -72,10 +77,11 @@ void main() {
   });
 
   test('Can create webFs from mocked interfaces', () => testbed.run(() async {
+    final FlutterProject flutterProject = FlutterProject.current();
     await WebFs.start(
       target: fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
-      flutterProject: FlutterProject.current(),
+      flutterProject: flutterProject,
     );
 
     // The build daemon is told to build once.
@@ -83,6 +89,9 @@ void main() {
 
     // Chrome is launched based on port from above.
     verify(mockChromeLauncher.launch('http://localhost:1234/')).called(1);
+
+    // .dart_tool directory is created.
+    expect(flutterProject.dartTool.existsSync(), true);
   }));
 }
 

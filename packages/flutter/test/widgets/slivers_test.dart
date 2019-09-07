@@ -350,6 +350,70 @@ void main() {
     expect(tester.takeException(), 'builder');
     ErrorWidget.builder = oldBuilder;
   });
+
+  testWidgets('SliverFixedExtentList with SliverChildBuilderDelegate auto-correct scroll offset - super fast', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 600);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          controller: controller,
+          cacheExtent: 0,
+          slivers: <Widget>[
+            SliverFixedExtentList(
+              itemExtent: 200,
+              delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                  if (index <= 6) {
+                    return Center(child: Text('Page $index'));
+                  }
+                  return null;
+                },
+              ),
+            )
+          ],
+        ),
+      )
+    );
+    await tester.drag(find.text('Page 5'), const Offset(0, -1000));
+    // Controller will be temporarily over-scrolled.
+    expect(controller.offset, 1600.0);
+    await tester.pumpAndSettle();
+    // It will be corrected after a auto scroll animation.
+    expect(controller.offset, 800.0);
+  });
+
+  testWidgets('SliverFixedExtentList with SliverChildBuilderDelegate auto-correct scroll offset - reasonable', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController(initialScrollOffset: 600);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          controller: controller,
+          cacheExtent: 0,
+          slivers: <Widget>[
+            SliverFixedExtentList(
+              itemExtent: 200,
+              delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                  if (index <= 6) {
+                    return Center(child: Text('Page $index'));
+                  }
+                  return null;
+                },
+              ),
+            )
+          ],
+        ),
+      )
+    );
+    await tester.drag(find.text('Page 5'), const Offset(0, -210));
+    // Controller will be temporarily over-scrolled.
+    expect(controller.offset, 810.0);
+    await tester.pumpAndSettle();
+    // It will be corrected after a auto scroll animation.
+    expect(controller.offset, 800.0);
+  });
 }
 
 bool isRight(Offset a, Offset b) => b.dx > a.dx;
