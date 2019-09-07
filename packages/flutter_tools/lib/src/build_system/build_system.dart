@@ -588,9 +588,9 @@ class _BuildInstance {
           outputFiles[output.resolveSymbolicLinksSync()] = output;
         }
       } else {
-        printStatus('${target.name}: Starting');
+        printTrace('${target.name}: Starting');
         await target.build(environment);
-        printStatus('${target.name}: Complete');
+        printTrace('${target.name}: Complete');
 
         final List<File> outputs = target.resolveOutputs(environment, implicit: true);
         // Update hashes for output files.
