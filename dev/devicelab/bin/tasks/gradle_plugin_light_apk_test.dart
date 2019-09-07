@@ -141,6 +141,10 @@ Future<void> main() async {
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleDebug');
         await project.runGradleTask('assembleDebug');
+        final String errorMessage = validateSnapshotDependency(project, 'kernel_blob.bin');
+        if (errorMessage != null) {
+          throw TaskResult.failure(errorMessage);
+        }
       });
 
       await runProjectTest((FlutterProject project) async {
@@ -226,7 +230,9 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e) {
+    } catch (e, st) {
+      print(e);
+      print(st);
       return TaskResult.failure(e.toString());
     }
   });
