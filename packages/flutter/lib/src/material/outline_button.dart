@@ -393,6 +393,8 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
   }
 
   Color get _outlineColor {
+    print('pressed is $_pressed');
+    print('color is mat state prop ${widget.borderSide?.color is MaterialStateProperty<Color>}');
     // If outline color is a `MaterialStateProperty`, it will be used in all
     // states, otherwise we determine the outline color in the current state.
     if (widget.borderSide?.color is MaterialStateProperty<Color>)

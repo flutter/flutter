@@ -74,8 +74,7 @@ void main() {
 
     // Highlighted (pressed).
     await gesture.down(center);
-    await tester.pump(); // Start the splash and highlight animations.
-    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     semanticsEnabled: true,
@@ -139,8 +138,7 @@ void main() {
 
     // Highlighted (pressed).
     await gesture.down(center);
-    await tester.pump(); // Start the splash and highlight animations.
-    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     skip: isBrowser,
@@ -208,8 +206,7 @@ void main() {
 
     // Highlighted (pressed).
     await gesture.down(center);
-    await tester.pump(); // Start the splash and highlight animations.
-    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await tester.pumpAndSettle();
     expect(textColor(), pressedColor);
   });
 
@@ -274,8 +271,7 @@ void main() {
 
     // Highlighted (pressed).
     await gesture.down(center);
-    await tester.pump(); // Start the splash and highlight animations.
-    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await tester.pumpAndSettle();
     expect(iconColor(), pressedColor);
   });
 
@@ -586,10 +582,7 @@ void main() {
 
     final Offset center = tester.getCenter(outlineButton);
     final TestGesture gesture = await tester.startGesture(center);
-    await tester.pump(); // start gesture
-    // Wait for the border's color to change to highlightedBorderColor and
-    // the fillColor to become opaque.
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
     expect(
       outlineButton,
       paints

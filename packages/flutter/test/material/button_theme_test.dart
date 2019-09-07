@@ -396,8 +396,7 @@ void main() {
 
     // Highlighted (pressed).
     await gesture.down(center);
-    await tester.pump(); // Start the splash and highlight animations.
-    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await tester.pumpAndSettle();
     expect(textColor(), pressedColor);
   },
     semanticsEnabled: true,

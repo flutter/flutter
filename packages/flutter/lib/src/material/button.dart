@@ -250,21 +250,24 @@ class RawMaterialButton extends StatefulWidget {
 }
 
 class _RawMaterialButtonState extends State<RawMaterialButton> {
-  final Set<MaterialState> _states = <MaterialState>{};
+  bool _pressed = false;
 
-  bool get _hovered => _states.contains(MaterialState.hovered);
-  bool get _focused => _states.contains(MaterialState.focused);
-  bool get _pressed => _states.contains(MaterialState.pressed);
-  bool get _disabled => _states.contains(MaterialState.disabled);
-
-  void _updateState(MaterialState state, bool value) {
-    value ? _states.add(state) : _states.remove(state);
+  @override
+  void didUpdateWidget(RawMaterialButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If the button is disabled while a press gesture is currently ongoing,
+    // InkWell makes a call to handleHighlightChanged. This causes an exception
+    // because it calls setState in the middle of a build. To preempt this, we
+    // manually update pressed to false when this situation occurs.
+    if (!widget.enabled && _pressed) {
+      _handleHighlightChanged(false);
+    }
   }
 
   void _handleHighlightChanged(bool value) {
     if (_pressed != value) {
       setState(() {
-        _updateState(MaterialState.pressed, value);
+        _pressed = value;
         if (widget.onHighlightChanged != null) {
           widget.onHighlightChanged(value);
         }
@@ -272,54 +275,19 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     }
   }
 
-  void _handleHoveredChanged(bool value) {
-    if (_hovered != value) {
-      setState(() {
-        _updateState(MaterialState.hovered, value);
-      });
-    }
-  }
-
-  void _handleFocusedChanged(bool value) {
-    if (_focused != value) {
-      setState(() {
-        _updateState(MaterialState.focused, value);
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _updateState(MaterialState.disabled, !widget.enabled);
-  }
-
-  @override
-  void didUpdateWidget(RawMaterialButton oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _updateState(MaterialState.disabled, !widget.enabled);
-    // If the button is disabled while a press gesture is currently ongoing,
-    // InkWell makes a call to handleHighlightChanged. This causes an exception
-    // because it calls setState in the middle of a build. To preempt this, we
-    // manually update pressed to false when this situation occurs.
-    if (_disabled && _pressed) {
-      _handleHighlightChanged(false);
-    }
-  }
-
-  double get _effectiveElevation {
+  double _effectiveElevation(Set<MaterialState> states) {
     // These conditionals are in order of precedence, so be careful about
     // reorganizing them.
-    if (_disabled) {
+    if (states.contains(MaterialState.disabled)) {
       return widget.disabledElevation;
     }
-    if (_pressed) {
+    if (states.contains(MaterialState.pressed)) {
       return widget.highlightElevation;
     }
-    if (_hovered) {
+    if (states.contains(MaterialState.hovered)) {
       return widget.hoverElevation;
     }
-    if (_focused) {
+    if (states.contains(MaterialState.focused)) {
       return widget.focusElevation;
     }
     return widget.elevation;
@@ -327,48 +295,53 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(widget.textStyle?.color, _states);
-    final ShapeBorder effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, _states);
+    final Widget result = MaterialStateBuilder(
+      disabled: !widget.enabled,
+      builder: (Set<MaterialState> states) {
+        final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(widget.textStyle?.color, states);
+        final ShapeBorder effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, states);
 
-    final Widget result = Focus(
-      focusNode: widget.focusNode,
-      canRequestFocus: widget.enabled,
-      onFocusChange: _handleFocusedChanged,
-      autofocus: widget.autofocus,
-      child: ConstrainedBox(
-        constraints: widget.constraints,
-        child: Material(
-          elevation: _effectiveElevation,
-          textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
-          shape: effectiveShape,
-          color: widget.fillColor,
-          type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
-          animationDuration: widget.animationDuration,
-          clipBehavior: widget.clipBehavior,
-          child: InkWell(
-            onHighlightChanged: _handleHighlightChanged,
-            splashColor: widget.splashColor,
-            highlightColor: widget.highlightColor,
-            focusColor: widget.focusColor,
-            hoverColor: widget.hoverColor,
-            onHover: _handleHoveredChanged,
-            onTap: widget.onPressed,
-            customBorder: effectiveShape,
-            child: IconTheme.merge(
-              data: IconThemeData(color: effectiveTextColor),
-              child: Container(
-                padding: widget.padding,
-                child: Center(
-                  widthFactor: 1.0,
-                  heightFactor: 1.0,
-                  child: widget.child,
+        return Focus(
+          focusNode: widget.focusNode,
+          canRequestFocus: widget.enabled,
+//          onFocusChange: _handleFocusedChanged,
+          autofocus: widget.autofocus,
+          child: ConstrainedBox(
+            constraints: widget.constraints,
+            child: Material(
+              elevation: _effectiveElevation(states),
+              textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
+              shape: effectiveShape,
+              color: widget.fillColor,
+              type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
+              animationDuration: widget.animationDuration,
+              clipBehavior: widget.clipBehavior,
+              child: InkWell(
+                onHighlightChanged: _handleHighlightChanged,
+                splashColor: widget.splashColor,
+                highlightColor: widget.highlightColor,
+                focusColor: widget.focusColor,
+                hoverColor: widget.hoverColor,
+                onTap: widget.onPressed,
+                customBorder: effectiveShape,
+                child: IconTheme.merge(
+                  data: IconThemeData(color: effectiveTextColor),
+                  child: Container(
+                    padding: widget.padding,
+                    child: Center(
+                      widthFactor: 1.0,
+                      heightFactor: 1.0,
+                      child: widget.child,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
+
     Size minSize;
     switch (widget.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:

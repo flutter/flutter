@@ -27,8 +27,7 @@ void main() {
     // Highlighted (pressed).
     final Offset center = tester.getCenter(find.byType(MaterialButton));
     await tester.startGesture(center);
-    await tester.pump(); // Start the splash and highlight animations.
-    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     semanticsEnabled: true,
