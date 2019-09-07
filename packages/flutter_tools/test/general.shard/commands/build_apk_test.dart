@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -150,6 +151,7 @@ void main() {
       )).called(1);
     },
     overrides: <Type, Generator>{
+      AndroidSdk: () => MockAndroidSdk(),
       GradleUtils: () => GradleUtils(),
       ProcessManager: () => mockProcessManager,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
@@ -181,6 +183,7 @@ void main() {
       )).called(1);
     },
     overrides: <Type, Generator>{
+      AndroidSdk: () => MockAndroidSdk(),
       GradleUtils: () => GradleUtils(),
       ProcessManager: () => mockProcessManager,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
@@ -214,6 +217,8 @@ class FakeFlutterProjectFactory extends FlutterProjectFactory {
     return super.fromDirectory(directoryOverride.childDirectory('flutter_project'));
   }
 }
+
+class MockAndroidSdk extends Mock implements AndroidSdk {}
 
 class MockProcessManager extends Mock implements ProcessManager {}
 
