@@ -173,6 +173,7 @@ void main() {
 
     expect(controller.offset, equals(550.0));
     expect(log, equals(<Type>[
+      ScrollDragEndNotification,
       ScrollEndNotification,
       UserScrollNotification,
       ScrollStartNotification,

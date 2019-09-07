@@ -93,14 +93,15 @@ void main() {
       ScrollStartNotification,
       UserScrollNotification,
       ScrollUpdateNotification,
+      ScrollDragEndNotification,
       ScrollEndNotification,
       UserScrollNotification,
     ];
     expect(depth0Types, equals(types));
     expect(depth1Types, equals(types));
 
-    expect(depth0Values, equals(<int>[0, 0, 0, 0, 0]));
-    expect(depth1Values, equals(<int>[1, 1, 1, 1, 1]));
+    expect(depth0Values, equals(<int>[0, 0, 0, 0, 0, 0]));
+    expect(depth1Values, equals(<int>[1, 1, 1, 1, 1, 1]));
   });
 
   testWidgets('ScrollNotifications bubble past Scaffold Material', (WidgetTester tester) async {
@@ -145,6 +146,7 @@ void main() {
       ScrollStartNotification,
       UserScrollNotification,
       ScrollUpdateNotification,
+      ScrollDragEndNotification,
       ScrollEndNotification,
       UserScrollNotification,
     ];

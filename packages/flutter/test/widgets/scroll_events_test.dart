@@ -17,6 +17,8 @@ Widget _buildScroller({ List<String> log }) {
         log.add('scroll-update');
       } else if (notification is ScrollEndNotification) {
         log.add('scroll-end');
+      } else if (notification is ScrollDragEndNotification){
+        log.add('scroll-drag-end');
       }
       return false;
     },
@@ -53,9 +55,9 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(log, equals(<String>['scroll-start', 'scroll-update']));
     await gesture.up();
-    expect(log, equals(<String>['scroll-start', 'scroll-update', 'scroll-end']));
+    expect(log, equals(<String>['scroll-start', 'scroll-update', 'scroll-drag-end', 'scroll-end']));
     await tester.pump(const Duration(seconds: 1));
-    expect(log, equals(<String>['scroll-start', 'scroll-update', 'scroll-end']));
+    expect(log, equals(<String>['scroll-start', 'scroll-update', 'scroll-drag-end', 'scroll-end']));
   });
 
   testWidgets('Scroll animateTo', (WidgetTester tester) async {
@@ -148,14 +150,16 @@ void main() {
     await tester.flingFrom(const Offset(100.0, 100.0), const Offset(-50.0, -50.0), 500.0);
     await tester.pump(const Duration(seconds: 1));
     log.removeWhere((String value) => value == 'scroll-update');
-    expect(log, equals(<String>['scroll-start']));
+    expect(log, equals(<String>['scroll-start', 'scroll-drag-end']));
     await tester.flingFrom(const Offset(100.0, 100.0), const Offset(-50.0, -50.0), 500.0);
     log.removeWhere((String value) => value == 'scroll-update');
-    expect(log, equals(<String>['scroll-start', 'scroll-end', 'scroll-start']));
+    expect(log, equals(<String>['scroll-start', 'scroll-drag-end', 'scroll-end', 'scroll-start',
+      'scroll-drag-end']));
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     log.removeWhere((String value) => value == 'scroll-update');
-    expect(log, equals(<String>['scroll-start', 'scroll-end', 'scroll-start', 'scroll-end']));
+    expect(log, equals(<String>['scroll-start', 'scroll-drag-end', 'scroll-end', 'scroll-start',
+      'scroll-drag-end', 'scroll-end']));
   });
 
   testWidgets('fling, pause, fling generates two start/end pairs', (WidgetTester tester) async {
@@ -166,15 +170,17 @@ void main() {
     await tester.flingFrom(const Offset(100.0, 100.0), const Offset(-50.0, -50.0), 500.0);
     await tester.pump(const Duration(seconds: 1));
     log.removeWhere((String value) => value == 'scroll-update');
-    expect(log, equals(<String>['scroll-start']));
+    expect(log, equals(<String>['scroll-start', 'scroll-drag-end']));
     await tester.pump(const Duration(minutes: 1));
     await tester.flingFrom(const Offset(100.0, 100.0), const Offset(-50.0, -50.0), 500.0);
     log.removeWhere((String value) => value == 'scroll-update');
-    expect(log, equals(<String>['scroll-start', 'scroll-end', 'scroll-start']));
+    expect(log, equals(<String>['scroll-start', 'scroll-drag-end','scroll-end', 'scroll-start',
+      'scroll-drag-end']));
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
     log.removeWhere((String value) => value == 'scroll-update');
-    expect(log, equals(<String>['scroll-start', 'scroll-end', 'scroll-start', 'scroll-end']));
+    expect(log, equals(<String>['scroll-start', 'scroll-drag-end', 'scroll-end', 'scroll-start',
+      'scroll-drag-end', 'scroll-end']));
   });
 
   testWidgets('fling up ends', (WidgetTester tester) async {
@@ -189,7 +195,7 @@ void main() {
     expect(log.first, equals('scroll-start'));
     expect(log.last, equals('scroll-end'));
     log.removeWhere((String value) => value == 'scroll-update');
-    expect(log.length, equals(2));
+    expect(log.length, equals(3));
     expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, equals(0.0));
   });
 }
