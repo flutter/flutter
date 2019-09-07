@@ -505,7 +505,9 @@ void main() {
     );
   }, skip: isBrowser);
 
-  testWidgets('Cursor layout has correct width', (WidgetTester tester) async {
+  // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
+  /*
+  testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
@@ -524,9 +526,9 @@ void main() {
       matchesGoldenFile('text_field_test.0.0.png'),
     );
     EditableText.debugDeterministicCursor = false;
-  }, skip: !isLinux);
+  }, skip: !Platform.isLinux);
 
-  testWidgets('Cursor layout has correct radius', (WidgetTester tester) async {
+  testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
         overlay(
@@ -546,7 +548,8 @@ void main() {
       matchesGoldenFile('text_field_test.1.0.png'),
     );
     EditableText.debugDeterministicCursor = false;
-  }, skip: !isLinux);
+  }, skip: !Platform.isLinux);
+  */
 
   testWidgets('Overflowing a line with spaces stops the cursor at the end', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
