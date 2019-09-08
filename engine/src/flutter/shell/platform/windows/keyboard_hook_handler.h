@@ -24,8 +24,7 @@ class KeyboardHookHandler {
                             int mods) = 0;
 
   // A function for hooking into unicode code point input.
-  virtual void CharHook(Win32FlutterWindow* window,
-                        unsigned int code_point) = 0;
+  virtual void CharHook(Win32FlutterWindow* window, char32_t code_point) = 0;
 };
 
 }  // namespace flutter

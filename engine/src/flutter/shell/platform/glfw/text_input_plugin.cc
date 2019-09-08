@@ -40,9 +40,7 @@ void TextInputPlugin::CharHook(GLFWwindow* window, unsigned int code_point) {
   if (active_model_ == nullptr) {
     return;
   }
-  // TODO(awdavies): Actually handle potential unicode characters. Probably
-  // requires some ICU data or something.
-  active_model_->AddCharacter(static_cast<char>(code_point));
+  active_model_->AddCharacter(code_point);
   SendStateUpdate(*active_model_);
 }
 

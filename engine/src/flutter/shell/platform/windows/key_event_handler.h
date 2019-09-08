@@ -34,7 +34,7 @@ class KeyEventHandler : public KeyboardHookHandler {
                     int mods) override;
 
   // |KeyboardHookHandler|
-  void CharHook(Win32FlutterWindow* window, unsigned int code_point) override;
+  void CharHook(Win32FlutterWindow* window, char32_t code_point) override;
 
  private:
   // The Flutter system channel for key event messages.

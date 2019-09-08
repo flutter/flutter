@@ -35,7 +35,7 @@ class TextInputPlugin : public KeyboardHookHandler {
                     int mods) override;
 
   // |KeyboardHookHandler|
-  void CharHook(Win32FlutterWindow* window, unsigned int code_point) override;
+  void CharHook(Win32FlutterWindow* window, char32_t code_point) override;
 
  private:
   // Sends the current state of the given model to the Flutter engine.

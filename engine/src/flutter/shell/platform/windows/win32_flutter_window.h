@@ -54,7 +54,7 @@ class Win32FlutterWindow : public Win32Window {
   void OnPointerUp(double x, double y) override;
 
   // |Win32Window|
-  void OnChar(unsigned int code_point) override;
+  void OnChar(char32_t code_point) override;
 
   // |Win32Window|
   void OnKey(int key, int scancode, int action, int mods) override;
@@ -103,7 +103,7 @@ class Win32FlutterWindow : public Win32Window {
   void SendPointerUp(double x, double y);
 
   // Reports a keyboard character to Flutter engine.
-  void SendChar(unsigned int code_point);
+  void SendChar(char32_t code_point);
 
   // Reports a raw keyboard message to Flutter engine.
   void SendKey(int key, int scancode, int action, int mods);

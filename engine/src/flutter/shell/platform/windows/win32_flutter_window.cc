@@ -125,7 +125,7 @@ void Win32FlutterWindow::OnPointerUp(double x, double y) {
   }
 }
 
-void Win32FlutterWindow::OnChar(unsigned int code_point) {
+void Win32FlutterWindow::OnChar(char32_t code_point) {
   if (process_events_) {
     SendChar(code_point);
   }
@@ -207,7 +207,7 @@ void Win32FlutterWindow::SendPointerUp(double x, double y) {
   SendPointerEventWithData(event);
 }
 
-void Win32FlutterWindow::SendChar(unsigned int code_point) {
+void Win32FlutterWindow::SendChar(char32_t code_point) {
   for (const auto& handler : keyboard_hook_handlers_) {
     handler->CharHook(this, code_point);
   }

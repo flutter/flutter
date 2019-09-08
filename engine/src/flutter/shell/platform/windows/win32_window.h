@@ -89,7 +89,7 @@ class Win32Window {
   virtual void OnPointerUp(double x, double y) = 0;
 
   // Called when character input occurs.
-  virtual void OnChar(unsigned int code_point) = 0;
+  virtual void OnChar(char32_t code_point) = 0;
 
   // Called when raw keyboard input occurs.
   virtual void OnKey(int key, int scancode, int action, int mods) = 0;
