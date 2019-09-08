@@ -126,6 +126,7 @@ abstract class Target {
       <Node>[
         for (Target target in dependencies) target._toNode(environment)
       ],
+      environment
     );
   }
 
@@ -477,7 +478,7 @@ class _BuildInstance {
     bool passed = true;
     bool skipped = false;
     try {
-      final _ChangeResult changeResult = await node._computeChanges(environment, fileCache);
+      final bool canSkip = await node.computeChanges(environment, fileCache);
       for (File input in node.inputs) {
         // The build system should produce a list of aggregate input and output
         // files for the overall build. The goal is to provide this to a hosting
@@ -494,7 +495,7 @@ class _BuildInstance {
         }
         inputFiles[resolvedPath] = input;
       }
-      if (changeResult.canSkip) {
+      if (canSkip) {
         skipped = true;
         printStatus('Skipping target: ${node.target.name}');
         for (File output in node.outputs) {
@@ -512,7 +513,7 @@ class _BuildInstance {
           outputFiles[output.path] = output;
         }
         // Delete outputs from previous stages that are no longer a part of the build.
-        for (String previousOutput in changeResult.previousOutputs) {
+        for (String previousOutput in node.previousOutputs) {
           if (!outputFiles.containsKey(previousOutput)) {
             fs.file(previousOutput).deleteSync();
           }
@@ -595,7 +596,30 @@ void verifyOutputDirectories(List<File> outputs, Environment environment, Target
 
 /// A node in the build graph.
 class Node {
-  const Node(this.target, this.inputs, this.outputs, this.dependencies);
+  Node(this.target, this.inputs, this.outputs, this.dependencies, Environment environment) {
+    final File stamp = target._findStampFile(environment);
+
+    // If the stamp file doesn't exist, we haven't run this step before and
+    // all inputs were added.
+    if (stamp.existsSync()) {
+      final String content = stamp.readAsStringSync();
+      // Something went wrong writing the stamp file.
+      if (content == null || content.isEmpty) {
+        stamp.deleteSync();
+        // Malformed stamp file, not safe to skip.
+         _dirty = true;
+      } else {
+        final Map<String, Object> values = json.decode(content);
+        final List<Object> inputs = values['inputs'];
+        final List<Object> outputs = values['outputs'];
+        inputs.cast<String>().forEach(previousInputs.add);
+        outputs.cast<String>().forEach(previousOutputs.add);
+      }
+    } else {
+      // No stamp file, not safe to skip.
+      _dirty = true;
+    }
+  }
 
   /// The resolved input files.
   ///
@@ -613,42 +637,26 @@ class Node {
   /// All of the nodes that this one depends on.
   final List<Node> dependencies;
 
+  /// Output file paths from the previous invocation of this build node.
+  final Set<String> previousOutputs = <String>{};
+
+  /// Inout file paths from the previous invocation of this build node.
+  final Set<String> previousInputs = <String>{};
+
+  /// Whether this node needs an action performed.
+  bool get dirty => _dirty;
+  bool _dirty = false;
+
   /// Collect hashes for all inputs to determine if any have changed.
   ///
   /// Returns whether this target can be skipped.
-  Future<_ChangeResult> _computeChanges(
+  Future<bool> computeChanges(
     Environment environment,
     FileHashStore fileHashStore,
   ) async {
-    final File stamp = target._findStampFile(environment);
-    final Set<String> previousInputs = <String>{};
-    final List<String> previousOutputs = <String>[];
     final Set<String> currentOutputPaths = <String>{
       for (File file in outputs) file.path
     };
-    bool canSkip = true;
-
-    // If the stamp file doesn't exist, we haven't run this step before and
-    // all inputs were added.
-    if (stamp.existsSync()) {
-      final String content = stamp.readAsStringSync();
-      // Something went wrong writing the stamp file.
-      if (content == null || content.isEmpty) {
-        stamp.deleteSync();
-        // Malformed stamp file, not safe to skip.
-        canSkip = false;
-      } else {
-        final Map<String, Object> values = json.decode(content);
-        final List<Object> inputs = values['inputs'];
-        final List<Object> outputs = values['outputs'];
-        inputs.cast<String>().forEach(previousInputs.add);
-        outputs.cast<String>().forEach(previousOutputs.add);
-      }
-    } else {
-      // No stamp file, not safe to skip.
-      canSkip = false;
-    }
-
     // For each input, first determine if we've already computed the hash
     // for it. Then collect it to be sent off for hashing as a group.
     final List<File> sourcesToHash = <File>[];
@@ -664,7 +672,7 @@ class Node {
       if (fileHashStore.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileHashStore.currentHashes[absolutePath];
         if (currentHash != previousHash) {
-          canSkip = false;
+          _dirty = true;
         }
       } else {
         sourcesToHash.add(file);
@@ -676,13 +684,13 @@ class Node {
     for (String previousOutput in previousOutputs) {
       // output paths changed.
       if (!currentOutputPaths.contains(previousOutput)) {
-        canSkip = false;
+        _dirty = true;
         // if this isn't a current output file there is no reason to compute the hash.
         continue;
       }
       final File file = fs.file(previousOutput);
       if (!file.existsSync()) {
-        canSkip = false;
+        _dirty = true;
         continue;
       }
       final String absolutePath = file.path;
@@ -690,7 +698,7 @@ class Node {
       if (fileHashStore.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileHashStore.currentHashes[absolutePath];
         if (currentHash != previousHash) {
-          canSkip = false;
+          _dirty = true;
         }
       } else {
         sourcesToHash.add(file);
@@ -707,18 +715,9 @@ class Node {
     if (sourcesToHash.isNotEmpty) {
       final List<File> dirty = await fileHashStore.hashFiles(sourcesToHash);
       if (dirty.isNotEmpty) {
-        canSkip = false;
+        _dirty = true;
       }
     }
-    return _ChangeResult(previousOutputs, canSkip);
+    return !_dirty;
   }
 }
-
-/// Helper class used when computing whether a target has changed.
-class _ChangeResult {
-  const _ChangeResult(this.previousOutputs, this.canSkip);
-
-  final List<String>  previousOutputs;
-  final bool canSkip;
-}
-
