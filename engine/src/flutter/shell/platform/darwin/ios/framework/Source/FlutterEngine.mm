@@ -69,12 +69,12 @@
   FlutterBinaryMessengerRelay* _binaryMessenger;
 }
 
-- (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)projectOrNil {
-  return [self initWithName:labelPrefix project:projectOrNil allowHeadlessExecution:YES];
+- (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)project {
+  return [self initWithName:labelPrefix project:project allowHeadlessExecution:YES];
 }
 
 - (instancetype)initWithName:(NSString*)labelPrefix
-                     project:(FlutterDartProject*)projectOrNil
+                     project:(FlutterDartProject*)project
       allowHeadlessExecution:(BOOL)allowHeadlessExecution {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
@@ -85,10 +85,10 @@
 
   _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterEngine>>(self);
 
-  if (projectOrNil == nil)
+  if (project == nil)
     _dartProject.reset([[FlutterDartProject alloc] init]);
   else
-    _dartProject.reset([projectOrNil retain]);
+    _dartProject.reset([project retain]);
 
   _pluginPublications = [NSMutableDictionary new];
   _platformViewsController.reset(new flutter::FlutterPlatformViewsController());
