@@ -788,6 +788,7 @@ class ClipPath extends SingleChildRenderObjectWidget {
     Key key,
     this.clipper,
     this.clipBehavior = Clip.antiAlias,
+    this.shadow,
     Widget child,
   }) : assert(clipBehavior != null),
        super(key: key, child: child);
@@ -820,6 +821,17 @@ class ClipPath extends SingleChildRenderObjectWidget {
     );
   }
 
+  /// A list of shadows cast by this [ClipPath] behind the [child].
+  ///
+  /// The shadow follows the path of the [clipper] applied to the box.
+  ///
+  /// See also:
+  ///
+  ///  * [kElevationToShadow], for some predefined shadows used in Material
+  ///    Design.
+  ///  * [PhysicalModel], a widget for showing shadows.
+  final List<Shadow> shadow;
+
   /// If non-null, determines which clip to use.
   ///
   /// The default clip, which is used if this property is null, is the
@@ -835,7 +847,7 @@ class ClipPath extends SingleChildRenderObjectWidget {
   @override
   RenderClipPath createRenderObject(BuildContext context) {
     assert(clipBehavior != Clip.none);
-    return RenderClipPath(clipper: clipper, clipBehavior: clipBehavior);
+    return RenderClipPath(clipper: clipper, clipBehavior: clipBehavior, shadow: shadow);
   }
 
   @override
@@ -843,7 +855,8 @@ class ClipPath extends SingleChildRenderObjectWidget {
     assert(clipBehavior != Clip.none);
     renderObject
       ..clipper = clipper
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      ..shadow = shadow;
   }
 
   @override

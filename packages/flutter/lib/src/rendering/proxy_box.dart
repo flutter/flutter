@@ -1503,12 +1503,25 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipPath({
     RenderBox child,
+    this.shadow,
     CustomClipper<Path> clipper,
     Clip clipBehavior = Clip.antiAlias,
   }) : assert(clipBehavior != null),
        assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
+
+  /// A list of shadows cast by this [RenderClipPath] behind the [child].
+  ///
+  /// The shadow follows the path of the [clipper] applied to the box.
+  ///
+  /// See also:
+  ///
+  ///  * [kElevationToShadow], for some predefined shadows used in Material
+  ///    Design.
+  ///  * [PhysicalModel], a widget for showing shadows.
+  List<Shadow> shadow;
+  
   @override
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
 
@@ -1525,6 +1538,24 @@ class RenderClipPath extends _RenderCustomClip<Path> {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    if(shadow != null) {
+        for (final Shadow item in shadow) {
+          final Paint itemPaint = item.toPaint();
+          Path itemPath;
+          Offset itemOffset = offset + item.offset;
+          Size itemSize = size;
+
+          if(item is BoxShadow) {
+            final BoxShadow itemBox = item;
+            itemSize +=  Offset(itemBox.spreadRadius * 2, itemBox.spreadRadius * 2);
+            itemOffset += Offset(item.offset.dx - itemBox.spreadRadius, item.offset.dy - itemBox.spreadRadius);
+          }
+
+          itemPath = clipper.getClip(itemSize).shift(itemOffset);
+          context.canvas.drawPath(itemPath, itemPaint);
+        }        
+    }
+      
     if (child != null) {
       _updateClip();
       layer = context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
