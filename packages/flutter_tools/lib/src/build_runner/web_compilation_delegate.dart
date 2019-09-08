@@ -9,7 +9,8 @@ import 'dart:io' as io; // ignore: dart_io_import
 import 'package:build/build.dart';
 import 'package:build_daemon/client.dart';
 import 'package:build_daemon/data/build_status.dart';
-import 'package:build_runner_core/build_runner_core.dart' as core;
+import 'package:build_runner_core/src/package_graph/package_graph.dart';
+import 'package:build_runner_core/src/asset/file_based.dart';
 import 'package:glob/glob.dart';
 import 'package:path/path.dart' as path;
 
@@ -80,9 +81,9 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
 ///
 /// This allows one build_runner build to read the output from a previous
 /// isolated build.
-class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
+class MultirootFileBasedAssetReader extends FileBasedAssetReader {
   MultirootFileBasedAssetReader(
-    core.PackageGraph packageGraph,
+    PackageGraph packageGraph,
     this.generatedDirectory,
   ) : super(packageGraph);
 
@@ -151,7 +152,7 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
   }
 
   /// Creates an [AssetId] for [file], which is a part of [packageNode].
-  AssetId _fileToAssetId(io.File file, core.PackageNode packageNode, [String root]) {
+  AssetId _fileToAssetId(io.File file, PackageNode packageNode, [String root]) {
     final String filePath = path.normalize(file.absolute.path);
     final String relativePath = path.relative(filePath, from: root ?? packageNode.path);
     return AssetId(packageNode.name, relativePath);
