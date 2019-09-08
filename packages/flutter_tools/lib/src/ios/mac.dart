@@ -94,17 +94,12 @@ class LockdownReturnCode {
 
 class IMobileDevice {
   IMobileDevice()
-      : _ideviceIdPath = artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios)
-          ?? 'idevice_id', // TODO(fujino): remove fallback once g3 updated
-        _ideviceinfoPath = artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios)
-          ?? 'ideviceinfo', // TODO(fujino): remove fallback once g3 updated
-        _idevicenamePath = artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios)
-          ?? 'idevicename', // TODO(fujino): remove fallback once g3 updated
-        _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios)
-          ?? 'idevicesyslog', // TODO(fujino): remove fallback once g3 updated
-        _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios)
-          ?? 'idevicescreenshot' { // TODO(fujino): remove fallback once g3 updated
-        }
+      : _ideviceIdPath = artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios),
+        _ideviceinfoPath = artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
+        _idevicenamePath = artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios),
+        _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
+        _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios);
+
   final String _ideviceIdPath;
   final String _ideviceinfoPath;
   final String _idevicenamePath;
@@ -267,7 +262,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool buildForDevice,
   DarwinArch activeArch,
   bool codesign = true,
-  bool usesTerminalUi = true,
+
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project))
     return XcodeBuildResult(success: false);
@@ -324,7 +319,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   Map<String, String> autoSigningConfigs;
   if (codesign && buildForDevice)
-    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: usesTerminalUi);
+    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -462,22 +457,41 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
   flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
-  // Run -showBuildSettings again but with the exact same parameters as the build.
-  final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(
-    (List<String>
-        .from(buildCommands)
-        ..add('-showBuildSettings'))
-        // Undocumented behavior: xcodebuild craps out if -showBuildSettings
-        // is used together with -allowProvisioningUpdates or
-        // -allowProvisioningDeviceRegistration and freezes forever.
-        .where((String buildCommand) {
-          return !const <String>[
-            '-allowProvisioningUpdates',
-            '-allowProvisioningDeviceRegistration',
-          ].contains(buildCommand);
-        }).toList(),
-    workingDirectory: app.project.hostAppRoot.path,
-  ));
+  // Run -showBuildSettings again but with the exact same parameters as the
+  // build. showBuildSettings is reported to ocassionally timeout. Here, we give
+  // it a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
+  // When there is a timeout, we retry once. See issue #35988.
+  final List<String> showBuildSettingsCommand = (List<String>
+      .from(buildCommands)
+      ..add('-showBuildSettings'))
+      // Undocumented behavior: xcodebuild craps out if -showBuildSettings
+      // is used together with -allowProvisioningUpdates or
+      // -allowProvisioningDeviceRegistration and freezes forever.
+      .where((String buildCommand) {
+        return !const <String>[
+          '-allowProvisioningUpdates',
+          '-allowProvisioningDeviceRegistration',
+        ].contains(buildCommand);
+      }).toList();
+  const Duration showBuildSettingsTimeout = Duration(minutes: 1);
+  Map<String, String> buildSettings;
+  try {
+    final RunResult showBuildSettingsResult = await runCheckedAsync(
+      showBuildSettingsCommand,
+      workingDirectory: app.project.hostAppRoot.path,
+      timeout: showBuildSettingsTimeout,
+      timeoutRetries: 1,
+    );
+    final String showBuildSettings = showBuildSettingsResult.stdout.trim();
+    buildSettings = parseXcodeBuildSettings(showBuildSettings);
+  } on ProcessException catch (e) {
+    if (e.toString().contains('timed out')) {
+      BuildEvent('xcode-show-build-settings-timeout',
+        command: showBuildSettingsCommand.join(' '),
+      ).send();
+    }
+    rethrow;
+  }
 
   if (buildResult.exitCode != 0) {
     printStatus('Failed to build iOS app');

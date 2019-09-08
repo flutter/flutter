@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/linux/makefile.dart';
@@ -161,6 +162,24 @@ BINARY_NAME=fizz_bar
     ProcessManager: () => mockProcessManager,
     Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('hidden when not enabled on Linux host', () {
+    when(platform.isLinux).thenReturn(true);
+
+    expect(BuildLinuxCommand().hidden, true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+     Platform: () => MockPlatform(),
+  });
+
+  testUsingContext('Not hidden when enabled and on Linux host', () {
+    when(platform.isLinux).thenReturn(true);
+
+    expect(BuildLinuxCommand().hidden, false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    Platform: () => MockPlatform(),
   });
 }
 

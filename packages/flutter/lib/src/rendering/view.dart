@@ -74,7 +74,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// The configuration is initially set by the `configuration` argument
   /// passed to the constructor.
   ///
-  /// Always call [scheduleInitialFrame] before changing the configuration.
+  /// Always call [prepareInitialFrame] before changing the configuration.
   set configuration(ViewConfiguration value) {
     assert(value != null);
     if (configuration == value)
@@ -110,16 +110,28 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   /// Bootstrap the rendering pipeline by scheduling the first frame.
   ///
+  /// Deprecated. Call [prepareInitialFrame] followed by a call to
+  /// [PipelineOwner.requestVisualUpdate] on [owner] instead.
+  @Deprecated('Call prepareInitialFrame followed by owner.requestVisualUpdate() instead.')
+  void scheduleInitialFrame() {
+    prepareInitialFrame();
+    owner.requestVisualUpdate();
+  }
+
+  /// Bootstrap the rendering pipeline by preparing the first frame.
+  ///
   /// This should only be called once, and must be called before changing
   /// [configuration]. It is typically called immediately after calling the
   /// constructor.
-  void scheduleInitialFrame() {
+  ///
+  /// This does not actually schedule the first frame. Call
+  /// [PipelineOwner.requestVisualUpdate] on [owner] to do that.
+  void prepareInitialFrame() {
     assert(owner != null);
     assert(_rootTransform == null);
     scheduleInitialLayout();
     scheduleInitialPaint(_updateMatricesAndCreateNewRootLayer());
     assert(_rootTransform != null);
-    owner.requestVisualUpdate();
   }
 
   Matrix4 _rootTransform;
