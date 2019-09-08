@@ -110,7 +110,7 @@ void main(List<String> argList) {
 
   if (args[_kShowDartPad] == true && snippetType != SnippetType.application) {
     errorExit('$snippetType was selected, but the --dartpad flag is only valid '
-      'application snippets.');
+      'for application snippets.');
   }
 
   if (args[_kInputOption] == null) {
