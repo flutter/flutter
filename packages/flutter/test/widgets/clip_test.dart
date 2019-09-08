@@ -537,6 +537,15 @@ void main() {
                 child: Transform.rotate(
                   angle: 1.0, // radians
                   child: ClipPath(
+                    shadow: <Shadow>[
+                        BoxShadow(
+                          color: Colors.red, 
+                          spreadRadius: 2,
+                          blurRadius: 2,
+                          offset: 
+                          const Offset(2, 2),
+                        ),
+                    ],
                     clipper: ShapeBorderClipper(
                       shape: BeveledRectangleBorder(
                         borderRadius: BorderRadius.circular(20.0),
