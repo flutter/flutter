@@ -127,7 +127,11 @@ function upgrade_flutter () {
 
     retry_upgrade
 
-    "$DART" $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
+    if [[ -z "$FLUTTER_AOT_TOOL" ]]; then
+      "$DART" $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
+    else
+      "$DART_2_NATIVE" aot --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH" "$SNAPSHOT_PATH"
+    fi
     echo "$revision" > "$STAMP_PATH"
   fi
   # The exit here is duplicitous since the function is run in a subshell,
@@ -146,6 +150,8 @@ SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
 STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"
 SCRIPT_PATH="$FLUTTER_TOOLS_DIR/bin/flutter_tools.dart"
 DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
+DART_2_NATIVE="$FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart2native"
+DART_AOT_RUNTIME="$FLUTTER_ROOT/bin/cache/dart-sdk/bin/dartaotruntime"
 
 DART="$DART_SDK_PATH/bin/dart"
 PUB="$DART_SDK_PATH/bin/pub"
@@ -180,4 +186,8 @@ fi
 
 # FLUTTER_TOOL_ARGS isn't quoted below, because it is meant to be considered as
 # separate space-separated args.
-"$DART" --packages="$FLUTTER_TOOLS_DIR/.packages" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+if [[ -z "$FLUTTER_AOT_TOOL" ]]; then
+  "$DART" --packages="$FLUTTER_TOOLS_DIR/.packages" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+else
+  "$DART_AOT_RUNTIME" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SNAPSHOT_PATH" "$@"
+fi
