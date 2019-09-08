@@ -364,9 +364,14 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
       vsync: this,
     );
     _controller.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed) {
-        if (widget.onEnd != null)
-          widget.onEnd();
+      switch (status) {
+        case AnimationStatus.completed:
+          if (widget.onEnd != null)
+            widget.onEnd();
+          break;
+        case AnimationStatus.dismissed:
+        case AnimationStatus.forward:
+        case AnimationStatus.reverse:
       }
     });
     _updateCurve();
