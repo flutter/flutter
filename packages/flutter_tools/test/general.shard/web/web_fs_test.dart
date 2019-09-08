@@ -46,6 +46,11 @@ void main() {
     });
     when(mockBuildDaemonCreator.assetServerPort(any)).thenReturn(4321);
     testbed = Testbed(
+      setup: () {
+        // Create an empty .packages file so we can read it when we check for
+        // plugins on WebFs.start()
+        fs.file('.packages').createSync();
+      },
       overrides: <Type, Generator>{
         OperatingSystemUtils: () => mockOperatingSystemUtils,
         BuildDaemonCreator: () => mockBuildDaemonCreator,

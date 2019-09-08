@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -94,6 +95,18 @@ void main() {
         throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
+  }));
+
+  test('hidden if feature flag is not enabled', () => testbed.run(() async {
+    expect(BuildWebCommand().hidden, true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
+  }));
+
+  test('not hidden if feature flag is enabled', () => testbed.run(() async {
+    expect(BuildWebCommand().hidden, false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
   }));
 }
 

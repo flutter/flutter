@@ -74,7 +74,7 @@ class CopyAssets extends Target {
   ];
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     final Directory output = environment
       .buildDir
       .childDirectory('flutter_assets');
@@ -128,7 +128,7 @@ class FlutterPlugins extends Target {
   ];
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     // The pubspec may change for reasons other than plugins changing, so we compare
     // the manifest before writing. Some hosting build systems use timestamps
     // so we need to be careful to avoid tricking them into doing more work than

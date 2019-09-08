@@ -1052,8 +1052,8 @@ void _ensureExists(Directory directory) {
 }
 
 const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[
-  <String>['windows-x64', 'windows-x64/windows-x64-flutter-glfw.zip'],
-  <String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper-glfw.zip'],
+  <String>['windows-x64', 'windows-x64/windows-x64-flutter.zip'],
+  <String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper.zip'],
 ];
 
 const List<List<String>> _linuxDesktopBinaryDirs = <List<String>>[

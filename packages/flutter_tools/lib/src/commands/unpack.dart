@@ -36,16 +36,16 @@ const Map<TargetPlatform, List<String>> artifactFilesByPlatform = <TargetPlatfor
     'FlutterMacOS.framework',
   ],
   TargetPlatform.windows_x64: <String>[
-    'flutter_windows_glfw.dll',
-    'flutter_windows_glfw.dll.exp',
-    'flutter_windows_glfw.dll.lib',
-    'flutter_windows_glfw.dll.pdb',
+    'flutter_windows.dll',
+    'flutter_windows.dll.exp',
+    'flutter_windows.dll.lib',
+    'flutter_windows.dll.pdb',
     'flutter_export.h',
     'flutter_messenger.h',
     'flutter_plugin_registrar.h',
-    'flutter_glfw.h',
+    'flutter_windows.h',
     'icudtl.dat',
-    'cpp_client_wrapper_glfw/',
+    'cpp_client_wrapper/',
   ],
 };
 

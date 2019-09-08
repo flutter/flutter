@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -248,8 +249,8 @@ void main() {
           width: 400.0,
           child: CupertinoTimerPicker(
             minuteInterval: 10,
-            secondInterval: 15,
-            initialTimerDuration: const Duration(hours: 10, minutes: 40, seconds: 45),
+            secondInterval: 12,
+            initialTimerDuration: const Duration(hours: 10, minutes: 40, seconds: 48),
             mode: CupertinoTimerPickerMode.hms,
             onTimerDurationChanged: (Duration d) {
               duration = d;
@@ -261,13 +262,13 @@ void main() {
 
     await tester.drag(find.text('40'), _kRowOffset);
     await tester.pump();
-    await tester.drag(find.text('45'), -_kRowOffset);
+    await tester.drag(find.text('48'), -_kRowOffset);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(
       duration,
-      const Duration(hours: 10, minutes: 50, seconds: 30),
+      const Duration(hours: 10, minutes: 50, seconds: 36),
     );
   });
 
@@ -905,7 +906,7 @@ void main() {
         CupertinoApp(
           home: Center(
             child: SizedBox(
-              width: 400,
+              width: 500,
               height: 400,
               child: RepaintBoundary(
                 child: CupertinoDatePicker(
@@ -923,7 +924,7 @@ void main() {
         find.byType(CupertinoDatePicker),
         matchesGoldenFile(
           'date_picker_test.datetime.initial.png',
-          version: 1,
+          version: 2,
         ),
       );
 
@@ -935,10 +936,140 @@ void main() {
         find.byType(CupertinoDatePicker),
         matchesGoldenFile(
           'date_picker_test.datetime.drag.png',
-          version: 1,
+          version: 2,
         ),
       );
     });
+  });
+
+  testWidgets('TimerPicker golden tests', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        // Also check if the picker respects the theme.
+        theme: const CupertinoThemeData(
+          textTheme: CupertinoTextThemeData(
+            pickerTextStyle: TextStyle(
+              color: Color(0xFF663311),
+            ),
+          ),
+        ),
+        home: Center(
+          child: SizedBox(
+            width: 320,
+            height: 216,
+            child: RepaintBoundary(
+              child: CupertinoTimerPicker(
+                mode: CupertinoTimerPickerMode.hm,
+                initialTimerDuration: const Duration(hours: 23, minutes: 59),
+                onTimerDurationChanged: (_) {},
+              ),
+            )
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(CupertinoTimerPicker),
+      matchesGoldenFile(
+        'timer_picker_test.datetime.initial.png',
+        version: 1,
+      ),
+    );
+
+    // Slightly drag the minute component to make the current minute off-center.
+    await tester.drag(find.text('59'), Offset(0, _kRowOffset.dy / 2));
+    await tester.pump();
+
+    await expectLater(
+      find.byType(CupertinoTimerPicker),
+      matchesGoldenFile(
+        'timer_picker_test.datetime.drag.png',
+        version: 1,
+      ),
+    );
+  });
+
+  testWidgets('TimerPicker only changes hour label after scrolling stops', (WidgetTester tester) async {
+    Duration duration;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            width: 320,
+            height: 216,
+            child: CupertinoTimerPicker(
+              mode: CupertinoTimerPickerMode.hm,
+              initialTimerDuration: const Duration(hours: 2, minutes: 30),
+              onTimerDurationChanged: (Duration d) { duration = d; },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(duration, isNull);
+    expect(find.text('hour'), findsNothing);
+    expect(find.text('hours'), findsOneWidget);
+
+    await tester.drag(find.text('2'), Offset(0, -_kRowOffset.dy));
+    // Duration should change but not the label.
+    expect(duration?.inHours, 1);
+    expect(find.text('hour'), findsNothing);
+    expect(find.text('hours'), findsOneWidget);
+    await tester.pumpAndSettle();
+
+    // Now the label should change.
+    expect(duration?.inHours, 1);
+    expect(find.text('hours'), findsNothing);
+    expect(find.text('hour'), findsOneWidget);
+  });
+
+  testWidgets('TimerPicker has intrinsic width and height', (WidgetTester tester) async {
+    const Key key = Key('key');
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTimerPicker(
+          key: key,
+          mode: CupertinoTimerPickerMode.hm,
+          initialTimerDuration: const Duration(hours: 2, minutes: 30),
+          onTimerDurationChanged: (Duration d) {},
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.descendant(of: find.byKey(key), matching: find.byType(Row))), const Size(320, 216));
+
+    // Different modes shouldn't share state.
+    await tester.pumpWidget(const Placeholder());
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTimerPicker(
+          key: key,
+          mode: CupertinoTimerPickerMode.ms,
+          initialTimerDuration: const Duration(minutes: 30, seconds: 3),
+          onTimerDurationChanged: (Duration d) {},
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.descendant(of: find.byKey(key), matching: find.byType(Row))), const Size(320, 216));
+
+    // Different modes shouldn't share state.
+    await tester.pumpWidget(const Placeholder());
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTimerPicker(
+          key: key,
+          mode: CupertinoTimerPickerMode.hms,
+          initialTimerDuration: const Duration(hours: 5, minutes: 17, seconds: 19),
+          onTimerDurationChanged: (Duration d) {},
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.descendant(of: find.byKey(key), matching: find.byType(Row))), const Size(330, 216));
   });
 
   testWidgets('scrollController can be removed or added', (WidgetTester tester) async {

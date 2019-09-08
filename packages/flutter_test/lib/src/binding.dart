@@ -834,8 +834,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
     super.initInstances();
-    window.onBeginFrame = null;
-    window.onDrawFrame = null;
     _mockFlutterAssets();
   }
 
@@ -979,12 +977,27 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
+  void ensureFrameCallbacksRegistered() {
+    // Leave Window alone, do nothing.
+    assert(window.onDrawFrame == null);
+    assert(window.onBeginFrame == null);
+  }
+
+  @override
   void scheduleWarmUpFrame() {
     // We override the default version of this so that the application-startup warm-up frame
     // does not schedule timers which we might never get around to running.
     handleBeginFrame(null);
     _currentFakeAsync.flushMicrotasks();
     handleDrawFrame();
+    _currentFakeAsync.flushMicrotasks();
+  }
+
+  @override
+  void scheduleAttachRootWidget(Widget rootWidget) {
+    // We override the default version of this so that the application-startup widget tree
+    // build does not schedule timers which we might never get around to running.
+    attachRootWidget(rootWidget);
     _currentFakeAsync.flushMicrotasks();
   }
 
@@ -1361,7 +1374,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       onNeedPaint: _handleViewNeedsPaint,
       window: window,
     );
-    renderView.scheduleInitialFrame();
+    renderView.prepareInitialFrame();
   }
 
   @override

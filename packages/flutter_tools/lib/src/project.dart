@@ -623,6 +623,9 @@ class WebProject {
       && indexFile.existsSync();
   }
 
+  /// The 'lib' directory for the application.
+  Directory get libDirectory => parent.directory.childDirectory('lib');
+
   /// The html file used to host the flutter web application.
   File get indexFile => parent.directory
       .childDirectory('web')

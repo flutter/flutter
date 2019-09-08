@@ -113,7 +113,7 @@ abstract class Target {
   List<Source> get outputs;
 
   /// The action which performs this build step.
-  Future<void> build(List<File> inputFiles, Environment environment);
+  Future<void> build(Environment environment);
 
   /// Create a [Node] with resolved inputs and outputs.
   Node _toNode(Environment environment) {
@@ -175,12 +175,8 @@ abstract class Target {
   /// which uses functions, behaviors, or patterns.
   List<File> resolveOutputs(
     Environment environment,
-    { bool implicit = true, }
   ) {
-    final List<File> outputEntities = _resolveConfiguration(outputs, environment, implicit: implicit, inputs: false);
-    if (implicit) {
-      verifyOutputDirectories(outputEntities, environment, this);
-    }
+    final List<File> outputEntities = _resolveConfiguration(outputs, environment, inputs: false);
     return outputEntities;
   }
 
@@ -203,7 +199,7 @@ abstract class Target {
       'inputs': resolveInputs(environment)
           .map((File file) => file.path)
           .toList(),
-      'outputs': resolveOutputs(environment, implicit: false)
+      'outputs': resolveOutputs(environment)
           .map((File file) => file.path)
           .toList(),
       'stamp': _findStampFile(environment).absolute.path,
@@ -509,11 +505,10 @@ class _BuildInstance {
         await node.target.build(environment);
         printStatus('${node.target.name}: Complete');
 
-        final List<File> outputs = node.target.resolveOutputs(environment, implicit: true);
         // Update hashes for output files.
-        await fileCache.hashFiles(outputs);
-        node.target._writeStamp(node.inputs, outputs, environment);
-        for (File output in outputs) {
+        await fileCache.hashFiles(node.outputs);
+        node.target._writeStamp(node.inputs, node.outputs, environment);
+        for (File output in node.outputs) {
           outputFiles[output.path] = output;
         }
         // Delete outputs from previous stages that are no longer a part of the build.
