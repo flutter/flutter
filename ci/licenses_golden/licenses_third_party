@@ -1,4 +1,4 @@
-Signature: b4990680edf3c9cdbf728c324c5f11af
+Signature: 8430918929b4abe4fd737ce8b1e47b92
 
 UNUSED LICENSES:
 
@@ -7440,6 +7440,7 @@ FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/main.cc
 FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/test.cc
 FILE: ../../../third_party/dart/runtime/llvm_codegen/codegen/main.cc
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/tree_map.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/timeline_base.dart
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_api_table.dart
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_ffiapi.dart
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/gen_api_table.dart
