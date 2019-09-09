@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -83,7 +84,8 @@ void main() {
     setUp(() {
       tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       mockProcessManager = MockProcessManager();
-      gradlew = fs.path.join(tempDir.path, 'flutter_project', 'android', 'gradlew');
+      gradlew = fs.path.join(tempDir.path, 'flutter_project', 'android',
+          platform.isWindows ? 'gradlew.bat' : 'gradlew');
 
       when(mockProcessManager.run(<String>[gradlew, '-v'],
           environment: anyNamed('environment')))
