@@ -26,8 +26,8 @@
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
-import 'dart:io' as io show exit, IOSink, Process, ProcessSignal, stderr, stdin, Stdout, stdout;
-import 'dart:io';
+import 'dart:io' as io show exit, IOSink, Process, ProcessSignal, stderr, stdin,
+    Stdout, stdout, IOOverrides, Directory, File, Link;
 
 import 'package:file/file.dart' hide File, Directory, Link, FileSystemEntity;
 import 'package:file/memory.dart';
@@ -93,14 +93,14 @@ export 'dart:io'
 ///
 /// The only safe delegate types are those that do not call out to `dart:io`,
 /// like the [MemoryFileSystem].
-class FlutterIOOverrides extends IOOverrides {
+class FlutterIOOverrides extends io.IOOverrides {
   FlutterIOOverrides({ FileSystem fileSystem })
     : _fileSystemDelegate = fileSystem;
 
   final FileSystem _fileSystemDelegate;
 
   @override
-  Directory createDirectory(String path) {
+  io.Directory createDirectory(String path) {
     if (_fileSystemDelegate == null) {
       return super.createDirectory(path);
     }
@@ -108,7 +108,7 @@ class FlutterIOOverrides extends IOOverrides {
   }
 
   @override
-  File createFile(String path) {
+  io.File createFile(String path) {
     if (_fileSystemDelegate == null) {
       return super.createFile(path);
     }
@@ -116,7 +116,7 @@ class FlutterIOOverrides extends IOOverrides {
   }
 
   @override
-  Link createLink(String path) {
+  io.Link createLink(String path) {
     if (_fileSystemDelegate == null) {
       return super.createLink(path);
     }
@@ -172,7 +172,7 @@ class FlutterIOOverrides extends IOOverrides {
   }
 
   @override
-  Directory getCurrentDirectory() {
+  io.Directory getCurrentDirectory() {
     if (_fileSystemDelegate == null) {
       return super.getCurrentDirectory();
     }
@@ -180,7 +180,7 @@ class FlutterIOOverrides extends IOOverrides {
   }
 
   @override
-  Directory getSystemTempDirectory() {
+  io.Directory getSystemTempDirectory() {
     if (_fileSystemDelegate == null) {
       return super.getSystemTempDirectory();
     }
