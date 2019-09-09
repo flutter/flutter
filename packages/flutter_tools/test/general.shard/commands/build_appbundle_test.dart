@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
@@ -76,17 +77,25 @@ void main() {
   });
 
   group('Flags', () {
+    BufferLogger mockLogger;
     Directory tempDir;
     ProcessManager mockProcessManager;
     MockAndroidSdk mockAndroidSdk;
     String gradlew;
+    Usage mockUsage;
+
 
     setUp(() {
+      mockLogger = BufferLogger();
+
+      mockUsage = MockUsage();
+      when(mockUsage.isFirstRun).thenReturn(true);
+
       tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
-      mockProcessManager = MockProcessManager();
       gradlew = fs.path.join(tempDir.path, 'flutter_project', 'android',
           platform.isWindows ? 'gradlew.bat' : 'gradlew');
 
+      mockProcessManager = MockProcessManager();
       when(mockProcessManager.run(<String>[gradlew, '-v'],
           environment: anyNamed('environment')))
         .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(0, 0, '', '')));
@@ -182,6 +191,65 @@ void main() {
       ProcessManager: () => mockProcessManager,
     },
     timeout: allowForCreateFlutterProject);
+
+    testUsingContext('guides the user when proguard fails', () async {
+      final String projectPath = await createProject(tempDir,
+          arguments: <String>['--no-pub', '--template=app']);
+
+      when(mockProcessManager.start(
+        <String>[
+          gradlew,
+          '-q',
+          '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptrack-widget-creation=false',
+          '-Pproguard=true',
+          '-Ptarget-platform=android-arm,android-arm64',
+          'bundleRelease',
+        ],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) {
+        const String proguardStdoutWarning =
+            'Warning: there were 6 unresolved references to program class members.'
+            'Your input classes appear to be inconsistent.'
+            'You may need to recompile the code.'
+            '(http://proguard.sourceforge.net/manual/troubleshooting.html#unresolvedprogramclassmember)';
+        return Future<Process>.value(
+          createMockProcess(
+            exitCode: 1,
+            stdout: proguardStdoutWarning,
+          )
+        );
+      });
+
+      await expectLater(() async {
+        await runBuildAppBundleCommand(
+          projectPath,
+        );
+      }, throwsToolExit(message: 'Gradle task bundleRelease failed with exit code 1'));
+
+      expect(mockLogger.statusText,
+          contains('Proguard may have failed to optimize the Java bytecode.'));
+      expect(mockLogger.statusText,
+          contains('To disable proguard, pass the `--no-proguard` flag to this command.'));
+      expect(mockLogger.statusText,
+          contains('To learn more about Proguard, see: https://flutter.dev/docs/deployment/android#enabling-proguard'));
+
+      verify(mockUsage.sendEvent(
+        'build-appbundle',
+        'proguard-failure',
+        parameters: anyNamed('parameters'),
+      )).called(1);
+    },
+    overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      GradleUtils: () => GradleUtils(),
+      FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      Logger: () => mockLogger,
+      ProcessManager: () => mockProcessManager,
+      Usage: () => mockUsage,
+    },
+    timeout: allowForCreateFlutterProject);
   });
 }
 
@@ -216,3 +284,5 @@ class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockProcessManager extends Mock implements ProcessManager {}
 
 class MockProcess extends Mock implements Process {}
+
+class MockUsage extends Mock implements Usage {}

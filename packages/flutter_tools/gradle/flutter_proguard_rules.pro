@@ -1,5 +1,5 @@
 # Prevents `Fragment and FragmentActivity not found`.
-# Note: Remove once we bring the Maven dependencies.
+# TODO(blasten): Remove once we bring the Maven dependencies.
 -dontwarn io.flutter.embedding.**
 
 # Build the ephemeral app in a module project.

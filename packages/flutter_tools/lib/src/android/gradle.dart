@@ -30,18 +30,11 @@ import 'android_sdk.dart';
 import 'android_studio.dart';
 
 /// Gradle utils in the current [AppContext].
-GradleUtils get gradleUtils => context.get<GradleUtils>() ?? GradleUtils.singleton();
+GradleUtils get gradleUtils => context.get<GradleUtils>();
 
 /// The implementation of Gradle Utils.
-@visibleForTesting
 class GradleUtils {
   GradleUtils();
-
-  factory GradleUtils.singleton() {
-    return _instance ??= GradleUtils();
-  }
-
-  static GradleUtils _instance;
 
   String _cachedExecutable;
   /// Gets the Gradle executable path.
@@ -747,6 +740,7 @@ Future<void> _buildGradleProjectV2(
   }
   command.add(assembleTask);
   bool potentialAndroidXFailure = false;
+  bool potentialProguardFailure = false;
   final Stopwatch sw = Stopwatch()..start();
   int exitCode = 1;
   try {
@@ -763,13 +757,17 @@ Future<void> _buildGradleProjectV2(
         if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
           potentialAndroidXFailure = true;
         }
+        // Proguard errors include this url.
+        if (!potentialProguardFailure && androidBuildInfo.proguard &&
+            line.contains('http://proguard.sourceforge.net')) {
+          potentialProguardFailure = true;
+        }
         // Always print the full line in verbose mode.
         if (logger.isVerbose) {
           return line;
         } else if (isAndroidXPluginWarning || !ndkMessageFilter.hasMatch(line)) {
           return null;
         }
-
         return line;
       },
     );
@@ -778,7 +776,12 @@ Future<void> _buildGradleProjectV2(
   }
 
   if (exitCode != 0) {
-    if (potentialAndroidXFailure) {
+    if (potentialProguardFailure) {
+      printStatus('❗️ Proguard may have failed to optimize the Java bytecode.', emphasis: true);
+      printStatus('✅ To disable proguard, pass the `--no-proguard` flag to this command.');
+      printStatus('📚 To learn more about Proguard, see: https://flutter.dev/docs/deployment/android#enabling-proguard');
+      BuildEvent('proguard-failure').send();
+    } else if (potentialAndroidXFailure) {
       printStatus('AndroidX incompatibilities may have caused this build to fail. See https://goo.gl/CP92wY.');
       BuildEvent('android-x-failure').send();
     }
