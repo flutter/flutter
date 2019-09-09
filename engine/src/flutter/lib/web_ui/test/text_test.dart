@@ -245,4 +245,21 @@ void main() async {
     // The nested span here should not set it's family to default sans-serif.
     expect(spans[1].style.fontFamily, 'Ahem');
   });
+
+  test('can set font families that need to be quoted', () {
+    // Set this to false so it doesn't default to 'Ahem' font.
+    debugEmulateFlutterTesterEnvironment = false;
+
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'MyFont 2000',
+      fontSize: 12.0,
+    ));
+
+    builder.addText('Hello');
+
+    final EngineParagraph paragraph = builder.build();
+    expect(paragraph.paragraphElement.style.fontFamily, '"MyFont 2000"');
+
+    debugEmulateFlutterTesterEnvironment = true;
+  });
 }
