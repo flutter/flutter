@@ -612,33 +612,25 @@ class DropdownButton<T> extends StatefulWidget {
        assert(isExpanded != null),
        super(key: key);
 
-  /// {@template flutter.material.dropdownButton.items}
   /// The list of items the user can select.
   ///
   /// If the [onChanged] callback is null or the list of items is null
   /// then the dropdown button will be disabled, i.e. its arrow will be
   /// displayed in grey and it will not respond to input. A disabled button
   /// will display the [disabledHint] widget if it is non-null.
-  /// {@endtemplate}
   final List<DropdownMenuItem<T>> items;
 
-  /// {@template flutter.material.dropdownButton.value}
   /// The value of the currently selected [DropdownMenuItem], or null if no
   /// item has been selected. If `value` is null then the menu is popped up as
   /// if the first item were selected.
-  /// {@endtemplate}
   final T value;
 
-  /// {@template flutter.material.dropdownButton.hint}
   /// A placeholder widget that is displayed if no item is selected.
-  /// {@endtemplate}
   final Widget hint;
 
-  /// {@template flutter.material.dropdownButton.disabledHint}
   /// A message to show when the dropdown is disabled.
   ///
   /// Displayed if [items] or [onChanged] is null.
-  /// {@endtemplate}
   final Widget disabledHint;
 
   /// {@template flutter.material.dropdownButton.onChanged}
@@ -651,23 +643,19 @@ class DropdownButton<T> extends StatefulWidget {
   /// {@endtemplate}
   final ValueChanged<T> onChanged;
 
-  /// {@template flutter.material.dropdownButton.elevation}
   /// The z-coordinate at which to place the menu when open.
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12,
   /// 16, and 24. See [kElevationToShadow].
   ///
   /// Defaults to 8, the appropriate elevation for dropdown buttons.
-  /// {@endtemplate}
   final int elevation;
 
-  /// {@template flutter.material.dropdownButton.style}
   /// The text style to use for text in the dropdown button and the dropdown
   /// menu that appears when you tap the button.
   ///
   /// Defaults to the [TextTheme.subhead] value of the current
   /// [ThemeData.textTheme] of the current [Theme].
-  /// {@endtemplate}
   final TextStyle style;
 
   /// The widget to use for drawing the drop-down button's underline.
@@ -675,57 +663,45 @@ class DropdownButton<T> extends StatefulWidget {
   /// Defaults to a 0.0 width bottom border with color 0xFFBDBDBD.
   final Widget underline;
 
-  /// {@template flutter.material.dropdownButton.icon}
   /// The widget to use for the drop-down button's icon.
   ///
   /// Defaults to an [Icon] with the [Icons.arrow_drop_down] glyph.
-  /// {@endtemplate}
   final Widget icon;
 
-  /// {@template flutter.material.dropdownButton.iconDisabledColor}
   /// The color of any [Icon] descendant of [icon] if this button is disabled,
   /// i.e. if [onChanged] is null.
   ///
   /// Defaults to [Colors.grey.shade400] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
   /// [Colors.white10] when it is [Brightness.dark]
-  /// {@endtemplate}
   final Color iconDisabledColor;
 
-  /// {@template flutter.material.dropdownButton.iconEnabledColor}
   /// The color of any [Icon] descendant of [icon] if this button is enabled,
   /// i.e. if [onChanged] is defined.
   ///
   /// Defaults to [Colors.grey.shade700] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
   /// [Colors.white70] when it is [Brightness.dark]
-  /// {@endtemplate}
   final Color iconEnabledColor;
 
-  /// {@template flutter.material.dropdownButton.iconSize}
   /// The size to use for the drop-down button's down arrow icon button.
   ///
   /// Defaults to 24.0.
-  /// {@endtemplate}
   final double iconSize;
 
-  /// {@template flutter.material.dropdownButton.isDense}
   /// Reduce the button's height.
   ///
   /// By default this button's height is the same as its menu items' heights.
   /// If isDense is true, the button's height is reduced by about half. This
   /// can be useful when the button is embedded in a container that adds
   /// its own decorations, like [InputDecorator].
-  /// {@endtemplate}
   final bool isDense;
 
-  /// {@template flutter.material.dropdownButton.isExpanded}
   /// Set the dropdown's inner contents to horizontally fill its parent.
   ///
   /// By default this button's inner width is the minimum size of its contents.
   /// If [isExpanded] is true, the inner width is expanded to fill its
   /// surrounding container.
-  /// {@endtemplate}
   final bool isExpanded;
 
   @override
@@ -965,24 +941,29 @@ class DropdownButtonFormField<T> extends FormField<T> {
   /// The [DropdownButton] [items] parameters must not be null.
   DropdownButtonFormField({
     Key key,
-    this.value,
-    @required this.items,
-    this.hint,
-    this.onChanged,
+    T value,
+    @required List<DropdownMenuItem<T>> items,
+    Widget hint,
+    @required this.onChanged,
     this.decoration = const InputDecoration(),
     FormFieldSetter<T> onSaved,
     FormFieldValidator<T> validator,
     bool autovalidate = false,
-    this.disabledHint,
-    this.elevation = 8,
-    this.style,
-    this.icon,
-    this.iconDisabledColor,
-    this.iconEnabledColor,
-    this.iconSize = 24.0,
-    this.isDense = false,
-    this.isExpanded = false,
-  }) : assert(decoration != null),
+    Widget disabledHint,
+    int elevation = 8,
+    TextStyle style,
+    Widget icon,
+    Color iconDisabledColor,
+    Color iconEnabledColor,
+    double iconSize = 24.0,
+    bool isDense = false,
+    bool isExpanded = false,
+  }) : assert(items == null || items.isEmpty || value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
+       assert(decoration != null),
+       assert(elevation != null),
+       assert(iconSize != null),
+       assert(isDense != null),
+       assert(isExpanded != null),
        super(
          key: key,
          onSaved: onSaved,
@@ -1017,44 +998,8 @@ class DropdownButtonFormField<T> extends FormField<T> {
          }
        );
 
-  /// {@macro flutter.material.dropdownButton.items}
-  final List<DropdownMenuItem<T>> items;
-
-  /// {@macro flutter.material.dropdownButton.value}
-  final T value;
-
-  /// {@macro flutter.material.dropdownButton.hint}
-  final Widget hint;
-
-  /// {@macro flutter.material.dropdownButton.disabledHint}
-  final Widget disabledHint;
-
   /// {@macro flutter.material.dropdownButton.onChanged}
   final ValueChanged<T> onChanged;
-
-  /// {@macro flutter.material.dropdownButton.elevation}
-  final int elevation;
-
-  /// {@macro flutter.material.dropdownButton.style}
-  final TextStyle style;
-
-  /// {@macro flutter.material.dropdownButton.icon}
-  final Widget icon;
-
-  /// {@macro flutter.material.dropdownButton.iconDisabledColor}
-  final Color iconDisabledColor;
-
-  /// {@macro flutter.material.dropdownButton.iconEnabledColor}
-  final Color iconEnabledColor;
-
-  /// {@macro flutter.material.dropdownButton.iconSize}
-  final double iconSize;
-
-  /// {@macro flutter.material.dropdownButton.isDense}
-  final bool isDense;
-
-  /// {@macro flutter.material.dropdownButton.isExpanded}
-  final bool isExpanded;
 
   /// The decoration to show around the dropdown button form field.
   ///
