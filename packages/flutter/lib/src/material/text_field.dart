@@ -175,7 +175,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// [InputDecoration] surrounds the field in a border using [OutlineInputBorder]
 /// and adds a label.
 ///
-/// ![A screenshot of the TextField widget](https://flutter.github.io/assets-for-api-docs/assets/material/text_field.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/text_field.png)
 ///
 /// ```dart
 /// TextField(

@@ -30,7 +30,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// override. The style is mixed with the ambient [DefaultTextStyle] by the
 /// [Text] widget.
 ///
-/// ![An example using TextStyle to create bold text](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_bold.png)
+/// ![Applying the style in this way creates bold text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_bold.png)
 ///
 /// ```dart
 /// Text(
@@ -46,7 +46,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// As in the previous example, the [Text] widget is given a specific style
 /// override which is implicitly mixed with the ambient [DefaultTextStyle].
 ///
-/// ![An example using TextStyle to create italic text](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_italics.png)
+/// ![This results in italicized text.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_italics.png)
 ///
 /// ```dart
 /// Text(
@@ -72,7 +72,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// The [backgroundColor] is treated as a shorthand for
 /// `background: Paint()..color = backgroundColor`.
 ///
-/// ![An example using TextStyle to change the text opacity and color](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_opacity_and_color.png)
+/// ![This results in three lines of text that go from lighter to darker in color.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_opacity_and_color.png)
 ///
 /// ```dart
 /// RichText(
@@ -102,7 +102,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// In this example, the ambient [DefaultTextStyle] is explicitly manipulated to
 /// obtain a [TextStyle] that doubles the default font size.
 ///
-/// ![An example using TextStyle to change the text size](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_size.png)
+/// ![This results in text that is twice as large as normal.](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_size.png)
 ///
 /// ```dart
 /// Text(
@@ -147,13 +147,13 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ### Wavy red underline with black text
 ///
 /// {@tool sample}
-/// Styles can be combined. In this example, the misspelt word is drawn in black
-/// text and underlined with a wavy red line to indicate a spelling error. (The
-/// remainder is styled according to the Flutter default text styles, not the
-/// ambient [DefaultTextStyle], since no explicit style is given and [RichText]
-/// does not automatically use the ambient [DefaultTextStyle].)
+/// Styles can be combined. In this example, the misspelled word is drawn in
+/// black text and underlined with a wavy red line to indicate a spelling error.
+/// (The remainder is styled according to the Flutter default text styles, not
+/// the ambient [DefaultTextStyle], since no explicit style is given and
+/// [RichText] does not automatically use the ambient [DefaultTextStyle].)
 ///
-/// ![An example using TextStyle to highlight a word with a red wavy underline](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_wavy_red_underline.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_wavy_red_underline.png)
 ///
 /// ```dart
 /// RichText(
@@ -276,7 +276,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// argument as shown in the example below:
 ///
 /// {@tool sample}
-/// ![An example using TextStyle to change the font family](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_custom_fonts.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_custom_fonts.png)
 ///
 /// ```dart
 /// const TextStyle(fontFamily: 'Raleway')
