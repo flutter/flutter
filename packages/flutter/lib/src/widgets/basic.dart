@@ -1563,13 +1563,17 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 ///
 /// {@tool sample}
 ///
-/// This snippet indents the child (a [Card] with some [Text]) by eight pixels
-/// in each direction:
+/// This snippet creates "Hello World!" [Text] inside a [Card] that is indented
+/// by sixteen pixels in each direction.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/padding.png)
 ///
 /// ```dart
-/// Padding(
-///   padding: EdgeInsets.all(8.0),
-///   child: const Card(child: Text('Hello World!')),
+/// const Card(
+///   child: Padding(
+///     padding: EdgeInsets.all(16.0),
+///     child: Text('Hello World!'),
+///   ),
 /// )
 /// ```
 /// {@end-tool}

@@ -92,9 +92,76 @@ enum MaterialTapTargetSize {
 
 /// Holds the color and typography values for a material design theme.
 ///
-/// Use this class to configure a [Theme] widget.
+/// Use this class to configure a [Theme] or [MaterialApp] widget.
 ///
 /// To obtain the current theme, use [Theme.of].
+///
+/// {@tool sample}
+///
+/// This sample creates a [Theme] widget that stores the `ThemeData`. The
+/// `ThemeData` can be accessed by descendant Widgets that use the correct
+/// `context`. This example uses the [Builder] widget to gain access to a
+/// descendant `context` that contains the `ThemeData`.
+///
+/// The [Container] widget uses [Theme.of] to retrieve the [primaryColor] from
+/// the `ThemeData` to draw an amber square.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/theme_data.png)
+///
+/// ```dart
+/// Theme(
+///   data: ThemeData(primaryColor: Colors.amber),
+///   child: Builder(
+///     builder: (BuildContext context) {
+///       return Container(
+///         width: 100,
+///         height: 100,
+///         color: Theme.of(context).primaryColor,
+///       );
+///     },
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// In addition to using the [Theme] widget, you can provide `ThemeData` to a
+/// [MaterialApp]. The `ThemeData` will be used throughout the app to style
+/// material design widgets.
+///
+/// {@tool sample}
+///
+/// This sample creates a [MaterialApp] widget that stores `ThemeData` and
+/// passes the `ThemeData` to descendant widgets. The [AppBar] widget uses the
+/// [primaryColor] to create a blue background. The [Text] widget uses the
+/// [TextTheme.body1] to create purple text. The [FloatingActionButton] widget
+/// uses the [accentColor] to create a green background.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_theme_data.png)
+///
+/// ```dart
+/// MaterialApp(
+///   theme: ThemeData(
+///     primaryColor: Colors.blue,
+///     accentColor: Colors.green,
+///     textTheme: TextTheme(body1: TextStyle(color: Colors.purple)),
+///   ),
+///   home: Scaffold(
+///     appBar: AppBar(
+///       title: const Text('ThemeData Demo'),
+///     ),
+///     floatingActionButton: FloatingActionButton(
+///       child: const Icon(Icons.add),
+///       onPressed: () {},
+///     ),
+///     body: Center(
+///       child: Text(
+///         'Button pressed 0 times',
+///       ),
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 @immutable
 class ThemeData extends Diagnosticable {
   /// Create a [ThemeData] given a set of preferred values.
