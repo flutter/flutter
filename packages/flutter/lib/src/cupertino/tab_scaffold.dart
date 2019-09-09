@@ -543,9 +543,9 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
             enabled: active,
             child: FocusScope(
               node: tabFocusNodes[index],
-              child: shouldBuildTab[index]
-                ? widget.tabBuilder(context, index)
-                : Container(),
+              child: Builder(builder: (BuildContext context) {
+                return shouldBuildTab[index] ? widget.tabBuilder(context, index) : Container();
+              }),
             ),
           ),
         );
