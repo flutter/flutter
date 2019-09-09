@@ -291,9 +291,6 @@ class FakeFlutterProjectFactory extends FlutterProjectFactory {
 }
 
 class MockAndroidSdk extends Mock implements AndroidSdk {}
-
 class MockProcessManager extends Mock implements ProcessManager {}
-
 class MockProcess extends Mock implements Process {}
-
 class MockUsage extends Mock implements Usage {}

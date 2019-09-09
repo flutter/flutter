@@ -32,8 +32,10 @@ import 'android_studio.dart';
 /// Gradle utils in the current [AppContext].
 GradleUtils get gradleUtils => context.get<GradleUtils>();
 
-/// The implementation of Gradle Utils.
+/// Provides utilities to run a Gradle task,
+/// such as finding the Gradle executable or constructing a Gradle project.
 class GradleUtils {
+  /// Empty constructor.
   GradleUtils();
 
   String _cachedExecutable;
