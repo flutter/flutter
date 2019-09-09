@@ -23,6 +23,9 @@ NS_ASSUME_NONNULL_BEGIN
  * Protocol for listener of events from the UIApplication, typically a FlutterPlugin.
  */
 @protocol FlutterApplicationLifeCycleDelegate
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+    <UNUserNotificationCenterDelegate>
+#endif
 @optional
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -97,15 +100,6 @@ NS_ASSUME_NONNULL_BEGIN
     API_DEPRECATED(
         "See -[UIApplicationDelegate application:didReceiveLocalNotification:] deprecation",
         ios(4.0, 10.0));
-
-/**
- * Calls all plugins registered for `UNUserNotificationCenterDelegate` callbacks.
- */
-- (void)userNotificationCenter:(UNUserNotificationCenter*)center
-       willPresentNotification:(UNNotification*)notification
-         withCompletionHandler:
-             (void (^)(UNNotificationPresentationOptions options))completionHandler
-    API_AVAILABLE(ios(10));
 
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
@@ -372,8 +366,14 @@ typedef void (*FlutterPluginRegistrantCallback)(NSObject<FlutterPluginRegistry>*
 /***************************************************************************************************
  * Implement this in the `UIAppDelegate` of your app to enable Flutter plugins to register
  * themselves to the application life cycle events.
+ *
+ * For plugins to receive events from `UNUserNotificationCenter`, register this as the
+ * `UNUserNotificationCenterDelegate`.
  */
 @protocol FlutterAppLifeCycleProvider
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+    <UNUserNotificationCenterDelegate>
+#endif
 - (void)addApplicationLifeCycleDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate;
 @end
 

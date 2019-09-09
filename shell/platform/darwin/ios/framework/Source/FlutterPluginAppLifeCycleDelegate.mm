@@ -276,16 +276,23 @@ static BOOL isPowerOfTwo(NSUInteger x) {
        willPresentNotification:(UNNotification*)notification
          withCompletionHandler:
              (void (^)(UNNotificationPresentationOptions options))completionHandler {
-  if (@available(iOS 10.0, *)) {
-    for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-      if (!delegate) {
-        continue;
-      }
-      if ([delegate respondsToSelector:_cmd]) {
-        [delegate userNotificationCenter:center
-                 willPresentNotification:notification
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if ([delegate respondsToSelector:_cmd]) {
+      [delegate userNotificationCenter:center
+               willPresentNotification:notification
+                 withCompletionHandler:completionHandler];
+    }
+  }
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter*)center
+    didReceiveNotificationResponse:(UNNotificationResponse*)response
+             withCompletionHandler:(void (^)(void))completionHandler {
+  for (id<FlutterApplicationLifeCycleDelegate> delegate in _delegates) {
+    if ([delegate respondsToSelector:_cmd]) {
+      [delegate userNotificationCenter:center
+          didReceiveNotificationResponse:response
                    withCompletionHandler:completionHandler];
-      }
     }
   }
 }
