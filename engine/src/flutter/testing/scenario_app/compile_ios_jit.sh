@@ -61,6 +61,7 @@ echo "Creating stub App using $SYSROOT..."
 
 echo "static const int Moo = 88;" | xcrun clang -x c \
   -arch x86_64 \
+  -fembed-bitcode-marker \
   -isysroot "$SYSROOT" \
   -miphoneos-version-min=8.0 \
   -dynamiclib \
