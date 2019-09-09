@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -855,6 +856,7 @@ flutter:
     Directory gradleWrapperDirectory;
     MockProcessManager mockProcessManager;
     Exception shouldBeToolExit;
+    String gradle_binary;
 
     setUp(() {
       fs = MemoryFileSystem();
@@ -877,11 +879,12 @@ flutter:
 
       mockProcessManager = MockProcessManager();
       shouldBeToolExit = null;
+      gradle_binary = platform.isWindows ? 'gradlew.bat' : 'gradlew';
     });
 
     testUsingContext('throws toolExit if gradle fails while downloading', () async {
       final List<String> cmd = <String>[
-        fs.path.join(fs.currentDirectory.path, 'android', 'gradlew'),
+        fs.path.join(fs.currentDirectory.path, 'android', gradle_binary),
         '-v',
       ];
       const String errorMessage = '''
@@ -897,8 +900,8 @@ at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManag
 at org.gradle.wrapper.Install.createDist(Install.java:48)
 at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
-      const ProcessException exception = ProcessException(
-        'gradlew',
+      final ProcessException exception = ProcessException(
+        gradle_binary,
         <String>['-v'],
         errorMessage,
         1,
@@ -921,7 +924,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
     testUsingContext('throw toolExit if gradle fails downloading with proxy error', () async {
       final List<String> cmd = <String>[
-        fs.path.join(fs.currentDirectory.path, 'android', 'gradlew'),
+        fs.path.join(fs.currentDirectory.path, 'android', gradle_binary),
         '-v',
       ];
       const String errorMessage = '''
@@ -939,8 +942,8 @@ at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManag
 at org.gradle.wrapper.Install.createDist(Install.java:48)
 at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
-      const ProcessException exception = ProcessException(
-        'gradlew',
+      final ProcessException exception = ProcessException(
+        gradle_binary,
         <String>['-v'],
         errorMessage,
         1,
