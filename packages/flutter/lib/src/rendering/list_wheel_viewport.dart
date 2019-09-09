@@ -140,6 +140,7 @@ class RenderListWheelViewport
     double offAxisFraction = 0,
     bool useMagnifier = false,
     double magnification = 1,
+    double offCenterOpacity = 1,
     @required double itemExtent,
     double squeeze = 1,
     bool clipToSize = true,
@@ -156,6 +157,8 @@ class RenderListWheelViewport
        assert(useMagnifier != null),
        assert(magnification != null),
        assert(magnification > 0),
+       assert(offCenterOpacity != null),
+       assert(offCenterOpacity >= 0 && offCenterOpacity <= 1),
        assert(itemExtent != null),
        assert(squeeze != null),
        assert(squeeze > 0),
@@ -172,6 +175,7 @@ class RenderListWheelViewport
        _offAxisFraction = offAxisFraction,
        _useMagnifier = useMagnifier,
        _magnification = magnification,
+       _offCenterOpacity = offCenterOpacity,
        _itemExtent = itemExtent,
        _squeeze = squeeze,
        _clipToSize = clipToSize,
@@ -365,6 +369,26 @@ class RenderListWheelViewport
     if (value == _magnification)
       return;
     _magnification = value;
+    markNeedsPaint();
+  }
+
+  /// {@template flutter.rendering.wheelList.offCenterOpacity}
+  /// The opacity value that will be applied to the wheel that appears below and
+  /// above the magnifier.
+  ///
+  /// The default value is 1.0, which will not change anything.
+  ///
+  /// Must be greater than or equal to 0, and less than or equal to 1.
+  /// {@endtemplate}
+  double get offCenterOpacity => _offCenterOpacity;
+  double _offCenterOpacity = 1.0;
+  set offCenterOpacity(double value) {
+    assert(value != null);
+    assert(value > 0);
+    assert(value <= 1);
+    if (value == _offCenterOpacity)
+      return;
+    _offCenterOpacity = value;
     markNeedsPaint();
   }
 
@@ -822,12 +846,12 @@ class RenderListWheelViewport
 
     // Offset that helps painting everything in the center (e.g. angle = 0).
     final Offset offsetToCenter = Offset(
-        untransformedPaintingCoordinates.dx,
-        -_topScrollMarginExtent);
+      untransformedPaintingCoordinates.dx,
+      -_topScrollMarginExtent
+    );
 
-    if (!useMagnifier)
-      _paintChildCylindrically(context, offset, child, transform, offsetToCenter);
-    else
+    final bool shouldApplyOffCenterDim = offCenterOpacity < 1;
+    if (useMagnifier || shouldApplyOffCenterDim)
       _paintChildWithMagnifier(
         context,
         offset,
@@ -836,6 +860,8 @@ class RenderListWheelViewport
         offsetToCenter,
         untransformedPaintingCoordinates,
       );
+    else
+      _paintChildCylindrically(context, offset, child, transform, offsetToCenter);
   }
 
   /// Paint child with the magnifier active - the child will be rendered
@@ -878,36 +904,36 @@ class RenderListWheelViewport
 
       // Clipping the part in the center.
       context.pushClipRect(
-          false,
-          offset,
-          centerRect,
-          (PaintingContext context, Offset offset) {
-            context.pushTransform(
-              false,
-              offset,
-              _magnifyTransform(),
-              (PaintingContext context, Offset offset) {
-                context.paintChild(
-                  child,
-                  offset + untransformedPaintingCoordinates);
-              });
+        needsCompositing,
+        offset,
+        centerRect,
+        (PaintingContext context, Offset offset) {
+          context.pushTransform(
+            false,
+            offset,
+            _magnifyTransform(),
+            (PaintingContext context, Offset offset) {
+              context.paintChild(
+                child,
+                offset + untransformedPaintingCoordinates);
           });
+      });
 
       // Clipping the part in either the top-half or bottom-half of the wheel.
       context.pushClipRect(
-          false,
-          offset,
-          untransformedPaintingCoordinates.dy <= magnifierTopLinePosition
-            ? topHalfRect
-            : bottomHalfRect,
-          (PaintingContext context, Offset offset) {
-            _paintChildCylindrically(
-              context,
-              offset,
-              child,
-              cylindricalTransform,
-              offsetToCenter);
-          },
+        needsCompositing,
+        offset,
+        untransformedPaintingCoordinates.dy <= magnifierTopLinePosition
+          ? topHalfRect
+          : bottomHalfRect,
+        (PaintingContext context, Offset offset) {
+          _paintChildCylindrically(
+            context,
+            offset,
+            child,
+            cylindricalTransform,
+            offsetToCenter);
+        },
       );
     } else {
       _paintChildCylindrically(
@@ -927,20 +953,24 @@ class RenderListWheelViewport
     Matrix4 cylindricalTransform,
     Offset offsetToCenter,
   ) {
+    final PaintingContextCallback innerPainter = (PaintingContext context, Offset offset) {
+      context.paintChild(
+        child,
+        // Paint everything in the center (e.g. angle = 0), then transform.
+        offset + offsetToCenter,
+      );
+    };
+
     context.pushTransform(
       // Text with TransformLayers and no cullRects currently have an issue rendering
       // https://github.com/flutter/flutter/issues/14224.
-      false,
+      needsCompositing,
       offset,
       _centerOriginTransform(cylindricalTransform),
       // Pre-transform painting function.
-      (PaintingContext context, Offset offset) {
-        context.paintChild(
-          child,
-          // Paint everything in the center (e.g. angle = 0), then transform.
-          offset + offsetToCenter,
-        );
-      },
+      offCenterOpacity == 1
+        ? innerPainter
+        : (PaintingContext context, Offset offset) => context.pushOpacity(offset, (offCenterOpacity * 255).round(), innerPainter),
     );
   }
 

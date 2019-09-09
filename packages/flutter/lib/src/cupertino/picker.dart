@@ -20,9 +20,10 @@ const Color _kHighlighterBorder = CupertinoDynamicColor.withBrightness(
 const double _kDefaultDiameterRatio = 1.07;
 const double _kDefaultPerspective = 0.003;
 const double _kSqueeze = 1.45;
-/// Opacity fraction value that hides the wheel above and below the 'magnifier'
-/// lens with the same color as the background.
-const double _kForegroundScreenOpacityFraction = 0.7;
+
+// Opacity fraction value that dims the wheel above and below the "magnifier"
+// lens.
+const double _kOffCenterOpacity = 0.447;
 
 /// An iOS-styled picker.
 ///
@@ -242,55 +243,14 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     }
   }
 
-  /// Makes the fade to [CupertinoPicker.backgroundColor] edge gradients.
-  Widget _buildGradientScreen(Color resolved) {
-    // Because BlendMode.dstOut doesn't work correctly with BoxDecoration we
-    // have to just do a color blend. And a due to the way we are layering
-    // the magnifier and the gradient on the background, using a transparent
-    // background color makes the picker look odd.
-    if (resolved == null || resolved.alpha < 255)
-      return Container();
-
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: <Color>[
-                resolved,
-                resolved.withAlpha(0xF2),
-                resolved.withAlpha(0xDD),
-                resolved.withAlpha(0),
-                resolved.withAlpha(0),
-                resolved.withAlpha(0xDD),
-                resolved.withAlpha(0xF2),
-                resolved,
-              ],
-              stops: const <double>[
-                0.0, 0.05, 0.09, 0.22, 0.78, 0.91, 0.95, 1.0,
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Makes the magnifier lens look so that the colors are normal through
-  /// the lens and partially grayed out around it.
+  /// Draws the magnifier borders.
   Widget _buildMagnifierScreen(Color resolved) {
-    final Color foreground = resolved?.withAlpha(
-      (resolved.alpha * _kForegroundScreenOpacityFraction).toInt(),
-    );
-
     final Color resolvedBorderColor = CupertinoDynamicColor.resolve(_kHighlighterBorder, context);
 
     return IgnorePointer(
       child: Column(
         children: <Widget>[
-          Expanded(child: Container(color: foreground)),
+          Expanded(child: Container()),
           Container(
             decoration: BoxDecoration(
               border: Border(
@@ -302,28 +262,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               height: widget.itemExtent * widget.magnification,
             ),
           ),
-          Expanded(child: Container(color: foreground)),
+          Expanded(child: Container()),
         ],
       ),
-    );
-  }
-
-  Widget _buildUnderMagnifierScreen(Color resolved) {
-    final Color foreground = resolved?.withAlpha(
-      (resolved.alpha * _kForegroundScreenOpacityFraction).toInt(),
-    );
-
-    return Column(
-      children: <Widget>[
-        Expanded(child: Container()),
-        Container(
-          color: foreground,
-          constraints: BoxConstraints.expand(
-            height: widget.itemExtent * widget.magnification,
-          ),
-        ),
-        Expanded(child: Container()),
-      ],
     );
   }
 
@@ -348,6 +289,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 offAxisFraction: widget.offAxisFraction,
                 useMagnifier: widget.useMagnifier,
                 magnification: widget.magnification,
+                offCenterOpacity: _kOffCenterOpacity,
                 itemExtent: widget.itemExtent,
                 squeeze: widget.squeeze,
                 onSelectedItemChanged: _handleSelectedItemChanged,
@@ -355,23 +297,14 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               ),
             ),
           ),
-          _buildGradientScreen(resolvedBackgroundColor),
           _buildMagnifierScreen(resolvedBackgroundColor),
         ],
       ),
     );
-    // Adds the appropriate opacity under the magnifier if the background
-    // color is transparent.
-    final bool shouldBuildUnderMagnifier = resolvedBackgroundColor != null
-                                        && resolvedBackgroundColor.alpha < 255;
-    return Stack(
-      children: <Widget> [
-        if (shouldBuildUnderMagnifier) _buildUnderMagnifierScreen(resolvedBackgroundColor),
-        DecoratedBox(
-          decoration: BoxDecoration(color: resolvedBackgroundColor),
-          child: result,
-        ),
-      ],
+
+    return DecoratedBox(
+      decoration: BoxDecoration(color: resolvedBackgroundColor),
+      child: result,
     );
   }
 }
