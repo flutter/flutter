@@ -1007,7 +1007,7 @@ void main() {
       expect(rootNode, equals(firstElement.owner.focusManager.rootScope));
     });
     testWidgets('Can autofocus a node.', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode(debugLabel: 'MaterialButton');
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
       await tester.pumpWidget(
         Focus(
           focusNode: focusNode,
