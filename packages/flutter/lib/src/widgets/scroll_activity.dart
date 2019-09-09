@@ -475,7 +475,7 @@ class DragScrollActivity extends ScrollActivity {
           dragDetails: lastDetails is DragEndDetails ? lastDetails : null,
       ).dispatch(context);
   }
-  
+
   @override
   bool get shouldIgnorePointer => true;
 

@@ -673,7 +673,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     if (keepScrollOffset)
       saveScrollOffset();
   }
-  
+
   /// Called by [beginActivity] to report when an scroll drag has been ended.
   void didEndScrollDrag() {
     activity.dispatchScrollDragEndNotification(copyWith(), context.notificationContext);
