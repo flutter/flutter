@@ -47,6 +47,7 @@ echo "Using $SYSROOT as sysroot."
 echo "Compiling Assembly..."
 
 cc -arch arm64 \
+  -fembed-bitcode \
   -isysroot "$SYSROOT" \
   -miphoneos-version-min=8.0 \
   -c "$OUTDIR/snapshot_assembly.S" \
@@ -55,6 +56,7 @@ cc -arch arm64 \
 echo "Linking App using $SYSROOT..."
 
 clang -arch arm64 \
+  -fembed-bitcode \
   -isysroot "$SYSROOT" \
   -miphoneos-version-min=8.0 \
   -dynamiclib -Xlinker -rpath -Xlinker @executable_path/Frameworks \
