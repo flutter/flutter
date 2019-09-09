@@ -41,10 +41,10 @@ export 'dart:io'
     show
         BytesBuilder,
         CompressionOptions,
-        // Directory,
+        // Directory,         NO! Use `file_system.dart`
         exitCode,
-        // File,
-        // FileSystemEntity,
+        // File,              NO! Use `file_system.dart`
+        // FileSystemEntity,  NO! Use `file_system.dart`
         gzip,
         HandshakeException,
         HttpClient,
