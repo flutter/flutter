@@ -625,7 +625,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// if the first item were selected.
   final T value;
 
-  /// A placeholder widget that is displayed if no item is selected.
+  /// A placeholder widget that is displayed if no item is selected, i.e. if [value] is null.
   final Widget hint;
 
   /// A message to show when the dropdown is disabled.
