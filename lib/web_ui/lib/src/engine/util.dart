@@ -238,3 +238,30 @@ String _pathToSvgClipPath(ui.Path path,
 bool _isNsErrorFailureException(dynamic e) {
   return js_util.getProperty(e, 'name') == 'NS_ERROR_FAILURE';
 }
+
+/// From: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#Syntax
+///
+/// Generic font families are a fallback mechanism, a means of preserving some
+/// of the style sheet author's intent when none of the specified fonts are
+/// available. Generic family names are keywords and must not be quoted. A
+/// generic font family should be the last item in the list of font family
+/// names.
+const Set<String> _genericFontFamilies = <String>{
+  'serif',
+  'sans-serif',
+  'monospace',
+  'cursive',
+  'fantasy',
+  'system-ui',
+  'math',
+  'emoji',
+  'fangsong',
+};
+
+/// Wraps a font family in quotes unless it is a generic font family.
+String quoteFontFamily(String fontFamily) {
+  if (_genericFontFamilies.contains(fontFamily)) {
+    return fontFamily;
+  }
+  return '"$fontFamily"';
+}
