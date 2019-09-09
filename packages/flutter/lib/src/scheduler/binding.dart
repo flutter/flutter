@@ -780,16 +780,14 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
     _warmUpFrame = true;
     Timeline.startSync('Warm-up frame');
-    bool hadScheduledFrame;
+    final bool hadScheduledFrame = _hasScheduledFrame;
     // We use timers here to ensure that microtasks flush in between.
     Timer.run(() {
       assert(_warmUpFrame);
-      hadScheduledFrame = _hasScheduledFrame;
       handleBeginFrame(null);
     });
     Timer.run(() {
       assert(_warmUpFrame);
-      assert(hadScheduledFrame != null);
       handleDrawFrame();
       // We call resetEpoch after this frame so that, in the hot reload case,
       // the very next frame pretends to have occurred immediately after this
