@@ -162,6 +162,7 @@ class GradientLinear extends EngineGradient {
   }
 }
 
+// TODO(flutter_web): Add screenshot tests when infra is ready.
 class GradientRadial extends EngineGradient {
   GradientRadial(this.center, this.radius, this.colors, this.colorStops,
       this.tileMode, this.matrix4)
@@ -176,7 +177,22 @@ class GradientRadial extends EngineGradient {
 
   @override
   Object createPaintStyle(html.CanvasRenderingContext2D ctx) {
-    throw UnimplementedError();
+    // TODO(flutter_web): see https://github.com/flutter/flutter/issues/32819
+    if (matrix4 != null && !Matrix4.fromFloat64List(matrix4).isIdentity()) {
+        throw UnimplementedError('matrix4 not supported in GradientRadial shader');
+    }
+    final html.CanvasGradient gradient =
+        ctx.createRadialGradient(center.dx, center.dy, 0, center.dx, center.dy, radius);
+    if (colorStops == null) {
+      assert(colors.length == 2);
+      gradient.addColorStop(0, colors[0].toCssString());
+      gradient.addColorStop(1, colors[1].toCssString());
+      return gradient;
+    }
+    for (int i = 0; i < colors.length; i++) {
+      gradient.addColorStop(colorStops[i], colors[i].toCssString());
+    }
+    return gradient;
   }
 
   @override
