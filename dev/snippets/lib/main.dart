@@ -109,7 +109,7 @@ void main(List<String> argList) {
   assert(snippetType != null, "Unable to find '${args[_kTypeOption]}' in SnippetType enum.");
 
   if (args[_kShowDartPad] == true && snippetType != SnippetType.application) {
-    errorExit('$snippetType was selected, but the --dartpad flag is only valid '
+    errorExit('${args[_kTypeOption]} was selected, but the --dartpad flag is only valid '
       'for application snippets.');
   }
 
