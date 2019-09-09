@@ -322,7 +322,7 @@ class AndroidDevice implements Device {
         process.exitCode.then<void>((int exitCode) {
           print('adb logcat process terminated with exit code $exitCode');
           if (!aborted) {
-            stream.addError(BuildFailedError('adb logcat failed with exit code $exitCode.'));
+            stream.addError(BuildFailedError('adb logcat failed with exit code $exitCode.\n'));
             processDone.complete();
           }
         });
