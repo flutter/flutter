@@ -278,29 +278,27 @@ class UserScrollNotification extends ScrollNotification {
   }
 }
 
-/// A notification that is dispatched as soon as pointer is no longer in
-/// contact with the screen i.e drag has been ended in [Scrollable] widget.
+/// A notification that is dispatched as soon as pointer is no longer in contact
+/// with the screen, e.g. when drag has ended in a [Scrollable] widget.
 ///
 /// See also:
 ///
-///  * [ScrollEndNotification], which indicates that scrolling has been ended
-///  * [ScrollEndNotification.dragDetails], null if residualVelocity
-///  causes ballistic simulation, otherwise not null
+///  * [ScrollEndNotification], which indicates that scrolling has been ended.
+///  * [ScrollEndNotification.dragDetails], which is null if residualVelocity
+///  causes ballistic simulation, otherwise not null.
 ///
-/// After [ScrollDragEndNotification], [ScrollEndNotification]
-/// will be dispatched immediately or after some delay(depending on the
-/// residual velocity causes ballistic animation or not)
-///
+/// [ScrollDragEndNotification] is dispatched before [ScrollEndNotification],
+/// and is guaranteed to contain the drag details without modification by any
+/// simulations used by the current [ScrollPhysics].
 class ScrollDragEndNotification extends ScrollNotification {
-  /// Creates a notification that drag in a [Scrollable] widget has been stopped.0
+  /// Creates a notification that drag in a [Scrollable] widget has stopped.
   ScrollDragEndNotification({
       @required ScrollMetrics metrics,
       @required BuildContext context,
       this.dragDetails,
 }) : super(metrics: metrics, context: context);
 
-  /// If the drag in [Scrollable] ends, and pointer is no longer in contact,
-  /// the details about that drag end.
+  /// The [DragEndDetails] at the moment the pointer has released.
   final DragEndDetails dragDetails;
 
   @override
