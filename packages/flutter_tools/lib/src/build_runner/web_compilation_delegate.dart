@@ -49,6 +49,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       });
       if (result.status == BuildStatus.failed) {
         success = false;
+        break;
       }
       if (result.status == BuildStatus.succeeded) {
         break;
@@ -60,17 +61,18 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         .childDirectory('build')
         .childDirectory('flutter_web');
 
-      for (Directory childDirectory in rootDirectory
+      final Iterable<Directory> childDirectories = rootDirectory
         .listSync()
-        .whereType<Directory>()) {
-        copyDirectorySync(childDirectory.childDirectory('lib'),
-          fs.directory(fs.path.join(testOutputDir, 'packages',
-          fs.path.basename(childDirectory.path))));
+        .whereType<Directory>();
+      for (Directory childDirectory in childDirectories) {
+        final String path = fs.path.join(testOutputDir, 'packages',
+            fs.path.basename(childDirectory.path));
+        copyDirectorySync(childDirectory.childDirectory('lib'), fs.directory(path));
       }
-      copyDirectorySync(rootDirectory
-        .childDirectory(projectName)
-        .childDirectory('test'),
-        fs.directory(fs.path.join(testOutputDir)));
+      final Directory outputDirectory = rootDirectory
+          .childDirectory(projectName)
+          .childDirectory('test');
+      copyDirectorySync(outputDirectory, fs.directory(fs.path.join(testOutputDir)));
     }
     return success;
   }
