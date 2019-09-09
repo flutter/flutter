@@ -909,7 +909,7 @@ class RenderListWheelViewport
         centerRect,
         (PaintingContext context, Offset offset) {
           context.pushTransform(
-            false,
+            needsCompositing,
             offset,
             _magnifyTransform(),
             (PaintingContext context, Offset offset) {
@@ -962,8 +962,6 @@ class RenderListWheelViewport
     };
 
     context.pushTransform(
-      // Text with TransformLayers and no cullRects currently have an issue rendering
-      // https://github.com/flutter/flutter/issues/14224.
       needsCompositing,
       offset,
       _centerOriginTransform(cylindricalTransform),
