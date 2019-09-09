@@ -1,4 +1,4 @@
-Signature: fbb45af6f72d091f4e9ab3ec32d2f847
+Signature: 13af0aa2cdf65d30084e380fb4459e64
 
 UNUSED LICENSES:
 
@@ -3317,6 +3317,7 @@ FILE: ../../../third_party/skia/src/codec/SkScalingCodec.h
 FILE: ../../../third_party/skia/src/core/SkDescriptor.cpp
 FILE: ../../../third_party/skia/src/core/SkDraw_atlas.cpp
 FILE: ../../../third_party/skia/src/core/SkEffectPriv.h
+FILE: ../../../third_party/skia/src/core/SkPathMakers.h
 FILE: ../../../third_party/skia/src/core/SkStrikeInterface.h
 FILE: ../../../third_party/skia/src/core/SkStrikeSpec.h
 FILE: ../../../third_party/skia/src/core/SkVMBlitter.cpp
