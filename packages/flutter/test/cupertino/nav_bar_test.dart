@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 int count = 0;
@@ -50,16 +51,35 @@ void main() {
     expect(tester.getCenter(find.text('Page 2')).dx, 400.0);
   });
 
-  testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
+  testWidgets('Opaque background does not add blur effects, non-opaque background adds blur effects', (WidgetTester tester) async {
+    const Color background = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFFE5E5E5),
+      darkColor: Color(0xF3E5E5E5),
+    );
+
     await tester.pumpWidget(
       const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.light),
         home: CupertinoNavigationBar(
           middle: Text('Title'),
-          backgroundColor: Color(0xFFE5E5E5),
+          backgroundColor: background,
         ),
       ),
     );
     expect(find.byType(BackdropFilter), findsNothing);
+    expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xFFE5E5E5)));
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoNavigationBar(
+          middle: Text('Title'),
+          backgroundColor: background,
+        ),
+      ),
+    );
+    expect(find.byType(BackdropFilter), findsOneWidget);
+    expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xF3E5E5E5)));
   });
 
   testWidgets('Non-opaque background adds blur effects', (WidgetTester tester) async {
