@@ -1,0 +1,10 @@
+name: web_engine_tester
+
+environment:
+  sdk: ">=2.2.0 <3.0.0"
+
+dependencies:
+  js: 0.6.1+1
+  stream_channel: 2.0.0
+  test: 1.6.5
+  webkit_inspection_protocol: 0.5.0

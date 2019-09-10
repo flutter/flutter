@@ -14,3 +14,5 @@ dev_dependencies:
   build_runner: 1.6.5
   build_test: 0.10.8
   build_web_compilers: 2.1.5
+  web_engine_tester:
+    path: ../../web_sdk/web_engine_tester
