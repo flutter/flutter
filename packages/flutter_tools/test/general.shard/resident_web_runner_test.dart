@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/build_runner/web_fs.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
@@ -74,6 +75,18 @@ void main() {
     });
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
   }
+
+  test('runner with web server device does not support debugging', () => testbed.run(() {
+    final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
+      WebServerDevice(),
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      ipv6: true,
+    );
+
+    expect(profileResidentWebRunner.debuggingEnabled, false);
+    expect(residentWebRunner.debuggingEnabled, true);
+  }));
 
   test('profile does not supportsServiceProtocol', () => testbed.run(() {
     final ResidentRunner profileResidentWebRunner = ResidentWebRunner(

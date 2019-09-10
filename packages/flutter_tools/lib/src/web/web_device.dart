@@ -223,6 +223,7 @@ class WebServerDevice extends Device {
   @override
   String get name => 'Server';
 
+  @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 
   @override

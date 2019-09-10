@@ -66,6 +66,9 @@ class ResidentWebRunner extends ResidentRunner {
   @override
   bool get supportsServiceProtocol => isRunningDebug && device is! WebServerDevice;
 
+  @override
+  bool get debuggingEnabled => isRunningDebug && device is! WebServerDevice;
+
   WebFs _webFs;
   DebugConnection _debugConnection;
   StreamSubscription<vmservice.Event> _stdOutSub;
