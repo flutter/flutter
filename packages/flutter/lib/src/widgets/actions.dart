@@ -148,8 +148,6 @@ class ActionDispatcher extends Diagnosticable {
   /// [FocusManager.primaryFocus] if the given `focusNode` is null.
   ///
   /// The `action` and `intent` arguments must not be null.
-  ///
-  /// Returns true if the action was successfully invoked.
   bool invokeAction(Action action, Intent intent, {FocusNode focusNode}) {
     assert(action != null);
     assert(intent != null);
@@ -182,20 +180,16 @@ class Actions extends InheritedWidget {
   /// The [child], [actions], and [dispatcher] arguments must not be null.
   const Actions({
     Key key,
-    this.dispatcher,
+    this.dispatcher = const ActionDispatcher(),
     @required this.actions,
     @required Widget child,
-  })  : assert(actions != null),
+  })  : assert(dispatcher != null),
+        assert(actions != null),
         super(key: key, child: child);
 
   /// The [ActionDispatcher] object that invokes actions.
   ///
   /// This is what is returned from [Actions.of], and used by [Actions.invoke].
-  ///
-  /// If this [dispatcher] is null, then [Actions.of] and [Actions.invoke] will
-  /// look up the tree until they find an Actions widget that has a dispatcher
-  /// set. If not such widget is found, then they will return/use a
-  /// default-constructed [ActionDispatcher].
   final ActionDispatcher dispatcher;
 
   /// A map of [Intent] keys to [ActionFactory] factory methods that defines
@@ -240,8 +234,7 @@ class Actions extends InheritedWidget {
   /// The `context` argument must not be null.
   static ActionDispatcher of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
-    final InheritedElement inheritedElement = context.ancestorInheritedElementForWidgetOfExactType(Actions);
-    final Actions inherited = context.inheritFromElement(inheritedElement);
+    final Actions inherited = context.inheritFromWidgetOfExactType(Actions);
     assert(() {
       if (nullOk) {
         return true;
@@ -274,8 +267,6 @@ class Actions extends InheritedWidget {
   /// `intent` doesn't map to an action in any of the [Actions.actions] maps
   /// that are found.
   ///
-  /// Returns true if an action was successfully invoked.
-  ///
   /// Setting `nullOk` to true means that if no ambient [Actions] widget is
   /// found, then this method will return false instead of throwing.
   static bool invoke(
@@ -286,7 +277,7 @@ class Actions extends InheritedWidget {
   }) {
     assert(context != null);
     assert(intent != null);
-    Element actionsElement;
+    Actions actions;
     Action action;
 
     bool visitAncestorElement(Element element) {
@@ -296,10 +287,9 @@ class Actions extends InheritedWidget {
       }
       // Below when we invoke the action, we need to use the dispatcher from the
       // Actions widget where we found the action, in case they need to match.
-      actionsElement = element;
-      final Actions actions = element.widget;
+      actions = element.widget;
       action = actions.actions[intent.key]?.call();
-      // Keep looking if we failed to find and create an action.
+      // Don't continue visiting if we successfully created an action.
       return action == null;
     }
 
@@ -308,7 +298,7 @@ class Actions extends InheritedWidget {
       if (nullOk) {
         return true;
       }
-      if (actionsElement == null) {
+      if (actions == null) {
         throw FlutterError('Unable to find a $Actions widget in the context.\n'
             '$Actions.invoke() was called with a context that does not contain an '
             '$Actions widget.\n'
@@ -333,10 +323,10 @@ class Actions extends InheritedWidget {
       // Will only get here if nullOk is true.
       return false;
     }
-
-    // Invoke the action we found using the dispatcher from the Actions Element
-    // we found, using the given focus node.
-    return _findDispatcher(actionsElement).invokeAction(action, intent, focusNode: focusNode);
+    // Invoke the action we found using the dispatcher from the Actions we
+    // found, using the given focus node. Or null, if nullOk is true, and we
+    // didn't find something.
+    return actions?.dispatcher?.invokeAction(action, intent, focusNode: focusNode);
   }
 
   @override
@@ -367,4 +357,17 @@ class DoNothingAction extends Action {
 
   @override
   void invoke(FocusNode node, Intent intent) { }
+}
+
+/// An action that invokes the currently focused control.
+///
+/// This is an abstract class that serves as a base class for actions that
+/// activate a control. It is bound to [LogicalKeyboardKey.enter] in the default
+/// keyboard map in [WidgetsApp].
+abstract class ActivateAction extends Action {
+  /// Creates a [ActivateAction] with a fixed [key];
+  const ActivateAction() : super(key);
+
+  /// The [LocalKey] that uniquely identifies this action.
+  static const LocalKey key = ValueKey<Type>(ActivateAction);
 }
