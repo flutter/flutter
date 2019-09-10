@@ -213,7 +213,7 @@ class WebServerDevice extends Device {
   Future<bool> get isLocalEmulator async => false;
 
   @override
-  bool isSupported() =>  featureFlags.isWebEnabled;
+  bool isSupported() => featureFlags.isWebEnabled;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {

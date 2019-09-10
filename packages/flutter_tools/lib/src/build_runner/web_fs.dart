@@ -315,9 +315,9 @@ class WebFs {
       } else if (request.url.path.contains('assets')) {
         final String assetPath = request.url.path.replaceFirst('assets/', '');
         final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));
-        try {
+        if (file.existsSync()) {
           return Response.ok(file.readAsBytesSync());
-        } on FileSystemException {
+        } else {
           return Response.notFound('');
         }
       }
