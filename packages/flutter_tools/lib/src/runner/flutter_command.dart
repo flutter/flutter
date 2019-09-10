@@ -132,6 +132,20 @@ abstract class FlutterCommand extends Command<void> {
     _requiresPubspecYaml = true;
   }
 
+  void usesWebOptions() {
+    if (featureFlags.isWebEnabled) {
+      argParser.addOption('hostname',
+        defaultsTo: 'localhost',
+        help: 'The hostname to serve web application on',
+      );
+      argParser.addFlag('launch-browser',
+        defaultsTo: true,
+        negatable: true,
+        help: 'Whether to automatically launch and connect to a selected browser device',
+      );
+    }
+  }
+
   void usesTargetOption() {
     argParser.addOption('target',
       abbr: 't',
