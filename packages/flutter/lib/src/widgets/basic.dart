@@ -6188,6 +6188,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool header,
     bool textField,
     bool readOnly,
+    bool focusable,
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
@@ -6242,6 +6243,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       header: header,
       textField: textField,
       readOnly: readOnly,
+      focusable: focusable,
       focused: focused,
       inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
       obscured: obscured,
@@ -6355,6 +6357,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       header: properties.header,
       textField: properties.textField,
       readOnly: properties.readOnly,
+      focusable: properties.focusable,
       focused: properties.focused,
       liveRegion: properties.liveRegion,
       maxValueLength: properties.maxValueLength,
@@ -6425,6 +6428,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..header = properties.header
       ..textField = properties.textField
       ..readOnly = properties.readOnly
+      ..focusable = properties.focusable
       ..focused = properties.focused
       ..inMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup
       ..obscured = properties.obscured

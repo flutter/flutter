@@ -76,12 +76,13 @@ void main() {
           isFocused: false,
           isPassword: false,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
           ],
         ));
 
         await driver.tap(normalTextField);
+        await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(await getSemantics(normalTextField), hasAndroidSemantics(
           className: AndroidClassName.editText,
@@ -90,14 +91,15 @@ void main() {
           isEditable: true,
           isPassword: false,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
-            AndroidSemanticsAction.setSelection,
+            AndroidSemanticsAction.click,
             AndroidSemanticsAction.copy,
+            AndroidSemanticsAction.setSelection,
           ],
         ));
 
         await driver.enterText('hello world');
+        await Future<void>.delayed(const Duration(milliseconds: 500));
 
         expect(await getSemantics(normalTextField), hasAndroidSemantics(
           text: 'hello world',
@@ -107,10 +109,10 @@ void main() {
           isEditable: true,
           isPassword: false,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
-            AndroidSemanticsAction.setSelection,
+            AndroidSemanticsAction.click,
             AndroidSemanticsAction.copy,
+            AndroidSemanticsAction.setSelection,
           ],
         ));
       });
@@ -128,8 +130,8 @@ void main() {
           isFocused: false,
           isPassword: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
           ],
         ));
 
@@ -142,10 +144,10 @@ void main() {
           isEditable: true,
           isPassword: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
-            AndroidSemanticsAction.setSelection,
+            AndroidSemanticsAction.click,
             AndroidSemanticsAction.copy,
+            AndroidSemanticsAction.setSelection,
           ],
         ));
 
@@ -159,10 +161,10 @@ void main() {
           isEditable: true,
           isPassword: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
-            AndroidSemanticsAction.setSelection,
+            AndroidSemanticsAction.click,
             AndroidSemanticsAction.copy,
+            AndroidSemanticsAction.setSelection,
           ],
         ));
       });
@@ -185,8 +187,8 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
           ],
         ));
 
@@ -199,8 +201,8 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
           ],
         ));
         expect(await getSemantics(find.byValueKey(disabledCheckboxKeyValue)), hasAndroidSemantics(
@@ -220,8 +222,8 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
           ],
         ));
 
@@ -234,8 +236,8 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
           ],
         ));
       });
@@ -247,8 +249,8 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
           ],
         ));
 
@@ -261,8 +263,8 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
           ],
         ));
       });
@@ -277,9 +279,155 @@ void main() {
           isFocusable: true,
           contentDescription: switchLabel,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
           ],
+        ));
+      });
+
+      tearDownAll(() async {
+        await driver.tap(find.byValueKey('back'));
+      });
+    });
+
+    group('Popup Controls', () {
+      setUpAll(() async {
+        await driver.tap(find.text(popupControlsRoute));
+      });
+
+      test('Popup Menu has correct Android semantics', () async {
+        expect(await getSemantics(find.byValueKey(popupButtonKeyValue)), hasAndroidSemantics(
+          className: AndroidClassName.button,
+          isChecked: false,
+          isCheckable: false,
+          isEnabled: true,
+          isFocusable: true,
+          actions: <AndroidSemanticsAction>[
+            AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
+          ],
+        ));
+
+        await driver.tap(find.byValueKey(popupButtonKeyValue));
+        // We have to wait wall time here because we're waiting for TalkBack to
+        // catch up.
+        await Future<void>.delayed(const Duration(milliseconds: 1500));
+
+        for (String item in popupItems) {
+          expect(await getSemantics(find.byValueKey('$popupKeyValue.$item')), hasAndroidSemantics(
+            className: AndroidClassName.view,
+            isChecked: false,
+            isCheckable: false,
+            isEnabled: true,
+            isFocusable: true,
+            actions: <AndroidSemanticsAction>[
+              if (item == popupItems.first) AndroidSemanticsAction.clearAccessibilityFocus,
+              if (item != popupItems.first) AndroidSemanticsAction.accessibilityFocus,
+              AndroidSemanticsAction.click,
+            ],
+          ), reason: "Popup $item doesn't have the right semantics");
+        }
+        await driver.tap(find.byValueKey('$popupKeyValue.${popupItems.first}'));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+
+        // Pop up the menu again, to verify that TalkBack gets the right answer
+        // more than just the first time.
+        await driver.tap(find.byValueKey(popupButtonKeyValue));
+        await Future<void>.delayed(const Duration(milliseconds: 1500));
+
+        for (String item in popupItems) {
+          expect(await getSemantics(find.byValueKey('$popupKeyValue.$item')), hasAndroidSemantics(
+            className: AndroidClassName.view,
+            isChecked: false,
+            isCheckable: false,
+            isEnabled: true,
+            isFocusable: true,
+            actions: <AndroidSemanticsAction>[
+              // TODO(gspencergoog): This should really be identical to the first time,
+              // but TalkBack doesn't find it the second time for some reason.
+              AndroidSemanticsAction.accessibilityFocus,
+              AndroidSemanticsAction.click,
+            ],
+          ), reason: "Popup $item doesn't have the right semantics the second time");
+        }
+        await driver.tap(find.byValueKey('$popupKeyValue.${popupItems.first}'));
+      });
+
+      test('Dropdown Menu has correct Android semantics', () async {
+        await Future<void>.delayed(const Duration(milliseconds: 1500));
+        expect(await getSemantics(find.byValueKey(dropdownButtonKeyValue)), hasAndroidSemantics(
+          className: AndroidClassName.button,
+          isChecked: false,
+          isCheckable: false,
+          isEnabled: true,
+          isFocusable: true,
+          actions: <AndroidSemanticsAction>[
+            AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
+          ],
+        ));
+
+        await driver.tap(find.byValueKey(dropdownButtonKeyValue));
+        await Future<void>.delayed(const Duration(milliseconds: 1500));
+
+        for (String item in popupItems) {
+          // There are two copies of each item, so we want to find the version
+          // that is in the overlay, not the one in the dropdown.
+          expect(await getSemantics(find.descendant(
+              of: find.byType('Scrollable'),
+              matching: find.byValueKey('$dropdownKeyValue.$item'),
+          )),
+          hasAndroidSemantics(
+            className: AndroidClassName.view,
+            isChecked: false,
+            isCheckable: false,
+            isEnabled: true,
+            isFocusable: true,
+            actions: <AndroidSemanticsAction>[
+              // TODO(gspencergoog): This should really be different for the first item:
+              // It should have clearAccessibilityFocus instead, but for some reason
+              // TalkBack doesn't find ask to focus it.
+              AndroidSemanticsAction.accessibilityFocus,
+              AndroidSemanticsAction.click,
+            ],
+          ), reason: "Dropdown $item doesn't have the right semantics");
+        }
+        await driver.tap(find.descendant(
+          of: find.byType('Scrollable'),
+          matching: find.byValueKey('$dropdownKeyValue.${popupItems.first}'),
+        ));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+
+        // Pop up the dropdown again, to verify that TalkBack gets the right answer
+        // more than just the first time.
+        await driver.tap(find.byValueKey(dropdownButtonKeyValue));
+        await Future<void>.delayed(const Duration(milliseconds: 1500));
+
+        for (String item in popupItems) {
+          // There are two copies of each item, so we want to find the version
+          // that is in the overlay, not the one in the dropdown.
+          expect(await getSemantics(find.descendant(
+            of: find.byType('Scrollable'),
+            matching: find.byValueKey('$dropdownKeyValue.$item'),
+          )),
+              hasAndroidSemantics(
+                className: AndroidClassName.view,
+                isChecked: false,
+                isCheckable: false,
+                isEnabled: true,
+                isFocusable: true,
+                actions: <AndroidSemanticsAction>[
+                  // TODO(gspencergoog): This should really be different for the first item:
+                  // It should have clearAccessibilityFocus instead, but for some reason
+                  // TalkBack doesn't find ask to focus it.
+                  AndroidSemanticsAction.accessibilityFocus,
+                  AndroidSemanticsAction.click,
+                ],
+              ), reason: "Dropdown $item doesn't have the right semantics the second time.");
+        }
+        await driver.tap(find.descendant(
+          of: find.byType('Scrollable'),
+          matching: find.byValueKey('$dropdownKeyValue.${popupItems.first}'),
         ));
       });
 
