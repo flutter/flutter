@@ -914,6 +914,8 @@ FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/service_isolate.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/service_isolate.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/vmservice/empty.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/vmservice/meta/vmservice.cmx
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/accessibility_bridge.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/collect_traces.dart
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.h

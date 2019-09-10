@@ -79,7 +79,10 @@ void SetInterfaceErrorHandler(fidl::Binding<T>& binding, std::string name) {
 PlatformView::PlatformView(
     PlatformView::Delegate& delegate,
     std::string debug_label,
+    fuchsia::ui::views::ViewRefControl view_ref_control,
+    fuchsia::ui::views::ViewRef view_ref,
     flutter::TaskRunners task_runners,
+    std::shared_ptr<sys::ServiceDirectory> runner_services,
     fidl::InterfaceHandle<fuchsia::sys::ServiceProvider>
         parent_environment_service_provider_handle,
     fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>
@@ -91,6 +94,8 @@ PlatformView::PlatformView(
     zx_handle_t vsync_event_handle)
     : flutter::PlatformView(delegate, std::move(task_runners)),
       debug_label_(std::move(debug_label)),
+      view_ref_control_(std::move(view_ref_control)),
+      view_ref_(std::move(view_ref)),
       session_listener_binding_(this, std::move(session_listener_request)),
       session_listener_error_callback_(
           std::move(session_listener_error_callback)),
@@ -120,6 +125,11 @@ PlatformView::PlatformView(
 
   // Finally! Register the native platform message handlers.
   RegisterPlatformMessageHandlers();
+
+  fuchsia::ui::views::ViewRef accessibility_view_ref;
+  view_ref_.Clone(&accessibility_view_ref);
+  accessibility_bridge_ = std::make_unique<AccessibilityBridge>(
+      runner_services, std::move(accessibility_view_ref));
 
   // TODO(SCN-975): Re-enable.  Likely that Engine should clone the ViewToken
   // and pass the clone in here.
@@ -591,11 +601,16 @@ void PlatformView::HandlePlatformMessage(
 }
 
 // |flutter::PlatformView|
+void PlatformView::SetSemanticsEnabled(bool enabled) {
+  accessibility_bridge_->SetSemanticsEnabled(enabled);
+  flutter::PlatformView::SetSemanticsEnabled(enabled);
+}
+
+// |flutter::PlatformView|
 void PlatformView::UpdateSemantics(
     flutter::SemanticsNodeUpdates update,
     flutter::CustomAccessibilityActionUpdates actions) {
-  // TODO(MIT-1539): Uncomment/Reimplement following code, to add A11y support.
-  // semantics_bridge_.UpdateSemantics(update);
+  accessibility_bridge_->AddSemanticsNodeUpdate(update);
 }
 
 // Channel handler for kAccessibilityChannel
