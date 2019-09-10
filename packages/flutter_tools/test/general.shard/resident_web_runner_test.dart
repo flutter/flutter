@@ -140,6 +140,8 @@ void main() {
     verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
       'cd27': 'web-javascript', 'cd28': null, 'cd29': 'false', 'cd30': 'true'
     })).called(1);
+  }, overrides: <Type, Generator>{
+    Usage: () => MockFlutterUsage(),
   }));
 
   test('Can hot restart after attaching', () => testbed.run(() async {
