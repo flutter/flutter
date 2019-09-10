@@ -275,24 +275,29 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 - (void)userNotificationCenter:(UNUserNotificationCenter*)center
        willPresentNotification:(UNNotification*)notification
          withCompletionHandler:
-             (void (^)(UNNotificationPresentationOptions options))completionHandler {
-  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
-    if ([delegate respondsToSelector:_cmd]) {
-      [delegate userNotificationCenter:center
-               willPresentNotification:notification
-                 withCompletionHandler:completionHandler];
+             (void (^)(UNNotificationPresentationOptions options))completionHandler
+    NS_AVAILABLE_IOS(10_0) {
+  if (@available(iOS 10.0, *)) {
+    for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+      if ([delegate respondsToSelector:_cmd]) {
+        [delegate userNotificationCenter:center
+                 willPresentNotification:notification
+                   withCompletionHandler:completionHandler];
+      }
     }
   }
 }
 
 - (void)userNotificationCenter:(UNUserNotificationCenter*)center
     didReceiveNotificationResponse:(UNNotificationResponse*)response
-             withCompletionHandler:(void (^)(void))completionHandler {
-  for (id<FlutterApplicationLifeCycleDelegate> delegate in _delegates) {
-    if ([delegate respondsToSelector:_cmd]) {
-      [delegate userNotificationCenter:center
-          didReceiveNotificationResponse:response
-                   withCompletionHandler:completionHandler];
+             withCompletionHandler:(void (^)(void))completionHandler NS_AVAILABLE_IOS(10_0) {
+  if (@available(iOS 10.0, *)) {
+    for (id<FlutterApplicationLifeCycleDelegate> delegate in _delegates) {
+      if ([delegate respondsToSelector:_cmd]) {
+        [delegate userNotificationCenter:center
+            didReceiveNotificationResponse:response
+                     withCompletionHandler:completionHandler];
+      }
     }
   }
 }
