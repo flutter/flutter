@@ -239,10 +239,9 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (managerFuture != null) {
       return managerFuture;
     }
-    final Completer<WebSocketChannel> completer =
-        Completer<WebSocketChannel>.sync();
-    final String path =
-        _webSocketHandler.create(webSocketHandler(completer.complete));
+    final Completer<WebSocketChannel> completer = Completer<WebSocketChannel>();
+    final String path = _webSocketHandler
+        .create(webSocketHandler(completer.complete));
     final Uri webSocketUrl = url.replace(scheme: 'ws').resolve(path);
     final Uri hostUrl = url
         .resolve('static/index.html')
@@ -320,6 +319,7 @@ class OneOffHandler {
 
   /// Dispatches [request] to the appropriate handler.
   FutureOr<shelf.Response> _onRequest(shelf.Request request) {
+    printTrace('request: ${request.url.path}');
     final List<String> components = p.url.split(request.url.path);
     if (components.isEmpty) {
       return shelf.Response.notFound(null);
@@ -529,7 +529,7 @@ class BrowserManager {
       completer.completeError(error, stackTrace);
     }));
 
-    return completer.future.timeout(const Duration(seconds: 30), onTimeout: () {
+    return completer.future.timeout(const Duration(seconds: 5), onTimeout: () {
       chrome.close();
       throwToolExit('Timed out waiting for ${runtime.name} to connect.');
       return;
