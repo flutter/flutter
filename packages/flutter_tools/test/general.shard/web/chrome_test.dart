@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process_manager.dart';
@@ -22,10 +23,12 @@ void main() {
   setUp(() {
     final MockPlatform platform = MockPlatform();
     when(platform.isWindows).thenReturn(false);
+    final MockFileSystem mockFileSystem = MockFileSystem();
     testbed = Testbed(overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Platform: () => platform,
       OperatingSystemUtils: () => MockOperatingSystemUtils(),
+      FileSystem: () => mockFileSystem,
     });
   });
 
@@ -36,9 +39,13 @@ void main() {
     when(platform.environment).thenReturn(<String, String>{
       kChromeEnvironment: 'example_chrome'
     });
+    final Directory mockDirectory = MockDirectory();
+    when(fs.systemTempDirectory).thenReturn(mockDirectory);
+    when(mockDirectory.createTempSync(any)).thenReturn(mockDirectory);
+    when(mockDirectory.path).thenReturn('example');
     when(processManager.start(<String>[
       'example_chrome',
-      '--user-data-dir=.dart_tool/chrome_profile',
+      '--user-data-dir=example',
       '--remote-debugging-port=1234',
       '--disable-background-timer-throttling',
       '--disable-extensions',
@@ -66,3 +73,5 @@ void main() {
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockPlatform extends Mock implements Platform {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+class MockFileSystem extends Mock implements FileSystem {}
+class MockDirectory extends Mock implements Directory {}

@@ -994,6 +994,14 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
+  void scheduleAttachRootWidget(Widget rootWidget) {
+    // We override the default version of this so that the application-startup widget tree
+    // build does not schedule timers which we might never get around to running.
+    attachRootWidget(rootWidget);
+    _currentFakeAsync.flushMicrotasks();
+  }
+
+  @override
   Future<void> idle() {
     final Future<void> result = super.idle();
     _currentFakeAsync.elapse(Duration.zero);
