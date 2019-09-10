@@ -99,7 +99,10 @@ template("jit_runner") {
     ]
 
     if (!product) {
-      deps += [ engine_observatory_target ]
+      deps += [
+        "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:flutter_jit_runner",
+        engine_observatory_target,
+      ]
     }
 
     binary = "flutter_jit${product_suffix}_runner"
@@ -118,6 +121,14 @@ template("jit_runner") {
         {
           path = rebase_path(engine_observatory_archive_file)
           dest = "observatory.tar"
+        },
+        {
+          path = rebase_path(
+                  get_label_info(
+                      "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:flutter_jit_runner",
+                      "target_gen_dir") +
+                  "/flutter_jit_runner.dartprofilersymbols")
+          dest = "flutter_jit_runner.dartprofilersymbols"
         },
       ]
     }
@@ -169,7 +180,10 @@ template("aot_runner") {
     ]
 
     if (!product) {
-      deps += [ engine_observatory_target ]
+      deps += [
+        "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:flutter_aot_runner",
+        engine_observatory_target,
+      ]
     }
 
     meta_dir = "$flutter_root/shell/platform/fuchsia/flutter/meta"
@@ -188,6 +202,14 @@ template("aot_runner") {
         {
           path = rebase_path(engine_observatory_archive_file)
           dest = "observatory.tar"
+        },
+        {
+          path = rebase_path(
+                  get_label_info(
+                      "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:flutter_aot_runner",
+                      "target_gen_dir") +
+                  "/flutter_aot_runner.dartprofilersymbols")
+          dest = "flutter_aot_runner.dartprofilersymbols"
         },
       ]
     }
