@@ -928,18 +928,3 @@ class DirectionalFocusAction extends _RequestFocusActionBase {
     node.focusInDirection(args.direction);
   }
 }
-
-/// An abstract [Action] class that activates the currently focused control.
-///
-/// This class is a base class for specific actions that can actually activate a
-/// control. It's intent [key] is bound to the ENTER key in [WidgetsApp] by default.
-///
-/// It is intended for controls with simple activations, like a button or checkbox.
-abstract class ActivateAction extends Action {
-  /// A const constructor to allow subclasses to have const constructors, and to
-  /// pass the [key] to the [Action] base class.
-  const ActivateAction() : super(key);
-
-  /// The [LocalKey] that uniquely identifies this action to an [Intent].
-  static const LocalKey key = ValueKey<Type>(ActivateAction);
-}
