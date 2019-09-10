@@ -4,11 +4,12 @@
 
 import 'dart:async';
 
-import '../android/apk.dart';
+import '../android/android_builder.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
 
@@ -40,16 +41,38 @@ class BuildApkCommand extends BuildSubCommand {
   final String name = 'apk';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-    DevelopmentArtifact.android,
-  };
-
-  @override
   final String description = 'Build an Android APK file from your app.\n\n'
     'This command can build debug and release versions of your application. \'debug\' builds support '
     'debugging and a quick development cycle. \'release\' builds don\'t support debugging and are '
     'suitable for deploying to app stores.';
+
+  @override
+  Future<Map<CustomDimensions, String>> get usageValues async {
+    final Map<CustomDimensions, String> usage = <CustomDimensions, String>{};
+
+    usage[CustomDimensions.commandBuildApkTargetPlatform] =
+        (argResults['target-platform'] as List<String>).join(',');
+    usage[CustomDimensions.commandBuildApkSplitPerAbi] =
+        argResults['split-per-abi'].toString();
+
+    if (argResults['release']) {
+      usage[CustomDimensions.commandBuildApkBuildMode] = 'release';
+    } else if (argResults['debug']) {
+      usage[CustomDimensions.commandBuildApkBuildMode] = 'debug';
+    } else if (argResults['profile']) {
+      usage[CustomDimensions.commandBuildApkBuildMode] = 'profile';
+    } else {
+      // The build defaults to release.
+      usage[CustomDimensions.commandBuildApkBuildMode] = 'release';
+    }
+    return usage;
+  }
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.android,
+  };
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -76,7 +99,7 @@ class BuildApkCommand extends BuildSubCommand {
                   '--split-per-abi', indent: 8);
       printStatus('Learn more on:  https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',indent: 8);
     }
-    await buildApk(
+    await androidBuilder.buildApk(
       project: FlutterProject.current(),
       target: targetFile,
       androidBuildInfo: androidBuildInfo,

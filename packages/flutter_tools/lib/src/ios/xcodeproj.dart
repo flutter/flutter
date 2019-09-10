@@ -10,6 +10,7 @@ import '../artifacts.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -19,6 +20,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 
 final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
@@ -249,6 +251,8 @@ class XcodeProjectInterpreter {
     return _minorVersion;
   }
 
+  /// Synchronously retrieve xcode build settings. Prefer using the async
+  /// version below.
   Map<String, String> getBuildSettings(String projectPath, String target) {
     try {
       final String out = runCheckedSync(<String>[
@@ -266,9 +270,65 @@ class XcodeProjectInterpreter {
     }
   }
 
-  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+  /// Asynchronously retrieve xcode build settings. This one is preferred for
+  /// new call-sites.
+  Future<Map<String, String>> getBuildSettingsAsync(
+      String projectPath, String target, {
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
+    final Status status = Status.withSpinner(
+      timeout: timeoutConfiguration.fastOperation,
+    );
+    final List<String> showBuildSettingsCommand = <String>[
+      _executable,
+      '-project',
+      fs.path.absolute(projectPath),
+      '-target',
+      target,
+      '-showBuildSettings',
+    ];
+    try {
+      // showBuildSettings is reported to ocassionally timeout. Here, we give it
+      // a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
+      // When there is a timeout, we retry once.
+      final RunResult result = await runCheckedAsync(
+        showBuildSettingsCommand,
+        workingDirectory: projectPath,
+        timeout: timeout,
+        timeoutRetries: 1,
+      );
+      final String out = result.stdout.trim();
+      return parseXcodeBuildSettings(out);
+    } catch(error) {
+      if (error is ProcessException && error.toString().contains('timed out')) {
+        BuildEvent('xcode-show-build-settings-timeout',
+          command: showBuildSettingsCommand.join(' '),
+        ).send();
+      }
+      printTrace('Unexpected failure to get the build settings: $error.');
+      return const <String, String>{};
+    } finally {
+      status.stop();
+    }
+  }
+
+  void cleanWorkspace(String workspacePath, String scheme) {
+    runSync(<String>[
+      _executable,
+      '-workspace',
+      workspacePath,
+      '-scheme',
+      scheme,
+      '-quiet',
+      'clean'
+    ], workingDirectory: fs.currentDirectory.path);
+  }
+
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
     final RunResult result = await runCheckedAsync(<String>[
-      _executable, '-list',
+      _executable,
+      '-list',
+      if (projectFilename != null) ...<String>['-project', projectFilename],
     ], workingDirectory: projectPath);
     return XcodeProjectInfo.fromXcodeBuildOutput(result.toString());
   }

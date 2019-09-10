@@ -34,7 +34,7 @@ IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 /// Specialized exception for expected situations where the ideviceinfo
 /// tool responds with exit code 255 / 'No device found' message
 class IOSDeviceNotFoundError implements Exception {
-  IOSDeviceNotFoundError(this.message);
+  const IOSDeviceNotFoundError(this.message);
 
   final String message;
 
@@ -42,19 +42,64 @@ class IOSDeviceNotFoundError implements Exception {
   String toString() => message;
 }
 
+/// Exception representing an attempt to find information on an iOS device
+/// that failed because the user had not paired the device with the host yet.
+class IOSDeviceNotTrustedError implements Exception {
+  const IOSDeviceNotTrustedError(this.message, this.lockdownCode);
+
+  /// The error message to show to the user.
+  final String message;
+
+  /// The associated `lockdownd` error code.
+  final LockdownReturnCode lockdownCode;
+
+  @override
+  String toString() => '$message (lockdownd error code ${lockdownCode.code})';
+}
+
+/// Class specifying possible return codes from `lockdownd`.
+///
+/// This contains only a subset of the return codes that `lockdownd` can return,
+/// as we only care about a limited subset. These values should be kept in sync with
+/// https://github.com/libimobiledevice/libimobiledevice/blob/26373b3/include/libimobiledevice/lockdown.h#L37
+class LockdownReturnCode {
+  const LockdownReturnCode._(this.code);
+
+  /// Creates a new [LockdownReturnCode] from the specified OS exit code.
+  ///
+  /// If the [code] maps to one of the known codes, a `const` instance will be
+  /// returned.
+  factory LockdownReturnCode.fromCode(int code) {
+    final Map<int, LockdownReturnCode> knownCodes = <int, LockdownReturnCode>{
+      pairingDialogResponsePending.code: pairingDialogResponsePending,
+      invalidHostId.code: invalidHostId,
+    };
+
+    return knownCodes.containsKey(code) ? knownCodes[code] : LockdownReturnCode._(code);
+  }
+
+  /// The OS exit code.
+  final int code;
+
+  /// Error code indicating that the pairing dialog has been shown to the user,
+  /// and the user has not yet responded as to whether to trust the host.
+  static const LockdownReturnCode pairingDialogResponsePending = LockdownReturnCode._(19);
+
+  /// Error code indicating that the host is not trusted.
+  ///
+  /// This can happen if the user explicitly says "do not trust this  computer"
+  /// or if they revoke all trusted computers in the device settings.
+  static const LockdownReturnCode invalidHostId = LockdownReturnCode._(21);
+}
+
 class IMobileDevice {
   IMobileDevice()
-      : _ideviceIdPath = artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios)
-          ?? 'idevice_id', // TODO(fujino): remove fallback once g3 updated
-        _ideviceinfoPath = artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios)
-          ?? 'ideviceinfo', // TODO(fujino): remove fallback once g3 updated
-        _idevicenamePath = artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios)
-          ?? 'idevicename', // TODO(fujino): remove fallback once g3 updated
-        _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios)
-          ?? 'idevicesyslog', // TODO(fujino): remove fallback once g3 updated
-        _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios)
-          ?? 'idevicescreenshot' { // TODO(fujino): remove fallback once g3 updated
-        }
+      : _ideviceIdPath = artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios),
+        _ideviceinfoPath = artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
+        _idevicenamePath = artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios),
+        _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
+        _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios);
+
   final String _ideviceIdPath;
   final String _ideviceinfoPath;
   final String _idevicenamePath;
@@ -159,7 +204,21 @@ class IMobileDevice {
         ),
       );
       if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
-        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
+        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}. Try unlocking attached devices.');
+      if (result.exitCode == 255 && result.stderr != null && result.stderr.contains('Could not connect to lockdownd')) {
+        if (result.stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
+          throw const IOSDeviceNotTrustedError(
+            'Device info unavailable. Is the device asking to "Trust This Computer?"',
+            LockdownReturnCode.pairingDialogResponsePending,
+          );
+        }
+        if (result.stderr.contains('error code -${LockdownReturnCode.invalidHostId.code}')) {
+          throw const IOSDeviceNotTrustedError(
+            'Device info unavailable. Device pairing "trust" may have been revoked.',
+            LockdownReturnCode.invalidHostId,
+          );
+        }
+      }
       if (result.exitCode != 0)
         throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
       return result.stdout.trim();
@@ -201,11 +260,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   BuildInfo buildInfo,
   String targetOverride,
   bool buildForDevice,
-  IOSArch activeArch,
+  DarwinArch activeArch,
   bool codesign = true,
-  bool usesTerminalUi = true,
+
 }) async {
-  if (!await upgradePbxProjWithFlutterAssets(app.project))
+  if (!upgradePbxProjWithFlutterAssets(app.project))
     return XcodeBuildResult(success: false);
 
   if (!_checkXcodeVersion())
@@ -260,7 +319,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   Map<String, String> autoSigningConfigs;
   if (codesign && buildForDevice)
-    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: usesTerminalUi);
+    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -317,7 +376,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   if (activeArch != null) {
-    final String activeArchName = getNameForIOSArch(activeArch);
+    final String activeArchName = getNameForDarwinArch(activeArch);
     if (activeArchName != null) {
       buildCommands.add('ONLY_ACTIVE_ARCH=YES');
       buildCommands.add('ARCHS=$activeArchName');
@@ -377,6 +436,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // Don't log analytics for downstream Flutter commands.
   // e.g. `flutter build bundle`.
   buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
+  buildCommands.add('COMPILER_INDEX_STORE_ENABLE=NO');
 
   final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
@@ -397,22 +457,41 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
   flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
-  // Run -showBuildSettings again but with the exact same parameters as the build.
-  final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(
-    (List<String>
-        .from(buildCommands)
-        ..add('-showBuildSettings'))
-        // Undocumented behavior: xcodebuild craps out if -showBuildSettings
-        // is used together with -allowProvisioningUpdates or
-        // -allowProvisioningDeviceRegistration and freezes forever.
-        .where((String buildCommand) {
-          return !const <String>[
-            '-allowProvisioningUpdates',
-            '-allowProvisioningDeviceRegistration',
-          ].contains(buildCommand);
-        }).toList(),
-    workingDirectory: app.project.hostAppRoot.path,
-  ));
+  // Run -showBuildSettings again but with the exact same parameters as the
+  // build. showBuildSettings is reported to ocassionally timeout. Here, we give
+  // it a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
+  // When there is a timeout, we retry once. See issue #35988.
+  final List<String> showBuildSettingsCommand = (List<String>
+      .from(buildCommands)
+      ..add('-showBuildSettings'))
+      // Undocumented behavior: xcodebuild craps out if -showBuildSettings
+      // is used together with -allowProvisioningUpdates or
+      // -allowProvisioningDeviceRegistration and freezes forever.
+      .where((String buildCommand) {
+        return !const <String>[
+          '-allowProvisioningUpdates',
+          '-allowProvisioningDeviceRegistration',
+        ].contains(buildCommand);
+      }).toList();
+  const Duration showBuildSettingsTimeout = Duration(minutes: 1);
+  Map<String, String> buildSettings;
+  try {
+    final RunResult showBuildSettingsResult = await runCheckedAsync(
+      showBuildSettingsCommand,
+      workingDirectory: app.project.hostAppRoot.path,
+      timeout: showBuildSettingsTimeout,
+      timeoutRetries: 1,
+    );
+    final String showBuildSettings = showBuildSettingsResult.stdout.trim();
+    buildSettings = parseXcodeBuildSettings(showBuildSettings);
+  } on ProcessException catch (e) {
+    if (e.toString().contains('timed out')) {
+      BuildEvent('xcode-show-build-settings-timeout',
+        command: showBuildSettingsCommand.join(' '),
+      ).send();
+    }
+    rethrow;
+  }
 
   if (buildResult.exitCode != 0) {
     printStatus('Failed to build iOS app');
@@ -614,10 +693,10 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
   manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
 }
 
-Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
+bool upgradePbxProjWithFlutterAssets(IosProject project) {
   final File xcodeProjectFile = project.xcodeProjectInfoFile;
-  assert(await xcodeProjectFile.exists());
-  final List<String> lines = await xcodeProjectFile.readAsLines();
+  assert(xcodeProjectFile.existsSync());
+  final List<String> lines = xcodeProjectFile.readAsLinesSync();
 
   final RegExp oldAssets = RegExp(r'\/\* (flutter_assets|app\.flx)');
   final StringBuffer buffer = StringBuffer();
@@ -632,6 +711,6 @@ Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
       buffer.writeln(line);
     }
   }
-  await xcodeProjectFile.writeAsString(buffer.toString());
+  xcodeProjectFile.writeAsStringSync(buffer.toString());
   return true;
 }

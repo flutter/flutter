@@ -211,7 +211,7 @@ Future<Device> findTargetDevice() async {
     return null;
   } else if (devices.length > 1) {
     printStatus('Found multiple connected devices:');
-    printStatus(devices.map<String>((Device d) => '  - ${d.name}\n').join(''));
+    await Device.printDevices(devices);
   }
   printStatus('Using device ${devices.first.name}.');
   return devices.first;
@@ -270,7 +270,6 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
     ),
     platformArgs: platformArgs,
     prebuiltApplication: !command.shouldBuild,
-    usesTerminalUi: false,
   );
 
   if (!result.started) {

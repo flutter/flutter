@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -20,12 +21,15 @@ import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
+import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
 
 class IOSDeploy {
   const IOSDeploy();
+
+  static IOSDeploy get instance => context.get<IOSDeploy>();
 
   /// Installs and runs the specified app bundle using ios-deploy, then returns
   /// the exit code.
@@ -35,14 +39,8 @@ class IOSDeploy {
     @required List<String> launchArguments,
   }) async {
     final String iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
-    // TODO(fujino): remove fallback once g3 updated
-    const List<String> fallbackIosDeployPath = <String>[
-      '/usr/bin/env',
-      'ios-deploy',
-    ];
-    final List<String> commandList = iosDeployPath != null ? <String>[iosDeployPath] : fallbackIosDeployPath;
     final List<String> launchCommand = <String>[
-      ...commandList,
+      iosDeployPath,
       '--id',
       deviceId,
       '--bundle',
@@ -131,11 +129,11 @@ class IOSDevice extends Device {
     _installerPath = artifacts.getArtifactPath(
       Artifact.ideviceinstaller,
       platform: TargetPlatform.ios,
-    ) ?? 'ideviceinstaller'; // TODO(fujino): remove fallback once g3 updated
+    );
     _iproxyPath = artifacts.getArtifactPath(
       Artifact.iproxy,
       platform: TargetPlatform.ios
-    ) ?? 'iproxy'; // TODO(fujino): remove fallback once g3 updated
+    );
   }
 
   String _installerPath;
@@ -152,9 +150,9 @@ class IOSDevice extends Device {
   @override
   final String name;
 
-  Map<ApplicationPackage, _IOSDeviceLogReader> _logReaders;
+  Map<ApplicationPackage, DeviceLogReader> _logReaders;
 
-  _IOSDevicePortForwarder _portForwarder;
+  DevicePortForwarder _portForwarder;
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -185,6 +183,9 @@ class IOSDevice extends Device {
       } on IOSDeviceNotFoundError catch (error) {
         // Unable to find device with given udid. Possibly a network device.
         printTrace('Error getting attached iOS device: $error');
+      } on IOSDeviceNotTrustedError catch (error) {
+        printTrace('Error getting attached iOS device information: $error');
+        UsageEvent('device', 'ios-trust-failure').send();
       }
     }
     return devices;
@@ -226,7 +227,8 @@ class IOSDevice extends Device {
         ),
       );
       return true;
-    } on ProcessException {
+    } on ProcessException catch (error) {
+      printError(error.message);
       return false;
     }
   }
@@ -241,7 +243,8 @@ class IOSDevice extends Device {
         ),
       );
       return true;
-    } on ProcessException {
+    } on ProcessException catch (error) {
+      printError(error.message);
       return false;
     }
   }
@@ -257,7 +260,6 @@ class IOSDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
     if (!prebuiltApplication) {
@@ -265,7 +267,7 @@ class IOSDevice extends Device {
       printTrace('Building ${package.name} for $id');
 
       final String cpuArchitecture = await iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
-      final IOSArch iosArch = getIOSArchForName(cpuArchitecture);
+      final DarwinArch iosArch = getIOSArchForName(cpuArchitecture);
 
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
@@ -273,7 +275,6 @@ class IOSDevice extends Device {
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
           buildForDevice: true,
-          usesTerminalUi: usesTerminalUi,
           activeArch: iosArch,
       );
       if (!buildResult.success) {
@@ -342,65 +343,55 @@ class IOSDevice extends Device {
     if (platformArgs['trace-startup'] ?? false)
       launchArguments.add('--trace-startup');
 
-    int installationResult = -1;
-    Uri localObservatoryUri;
+    final Status installStatus = logger.startProgress(
+        'Installing and launching...',
+        timeout: timeoutConfiguration.slowOperation);
+    try {
+      ProtocolDiscovery observatoryDiscovery;
+      if (debuggingOptions.debuggingEnabled) {
+        // Debugging is enabled, look for the observatory server port post launch.
+        printTrace('Debugging is enabled, connecting to observatory');
 
-    final Status installStatus = logger.startProgress('Installing and launching...', timeout: timeoutConfiguration.slowOperation);
+        // TODO(danrubel): The Android device class does something similar to this code below.
+        // The various Device subclasses should be refactored and common code moved into the superclass.
+        observatoryDiscovery = ProtocolDiscovery.observatory(
+          getLogReader(app: package),
+          portForwarder: portForwarder,
+          hostPort: debuggingOptions.observatoryPort,
+          ipv6: ipv6,
+        );
+      }
 
-    if (!debuggingOptions.debuggingEnabled) {
-      // If debugging is not enabled, just launch the application and continue.
-      printTrace('Debugging is not enabled');
-      installationResult = await const IOSDeploy().runApp(
+      final int installationResult = await IOSDeploy.instance.runApp(
         deviceId: id,
         bundlePath: bundle.path,
         launchArguments: launchArguments,
       );
-    } else {
-      // Debugging is enabled, look for the observatory server port post launch.
-      printTrace('Debugging is enabled, connecting to observatory');
+      if (installationResult != 0) {
+        printError('Could not install ${bundle.path} on $id.');
+        printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
+        printError('  open ios/Runner.xcworkspace');
+        printError('');
+        return LaunchResult.failed();
+      }
 
-      // TODO(danrubel): The Android device class does something similar to this code below.
-      // The various Device subclasses should be refactored and common code moved into the superclass.
-      final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(
-        getLogReader(app: package),
-        portForwarder: portForwarder,
-        hostPort: debuggingOptions.observatoryPort,
-        ipv6: ipv6,
-      );
+      if (!debuggingOptions.debuggingEnabled) {
+        return LaunchResult.succeeded();
+      }
 
-      final Future<Uri> forwardObservatoryUri = observatoryDiscovery.uri;
-
-      final Future<int> launch = const IOSDeploy().runApp(
-        deviceId: id,
-        bundlePath: bundle.path,
-        launchArguments: launchArguments,
-      );
-
-      localObservatoryUri = await launch.then<Uri>((int result) async {
-        installationResult = result;
-
-        if (result != 0) {
-          printTrace('Failed to launch the application on device.');
-          return null;
-        }
-
+      try {
         printTrace('Application launched on the device. Waiting for observatory port.');
-        return await forwardObservatoryUri;
-      }).whenComplete(() {
-        observatoryDiscovery.cancel();
-      });
+        final Uri localUri = await observatoryDiscovery.uri;
+        return LaunchResult.succeeded(observatoryUri: localUri);
+      } catch (error) {
+        printError('Failed to establish a debug connection with $id: $error');
+        return LaunchResult.failed();
+      } finally {
+        await observatoryDiscovery?.cancel();
+      }
+    } finally {
+      installStatus.stop();
     }
-    installStatus.stop();
-
-    if (installationResult != 0) {
-      printError('Could not install ${bundle.path} on $id.');
-      printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
-      printError('  open ios/Runner.xcworkspace');
-      printError('');
-      return LaunchResult.failed();
-    }
-
-    return LaunchResult.succeeded(observatoryUri: localObservatoryUri);
   }
 
   @override
@@ -417,12 +408,23 @@ class IOSDevice extends Device {
 
   @override
   DeviceLogReader getLogReader({ ApplicationPackage app }) {
-    _logReaders ??= <ApplicationPackage, _IOSDeviceLogReader>{};
+    _logReaders ??= <ApplicationPackage, DeviceLogReader>{};
     return _logReaders.putIfAbsent(app, () => _IOSDeviceLogReader(this, app));
+  }
+
+  @visibleForTesting
+  void setLogReader(ApplicationPackage app, DeviceLogReader logReader) {
+    _logReaders ??= <ApplicationPackage, DeviceLogReader>{};
+    _logReaders[app] = logReader;
   }
 
   @override
   DevicePortForwarder get portForwarder => _portForwarder ??= _IOSDevicePortForwarder(this);
+
+  @visibleForTesting
+  set portForwarder(DevicePortForwarder forwarder) {
+    _portForwarder = forwarder;
+  }
 
   @override
   void clearLogs() { }

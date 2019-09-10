@@ -43,11 +43,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
   }
 }
 
-// TODO(jonahwilliams): remove this constant when the error message is removed.
-// The web engine is currently spamming this message on certain pages. Filter it out
-// until we remove it entirely. See flutter/flutter##37625.
-const String _kBadError = 'WARNING: 3D transformation matrix was passed to BitmapCanvas.';
-
 /// A hot-runner which handles browser specific delegation.
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(this.device, {
@@ -57,19 +52,23 @@ class ResidentWebRunner extends ResidentRunner {
     @required DebuggingOptions debuggingOptions,
   }) : super(
           <FlutterDevice>[],
-          target: target,
+          target: target ?? fs.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
-          usesTerminalUi: true,
           stayResident: true,
         );
 
   final Device device;
   final FlutterProject flutterProject;
 
+  // Only the debug builds of the web support the service protocol.
+  @override
+  bool get supportsServiceProtocol => isRunningDebug;
+
   WebFs _webFs;
   DebugConnection _debugConnection;
   StreamSubscription<vmservice.Event> _stdOutSub;
+  bool _exited = false;
 
   vmservice.VmService get _vmService => _debugConnection.vmService;
 
@@ -98,9 +97,13 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   Future<void> _cleanup() async {
+    if (_exited) {
+      return;
+    }
     await _debugConnection?.close();
     await _stdOutSub?.cancel();
     await _webFs?.stop();
+    _exited = true;
   }
 
   @override
@@ -138,7 +141,7 @@ class ResidentWebRunner extends ResidentRunner {
     );
     if (package == null) {
       printError('No application found for TargetPlatform.web_javascript.');
-      printError('To add web support to a project, run `flutter create --web .`.');
+      printError('To add web support to a project, run `flutter create .`.');
       return 1;
     }
     if (!fs.isFileSync(mainPath)) {
@@ -150,6 +153,8 @@ class ResidentWebRunner extends ResidentRunner {
       printError(message);
       return 1;
     }
+    final String modeName = debuggingOptions.buildInfo.friendlyModeName;
+    printStatus('Launching ${getDisplayPath(target)} on ${device.name} in $modeName mode...');
     Status buildStatus;
     try {
       buildStatus = logger.startProgress('Building application for the web...', timeout: null);
@@ -160,6 +165,7 @@ class ResidentWebRunner extends ResidentRunner {
       );
       if (supportsServiceProtocol) {
         _debugConnection = await _webFs.runAndDebug();
+        unawaited(_debugConnection.onDone.whenComplete(exit));
       }
     } catch (err, stackTrace) {
       printError(err.toString());
@@ -196,12 +202,13 @@ class ResidentWebRunner extends ResidentRunner {
     if (supportsServiceProtocol) {
       _stdOutSub = _debugConnection.vmService.onStdoutEvent.listen((vmservice.Event log) {
         final String message = utf8.decode(base64.decode(log.bytes)).trim();
-        // TODO(jonahwilliams): remove this error once it is gone from the engine #37625.
-        if (!message.contains(_kBadError)) {
-          printStatus(message);
-        }
+        printStatus(message);
       });
+      unawaited(_debugConnection.vmService.registerService('reloadSources', 'FlutterTools'));
       websocketUri = Uri.parse(_debugConnection.uri);
+    }
+    if (websocketUri != null) {
+      printStatus('Debug service listening on $websocketUri');
     }
     connectionInfoCompleter?.complete(
       DebugConnectionInfo(wsUri: websocketUri)
@@ -218,9 +225,6 @@ class ResidentWebRunner extends ResidentRunner {
     String reason,
     bool benchmarkMode = false,
   }) async {
-    if (!fullRestart) {
-      return OperationResult(1, 'hot reload not supported on the web.');
-    }
     final Stopwatch timer = Stopwatch()..start();
     final Status status = logger.startProgress(
       'Performing hot restart...',
@@ -235,12 +239,18 @@ class ResidentWebRunner extends ResidentRunner {
       return OperationResult(1, 'Failed to recompile application.');
     }
     if (supportsServiceProtocol) {
-      final vmservice.Response reloadResponse = await _vmService.callServiceExtension('hotRestart');
-      status.stop();
-      printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-      return reloadResponse.type == 'Success'
-          ? OperationResult.ok
-          : OperationResult(1, reloadResponse.toString());
+      try {
+        final vmservice.Response reloadResponse = await _vmService.callServiceExtension('hotRestart');
+        printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+        return reloadResponse.type == 'Success'
+            ? OperationResult.ok
+            : OperationResult(1, reloadResponse.toString());
+      } on vmservice.RPCError {
+        await _webFs.hardRefresh();
+        return OperationResult(1, 'Page requires full reload');
+      } finally {
+        status.stop();
+      }
     }
     // If we're not in hot mode, the only way to restart is to reload the tab.
     await _webFs.hardRefresh();

@@ -9,6 +9,7 @@ import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -24,6 +25,8 @@ import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import 'common.dart';
+
+final Generator kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
@@ -150,7 +153,7 @@ ro.build.version.codename=REL
 typedef ProcessFactory = Process Function(List<String> command);
 
 /// A ProcessManager that starts Processes by delegating to a ProcessFactory.
-class MockProcessManager implements ProcessManager {
+class MockProcessManager extends Mock implements ProcessManager {
   ProcessFactory processFactory = (List<String> commands) => MockProcess();
   bool canRunSucceeds = true;
   bool runSucceeds = true;
@@ -177,9 +180,45 @@ class MockProcessManager implements ProcessManager {
     commands = command;
     return Future<Process>.value(processFactory(command));
   }
+}
 
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
+/// A function that generates a process factory that gives processes that fail
+/// a given number of times before succeeding. The returned processes will
+/// fail after a delay if one is supplied.
+ProcessFactory flakyProcessFactory({
+    int flakes,
+    bool Function(List<String> command) filter,
+    Duration delay,
+    Stream<List<int>> Function() stdout,
+    Stream<List<int>> Function() stderr,
+  }) {
+  int flakesLeft = flakes;
+  stdout ??= () => const Stream<List<int>>.empty();
+  stderr ??= () => const Stream<List<int>>.empty();
+  return (List<String> command) {
+    if (filter != null && !filter(command)) {
+      return MockProcess();
+    }
+    if (flakesLeft == 0) {
+      return MockProcess(
+        exitCode: Future<int>.value(0),
+        stdout: stdout(),
+        stderr: stderr(),
+      );
+    }
+    flakesLeft = flakesLeft - 1;
+    Future<int> exitFuture;
+    if (delay == null) {
+      exitFuture = Future<int>.value(-9);
+    } else {
+      exitFuture = Future<int>.delayed(delay, () => Future<int>.value(-9));
+    }
+    return MockProcess(
+      exitCode: exitFuture,
+      stdout: stdout(),
+      stderr: stderr(),
+    );
+  };
 }
 
 /// A process that exits successfully with no output and ignores all input.
@@ -611,3 +650,25 @@ class FakeProcessResult implements ProcessResult {
   @override
   String toString() => stdout?.toString() ?? stderr?.toString() ?? runtimeType.toString();
 }
+
+class MockStdIn extends Mock implements IOSink {
+  final StringBuffer stdInWrites = StringBuffer();
+
+  String getAndClear() {
+    final String result = stdInWrites.toString();
+    stdInWrites.clear();
+    return result;
+  }
+
+  @override
+  void write([ Object o = '' ]) {
+    stdInWrites.write(o);
+  }
+
+  @override
+  void writeln([ Object o = '' ]) {
+    stdInWrites.writeln(o);
+  }
+}
+
+class MockStream extends Mock implements Stream<List<int>> {}

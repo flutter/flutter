@@ -150,7 +150,7 @@ enum SchedulerPhase {
   /// Microtasks scheduled during the processing of transient callbacks are
   /// current executing.
   ///
-  /// This may include, for instance, callbacks from futures resulted during the
+  /// This may include, for instance, callbacks from futures resolved during the
   /// [transientCallbacks] phase.
   midFrameMicrotasks,
 
@@ -194,14 +194,14 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    window.onBeginFrame = _handleBeginFrame;
-    window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     readInitialLifecycleStateFromNativeWindow();
 
     if (!kReleaseMode) {
       int frameNumber = 0;
 
+      // use frameTimings. https://github.com/flutter/flutter/issues/38838
+      // ignore: deprecated_member_use
       window.onReportTimings = (List<FrameTiming> timings) {
         for (FrameTiming frameTiming in timings) {
           frameNumber += 1;
@@ -654,6 +654,12 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
       scheduleFrame();
   }
 
+  @protected
+  void ensureFrameCallbacksRegistered() {
+    window.onBeginFrame ??= _handleBeginFrame;
+    window.onDrawFrame ??= _handleDrawFrame;
+  }
+
   /// Schedules a new frame using [scheduleFrame] if this object is not
   /// currently producing a frame.
   ///
@@ -715,6 +721,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         debugPrintStack(label: 'scheduleFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
+    ensureFrameCallbacksRegistered();
     window.scheduleFrame();
     _hasScheduledFrame = true;
   }

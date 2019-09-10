@@ -38,6 +38,8 @@ const String digestsEntrypointExtension = '.digests';
 const String jsModuleErrorsExtension = '.ddc.js.errors';
 const String jsModuleExtension = '.ddc.js';
 const String jsSourceMapExtension = '.ddc.js.map';
+const String kReleaseFlag = 'release';
+const String kProfileFlag = 'profile';
 
 final DartPlatform flutterWebPlatform =
     DartPlatform.register('flutter_web', <String>[
@@ -71,8 +73,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     'flutter_tools:test_bootstrap',
     <BuilderFactory>[
       (BuilderOptions options) => const DebugTestBuilder(),
-      (BuilderOptions options) => FlutterWebTestBootstrapBuilder(
-          options.config['targets']?.split(',') ?? const <String>[]),
+      (BuilderOptions options) => const FlutterWebTestBootstrapBuilder(),
     ],
     core.toRoot(),
     hideOutput: true,
@@ -85,7 +86,10 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
   core.apply(
     'flutter_tools:shell',
     <BuilderFactory>[
-      (BuilderOptions options) => const FlutterWebShellBuilder(),
+      (BuilderOptions options) {
+        final bool hasPlugins = options.config['hasPlugins'] == true;
+        return FlutterWebShellBuilder(hasPlugins: hasPlugins);
+      }
     ],
     core.toRoot(),
     hideOutput: true,
@@ -131,6 +135,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               platform: flutterWebPlatform,
               platformSdk: builderOptions.config['flutterWebSdk'],
               sdkKernelPath: path.url.join('kernel', 'flutter_ddc_sdk.dill'),
+              librariesPath: 'libraries.json',
             ),
       ],
       core.toAllPackages(),
@@ -141,7 +146,8 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     'flutter_tools:entrypoint',
     <BuilderFactory>[
       (BuilderOptions options) => FlutterWebEntrypointBuilder(
-          options.config['release'] ??  false,
+          options.config[kReleaseFlag] ?? false,
+          options.config[kProfileFlag] ?? false,
           options.config['flutterWebSdk'],
           options.config['targets']?.split(',') ?? const <String>[],
       ),
@@ -157,7 +163,11 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
   core.apply(
     'flutter_tools:test_entrypoint',
     <BuilderFactory>[
-      (BuilderOptions options) => const FlutterWebTestEntrypointBuilder(),
+      (BuilderOptions options) {
+        final List<String> targets = options.config['targets']?.split(',')
+            ?? const <String>[];
+        return FlutterWebTestEntrypointBuilder(targets);
+      }
     ],
     core.toRoot(),
     hideOutput: true,
@@ -180,7 +190,9 @@ Future<void> main(List<String> args, [SendPort sendPort]) async {
 
 /// A ddc-only entrypoint builder that respects the Flutter target flag.
 class FlutterWebTestEntrypointBuilder implements Builder {
-  const FlutterWebTestEntrypointBuilder();
+  const FlutterWebTestEntrypointBuilder(this.targets);
+
+  final List<String> targets;
 
   @override
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
@@ -195,6 +207,11 @@ class FlutterWebTestEntrypointBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
+    log.shout('does ${targets} contain ${buildStep.inputId.path}?');
+     if (!targets.any((String target) => buildStep
+        .inputId.path.contains('$target.browser_test.dart'))) {
+      return;
+    }
     log.info('building for target ${buildStep.inputId.path}');
     await bootstrapDdc(buildStep, platform: flutterWebPlatform);
   }
@@ -202,9 +219,10 @@ class FlutterWebTestEntrypointBuilder implements Builder {
 
 /// A ddc-only entrypoint builder that respects the Flutter target flag.
 class FlutterWebEntrypointBuilder implements Builder {
-  const FlutterWebEntrypointBuilder(this.release, this.flutterWebSdk, this.targets);
+  const FlutterWebEntrypointBuilder(this.release, this.profile, this.flutterWebSdk, this.targets);
 
   final bool release;
+  final bool profile;
   final String flutterWebSdk;
   final List<String> targets;
 
@@ -221,13 +239,12 @@ class FlutterWebEntrypointBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    log.info('building for target ${buildStep.inputId.path}');
     if (!targets.any((String target) => buildStep
         .inputId.path.contains(target.replaceFirst('.dart', '_web_entrypoint.dart')))) {
       return;
     }
-    if (release) {
-      await bootstrapDart2Js(buildStep, flutterWebSdk);
+    if (release || profile) {
+      await bootstrapDart2Js(buildStep, flutterWebSdk, profile);
     } else {
       await bootstrapDdc(buildStep, platform: flutterWebPlatform);
     }
@@ -236,9 +253,7 @@ class FlutterWebEntrypointBuilder implements Builder {
 
 /// Bootstraps the test entrypoint.
 class FlutterWebTestBootstrapBuilder implements Builder {
-  const FlutterWebTestBootstrapBuilder(this.targets);
-
-  final List<String> targets;
+  const FlutterWebTestBootstrapBuilder();
 
   @override
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
@@ -254,10 +269,6 @@ class FlutterWebTestBootstrapBuilder implements Builder {
     final String assetPath = id.pathSegments.first == 'lib'
         ? path.url.join('packages', id.package, id.path)
         : id.path;
-    if (!targets.contains(id.path)) {
-      log.info('skipping target ${buildStep.inputId.path} with targets: $targets');
-      return;
-    }
     final Metadata metadata = parseMetadata(
         assetPath, contents, Runtime.builtIn.map((Runtime runtime) => runtime.name).toSet());
 
@@ -351,7 +362,9 @@ void setStackTraceMapper(StackTraceMapper mapper) {
 
 /// A shell builder which generates the web specific entrypoint.
 class FlutterWebShellBuilder implements Builder {
-  const FlutterWebShellBuilder();
+  const FlutterWebShellBuilder({this.hasPlugins = false});
+
+  final bool hasPlugins;
 
   @override
   Future<void> build(BuildStep buildStep) async {
@@ -361,16 +374,33 @@ class FlutterWebShellBuilder implements Builder {
       return;
     }
     final AssetId outputId = buildStep.inputId.changeExtension('_web_entrypoint.dart');
-    await buildStep.writeAsString(outputId, '''
+    if (hasPlugins) {
+      await buildStep.writeAsString(outputId, '''
 import 'dart:ui' as ui;
+
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+
+import 'generated_plugin_registrant.dart';
+import "${path.url.basename(buildStep.inputId.path)}" as entrypoint;
+
+Future<void> main() async {
+  registerPlugins(webPluginRegistry);
+  await ui.webOnlyInitializePlatform();
+  entrypoint.main();
+}
+''');
+    } else {
+      await buildStep.writeAsString(outputId, '''
+import 'dart:ui' as ui;
+
 import "${path.url.basename(buildStep.inputId.path)}" as entrypoint;
 
 Future<void> main() async {
   await ui.webOnlyInitializePlatform();
   entrypoint.main();
 }
-
 ''');
+    }
   }
 
   @override
@@ -379,7 +409,7 @@ Future<void> main() async {
   };
 }
 
-Future<void> bootstrapDart2Js(BuildStep buildStep, String flutterWebSdk) async {
+Future<void> bootstrapDart2Js(BuildStep buildStep, String flutterWebSdk, bool profile) async {
   final AssetId dartEntrypointId = buildStep.inputId;
   final AssetId moduleId = dartEntrypointId.changeExtension(moduleExtension(flutterWebPlatform));
   final Module module = Module.fromJson(json.decode(await buildStep.readAsString(moduleId)));
@@ -389,7 +419,7 @@ Future<void> bootstrapDart2Js(BuildStep buildStep, String flutterWebSdk) async {
   final Iterable<AssetId> allSrcs = allDeps.expand((Module module) => module.sources);
   await scratchSpace.ensureAssets(allSrcs, buildStep);
 
-  final String packageFile = await _createPackageFile(allSrcs, buildStep, scratchSpace);
+  final String packageFile = _createPackageFile(allSrcs, buildStep, scratchSpace);
   final String dartPath = dartEntrypointId.path.startsWith('lib/')
       ? 'package:${dartEntrypointId.package}/'
           '${dartEntrypointId.path.substring('lib/'.length)}'
@@ -401,11 +431,17 @@ Future<void> bootstrapDart2Js(BuildStep buildStep, String flutterWebSdk) async {
   final String librariesPath = path.join(flutterWebSdkPath, 'libraries.json');
   final List<String> args = <String>[
     '--libraries-spec="$librariesPath"',
-    '-O4',
+    if (profile)
+      '-O1'
+    else
+      '-O4',
     '-o',
     '$jsOutputPath',
     '--packages="$packageFile"',
-    '-Ddart.vm.product=true',
+    if (profile)
+      '-Ddart.vm.profile=true'
+    else
+      '-Ddart.vm.product=true',
     dartPath,
   ];
   final Dart2JsBatchWorkerPool dart2js = await buildStep.fetchResource(dart2JsWorkerResource);
@@ -443,7 +479,7 @@ Future<void> _copyIfExists(
 /// The filename is based off the MD5 hash of the asset path so that files are
 /// unique regarless of situations like `web/foo/bar.dart` vs
 /// `web/foo-bar.dart`.
-Future<String> _createPackageFile(Iterable<AssetId> inputSources, BuildStep buildStep, ScratchSpace scratchSpace) async {
+String _createPackageFile(Iterable<AssetId> inputSources, BuildStep buildStep, ScratchSpace scratchSpace) {
   final Uri inputUri = buildStep.inputId.uri;
   final String packageFileName =
       '.package-${md5.convert(inputUri.toString().codeUnits)}';
@@ -452,8 +488,7 @@ Future<String> _createPackageFile(Iterable<AssetId> inputSources, BuildStep buil
   final Set<String> packageNames = inputSources.map((AssetId s) => s.package).toSet();
   final String packagesFileContent =
       packageNames.map((String name) => '$name:packages/$name/').join('\n');
-  await packagesFile
-      .writeAsString('# Generated for $inputUri\n$packagesFileContent');
+  packagesFile .writeAsStringSync('# Generated for $inputUri\n$packagesFileContent');
   return packageFileName;
 }
 

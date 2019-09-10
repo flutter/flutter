@@ -160,7 +160,6 @@ class CachedArtifacts extends Artifacts {
 
   @override
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
-    platform ??= _currentHostPlatform;
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
@@ -170,20 +169,30 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.ios:
         return _getIosArtifactPath(artifact, platform, mode);
       case TargetPlatform.darwin_x64:
+        return _getDarwinArtifactPath(artifact, platform, mode);
       case TargetPlatform.linux_x64:
-      case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.windows_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
-        return _getHostArtifactPath(artifact, platform, mode);
+      default: // could be null, but that can't be specified as a case.
+        return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform, mode);
     }
-    assert(false, 'Invalid platform $platform.');
-    return null;
   }
 
   @override
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]) {
     return fs.path.basename(_getEngineArtifactsPath(platform, mode));
+  }
+
+  String _getDarwinArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
+    // When platform is null, a generic host platform artifact is being requested
+    // and not the gen_snapshot for darwin as a target platform.
+    if (platform != null && artifact == Artifact.genSnapshot) {
+      final String engineDir = _getEngineArtifactsPath(platform, mode);
+      return fs.path.join(engineDir, _artifactToFileName(artifact));
+    }
+    return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform, mode);
   }
 
   String _getAndroidArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
@@ -240,6 +249,7 @@ class CachedArtifacts extends Artifacts {
   }
 
   String _getHostArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
+    assert(platform != null);
     switch (artifact) {
       case Artifact.genSnapshot:
         // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
@@ -274,8 +284,14 @@ class CachedArtifacts extends Artifacts {
       case Artifact.linuxDesktopPath:
       case Artifact.windowsDesktopPath:
       case Artifact.flutterMacOSPodspec:
+        // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
+        // under a separate directory from the host artifacts.
+        // https://github.com/flutter/flutter/issues/38935
+        String platformDirName = getNameForTargetPlatform(platform);
+        if (mode == BuildMode.profile || mode == BuildMode.release) {
+          platformDirName = '$platformDirName-${getNameForBuildMode(mode)}';
+        }
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
-        final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
       case Artifact.skyEnginePath:
         final Directory dartPackageDirectory = cache.getCacheDir('pkg');
@@ -293,6 +309,14 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.linux_x64:
       case TargetPlatform.darwin_x64:
       case TargetPlatform.windows_x64:
+        // TODO(jonahwilliams): remove once debug desktop artifacts are uploaded
+        // under a separate directory from the host artifacts.
+        // https://github.com/flutter/flutter/issues/38935
+        if (mode == BuildMode.debug || mode == null) {
+          return fs.path.join(engineDir, platformName);
+        }
+        final String suffix = mode != BuildMode.debug ? '-${snakeCase(getModeName(mode), '-')}' : '';
+        return fs.path.join(engineDir, platformName + suffix);
       case TargetPlatform.fuchsia:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:

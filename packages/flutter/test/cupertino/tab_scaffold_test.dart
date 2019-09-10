@@ -76,7 +76,7 @@ void main() {
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
     ));
-    expect(tab2.text.style.color, CupertinoColors.inactiveGray);
+    expect(tab2.text.style.color.value, 0xFF999999);
 
     await tester.tap(find.text('Tab 2'));
     await tester.pump();
@@ -86,7 +86,7 @@ void main() {
       of: find.text('Tab 1'),
       matching: find.byType(RichText),
     ));
-    expect(tab1.text.style.color, CupertinoColors.inactiveGray);
+    expect(tab1.text.style.color.value, 0xFF999999);
     tab2 = tester.widget(find.descendant(
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
@@ -373,7 +373,7 @@ void main() {
       matching: find.byType(RichText),
     ));
     // Tab 2 should still be selected after changing theme.
-    expect(tab1.text.style.color, CupertinoColors.inactiveGray);
+    expect(tab1.text.style.color.value, 0xFF757575);
     final RichText tab2 = tester.widget(find.descendant(
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
@@ -980,6 +980,48 @@ void main() {
     // The exact same state instance is still there.
     expect(tester.state<EditableTextState>(find.byType(EditableText)), editableState);
     expect(find.text("don't lose me"), findsOneWidget);
+  });
+
+  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
+            child: CupertinoTabScaffold(
+              tabBar: CupertinoTabBar(
+                items: List<BottomNavigationBarItem>.generate(
+                  10,
+                  (int i) => BottomNavigationBarItem(icon: const ImageIcon(TestImageProvider(24, 23)), title: Text('$i'))
+                ),
+              ),
+              tabBuilder: (BuildContext context, int index) => const Text('content'),
+            ),
+          );
+        }),
+      ),
+    );
+
+    final Iterable<RichText> barItems = tester.widgetList<RichText>(
+      find.descendant(
+        of: find.byType(CupertinoTabBar),
+        matching: find.byType(RichText),
+      ),
+    );
+
+    final Iterable<RichText> contents = tester.widgetList<RichText>(
+      find.descendant(
+        of: find.text('content'),
+        matching: find.byType(RichText),
+        skipOffstage: false,
+      ),
+    );
+
+    expect(barItems.length, greaterThan(0));
+    expect(barItems.any((RichText t) => t.textScaleFactor != 1), isFalse);
+
+    expect(contents.length, greaterThan(0));
+    expect(contents.any((RichText t) => t.textScaleFactor != 99), isFalse);
   });
 }
 

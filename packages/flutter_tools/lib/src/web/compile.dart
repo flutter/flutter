@@ -30,7 +30,8 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
   try {
     result = await webCompilationProxy.initialize(
       projectDirectory: FlutterProject.current().directory,
-      release: buildInfo.isRelease,
+      mode: buildInfo.mode,
+      projectName: flutterProject.manifest.appName,
       targets: <String>[target],
     );
     if (result) {
@@ -81,15 +82,11 @@ class WebCompilationProxy {
   /// the entrypoints for dart2js to later take over.
   Future<bool> initialize({
     @required Directory projectDirectory,
+    @required String projectName,
     String testOutputDir,
-    bool release,
+    BuildMode mode,
     @required List<String> targets,
   }) async {
-    throw UnimplementedError();
-  }
-
-  /// Invalidate the source files in `inputs` and recompile them to JavaScript.
-  Future<void> invalidate({@required List<Uri> inputs}) async {
     throw UnimplementedError();
   }
 }

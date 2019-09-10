@@ -113,7 +113,7 @@ abstract class Target {
   List<Source> get outputs;
 
   /// The action which performs this build step.
-  Future<void> build(List<File> inputFiles, Environment environment);
+  Future<void> build(Environment environment);
 
   /// Collect hashes for all inputs to determine if any have changed.
   ///
@@ -349,6 +349,7 @@ class Environment {
   /// defaults based on it.
   factory Environment({
     @required Directory projectDir,
+    @required Directory outputDir,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
   }) {
@@ -371,6 +372,7 @@ class Environment {
     final Directory rootBuildDir = buildDir ?? projectDir.childDirectory('build');
     final Directory buildDirectory = rootBuildDir.childDirectory(buildPrefix);
     return Environment._(
+      outputDir: outputDir,
       projectDir: projectDir,
       buildDir: buildDirectory,
       rootBuildDir: rootBuildDir,
@@ -381,6 +383,7 @@ class Environment {
   }
 
   Environment._({
+    @required this.outputDir,
     @required this.projectDir,
     @required this.buildDir,
     @required this.rootBuildDir,
@@ -400,6 +403,9 @@ class Environment {
 
   /// The [Source] value which is substituted with a path to the flutter root.
   static const String kFlutterRootDirectory = '{FLUTTER_ROOT}';
+
+  /// The [Source] value which is substituted with a path to [outputDir].
+  static const String kOutputDirectory = '{OUTPUT_DIR}';
 
   /// The `PROJECT_DIR` environment variable.
   ///
@@ -423,6 +429,11 @@ class Environment {
   ///
   /// Defaults to to the value of [Cache.flutterRoot].
   final Directory flutterRootDir;
+
+  /// The `OUTPUT_DIR` environment variable.
+  ///
+  /// Must be provided to configure the output location for the final artifacts.
+  final Directory outputDir;
 
   /// Additional configuration passed to the build targets.
   ///
@@ -464,6 +475,7 @@ class BuildSystem {
     { BuildSystemConfig buildSystemConfig = const BuildSystemConfig() }
   ) async {
     environment.buildDir.createSync(recursive: true);
+    environment.outputDir.createSync(recursive: true);
 
     // Load file hash store from previous builds.
     final FileHashStore fileCache = FileHashStore(environment)
@@ -482,19 +494,21 @@ class BuildSystem {
     }
     // TODO(jonahwilliams): this is a bit of a hack, due to various parts of
     // the flutter tool writing these files unconditionally. Since Xcode uses
-    // timestamps to track files, this leads to unecessary rebuilds if they
+    // timestamps to track files, this leads to unnecessary rebuilds if they
     // are included. Once all the places that write these files have been
     // tracked down and moved into assemble, these checks should be removable.
+    // We also remove files under .dart_tool, since these are intermediaries
+    // and don't need to be tracked by external systems.
     {
       buildInstance.inputFiles.removeWhere((String path, File file) {
-        return path.contains('pubspec.yaml') ||
-           path.contains('.flutter-plugins') ||
-           path.contains('xcconfig');
+        return path.contains('.flutter-plugins') ||
+                       path.contains('xcconfig') ||
+                     path.contains('.dart_tool');
       });
       buildInstance.outputFiles.removeWhere((String path, File file) {
-        return path.contains('pubspec.yaml') ||
-           path.contains('.flutter-plugins') ||
-           path.contains('xcconfig');
+        return path.contains('.flutter-plugins') ||
+                       path.contains('xcconfig') ||
+                     path.contains('.dart_tool');
       });
     }
     return BuildResult(
@@ -508,6 +522,7 @@ class BuildSystem {
     );
   }
 }
+
 
 /// An active instance of a build.
 class _BuildInstance {
@@ -570,7 +585,7 @@ class _BuildInstance {
         }
       } else {
         printStatus('${target.name}: Starting');
-        await target.build(inputs, environment);
+        await target.build(environment);
         printStatus('${target.name}: Complete');
 
         final List<File> outputs = target.resolveOutputs(environment, implicit: true);

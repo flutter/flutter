@@ -4,24 +4,29 @@
 
 import 'dart:async';
 
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
-
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
+import 'package:flutter_tools/src/web/workflow.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/testbed.dart';
 
 final Generator _kNoColorOutputPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
@@ -308,6 +313,56 @@ void main() {
       ));
     }, overrides: noColorTerminalOverride);
 
+    testUsingContext('validate non-verbose output format for run with crash', () async {
+      expect(await FakeCrashingDoctor().diagnose(verbose: false), isFalse);
+      expect(testLogger.statusText, equals(
+              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              '[✓] Passing Validator (with statusInfo)\n'
+              '[✓] Another Passing Validator (with statusInfo)\n'
+              '[☠] Crashing validator (the doctor check crashed)\n'
+              '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
+              'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
+              '    ✗ fatal error\n'
+              '[✓] Validators are fun (with statusInfo)\n'
+              '[✓] Four score and seven validators ago (with statusInfo)\n'
+              '\n'
+              '! Doctor found issues in 1 category.\n'
+      ));
+    }, overrides: noColorTerminalOverride);
+
+    testUsingContext('validate verbose output format contains trace for run with crash', () async {
+      expect(await FakeCrashingDoctor().diagnose(verbose: true), isFalse);
+      expect(testLogger.statusText, contains('#0      CrashingValidator.validate'));
+    }, overrides: noColorTerminalOverride);
+
+
+    testUsingContext('validate non-verbose output format for run with an async crash', () async {
+      final Completer<void> completer = Completer<void>();
+      await FakeAsync().run((FakeAsync time) {
+        unawaited(FakeAsyncCrashingDoctor(time).diagnose(verbose: false).then((bool r) {
+          expect(r, isFalse);
+          completer.complete(null);
+        }));
+        time.elapse(const Duration(seconds: 1));
+        time.flushMicrotasks();
+        return completer.future;
+      });
+      expect(testLogger.statusText, equals(
+              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              '[✓] Passing Validator (with statusInfo)\n'
+              '[✓] Another Passing Validator (with statusInfo)\n'
+              '[☠] Async crashing validator (the doctor check crashed)\n'
+              '    ✗ Due to an error, the doctor check did not complete. If the error message below is not helpful, '
+              'please let us know about this issue at https://github.com/flutter/flutter/issues.\n'
+              '    ✗ fatal error\n'
+              '[✓] Validators are fun (with statusInfo)\n'
+              '[✓] Four score and seven validators ago (with statusInfo)\n'
+              '\n'
+              '! Doctor found issues in 1 category.\n'
+      ));
+    }, overrides: noColorTerminalOverride);
+
+
     testUsingContext('validate non-verbose output format when only one category fails', () async {
       expect(await FakeSinglePassingDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
@@ -570,6 +625,15 @@ void main() {
       expect(testLogger.statusText, startsWith('[✗]'));
     }, overrides: noColorTerminalOverride);
   });
+
+  testUsingContext('WebWorkflow is a part of validator workflows if enabled', () async {
+    when(processManager.canRun(any)).thenReturn(true);
+
+    expect(DoctorValidatorsProvider.defaultInstance.workflows.contains(webWorkflow), true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    ProcessManager: () => MockProcessManager(),
+  });
 }
 
 class MockUsage extends Mock implements Usage {}
@@ -647,6 +711,33 @@ class PartialValidatorWithHintsOnly extends DoctorValidator {
   }
 }
 
+class CrashingValidator extends DoctorValidator {
+  CrashingValidator() : super('Crashing validator');
+
+  @override
+  Future<ValidationResult> validate() async {
+    throw 'fatal error';
+  }
+}
+
+class AsyncCrashingValidator extends DoctorValidator {
+  AsyncCrashingValidator(this._time) : super('Async crashing validator');
+
+  final FakeAsync _time;
+
+  @override
+  Future<ValidationResult> validate() {
+    const Duration delay = Duration(seconds: 1);
+    final Future<ValidationResult> result = Future<ValidationResult>
+        .delayed(delay).then((_) {
+      throw 'fatal error';
+    });
+    _time.elapse(const Duration(seconds: 1));
+    _time.flushMicrotasks();
+    return result;
+  }
+}
+
 /// A doctor that fails with a missing [ValidationResult].
 class FakeDoctor extends Doctor {
   List<DoctorValidator> _validators;
@@ -704,6 +795,44 @@ class FakeQuietDoctor extends Doctor {
       _validators = <DoctorValidator>[];
       _validators.add(PassingValidator('Passing Validator'));
       _validators.add(PassingValidator('Another Passing Validator'));
+      _validators.add(PassingValidator('Validators are fun'));
+      _validators.add(PassingValidator('Four score and seven validators ago'));
+    }
+    return _validators;
+  }
+}
+
+/// A doctor with a validator that throws an exception.
+class FakeCrashingDoctor extends Doctor {
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    if (_validators == null) {
+      _validators = <DoctorValidator>[];
+      _validators.add(PassingValidator('Passing Validator'));
+      _validators.add(PassingValidator('Another Passing Validator'));
+      _validators.add(CrashingValidator());
+      _validators.add(PassingValidator('Validators are fun'));
+      _validators.add(PassingValidator('Four score and seven validators ago'));
+    }
+    return _validators;
+  }
+}
+
+/// A doctor with a validator that throws an exception.
+class FakeAsyncCrashingDoctor extends Doctor {
+  FakeAsyncCrashingDoctor(this._time);
+
+  final FakeAsync _time;
+
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    if (_validators == null) {
+      _validators = <DoctorValidator>[];
+      _validators.add(PassingValidator('Passing Validator'));
+      _validators.add(PassingValidator('Another Passing Validator'));
+      _validators.add(AsyncCrashingValidator(_time));
       _validators.add(PassingValidator('Validators are fun'));
       _validators.add(PassingValidator('Four score and seven validators ago'));
     }

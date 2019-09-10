@@ -71,6 +71,10 @@ class SourceVisitor {
         segments.addAll(
             fs.path.split(environment.flutterRootDir.absolute.path));
         break;
+      case Environment.kOutputDirectory:
+        segments.addAll(
+            fs.path.split(environment.outputDir.resolveSymbolicLinksSync()));
+        break;
       default:
         throw InvalidPatternException(pattern);
     }

@@ -7,10 +7,13 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/linux/makefile.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
@@ -130,6 +133,53 @@ BINARY_NAME=fizz_bar
         throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+  });
+
+  testUsingContext('Release build prints an under-construction warning', () async {
+    final BuildCommand command = BuildCommand();
+    applyMocksToCommand(command);
+    fs.file('linux/build.sh').createSync(recursive: true);
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+
+    when(mockProcessManager.start(<String>[
+      'make',
+      '-C',
+      '/linux',
+    ], runInShell: true)).thenAnswer((Invocation invocation) async {
+      return mockProcess;
+    });
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux']
+    );
+
+    final BufferLogger bufferLogger = logger;
+    expect(bufferLogger.statusText, contains('🚧'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => mockProcessManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('hidden when not enabled on Linux host', () {
+    when(platform.isLinux).thenReturn(true);
+
+    expect(BuildLinuxCommand().hidden, true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+     Platform: () => MockPlatform(),
+  });
+
+  testUsingContext('Not hidden when enabled and on Linux host', () {
+    when(platform.isLinux).thenReturn(true);
+
+    expect(BuildLinuxCommand().hidden, false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    Platform: () => MockPlatform(),
   });
 }
 

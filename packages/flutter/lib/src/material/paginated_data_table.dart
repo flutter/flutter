@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'button_bar.dart';
-import 'button_theme.dart';
 import 'card.dart';
 import 'constants.dart';
 import 'data_table.dart';
@@ -439,16 +438,14 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 data: const IconThemeData(
                   opacity: 0.54
                 ),
-                child: ButtonTheme.bar(
-                  child: Ink(
-                    height: 64.0,
-                    color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
-                    child: Padding(
-                      padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: headerWidgets,
-                      ),
+                child: Ink(
+                  height: 64.0,
+                  color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: headerWidgets,
                     ),
                   ),
                 ),

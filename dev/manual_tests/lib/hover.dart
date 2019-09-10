@@ -82,8 +82,8 @@ class _HoverDemoState extends State<HoverDemo> {
                     decoration: InputDecoration(labelText: 'Enter Text', filled: true),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
                   child: TextField(
                     autofocus: false,
                     decoration: InputDecoration(

@@ -11,9 +11,7 @@ import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
 import '../flutter_test_alternative.dart';
 
 void main() {
-  setUp(() {
-    TestWidgetsFlutterBinding.ensureInitialized();
-  });
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   group('BasicMessageChannel', () {
     const MessageCodec<String> string = StringCodec();

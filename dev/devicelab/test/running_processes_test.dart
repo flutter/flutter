@@ -24,17 +24,17 @@ ProcessId CreationDate         CommandLine
         results,
         equals(<RunningProcessInfo>[
           RunningProcessInfo(
-            6552,
+            '6552',
             DateTime(2019, 7, 3, 17, 0, 27),
             r'"C:\tools\dart-sdk\bin\dart.exe" .\bin\agent.dart ci',
           ),
           RunningProcessInfo(
-            6553,
+            '6553',
             DateTime(2019, 7, 3, 22, 0, 27),
             r'"C:\tools\dart-sdk1\bin\dart.exe" .\bin\agent.dart ci',
           ),
           RunningProcessInfo(
-            6554,
+            '6554',
             DateTime(2019, 7, 3, 11, 0, 27),
             r'"C:\tools\dart-sdk2\bin\dart.exe" .\bin\agent.dart ci',
           ),
@@ -54,12 +54,12 @@ Sat Mar  9 20:13:00 2019        49 /usr/sbin/syslogd
         results,
         equals(<RunningProcessInfo>[
           RunningProcessInfo(
-            1,
+            '1',
             DateTime(2019, 3, 9, 20, 12, 47),
             '/sbin/launchd',
           ),
           RunningProcessInfo(
-            49,
+            '49',
             DateTime(2019, 3, 9, 20, 13, 00),
             '/usr/sbin/syslogd',
           ),
