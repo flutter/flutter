@@ -41,7 +41,7 @@ task:
         $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
         cd $ENGINE_PATH/src/flutter/lib/web_ui
         $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
-        CHROME_NO_SANDBOX=true $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dart dev/test.dart
+        CHROME_NO_SANDBOX=true $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dart dev/felt.dart
       fetch_framework_script: |
         mkdir -p $FRAMEWORK_PATH
         cd $FRAMEWORK_PATH

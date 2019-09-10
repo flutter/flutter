@@ -138,7 +138,10 @@ Future<void> _buildTests() async {
   }
 }
 
-Future<int> _runTestBatch(
+/// Runs a batch of tests.
+///
+/// Unless [expectFailure] is set to false, sets [io.exitCode] to a non-zero value if any tests fail.
+Future<void> _runTestBatch(
   List<String> testFiles, {
     @required int concurrency,
     @required bool expectFailure,
@@ -174,6 +177,4 @@ Future<int> _runTestBatch(
       io.exitCode = 1;
     }
   }
-
-  return io.exitCode;
 }

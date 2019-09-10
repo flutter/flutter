@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# felt: a command-line utility for building and testing Flutter web engine.
+#       It stands for Flutter Engine Local Tester.
+
+FELT_PATH=`which felt`
+if [ -z "$FELT_PATH" ]
+then
+  echo "ERROR: felt is not in your PATH"
+  echo "Fix: add lib/web_ui/dev to your PATH"
+  exit 1
+fi
+
+GCLIENT_PATH=`which gclient`
+if [ -z "$GCLIENT_PATH" ]
+then
+  echo "ERROR: gclient is not in your PATH"
+  echo "Fix: add the path to your installation of depot_tools to your PATH"
+  exit 1
+fi
+
+NINJA_PATH=`which ninja`
+if [ -z "$NINJA_PATH" ]
+then
+  echo "ERROR: ninja is not in your PATH"
+  echo "Fix: add the path to your installation of depot_tools to your PATH"
+  exit 1
+fi
+
+ENGINE_SRC_DIR="$(dirname $(dirname $(dirname $(dirname $(dirname ${FELT_PATH})))))"
+FLUTTER_DIR="${ENGINE_SRC_DIR}/flutter"
+WEB_UI_DIR="${FLUTTER_DIR}/lib/web_ui"
+DEV_DIR="${WEB_UI_DIR}/dev"
+OUT_DIR="${ENGINE_SRC_DIR}/out"
+HOST_DEBUG_UNOPT_DIR="${ENGINE_SRC_DIR}/out/host_debug_unopt"
+DART_SDK_DIR="${ENGINE_SRC_DIR}/out/host_debug_unopt/dart-sdk"
+GN="${FLUTTER_DIR}/tools/gn"
+
+if [ ! -d "${OUT_DIR}" ] || [ ! -d "${HOST_DEBUG_UNOPT_DIR}" ]
+then
+  echo "Compiling the Dart SDK."
+  gclient sync
+  $GN --unoptimized --full-dart-sdk
+  ninja -C $HOST_DEBUG_UNOPT_DIR
+fi
+
+(cd $WEB_UI_DIR && $DART_SDK_DIR/bin/dart dev/felt.dart $@)
