@@ -855,7 +855,6 @@ flutter:
     Directory tempDir;
     Directory gradleWrapperDirectory;
     MockProcessManager mockProcessManager;
-    Exception shouldBeToolExit;
     String gradleBinary;
 
     setUp(() {
