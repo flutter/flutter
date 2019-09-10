@@ -41,11 +41,6 @@ class SkiaFontCollection {
           'There was a problem trying to load FontManifest.json');
     }
 
-    // Add Roboto to the bundled fonts since it is provided by default by
-    // Flutter.
-    _fontLoadingFutures
-        .add(_registerFont('Roboto', _robotoFontUrl, <String, String>{}));
-
     for (Map<String, dynamic> fontFamily in fontManifest) {
       final String family = fontFamily['family'];
       final List<dynamic> fontAssets = fontFamily['fonts'];
