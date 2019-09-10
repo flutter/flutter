@@ -107,6 +107,7 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
       _handlers.remove(channel);
     else
       _handlers[channel] = handler;
+    drainChannelBuffers(channel);
   }
 
   @override

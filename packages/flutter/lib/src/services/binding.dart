@@ -214,6 +214,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
       _handlers.remove(channel);
     else
       _handlers[channel] = handler;
+    drainChannelBuffers(channel);
   }
 
   @override
