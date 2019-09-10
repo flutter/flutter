@@ -184,6 +184,24 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
+    testUsingContext('VisualStudio getters return the right values if no installation is found', () {
+      setMockCompatibleVisualStudioInstallation(null);
+      setMockPrereleaseVisualStudioInstallation(null);
+      setMockAnyVisualStudioInstallation(null);
+
+      visualStudio = VisualStudio();
+      expect(visualStudio.isInstalled, false);
+      expect(visualStudio.hasNecessaryComponents, false);
+      expect(visualStudio.isComplete, false);
+      expect(visualStudio.isRebootRequired, false);
+      expect(visualStudio.isLaunchable, false);
+      expect(visualStudio.displayName, null);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFilesystem,
+      Platform: () => windowsPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
+
     testUsingContext('isInstalled returns true even with missing status information', () {
       setMockCompatibleVisualStudioInstallation(null);
       setMockPrereleaseVisualStudioInstallation(null);
