@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 import 'package:test_api/test_api.dart' as test_package;
@@ -16,6 +17,7 @@ import 'package:test_api/test_api.dart' as test_package;
 import 'all_elements.dart';
 import 'binding.dart';
 import 'controller.dart';
+import 'event_simulation.dart';
 import 'finders.dart';
 import 'matchers.dart';
 import 'test_async_utils.dart';
@@ -717,6 +719,24 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       testTextInput.enterText(text);
       await idle();
     });
+  }
+
+  /// Simulates sending a physical key down event through the system channel.
+  ///
+  /// This only simulates key presses coming from a physical keyboard,
+  /// not from a soft keyboard.
+  Future<void> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android'}) {
+    // Internally wrapped in async guard.
+    return simulateKeyDownEvent(key, platform: platform);
+  }
+
+  /// Simulates sending a physical key up event through the system channel.
+  ///
+  /// This only simulates key presses coming from a physical keyboard,
+  /// not from a soft keyboard.
+  Future<void> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) {
+    // Internally wrapped in async guard.
+    return simulateKeyUpEvent(key, platform: platform);
   }
 
   /// Makes an effort to dismiss the current page with a Material [Scaffold] or

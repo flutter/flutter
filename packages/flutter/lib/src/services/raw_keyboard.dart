@@ -512,4 +512,12 @@ class RawKeyboard {
   Set<LogicalKeyboardKey> get keysPressed {
     return _keysPressed.toSet();
   }
+
+  /// Clear the list of keys that are down.
+  ///
+  /// This is used by the testing framework to make sure tests are hermetic.
+  @visibleForTesting
+  void clearKeysPressed() {
+    _keysPressed.clear();
+  }
 }
