@@ -1118,7 +1118,7 @@ class PluginUtilities {
 }
 
 // TODO(flutter_web): see https://github.com/flutter/flutter/issues/33616.
-class ImageShader {
+class ImageShader implements Shader {
   ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4);
 }
 
