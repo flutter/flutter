@@ -254,23 +254,11 @@ ArgParser _createArgsParser() {
 final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
 
 String getBranchName() {
-  final ProcessResult gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
-  if (gitResult.exitCode != 0)
-    throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
-  final Match gitBranchMatch = gitBranchRegexp.firstMatch(
-      gitResult.stdout.trim().split('\n').first);
-  return gitBranchMatch == null ? '' : gitBranchMatch.group(1).split('...').first;
+  return 'stable';
 }
 
 String gitRevision() {
-  const int kGitRevisionLength = 10;
-
-  final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
-  if (gitResult.exitCode != 0)
-    throw 'git rev-parse exit with non-zero exit code: ${gitResult.exitCode}';
-  final String gitRevision = gitResult.stdout.trim();
-
-  return gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
+  return '2d2a1ffec9';
 }
 
 void createFooter(String footerPath, String version) {

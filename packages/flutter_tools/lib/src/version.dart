@@ -20,7 +20,7 @@ import 'globals.dart';
 class FlutterVersion {
   @visibleForTesting
   FlutterVersion([this._clock = const SystemClock()]) {
-    _frameworkRevision = _runGit('git log -n 1 --pretty=format:%H');
+    _frameworkRevision = '2d2a1ffec95cc70a3218872a2cd3f8de4933c42f';
     _frameworkVersion = GitTagVersion.determine().frameworkVersionFor(_frameworkRevision);
   }
 
@@ -60,19 +60,7 @@ class FlutterVersion {
   /// The channel is the upstream branch.
   /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
   String get channel {
-    if (_channel == null) {
-      final String channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
-      final int slash = channel.indexOf('/');
-      if (slash != -1) {
-        final String remote = channel.substring(0, slash);
-        _repositoryUrl = _runGit('git ls-remote --get-url $remote');
-        _channel = channel.substring(slash + 1);
-       } else if (channel.isEmpty) {
-        _channel = 'unknown';
-      } else {
-        _channel = channel;
-      }
-    }
+    _channel ??= 'stable';
     return _channel;
   }
 
@@ -197,10 +185,7 @@ class FlutterVersion {
   /// If [redactUnknownBranches] is true and the branch is unknown,
   /// the branch name will be returned as `'[user-branch]'`.
   String getBranchName({ bool redactUnknownBranches = false }) {
-    _branch ??= () {
-      final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
-      return branch == 'HEAD' ? channel : branch;
-    }();
+    _branch ??= 'stable';
     if (redactUnknownBranches || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
       if (!officialChannels.contains(_branch) && !obsoleteBranches.containsKey(_branch))
@@ -602,15 +587,15 @@ class GitTagVersion {
 
   String frameworkVersionFor(String revision) {
     if (x == null || y == null || z == null || !revision.startsWith(hash))
-      return '0.0.0-unknown';
+      return '1.9.1+hotfix.2';
     if (commits == 0) {
       if (hotfix != null)
         return '$x.$y.$z+hotfix.$hotfix';
       return '$x.$y.$z';
     }
     if (hotfix != null)
-      return '$x.$y.$z+hotfix.${hotfix + 1}-pre.$commits';
-    return '$x.$y.${z + 1}-pre.$commits';
+      return '$x.$y.$z+hotfix.$hotfix';
+    return '$x.$y.$z';
   }
 }
 

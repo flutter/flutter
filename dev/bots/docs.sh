@@ -122,24 +122,11 @@ fi
 cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/doc"
 
 # Upload new API docs when running on Cirrus
-if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
-  echo "This is not a pull request; considering whether to upload docs... (branch=$CIRRUS_BRANCH)"
-  if [[ "$CIRRUS_BRANCH" == "master" ]]; then
-    echo "Updating $CIRRUS_BRANCH docs: https://master-api.flutter.dev/"
-    # Disable search indexing on the master staging site so searches get only
-    # the stable site.
-    echo -e "User-agent: *\nDisallow: /" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
-    export FIREBASE_TOKEN="$FIREBASE_MASTER_TOKEN"
-    deploy 5 master-docs-flutter-dev
-  fi
-
-  if [[ "$CIRRUS_BRANCH" == "stable" ]]; then
-    # Enable search indexing on the master staging site so searches get only
-    # the stable site.
-    echo "Updating $CIRRUS_BRANCH docs: https://api.flutter.dev/"
-    echo -e "# All robots welcome!" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
-    export FIREBASE_TOKEN="$FIREBASE_PUBLIC_TOKEN"
-    deploy 5 docs-flutter-dev
-  fi
+if [[ -n "$CIRRUS_CI" ]]; then
+  # Enable search indexing on the master staging site so searches get only
+  # the stable site.
+  echo "Updating $CIRRUS_BRANCH docs: https://api.flutter.dev/"
+  echo -e "# All robots welcome!" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
+  export FIREBASE_TOKEN="$FIREBASE_PUBLIC_TOKEN"
+  deploy 5 docs-flutter-dev
 fi
-
