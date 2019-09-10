@@ -235,7 +235,6 @@ class ResidentWebRunner extends ResidentRunner {
       progressId: 'hot.restart',
     );
     final bool success = await _webFs.recompile();
-    String restartEvent = 'restart';
     if (!success) {
       status.stop();
       return OperationResult(1, 'Failed to recompile application.');
@@ -252,7 +251,7 @@ class ResidentWebRunner extends ResidentRunner {
         return OperationResult(1, 'Page requires full reload');
       } finally {
         status.stop();
-        HotEvent(restartEvent,
+        HotEvent('restart',
           targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
           sdkName: await device.sdkNameAndVersion,
           emulator: false,
