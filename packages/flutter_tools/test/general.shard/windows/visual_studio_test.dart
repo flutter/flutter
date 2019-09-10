@@ -264,7 +264,7 @@ void main() {
       Platform: () => windowsPlatform,
       ProcessManager: () => mockProcessManager,
     });
-    
+
     testUsingContext('vcvarsPath returns null when VS is present but with require components but installation is faulty', () {
       final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
         ..['isRebootRequired'] = true;
