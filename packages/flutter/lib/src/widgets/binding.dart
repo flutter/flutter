@@ -284,17 +284,19 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
         },
       );
 
-      registerBoolServiceExtension(
-        name: 'showPerformanceOverlay',
-        getter: () =>
-        Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
-        setter: (bool value) {
-          if (WidgetsApp.showPerformanceOverlayOverride == value)
-            return Future<void>.value();
-          WidgetsApp.showPerformanceOverlayOverride = value;
-          return _forceRebuild();
-        },
-      );
+      if (!kIsWeb) {
+        registerBoolServiceExtension(
+          name: 'showPerformanceOverlay',
+          getter: () =>
+          Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
+          setter: (bool value) {
+            if (WidgetsApp.showPerformanceOverlayOverride == value)
+              return Future<void>.value();
+            WidgetsApp.showPerformanceOverlayOverride = value;
+            return _forceRebuild();
+          },
+        );
+      }
 
       registerServiceExtension(
         name: 'didSendFirstFrameEvent',
