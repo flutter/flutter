@@ -1,0 +1,11 @@
+targets:
+  $default:
+    builders:
+      build_web_compilers|entrypoint:
+        options:
+          compiler: dart2js
+          dart2js_args:
+            - --no-minify
+            - --enable-asserts
+        generate_for:
+          - test/**.dart

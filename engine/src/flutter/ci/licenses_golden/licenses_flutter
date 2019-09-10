@@ -346,7 +346,6 @@ FILE: ../../../flutter/lib/ui/window/viewport_metrics.cc
 FILE: ../../../flutter/lib/ui/window/viewport_metrics.h
 FILE: ../../../flutter/lib/ui/window/window.cc
 FILE: ../../../flutter/lib/ui/window/window.h
-FILE: ../../../flutter/lib/web_ui/dev/test.dart
 FILE: ../../../flutter/lib/web_ui/lib/assets/houdini_painter.js
 FILE: ../../../flutter/lib/web_ui/lib/src/engine.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/alarm_clock.dart
