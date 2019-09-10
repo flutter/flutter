@@ -65,12 +65,17 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
             SkImage::MakeFromBitmap(bitmap));
       };
 
+  // The first argument is treated as the executable name. Don't make tests have
+  // to do this manually.
+  AddCommandLineArgument("embedder_unittest");
+
   if (preference == InitializationPreference::kInitialize) {
     SetSoftwareRendererConfig();
     SetAssetsPath();
     SetSnapshots();
     SetIsolateCreateCallbackHook();
     SetSemanticsCallbackHooks();
+    AddCommandLineArgument("--disable-observatory");
   }
 }
 
@@ -197,8 +202,9 @@ FlutterCompositor& EmbedderConfigBuilder::GetCompositor() {
   return compositor_;
 }
 
-UniqueEngine EmbedderConfigBuilder::LaunchEngine() {
+UniqueEngine EmbedderConfigBuilder::LaunchEngine() const {
   FlutterEngine engine = nullptr;
+  FlutterProjectArgs project_args = project_args_;
 
   std::vector<const char*> args;
   args.reserve(command_line_arguments_.size());
@@ -208,17 +214,17 @@ UniqueEngine EmbedderConfigBuilder::LaunchEngine() {
   }
 
   if (args.size() > 0) {
-    project_args_.command_line_argv = args.data();
-    project_args_.command_line_argc = args.size();
+    project_args.command_line_argv = args.data();
+    project_args.command_line_argc = args.size();
   } else {
     // Clear it out in case this is not the first engine launch from the
     // embedder config builder.
-    project_args_.command_line_argv = nullptr;
-    project_args_.command_line_argc = 0;
+    project_args.command_line_argv = nullptr;
+    project_args.command_line_argc = 0;
   }
 
   auto result = FlutterEngineRun(FLUTTER_ENGINE_VERSION, &renderer_config_,
-                                 &project_args_, &context_, &engine);
+                                 &project_args, &context_, &engine);
 
   if (result != kSuccess) {
     return {};

@@ -68,7 +68,7 @@ class EmbedderConfigBuilder {
 
   FlutterCompositor& GetCompositor();
 
-  UniqueEngine LaunchEngine();
+  UniqueEngine LaunchEngine() const;
 
  private:
   EmbedderTestContext& context_;
