@@ -22,6 +22,8 @@
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
 #include "flutter/shell/common/animator.h"
+#include "flutter/shell/common/platform_view.h"
+#include "flutter/shell/common/pointer_data_dispatcher.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/shell_io_manager.h"
@@ -234,6 +236,12 @@ class Engine final : public RuntimeDelegate {
   ///                                tasks that require access to components
   ///                                that cannot be safely accessed by the
   ///                                engine. This is the shell.
+  /// @param      dispatcher_maker   The `std::function` provided by
+  ///                                `PlatformView` for engine to create the
+  ///                                pointer data dispatcher. Similar to other
+  ///                                engine resources, this dispatcher_maker and
+  ///                                its returned dispatcher is only safe to be
+  ///                                called from the UI thread.
   /// @param      vm                 An instance of the running Dart VM.
   /// @param[in]  isolate_snapshot   The snapshot used to create the root
   ///                                isolate. Even though the isolate is not
@@ -265,6 +273,7 @@ class Engine final : public RuntimeDelegate {
   ///                                GPU.
   ///
   Engine(Delegate& delegate,
+         PointerDataDispatcherMaker& dispatcher_maker,
          DartVM& vm,
          fml::RefPtr<const DartSnapshot> isolate_snapshot,
          fml::RefPtr<const DartSnapshot> shared_snapshot,
@@ -649,7 +658,7 @@ class Engine final : public RuntimeDelegate {
   ///                            timeline and allow grouping frames and input
   ///                            events into logical chunks.
   ///
-  void DispatchPointerDataPacket(const PointerDataPacket& packet,
+  void DispatchPointerDataPacket(std::unique_ptr<PointerDataPacket> packet,
                                  uint64_t trace_flow_id);
 
   //----------------------------------------------------------------------------
@@ -705,6 +714,7 @@ class Engine final : public RuntimeDelegate {
   const Settings settings_;
   std::unique_ptr<Animator> animator_;
   std::unique_ptr<RuntimeController> runtime_controller_;
+  std::unique_ptr<PointerDataDispatcher> pointer_data_dispatcher_;
   std::string initial_route_;
   ViewportMetrics viewport_metrics_;
   std::shared_ptr<AssetManager> asset_manager_;

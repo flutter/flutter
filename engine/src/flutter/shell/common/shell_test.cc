@@ -132,6 +132,16 @@ void ShellTest::PumpOneFrame(Shell* shell) {
   latch.Wait();
 }
 
+void ShellTest::DispatchFakePointerData(Shell* shell) {
+  fml::AutoResetWaitableEvent latch;
+  shell->GetTaskRunners().GetPlatformTaskRunner()->PostTask([&latch, shell]() {
+    auto packet = std::make_unique<PointerDataPacket>(1);
+    shell->OnPlatformViewDispatchPointerDataPacket(std::move(packet));
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
 int ShellTest::UnreportedTimingsCount(Shell* shell) {
   return shell->unreported_timings_.size();
 }
@@ -219,6 +229,15 @@ ShellTestPlatformView::~ShellTestPlatformView() = default;
 // |PlatformView|
 std::unique_ptr<Surface> ShellTestPlatformView::CreateRenderingSurface() {
   return std::make_unique<GPUSurfaceGL>(this, true);
+}
+
+// |PlatformView|
+PointerDataDispatcherMaker ShellTestPlatformView::GetDispatcherMaker() {
+  return [](Animator& animator, RuntimeController& controller,
+            TaskRunners task_runners) {
+    return std::make_unique<SmoothPointerDataDispatcher>(animator, controller,
+                                                         task_runners);
+  };
 }
 
 // |GPUSurfaceGLDelegate|
