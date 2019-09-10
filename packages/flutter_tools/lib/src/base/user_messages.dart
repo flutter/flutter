@@ -212,6 +212,10 @@ class UserMessages {
       'More than one device connected; please specify a device with '
       "the '-d <deviceId>' flag.";
   String get flutterNoConnectedDevices => 'No connected devices.';
+    String get flutterNoPackageFile =>
+      'Error: No .packages file found.\n'
+      'This command should be run from the root of your Flutter project.\n'
+      'Do not run this command from the root of your git clone of Flutter.';
   String get flutterNoPubspec =>
       'Error: No pubspec.yaml file found.\n'
       'This command should be run from the root of your Flutter project.\n'
