@@ -861,11 +861,12 @@ flutter:
     setUp(() {
       fs = MemoryFileSystem();
       tempDir = fs.systemTempDirectory.createTempSync('artifacts_test.');
+      gradleBinary = platform.isWindows ? 'gradlew.bat' : 'gradlew';
       gradleWrapperDirectory = fs.directory(
         fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper'));
       gradleWrapperDirectory.createSync(recursive: true);
       gradleWrapperDirectory
-        .childFile('gradlew')
+        .childFile(gradleBinary)
         .writeAsStringSync('irrelevant');
       gradleWrapperDirectory
         .childDirectory('gradle')
@@ -879,7 +880,6 @@ flutter:
 
       mockProcessManager = MockProcessManager();
       shouldBeToolExit = null;
-      gradleBinary = platform.isWindows ? 'gradlew.bat' : 'gradlew';
     });
 
     testUsingContext('throws toolExit if gradle fails while downloading', () async {
