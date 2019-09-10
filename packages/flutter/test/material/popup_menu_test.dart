@@ -690,6 +690,81 @@ void main() {
     await tester.tap(find.text('Menu Button'));
   });
 
+  testWidgets('PopupMenuItem child height is a minium, child is vertically centered', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/39508.
+
+    final Key popupMenuButtonKey = UniqueKey();
+    final Type menuItemType = const PopupMenuItem<String>(child: Text('item')).runtimeType;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              child: const Text('button'),
+              onSelected: (String result) { },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>( // Item's height = 48 (height == minHeight is 48).
+                    child: Text('Item 0'),
+                    value: '0',
+                  ),
+                  const PopupMenuItem<String>( // Item's height = 50 (height == minHeight is 50).
+                    height: 50,
+                    child: SizedBox(
+                      height: 40,
+                      child: Text('Item 1'),
+                    ),
+                    value: '1',
+                  ),
+                  const PopupMenuItem<String>( // Item's height = 75 (height == minHeight is 75).
+                    height: 75,
+                    child: SizedBox(
+                      child: Text('Item 2'),
+                    ),
+                    value: '2',
+                  ),
+                  const PopupMenuItem<String>( // Item's height = 100.
+                    child: SizedBox(
+                      height: 100,
+                      child: Text('Item 3'),
+                    ),
+                    value: '3',
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    // The menu items and their InkWells should have the expected vertical size
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 48);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 1')).height, 50);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 2')).height, 75);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 3')).height, 100);
+    expect(tester.getSize(find.widgetWithText(InkWell, 'Item 0')).height, 48);
+    expect(tester.getSize(find.widgetWithText(InkWell, 'Item 1')).height, 50);
+    expect(tester.getSize(find.widgetWithText(InkWell, 'Item 2')).height, 75);
+    expect(tester.getSize(find.widgetWithText(InkWell, 'Item 3')).height, 100);
+
+    // Menu item children which whose height is less than the PopupMenuItem
+    // are vertically centered.
+    expect(
+      tester.getRect(find.widgetWithText(menuItemType, 'Item 0')).center.dy,
+      tester.getRect(find.text('Item 0')).center.dy,
+    );
+    expect(
+      tester.getRect(find.widgetWithText(menuItemType, 'Item 2')).center.dy,
+      tester.getRect(find.text('Item 2')).center.dy,
+    );
+  });
 }
 
 class TestApp extends StatefulWidget {
