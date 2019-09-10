@@ -122,7 +122,12 @@ class CopyFlutterBundle extends Target {
         try {
           final File file = fs.file(fs.path.join(environment.outputDir.path, entry.key));
           file.parent.createSync(recursive: true);
-          await file.writeAsBytes(await entry.value.contentsAsBytes());
+          final DevFSContent content = entry.value;
+          if (content is DevFSFileContent && content.file is File) {
+            await (content.file as File).copy(file.path);
+          } else {
+            await file.writeAsBytes(await entry.value.contentsAsBytes());
+          }
         } finally {
           resource.release();
         }
