@@ -856,7 +856,7 @@ abstract class ResidentRunner {
   @mustCallSuper
   Future<void> preExit() async {
     // If _dillOutputPath is null, we created a temporary directory for the dill.
-    if (_dillOutputPath == null) {
+    if (_dillOutputPath == null && artifactDirectory.existsSync()) {
       artifactDirectory.deleteSync(recursive: true);
     }
   }
