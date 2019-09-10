@@ -338,7 +338,7 @@ bool _isWithinVersionRange(String targetVersion, {String min, String max}) {
       parsedTargetVersion <= Version.parse(max);
 }
 
-const String defaultGradleVersion = '4.10.2';
+const String defaultGradleVersion = '5.4.1';
 
 /// Returns the Gradle version that is required by the given Android Gradle plugin version
 /// by picking the largest compatible version from
