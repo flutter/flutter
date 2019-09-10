@@ -18,7 +18,6 @@ import 'convert.dart';
 import 'globals.dart';
 
 class FlutterVersion {
-  @visibleForTesting
   FlutterVersion([this._clock = const SystemClock()]) {
     _frameworkRevision = _runGit(gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '));
     _frameworkVersion = GitTagVersion.determine().frameworkVersionFor(_frameworkRevision);
