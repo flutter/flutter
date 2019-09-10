@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
@@ -77,7 +76,6 @@ void main() {
   });
 
   group('Flags', () {
-    BufferLogger mockLogger;
     Directory tempDir;
     ProcessManager mockProcessManager;
     MockAndroidSdk mockAndroidSdk;
@@ -86,8 +84,6 @@ void main() {
 
 
     setUp(() {
-      mockLogger = BufferLogger();
-
       mockUsage = MockUsage();
       when(mockUsage.isFirstRun).thenReturn(true);
 
@@ -228,11 +224,11 @@ void main() {
         );
       }, throwsToolExit(message: 'Gradle task bundleRelease failed with exit code 1'));
 
-      expect(mockLogger.statusText,
+      expect(testLogger.statusText,
           contains('Proguard may have failed to optimize the Java bytecode.'));
-      expect(mockLogger.statusText,
+      expect(testLogger.statusText,
           contains('To disable proguard, pass the `--no-proguard` flag to this command.'));
-      expect(mockLogger.statusText,
+      expect(testLogger.statusText,
           contains('To learn more about Proguard, see: https://flutter.dev/docs/deployment/android#enabling-proguard'));
 
       verify(mockUsage.sendEvent(
@@ -245,7 +241,6 @@ void main() {
       AndroidSdk: () => mockAndroidSdk,
       GradleUtils: () => GradleUtils(),
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      Logger: () => mockLogger,
       ProcessManager: () => mockProcessManager,
       Usage: () => mockUsage,
     },

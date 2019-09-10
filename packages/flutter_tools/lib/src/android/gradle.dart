@@ -779,9 +779,10 @@ Future<void> _buildGradleProjectV2(
 
   if (exitCode != 0) {
     if (potentialProguardFailure) {
-      printStatus('❗️ Proguard may have failed to optimize the Java bytecode.', emphasis: true);
-      printStatus('✅ To disable proguard, pass the `--no-proguard` flag to this command.');
-      printStatus('📚 To learn more about Proguard, see: https://flutter.dev/docs/deployment/android#enabling-proguard');
+      final String exclamationMark = terminal.color('[!]', TerminalColor.red);
+      printStatus('$exclamationMark Proguard may have failed to optimize the Java bytecode.', emphasis: true);
+      printStatus('To disable proguard, pass the `--no-proguard` flag to this command.', indent: 4);
+      printStatus('To learn more about Proguard, see: https://flutter.dev/docs/deployment/android#enabling-proguard', indent: 4);
       BuildEvent('proguard-failure').send();
     } else if (potentialAndroidXFailure) {
       printStatus('AndroidX incompatibilities may have caused this build to fail. See https://goo.gl/CP92wY.');
