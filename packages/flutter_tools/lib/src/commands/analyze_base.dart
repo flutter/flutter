@@ -17,7 +17,7 @@ import '../globals.dart';
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
   AnalyzeBase(this.argResults) {
-    if (!fs.isFileSync('.package')) {
+    if (!fs.isFileSync('.packages')) {
       throw ToolExit(userMessages.flutterNoPackageFile);
     }
   }
