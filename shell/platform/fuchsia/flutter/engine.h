@@ -31,10 +31,13 @@ class Engine final {
   Engine(Delegate& delegate,
          std::string thread_label,
          std::shared_ptr<sys::ServiceDirectory> svc,
+         std::shared_ptr<sys::ServiceDirectory> runner_services,
          flutter::Settings settings,
          fml::RefPtr<const flutter::DartSnapshot> isolate_snapshot,
          fml::RefPtr<const flutter::DartSnapshot> shared_snapshot,
          fuchsia::ui::views::ViewToken view_token,
+         fuchsia::ui::views::ViewRefControl view_ref_control,
+         fuchsia::ui::views::ViewRef view_ref,
          UniqueFDIONS fdio_ns,
          fidl::InterfaceRequest<fuchsia::io::Directory> directory_request);
   ~Engine();

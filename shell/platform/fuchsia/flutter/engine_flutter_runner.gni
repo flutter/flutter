@@ -42,6 +42,8 @@ template("flutter_runner") {
     libs = []
 
     sources = [
+      "accessibility_bridge.cc",
+      "accessibility_bridge.h",
       "component.cc",
       "component.h",
       "compositor_context.cc",
@@ -110,6 +112,7 @@ template("flutter_runner") {
     ]
 
     deps = [
+             "$fuchsia_sdk_root/fidl:fuchsia.accessibility.semantics",
              "$fuchsia_sdk_root/fidl:fuchsia.fonts",
              "$fuchsia_sdk_root/fidl:fuchsia.images",
              "$fuchsia_sdk_root/fidl:fuchsia.io",

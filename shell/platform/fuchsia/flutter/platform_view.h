@@ -17,6 +17,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/shell/common/platform_view.h"
+#include "flutter/shell/platform/fuchsia/flutter/accessibility_bridge.h"
 #include "lib/fidl/cpp/binding.h"
 #include "lib/ui/scenic/cpp/id.h"
 
@@ -41,7 +42,10 @@ class PlatformView final : public flutter::PlatformView,
  public:
   PlatformView(PlatformView::Delegate& delegate,
                std::string debug_label,
+               fuchsia::ui::views::ViewRefControl view_ref_control,
+               fuchsia::ui::views::ViewRef view_ref,
                flutter::TaskRunners task_runners,
+               std::shared_ptr<sys::ServiceDirectory> runner_services,
                fidl::InterfaceHandle<fuchsia::sys::ServiceProvider>
                    parent_environment_service_provider,
                fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>
@@ -64,6 +68,11 @@ class PlatformView final : public flutter::PlatformView,
 
  private:
   const std::string debug_label_;
+  // TODO(MI4-2490): remove once ViewRefControl is passed to Scenic and kept
+  // alive there
+  const fuchsia::ui::views::ViewRefControl view_ref_control_;
+  const fuchsia::ui::views::ViewRef view_ref_;
+  std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
 
   fidl::Binding<fuchsia::ui::scenic::SessionListener> session_listener_binding_;
   fit::closure session_listener_error_callback_;
@@ -143,6 +152,9 @@ class PlatformView final : public flutter::PlatformView,
   // |flutter::PlatformView|
   void HandlePlatformMessage(
       fml::RefPtr<flutter::PlatformMessage> message) override;
+
+  // |flutter::PlatformView|
+  void SetSemanticsEnabled(bool enabled) override;
 
   // |flutter::PlatformView|
   void UpdateSemantics(
