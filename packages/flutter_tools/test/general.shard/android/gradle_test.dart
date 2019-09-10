@@ -908,14 +908,9 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       );
       when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
         .thenThrow(exception);
-      try {
+      await expectLater(() async {
         await checkGradleDependencies();
-      } catch (e) {
-        shouldBeToolExit = e;
-      }
-      // Ensure that we throw a meaningful ToolExit
-      expect(shouldBeToolExit, isToolExit);
-      expect((shouldBeToolExit as ToolExit).message, contains(errorMessage));
+      }, throwsToolExit(message: errorMessage));
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => fs,
