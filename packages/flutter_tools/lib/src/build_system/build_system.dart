@@ -596,27 +596,40 @@ void verifyOutputDirectories(List<File> outputs, Environment environment, Target
 
 /// A node in the build graph.
 class Node {
-  Node(this.target, this.inputs, this.outputs, this.dependencies, Environment environment) {
+  Node(this.target, this.inputs, this.outputs, this.dependencies,
+      Environment environment) {
     final File stamp = target._findStampFile(environment);
 
     // If the stamp file doesn't exist, we haven't run this step before and
     // all inputs were added.
-    if (stamp.existsSync()) {
-      final String content = stamp.readAsStringSync();
-      // Something went wrong writing the stamp file.
-      if (content == null || content.isEmpty) {
-        stamp.deleteSync();
-        // Malformed stamp file, not safe to skip.
-         _dirty = true;
-      } else {
-        final Map<String, Object> values = json.decode(content);
-        final List<Object> inputs = values['inputs'];
-        final List<Object> outputs = values['outputs'];
-        inputs.cast<String>().forEach(previousInputs.add);
-        outputs.cast<String>().forEach(previousOutputs.add);
-      }
-    } else {
+    if (!stamp.existsSync()) {
       // No stamp file, not safe to skip.
+      _dirty = true;
+      return;
+    }
+    final String content = stamp.readAsStringSync();
+    // Something went wrong writing the stamp file.
+    if (content == null || content.isEmpty) {
+      stamp.deleteSync();
+      // Malformed stamp file, not safe to skip.
+      _dirty = true;
+      return;
+    }
+    Map<String, Object> values;
+    try {
+      values = json.decode(content);
+    } on FormatException {
+      // The json is malformed in some way.
+      _dirty = true;
+      return;
+    }
+    final Object inputs = values['inputs'];
+    final Object outputs = values['outputs'];
+    if (inputs is List<Object> && outputs is List<Object>) {
+      inputs?.cast<String>()?.forEach(previousInputs.add);
+      outputs?.cast<String>()?.forEach(previousOutputs.add);
+    } else {
+      // The json is malformed in some way.
       _dirty = true;
     }
   }

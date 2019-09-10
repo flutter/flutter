@@ -235,6 +235,28 @@ void main() {
     expect(environment.buildDir.childFile('foo.out').existsSync(), false);
   }));
 
+  test('reruns build if stamp is corrupted', () => testbed.run(() async {
+    final TestTarget testTarget = TestTarget((Environment envionment) async {
+      environment.buildDir.childFile('foo.out').createSync();
+    })
+      ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
+      ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/foo.out')];
+    fs.file('foo.dart').createSync();
+    await buildSystem.build(testTarget, environment);
+
+    // invalid JSON
+    environment.buildDir.childFile('test.stamp').writeAsStringSync('{X');
+    await buildSystem.build(testTarget, environment);
+
+    // empty file
+    environment.buildDir.childFile('test.stamp').writeAsStringSync('');
+    await buildSystem.build(testTarget, environment);
+
+    // invalid format
+    environment.buildDir.childFile('test.stamp').writeAsStringSync('{"inputs": 2, "outputs": 3}');
+    await buildSystem.build(testTarget, environment);
+  }));
+
 
   test('handles a throwing build action', () => testbed.run(() async {
     final BuildResult result = await buildSystem.build(fizzTarget, environment);
