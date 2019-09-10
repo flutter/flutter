@@ -43,6 +43,7 @@ class ShellTest : public ThreadTest {
   static void RunEngine(Shell* shell, RunConfiguration configuration);
 
   static void PumpOneFrame(Shell* shell);
+  static void DispatchFakePointerData(Shell* shell);
 
   // Declare |UnreportedTimingsCount|, |GetNeedsReportTimings| and
   // |SetNeedsReportTimings| inside |ShellTest| mainly for easier friend class
@@ -83,6 +84,9 @@ class ShellTestPlatformView : public PlatformView, public GPUSurfaceGLDelegate {
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;
+
+  // |PlatformView|
+  PointerDataDispatcherMaker GetDispatcherMaker() override;
 
   // |GPUSurfaceGLDelegate|
   bool GLContextMakeCurrent() override;

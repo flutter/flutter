@@ -11,6 +11,7 @@ void main() {}
 
 void nativeReportTimingsCallback(List<int> timings) native 'NativeReportTimingsCallback';
 void nativeOnBeginFrame(int microseconds) native 'NativeOnBeginFrame';
+void nativeOnPointerDataPacket() native 'NativeOnPointerDataPacket';
 
 @pragma('vm:entry-point')
 void reportTimingsMain() {
@@ -27,6 +28,16 @@ void reportTimingsMain() {
 
 @pragma('vm:entry-point')
 void onBeginFrameMain() {
+  window.onBeginFrame = (Duration beginTime) {
+    nativeOnBeginFrame(beginTime.inMicroseconds);
+  };
+}
+
+@pragma('vm:entry-point')
+void onPointerDataPacketMain() {
+  window.onPointerDataPacket = (PointerDataPacket packet) {
+    nativeOnPointerDataPacket();
+  };
   window.onBeginFrame = (Duration beginTime) {
     nativeOnBeginFrame(beginTime.inMicroseconds);
   };

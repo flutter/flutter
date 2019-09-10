@@ -29,6 +29,7 @@
 #include "flutter/shell/common/animator.h"
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/platform_view.h"
+#include "flutter/shell/common/pointer_data_dispatcher.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/common/surface.h"

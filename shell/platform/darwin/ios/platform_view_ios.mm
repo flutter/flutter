@@ -66,6 +66,12 @@ void PlatformViewIOS::SetOwnerViewController(fml::WeakPtr<FlutterViewController>
   }
 }
 
+PointerDataDispatcherMaker PlatformViewIOS::GetDispatcherMaker() {
+  return [](Animator& animator, RuntimeController& controller, TaskRunners task_runners) {
+    return std::make_unique<SmoothPointerDataDispatcher>(animator, controller, task_runners);
+  };
+}
+
 void PlatformViewIOS::RegisterExternalTexture(int64_t texture_id,
                                               NSObject<FlutterTexture>* texture) {
   RegisterTexture(std::make_shared<IOSExternalTextureGL>(texture_id, texture));
