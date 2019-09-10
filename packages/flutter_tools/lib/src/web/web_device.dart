@@ -183,7 +183,7 @@ String parseVersionForWindows(String input) {
 /// A special device type to allow serving for arbitrary browsers.
 class WebServerDevice extends Device {
   WebServerDevice() : super(
-    'web-server',
+    'web',
     platformType: PlatformType.web,
     category: Category.web,
     ephemeral: false,
@@ -197,7 +197,7 @@ class WebServerDevice extends Device {
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {
-    return null;
+    return NoOpDeviceLogReader(app.name);
   }
 
   @override
@@ -223,8 +223,7 @@ class WebServerDevice extends Device {
   @override
   String get name => 'Server';
 
-  @override
-  DevicePortForwarder get portForwarder => null;
+  DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 
   @override
   Future<String> get sdkNameAndVersion async => 'Flutter Tools';
