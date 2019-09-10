@@ -50,6 +50,7 @@ void main() {
         @required String target,
         @required FlutterProject flutterProject,
         @required BuildInfo buildInfo,
+        @required bool skipDwds,
       }) async {
         return mockWebFs;
       },
@@ -217,7 +218,7 @@ void main() {
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
     expect(result.code, 1);
-    expect(result.message, contains('Page requires full reload'));
+    expect(result.message, contains('Page requires refresh'));
   }));
 
   test('printHelp without details is spoopy', () => testbed.run(() async {
@@ -393,7 +394,7 @@ void main() {
   }));
 }
 
-class MockWebDevice extends Mock implements Device {}
+class MockWebDevice extends Mock implements ChromeDevice {}
 class MockBuildDaemonCreator extends Mock implements BuildDaemonCreator {}
 class MockFlutterWebFs extends Mock implements WebFs {}
 class MockDebugConnection extends Mock implements DebugConnection {}

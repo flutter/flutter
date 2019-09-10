@@ -88,9 +88,6 @@ void main() {
     // The build daemon is told to build once.
     verify(mockBuildDaemonClient.startBuild()).called(1);
 
-    // Chrome is launched based on port from above.
-    verify(mockChromeLauncher.launch('http://localhost:1234/')).called(1);
-
     // .dart_tool directory is created.
     expect(flutterProject.dartTool.existsSync(), true);
   }));
