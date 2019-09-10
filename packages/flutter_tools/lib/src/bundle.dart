@@ -180,7 +180,11 @@ Future<void> buildWithAssemble({
   for (File inputFile in result.inputFiles) {
     buffer.write('${inputFile.path} ');
   }
-  fs.file(depfilePath).writeAsStringSync(buffer.toString());
+  final File depfile = fs.file(depfilePath);
+  if (depfile.parent.existsSync()) {
+    depfile.parent.createSync(recursive: true);
+  }
+  depfile.writeAsStringSync(buffer.toString());
 }
 
 Future<AssetBundle> buildAssets({
