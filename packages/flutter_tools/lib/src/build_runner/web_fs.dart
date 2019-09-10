@@ -336,7 +336,12 @@ class BuildDaemonCreator {
   static const String _ignoredLine3 = 'have your dependencies specified fully in your pubspec.yaml';
 
   /// Start a build daemon and register the web targets.
-  Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {bool release = false, bool profile = false, bool hasPlugins = false}) async {
+  Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {
+    bool release = false,
+    bool profile = false,
+    bool hasPlugins = false,
+    bool includeTests = false,
+  }) async {
     try {
       final BuildDaemonClient client = await _connectClient(
         workingDirectory,
@@ -344,7 +349,7 @@ class BuildDaemonCreator {
         profile: profile,
         hasPlugins: hasPlugins,
       );
-      _registerBuildTargets(client);
+      _registerBuildTargets(client, includeTests);
       return client;
     } on OptionsSkew {
       throwToolExit(
@@ -357,6 +362,7 @@ class BuildDaemonCreator {
 
   void _registerBuildTargets(
     BuildDaemonClient client,
+    bool includeTests,
   ) {
     final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
       ..output = ''
@@ -365,6 +371,11 @@ class BuildDaemonCreator {
     client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
       ..target = 'web'
       ..outputLocation = outputLocation?.toBuilder()));
+    if (includeTests) {
+      client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
+        ..target = 'test'
+        ..outputLocation = outputLocation?.toBuilder()));
+    }
   }
 
   Future<BuildDaemonClient> _connectClient(

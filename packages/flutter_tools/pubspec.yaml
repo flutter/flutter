@@ -11,7 +11,7 @@ dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   archive: 2.0.10
   args: 1.5.2
-  dwds: 0.5.4
+  dwds: 0.5.5
   completion: 0.2.1+1
   coverage: 0.13.2
   crypto: 2.1.2
@@ -136,4 +136,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 1699
+# PUBSPEC CHECKSUM: 2d9a
