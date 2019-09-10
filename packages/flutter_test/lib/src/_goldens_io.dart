@@ -99,7 +99,7 @@ class LocalFileComparator extends GoldenFileComparator {
       String additionalFeedback = '';
       if (result.diffs != null) {
         additionalFeedback = '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
-        final Map<String, List<int>> diffs = result.diffs;
+        final Map<String, Object> diffs = result.diffs;
         diffs.forEach((String name, Object untypedImage) {
           final Image image = untypedImage;
           final File output = _getFailureFile(name, golden);
