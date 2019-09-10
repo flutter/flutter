@@ -9,7 +9,8 @@ import 'dart:io' as io; // ignore: dart_io_import
 import 'package:build/build.dart';
 import 'package:build_daemon/client.dart';
 import 'package:build_daemon/data/build_status.dart';
-import 'package:build_runner_core/build_runner_core.dart' as core;
+import 'package:build_runner_core/src/package_graph/package_graph.dart' as core;
+import 'package:build_runner_core/src/asset/file_based.dart' as core;
 import 'package:glob/glob.dart';
 import 'package:path/path.dart' as path;
 
