@@ -72,9 +72,10 @@ task:
       build_script: |
         cd $ENGINE_PATH/src/flutter
         ./ci/build.sh
+    - name: build_fuchsia_artifacts
       compile_fuchsia_script: |
         cd $ENGINE_PATH/src
-        ./flutter/tools/fuchsia/build_fuchsia_artifacts.py --engine-version HEAD --runtime-mode debug
+        ./flutter/tools/fuchsia/build_fuchsia_artifacts.py --engine-version HEAD --runtime-mode debug --no-lto
         cd $ENGINE_PATH/src/flutter
         ./ci/build_flutter_runner_tests.sh
 
