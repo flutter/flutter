@@ -878,7 +878,6 @@ flutter:
         .writeAsStringSync('irrelevant');
 
       mockProcessManager = MockProcessManager();
-      shouldBeToolExit = null;
     });
 
     testUsingContext('throws toolExit if gradle fails while downloading', () async {
