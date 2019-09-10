@@ -102,20 +102,11 @@ class WebFs {
     await _connectedApps?.cancel();
   }
 
-  /// Retrieve the [DebugConnection] for the current application.
-  Future<DebugConnection> runAndDebug(bool startPaused) async {
-    final Completer<DebugConnection> firstConnection = Completer<DebugConnection>();
-    _connectedApps =  _dwds.connectedApps.listen((AppConnection appConnection) async {
-      if (!startPaused) {
-        appConnection.runMain();
-      }
-      final DebugConnection debugConnection = await _dwds.debugConnection(appConnection);
-      if (!firstConnection.isCompleted) {
-        firstConnection.complete(debugConnection);
-      }
-    });
-    return firstConnection.future;
-  }
+  /// Retrieve the [AppConnection] for the current application.
+  Stream<AppConnection> connect() =>  _dwds.connectedApps;
+
+  /// Retrieve the [DebugConnection] for the [appConnection].
+  Future<DebugConnection> debug(AppConnection appConnection) => _dwds.debugConnection(appConnection);
 
   /// Perform a hard refresh of all connected browser tabs.
   Future<void> hardRefresh() async {
@@ -426,13 +417,3 @@ class BuildDaemonCreator {
     return int.tryParse(fs.file(portFilePath).readAsStringSync());
   }
 }
-<<<<<<< HEAD
-
-class WebFsResult {
-  const WebFsResult(this.debugConnection, this.appConnection);
-
-  final DebugConnection debugConnection;
-  final AppConnection appConnection;
-}
-=======
->>>>>>> 399bb04e2de41665320d3c888f40af6d8bc734a2

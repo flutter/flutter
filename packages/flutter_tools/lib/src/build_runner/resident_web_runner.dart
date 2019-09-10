@@ -66,9 +66,10 @@ class ResidentWebRunner extends ResidentRunner {
   bool get supportsServiceProtocol => isRunningDebug;
 
   WebFs _webFs;
-  WebFsResult _webFsResult;
-  DebugConnection get _debugConnection => _webFsResult.debugConnection;
+  DebugConnection _debugConnection;
+  AppConnection _appConnection;
   StreamSubscription<vmservice.Event> _stdOutSub;
+  StreamSubscription<AppConnection> _appConnections;
   bool _exited = false;
 
   vmservice.VmService get _vmService => _debugConnection.vmService;
@@ -104,6 +105,7 @@ class ResidentWebRunner extends ResidentRunner {
     await _debugConnection?.close();
     await _stdOutSub?.cancel();
     await _webFs?.stop();
+    await _appConnections?.cancel();
     _exited = true;
   }
 
@@ -164,10 +166,6 @@ class ResidentWebRunner extends ResidentRunner {
         flutterProject: flutterProject,
         buildInfo: debuggingOptions.buildInfo,
       );
-      if (supportsServiceProtocol) {
-        _webFsResult = await _webFs.runAndDebug(debuggingOptions.startPaused);
-        unawaited(_debugConnection.onDone.whenComplete(exit));
-      }
     } catch (err, stackTrace) {
       printError(err.toString());
       printError(stackTrace.toString());
@@ -187,6 +185,22 @@ class ResidentWebRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
   }) async {
+    if (supportsServiceProtocol) {
+      final Completer<DebugConnection> _firstConnection = Completer<DebugConnection>();
+      _appConnections = _webFs.connect().listen((AppConnection appConnection) async {
+        final DebugConnection debugConnection = await _webFs.debug(appConnection);
+        if (!_firstConnection.isCompleted) {
+          _appConnection = appConnection;
+          _firstConnection.complete(debugConnection);
+          unawaited(debugConnection.onDone.whenComplete(exit));
+        } else {
+          _appConnection = appConnection;
+          // Refreshing/hot restart will always unpause the application.
+          appConnection.runMain();
+        }
+      });
+      _debugConnection = await _firstConnection.future;
+    }
     // Cleanup old subscriptions. These will throw if there isn't anything
     // listening, which is fine because that is what we want to ensure.
     try {
@@ -200,13 +214,14 @@ class ResidentWebRunner extends ResidentRunner {
       // Ignore this specific error.
     }
     if (debuggingOptions.startPaused) {
-      StreamSubscription<void> resumeSubscription;
-      resumeSubscription = _debugConnection.vmService.onDebugEvent.listen((vmservice.Event event) {
+      _debugConnection.vmService.onEvent('Debug').listen((vmservice.Event event) {
+        printStatus('EVENT!!!!: $event');
         if (event.type == vmservice.EventKind.kResume) {
-          _webFsResult.appConnection.runMain();
-          resumeSubscription.cancel();
+        _appConnection.runMain();
         }
       });
+    } else {
+      _appConnection?.runMain();
     }
     Uri websocketUri;
     if (supportsServiceProtocol) {

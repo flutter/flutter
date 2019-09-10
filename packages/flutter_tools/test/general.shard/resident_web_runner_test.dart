@@ -59,8 +59,8 @@ void main() {
     fs.file('pubspec.yaml').createSync();
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
-    when(mockWebFs.runAndDebug(false)).thenAnswer((Invocation _) async {
-      return mockDebugConnection;
+    when(mockWebFs.connect()).thenAnswer((Invocation _) async* {
+      yield MockAppConnection();
     });
     when(mockWebFs.recompile()).thenAnswer((Invocation _) {
       return Future<bool>.value(false);
@@ -385,3 +385,4 @@ class MockBuildDaemonCreator extends Mock implements BuildDaemonCreator {}
 class MockFlutterWebFs extends Mock implements WebFs {}
 class MockDebugConnection extends Mock implements DebugConnection {}
 class MockVmService extends Mock implements VmService {}
+class MockAppConnection extends Mock implements AppConnection {}
