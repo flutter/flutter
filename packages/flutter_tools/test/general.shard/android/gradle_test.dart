@@ -903,7 +903,7 @@ flutter:
             'distributionPath=wrapper/dists\n'
             'zipStoreBase=GRADLE_USER_HOME\n'
             'zipStorePath=wrapper/dists\n'
-            'distributionUrl=https\\://services.gradle.org/distributions/gradle-4.10.2-all.zip\n');
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-5.4.1-all.zip\n');
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
@@ -943,7 +943,7 @@ flutter:
             'distributionPath=wrapper/dists\n'
             'zipStoreBase=GRADLE_USER_HOME\n'
             'zipStorePath=wrapper/dists\n'
-            'distributionUrl=https\\://services.gradle.org/distributions/gradle-4.10.2-all.zip\n');
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-5.4.1-all.zip\n');
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
