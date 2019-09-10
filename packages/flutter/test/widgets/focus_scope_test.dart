@@ -1006,6 +1006,29 @@ void main() {
       expect(rootNode.hasFocus, isTrue);
       expect(rootNode, equals(firstElement.owner.focusManager.rootScope));
     });
+    testWidgets('Can autofocus a node.', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      await tester.pumpWidget(
+        Focus(
+          focusNode: focusNode,
+          child: Container(),
+        ),
+      );
+
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isFalse);
+
+      await tester.pumpWidget(
+        Focus(
+          autofocus: true,
+          focusNode: focusNode,
+          child: Container(),
+        ),
+      );
+
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    });
   });
   group(Focus, () {
     testWidgets('Focus.of stops at the nearest Focus widget.', (WidgetTester tester) async {
