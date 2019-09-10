@@ -536,34 +536,32 @@ abstract class ResidentRunner {
     this.ipv6,
     this.stayResident = true,
     this.hotMode = true,
-    this.dillOutputPath,
+    String dillOutputPath,
   }) : mainPath = findMainDartFile(target),
        projectRootPath = projectRootPath ?? fs.currentDirectory.path,
        packagesFilePath = packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
+       _dillOutputPath = dillOutputPath,
+       _artifactDirectory = dillOutputPath == null
+          ? fs.systemTempDirectory.createTempSync('_fluttter_tool')
+          : fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle() {
-    // TODO(jonahwilliams): this is transitionary logic to allow us to support
-    // platforms that are not yet using flutter assemble. In the "new world",
-    // builds are isolated based on a number of factors. Thus, we cannot assume
-    // that a debug build will create the expected `build/app.dill` file. For
-    // now, I'm working around this by just creating it if it is missing here.
-    // In the future, once build & run are more strongly separated, the build
-    // environment will be plumbed through so that it all comes from a single
-    // source of truth, the [Environment].
-    final File dillOutput = fs.file(dillOutputPath ?? fs.path.join('build', 'app.dill'));
-    if (!dillOutput.existsSync()) {
-      dillOutput.createSync(recursive: true);
+    if (!_artifactDirectory.existsSync()) {
+      _artifactDirectory.createSync(recursive: true);
     }
   }
 
   @protected
   @visibleForTesting
   final List<FlutterDevice> flutterDevices;
+
   final String target;
   final DebuggingOptions debuggingOptions;
   final bool stayResident;
   final bool ipv6;
+  final String _dillOutputPath;
+  /// The parent location of the incremental artifacts.
+  final Directory _artifactDirectory;
   final Completer<int> _finished = Completer<int>();
-  final String dillOutputPath;
   final String packagesFilePath;
   final String projectRootPath;
   final String mainPath;
@@ -571,6 +569,8 @@ abstract class ResidentRunner {
 
   bool _exited = false;
   bool hotMode ;
+
+  String get dillOutputPath => _dillOutputPath ?? fs.path.join(_artifactDirectory.path, 'app.dill');
   String getReloadPath({ bool fullRestart }) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
 
   bool get isRunningDebug => debuggingOptions.buildInfo.isDebug;
