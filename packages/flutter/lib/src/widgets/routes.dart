@@ -185,6 +185,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     _animation.addStatusListener(_handleStatusChanged);
+    super.didPush();
     return _controller.forward();
   }
 
@@ -629,11 +630,16 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   // This should be called to wrap any changes to route.isCurrent, route.canPop,
   // and route.offstage.
   void _routeSetState(VoidCallback fn) {
+    if (widget.route.isCurrent) {
+      widget.route.navigator.focusScopeNode.setFirstFocus(focusScopeNode);
+    }
     setState(fn);
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool isReversing = widget.route.animation?.status == AnimationStatus.reverse;
+    focusScopeNode.canRequestFocus = !isReversing;
     return _ModalScopeStatus(
       route: widget.route,
       isCurrent: widget.route.isCurrent, // _routeSetState is called if this updates
