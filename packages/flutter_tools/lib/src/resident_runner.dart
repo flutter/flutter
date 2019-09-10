@@ -541,12 +541,12 @@ abstract class ResidentRunner {
        projectRootPath = projectRootPath ?? fs.currentDirectory.path,
        packagesFilePath = packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
        _dillOutputPath = dillOutputPath,
-       _artifactDirectory = dillOutputPath == null
+       artifactDirectory = dillOutputPath == null
           ? fs.systemTempDirectory.createTempSync('_fluttter_tool')
           : fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle() {
-    if (!_artifactDirectory.existsSync()) {
-      _artifactDirectory.createSync(recursive: true);
+    if (!artifactDirectory.existsSync()) {
+      artifactDirectory.createSync(recursive: true);
     }
   }
 
@@ -560,7 +560,8 @@ abstract class ResidentRunner {
   final bool ipv6;
   final String _dillOutputPath;
   /// The parent location of the incremental artifacts.
-  final Directory _artifactDirectory;
+  @visibleForTesting
+  final Directory artifactDirectory;
   final Completer<int> _finished = Completer<int>();
   final String packagesFilePath;
   final String projectRootPath;
@@ -570,7 +571,7 @@ abstract class ResidentRunner {
   bool _exited = false;
   bool hotMode ;
 
-  String get dillOutputPath => _dillOutputPath ?? fs.path.join(_artifactDirectory.path, 'app.dill');
+  String get dillOutputPath => _dillOutputPath ?? fs.path.join(artifactDirectory.path, 'app.dill');
   String getReloadPath({ bool fullRestart }) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
 
   bool get isRunningDebug => debuggingOptions.buildInfo.isDebug;
@@ -714,7 +715,10 @@ abstract class ResidentRunner {
   ///
   /// Throws an [AssertionError] if [Devce.supportsScreenshot] is not true.
   Future<void> screenshot(FlutterDevice device) async {
-    assert(device.device.supportsScreenshot);
+    if (!device.device.supportsScreenshot) {
+      throwToolExit('Device ${device.device.name} does not support screenshots.');
+    }
+
     final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...', timeout: timeoutConfiguration.fastOperation);
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
@@ -849,7 +853,13 @@ abstract class ResidentRunner {
     return exitCode;
   }
 
-  Future<void> preExit() async { }
+  @mustCallSuper
+  Future<void> preExit() async {
+    // If _dillOutputPath is null, we created a temporary directory for the dill.
+    if (_dillOutputPath == null) {
+      artifactDirectory.deleteSync(recursive: true);
+    }
+  }
 
   Future<void> exitApp() async {
     final List<Future<void>> futures = <Future<void>>[];
