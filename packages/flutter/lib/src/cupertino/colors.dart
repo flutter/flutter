@@ -325,13 +325,15 @@ class CupertinoDynamicColor extends Color {
   /// Resolves the given [Color] by calling [resolveFrom].
   ///
   /// If the given color is already a concrete [Color], it will be returned as is.
+  /// If the given color is null, returns null.
   /// If the given color is a [CupertinoDynamicColor], but the given [BuildContext]
   /// lacks the dependencies required to the color resolution, the default trait
   /// value will be used ([Brightness.light] platform brightness, normal contrast,
   /// [CupertinoUserInterfaceLevelData.base] elevation level), unless [nullOk] is
   /// set to false, in which case an exception will be thrown.
   static Color resolve(Color resolvable, BuildContext context, { bool nullOk = true }) {
-    assert(resolvable != null);
+    if (resolvable == null)
+      return null;
     assert(context != null);
     return (resolvable is CupertinoDynamicColor)
       ? resolvable.resolveFrom(context, nullOk: nullOk)
@@ -1089,14 +1091,14 @@ const CupertinoSystemColorsData _kSystemColorsFallback = CupertinoSystemColorsDa
     darkHighContrastElevatedColor: Color.fromARGB(255, 36, 36, 38),
   ),
   secondarySystemGroupedBackground: CupertinoDynamicColor(
-    color: Color.fromARGB(255, 242, 242, 247),
-    darkColor: Color.fromARGB(255, 0, 0, 0),
-    highContrastColor: Color.fromARGB(255, 235, 235, 240),
-    darkHighContrastColor: Color.fromARGB(255, 0, 0, 0),
-    elevatedColor: Color.fromARGB(255, 242, 242, 247),
-    darkElevatedColor: Color.fromARGB(255, 28, 28, 30),
-    highContrastElevatedColor: Color.fromARGB(255, 235, 235, 240),
-    darkHighContrastElevatedColor: Color.fromARGB(255, 36, 36, 38),
+    color: Color.fromARGB(255, 255, 255, 255),
+    darkColor: Color.fromARGB(255, 28, 28, 30),
+    highContrastColor: Color.fromARGB(255, 255, 255, 255),
+    darkHighContrastColor: Color.fromARGB(255, 36, 36, 38),
+    elevatedColor: Color.fromARGB(255, 255, 255, 255),
+    darkElevatedColor: Color.fromARGB(255, 44, 44, 46),
+    highContrastElevatedColor: Color.fromARGB(255, 255, 255, 255),
+    darkHighContrastElevatedColor: Color.fromARGB(255, 54, 54, 56),
   ),
   tertiarySystemGroupedBackground: CupertinoDynamicColor(
     color: Color.fromARGB(255, 242, 242, 247),

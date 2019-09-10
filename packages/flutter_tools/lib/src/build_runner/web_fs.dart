@@ -31,6 +31,8 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../platform_plugins.dart';
+import '../plugins.dart';
 import '../project.dart';
 import '../web/chrome.dart';
 
@@ -38,7 +40,7 @@ import '../web/chrome.dart';
 const String kBuildTargetName = 'web';
 
 /// A factory for creating a [Dwds] instance.
-DwdsFactory get dwdsFactpory => context.get<DwdsFactory>() ?? Dwds.start;
+DwdsFactory get dwdsFactory => context.get<DwdsFactory>() ?? Dwds.start;
 
 /// The [BuildDaemonCreator] instance.
 BuildDaemonCreator get buildDaemonCreator => context.get<BuildDaemonCreator>() ?? const BuildDaemonCreator();
@@ -49,10 +51,10 @@ WebFsFactory get webFsFactory => context.get<WebFsFactory>() ?? WebFs.start;
 /// A factory for creating an [HttpMultiServer] instance.
 HttpMultiServerFactory get httpMultiServerFactory => context.get<HttpMultiServerFactory>() ?? HttpMultiServer.bind;
 
-/// A function with the same signature as [HttpMultiServier.bind].
+/// A function with the same signature as [HttpMultiServer.bind].
 typedef HttpMultiServerFactory = Future<HttpServer> Function(dynamic address, int port);
 
-/// A function with the same signatire as [Dwds.start].
+/// A function with the same signature as [Dwds.start].
 typedef DwdsFactory = Future<Dwds> Function({
   @required int applicationPort,
   @required int assetServerPort,
@@ -88,6 +90,7 @@ class WebFs {
   final Dwds _dwds;
   final Chrome _chrome;
   final BuildDaemonClient _client;
+  StreamSubscription<void> _connectedApps;
 
   static const String _kHostName = 'localhost';
 
@@ -96,15 +99,22 @@ class WebFs {
     await _dwds.stop();
     await _server.close(force: true);
     await _chrome.close();
+    await _connectedApps?.cancel();
   }
 
   /// Retrieve the [DebugConnection] for the current application.
-  Future<WebFsResult> runAndDebug(bool startPaused) async {
-    final AppConnection appConnection = await _dwds.connectedApps.first;
-    if (!startPaused) {
-      appConnection.runMain();
-    }
-    return WebFsResult(await _dwds.debugConnection(appConnection), appConnection);
+  Future<DebugConnection> runAndDebug(bool startPaused) async {
+    final Completer<DebugConnection> firstConnection = Completer<DebugConnection>();
+    _connectedApps =  _dwds.connectedApps.listen((AppConnection appConnection) async {
+      if (!startPaused) {
+        appConnection.runMain();
+      }
+      final DebugConnection debugConnection = await _dwds.debugConnection(appConnection);
+      if (!firstConnection.isCompleted) {
+        firstConnection.complete(debugConnection);
+      }
+    });
+    return firstConnection.future;
   }
 
   /// Perform a hard refresh of all connected browser tabs.
@@ -146,9 +156,11 @@ class WebFs {
     if (!flutterProject.dartTool.existsSync()) {
       flutterProject.dartTool.createSync(recursive: true);
     }
+
+    final bool hasWebPlugins = findPlugins(flutterProject).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     // Start the build daemon and run an initial build.
     final BuildDaemonClient client = await buildDaemonCreator
-      .startBuildDaemon(fs.currentDirectory.path, release: buildInfo.isRelease, profile: buildInfo.isProfile);
+      .startBuildDaemon(fs.currentDirectory.path, release: buildInfo.isRelease, profile: buildInfo.isProfile, hasPlugins: hasWebPlugins);
     client.startBuild();
     // Only provide relevant build results
     final Stream<BuildResult> filteredBuildResults = client.buildResults
@@ -165,7 +177,7 @@ class WebFs {
 
     // Initialize the dwds server.
     final int port = await os.findFreePort();
-    final Dwds dwds = await dwdsFactpory(
+    final Dwds dwds = await dwdsFactory(
       hostname: _kHostName,
       applicationPort: port,
       applicationTarget: kBuildTargetName,
@@ -254,7 +266,7 @@ class WebFs {
         return Response.ok(file.readAsBytesSync(), headers: <String, String>{
           'Content-Type': 'text/javascript',
         });
-      } else if (request.url.path.contains('dart_sdk')) {
+      } else if (request.url.path.endsWith('dart_sdk.js')) {
         final File file = fs.file(fs.path.join(
           artifacts.getArtifactPath(Artifact.flutterWebSdk),
           'kernel',
@@ -264,12 +276,29 @@ class WebFs {
         return Response.ok(file.readAsBytesSync(), headers: <String, String>{
           'Content-Type': 'text/javascript',
         });
+      } else if (request.url.path.endsWith('dart_sdk.js.map')) {
+        final File file = fs.file(fs.path.join(
+          artifacts.getArtifactPath(Artifact.flutterWebSdk),
+          'kernel',
+          'amd',
+          'dart_sdk.js.map',
+        ));
+        return Response.ok(file.readAsBytesSync());
       } else if (request.url.path.endsWith('.dart')) {
         // This is likely a sourcemap request. The first segment is the
         // package name, and the rest is the path to the file relative to
         // the package uri. For example, `foo/bar.dart` would represent a
         // file at a path like `foo/lib/bar.dart`. If there is no leading
         // segment, then we assume it is from the current package.
+
+        // Handle sdk requests that have mangled urls from engine build.
+        if (request.url.path.contains('flutter_web_sdk')) {
+          // Note: the request is a uri and not a file path, so they always use `/`.
+          final String sdkPath = fs.path.joinAll(request.url.path.split('flutter_web_sdk/').last.split('/'));
+          final String webSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
+          return Response.ok(fs.file(fs.path.join(webSdkPath, sdkPath)).readAsBytesSync());
+        }
+
         final String packageName = request.url.pathSegments.length == 1
           ? flutterProject.manifest.appName
           : request.url.pathSegments.first;
@@ -309,12 +338,13 @@ class BuildDaemonCreator {
   static const String _ignoredLine3 = 'have your dependencies specified fully in your pubspec.yaml';
 
   /// Start a build daemon and register the web targets.
-  Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {bool release = false, bool profile = false }) async {
+  Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {bool release = false, bool profile = false, bool hasPlugins = false}) async {
     try {
       final BuildDaemonClient client = await _connectClient(
         workingDirectory,
         release: release,
         profile: profile,
+        hasPlugins: hasPlugins,
       );
       _registerBuildTargets(client);
       return client;
@@ -341,7 +371,7 @@ class BuildDaemonCreator {
 
   Future<BuildDaemonClient> _connectClient(
     String workingDirectory,
-    { bool release, bool profile }
+    { bool release, bool profile, bool hasPlugins }
   ) {
     final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
     final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
@@ -362,6 +392,7 @@ class BuildDaemonCreator {
         '--define', 'flutter_tools:entrypoint=release=$release',
         '--define', 'flutter_tools:entrypoint=profile=$profile',
         '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
+        '--define', 'flutter_tools:shell=hasPlugins=$hasPlugins',
       ],
       logHandler: (ServerLog serverLog) {
         switch (serverLog.level) {
@@ -395,6 +426,7 @@ class BuildDaemonCreator {
     return int.tryParse(fs.file(portFilePath).readAsStringSync());
   }
 }
+<<<<<<< HEAD
 
 class WebFsResult {
   const WebFsResult(this.debugConnection, this.appConnection);
@@ -402,3 +434,5 @@ class WebFsResult {
   final DebugConnection debugConnection;
   final AppConnection appConnection;
 }
+=======
+>>>>>>> 399bb04e2de41665320d3c888f40af6d8bc734a2

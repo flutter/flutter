@@ -104,22 +104,22 @@ const TextStyle _kDefaultPickerDarkTextStyle = TextStyle(
 );
 
 // Eyeballed value since it's not documented in https://developer.apple.com/design/resources/.
+// Inspected on iOS 13 simulator with "Debug View Hierarchy".
 const TextStyle _kDefaultDateTimePickerLightTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Display',
   fontSize: 21,
-  fontWeight: FontWeight.w300,
-  letterSpacing: -1.05,
+  fontWeight: FontWeight.normal,
   color: CupertinoColors.black,
 );
 
 // Eyeballed value since it's not documented in https://developer.apple.com/design/resources/.
+// Inspected on iOS 13 simulator with "Debug View Hierarchy".
 const TextStyle _kDefaultDateTimePickerDarkTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Display',
   fontSize: 21,
-  fontWeight: FontWeight.w300,
-  letterSpacing: -1.05,
+  fontWeight: FontWeight.normal,
   color: CupertinoColors.white,
 );
 
@@ -216,7 +216,7 @@ class CupertinoTextThemeData extends Diagnosticable {
   /// Returns a copy of the current [CupertinoTextThemeData] with all the colors
   /// resolved against the given [BuildContext].
   CupertinoTextThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
-    Color convertColor(Color color) => color == null ? null : CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+    Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
     TextStyle resolveTextStyle(TextStyle textStyle) {
       return textStyle?.copyWith(
