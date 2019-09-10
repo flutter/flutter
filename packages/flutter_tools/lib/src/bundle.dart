@@ -181,7 +181,7 @@ Future<void> buildWithAssemble({
     buffer.write('${inputFile.path} ');
   }
   final File depfile = fs.file(depfilePath);
-  if (depfile.parent.existsSync()) {
+  if (!depfile.parent.existsSync()) {
     depfile.parent.createSync(recursive: true);
   }
   depfile.writeAsStringSync(buffer.toString());
