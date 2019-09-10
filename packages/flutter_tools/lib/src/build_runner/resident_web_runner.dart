@@ -19,6 +19,7 @@ import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import '../resident_runner.dart';
 import '../web/web_runner.dart';
 import 'web_fs.dart';
@@ -234,6 +235,7 @@ class ResidentWebRunner extends ResidentRunner {
       progressId: 'hot.restart',
     );
     final bool success = await _webFs.recompile();
+    String restartEvent = 'restart';
     if (!success) {
       status.stop();
       return OperationResult(1, 'Failed to recompile application.');
@@ -250,6 +252,13 @@ class ResidentWebRunner extends ResidentRunner {
         return OperationResult(1, 'Page requires full reload');
       } finally {
         status.stop();
+        HotEvent(restartEvent,
+          targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
+          sdkName: await device.sdkNameAndVersion,
+          emulator: false,
+          fullRestart: true,
+          reason: reason,
+        ).send();
       }
     }
     // If we're not in hot mode, the only way to restart is to reload the tab.
