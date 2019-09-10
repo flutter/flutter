@@ -1503,6 +1503,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
     return Semantics(
       child: _pageBuilder(context, animation, secondaryAnimation),
       scopesRoute: true,
+      focusable: true,
       explicitChildNodes: true,
     );
   }
