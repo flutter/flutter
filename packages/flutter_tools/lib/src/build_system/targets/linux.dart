@@ -29,7 +29,6 @@ class UnpackLinux extends Target {
     Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_plugin_registrar.h'),
     Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_glfw.h'),
     Source.pattern('{PROJECT_DIR}/linux/flutter/icudtl.dat'),
-    Source.pattern('{PROJECT_DIR}/linux/flutter/cpp_client_wrapper_glfw/*'),
   ];
 
   @override
