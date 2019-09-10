@@ -801,7 +801,7 @@ void main() {
         find.byType(RepaintBoundary).last,
         matchesGoldenFile(
           'nav_bar_test.standard_title.png',
-          version: 1,
+          version: 2,
         ),
       );
     },
@@ -835,7 +835,7 @@ void main() {
         find.byType(RepaintBoundary).last,
         matchesGoldenFile(
           'nav_bar_test.large_title.png',
-          version: 1,
+          version: 2,
         ),
       );
     },
