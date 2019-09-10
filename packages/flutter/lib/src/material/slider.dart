@@ -381,8 +381,16 @@ class Slider extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('value', value));
+    properties.add(ObjectFlagProperty<ValueChanged<double>>('onChanged', onChanged, ifNull: 'disabled'));
+    properties.add(ObjectFlagProperty<ValueChanged<double>>.has('onChangeStart', onChangeStart));
+    properties.add(ObjectFlagProperty<ValueChanged<double>>.has('onChangeEnd', onChangeEnd));
     properties.add(DoubleProperty('min', min));
     properties.add(DoubleProperty('max', max));
+    properties.add(IntProperty('divisions', divisions));
+    properties.add(StringProperty('label', label));
+    properties.add(ColorProperty('activeColor', activeColor));
+    properties.add(ColorProperty('inactiveColor', inactiveColor));
+    properties.add(ObjectFlagProperty<ValueChanged<double>>.has('semanticFormatterCallback', semanticFormatterCallback));
   }
 }
 
