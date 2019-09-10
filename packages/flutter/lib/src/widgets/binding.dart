@@ -940,6 +940,9 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
       owner.buildScope(element, () {
         element.mount(null, null);
       });
+      // This is most likely the first time the framework is ready to produce
+      // a frame. Ensure that we are asked for one.
+      SchedulerBinding.instance.ensureVisualUpdate();
     } else {
       element._newWidget = this;
       element.markNeedsBuild();
