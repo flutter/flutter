@@ -8,7 +8,9 @@
 
  /// Ensure the [WidgetsBinding] is initialized.
 WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String> environment]) {
-  AutomatedTestWidgetsFlutterBinding();
+  if (WidgetsBinding.instance == null) {
+    AutomatedTestWidgetsFlutterBinding();
+  }
   assert(WidgetsBinding.instance is TestWidgetsFlutterBinding);
   return WidgetsBinding.instance;
 }
