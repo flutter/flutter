@@ -126,7 +126,7 @@ void main() {
     final BuildResult result = await buildSystem.build(badTarget, environment);
 
     expect(result.hasException, true);
-    expect(result.exceptions.values.single.exception, isInstanceOf<MissingOutputException>());
+    expect(result.exceptions.values.single.exception, isInstanceOf<FileSystemException>());
   }));
 
   test('Saves a stamp file with inputs and outputs', () => testbed.run(() async {
@@ -209,6 +209,52 @@ void main() {
     await buildSystem.build(barTarget, environment);
 
     expect(shared, 1);
+  }));
+
+  test('Automatically cleans old outputs when dag changes', () => testbed.run(() async {
+    final TestTarget testTarget = TestTarget((Environment envionment) async {
+      environment.buildDir.childFile('foo.out').createSync();
+    })
+      ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
+      ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/foo.out')];
+    fs.file('foo.dart').createSync();
+
+    await buildSystem.build(testTarget, environment);
+
+    expect(environment.buildDir.childFile('foo.out').existsSync(), true);
+
+    final TestTarget testTarget2 = TestTarget((Environment envionment) async {
+      environment.buildDir.childFile('bar.out').createSync();
+    })
+      ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
+      ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/bar.out')];
+
+    await buildSystem.build(testTarget2, environment);
+
+    expect(environment.buildDir.childFile('bar.out').existsSync(), true);
+    expect(environment.buildDir.childFile('foo.out').existsSync(), false);
+  }));
+
+  test('reruns build if stamp is corrupted', () => testbed.run(() async {
+    final TestTarget testTarget = TestTarget((Environment envionment) async {
+      environment.buildDir.childFile('foo.out').createSync();
+    })
+      ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
+      ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/foo.out')];
+    fs.file('foo.dart').createSync();
+    await buildSystem.build(testTarget, environment);
+
+    // invalid JSON
+    environment.buildDir.childFile('test.stamp').writeAsStringSync('{X');
+    await buildSystem.build(testTarget, environment);
+
+    // empty file
+    environment.buildDir.childFile('test.stamp').writeAsStringSync('');
+    await buildSystem.build(testTarget, environment);
+
+    // invalid format
+    environment.buildDir.childFile('test.stamp').writeAsStringSync('{"inputs": 2, "outputs": 3}');
+    await buildSystem.build(testTarget, environment);
   }));
 
 
