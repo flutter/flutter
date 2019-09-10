@@ -1,4 +1,4 @@
-Signature: 74f59f4bf247930a9c4e3b04db74b92f
+Signature: 80603eb2a40e5b92814ca8c780c1def0
 
 UNUSED LICENSES:
 
@@ -3364,6 +3364,8 @@ FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRingBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRingBuffer.h
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStagingManager.cpp
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStagingManager.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStencilAttachment.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStencilAttachment.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnTexture.cpp
