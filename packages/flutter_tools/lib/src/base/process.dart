@@ -275,13 +275,23 @@ Future<RunResult> runAsync(
 
     int exitCode;
     exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
+      // The process timed out. Kill it.
+      processManager.killPid(process.pid);
       return null;
     });
 
     String stdoutString;
     String stderrString;
     try {
-      await Future.wait<void>(<Future<void>>[stdoutFuture, stderrFuture]);
+      Future<void> stdioFuture =
+          Future.wait<void>(<Future<void>>[stdoutFuture, stderrFuture]);
+      if (exitCode == null) {
+        // If we had to kill the process for a timeout, only wait a short time
+        // for the stdio streams to drain in case killing the process didn't
+        // work.
+        stdioFuture = stdioFuture.timeout(const Duration(seconds: 1));
+      }
+      await stdioFuture;
     } catch (_) {
       // Ignore errors on the process' stdout and stderr streams. Just capture
       // whatever we got, and use the exit code
@@ -298,9 +308,6 @@ Future<RunResult> runAsync(
       printTrace(runResult.toString());
       return runResult;
     }
-
-    // The process timed out. Kill it.
-    processManager.killPid(process.pid);
 
     // If we are out of timeoutRetries, throw a ProcessException.
     if (timeoutRetries < 0) {
