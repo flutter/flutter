@@ -35,22 +35,16 @@ class VisualStudioValidator extends DoctorValidator {
       }
 
       // Messages for faulty installations.
-      if (!visualStudio.isComplete) {
-        status = ValidationType.partial;
-        messages.add(ValidationMessage.error(userMessages.visualStudioIsIncomplete));
-      }
-
-      if (!visualStudio.isLaunchable) {
-        status = ValidationType.partial;
-        messages.add(ValidationMessage.error(userMessages.visualStudioNotLaunchable));
-      }
-
       if (visualStudio.isRebootRequired) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.error(userMessages.visualStudioRebootRequired));
-      }
-
-      if (!visualStudio.hasNecessaryComponents) {
+      } else if (!visualStudio.isComplete) {
+        status = ValidationType.partial;
+        messages.add(ValidationMessage.error(userMessages.visualStudioIsIncomplete));
+      } else if (!visualStudio.isLaunchable) {
+        status = ValidationType.partial;
+        messages.add(ValidationMessage.error(userMessages.visualStudioNotLaunchable));
+      } else  if (!visualStudio.hasNecessaryComponents) {
         status = ValidationType.partial;
         final int majorVersion = int.tryParse(visualStudio.fullVersion.split('.')[0]);
         messages.add(ValidationMessage.error(

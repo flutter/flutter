@@ -151,6 +151,9 @@ class VisualStudio {
   /// This key is under the 'catalog' entry.
   static const String _isPrereleaseKey = 'productMilestoneIsPreRelease';
 
+  /// vswhere argument keys
+  static const String _prereleaseKey = '-prerelease';
+
   /// Returns the details dictionary for the newest version of Visual Studio
   /// that includes all of [requiredComponents], if there is one.
   Map<String, dynamic> _visualStudioDetails(
@@ -160,8 +163,7 @@ class VisualStudio {
         : <String>['-requires', ...requiredComponents];
     try {
       final List<String> defaultArguments = <String>[
-        '-format',
-        'json',
+        '-format', 'json',
         '-utf8',
         '-latest',
       ];
@@ -186,6 +188,18 @@ class VisualStudio {
     return null;
   }
 
+  /// Checks if the given installation has issues that the user must resolve.
+  bool installationHasIssues(Map<String, dynamic>installationDetails) {
+    assert(installationDetails != null);
+    assert(installationDetails[_isCompleteKey] != null);
+    assert(installationDetails[_isRebootRequiredKey] != null);
+    assert(installationDetails[_isLaunchableKey] != null);
+
+    return installationDetails[_isCompleteKey] == false ||
+      installationDetails[_isRebootRequiredKey] == true ||
+      installationDetails[_isLaunchableKey] == false;
+  }
+
   /// Returns the details dictionary for the latest version of Visual Studio
   /// that has all required components.
   Map<String, dynamic> _cachedUsableVisualStudioDetails;
@@ -195,7 +209,13 @@ class VisualStudio {
     // If a stable version is not found, try searching for a pre-release version.
     _cachedUsableVisualStudioDetails ??= _visualStudioDetails(
         requiredComponents: _requiredComponents().keys,
-        additionalArguments: <String>['-prerelease']);
+        additionalArguments: <String>[_prereleaseKey]);
+    if (_cachedUsableVisualStudioDetails != null) {
+      if (installationHasIssues(_cachedUsableVisualStudioDetails)) {
+        _cachedAnyVisualStudioDetails = _cachedUsableVisualStudioDetails;
+        return null;
+      }
+    }
     return _cachedUsableVisualStudioDetails;
   }
 
@@ -205,7 +225,7 @@ class VisualStudio {
   Map<String, dynamic> get _anyVisualStudioDetails {
     // Search for all types of installations.
     _cachedAnyVisualStudioDetails ??= _visualStudioDetails(
-        additionalArguments: <String>['-prerelease', '-all']);
+        additionalArguments: <String>[_prereleaseKey, '-all']);
     return _cachedAnyVisualStudioDetails;
   }
 

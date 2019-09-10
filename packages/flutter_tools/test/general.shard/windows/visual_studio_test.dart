@@ -264,6 +264,34 @@ void main() {
       Platform: () => windowsPlatform,
       ProcessManager: () => mockProcessManager,
     });
+    
+    testUsingContext('vcvarsPath returns null when VS is present but with require components but installation is faulty', () {
+      final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
+        ..['isRebootRequired'] = true;
+      setMockCompatibleVisualStudioInstallation(response);
+      setMockPrereleaseVisualStudioInstallation(null);
+
+      visualStudio = VisualStudio();
+      expect(visualStudio.vcvarsPath, isNull);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFilesystem,
+      Platform: () => windowsPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('hasNecessaryComponents returns false when VS is present with required components but installation is faulty', () {
+      final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
+        ..['isRebootRequired'] = true;
+      setMockCompatibleVisualStudioInstallation(response);
+      setMockPrereleaseVisualStudioInstallation(null);
+
+      visualStudio = VisualStudio();
+      expect(visualStudio.hasNecessaryComponents, false);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFilesystem,
+      Platform: () => windowsPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
 
     testUsingContext('VS metadata is available when VS is present, even if missing components', () {
       setMockCompatibleVisualStudioInstallation(null);
