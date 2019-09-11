@@ -4,6 +4,7 @@
 
 import 'dart:ui' show Color;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 /// Interactive states that some of the Material widgets can take on when
@@ -68,7 +69,8 @@ enum MaterialState {
 /// set of states.
 typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 
-/// A widget that uses [builder] to obtain its child widget.
+/// A widget that can be used to create widgets with custom interactive behavior,
+/// such as a button that changes its label text style on hover/focus/press.
 ///
 /// If any of the parameters are updated, this widget will call [builder] with the
 /// proper `Set<MaterialState>`.
@@ -76,6 +78,51 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// If [hovered], [focused], or [pressed] are null, [MaterialStateBuilder] will wrap
 /// listener widgets for hover, focus, and press changes and call [builder] with the
 /// proper `Set<MaterialState>`.
+///
+/// {@tool sample}
+///
+/// This example shows how you can use [MaterialStateBuilder] to create a custom
+/// interactive button. When the button is hovered, the text gets an underline,
+/// the elevation increases, and the border width increases. When the button is
+/// pressed, the text and border become yellow.
+///
+/// ```dart
+/// MaterialStateBuilder(
+///   disabled: false,
+///   builder: (BuildContext context, Set<MaterialState> states) {
+///     final bool pressed = states.contains(MaterialState.pressed);
+///     final bool hovered = states.contains(MaterialState.hovered);
+///
+///     return RaisedButton(
+///       onPressed: () {},
+///       elevation: pressed ? 10 : 2,
+///       color: Colors.blue,
+///       shape: RoundedRectangleBorder(
+///         side: BorderSide(
+///           color: pressed ? Colors.yellow : Colors.white,
+///           width: hovered ? 2 : 1,
+///         ),
+///       ),
+///       child: Text(
+///         'Button',
+///         style: TextStyle(
+///           color: pressed ? Colors.yellow : Colors.white,
+///           decoration: hovered ? TextDecoration.underline : null,
+///           fontSize: 20.0,
+///         ),
+///       ),
+///     );
+///   },
+/// )
+///
+/// ```
+/// {@end-tool}
+///
+/// For simple interactive behavior such as changing the text color or elevation,
+/// consider using existing parameters such:
+///  * [FlatButton.disabledTextColor].
+///  * [RaisedButton.focusElevation].
+///  * [InputChip.pressElevation].
 class MaterialStateBuilder extends StatefulWidget {
   /// Creates a widget that listens for changes in states and delegates its
   /// build to a callback.
@@ -161,9 +208,7 @@ class _MaterialStateBuilderState extends State<MaterialStateBuilder> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
+  void _updateAllStates() {
     if (widget.hovered != null)
       _updateState(MaterialState.hovered, widget.hovered);
     if (widget.focused != null)
@@ -176,17 +221,15 @@ class _MaterialStateBuilderState extends State<MaterialStateBuilder> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _updateAllStates();
+  }
+
+  @override
   void didUpdateWidget(MaterialStateBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.hovered != null)
-      _updateState(MaterialState.hovered, widget.hovered);
-    if (widget.focused != null)
-      _updateState(MaterialState.focused, widget.focused);
-    if (widget.pressed != null)
-      _updateState(MaterialState.pressed, widget.pressed);
-    _updateState(MaterialState.disabled, widget.disabled);
-    _updateState(MaterialState.selected, widget.selected);
-    _updateState(MaterialState.error, widget.error);
+    _updateAllStates();
   }
 
   @override
@@ -212,8 +255,6 @@ class _MaterialStateBuilderState extends State<MaterialStateBuilder> {
     if (widget.pressed == null) {
       result = GestureDetector(
         excludeFromSemantics: true,
-        onForcePressStart: (_) => _updateState(MaterialState.pressed, true),
-        onForcePressEnd: (_) => _updateState(MaterialState.pressed, false),
         onTapDown: (_) => _updateState(MaterialState.pressed, true),
         onTapCancel: () => _updateState(MaterialState.pressed, false),
         onTapUp: (_) => _updateState(MaterialState.pressed, false),

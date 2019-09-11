@@ -1796,7 +1796,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
           enabled: canTap ? widget.isEnabled : null,
           child: result,
         );
-
       },
     );
   }
