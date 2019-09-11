@@ -158,7 +158,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        if (useProguard(project)) {
+        if (useProguard()) {
             String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                     "gradle", "flutter_proguard_rules.pro")
             project.android.buildTypes {
@@ -465,8 +465,7 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
-
-    private static Boolean useProguard(Project project) {
+    private Boolean useProguard() {
         if (project.hasProperty('proguard')) {
             return project.property('proguard').toBoolean()
         }
