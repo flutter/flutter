@@ -244,7 +244,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   }
 
   /// Draws the magnifier borders.
-  Widget _buildMagnifierScreen(Color resolved) {
+  Widget _buildMagnifierScreen() {
     final Color resolvedBorderColor = CupertinoDynamicColor.resolve(_kHighlighterBorder, context);
 
     return IgnorePointer(
@@ -291,7 +291,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               ),
             ),
           ),
-          _buildMagnifierScreen(resolvedBackgroundColor),
+          _buildMagnifierScreen(),
         ],
       ),
     );
