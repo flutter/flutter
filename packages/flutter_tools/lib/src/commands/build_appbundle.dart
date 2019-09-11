@@ -22,12 +22,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
     argParser
       ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
-      ..addFlag('proguard',
-        negatable: true,
-        defaultsTo: true,
-        help: 'Whether to enable Proguard on release mode. '
-              'To learn more, see: https://flutter.dev/docs/deployment/android#enabling-proguard',
-      )
       ..addMultiOption('target-platform',
         splitCommas: true,
         defaultsTo: <String>['android-arm', 'android-arm64'],
@@ -69,8 +63,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(getBuildInfo(),
-      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName),
-      proguard: argResults['proguard'],
+      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName)
     );
     await androidBuilder.buildAab(
       project: FlutterProject.current(),

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' hide File;
 
 import 'package:args/command_runner.dart';
@@ -16,7 +17,21 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
+
+Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr = '' }) {
+  final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[
+    utf8.encode(stdout),
+  ]);
+  final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(<List<int>>[
+    utf8.encode(stderr),
+  ]);
+  final Process process = MockProcess();
+
+  when(process.stdout).thenAnswer((_) => stdoutStream);
+  when(process.stderr).thenAnswer((_) => stderrStream);
+  when(process.exitCode).thenAnswer((_) => Future<int>.value(exitCode));
+  return process;
+}
 
 void main() {
   group('channel', () {
