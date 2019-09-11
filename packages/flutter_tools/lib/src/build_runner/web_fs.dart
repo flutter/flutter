@@ -107,11 +107,18 @@ class WebFs {
   }
 
   /// Retrieve the [DebugConnection] for the current application.
-  Future<DebugConnection> runAndDebug() {
+  ///
+  /// if [useExtension] is true, will attempt to connect via the extension
+  /// stream.
+  Future<DebugConnection> runAndDebug(bool useExtension) {
     final Completer<DebugConnection> firstConnection = Completer<DebugConnection>();
     _connectedApps = _dwds.connectedApps.listen((AppConnection appConnection) async {
-      appConnection.runMain();
-      final DebugConnection debugConnection = await _dwds.debugConnection(appConnection);
+      if (!useExtension) {
+        appConnection.runMain();
+      }
+      final DebugConnection debugConnection = useExtension
+          ? await _dwds.extensionDebugConnections.stream.first
+          : await _dwds.debugConnection(appConnection);
       if (!firstConnection.isCompleted) {
         firstConnection.complete(debugConnection);
       }
@@ -169,7 +176,7 @@ class WebFs {
     await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
     // Initialize the dwds server.
-    final int hostPort = int.tryParse(port ?? '') ?? await os.findFreePort();
+    final int hostPort = port == null ? await os.findFreePort() : int.tryParse(port);
     // Map the bootstrap files to the correct package directory.
     final String targetBaseName = fs.path
       .withoutExtension(target).replaceFirst('lib${fs.path.separator}', '');
@@ -234,7 +241,7 @@ class WebFs {
       client,
       server,
       dwds,
-      'http://$_kHostName:$port/',
+      'http://$_kHostName:$hostPort/',
     );
   }
 
