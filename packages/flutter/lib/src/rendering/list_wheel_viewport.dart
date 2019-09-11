@@ -384,8 +384,7 @@ class RenderListWheelViewport
   double _offCenterOpacity = 1.0;
   set offCenterOpacity(double value) {
     assert(value != null);
-    assert(value > 0);
-    assert(value <= 1);
+    assert(value >= 0 && value <= 1);
     if (value == _offCenterOpacity)
       return;
     _offCenterOpacity = value;

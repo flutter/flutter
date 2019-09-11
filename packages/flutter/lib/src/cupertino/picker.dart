@@ -248,31 +248,25 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     final Color resolvedBorderColor = CupertinoDynamicColor.resolve(_kHighlighterBorder, context);
 
     return IgnorePointer(
-      child: Column(
-        children: <Widget>[
-          Expanded(child: Container()),
-          Container(
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(width: 0.0, color: resolvedBorderColor),
-                bottom: BorderSide(width: 0.0, color: resolvedBorderColor),
-              ),
-            ),
-            constraints: BoxConstraints.expand(
-              height: widget.itemExtent * widget.magnification,
+      child: Center(
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(width: 0.0, color: resolvedBorderColor),
+              bottom: BorderSide(width: 0.0, color: resolvedBorderColor),
             ),
           ),
-          Expanded(child: Container()),
-        ],
+          constraints: BoxConstraints.expand(
+            height: widget.itemExtent * widget.magnification,
+          ),
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color resolvedBackgroundColor = widget.backgroundColor == null
-      ? null
-      : CupertinoDynamicColor.resolve(widget.backgroundColor, context);
+    final Color resolvedBackgroundColor = CupertinoDynamicColor.resolve(widget.backgroundColor, context);
 
     final Widget result = DefaultTextStyle(
       style: CupertinoTheme.of(context).textTheme.pickerTextStyle,
