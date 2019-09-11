@@ -463,8 +463,8 @@ Future<void> _runTests() async {
 Future<void> _runWebTests() async {
   // TODO(yjbanov): re-enable when web test cirrus flakiness is resolved
   await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
-    'test/foundation/',
     // TODO(yjbanov): re-enable when flakiness is resolved
+    // 'test/foundation/',
     // 'test/physics/',
     // 'test/rendering/',
     // 'test/services/',
