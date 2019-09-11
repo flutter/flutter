@@ -234,6 +234,12 @@ def main():
       default='all')
 
   parser.add_argument(
+      '--archs',
+      type=str,
+      choices=['x64', 'arm64', 'all'],
+      default='all')
+
+  parser.add_argument(
       '--no-lto',
       action='store_true',
       default=False,
@@ -243,7 +249,7 @@ def main():
   RemoveDirectoryIfExists(_bucket_directory)
   build_mode = args.runtime_mode
 
-  archs = ['x64', 'arm64']
+  archs = ['x64', 'arm64'] if args.archs == 'all' else [args.archs]
   runtime_modes = ['debug', 'profile', 'release']
   product_modes = [False, False, True]
 
