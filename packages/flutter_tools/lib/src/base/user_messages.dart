@@ -167,8 +167,8 @@ class UserMessages {
       '$consequence\n'
       'To upgrade:\n'
       '$upgradeInstructions';
-  String cocoaPodsOutdated(String recVersion, String consequence, String upgradeInstructions) =>
-      'CocoaPods out of date ($recVersion is recommended).\n'
+  String cocoaPodsOutdated(String currentVersion, String recVersion, String consequence, String upgradeInstructions) =>
+      'CocoaPods $currentVersion out of date ($recVersion is recommended).\n'
       '$consequence\n'
       'To upgrade:\n'
       '$upgradeInstructions';
@@ -193,6 +193,12 @@ class UserMessages {
   String get visualStudioMissing =>
       'Visual Studio not installed; this is necessary for Windows development.\n'
       'Download at https://visualstudio.microsoft.com/downloads/.';
+  String get visualStudioIsPrerelease => 'The current Visual Studio installation is a pre-release version. It may not be '
+      'supported by Flutter yet.';
+  String get visualStudioNotLaunchable =>
+      'The current Visual Studio installation is not launchable. Please reinstall Visual Studio.';
+  String get visualStudioIsIncomplete => 'The current Visual Studio installation is incomplete. Please reinstall Visual Studio.';
+  String get visualStudioRebootRequired => 'Visual Studio requires a reboot of your system to complete installation.';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';

@@ -79,6 +79,7 @@ void main() {
   test('Can create webFs from mocked interfaces', () => testbed.run(() async {
     final FlutterProject flutterProject = FlutterProject.current();
     await WebFs.start(
+      skipDwds: false,
       target: fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
@@ -86,9 +87,6 @@ void main() {
 
     // The build daemon is told to build once.
     verify(mockBuildDaemonClient.startBuild()).called(1);
-
-    // Chrome is launched based on port from above.
-    verify(mockChromeLauncher.launch('http://localhost:1234/')).called(1);
 
     // .dart_tool directory is created.
     expect(flutterProject.dartTool.existsSync(), true);

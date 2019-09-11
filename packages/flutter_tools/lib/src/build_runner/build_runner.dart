@@ -21,6 +21,7 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../codegen.dart';
 import '../dart/pub.dart';
+import '../dart/sdk.dart';
 import '../globals.dart';
 import '../project.dart';
 
@@ -112,7 +113,7 @@ class BuildRunner extends CodeGenerator {
       }
       scriptIdFile.writeAsBytesSync(appliedBuilderDigest);
       final ProcessResult generateResult = await processManager.run(<String>[
-        'pub', 'run', 'build_runner', 'generate-build-script'
+        sdkBinaryName('pub'), 'run', 'build_runner', 'generate-build-script'
       ], workingDirectory: syntheticPubspec.parent.path);
       if (generateResult.exitCode != 0) {
         throwToolExit('Error generating build_script snapshot: ${generateResult.stderr}');
