@@ -22,6 +22,7 @@ import 'visual_studio.dart';
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {String target}) async {
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot,
+    'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,
     'PROJECT_DIR': windowsProject.project.directory.path,
     'TRACK_WIDGET_CREATION': (buildInfo?.trackWidgetCreation == true).toString(),
   };
