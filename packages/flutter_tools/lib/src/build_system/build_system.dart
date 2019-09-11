@@ -10,7 +10,6 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../cache.dart';
@@ -21,9 +20,6 @@ import 'file_hash_store.dart';
 import 'source.dart';
 
 export 'source.dart';
-
-/// The [BuildSystem] instance.
-BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// Configuration for the build system itself.
 class BuildSystemConfig {
@@ -501,14 +497,14 @@ class _BuildInstance {
       }
       if (canSkip) {
         skipped = true;
-        printTrace('Skipping target: ${node.target.name}');
+        printStatus('Skipping target: ${node.target.name}');
         for (File output in node.outputs) {
           outputFiles[output.path] = output;
         }
       } else {
-        printTrace('${node.target.name}: Starting');
+        printStatus('${node.target.name}: Starting');
         await node.target.build(environment);
-        printTrace('${node.target.name}: Complete');
+        printStatus('${node.target.name}: Complete');
 
         // Update hashes for output files.
         await fileCache.hashFiles(node.outputs);
