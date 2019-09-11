@@ -146,6 +146,96 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
   }
 }
 
+// A transition designed to match the default page transition in Android Q.
+class _ZoomingPageTransition extends StatelessWidget {
+  const _ZoomingPageTransition({
+    Key key,
+    this.animation,
+    this.secondaryAnimation,
+    this.child,
+  }) : super(key: key);
+
+  // The new page fades in quickly just as it starts increasing in size.
+  static final Tween<double> _opacityTween = Tween<double>(
+    begin: 0.0,
+    end: 1.0,
+  );
+
+  // The new page begins at 80% size before increasing until its at full size.
+  static final Tween<double> _primaryScaleTween = Tween<double>(
+    begin: 0.95,
+    end: 1.0,
+  );
+
+  // The previous page begins at full size before expanding to 125% of its size
+  // to create a 'zoom' effect.
+  static final Tween<double> _secondaryScaleTween = Tween<double>(
+    begin: 1.0,
+    end: 1.1,
+  );
+
+  // The scrim obscures the old page by becoming increasingly opaque.
+  static final Tween<double> _scrimOpacityTween = Tween<double>(
+    begin: 0.0,
+    end: 0.25,
+  );
+
+  // The acceleration curve used by the animations in the transition.
+  static const Curve _transitionCurve = Cubic(0.20, 0.00, 0.00, 1.00);
+
+  final Animation<double> animation;
+  final Animation<double> secondaryAnimation;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final CurvedAnimation primaryAnimation = CurvedAnimation(
+      parent: animation,
+      curve: _transitionCurve,
+      reverseCurve: _transitionCurve.flipped,
+    );
+
+    final CurvedAnimation primaryEntranceAnimation = CurvedAnimation(
+      parent: primaryAnimation,
+      curve: const Interval(0.5, 1.0),
+      reverseCurve: const Interval(0.0, 1.0),
+    );
+
+    // Quickly fade in the new page.
+    final Animation<double> opacityAnimation = _opacityTween.animate(CurvedAnimation(
+      parent: primaryAnimation,
+      curve: const Interval(0.5, 0.6),
+      reverseCurve: const Interval(0.99, 1.0),
+    ));
+
+    // Scale in the new page.
+    final Animation<double> primaryScaleAnimation = _primaryScaleTween.animate(primaryEntranceAnimation);
+
+    // "Zoom" into the new page by scaling the previous page.
+    final Animation<double> secondaryScaleAnimation = _secondaryScaleTween.animate(CurvedAnimation(
+      parent: secondaryAnimation,
+      curve: _transitionCurve,
+      reverseCurve: _transitionCurve.flipped,
+    ));
+
+    final Animation<double> scrimAnimation = _scrimOpacityTween.animate(primaryEntranceAnimation);
+
+    return FadeTransition(
+      opacity: opacityAnimation,
+      child: Container(
+        color: Colors.black.withOpacity(scrimAnimation.value),
+        child: ScaleTransition(
+          scale: primaryScaleAnimation,
+          child: ScaleTransition(
+            scale: secondaryScaleAnimation,
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation.
 ///
@@ -158,6 +248,8 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a default page transition.
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
+///  * [ZoomingPageTransitionsBuilder], which defines a page transition similar
+///    to the one provided in Android Q.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 abstract class PageTransitionsBuilder {
@@ -191,6 +283,8 @@ abstract class PageTransitionsBuilder {
 ///
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
+///  * [ZoomingPageTransitionsBuilder], which defines a page transition similar
+///    to the one provided in Android Q.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
@@ -216,6 +310,8 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 /// See also:
 ///
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a default page transition.
+///  * [ZoomingPageTransitionsBuilder], which defines a page transition similar
+///    to the one provided in Android Q.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
@@ -238,6 +334,37 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
+/// Used by [PageTransitionsTheme] to define a zooming [MaterialPageRoute] page
+/// transition animation that looks like the default page transition used on
+/// Android Q.
+///
+/// See also:
+///
+///  * [FadeUpwardsPageTransitionsBuilder], which defines a default page transition.
+///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
+///    similar to the one provided by Android P.
+///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
+///    transition that matches native iOS page transitions.
+class ZoomingPageTransitionsBuilder extends PageTransitionsBuilder {
+  /// Construct a [ZoomingPageTransitionsBuilder].
+  const ZoomingPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+      PageRoute<T> route,
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child,
+      ) {
+    return _ZoomingPageTransition(
+      animation: animation,
+      secondaryAnimation: secondaryAnimation,
+      child: child,
+    );
+  }
+}
+
 /// Used by [PageTransitionsTheme] to define a horizontal [MaterialPageRoute]
 /// page transition animation that matches native iOS page transitions.
 ///
@@ -246,6 +373,8 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a default page transition.
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
+///  * [ZoomingPageTransitionsBuilder], which defines a page transition similar
+///    to the one provided in Android Q.
 class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Construct a [CupertinoPageTransitionsBuilder].
   const CupertinoPageTransitionsBuilder();
@@ -279,6 +408,8 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a default page transition.
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
+///  * [ZoomingPageTransitionsBuilder], which defines a page transition similar
+///    to the one provided in Android Q.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 @immutable
