@@ -201,12 +201,12 @@ class VisualStudio {
 
     if (installationDetails[_isLaunchableKey] != null && !installationDetails[_isLaunchableKey]) {
       return true;
-    } 
+    }
 
     if (installationDetails[_isRebootRequiredKey] != null && installationDetails[_isRebootRequiredKey]) {
       return true;
     }
-     
+
     return false;
   }
 
