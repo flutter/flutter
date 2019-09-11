@@ -528,12 +528,7 @@ class BrowserManager {
       }
       completer.completeError(error, stackTrace);
     }));
-
-    return completer.future.timeout(const Duration(seconds: 30), onTimeout: () {
-      chrome.close();
-      throwToolExit('Timed out waiting for ${runtime.name} to connect.');
-      return;
-    });
+    return completer.future;
   }
 
   /// Loads [_BrowserEnvironment].
