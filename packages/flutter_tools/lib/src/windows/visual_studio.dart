@@ -44,7 +44,7 @@ class VisualStudio {
   String get fullVersion => _bestVisualStudioDetails[_fullVersionKey];
 
   // Properties that determine the status of the installation. There might be
-  // Windows versions that don't include them, so default to a "valid" value to
+  // Visual Studio versions that don't include them, so default to a "valid" value to
   // avoid false negatives.
 
   /// True there is complete installation of Visual Studio.
@@ -192,7 +192,7 @@ class VisualStudio {
   /// Checks if the given installation has issues that the user must resolve.
   ///
   /// Returns false if the required information is missing since older versions
-  /// of Windows might not include them.
+  /// of Visual Studio might not include them.
   bool installationHasIssues(Map<String, dynamic>installationDetails) {
     assert(installationDetails != null);
     if (installationDetails[_isCompleteKey] != null && !installationDetails[_isCompleteKey]) {

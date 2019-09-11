@@ -47,7 +47,7 @@ void main() {
   };
 
   // A version of a response that doesn't include certain installation status
-  // information that might be missing in older Windows versions.
+  // information that might be missing in older Visual Studio versions.
   const Map<String, dynamic> _oldResponse = <String, dynamic>{
     'installationPath': visualStudioPath,
     'displayName': 'Visual Studio Community 2017',
