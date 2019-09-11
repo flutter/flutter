@@ -81,7 +81,6 @@ flutter_tools:lib/''');
         fs.path.join('bin', 'cache', 'pkg', 'sky_engine', 'sdk_ext',
             'vmservice_io.dart'),
         fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
-        fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart.exe'),
         fs.path.join(engineArtifacts, getNameForHostPlatform(hostPlatform),
             'frontend_server.dart.snapshot'),
         fs.path.join(engineArtifacts, 'android-arm-profile',
