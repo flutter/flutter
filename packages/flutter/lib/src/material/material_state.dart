@@ -4,7 +4,6 @@
 
 import 'dart:ui' show Color;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 /// Interactive states that some of the Material widgets can take on when
