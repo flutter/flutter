@@ -146,11 +146,11 @@ abstract class Target {
     final File stamp = _findStampFile(environment);
     final List<String> inputPaths = <String>[];
     for (File input in inputs) {
-      inputPaths.add(input.resolveSymbolicLinksSync());
+      inputPaths.add(input.path);
     }
     final List<String> outputPaths = <String>[];
     for (File output in outputs) {
-      outputPaths.add(output.resolveSymbolicLinksSync());
+      outputPaths.add(output.path);
     }
     final Map<String, Object> result = <String, Object>{
       'inputs': inputPaths,

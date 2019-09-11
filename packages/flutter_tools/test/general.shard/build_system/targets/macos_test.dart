@@ -87,9 +87,16 @@ void main() {
     }
     when(processManager.run(any)).thenAnswer((Invocation invocation) async {
       final List<String> arguments = invocation.positionalArguments.first;
-      final Directory source = fs.directory(arguments[arguments.length - 2]);
-      final Directory target = fs.directory(arguments.last)
+      final String sourcePath = arguments[arguments.length - 2];
+      final String targetPath = arguments.last;
+      // Verify there are no trailing `/`.
+      expect(sourcePath, isNot(endsWith(fs.path.separator)));
+      expect(targetPath, isNot(endsWith(fs.path.separator)));
+
+      final Directory source = fs.directory(sourcePath);
+      final Directory target = fs.directory(targetPath)
         ..createSync(recursive: true);
+
       for (FileSystemEntity entity in source.listSync(recursive: true)) {
         if (entity is File) {
           final String relative = fs.path.relative(entity.path, from: source.path);
