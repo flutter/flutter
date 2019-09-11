@@ -4,7 +4,7 @@
 
 import 'dart:ui' show Color;
 
-import '../../widgets.dart';
+import 'package:flutter/widgets.dart';
 
 /// Interactive states that some of the Material widgets can take on when
 /// receiving input from the user.
@@ -68,23 +68,32 @@ enum MaterialState {
 /// set of states.
 typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 
-/// A widget that uses [builder] to obtain it's child widget.
+/// A widget that uses [builder] to obtain its child widget.
 ///
-/// [MaterialStateBuilder] will listen for hover, focus, and press changes and
-/// call [builder] with the current `Set<MaterialState>`.
+/// If any of the parameters are updated, this widget will call [builder] with the
+/// proper `Set<MaterialState>`.
 ///
-/// Additionally, [MaterialStateBuilder] will listen for changes to the given
-/// [disabled], [selected], and [error] parameters, and call [builder] any time
-/// they are updated.
+/// If [hovered], [focused], or [pressed] are null, [MaterialStateBuilder] will wrap
+/// listener widgets for hover, focus, and press changes and call [builder] with the
+/// proper `Set<MaterialState>`.
 class MaterialStateBuilder extends StatefulWidget {
   /// Creates a widget that listens for changes in states and delegates its
   /// build to a callback.
+  ///
+  /// If [hovered], [focused], or [pressed] are null, this widget will use [MouseRegion],
+  /// [Focus], and [GestureDetector] widgets respectively to determine the hover, focus
+  /// and pressed states.
+  ///
+  /// The [disabled], [selected], and [error] arguments default to `false`.
   ///
   /// The [builder], [disabled], [selected], and [error] arguments must be
   /// non-null.
   const MaterialStateBuilder({
     Key key,
     @required this.builder,
+    this.hovered,
+    this.focused,
+    this.pressed,
     this.disabled = false,
     this.selected = false,
     this.error = false,
@@ -96,18 +105,45 @@ class MaterialStateBuilder extends StatefulWidget {
 
   /// The callback that returns the child of this widget based on the current
   /// `Set<MaterialState>`.
-  final MaterialPropertyResolver<Widget> builder;
+  final Function(BuildContext context, Set<MaterialState> states) builder;
+
+  /// Whether or not the child of this widget is considered to be
+  /// [MaterialState.hovered].
+  ///
+  /// If `null`, widget will be wrapped in a [MouseRegion] to determine when
+  /// the child widget is being hovered over.
+  final bool hovered;
+
+  /// Whether or not the child of this widget is considered to be
+  /// [MaterialState.focused].
+  ///
+  /// If `null`, widget will be wrapped in a [Focus] to determine when the child
+  /// widget is in focus.
+  final bool focused;
+
+  /// Whether or not the child of this widget is considered to be
+  /// [MaterialState.pressed].
+  ///
+  /// If `null`, widget will be wrapped in a [Focus] to determine when the child
+  /// widget is in focus.
+  final bool pressed;
 
   /// Whether or not the child of this widget is considered to be
   /// [MaterialState.disabled].
+  ///
+  /// Defaults to `false`.
   final bool disabled;
 
   /// Whether or not the child of this widget is considered to be
   /// [MaterialState.selected].
+  ///
+  /// Defaults to `false`.
   final bool selected;
 
   /// Whether or not the child of this widget is considered to be
   /// [MaterialState.error].
+  ///
+  /// Defaults to `false`.
   final bool error;
 
   @override
@@ -128,6 +164,12 @@ class _MaterialStateBuilderState extends State<MaterialStateBuilder> {
   @override
   void initState() {
     super.initState();
+    if (widget.hovered != null)
+      _updateState(MaterialState.hovered, widget.hovered);
+    if (widget.focused != null)
+      _updateState(MaterialState.focused, widget.focused);
+    if (widget.pressed != null)
+      _updateState(MaterialState.pressed, widget.pressed);
     _updateState(MaterialState.disabled, widget.disabled);
     _updateState(MaterialState.selected, widget.selected);
     _updateState(MaterialState.error, widget.error);
@@ -136,6 +178,12 @@ class _MaterialStateBuilderState extends State<MaterialStateBuilder> {
   @override
   void didUpdateWidget(MaterialStateBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.hovered != null)
+      _updateState(MaterialState.hovered, widget.hovered);
+    if (widget.focused != null)
+      _updateState(MaterialState.focused, widget.focused);
+    if (widget.pressed != null)
+      _updateState(MaterialState.pressed, widget.pressed);
     _updateState(MaterialState.disabled, widget.disabled);
     _updateState(MaterialState.selected, widget.selected);
     _updateState(MaterialState.error, widget.error);
@@ -143,22 +191,37 @@ class _MaterialStateBuilderState extends State<MaterialStateBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => _updateState(MaterialState.hovered, true),
-      onExit: (_) => _updateState(MaterialState.hovered, false),
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
+    Widget result = widget.builder(context, _states);
+
+    if (widget.hovered == null) {
+      result = MouseRegion(
+        onEnter: (_) => _updateState(MaterialState.hovered, true),
+        onExit: (_) => _updateState(MaterialState.hovered, false),
+        child: result,
+      );
+    }
+
+    if (widget.focused == null) {
+      result = Focus(
+        skipTraversal: true,
+        onFocusChange: (bool value) => _updateState(MaterialState.focused, value),
+        child: result,
+      );
+    }
+
+    if (widget.pressed == null) {
+      result = GestureDetector(
+        excludeFromSemantics: true,
+        onForcePressStart: (_) => _updateState(MaterialState.pressed, true),
+        onForcePressEnd: (_) => _updateState(MaterialState.pressed, false),
         onTapDown: (_) => _updateState(MaterialState.pressed, true),
         onTapCancel: () => _updateState(MaterialState.pressed, false),
         onTapUp: (_) => _updateState(MaterialState.pressed, false),
-        excludeFromSemantics: true,
-        child: Focus(
-          skipTraversal: true,
-          onFocusChange: (bool value) => _updateState(MaterialState.focused, value),
-          child: widget.builder(_states),
-        ),
-      ),
-    );
+        child: result,
+      );
+    }
+
+    return result;
   }
 }
 

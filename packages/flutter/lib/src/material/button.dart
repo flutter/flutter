@@ -252,6 +252,17 @@ class RawMaterialButton extends StatefulWidget {
 class _RawMaterialButtonState extends State<RawMaterialButton> {
   bool _pressed = false;
 
+  void _handleHighlightChanged(bool value) {
+    if (_pressed != value) {
+      setState(() {
+        _pressed = value;
+        if (widget.onHighlightChanged != null) {
+          widget.onHighlightChanged(value);
+        }
+      });
+    }
+  }
+
   @override
   void didUpdateWidget(RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -261,17 +272,6 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     // manually update pressed to false when this situation occurs.
     if (!widget.enabled && _pressed) {
       _handleHighlightChanged(false);
-    }
-  }
-
-  void _handleHighlightChanged(bool value) {
-    if (_pressed != value) {
-      setState(() {
-        _pressed = value;
-        if (widget.onHighlightChanged != null) {
-          widget.onHighlightChanged(value);
-        }
-      });
     }
   }
 
@@ -295,16 +295,16 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget result = MaterialStateBuilder(
+    return MaterialStateBuilder(
       disabled: !widget.enabled,
-      builder: (Set<MaterialState> states) {
+      pressed: _pressed,
+      builder: (BuildContext context, Set<MaterialState> states) {
         final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(widget.textStyle?.color, states);
-        final ShapeBorder effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, states);
+        final ShapeBorder effectiveShape = MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, states);
 
-        return Focus(
+        final Widget result = Focus(
           focusNode: widget.focusNode,
           canRequestFocus: widget.enabled,
-//          onFocusChange: _handleFocusedChanged,
           autofocus: widget.autofocus,
           child: ConstrainedBox(
             constraints: widget.constraints,
@@ -339,27 +339,26 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
             ),
           ),
         );
+        Size minSize;
+        switch (widget.materialTapTargetSize) {
+          case MaterialTapTargetSize.padded:
+            minSize = const Size(48.0, 48.0);
+            break;
+          case MaterialTapTargetSize.shrinkWrap:
+            minSize = Size.zero;
+            break;
+        }
+
+        return Semantics(
+          container: true,
+          button: true,
+          enabled: widget.enabled,
+          child: _InputPadding(
+            minSize: minSize,
+            child: result,
+          ),
+        );
       },
-    );
-
-    Size minSize;
-    switch (widget.materialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        minSize = const Size(48.0, 48.0);
-        break;
-      case MaterialTapTargetSize.shrinkWrap:
-        minSize = Size.zero;
-        break;
-    }
-
-    return Semantics(
-      container: true,
-      button: true,
-      enabled: widget.enabled,
-      child: _InputPadding(
-        minSize: minSize,
-        child: result,
-      ),
     );
   }
 }

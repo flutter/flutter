@@ -71,7 +71,8 @@ void main() {
 
     // Highlighted (pressed).
     await gesture.down(center);
-    await tester.pumpAndSettle();
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     semanticsEnabled: true,
@@ -135,7 +136,8 @@ void main() {
 
     // Highlighted (pressed).
     await gesture.down(center);
-    await tester.pumpAndSettle();
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     semanticsEnabled: true,
@@ -203,7 +205,8 @@ void main() {
 
     // Highlighted (pressed).
     await gesture.down(center);
-    await tester.pumpAndSettle();
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(textColor(), pressedColor);
   });
 
@@ -268,7 +271,8 @@ void main() {
 
     // Highlighted (pressed).
     await gesture.down(center);
-    await tester.pumpAndSettle();
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(iconColor(), pressedColor);
   });
 
