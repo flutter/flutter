@@ -231,7 +231,7 @@ class WebFs {
     Cascade cascade = Cascade();
     cascade = cascade.add(handler);
     cascade = cascade.add(_assetHandler(flutterProject));
-    final HttpServer server = await httpMultiServerFactory(_kHostName, hostPort);
+    final HttpServer server = await httpMultiServerFactory(hostname ?? _kHostName, hostPort);
     shelf_io.serveRequests(server, cascade.handler);
     return WebFs(
       client,
