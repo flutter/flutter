@@ -63,6 +63,38 @@ void main() {
     expect(widget.style.color.withAlpha(255), CupertinoColors.destructiveRed);
   });
 
+  testWidgets('Dialog dark theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
+          child: CupertinoAlertDialog(
+            title: const Text('The Title'),
+            content: const Text('Content'),
+            actions: <Widget>[
+              CupertinoDialogAction(child: const Text('Cancel'), isDefaultAction: true, onPressed: () {}),
+              const CupertinoDialogAction(child: Text('OK')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RichText cancelText =  tester.widget<RichText>(
+      find.descendant(of: find.text('Cancel'), matching: find.byType(RichText)),
+    );
+
+    expect(
+      cancelText.text.style.color.value,
+      0xFF0A84FF, // dark elevated color of systemBlue.
+    );
+
+    expect(
+      find.byType(CupertinoAlertDialog),
+      paints..rect(color: const Color(0xBF1E1E1E)),
+    );
+  });
+
   testWidgets('Has semantic annotations', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(const MaterialApp(home: Material(
@@ -739,8 +771,8 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    const Color normalButtonBackgroundColor = Color(0xc0ffffff);
-    const Color pressedButtonBackgroundColor = Color(0x90ffffff);
+    const Color normalButtonBackgroundColor = Color(0xCCF2F2F2);
+    const Color pressedButtonBackgroundColor = Color(0xFFE1E1E1);
     final RenderBox firstButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 1');
     final RenderBox secondButtonBox = findActionButtonRenderBoxByTitle(tester, 'Option 2');
     final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
