@@ -793,10 +793,7 @@ class TextBox {
 
   @override
   String toString() {
-    if (engine.assertionsEnabled) {
-      return 'TextBox.fromLTRBD(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)}, $direction)';
-    }
-    return super.toString();
+    return 'TextBox.fromLTRBD(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)}, $direction)';
   }
 }
 
