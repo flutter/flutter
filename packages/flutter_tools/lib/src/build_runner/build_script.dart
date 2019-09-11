@@ -63,8 +63,6 @@ final DartPlatform flutterWebPlatform =
   // Flutter web specific libraries.
   'ui',
   '_engine',
-  'io',
-  'isolate',
 ]);
 
 /// The builders required to compile a Flutter application to the web.
@@ -238,6 +236,7 @@ class FlutterWebEntrypointBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
+  log.info('Does $targets contain ${buildStep.inputId.path}?????????????');
     if (!targets.any((String target) => buildStep
         .inputId.path.contains(target.replaceFirst('.dart', '_web_entrypoint.dart')))) {
       return;
