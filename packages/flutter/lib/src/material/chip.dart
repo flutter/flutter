@@ -1475,8 +1475,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   Animation<double> enableAnimation;
   Animation<double> selectionFade;
 
-  final Set<MaterialState> _states = <MaterialState>{};
-
   bool get hasDeleteButton => widget.onDeleted != null;
   bool get hasAvatar => widget.avatar != null;
 
@@ -1493,8 +1491,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   void initState() {
     assert(widget.onSelected == null || widget.onPressed == null);
     super.initState();
-    _updateState(MaterialState.disabled, !widget.isEnabled);
-    _updateState(MaterialState.selected, widget.selected);
     selectController = AnimationController(
       duration: _kSelectDuration,
       value: widget.selected == true ? 1.0 : 0.0,
@@ -1565,17 +1561,12 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     super.dispose();
   }
 
-  void _updateState(MaterialState state, bool value) {
-    value ? _states.add(state) : _states.remove(state);
-  }
-
   void _handleTapDown(TapDownDetails details) {
     if (!canTap) {
       return;
     }
     setState(() {
       _isTapping = true;
-      _updateState(MaterialState.pressed, true);
     });
   }
 
@@ -1585,7 +1576,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     }
     setState(() {
       _isTapping = false;
-      _updateState(MaterialState.pressed, false);
     });
   }
 
@@ -1595,23 +1585,10 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     }
     setState(() {
       _isTapping = false;
-      _updateState(MaterialState.pressed, false);
     });
     // Only one of these can be set, so only one will be called.
     widget.onSelected?.call(!widget.selected);
     widget.onPressed?.call();
-  }
-
-  void _handleFocus(bool isFocused) {
-    setState(() {
-      _updateState(MaterialState.focused, isFocused);
-    });
-  }
-
-  void _handleHover(bool isHovered) {
-    setState(() {
-      _updateState(MaterialState.hovered, isHovered);
-    });
   }
 
   /// Picks between three different colors, depending upon the state of two
@@ -1633,7 +1610,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isEnabled != widget.isEnabled) {
       setState(() {
-        _updateState(MaterialState.disabled, !widget.isEnabled);
         if (widget.isEnabled) {
           enableController.forward();
         } else {
@@ -1652,7 +1628,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     }
     if (oldWidget.selected != widget.selected) {
       setState(() {
-        _updateState(MaterialState.selected, widget.selected);
         if (widget.selected == true) {
           selectController.forward();
         } else {
@@ -1711,112 +1686,118 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
 
-    final ThemeData theme = Theme.of(context);
-    final ChipThemeData chipTheme = ChipTheme.of(context);
-    final TextDirection textDirection = Directionality.of(context);
-    final ShapeBorder shape = widget.shape ?? chipTheme.shape;
-    final double elevation = widget.elevation ?? chipTheme.elevation ?? _defaultElevation;
-    final double pressElevation = widget.pressElevation ?? chipTheme.pressElevation ?? _defaultPressElevation;
-    final Color shadowColor = widget.shadowColor ?? chipTheme.shadowColor ?? _defaultShadowColor;
-    final Color selectedShadowColor = widget.selectedShadowColor ?? chipTheme.selectedShadowColor ?? _defaultShadowColor;
+    return MaterialStateBuilder(
+      pressed: _isTapping,
+      selected: widget.selected,
+      disabled: !widget.isEnabled,
+      builder: (BuildContext context, Set<MaterialState> states) {
+        final ThemeData theme = Theme.of(context);
+        final ChipThemeData chipTheme = ChipTheme.of(context);
+        final TextDirection textDirection = Directionality.of(context);
+        final ShapeBorder shape = widget.shape ?? chipTheme.shape;
+        final double elevation = widget.elevation ?? chipTheme.elevation ?? _defaultElevation;
+        final double pressElevation = widget.pressElevation ?? chipTheme.pressElevation ?? _defaultPressElevation;
+        final Color shadowColor = widget.shadowColor ?? chipTheme.shadowColor ?? _defaultShadowColor;
+        final Color selectedShadowColor = widget.selectedShadowColor ?? chipTheme.selectedShadowColor ?? _defaultShadowColor;
 
-    final TextStyle effectiveLabelStyle = widget.labelStyle ?? chipTheme.labelStyle;
-    final Color resolvedLabelColor =  MaterialStateProperty.resolveAs<Color>(effectiveLabelStyle?.color, _states);
-    final TextStyle resolvedLabelStyle = effectiveLabelStyle?.copyWith(color: resolvedLabelColor);
+        final TextStyle effectiveLabelStyle = widget.labelStyle ?? chipTheme.labelStyle;
+        final Color resolvedLabelColor =  MaterialStateProperty.resolveAs<Color>(effectiveLabelStyle?.color, states);
+        final TextStyle resolvedLabelStyle = effectiveLabelStyle?.copyWith(color: resolvedLabelColor);
 
-    Widget result = Focus(
-      onFocusChange: _handleFocus,
-      focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
-      canRequestFocus: widget.isEnabled,
-      child: Material(
-        elevation: isTapping ? pressElevation : elevation,
-        shadowColor: widget.selected ? selectedShadowColor : shadowColor,
-        animationDuration: pressedAnimationDuration,
-        shape: shape,
-        clipBehavior: widget.clipBehavior,
-        child: InkWell(
-          onTap: canTap ? _handleTap : null,
-          onTapDown: canTap ? _handleTapDown : null,
-          onTapCancel: canTap ? _handleTapCancel : null,
-          onHover: canTap ? _handleHover : null,
-          customBorder: shape,
-          child: AnimatedBuilder(
-            animation: Listenable.merge(<Listenable>[selectController, enableController]),
-            builder: (BuildContext context, Widget child) {
-              return Container(
-                decoration: ShapeDecoration(
-                  shape: shape,
-                  color: getBackgroundColor(chipTheme),
+        Widget result = Focus(
+          focusNode: widget.focusNode,
+          autofocus: widget.autofocus,
+          canRequestFocus: widget.isEnabled,
+          child: Material(
+            elevation: isTapping ? pressElevation : elevation,
+            shadowColor: widget.selected ? selectedShadowColor : shadowColor,
+            animationDuration: pressedAnimationDuration,
+            shape: shape,
+            clipBehavior: widget.clipBehavior,
+            child: InkWell(
+              onTap: canTap ? _handleTap : null,
+              onTapDown: canTap ? _handleTapDown : null,
+              onTapCancel: canTap ? _handleTapCancel : null,
+              customBorder: shape,
+              child: AnimatedBuilder(
+                animation: Listenable.merge(<Listenable>[selectController, enableController]),
+                builder: (BuildContext context, Widget child) {
+                  return Container(
+                    decoration: ShapeDecoration(
+                      shape: shape,
+                      color: getBackgroundColor(chipTheme),
+                    ),
+                    child: child,
+                  );
+                },
+                child: _wrapWithTooltip(
+                  widget.tooltip,
+                  widget.onPressed,
+                  _ChipRenderWidget(
+                    theme: _ChipRenderTheme(
+                      label: DefaultTextStyle(
+                        overflow: TextOverflow.fade,
+                        textAlign: TextAlign.start,
+                        maxLines: 1,
+                        softWrap: false,
+                        style: resolvedLabelStyle,
+                        child: widget.label,
+                      ),
+                      avatar: AnimatedSwitcher(
+                        child: widget.avatar,
+                        duration: _kDrawerDuration,
+                        switchInCurve: Curves.fastOutSlowIn,
+                      ),
+                      deleteIcon: AnimatedSwitcher(
+                        child: _buildDeleteIcon(context, theme, chipTheme),
+                        duration: _kDrawerDuration,
+                        switchInCurve: Curves.fastOutSlowIn,
+                      ),
+                      brightness: chipTheme.brightness,
+                      padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
+                      labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
+                      showAvatar: hasAvatar,
+                      showCheckmark: widget.showCheckmark,
+                      canTapBody: canTap,
+                    ),
+                    value: widget.selected,
+                    checkmarkAnimation: checkmarkAnimation,
+                    enableAnimation: enableAnimation,
+                    avatarDrawerAnimation: avatarDrawerAnimation,
+                    deleteDrawerAnimation: deleteDrawerAnimation,
+                    isEnabled: widget.isEnabled,
+                    avatarBorder: widget.avatarBorder,
+                  ),
                 ),
-                child: child,
-              );
-            },
-            child: _wrapWithTooltip(
-              widget.tooltip,
-              widget.onPressed,
-              _ChipRenderWidget(
-                theme: _ChipRenderTheme(
-                  label: DefaultTextStyle(
-                    overflow: TextOverflow.fade,
-                    textAlign: TextAlign.start,
-                    maxLines: 1,
-                    softWrap: false,
-                    style: resolvedLabelStyle,
-                    child: widget.label,
-                  ),
-                  avatar: AnimatedSwitcher(
-                    child: widget.avatar,
-                    duration: _kDrawerDuration,
-                    switchInCurve: Curves.fastOutSlowIn,
-                  ),
-                  deleteIcon: AnimatedSwitcher(
-                    child: _buildDeleteIcon(context, theme, chipTheme),
-                    duration: _kDrawerDuration,
-                    switchInCurve: Curves.fastOutSlowIn,
-                  ),
-                  brightness: chipTheme.brightness,
-                  padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
-                  labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
-                  showAvatar: hasAvatar,
-                  showCheckmark: widget.showCheckmark,
-                  canTapBody: canTap,
-                ),
-                value: widget.selected,
-                checkmarkAnimation: checkmarkAnimation,
-                enableAnimation: enableAnimation,
-                avatarDrawerAnimation: avatarDrawerAnimation,
-                deleteDrawerAnimation: deleteDrawerAnimation,
-                isEnabled: widget.isEnabled,
-                avatarBorder: widget.avatarBorder,
               ),
             ),
           ),
-        ),
-      ),
-    );
-    BoxConstraints constraints;
-    switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
-      case MaterialTapTargetSize.padded:
-        constraints = const BoxConstraints(minHeight: kMinInteractiveDimension);
-        break;
-      case MaterialTapTargetSize.shrinkWrap:
-        constraints = const BoxConstraints();
-        break;
-    }
-    result = _ChipRedirectingHitDetectionWidget(
-      constraints: constraints,
-      child: Center(
-        child: result,
-        widthFactor: 1.0,
-        heightFactor: 1.0,
-      ),
-    );
-    return Semantics(
-      container: true,
-      selected: widget.selected,
-      enabled: canTap ? widget.isEnabled : null,
-      child: result,
+        );
+        BoxConstraints constraints;
+        switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
+          case MaterialTapTargetSize.padded:
+            constraints = const BoxConstraints(minHeight: kMinInteractiveDimension);
+            break;
+          case MaterialTapTargetSize.shrinkWrap:
+            constraints = const BoxConstraints();
+            break;
+        }
+        result = _ChipRedirectingHitDetectionWidget(
+          constraints: constraints,
+          child: Center(
+            child: result,
+            widthFactor: 1.0,
+            heightFactor: 1.0,
+          ),
+        );
+        return Semantics(
+          container: true,
+          selected: widget.selected,
+          enabled: canTap ? widget.isEnabled : null,
+          child: result,
+        );
+
+      },
     );
   }
 }
