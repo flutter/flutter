@@ -659,13 +659,6 @@ if (is_win) {
     default_warning_flags += [ "-Wunguarded-availability" ]
   }
 
-  if (is_fuchsia) {
-    default_warning_flags += [
-      "-Wno-c99-designator",
-      "-Wno-reorder-init-list",
-    ]
-  }
-
   if (allow_deprecated_api_calls) {
     default_warning_flags += [ "-Wno-deprecated-declarations" ]
   }
