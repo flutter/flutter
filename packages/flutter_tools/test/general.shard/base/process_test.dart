@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -103,13 +105,13 @@ void main() {
       // MockProcessManager has an implementation of start() that returns the
       // result of processFactory.
       flakyProcessManager = MockProcessManager();
+    });
+
+    testUsingContext('flaky process fails without retry', () async {
       flakyProcessManager.processFactory = flakyProcessFactory(
         flakes: 1,
         delay: delay,
       );
-    });
-
-    testUsingContext('flaky process fails without retry', () async {
       final RunResult result = await runAsync(
         <String>['dummy'],
         timeout: delay + const Duration(seconds: 1),
@@ -120,6 +122,10 @@ void main() {
     });
 
     testUsingContext('flaky process succeeds with retry', () async {
+      flakyProcessManager.processFactory = flakyProcessFactory(
+        flakes: 1,
+        delay: delay,
+      );
       final RunResult result = await runAsync(
         <String>['dummy'],
         timeout: delay - const Duration(milliseconds: 500),
@@ -131,6 +137,22 @@ void main() {
     });
 
     testUsingContext('flaky process generates ProcessException on timeout', () async {
+      final Completer<List<int>> flakyStderr = Completer<List<int>>();
+      final Completer<List<int>> flakyStdout = Completer<List<int>>();
+      flakyProcessManager.processFactory = flakyProcessFactory(
+        flakes: 1,
+        delay: delay,
+        stderr: () => Stream<List<int>>.fromFuture(flakyStderr.future),
+        stdout: () => Stream<List<int>>.fromFuture(flakyStdout.future),
+      );
+      when(flakyProcessManager.killPid(any)).thenAnswer((_) {
+        // Don't let the stderr stream stop until the process is killed. This
+        // ensures that runAsync() does not delay killing the process until
+        // stdout and stderr are drained (which won't happen).
+        flakyStderr.complete(<int>[]);
+        flakyStdout.complete(<int>[]);
+        return true;
+      });
       expect(() async => await runAsync(
         <String>['dummy'],
         timeout: delay - const Duration(milliseconds: 500),
