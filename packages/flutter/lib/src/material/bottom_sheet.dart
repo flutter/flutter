@@ -427,6 +427,10 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// that a modal [BottomSheet] needs to be displayed above all other content
 /// but the caller is inside another [Navigator].
 ///
+/// The optional [backgroundColor], [elevation], [shape], and [clipBehavior]
+/// parameters can be passed in to customize the appearance and behavior of
+/// modal bottom sheets.
+///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
@@ -456,13 +460,15 @@ Future<T> showModalBottomSheet<T>({
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
+  final BottomSheetThemeData theme = Theme.of(context).bottomSheetTheme;
+
   return Navigator.of(context, rootNavigator: useRootNavigator).push(_ModalBottomSheetRoute<T>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     isScrollControlled: isScrollControlled,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    backgroundColor: backgroundColor,
-    elevation: elevation ?? Theme.of(context).bottomSheetTheme.modalElevation,
+    backgroundColor: backgroundColor ?? theme?.modalBackgroundColor ?? theme?.backgroundColor,
+    elevation: elevation ?? theme?.modalElevation ?? theme?.elevation,
     shape: shape,
     clipBehavior: clipBehavior,
   ));
@@ -473,6 +479,10 @@ Future<T> showModalBottomSheet<T>({
 ///
 /// Returns a controller that can be used to close and otherwise manipulate the
 /// bottom sheet.
+///
+/// The optional [backgroundColor], [elevation], [shape], and [clipBehavior]
+/// parameters can be passed in to customize the appearance and behavior of
+/// persistent bottom sheets.
 ///
 /// To rebuild the bottom sheet (e.g. if it is stateful), call
 /// [PersistentBottomSheetController.setState] on the controller returned by

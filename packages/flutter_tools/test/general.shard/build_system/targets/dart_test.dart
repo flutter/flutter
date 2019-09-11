@@ -135,7 +135,7 @@ flutter_tools:lib/''');
       return const CompilerOutput('example', 0, <Uri>[]);
     });
 
-    await const KernelSnapshot().build(<File>[], androidEnvironment);
+    await const KernelSnapshot().build(androidEnvironment);
   }, overrides: <Type, Generator>{
     KernelCompilerFactory: () => MockKernelCompilerFactory(),
   }));
@@ -159,7 +159,7 @@ flutter_tools:lib/''');
       return const CompilerOutput('example', 0, <Uri>[]);
     });
 
-    await const KernelSnapshot().build(<File>[], Environment(
+    await const KernelSnapshot().build(Environment(
         outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
         defines: <String, String>{
