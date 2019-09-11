@@ -169,7 +169,7 @@ class ResidentWebRunner extends ResidentRunner {
         buildInfo: debuggingOptions.buildInfo,
         hostname: debuggingOptions.hostname,
         port: debuggingOptions.port,
-        skipDwds: false,
+        skipDwds: device is WebServerDevice,
       );
       await device.startApp(package, mainPath: target, debuggingOptions: debuggingOptions, platformArgs: <String, Object>{
         'uri': _webFs.uri
