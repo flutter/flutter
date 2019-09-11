@@ -206,5 +206,6 @@ class ColdRunner extends ResidentRunner {
       if (device.vmServices == null || device.vmServices.isEmpty)
         await device.device.stopApp(device.package);
     }
+    await super.preExit();
   }
 }
