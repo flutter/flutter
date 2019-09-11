@@ -202,6 +202,11 @@ class SnippetGenerator {
   /// The [type] is the type of snippet to create: either a
   /// [SnippetType.application] or a [SnippetType.sample].
   ///
+  /// [showDartPad] indicates whether DartPad should be shown where possible.
+  /// Currently, this value only has an effect if [type] is
+  /// [SnippetType.application], in which case an alternate skeleton file is
+  /// used to create the final HTML output.
+  ///
   /// The [template] must not be null if the [type] is
   /// [SnippetType.application], and specifies the name of the template to use
   /// for the application code.
@@ -212,6 +217,7 @@ class SnippetGenerator {
   String generate(
     File input,
     SnippetType type, {
+    bool showDartPad = false,
     String template,
     File output,
     @required Map<String, Object> metadata,
@@ -219,6 +225,8 @@ class SnippetGenerator {
     assert(template != null || type != SnippetType.application);
     assert(metadata != null && metadata['id'] != null);
     assert(input != null);
+    assert(!showDartPad || type == SnippetType.application,
+        'Only application snippets work with dartpad.');
     final List<_ComponentTuple> snippetData = parseInput(_loadFileAsUtf8(input));
     switch (type) {
       case SnippetType.application:
@@ -266,7 +274,8 @@ class SnippetGenerator {
       case SnippetType.sample:
         break;
     }
-    final String skeleton = _loadFileAsUtf8(configuration.getHtmlSkeletonFile(type));
+    final String skeleton =
+        _loadFileAsUtf8(configuration.getHtmlSkeletonFile(type, showDartPad: showDartPad));
     return interpolateSkeleton(type, snippetData, skeleton, metadata);
   }
 }

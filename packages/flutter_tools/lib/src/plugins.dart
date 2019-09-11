@@ -89,6 +89,11 @@ class Plugin {
           MacOSPlugin.fromYaml(name, platformsYaml[MacOSPlugin.kConfigKey]);
     }
 
+    if (platformsYaml[WebPlugin.kConfigKey] != null) {
+      platforms[WebPlugin.kConfigKey] =
+          WebPlugin.fromYaml(name, platformsYaml[WebPlugin.kConfigKey]);
+    }
+
     return Plugin(
       name: name,
       path: path,
@@ -344,8 +349,9 @@ const String _objcPluginRegistryImplementationTemplate = '''//
 const String _swiftPluginRegistryTemplate = '''//
 //  Generated file. Do not edit.
 //
-import Foundation
+
 import {{framework}}
+import Foundation
 
 {{#plugins}}
 import {{name}}
@@ -382,6 +388,25 @@ Depends on all your plugins, and provides a function to register them.
   s.dependency '{{name}}'
   {{/plugins}}
 end
+''';
+
+const String _dartPluginRegistryTemplate = '''//
+// Generated file. Do not edit.
+//
+import 'dart:ui';
+
+{{#plugins}}
+import 'package:{{name}}/{{file}}';
+{{/plugins}}
+
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+
+void registerPlugins(PluginRegistry registry) {
+{{#plugins}}
+  {{class}}.registerWith(registry.registrarFor({{class}}));
+{{/plugins}}
+  registry.registerMessageHandler();
+}
 ''';
 
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -439,6 +464,27 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
   );
 }
 
+Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+  final List<Map<String, dynamic>> webPlugins = _extractPlatformMaps(plugins, WebPlugin.kConfigKey);
+  final Map<String, dynamic> context = <String, dynamic>{
+    'plugins': webPlugins,
+  };
+  final String registryDirectory = project.web.libDirectory.path;
+  final String filePath = fs.path.join(registryDirectory, 'generated_plugin_registrant.dart');
+  if (webPlugins.isEmpty) {
+    final File file = fs.file(filePath);
+    if (file.existsSync()) {
+      file.deleteSync();
+    }
+  } else {
+    _renderTemplateToFile(
+      _dartPluginRegistryTemplate,
+      context,
+      filePath,
+    );
+  }
+}
+
 /// Rewrites the `.flutter-plugins` file of [project] based on the plugin
 /// dependencies declared in `pubspec.yaml`.
 ///
@@ -489,6 +535,9 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
       cocoaPods.addPodsDependencyToFlutterXcconfig(subproject);
     }
   }
+  }
+  if (featureFlags.isWebEnabled && project.web.existsSync()) {
+    await _writeWebPluginRegistrant(project, plugins);
   }
 }
 

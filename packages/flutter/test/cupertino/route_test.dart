@@ -743,6 +743,79 @@ void main() {
       false,
     );
   });
+
+  testWidgets('ModalPopup overlay dark mode', (WidgetTester tester) async {
+    StateSetter stateSetter;
+    Brightness brightness = Brightness.light;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          stateSetter = setter;
+          return CupertinoApp(
+            theme: CupertinoThemeData(brightness: brightness),
+            home: CupertinoPageScaffold(
+              child: Builder(builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () async {
+                    await showCupertinoModalPopup<void>(
+                      context: context,
+                      builder: (BuildContext context) => const SizedBox(),
+                    );
+                  },
+                  child: const Text('tap'),
+                );
+              }),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color.value,
+      0x33000000,
+    );
+
+    stateSetter(() { brightness = Brightness.dark; });
+    await tester.pump();
+
+    // TODO(LongCatIsLooong): The background overlay SHOULD switch to dark color.
+    expect(
+      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color.value,
+      0x33000000,
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoPageScaffold(
+          child: Builder(builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () async {
+                  await showCupertinoModalPopup<void>(
+                    context: context,
+                    builder: (BuildContext context) => const SizedBox(),
+                  );
+                },
+                child: const Text('tap'),
+              );
+          }),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color.value,
+      0x7A000000,
+    );
+  });
 }
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}

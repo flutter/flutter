@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -24,7 +25,7 @@ import '../../src/testbed.dart';
 
 class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Profile', 'Release'],
@@ -178,6 +179,24 @@ void main() {
         throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
+  });
+
+  testUsingContext('hidden when not enabled on macOS host', () {
+    when(platform.isMacOS).thenReturn(true);
+
+    expect(BuildMacosCommand().hidden, true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
+     Platform: () => MockPlatform(),
+  });
+
+  testUsingContext('Not hidden when enabled and on macOS host', () {
+    when(platform.isMacOS).thenReturn(true);
+
+    expect(BuildMacosCommand().hidden, false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    Platform: () => MockPlatform(),
   });
 }
 

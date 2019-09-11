@@ -36,7 +36,7 @@ class BuildLinuxCommand extends BuildSubCommand {
   final String name = 'linux';
 
   @override
-  bool hidden = true;
+  bool get hidden => !featureFlags.isLinuxEnabled || !platform.isLinux;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -45,7 +45,7 @@ class BuildLinuxCommand extends BuildSubCommand {
   };
 
   @override
-  String get description => 'build the Linux desktop target (Experimental).';
+  String get description => 'build the Linux desktop target.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {

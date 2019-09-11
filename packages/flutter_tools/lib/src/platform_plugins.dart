@@ -139,3 +139,54 @@ class MacOSPlugin extends PluginPlatform {
     };
   }
 }
+
+/// Contains the parameters to template a web plugin.
+///
+/// The required fields include: [name] of the plugin, the [pluginClass] that will
+/// be the entry point to the plugin's implementation, and the [fileName]
+/// containing the code.
+class WebPlugin extends PluginPlatform {
+  const WebPlugin({
+    @required this.name,
+    @required this.pluginClass,
+    @required this.fileName,
+  });
+
+  factory WebPlugin.fromYaml(String name, YamlMap yaml) {
+    assert(validate(yaml));
+    return WebPlugin(
+      name: name,
+      pluginClass: yaml['pluginClass'],
+      fileName: yaml['fileName'],
+    );
+  }
+
+  static bool validate(YamlMap yaml) {
+    if (yaml == null) {
+      return false;
+    }
+    return yaml['pluginClass'] is String && yaml['fileName'] is String;
+  }
+
+  static const String kConfigKey = 'web';
+
+  /// The name of the plugin.
+  final String name;
+
+  /// The class containing the plugin implementation details.
+  ///
+  /// This class should have a static `registerWith` method defined.
+  final String pluginClass;
+
+  /// The name of the file containing the class implementation above.
+  final String fileName;
+
+  @override
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'name': name,
+      'class': pluginClass,
+      'file': fileName,
+    };
+  }
+}

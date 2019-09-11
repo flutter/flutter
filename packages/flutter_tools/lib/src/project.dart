@@ -623,6 +623,9 @@ class WebProject {
       && indexFile.existsSync();
   }
 
+  /// The 'lib' directory for the application.
+  Directory get libDirectory => parent.directory.childDirectory('lib');
+
   /// The html file used to host the flutter web application.
   File get indexFile => parent.directory
       .childDirectory('web')
@@ -749,11 +752,19 @@ class WindowsProject {
 
   Directory get _editableDirectory => project.directory.childDirectory('windows');
 
-  Directory get _cacheDirectory => _editableDirectory.childDirectory('flutter');
+  /// The directory in the project that is managed by Flutter. As much as
+  /// possible, files that are edited by Flutter tooling after initial project
+  /// creation should live here.
+  Directory get managedDirectory => _editableDirectory.childDirectory('flutter');
+
+  /// The subdirectory of [managedDirectory] that contains files that are
+  /// generated on the fly. All generated files that are not intended to be
+  /// checked in should live here.
+  Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the build.
-  File get generatedPropertySheetFile => _cacheDirectory.childFile('Generated.props');
+  File get generatedPropertySheetFile => ephemeralDirectory.childFile('Generated.props');
 
   // The MSBuild project file.
   File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
@@ -764,7 +775,7 @@ class WindowsProject {
   /// The file where the VS build will write the name of the built app.
   ///
   /// Ideally this will be replaced in the future with inspection of the project.
-  File get nameFile => _cacheDirectory.childFile('exe_filename');
+  File get nameFile => ephemeralDirectory.childFile('exe_filename');
 }
 
 /// The Linux sub project.
@@ -775,6 +786,8 @@ class LinuxProject {
 
   Directory get editableHostAppDirectory => project.directory.childDirectory('linux');
 
+  // TODO(stuartmorgan): Move to using an ephemeralDirectory to match the other
+  // desktop projects.
   Directory get cacheDirectory => editableHostAppDirectory.childDirectory('flutter');
 
   bool existsSync() => editableHostAppDirectory.existsSync();

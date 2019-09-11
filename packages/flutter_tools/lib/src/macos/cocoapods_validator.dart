@@ -45,8 +45,9 @@ class CocoaPodsValidator extends DoctorValidator {
             userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
       } else {
         status = ValidationType.partial;
+        final String currentVersionText = await cocoaPods.cocoaPodsVersionText;
         messages.add(ValidationMessage.hint(
-            userMessages.cocoaPodsOutdated(cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
+            userMessages.cocoaPodsOutdated(currentVersionText, cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
       }
     }
 

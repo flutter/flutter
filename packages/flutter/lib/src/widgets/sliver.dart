@@ -127,7 +127,11 @@ abstract class SliverChildDelegate {
   /// return a precise non-null value.
   ///
   /// Subclasses typically override this function and wrap their children in
-  /// [AutomaticKeepAlive] and [RepaintBoundary] widgets.
+  /// [AutomaticKeepAlive], [IndexedSemantics], and [RepaintBoundary] widgets.
+  ///
+  /// The values returned by this method are cached. To indicate that the
+  /// widgets have changed, a new delegate must be provided, and the new
+  /// delegate's [shouldRebuild] method must return true.
   Widget build(BuildContext context, int index);
 
   /// Returns an estimate of the number of children this delegate will build.
@@ -711,6 +715,10 @@ abstract class SliverWithKeepAliveWidget extends RenderObjectWidget {
 /// A base class for sliver that have multiple box children.
 ///
 /// Helps subclasses build their children lazily using a [SliverChildDelegate].
+///
+/// The widgets returned by the [delegate] are cached and the delegate is only
+/// consulted again if it changes and the new delegate's [shouldRebuild] method
+/// returns true.
 abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   /// Initializes fields for subclasses.
   const SliverMultiBoxAdaptorWidget({
@@ -722,7 +730,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   /// {@template flutter.widgets.sliverChildDelegate}
   /// The delegate that provides the children for this widget.
   ///
-  /// The children are constructed lazily using this widget to avoid creating
+  /// The children are constructed lazily using this delegate to avoid creating
   /// more children than are visible through the [Viewport].
   ///
   /// See also:

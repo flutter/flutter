@@ -83,6 +83,11 @@
   font-family: courier, lucidia;
 }
 
+.snippet-dartpad {
+  width: 100%;
+  height: 500px;
+}
+
 .anchor-container {
   position: relative;
 }

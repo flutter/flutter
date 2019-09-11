@@ -19,7 +19,7 @@ class DependentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color resolved = CupertinoDynamicColor.resolve(color, context);
+    final Color resolved = CupertinoDynamicColor.resolve(color, context, nullOk: false);
     return DecoratedBox(
       decoration: BoxDecoration(color: resolved),
       child: const SizedBox.expand(),
@@ -158,6 +158,10 @@ void main() {
       'highContrastColor = Color(0xff000002), '
       'darkHighContrastColor = Color(0xff000003))',
     );
+  });
+
+  test('can resolve null color', () {
+    expect(CupertinoDynamicColor.resolve(null, null), isNull);
   });
 
   test('withVibrancy constructor creates colors that may depend on vibrancy', () {
