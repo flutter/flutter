@@ -349,8 +349,8 @@ class RangeSlider extends StatefulWidget {
     properties.add(DoubleProperty('min', min));
     properties.add(DoubleProperty('max', max));
     properties.add(IntProperty('divisions', divisions));
-    properties.add(StringProperty('label1', labels.start));
-    properties.add(StringProperty('label2', labels.end));
+    properties.add(StringProperty('label1', labels?.start));
+    properties.add(StringProperty('label2', labels?.end));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
     properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('semanticFormatterCallback', semanticFormatterCallback));

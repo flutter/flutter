@@ -1534,22 +1534,21 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets(
-      'Range Slider implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Range Slider implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     RangeSlider(
       activeColor: Colors.blue,
       divisions: 4,
       inactiveColor: Colors.grey,
-      labels: RangeLabels('lowerValue', 'upperValue'),
+      labels: const RangeLabels('lowerValue', 'upperValue'),
       max: 100.0,
       min: 0.0,
       onChanged: null,
       onChangeEnd: null,
       onChangeStart: null,
       semanticFormatterCallback: null,
-      values: RangeValues(25.0, 75.0),
+      values: const RangeValues(25.0, 75.0),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
