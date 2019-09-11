@@ -1533,5 +1533,41 @@ void main() {
 
     await gesture.up();
   });
+
+  testWidgets(
+      'Range Slider implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    RangeSlider(
+      activeColor: Colors.blue,
+      divisions: 4,
+      inactiveColor: Colors.grey,
+      labels: RangeLabels('lowerValue', 'upperValue'),
+      max: 100.0,
+      min: 0.0,
+      onChanged: null,
+      onChangeEnd: null,
+      onChangeStart: null,
+      semanticFormatterCallback: null,
+      values: RangeValues(25.0, 75.0),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString()).toList();
+
+    expect(description, <String>[
+      'value1: 25.0',
+      'value2: 75.0',
+      'disabled',
+      'min: 0.0',
+      'max: 100.0',
+      'divisions: 4',
+      'label1: "lowerValue"',
+      'label2: "upperValue"',
+      'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
+      'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))'
+    ]);
+  });
 }
 
