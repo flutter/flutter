@@ -167,7 +167,7 @@ class ResidentWebRunner extends ResidentRunner {
         target: target,
         flutterProject: flutterProject,
         buildInfo: debuggingOptions.buildInfo,
-        skipDwds: true,
+        skipDwds: device is WebDevices,
       );
       await device.startApp(package, mainPath: target, platformArgs: <String, Object>{
         'uri': _webFs.uri
