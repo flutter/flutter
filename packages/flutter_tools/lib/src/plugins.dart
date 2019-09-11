@@ -349,8 +349,9 @@ const String _objcPluginRegistryImplementationTemplate = '''//
 const String _swiftPluginRegistryTemplate = '''//
 //  Generated file. Do not edit.
 //
-import Foundation
+
 import {{framework}}
+import Foundation
 
 {{#plugins}}
 import {{name}}
