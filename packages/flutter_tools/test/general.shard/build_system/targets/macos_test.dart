@@ -173,6 +173,26 @@ void main() {
     expect(fs.file(precompiledIsolate).existsSync(), false);
   }));
 
+  test('release/profile macOS application updates when App.framework updates', () => testbed.run(() async {
+    fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
+        'vm_isolate_snapshot.bin')).createSync(recursive: true);
+    fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
+        'isolate_snapshot.bin')).createSync(recursive: true);
+    final File inputFramework = fs.file(fs.path.join(environment.buildDir.path, 'App.framework', 'App'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('ABC');
+
+    await const ProfileMacOSBundleFlutterAssets().build(environment..defines[kBuildMode] = 'profile');
+    final File outputFramework = fs.file(fs.path.join(environment.outputDir.path, 'App.framework', 'App'));
+
+    expect(outputFramework.readAsStringSync(), 'ABC');
+
+    inputFramework.writeAsStringSync('DEF');
+    await const ProfileMacOSBundleFlutterAssets().build(environment..defines[kBuildMode] = 'profile');
+
+    expect(outputFramework.readAsStringSync(), 'DEF');
+  }));
+
   test('release/profile macOS compilation uses correct gen_snapshot', () => testbed.run(() async {
     when(genSnapshot.run(
       snapshotType: anyNamed('snapshotType'),

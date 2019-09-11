@@ -290,6 +290,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
     Source.behavior(MacOSAssetBehavior())
   ];
 
