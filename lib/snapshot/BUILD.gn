@@ -23,8 +23,7 @@ compiled_action("generate_snapshot_bin") {
   tool = "//third_party/dart/runtime/bin:gen_snapshot"
 
   if (is_fuchsia || is_fuchsia_host) {
-    platform_kernel =
-        "$root_out_dir/engine_flutter_runner_patched_sdk/platform_strong.dill"
+    platform_kernel = "//prebuilt/gallium/prod/platform_strong.dill"
   } else {
     platform_kernel = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
   }
@@ -79,6 +78,11 @@ template("bin_to_assembly") {
     deps = invoker.deps
     script = "//third_party/dart/runtime/tools/bin_to_assembly.py"
     output = invoker.input + ".S"
+
+    if (is_fuchsia || is_fuchsia_host) {
+      output = "$root_out_dir/flutter_runner_patched_sdk/$output"
+    }
+
     args = [
       "--input",
       rebase_path(invoker.input),
@@ -122,6 +126,11 @@ template("bin_to_coff") {
     deps = invoker.deps
     script = "//third_party/dart/runtime/tools/bin_to_coff.py"
     output = invoker.input + ".o"
+
+    if ((is_fuchsia || is_fuchsia_host) && !using_fuchsia_sdk) {
+      output = "$root_out_dir/flutter_runner_patched_sdk/$output"
+    }
+
     args = [
       "--input",
       rebase_path(invoker.input),
@@ -209,7 +218,7 @@ bin_to_linkable("platform_strong_dill_linkable") {
     ":kernel_platform_files",
   ]
   if (is_fuchsia || is_fuchsia_host) {
-    input = "$root_out_dir/engine_flutter_runner_patched_sdk/platform_strong.dill"
+    input = "//prebuilt/gallium/prod/platform_strong.dill"
   } else {
     input = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
   }
@@ -275,9 +284,7 @@ compile_platform("strong_platform") {
 # Fuchsia's snapshot requires a different platform with extra dart: libraries.
 if (is_fuchsia || is_fuchsia_host) {
   group("kernel_platform_files") {
-    public_deps = [
-      "$flutter_root/shell/platform/fuchsia/flutter/kernel:kernel_platform_files",
-    ]
+    # We use pre-builts for the strong platform file.
   }
 } else {
   group("kernel_platform_files") {
