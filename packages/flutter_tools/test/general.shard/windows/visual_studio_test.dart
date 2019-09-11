@@ -46,7 +46,7 @@ void main() {
     }
   };
 
-  // A version of a response that doesn't include certain installation status 
+  // A version of a response that doesn't include certain installation status
   // information that might be missing in older Windows versions.
   const Map<String, dynamic> _oldResponse = <String, dynamic>{
     'installationPath': visualStudioPath,

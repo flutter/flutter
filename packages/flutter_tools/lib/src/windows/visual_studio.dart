@@ -190,20 +190,24 @@ class VisualStudio {
   }
 
   /// Checks if the given installation has issues that the user must resolve.
-  /// 
+  ///
   /// Returns false if the required information is missing since older versions
   /// of Windows might not include them.
   bool installationHasIssues(Map<String, dynamic>installationDetails) {
     assert(installationDetails != null);
-    if (installationDetails[_isCompleteKey] == null ||
-        installationDetails[_isRebootRequiredKey] == null ||
-        installationDetails[_isLaunchableKey] == null) {
-      return false;
+    if (installationDetails[_isCompleteKey] != null && !installationDetails[_isCompleteKey]) {
+      return true;
     }
 
-    return installationDetails[_isCompleteKey] == false ||
-      installationDetails[_isRebootRequiredKey] == true ||
-      installationDetails[_isLaunchableKey] == false;
+    if (installationDetails[_isLaunchableKey] != null && !installationDetails[_isLaunchableKey]) {
+      return true;
+    } 
+
+    if (installationDetails[_isRebootRequiredKey] != null && installationDetails[_isRebootRequiredKey]) {
+      return true;
+    }
+     
+    return false;
   }
 
   /// Returns the details dictionary for the latest version of Visual Studio
