@@ -92,6 +92,7 @@ class AndroidBuildInfo {
       AndroidArch.arm64_v8a,
     ],
     this.splitPerAbi = false,
+    this.proguard = false,
   });
 
   // The build info containing the mode and flavor.
@@ -103,6 +104,9 @@ class AndroidBuildInfo {
   /// build artifact. When this is true, multiple build artifacts (one per ABI)
   /// will be produced.
   final bool splitPerAbi;
+
+  /// Whether to enable Proguard on release mode.
+  final bool proguard;
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
