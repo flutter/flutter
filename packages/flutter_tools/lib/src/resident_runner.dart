@@ -715,9 +715,7 @@ abstract class ResidentRunner {
   ///
   /// Throws an [AssertionError] if [Devce.supportsScreenshot] is not true.
   Future<void> screenshot(FlutterDevice device) async {
-    if (!device.device.supportsScreenshot) {
-      throwToolExit('Device ${device.device.name} does not support screenshots.');
-    }
+    assert(device.device.supportsScreenshot);
 
     final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...', timeout: timeoutConfiguration.fastOperation);
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
