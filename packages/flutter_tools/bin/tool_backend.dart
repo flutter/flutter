@@ -40,7 +40,7 @@ or
       cacheDirectory = 'linux/flutter';
       break;
     case 'windows-x64':
-      cacheDirectory = 'windows/flutter';
+      cacheDirectory = 'windows/flutter/ephemeral';
       break;
     default:
       stderr.write('Unsupported target platform $targetPlatform');
