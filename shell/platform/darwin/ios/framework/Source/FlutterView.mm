@@ -13,6 +13,7 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
+#include "flutter/shell/platform/darwin/ios/ios_gl_context.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
@@ -21,9 +22,10 @@
 #include "flutter/shell/platform/darwin/ios/ios_surface_metal.h"
 #endif  //  FLUTTER_SHELL_ENABLE_METAL
 
-@implementation FlutterView
-
-id<FlutterViewEngineDelegate> _delegate;
+@implementation FlutterView {
+  id<FlutterViewEngineDelegate> _delegate;
+  std::unique_ptr<flutter::IOSGLContext> _onscreenGLContext;
+}
 
 - (instancetype)init {
   @throw([NSException exceptionWithName:@"FlutterView must initWithDelegate"
@@ -93,8 +95,14 @@ id<FlutterViewEngineDelegate> _delegate;
 #endif  // TARGET_IPHONE_SIMULATOR
 }
 
-- (std::unique_ptr<flutter::IOSSurface>)createSurface:
-    (std::shared_ptr<flutter::IOSGLContext>)context {
+- (std::unique_ptr<flutter::IOSSurface>)createSurfaceWithResourceGLContext:
+    (fml::WeakPtr<flutter::IOSGLContext>)resourceGLContext {
+#if !TARGET_IPHONE_SIMULATOR
+  if (!_onscreenGLContext) {
+    _onscreenGLContext = resourceGLContext->MakeSharedContext();
+  }
+#endif  // !TARGET_IPHONE_SIMULATOR
+
   if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
     fml::scoped_nsobject<CAEAGLLayer> eagl_layer(
         reinterpret_cast<CAEAGLLayer*>([self.layer retain]));
@@ -105,8 +113,9 @@ id<FlutterViewEngineDelegate> _delegate;
         eagl_layer.get().presentsWithTransaction = YES;
       }
     }
-    return std::make_unique<flutter::IOSSurfaceGL>(context, std::move(eagl_layer),
-                                                   [_delegate platformViewsController]);
+    return std::make_unique<flutter::IOSSurfaceGL>(
+        _onscreenGLContext->GetWeakPtr(), std::move(resourceGLContext), std::move(eagl_layer),
+        [_delegate platformViewsController]);
 #if FLUTTER_SHELL_ENABLE_METAL
   } else if ([self.layer isKindOfClass:[CAMetalLayer class]]) {
     fml::scoped_nsobject<CAMetalLayer> metalLayer(
