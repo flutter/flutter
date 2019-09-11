@@ -24,7 +24,7 @@ compiled_action("generate_snapshot_bin") {
 
   if (is_fuchsia || is_fuchsia_host) {
     platform_kernel =
-        "$root_out_dir/flutter_runner_patched_sdk/platform_strong.dill"
+        "$root_out_dir/engine_flutter_runner_patched_sdk/platform_strong.dill"
   } else {
     platform_kernel = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
   }
@@ -209,7 +209,7 @@ bin_to_linkable("platform_strong_dill_linkable") {
     ":kernel_platform_files",
   ]
   if (is_fuchsia || is_fuchsia_host) {
-    input = "$root_out_dir/flutter_runner_patched_sdk/platform_strong.dill"
+    input = "$root_out_dir/engine_flutter_runner_patched_sdk/platform_strong.dill"
   } else {
     input = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
   }

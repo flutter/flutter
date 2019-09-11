@@ -125,11 +125,12 @@ def CopyToBucketWithMode(source, destination, aot, product, runner_type):
 
   destination = os.path.join(_bucket_directory, destination, mode)
   CreateFarPackage(pm_bin, far_base, key_path, destination)
-  patched_sdk_dirname = '%s_runner_patched_sdk' % runner_type
-  patched_sdk_dir = os.path.join(source_root, patched_sdk_dirname)
-  dest_sdk_path = os.path.join(destination, patched_sdk_dirname)
+  src_patched_sdk_dirname = 'engine_%s_runner_patched_sdk' % runner_type
+  src_patched_sdk_dir = os.path.join(source_root, src_patched_sdk_dirname)
+  dest_patched_sdk_dirname = '%s_runner_patched_sdk' % runner_type
+  dest_sdk_path = os.path.join(destination, dest_patched_sdk_dirname)
   if not os.path.exists(dest_sdk_path):
-    CopyPath(patched_sdk_dir, dest_sdk_path)
+    CopyPath(src_patched_sdk_dir, dest_sdk_path)
   CopyGenSnapshotIfExists(source_root, destination)
 
 

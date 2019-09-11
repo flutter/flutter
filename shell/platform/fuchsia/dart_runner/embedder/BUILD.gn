@@ -9,7 +9,7 @@ import("//topaz/runtime/dart/dart_kernel.gni")
 dart_kernel("shim") {
   platform_name = "dart_runner"
   platform_deps = [ "//topaz/runtime/dart_runner/kernel:kernel_platform_files" ]
-  platform_path = "$root_out_dir/dart_runner_patched_sdk"
+  platform_path = "$root_out_dir/engine_dart_runner_patched_sdk"
 
   disable_analysis = true
 
@@ -24,7 +24,7 @@ dart_kernel("shim") {
 dart_kernel("shim_product") {
   platform_name = "dart_runner"
   platform_deps = [ "//topaz/runtime/dart_runner/kernel:kernel_platform_files" ]
-  platform_path = "$root_out_dir/dart_runner_patched_sdk"
+  platform_path = "$root_out_dir/engine_dart_runner_patched_sdk"
 
   disable_analysis = true
 

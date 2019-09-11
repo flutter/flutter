@@ -15,8 +15,8 @@ compile_platform("kernel_platform_files") {
   libraries_specification_uri = "org-dartlang-sdk:///flutter/shell/platform/fuchsia/dart_runner/kernel/libraries.json"
 
   outputs = [
-    "$root_out_dir/dart_runner_patched_sdk/platform_strong.dill",
-    "$root_out_dir/dart_runner_patched_sdk/vm_outline_strong.dill",
+    "$root_out_dir/engine_dart_runner_patched_sdk/platform_strong.dill",
+    "$root_out_dir/engine_dart_runner_patched_sdk/vm_outline_strong.dill",
   ]
 
   args = [
@@ -40,7 +40,8 @@ template("create_kernel_core_snapshot") {
       ":kernel_platform_files",
     ]
 
-    platform_dill = "$root_out_dir/dart_runner_patched_sdk/platform_strong.dill"
+    platform_dill =
+        "$root_out_dir/engine_dart_runner_patched_sdk/platform_strong.dill"
     compilation_trace =
         "$flutter_root/shell/platform/fuchsia/flutter/compilation_trace.txt"
     inputs = [
