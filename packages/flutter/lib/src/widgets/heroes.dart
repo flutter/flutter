@@ -413,6 +413,7 @@ class _HeroFlightManifest {
     @required this.createRectTween,
     @required this.shuttleBuilder,
     @required this.isUserGestureTransition,
+    @required this.isDiverted,
   }) : assert(fromHero.widget.tag == toHero.widget.tag);
 
   final HeroFlightDirection type;
@@ -425,6 +426,7 @@ class _HeroFlightManifest {
   final CreateRectTween createRectTween;
   final HeroFlightShuttleBuilder shuttleBuilder;
   final bool isUserGestureTransition;
+  final bool isDiverted;
 
   Object get tag => fromHero.widget.tag;
 
@@ -432,6 +434,7 @@ class _HeroFlightManifest {
     return CurvedAnimation(
       parent: (type == HeroFlightDirection.push) ? toRoute.animation : fromRoute.animation,
       curve: Curves.fastOutSlowIn,
+      reverseCurve: isDiverted ? null : Curves.fastOutSlowIn.flipped,
     );
   }
 
@@ -805,6 +808,7 @@ class HeroController extends NavigatorObserver {
       if (toHeroes[tag] != null) {
         final HeroFlightShuttleBuilder fromShuttleBuilder = fromHeroes[tag].widget.flightShuttleBuilder;
         final HeroFlightShuttleBuilder toShuttleBuilder = toHeroes[tag].widget.flightShuttleBuilder;
+        final bool isDiverted = _flights[tag] != null;
 
         final _HeroFlightManifest manifest = _HeroFlightManifest(
           type: flightType,
@@ -818,9 +822,10 @@ class HeroController extends NavigatorObserver {
           shuttleBuilder:
               toShuttleBuilder ?? fromShuttleBuilder ?? _defaultHeroFlightShuttleBuilder,
           isUserGestureTransition: isUserGestureTransition,
+          isDiverted: isDiverted,
         );
 
-        if (_flights[tag] != null)
+        if (isDiverted)
           _flights[tag].divert(manifest);
         else
           _flights[tag] = _HeroFlight(_handleFlightEnded)..start(manifest);
