@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -800,7 +801,7 @@ class _ToggleButton extends StatelessWidget {
     }
 
     final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.body1;
-    final BoxConstraints currentConstraints = constraints ?? toggleButtonsTheme.constraints ?? const BoxConstraints(minWidth: 48.0, minHeight: 48.0);
+    final BoxConstraints currentConstraints = constraints ?? toggleButtonsTheme.constraints ?? const BoxConstraints(minWidth: kMinInteractiveDimension, minHeight: kMinInteractiveDimension);
 
     final Widget result = ClipRRect(
       borderRadius: clipRadius,
