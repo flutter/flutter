@@ -40,9 +40,9 @@ void main() {
     'isRebootRequired': false,
     'isComplete': true,
     'isLaunchable': true,
+    'isPrerelease': false,
     'catalog': <String, dynamic>{
       'productDisplayVersion': '15.9.12',
-      'productMilestoneIsPreRelease': true,
     }
   };
 
@@ -169,12 +169,7 @@ void main() {
       setMockAnyVisualStudioInstallation(null);
 
       final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
-        ..addAll(<String, dynamic>{
-          'catalog': <String, dynamic>{
-            'productDisplayVersion': '15.9.12',
-            'productMilestoneIsPreRelease': true,
-          }
-        });
+        ..['isPrerelease'] = true;
       setMockPrereleaseVisualStudioInstallation(response);
 
 

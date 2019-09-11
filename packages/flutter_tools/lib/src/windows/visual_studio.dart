@@ -35,10 +35,6 @@ class VisualStudio {
   String get displayVersion =>
       _bestVisualStudioDetails[_catalogKey][_catalogDisplayVersionKey];
 
-  /// True if the Visual Studio installation is as pre-release version.
-  bool get isPrerelease =>
-      _bestVisualStudioDetails[_catalogKey][_isPrereleaseKey];
-
   /// The directory where Visual Studio is installed.
   String get installLocation => _bestVisualStudioDetails[_installationPathKey];
 
@@ -47,14 +43,21 @@ class VisualStudio {
   /// For instance: "15.4.27004.2002".
   String get fullVersion => _bestVisualStudioDetails[_fullVersionKey];
 
+  // Properties that determine the status of the installation. There might be
+  // Windows versions that don't include them, so default to a "valid" value to
+  // avoid false negatives.
+
   /// True there is complete installation of Visual Studio.
-  bool get isComplete => _bestVisualStudioDetails[_isCompleteKey];
+  bool get isComplete => _bestVisualStudioDetails[_isCompleteKey] ?? true;
 
   /// True if Visual Studio is launchable.
-  bool get isLaunchable => _bestVisualStudioDetails[_isLaunchableKey];
+  bool get isLaunchable => _bestVisualStudioDetails[_isLaunchableKey] ?? true;
+
+    /// True if the Visual Studio installation is as pre-release version.
+  bool get isPrerelease => _bestVisualStudioDetails[_isPrereleaseKey] ?? false;
 
   /// True if a reboot is required to complete the Visual Studio installation.
-  bool get isRebootRequired => _bestVisualStudioDetails[_isRebootRequiredKey];
+  bool get isRebootRequired => _bestVisualStudioDetails[_isRebootRequiredKey] ?? false;
 
   /// The name of the recommended Visual Studio installer workload.
   String get workloadDescription => 'Desktop development with C++';
@@ -141,15 +144,13 @@ class VisualStudio {
   /// The 'catalog' entry containing more details.
   static const String _catalogKey = 'catalog';
 
+  /// The key for a pre-release version.
+  static const String _isPrereleaseKey = 'isPrerelease';
+
   /// The user-friendly version.
   ///
   /// This key is under the 'catalog' entry.
   static const String _catalogDisplayVersionKey = 'productDisplayVersion';
-
-  /// The key for a pre-release version.
-  ///
-  /// This key is under the 'catalog' entry.
-  static const String _isPrereleaseKey = 'productMilestoneIsPreRelease';
 
   /// vswhere argument keys
   static const String _prereleaseKey = '-prerelease';
