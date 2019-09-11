@@ -198,9 +198,6 @@ abstract class SearchDelegate<T> {
       primaryIconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
       primaryColorBrightness: Brightness.light,
       primaryTextTheme: theme.textTheme,
-      inputDecorationTheme: theme.inputDecorationTheme.copyWith(
-        border: InputBorder.none,
-      ),
     );
   }
 
@@ -503,24 +500,28 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       namesRoute: true,
       label: routeName,
       child: Scaffold(
-        appBar: _ThemedPreferredSizeWidget(
-          theme: theme,
-          child: AppBar(
-            leading: widget.delegate.buildLeading(context),
-            title: TextField(
-              controller: widget.delegate._queryTextController,
-              focusNode: focusNode,
-              textInputAction: widget.delegate.textInputAction,
-              keyboardType: widget.delegate.keyboardType,
-              onSubmitted: (String _) {
-                widget.delegate.showResults(context);
-              },
-              decoration: InputDecoration(
-                hintText: searchFieldLabel,
-              ),
+        appBar: AppBar(
+          backgroundColor: theme.primaryColor,
+          iconTheme: theme.primaryIconTheme,
+          textTheme: theme.primaryTextTheme,
+          brightness: theme.primaryColorBrightness,
+          leading: widget.delegate.buildLeading(context),
+          title: TextField(
+            controller: widget.delegate._queryTextController,
+            focusNode: focusNode,
+            style: theme.textTheme.title,
+            textInputAction: widget.delegate.textInputAction,
+            keyboardType: widget.delegate.keyboardType,
+            onSubmitted: (String _) {
+              widget.delegate.showResults(context);
+            },
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: searchFieldLabel,
+              hintStyle: theme.inputDecorationTheme.hintStyle,
             ),
-            actions: widget.delegate.buildActions(context),
           ),
+          actions: widget.delegate.buildActions(context),
         ),
         body: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
@@ -529,22 +530,4 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       ),
     );
   }
-}
-
-class _ThemedPreferredSizeWidget extends StatelessWidget implements PreferredSizeWidget {
-  const _ThemedPreferredSizeWidget({ this.theme, this.child });
-
-  final ThemeData theme;
-  final PreferredSizeWidget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Theme(
-      data: theme,
-      child: child,
-    );
-  }
-
-  @override
-  Size get preferredSize => child.preferredSize;
 }

@@ -90,7 +90,7 @@ class MockXcode extends Mock implements Xcode {}
 
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
     return XcodeProjectInfo(null, null, <String>['Runner']);
   }
 }

@@ -973,4 +973,64 @@ void main() {
     expect(arguments.single, 'pushReplacementNamed');
     arguments.clear();
   });
+
+  testWidgets('Initial route can have gaps', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> keyNav = GlobalKey<NavigatorState>();
+    const Key keyRoot = Key('Root');
+    const Key keyA = Key('A');
+    const Key keyABC = Key('ABC');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: keyNav,
+        initialRoute: '/A/B/C',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => Container(key: keyRoot),
+          '/A': (BuildContext context) => Container(key: keyA),
+          // The route /A/B is intentionally left out.
+          '/A/B/C': (BuildContext context) => Container(key: keyABC),
+        },
+      ),
+    );
+
+    // The initial route /A/B/C should've been pushed successfully.
+    expect(find.byKey(keyRoot), findsOneWidget);
+    expect(find.byKey(keyA), findsOneWidget);
+    expect(find.byKey(keyABC), findsOneWidget);
+
+    keyNav.currentState.pop();
+    await tester.pumpAndSettle();
+    expect(find.byKey(keyRoot), findsOneWidget);
+    expect(find.byKey(keyA), findsOneWidget);
+    expect(find.byKey(keyABC), findsNothing);
+  });
+
+  testWidgets('The full initial route has to be matched', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> keyNav = GlobalKey<NavigatorState>();
+    const Key keyRoot = Key('Root');
+    const Key keyA = Key('A');
+    const Key keyAB = Key('AB');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: keyNav,
+        initialRoute: '/A/B/C',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => Container(key: keyRoot),
+          '/A': (BuildContext context) => Container(key: keyA),
+          '/A/B': (BuildContext context) => Container(key: keyAB),
+          // The route /A/B/C is intentionally left out.
+        },
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception is String, isTrue);
+    expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
+
+    // Only the root route should've been pushed.
+    expect(find.byKey(keyRoot), findsOneWidget);
+    expect(find.byKey(keyA), findsNothing);
+    expect(find.byKey(keyAB), findsNothing);
+  });
 }

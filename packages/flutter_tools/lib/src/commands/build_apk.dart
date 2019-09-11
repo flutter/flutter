@@ -10,7 +10,7 @@ import '../build_info.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
@@ -25,8 +25,14 @@ class BuildApkCommand extends BuildSubCommand {
     argParser
       ..addFlag('split-per-abi',
         negatable: false,
-        help: 'Whether to split the APKs per ABIs.'
+        help: 'Whether to split the APKs per ABIs. '
               'To learn more, see: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',
+      )
+      ..addFlag('proguard',
+        negatable: true,
+        defaultsTo: true,
+        help: 'Whether to enable Proguard on release mode. '
+              'To learn more, see: https://flutter.dev/docs/deployment/android#enabling-proguard',
       )
       ..addMultiOption('target-platform',
         splitCommas: true,
@@ -69,11 +75,18 @@ class BuildApkCommand extends BuildSubCommand {
   }
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.android,
+  };
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = getBuildInfo();
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(buildInfo,
       splitPerAbi: argResults['split-per-abi'],
-      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName)
+      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName),
+      proguard: argResults['proguard'],
     );
 
     if (buildInfo.isRelease && !androidBuildInfo.splitPerAbi && androidBuildInfo.targetArchs.length > 1) {

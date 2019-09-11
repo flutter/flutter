@@ -129,7 +129,7 @@ void main() {
     );
 
     // Spot-check important elements from the properties file.
-    final File propsFile = fs.file(r'C:\windows\flutter\Generated.props');
+    final File propsFile = fs.file(r'C:\windows\flutter\ephemeral\Generated.props');
     expect(propsFile.existsSync(), true);
     final xml.XmlDocument props = xml.parse(propsFile.readAsStringSync());
     expect(props.findAllElements('PropertyGroup').first.getAttribute('Label'), 'UserMacros');

@@ -375,6 +375,10 @@ class _FocusState extends State<Focus> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _focusAttachment?.reparent();
+    _handleAutofocus();
+  }
+
+  void _handleAutofocus() {
     if (!_didAutofocus && widget.autofocus) {
       FocusScope.of(context).autofocus(focusNode);
       _didAutofocus = true;
@@ -402,12 +406,15 @@ class _FocusState extends State<Focus> {
     if (oldWidget.focusNode == widget.focusNode) {
       focusNode.skipTraversal = widget.skipTraversal ?? focusNode.skipTraversal;
       focusNode.canRequestFocus = widget.canRequestFocus ?? focusNode.canRequestFocus;
-      return;
+    } else {
+      _focusAttachment.detach();
+      focusNode.removeListener(_handleFocusChanged);
+      _initNode();
     }
 
-    _focusAttachment.detach();
-    focusNode.removeListener(_handleFocusChanged);
-    _initNode();
+    if (oldWidget.autofocus != widget.autofocus) {
+      _handleAutofocus();
+    }
   }
 
   void _handleFocusChanged() {

@@ -349,8 +349,9 @@ const String _objcPluginRegistryImplementationTemplate = '''//
 const String _swiftPluginRegistryTemplate = '''//
 //  Generated file. Do not edit.
 //
-import Foundation
+
 import {{framework}}
+import Foundation
 
 {{#plugins}}
 import {{name}}
@@ -472,11 +473,9 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
   final String filePath = fs.path.join(registryDirectory, 'generated_plugin_registrant.dart');
   if (webPlugins.isEmpty) {
     final File file = fs.file(filePath);
-    file.createSync(recursive: true);
-    file.writeAsStringSync('''
-// Generated file. Intentionally left empty due to no web plugins registered.
-void registerPlugins(ignored) {}
-''');
+    if (file.existsSync()) {
+      file.deleteSync();
+    }
   } else {
     _renderTemplateToFile(
       _dartPluginRegistryTemplate,

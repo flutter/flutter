@@ -41,6 +41,7 @@ void main() {
       fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       when(mockWebCompilationProxy.initialize(
+        projectName: anyNamed('projectName'),
         projectDirectory: anyNamed('projectDirectory'),
         mode: anyNamed('mode')
       )).thenAnswer((Invocation invocation) {
