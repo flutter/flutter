@@ -12,6 +12,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -310,7 +311,16 @@ Future<String> _initializeGradle(FlutterProject project) async {
   printTrace('Using gradle from $gradle.');
   // Validates the Gradle executable by asking for its version.
   // Makes Gradle Wrapper download and install Gradle distribution, if needed.
-  await runCheckedAsync(<String>[gradle, '-v'], environment: _gradleEnv);
+  try {
+    await runCheckedAsync(<String>[gradle, '-v'], environment: _gradleEnv);
+  } catch (e) {
+    if (e is ProcessException &&
+        e.toString().contains('java.io.FileNotFoundException: https://downloads.gradle.org') ||
+        e.toString().contains('java.io.IOException: Unable to tunnel through proxy')) {
+      throwToolExit('$gradle threw an error while trying to update itself.\n$e');
+    }
+    rethrow;
+  }
   status.stop();
   return gradle;
 }
