@@ -1,4 +1,4 @@
-Signature: bec6d48e8b32415d145c73f886f7b58b
+Signature: 956a246c8f4d504ffd875e163059133d
 
 UNUSED LICENSES:
 
@@ -490,6 +490,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.auth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.dhcp/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/meta.json
@@ -1143,6 +1144,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/util.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/vmo_fields.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/vmo_holder.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/vmo_writer.dart
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/testing.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_media/meta.json
@@ -1209,6 +1211,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/peer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/address.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/appearance.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/connection_role.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/device_class.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/id.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
@@ -1252,6 +1255,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.control/goldfish
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.control/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.pipe/goldfish-pipe.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish.pipe/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/image_pipe2.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/property_provider.fidl
@@ -1287,6 +1291,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.testing/test_harness.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/annotation/annotation.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story/story_shell_factory.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.dhcp/dhcp.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.dhcp/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/meta.json
@@ -1981,6 +1987,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.auth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.dhcp/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/meta.json
@@ -2719,8 +2726,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/decoding.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/encoding.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/formatting.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/coding.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/string_view.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/vector_view.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/validating.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function.h
