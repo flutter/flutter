@@ -20,6 +20,7 @@ import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../resident_runner.dart';
+import '../web/web_device.dart';
 import '../web/web_runner.dart';
 import 'web_fs.dart';
 
@@ -63,7 +64,10 @@ class ResidentWebRunner extends ResidentRunner {
 
   // Only the debug builds of the web support the service protocol.
   @override
-  bool get supportsServiceProtocol => isRunningDebug;
+  bool get supportsServiceProtocol => isRunningDebug && device is! WebServerDevice;
+
+  @override
+  bool get debuggingEnabled => isRunningDebug && device is! WebServerDevice;
 
   WebFs _webFs;
   DebugConnection _debugConnection;
@@ -103,6 +107,7 @@ class ResidentWebRunner extends ResidentRunner {
     await _debugConnection?.close();
     await _stdOutSub?.cancel();
     await _webFs?.stop();
+    await device.stopApp(null);
     _exited = true;
   }
 
@@ -162,7 +167,11 @@ class ResidentWebRunner extends ResidentRunner {
         target: target,
         flutterProject: flutterProject,
         buildInfo: debuggingOptions.buildInfo,
+        skipDwds: true,
       );
+      await device.startApp(package, mainPath: target, platformArgs: <String, Object>{
+        'uri': _webFs.uri
+      });
       if (supportsServiceProtocol) {
         _debugConnection = await _webFs.runAndDebug();
         unawaited(_debugConnection.onDone.whenComplete(exit));
@@ -246,15 +255,13 @@ class ResidentWebRunner extends ResidentRunner {
             ? OperationResult.ok
             : OperationResult(1, reloadResponse.toString());
       } on vmservice.RPCError {
-        await _webFs.hardRefresh();
-        return OperationResult(1, 'Page requires full reload');
+        return OperationResult(1, 'Page requires refresh.');
       } finally {
         status.stop();
       }
     }
-    // If we're not in hot mode, the only way to restart is to reload the tab.
-    await _webFs.hardRefresh();
     status.stop();
+    printStatus('Recompile complete. Page requires refresh.');
     return OperationResult.ok;
   }
 
