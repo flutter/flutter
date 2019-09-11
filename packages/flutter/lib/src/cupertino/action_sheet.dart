@@ -30,23 +30,6 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
   textBaseline: TextBaseline.alphabetic,
 );
 
-// This decoration is applied to the blurred backdrop to lighten the blurred
-// image. Brightening is done to counteract the dark modal barrier that
-// appears behind the alert. The overlay blend mode does the brightening.
-// The white color doesn't paint any white, it's a placeholder and is going to be
-// replaced by the resolved color of _kAlertBlurOverlayColor.
-const BoxDecoration _kAlertBlurOverlayDecoration = BoxDecoration(
-  color: CupertinoColors.white,
-  backgroundBlendMode: BlendMode.overlay,
-);
-
-// Color of the overlay.
-// Extracted from https://developer.apple.com/design/resources/.
-const Color _kAlertBlurOverlayColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0x66000000),
-  darkColor: Color(0x99000000),
-);
-
 // Translucent, very light gray that is painted on top of the blurred backdrop
 // as the action sheet's background color.
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/39272. Use
@@ -224,13 +207,9 @@ class CupertinoActionSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[
       Flexible(child: ClipRRect(
-        borderRadius: BorderRadius.circular(12.0),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-          child: Container(
-            decoration: _kAlertBlurOverlayDecoration.copyWith(
-              color: CupertinoDynamicColor.resolve(_kAlertBlurOverlayColor, context),
-            ),
+          borderRadius: BorderRadius.circular(12.0),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
             child: _CupertinoAlertRenderWidget(
               contentSection: Builder(builder: _buildContent),
               actionsSection: _buildActions(),
@@ -238,14 +217,8 @@ class CupertinoActionSheet extends StatelessWidget {
           ),
         ),
       ),
-      ),
+      if (cancelButton != null) _buildCancelButton(),
     ];
-
-    if (cancelButton != null) {
-      children.add(
-        _buildCancelButton(),
-      );
-    }
 
     final Orientation orientation = MediaQuery.of(context).orientation;
     double actionSheetWidth;
@@ -420,14 +393,14 @@ class _CupertinoAlertRenderWidget extends RenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     return _RenderCupertinoAlert(
       dividerThickness: _kDividerThickness / MediaQuery.of(context).devicePixelRatio,
-      dividerColor: _kButtonDividerColor,
+      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context),
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoAlert renderObject) {
     super.updateRenderObject(context, renderObject);
-    renderObject.dividerColor = _kButtonDividerColor;
+    renderObject.dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context);
   }
 
   @override
@@ -1034,7 +1007,7 @@ class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     return _RenderCupertinoAlertActions(
       dividerThickness: _dividerThickness,
-      dividerColor: _kButtonDividerColor,
+      dividerColor: CupertinoDynamicColor.resolve(_kButtonDividerColor, context),
       hasCancelButton: _hasCancelButton,
       backgroundColor: CupertinoDynamicColor.resolve(_kBackgroundColor, context),
       pressedColor: CupertinoDynamicColor.resolve(_kPressedColor, context),
@@ -1045,7 +1018,7 @@ class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderCupertinoAlertActions renderObject) {
     renderObject
       ..dividerThickness = _dividerThickness
-      ..dividerColor = _kButtonDividerColor
+      ..dividerColor = CupertinoDynamicColor.resolve(_kButtonDividerColor, context)
       ..hasCancelButton = _hasCancelButton
       ..backgroundColor = CupertinoDynamicColor.resolve(_kBackgroundColor, context)
       ..pressedColor = CupertinoDynamicColor.resolve(_kPressedColor, context);
