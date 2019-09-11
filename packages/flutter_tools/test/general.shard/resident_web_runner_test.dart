@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/build_runner/web_fs.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
@@ -50,6 +51,7 @@ void main() {
         @required String target,
         @required FlutterProject flutterProject,
         @required BuildInfo buildInfo,
+        @required bool skipDwds,
       }) async {
         return mockWebFs;
       },
@@ -75,6 +77,18 @@ void main() {
     });
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
   }
+
+  test('runner with web server device does not support debugging', () => testbed.run(() {
+    final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
+      WebServerDevice(),
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      ipv6: true,
+    );
+
+    expect(profileResidentWebRunner.debuggingEnabled, false);
+    expect(residentWebRunner.debuggingEnabled, true);
+  }));
 
   test('profile does not supportsServiceProtocol', () => testbed.run(() {
     final ResidentRunner profileResidentWebRunner = ResidentWebRunner(
@@ -217,7 +231,7 @@ void main() {
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
     expect(result.code, 1);
-    expect(result.message, contains('Page requires full reload'));
+    expect(result.message, contains('Page requires refresh'));
   }));
 
   test('printHelp without details is spoopy', () => testbed.run(() async {
@@ -394,7 +408,7 @@ void main() {
 }
 
 class MockFlutterUsage extends Mock implements Usage {}
-class MockWebDevice extends Mock implements Device {}
+class MockWebDevice extends Mock implements ChromeDevice {}
 class MockBuildDaemonCreator extends Mock implements BuildDaemonCreator {}
 class MockFlutterWebFs extends Mock implements WebFs {}
 class MockDebugConnection extends Mock implements DebugConnection {}

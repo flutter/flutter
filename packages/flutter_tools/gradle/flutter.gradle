@@ -132,16 +132,6 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        // Add custom build types
-        project.android.buildTypes {
-            profile {
-                initWith debug
-                if (it.hasProperty('matchingFallbacks')) {
-                    matchingFallbacks = ['debug', 'release']
-                }
-            }
-        }
-
         String flutterRootPath = resolveProperty(project, "flutter.sdk", System.env.FLUTTER_ROOT)
         if (flutterRootPath == null) {
             throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file or with a FLUTTER_ROOT environment variable.")
@@ -153,6 +143,30 @@ class FlutterPlugin implements Plugin<Project> {
 
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
+
+        // Add custom build types.
+        project.android.buildTypes {
+            profile {
+                initWith debug
+                if (it.hasProperty("matchingFallbacks")) {
+                    matchingFallbacks = ["debug", "release"]
+                }
+            }
+        }
+
+        if (useProguard(project)) {
+            String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
+                    "gradle", "flutter_proguard_rules.pro")
+            project.android.buildTypes {
+                release {
+                    minifyEnabled true
+                    useProguard true
+                    // Fallback to `android/app/proguard-rules.pro`.
+                    // This way, custom Proguard rules can be configured as needed.
+                    proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"
+                }
+            }
+        }
 
         if (useLocalEngine(project)) {
             String engineOutPath = project.property('localEngineOut')
@@ -371,6 +385,14 @@ class FlutterPlugin implements Plugin<Project> {
     private static Boolean isVerbose(Project project) {
         if (project.hasProperty('verbose')) {
             return project.property('verbose').toBoolean()
+        }
+        return false
+    }
+
+
+    private static Boolean useProguard(Project project) {
+        if (project.hasProperty('proguard')) {
+            return project.property('proguard').toBoolean()
         }
         return false
     }
