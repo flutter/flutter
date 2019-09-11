@@ -118,10 +118,7 @@ abstract class UnpackMacOS extends Target {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    String basePath = artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
-    if (basePath.endsWith(fs.path.separator)) {
-      basePath = basePath.substring(0, basePath.length);
-    }
+    final String basePath = artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
     final Directory targetDirectory = environment
       .outputDir
       .childDirectory('FlutterMacOS.framework');
