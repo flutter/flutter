@@ -25,8 +25,14 @@ class BuildApkCommand extends BuildSubCommand {
     argParser
       ..addFlag('split-per-abi',
         negatable: false,
-        help: 'Whether to split the APKs per ABIs.'
+        help: 'Whether to split the APKs per ABIs. '
               'To learn more, see: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',
+      )
+      ..addFlag('proguard',
+        negatable: true,
+        defaultsTo: true,
+        help: 'Whether to enable Proguard on release mode. '
+              'To learn more, see: https://flutter.dev/docs/deployment/android#enabling-proguard',
       )
       ..addMultiOption('target-platform',
         splitCommas: true,
@@ -79,7 +85,8 @@ class BuildApkCommand extends BuildSubCommand {
     final BuildInfo buildInfo = getBuildInfo();
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(buildInfo,
       splitPerAbi: argResults['split-per-abi'],
-      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName)
+      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName),
+      proguard: argResults['proguard'],
     );
 
     if (buildInfo.isRelease && !androidBuildInfo.splitPerAbi && androidBuildInfo.targetArchs.length > 1) {
