@@ -48,10 +48,10 @@ class VisualStudio {
   // avoid false negatives.
 
   /// True there is complete installation of Visual Studio.
-  bool get isComplete => _bestVisualStudioDetails[_isCompleteKey] ?? true;
+  bool get isComplete => _bestVisualStudioDetails[_isCompleteKey] ?? false;
 
   /// True if Visual Studio is launchable.
-  bool get isLaunchable => _bestVisualStudioDetails[_isLaunchableKey] ?? true;
+  bool get isLaunchable => _bestVisualStudioDetails[_isLaunchableKey] ?? false;
 
     /// True if the Visual Studio installation is as pre-release version.
   bool get isPrerelease => _bestVisualStudioDetails[_isPrereleaseKey] ?? false;
