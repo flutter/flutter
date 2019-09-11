@@ -46,6 +46,17 @@ void main() {
     }
   };
 
+  // A version of a response that doesn't include certain installation status 
+  // information that might be missing in older Windows versions.
+  const Map<String, dynamic> _oldResponse = <String, dynamic>{
+    'installationPath': visualStudioPath,
+    'displayName': 'Visual Studio Community 2017',
+    'installationVersion': '15.9.28307.665',
+    'catalog': <String, dynamic>{
+      'productDisplayVersion': '15.9.12',
+    }
+  };
+
   // Arguments for a vswhere query to search for an installation with the required components.
   const List<String> _requiredComponents = <String>[
     'Microsoft.Component.MSBuild',
@@ -151,6 +162,19 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
+    testUsingContext('isInstalled returns true even with missing status information', () {
+      setMockCompatibleVisualStudioInstallation(null);
+      setMockPrereleaseVisualStudioInstallation(null);
+      setMockAnyVisualStudioInstallation(_oldResponse);
+
+      visualStudio = VisualStudio();
+      expect(visualStudio.isInstalled, true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFilesystem,
+      Platform: () => windowsPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
+
     testUsingContext('isInstalled returns true when VS is present but missing components', () {
       setMockCompatibleVisualStudioInstallation(null);
       setMockPrereleaseVisualStudioInstallation(null);
@@ -171,7 +195,6 @@ void main() {
       final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
         ..['isPrerelease'] = true;
       setMockPrereleaseVisualStudioInstallation(response);
-
 
       visualStudio = VisualStudio();
       expect(visualStudio.isInstalled, true);

@@ -190,11 +190,16 @@ class VisualStudio {
   }
 
   /// Checks if the given installation has issues that the user must resolve.
+  /// 
+  /// Returns false if the required information is missing since older versions
+  /// of Windows might not include them.
   bool installationHasIssues(Map<String, dynamic>installationDetails) {
     assert(installationDetails != null);
-    assert(installationDetails[_isCompleteKey] != null);
-    assert(installationDetails[_isRebootRequiredKey] != null);
-    assert(installationDetails[_isLaunchableKey] != null);
+    if (installationDetails[_isCompleteKey] == null ||
+        installationDetails[_isRebootRequiredKey] == null ||
+        installationDetails[_isLaunchableKey] == null) {
+      return false;
+    }
 
     return installationDetails[_isCompleteKey] == false ||
       installationDetails[_isRebootRequiredKey] == true ||
