@@ -161,13 +161,13 @@ class _ZoomingPageTransition extends StatelessWidget {
     end: 1.0,
   );
 
-  // The new page begins at 80% size before increasing until its at full size.
+  // The new page begins at 95% size before increasing until its at full size.
   static final Tween<double> _primaryScaleTween = Tween<double>(
     begin: 0.95,
     end: 1.0,
   );
 
-  // The previous page begins at full size before expanding to 125% of its size
+  // The previous page begins at full size before expanding to 110% of its size
   // to create a 'zoom' effect.
   static final Tween<double> _secondaryScaleTween = Tween<double>(
     begin: 1.0,
