@@ -78,8 +78,6 @@ final DartPlatform flutterWebPlatform =
   // Flutter web specific libraries.
   'ui',
   '_engine',
-  'io',
-  'isolate',
 ]);
 
 /// The builders required to compile a Flutter application to the web.
