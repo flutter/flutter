@@ -390,7 +390,7 @@ void main() {
     when(mockDevice.supportsScreenshot).thenReturn(false);
 
     expect(() => residentRunner.screenshot(mockFlutterDevice),
-        throwsA(isInstanceOf<ToolExit>()));
+        throwsA(isInstanceOf<AssertionError>()));
   }));
 
   test('ResidentRunner does not toggle banner in non-debug mode', () => testbed.run(() async {
