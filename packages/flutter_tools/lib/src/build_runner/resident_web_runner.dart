@@ -19,6 +19,7 @@ import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import '../resident_runner.dart';
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
@@ -258,6 +259,13 @@ class ResidentWebRunner extends ResidentRunner {
         return OperationResult(1, 'Page requires refresh.');
       } finally {
         status.stop();
+        HotEvent('restart',
+          targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
+          sdkName: await device.sdkNameAndVersion,
+          emulator: false,
+          fullRestart: true,
+          reason: reason,
+        ).send();
       }
     }
     status.stop();
