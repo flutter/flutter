@@ -275,11 +275,7 @@ class Color {
 
   @override
   String toString() {
-    if (engine.assertionsEnabled) {
-      return 'Color(0x${value.toRadixString(16).padLeft(8, '0')})';
-    } else {
-      return super.toString();
-    }
+    return 'Color(0x${value.toRadixString(16).padLeft(8, '0')})';
   }
 }
 
@@ -1192,36 +1188,32 @@ class Paint {
 
   @override
   String toString() {
-    if (engine.assertionsEnabled) {
-      final StringBuffer result = StringBuffer();
-      String semicolon = '';
-      result.write('Paint(');
-      if (style == PaintingStyle.stroke) {
-        result.write('$style');
-        if (strokeWidth != null && strokeWidth != 0.0)
-          result.write(' $strokeWidth');
-        else
-          result.write(' hairline');
-        if (strokeCap != null && strokeCap != StrokeCap.butt)
-          result.write(' $strokeCap');
-        semicolon = '; ';
-      }
-      if (isAntiAlias != true) {
-        result.write('${semicolon}antialias off');
-        semicolon = '; ';
-      }
-      if (color != _defaultPaintColor) {
-        if (color != null)
-          result.write('$semicolon$color');
-        else
-          result.write('${semicolon}no color');
-        semicolon = '; ';
-      }
-      result.write(')');
-      return result.toString();
-    } else {
-      return super.toString();
+    final StringBuffer result = StringBuffer();
+    String semicolon = '';
+    result.write('Paint(');
+    if (style == PaintingStyle.stroke) {
+      result.write('$style');
+      if (strokeWidth != null && strokeWidth != 0.0)
+        result.write(' $strokeWidth');
+      else
+        result.write(' hairline');
+      if (strokeCap != null && strokeCap != StrokeCap.butt)
+        result.write(' $strokeCap');
+      semicolon = '; ';
     }
+    if (isAntiAlias != true) {
+      result.write('${semicolon}antialias off');
+      semicolon = '; ';
+    }
+    if (color != _defaultPaintColor) {
+      if (color != null)
+        result.write('$semicolon$color');
+      else
+        result.write('${semicolon}no color');
+      semicolon = '; ';
+    }
+    result.write(')');
+    return result.toString();
   }
 }
 
@@ -1447,9 +1439,7 @@ class ColorFilter {
   }
 
   @override
-  String toString() => engine.assertionsEnabled
-      ? 'ColorFilter($_color, $_blendMode)'
-      : super.toString();
+  String toString() => 'ColorFilter($_color, $_blendMode)';
 }
 
 /// Styles to use for blurs in [MaskFilter] objects.
