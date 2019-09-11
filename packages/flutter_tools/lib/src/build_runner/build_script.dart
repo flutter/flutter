@@ -207,11 +207,11 @@ class FlutterWebTestEntrypointBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-     if (!targets.any((String target) => target.contains(buildStep
+    log.info('Does $targets contain ${buildStep.inputId.path}?????????????');
+    if (!targets.any((String target) => target.contains(buildStep
         .inputId.path.replaceFirst('.browser_test.dart', '')))) {
       return;
     }
-    log.info('building for target ${buildStep.inputId.path}');
     await bootstrapDdc(buildStep, platform: flutterWebPlatform);
   }
 }
