@@ -485,7 +485,6 @@ class DebuggingOptions {
     this.verboseSystemLogs = false,
     this.observatoryPort,
     this.hostname,
-    this.launchBrowser,
     this.port,
    }) : debuggingEnabled = true;
 
@@ -502,7 +501,6 @@ class DebuggingOptions {
       dumpSkpOnShaderCompilation = false,
       verboseSystemLogs = false,
       hostname = null,
-      launchBrowser = true,
       port = null,
       observatoryPort = null;
 
@@ -522,7 +520,6 @@ class DebuggingOptions {
   final int observatoryPort;
   final String port;
   final String hostname;
-  final bool launchBrowser;
 
   bool get hasObservatoryPort => observatoryPort != null;
 }

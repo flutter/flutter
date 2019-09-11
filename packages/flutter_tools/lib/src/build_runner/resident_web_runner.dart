@@ -175,7 +175,7 @@ class ResidentWebRunner extends ResidentRunner {
         'uri': _webFs.uri
       });
       if (supportsServiceProtocol) {
-        _debugConnection = await _webFs.runAndDebug(!debuggingOptions.launchBrowser);
+        _debugConnection = await _webFs.runAndDebug();
         unawaited(_debugConnection.onDone.whenComplete(exit));
       }
     } catch (err, stackTrace) {

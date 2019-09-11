@@ -291,7 +291,6 @@ class RunCommand extends RunCommandBase {
         verboseSystemLogs: argResults['verbose-system-logs'],
         hostname: featureFlags.isWebEnabled ? argResults['hostname'] : '',
         port: featureFlags.isWebEnabled ? argResults['port'] : '',
-        launchBrowser: featureFlags.isWebEnabled ? argResults['launch-browser'] : false,
       );
     }
   }
