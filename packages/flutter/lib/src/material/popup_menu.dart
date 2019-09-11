@@ -208,15 +208,16 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   ///
   /// By default, the item is [enabled].
   ///
-  /// The `enabled` argument must not be null.
+  /// The `enabled` and `height` arguments must not be null.
   const PopupMenuItem({
     Key key,
     this.value,
     this.enabled = true,
-    this.height,
+    this.height = kMinInteractiveDimension,
     this.textStyle,
     @required this.child,
   }) : assert(enabled != null),
+       assert(height != null),
        super(key: key);
 
   /// The value that will be returned by [showMenu] if this entry is selected.
@@ -230,7 +231,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
 
   /// The minimum height height of the menu item.
   ///
-  /// Defaults to kMinInteractiveDimension pixels.
+  /// Defaults to [kMinInteractiveDimension] pixels.
   @override
   final double height;
 
@@ -305,7 +306,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       duration: kThemeChangeDuration,
       child: Container(
         alignment: AlignmentDirectional.centerStart,
-        constraints: BoxConstraints(minHeight: widget.height ?? kMinInteractiveDimension),
+        constraints: BoxConstraints(minHeight: widget.height),
         padding: const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
         child: buildChild(),
       ),
