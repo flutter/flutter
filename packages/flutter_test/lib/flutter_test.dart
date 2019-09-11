@@ -46,6 +46,8 @@ library flutter_test;
 
 export 'dart:async' show Future;
 
+export 'src/_goldens_io.dart'
+  if (dart.library.html) 'src/_goldens_web.dart';
 export 'src/accessibility.dart';
 export 'src/all_elements.dart';
 export 'src/binding.dart';
