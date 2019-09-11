@@ -1,4 +1,4 @@
-Signature: c125b37166395d942a9bf69db5d6fd46
+Signature: ea72b0375f261e7962a6bdc7a923ae91
 
 UNUSED LICENSES:
 
@@ -1403,6 +1403,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-GCC-x86_64-Release-ANGLE.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-GCC-x86_64-Release-NoGPU.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-GCC-x86_64-Release-Shared.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm-Debug-iOS.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm64-Debug-iOS.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-x86_64-Debug-ASAN.json
@@ -1497,6 +1498,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus5x-GPU-Adreno418-arm64-Release-All-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus7-CPU-Tegra3-arm-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-P30-GPU-MaliG76-arm64-Release-All-Android_Vulkan.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Pixel3a-GPU-Adreno615-arm64-Release-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-ChromeOS-Clang-ASUSChromebookFlipC100-GPU-MaliT764-arm-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-ChromeOS-Clang-AcerChromebook13_CB5_311-GPU-TegraK1-arm-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Chromecast-Clang-Chorizo-CPU-Cortex_A7-arm-Debug-All.json
