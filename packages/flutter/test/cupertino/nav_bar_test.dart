@@ -52,7 +52,7 @@ void main() {
   });
 
   testWidgets('Opaque background does not add blur effects, non-opaque background adds blur effects', (WidgetTester tester) async {
-    const Color background = CupertinoDynamicColor.withBrightness(
+    const CupertinoDynamicColor background = CupertinoDynamicColor.withBrightness(
       color: Color(0xFFE5E5E5),
       darkColor: Color(0xF3E5E5E5),
     );
@@ -67,7 +67,7 @@ void main() {
       ),
     );
     expect(find.byType(BackdropFilter), findsNothing);
-    expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xFFE5E5E5)));
+    expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.color));
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -79,7 +79,7 @@ void main() {
       ),
     );
     expect(find.byType(BackdropFilter), findsOneWidget);
-    expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xF3E5E5E5)));
+    expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.darkColor));
   });
 
   testWidgets('Non-opaque background adds blur effects', (WidgetTester tester) async {
