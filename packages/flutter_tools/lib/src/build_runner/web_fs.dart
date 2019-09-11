@@ -16,7 +16,7 @@ import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
-import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
+import 'package:shelf_proxy/shelf_proxy.dart';
 
 import '../artifacts.dart';
 import '../asset.dart';
@@ -74,6 +74,7 @@ typedef WebFsFactory = Future<WebFs> Function({
   @required String target,
   @required FlutterProject flutterProject,
   @required BuildInfo buildInfo,
+  @required bool skipDwds,
 });
 
 /// The dev filesystem responsible for building and serving  web applications.
@@ -83,12 +84,14 @@ class WebFs {
     this._client,
     this._server,
     this._dwds,
-    this._chrome,
+    this.uri,
   );
+
+  /// The server uri.
+  final String uri;
 
   final HttpServer _server;
   final Dwds _dwds;
-  final Chrome _chrome;
   final BuildDaemonClient _client;
   StreamSubscription<void> _connectedApps;
 
@@ -96,14 +99,13 @@ class WebFs {
 
   Future<void> stop() async {
     await _client.close();
-    await _dwds.stop();
+    await _dwds?.stop();
     await _server.close(force: true);
-    await _chrome.close();
     await _connectedApps?.cancel();
   }
 
   /// Retrieve the [DebugConnection] for the current application.
-  Future<DebugConnection> runAndDebug() async {
+  Future<DebugConnection> runAndDebug() {
     final Completer<DebugConnection> firstConnection = Completer<DebugConnection>();
     _connectedApps =  _dwds.connectedApps.listen((AppConnection appConnection) async {
       appConnection.runMain();
@@ -113,18 +115,6 @@ class WebFs {
       }
     });
     return firstConnection.future;
-  }
-
-  /// Perform a hard refresh of all connected browser tabs.
-  Future<void> hardRefresh() async {
-    final List<ChromeTab> tabs = await _chrome.chromeConnection.getTabs();
-    for (ChromeTab tab in tabs) {
-      if (!tab.url.contains('localhost')) {
-        continue;
-      }
-      final WipConnection connection = await tab.connect();
-      await connection.sendCommand('Page.reload');
-    }
   }
 
   /// Recompile the web application and return whether this was successful.
@@ -148,7 +138,8 @@ class WebFs {
   static Future<WebFs> start({
     @required String target,
     @required FlutterProject flutterProject,
-    @required BuildInfo buildInfo
+    @required BuildInfo buildInfo,
+    @required bool skipDwds,
   }) async {
     // workaround for https://github.com/flutter/flutter/issues/38290
     if (!flutterProject.dartTool.existsSync()) {
@@ -175,21 +166,6 @@ class WebFs {
 
     // Initialize the dwds server.
     final int port = await os.findFreePort();
-    final Dwds dwds = await dwdsFactory(
-      hostname: _kHostName,
-      applicationPort: port,
-      applicationTarget: kBuildTargetName,
-      assetServerPort: daemonAssetPort,
-      buildResults: filteredBuildResults,
-      chromeConnection: () async {
-        return (await ChromeLauncher.connectedInstance).chromeConnection;
-      },
-      reloadConfiguration: ReloadConfiguration.none,
-      serveDevTools: true,
-      verbose: false,
-      enableDebugExtension: true,
-      logWriter: (dynamic level, String message) => printTrace(message),
-    );
     // Map the bootstrap files to the correct package directory.
     final String targetBaseName = fs.path
       .withoutExtension(target).replaceFirst('lib${fs.path.separator}', '');
@@ -203,7 +179,7 @@ class WebFs {
       '${targetBaseName}_web_entrypoint.digests': 'packages/${flutterProject.manifest.appName}/'
         '${targetBaseName}_web_entrypoint.digests',
     };
-    final Handler handler = const Pipeline().addMiddleware((Handler innerHandler) {
+    final Pipeline pipeline = const Pipeline().addMiddleware((Handler innerHandler) {
       return (Request request) async {
         // Redirect the main.dart.js to the target file we decided to serve.
         if (mappedUrls.containsKey(request.url.path)) {
@@ -222,19 +198,39 @@ class WebFs {
           return innerHandler(request);
         }
       };
-    })
-      .addHandler(dwds.handler);
+    });
+    Handler handler;
+    Dwds dwds;
+    if (!skipDwds) {
+      dwds = await dwdsFactory(
+        hostname: _kHostName,
+        applicationPort: port,
+        applicationTarget: kBuildTargetName,
+        assetServerPort: daemonAssetPort,
+        buildResults: filteredBuildResults,
+        chromeConnection: () async {
+          return (await ChromeLauncher.connectedInstance).chromeConnection;
+        },
+        reloadConfiguration: ReloadConfiguration.none,
+        serveDevTools: true,
+        verbose: false,
+        enableDebugExtension: true,
+        logWriter: (dynamic level, String message) => printTrace(message),
+      );
+      handler = pipeline.addHandler(dwds.handler);
+    } else {
+      handler = pipeline.addHandler(proxyHandler('http://localhost:$daemonAssetPort/web/'));
+    }
     Cascade cascade = Cascade();
     cascade = cascade.add(handler);
     cascade = cascade.add(_assetHandler(flutterProject));
     final HttpServer server = await httpMultiServerFactory(_kHostName, port);
     shelf_io.serveRequests(server, cascade.handler);
-    final Chrome chrome = await chromeLauncher.launch('http://$_kHostName:$port/');
     return WebFs(
       client,
       server,
       dwds,
-      chrome,
+      'http://$_kHostName:$port/',
     );
   }
 
@@ -319,7 +315,11 @@ class WebFs {
       } else if (request.url.path.contains('assets')) {
         final String assetPath = request.url.path.replaceFirst('assets/', '');
         final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));
-        return Response.ok(file.readAsBytesSync());
+        if (file.existsSync()) {
+          return Response.ok(file.readAsBytesSync());
+        } else {
+          return Response.notFound('');
+        }
       }
       return Response.notFound('');
     };
