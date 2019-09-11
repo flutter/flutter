@@ -85,17 +85,20 @@ void main() {
     for (File input in inputs) {
       input.createSync(recursive: true);
     }
+    // Create output directory so we can test that it is deleted.
+    environment.outputDir.childDirectory(_kOutputPrefix)
+        .createSync(recursive: true);
+
     when(processManager.run(any)).thenAnswer((Invocation invocation) async {
       final List<String> arguments = invocation.positionalArguments.first;
       final String sourcePath = arguments[arguments.length - 2];
       final String targetPath = arguments.last;
-      // Verify there are no trailing `/`.
-      expect(sourcePath, isNot(endsWith(fs.path.separator)));
-      expect(targetPath, isNot(endsWith(fs.path.separator)));
-
       final Directory source = fs.directory(sourcePath);
-      final Directory target = fs.directory(targetPath)
-        ..createSync(recursive: true);
+      final Directory target = fs.directory(targetPath);
+
+      // verify directory was deleted by command.
+      expect(target.existsSync(), false);
+      target.createSync(recursive: true);
 
       for (FileSystemEntity entity in source.listSync(recursive: true)) {
         if (entity is File) {

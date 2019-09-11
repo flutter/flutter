@@ -122,9 +122,12 @@ abstract class UnpackMacOS extends Target {
     if (basePath.endsWith(fs.path.separator)) {
       basePath = basePath.substring(0, basePath.length);
     }
-    final File targetDirectory = environment
+    final Directory targetDirectory = environment
       .outputDir
-      .childFile('FlutterMacOS.framework');
+      .childDirectory('FlutterMacOS.framework');
+    if (targetDirectory.existsSync()) {
+      targetDirectory.deleteSync(recursive: true);
+    }
     final ProcessResult result = await processManager
         .run(<String>['cp', '-R', basePath, targetDirectory.path]);
     if (result.exitCode != 0) {
