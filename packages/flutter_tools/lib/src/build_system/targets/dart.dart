@@ -2,22 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:pool/pool.dart';
-
 import '../../artifacts.dart';
-import '../../asset.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
-import '../../devfs.dart';
 import '../../globals.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
-import 'assets.dart';
 
 /// The define to pass a [BuildMode].
 const String kBuildMode= 'BuildMode';
@@ -60,111 +55,6 @@ List<File> listDartSources(Environment environment) {
   return dartFiles;
 }
 
-/// Copies the prebuilt flutter bundle.
-// This is a one-off rule for implementing build bundle in terms of assemble.
-class CopyFlutterBundle extends Target {
-  const CopyFlutterBundle();
-
-  @override
-  String get name => 'copy_flutter_bundle';
-
-  @override
-  List<Source> get inputs => const <Source>[
-    Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
-    Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.behavior(AssetOutputBehavior())
-  ];
-
-  @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
-    Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
-    Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
-    Source.pattern('{OUTPUT_DIR}/AssetManifest.json'),
-    Source.pattern('{OUTPUT_DIR}/FontManifest.json'),
-    Source.pattern('{OUTPUT_DIR}/LICENSE'),
-    Source.behavior(AssetOutputBehavior())
-  ];
-
-  @override
-  Future<void> build(Environment environment) async {
-    if (environment.defines[kBuildMode] == null) {
-      throw MissingDefineException(kBuildMode, 'copy_flutter_bundle');
-    }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-
-    // We're not smart enough to only remove assets that are removed. If
-    // anything changes blow away the whole directory.
-    if (environment.outputDir.existsSync()) {
-      environment.outputDir.deleteSync(recursive: true);
-    }
-    environment.outputDir.createSync(recursive: true);
-
-    // Only copy the prebuilt runtimes and kernel blob in debug mode.
-    if (buildMode == BuildMode.debug) {
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
-      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
-      environment.buildDir.childFile('app.dill')
-          .copySync(environment.outputDir.childFile('kernel_blob.bin').path);
-      fs.file(vmSnapshotData)
-          .copySync(environment.outputDir.childFile('vm_snapshot_data').path);
-      fs.file(isolateSnapshotData)
-          .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
-    }
-
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    await assetBundle.build();
-    final Pool pool = Pool(64);
-    await Future.wait<void>(
-      assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
-        final PoolResource resource = await pool.request();
-        try {
-          final File file = fs.file(fs.path.join(environment.outputDir.path, entry.key));
-          file.parent.createSync(recursive: true);
-          final DevFSContent content = entry.value;
-          if (content is DevFSFileContent && content.file is File) {
-            await (content.file as File).copy(file.path);
-          } else {
-            await file.writeAsBytes(await entry.value.contentsAsBytes());
-          }
-        } finally {
-          resource.release();
-        }
-      }));
-  }
-
-  @override
-  List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
-  ];
-}
-
-/// Copies the prebuilt flutter bundle for release mode.
-class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
-  const ReleaseCopyFlutterBundle();
-
-  @override
-  String get name => 'release_flutter_bundle';
-
-  @override
-  List<Source> get inputs => const <Source>[
-    Source.behavior(AssetOutputBehavior())
-  ];
-
-  @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/AssetManifest.json'),
-    Source.pattern('{OUTPUT_DIR}/FontManifest.json'),
-    Source.pattern('{OUTPUT_DIR}/LICENSE'),
-    Source.behavior(AssetOutputBehavior())
-  ];
-
-  @override
-  List<Target> get dependencies => const <Target>[];
-}
-
-
 /// Generate a snapshot of the dart code used in the program.
 class KernelSnapshot extends Target {
   const KernelSnapshot();
@@ -201,7 +91,6 @@ class KernelSnapshot extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
     final String packagesPath = environment.projectDir.childFile('.packages').path;
-    // TODO(jonahwilliams): use a full file uri to remove Dart complaint about entrypoint.
     final PackageUriMapper packageUriMapper = PackageUriMapper(targetFile,
         packagesPath, null, null);
 
@@ -212,6 +101,7 @@ class KernelSnapshot extends Target {
       targetModel: TargetModel.flutter,
       targetProductVm: buildMode == BuildMode.release,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
+      depFilePath: null,
       packagesPath: packagesPath,
       linkPlatformKernelIn: buildMode == BuildMode.release,
       mainPath: packageUriMapper.map(targetFile)?.toString() ?? targetFile,

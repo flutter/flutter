@@ -92,9 +92,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.frontendServerSnapshotForEngineDartSdk:
       return 'frontend_server.dart.snapshot';
     case Artifact.engineDartBinary:
-      if (platform == TargetPlatform.windows_x64) {
-        return 'dart.exe';
-      }
       return 'dart';
     case Artifact.dart2jsSnapshot:
       return 'dart2js.dart.snapshot';
@@ -268,7 +265,7 @@ class CachedArtifacts extends Artifacts {
       case Artifact.engineDartSdkPath:
         return dartSdkPath;
       case Artifact.engineDartBinary:
-        return fs.path.join(dartSdkPath, 'bin', _artifactToFileName(artifact, platform));
+        return fs.path.join(dartSdkPath, 'bin', _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
         return fs.path.join(_getFlutterPatchedSdkPath(mode), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:

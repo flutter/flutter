@@ -141,7 +141,7 @@ Future<void> main() async {
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleDebug');
         await project.runGradleTask('assembleDebug');
-        final String errorMessage = validateSnapshotDependency(project, 'kernel_blob.bin');
+        final String errorMessage = validateSnapshotDependency(project, 'build/app.dill');
         if (errorMessage != null) {
           throw TaskResult.failure(errorMessage);
         }
