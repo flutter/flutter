@@ -486,6 +486,7 @@ class DebuggingOptions {
     this.observatoryPort,
     this.hostname,
     this.launchBrowser,
+    this.port,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo)
@@ -500,8 +501,9 @@ class DebuggingOptions {
       traceSystrace = false,
       dumpSkpOnShaderCompilation = false,
       verboseSystemLogs = false,
-      hostname = '',
+      hostname = null,
       launchBrowser = true,
+      port = null,
       observatoryPort = null;
 
   final bool debuggingEnabled;
@@ -518,6 +520,7 @@ class DebuggingOptions {
   final bool useTestFonts;
   final bool verboseSystemLogs;
   final int observatoryPort;
+  final String port;
   final String hostname;
   final bool launchBrowser;
 

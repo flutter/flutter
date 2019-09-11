@@ -44,7 +44,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       ..addOption('route',
         help: 'Which route to load when running the app.',
       );
-    usesWebOptions();
+    usesWebOptions(hide: !verboseHelp);
     usesTargetOption();
     usesPortOptions();
     usesIpv6Flag();
@@ -289,7 +289,8 @@ class RunCommand extends RunCommandBase {
         dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'],
         observatoryPort: observatoryPort,
         verboseSystemLogs: argResults['verbose-system-logs'],
-        hostName: featureFlags.isWebEnabled ? argResults['hostname'] : '',
+        hostname: featureFlags.isWebEnabled ? argResults['hostname'] : '',
+        port: featureFlags.isWebEnabled ? argResults['port'] : '',
         launchBrowser: featureFlags.isWebEnabled ? argResults['launch-browser'] : false,
       );
     }

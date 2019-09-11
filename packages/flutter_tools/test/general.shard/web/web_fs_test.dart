@@ -83,6 +83,8 @@ void main() {
       target: fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
+      hostname: null,
+      port: null,
     );
 
     // The build daemon is told to build once.
