@@ -1,4 +1,4 @@
-Signature: 8b1fbe7507bd427369e04e74cc99a8a9
+Signature: f2b1b1f175ef6b86c8879f4e8f6f190b
 
 UNUSED LICENSES:
 
@@ -7371,6 +7371,10 @@ FILE: ../../../third_party/dart/sdk/lib/html/html_common/conversions_dart2js.dar
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/html_common.dart
 FILE: ../../../third_party/dart/sdk/lib/libraries.json
 FILE: ../../../third_party/dart/sdk/lib/vmservice_libraries.json
+FILE: ../../../third_party/dart/sdk_nnbd/lib/html/html_common/conversions_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/html/html_common/html_common.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/libraries.json
+FILE: ../../../third_party/dart/sdk_nnbd/lib/vmservice_libraries.json
 FILE: ../../../third_party/dart/third_party/7zip.tar.gz.sha1
 FILE: ../../../third_party/dart/third_party/clang.tar.gz.sha1
 ----------------------------------------------------------------------------------------------------
@@ -7555,6 +7559,14 @@ FILE: ../../../third_party/dart/sdk/lib/ffi/ffi.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/native_type.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/struct.dart
 FILE: ../../../third_party/dart/sdk/lib/wasm/wasm.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/rti.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/shared/recipe_syntax.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/ffi/annotations.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/ffi/dynamic_library.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/ffi/ffi.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/ffi/native_type.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/ffi/struct.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/wasm/wasm.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -8026,6 +8038,95 @@ FILE: ../../../third_party/dart/sdk/lib/svg/dart2js/svg_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_audio/dart2js/web_audio_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/crypto.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/http_date.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/libraries.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/async_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/core_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/isolate_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/math_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/mirrors_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/foreign_helper.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/interceptors.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/isolate_helper.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/js_array.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/js_number.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/js_string.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/native_helper.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/regexp_helper.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/string_helper.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/async_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/constant_map.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/core_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/foreign_helper.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/interceptors.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/isolate_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_array.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_number.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_string.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/math_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/mirrors_patch_cfe.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/native_helper.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/regexp_helper.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/string_helper.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/sdk_library_metadata/lib/libraries.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/async/async.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/async/async_error.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/async/broadcast_stream_controller.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/async/future.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/async/future_impl.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/async/stream_controller.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/async/stream_impl.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/async/stream_pipe.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/async/timer.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/collection/collection.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/collection/iterable.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/collection/iterator.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/collection/maps.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/collection/splay_tree.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/bool.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/core.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/double.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/errors.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/exceptions.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/expando.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/identical.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/int.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/invocation.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/iterator.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/list.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/num.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/object.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/print.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/regexp.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/string.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/type.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/uri.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/html/dart2js/html_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/html/dartium/nativewrappers.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/html/html_common/conversions.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/html/html_common/css_class_set.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/html/html_common/html_common_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/html/html_common/metadata.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/indexed_db/dart2js/indexed_db_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/internal/async_cast.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/internal/cast.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/internal/internal.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/common.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/directory.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/directory_impl.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/eventhandler.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/io.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/platform.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/platform_impl.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/secure_server_socket.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/isolate/isolate.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/math/math.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/math/random.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/svg/dart2js/svg_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/web_audio/dart2js/web_audio_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/web_gl/dart2js/web_gl_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/web_sql/dart2js/web_sql_dart2js.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2012, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -8190,6 +8291,23 @@ FILE: ../../../third_party/dart/sdk/lib/io/namespace_impl.dart
 FILE: ../../../third_party/dart/sdk/lib/io/overrides.dart
 FILE: ../../../third_party/dart/sdk/lib/io/sync_socket.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/named_lookup.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/overrides.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/cli_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/custom_hash_map.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/identity_hash_map.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/linked_hash_map.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/profile.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/cli_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/cli/cli.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/cli/wait_for.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/bigint.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/internal/linked_list.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/internal/patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/embedder_config.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/namespace_impl.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/overrides.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/sync_socket.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/vmservice/named_lookup.dart
 FILE: ../../../third_party/dart/utils/bazel/kernel_worker.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2017, the Dart project authors.  Please see the AUTHORS file
@@ -8326,6 +8444,11 @@ FILE: ../../../third_party/dart/sdk/lib/js/_js.dart
 FILE: ../../../third_party/dart/sdk/lib/js/_js_client.dart
 FILE: ../../../third_party/dart/sdk/lib/js/_js_server.dart
 FILE: ../../../third_party/dart/sdk/lib/typed_data/unmodifiable_typed_data.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/instantiation.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/js/_js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/js/_js_client.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/js/_js_server.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/typed_data/unmodifiable_typed_data.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -8599,6 +8722,10 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/lib/js_util/dar
 FILE: ../../../third_party/dart/sdk/lib/developer/service.dart
 FILE: ../../../third_party/dart/sdk/lib/js_util/dart2js/js_util_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/devfs.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/lib/js_util/dart2js/js_util_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/developer/service.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/js_util/dart2js/js_util_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/vmservice/devfs.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -8720,6 +8847,22 @@ FILE: ../../../third_party/dart/sdk/lib/html/html_common/filtered_element_list.d
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/lists.dart
 FILE: ../../../third_party/dart/sdk/lib/internal/iterable.dart
 FILE: ../../../third_party/dart/sdk/lib/internal/sort.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/collection/queue.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/comparable.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/date_time.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/duration.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/function.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/iterable.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/map.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/pattern.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/set.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/stopwatch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/string_buffer.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/html/html_common/device.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/html/html_common/filtered_element_list.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/html/html_common/lists.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/internal/iterable.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/internal/sort.dart
 FILE: ../../../third_party/dart/utils/peg/pegparser.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2011, the Dart project authors.  Please see the AUTHORS file
@@ -8846,6 +8989,29 @@ FILE: ../../../third_party/dart/sdk/lib/io/io_resource_info.dart
 FILE: ../../../third_party/dart/sdk/lib/io/security_context.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/asset.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/vmservice.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/lib/js/dart2js/js_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/developer_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/ddc_runtime/classes.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/ddc_runtime/operations.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/ddc_runtime/rtti.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/ddc_runtime/runtime.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/ddc_runtime/types.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/ddc_runtime/utils.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/debugger.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/js_mirrors.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/developer_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/preambles/d8.js
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/preambles/jsshell.js
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/shared/async_await_error_codes.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/convert/base64.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/developer/developer.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/developer/extension.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/developer/timeline.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/io_resource_info.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/security_context.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/vmservice/asset.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/vmservice/vmservice.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2015, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -9184,6 +9350,94 @@ FILE: ../../../third_party/dart/sdk/lib/vmservice/message_router.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/running_isolate.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/running_isolates.dart
 FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_chrome/dart2js/chrome_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/http.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/http_headers.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/http_impl.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/http_parser.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/http_session.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/websocket.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/websocket_impl.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/collection_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/convert_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/internal_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/io_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/typed_data_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/annotations.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/js_helper.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/js_primitives.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/js_rti.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/mirror_helper.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/native_typed_data.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/annotations.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/collection_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/convert_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/internal_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/io_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_helper.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_names.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_primitives.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_rti.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/native_typed_data.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/typed_data_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/async/deferred_load.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/async/schedule_microtask.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/async/stream.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/async/stream_transformers.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/async/zone.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/collection/collections.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/collection/hash_map.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/collection/hash_set.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/collection/linked_hash_map.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/collection/linked_hash_set.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/collection/linked_list.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/collection/list.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/convert/ascii.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/convert/byte_conversion.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/convert/chunked_conversion.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/convert/codec.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/convert/convert.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/convert/converter.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/convert/encoding.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/convert/html_escape.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/convert/json.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/convert/latin1.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/convert/line_splitter.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/convert/string_conversion.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/convert/utf.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/annotations.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/null.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/stacktrace.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/string_sink.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/symbol.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/internal/list.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/internal/print.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/internal/symbol.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/bytes_builder.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/data_transformer.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/file.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/file_impl.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/file_system_entity.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/io_service.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/io_sink.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/link.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/secure_socket.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/socket.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/stdio.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/string_transformer.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/js/dart2js/js_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/math/jenkins_smi_hash.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/math/point.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/math/rectangle.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/mirrors/mirrors.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/typed_data/typed_data.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/vmservice/client.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/vmservice/constants.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/vmservice/message.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/vmservice/message_router.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/vmservice/running_isolate.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/vmservice/running_isolates.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/web_gl/dart2js/web_gl_dart2js.dart
 FILE: ../../../third_party/dart/utils/compiler/create_snapshot_entry.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2013, the Dart project authors.  Please see the AUTHORS file
@@ -9374,6 +9628,17 @@ FILE: ../../../third_party/dart/sdk/lib/io/process.dart
 FILE: ../../../third_party/dart/sdk/lib/io/service_object.dart
 FILE: ../../../third_party/dart/sdk/lib/isolate/capability.dart
 FILE: ../../../third_party/dart/sdk/lib/profiler/profiler.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/preambles/d8.js
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/preambles/jsshell.js
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/linked_hash_map.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/shared/embedded_names.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/collection/set.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/core/sink.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/developer/profiler.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/process.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/io/service_object.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/isolate/capability.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/profiler/profiler.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2014, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
