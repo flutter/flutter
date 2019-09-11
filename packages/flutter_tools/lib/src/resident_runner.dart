@@ -573,6 +573,7 @@ abstract class ResidentRunner {
   bool hotMode ;
   String getReloadPath({ bool fullRestart }) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
 
+  bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
   bool get isRunningDebug => debuggingOptions.buildInfo.isDebug;
   bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
