@@ -839,7 +839,7 @@ class HeroController extends NavigatorObserver {
     // be put on stage again.
     for (Object tag in toHeroes.keys) {
       if (fromHeroes[tag] == null)
-        toHeroes[tag].endFlight();
+        toHeroes[tag].ensurePlaceholderIsHidden();
     }
   }
 
