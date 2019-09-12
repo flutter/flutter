@@ -235,6 +235,9 @@ class VisualStudio {
   /// to avoid repeating vswhere queries that have already not found an installation.
   Map<String, dynamic> _cachedUsableVisualStudioDetails;
   Map<String, dynamic> get _usableVisualStudioDetails {
+    if (_cachedUsableVisualStudioDetails != null) {
+      return _cachedUsableVisualStudioDetails;
+    }
     Map<String, dynamic> visualStudioDetails =
         _visualStudioDetails(requiredComponents: _requiredComponents().keys);
     // If a stable version is not found, try searching for a pre-release version.
