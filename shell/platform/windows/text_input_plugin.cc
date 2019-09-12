@@ -34,8 +34,6 @@ static constexpr char kBadArgumentError[] = "Bad Arguments";
 static constexpr char kInternalConsistencyError[] =
     "Internal Consistency Error";
 
-static constexpr uint32_t kInputModelLimit = 256;
-
 namespace flutter {
 
 void TextInputPlugin::CharHook(Win32FlutterWindow* window,
@@ -86,7 +84,7 @@ void TextInputPlugin::KeyboardHook(Win32FlutterWindow* window,
         }
         break;
       case VK_RETURN:
-        EnterPressed(active_model_);
+        EnterPressed(active_model_.get());
         break;
       default:
         break;
@@ -140,19 +138,8 @@ void TextInputPlugin::HandleMethodCall(
         return;
       }
       int client_id = client_id_json.GetInt();
-      if (input_models_.find(client_id) == input_models_.end()) {
-        // Skips out on adding a new input model once over the limit.
-        if (input_models_.size() > kInputModelLimit) {
-          result->Error(
-              kInternalConsistencyError,
-              "Input models over limit. Aborting creation of new text model.");
-          return;
-        }
-        input_models_.insert(std::make_pair(
-            client_id,
-            std::make_unique<TextInputModel>(client_id, client_config)));
-      }
-      active_model_ = input_models_[client_id].get();
+      active_model_ =
+          std::make_unique<TextInputModel>(client_id, client_config);
     } else if (method.compare(kSetEditingStateMethod) == 0) {
       if (active_model_ == nullptr) {
         result->Error(
