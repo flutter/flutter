@@ -100,10 +100,10 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       assert(() { httpClientProvider = debugNetworkImageHttpClientProvider; return true; }());
 
       final _DownloadRequest downloadRequest = _DownloadRequest(
-          downloadResponseHandler.sendPort,
-          resolved,
-          headers,
-          httpClientProvider
+        downloadResponseHandler.sendPort,
+        resolved,
+        headers,
+        httpClientProvider,
       );
       if (_requestPort != null) {
         // If worker isolate is properly set up ([_requestPort] is holding
@@ -134,6 +134,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   void _spawnAndSetupIsolate() {
     assert(_pendingLoadRequests == null);
     assert(_loaderErrorHandler == null);
+    assert(_pendingLoader == null);
     _pendingLoadRequests = <_DownloadRequest>[];
     _pendingLoader = _spawnIsolate()..then((Isolate isolate) {
       _loaderErrorHandler = RawReceivePort((List<dynamic> errorAndStackTrace) {
@@ -157,12 +158,11 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   Future<Isolate> _spawnIsolate() {
-    // This is used to get _requestPort [SendPort] that can be used to
-    // communicate with worker isolate: when isolate is spawned it will send
-    // it's [SendPort] over via this [RawReceivePort].
-    // Received `sendPort` can also be null, which indicates that worker
-    // isolate exited after being idle.
-    final RawReceivePort receivePort = RawReceivePort((SendPort sendPort) {
+    // Once worker isolate is up and running it sends it's [sendPort] over
+    // [communicationBootstrapHandler] receive port.
+    // If [sendPort] is [null], it indicates that worker isolate exited after
+    // being idle.
+    final RawReceivePort communicationBootstrapHandler = RawReceivePort((SendPort sendPort) {
       _requestPort = sendPort;
       if (sendPort == null) {
         assert(_pendingLoadRequests.isEmpty);
@@ -180,7 +180,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       _pendingLoadRequests.clear();
     });
 
-    return Isolate.spawn<SendPort>(_initializeWorkerIsolate, receivePort.sendPort, paused: true);
+    return Isolate.spawn<SendPort>(_initializeWorkerIsolate,
+      communicationBootstrapHandler.sendPort, paused: true);
   }
 
   @override
@@ -228,7 +229,15 @@ class _DownloadRequest {
 final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
 const Duration _idleDuration = Duration(seconds: 60);
 
-void _initializeWorkerIsolate(SendPort mainIsolateSendPort) {
+/// Sets up the worker isolate to listen for incoming [_DownloadRequest]s from
+/// the main isolate.
+///
+/// This method runs on a worker isolate.
+///
+/// The `handshakeSendPort` argument is this worker isolate's communications
+/// link back to the main isolate. It is used to set-up the channel with which
+/// the main isolate sends download requests to the worker isolate.
+void _initializeWorkerIsolate(SendPort handshakeSendPort) {
   int ongoingRequests = 0;
   Timer idleTimer;
   RawReceivePort downloadRequestHandler;
@@ -237,10 +246,9 @@ void _initializeWorkerIsolate(SendPort mainIsolateSendPort) {
   downloadRequestHandler = RawReceivePort((_DownloadRequest downloadRequest) async {
     ongoingRequests++;
     idleTimer?.cancel();
-    final HttpClient httpClient =
-      downloadRequest.httpClientProvider != null
-          ? downloadRequest.httpClientProvider()
-          : _sharedHttpClient;
+    final HttpClient httpClient = downloadRequest.httpClientProvider != null
+        ? downloadRequest.httpClientProvider()
+        : _sharedHttpClient;
 
     try {
       final HttpClientRequest request = await httpClient.getUrl(downloadRequest.uri);
@@ -248,21 +256,23 @@ void _initializeWorkerIsolate(SendPort mainIsolateSendPort) {
         request.headers.add(name, value);
       });
       final HttpClientResponse response = await request.close();
-      if (response.statusCode != HttpStatus.ok)
+      if (response.statusCode != HttpStatus.ok) {
         throw image_provider.NetworkImageLoadException(
-            statusCode: response?.statusCode,
-            uri: downloadRequest.uri
+          statusCode: response?.statusCode,
+          uri: downloadRequest.uri,
         );
+      }
       final TransferableTypedData transferable = await getHttpClientResponseBytes(
-          response,
-          onBytesReceived: (int cumulative, int total) {
-             downloadRequest.sendPort.send(_DownloadResponse.chunkEvent(
-                 ImageChunkEvent(
-                     cumulativeBytesLoaded: cumulative,
-                     expectedTotalBytes: total,
-                 )
-             ));
-          });
+        response,
+        onBytesReceived: (int cumulative, int total) {
+          downloadRequest.sendPort.send(_DownloadResponse.chunkEvent(
+            ImageChunkEvent(
+              cumulativeBytesLoaded: cumulative,
+              expectedTotalBytes: total,
+            ),
+          ));
+        },
+      );
       downloadRequest.sendPort.send(_DownloadResponse.bytes(transferable));
     } catch (error) {
       downloadRequest.sendPort.send(_DownloadResponse.error(error));
@@ -270,12 +280,13 @@ void _initializeWorkerIsolate(SendPort mainIsolateSendPort) {
     ongoingRequests--;
     if (ongoingRequests == 0) {
       idleTimer = Timer(_idleDuration, () {
+        assert(ongoingRequests == 0);
         // [null] indicates that worker is going down.
-        mainIsolateSendPort.send(null);
-        downloadRequestHandler?.close();
+        handshakeSendPort.send(null);
+        downloadRequestHandler.close();
       });
     }
   });
 
-  mainIsolateSendPort.send(downloadRequestHandler.sendPort);
+  handshakeSendPort.send(downloadRequestHandler.sendPort);
 }

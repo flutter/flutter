@@ -99,6 +99,8 @@ Future<TransferableTypedData> getHttpClientResponseBytes(
 /// Efficiently converts the response body of an [HttpClientResponse] into a
 /// [Uint8List].
 ///
+/// (This method is deprecated - use [getHttpClientResponseBytes] instead.)
+///
 /// The future returned will forward any error emitted by `response`.
 ///
 /// The `onBytesReceived` callback, if specified, will be invoked for every
@@ -114,16 +116,16 @@ Future<TransferableTypedData> getHttpClientResponseBytes(
 /// bytes from this method (assuming the response is sending compressed bytes),
 /// set both [HttpClient.autoUncompress] to false and the `autoUncompress`
 /// parameter to false.
-@Deprecated('Use getHttpClientReponseBytes instead')
+@Deprecated('Use getHttpClientResponseBytes instead')
 Future<Uint8List> consolidateHttpClientResponseBytes(
-    HttpClientResponse response, {
-      bool autoUncompress = true,
-      BytesReceivedCallback onBytesReceived,
-    }) async {
+  HttpClientResponse response, {
+  bool autoUncompress = true,
+  BytesReceivedCallback onBytesReceived,
+}) async {
   final TransferableTypedData bytes = await getHttpClientResponseBytes(
     response,
     autoUncompress: autoUncompress,
-    onBytesReceived: onBytesReceived
+    onBytesReceived: onBytesReceived,
   );
   return bytes.materialize().asUint8List();
 }
