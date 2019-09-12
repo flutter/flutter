@@ -96,7 +96,6 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 ///
 ///         return RaisedButton(
 ///           onPressed: () {},
-///           elevation: pressed ? 10 : 2,
 ///           color: Colors.blue,
 ///           shape: RoundedRectangleBorder(
 ///             side: BorderSide(
