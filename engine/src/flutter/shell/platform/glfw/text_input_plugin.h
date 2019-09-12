@@ -50,11 +50,8 @@ class TextInputPlugin : public KeyboardHookHandler {
   // The MethodChannel used for communication with the Flutter engine.
   std::unique_ptr<flutter::MethodChannel<rapidjson::Document>> channel_;
 
-  // Mapping of client IDs to text input models.
-  std::map<int, std::unique_ptr<TextInputModel>> input_models_;
-
   // The active model. nullptr if not set.
-  TextInputModel* active_model_;
+  std::unique_ptr<TextInputModel> active_model_;
 };
 
 }  // namespace flutter
