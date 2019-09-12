@@ -12,7 +12,7 @@ import 'mock_image_http.dart';
 
 void main() {
   testWidgets('Card Collection smoke test', (WidgetTester tester) async {
-    HttpOverrides.runZoned(() async {
+    HttpOverrides.runZoned<Future<void>>(() async {
       card_collection.main(); // builds the app and schedules a frame but doesn't trigger one
       await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
       await tester.pump(); // triggers a frame

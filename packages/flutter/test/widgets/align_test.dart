@@ -9,45 +9,45 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('Align smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Align(
-        child: new Container(),
+      Align(
+        child: Container(),
         alignment: const Alignment(0.50, 0.50),
       ),
     );
 
     await tester.pumpWidget(
-      new Align(
-        child: new Container(),
+      Align(
+        child: Container(),
         alignment: const Alignment(0.0, 0.0),
       ),
     );
 
     await tester.pumpWidget(
       const Align(
-        key: const GlobalObjectKey<Null>(null),
+        key: GlobalObjectKey<State<StatefulWidget>>(null),
         alignment: Alignment.topLeft,
       ),
     );
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
-      child: const Align(
-        key: const GlobalObjectKey<Null>(null),
+      child: Align(
+        key: GlobalObjectKey<State<StatefulWidget>>(null),
         alignment: AlignmentDirectional.topStart,
       ),
     ));
     await tester.pumpWidget(
       const Align(
-        key: const GlobalObjectKey<Null>(null),
+        key: GlobalObjectKey<State<StatefulWidget>>(null),
         alignment: Alignment.topLeft,
       ),
     );
   });
 
   testWidgets('Align control test (LTR)', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new Align(
-        child: new Container(width: 100.0, height: 80.0),
+      child: Align(
+        child: Container(width: 100.0, height: 80.0),
         alignment: AlignmentDirectional.topStart,
       ),
     ));
@@ -55,10 +55,10 @@ void main() {
     expect(tester.getTopLeft(find.byType(Container)).dx, 0.0);
     expect(tester.getBottomRight(find.byType(Container)).dx, 100.0);
 
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new Align(
-        child: new Container(width: 100.0, height: 80.0),
+      child: Align(
+        child: Container(width: 100.0, height: 80.0),
         alignment: Alignment.topLeft,
       ),
     ));
@@ -68,10 +68,10 @@ void main() {
   });
 
   testWidgets('Align control test (RTL)', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.rtl,
-      child: new Align(
-        child: new Container(width: 100.0, height: 80.0),
+      child: Align(
+        child: Container(width: 100.0, height: 80.0),
         alignment: AlignmentDirectional.topStart,
       ),
     ));
@@ -79,10 +79,10 @@ void main() {
     expect(tester.getTopLeft(find.byType(Container)).dx, 700.0);
     expect(tester.getBottomRight(find.byType(Container)).dx, 800.0);
 
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new Align(
-        child: new Container(width: 100.0, height: 80.0),
+      child: Align(
+        child: Container(width: 100.0, height: 80.0),
         alignment: Alignment.topLeft,
       ),
     ));
@@ -92,14 +92,14 @@ void main() {
   });
 
   testWidgets('Shrink wraps in finite space', (WidgetTester tester) async {
-    final GlobalKey alignKey = new GlobalKey();
+    final GlobalKey alignKey = GlobalKey();
     await tester.pumpWidget(
-      new SingleChildScrollView(
-        child: new Align(
+      SingleChildScrollView(
+        child: Align(
           key: alignKey,
-          child: new Container(
+          child: Container(
             width: 10.0,
-            height: 10.0
+            height: 10.0,
           ),
           alignment: const Alignment(0.0, 0.0),
         ),

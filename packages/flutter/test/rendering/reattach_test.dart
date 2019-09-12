@@ -4,32 +4,32 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
 class TestTree {
   TestTree() {
     // incoming constraints are tight 800x600
-    root = new RenderPositionedBox(
-      child: new RenderConstrainedBox(
+    root = RenderPositionedBox(
+      child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 800.0),
         // Place the child to be evaluated within both a repaint boundary and a
         // layout-root element (in this case a tightly constrained box). Otherwise
         // the act of transplanting the root into a new container will cause the
         // relayout/repaint of the new parent node to satisfy the test.
-        child: new RenderRepaintBoundary(
-          child: new RenderConstrainedBox(
+        child: RenderRepaintBoundary(
+          child: RenderConstrainedBox(
             additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
-            child: new RenderRepaintBoundary(
-              child: new RenderCustomPaint(
-                painter: new TestCallbackPainter(
+            child: RenderRepaintBoundary(
+              child: RenderCustomPaint(
+                painter: TestCallbackPainter(
                   onPaint: () { painted = true; },
                 ),
-                child: new RenderPositionedBox(
-                  child: child = new RenderConstrainedBox(
+                child: RenderPositionedBox(
+                  child: child = RenderConstrainedBox(
                     additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
-                    child: new RenderSemanticsAnnotations(label: 'Hello there foo', textDirection: TextDirection.ltr)
+                    child: RenderSemanticsAnnotations(label: 'Hello there foo', textDirection: TextDirection.ltr),
                   ),
                 ),
               ),
@@ -54,19 +54,19 @@ class MutableCompositor extends RenderProxyBox {
 class TestCompositingBitsTree {
   TestCompositingBitsTree() {
     // incoming constraints are tight 800x600
-    root = new RenderPositionedBox(
-      child: new RenderConstrainedBox(
+    root = RenderPositionedBox(
+      child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 800.0),
         // Place the child to be evaluated within a repaint boundary. Otherwise
         // the act of transplanting the root into a new container will cause the
         // repaint of the new parent node to satisfy the test.
-        child: new RenderRepaintBoundary(
-          child: compositor = new MutableCompositor(
-            child: new RenderCustomPaint(
-              painter: new TestCallbackPainter(
+        child: RenderRepaintBoundary(
+          child: compositor = MutableCompositor(
+            child: RenderCustomPaint(
+              painter: TestCallbackPainter(
                 onPaint: () { painted = true; },
               ),
-              child: child = new RenderConstrainedBox(
+              child: child = RenderConstrainedBox(
                 additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0)
               ),
             ),
@@ -83,7 +83,7 @@ class TestCompositingBitsTree {
 
 void main() {
   test('objects can be detached and re-attached: layout', () {
-    final TestTree testTree = new TestTree();
+    final TestTree testTree = TestTree();
     // Lay out
     layout(testTree.root, phase: EnginePhase.layout);
     expect(testTree.child.size, equals(const Size(20.0, 20.0)));
@@ -98,7 +98,7 @@ void main() {
     expect(testTree.child.size, equals(const Size(5.0, 5.0)));
   });
   test('objects can be detached and re-attached: compositingBits', () {
-    final TestCompositingBitsTree testTree = new TestCompositingBitsTree();
+    final TestCompositingBitsTree testTree = TestCompositingBitsTree();
     // Lay out, composite, and paint
     layout(testTree.root, phase: EnginePhase.paint);
     expect(testTree.painted, isTrue);
@@ -114,7 +114,7 @@ void main() {
     expect(testTree.painted, isTrue);
   });
   test('objects can be detached and re-attached: paint', () {
-    final TestTree testTree = new TestTree();
+    final TestTree testTree = TestTree();
     // Lay out, composite, and paint
     layout(testTree.root, phase: EnginePhase.paint);
     expect(testTree.painted, isTrue);
@@ -129,7 +129,7 @@ void main() {
     expect(testTree.painted, isTrue);
   });
   test('objects can be detached and re-attached: semantics (no change)', () {
-    final TestTree testTree = new TestTree();
+    final TestTree testTree = TestTree();
     int semanticsUpdateCount = 0;
     final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
       listener: () {
@@ -152,7 +152,7 @@ void main() {
     semanticsHandle.dispose();
   });
   test('objects can be detached and re-attached: semantics (with change)', () {
-    final TestTree testTree = new TestTree();
+    final TestTree testTree = TestTree();
     int semanticsUpdateCount = 0;
     final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
         listener: () {

@@ -38,6 +38,18 @@
   "drawerLabel": "導覽選單",
   "popupMenuLabel": "彈出式選單",
   "dialogLabel": "對話方塊",
-  "alertDialogLabel": "警报",
-  "searchFieldLabel": "搜索"
+  "alertDialogLabel": "快訊",
+  "searchFieldLabel": "搜尋",
+  "reorderItemToStart": "移至開頭",
+  "reorderItemToEnd": "移至結尾",
+  "reorderItemUp": "向上移",
+  "reorderItemDown": "向下移",
+  "reorderItemLeft": "向左移",
+  "reorderItemRight": "向右移",
+  "expandedIconTapHint": "收合",
+  "collapsedIconTapHint": "展開",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "還可輸入 1 個字元",
+  "remainingTextFieldCharacterCountOther": "還可輸入 $remainingCount 個字元",
+  "refreshIndicatorSemanticLabel": "重新整理"
 }

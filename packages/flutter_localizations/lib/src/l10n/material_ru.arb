@@ -1,4 +1,6 @@
 {
+  "remainingTextFieldCharacterCountFew": "Осталось $remainingCount символа",
+  "remainingTextFieldCharacterCountMany": "Осталось $remainingCount символов",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "H:mm",
   "selectedRowCountTitleFew": "Выбрано $selectedRowCount объекта",
@@ -41,6 +43,18 @@
   "drawerLabel": "Меню навигации",
   "popupMenuLabel": "Всплывающее меню",
   "dialogLabel": "Диалоговое окно",
-  "alertDialogLabel": "бдительный",
-  "searchFieldLabel": "Поиск"
+  "alertDialogLabel": "Оповещение",
+  "searchFieldLabel": "Поиск",
+  "reorderItemToStart": "Переместить в начало",
+  "reorderItemToEnd": "Переместить в конец",
+  "reorderItemUp": "Переместить вверх",
+  "reorderItemDown": "Переместить вниз",
+  "reorderItemLeft": "Переместить влево",
+  "reorderItemRight": "Переместить вправо",
+  "expandedIconTapHint": "Свернуть",
+  "collapsedIconTapHint": "Развернуть",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Остался 1 символ",
+  "remainingTextFieldCharacterCountOther": "Осталось $remainingCount символа",
+  "refreshIndicatorSemanticLabel": "Обновление"
 }

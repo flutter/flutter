@@ -9,17 +9,17 @@ class TestUniqueWidget extends UniqueWidget<TestUniqueWidgetState> {
   const TestUniqueWidget({ GlobalKey<TestUniqueWidgetState> key }) : super(key: key);
 
   @override
-  TestUniqueWidgetState createState() => new TestUniqueWidgetState();
+  TestUniqueWidgetState createState() => TestUniqueWidgetState();
 }
 
 class TestUniqueWidgetState extends State<TestUniqueWidget> {
   @override
-  Widget build(BuildContext context) => new Container();
+  Widget build(BuildContext context) => Container();
 }
 
 void main() {
   testWidgets('Unique widget control test', (WidgetTester tester) async {
-    final TestUniqueWidget widget = new TestUniqueWidget(key: new GlobalKey<TestUniqueWidgetState>());
+    final TestUniqueWidget widget = TestUniqueWidget(key: GlobalKey<TestUniqueWidgetState>());
 
     await tester.pumpWidget(widget);
 
@@ -27,7 +27,7 @@ void main() {
 
     expect(state, isNotNull);
 
-    await tester.pumpWidget(new Container(child: widget));
+    await tester.pumpWidget(Container(child: widget));
 
     expect(widget.currentState, equals(state));
   });

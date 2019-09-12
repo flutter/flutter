@@ -38,6 +38,18 @@
   "drawerLabel": "Menu di chuyển",
   "popupMenuLabel": "Menu bật lên",
   "dialogLabel": "Hộp thoại",
-  "alertDialogLabel": "Hộp thoại",
-  "searchFieldLabel": "Tìm kiếm"
+  "alertDialogLabel": "Thông báo",
+  "searchFieldLabel": "Tìm kiếm",
+  "reorderItemToStart": "Di chuyển lên đầu danh sách",
+  "reorderItemToEnd": "Di chuyển xuống cuối danh sách",
+  "reorderItemUp": "Di chuyển lên",
+  "reorderItemDown": "Di chuyển xuống",
+  "reorderItemLeft": "Di chuyển sang trái",
+  "reorderItemRight": "Di chuyển sang phải",
+  "expandedIconTapHint": "Thu gọn",
+  "collapsedIconTapHint": "Mở rộng",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Còn lại 1 ký tự",
+  "remainingTextFieldCharacterCountOther": "Còn lại $remainingCount ký tự",
+  "refreshIndicatorSemanticLabel": "Làm mới"
 }

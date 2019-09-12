@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // This demo is based on
-// https://material.google.com/components/dialogs.html#dialogs-full-screen-dialogs
+// https://material.io/design/components/dialogs.html#full-screen-dialog
 
 enum DismissDialogAction {
   cancel,
@@ -19,8 +19,8 @@ enum DismissDialogAction {
 class DateTimeItem extends StatelessWidget {
   DateTimeItem({ Key key, DateTime dateTime, @required this.onChanged })
     : assert(onChanged != null),
-      date = new DateTime(dateTime.year, dateTime.month, dateTime.day),
-      time = new TimeOfDay(hour: dateTime.hour, minute: dateTime.minute),
+      date = DateTime(dateTime.year, dateTime.month, dateTime.day),
+      time = TimeOfDay(hour: dateTime.hour, minute: dateTime.minute),
       super(key: key);
 
   final DateTime date;
@@ -31,78 +31,78 @@ class DateTimeItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    return new DefaultTextStyle(
+    return DefaultTextStyle(
       style: theme.textTheme.subhead,
-      child: new Row(
+      child: Row(
         children: <Widget>[
-          new Expanded(
-            child: new Container(
+          Expanded(
+            child: Container(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              decoration: new BoxDecoration(
-                border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: theme.dividerColor))
               ),
-              child: new InkWell(
+              child: InkWell(
                 onTap: () {
                   showDatePicker(
                     context: context,
                     initialDate: date,
                     firstDate: date.subtract(const Duration(days: 30)),
-                    lastDate: date.add(const Duration(days: 30))
+                    lastDate: date.add(const Duration(days: 30)),
                   )
-                  .then<Null>((DateTime value) {
+                  .then<void>((DateTime value) {
                     if (value != null)
-                      onChanged(new DateTime(value.year, value.month, value.day, time.hour, time.minute));
+                      onChanged(DateTime(value.year, value.month, value.day, time.hour, time.minute));
                   });
                 },
-                child: new Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    new Text(new DateFormat('EEE, MMM d yyyy').format(date)),
+                    Text(DateFormat('EEE, MMM d yyyy').format(date)),
                     const Icon(Icons.arrow_drop_down, color: Colors.black54),
-                  ]
-                )
-              )
-            )
+                  ],
+                ),
+              ),
+            ),
           ),
-          new Container(
+          Container(
             margin: const EdgeInsets.only(left: 8.0),
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            decoration: new BoxDecoration(
-              border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: theme.dividerColor))
             ),
-            child: new InkWell(
+            child: InkWell(
               onTap: () {
                 showTimePicker(
                   context: context,
-                  initialTime: time
+                  initialTime: time,
                 )
-                .then<Null>((TimeOfDay value) {
+                .then<void>((TimeOfDay value) {
                   if (value != null)
-                    onChanged(new DateTime(date.year, date.month, date.day, value.hour, value.minute));
+                    onChanged(DateTime(date.year, date.month, date.day, value.hour, value.minute));
                 });
               },
-              child: new Row(
+              child: Row(
                 children: <Widget>[
-                  new Text('${time.format(context)}'),
+                  Text('${time.format(context)}'),
                   const Icon(Icons.arrow_drop_down, color: Colors.black54),
-                ]
-              )
-            )
-          )
-        ]
-      )
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 class FullScreenDialogDemo extends StatefulWidget {
   @override
-  FullScreenDialogDemoState createState() => new FullScreenDialogDemoState();
+  FullScreenDialogDemoState createState() => FullScreenDialogDemoState();
 }
 
 class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
-  DateTime _fromDateTime = new DateTime.now();
-  DateTime _toDateTime = new DateTime.now();
+  DateTime _fromDateTime = DateTime.now();
+  DateTime _toDateTime = DateTime.now();
   bool _allDayValue = false;
   bool _saveNeeded = false;
   bool _hasLocation = false;
@@ -120,24 +120,24 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     return await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
-        return new AlertDialog(
-          content: new Text(
+        return AlertDialog(
+          content: Text(
             'Discard new event?',
-            style: dialogTextStyle
+            style: dialogTextStyle,
           ),
           actions: <Widget>[
-            new FlatButton(
+            FlatButton(
               child: const Text('CANCEL'),
               onPressed: () {
                 Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
-              }
+              },
             ),
-            new FlatButton(
+            FlatButton(
               child: const Text('DISCARD'),
               onPressed: () {
                 Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
-              }
-            )
+              },
+            ),
           ],
         );
       },
@@ -148,118 +148,120 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(_hasName ? _eventName : 'Event Name TBD'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_hasName ? _eventName : 'Event Name TBD'),
         actions: <Widget> [
-          new FlatButton(
-            child: new Text('SAVE', style: theme.textTheme.body1.copyWith(color: Colors.white)),
+          FlatButton(
+            child: Text('SAVE', style: theme.textTheme.body1.copyWith(color: Colors.white)),
             onPressed: () {
               Navigator.pop(context, DismissDialogAction.save);
-            }
-          )
-        ]
+            },
+          ),
+        ],
       ),
-      body: new Form(
+      body: Form(
         onWillPop: _onWillPop,
-        child: new ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: <Widget>[
-            new Container(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              alignment: Alignment.bottomLeft,
-              child: new TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Event name',
-                  filled: true
-                ),
-                style: theme.textTheme.headline,
-                onChanged: (String value) {
-                  setState(() {
-                    _hasName = value.isNotEmpty;
-                    if (_hasName) {
-                      _eventName = value;
-                    }
-                  });
-                }
-              )
-            ),
-            new Container(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              alignment: Alignment.bottomLeft,
-              child: new TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Location',
-                  hintText: 'Where is the event?',
-                  filled: true
-                ),
-                onChanged: (String value) {
-                  setState(() {
-                    _hasLocation = value.isNotEmpty;
-                  });
-                }
-              )
-            ),
-            new Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                new Text('From', style: theme.textTheme.caption),
-                new DateTimeItem(
-                  dateTime: _fromDateTime,
-                  onChanged: (DateTime value) {
+        child: Scrollbar(
+          child: ListView(
+            padding: const EdgeInsets.all(16.0),
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                alignment: Alignment.bottomLeft,
+                child: TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Event name',
+                    filled: true,
+                  ),
+                  style: theme.textTheme.headline,
+                  onChanged: (String value) {
                     setState(() {
-                      _fromDateTime = value;
-                      _saveNeeded = true;
+                      _hasName = value.isNotEmpty;
+                      if (_hasName) {
+                        _eventName = value;
+                      }
                     });
-                  }
-                )
-              ]
-            ),
-            new Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                new Text('To', style: theme.textTheme.caption),
-                new DateTimeItem(
-                  dateTime: _toDateTime,
-                  onChanged: (DateTime value) {
-                    setState(() {
-                      _toDateTime = value;
-                      _saveNeeded = true;
-                    });
-                  }
+                  },
                 ),
-                const Text('All-day'),
-              ]
-            ),
-            new Container(
-              decoration: new BoxDecoration(
-                border: new Border(bottom: new BorderSide(color: theme.dividerColor))
               ),
-              child: new Row(
-                children: <Widget> [
-                  new Checkbox(
-                    value: _allDayValue,
-                    onChanged: (bool value) {
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                alignment: Alignment.bottomLeft,
+                child: TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Location',
+                    hintText: 'Where is the event?',
+                    filled: true,
+                  ),
+                  onChanged: (String value) {
+                    setState(() {
+                      _hasLocation = value.isNotEmpty;
+                    });
+                  },
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('From', style: theme.textTheme.caption),
+                  DateTimeItem(
+                    dateTime: _fromDateTime,
+                    onChanged: (DateTime value) {
                       setState(() {
-                        _allDayValue = value;
+                        _fromDateTime = value;
                         _saveNeeded = true;
                       });
-                    }
+                    },
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('To', style: theme.textTheme.caption),
+                  DateTimeItem(
+                    dateTime: _toDateTime,
+                    onChanged: (DateTime value) {
+                      setState(() {
+                        _toDateTime = value;
+                        _saveNeeded = true;
+                      });
+                    },
                   ),
                   const Text('All-day'),
-                ]
-              )
-            )
-          ]
-          .map((Widget child) {
-            return new Container(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              height: 96.0,
-              child: child
-            );
-          })
-          .toList()
-        )
+                ],
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: theme.dividerColor))
+                ),
+                child: Row(
+                  children: <Widget> [
+                    Checkbox(
+                      value: _allDayValue,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _allDayValue = value;
+                          _saveNeeded = true;
+                        });
+                      },
+                    ),
+                    const Text('All-day'),
+                  ],
+                ),
+              ),
+            ]
+            .map<Widget>((Widget child) {
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                height: 96.0,
+                child: child,
+              );
+            })
+            .toList(),
+          ),
+        ),
       ),
     );
   }

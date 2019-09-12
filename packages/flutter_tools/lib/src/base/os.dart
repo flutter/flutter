@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:archive/archive.dart';
+
+import '../globals.dart';
 import 'context.dart';
 import 'file_system.dart';
 import 'io.dart';
@@ -11,21 +13,29 @@ import 'process.dart';
 import 'process_manager.dart';
 
 /// Returns [OperatingSystemUtils] active in the current app context (i.e. zone).
-OperatingSystemUtils get os => context[OperatingSystemUtils];
+OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils() {
     if (platform.isWindows) {
-      return new _WindowsUtils();
+      return _WindowsUtils();
     } else {
-      return new _PosixUtils();
+      return _PosixUtils();
     }
   }
 
   OperatingSystemUtils._private();
 
   /// Make the given file executable. This may be a no-op on some platforms.
-  ProcessResult makeExecutable(File file);
+  void makeExecutable(File file);
+
+  /// Updates the specified file system [entity] to have the file mode
+  /// bits set to the value defined by [mode], which can be specified in octal
+  /// (e.g. `644`) or symbolically (e.g. `u+x`).
+  ///
+  /// On operating systems that do not support file mode bits, this will be a
+  /// no-op.
+  void chmod(FileSystemEntity entity, String mode);
 
   /// Return the path (with symlinks resolved) to the given executable, or null
   /// if `which` was not able to locate the binary.
@@ -59,31 +69,78 @@ abstract class OperatingSystemUtils {
   ///
   /// If available, the detailed version of the OS is included.
   String get name {
-    const Map<String, String> osNames = const <String, String>{
+    const Map<String, String> osNames = <String, String>{
       'macos': 'Mac OS',
       'linux': 'Linux',
-      'windows': 'Windows'
+      'windows': 'Windows',
     };
     final String osName = platform.operatingSystem;
     return osNames.containsKey(osName) ? osNames[osName] : osName;
   }
 
-  List<File> _which(String execName, {bool all = false});
+  List<File> _which(String execName, { bool all = false });
 
   /// Returns the separator between items in the PATH environment variable.
   String get pathVarSeparator;
+
+  /// Returns an unused network port.
+  ///
+  /// Returns 0 if an unused port cannot be found.
+  ///
+  /// The port returned by this function may become used before it is bound by
+  /// its intended user.
+  Future<int> findFreePort({bool ipv6 = false}) async {
+    int port = 0;
+    ServerSocket serverSocket;
+    final InternetAddress loopback =
+        ipv6 ? InternetAddress.loopbackIPv6 : InternetAddress.loopbackIPv4;
+    try {
+      serverSocket = await ServerSocket.bind(loopback, 0);
+      port = serverSocket.port;
+    } on SocketException catch (e) {
+      // If ipv4 loopback bind fails, try ipv6.
+      if (!ipv6) {
+        return findFreePort(ipv6: true);
+      }
+      printTrace('findFreePort failed: $e');
+    } catch (e) {
+      // Failures are signaled by a return value of 0 from this function.
+      printTrace('findFreePort failed: $e');
+    } finally {
+      if (serverSocket != null) {
+        await serverSocket.close();
+      }
+    }
+    return port;
+  }
 }
 
 class _PosixUtils extends OperatingSystemUtils {
   _PosixUtils() : super._private();
 
   @override
-  ProcessResult makeExecutable(File file) {
-    return processManager.runSync(<String>['chmod', 'a+x', file.path]);
+  void makeExecutable(File file) {
+    chmod(file, 'a+x');
   }
 
   @override
-  List<File> _which(String execName, {bool all = false}) {
+  void chmod(FileSystemEntity entity, String mode) {
+    try {
+      final ProcessResult result = processManager.runSync(<String>['chmod', mode, entity.path]);
+      if (result.exitCode != 0) {
+        printTrace(
+          'Error trying to run chmod on ${entity.absolute.path}'
+          '\nstdout: ${result.stdout}'
+          '\nstderr: ${result.stderr}',
+        );
+      }
+    } on ProcessException catch (error) {
+      printTrace('Error trying to run chmod on ${entity.absolute.path}: $error');
+    }
+  }
+
+  @override
+  List<File> _which(String execName, { bool all = false }) {
     final List<String> command = <String>['which'];
     if (all)
       command.add('-a');
@@ -92,35 +149,50 @@ class _PosixUtils extends OperatingSystemUtils {
     if (result.exitCode != 0)
       return const <File>[];
     final String stdout = result.stdout;
-    return stdout.trim().split('\n').map((String path) => fs.file(path.trim())).toList();
+    return stdout.trim().split('\n').map<File>((String path) => fs.file(path.trim())).toList();
   }
 
   @override
   void zip(Directory data, File zipFile) {
-    runSync(<String>['zip', '-r', '-q', zipFile.path, '.'], workingDirectory: data.path);
+    processUtils.runSync(
+      <String>['zip', '-r', '-q', zipFile.path, '.'],
+      workingDirectory: data.path,
+      throwOnError: true,
+    );
   }
 
   // unzip -o -q zipfile -d dest
   @override
   void unzip(File file, Directory targetDirectory) {
-    runSync(<String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path]);
+    processUtils.runSync(
+      <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
+      throwOnError: true,
+    );
   }
 
   @override
-  bool verifyZip(File zipFile) => exitsHappy(<String>['zip', '-T', zipFile.path]);
+  bool verifyZip(File zipFile) =>
+      processUtils.exitsHappySync(<String>['zip', '-T', zipFile.path]);
 
   // tar -xzf tarball -C dest
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
-    runSync(<String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path]);
+    processUtils.runSync(
+      <String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path],
+      throwOnError: true,
+    );
   }
 
   @override
-  bool verifyGzip(File gzippedFile) => exitsHappy(<String>['gzip', '-t', gzippedFile.path]);
+  bool verifyGzip(File gzippedFile) =>
+      processUtils.exitsHappySync(<String>['gzip', '-t', gzippedFile.path]);
 
   @override
   File makePipe(String path) {
-    runSync(<String>['mkfifo', path]);
+    processUtils.runSync(
+      <String>['mkfifo', path],
+      throwOnError: true,
+    );
     return fs.file(path);
   }
 
@@ -130,12 +202,12 @@ class _PosixUtils extends OperatingSystemUtils {
   String get name {
     if (_name == null) {
       if (platform.isMacOS) {
-        final List<ProcessResult> results = <ProcessResult>[
-          processManager.runSync(<String>['sw_vers', '-productName']),
-          processManager.runSync(<String>['sw_vers', '-productVersion']),
-          processManager.runSync(<String>['sw_vers', '-buildVersion']),
+        final List<RunResult> results = <RunResult>[
+          processUtils.runSync(<String>['sw_vers', '-productName']),
+          processUtils.runSync(<String>['sw_vers', '-productVersion']),
+          processUtils.runSync(<String>['sw_vers', '-buildVersion']),
         ];
-        if (results.every((ProcessResult result) => result.exitCode == 0)) {
+        if (results.every((RunResult result) => result.exitCode == 0)) {
           _name = '${results[0].stdout.trim()} ${results[1].stdout
               .trim()} ${results[2].stdout.trim()}';
         }
@@ -152,27 +224,27 @@ class _PosixUtils extends OperatingSystemUtils {
 class _WindowsUtils extends OperatingSystemUtils {
   _WindowsUtils() : super._private();
 
-  // This is a no-op.
   @override
-  ProcessResult makeExecutable(File file) {
-    return new ProcessResult(0, 0, null, null);
-  }
+  void makeExecutable(File file) {}
 
   @override
-  List<File> _which(String execName, {bool all = false}) {
+  void chmod(FileSystemEntity entity, String mode) {}
+
+  @override
+  List<File> _which(String execName, { bool all = false }) {
     // `where` always returns all matches, not just the first one.
     final ProcessResult result = processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0)
       return const <File>[];
     final List<String> lines = result.stdout.trim().split('\n');
     if (all)
-      return lines.map((String path) => fs.file(path.trim())).toList();
+      return lines.map<File>((String path) => fs.file(path.trim())).toList();
     return <File>[fs.file(lines.first.trim())];
   }
 
   @override
   void zip(Directory data, File zipFile) {
-    final Archive archive = new Archive();
+    final Archive archive = Archive();
     for (FileSystemEntity entity in data.listSync(recursive: true)) {
       if (entity is! File) {
         continue;
@@ -180,21 +252,21 @@ class _WindowsUtils extends OperatingSystemUtils {
       final File file = entity;
       final String path = file.fileSystem.path.relative(file.path, from: data.path);
       final List<int> bytes = file.readAsBytesSync();
-      archive.addFile(new ArchiveFile(path, bytes.length, bytes));
+      archive.addFile(ArchiveFile(path, bytes.length, bytes));
     }
-    zipFile.writeAsBytesSync(new ZipEncoder().encode(archive), flush: true);
+    zipFile.writeAsBytesSync(ZipEncoder().encode(archive), flush: true);
   }
 
   @override
   void unzip(File file, Directory targetDirectory) {
-    final Archive archive = new ZipDecoder().decodeBytes(file.readAsBytesSync());
+    final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
     _unpackArchive(archive, targetDirectory);
   }
 
   @override
   bool verifyZip(File zipFile) {
     try {
-      new ZipDecoder().decodeBytes(zipFile.readAsBytesSync(), verify: true);
+      ZipDecoder().decodeBytes(zipFile.readAsBytesSync(), verify: true);
     } on FileSystemException catch (_) {
       return false;
     } on ArchiveException catch (_) {
@@ -205,8 +277,8 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
-    final Archive archive = new TarDecoder().decodeBytes(
-      new GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
+    final Archive archive = TarDecoder().decodeBytes(
+      GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
     );
     _unpackArchive(archive, targetDirectory);
   }
@@ -214,7 +286,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   bool verifyGzip(File gzipFile) {
     try {
-      new GZipDecoder().decodeBytes(gzipFile.readAsBytesSync(), verify: true);
+      GZipDecoder().decodeBytes(gzipFile.readAsBytesSync(), verify: true);
     } on FileSystemException catch (_) {
       return false;
     } on ArchiveException catch (_) {
@@ -238,7 +310,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   File makePipe(String path) {
-    throw new UnsupportedError('makePipe is not implemented on Windows.');
+    throw UnsupportedError('makePipe is not implemented on Windows.');
   }
 
   String _name;
@@ -264,7 +336,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 /// directory or the current working directory if none specified.
 /// Return null if the project root could not be found
 /// or if the project root is the flutter repository root.
-String findProjectRoot([String directory]) {
+String findProjectRoot([ String directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fs.currentDirectory.path;
   while (true) {

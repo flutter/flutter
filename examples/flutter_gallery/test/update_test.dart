@@ -7,7 +7,7 @@ import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 
 Future<String> mockUpdateUrlFetcher() {
   // A real implementation would connect to the network to retrieve this value
-  return new Future<String>.value('http://www.example.com/');
+  return Future<String>.value('http://www.example.com/');
 }
 
 void main() {
@@ -20,7 +20,7 @@ void main() {
     await tester.pumpWidget(
       const GalleryApp(
         testMode: true,
-        updateUrlFetcher: mockUpdateUrlFetcher
+        updateUrlFetcher: mockUpdateUrlFetcher,
       )
     );
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865

@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 const String _explanatoryText =
   "When the Scaffold's floating action button changes, the new button fades and "
   'turns into view. In this demo, changing tabs can cause the app to be rebuilt '
@@ -20,27 +22,27 @@ class _Page {
   Color get labelColor => colors != null ? colors.shade300 : Colors.grey.shade300;
   bool get fabDefined => colors != null && icon != null;
   Color get fabColor => colors.shade400;
-  Icon get fabIcon => new Icon(icon);
-  Key get fabKey => new ValueKey<Color>(fabColor);
+  Icon get fabIcon => Icon(icon);
+  Key get fabKey => ValueKey<Color>(fabColor);
 }
 
 final List<_Page> _allPages = <_Page>[
-  new _Page(label: 'Blue', colors: Colors.indigo, icon: Icons.add),
-  new _Page(label: 'Eco', colors: Colors.green, icon: Icons.create),
-  new _Page(label: 'No'),
-  new _Page(label: 'Teal', colors: Colors.teal, icon: Icons.add),
-  new _Page(label: 'Red', colors: Colors.red, icon: Icons.create),
+  _Page(label: 'Blue', colors: Colors.indigo, icon: Icons.add),
+  _Page(label: 'Eco', colors: Colors.green, icon: Icons.create),
+  _Page(label: 'No'),
+  _Page(label: 'Teal', colors: Colors.teal, icon: Icons.add),
+  _Page(label: 'Red', colors: Colors.red, icon: Icons.create),
 ];
 
 class TabsFabDemo extends StatefulWidget {
   static const String routeName = '/material/tabs-fab';
 
   @override
-  _TabsFabDemoState createState() => new _TabsFabDemoState();
+  _TabsFabDemoState createState() => _TabsFabDemoState();
 }
 
 class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStateMixin {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   TabController _controller;
   _Page _selectedPage;
@@ -49,7 +51,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _controller = new TabController(vsync: this, length: _allPages.length);
+    _controller = TabController(vsync: this, length: _allPages.length);
     _controller.addListener(_handleTabSelection);
     _selectedPage = _allPages[0];
   }
@@ -67,36 +69,36 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   }
 
   void _showExplanatoryText() {
-    _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
-      return new Container(
-        decoration: new BoxDecoration(
-          border: new Border(top: new BorderSide(color: Theme.of(context).dividerColor))
+    _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+      return Container(
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: Theme.of(context).dividerColor))
         ),
-        child: new Padding(
+        child: Padding(
           padding: const EdgeInsets.all(32.0),
-          child: new Text(_explanatoryText, style: Theme.of(context).textTheme.subhead)
-        )
+          child: Text(_explanatoryText, style: Theme.of(context).textTheme.subhead),
+        ),
       );
     });
   }
 
   Widget buildTabView(_Page page) {
-    return new Builder(
+    return Builder(
       builder: (BuildContext context) {
-        return new Container(
-          key: new ValueKey<String>(page.label),
+        return Container(
+          key: ValueKey<String>(page.label),
           padding: const EdgeInsets.fromLTRB(48.0, 48.0, 48.0, 96.0),
-          child: new Card(
-            child: new Center(
-              child: new Text(page.label,
-                style: new TextStyle(
+          child: Card(
+            child: Center(
+              child: Text(page.label,
+                style: TextStyle(
                   color: page.labelColor,
-                  fontSize: 32.0
+                  fontSize: 32.0,
                 ),
-                textAlign: TextAlign.center
-              )
-            )
-          )
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
         );
       }
     );
@@ -107,38 +109,39 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
       return null;
 
     if (_extendedButtons) {
-      return new FloatingActionButton.extended(
-        key: new ValueKey<Key>(page.fabKey),
+      return FloatingActionButton.extended(
+        key: ValueKey<Key>(page.fabKey),
         tooltip: 'Show explanation',
         backgroundColor: page.fabColor,
         icon: page.fabIcon,
-        label: new Text(page.label.toUpperCase()),
-        onPressed: _showExplanatoryText
+        label: Text(page.label.toUpperCase()),
+        onPressed: _showExplanatoryText,
       );
     }
 
-    return new FloatingActionButton(
+    return FloatingActionButton(
       key: page.fabKey,
       tooltip: 'Show explanation',
       backgroundColor: page.fabColor,
       child: page.fabIcon,
-      onPressed: _showExplanatoryText
+      onPressed: _showExplanatoryText,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       key: _scaffoldKey,
-      appBar: new AppBar(
+      appBar: AppBar(
         title: const Text('FAB per tab'),
-        bottom: new TabBar(
+        bottom: TabBar(
           controller: _controller,
-          tabs: _allPages.map((_Page page) => new Tab(text: page.label.toUpperCase())).toList(),
+          tabs: _allPages.map<Widget>((_Page page) => Tab(text: page.label.toUpperCase())).toList(),
         ),
         actions: <Widget>[
-          new IconButton(
-            icon: const Icon(Icons.sentiment_very_satisfied),
+          MaterialDemoDocumentationButton(TabsFabDemo.routeName),
+          IconButton(
+            icon: const Icon(Icons.sentiment_very_satisfied, semanticLabel: 'Toggle extended buttons'),
             onPressed: () {
               setState(() {
                 _extendedButtons = !_extendedButtons;
@@ -148,9 +151,9 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
         ],
       ),
       floatingActionButton: buildFloatingActionButton(_selectedPage),
-      body: new TabBarView(
+      body: TabBarView(
         controller: _controller,
-        children: _allPages.map(buildTabView).toList()
+        children: _allPages.map<Widget>(buildTabView).toList(),
       ),
     );
   }

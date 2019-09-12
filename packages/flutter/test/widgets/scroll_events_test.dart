@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
 Widget _buildScroller({ List<String> log }) {
-  return new NotificationListener<ScrollNotification>(
+  return NotificationListener<ScrollNotification>(
     onNotification: (ScrollNotification notification) {
       if (notification is ScrollStartNotification) {
         log.add('scroll-start');
@@ -20,15 +20,15 @@ Widget _buildScroller({ List<String> log }) {
       }
       return false;
     },
-    child: new SingleChildScrollView(
-      child: new Container(width: 1000.0, height: 1000.0),
+    child: SingleChildScrollView(
+      child: Container(width: 1000.0, height: 1000.0),
     ),
   );
 }
 
 void main() {
-  Completer<Null> animateTo(WidgetTester tester, double newScrollOffset, { @required Duration duration }) {
-    final Completer<Null> completer = new Completer<Null>();
+  Completer<void> animateTo(WidgetTester tester, double newScrollOffset, { @required Duration duration }) {
+    final Completer<void> completer = Completer<void>();
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.animateTo(newScrollOffset, duration: duration, curve: Curves.linear).whenComplete(completer.complete);
     return completer;
@@ -63,7 +63,7 @@ void main() {
     await tester.pumpWidget(_buildScroller(log: log));
 
     expect(log, equals(<String>[]));
-    final Completer<Null> completer = animateTo(tester, 100.0, duration: const Duration(seconds: 1));
+    final Completer<void> completer = animateTo(tester, 100.0, duration: const Duration(seconds: 1));
     expect(completer.isCompleted, isFalse);
     expect(log, equals(<String>['scroll-start']));
     await tester.pump(const Duration(milliseconds: 100));
@@ -91,7 +91,7 @@ void main() {
     await tester.pumpWidget(_buildScroller(log: log));
 
     expect(log, equals(<String>[]));
-    final Completer<Null> completer = animateTo(tester, 100.0, duration: const Duration(seconds: 1));
+    final Completer<void> completer = animateTo(tester, 100.0, duration: const Duration(seconds: 1));
     expect(completer.isCompleted, isFalse);
     expect(log, equals(<String>['scroll-start']));
     await tester.pump(const Duration(milliseconds: 100));
@@ -116,7 +116,7 @@ void main() {
     await tester.pumpWidget(_buildScroller(log: log));
 
     expect(log, equals(<String>[]));
-    Completer<Null> completer = animateTo(tester, 100.0, duration: const Duration(seconds: 1));
+    Completer<void> completer = animateTo(tester, 100.0, duration: const Duration(seconds: 1));
     expect(completer.isCompleted, isFalse);
     expect(log, equals(<String>['scroll-start']));
     await tester.pump(const Duration(milliseconds: 100));
@@ -139,7 +139,7 @@ void main() {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
-    // The ideal behaviour here would be a single start/end pair, but for
+    // The ideal behavior here would be a single start/end pair, but for
     // simplicity of implementation we compromise here and accept two. Should
     // you find a way to make this work with just one without complicating the
     // API, feel free to change the expectation here.

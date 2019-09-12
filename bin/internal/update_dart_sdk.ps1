@@ -23,6 +23,15 @@ $engineVersion = (Get-Content "$flutterRoot\bin\internal\engine.version")
 
 $oldDartSdkPrefix = "dart-sdk.old"
 
+# Make sure that PowerShell has expected version.
+$psMajorVersionRequired = 5
+$psMajorVersionLocal = $PSVersionTable.PSVersion.Major
+if ($psMajorVersionLocal -lt $psMajorVersionRequired) {
+    Write-Host "Flutter requires PowerShell $psMajorVersionRequired.0 or newer."
+    Write-Host "See https://flutter.dev/docs/get-started/install/windows for more."
+    return
+}
+
 if ((Test-Path $engineStamp) -and ($engineVersion -eq (Get-Content $engineStamp))) {
     return
 }
@@ -43,8 +52,22 @@ if (Test-Path $dartSdkPath) {
 }
 New-Item $dartSdkPath -force -type directory | Out-Null
 $dartSdkZip = "$cachePath\$dartZipName"
-Import-Module BitsTransfer
-Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
+
+Try {
+    Import-Module BitsTransfer
+    Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
+}
+Catch {
+    Write-Host "Downloading the Dart SDK using the BITS service failed, retrying with WebRequest..."
+    # Invoke-WebRequest is very slow when the progress bar is visible - a 28
+    # second download can become a 33 minute download. Disable it with
+    # $ProgressPreference and then restore the original value afterwards.
+    # https://github.com/flutter/flutter/issues/37789
+    $OriginalProgressPreference = $ProgressPreference
+    $ProgressPreference = 'SilentlyContinue'
+    Invoke-WebRequest -Uri $dartSdkUrl -OutFile $dartSdkZip
+    $ProgressPreference = $OriginalProgressPreference
+}
 
 Write-Host "Unzipping Dart SDK..."
 If (Get-Command 7z -errorAction SilentlyContinue) {

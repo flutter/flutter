@@ -8,9 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Does flutter_test catch leaking tickers?', (WidgetTester tester) async {
-    new Ticker((Duration duration) { })..start();
+    Ticker((Duration duration) { })..start();
 
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.paused');
-    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) {});
   });
 }

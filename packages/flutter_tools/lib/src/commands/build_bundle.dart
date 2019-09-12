@@ -5,15 +5,21 @@
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
-import '../runner/flutter_command.dart' show FlutterOptions;
+import '../features.dart';
+import '../project.dart';
+import '../reporting/reporting.dart';
+import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
-  BuildBundleCommand({bool verboseHelp = false}) {
+  BuildBundleCommand({bool verboseHelp = false, this.bundleBuilder}) {
     usesTargetOption();
-    addBuildModeFlags();
+    usesFilesystemOptions(hide: !verboseHelp);
+    usesBuildNumberOption();
+    addBuildModeFlags(verboseHelp: verboseHelp);
     argParser
       ..addFlag('precompiled', negatable: false)
       // This option is still referenced by the iOS build scripts. We should
@@ -21,27 +27,19 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('asset-base', help: 'Ignored. Will be removed.', hide: !verboseHelp)
       ..addOption('manifest', defaultsTo: defaultManifestPath)
       ..addOption('private-key', defaultsTo: defaultPrivateKeyPath)
-      ..addOption('snapshot', defaultsTo: defaultSnapshotPath)
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
-      ..addOption('kernel-file', defaultsTo: defaultApplicationKernelPath)
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
-      )
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'ios']
-      )
-      ..addFlag('track-widget-creation',
-        hide: !verboseHelp,
-        help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
-      )
-      ..addFlag('build-snapshot',
-        hide: !verboseHelp,
-        defaultsTo: false,
-        help: 'Build and use application-specific VM snapshot instead of\n'
-            'prebuilt one provided by the engine.',
+        allowed: const <String>[
+          'android-arm',
+          'android-arm64',
+          'android-x86',
+          'android-x64',
+          'ios',
+          'darwin-x64',
+          'linux-x64',
+          'windows-x64',
+        ],
       )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
@@ -55,20 +53,14 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addFlag('report-licensed-packages',
         help: 'Whether to report the names of all the packages that are included '
               'in the application\'s LICENSE file.',
-        defaultsTo: false)
-      ..addMultiOption('filesystem-root',
-        hide: !verboseHelp,
-        help: 'Specify the path, that is used as root in a virtual file system\n'
-            'for compilation. Input file name should be specified as Uri in\n'
-            'filesystem-scheme scheme. Use only in Dart 2 mode.\n'
-            'Requires --output-dill option to be explicitly specified.\n')
-      ..addOption('filesystem-scheme',
-        defaultsTo: 'org-dartlang-root',
-        hide: !verboseHelp,
-        help: 'Specify the scheme that is used for virtual file system used in\n'
-            'compilation. See more details on filesystem-root option.\n');
+        defaultsTo: false);
     usesPubOption();
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
+
+    bundleBuilder ??= BundleBuilder();
   }
+
+  BundleBuilder bundleBuilder;
 
   @override
   final String name = 'bundle';
@@ -82,35 +74,64 @@ class BuildBundleCommand extends BuildSubCommand {
       ' iOS runtimes.';
 
   @override
-  Future<Null> runCommand() async {
-    await super.runCommand();
+  Future<Map<CustomDimensions, String>> get usageValues async {
+    final String projectDir = fs.file(targetFile).parent.parent.path;
+    final FlutterProject futterProject = FlutterProject.fromPath(projectDir);
+    if (futterProject == null) {
+      return const <CustomDimensions, String>{};
+    }
+    return <CustomDimensions, String>{
+      CustomDimensions.commandBuildBundleTargetPlatform: argResults['target-platform'],
+      CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}'
+    };
+  }
 
+  @override
+  Future<FlutterCommandResult> runCommand() async {
     final String targetPlatform = argResults['target-platform'];
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
-    if (platform == null)
+    if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
+    }
+    // Check for target platforms that are only allowed via feature flags.
+    switch (platform) {
+      case TargetPlatform.darwin_x64:
+        if (!featureFlags.isMacOSEnabled) {
+          throwToolExit('macOS is not a supported target platform.');
+        }
+        break;
+      case TargetPlatform.windows_x64:
+        if (!featureFlags.isWindowsEnabled) {
+          throwToolExit('Windows is not a supported target platform.');
+        }
+        break;
+      case TargetPlatform.linux_x64:
+        if (!featureFlags.isLinuxEnabled) {
+          throwToolExit('Linux is not a supported target platform.');
+        }
+        break;
+      default:
+        break;
+    }
 
     final BuildMode buildMode = getBuildMode();
 
-    await build(
+    await bundleBuilder.build(
       platform: platform,
       buildMode: buildMode,
       mainPath: targetFile,
       manifestPath: argResults['manifest'],
-      snapshotPath: argResults['snapshot'],
-      applicationKernelFilePath: argResults['kernel-file'],
       depfilePath: argResults['depfile'],
       privateKeyPath: argResults['private-key'],
       assetDirPath: argResults['asset-dir'],
-      previewDart2: argResults['preview-dart-2'],
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
-      buildSnapshot: argResults['build-snapshot'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],
       fileSystemRoots: argResults['filesystem-root'],
     );
+    return null;
   }
 }

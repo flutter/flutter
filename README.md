@@ -1,96 +1,65 @@
-# <img src="https://flutter.io/images/flutter-mark-square-100.png" alt="Flutter" width="40" height="40" /> Flutter [![Join Gitter Chat Channel -](https://badges.gitter.im/flutter/flutter.svg)](https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status - Travis](https://travis-ci.org/flutter/flutter.svg?branch=master)](https://travis-ci.org/flutter/flutter) [![Build Status - AppVeyor](https://ci.appveyor.com/api/projects/status/meyi9evcny64a2mg/branch/master?svg=true)](https://ci.appveyor.com/project/flutter/flutter/branch/master) [![Build Status - Cirrus](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.com/github/flutter/flutter) [![Coverage Status -](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
+# [![Flutter logo][]][flutter.dev]
 
-A new mobile app SDK to help developers and designers build modern mobile apps for iOS and Android. Flutter is an open-source project currently in beta.
+[![Build Status - Cirrus][]][Build status]
+[![Gitter Channel][]][Gitter badge]
 
-### Documentation
+Flutter is Google's mobile app SDK for crafting high-quality native interfaces
+on iOS and Android in record time. Flutter works with existing code, is used by
+developers and organizations around the world, and is free and open source.
 
-* **Main site: [flutter.io][]**
-* [Install](https://flutter.io/setup/)
-* [Get started](https://flutter.io/getting-started/)
-* [Contribute](CONTRIBUTING.md)
+## Documentation
 
-## Fast development
+* [Install Flutter](https://flutter.dev/get-started/)
+* [Flutter documentation](https://flutter.dev/docs)
+* [Development wiki](https://github.com/flutter/flutter/wiki)
+* [Contributing to Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
 
-Flutter's <em>hot reload</em> helps you quickly
-and easily experiment, build UIs, add features, and fix
-bugs faster. Experience sub-second reload times,
-without losing state, on
-emulators, simulators, and hardware for iOS
-and Android.
+For announcements about new releases and breaking changes, follow the
+[flutter-announce@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-announce)
+mailing list.
 
-<img src="https://user-images.githubusercontent.com/919717/28131204-0f8c3cda-66ee-11e7-9428-6a0513eac75d.gif" alt="Make a change in your code, and your app is changed instantly.">
+## About Flutter
 
-## Expressive, beautiful UIs
+We think Flutter will help you create beautiful, fast apps, with a productive,
+extensible and open development model.
 
-Delight your users with Flutter's built-in
-beautiful Material Design and
-Cupertino (iOS-flavor) widgets, rich motion APIs,
-smooth natural scrolling, and platform awareness.
+### Beautiful apps
 
-[<img src="https://github.com/flutter/website/blob/master/images/homepage/screenshot-1.png" width="270" height="480" alt="Brand-first shopping design" align="left">](https://github.com/flutter/flutter/tree/master/examples/flutter_gallery/lib/demo/animation)
-[<img src="https://github.com/flutter/website/blob/master/images/homepage/screenshot-2.png" width="270" height="480" alt="Fitness app design">](https://github.com/flutter/posse_gallery)
+We want to enable designers to deliver their full creative vision without being
+forced to water it down due to limitations of the underlying framework.
+Flutter's [layered architecture] gives you control over every pixel on the
+screen, and its powerful compositing capabilities let you overlay and animate
+graphics, video, text and controls without limitation. Flutter includes a full
+[set of widgets][widget catalog] that deliver pixel-perfect experiences on both
+iOS and Android.
 
-[<img src="https://github.com/flutter/website/blob/master/images/homepage/screenshot-3.png" width="270" height="480" alt="Contact app design" align="left">](https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/lib/demo/contacts_demo.dart)
-[<img src="https://github.com/flutter/website/blob/master/images/homepage/ios-friendlychat.png" width="270" height="480" alt="iOS chat app design">](https://codelabs.developers.google.com/codelabs/flutter-firebase)
+![Reflectly hero image][Reflectly hero image]
 
-Browse the <a href="https://flutter.io/widgets/">widget catalog</a>.
+### Fast apps
 
-## Modern, reactive framework
+Flutter is fast. It's powered by the same hardware-accelerated [Skia] 2D
+graphics library that underpins Chrome and Android. We architected Flutter to
+support glitch-free, jank-free graphics at the native speed of your device.
+Flutter code is powered by the world-class [Dart platform], which enables
+compilation to native 32-bit and 64-bit ARM code for iOS and Android.
 
-Easily compose your UI with Flutter's
-modern functional-reactive framework and
-rich set of platform, layout, and foundation widgets.
-Solve your tough UI challenges with
-powerful and flexible APIs for 2D, animation, gestures,
-effects, and more.
+### Productive development
 
-```dart
-class CounterState extends State<Counter> {
-  int counter = 0;
+Flutter offers stateful hot reload, allowing you to make changes to your code
+and see the results instantly without restarting your app or losing its state.
 
-  void increment() {
-    // Tells the Flutter framework that state has changed,
-    // so the framework can run build() and update the display.
-    setState(() {
-      counter++;
-    });
-  }
+[![Hot reload animation][]][Hot reload]
 
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called.
-    // The Flutter framework has been optimized to make rerunning
-    // build methods fast, so that you can just rebuild anything that
-    // needs updating rather than having to individually change
-    // instances of widgets.
-    return new Row(
-      children: <Widget>[
-        new RaisedButton(
-          onPressed: increment,
-          child: new Text('Increment'),
-        ),
-        new Text('Count: $counter'),
-      ],
-    );
-  }
-}
-```
+### Extensible and open model
 
-Browse the <a href="https://flutter.io/widgets/">widget catalog</a>
-and learn more about the
-<a href="https://flutter.io/widgets-intro/">functional-reactive framework</a>.
-
-## Access native features and SDKs
-
-Make your app come to life
-with platform APIs, 3rd party SDKs,
-and native code.
-Flutter lets you reuse your existing Java/Kotlin and ObjC/Swift code,
-and access native features and SDKs on Android and iOS.
-
-Accessing platform features is easy. Here is a snippet from our <a href="https://github.com/flutter/flutter/tree/master/examples/platform_channel">interop example</a>:
+Flutter works with any development tool, but includes editor plug-ins for both
+[Visual Studio Code] and [IntelliJ / Android Studio]. Flutter provides
+[thousands of packages][Flutter packages] to speed your development, regardless
+of your target platform. And accessing platform features is easy. Here is a
+snippet from our [interop example]:
 
 ```dart
-Future<Null> getBatteryLevel() async {
+Future<void> getBatteryLevel() async {
   var batteryLevel = 'unknown';
   try {
     int result = await methodChannel.invokeMethod('getBatteryLevel');
@@ -104,66 +73,24 @@ Future<Null> getBatteryLevel() async {
 }
 ```
 
-Learn how to use <a href="https://flutter.io/using-packages/">packages</a>, or
-write <a href="https://flutter.io/platform-channels/">platform channels</a>,
-to access native code, APIs, and SDKs.
+Flutter is a fully open source project, and we welcome contributions.
+Information on how to get started can be found at our
+[contributor guide](CONTRIBUTING.md).
 
-## Unified app development
-
-Flutter has the tools and libraries to help you easily
-bring your ideas to life on iOS and Android.
-If you don't have any mobile development experience, Flutter
-is an easy and fast way to build beautiful mobile apps.
-If you are an experienced iOS or Android developer,
-you can use Flutter for your views and leverage much of your
-existing Java/Kotlin/ObjC/Swift investment.
-
-### Build
-
-* **Beautiful app UIs**
-    * Rich 2D GPU-accelerated APIs
-    * Reactive framework
-    * Animation/motion APIs
-    * Material Design and iOS widgets
-* **Fluid coding experience**
-    * Sub-second, stateful hot reload
-    * IntelliJ: refactor, code completion, etc
-    * Dart language and core libs
-    * Package manager
-* **Full-featured apps**
-    * Interop with mobile OS APIs & SDKs
-    * Gradle/Java/Kotlin
-    * Cocoapods/ObjC/Swift
-
-### Optimize
-
-* **Test**
-    * Unit testing
-    * Integration testing
-    * On-device testing
-* **Debug**
-    * IDE debugger
-    * Web-based debugger
-    * async/await aware
-    * Expression evaluator
-* **Profile**
-    * Timeline
-    * CPU and memory
-    * In-app perf charts
-
-### Deploy
-
-* **Compile**
-    * Native ARM code
-    * Dead code elimination
-* **Distribution**
-    * App Store
-    * Play Store
-
-Learn more about what makes Flutter special in the
-<a href="https://flutter.io/technical-overview/">technical overview</a>.
-
-Join us in our [Gitter chat room](https://gitter.im/flutter/flutter) or join our public mailing list,
-[flutter-dev@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-dev).
-
-[flutter.io]: https://flutter.io/
+[Flutter logo]: https://flutter.dev/assets/flutter-lockup-4cb0ee072ab312e59784d9fbf4fb7ad42688a7fdaea1270ccf6bbf4f34b7e03f.svg
+[flutter.dev]: https://flutter.dev
+[Build Status - Cirrus]: https://api.cirrus-ci.com/github/flutter/flutter.svg
+[Build status]: https://cirrus-ci.com/github/flutter/flutter/master
+[Gitter Channel]: https://badges.gitter.im/flutter/flutter.svg
+[Gitter badge]: https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+[layered architecture]: https://flutter.dev/docs/resources/inside-flutter
+[widget catalog]: https://flutter.dev/widgets/
+[Reflectly hero image]: https://github.com/flutter/website/blob/master/src/images/homepage/reflectly-hero-600px.png
+[Skia]: https://skia.org/
+[Dart platform]: https://dart.dev/
+[Hot reload animation]: https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/tools/android-studio/hot-reload.gif
+[Hot reload]: https://flutter.dev/docs/development/tools/hot-reload
+[Visual Studio Code]: https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter
+[IntelliJ / Android Studio]: https://plugins.jetbrains.com/plugin/9212-flutter
+[Flutter packages]: https://pub.dev/flutter
+[interop example]: https://github.com/flutter/flutter/tree/master/examples/platform_channel

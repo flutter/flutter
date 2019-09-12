@@ -37,7 +37,19 @@
   "modalBarrierDismissLabel": "برخاست کریں",
   "drawerLabel": "نیویگیشن مینو",
   "popupMenuLabel": "پاپ اپ مینو",
-  "dialogLabel": "ڈائیلاگ",
-  "alertDialogLabel": "انتباہ",
-  "searchFieldLabel": "تلاش کریں"
+  "dialogLabel": "ڈائلاگ",
+  "alertDialogLabel": "الرٹ",
+  "searchFieldLabel": "تلاش",
+  "reorderItemToStart": "شروع میں منتقل کریں",
+  "reorderItemToEnd": "آخر میں منتقل کریں",
+  "reorderItemUp": "اوپر منتقل کریں",
+  "reorderItemDown": "نیچے منتقل کریں",
+  "reorderItemLeft": "بائیں منتقل کریں",
+  "reorderItemRight": "دائیں منتقل کریں",
+  "expandedIconTapHint": "سکیڑیں",
+  "collapsedIconTapHint": "پھیلائیں",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "1 حرف باقی ہے",
+  "remainingTextFieldCharacterCountOther": "$remainingCount حروف باقی ہیں",
+  "refreshIndicatorSemanticLabel": "ریفریش کریں"
 }

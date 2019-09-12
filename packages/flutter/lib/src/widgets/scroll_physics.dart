@@ -3,17 +3,25 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 
+import 'binding.dart' show WidgetsBinding;
 import 'overscroll_indicator.dart';
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
 
 export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, Tolerance;
+
+// Examples can assume:
+// class FooScrollPhysics extends ScrollPhysics {
+//   const FooScrollPhysics({ ScrollPhysics parent }): super(parent: parent);
+// }
+// class BarScrollPhysics extends ScrollPhysics {
+//   const BarScrollPhysics({ ScrollPhysics parent }): super(parent: parent);
+// }
 
 /// Determines the physics of a [Scrollable] widget.
 ///
@@ -24,6 +32,9 @@ export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, T
 /// velocity are used as the initial conditions for the particle in the
 /// simulation. The movement of the particle in the simulation is then used to
 /// determine the scroll position for the widget.
+///
+/// Instead of creating your own subclasses, [parent] can be used to combine
+/// [ScrollPhysics] objects of different types to get the desired scroll physics.
 @immutable
 class ScrollPhysics {
   /// Creates an object with the default scroll physics.
@@ -34,16 +45,26 @@ class ScrollPhysics {
   /// If a subclass of [ScrollPhysics] does not override a method, that subclass
   /// will inherit an implementation from this base class that defers to
   /// [parent]. This mechanism lets you assemble novel combinations of
-  /// [ScrollPhysics] subclasses at runtime.
+  /// [ScrollPhysics] subclasses at runtime. For example:
+  ///
+  /// ```dart
+  /// BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
+  ///
+  /// ```
+  /// will result in a [ScrollPhysics] that has the combined behavior
+  /// of [BouncingScrollPhysics] and [AlwaysScrollableScrollPhysics]:
+  /// behaviors that are not specified in [BouncingScrollPhysics]
+  /// (e.g. [shouldAcceptUserOffset]) will defer to [AlwaysScrollableScrollPhysics].
   final ScrollPhysics parent;
 
   /// If [parent] is null then return ancestor, otherwise recursively build a
   /// ScrollPhysics that has [ancestor] as its parent.
   ///
   /// This method is typically used to define [applyTo] methods like:
+  ///
   /// ```dart
   /// FooScrollPhysics applyTo(ScrollPhysics ancestor) {
-  ///   return new FooScrollPhysics(parent: buildParent(ancestor));
+  ///   return FooScrollPhysics(parent: buildParent(ancestor));
   /// }
   /// ```
   @protected
@@ -59,12 +80,24 @@ class ScrollPhysics {
   /// The returned object will combine some of the behaviors from this
   /// [ScrollPhysics] instance and some of the behaviors from [ancestor].
   ///
+  /// {@tool sample}
+  ///
+  /// In the following example, the [applyTo] method is used to combine the
+  /// scroll physics of two [ScrollPhysics] objects, the resulting [ScrollPhysics]
+  /// `x` has the same behavior as `y`:
+  ///
+  /// ```dart
+  /// final FooScrollPhysics x = FooScrollPhysics().applyTo(BarScrollPhysics());
+  /// const FooScrollPhysics y = FooScrollPhysics(parent: BarScrollPhysics());
+  /// ```
+  /// {@end-tool}
+  ///
   /// See also:
   ///
-  ///   * [buildParent], a utility method that's often used to define [applyTo]
-  ///     methods for ScrollPhysics subclasses.
+  ///  * [buildParent], a utility method that's often used to define [applyTo]
+  ///    methods for ScrollPhysics subclasses.
   ScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new ScrollPhysics(parent: buildParent(ancestor));
+    return ScrollPhysics(parent: buildParent(ancestor));
   }
 
   /// Used by [DragScrollActivity] and other user-driven activities to convert
@@ -160,7 +193,7 @@ class ScrollPhysics {
     return parent.createBallisticSimulation(position, velocity);
   }
 
-  static final SpringDescription _kDefaultSpring = new SpringDescription.withDampingRatio(
+  static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(
     mass: 0.5,
     stiffness: 100.0,
     ratio: 1.1,
@@ -170,11 +203,11 @@ class ScrollPhysics {
   SpringDescription get spring => parent?.spring ?? _kDefaultSpring;
 
   /// The default accuracy to which scrolling is computed.
-  static final Tolerance _kDefaultTolerance = new Tolerance(
+  static final Tolerance _kDefaultTolerance = Tolerance(
     // TODO(ianh): Handle the case of the device pixel ratio changing.
     // TODO(ianh): Get this from the local MediaQuery not dart:ui's window object.
-    velocity: 1.0 / (0.050 * ui.window.devicePixelRatio), // logical pixels per second
-    distance: 1.0 / ui.window.devicePixelRatio // logical pixels
+    velocity: 1.0 / (0.050 * WidgetsBinding.instance.window.devicePixelRatio), // logical pixels per second
+    distance: 1.0 / WidgetsBinding.instance.window.devicePixelRatio, // logical pixels
   );
 
   /// The tolerance to use for ballistic simulations.
@@ -225,6 +258,15 @@ class ScrollPhysics {
   /// If null, no minimum threshold is enforced.
   double get dragStartDistanceMotionThreshold => parent?.dragStartDistanceMotionThreshold;
 
+  /// Whether a viewport is allowed to change its scroll position implicitly in
+  /// responds to a call to [RenderObject.showOnScreen].
+  ///
+  /// [RenderObject.showOnScreen] is for example used to bring a text field
+  /// fully on screen after it has received focus. This property controls
+  /// whether the viewport associated with this object is allowed to change the
+  /// scroll position to fulfill such a request.
+  bool get allowImplicitScrolling => true;
+
   @override
   String toString() {
     if (parent == null)
@@ -251,7 +293,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
 
   @override
   BouncingScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new BouncingScrollPhysics(parent: buildParent(ancestor));
+    return BouncingScrollPhysics(parent: buildParent(ancestor));
   }
 
   /// The multiple applied to overscroll to make it appear that scrolling past
@@ -307,7 +349,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
-      return new BouncingScrollSimulation(
+      return BouncingScrollSimulation(
         spring: spring,
         position: position.pixels,
         velocity: velocity * 0.91, // TODO(abarth): We should move this constant closer to the drag end.
@@ -373,14 +415,14 @@ class ClampingScrollPhysics extends ScrollPhysics {
 
   @override
   ClampingScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new ClampingScrollPhysics(parent: buildParent(ancestor));
+    return ClampingScrollPhysics(parent: buildParent(ancestor));
   }
 
   @override
   double applyBoundaryConditions(ScrollMetrics position, double value) {
     assert(() {
       if (value == position.pixels) {
-        throw new FlutterError(
+        throw FlutterError(
           '$runtimeType.applyBoundaryConditions() was called redundantly.\n'
           'The proposed new position, $value, is exactly equal to the current position of the '
           'given ${position.runtimeType}, ${position.pixels}.\n'
@@ -389,7 +431,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
           'The physics object in question was:\n'
           '  $this\n'
           'The position object in question was:\n'
-          '  $position\n'
+          '  $position'
         );
       }
       return true;
@@ -415,12 +457,12 @@ class ClampingScrollPhysics extends ScrollPhysics {
       if (position.pixels < position.minScrollExtent)
         end = position.minScrollExtent;
       assert(end != null);
-      return new ScrollSpringSimulation(
+      return ScrollSpringSimulation(
         spring,
         position.pixels,
-        position.maxScrollExtent,
+        end,
         math.min(0.0, velocity),
-        tolerance: tolerance
+        tolerance: tolerance,
       );
     }
     if (velocity.abs() < tolerance.velocity)
@@ -429,7 +471,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
       return null;
     if (velocity < 0.0 && position.pixels <= position.minScrollExtent)
       return null;
-    return new ClampingScrollSimulation(
+    return ClampingScrollSimulation(
       position: position.pixels,
       velocity: velocity,
       tolerance: tolerance,
@@ -457,7 +499,7 @@ class AlwaysScrollableScrollPhysics extends ScrollPhysics {
 
   @override
   AlwaysScrollableScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new AlwaysScrollableScrollPhysics(parent: buildParent(ancestor));
+    return AlwaysScrollableScrollPhysics(parent: buildParent(ancestor));
   }
 
   @override
@@ -480,9 +522,12 @@ class NeverScrollableScrollPhysics extends ScrollPhysics {
 
   @override
   NeverScrollableScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new NeverScrollableScrollPhysics(parent: buildParent(ancestor));
+    return NeverScrollableScrollPhysics(parent: buildParent(ancestor));
   }
 
   @override
   bool shouldAcceptUserOffset(ScrollMetrics position) => false;
+
+  @override
+  bool get allowImplicitScrolling => false;
 }

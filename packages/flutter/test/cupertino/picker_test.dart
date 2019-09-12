@@ -3,32 +3,69 @@
 // found in the LICENSE file.
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('Picker respects theme styling', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            height: 300.0,
+            width: 300.0,
+            child: CupertinoPicker(
+              itemExtent: 50.0,
+              onSelectedItemChanged: (_) { },
+              children: List<Widget>.generate(3, (int index) {
+                return Container(
+                  height: 50.0,
+                  width: 300.0,
+                  child: Text(index.toString()),
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph = tester.renderObject(find.text('1'));
+
+    expect(paragraph.text.style, const TextStyle(
+      inherit: false,
+      fontFamily: '.SF Pro Display',
+      fontSize: 25.0,
+      fontWeight: FontWeight.w400,
+      letterSpacing: -0.41,
+      color: CupertinoColors.black,
+    ));
+  });
+
   group('layout', () {
     testWidgets('selected item is in the middle', (WidgetTester tester) async {
       final FixedExtentScrollController controller =
-          new FixedExtentScrollController(initialItem: 1);
+          FixedExtentScrollController(initialItem: 1);
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Align(
+          child: Align(
             alignment: Alignment.topLeft,
-            child: new SizedBox(
+            child: SizedBox(
               height: 300.0,
               width: 300.0,
-              child: new CupertinoPicker(
+              child: CupertinoPicker(
                 scrollController: controller,
                 itemExtent: 50.0,
-                onSelectedItemChanged: (_) {},
-                children: new List<Widget>.generate(3, (int index) {
-                  return new Container(
+                onSelectedItemChanged: (_) { },
+                children: List<Widget>.generate(3, (int index) {
+                  return Container(
                     height: 50.0,
                     width: 300.0,
-                    child: new Text(index.toString()),
+                    child: Text(index.toString()),
                   );
                 }),
               ),
@@ -56,6 +93,127 @@ void main() {
     });
   });
 
+  group('gradient', () {
+    testWidgets('gradient displays correctly with background color', (WidgetTester tester) async {
+      const Color backgroundColor = Color.fromRGBO(255, 0, 0, 1.0);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 300.0,
+              width: 300.0,
+              child: CupertinoPicker(
+                backgroundColor: backgroundColor,
+                itemExtent: 15.0,
+                children: const <Widget>[
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                ],
+                onSelectedItemChanged: (int i) { },
+              ),
+            ),
+          ),
+        ),
+      );
+      final Container container = tester.firstWidget(find.byType(Container));
+      final BoxDecoration boxDecoration = container.decoration;
+      expect(boxDecoration.gradient.colors, <Color>[
+        backgroundColor,
+        backgroundColor.withAlpha(0xF2),
+        backgroundColor.withAlpha(0xDD),
+        backgroundColor.withAlpha(0x00),
+        backgroundColor.withAlpha(0x00),
+        backgroundColor.withAlpha(0xDD),
+        backgroundColor.withAlpha(0xF2),
+        backgroundColor,
+      ]);
+    });
+
+    testWidgets('No gradient displays with transparent background color', (WidgetTester tester) async {
+      const Color backgroundColor = Color.fromRGBO(255, 0, 0, 0.5);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 300.0,
+              width: 300.0,
+              child: CupertinoPicker(
+                backgroundColor: backgroundColor,
+                itemExtent: 15.0,
+                children: const <Widget>[
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                ],
+                onSelectedItemChanged: (int i) { },
+              ),
+            ),
+          ),
+        ),
+      );
+      final DecoratedBox decoratedBox = tester.firstWidget(find.byType(DecoratedBox));
+      final BoxDecoration boxDecoration = decoratedBox.decoration;
+      expect(boxDecoration.gradient, isNull);
+      expect(boxDecoration.color, isNotNull);
+    });
+
+    testWidgets('gradient displays correctly with null background color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              height: 300.0,
+              width: 300.0,
+              child: CupertinoPicker(
+                backgroundColor: null,
+                itemExtent: 15.0,
+                children: const <Widget>[
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                  Text('1'),
+                ],
+                onSelectedItemChanged: (int i) { },
+              ),
+            ),
+          ),
+        ),
+      );
+      // If the background color is null, the gradient color should be white.
+      const Color backgroundColor = Color(0xFFFFFFFF);
+      final Container container = tester.firstWidget(find.byType(Container));
+      final BoxDecoration boxDecoration = container.decoration;
+      expect(boxDecoration.gradient.colors, <Color>[
+        backgroundColor,
+        backgroundColor.withAlpha(0xF2),
+        backgroundColor.withAlpha(0xDD),
+        backgroundColor.withAlpha(0x00),
+        backgroundColor.withAlpha(0x00),
+        backgroundColor.withAlpha(0xDD),
+        backgroundColor.withAlpha(0xF2),
+        backgroundColor,
+      ]);
+    });
+  });
+
   group('scroll', () {
     testWidgets(
       'scrolling calls onSelectedItemChanged and triggers haptic feedback',
@@ -69,17 +227,17 @@ void main() {
         });
 
         await tester.pumpWidget(
-          new Directionality(
+          Directionality(
             textDirection: TextDirection.ltr,
-            child: new CupertinoPicker(
+            child: CupertinoPicker(
               itemExtent: 100.0,
               onSelectedItemChanged: (int index) { selectedItems.add(index); },
-              children: new List<Widget>.generate(100, (int index) {
-                return new Center(
-                  child: new Container(
+              children: List<Widget>.generate(100, (int index) {
+                return Center(
+                  child: Container(
                     width: 400.0,
                     height: 100.0,
-                    child: new Text(index.toString()),
+                    child: Text(index.toString()),
                   ),
                 );
               }),
@@ -124,17 +282,17 @@ void main() {
         });
 
         await tester.pumpWidget(
-          new Directionality(
+          Directionality(
             textDirection: TextDirection.ltr,
-            child: new CupertinoPicker(
+            child: CupertinoPicker(
               itemExtent: 100.0,
               onSelectedItemChanged: (int index) { selectedItems.add(index); },
-              children: new List<Widget>.generate(100, (int index) {
-                return new Center(
-                  child: new Container(
+              children: List<Widget>.generate(100, (int index) {
+                return Center(
+                  child: Container(
                     width: 400.0,
                     height: 100.0,
-                    child: new Text(index.toString()),
+                    child: Text(index.toString()),
                   ),
                 );
               }),
@@ -153,22 +311,22 @@ void main() {
     testWidgets('a drag in between items settles back', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       final FixedExtentScrollController controller =
-          new FixedExtentScrollController(initialItem: 10);
+          FixedExtentScrollController(initialItem: 10);
       final List<int> selectedItems = <int>[];
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new CupertinoPicker(
+          child: CupertinoPicker(
             scrollController: controller,
             itemExtent: 100.0,
             onSelectedItemChanged: (int index) { selectedItems.add(index); },
-            children: new List<Widget>.generate(100, (int index) {
-              return new Center(
-                child: new Container(
+            children: List<Widget>.generate(100, (int index) {
+              return Center(
+                child: Container(
                   width: 400.0,
                   height: 100.0,
-                  child: new Text(index.toString()),
+                  child: Text(index.toString()),
                 ),
               );
             }),
@@ -177,7 +335,7 @@ void main() {
       );
 
       // Drag it by a bit but not enough to move to the next item.
-      await tester.drag(find.text('10'), const Offset(0.0, 30.0));
+      await tester.drag(find.text('10'), const Offset(0.0, 30.0), touchSlopY: 0.0);
 
       // The item that was in the center now moved a bit.
       expect(
@@ -194,7 +352,7 @@ void main() {
       expect(selectedItems.isEmpty, true);
 
       // Drag it by enough to move to the next item.
-      await tester.drag(find.text('10'), const Offset(0.0, 70.0));
+      await tester.drag(find.text('10'), const Offset(0.0, 70.0), touchSlopY: 0.0);
 
       await tester.pumpAndSettle();
 
@@ -210,22 +368,22 @@ void main() {
     testWidgets('a big fling that overscrolls springs back', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       final FixedExtentScrollController controller =
-          new FixedExtentScrollController(initialItem: 10);
+          FixedExtentScrollController(initialItem: 10);
       final List<int> selectedItems = <int>[];
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new CupertinoPicker(
+          child: CupertinoPicker(
             scrollController: controller,
             itemExtent: 100.0,
             onSelectedItemChanged: (int index) { selectedItems.add(index); },
-            children: new List<Widget>.generate(100, (int index) {
-              return new Center(
-                child: new Container(
+            children: List<Widget>.generate(100, (int index) {
+              return Center(
+                child: Container(
                   width: 400.0,
                   height: 100.0,
-                  child: new Text(index.toString()),
+                  child: Text(index.toString()),
                 ),
               );
             }),
@@ -240,11 +398,10 @@ void main() {
         1000.0,
       );
 
-      expect(
-        tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
-        // Should have been flung far enough to go off screen.
-        greaterThan(600.0),
-      );
+      // Should have been flung far enough that even the first item goes off
+      // screen and gets removed.
+      expect(find.widgetWithText(Container, '0').evaluate().isEmpty, true);
+
       expect(
         selectedItems,
         // This specific throw was fast enough that each scroll update landed

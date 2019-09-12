@@ -13,7 +13,7 @@ class Changer extends StatefulWidget {
   final Widget child;
 
   @override
-  ChangerState createState() => new ChangerState();
+  ChangerState createState() => ChangerState();
 }
 
 class ChangerState extends State<Changer> {
@@ -28,7 +28,7 @@ class ChangerState extends State<Changer> {
   void test() { setState(() { _state = true; }); }
 
   @override
-  Widget build(BuildContext context) => _state ? new Wrapper(widget.child) : widget.child;
+  Widget build(BuildContext context) => _state ? Wrapper(widget.child) : widget.child;
 }
 
 class Wrapper extends StatelessWidget {
@@ -42,7 +42,7 @@ class Wrapper extends StatelessWidget {
 
 class Leaf extends StatefulWidget {
   @override
-  LeafState createState() => new LeafState();
+  LeafState createState() => LeafState();
 }
 
 class LeafState extends State<Leaf> {
@@ -52,8 +52,8 @@ class LeafState extends State<Leaf> {
 
 void main() {
   testWidgets('three-way setState() smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(new Changer(new Wrapper(new Leaf())));
-    await tester.pumpWidget(new Changer(new Wrapper(new Leaf())));
+    await tester.pumpWidget(Changer(Wrapper(Leaf())));
+    await tester.pumpWidget(Changer(Wrapper(Leaf())));
     changer.test();
     await tester.pump();
   });

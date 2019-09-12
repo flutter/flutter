@@ -4,15 +4,16 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('SliverList reverse children (with keys)', (WidgetTester tester) async {
-    final List<int> items = new List<int>.generate(20, (int i) => i);
+    final List<int> items = List<int>.generate(20, (int i) => i);
     const double itemHeight = 300.0;
     const double viewportHeight = 500.0;
 
     const double scrollPosition = 18 * itemHeight;
-    final ScrollController controller = new ScrollController(initialScrollOffset: scrollPosition);
+    final ScrollController controller = ScrollController(initialScrollOffset: scrollPosition);
 
     await tester.pumpWidget(_buildSliverList(
       items: items,
@@ -54,12 +55,12 @@ void main() {
   });
 
   testWidgets('SliverList replace children (with keys)', (WidgetTester tester) async {
-    final List<int> items = new List<int>.generate(20, (int i) => i);
+    final List<int> items = List<int>.generate(20, (int i) => i);
     const double itemHeight = 300.0;
     const double viewportHeight = 500.0;
 
     const double scrollPosition = 18 * itemHeight;
-    final ScrollController controller = new ScrollController(initialScrollOffset: scrollPosition);
+    final ScrollController controller = ScrollController(initialScrollOffset: scrollPosition);
 
     await tester.pumpWidget(_buildSliverList(
       items: items,
@@ -76,7 +77,7 @@ void main() {
     expect(find.text('Tile 19'), findsOneWidget);
 
     await tester.pumpWidget(_buildSliverList(
-      items: items.map((int i) => i + 100).toList(),
+      items: items.map<int>((int i) => i + 100).toList(),
       controller: controller,
       itemHeight: itemHeight,
       viewportHeight: viewportHeight,
@@ -106,12 +107,12 @@ void main() {
   });
 
   testWidgets('SliverList replace with shorter children list (with keys)', (WidgetTester tester) async {
-    final List<int> items = new List<int>.generate(20, (int i) => i);
+    final List<int> items = List<int>.generate(20, (int i) => i);
     const double itemHeight = 300.0;
     const double viewportHeight = 500.0;
 
     final double scrollPosition = items.length * itemHeight - viewportHeight;
-    final ScrollController controller = new ScrollController(initialScrollOffset: scrollPosition);
+    final ScrollController controller = ScrollController(initialScrollOffset: scrollPosition);
 
     await tester.pumpWidget(_buildSliverList(
       items: items,
@@ -144,6 +145,52 @@ void main() {
     expect(find.text('Tile 18'), findsOneWidget);
     expect(find.text('Tile 19'), findsNothing);
   });
+
+  testWidgets('SliverList should layout first child in case of child reordering', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/35904.
+    List<String> items = <String>['1', '2'];
+
+    await tester.pumpWidget(_buildSliverListRenderWidgetChild(items));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tile 1'), findsOneWidget);
+    expect(find.text('Tile 2'), findsOneWidget);
+
+    items = items.reversed.toList();
+    await tester.pumpWidget(_buildSliverListRenderWidgetChild(items));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tile 1'), findsOneWidget);
+    expect(find.text('Tile 2'), findsOneWidget);
+  });
+}
+
+Widget _buildSliverListRenderWidgetChild(List<String> items) {
+  return MaterialApp(
+    home: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Container(
+          height: 500,
+          child: CustomScrollView(
+            controller: ScrollController(),
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  items.map<Widget>((String item) {
+                    return Chip(
+                      key: Key(item),
+                      label: Text('Tile $item'),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 Widget _buildSliverList({
@@ -152,21 +199,21 @@ Widget _buildSliverList({
   double itemHeight = 500.0,
   double viewportHeight = 300.0,
 }) {
-  return new Directionality(
+  return Directionality(
     textDirection: TextDirection.ltr,
-    child: new Center(
-      child: new Container(
+    child: Center(
+      child: Container(
         height: viewportHeight,
-        child: new CustomScrollView(
+        child: CustomScrollView(
           controller: controller,
           slivers: <Widget>[
-            new SliverList(
-              delegate: new SliverChildBuilderDelegate(
-                    (BuildContext context, int i) {
-                  return new Container(
-                    key: new ValueKey<int>(items[i]),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int i) {
+                  return Container(
+                    key: ValueKey<int>(items[i]),
                     height: itemHeight,
-                    child: new Text('Tile ${items[i]}'),
+                    child: Text('Tile ${items[i]}'),
                   );
                 },
                 childCount: items.length,

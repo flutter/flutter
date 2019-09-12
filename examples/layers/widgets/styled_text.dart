@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-typedef Widget _TextTransformer(String name, String text);
+typedef _TextTransformer = Widget Function(String name, String text);
 
 // From https://en.wikiquote.org/wiki/2001:_A_Space_Odyssey_(film)
 const String _kDialogText = '''
@@ -20,61 +20,61 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
 // [["Dave", "Open the pod bay..."] ...]
 final List<List<String>> _kNameLines = _kDialogText
   .split('\n')
-  .map((String line) => line.split(':'))
+  .map<List<String>>((String line) => line.split(':'))
   .toList();
 
-final TextStyle _kDaveStyle = new TextStyle(color: Colors.indigo.shade400, height: 1.8);
-final TextStyle _kHalStyle = new TextStyle(color: Colors.red.shade400, fontFamily: 'monospace');
-const TextStyle _kBold = const TextStyle(fontWeight: FontWeight.bold);
-const TextStyle _kUnderline = const TextStyle(
+final TextStyle _kDaveStyle = TextStyle(color: Colors.indigo.shade400, height: 1.8);
+final TextStyle _kHalStyle = TextStyle(color: Colors.red.shade400, fontFamily: 'monospace');
+const TextStyle _kBold = TextStyle(fontWeight: FontWeight.bold);
+const TextStyle _kUnderline = TextStyle(
   decoration: TextDecoration.underline,
-  decorationColor: const Color(0xFF000000),
-  decorationStyle: TextDecorationStyle.wavy
+  decorationColor: Color(0xFF000000),
+  decorationStyle: TextDecorationStyle.wavy,
 );
 
 Widget toStyledText(String name, String text) {
   final TextStyle lineStyle = (name == 'Dave') ? _kDaveStyle : _kHalStyle;
-  return new RichText(
-    key: new Key(text),
-    text: new TextSpan(
+  return RichText(
+    key: Key(text),
+    text: TextSpan(
       style: lineStyle,
       children: <TextSpan>[
-        new TextSpan(
+        TextSpan(
           style: _kBold,
           children: <TextSpan>[
-            new TextSpan(
+            TextSpan(
               style: _kUnderline,
-              text: name
+              text: name,
             ),
-            const TextSpan(text: ':')
-          ]
+            const TextSpan(text: ':'),
+          ],
         ),
-        new TextSpan(text: text)
-      ]
-    )
+        TextSpan(text: text),
+      ],
+    ),
   );
 }
 
-Widget toPlainText(String name, String text) => new Text(name + ':' + text);
+Widget toPlainText(String name, String text) => Text(name + ':' + text);
 
 class SpeakerSeparator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return Container(
       constraints: const BoxConstraints.expand(height: 0.0),
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 64.0),
       decoration: const BoxDecoration(
-        border: const Border(
-          bottom: const BorderSide(color: const Color.fromARGB(24, 0, 0, 0))
+        border: Border(
+          bottom: BorderSide(color: Color.fromARGB(24, 0, 0, 0))
         )
-      )
+      ),
     );
   }
 }
 
 class StyledTextDemo extends StatefulWidget {
   @override
-  _StyledTextDemoState createState() => new _StyledTextDemoState();
+  _StyledTextDemoState createState() => _StyledTextDemoState();
 }
 
 class _StyledTextDemoState extends State<StyledTextDemo> {
@@ -102,34 +102,34 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
     for (Widget line in lines) {
       children.add(line);
       if (line != lines.last)
-        children.add(new SpeakerSeparator());
+        children.add(SpeakerSeparator());
     }
 
-    return new GestureDetector(
+    return GestureDetector(
       onTap: _handleTap,
-      child: new Container(
+      child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: new Column(
+        child: Column(
           children: children,
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start
-        )
-      )
+          crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+      ),
     );
   }
 }
 
 void main() {
-  runApp(new MaterialApp(
-    theme: new ThemeData.light(),
-    home: new Scaffold(
-      appBar: new AppBar(
-        title: const Text('Hal and Dave')
+  runApp(MaterialApp(
+    theme: ThemeData.light(),
+    home: Scaffold(
+      appBar: AppBar(
+        title: const Text('Hal and Dave'),
       ),
-      body: new Material(
+      body: Material(
         color: Colors.grey.shade50,
-        child: new StyledTextDemo()
-      )
-    )
+        child: StyledTextDemo(),
+      ),
+    ),
   ));
 }

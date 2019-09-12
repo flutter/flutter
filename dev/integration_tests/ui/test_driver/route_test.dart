@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:test/test.dart';
+
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('flutter run test --route', () {
@@ -14,7 +15,7 @@ void main() {
     });
 
     tearDownAll(() async {
-      driver?.close();
+      await driver?.close();
     });
 
     test('sanity check flutter drive --route', () async {

@@ -20,7 +20,7 @@ class TextRange {
   /// constant.
   const TextRange({
     @required this.start,
-    @required this.end
+    @required this.end,
   }) : assert(start != null && start >= -1),
        assert(end != null && end >= -1);
 
@@ -33,7 +33,7 @@ class TextRange {
       end = offset;
 
   /// A text range that contains nothing and is not in the text.
-  static const TextRange empty = const TextRange(start: -1, end: -1);
+  static const TextRange empty = TextRange(start: -1, end: -1);
 
   /// The index of the first character in the range.
   ///
@@ -86,7 +86,7 @@ class TextRange {
   @override
   int get hashCode => hashValues(
     start.hashCode,
-    end.hashCode
+    end.hashCode,
   );
 
   @override
@@ -103,7 +103,7 @@ class TextSelection extends TextRange {
     @required this.baseOffset,
     @required this.extentOffset,
     this.affinity = TextAffinity.downstream,
-    this.isDirectional = false
+    this.isDirectional = false,
   }) : super(
          start: baseOffset < extentOffset ? baseOffset : extentOffset,
          end: baseOffset < extentOffset ? extentOffset : baseOffset
@@ -118,8 +118,11 @@ class TextSelection extends TextRange {
   /// The [offset] argument must not be null.
   const TextSelection.collapsed({
     @required int offset,
-    this.affinity = TextAffinity.downstream
-  }) : baseOffset = offset, extentOffset = offset, isDirectional = false, super.collapsed(offset);
+    this.affinity = TextAffinity.downstream,
+  }) : baseOffset = offset,
+       extentOffset = offset,
+       isDirectional = false,
+       super.collapsed(offset);
 
   /// Creates a collapsed selection at the given text position.
   ///
@@ -163,7 +166,7 @@ class TextSelection extends TextRange {
   /// The position at which the selection originates.
   ///
   /// Might be larger than, smaller than, or equal to extent.
-  TextPosition get base => new TextPosition(offset: baseOffset, affinity: affinity);
+  TextPosition get base => TextPosition(offset: baseOffset, affinity: affinity);
 
   /// The position at which the selection terminates.
   ///
@@ -172,7 +175,7 @@ class TextSelection extends TextRange {
   /// side of the selection, this is the location at which to paint the caret.
   ///
   /// Might be larger than, smaller than, or equal to base.
-  TextPosition get extent => new TextPosition(offset: extentOffset, affinity: affinity);
+  TextPosition get extent => TextPosition(offset: extentOffset, affinity: affinity);
 
   @override
   String toString() {
@@ -197,7 +200,7 @@ class TextSelection extends TextRange {
     baseOffset.hashCode,
     extentOffset.hashCode,
     affinity.hashCode,
-    isDirectional.hashCode
+    isDirectional.hashCode,
   );
 
   /// Creates a new [TextSelection] based on the current selection, with the
@@ -208,7 +211,7 @@ class TextSelection extends TextRange {
     TextAffinity affinity,
     bool isDirectional,
   }) {
-    return new TextSelection(
+    return TextSelection(
       baseOffset: baseOffset ?? this.baseOffset,
       extentOffset: extentOffset ?? this.extentOffset,
       affinity: affinity ?? this.affinity,

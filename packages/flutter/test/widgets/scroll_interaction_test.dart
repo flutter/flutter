@@ -8,11 +8,11 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('Scroll flings twice in a row does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           children: <Widget>[
-            new Container(height: 100000.0)
+            Container(height: 100000.0),
           ],
         ),
       ),

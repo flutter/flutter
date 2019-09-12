@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
@@ -36,9 +36,9 @@ void main() {
     RenderBox child1, child2;
     bool movedChild1 = false;
     bool movedChild2 = false;
-    final RenderFlex block = new RenderFlex(textDirection: TextDirection.ltr);
-    block.add(child1 = new RenderLayoutTestBox(() { movedChild1 = true; }));
-    block.add(child2 = new RenderLayoutTestBox(() { movedChild2 = true; }));
+    final RenderFlex block = RenderFlex(textDirection: TextDirection.ltr);
+    block.add(child1 = RenderLayoutTestBox(() { movedChild1 = true; }));
+    block.add(child2 = RenderLayoutTestBox(() { movedChild2 = true; }));
 
     expect(movedChild1, isFalse);
     expect(movedChild2, isFalse);

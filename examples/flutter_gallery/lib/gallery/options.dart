@@ -6,11 +6,10 @@ import 'package:flutter/material.dart';
 
 import 'about.dart';
 import 'scales.dart';
-import 'themes.dart';
 
 class GalleryOptions {
   GalleryOptions({
-    this.theme,
+    this.themeMode,
     this.textScaleFactor,
     this.textDirection = TextDirection.ltr,
     this.timeDilation = 1.0,
@@ -20,7 +19,7 @@ class GalleryOptions {
     this.showPerformanceOverlay = false,
   });
 
-  final GalleryTheme theme;
+  final ThemeMode themeMode;
   final GalleryTextScaleValue textScaleFactor;
   final TextDirection textDirection;
   final double timeDilation;
@@ -30,7 +29,7 @@ class GalleryOptions {
   final bool showOffscreenLayersCheckerboard;
 
   GalleryOptions copyWith({
-    GalleryTheme theme,
+    ThemeMode themeMode,
     GalleryTextScaleValue textScaleFactor,
     TextDirection textDirection,
     double timeDilation,
@@ -39,8 +38,8 @@ class GalleryOptions {
     bool showRasterCacheImagesCheckerboard,
     bool showOffscreenLayersCheckerboard,
   }) {
-    return new GalleryOptions(
-      theme: theme ?? this.theme,
+    return GalleryOptions(
+      themeMode: themeMode ?? this.themeMode,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       textDirection: textDirection ?? this.textDirection,
       timeDilation: timeDilation ?? this.timeDilation,
@@ -56,7 +55,7 @@ class GalleryOptions {
     if (runtimeType != other.runtimeType)
       return false;
     final GalleryOptions typedOther = other;
-    return theme == typedOther.theme
+    return themeMode == typedOther.themeMode
         && textScaleFactor == typedOther.textScaleFactor
         && textDirection == typedOther.textDirection
         && platform == typedOther.platform
@@ -67,7 +66,7 @@ class GalleryOptions {
 
   @override
   int get hashCode => hashValues(
-    theme,
+    themeMode,
     textScaleFactor,
     textDirection,
     timeDilation,
@@ -79,12 +78,12 @@ class GalleryOptions {
 
   @override
   String toString() {
-    return '$runtimeType($theme)';
+    return '$runtimeType($themeMode)';
   }
 }
 
 const double _kItemHeight = 48.0;
-const EdgeInsetsDirectional _kItemPadding = const EdgeInsetsDirectional.only(start: 56.0);
+const EdgeInsetsDirectional _kItemPadding = EdgeInsetsDirectional.only(start: 56.0);
 
 class _OptionsItem extends StatelessWidget {
   const _OptionsItem({ Key key, this.child }) : super(key: key);
@@ -95,16 +94,16 @@ class _OptionsItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
 
-    return new MergeSemantics(
-      child: new Container(
-        constraints: new BoxConstraints(minHeight: _kItemHeight * textScaleFactor),
+    return MergeSemantics(
+      child: Container(
+        constraints: BoxConstraints(minHeight: _kItemHeight * textScaleFactor),
         padding: _kItemPadding,
         alignment: AlignmentDirectional.centerStart,
-        child: new DefaultTextStyle(
+        child: DefaultTextStyle(
           style: DefaultTextStyle.of(context).style,
           maxLines: 2,
           overflow: TextOverflow.fade,
-          child: new IconTheme(
+          child: IconTheme(
             data: Theme.of(context).primaryIconTheme,
             child: child,
           ),
@@ -115,20 +114,23 @@ class _OptionsItem extends StatelessWidget {
 }
 
 class _BooleanItem extends StatelessWidget {
-  const _BooleanItem(this.title, this.value, this.onChanged);
+  const _BooleanItem(this.title, this.value, this.onChanged, { this.switchKey });
 
   final String title;
   final bool value;
   final ValueChanged<bool> onChanged;
+  // [switchKey] is used for accessing the switch from driver tests.
+  final Key switchKey;
 
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    return new _OptionsItem(
-      child: new Row(
+    return _OptionsItem(
+      child: Row(
         children: <Widget>[
-          new Expanded(child: new Text(title)),
-          new Switch(
+          Expanded(child: Text(title)),
+          Switch(
+            key: switchKey,
             value: value,
             onChanged: onChanged,
             activeColor: const Color(0xFF39CEFD),
@@ -148,10 +150,10 @@ class _ActionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new _OptionsItem(
-      child: new _FlatButton(
+    return _OptionsItem(
+      child: _FlatButton(
         onPressed: onTap,
-        child: new Text(text),
+        child: Text(text),
       ),
     );
   }
@@ -165,10 +167,10 @@ class _FlatButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new FlatButton(
+    return FlatButton(
       padding: EdgeInsets.zero,
       onPressed: onPressed,
-      child: new DefaultTextStyle(
+      child: DefaultTextStyle(
         style: Theme.of(context).primaryTextTheme.subhead,
         child: child,
       ),
@@ -184,14 +186,14 @@ class _Heading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return new _OptionsItem(
-      child: new DefaultTextStyle(
+    return _OptionsItem(
+      child: DefaultTextStyle(
         style: theme.textTheme.body1.copyWith(
           fontFamily: 'GoogleSans',
           color: theme.accentColor,
         ),
-        child: new Semantics(
-          child: new Text(text),
+        child: Semantics(
+          child: Text(text),
           header: true,
         ),
       ),
@@ -199,24 +201,55 @@ class _Heading extends StatelessWidget {
   }
 }
 
-class _ThemeItem extends StatelessWidget {
-  const _ThemeItem(this.options, this.onOptionsChanged);
+class _ThemeModeItem extends StatelessWidget {
+  const _ThemeModeItem(this.options, this.onOptionsChanged);
 
   final GalleryOptions options;
   final ValueChanged<GalleryOptions> onOptionsChanged;
 
+  static final Map<ThemeMode, String> modeLabels = <ThemeMode, String>{
+    ThemeMode.system: 'System Default',
+    ThemeMode.light: 'Light',
+    ThemeMode.dark: 'Dark',
+  };
+
   @override
   Widget build(BuildContext context) {
-    return new _BooleanItem(
-      'Dark Theme',
-      options.theme == kDarkGalleryTheme,
-      (bool value) {
-        onOptionsChanged(
-          options.copyWith(
-            theme: value ? kDarkGalleryTheme : kLightGalleryTheme,
+    return _OptionsItem(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text('Theme'),
+                Text(
+                  '${modeLabels[options.themeMode]}',
+                  style: Theme.of(context).primaryTextTheme.body1,
+                ),
+              ],
+            ),
           ),
-        );
-      },
+          PopupMenuButton<ThemeMode>(
+            padding: const EdgeInsetsDirectional.only(end: 16.0),
+            icon: const Icon(Icons.arrow_drop_down),
+            initialValue: options.themeMode,
+            itemBuilder: (BuildContext context) {
+              return ThemeMode.values.map<PopupMenuItem<ThemeMode>>((ThemeMode mode) {
+                return PopupMenuItem<ThemeMode>(
+                  value: mode,
+                  child: Text(modeLabels[mode]),
+                );
+              }).toList();
+            },
+            onSelected: (ThemeMode mode) {
+              onOptionsChanged(
+                options.copyWith(themeMode: mode),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -229,29 +262,29 @@ class _TextScaleFactorItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new _OptionsItem(
-      child: new Row(
+    return _OptionsItem(
+      child: Row(
         children: <Widget>[
-          new Expanded(
-            child: new Column(
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 const Text('Text size'),
-                new Text(
+                Text(
                   '${options.textScaleFactor.label}',
                   style: Theme.of(context).primaryTextTheme.body1,
                 ),
               ],
             ),
           ),
-          new PopupMenuButton<GalleryTextScaleValue>(
+          PopupMenuButton<GalleryTextScaleValue>(
             padding: const EdgeInsetsDirectional.only(end: 16.0),
             icon: const Icon(Icons.arrow_drop_down),
             itemBuilder: (BuildContext context) {
-              return kAllGalleryTextScaleValues.map((GalleryTextScaleValue scaleValue) {
-                return new PopupMenuItem<GalleryTextScaleValue>(
+              return kAllGalleryTextScaleValues.map<PopupMenuItem<GalleryTextScaleValue>>((GalleryTextScaleValue scaleValue) {
+                return PopupMenuItem<GalleryTextScaleValue>(
                   value: scaleValue,
-                  child: new Text(scaleValue.label),
+                  child: Text(scaleValue.label),
                 );
               }).toList();
             },
@@ -275,7 +308,7 @@ class _TextDirectionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new _BooleanItem(
+    return _BooleanItem(
       'Force RTL',
       options.textDirection == TextDirection.rtl,
       (bool value) {
@@ -285,6 +318,7 @@ class _TextDirectionItem extends StatelessWidget {
           ),
         );
       },
+      switchKey: const Key('text_direction'),
     );
   }
 }
@@ -297,7 +331,7 @@ class _TimeDilationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new _BooleanItem(
+    return _BooleanItem(
       'Slow motion',
       options.timeDilation != 1.0,
       (bool value) {
@@ -307,6 +341,7 @@ class _TimeDilationItem extends StatelessWidget {
           ),
         );
       },
+      switchKey: const Key('slow_motion'),
     );
   }
 }
@@ -332,29 +367,29 @@ class _PlatformItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new _OptionsItem(
-      child: new Row(
+    return _OptionsItem(
+      child: Row(
         children: <Widget>[
-          new Expanded(
-            child: new Column(
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 const Text('Platform mechanics'),
-                 new Text(
+                 Text(
                    '${_platformLabel(options.platform)}',
                    style: Theme.of(context).primaryTextTheme.body1,
                  ),
               ],
             ),
           ),
-          new PopupMenuButton<TargetPlatform>(
+          PopupMenuButton<TargetPlatform>(
             padding: const EdgeInsetsDirectional.only(end: 16.0),
             icon: const Icon(Icons.arrow_drop_down),
             itemBuilder: (BuildContext context) {
               return TargetPlatform.values.map((TargetPlatform platform) {
-                return new PopupMenuItem<TargetPlatform>(
+                return PopupMenuItem<TargetPlatform>(
                   value: platform,
-                  child: new Text(_platformLabel(platform)),
+                  child: Text(_platformLabel(platform)),
                 );
               }).toList();
             },
@@ -385,9 +420,9 @@ class GalleryOptionsPage extends StatelessWidget {
   List<Widget> _enabledDiagnosticItems() {
     // Boolean showFoo options with a value of null: don't display
     // the showFoo option at all.
-    if (null == options.showOffscreenLayersCheckerboard
-             ?? options.showRasterCacheImagesCheckerboard
-             ?? options.showPerformanceOverlay)
+    if (options.showOffscreenLayersCheckerboard == null &&
+        options.showRasterCacheImagesCheckerboard == null &&
+        options.showPerformanceOverlay == null)
       return const <Widget>[];
 
     final List<Widget> items = <Widget>[
@@ -397,18 +432,18 @@ class GalleryOptionsPage extends StatelessWidget {
 
     if (options.showOffscreenLayersCheckerboard != null) {
       items.add(
-        new _BooleanItem(
+        _BooleanItem(
           'Highlight offscreen layers',
           options.showOffscreenLayersCheckerboard,
           (bool value) {
             onOptionsChanged(options.copyWith(showOffscreenLayersCheckerboard: value));
-          }
+          },
         ),
       );
     }
     if (options.showRasterCacheImagesCheckerboard != null) {
       items.add(
-        new _BooleanItem(
+        _BooleanItem(
           'Highlight raster cache images',
           options.showRasterCacheImagesCheckerboard,
           (bool value) {
@@ -419,7 +454,7 @@ class GalleryOptionsPage extends StatelessWidget {
     }
     if (options.showPerformanceOverlay != null) {
       items.add(
-        new _BooleanItem(
+        _BooleanItem(
           'Show performance overlay',
           options.showPerformanceOverlay,
           (bool value) {
@@ -436,31 +471,27 @@ class GalleryOptionsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    return new DefaultTextStyle(
+    return DefaultTextStyle(
       style: theme.primaryTextTheme.subhead,
-      child: new ListView(
+      child: ListView(
         padding: const EdgeInsets.only(bottom: 124.0),
         children: <Widget>[
           const _Heading('Display'),
-          new _ThemeItem(options, onOptionsChanged),
-          new _TextScaleFactorItem(options, onOptionsChanged),
-          new _TextDirectionItem(options, onOptionsChanged),
-          new _TimeDilationItem(options, onOptionsChanged),
+          _ThemeModeItem(options, onOptionsChanged),
+          _TextScaleFactorItem(options, onOptionsChanged),
+          _TextDirectionItem(options, onOptionsChanged),
+          _TimeDilationItem(options, onOptionsChanged),
           const Divider(),
           const _Heading('Platform mechanics'),
-          new _PlatformItem(options, onOptionsChanged),
-        ]..addAll(
-          _enabledDiagnosticItems(),
-        )..addAll(
-          <Widget>[
-            const Divider(),
-            const _Heading('Flutter gallery'),
-            new _ActionItem('About Flutter Gallery', () {
-              showGalleryAboutDialog(context);
-            }),
-            new _ActionItem('Send feedback', onSendFeedback),
-          ],
-        ),
+          _PlatformItem(options, onOptionsChanged),
+          ..._enabledDiagnosticItems(),
+          const Divider(),
+          const _Heading('Flutter gallery'),
+          _ActionItem('About Flutter Gallery', () {
+            showGalleryAboutDialog(context);
+          }),
+          _ActionItem('Send feedback', onSendFeedback),
+        ],
       ),
     );
   }

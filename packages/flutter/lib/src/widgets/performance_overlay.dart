@@ -36,11 +36,12 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
   }) : super(key: key);
 
   /// Create a performance overlay that displays all available statistics
-  PerformanceOverlay.allEnabled({ Key key,
-                                  this.rasterizerThreshold = 0,
-                                  this.checkerboardRasterCacheImages = false,
-                                  this.checkerboardOffscreenLayers = false })
-    : optionsMask =
+  PerformanceOverlay.allEnabled({
+    Key key,
+    this.rasterizerThreshold = 0,
+    this.checkerboardRasterCacheImages = false,
+    this.checkerboardOffscreenLayers = false,
+  }) : optionsMask =
         1 << PerformanceOverlayOption.displayRasterizerStatistics.index |
         1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index |
         1 << PerformanceOverlayOption.displayEngineStatistics.index |
@@ -103,7 +104,7 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
   final bool checkerboardOffscreenLayers;
 
   @override
-  RenderPerformanceOverlay createRenderObject(BuildContext context) => new RenderPerformanceOverlay(
+  RenderPerformanceOverlay createRenderObject(BuildContext context) => RenderPerformanceOverlay(
     optionsMask: optionsMask,
     rasterizerThreshold: rasterizerThreshold,
     checkerboardRasterCacheImages: checkerboardRasterCacheImages,

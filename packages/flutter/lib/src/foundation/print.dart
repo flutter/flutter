@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 
 /// Signature for [debugPrint] implementations.
-typedef void DebugPrintCallback(String message, { int wrapWidth });
+typedef DebugPrintCallback = void Function(String message, { int wrapWidth });
 
 /// Prints a message to the console, which you can access using the "flutter"
 /// tool's "logs" command ("flutter logs").
@@ -32,7 +32,7 @@ DebugPrintCallback debugPrint = debugPrintThrottled;
 /// Used by tests.
 void debugPrintSynchronously(String message, { int wrapWidth }) {
   if (wrapWidth != null) {
-    print(message.split('\n').expand((String line) => debugWordWrap(line, wrapWidth)).join('\n'));
+    print(message.split('\n').expand<String>((String line) => debugWordWrap(line, wrapWidth)).join('\n'));
   } else {
     print(message);
   }
@@ -41,20 +41,21 @@ void debugPrintSynchronously(String message, { int wrapWidth }) {
 /// Implementation of [debugPrint] that throttles messages. This avoids dropping
 /// messages on platforms that rate-limit their logging (for example, Android).
 void debugPrintThrottled(String message, { int wrapWidth }) {
+  final List<String> messageLines = message?.split('\n') ?? <String>['null'];
   if (wrapWidth != null) {
-    _debugPrintBuffer.addAll(message.split('\n').expand((String line) => debugWordWrap(line, wrapWidth)));
+    _debugPrintBuffer.addAll(messageLines.expand<String>((String line) => debugWordWrap(line, wrapWidth)));
   } else {
-    _debugPrintBuffer.addAll(message.split('\n'));
+    _debugPrintBuffer.addAll(messageLines);
   }
   if (!_debugPrintScheduled)
     _debugPrintTask();
 }
 int _debugPrintedCharacters = 0;
 const int _kDebugPrintCapacity = 12 * 1024;
-const Duration _kDebugPrintPauseTime = const Duration(seconds: 1);
-final Queue<String> _debugPrintBuffer = new Queue<String>();
-final Stopwatch _debugPrintStopwatch = new Stopwatch();
-Completer<Null> _debugPrintCompleter;
+const Duration _kDebugPrintPauseTime = Duration(seconds: 1);
+final Queue<String> _debugPrintBuffer = Queue<String>();
+final Stopwatch _debugPrintStopwatch = Stopwatch();
+Completer<void> _debugPrintCompleter;
 bool _debugPrintScheduled = false;
 void _debugPrintTask() {
   _debugPrintScheduled = false;
@@ -71,8 +72,8 @@ void _debugPrintTask() {
   if (_debugPrintBuffer.isNotEmpty) {
     _debugPrintScheduled = true;
     _debugPrintedCharacters = 0;
-    new Timer(_kDebugPrintPauseTime, _debugPrintTask);
-    _debugPrintCompleter ??= new Completer<Null>();
+    Timer(_kDebugPrintPauseTime, _debugPrintTask);
+    _debugPrintCompleter ??= Completer<void>();
   } else {
     _debugPrintStopwatch.start();
     _debugPrintCompleter?.complete();
@@ -83,10 +84,11 @@ void _debugPrintTask() {
 /// A Future that resolves when there is no longer any buffered content being
 /// printed by [debugPrintThrottled] (which is the default implementation for
 /// [debugPrint], which is used to report errors to the console).
-Future<Null> get debugPrintDone => _debugPrintCompleter?.future ?? new Future<Null>.value();
+Future<void> get debugPrintDone => _debugPrintCompleter?.future ?? Future<void>.value();
 
-final RegExp _indentPattern = new RegExp('^ *(?:[-+*] |[0-9]+[.):] )?');
+final RegExp _indentPattern = RegExp('^ *(?:[-+*] |[0-9]+[.):] )?');
 enum _WordWrapParseMode { inSpace, inWord, atBreak }
+
 /// Wraps the given string at the given width.
 ///
 /// Wrapping occurs at space characters (U+0020). Lines that start with an
@@ -134,7 +136,8 @@ Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = 
         if ((index - startForLengthCalculations > width) || (index == message.length)) {
           // we are over the width line, so break
           if ((index - startForLengthCalculations <= width) || (lastWordEnd == null)) {
-            // we should use this point, before either it doesn't actually go over the end (last line), or it does, but there was no earlier break point
+            // we should use this point, because either it doesn't actually go over the
+            // end (last line), or it does, but there was no earlier break point
             lastWordEnd = index;
           }
           if (addPrefix) {

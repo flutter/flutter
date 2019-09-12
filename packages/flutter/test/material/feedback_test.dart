@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,12 +10,12 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 void main () {
-  const Duration kWaitDuration = const Duration(seconds: 1);
+  const Duration kWaitDuration = Duration(seconds: 1);
 
   FeedbackTester feedback;
 
   setUp(() {
-    feedback = new FeedbackTester();
+    feedback = FeedbackTester();
   });
 
   tearDown(() {
@@ -29,7 +27,7 @@ void main () {
 
     setUp(() {
       semanticEvents = <Map<String, Object>>[];
-      SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+      SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
         final Map<dynamic, dynamic> typedMessage = message;
         semanticEvents.add(typedMessage.cast<String, Object>());
       });
@@ -40,9 +38,9 @@ void main () {
     });
 
     testWidgets('forTap', (WidgetTester tester) async {
-      final SemanticsTester semanticsTester = new SemanticsTester(tester);
+      final SemanticsTester semanticsTester = SemanticsTester(tester);
 
-      await tester.pumpWidget(new TestWidget(
+      await tester.pumpWidget(TestWidget(
         tapHandler: (BuildContext context) {
           return () => Feedback.forTap(context);
         },
@@ -69,14 +67,14 @@ void main () {
     });
 
     testWidgets('forTap Wrapper', (WidgetTester tester) async {
-      final SemanticsTester semanticsTester = new SemanticsTester(tester);
+      final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       int callbackCount = 0;
       final VoidCallback callback = () {
         callbackCount++;
       };
 
-      await tester.pumpWidget(new TestWidget(
+      await tester.pumpWidget(TestWidget(
         tapHandler: (BuildContext context) {
           return Feedback.wrapForTap(callback, context);
         },
@@ -104,9 +102,9 @@ void main () {
     });
 
     testWidgets('forLongPress', (WidgetTester tester) async {
-      final SemanticsTester semanticsTester = new SemanticsTester(tester);
+      final SemanticsTester semanticsTester = SemanticsTester(tester);
 
-      await tester.pumpWidget(new TestWidget(
+      await tester.pumpWidget(TestWidget(
         longPressHandler: (BuildContext context) {
           return () => Feedback.forLongPress(context);
         },
@@ -132,13 +130,13 @@ void main () {
     });
 
     testWidgets('forLongPress Wrapper', (WidgetTester tester) async {
-      final SemanticsTester semanticsTester = new SemanticsTester(tester);
+      final SemanticsTester semanticsTester = SemanticsTester(tester);
       int callbackCount = 0;
       final VoidCallback callback = () {
         callbackCount++;
       };
 
-      await tester.pumpWidget(new TestWidget(
+      await tester.pumpWidget(TestWidget(
         longPressHandler: (BuildContext context) {
           return Feedback.wrapForLongPress(callback, context);
         },
@@ -169,9 +167,9 @@ void main () {
 
   group('Feedback on iOS', () {
     testWidgets('forTap', (WidgetTester tester) async {
-      await tester.pumpWidget(new Theme(
-        data: new ThemeData(platform: TargetPlatform.iOS),
-        child: new TestWidget(
+      await tester.pumpWidget(Theme(
+        data: ThemeData(platform: TargetPlatform.iOS),
+        child: TestWidget(
           tapHandler: (BuildContext context) {
             return () => Feedback.forTap(context);
           },
@@ -185,9 +183,9 @@ void main () {
     });
 
     testWidgets('forLongPress', (WidgetTester tester) async {
-      await tester.pumpWidget(new Theme(
-        data: new ThemeData(platform: TargetPlatform.iOS),
-        child: new TestWidget(
+      await tester.pumpWidget(Theme(
+        data: ThemeData(platform: TargetPlatform.iOS),
+        child: TestWidget(
           longPressHandler: (BuildContext context) {
             return () => Feedback.forLongPress(context);
           },
@@ -216,7 +214,7 @@ class TestWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new GestureDetector(
+    return GestureDetector(
         onTap: tapHandler(context),
         onLongPress: longPressHandler(context),
         child: const Text('X', textDirection: TextDirection.ltr),
@@ -224,4 +222,4 @@ class TestWidget extends StatelessWidget {
   }
 }
 
-typedef VoidCallback HandlerCreator(BuildContext context);
+typedef HandlerCreator = VoidCallback Function(BuildContext context);

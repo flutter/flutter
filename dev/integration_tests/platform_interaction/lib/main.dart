@@ -12,12 +12,12 @@ import 'src/test_step.dart';
 
 void main() {
   enableFlutterDriverExtension();
-  runApp(new TestApp());
+  runApp(TestApp());
 }
 
 class TestApp extends StatefulWidget {
   @override
-  _TestAppState createState() => new _TestAppState();
+  _TestAppState createState() => _TestAppState();
 }
 
 class _TestAppState extends State<TestApp> {
@@ -27,17 +27,12 @@ class _TestAppState extends State<TestApp> {
   Future<TestStepResult> _result;
   int _step = 0;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   void _executeNextStep() {
     setState(() {
       if (_step < steps.length)
         _result = steps[_step++]();
       else
-        _result = new Future<TestStepResult>.value(TestStepResult.complete);
+        _result = Future<TestStepResult>.value(TestStepResult.complete);
     });
   }
 
@@ -45,25 +40,25 @@ class _TestAppState extends State<TestApp> {
     BuildContext context,
     AsyncSnapshot<TestStepResult> snapshot,
   ) {
-    return new TestStepResult.fromSnapshot(snapshot).asWidget(context);
+    return TestStepResult.fromSnapshot(snapshot).asWidget(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'Platform Interaction Test',
-      home: new Scaffold(
-        appBar: new AppBar(
+      home: Scaffold(
+        appBar: AppBar(
           title: const Text('Platform Interaction Test'),
         ),
-        body: new Padding(
+        body: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: new FutureBuilder<TestStepResult>(
+          child: FutureBuilder<TestStepResult>(
             future: _result,
             builder: _buildTestResultWidget,
           ),
         ),
-        floatingActionButton: new FloatingActionButton(
+        floatingActionButton: FloatingActionButton(
           key: const ValueKey<String>('step'),
           onPressed: _executeNextStep,
           child: const Icon(Icons.navigate_next),

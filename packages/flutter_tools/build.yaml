@@ -1,0 +1,8 @@
+targets:
+  $default:
+    builders:
+      build_web_compilers|entrypoint:
+        enabled: false
+    sources:
+      exclude:
+        - "test/data/**"

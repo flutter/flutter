@@ -39,5 +39,17 @@
   "popupMenuLabel": "Pop-up menu",
   "dialogLabel": "Dialogue",
   "alertDialogLabel": "Alert",
-  "searchFieldLabel": "Search"
+  "searchFieldLabel": "Search",
+  "reorderItemToStart": "Move to the start",
+  "reorderItemToEnd": "Move to the end",
+  "reorderItemUp": "Move up",
+  "reorderItemDown": "Move down",
+  "reorderItemLeft": "Move to the left",
+  "reorderItemRight": "Move to the right",
+  "expandedIconTapHint": "Collapse",
+  "collapsedIconTapHint": "Expand",
+  "remainingTextFieldCharacterCountZero": "No characters remaining",
+  "remainingTextFieldCharacterCountOne": "1 character remaining",
+  "remainingTextFieldCharacterCountOther": "$remainingCount characters remaining",
+  "refreshIndicatorSemanticLabel": "Refresh"
 }

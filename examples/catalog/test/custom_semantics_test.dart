@@ -91,7 +91,8 @@ void main() {
   });
 }
 
-void expectAdjustable(SemanticsNode node, {
+void expectAdjustable(
+  SemanticsNode node, {
   bool hasIncreaseAction = true,
   bool hasDecreaseAction = true,
   String label = '',

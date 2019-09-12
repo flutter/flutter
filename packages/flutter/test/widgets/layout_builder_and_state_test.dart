@@ -15,7 +15,7 @@ class StatefulWrapper extends StatefulWidget {
   final Widget child;
 
   @override
-  StatefulWrapperState createState() => new StatefulWrapperState();
+  StatefulWrapperState createState() => StatefulWrapperState();
 }
 
 class StatefulWrapperState extends State<StatefulWrapper> {
@@ -50,14 +50,14 @@ class Wrapper extends StatelessWidget {
 void main() {
   testWidgets('Calling setState on a widget that moves into a LayoutBuilder in the same frame', (WidgetTester tester) async {
     StatefulWrapperState statefulWrapper;
-    final Widget inner = new Wrapper(
-      child: new StatefulWrapper(
-        key: new GlobalKey(),
-        child: new Container(),
+    final Widget inner = Wrapper(
+      child: StatefulWrapper(
+        key: GlobalKey(),
+        child: Container(),
       ),
     );
-    await tester.pumpWidget(new FlipWidget(
-      left: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+    await tester.pumpWidget(FlipWidget(
+      left: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         return inner;
       }),
       right: inner,

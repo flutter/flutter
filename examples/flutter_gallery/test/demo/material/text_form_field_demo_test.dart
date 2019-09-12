@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('validates name field correctly', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(home: const TextFormFieldDemo()));
+    await tester.pumpWidget(const MaterialApp(home: TextFormFieldDemo()));
 
     final Finder submitButton = find.widgetWithText(RaisedButton, 'SUBMIT');
     expect(submitButton, findsOneWidget);
@@ -16,8 +16,16 @@ void main() {
     final Finder nameField = find.widgetWithText(TextFormField, 'Name *');
     expect(nameField, findsOneWidget);
 
+    final Finder phoneNumberField = find.widgetWithText(TextFormField, 'Phone Number *');
+    expect(phoneNumberField, findsOneWidget);
+
     final Finder passwordField = find.widgetWithText(TextFormField, 'Password *');
     expect(passwordField, findsOneWidget);
+
+    // Verify the that the phone number's TextInputFormatter does what's expected.
+    await tester.enterText(phoneNumberField, '1234567890');
+    await tester.pumpAndSettle();
+    expect(find.text('(123) 456-7890'), findsOneWidget);
 
     await tester.enterText(nameField, '');
     await tester.pumpAndSettle();

@@ -6,19 +6,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class Item {
-  GlobalKey key1 = new GlobalKey();
-  GlobalKey key2 = new GlobalKey();
+  GlobalKey key1 = GlobalKey();
+  GlobalKey key2 = GlobalKey();
 
   @override
   String toString() => 'Item($key1, $key2)';
 }
-List<Item> items = <Item>[new Item(), new Item()];
+List<Item> items = <Item>[Item(), Item()];
 
 class StatefulLeaf extends StatefulWidget {
   const StatefulLeaf({ GlobalKey key }) : super(key: key);
 
   @override
-  StatefulLeafState createState() => new StatefulLeafState();
+  StatefulLeafState createState() => StatefulLeafState();
 }
 
 class StatefulLeafState extends State<StatefulLeaf> {
@@ -36,20 +36,20 @@ class KeyedWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return Container(
       key: key1,
-      child: new StatefulLeaf(
+      child: StatefulLeaf(
         key: key2,
-      )
+      ),
     );
   }
 }
 
 Widget builder() {
-  return new Column(
+  return Column(
     children: <Widget>[
-      new KeyedWrapper(items[1].key1, items[1].key2),
-      new KeyedWrapper(items[0].key1, items[0].key2),
+      KeyedWrapper(items[1].key1, items[1].key2),
+      KeyedWrapper(items[0].key1, items[0].key2),
     ],
   );
 }

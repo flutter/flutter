@@ -14,7 +14,7 @@ class CupertinoThumbPainter {
   CupertinoThumbPainter({
     this.color = CupertinoColors.white,
     this.shadowColor = const Color(0x2C000000),
-  }) : _shadowPaint = new BoxShadow(
+  }) : _shadowPaint = BoxShadow(
          color: shadowColor,
          blurRadius: 1.0,
        ).toPaint();
@@ -39,13 +39,13 @@ class CupertinoThumbPainter {
   /// Consider using [radius] and [extension] when deciding how large a
   /// rectangle to use for the thumb.
   void paint(Canvas canvas, Rect rect) {
-    final RRect rrect = new RRect.fromRectAndRadius(
+    final RRect rrect = RRect.fromRectAndRadius(
       rect,
-      new Radius.circular(rect.shortestSide / 2.0),
+      Radius.circular(rect.shortestSide / 2.0),
     );
 
     canvas.drawRRect(rrect, _shadowPaint);
     canvas.drawRRect(rrect.shift(const Offset(0.0, 3.0)), _shadowPaint);
-    canvas.drawRRect(rrect, new Paint()..color = color);
+    canvas.drawRRect(rrect, Paint()..color = color);
   }
 }

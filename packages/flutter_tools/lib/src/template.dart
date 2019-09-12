@@ -4,6 +4,7 @@
 
 import 'package:mustache/mustache.dart' as mustache;
 
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'cache.dart';
 import 'globals.dart';
@@ -53,22 +54,31 @@ class Template {
   factory Template.fromName(String name) {
     // All named templates are placed in the 'templates' directory
     final Directory templateDir = templateDirectoryInPackage(name);
-    return new Template(templateDir, templateDir);
+    return Template(templateDir, templateDir);
   }
 
   static const String templateExtension = '.tmpl';
   static const String copyTemplateExtension = '.copy.tmpl';
-  final Pattern _kTemplateLanguageVariant = new RegExp(r'(\w+)-(\w+)\.tmpl.*');
+  final Pattern _kTemplateLanguageVariant = RegExp(r'(\w+)-(\w+)\.tmpl.*');
 
   Map<String /* relative */, String /* absolute source */> _templateFilePaths;
 
+  /// Render the template into [directory].
+  ///
+  /// May throw a [ToolExit] if the directory is not writable.
   int render(
     Directory destination,
     Map<String, dynamic> context, {
     bool overwriteExisting = true,
     bool printStatusWhenWriting = true,
   }) {
-    destination.createSync(recursive: true);
+    try {
+      destination.createSync(recursive: true);
+    } on FileSystemException catch (err) {
+      printError(err.toString());
+      throwToolExit('Failed to flutter create at ${destination.path}.');
+      return 0;
+    }
     int fileCount = 0;
 
     /// Returns the resolved destination path corresponding to the specified
@@ -84,6 +94,11 @@ class Template {
         if (language != match.group(2))
           return null;
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
+      }
+      // Only build a web project if explicitly asked.
+      final bool web = context['web'];
+      if (relativeDestinationPath.contains('web') && !web) {
+        return null;
       }
       final String projectName = context['projectName'];
       final String androidIdentifier = context['androidIdentifier'];
@@ -107,6 +122,10 @@ class Template {
     }
 
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
+      final bool withRootModule = context['withRootModule'] ?? false;
+      if (!withRootModule && absoluteSourcePath.contains('flutter_root'))
+        return;
+
       final String finalDestinationPath = renderPath(relativeDestinationPath);
       if (finalDestinationPath == null)
         return;
@@ -150,7 +169,7 @@ class Template {
 
       if (sourceFile.path.endsWith(templateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
-        final String renderedContents = new mustache.Template(templateContents).renderString(context);
+        final String renderedContents = mustache.Template(templateContents).renderString(context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
 

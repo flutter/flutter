@@ -17,12 +17,11 @@ import 'src/base/logger.dart';
 import 'src/base/process.dart';
 import 'src/base/utils.dart';
 import 'src/context_runner.dart';
-import 'src/crash_reporting.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
+import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
-import 'src/usage.dart';
 import 'src/version.dart';
 
 /// Runs the Flutter tool with support for the specified list of [commands].
@@ -34,17 +33,18 @@ Future<int> run(
   bool verboseHelp = false,
   bool reportCrashes,
   String flutterVersion,
+  Map<Type, Generator> overrides,
 }) {
   reportCrashes ??= !isRunningOnBot;
 
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
-    args = new List<String>.from(args);
+    args = List<String>.from(args);
     args.removeWhere((String option) => option == '-v' || option == '--verbose');
   }
 
-  final FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp);
+  final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
   commands.forEach(runner.addCommand);
 
   return runInContext<int>(() async {
@@ -52,45 +52,51 @@ Future<int> run(
     final String systemLocale = await intl_standalone.findSystemLocale();
     intl.Intl.defaultLocale = intl.Intl.verifiedLocale(
       systemLocale, intl.NumberFormat.localeExists,
-      onFailure: (String _) => 'en_US'
+      onFailure: (String _) => 'en_US',
     );
 
-    try {
-      await runner.run(args);
-      await _exit(0);
-    } catch (error, stackTrace) {
-      String getVersion() => flutterVersion ?? FlutterVersion.instance.getVersionString();
-      return await _handleToolError(error, stackTrace, verbose, args, reportCrashes, getVersion);
-    }
-    return 0;
-  });
+    String getVersion() => flutterVersion ?? FlutterVersion.instance.getVersionString(redactUnknownBranches: true);
+    Object firstError;
+    StackTrace firstStackTrace;
+    return await runZoned<Future<int>>(() async {
+      try {
+        await runner.run(args);
+        return await _exit(0);
+      } catch (error, stackTrace) {
+        firstError = error;
+        firstStackTrace = stackTrace;
+        return await _handleToolError(
+            error, stackTrace, verbose, args, reportCrashes, getVersion);
+      }
+    }, onError: (Object error, StackTrace stackTrace) async {
+      // If sending a crash report throws an error into the zone, we don't want
+      // to re-try sending the crash report with *that* error. Rather, we want
+      // to send the original error that triggered the crash report.
+      final Object e = firstError ?? error;
+      final StackTrace s = firstStackTrace ?? stackTrace;
+      await _handleToolError(e, s, verbose, args, reportCrashes, getVersion);
+    });
+  }, overrides: overrides);
 }
 
 Future<int> _handleToolError(
-    dynamic error,
-    StackTrace stackTrace,
-    bool verbose,
-    List<String> args,
-    bool reportCrashes,
-    String getFlutterVersion(),
-    ) async {
+  dynamic error,
+  StackTrace stackTrace,
+  bool verbose,
+  List<String> args,
+  bool reportCrashes,
+  String getFlutterVersion(),
+) async {
   if (error is UsageException) {
-    stderr.writeln(error.message);
-    stderr.writeln();
-    stderr.writeln(
-        "Run 'flutter -h' (or 'flutter <command> -h') for available "
-            'flutter commands and options.'
-    );
+    printError('${error.message}\n');
+    printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
     // Argument error exit code.
     return _exit(64);
   } else if (error is ToolExit) {
     if (error.message != null)
-      stderr.writeln(error.message);
-    if (verbose) {
-      stderr.writeln();
-      stderr.writeln(stackTrace.toString());
-      stderr.writeln();
-    }
+      printError(error.message);
+    if (verbose)
+      printError('\n$stackTrace\n');
     return _exit(error.exitCode ?? 1);
   } else if (error is ProcessExit) {
     // We've caught an exit code.
@@ -109,37 +115,40 @@ Future<int> _handleToolError(
       stderr.writeln('$error');
       stderr.writeln(stackTrace.toString());
       return _exit(1);
+    }
+
+    // Report to both [Usage] and [CrashReportSender].
+    flutterUsage.sendException(error);
+    await CrashReportSender.instance.sendReport(
+      error: error,
+      stackTrace: stackTrace,
+      getFlutterVersion: getFlutterVersion,
+      command: args.join(' '),
+    );
+
+    if (error is String) {
+      stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
     } else {
-      flutterUsage.sendException(error, stackTrace);
+      stderr.writeln('Oops; flutter has exited unexpectedly.');
+    }
 
-      if (error is String)
-        stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
-      else
-        stderr.writeln('Oops; flutter has exited unexpectedly.');
-
-      await CrashReportSender.instance.sendReport(
-        error: error,
-        stackTrace: stackTrace,
-        getFlutterVersion: getFlutterVersion,
+    try {
+      final File file = await _createLocalCrashReport(args, error, stackTrace);
+      stderr.writeln(
+        'Crash report written to ${file.path};\n'
+            'please let us know at https://github.com/flutter/flutter/issues.',
       );
-      try {
-        final File file = await _createLocalCrashReport(args, error, stackTrace);
-        stderr.writeln(
-          'Crash report written to ${file.path};\n'
-              'please let us know at https://github.com/flutter/flutter/issues.',
-        );
-        return _exit(1);
-      } catch (error) {
-        stderr.writeln(
-          'Unable to generate crash report due to secondary error: $error\n'
-              'please let us know at https://github.com/flutter/flutter/issues.',
-        );
-        // Any exception throw here (including one thrown by `_exit()`) will
-        // get caught by our zone's `onError` handler. In order to avoid an
-        // infinite error loop, we throw an error that is recognized above
-        // and will trigger an immediate exit.
-        throw new ProcessExit(1, immediate: true);
-      }
+      return _exit(1);
+    } catch (error) {
+      stderr.writeln(
+        'Unable to generate crash report due to secondary error: $error\n'
+            'please let us know at https://github.com/flutter/flutter/issues.',
+      );
+      // Any exception throw here (including one thrown by `_exit()`) will
+      // get caught by our zone's `onError` handler. In order to avoid an
+      // infinite error loop, we throw an error that is recognized above
+      // and will trigger an immediate exit.
+      throw ProcessExit(1, immediate: true);
     }
   }
 }
@@ -156,7 +165,7 @@ FileSystem crashFileSystem = const LocalFileSystem();
 Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrace stackTrace) async {
   File crashFile = getUniqueFile(crashFileSystem.currentDirectory, 'flutter', 'log');
 
-  final StringBuffer buffer = new StringBuffer();
+  final StringBuffer buffer = StringBuffer();
 
   buffer.writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
 
@@ -171,12 +180,12 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrac
   buffer.writeln('```\n${await _doctorText()}```');
 
   try {
-    await crashFile.writeAsString(buffer.toString());
+    crashFile.writeAsStringSync(buffer.toString());
   } on FileSystemException catch (_) {
     // Fallback to the system temporary directory.
     crashFile = getUniqueFile(crashFileSystem.systemTempDirectory, 'flutter', 'log');
     try {
-      await crashFile.writeAsString(buffer.toString());
+      crashFile.writeAsStringSync(buffer.toString());
     } on FileSystemException catch (e) {
       printError('Could not write crash report to disk: $e');
       printError(buffer.toString());
@@ -188,7 +197,7 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrac
 
 Future<String> _doctorText() async {
   try {
-    final BufferLogger logger = new BufferLogger();
+    final BufferLogger logger = BufferLogger();
 
     await context.run<bool>(
       body: () => doctor.diagnose(verbose: true),
@@ -210,7 +219,7 @@ Future<int> _exit(int code) async {
   // Send any last analytics calls that are in progress without overly delaying
   // the tool's exit (we wait a maximum of 250ms).
   if (flutterUsage.enabled) {
-    final Stopwatch stopwatch = new Stopwatch()..start();
+    final Stopwatch stopwatch = Stopwatch()..start();
     await flutterUsage.ensureAnalyticsSent();
     printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
   }
@@ -218,7 +227,7 @@ Future<int> _exit(int code) async {
   // Run shutdown hooks before flushing logs
   await runShutdownHooks();
 
-  final Completer<Null> completer = new Completer<Null>();
+  final Completer<void> completer = Completer<void>();
 
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {

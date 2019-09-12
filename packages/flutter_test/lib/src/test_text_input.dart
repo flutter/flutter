@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 
 import 'widget_tester.dart';
@@ -35,6 +36,9 @@ class TestTextInput {
   /// first be requested, e.g. using [WidgetTester.showKeyboard].
   final VoidCallback onCleared;
 
+  /// The messenger which sends the bytes for this channel, not null.
+  BinaryMessenger get _binaryMessenger => ServicesBinding.instance.defaultBinaryMessenger;
+
   /// Installs this object as a mock handler for [SystemChannels.textInput].
   void register() {
     SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
@@ -56,6 +60,9 @@ class TestTextInput {
   /// Use [register] and [unregister] methods to control this value.
   bool get isRegistered => _isRegistered;
   bool _isRegistered = false;
+
+  /// Whether there are any active clients listening to text input.
+  bool get hasAnyClients => _client > 0;
 
   int _client = 0;
 
@@ -103,11 +110,11 @@ class TestTextInput {
     // Not using the `expect` function because in the case of a FlutterDriver
     // test this code does not run in a package:test test zone.
     if (_client == 0)
-      throw new TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
-    BinaryMessages.handlePlatformMessage(
+      throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
+    _binaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
-        new MethodCall(
+        MethodCall(
           'TextInputClient.updateEditingState',
           <dynamic>[_client, value.toJSON()],
         ),
@@ -118,7 +125,7 @@ class TestTextInput {
 
   /// Simulates the user typing the given text.
   void enterText(String text) {
-    updateEditingValue(new TextEditingValue(
+    updateEditingValue(TextEditingValue(
       text: text,
     ));
   }
@@ -126,21 +133,42 @@ class TestTextInput {
   /// Simulates the user pressing one of the [TextInputAction] buttons.
   /// Does not check that the [TextInputAction] performed is an acceptable one
   /// based on the `inputAction` [setClientArgs].
-  void receiveAction(TextInputAction action) {
-    // Not using the `expect` function because in the case of a FlutterDriver
-    // test this code does not run in a package:test test zone.
-    if (_client == 0)
-      throw new TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
-    BinaryMessages.handlePlatformMessage(
-      SystemChannels.textInput.name,
-      SystemChannels.textInput.codec.encodeMethodCall(
-        new MethodCall(
-          'TextInputClient.performAction',
-          <dynamic>[_client, action.toString()],
+  Future<void> receiveAction(TextInputAction action) async {
+    return TestAsyncUtils.guard(() {
+      // Not using the `expect` function because in the case of a FlutterDriver
+      // test this code does not run in a package:test test zone.
+      if (_client == 0) {
+        throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
+      }
+
+      final Completer<void> completer = Completer<void>();
+
+      _binaryMessenger.handlePlatformMessage(
+        SystemChannels.textInput.name,
+        SystemChannels.textInput.codec.encodeMethodCall(
+          MethodCall(
+            'TextInputClient.performAction',
+            <dynamic>[_client, action.toString()],
+          ),
         ),
-      ),
-      (ByteData data) { /* response from framework is discarded */ },
-    );
+        (ByteData data) {
+          try {
+            // Decoding throws a PlatformException if the data represents an
+            // error, and that's all we care about here.
+            SystemChannels.textInput.codec.decodeEnvelope(data);
+
+            // No error was found. Complete without issue.
+            completer.complete();
+          } catch (error) {
+            // An exception occurred as a result of receiveAction()'ing. Report
+            // that error.
+            completer.completeError(error);
+          }
+        },
+      );
+
+      return completer.future;
+    });
   }
 
   /// Simulates the user hiding the onscreen keyboard.

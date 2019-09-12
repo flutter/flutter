@@ -21,6 +21,6 @@ Future<void> main(FutureOr<void> testMain()) async {
 
 void runTest() {
   testWidgets('custom exception reporter', (WidgetTester tester) {
-    throw new StateError('foo');
+    throw StateError('foo');
   });
 }

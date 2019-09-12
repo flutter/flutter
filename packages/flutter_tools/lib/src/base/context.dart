@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 ///
 /// Generators are allowed to return `null`, in which case the context will
 /// store the `null` value as the value for that type.
-typedef dynamic Generator();
+typedef Generator = dynamic Function();
 
 /// An exception thrown by [AppContext] when you try to get a [Type] value from
 /// the context, and the instantiation of the value results in a dependency
@@ -33,7 +33,7 @@ class ContextDependencyCycleException implements Exception {
 /// context will not have any values associated with it.
 ///
 /// This is guaranteed to never return `null`.
-AppContext get context => Zone.current[_Key.key] ?? AppContext._root;
+AppContext get context => Zone.current[_Key.key] as AppContext ?? AppContext._root;
 
 /// A lookup table (mapping types to values) and an implied scope, in which
 /// code is run.
@@ -43,7 +43,7 @@ AppContext get context => Zone.current[_Key.key] ?? AppContext._root;
 /// scope) is created.
 ///
 /// Child contexts are created and run using zones. To read more about how
-/// zones work, see https://www.dartlang.org/articles/libraries/zones.
+/// zones work, see https://api.dart.dev/stable/dart-async/Zone-class.html.
 class AppContext {
   AppContext._(
     this._parent,
@@ -61,7 +61,7 @@ class AppContext {
   List<Type> _reentrantChecks;
 
   /// Bootstrap context.
-  static final AppContext _root = new AppContext._(null, 'ROOT');
+  static final AppContext _root = AppContext._(null, 'ROOT');
 
   dynamic _boxNull(dynamic value) => value ?? _BoxedNull.instance;
 
@@ -90,8 +90,8 @@ class AppContext {
       final int index = _reentrantChecks.indexOf(type);
       if (index >= 0) {
         // We're already in the process of trying to generate this type.
-        throw new ContextDependencyCycleException._(
-            new UnmodifiableListView<Type>(_reentrantChecks.sublist(index)));
+        throw ContextDependencyCycleException._(
+            UnmodifiableListView<Type>(_reentrantChecks.sublist(index)));
       }
 
       _reentrantChecks.add(type);
@@ -107,7 +107,18 @@ class AppContext {
 
   /// Gets the value associated with the specified [type], or `null` if no
   /// such value has been associated.
-  dynamic operator [](Type type) {
+  T get<T>() {
+    dynamic value = _generateIfNecessary(T, _overrides);
+    if (value == null && _parent != null) {
+      value = _parent.get<T>();
+    }
+    return _unboxNull(value ?? _generateIfNecessary(T, _fallbacks)) as T;
+  }
+
+  /// Gets the value associated with the specified [type], or `null` if no
+  /// such value has been associated.
+  @Deprecated('use get<T> instead for type safety.')
+  Object operator [](Type type) {
     dynamic value = _generateIfNecessary(type, _overrides);
     if (value == null && _parent != null)
       value = _parent[type];
@@ -131,22 +142,24 @@ class AppContext {
     String name,
     Map<Type, Generator> overrides,
     Map<Type, Generator> fallbacks,
+    ZoneSpecification zoneSpecification,
   }) async {
-    final AppContext child = new AppContext._(
+    final AppContext child = AppContext._(
       this,
       name,
-      new Map<Type, Generator>.unmodifiable(overrides ?? const <Type, Generator>{}),
-      new Map<Type, Generator>.unmodifiable(fallbacks ?? const <Type, Generator>{}),
+      Map<Type, Generator>.unmodifiable(overrides ?? const <Type, Generator>{}),
+      Map<Type, Generator>.unmodifiable(fallbacks ?? const <Type, Generator>{}),
     );
     return await runZoned<Future<V>>(
       () async => await body(),
       zoneValues: <_Key, AppContext>{_Key.key: child},
+      zoneSpecification: zoneSpecification,
     );
   }
 
   @override
   String toString() {
-    final StringBuffer buf = new StringBuffer();
+    final StringBuffer buf = StringBuffer();
     String indent = '';
     AppContext ctx = this;
     while (ctx != null) {
@@ -170,7 +183,7 @@ class AppContext {
 class _Key {
   const _Key();
 
-  static const _Key key = const _Key();
+  static const _Key key = _Key();
 
   @override
   String toString() => 'context';
@@ -180,5 +193,5 @@ class _Key {
 class _BoxedNull {
   const _BoxedNull();
 
-  static const _BoxedNull instance = const _BoxedNull();
+  static const _BoxedNull instance = _BoxedNull();
 }

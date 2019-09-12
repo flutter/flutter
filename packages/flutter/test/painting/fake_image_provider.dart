@@ -22,15 +22,15 @@ class FakeImageProvider extends ImageProvider<FakeImageProvider> {
 
   @override
   Future<FakeImageProvider> obtainKey(ImageConfiguration configuration) {
-    return new SynchronousFuture<FakeImageProvider>(this);
+    return SynchronousFuture<FakeImageProvider>(this);
   }
 
   @override
   ImageStreamCompleter load(FakeImageProvider key) {
     assert(key == this);
-    return new MultiFrameImageStreamCompleter(
-      codec: new SynchronousFuture<ui.Codec>(_codec),
-      scale: scale
+    return MultiFrameImageStreamCompleter(
+      codec: SynchronousFuture<ui.Codec>(_codec),
+      scale: scale,
     );
   }
 }

@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('AnimatedPadding.debugFillProperties', (WidgetTester tester) async {
-    final AnimatedPadding padding = new AnimatedPadding(
+    final AnimatedPadding padding = AnimatedPadding(
       padding: const EdgeInsets.all(7.0),
       curve: Curves.ease,
       duration: const Duration(milliseconds: 200),
@@ -18,15 +18,15 @@ void main() {
   });
 
   testWidgets('AnimatedPadding padding visual-to-directional animation', (WidgetTester tester) async {
-    final Key target = new UniqueKey();
+    final Key target = UniqueKey();
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new AnimatedPadding(
+        child: AnimatedPadding(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.only(right: 50.0),
-          child: new SizedBox.expand(key: target),
+          child: SizedBox.expand(key: target),
         ),
       ),
     );
@@ -35,12 +35,12 @@ void main() {
     expect(tester.getTopRight(find.byKey(target)), const Offset(750.0, 0.0));
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new AnimatedPadding(
+        child: AnimatedPadding(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsetsDirectional.only(start: 100.0),
-          child: new SizedBox.expand(key: target),
+          child: SizedBox.expand(key: target),
         ),
       ),
     );

@@ -8,38 +8,67 @@ import '../base/context.dart';
 import '../globals.dart';
 import 'common.dart';
 import 'io.dart';
+import 'platform.dart';
 
 const int kNetworkProblemExitCode = 50;
 
-typedef HttpClient HttpClientFactory();
+typedef HttpClientFactory = HttpClient Function();
 
 /// Download a file from the given URL and return the bytes.
-Future<List<int>> fetchUrl(Uri url) async {
+Future<List<int>> fetchUrl(Uri url, {int maxAttempts}) async {
   int attempts = 0;
-  int duration = 1;
+  int durationSeconds = 1;
   while (true) {
     attempts += 1;
     final List<int> result = await _attempt(url);
     if (result != null)
       return result;
-    printStatus('Download failed -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
-    await new Future<Null>.delayed(new Duration(seconds: duration));
-    if (duration < 64)
-      duration *= 2;
+    if (maxAttempts != null && attempts >= maxAttempts) {
+      printStatus('Download failed -- retry $attempts');
+      return null;
+    }
+    printStatus('Download failed -- attempting retry $attempts in '
+        '$durationSeconds second${ durationSeconds == 1 ? "" : "s"}...');
+    await Future<void>.delayed(Duration(seconds: durationSeconds));
+    if (durationSeconds < 64)
+      durationSeconds *= 2;
   }
 }
 
-Future<List<int>> _attempt(Uri url) async {
+/// Check if the given URL points to a valid endpoint.
+Future<bool> doesRemoteFileExist(Uri url) async =>
+  (await _attempt(url, onlyHeaders: true)) != null;
+
+Future<List<int>> _attempt(Uri url, { bool onlyHeaders = false }) async {
   printTrace('Downloading: $url');
   HttpClient httpClient;
-  if (context[HttpClientFactory] != null) {
-    httpClient = context[HttpClientFactory]();
+  if (context.get<HttpClientFactory>() != null) {
+    httpClient = context.get<HttpClientFactory>()();
   } else {
-    httpClient = new HttpClient();
+    httpClient = HttpClient();
   }
   HttpClientRequest request;
+  HttpClientResponse response;
   try {
-    request = await httpClient.getUrl(url);
+    if (onlyHeaders) {
+      request = await httpClient.headUrl(url);
+    } else {
+      request = await httpClient.getUrl(url);
+    }
+    response = await request.close();
+  } on ArgumentError catch (error) {
+    final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
+    if (overrideUrl != null && url.toString().contains(overrideUrl)) {
+      printError(error.toString());
+      throwToolExit(
+        'The value of FLUTTER_STORAGE_BASE_URL ($overrideUrl) could not be '
+        'parsed as a valid url. Please see https://flutter.dev/community/china '
+        'for an example of how to use it.\n'
+        'Full URL: $url',
+        exitCode: kNetworkProblemExitCode,);
+    }
+    printError(error.toString());
+    rethrow;
   } on HandshakeException catch (error) {
     printTrace(error.toString());
     throwToolExit(
@@ -51,8 +80,17 @@ Future<List<int>> _attempt(Uri url) async {
   } on SocketException catch (error) {
     printTrace('Download error: $error');
     return null;
+  } on HttpException catch (error) {
+    printTrace('Download error: $error');
+    return null;
   }
-  final HttpClientResponse response = await request.close();
+  assert(response != null);
+
+  // If we're making a HEAD request, we're only checking to see if the URL is
+  // valid.
+  if (onlyHeaders) {
+    return (response.statusCode == 200) ? <int>[] : null;
+  }
   if (response.statusCode != 200) {
     if (response.statusCode > 0 && response.statusCode < 500) {
       throwToolExit(
@@ -68,7 +106,7 @@ Future<List<int>> _attempt(Uri url) async {
   }
   printTrace('Received response from server, collecting bytes...');
   try {
-    final BytesBuilder responseBody = new BytesBuilder(copy: false);
+    final BytesBuilder responseBody = BytesBuilder(copy: false);
     await response.forEach(responseBody.add);
     return responseBody.takeBytes();
   } on IOException catch (error) {

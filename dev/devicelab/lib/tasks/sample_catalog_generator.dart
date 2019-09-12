@@ -18,7 +18,7 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
   final String deviceId = device.deviceId;
 
   final Directory catalogDirectory = dir('${flutterDirectory.path}/examples/catalog');
-  await inDirectory(catalogDirectory, () async {
+  await inDirectory<void>(catalogDirectory, () async {
     await flutter('packages', options: <String>['get']);
 
     final bool isIosDevice = deviceOperatingSystem == DeviceOperatingSystem.ios;
@@ -39,10 +39,10 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
     await saveCatalogScreenshots(
       directory: dir('${flutterDirectory.path}/examples/catalog/.generated'),
       commit: commit,
-      token: authorizationToken,
+      token: authorizationToken, // TODO(fujino): workaround auth token for local runs
       prefix: isIosDevice ? 'ios_' : '',
     );
   });
 
-  return new TaskResult.success(null);
+  return TaskResult.success(null);
 }

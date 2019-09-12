@@ -12,7 +12,7 @@ class _GridPaperPainter extends CustomPainter {
     this.color,
     this.interval,
     this.divisions,
-    this.subdivisions
+    this.subdivisions,
   });
 
   final Color color;
@@ -22,16 +22,16 @@ class _GridPaperPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint linePaint = new Paint()
+    final Paint linePaint = Paint()
       ..color = color;
     final double allDivisions = (divisions * subdivisions).toDouble();
     for (double x = 0.0; x <= size.width; x += interval / allDivisions) {
       linePaint.strokeWidth = (x % interval == 0.0) ? 1.0 : (x % (interval / subdivisions) == 0.0) ? 0.5 : 0.25;
-      canvas.drawLine(new Offset(x, 0.0), new Offset(x, size.height), linePaint);
+      canvas.drawLine(Offset(x, 0.0), Offset(x, size.height), linePaint);
     }
     for (double y = 0.0; y <= size.height; y += interval / allDivisions) {
       linePaint.strokeWidth = (y % interval == 0.0) ? 1.0 : (y % (interval / subdivisions) == 0.0) ? 0.5 : 0.25;
-      canvas.drawLine(new Offset(0.0, y), new Offset(size.width, y), linePaint);
+      canvas.drawLine(Offset(0.0, y), Offset(size.width, y), linePaint);
     }
   }
 
@@ -107,8 +107,8 @@ class GridPaper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new CustomPaint(
-      foregroundPainter: new _GridPaperPainter(
+    return CustomPaint(
+      foregroundPainter: _GridPaperPainter(
         color: color,
         interval: interval,
         divisions: divisions,

@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:test/test.dart';
+@TestOn('!chrome')
 
-enum _TestEnum {
-  a, b, c, d, e, f, g, h,
-}
+import 'package:flutter/foundation.dart';
+import '../flutter_test_alternative.dart';
+
+enum _TestEnum { a, b, c, d, e, f, g, h, }
 
 void main() {
   test('BitField control test', () {
-    final BitField<_TestEnum> field = new BitField<_TestEnum>(8);
+    final BitField<_TestEnum> field = BitField<_TestEnum>(8);
 
     expect(field[_TestEnum.d], isFalse);
 
@@ -42,11 +42,11 @@ void main() {
   });
 
   test('BitField.filed control test', () {
-    final BitField<_TestEnum> field1 = new BitField<_TestEnum>.filled(8, true);
+    final BitField<_TestEnum> field1 = BitField<_TestEnum>.filled(8, true);
 
     expect(field1[_TestEnum.d], isTrue);
 
-    final BitField<_TestEnum> field2 = new BitField<_TestEnum>.filled(8, false);
+    final BitField<_TestEnum> field2 = BitField<_TestEnum>.filled(8, false);
 
     expect(field2[_TestEnum.d], isFalse);
   });

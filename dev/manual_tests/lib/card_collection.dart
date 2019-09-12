@@ -9,31 +9,31 @@ import 'package:flutter/rendering.dart' show debugDumpRenderTree;
 
 class CardModel {
   CardModel(this.value, this.height) {
-    textController = new TextEditingController(text: 'Item $value');
+    textController = TextEditingController(text: 'Item $value');
   }
   int value;
   double height;
   int get color => ((value % 9) + 1) * 100;
   TextEditingController textController;
-  Key get key => new ObjectKey(this);
+  Key get key => ObjectKey(this);
 }
 
 class CardCollection extends StatefulWidget {
   @override
-  CardCollectionState createState() => new CardCollectionState();
+  CardCollectionState createState() => CardCollectionState();
 }
 
 class CardCollectionState extends State<CardCollection> {
 
   static const TextStyle cardLabelStyle =
-    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
+    TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   // TODO(hansmuller): need a local image asset
   static const String _sunshineURL = 'http://www.walltor.com/images/wallpaper/good-morning-sunshine-58540.jpg';
 
   static const double kCardMargins = 8.0;
   static const double kFixedCardHeight = 100.0;
-  static const List<double> _cardHeights = const <double>[
+  static const List<double> _cardHeights = <double>[
     48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
     48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
     48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
@@ -51,27 +51,27 @@ class CardCollectionState extends State<CardCollection> {
   void _updateCardSizes() {
     if (_fixedSizeCards)
       return;
-    _cardModels = new List<CardModel>.generate(
+    _cardModels = List<CardModel>.generate(
       _cardModels.length,
       (int i) {
         _cardModels[i].height = _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i];
         return _cardModels[i];
-      }
+      },
     );
   }
 
   void _initVariableSizedCardModels() {
-    _cardModels = new List<CardModel>.generate(
+    _cardModels = List<CardModel>.generate(
       _cardHeights.length,
-      (int i) => new CardModel(i, _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i])
+      (int i) => CardModel(i, _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i]),
     );
   }
 
   void _initFixedSizedCardModels() {
     const int cardCount = 27;
-    _cardModels = new List<CardModel>.generate(
+    _cardModels = List<CardModel>.generate(
       cardCount,
-      (int i) => new CardModel(i, kFixedCardHeight),
+      (int i) => CardModel(i, kFixedCardHeight),
     );
   }
 
@@ -97,12 +97,12 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   Widget _buildDrawer() {
-    return new Drawer(
-      child: new IconTheme(
+    return Drawer(
+      child: IconTheme(
         data: const IconThemeData(color: Colors.black),
-        child: new ListView(
+        child: ListView(
           children: <Widget>[
-            const DrawerHeader(child: const Center(child: const Text('Options'))),
+            const DrawerHeader(child: Center(child: Text('Options'))),
             buildDrawerCheckbox('Make card labels editable', _editable, _toggleEditable),
             buildDrawerCheckbox('Fixed size cards', _fixedSizeCards, _toggleFixedSizeCards),
             buildDrawerCheckbox('Let the sun shine', _sunshine, _toggleSunshine),
@@ -121,7 +121,7 @@ class CardCollectionState extends State<CardCollection> {
             buildFontRadioItem('Center-align text', TextAlign.center, _textAlign, _changeTextAlign, icon: Icons.format_align_center, enabled: !_editable),
             buildFontRadioItem('Right-align text', TextAlign.right, _textAlign, _changeTextAlign, icon: Icons.format_align_right, enabled: !_editable),
             const Divider(),
-            new ListTile(
+            ListTile(
               leading: const Icon(Icons.dvr),
               onTap: () { debugDumpApp(); debugDumpRenderTree(); },
               title: const Text('Dump App to Console'),
@@ -182,10 +182,10 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   Widget buildDrawerCheckbox(String label, bool value, void callback(), { bool enabled = true }) {
-    return new ListTile(
+    return ListTile(
       onTap: enabled ? callback : null,
-      title: new Text(label),
-      trailing: new Checkbox(
+      title: Text(label),
+      trailing: Checkbox(
         value: value,
         onChanged: enabled ? (_) { callback(); } : null,
       ),
@@ -193,11 +193,11 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   Widget buildDrawerColorRadioItem(String label, MaterialColor itemValue, MaterialColor currentValue, ValueChanged<MaterialColor> onChanged, { IconData icon, bool enabled = true }) {
-    return new ListTile(
-      leading: new Icon(icon),
-      title: new Text(label),
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(label),
       onTap: enabled ? () { onChanged(itemValue); } : null,
-      trailing: new Radio<MaterialColor>(
+      trailing: Radio<MaterialColor>(
         value: itemValue,
         groupValue: currentValue,
         onChanged: enabled ? onChanged : null,
@@ -206,11 +206,11 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection> onChanged, { IconData icon, bool enabled = true }) {
-    return new ListTile(
-      leading: new Icon(icon),
-      title: new Text(label),
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(label),
       onTap: enabled ? () { onChanged(itemValue); } : null,
-      trailing: new Radio<DismissDirection>(
+      trailing: Radio<DismissDirection>(
         value: itemValue,
         groupValue: currentValue,
         onChanged: enabled ? onChanged : null,
@@ -219,11 +219,11 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   Widget buildFontRadioItem(String label, TextAlign itemValue, TextAlign currentValue, ValueChanged<TextAlign> onChanged, { IconData icon, bool enabled = true }) {
-    return new ListTile(
-      leading: new Icon(icon),
-      title: new Text(label),
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(label),
       onTap: enabled ? () { onChanged(itemValue); } : null,
-      trailing: new Radio<TextAlign>(
+      trailing: Radio<TextAlign>(
         value: itemValue,
         groupValue: currentValue,
         onChanged: enabled ? onChanged : null,
@@ -232,34 +232,34 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   Widget _buildAppBar(BuildContext context) {
-    return new AppBar(
+    return AppBar(
       actions: <Widget>[
-        new Text(_dismissDirectionText(_dismissDirection))
+        Text(_dismissDirectionText(_dismissDirection)),
       ],
-      flexibleSpace: new Container(
+      flexibleSpace: Container(
         padding: const EdgeInsets.only(left: 72.0),
         height: 128.0,
         alignment: const Alignment(-1.0, 0.5),
-        child: new Text('Swipe Away: ${_cardModels.length}', style: Theme.of(context).primaryTextTheme.title),
+        child: Text('Swipe Away: ${_cardModels.length}', style: Theme.of(context).primaryTextTheme.title),
       ),
     );
   }
 
   Widget _buildCard(BuildContext context, int index) {
     final CardModel cardModel = _cardModels[index];
-    final Widget card = new Dismissible(
-      key: new ObjectKey(cardModel),
+    final Widget card = Dismissible(
+      key: ObjectKey(cardModel),
       direction: _dismissDirection,
       onDismissed: (DismissDirection direction) { dismissCard(cardModel); },
-      child: new Card(
+      child: Card(
         color: _primaryColor[cardModel.color],
-        child: new Container(
+        child: Container(
           height: cardModel.height,
           padding: const EdgeInsets.all(kCardMargins),
           child: _editable ?
-            new Center(
-              child: new TextField(
-                key: new GlobalObjectKey(cardModel),
+            Center(
+              child: TextField(
+                key: GlobalObjectKey(cardModel),
                 controller: cardModel.textController,
               ),
             )
@@ -267,11 +267,11 @@ class CardCollectionState extends State<CardCollection> {
               style: cardLabelStyle.copyWith(
                 fontSize: _varyFontSizes ? 5.0 + index : null
               ),
-              child: new Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  new Text(cardModel.textController.text, textAlign: _textAlign),
+                  Text(cardModel.textController.text, textAlign: _textAlign),
                 ],
               ),
             ),
@@ -297,12 +297,12 @@ class CardCollectionState extends State<CardCollection> {
     // TODO(abarth): This icon is wrong in RTL.
     Widget leftArrowIcon = const Icon(Icons.arrow_back, size: 36.0);
     if (_dismissDirection == DismissDirection.startToEnd)
-      leftArrowIcon = new Opacity(opacity: 0.1, child: leftArrowIcon);
+      leftArrowIcon = Opacity(opacity: 0.1, child: leftArrowIcon);
 
       // TODO(abarth): This icon is wrong in RTL.
     Widget rightArrowIcon = const Icon(Icons.arrow_forward, size: 36.0);
     if (_dismissDirection == DismissDirection.endToStart)
-      rightArrowIcon = new Opacity(opacity: 0.1, child: rightArrowIcon);
+      rightArrowIcon = Opacity(opacity: 0.1, child: rightArrowIcon);
 
     final ThemeData theme = Theme.of(context);
     final TextStyle backgroundTextStyle = theme.primaryTextTheme.title;
@@ -312,18 +312,18 @@ class CardCollectionState extends State<CardCollection> {
     // size of the background,card Stack will be based only on the card. The
     // Viewport ensures that when the card's resize animation occurs, the
     // background (text and icons) will just be clipped, not resized.
-    final Widget background = new Positioned.fill(
-      child: new Container(
+    final Widget background = Positioned.fill(
+      child: Container(
         margin: const EdgeInsets.all(4.0),
-        child: new SingleChildScrollView(
-          child: new Container(
+        child: SingleChildScrollView(
+          child: Container(
             height: cardModel.height,
             color: theme.primaryColor,
-            child: new Row(
+            child: Row(
               children: <Widget>[
                 leftArrowIcon,
-                new Expanded(
-                  child: new Text(backgroundMessage,
+                Expanded(
+                  child: Text(backgroundMessage,
                     style: backgroundTextStyle,
                     textAlign: TextAlign.center,
                   ),
@@ -336,10 +336,10 @@ class CardCollectionState extends State<CardCollection> {
       ),
     );
 
-    return new IconTheme(
+    return IconTheme(
       key: cardModel.key,
       data: const IconThemeData(color: Colors.white),
-      child: new Stack(children: <Widget>[background, card]),
+      child: Stack(children: <Widget>[background, card]),
     );
   }
 
@@ -347,40 +347,40 @@ class CardCollectionState extends State<CardCollection> {
     return const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: const <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
-        stops: const <double>[0.1, 0.35],
+        colors: <Color>[Color(0x00FFFFFF), Color(0xFFFFFFFF)],
+        stops: <double>[0.1, 0.35],
     )
     .createShader(bounds);
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget cardCollection = new ListView.builder(
+    Widget cardCollection = ListView.builder(
       itemExtent: _fixedSizeCards ? kFixedCardHeight : null,
       itemCount: _cardModels.length,
       itemBuilder: _buildCard,
     );
 
     if (_sunshine) {
-      cardCollection = new Stack(
+      cardCollection = Stack(
         children: <Widget>[
-          new Column(children: <Widget>[new Image.network(_sunshineURL)]),
-          new ShaderMask(child: cardCollection, shaderCallback: _createShader),
+          Column(children: <Widget>[Image.network(_sunshineURL)]),
+          ShaderMask(child: cardCollection, shaderCallback: _createShader),
         ],
       );
     }
 
-    final Widget body = new Container(
+    final Widget body = Container(
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
       color: _primaryColor.shade50,
       child: cardCollection,
     );
 
-    return new Theme(
-      data: new ThemeData(
+    return Theme(
+      data: ThemeData(
         primarySwatch: _primaryColor,
       ),
-      child: new Scaffold(
+      child: Scaffold(
         appBar: _buildAppBar(context),
         drawer: _buildDrawer(),
         body: body,
@@ -390,8 +390,8 @@ class CardCollectionState extends State<CardCollection> {
 }
 
 void main() {
-  runApp(new MaterialApp(
+  runApp(MaterialApp(
     title: 'Cards',
-    home: new CardCollection(),
+    home: CardCollection(),
   ));
 }

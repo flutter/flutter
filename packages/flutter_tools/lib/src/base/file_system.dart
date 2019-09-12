@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:file/record_replay.dart';
+import 'package:meta/meta.dart';
 
 import 'common.dart' show throwToolExit;
 import 'context.dart';
@@ -16,13 +17,13 @@ export 'package:file/file.dart';
 export 'package:file/local.dart';
 
 const String _kRecordingType = 'file';
-const FileSystem _kLocalFs = const LocalFileSystem();
+const FileSystem _kLocalFs = LocalFileSystem();
 
 /// Currently active implementation of the file system.
 ///
 /// By default it uses local disk-based implementation. Override this in tests
 /// with [MemoryFileSystem].
-FileSystem get fs => context[FileSystem] ?? _kLocalFs;
+FileSystem get fs => context.get<FileSystem>() ?? _kLocalFs;
 
 /// Gets a [FileSystem] that will record file system activity to the specified
 /// base recording [location].
@@ -32,12 +33,10 @@ FileSystem get fs => context[FileSystem] ?? _kLocalFs;
 /// directory as long as there is no collision with the `"file"` subdirectory.
 RecordingFileSystem getRecordingFileSystem(String location) {
   final Directory dir = getRecordingSink(location, _kRecordingType);
-  final RecordingFileSystem fileSystem = new RecordingFileSystem(
+  final RecordingFileSystem fileSystem = RecordingFileSystem(
       delegate: _kLocalFs, destination: dir);
   addShutdownHook(() async {
-    await fileSystem.recording.flush(
-      pendingResultTimeout: const Duration(seconds: 5),
-    );
+    await fileSystem.recording.flush();
   }, ShutdownStage.SERIALIZE_RECORDING);
   return fileSystem;
 }
@@ -50,7 +49,7 @@ RecordingFileSystem getRecordingFileSystem(String location) {
 /// [getRecordingFileSystem]), or a [ToolExit] will be thrown.
 ReplayFileSystem getReplayFileSystem(String location) {
   final Directory dir = getReplaySource(location, _kRecordingType);
-  return new ReplayFileSystem(recording: dir);
+  return ReplayFileSystem(recording: dir);
 }
 
 /// Create the ancestor directories of a file path if they do not already exist.
@@ -65,13 +64,20 @@ void ensureDirectoryExists(String filePath) {
   }
 }
 
-/// Recursively copies `srcDir` to `destDir`, invoking [onFileCopied] if
-/// specified for each source/destination file pair.
+/// Creates `destDir` if needed, then recursively copies `srcDir` to `destDir`,
+/// invoking [onFileCopied], if specified, for each source/destination file pair.
 ///
-/// Creates `destDir` if needed.
-void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(File srcFile, File destFile)]) {
+/// Skips files if [shouldCopyFile] returns `false`.
+void copyDirectorySync(
+  Directory srcDir,
+  Directory destDir,
+  {
+    bool shouldCopyFile(File srcFile, File destFile),
+    void onFileCopied(File srcFile, File destFile),
+  }
+) {
   if (!srcDir.existsSync())
-    throw new Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
+    throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
 
   if (!destDir.existsSync())
     destDir.createSync(recursive: true);
@@ -80,13 +86,20 @@ void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(F
     final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
     if (entity is File) {
       final File newFile = destDir.fileSystem.file(newPath);
+      if (shouldCopyFile != null && !shouldCopyFile(entity, newFile)) {
+        continue;
+      }
       newFile.writeAsBytesSync(entity.readAsBytesSync());
       onFileCopied?.call(entity, newFile);
     } else if (entity is Directory) {
       copyDirectorySync(
-        entity, destDir.fileSystem.directory(newPath));
+        entity,
+        destDir.fileSystem.directory(newPath),
+        shouldCopyFile: shouldCopyFile,
+        onFileCopied: onFileCopied,
+      );
     } else {
-      throw new Exception('${entity.path} is neither File nor Directory');
+      throw Exception('${entity.path} is neither File nor Directory');
     }
   }
 }
@@ -104,15 +117,15 @@ void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(F
 Directory getRecordingSink(String dirname, String basename) {
   final String location = _kLocalFs.path.join(dirname, basename);
   switch (_kLocalFs.typeSync(location, followLinks: false)) {
-    case FileSystemEntityType.FILE: // ignore: deprecated_member_use
-    case FileSystemEntityType.LINK: // ignore: deprecated_member_use
+    case FileSystemEntityType.file:
+    case FileSystemEntityType.link:
       throwToolExit('Invalid record-to location: $dirname ("$basename" exists as non-directory)');
       break;
-    case FileSystemEntityType.DIRECTORY: // ignore: deprecated_member_use
+    case FileSystemEntityType.directory:
       if (_kLocalFs.directory(location).listSync(followLinks: false).isNotEmpty)
         throwToolExit('Invalid record-to location: $dirname ("$basename" is not empty)');
       break;
-    case FileSystemEntityType.NOT_FOUND: // ignore: deprecated_member_use
+    case FileSystemEntityType.notFound:
       _kLocalFs.directory(location).createSync(recursive: true);
   }
   return _kLocalFs.directory(location);
@@ -145,3 +158,26 @@ String canonicalizePath(String path) => fs.path.normalize(fs.path.absolute(path)
 /// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
 /// path unchanged.
 String escapePath(String path) => platform.isWindows ? path.replaceAll('\\', '\\\\') : path;
+
+/// Returns true if the file system [entity] has not been modified since the
+/// latest modification to [referenceFile].
+///
+/// Returns true, if [entity] does not exist.
+///
+/// Returns false, if [entity] exists, but [referenceFile] does not.
+bool isOlderThanReference({ @required FileSystemEntity entity, @required File referenceFile }) {
+  if (!entity.existsSync())
+    return true;
+  return referenceFile.existsSync()
+      && referenceFile.lastModifiedSync().isAfter(entity.statSync().modified);
+}
+
+/// Exception indicating that a file that was expected to exist was not found.
+class FileNotFoundException implements IOException {
+  const FileNotFoundException(this.path);
+
+  final String path;
+
+  @override
+  String toString() => 'File not found: $path';
+}

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
@@ -13,13 +13,13 @@ void main() {
     RenderBox root, child, text;
     double baseline1, baseline2, height1, height2;
 
-    root = new RenderPositionedBox(
-      child: new RenderCustomPaint(
-        child: child = text = new RenderParagraph(
+    root = RenderPositionedBox(
+      child: RenderCustomPaint(
+        child: child = text = RenderParagraph(
           const TextSpan(text: 'Hello World'),
           textDirection: TextDirection.ltr,
         ),
-        painter: new TestCallbackPainter(
+        painter: TestCallbackPainter(
           onPaint: () {
             baseline1 = child.getDistanceToBaseline(TextBaseline.alphabetic);
             height1 = text.size.height;
@@ -29,17 +29,17 @@ void main() {
     );
     layout(root, phase: EnginePhase.paint);
 
-    root = new RenderPositionedBox(
-      child: new RenderCustomPaint(
-        child: child = new RenderConstrainedOverflowBox(
-          child: text = new RenderParagraph(
+    root = RenderPositionedBox(
+      child: RenderCustomPaint(
+        child: child = RenderConstrainedOverflowBox(
+          child: text = RenderParagraph(
             const TextSpan(text: 'Hello World'),
             textDirection: TextDirection.ltr,
           ),
           maxHeight: height1 / 2.0,
           alignment: Alignment.topLeft,
         ),
-        painter: new TestCallbackPainter(
+        painter: TestCallbackPainter(
           onPaint: () {
             baseline2 = child.getDistanceToBaseline(TextBaseline.alphabetic);
             height2 = text.size.height;

@@ -11,15 +11,15 @@ import 'package:flutter_driver/driver_extension.dart';
 void main() {
   enableFlutterDriverExtension();
   debugPrint('Application starting...');
-  runApp(new MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
   @override
-  State createState() => new MyAppState();
+  State createState() => MyAppState();
 }
 
-const MethodChannel channel = const MethodChannel('texture');
+const MethodChannel channel = MethodChannel('texture');
 
 enum FrameState { initial, slow, afterSlow, fast, afterFast }
 
@@ -30,7 +30,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   IconData _icon;
   double _flutterFrameRate;
 
-  Future<Null> _summarizeStats() async {
+  Future<void> _summarizeStats() async {
     final double framesProduced = await channel.invokeMethod('getProducedFrameRate');
     final double framesConsumed = await channel.invokeMethod('getConsumedFrameRate');
     _summary = '''
@@ -39,7 +39,7 @@ Consumed: ${framesConsumed.toStringAsFixed(1)}fps
 Widget builds: $_widgetBuilds''';
   }
 
-  Future<Null> _nextState() async {
+  Future<void> _nextState() async {
     switch (_state) {
       case FrameState.initial:
         debugPrint('Starting .5x speed test...');
@@ -47,11 +47,11 @@ Widget builds: $_widgetBuilds''';
         _summary = 'Producing texture frames at .5x speed...';
         _state = FrameState.slow;
         _icon = Icons.stop;
-        channel.invokeMethod('start', _flutterFrameRate ~/ 2);
+        channel.invokeMethod<void>('start', _flutterFrameRate ~/ 2);
         break;
       case FrameState.slow:
         debugPrint('Stopping .5x speed test...');
-        await channel.invokeMethod('stop');
+        await channel.invokeMethod<void>('stop');
         await _summarizeStats();
         _icon = Icons.fast_forward;
         _state = FrameState.afterSlow;
@@ -62,11 +62,11 @@ Widget builds: $_widgetBuilds''';
         _summary = 'Producing texture frames at 2x speed...';
         _state = FrameState.fast;
         _icon = Icons.stop;
-        channel.invokeMethod('start', (_flutterFrameRate * 2).toInt());
+        channel.invokeMethod<void>('start', (_flutterFrameRate * 2).toInt());
         break;
       case FrameState.fast:
         debugPrint('Stopping 2x speed test...');
-        await channel.invokeMethod('stop');
+        await channel.invokeMethod<void>('stop');
         await _summarizeStats();
         _state = FrameState.afterFast;
         _icon = Icons.replay;
@@ -90,9 +90,9 @@ Widget builds: $_widgetBuilds''';
   static const int calibrationTickCount = 600;
 
   /// Measures Flutter's frame rate.
-  Future<Null> _calibrate() async {
+  Future<void> _calibrate() async {
     debugPrint('Awaiting calm (3 second pause)...');
-    await new Future<Null>.delayed(const Duration(milliseconds: 3000));
+    await Future<void>.delayed(const Duration(milliseconds: 3000));
     debugPrint('Calibrating...');
     DateTime startTime;
     int tickCount = 0;
@@ -100,7 +100,7 @@ Widget builds: $_widgetBuilds''';
     ticker = createTicker((Duration time) {
       tickCount += 1;
       if (tickCount == calibrationTickCount) { // about 10 seconds
-        final Duration elapsed = new DateTime.now().difference(startTime);
+        final Duration elapsed = DateTime.now().difference(startTime);
         ticker.stop();
         ticker.dispose();
         setState(() {
@@ -118,7 +118,7 @@ Press play to produce texture frames.''';
       }
     });
     ticker.start();
-    startTime = new DateTime.now();
+    startTime = DateTime.now();
     setState(() {
       _summary = 'Calibrating...';
       _icon = null;
@@ -128,23 +128,23 @@ Press play to produce texture frames.''';
   @override
   Widget build(BuildContext context) {
     _widgetBuilds += 1;
-    return new MaterialApp(
-      home: new Scaffold(
-        body: new Center(
-          child: new Column(
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              new Container(
+              Container(
                 width: 300.0,
                 height: 200.0,
                 child: const Texture(textureId: 0),
               ),
-              new Container(
+              Container(
                 width: 300.0,
                 height: 60.0,
                 color: Colors.grey,
-                child: new Center(
-                  child: new Text(
+                child: Center(
+                  child: Text(
                     _summary,
                     key: const ValueKey<String>('summary'),
                   ),
@@ -153,9 +153,9 @@ Press play to produce texture frames.''';
             ],
           ),
         ),
-        floatingActionButton: _icon == null ? null : new FloatingActionButton(
+        floatingActionButton: _icon == null ? null : FloatingActionButton(
           key: const ValueKey<String>('fab'),
-          child: new Icon(_icon),
+          child: Icon(_icon),
           onPressed: _nextState,
         ),
       ),

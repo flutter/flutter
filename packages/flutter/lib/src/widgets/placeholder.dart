@@ -18,12 +18,12 @@ class _PlaceholderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
     final Rect rect = Offset.zero & size;
-    final Path path = new Path()
+    final Path path = Path()
       ..addRect(rect)
       ..addPolygon(<Offset>[rect.topRight, rect.bottomLeft], false)
       ..addPolygon(<Offset>[rect.topLeft, rect.bottomRight], false);
@@ -83,12 +83,12 @@ class Placeholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new LimitedBox(
+    return LimitedBox(
       maxWidth: fallbackWidth,
       maxHeight: fallbackHeight,
-      child: new CustomPaint(
+      child: CustomPaint(
         size: Size.infinite,
-        foregroundPainter: new _PlaceholderPainter(
+        foregroundPainter: _PlaceholderPainter(
           color: color,
           strokeWidth: strokeWidth,
         ),

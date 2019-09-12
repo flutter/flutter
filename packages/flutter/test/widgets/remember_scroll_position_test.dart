@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
-ScrollController _controller = new ScrollController(
+ScrollController _controller = ScrollController(
   initialScrollOffset: 110.0,
 );
 
@@ -17,40 +17,40 @@ class ThePositiveNumbers extends StatelessWidget {
   final int from;
   @override
   Widget build(BuildContext context) {
-    return new ListView.builder(
+    return ListView.builder(
       key: const PageStorageKey<String>('ThePositiveNumbers'),
       itemExtent: 100.0,
       controller: _controller,
       itemBuilder: (BuildContext context, int index) {
-        return new Text('${index + from}', key: new ValueKey<int>(index));
-      }
+        return Text('${index + from}', key: ValueKey<int>(index));
+      },
     );
   }
 }
 
-Future<Null> performTest(WidgetTester tester, bool maintainState) async {
-  final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+Future<void> performTest(WidgetTester tester, bool maintainState) async {
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   await tester.pumpWidget(
-    new Directionality(
+    Directionality(
       textDirection: TextDirection.ltr,
-      child: new Navigator(
+      child: Navigator(
         key: navigatorKey,
         onGenerateRoute: (RouteSettings settings) {
           if (settings.name == '/') {
-            return new MaterialPageRoute<void>(
+            return MaterialPageRoute<void>(
               settings: settings,
-              builder: (_) => new Container(child: const ThePositiveNumbers(from: 0)),
+              builder: (_) => Container(child: const ThePositiveNumbers(from: 0)),
               maintainState: maintainState,
             );
           } else if (settings.name == '/second') {
-            return new MaterialPageRoute<void>(
+            return MaterialPageRoute<void>(
               settings: settings,
-              builder: (_) => new Container(child: const ThePositiveNumbers(from: 10000)),
+              builder: (_) => Container(child: const ThePositiveNumbers(from: 10000)),
               maintainState: maintainState,
             );
           }
           return null;
-        }
+        },
       ),
     ),
   );

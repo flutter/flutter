@@ -18,6 +18,14 @@ const String kGalleryTitle = 'Flutter gallery';
 // values approved by verityToStringOutput().
 int toStringErrors = 0;
 
+// There are 3 places where the Gallery demos are traversed.
+// 1- In widget tests such as examples/flutter_gallery/test/smoke_test.dart
+// 2- In driver tests such as examples/flutter_gallery/test_driver/transitions_perf_test.dart
+// 3- In on-device instrumentation tests such as examples/flutter_gallery/test/live_smoketest.dart
+//
+// If you change navigation behavior in the Gallery or in the framework, make
+// sure all 3 are covered.
+
 void reportToStringError(String name, String route, int lineNumber, List<String> lines, String message) {
   // If you're on line 12, then it has index 11.
   // If you want 1 line before and 1 line after, then you want lines with index 10, 11, and 12.
@@ -46,7 +54,7 @@ void verifyToStringOutput(String name, String route, String testString) {
   }
 }
 
-Future<Null> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
+Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
   // Don't use pumpUntilNoTransientCallbacks in this function, because some of
   // the smoketests have infinitely-running animations (e.g. the progress
   // indicators demo).
@@ -74,15 +82,15 @@ Future<Null> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
   verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance?.renderView?.debugLayer?.toStringDeep());
 
   // Scroll the demo around a bit more.
+  await tester.flingFrom(const Offset(400.0, 300.0), const Offset(0.0, 400.0), 1000.0);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
   await tester.flingFrom(const Offset(400.0, 300.0), const Offset(-200.0, 0.0), 500.0);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 50));
   await tester.pump(const Duration(milliseconds: 200));
   await tester.pump(const Duration(milliseconds: 400));
   await tester.flingFrom(const Offset(400.0, 300.0), const Offset(100.0, 0.0), 500.0);
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 400));
-  await tester.flingFrom(const Offset(400.0, 300.0), const Offset(0.0, 400.0), 1000.0);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 400));
 
@@ -94,35 +102,35 @@ Future<Null> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
   await tester.pump(const Duration(milliseconds: 400)); // Wait until it has finished.
 }
 
-Future<Null> smokeOptionsPage(WidgetTester tester) async {
+Future<void> smokeOptionsPage(WidgetTester tester) async {
   final Finder showOptionsPageButton = find.byTooltip('Toggle options page');
 
   // Show the options page
   await tester.tap(showOptionsPageButton);
   await tester.pumpAndSettle();
 
-  // Switch to the dark theme: first switch control
+  // Switch to the dark theme: first menu button, choose 'Dark'
+  await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Dark'));
+  await tester.pumpAndSettle();
+
+  // Switch back to system theme setting: first menu button, choose 'System Default'
+  await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('System Default').at(1));
+  await tester.pumpAndSettle();
+
+  // Switch text direction: first switch
   await tester.tap(find.byType(Switch).first);
   await tester.pumpAndSettle();
 
-  // Switch back to the light theme: first switch control again
+  // Switch back to system text direction: first switch control again
   await tester.tap(find.byType(Switch).first);
-  await tester.pumpAndSettle();
-
-  // Popup the text size menu: first menu button, choose 'Small'
-  await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('Small'));
-  await tester.pumpAndSettle();
-
-  // Popup the text size menu: first menu button, choose 'Normal'
-  await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('Normal'));
   await tester.pumpAndSettle();
 
   // Scroll the 'Send feedback' item into view
-  await tester.drag(find.text('Normal'), const Offset(0.0, -1000.0));
+  await tester.drag(find.text('Theme'), const Offset(0.0, -1000.0));
   await tester.pumpAndSettle();
   await tester.tap(find.text('Send feedback'));
   await tester.pumpAndSettle();
@@ -133,11 +141,11 @@ Future<Null> smokeOptionsPage(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-Future<Null> smokeGallery(WidgetTester tester) async {
+Future<void> smokeGallery(WidgetTester tester) async {
   bool sendFeedbackButtonPressed = false;
 
   await tester.pumpWidget(
-    new GalleryApp(
+    GalleryApp(
       testMode: true,
       onSendFeedback: () {
         sendFeedbackButtonPressed = true; // see smokeOptionsPage()

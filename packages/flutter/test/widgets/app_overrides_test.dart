@@ -28,12 +28,12 @@ class TestRoute<T> extends PageRoute<T> {
   }
 }
 
-Future<Null> pumpApp(WidgetTester tester) async {
+Future<void> pumpApp(WidgetTester tester) async {
   await tester.pumpWidget(
-    new WidgetsApp(
+    WidgetsApp(
       color: const Color(0xFF333333),
       onGenerateRoute: (RouteSettings settings) {
-        return new TestRoute<Null>(settings: settings, child: new Container());
+        return TestRoute<void>(settings: settings, child: Container());
       },
     ),
   );

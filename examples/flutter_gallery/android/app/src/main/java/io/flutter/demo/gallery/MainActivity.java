@@ -4,9 +4,11 @@
 
 package io.flutter.demo.gallery;
 
+import android.os.Build;
 import android.os.Bundle;
 
 import io.flutter.app.FlutterActivity;
+import io.flutter.view.FlutterView;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
@@ -23,5 +25,15 @@ public class MainActivity extends FlutterActivity {
         super.onCreate(savedInstanceState);
         GeneratedPluginRegistrant.registerWith(this);
         instrumentation = new FlutterGalleryInstrumentation(this.getFlutterView());
+        getFlutterView().addFirstFrameListener(new FlutterView.FirstFrameListener() {
+            @Override
+            public void onFirstFrame() {
+                // Report fully drawn time for Play Store Console.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    MainActivity.this.reportFullyDrawn();
+                }
+                MainActivity.this.getFlutterView().removeFirstFrameListener(this);
+            }
+          });
     }
 }

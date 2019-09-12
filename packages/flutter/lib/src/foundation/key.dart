@@ -11,6 +11,8 @@ import 'package:meta/meta.dart';
 /// A new widget will only be used to update an existing element if its key is
 /// the same as the key of the current widget associated with the element.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=kn0EOS-ZiIc}
+///
 /// Keys must be unique amongst the [Element]s with the same parent.
 ///
 /// Subclasses of [Key] should either subclass [LocalKey] or [GlobalKey].
@@ -76,11 +78,13 @@ class ValueKey<T> extends LocalKey {
   String toString() {
     final String valueString = T == String ? '<\'$value\'>' : '<$value>';
     // The crazy on the next line is a workaround for
-    // https://github.com/dart-lang/sdk/issues/28548
-    if (runtimeType == new _TypeLiteral<ValueKey<T>>().type)
+    // https://github.com/dart-lang/sdk/issues/33297
+    if (runtimeType == _TypeLiteral<ValueKey<T>>().type)
       return '[$valueString]';
     return '[$T $valueString]';
   }
 }
 
-class _TypeLiteral<T> { Type get type => T; }
+class _TypeLiteral<T> {
+  Type get type => T;
+}

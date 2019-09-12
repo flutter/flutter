@@ -21,6 +21,5 @@ void main() {
   enableFlutterDriverExtension(handler: _handleMessages);
   // As in lib/main.dart: overriding https://github.com/flutter/flutter/issues/13736
   // for better visual effect at the cost of performance.
-  MaterialPageRoute.debugEnableFadingRoutes = true; // ignore: deprecated_member_use
   runApp(const GalleryApp(testMode: true));
 }

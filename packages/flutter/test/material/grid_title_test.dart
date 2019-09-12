@@ -7,24 +7,24 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('GridTile control test', (WidgetTester tester) async {
-    final Key headerKey = new UniqueKey();
-    final Key footerKey = new UniqueKey();
+    final Key headerKey = UniqueKey();
+    final Key footerKey = UniqueKey();
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new GridTile(
-        header: new GridTileBar(
+    await tester.pumpWidget(MaterialApp(
+      home: GridTile(
+        header: GridTileBar(
           key: headerKey,
           leading: const Icon(Icons.thumb_up),
           title: const Text('Header'),
           subtitle: const Text('Subtitle'),
           trailing: const Icon(Icons.thumb_up),
         ),
-        child: new DecoratedBox(
-          decoration: new BoxDecoration(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
             color: Colors.green[500],
           ),
         ),
-        footer: new GridTileBar(
+        footer: GridTileBar(
           key: footerKey,
           title: const Text('Footer'),
           backgroundColor: Colors.black38,
@@ -41,7 +41,7 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const GridTile(child: const Text('Simple')),
+        child: GridTile(child: Text('Simple')),
       ),
     );
 

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-class MemoryPressureObserver extends WidgetsBindingObserver {
+class MemoryPressureObserver with WidgetsBindingObserver {
   bool sawMemoryPressure = false;
 
   @override
@@ -17,7 +17,7 @@ class MemoryPressureObserver extends WidgetsBindingObserver {
   }
 }
 
-class AppLifecycleStateObserver extends WidgetsBindingObserver {
+class AppLifecycleStateObserver with WidgetsBindingObserver {
   AppLifecycleState lifecycleState;
 
   @override
@@ -26,7 +26,7 @@ class AppLifecycleStateObserver extends WidgetsBindingObserver {
   }
 }
 
-class PushRouteObserver extends WidgetsBindingObserver {
+class PushRouteObserver with WidgetsBindingObserver {
   String pushedRoute;
 
   @override
@@ -42,79 +42,81 @@ void main() {
   });
 
   testWidgets('didHaveMemoryPressure callback', (WidgetTester tester) async {
-    final MemoryPressureObserver observer = new MemoryPressureObserver();
+    final MemoryPressureObserver observer = MemoryPressureObserver();
     WidgetsBinding.instance.addObserver(observer);
     final ByteData message = const JSONMessageCodec().encodeMessage(
       <String, dynamic>{'type': 'memoryPressure'});
-    await BinaryMessages.handlePlatformMessage('flutter/system', message, (_) {});
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
     expect(observer.sawMemoryPressure, true);
     WidgetsBinding.instance.removeObserver(observer);
   });
 
   testWidgets('handleLifecycleStateChanged callback', (WidgetTester tester) async {
-    final AppLifecycleStateObserver observer = new AppLifecycleStateObserver();
+    final BinaryMessenger defaultBinaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
+    final AppLifecycleStateObserver observer = AppLifecycleStateObserver();
     WidgetsBinding.instance.addObserver(observer);
 
     ByteData message = const StringCodec().encodeMessage('AppLifecycleState.paused');
-    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(observer.lifecycleState, AppLifecycleState.paused);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
-    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(observer.lifecycleState, AppLifecycleState.resumed);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
-    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(observer.lifecycleState, AppLifecycleState.inactive);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.suspending');
-    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(observer.lifecycleState, AppLifecycleState.suspending);
   });
 
   testWidgets('didPushRoute callback', (WidgetTester tester) async {
-    final PushRouteObserver observer = new PushRouteObserver();
+    final PushRouteObserver observer = PushRouteObserver();
     WidgetsBinding.instance.addObserver(observer);
 
     const String testRouteName = 'testRouteName';
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRoute', testRouteName));
-    await BinaryMessages.handlePlatformMessage('flutter/navigation', message, (_) {});
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRoute, testRouteName);
 
     WidgetsBinding.instance.removeObserver(observer);
   });
 
   testWidgets('Application lifecycle affects frame scheduling', (WidgetTester tester) async {
+    final BinaryMessenger defaultBinaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
     ByteData message;
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.paused');
-    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
-    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
-    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.suspending');
-    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
-    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.paused');
-    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     tester.binding.scheduleFrame();

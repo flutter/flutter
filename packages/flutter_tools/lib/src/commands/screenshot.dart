@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -15,7 +15,7 @@ import '../vmservice.dart';
 
 const String _kOut = 'out';
 const String _kType = 'type';
-const String _kObservatoryPort = 'observatory-port';
+const String _kObservatoryUri = 'observatory-uri';
 const String _kDeviceType = 'device';
 const String _kSkiaType = 'skia';
 const String _kRasterizerType = 'rasterizer';
@@ -29,12 +29,12 @@ class ScreenshotCommand extends FlutterCommand {
       help: 'Location to write the screenshot.',
     );
     argParser.addOption(
-      _kObservatoryPort,
-      valueHelp: 'port',
-      help: 'The observatory port to connect to.\n'
+      _kObservatoryUri,
+      valueHelp: 'URI',
+      help: 'The observatory URI to connect to.\n'
           'This is required when --$_kType is "$_kSkiaType" or "$_kRasterizerType".\n'
-          'To find the observatory port number, use "flutter run --verbose"\n'
-          'and look for "Forwarded host port ... for Observatory" in the output.',
+          'To find the observatory URI, use "flutter run" and look for'
+          '"An Observatory ... is available at" in the output.',
     );
     argParser.addOption(
       _kType,
@@ -42,11 +42,11 @@ class ScreenshotCommand extends FlutterCommand {
       help: 'The type of screenshot to retrieve.',
       allowed: const <String>[_kDeviceType, _kSkiaType, _kRasterizerType],
       allowedHelp: const <String, String>{
-        _kDeviceType: 'Delegate to the device\'s native screenshot capabilities. This\n'
-            'screenshots the entire screen currently being displayed (including content\n'
+        _kDeviceType: 'Delegate to the device\'s native screenshot capabilities. This '
+            'screenshots the entire screen currently being displayed (including content '
             'not rendered by Flutter, like the device status bar).',
-        _kSkiaType: 'Render the Flutter app as a Skia picture. Requires --$_kObservatoryPort',
-        _kRasterizerType: 'Render the Flutter app using the rasterizer. Requires --$_kObservatoryPort',
+        _kSkiaType: 'Render the Flutter app as a Skia picture. Requires --$_kObservatoryUri',
+        _kRasterizerType: 'Render the Flutter app using the rasterizer. Requires --$_kObservatoryUri',
       },
       defaultsTo: _kDeviceType,
     );
@@ -64,51 +64,59 @@ class ScreenshotCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<Null> verifyThenRunCommand() async {
+  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     device = await findTargetDevice();
-    if (device == null)
+    if (device == null) {
       throwToolExit('Must have a connected device');
-    if (argResults[_kType] == _kDeviceType && !device.supportsScreenshot)
+    }
+    if (argResults[_kType] == _kDeviceType && !device.supportsScreenshot) {
       throwToolExit('Screenshot not supported for ${device.name}.');
-    if (argResults[_kType] != _kDeviceType && argResults[_kObservatoryPort] == null)
-      throwToolExit('Observatory port must be specified for screenshot type ${argResults[_kType]}');
-    return super.verifyThenRunCommand();
+    }
+    if (argResults[_kType] != _kDeviceType && argResults[_kObservatoryUri] == null) {
+      throwToolExit('Observatory URI must be specified for screenshot type ${argResults[_kType]}');
+    }
+    return super.verifyThenRunCommand(commandPath);
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     File outputFile;
     if (argResults.wasParsed(_kOut))
       outputFile = fs.file(argResults[_kOut]);
 
     switch (argResults[_kType]) {
       case _kDeviceType:
-        return runScreenshot(outputFile);
+        await runScreenshot(outputFile);
+        return null;
       case _kSkiaType:
-        return runSkia(outputFile);
+        await runSkia(outputFile);
+        return null;
       case _kRasterizerType:
-        return runRasterizer(outputFile);
+        await runRasterizer(outputFile);
+        return null;
     }
+
+    return null;
   }
 
-  Future<Null> runScreenshot(File outputFile) async {
+  Future<void> runScreenshot(File outputFile) async {
     outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
       await device.takeScreenshot(outputFile);
     } catch (error) {
       throwToolExit('Error taking screenshot: $error');
     }
-    await showOutputFileInfo(outputFile);
+    _showOutputFileInfo(outputFile);
   }
 
-  Future<Null> runSkia(File outputFile) async {
+  Future<void> runSkia(File outputFile) async {
     final Map<String, dynamic> skp = await _invokeVmServiceRpc('_flutter.screenshotSkp');
     outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
     final IOSink sink = outputFile.openWrite();
     sink.add(base64.decode(skp['skp']));
     await sink.close();
-    await showOutputFileInfo(outputFile);
-    await _ensureOutputIsNotJsonRpcError(outputFile);
+    _showOutputFileInfo(outputFile);
+    _ensureOutputIsNotJsonRpcError(outputFile);
   }
 
   Future<void> runRasterizer(File outputFile) async {
@@ -117,29 +125,30 @@ class ScreenshotCommand extends FlutterCommand {
     final IOSink sink = outputFile.openWrite();
     sink.add(base64.decode(response['screenshot']));
     await sink.close();
-    await showOutputFileInfo(outputFile);
-    await _ensureOutputIsNotJsonRpcError(outputFile);
+    _showOutputFileInfo(outputFile);
+    _ensureOutputIsNotJsonRpcError(outputFile);
   }
 
   Future<Map<String, dynamic>> _invokeVmServiceRpc(String method) async {
-    final Uri observatoryUri = new Uri(scheme: 'http', host: '127.0.0.1',
-        port: int.parse(argResults[_kObservatoryPort]));
+    final Uri observatoryUri = Uri.parse(argResults[_kObservatoryUri]);
     final VMService vmService = await VMService.connect(observatoryUri);
     return await vmService.vm.invokeRpcRaw(method);
   }
 
-  Future<void> _ensureOutputIsNotJsonRpcError(File outputFile) async {
-    if (await outputFile.length() < 1000) {
-      final String content = await outputFile.readAsString(
-        encoding: const AsciiCodec(allowInvalid: true),
-      );
-      if (content.startsWith('{"jsonrpc":"2.0", "error"'))
-        throwToolExit('\nIt appears the output file contains an error message, not valid skia output.');
+  void _ensureOutputIsNotJsonRpcError(File outputFile) {
+    if (outputFile.lengthSync() >= 1000) {
+      return;
+    }
+    final String content = outputFile.readAsStringSync(
+      encoding: const AsciiCodec(allowInvalid: true),
+    );
+    if (content.startsWith('{"jsonrpc":"2.0", "error"')) {
+      throwToolExit('It appears the output file contains an error message, not valid skia output.');
     }
   }
 
-  Future<Null> showOutputFileInfo(File outputFile) async {
-    final int sizeKB = (await outputFile.length()) ~/ 1024;
+  void _showOutputFileInfo(File outputFile) {
+    final int sizeKB = (outputFile.lengthSync()) ~/ 1024;
     printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
   }
 }

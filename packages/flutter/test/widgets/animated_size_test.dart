@@ -10,17 +10,17 @@ class TestPaintingContext implements PaintingContext {
   final List<Invocation> invocations = <Invocation>[];
 
   @override
-    void noSuchMethod(Invocation invocation) {
-      invocations.add(invocation);
-    }
+  void noSuchMethod(Invocation invocation) {
+    invocations.add(invocation);
+  }
 }
 
 void main() {
   group('AnimatedSize', () {
     testWidgets('animates forwards then backwards with stable-sized children', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Center(
-          child: new AnimatedSize(
+        Center(
+          child: AnimatedSize(
             duration: const Duration(milliseconds: 200),
             vsync: tester,
             child: const SizedBox(
@@ -36,8 +36,8 @@ void main() {
       expect(box.size.height, equals(100.0));
 
       await tester.pumpWidget(
-        new Center(
-          child: new AnimatedSize(
+        Center(
+          child: AnimatedSize(
             duration: const Duration(milliseconds: 200),
             vsync: tester,
             child: const SizedBox(
@@ -53,7 +53,7 @@ void main() {
       expect(box.size.width, equals(150.0));
       expect(box.size.height, equals(150.0));
 
-      TestPaintingContext context = new TestPaintingContext();
+      TestPaintingContext context = TestPaintingContext();
       box.paint(context, Offset.zero);
       expect(context.invocations.first.memberName, equals(#pushClipRect));
 
@@ -63,8 +63,8 @@ void main() {
       expect(box.size.height, equals(200.0));
 
       await tester.pumpWidget(
-        new Center(
-          child: new AnimatedSize(
+        Center(
+          child: AnimatedSize(
             duration: const Duration(milliseconds: 200),
             vsync: tester,
             child: const SizedBox(
@@ -80,7 +80,7 @@ void main() {
       expect(box.size.width, equals(150.0));
       expect(box.size.height, equals(150.0));
 
-      context = new TestPaintingContext();
+      context = TestPaintingContext();
       box.paint(context, Offset.zero);
       expect(context.invocations.first.memberName, equals(#paintChild));
 
@@ -92,11 +92,11 @@ void main() {
 
     testWidgets('clamps animated size to constraints', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Center(
-          child: new SizedBox (
+        Center(
+          child: SizedBox (
             width: 100.0,
             height: 100.0,
-            child: new AnimatedSize(
+            child: AnimatedSize(
               duration: const Duration(milliseconds: 200),
               vsync: tester,
               child: const SizedBox(
@@ -114,11 +114,11 @@ void main() {
 
       // Attempt to animate beyond the outer SizedBox.
       await tester.pumpWidget(
-        new Center(
-          child: new SizedBox (
+        Center(
+          child: SizedBox (
             width: 100.0,
             height: 100.0,
-            child: new AnimatedSize(
+            child: AnimatedSize(
               duration: const Duration(milliseconds: 200),
               vsync: tester,
               child: const SizedBox(
@@ -138,11 +138,11 @@ void main() {
     });
 
     testWidgets('tracks unstable child, then resumes animation when child stabilizes', (WidgetTester tester) async {
-      Future<Null> pumpMillis(int millis) async {
-        await tester.pump(new Duration(milliseconds: millis));
+      Future<void> pumpMillis(int millis) async {
+        await tester.pump(Duration(milliseconds: millis));
       }
 
-      void verify({double size, RenderAnimatedSizeState state}) {
+      void verify({ double size, RenderAnimatedSizeState state }) {
         assert(size != null || state != null);
         final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
         if (size != null) {
@@ -155,11 +155,11 @@ void main() {
       }
 
       await tester.pumpWidget(
-        new Center(
-          child: new AnimatedSize(
+        Center(
+          child: AnimatedSize(
             duration: const Duration(milliseconds: 200),
             vsync: tester,
-            child: new AnimatedContainer(
+            child: AnimatedContainer(
               duration: const Duration(milliseconds: 100),
               width: 100.0,
               height: 100.0,
@@ -172,11 +172,11 @@ void main() {
 
       // Animate child size from 100 to 200 slowly (100ms).
       await tester.pumpWidget(
-        new Center(
-          child: new AnimatedSize(
+        Center(
+          child: AnimatedSize(
             duration: const Duration(milliseconds: 200),
             vsync: tester,
-            child: new AnimatedContainer(
+            child: AnimatedContainer(
               duration: const Duration(milliseconds: 100),
               width: 200.0,
               height: 200.0,
@@ -201,11 +201,11 @@ void main() {
 
       // Quickly (in 1ms) change size back to 100
       await tester.pumpWidget(
-        new Center(
-          child: new AnimatedSize(
+        Center(
+          child: AnimatedSize(
             duration: const Duration(milliseconds: 200),
             vsync: tester,
-            child: new AnimatedContainer(
+            child: AnimatedContainer(
               duration: const Duration(milliseconds: 1),
               width: 100.0,
               height: 100.0,
@@ -226,10 +226,10 @@ void main() {
     testWidgets('resyncs its animation controller', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
-          child: const AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            vsync: const TestVSync(),
-            child: const SizedBox(
+          child: AnimatedSize(
+            duration: Duration(milliseconds: 200),
+            vsync: TestVSync(),
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
             ),
@@ -238,8 +238,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        new Center(
-          child: new AnimatedSize(
+        Center(
+          child: AnimatedSize(
             duration: const Duration(milliseconds: 200),
             vsync: tester,
             child: const SizedBox(
@@ -258,8 +258,8 @@ void main() {
 
     testWidgets('does not run animation unnecessarily', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Center(
-          child: new AnimatedSize(
+        Center(
+          child: AnimatedSize(
             duration: const Duration(milliseconds: 200),
             vsync: tester,
             child: const SizedBox(

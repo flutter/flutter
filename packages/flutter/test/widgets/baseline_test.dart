@@ -9,30 +9,30 @@ void main() {
   testWidgets('Baseline - control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: const DefaultTextStyle(
-          style: const TextStyle(
+        child: DefaultTextStyle(
+          style: TextStyle(
             fontFamily: 'Ahem',
             fontSize: 100.0,
           ),
-          child: const Text('X', textDirection: TextDirection.ltr),
+          child: Text('X', textDirection: TextDirection.ltr),
         ),
       ),
     );
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Baseline - position test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: const Baseline(
+        child: Baseline(
           baseline: 180.0,
           baselineType: TextBaseline.alphabetic,
-          child: const DefaultTextStyle(
-            style: const TextStyle(
+          child: DefaultTextStyle(
+            style: TextStyle(
               fontFamily: 'Ahem',
               fontSize: 100.0,
             ),
-            child: const Text('X', textDirection: TextDirection.ltr),
+            child: Text('X', textDirection: TextDirection.ltr),
           ),
         ),
       ),
@@ -40,18 +40,18 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
     expect(tester.renderObject<RenderBox>(find.byType(Baseline)).size,
            within<Size>(from: const Size(100.0, 200.0), distance: 0.001));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Chip caches baseline', (WidgetTester tester) async {
     int calls = 0;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Baseline(
+      MaterialApp(
+        home: Material(
+          child: Baseline(
             baseline: 100.0,
             baselineType: TextBaseline.alphabetic,
-            child: new Chip(
-              label: new BaselineDetector(() {
+            child: Chip(
+              label: BaselineDetector(() {
                 calls += 1;
               }),
             ),
@@ -65,18 +65,18 @@ void main() {
     tester.renderObject<RenderBaselineDetector>(find.byType(BaselineDetector)).dirty();
     await tester.pump();
     expect(calls, 2);
-  });
+  }, skip: isBrowser);
 
   testWidgets('ListTile caches baseline', (WidgetTester tester) async {
     int calls = 0;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Baseline(
+      MaterialApp(
+        home: Material(
+          child: Baseline(
             baseline: 100.0,
             baselineType: TextBaseline.alphabetic,
-            child: new ListTile(
-              title: new BaselineDetector(() {
+            child: ListTile(
+              title: BaselineDetector(() {
                 calls += 1;
               }),
             ),
@@ -99,7 +99,7 @@ class BaselineDetector extends LeafRenderObjectWidget {
   final VoidCallback callback;
 
   @override
-  RenderBaselineDetector createRenderObject(BuildContext context) => new RenderBaselineDetector(callback);
+  RenderBaselineDetector createRenderObject(BuildContext context) => RenderBaselineDetector(callback);
 
   @override
   void updateRenderObject(BuildContext context, RenderBaselineDetector renderObject) {

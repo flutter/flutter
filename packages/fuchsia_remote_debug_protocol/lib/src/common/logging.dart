@@ -13,8 +13,7 @@ enum LoggingLevel {
   /// Logs no logs.
   none,
 
-  /// Logs severe messages at the most (note that severe messages are always
-  /// logged).
+  /// Logs severe messages at the most (severe messages are always logged).
   ///
   /// Severe means that the process has encountered a critical level of failure
   /// in which it cannot recover and will terminate as a result.
@@ -43,7 +42,7 @@ enum LoggingLevel {
 }
 
 /// Signature of a function that logs a [LogMessage].
-typedef void LoggingFunction(LogMessage log);
+typedef LoggingFunction = void Function(LogMessage log);
 
 /// The default logging function.
 ///
@@ -70,9 +69,8 @@ class LogMessage {
   ///
   /// When this message is created, it sets its [time] to [DateTime.now].
   LogMessage(this.message, this.tag, this.level)
-      : this.levelName =
-            level.toString().substring(level.toString().indexOf('.') + 1),
-        this.time = new DateTime.now();
+    : levelName = level.toString().substring(level.toString().indexOf('.') + 1),
+      time = DateTime.now();
 
   /// The actual log message.
   final String message;
@@ -124,27 +122,27 @@ class Logger {
   ///
   /// Severe messages are always logged, regardless of what level is set.
   void severe(String message) {
-    loggingFunction(new LogMessage(message, tag, LoggingLevel.severe));
+    loggingFunction(LogMessage(message, tag, LoggingLevel.severe));
   }
 
   /// Logs a [LoggingLevel.warning] level `message`.
   void warning(String message) {
     if (globalLevel.index >= LoggingLevel.warning.index) {
-      loggingFunction(new LogMessage(message, tag, LoggingLevel.warning));
+      loggingFunction(LogMessage(message, tag, LoggingLevel.warning));
     }
   }
 
   /// Logs a [LoggingLevel.info] level `message`.
   void info(String message) {
     if (globalLevel.index >= LoggingLevel.info.index) {
-      loggingFunction(new LogMessage(message, tag, LoggingLevel.info));
+      loggingFunction(LogMessage(message, tag, LoggingLevel.info));
     }
   }
 
   /// Logs a [LoggingLevel.fine] level `message`.
   void fine(String message) {
     if (globalLevel.index >= LoggingLevel.fine.index) {
-      loggingFunction(new LogMessage(message, tag, LoggingLevel.fine));
+      loggingFunction(LogMessage(message, tag, LoggingLevel.fine));
     }
   }
 }

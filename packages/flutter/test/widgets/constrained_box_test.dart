@@ -16,7 +16,7 @@ void main() {
 
   testWidgets('ConstrainedBox intrinsics - minHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ConstrainedBox(
+      ConstrainedBox(
         constraints: const BoxConstraints(
           minHeight: 20.0,
         ),
@@ -31,7 +31,7 @@ void main() {
 
   testWidgets('ConstrainedBox intrinsics - minWidth', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ConstrainedBox(
+      ConstrainedBox(
         constraints: const BoxConstraints(
           minWidth: 20.0,
         ),
@@ -46,7 +46,7 @@ void main() {
 
   testWidgets('ConstrainedBox intrinsics - maxHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ConstrainedBox(
+      ConstrainedBox(
         constraints: const BoxConstraints(
           maxHeight: 20.0,
         ),
@@ -61,7 +61,7 @@ void main() {
 
   testWidgets('ConstrainedBox intrinsics - maxWidth', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ConstrainedBox(
+      ConstrainedBox(
         constraints: const BoxConstraints(
           maxWidth: 20.0,
         ),
@@ -76,7 +76,7 @@ void main() {
 
   testWidgets('ConstrainedBox intrinsics - tight', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ConstrainedBox(
+      ConstrainedBox(
         constraints: const BoxConstraints.tightFor(width: 10.0, height: 30.0),
         child: const Placeholder(),
       ),
@@ -90,7 +90,7 @@ void main() {
 
   testWidgets('ConstrainedBox intrinsics - minHeight - with infinite width', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ConstrainedBox(
+      ConstrainedBox(
         constraints: const BoxConstraints(
           minWidth: double.infinity,
           minHeight: 20.0,
@@ -106,7 +106,7 @@ void main() {
 
   testWidgets('ConstrainedBox intrinsics - minWidth - with infinite height', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ConstrainedBox(
+      ConstrainedBox(
         constraints: const BoxConstraints(
           minWidth: 20.0,
           minHeight: double.infinity,
@@ -122,7 +122,7 @@ void main() {
 
   testWidgets('ConstrainedBox intrinsics - infinite', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ConstrainedBox(
+      ConstrainedBox(
         constraints: const BoxConstraints.tightFor(width: double.infinity, height: double.infinity),
         child: const Placeholder(),
       ),

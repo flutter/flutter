@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:test/test.dart';
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('scrolling performance test', () {
@@ -29,17 +29,17 @@ void main() {
         // Scroll down
         for (int i = 0; i < 5; i++) {
           await driver.scroll(stockList, 0.0, -300.0, const Duration(milliseconds: 300));
-          await new Future<Null>.delayed(const Duration(milliseconds: 500));
+          await Future<void>.delayed(const Duration(milliseconds: 500));
         }
 
         // Scroll up
         for (int i = 0; i < 5; i++) {
           await driver.scroll(stockList, 0.0, 300.0, const Duration(milliseconds: 300));
-          await new Future<Null>.delayed(const Duration(milliseconds: 500));
+          await Future<void>.delayed(const Duration(milliseconds: 500));
         }
       });
 
-      final TimelineSummary summary = new TimelineSummary.summarize(timeline);
+      final TimelineSummary summary = TimelineSummary.summarize(timeline);
       summary.writeSummaryToFile('stocks_scroll_perf', pretty: true);
       summary.writeTimelineToFile('stocks_scroll_perf', pretty: true);
     });

@@ -11,7 +11,7 @@ class Timeline {
   ///
   /// See https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
   factory Timeline.fromJson(Map<String, dynamic> json) {
-    return new Timeline._(json, _parseEvents(json));
+    return Timeline._(json, _parseEvents(json));
   }
 
   Timeline._(this.json, this.events);
@@ -27,7 +27,7 @@ class Timeline {
 class TimelineEvent {
   /// Creates a timeline event given JSON-encoded event data.
   factory TimelineEvent(Map<String, dynamic> json) {
-    return new TimelineEvent._(
+    return TimelineEvent._(
       json,
       json['name'],
       json['cat'],
@@ -35,14 +35,14 @@ class TimelineEvent {
       json['pid'],
       json['tid'],
       json['dur'] != null
-        ? new Duration(microseconds: json['dur'])
+        ? Duration(microseconds: json['dur'])
         : null,
       json['tdur'] != null
-        ? new Duration(microseconds: json['tdur'])
+        ? Duration(microseconds: json['tdur'])
         : null,
       json['ts'],
       json['tts'],
-      json['args']
+      json['args'],
     );
   }
 
@@ -57,7 +57,7 @@ class TimelineEvent {
     this.threadDuration,
     this.timestampMicros,
     this.threadTimestampMicros,
-    this.arguments
+    this.arguments,
   );
 
   /// The original event JSON.
@@ -127,8 +127,8 @@ List<TimelineEvent> _parseEvents(Map<String, dynamic> json) {
   if (jsonEvents == null)
     return null;
 
-  // TODO(vegorov) use instance method version of castFrom when it is available.
+  // TODO(vegorov): use instance method version of castFrom when it is available.
   return Iterable.castFrom<dynamic, Map<String, dynamic>>(jsonEvents)
-    .map((Map<String, dynamic> eventJson) => new TimelineEvent(eventJson))
+    .map<TimelineEvent>((Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
     .toList();
 }

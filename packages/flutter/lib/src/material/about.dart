@@ -33,6 +33,77 @@ import 'theme.dart';
 ///
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
+/// {@tool snippet --template=stateless_widget_material}
+///
+/// This sample shows two ways to open [AboutDialog]. The first one
+/// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
+///
+/// ```dart
+///
+///  Widget build(BuildContext context) {
+///    final TextStyle textStyle = Theme.of(context).textTheme.body1;
+///    final List<Widget> aboutBoxChildren = <Widget>[
+///      SizedBox(height: 24),
+///      RichText(
+///        text: TextSpan(
+///          children: <TextSpan>[
+///            TextSpan(
+///              style: textStyle,
+///              text: 'Flutter is Google’s UI toolkit for building beautiful, '
+///              'natively compiled applications for mobile, web, and desktop '
+///              'from a single codebase. Learn more about Flutter at '
+///            ),
+///            TextSpan(
+///              style: textStyle.copyWith(color: Theme.of(context).accentColor),
+///              text: 'https://flutter.dev'
+///            ),
+///            TextSpan(
+///              style: textStyle,
+///              text: '.'
+///            ),
+///          ],
+///        ),
+///      ),
+///    ];
+///
+///    return Scaffold(
+///      appBar: AppBar(
+///        title: Text('Show About Example'),
+///      ),
+///      drawer: Drawer(
+///        child: SingleChildScrollView(
+///          child: SafeArea(
+///            child: AboutListTile(
+///              icon: Icon(Icons.info),
+///              applicationIcon: FlutterLogo(),
+///              applicationName: 'Show About Example',
+///              applicationVersion: 'August 2019',
+///              applicationLegalese: '© 2019 The Chromium Authors',
+///              aboutBoxChildren: aboutBoxChildren,
+///            ),
+///          ),
+///        ),
+///      ),
+///      body: Center(
+///        child: RaisedButton(
+///          child: Text('Show About Example'),
+///          onPressed: () {
+///            showAboutDialog(
+///              context: context,
+///              applicationIcon: FlutterLogo(),
+///              applicationName: 'Show About Example',
+///              applicationVersion: 'August 2019',
+///              applicationLegalese: '© 2019 The Chromium Authors',
+///              children: aboutBoxChildren,
+///            );
+///          },
+///        ),
+///      ),
+///    );
+///}
+/// ```
+/// {@end-tool}
+///
 class AboutListTile extends StatelessWidget {
   /// Creates a list tile for showing an about box.
   ///
@@ -47,7 +118,8 @@ class AboutListTile extends StatelessWidget {
     this.applicationVersion,
     this.applicationIcon,
     this.applicationLegalese,
-    this.aboutBoxChildren
+    this.aboutBoxChildren,
+    this.dense,
   }) : super(key: key);
 
   /// The icon to show for this drawer item.
@@ -106,13 +178,23 @@ class AboutListTile extends StatelessWidget {
   /// Defaults to nothing.
   final List<Widget> aboutBoxChildren;
 
+  /// Whether this list tile is part of a vertically dense list.
+  ///
+  /// If this property is null, then its value is based on [ListTileTheme.dense].
+  ///
+  /// Dense list tiles default to a smaller height.
+  final bool dense;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    return new ListTile(
+    assert(debugCheckHasMaterialLocalizations(context));
+    return ListTile(
       leading: icon,
-      title: child ??
-        new Text(MaterialLocalizations.of(context).aboutListTileTitle(applicationName ?? _defaultApplicationName(context))),
+      title: child ?? Text(MaterialLocalizations.of(context).aboutListTileTitle(
+        applicationName ?? _defaultApplicationName(context),
+      )),
+      dense: dense,
       onTap: () {
         showAboutDialog(
           context: context,
@@ -120,9 +202,9 @@ class AboutListTile extends StatelessWidget {
           applicationVersion: applicationVersion,
           applicationIcon: applicationIcon,
           applicationLegalese: applicationLegalese,
-          children: aboutBoxChildren
+          children: aboutBoxChildren,
         );
-      }
+      },
     );
   }
 }
@@ -155,14 +237,14 @@ void showAboutDialog({
   showDialog<void>(
     context: context,
     builder: (BuildContext context) {
-      return new AboutDialog(
+      return AboutDialog(
         applicationName: applicationName,
         applicationVersion: applicationVersion,
         applicationIcon: applicationIcon,
         applicationLegalese: applicationLegalese,
         children: children,
       );
-    }
+    },
   );
 }
 
@@ -184,14 +266,15 @@ void showLicensePage({
   String applicationName,
   String applicationVersion,
   Widget applicationIcon,
-  String applicationLegalese
+  String applicationLegalese,
 }) {
   assert(context != null);
-  Navigator.push(context, new MaterialPageRoute<void>(
-    builder: (BuildContext context) => new LicensePage(
+  Navigator.push(context, MaterialPageRoute<void>(
+    builder: (BuildContext context) => LicensePage(
       applicationName: applicationName,
       applicationVersion: applicationVersion,
-      applicationLegalese: applicationLegalese
+      applicationIcon: applicationIcon,
+      applicationLegalese: applicationLegalese,
     )
   ));
 }
@@ -263,57 +346,57 @@ class AboutDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     final String name = applicationName ?? _defaultApplicationName(context);
     final String version = applicationVersion ?? _defaultApplicationVersion(context);
     final Widget icon = applicationIcon ?? _defaultApplicationIcon(context);
-    List<Widget> body = <Widget>[];
-    if (icon != null)
-      body.add(new IconTheme(data: const IconThemeData(size: 48.0), child: icon));
-    body.add(new Expanded(
-      child: new Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: new ListBody(
+    return AlertDialog(
+      content: SingleChildScrollView(
+        child: ListBody(
           children: <Widget>[
-            new Text(name, style: Theme.of(context).textTheme.headline),
-            new Text(version, style: Theme.of(context).textTheme.body1),
-            new Container(height: 18.0),
-            new Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption)
-          ]
-        )
-      )
-    ));
-    body = <Widget>[
-      new Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: body
-      ),
-    ];
-    if (children != null)
-      body.addAll(children);
-    return new AlertDialog(
-      content: new SingleChildScrollView(
-        child: new ListBody(children: body),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: ListBody(
+                      children: <Widget>[
+                        Text(name, style: Theme.of(context).textTheme.headline),
+                        Text(version, style: Theme.of(context).textTheme.body1),
+                        Container(height: 18.0),
+                        Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            ...?children,
+          ],
+        ),
       ),
       actions: <Widget>[
-        new FlatButton(
-          child: new Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
+        FlatButton(
+          child: Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
           onPressed: () {
             showLicensePage(
               context: context,
               applicationName: applicationName,
               applicationVersion: applicationVersion,
               applicationIcon: applicationIcon,
-              applicationLegalese: applicationLegalese
+              applicationLegalese: applicationLegalese,
             );
-          }
+          },
         ),
-        new FlatButton(
-          child: new Text(MaterialLocalizations.of(context).closeButtonLabel),
+        FlatButton(
+          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
           onPressed: () {
             Navigator.pop(context);
-          }
+          },
         ),
-      ]
+      ],
     );
   }
 }
@@ -340,7 +423,8 @@ class LicensePage extends StatefulWidget {
     Key key,
     this.applicationName,
     this.applicationVersion,
-    this.applicationLegalese
+    this.applicationIcon,
+    this.applicationLegalese,
   }) : super(key: key);
 
   /// The name of the application.
@@ -356,6 +440,14 @@ class LicensePage extends StatefulWidget {
   /// Defaults to the empty string.
   final String applicationVersion;
 
+  /// The icon to show below the application name.
+  ///
+  /// By default no icon is shown.
+  ///
+  /// Typically this will be an [ImageIcon] widget. It should honor the
+  /// [IconTheme]'s [IconThemeData.size].
+  final Widget applicationIcon;
+
   /// A string to show in small print.
   ///
   /// Typically this is a copyright notice.
@@ -364,7 +456,7 @@ class LicensePage extends StatefulWidget {
   final String applicationLegalese;
 
   @override
-  _LicensePageState createState() => new _LicensePageState();
+  _LicensePageState createState() => _LicensePageState();
 }
 
 class _LicensePageState extends State<LicensePage> {
@@ -377,53 +469,64 @@ class _LicensePageState extends State<LicensePage> {
   final List<Widget> _licenses = <Widget>[];
   bool _loaded = false;
 
-  Future<Null> _initLicenses() async {
-    final Flow flow = Flow.begin();
-    Timeline.timeSync('_initLicenses()', () { }, flow: flow);
+  Future<void> _initLicenses() async {
+    int debugFlowId = -1;
+    assert(() {
+      final Flow flow = Flow.begin();
+      Timeline.timeSync('_initLicenses()', () { }, flow: flow);
+      debugFlowId = flow.id;
+      return true;
+    }());
     await for (LicenseEntry license in LicenseRegistry.licenses) {
-      if (!mounted)
+      if (!mounted) {
         return;
-      Timeline.timeSync('_initLicenses()', () { }, flow: Flow.step(flow.id));
+      }
+      assert(() {
+        Timeline.timeSync('_initLicenses()', () { }, flow: Flow.step(debugFlowId));
+        return true;
+      }());
       final List<LicenseParagraph> paragraphs =
         await SchedulerBinding.instance.scheduleTask<List<LicenseParagraph>>(
-          () => license.paragraphs.toList(),
+          license.paragraphs.toList,
           Priority.animation,
           debugLabel: 'License',
-          flow: flow,
         );
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _licenses.add(const Padding(
-          padding: const EdgeInsets.symmetric(vertical: 18.0),
-          child: const Text(
+          padding: EdgeInsets.symmetric(vertical: 18.0),
+          child: Text(
             '🍀‬', // That's U+1F340. Could also use U+2766 (❦) if U+1F340 doesn't work everywhere.
-            textAlign: TextAlign.center
-          )
-        ));
-        _licenses.add(new Container(
-          decoration: const BoxDecoration(
-            border: const Border(bottom: const BorderSide(width: 0.0))
+            textAlign: TextAlign.center,
           ),
-          child: new Text(
+        ));
+        _licenses.add(Container(
+          decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(width: 0.0))
+          ),
+          child: Text(
             license.packages.join(', '),
             style: const TextStyle(fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center
-          )
+            textAlign: TextAlign.center,
+          ),
         ));
         for (LicenseParagraph paragraph in paragraphs) {
           if (paragraph.indent == LicenseParagraph.centeredIndent) {
-            _licenses.add(new Padding(
+            _licenses.add(Padding(
               padding: const EdgeInsets.only(top: 16.0),
-              child: new Text(
+              child: Text(
                 paragraph.text,
                 style: const TextStyle(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center
-              )
+                textAlign: TextAlign.center,
+              ),
             ));
           } else {
             assert(paragraph.indent >= 0);
-            _licenses.add(new Padding(
-              padding: new EdgeInsetsDirectional.only(top: 8.0, start: 16.0 * paragraph.indent),
-              child: new Text(paragraph.text)
+            _licenses.add(Padding(
+              padding: EdgeInsetsDirectional.only(top: 8.0, start: 16.0 * paragraph.indent),
+              child: Text(paragraph.text),
             ));
           }
         }
@@ -432,47 +535,54 @@ class _LicensePageState extends State<LicensePage> {
     setState(() {
       _loaded = true;
     });
-    Timeline.timeSync('Build scheduled', () { }, flow: Flow.end(flow.id));
+    assert(() {
+      Timeline.timeSync('Build scheduled', () { }, flow: Flow.end(debugFlowId));
+      return true;
+    }());
   }
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     final String name = widget.applicationName ?? _defaultApplicationName(context);
     final String version = widget.applicationVersion ?? _defaultApplicationVersion(context);
+    final Widget icon = widget.applicationIcon ?? _defaultApplicationIcon(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final List<Widget> contents = <Widget>[
-      new Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
-      new Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
-      new Container(height: 18.0),
-      new Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
-      new Container(height: 18.0),
-      new Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
-      new Container(height: 24.0),
-    ];
-    contents.addAll(_licenses);
-    if (!_loaded) {
-      contents.add(const Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24.0),
-        child: const Center(
-          child: const CircularProgressIndicator()
-        )
-      ));
-    }
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(localizations.licensesPageTitle),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(localizations.licensesPageTitle),
       ),
       // All of the licenses page text is English. We don't want localized text
       // or text direction.
-      body: new Localizations.override(
+      body: Localizations.override(
         locale: const Locale('en', 'US'),
         context: context,
-        child: new DefaultTextStyle(
+        child: DefaultTextStyle(
           style: Theme.of(context).textTheme.caption,
-          child: new Scrollbar(
-            child: new ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-              children: contents,
+          child: SafeArea(
+            bottom: false,
+            child: Scrollbar(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                children: <Widget>[
+                  Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
+                  if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
+                  Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
+                  Container(height: 18.0),
+                  Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
+                  Container(height: 18.0),
+                  Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
+                  Container(height: 24.0),
+                  ..._licenses,
+                  if (!_loaded)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 24.0),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                ],
+              ),
             ),
           ),
         ),
@@ -482,6 +592,12 @@ class _LicensePageState extends State<LicensePage> {
 }
 
 String _defaultApplicationName(BuildContext context) {
+  // This doesn't handle the case of the application's title dynamically
+  // changing. In theory, we should make Title expose the current application
+  // title using an InheritedWidget, and so forth. However, in practice, if
+  // someone really wants their application title to change dynamically, they
+  // can provide an explicit applicationName to the widgets defined in this
+  // file, instead of relying on the default.
   final Title ancestorTitle = context.ancestorWidgetOfExactType(Title);
   return ancestorTitle?.title ?? Platform.resolvedExecutable.split(Platform.pathSeparator).last;
 }

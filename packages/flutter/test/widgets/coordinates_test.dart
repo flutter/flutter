@@ -8,26 +8,26 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Comparing coordinates', (WidgetTester tester) async {
-    final Key keyA = new GlobalKey();
-    final Key keyB = new GlobalKey();
+    final Key keyA = GlobalKey();
+    final Key keyB = GlobalKey();
 
     await tester.pumpWidget(
-      new Stack(
+      Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Positioned(
+          Positioned(
             top: 100.0,
             left: 100.0,
-            child: new SizedBox(
+            child: SizedBox(
               key: keyA,
               width: 10.0,
               height: 10.0,
             ),
           ),
-          new Positioned(
+          Positioned(
             left: 100.0,
             top: 200.0,
-            child: new SizedBox(
+            child: SizedBox(
               key: keyB,
               width: 20.0,
               height: 10.0,

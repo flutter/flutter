@@ -1,0 +1,146 @@
+/* Styles for handling custom code snippets */
+.snippet-container {
+  background-color: #2372a3;
+  padding: 10px;
+  overflow: auto;
+}
+
+.snippet-container pre {
+  max-height: 500px;
+  overflow: auto;
+  padding: 10px;
+  margin: 0px;
+}
+
+.snippet-container ::-webkit-scrollbar {
+  width: 12px;
+}
+
+.snippet-container ::-webkit-scrollbar-thumb {
+  width: 12px;
+  border-radius: 6px;
+}
+
+.snippet {
+  position: relative;
+}
+
+.snippet-description {
+  padding: 10px;
+  color: white;
+}
+
+.snippet-description a:link {
+  color: #c7fcf4;
+}
+.snippet-description a:visited {
+  color: #c7dbfc;
+}
+.snippet-description a:hover {
+  color: white;
+}
+.snippet-description a:active {
+  color: #80b0fc;
+}
+
+.snippet-buttons button {
+  background-color: #2372a3;
+  border-style: none;
+  color: white;
+  padding: 10px 24px;
+  cursor: pointer;
+  float: left;
+}
+
+.snippet-buttons:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.snippet-buttons button:focus { outline: none; }
+
+.snippet-buttons button:hover {
+  opacity: 1.0;
+}
+
+.snippet-buttons :not([selected]) {
+  opacity: 0.65;
+}
+
+.snippet-buttons [selected] {
+  opacity: 1.0;
+}
+
+.snippet-container [hidden] {
+  display: none;
+}
+
+.snippet-create-command {
+  text-align: end;
+  font-size: smaller;
+  font-style: normal;
+  font-family: courier, lucidia;
+}
+
+.snippet-dartpad {
+  width: 100%;
+  height: 500px;
+}
+
+.anchor-container {
+  position: relative;
+}
+
+.anchor-button-overlay {
+  position: absolute;
+  top: 0px;
+  right: 5px;
+  height: 28px;
+  width: 28px;
+  transition: .3s ease;
+  background-color: #2372a3;
+}
+
+.anchor-button {
+  border-style: none;
+  background: none;
+  cursor: pointer;
+}
+
+/* Styles for the copy-to-clipboard button */
+.copyable-container {
+  position: relative;
+}
+
+.copy-button-overlay {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  height: 28px;
+  width: 28px;
+  transition: .3s ease;
+  background-color: #2372a3;
+}
+
+.copy-button {
+  border-style: none;
+  background: none;
+  cursor: pointer;
+}
+
+.copy-button :focus {
+  outline: 0px;
+}
+
+.copy-button :hover {
+  transition: .3s ease;
+  color: #222;
+}
+
+.copy-image {
+  opacity: 0.65;
+  color: #2372a3;
+  font-size: 28px;
+  padding-top: 4px;
+}

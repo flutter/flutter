@@ -22,12 +22,12 @@ void main() {
       }
     }
 
-    Future<Null> scrollUpOneEntry() async {
+    Future<void> scrollUpOneEntry() async {
       await tester.dragFrom(const Offset(200.0, 200.0), const Offset(0.0, -88.00));
       await tester.pumpAndSettle();
     }
 
-    Future<Null> tapEntry(String title) async {
+    Future<void> tapEntry(String title) async {
       await tester.tap(find.text(title));
       await tester.pumpAndSettle();
     }

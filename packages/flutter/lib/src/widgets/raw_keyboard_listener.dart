@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 
 export 'package:flutter/services.dart' show RawKeyEvent;
@@ -30,17 +31,26 @@ class RawKeyboardListener extends StatefulWidget {
   ///
   /// For text entry, consider using a [EditableText], which integrates with
   /// on-screen keyboards and input method editors (IMEs).
+  ///
+  /// The [focusNode] and [child] arguments are required and must not be null.
+  ///
+  /// The [autofocus] argument must not be null.
   const RawKeyboardListener({
     Key key,
     @required this.focusNode,
-    @required this.onKey,
+    this.autofocus = false,
+    this.onKey,
     @required this.child,
   }) : assert(focusNode != null),
+       assert(autofocus != null),
        assert(child != null),
        super(key: key);
 
-  /// Controls whether this widget has keyboard focus.
+  /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
 
   /// Called whenever this widget receives a raw keyboard event.
   final ValueChanged<RawKeyEvent> onKey;
@@ -51,12 +61,12 @@ class RawKeyboardListener extends StatefulWidget {
   final Widget child;
 
   @override
-  _RawKeyboardListenerState createState() => new _RawKeyboardListenerState();
+  _RawKeyboardListenerState createState() => _RawKeyboardListenerState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
   }
 }
 
@@ -112,5 +122,11 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    return Focus(
+      focusNode: widget.focusNode,
+      autofocus: widget.autofocus,
+      child: widget.child,
+    );
+  }
 }

@@ -11,22 +11,22 @@ void main() {
     int detector1TapCount = 0;
     int detector2TapCount = 0;
 
-    final Widget widget = new GestureDetector(
-      child: new Column(
+    final Widget widget = GestureDetector(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          new GestureDetector(
+          GestureDetector(
             onTap: () { detector1TapCount += 1; },
             behavior: HitTestBehavior.opaque,
             child: const SizedBox(width: 200.0, height: 200.0),
           ),
-          new GestureDetector(
+          GestureDetector(
             onTap: () { detector2TapCount += 1; },
             behavior: HitTestBehavior.opaque,
-            child: const SizedBox(width: 200.0, height: 200.0)
-          )
+            child: const SizedBox(width: 200.0, height: 200.0),
+          ),
         ],
-      )
+      ),
     );
 
     await tester.pumpWidget(widget);

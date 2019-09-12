@@ -23,23 +23,23 @@ class TestScrollBehavior extends ScrollBehavior {
 
 void main() {
   testWidgets('Inherited ScrollConfiguration changed', (WidgetTester tester) async {
-    final GlobalKey key = new GlobalKey(debugLabel: 'scrollable');
+    final GlobalKey key = GlobalKey(debugLabel: 'scrollable');
     TestScrollBehavior behavior;
     ScrollPositionWithSingleContext position;
 
-    final Widget scrollView = new SingleChildScrollView(
+    final Widget scrollView = SingleChildScrollView(
       key: key,
-      child: new Builder(
+      child: Builder(
         builder: (BuildContext context) {
           behavior = ScrollConfiguration.of(context);
           position = Scrollable.of(context).position;
-          return new Container(height: 1000.0);
+          return Container(height: 1000.0);
         },
       ),
     );
 
     await tester.pumpWidget(
-      new ScrollConfiguration(
+      ScrollConfiguration(
         behavior: const TestScrollBehavior(true),
         child: scrollView,
       ),
@@ -54,7 +54,7 @@ void main() {
 
     // Same Scrollable, different ScrollConfiguration
     await tester.pumpWidget(
-      new ScrollConfiguration(
+      ScrollConfiguration(
         behavior: const TestScrollBehavior(false),
         child: scrollView,
       ),

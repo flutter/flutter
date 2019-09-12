@@ -15,18 +15,18 @@ import '../globals.dart';
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
+  AnalyzeBase(this.argResults);
+
   /// The parsed argument results for execution.
   final ArgResults argResults;
 
-  AnalyzeBase(this.argResults);
-
   /// Called by [AnalyzeCommand] to start the analysis process.
-  Future<Null> analyze();
+  Future<void> analyze();
 
   void dumpErrors(Iterable<String> errors) {
     if (argResults['write'] != null) {
       try {
-        final RandomAccessFile resultsFile = fs.file(argResults['write']).openSync(mode: FileMode.WRITE); // ignore: deprecated_member_use
+        final RandomAccessFile resultsFile = fs.file(argResults['write']).openSync(mode: FileMode.write);
         try {
           resultsFile.lockSync();
           resultsFile.writeStringSync(errors.join('\n'));
@@ -44,7 +44,7 @@ abstract class AnalyzeBase {
     final Map<String, dynamic> data = <String, dynamic>{
       'time': stopwatch.elapsedMilliseconds / 1000.0,
       'issues': errorCount,
-      'missingDartDocs': membersMissingDocumentation
+      'missingDartDocs': membersMissingDocumentation,
     };
     fs.file(benchmarkOut).writeAsStringSync(toPrettyJson(data));
     printStatus('Analysis benchmark written to $benchmarkOut ($data).');
@@ -116,14 +116,14 @@ class PackageDependency {
 
 class PackageDependencyTracker {
   /// Packages whose source is defined in the vended SDK.
-  static const List<String> _vendedSdkPackages = const <String>['analyzer', 'front_end', 'kernel'];
+  static const List<String> _vendedSdkPackages = <String>['analyzer', 'front_end', 'kernel'];
 
   // This is a map from package names to objects that track the paths
   // involved (sources and targets).
   Map<String, PackageDependency> packages = <String, PackageDependency>{};
 
   PackageDependency getPackageDependency(String packageName) {
-    return packages.putIfAbsent(packageName, () => new PackageDependency());
+    return packages.putIfAbsent(packageName, () => PackageDependency());
   }
 
   /// Read the .packages file in [directory] and add referenced packages to [dependencies].
@@ -135,7 +135,7 @@ class PackageDependencyTracker {
       final Iterable<String> lines = dotPackages
         .readAsStringSync()
         .split('\n')
-        .where((String line) => !line.startsWith(new RegExp(r'^ *#')));
+        .where((String line) => !line.startsWith(RegExp(r'^ *#')));
       for (String line in lines) {
         final int colon = line.indexOf(':');
         if (colon > 0) {
@@ -177,7 +177,7 @@ class PackageDependencyTracker {
 
     // prepare a union of all the .packages files
     if (dependencies.hasConflicts) {
-      final StringBuffer message = new StringBuffer();
+      final StringBuffer message = StringBuffer();
       message.writeln(dependencies.generateConflictReport());
       message.writeln('Make sure you have run "pub upgrade" in all the directories mentioned above.');
       if (dependencies.hasConflictsAffectingFlutterRepo) {
@@ -205,7 +205,7 @@ class PackageDependencyTracker {
 
   String generateConflictReport() {
     assert(hasConflicts);
-    final StringBuffer result = new StringBuffer();
+    final StringBuffer result = StringBuffer();
     for (String package in packages.keys.where((String package) => packages[package].hasConflict)) {
       result.writeln('Package "$package" has conflicts:');
       packages[package].describeConflict(result);

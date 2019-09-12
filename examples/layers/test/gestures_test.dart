@@ -9,14 +9,14 @@ import '../widgets/gestures.dart';
 
 void main() {
   testWidgets('Tap on center change color', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new GestureDemo(),
+      child: GestureDemo(),
     ));
     final Finder finder = find.byType(GestureDemo);
 
     MaterialColor getSwatch() => tester.state<GestureDemoState>(finder).swatch;
-    Future<Null> tap() async {
+    Future<void> tap() async {
       final Offset topLeft = tester.getTopLeft(finder);
       await tester.tapAt(tester.getSize(finder).center(topLeft));
       await tester.pump(const Duration(seconds: 1));

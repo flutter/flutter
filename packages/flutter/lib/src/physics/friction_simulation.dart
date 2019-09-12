@@ -18,7 +18,10 @@ class FrictionSimulation extends Simulation {
   /// drag coefficient, a unitless value; the initial position, in the same
   /// length units as used for [x]; and the initial velocity, in the same
   /// velocity units as used for [dx].
-  FrictionSimulation(double drag, double position, double velocity, {
+  FrictionSimulation(
+    double drag,
+    double position,
+    double velocity, {
     Tolerance tolerance = Tolerance.defaultTolerance,
   }) : _drag = drag,
        _dragLog = math.log(drag),
@@ -41,11 +44,11 @@ class FrictionSimulation extends Simulation {
     assert(startVelocity == 0.0 || endVelocity == 0.0 || startVelocity.sign == endVelocity.sign);
     assert(startVelocity.abs() >= endVelocity.abs());
     assert((endPosition - startPosition).sign == startVelocity.sign);
-    return new FrictionSimulation(
+    return FrictionSimulation(
       _dragFor(startPosition, endPosition, startVelocity, endVelocity),
       startPosition,
       startVelocity,
-      tolerance: new Tolerance(velocity: endVelocity.abs()),
+      tolerance: Tolerance(velocity: endVelocity.abs()),
     );
   }
 
@@ -104,7 +107,7 @@ class BoundedFrictionSimulation extends FrictionSimulation {
     double position,
     double velocity,
     this._minX,
-    this._maxX
+    this._maxX,
   ) : assert(position.clamp(_minX, _maxX) == position),
       super(drag, position, velocity);
 

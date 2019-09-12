@@ -19,8 +19,10 @@ class TestInkSplash extends InkSplash {
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
+    ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
+    TextDirection textDirection,
   }) : super(
     controller: controller,
     referenceBox: referenceBox,
@@ -29,8 +31,10 @@ class TestInkSplash extends InkSplash {
     containedInkWell: containedInkWell,
     rectCallback: rectCallback,
     borderRadius: borderRadius,
+    customBorder: customBorder,
     radius: radius,
     onRemoved: onRemoved,
+    textDirection: textDirection,
   );
 
   @override
@@ -58,10 +62,12 @@ class TestInkSplashFactory extends InteractiveInkFeatureFactory {
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
+    ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
+    TextDirection textDirection,
   }) {
-    return new TestInkSplash(
+    return TestInkSplash(
       controller: controller,
       referenceBox: referenceBox,
       position: position,
@@ -69,33 +75,35 @@ class TestInkSplashFactory extends InteractiveInkFeatureFactory {
       containedInkWell: containedInkWell,
       rectCallback: rectCallback,
       borderRadius: borderRadius,
+      customBorder: customBorder,
       radius: radius,
       onRemoved: onRemoved,
+      textDirection: textDirection,
     );
   }
 }
 
 void main() {
   testWidgets('Tap and no focus causes a splash', (WidgetTester tester) async {
-    final Key textField1 = new UniqueKey();
-    final Key textField2 = new UniqueKey();
+    final Key textField1 = UniqueKey();
+    final Key textField2 = UniqueKey();
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Theme(
-          data: new ThemeData.light().copyWith(splashFactory: const TestInkSplashFactory()),
-          child: new Material(
-            child: new Container(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData.light().copyWith(splashFactory: const TestInkSplashFactory()),
+          child: Material(
+            child: Container(
               alignment: Alignment.topLeft,
-              child: new Column(
+              child: Column(
                 children: <Widget>[
-                  new TextField(
+                  TextField(
                     key: textField1,
                     decoration: const InputDecoration(
                       labelText: 'label',
                     ),
                   ),
-                  new TextField(
+                  TextField(
                     key: textField2,
                     decoration: const InputDecoration(
                       labelText: 'label',
@@ -145,23 +153,23 @@ void main() {
 
   testWidgets('Splash cancel', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Theme(
-          data: new ThemeData.light().copyWith(splashFactory: const TestInkSplashFactory()),
-          child: new Material(
-            child: new ListView(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData.light().copyWith(splashFactory: const TestInkSplashFactory()),
+          child: Material(
+            child: ListView(
               children: <Widget>[
                 const TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'label1',
                   ),
                 ),
                 const TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'label2',
                   ),
                 ),
-                new Container(
+                Container(
                   height: 1000.0,
                   color: const Color(0xFF00FF00),
                 ),

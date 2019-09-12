@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('Haptic feedback control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
@@ -27,7 +29,7 @@ void main() {
         log.add(methodCall);
       });
 
-      await Function.apply(hapticFunction, null);
+      await hapticFunction();
       expect(log, hasLength(1));
       expect(
         log.last,

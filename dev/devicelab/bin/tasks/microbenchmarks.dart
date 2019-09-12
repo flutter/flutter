@@ -9,7 +9,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/tasks/microbenchmarks.dart';
 
 /// Runs microbenchmarks on Android.
-Future<Null> main() async {
+Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
   await task(createMicrobenchmarkTask());
 }
