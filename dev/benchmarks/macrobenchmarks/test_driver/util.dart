@@ -20,8 +20,6 @@ void macroPerfTest(
     // See: https://github.com/flutter/flutter/issues/19434
     await Future<void>.delayed(const Duration(milliseconds: 250));
 
-    await driver.forceGC();
-
     final SerializableFinder button = find.byValueKey(routeName);
     expect(button, isNotNull);
     await driver.tap(button);

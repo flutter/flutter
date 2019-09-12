@@ -140,7 +140,6 @@ class FlutterDriver {
   static const String _setVMTimelineFlagsMethodName = 'setVMTimelineFlags';
   static const String _getVMTimelineMethodName = 'getVMTimeline';
   static const String _clearVMTimelineMethodName = 'clearVMTimeline';
-  static const String _collectAllGarbageMethodName = '_collectAllGarbage';
 
   static int _nextDriverId = 0;
 
@@ -1031,21 +1030,9 @@ class FlutterDriver {
     return result;
   }
 
-  /// Force a garbage collection run in the VM.
-  Future<void> forceGC() async {
-    try {
-      await _peer
-          .sendRequest(_collectAllGarbageMethodName, <String, String>{
-            'isolateId': 'isolates/${appIsolate.numberAsString}',
-          });
-    } catch (error, stackTrace) {
-      throw DriverError(
-        'Failed to force a GC due to remote error',
-        error,
-        stackTrace,
-      );
-    }
-  }
+  /// This function was always illegal. Replace any use with a no-op.
+  @Deprecated('This function was always illegal. Replace any use with a no-op.')
+  Future<void> forceGC() async { }
 
   /// Closes the underlying connection to the VM service.
   ///
