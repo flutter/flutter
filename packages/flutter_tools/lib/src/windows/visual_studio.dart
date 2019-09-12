@@ -35,10 +35,6 @@ class VisualStudio {
   String get displayVersion =>
       _bestVisualStudioDetails[_catalogKey][_catalogDisplayVersionKey];
 
-  /// True if the Visual Studio installation is as pre-release version.
-  bool get isPrerelease =>
-      _bestVisualStudioDetails[_catalogKey][_isPrereleaseKey];
-
   /// The directory where Visual Studio is installed.
   String get installLocation => _bestVisualStudioDetails[_installationPathKey];
 
@@ -47,14 +43,21 @@ class VisualStudio {
   /// For instance: "15.4.27004.2002".
   String get fullVersion => _bestVisualStudioDetails[_fullVersionKey];
 
+  // Properties that determine the status of the installation. There might be
+  // Visual Studio versions that don't include them, so default to a "valid" value to
+  // avoid false negatives.
+
   /// True there is complete installation of Visual Studio.
-  bool get isComplete => _bestVisualStudioDetails[_isCompleteKey];
+  bool get isComplete => _bestVisualStudioDetails[_isCompleteKey] ?? false;
 
   /// True if Visual Studio is launchable.
-  bool get isLaunchable => _bestVisualStudioDetails[_isLaunchableKey];
+  bool get isLaunchable => _bestVisualStudioDetails[_isLaunchableKey] ?? false;
+
+    /// True if the Visual Studio installation is as pre-release version.
+  bool get isPrerelease => _bestVisualStudioDetails[_isPrereleaseKey] ?? false;
 
   /// True if a reboot is required to complete the Visual Studio installation.
-  bool get isRebootRequired => _bestVisualStudioDetails[_isRebootRequiredKey];
+  bool get isRebootRequired => _bestVisualStudioDetails[_isRebootRequiredKey] ?? false;
 
   /// The name of the recommended Visual Studio installer workload.
   String get workloadDescription => 'Desktop development with C++';
@@ -141,15 +144,13 @@ class VisualStudio {
   /// The 'catalog' entry containing more details.
   static const String _catalogKey = 'catalog';
 
+  /// The key for a pre-release version.
+  static const String _isPrereleaseKey = 'isPrerelease';
+
   /// The user-friendly version.
   ///
   /// This key is under the 'catalog' entry.
   static const String _catalogDisplayVersionKey = 'productDisplayVersion';
-
-  /// The key for a pre-release version.
-  ///
-  /// This key is under the 'catalog' entry.
-  static const String _isPrereleaseKey = 'productMilestoneIsPreRelease';
 
   /// vswhere argument keys
   static const String _prereleaseKey = '-prerelease';
@@ -189,15 +190,24 @@ class VisualStudio {
   }
 
   /// Checks if the given installation has issues that the user must resolve.
+  ///
+  /// Returns false if the required information is missing since older versions
+  /// of Visual Studio might not include them.
   bool installationHasIssues(Map<String, dynamic>installationDetails) {
     assert(installationDetails != null);
-    assert(installationDetails[_isCompleteKey] != null);
-    assert(installationDetails[_isRebootRequiredKey] != null);
-    assert(installationDetails[_isLaunchableKey] != null);
+    if (installationDetails[_isCompleteKey] != null && !installationDetails[_isCompleteKey]) {
+      return true;
+    }
 
-    return installationDetails[_isCompleteKey] == false ||
-      installationDetails[_isRebootRequiredKey] == true ||
-      installationDetails[_isLaunchableKey] == false;
+    if (installationDetails[_isLaunchableKey] != null && !installationDetails[_isLaunchableKey]) {
+      return true;
+    }
+
+    if (installationDetails[_isRebootRequiredKey] != null && installationDetails[_isRebootRequiredKey]) {
+      return true;
+    }
+
+    return false;
   }
 
   /// Returns the details dictionary for the latest version of Visual Studio
