@@ -82,8 +82,8 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 ///
 /// This example shows how you can use [MaterialStateBuilder] to create a custom
 /// interactive button. When the button is hovered, the text gets an underline,
-/// the elevation increases, and the border width increases. When the button is
-/// pressed, the text and border become yellow.
+/// and the border width increases. When the button is pressed, the text and
+/// border become yellow.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
