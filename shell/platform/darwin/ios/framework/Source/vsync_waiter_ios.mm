@@ -114,7 +114,8 @@ float VsyncWaiterIOS::GetDisplayRefreshRate() const {
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
-  fml::TimePoint frame_start_time = fml::TimePoint::Now();
+  CFTimeInterval delay = CACurrentMediaTime() - link.timestamp;
+  fml::TimePoint frame_start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
   fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(link.duration);
 
   display_link_.get().paused = YES;
