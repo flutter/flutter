@@ -493,7 +493,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///
 /// {@animation 200 150 https://flutter.github.io/assets-for-api-docs/assets/widgets/future_builder_error.mp4}
 ///
-/// {@tool sample}
+/// {@tool snippet --template=stateful_widget_material}
 ///
 /// This sample shows a [FutureBuilder] that displays a loading spinner while it
 /// loads data. It displays a success icon and text if the [Future] completes
@@ -502,55 +502,64 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// in the UI.
 ///
 /// ```dart
-/// FutureBuilder<String>(
-///   future: _calculation, // a previously-obtained Future<String> or null
-///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-///     List<Widget> children;
+/// Future<String> _calculation = Future<String>.delayed(
+///   Duration(seconds: 2),
+///   () => 'Data Loaded',
+/// );
 ///
-///     if (snapshot.hasData) {
-///       children = <Widget>[
-///         Icon(
-///           Icons.check_circle_outline,
-///           color: Colors.green,
-///           size: widget.size,
+/// Widget build(BuildContext context) {
+///   return FutureBuilder<String>(
+///     future: _calculation, // a previously-obtained Future<String> or null
+///     builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+///       List<Widget> children;
+///
+///       if (snapshot.hasData) {
+///         children = <Widget>[
+///           Icon(
+///             Icons.check_circle_outline,
+///             color: Colors.green,
+///             size: 60,
+///           ),
+///           Padding(
+///             padding: const EdgeInsets.only(top: 16),
+///             child: Text('Result: ${snapshot.data}'),
+///           )
+///         ];
+///       } else if (snapshot.hasError) {
+///         children = <Widget>[
+///           Icon(
+///             Icons.error_outline,
+///             color: Colors.red,
+///             size: 60,
+///           ),
+///           Padding(
+///             padding: const EdgeInsets.only(top: 16),
+///             child: Text('Error: ${snapshot.error}'),
+///           )
+///         ];
+///       } else {
+///         children = <Widget>[
+///           SizedBox(
+///             child: CircularProgressIndicator(),
+///             width: 60,
+///             height: 60,
+///           ),
+///           const Padding(
+///             padding: EdgeInsets.only(top: 16),
+///             child: Text('Awaiting result...'),
+///           )
+///         ];
+///       }
+///       return Center(
+///         child: Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
+///           crossAxisAlignment: CrossAxisAlignment.center,
+///           children: children,
 ///         ),
-///         Padding(
-///           padding: const EdgeInsets.only(top: 16),
-///           child: Text('Result: ${snapshot.data}'),
-///         )
-///       ];
-///     } else if (snapshot.hasError) {
-///       children = <Widget>[
-///         Icon(
-///           Icons.error_outline,
-///           color: Colors.red,
-///           size: widget.size,
-///         ),
-///         Padding(
-///           padding: const EdgeInsets.only(top: 16),
-///           child: Text('Error: ${snapshot.error}'),
-///         )
-///       ];
-///     } else {
-///       children = <Widget>[
-///         SizedBox(
-///           child: const CircularProgressIndicator(),
-///           width: widget.size,
-///           height: widget.size,
-///         ),
-///         const Padding(
-///           padding: EdgeInsets.only(top: 16),
-///           child: Text('Awaiting result...'),
-///         )
-///       ];
-///     }
-///     return Column(
-///       mainAxisAlignment: MainAxisAlignment.center,
-///       crossAxisAlignment: CrossAxisAlignment.center,
-///       children: children,
-///     );
-///   },
-/// )
+///       );
+///     },
+///   );
+/// }
 /// ```
 /// {@end-tool}
 // TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
