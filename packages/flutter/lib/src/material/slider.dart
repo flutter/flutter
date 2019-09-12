@@ -672,7 +672,7 @@ class _RenderSlider extends RenderBox {
        _textDirection = textDirection {
     _updateLabelPainter();
     final GestureArenaTeam team = GestureArenaTeam();
-    _drag = HorizontalDragGestureRecognizer()
+    _drag = HorizontalDragGestureRecognizer(touchSlop: 0)
       ..team = team
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate

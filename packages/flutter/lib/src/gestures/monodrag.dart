@@ -468,23 +468,29 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 ///  * [MultiDragGestureRecognizer], for a family of gesture recognizers that
 ///    track each touch point independently.
 class VerticalDragGestureRecognizer extends DragGestureRecognizer {
+
+  /// The distance a touch has to travel for the framework to be confident that
+  /// the gesture is a scroll gesture. Defaults to [kTouchSlop].
+  final double touchSlop;
+
   /// Create a gesture recognizer for interactions in the vertical axis.
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
   VerticalDragGestureRecognizer({
     Object debugOwner,
     PointerDeviceKind kind,
+    this.touchSlop = kTouchSlop,
   }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
   bool isFlingGesture(VelocityEstimate estimate) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? kTouchSlop;
+    final double minDistance = minFlingDistance ?? touchSlop;
     return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
   }
 
   @override
-  bool get _hasSufficientGlobalDistanceToAccept => _globalDistanceMoved.abs() > kTouchSlop;
+  bool get _hasSufficientGlobalDistanceToAccept => _globalDistanceMoved.abs() > touchSlop;
 
   @override
   Offset _getDeltaForDetails(Offset delta) => Offset(0.0, delta.dy);
@@ -507,23 +513,29 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 ///  * [MultiDragGestureRecognizer], for a family of gesture recognizers that
 ///    track each touch point independently.
 class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
+
+  /// The distance a touch has to travel for the framework to be confident that
+  /// the gesture is a scroll gesture. Defaults to [kTouchSlop].
+  final double touchSlop;
+
   /// Create a gesture recognizer for interactions in the horizontal axis.
   ///
   /// {@macro flutter.gestures.gestureRecognizer.kind}
   HorizontalDragGestureRecognizer({
     Object debugOwner,
     PointerDeviceKind kind,
+    this.touchSlop = kTouchSlop,
   }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
   bool isFlingGesture(VelocityEstimate estimate) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? kTouchSlop;
+    final double minDistance = minFlingDistance ?? touchSlop;
     return estimate.pixelsPerSecond.dx.abs() > minVelocity && estimate.offset.dx.abs() > minDistance;
   }
 
   @override
-  bool get _hasSufficientGlobalDistanceToAccept => _globalDistanceMoved.abs() > kTouchSlop;
+  bool get _hasSufficientGlobalDistanceToAccept => _globalDistanceMoved.abs() > touchSlop;
 
   @override
   Offset _getDeltaForDetails(Offset delta) => Offset(delta.dx, 0.0);
