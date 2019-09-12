@@ -152,6 +152,7 @@ void main() {
       GradleUtils: () => GradleUtils(),
       ProcessManager: () => mockProcessManager,
     },
+    skip: true,
     timeout: allowForCreateFlutterProject);
 
     testUsingContext('proguard is disabled when --no-proguard is passed', () async {
@@ -186,6 +187,7 @@ void main() {
       GradleUtils: () => GradleUtils(),
       ProcessManager: () => mockProcessManager,
     },
+    skip: true,
     timeout: allowForCreateFlutterProject);
 
     testUsingContext('guides the user when proguard fails', () async {
@@ -244,6 +246,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Usage: () => mockUsage,
     },
+    skip: true,
     timeout: allowForCreateFlutterProject);
   });
 }
