@@ -30,6 +30,15 @@ args.ArgParser get _argParser {
       help: 'Pauses the browser before running a test, giving you an '
         'opportunity to add breakpoints or inspect loaded code before '
         'running the code.',
+    )
+    ..addOption(
+      'chrome-version',
+      help: 'The Chrome version to use while running tests. If the requested '
+        'version has not been installed, it will be downloaded and installed '
+        'automatically. A specific Chrome build version number, such as 695653 '
+        'this use that version of Chrome. Value "latest" will use the latest '
+        'available build of Chrome, installing it if necessary. Value "system" '
+        'will use the manually installed version of Chrome on this computer.',
     );
 }
 
@@ -63,6 +72,9 @@ class Environment {
       }
     }
 
+    final String pinnedChromeVersion = io.File(pathlib.join(webUiRootDir.path, 'dev', 'chrome.lock')).readAsStringSync().trim();
+    final String chromeVersion = options['chrome-version'] ?? pinnedChromeVersion;
+
     return Environment._(
       self: self,
       webUiRootDir: webUiRootDir,
@@ -73,6 +85,7 @@ class Environment {
       requestedShards: shards,
       isDebug: isDebug,
       targets: targets,
+      chromeVersion: chromeVersion,
     );
   }
 
@@ -86,6 +99,7 @@ class Environment {
     this.requestedShards,
     this.isDebug,
     this.targets,
+    this.chromeVersion,
   });
 
   /// The Dart script that's currently running.
@@ -119,6 +133,21 @@ class Environment {
 
   /// Paths to targets to run, e.g. a single test.
   final List<String> targets;
+
+  /// The Chrome version used for testing.
+  ///
+  /// The value must be one of:
+  ///
+  /// - "system", which indicates the Chrome installed on the local machine.
+  /// - "latest", which indicates the latest available Chrome build specified by:
+  ///   https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2FLAST_CHANGE?alt=media
+  /// - A build number pointing at a pre-built version of Chrome available at:
+  ///   https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=Linux_x64/
+  ///
+  /// The "system" Chrome is assumed to be already properly installed and will be invoked directly.
+  ///
+  /// The "latest" or a specific build number will be downloaded and cached in [webUiDartToolDir].
+  final String chromeVersion;
 
   /// The "dart" executable file.
   String get dartExecutable => pathlib.join(dartSdkDir.path, 'bin', 'dart');
@@ -155,13 +184,4 @@ class Environment {
     webUiRootDir.path,
     '.dart_tool',
   ));
-}
-
-String _which(String executable) {
-  final io.ProcessResult result = io.Process.runSync('which', <String>[executable]);
-  if (result.exitCode != 0) {
-    io.stderr.writeln(result.stderr);
-    io.exit(result.exitCode);
-  }
-  return result.stdout;
 }
