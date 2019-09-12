@@ -85,11 +85,21 @@ void main() {
     for (File input in inputs) {
       input.createSync(recursive: true);
     }
+    // Create output directory so we can test that it is deleted.
+    environment.outputDir.childDirectory(_kOutputPrefix)
+        .createSync(recursive: true);
+
     when(processManager.run(any)).thenAnswer((Invocation invocation) async {
       final List<String> arguments = invocation.positionalArguments.first;
-      final Directory source = fs.directory(arguments[arguments.length - 2]);
-      final Directory target = fs.directory(arguments.last)
-        ..createSync(recursive: true);
+      final String sourcePath = arguments[arguments.length - 2];
+      final String targetPath = arguments.last;
+      final Directory source = fs.directory(sourcePath);
+      final Directory target = fs.directory(targetPath);
+
+      // verify directory was deleted by command.
+      expect(target.existsSync(), false);
+      target.createSync(recursive: true);
+
       for (FileSystemEntity entity in source.listSync(recursive: true)) {
         if (entity is File) {
           final String relative = fs.path.relative(entity.path, from: source.path);
@@ -161,6 +171,26 @@ void main() {
     expect(fs.file(outputKernel).existsSync(), false);
     expect(fs.file(precompiledVm).existsSync(), false);
     expect(fs.file(precompiledIsolate).existsSync(), false);
+  }));
+
+  test('release/profile macOS application updates when App.framework updates', () => testbed.run(() async {
+    fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
+        'vm_isolate_snapshot.bin')).createSync(recursive: true);
+    fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
+        'isolate_snapshot.bin')).createSync(recursive: true);
+    final File inputFramework = fs.file(fs.path.join(environment.buildDir.path, 'App.framework', 'App'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('ABC');
+
+    await const ProfileMacOSBundleFlutterAssets().build(environment..defines[kBuildMode] = 'profile');
+    final File outputFramework = fs.file(fs.path.join(environment.outputDir.path, 'App.framework', 'App'));
+
+    expect(outputFramework.readAsStringSync(), 'ABC');
+
+    inputFramework.writeAsStringSync('DEF');
+    await const ProfileMacOSBundleFlutterAssets().build(environment..defines[kBuildMode] = 'profile');
+
+    expect(outputFramework.readAsStringSync(), 'DEF');
   }));
 
   test('release/profile macOS compilation uses correct gen_snapshot', () => testbed.run(() async {
