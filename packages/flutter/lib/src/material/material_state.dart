@@ -78,7 +78,7 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// listener widgets for hover, focus, and press changes and call [builder] with the
 /// proper `Set<MaterialState>`.
 ///
-/// {@tool dartpad --template=stateless_widget_scaffold}
+/// {@tool snippet --template=stateless_widget_scaffold}
 ///
 /// This example shows how you can use [MaterialStateBuilder] to create a custom
 /// interactive button. When the button is hovered, the text gets an underline,
