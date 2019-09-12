@@ -183,6 +183,7 @@ class ChipThemeData extends Diagnosticable {
     @required this.secondarySelectedColor,
     this.shadowColor,
     this.selectedShadowColor,
+    this.checkMarkColor,
     @required this.labelPadding,
     @required this.padding,
     @required this.shape,
@@ -326,6 +327,11 @@ class ChipThemeData extends Diagnosticable {
   ///  * [shadowColor]
   final Color selectedShadowColor;
 
+  /// Color of the chip's check mark when a check mark is visible.
+  ///
+  /// This will override the color set by the platform's brightness setting.
+  final Color checkMarkColor;
+
   /// The padding around the [label] widget.
   ///
   /// By default, this is 4 logical pixels at the beginning and the end of the
@@ -380,6 +386,7 @@ class ChipThemeData extends Diagnosticable {
     Color secondarySelectedColor,
     Color shadowColor,
     Color selectedShadowColor,
+    Color checkMarkColor,
     EdgeInsetsGeometry labelPadding,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
@@ -397,6 +404,7 @@ class ChipThemeData extends Diagnosticable {
       secondarySelectedColor: secondarySelectedColor ?? this.secondarySelectedColor,
       shadowColor: shadowColor ?? this.shadowColor,
       selectedShadowColor: selectedShadowColor ?? this.selectedShadowColor,
+      checkMarkColor: checkMarkColor ?? this.checkMarkColor,
       labelPadding: labelPadding ?? this.labelPadding,
       padding: padding ?? this.padding,
       shape: shape ?? this.shape,
@@ -425,6 +433,7 @@ class ChipThemeData extends Diagnosticable {
       secondarySelectedColor: Color.lerp(a?.secondarySelectedColor, b?.secondarySelectedColor, t),
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       selectedShadowColor: Color.lerp(a?.selectedShadowColor, b?.selectedShadowColor, t),
+      checkMarkColor: Color.lerp(a?.checkMarkColor, b?.checkMarkColor, t),
       labelPadding: EdgeInsetsGeometry.lerp(a?.labelPadding, b?.labelPadding, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
@@ -446,6 +455,7 @@ class ChipThemeData extends Diagnosticable {
       secondarySelectedColor,
       shadowColor,
       selectedShadowColor,
+      checkMarkColor,
       labelPadding,
       padding,
       shape,
@@ -473,6 +483,7 @@ class ChipThemeData extends Diagnosticable {
         && otherData.secondarySelectedColor == secondarySelectedColor
         && otherData.shadowColor == shadowColor
         && otherData.selectedShadowColor == selectedShadowColor
+        && otherData.checkMarkColor == checkMarkColor
         && otherData.labelPadding == labelPadding
         && otherData.padding == padding
         && otherData.shape == shape
@@ -499,6 +510,7 @@ class ChipThemeData extends Diagnosticable {
     properties.add(ColorProperty('secondarySelectedColor', secondarySelectedColor, defaultValue: defaultData.secondarySelectedColor));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: defaultData.shadowColor));
     properties.add(ColorProperty('selectedShadowColor', selectedShadowColor, defaultValue: defaultData.selectedShadowColor));
+    properties.add(ColorProperty('checkMarkColor', checkMarkColor, defaultValue: defaultData.checkMarkColor));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('labelPadding', labelPadding, defaultValue: defaultData.labelPadding));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultData.padding));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));

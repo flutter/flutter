@@ -1072,6 +1072,7 @@ class FilterChip extends StatelessWidget
     this.elevation,
     this.shadowColor,
     this.selectedShadowColor,
+    this.checkMarkColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(selected != null),
        assert(label != null),
@@ -1124,6 +1125,8 @@ class FilterChip extends StatelessWidget
   @override
   final ShapeBorder avatarBorder;
 
+  final Color checkMarkColor;
+
   @override
   bool get isEnabled => onSelected != null;
 
@@ -1152,6 +1155,7 @@ class FilterChip extends StatelessWidget
       elevation: elevation,
       shadowColor: shadowColor,
       selectedShadowColor: selectedShadowColor,
+      checkMarkColor: checkMarkColor,
       avatarBorder: avatarBorder,
     );
   }
@@ -1364,6 +1368,7 @@ class RawChip extends StatefulWidget
     this.isEnabled = true,
     this.disabledColor,
     this.selectedColor,
+    this.checkMarkColor,
     this.tooltip,
     this.shape,
     this.clipBehavior = Clip.none,
@@ -1447,6 +1452,8 @@ class RawChip extends StatefulWidget
   ///
   /// Defaults to true.
   final bool showCheckmark;
+
+  final Color checkMarkColor;
 
   /// If set, this indicates that the chip should be disabled if all of the
   /// tap callbacks ([onSelected], [onPressed]) are null.
@@ -1719,6 +1726,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final double pressElevation = widget.pressElevation ?? chipTheme.pressElevation ?? _defaultPressElevation;
     final Color shadowColor = widget.shadowColor ?? chipTheme.shadowColor ?? _defaultShadowColor;
     final Color selectedShadowColor = widget.selectedShadowColor ?? chipTheme.selectedShadowColor ?? _defaultShadowColor;
+    final Color checkMarkColor = widget.checkMarkColor ?? chipTheme.checkMarkColor;
 
     final TextStyle effectiveLabelStyle = widget.labelStyle ?? chipTheme.labelStyle;
     final Color resolvedLabelColor =  MaterialStateProperty.resolveAs<Color>(effectiveLabelStyle?.color, _states);
@@ -1780,6 +1788,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                   labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
                   showAvatar: hasAvatar,
                   showCheckmark: widget.showCheckmark,
+                  checkMarkColor: checkMarkColor,
                   canTapBody: canTap,
                 ),
                 value: widget.selected,
@@ -2048,6 +2057,7 @@ class _ChipRenderTheme {
     @required this.labelPadding,
     @required this.showAvatar,
     @required this.showCheckmark,
+    @required this.checkMarkColor,
     @required this.canTapBody,
   });
 
@@ -2059,6 +2069,7 @@ class _ChipRenderTheme {
   final EdgeInsets labelPadding;
   final bool showAvatar;
   final bool showCheckmark;
+  final Color checkMarkColor;
   final bool canTapBody;
 
   @override
@@ -2078,6 +2089,7 @@ class _ChipRenderTheme {
         && typedOther.labelPadding == labelPadding
         && typedOther.showAvatar == showAvatar
         && typedOther.showCheckmark == showCheckmark
+        && typedOther.checkMarkColor == checkMarkColor
         && typedOther.canTapBody == canTapBody;
   }
 
@@ -2092,6 +2104,7 @@ class _ChipRenderTheme {
       labelPadding,
       showAvatar,
       showCheckmark,
+      checkMarkColor,
       canTapBody,
     );
   }
@@ -2584,13 +2597,19 @@ class _RenderChip extends RenderBox {
 
   void _paintCheck(Canvas canvas, Offset origin, double size) {
     Color paintColor;
-    switch (theme.brightness) {
-      case Brightness.light:
-        paintColor = theme.showAvatar ? Colors.white : Colors.black.withAlpha(_kCheckmarkAlpha);
-        break;
-      case Brightness.dark:
-        paintColor = theme.showAvatar ? Colors.black : Colors.white.withAlpha(_kCheckmarkAlpha);
-        break;
+    if (theme.checkMarkColor != null) {
+      paintColor = theme.checkMarkColor;
+    } else {
+      switch (theme.brightness) {
+        case Brightness.light:
+          paintColor = theme.showAvatar ? Colors.white : Colors.black.withAlpha(
+              _kCheckmarkAlpha);
+          break;
+        case Brightness.dark:
+          paintColor = theme.showAvatar ? Colors.black : Colors.white.withAlpha(
+              _kCheckmarkAlpha);
+          break;
+      }
     }
 
     final ColorTween fadeTween = ColorTween(begin: Colors.transparent, end: paintColor);
