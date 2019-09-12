@@ -4,6 +4,7 @@
 
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/process.dart';
 import '../convert.dart';
 import '../globals.dart';
@@ -38,9 +39,12 @@ class PlistParser {
       final List<String> args = <String>[
         executable, '-convert', 'json', '-o', '-', normalizedPlistPath,
       ];
-      final String jsonContent = runCheckedSync(args);
+      final String jsonContent = processUtils.runSync(
+        args,
+        throwOnError: true,
+      ).stdout.trim();
       return json.decode(jsonContent);
-    } catch (error) {
+    } on ProcessException catch (error) {
       printTrace('$error');
       return const <String, dynamic>{};
     }

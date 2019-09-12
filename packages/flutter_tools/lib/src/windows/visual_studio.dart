@@ -6,7 +6,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
-import '../base/process_manager.dart';
+import '../base/process.dart';
 import '../convert.dart';
 
 VisualStudio get visualStudio => context.get<VisualStudio>();
@@ -167,7 +167,7 @@ class VisualStudio {
         '-utf8',
         '-latest',
       ];
-      final ProcessResult whereResult = processManager.runSync(<String>[
+      final RunResult whereResult = processUtils.runSync(<String>[
         _vswherePath,
         ...defaultArguments,
         ...?additionalArguments,

@@ -69,18 +69,23 @@ void main() {
     final String finalResponse =
         json.encode(<Map<String, dynamic>>[response]);
     when<String>(result.stdout).thenReturn(finalResponse);
+    when<String>(result.stderr).thenReturn('');
     final List<String> requirementArguments = requiredComponents == null
         ? <String>[]
         : <String>['-requires', ...requiredComponents];
-    when(mockProcessManager.runSync(<String>[
-      vswherePath,
-      '-format',
-      'json',
-      '-utf8',
-      '-latest',
-      ...?additionalArguments,
-      ...?requirementArguments,
-    ])).thenAnswer((Invocation invocation) {
+    when(mockProcessManager.runSync(
+      <String>[
+        vswherePath,
+          '-format',
+          'json',
+          '-utf8',
+          '-latest',
+          ...?additionalArguments,
+          ...?requirementArguments,
+      ],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenAnswer((Invocation invocation) {
       return result;
     });
   }
@@ -111,8 +116,11 @@ void main() {
     });
 
     testUsingContext('isInstalled returns false when vswhere is missing', () {
-      when(mockProcessManager.runSync(any))
-          .thenThrow(const ProcessException('vswhere', <String>[]));
+      when(mockProcessManager.runSync(
+        any,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenThrow(const ProcessException('vswhere', <String>[]));
 
       visualStudio = VisualStudio();
       expect(visualStudio.isInstalled, false);
@@ -123,8 +131,11 @@ void main() {
     });
 
     testUsingContext('vcvarsPath returns null when vswhere is missing', () {
-      when(mockProcessManager.runSync(any))
-          .thenThrow(const ProcessException('vswhere', <String>[]));
+      when(mockProcessManager.runSync(
+        any,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenThrow(const ProcessException('vswhere', <String>[]));
 
       visualStudio = VisualStudio();
       expect(visualStudio.vcvarsPath, isNull);
@@ -135,13 +146,24 @@ void main() {
     });
 
     testUsingContext('isInstalled returns false when vswhere returns non-zero', () {
-      when(mockProcessManager.runSync(any))
-          .thenThrow(const ProcessException('vswhere', <String>[]));
+
+      when(mockProcessManager.runSync(
+        any,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenThrow(const ProcessException('vswhere', <String>[]));
+
       final MockProcessResult result = MockProcessResult();
       when(result.exitCode).thenReturn(1);
-      when(mockProcessManager.runSync(any)).thenAnswer((Invocation invocation) {
+      when(mockProcessManager.runSync(
+        any,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((Invocation invocation) {
         return result;
       });
+      when<String>(result.stdout).thenReturn('');
+      when<String>(result.stderr).thenReturn('');
 
       visualStudio = VisualStudio();
       expect(visualStudio.isInstalled, false);
