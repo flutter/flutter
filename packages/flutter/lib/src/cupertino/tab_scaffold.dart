@@ -467,6 +467,11 @@ class _TabSwitchingView extends StatefulWidget {
 class _TabSwitchingViewState extends State<_TabSwitchingView> {
   final List<bool> shouldBuildTab = <bool>[];
   final List<FocusScopeNode> tabFocusNodes = <FocusScopeNode>[];
+
+  // When focus nodes are no longer needed, we need to dispose of them, but we
+  // can't be sure that nothing else is listening to them until this widget is
+  // disposed of, so when they are no longer needed, we move them to this list,
+  // and dispose of them when we dispose of this widget.
   final List<FocusScopeNode> discardedNodes = <FocusScopeNode>[];
 
   @override
@@ -504,13 +509,13 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
   void _focusActiveTab() {
     if (tabFocusNodes.length != widget.tabCount) {
       if (tabFocusNodes.length > widget.tabCount) {
-        discardedNodes.addAll(tabFocusNodes.sublist(widget.tabCount, tabFocusNodes.length));
+        discardedNodes.addAll(tabFocusNodes.sublist(widget.tabCount));
         tabFocusNodes.removeRange(widget.tabCount, tabFocusNodes.length);
       } else {
         tabFocusNodes.addAll(
           List<FocusScopeNode>.generate(
             widget.tabCount - tabFocusNodes.length,
-                (int index) => FocusScopeNode(debugLabel: '${describeIdentity(widget)} Tab ${index + tabFocusNodes.length}'),
+              (int index) => FocusScopeNode(debugLabel: '${describeIdentity(widget)} Tab ${index + tabFocusNodes.length}'),
           ),
         );
       }
