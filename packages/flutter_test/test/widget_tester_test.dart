@@ -467,6 +467,7 @@ void main() {
       final StringBuffer buf = StringBuffer('1');
       await tester.runAsync(() async {
         buf.write('2');
+        //ignore: avoid_slow_async_io
         await Directory.current.stat();
         buf.write('3');
       });

@@ -76,12 +76,13 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  codegen_integration_win:
-    description: >
-      Runs codegeneration and verifies that it can execute
-      correctly.
-    stage: devicelab_win
-    required_agent_capabilities: ["windows/android"]
+  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
+  # codegen_integration_win:
+  #   description: >
+  #     Runs codegeneration and verifies that it can execute
+  #     correctly.
+  #   stage: devicelab_win
+  #   required_agent_capabilities: ["windows/android"]
 
   codegen_integration_mac:
     description: >
@@ -90,19 +91,21 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  codegen_integration_linux:
-    description: >
-      Runs codegeneration and verifies that it can execute
-      correctly.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
+  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
+  # codegen_integration_linux:
+  #   description: >
+  #     Runs codegeneration and verifies that it can execute
+  #     correctly.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
 
-  uncaught_image_error_linux:
-    description: >
-      Ensures that an error thrown into the zone can be caught by the ImageStream
-      completer
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
+  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
+  # uncaught_image_error_linux:
+  #   description: >
+  #     Ensures that an error thrown into the zone can be caught by the ImageStream
+  #     completer
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
 
   flutter_gallery_android__compile:
     description: >
@@ -125,12 +128,13 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  windows_chrome_dev_mode:
-    description: >
-      Run flutter web on the devicelab and hot restart.
-    stage: devicelab_win
-    required_agent_capabilities: ["windows/android"]
-    flaky: true
+  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
+  # windows_chrome_dev_mode:
+  #   description: >
+  #     Run flutter web on the devicelab and hot restart.
+  #   stage: devicelab_win
+  #   required_agent_capabilities: ["windows/android"]
+  #   flaky: true
 
   # Android on-device tests
 
@@ -323,14 +327,14 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  flutter_gallery_instrumentation_test:
-    description: >
-      Same as flutter_gallery__transition_perf but uses Android instrumentation
-      framework, and therefore does not require a host computer to run. This
-      test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
+  # flutter_gallery_instrumentation_test:
+  #   description: >
+  #     Same as flutter_gallery__transition_perf but uses Android instrumentation
+  #     framework, and therefore does not require a host computer to run. This
+  #     test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
+  #   flaky: true
 
   flutter_attach_test:
     description: >
@@ -344,18 +348,20 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  linux_chrome_dev_mode:
-    description: >
-      Run flutter web on the devicelab and hot restart.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
+  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
+  # linux_chrome_dev_mode:
+  #   description: >
+  #     Run flutter web on the devicelab and hot restart.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
+  #   flaky: true
 
-  web_size__compile_test:
-    description: >
-      Measures the size of a dart2js bundle.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
+  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
+  # web_size__compile_test:
+  #   description: >
+  #     Measures the size of a dart2js bundle.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
 
   image_list_reported_duration:
     description: >
@@ -369,11 +375,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  build_benchmark:
-    description: >
-      Measures APK build performance across config changes.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
+  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
+  # build_benchmark:
+  #   description: >
+  #     Measures APK build performance across config changes.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
 
   # iOS on-device tests
 
@@ -517,12 +524,12 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  macos_chrome_dev_mode:
-    description: >
-      Run flutter web on the devicelab and hot restart.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-    flaky: true # marekd as flaky while infra is under heavy development
+  # macos_chrome_dev_mode:
+  #   description: >
+  #     Run flutter web on the devicelab and hot restart.
+  #   stage: devicelab_ios
+  #   required_agent_capabilities: ["mac/ios"]
+  #   flaky: true # marked as flaky while infra is under heavy development
 
   build_benchmark_ios:
     description: >
@@ -540,21 +547,18 @@ tasks:
     description: >
       A some test that runs on macOS Catalina, which is a clone of the Dart VM hot patching performance benchmarking.
     stage: devicelab_ios
-    flaky: true
     required_agent_capabilities: ["mac-catalina/ios"]
 
   smoke_catalina_start_up:
     description: >
       A smoke test that runs on macOS Catalina, which is a clone of the Gallery startup latency test.
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["mac-catalina/android"]
 
   smoke_catalina_hot_mode_dev_cycle__benchmark:
     description: >
       A some test that runs on macOS Catalina, which is a clone of the Dart VM hot patching performance benchmarking.
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["mac-catalina/android"]
 
   # Tests running on Windows host
@@ -583,11 +587,11 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  run_without_leak_win:
-    description: >
-      Checks that `flutter run` does not leak dart.exe on Windows.
-    stage: devicelab_win
-    required_agent_capabilities: ["windows/android"]
+  # run_without_leak_win:
+  #   description: >
+  #     Checks that `flutter run` does not leak dart.exe on Windows.
+  #   stage: devicelab_win
+  #   required_agent_capabilities: ["windows/android"]
 
   # Tests running on Linux hosts
 
@@ -620,7 +624,6 @@ tasks:
       Measures the performance of screen transitions in Flutter Gallery on
       Android.
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   flutter_gallery__transition_perf_with_semantics:
@@ -655,23 +658,23 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  run_without_leak_linux:
-    description: >
-      Checks that `flutter run` does not leak dart on Linux.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
+  # run_without_leak_linux:
+  #   description: >
+  #     Checks that `flutter run` does not leak dart on Linux.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
+  #   flaky: true
 
-  run_without_leak_mac:
-    description: >
-      Checks that `flutter run` does not leak dart on macOS.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-    flaky: true
+  # run_without_leak_mac:
+  #   description: >
+  #     Checks that `flutter run` does not leak dart on macOS.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["mac/android"]
+  #   flaky: true
 
-  android_splash_screen_integration_test:
-    description: >
-      Runs end-to-end test of Flutter's Android splash behavior.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
+  # android_splash_screen_integration_test:
+  #   description: >
+  #     Runs end-to-end test of Flutter's Android splash behavior.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
+  #   flaky: true

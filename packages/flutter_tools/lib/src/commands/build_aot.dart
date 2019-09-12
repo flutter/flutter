@@ -9,6 +9,7 @@ import '../base/build.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/version.dart';
@@ -142,14 +143,18 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
 
         // Merge arch-specific App.frameworks into a multi-arch App.framework.
         if ((await Future.wait<int>(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
-          final Iterable<String> dylibs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
+          final Iterable<String> dylibs = iosBuilds.values.map<String>(
+              (String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
           fs.directory(fs.path.join(outputPath, 'App.framework'))..createSync();
-          await runCheckedAsync(<String>[
-            'lipo',
-            ...dylibs,
-            '-create',
-            '-output', fs.path.join(outputPath, 'App.framework', 'App'),
-          ]);
+          await processUtils.run(
+            <String>[
+              'lipo',
+              ...dylibs,
+              '-create',
+              '-output', fs.path.join(outputPath, 'App.framework', 'App'),
+            ],
+            throwOnError: true,
+          );
         } else {
           status?.cancel();
           exitCodes.forEach((DarwinArch iosArch, Future<int> exitCodeFuture) async {
@@ -173,10 +178,10 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
           throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');
         }
       }
-    } on String catch (error) {
-      // Catch the String exceptions thrown from the `runCheckedSync` methods below.
+    } on ProcessException catch (error) {
+      // Catch the String exceptions thrown from the `runSync` methods below.
       status?.cancel();
-      printError(error);
+      printError(error.toString());
       return null;
     }
     status?.stop();
@@ -226,19 +231,20 @@ Future<void> validateBitcode(BuildMode buildMode, TargetPlatform targetPlatform)
 }
 
 Version _parseVersionFromClang(String clangVersion) {
-  const String prefix = 'Apple LLVM version ';
+  final RegExp pattern = RegExp(r'Apple (LLVM|clang) version (\d+\.\d+\.\d+) ');
   void _invalid() {
     throwToolExit('Unable to parse Clang version from "$clangVersion". '
-                  'Expected a string like "$prefix #.#.# (clang-####.#.##.#)".');
+                  'Expected a string like "Apple (LLVM|clang) #.#.# (clang-####.#.##.#)".');
   }
-  if (clangVersion == null || clangVersion.length <= prefix.length || !clangVersion.startsWith(prefix)) {
+
+  if (clangVersion == null || clangVersion.isEmpty) {
     _invalid();
   }
-  final int lastSpace = clangVersion.lastIndexOf(' ');
-  if (lastSpace == -1) {
+  final RegExpMatch match = pattern.firstMatch(clangVersion);
+  if (match == null || match.groupCount != 2) {
     _invalid();
   }
-  final Version version = Version.parse(clangVersion.substring(prefix.length, lastSpace));
+  final Version version = Version.parse(match.group(2));
   if (version == null) {
     _invalid();
   }

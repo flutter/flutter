@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -482,6 +483,55 @@ void main() {
       // Since none of the focused nodes handle this event, nothing should
       // receive it.
       expect(receivedAnEvent, isEmpty);
+    });
+    testWidgets('Events change focus highlight mode.', (WidgetTester tester) async {
+      await setupWidget(tester);
+      int callCount = 0;
+      FocusHighlightMode lastMode;
+      void handleModeChange(FocusHighlightMode mode) {
+        lastMode = mode;
+        callCount++;
+      }
+
+      final FocusManager focusManager = WidgetsBinding.instance.focusManager;
+      focusManager.addHighlightModeListener(handleModeChange);
+      addTearDown(() => focusManager.removeHighlightModeListener(handleModeChange));
+      expect(callCount, equals(0));
+      expect(lastMode, isNull);
+      focusManager.highlightStrategy = FocusHighlightStrategy.automatic;
+      expect(focusManager.highlightMode, equals(FocusHighlightMode.touch));
+      sendFakeKeyEvent(<String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'fuchsia',
+        'hidUsage': 0x04,
+        'codePoint': 0x64,
+        'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
+      });
+      expect(callCount, equals(1));
+      expect(lastMode, FocusHighlightMode.traditional);
+      expect(focusManager.highlightMode, equals(FocusHighlightMode.traditional));
+      await tester.tap(find.byType(Container));
+      expect(callCount, equals(2));
+      expect(lastMode, FocusHighlightMode.touch);
+      expect(focusManager.highlightMode, equals(FocusHighlightMode.touch));
+      final TestGesture gesture = await tester.startGesture(Offset.zero, kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await gesture.up();
+      expect(callCount, equals(3));
+      expect(lastMode, FocusHighlightMode.traditional);
+      expect(focusManager.highlightMode, equals(FocusHighlightMode.traditional));
+      await tester.tap(find.byType(Container));
+      expect(callCount, equals(4));
+      expect(lastMode, FocusHighlightMode.touch);
+      expect(focusManager.highlightMode, equals(FocusHighlightMode.touch));
+      focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      expect(callCount, equals(5));
+      expect(lastMode, FocusHighlightMode.traditional);
+      expect(focusManager.highlightMode, equals(FocusHighlightMode.traditional));
+      focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+      expect(callCount, equals(6));
+      expect(lastMode, FocusHighlightMode.touch);
+      expect(focusManager.highlightMode, equals(FocusHighlightMode.touch));
     });
     testWidgets('implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();

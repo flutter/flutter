@@ -15,7 +15,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../services/fake_platform_views.dart';
 
 void main() {
-
   group('AndroidView', () {
     testWidgets('Create Android view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();

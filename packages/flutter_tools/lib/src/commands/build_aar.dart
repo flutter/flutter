@@ -4,17 +4,13 @@
 
 import 'dart:async';
 
-import '../android/aar.dart';
-import '../base/context.dart';
+import '../android/android_builder.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
-
-/// The AAR builder in the current context.
-AarBuilder get aarBuilder => context.get<AarBuilder>() ?? AarBuilderImpl();
 
 class BuildAarCommand extends BuildSubCommand {
   BuildAarCommand({bool verboseHelp = false}) {
@@ -74,7 +70,7 @@ class BuildAarCommand extends BuildSubCommand {
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(buildInfo,
         targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName));
 
-    await aarBuilder.build(
+    await androidBuilder.buildAar(
       project: _getProject(),
       target: '', // Not needed because this command only builds Android's code.
       androidBuildInfo: androidBuildInfo,

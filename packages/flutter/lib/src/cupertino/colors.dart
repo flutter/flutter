@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show Color;
-import 'package:collection/collection.dart' show DeepCollectionEquality;
 
 import '../../foundation.dart';
 import '../widgets/basic.dart';
@@ -144,7 +143,7 @@ class CupertinoDynamicColor extends Color {
   /// [BuildContext] given. The default effective color is [color].
   ///
   /// All the colors must not be null.
-  CupertinoDynamicColor({
+  const CupertinoDynamicColor({
     @required Color color,
     @required Color darkColor,
     @required Color highContrastColor,
@@ -155,16 +154,14 @@ class CupertinoDynamicColor extends Color {
     @required Color darkHighContrastElevatedColor,
   }) : this._(
          color,
-         <List<List<Color>>>[
-           <List<Color>>[
-             <Color>[darkColor, darkElevatedColor],
-             <Color>[darkHighContrastColor, darkHighContrastElevatedColor],
-           ],
-         <List<Color>>[
-             <Color>[color, elevatedColor],
-             <Color>[highContrastColor, highContrastElevatedColor],
-           ],
-         ],
+         color,
+         darkColor,
+         highContrastColor,
+         darkHighContrastColor,
+         elevatedColor,
+         darkElevatedColor,
+         highContrastElevatedColor,
+         darkHighContrastElevatedColor,
        );
 
   /// Creates an adaptive [Color] that changes its effective color based on the
@@ -173,7 +170,7 @@ class CupertinoDynamicColor extends Color {
   /// ([MediaQueryData.highContrast]). The default effective color is [color].
   ///
   /// All the colors must not be null.
-  CupertinoDynamicColor.withBrightnessAndContrast({
+  const CupertinoDynamicColor.withBrightnessAndContrast({
     @required Color color,
     @required Color darkColor,
     @required Color highContrastColor,
@@ -188,12 +185,13 @@ class CupertinoDynamicColor extends Color {
     highContrastElevatedColor: highContrastColor,
     darkHighContrastElevatedColor: darkHighContrastColor,
   );
+
   /// Creates an adaptive [Color] that changes its effective color based on the given
   /// [BuildContext]'s brightness (from [MediaQueryData.platformBrightness] or
   /// [CupertinoThemeData.brightness]). The default effective color is [color].
   ///
   /// All the colors must not be null.
-  CupertinoDynamicColor.withBrightness({
+  const CupertinoDynamicColor.withBrightness({
     @required Color color,
     @required Color darkColor,
   }) : this(
@@ -207,19 +205,34 @@ class CupertinoDynamicColor extends Color {
     darkHighContrastElevatedColor: darkColor,
   );
 
-  CupertinoDynamicColor._(
-    Color value,
-    this._colorMap,
-  ) : assert(() {
-        Iterable<Object> expand(Object a) {
-          return (a is Iterable<Object>) ? a.expand<Object>(expand) : <Object>[a];
-        }
+  const CupertinoDynamicColor._(
+    this._effectiveColor,
+    this.color,
+    this.darkColor,
+    this.highContrastColor,
+    this.darkHighContrastColor,
+    this.elevatedColor,
+    this.darkElevatedColor,
+    this.highContrastElevatedColor,
+    this.darkHighContrastElevatedColor,
+  ) : assert(color != null),
+      assert(darkColor != null),
+      assert(highContrastColor != null),
+      assert(darkHighContrastColor != null),
+      assert(elevatedColor != null),
+      assert(darkElevatedColor != null),
+      assert(highContrastElevatedColor != null),
+      assert(darkHighContrastElevatedColor != null),
+      assert(_effectiveColor != null),
+      // The super constructor has to be called with a dummy value in order to mark
+      // this constructor const.
+      // The field `value` is overriden in the class implementation.
+      super(0);
 
-        final Iterable<Object> expanded = expand(_colorMap);
-        assert(expanded.contains(value), '$value is not one of $_colorMap');
-        return !expanded.contains(null) && expanded.length == 8;
-      }(), 'The colorMap provided is invalid: $_colorMap'),
-      super(value.value);
+  final Color _effectiveColor;
+
+  @override
+  int get value => _effectiveColor.value;
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// normal contrast, and base interface elevation.
@@ -230,9 +243,7 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.light].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `false`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.base].
-  Color get color => _colorMap[Brightness.light.index]
-                              [0]  // 0 for normal contrast.
-                              [CupertinoUserInterfaceLevelData.base.index];
+  final Color color;
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// normal contrast, and base interface elevation.
@@ -243,9 +254,7 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.dark].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `false`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.base].
-  Color get darkColor => _colorMap[Brightness.dark.index]
-                                  [0]  // 0 for normal contrast.
-                                  [CupertinoUserInterfaceLevelData.base.index];
+  final Color darkColor;
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// high contrast, and base interface elevation.
@@ -256,9 +265,7 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.light].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `true`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.base].
-  Color get highContrastColor => _colorMap[Brightness.light.index]
-                                          [1]  // 1 for high contrast.
-                                          [CupertinoUserInterfaceLevelData.base.index];
+  final Color highContrastColor;
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// high contrast, and base interface elevation.
@@ -269,9 +276,7 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.dark].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `true`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.base].
-  Color get darkHighContrastColor => _colorMap[Brightness.dark.index]
-                                              [1]  // 1 for high contrast.
-                                              [CupertinoUserInterfaceLevelData.base.index];
+  final Color darkHighContrastColor;
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// normal contrast, and elevated interface elevation.
@@ -282,9 +287,7 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.light].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `false`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.elevated].
-  Color get elevatedColor => _colorMap [Brightness.light.index]
-                                       [0]  // 0 for normal contrast.
-                                       [CupertinoUserInterfaceLevelData.elevated.index];
+  final Color elevatedColor;
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// normal contrast, and elevated interface elevation.
@@ -295,9 +298,7 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.dark].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `false`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.elevated].
-  Color get darkElevatedColor => _colorMap[Brightness.dark.index]
-                                          [0]  // 0 for normal contrast.
-                                          [CupertinoUserInterfaceLevelData.elevated.index];
+  final Color darkElevatedColor;
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// high contrast, and elevated interface elevation.
@@ -308,9 +309,7 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.light].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `true`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.elevated].
-  Color get highContrastElevatedColor => _colorMap[Brightness.light.index]
-                                                  [1]  // 1 for high contrast.
-                                                  [CupertinoUserInterfaceLevelData.elevated.index];
+  final Color highContrastElevatedColor;
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// high contrast, and elevated interface elevation.
@@ -321,20 +320,20 @@ class CupertinoDynamicColor extends Color {
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.dark].
   /// - has a [MediaQuery] whose [MediaQueryData.highContrast] is `true`.
   /// - has a [CupertinoUserInterfaceLevel] that indicates [CupertinoUserInterfaceLevelData.elevated].
-  Color get darkHighContrastElevatedColor => _colorMap[Brightness.dark.index]
-                                                      [1]  // 1 for high contrast.
-                                                      [CupertinoUserInterfaceLevelData.elevated.index];
-
-  final List<List<List<Color>>> _colorMap;
+  final Color darkHighContrastElevatedColor;
 
   /// Resolves the given [Color] by calling [resolveFrom].
   ///
   /// If the given color is already a concrete [Color], it will be returned as is.
+  /// If the given color is null, returns null.
   /// If the given color is a [CupertinoDynamicColor], but the given [BuildContext]
-  /// lacks the dependencies essential to the color resolution, an exception will
-  /// be thrown, unless [nullOk] is set to true.
-  static Color resolve(Color resolvable, BuildContext context, { bool nullOk = false }) {
-    assert(resolvable != null);
+  /// lacks the dependencies required to the color resolution, the default trait
+  /// value will be used ([Brightness.light] platform brightness, normal contrast,
+  /// [CupertinoUserInterfaceLevelData.base] elevation level), unless [nullOk] is
+  /// set to false, in which case an exception will be thrown.
+  static Color resolve(Color resolvable, BuildContext context, { bool nullOk = true }) {
+    if (resolvable == null)
+      return null;
     assert(context != null);
     return (resolvable is CupertinoDynamicColor)
       ? resolvable.resolveFrom(context, nullOk: nullOk)
@@ -385,37 +384,59 @@ class CupertinoDynamicColor extends Color {
   /// from the previous [CupertinoTheme.of] call, in an effort to determine the
   /// brightness value.
   ///
-  /// If any of the required dependecies are missing from the given context, an exception
-  /// will be thrown unless [nullOk] is set to `true`.
+  /// If any of the required dependecies are missing from the given context, the
+  /// default value of that trait will be used ([Brightness.light] platform
+  /// brightness, normal contrast, [CupertinoUserInterfaceLevelData.base] elevation
+  /// level), unless [nullOk] is set to false, in which case an exception will be
+  /// thrown.
   CupertinoDynamicColor resolveFrom(BuildContext context, { bool nullOk = false }) {
-    int brightnessNumber = 0;
-    int highContrastNumber = 0;
-    int interfaceElevationNumber = 0;
+    final Brightness brightness = _isPlatformBrightnessDependent
+      ? CupertinoTheme.brightnessOf(context, nullOk: nullOk) ?? Brightness.light
+      : Brightness.light;
 
-    // If this CupertinoDynamicColor cares about brightness.
-    if (_isPlatformBrightnessDependent) {
-      final Brightness brightness = CupertinoTheme.brightnessOf(context, nullOk: nullOk) ?? Brightness.light;
-      brightnessNumber = brightness.index;
+    final bool isHighContrastEnabled = _isHighContrastDependent
+      && (MediaQuery.of(context, nullOk: nullOk)?.highContrast ?? false);
+
+
+    final CupertinoUserInterfaceLevelData level = _isInterfaceElevationDependent
+      ? CupertinoUserInterfaceLevel.of(context, nullOk: nullOk) ?? CupertinoUserInterfaceLevelData.base
+      : CupertinoUserInterfaceLevelData.base;
+
+    Color resolved;
+    switch (brightness) {
+      case Brightness.light:
+        switch (level) {
+          case CupertinoUserInterfaceLevelData.base:
+            resolved = isHighContrastEnabled ? highContrastColor : color;
+            break;
+          case CupertinoUserInterfaceLevelData.elevated:
+            resolved = isHighContrastEnabled ? highContrastElevatedColor : elevatedColor;
+            break;
+        }
+        break;
+      case Brightness.dark:
+        switch (level) {
+          case CupertinoUserInterfaceLevelData.base:
+            resolved = isHighContrastEnabled ? darkHighContrastColor : darkColor;
+            break;
+          case CupertinoUserInterfaceLevelData.elevated:
+            resolved = isHighContrastEnabled ? darkHighContrastElevatedColor : darkElevatedColor;
+            break;
+        }
     }
 
-    // If this CupertinoDynamicColor cares about accessibility contrast.
-    if (_isHighContrastDependent) {
-      final bool isHighContrastEnabled = MediaQuery.of(context, nullOk: nullOk)?.highContrast
-        ?? false;
-
-        highContrastNumber = isHighContrastEnabled ? 1 : 0;
-    }
-
-    // If this CupertinoDynamicColor cares about user interface elevation.
-    if (_isInterfaceElevationDependent) {
-      final CupertinoUserInterfaceLevelData level = CupertinoUserInterfaceLevel.of(context, nullOk: nullOk)
-        ?? CupertinoUserInterfaceLevelData.base;
-
-      interfaceElevationNumber = level.index;
-    }
-
-    final Color resolved = _colorMap[brightnessNumber][highContrastNumber][interfaceElevationNumber];
-    return resolved.value == value ? this : CupertinoDynamicColor._(resolved, _colorMap);
+    assert(resolved != null);
+    return CupertinoDynamicColor._(
+      resolved,
+      color,
+      darkColor,
+      highContrastColor,
+      darkHighContrastColor,
+      elevatedColor,
+      darkElevatedColor,
+      highContrastElevatedColor,
+      darkHighContrastElevatedColor,
+    );
   }
 
   @override
@@ -425,7 +446,14 @@ class CupertinoDynamicColor extends Color {
 
     return other.runtimeType == runtimeType
         && value == other.value
-        && (identical(_colorMap, other._colorMap) || const DeepCollectionEquality().equals(_colorMap, other._colorMap));
+        && color == other.color
+        && darkColor == other.darkColor
+        && highContrastColor == other.highContrastColor
+        && darkHighContrastColor == other.darkHighContrastColor
+        && elevatedColor == other.elevatedColor
+        && darkElevatedColor == other.darkElevatedColor
+        && highContrastElevatedColor == other.highContrastElevatedColor
+        && darkHighContrastElevatedColor == other.darkHighContrastElevatedColor;
   }
 
   @override
@@ -924,285 +952,282 @@ class CupertinoSystemColors extends InheritedWidget {
     assert(context != null);
     assert(useFallbackValues != null);
     final CupertinoSystemColors widget = context.inheritFromWidgetOfExactType(CupertinoSystemColors);
-    return widget?._data ?? (useFallbackValues ? fallbackValues : null);
-  }
-
-  /// Fallback System Colors, extracted from:
-  /// https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#dynamic-system-colors
-  /// and iOS 13 beta.
-  @visibleForTesting
-  static CupertinoSystemColorsData get fallbackValues {
-    return CupertinoSystemColorsData(
-      label: CupertinoDynamicColor(
-        color: const Color.fromARGB(255, 0, 0, 0),
-        darkColor: const Color.fromARGB(255, 255, 255, 255),
-        highContrastColor: const Color.fromARGB(255, 0, 0, 0),
-        darkHighContrastColor: const Color.fromARGB(255, 255, 255, 255),
-        elevatedColor: const Color.fromARGB(255, 0, 0, 0),
-        darkElevatedColor: const Color.fromARGB(255, 255, 255, 255),
-        highContrastElevatedColor: const Color.fromARGB(255, 0, 0, 0),
-        darkHighContrastElevatedColor: const Color.fromARGB(255, 255, 255, 255),
-      ),
-      secondaryLabel: CupertinoDynamicColor(
-        color: const Color.fromARGB(255, 0, 0, 0),
-        darkColor: const Color.fromARGB(255, 255, 255, 255),
-        highContrastColor: const Color.fromARGB(255, 0, 0, 0),
-        darkHighContrastColor: const Color.fromARGB(255, 255, 255, 255),
-        elevatedColor: const Color.fromARGB(255, 0, 0, 0),
-        darkElevatedColor: const Color.fromARGB(255, 255, 255, 255),
-        highContrastElevatedColor: const Color.fromARGB(255, 0, 0, 0),
-        darkHighContrastElevatedColor: const Color.fromARGB(255, 255, 255, 255),
-      ),
-      tertiaryLabel: CupertinoDynamicColor(
-        color: const Color.fromARGB(76, 60, 60, 67),
-        darkColor: const Color.fromARGB(76, 235, 235, 245),
-        highContrastColor: const Color.fromARGB(96, 60, 60, 67),
-        darkHighContrastColor: const Color.fromARGB(96, 235, 235, 245),
-        elevatedColor: const Color.fromARGB(76, 60, 60, 67),
-        darkElevatedColor: const Color.fromARGB(76, 235, 235, 245),
-        highContrastElevatedColor: const Color.fromARGB(96, 60, 60, 67),
-        darkHighContrastElevatedColor: const Color.fromARGB(96, 235, 235, 245),
-      ),
-      quaternaryLabel: CupertinoDynamicColor(
-        color: const Color.fromARGB(45, 60, 60, 67),
-        darkColor: const Color.fromARGB(40, 235, 235, 245),
-        highContrastColor: const Color.fromARGB(66, 60, 60, 67),
-        darkHighContrastColor: const Color.fromARGB(61, 235, 235, 245),
-        elevatedColor: const Color.fromARGB(45, 60, 60, 67),
-        darkElevatedColor: const Color.fromARGB(40, 235, 235, 245),
-        highContrastElevatedColor: const Color.fromARGB(66, 60, 60, 67),
-        darkHighContrastElevatedColor: const Color.fromARGB(61, 235, 235, 245),
-      ),
-      systemFill: CupertinoDynamicColor(
-        color: const Color.fromARGB(51, 120, 120, 128),
-        darkColor: const Color.fromARGB(91, 120, 120, 128),
-        highContrastColor: const Color.fromARGB(71, 120, 120, 128),
-        darkHighContrastColor: const Color.fromARGB(112, 120, 120, 128),
-        elevatedColor: const Color.fromARGB(51, 120, 120, 128),
-        darkElevatedColor: const Color.fromARGB(91, 120, 120, 128),
-        highContrastElevatedColor: const Color.fromARGB(71, 120, 120, 128),
-        darkHighContrastElevatedColor: const Color.fromARGB(112, 120, 120, 128),
-      ),
-      secondarySystemFill: CupertinoDynamicColor(
-        color: const Color.fromARGB(153, 60, 60, 67),
-        darkColor: const Color.fromARGB(153, 235, 235, 245),
-        highContrastColor: const Color.fromARGB(173, 60, 60, 67),
-        darkHighContrastColor: const Color.fromARGB(173, 235, 235, 245),
-        elevatedColor: const Color.fromARGB(153, 60, 60, 67),
-        darkElevatedColor: const Color.fromARGB(153, 235, 235, 245),
-        highContrastElevatedColor: const Color.fromARGB(173, 60, 60, 67),
-        darkHighContrastElevatedColor: const Color.fromARGB(173, 235, 235, 245),
-      ),
-      tertiarySystemFill: CupertinoDynamicColor(
-        color: const Color.fromARGB(30, 118, 118, 128),
-        darkColor: const Color.fromARGB(61, 118, 118, 128),
-        highContrastColor: const Color.fromARGB(51, 118, 118, 128),
-        darkHighContrastColor: const Color.fromARGB(81, 118, 118, 128),
-        elevatedColor: const Color.fromARGB(30, 118, 118, 128),
-        darkElevatedColor: const Color.fromARGB(61, 118, 118, 128),
-        highContrastElevatedColor: const Color.fromARGB(51, 118, 118, 128),
-        darkHighContrastElevatedColor: const Color.fromARGB(81, 118, 118, 128),
-      ),
-      quaternarySystemFill: CupertinoDynamicColor(
-        color: const Color.fromARGB(20, 116, 116, 128),
-        darkColor: const Color.fromARGB(45, 118, 118, 128),
-        highContrastColor: const Color.fromARGB(40, 116, 116, 128),
-        darkHighContrastColor: const Color.fromARGB(66, 118, 118, 128),
-        elevatedColor: const Color.fromARGB(20, 116, 116, 128),
-        darkElevatedColor: const Color.fromARGB(45, 118, 118, 128),
-        highContrastElevatedColor: const Color.fromARGB(40, 116, 116, 128),
-        darkHighContrastElevatedColor: const Color.fromARGB(66, 118, 118, 128),
-      ),
-      placeholderText: CupertinoDynamicColor(
-        color: const Color.fromARGB(76, 60, 60, 67),
-        darkColor: const Color.fromARGB(76, 235, 235, 245),
-        highContrastColor: const Color.fromARGB(96, 60, 60, 67),
-        darkHighContrastColor: const Color.fromARGB(96, 235, 235, 245),
-        elevatedColor: const Color.fromARGB(76, 60, 60, 67),
-        darkElevatedColor: const Color.fromARGB(76, 235, 235, 245),
-        highContrastElevatedColor: const Color.fromARGB(96, 60, 60, 67),
-        darkHighContrastElevatedColor: const Color.fromARGB(96, 235, 235, 245),
-      ),
-      systemBackground: CupertinoDynamicColor(
-        color: const Color.fromARGB(255, 255, 255, 255),
-        darkColor: const Color.fromARGB(255, 0, 0, 0),
-        highContrastColor: const Color.fromARGB(255, 255, 255, 255),
-        darkHighContrastColor: const Color.fromARGB(255, 0, 0, 0),
-        elevatedColor: const Color.fromARGB(255, 255, 255, 255),
-        darkElevatedColor: const Color.fromARGB(255, 28, 28, 30),
-        highContrastElevatedColor: const Color.fromARGB(255, 255, 255, 255),
-        darkHighContrastElevatedColor: const Color.fromARGB(255, 36, 36, 38),
-      ),
-      secondarySystemBackground: CupertinoDynamicColor(
-        color: const Color.fromARGB(255, 242, 242, 247),
-        darkColor: const Color.fromARGB(255, 28, 28, 30),
-        highContrastColor: const Color.fromARGB(255, 235, 235, 240),
-        darkHighContrastColor: const Color.fromARGB(255, 36, 36, 38),
-        elevatedColor: const Color.fromARGB(255, 242, 242, 247),
-        darkElevatedColor: const Color.fromARGB(255, 44, 44, 46),
-        highContrastElevatedColor: const Color.fromARGB(255, 235, 235, 240),
-        darkHighContrastElevatedColor: const Color.fromARGB(255, 54, 54, 56),
-      ),
-      tertiarySystemBackground: CupertinoDynamicColor(
-        color: const Color.fromARGB(255, 255, 255, 255),
-        darkColor: const Color.fromARGB(255, 44, 44, 46),
-        highContrastColor: const Color.fromARGB(255, 255, 255, 255),
-        darkHighContrastColor: const Color.fromARGB(255, 54, 54, 56),
-        elevatedColor: const Color.fromARGB(255, 255, 255, 255),
-        darkElevatedColor: const Color.fromARGB(255, 58, 58, 60),
-        highContrastElevatedColor: const Color.fromARGB(255, 255, 255, 255),
-        darkHighContrastElevatedColor: const Color.fromARGB(255, 68, 68, 70),
-      ),
-      systemGroupedBackground: CupertinoDynamicColor(
-        color: const Color.fromARGB(255, 242, 242, 247),
-        darkColor: const Color.fromARGB(255, 0, 0, 0),
-        highContrastColor: const Color.fromARGB(255, 235, 235, 240),
-        darkHighContrastColor: const Color.fromARGB(255, 0, 0, 0),
-        elevatedColor: const Color.fromARGB(255, 242, 242, 247),
-        darkElevatedColor: const Color.fromARGB(255, 28, 28, 30),
-        highContrastElevatedColor: const Color.fromARGB(255, 235, 235, 240),
-        darkHighContrastElevatedColor: const Color.fromARGB(255, 36, 36, 38),
-      ),
-      secondarySystemGroupedBackground: CupertinoDynamicColor(
-        color: const Color.fromARGB(255, 242, 242, 247),
-        darkColor: const Color.fromARGB(255, 0, 0, 0),
-        highContrastColor: const Color.fromARGB(255, 235, 235, 240),
-        darkHighContrastColor: const Color.fromARGB(255, 0, 0, 0),
-        elevatedColor: const Color.fromARGB(255, 242, 242, 247),
-        darkElevatedColor: const Color.fromARGB(255, 28, 28, 30),
-        highContrastElevatedColor: const Color.fromARGB(255, 235, 235, 240),
-        darkHighContrastElevatedColor: const Color.fromARGB(255, 36, 36, 38),
-      ),
-      tertiarySystemGroupedBackground: CupertinoDynamicColor(
-        color: const Color.fromARGB(255, 242, 242, 247),
-        darkColor: const Color.fromARGB(255, 44, 44, 46),
-        highContrastColor: const Color.fromARGB(255, 235, 235, 240),
-        darkHighContrastColor: const Color.fromARGB(255, 54, 54, 56),
-        elevatedColor: const Color.fromARGB(255, 242, 242, 247),
-        darkElevatedColor: const Color.fromARGB(255, 58, 58, 60),
-        highContrastElevatedColor: const Color.fromARGB(255, 235, 235, 240),
-        darkHighContrastElevatedColor: const Color.fromARGB(255, 68, 68, 70),
-      ),
-      separator: CupertinoDynamicColor(
-        color: const Color.fromARGB(73, 60, 60, 67),
-        darkColor: const Color.fromARGB(153, 84, 84, 88),
-        highContrastColor: const Color.fromARGB(94, 60, 60, 67),
-        darkHighContrastColor: const Color.fromARGB(173, 84, 84, 88),
-        elevatedColor: const Color.fromARGB(73, 60, 60, 67),
-        darkElevatedColor: const Color.fromARGB(153, 84, 84, 88),
-        highContrastElevatedColor: const Color.fromARGB(94, 60, 60, 67),
-        darkHighContrastElevatedColor: const Color.fromARGB(173, 84, 84, 88),
-      ),
-      opaqueSeparator: CupertinoDynamicColor(
-        color: const Color.fromARGB(255, 198, 198, 200),
-        darkColor: const Color.fromARGB(255, 56, 56, 58),
-        highContrastColor: const Color.fromARGB(255, 198, 198, 200),
-        darkHighContrastColor: const Color.fromARGB(255, 56, 56, 58),
-        elevatedColor: const Color.fromARGB(255, 198, 198, 200),
-        darkElevatedColor: const Color.fromARGB(255, 56, 56, 58),
-        highContrastElevatedColor: const Color.fromARGB(255, 198, 198, 200),
-        darkHighContrastElevatedColor: const Color.fromARGB(255, 56, 56, 58),
-      ),
-      link: CupertinoDynamicColor(
-        color: const Color.fromARGB(255, 0, 122, 255),
-        darkColor: const Color.fromARGB(255, 9, 132, 255),
-        highContrastColor: const Color.fromARGB(255, 0, 122, 255),
-        darkHighContrastColor: const Color.fromARGB(255, 9, 132, 255),
-        elevatedColor: const Color.fromARGB(255, 0, 122, 255),
-        darkElevatedColor: const Color.fromARGB(255, 9, 132, 255),
-        highContrastElevatedColor: const Color.fromARGB(255, 0, 122, 255),
-        darkHighContrastElevatedColor: const Color.fromARGB(255, 9, 132, 255),
-      ),
-      systemBlue: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 0, 122, 255),
-        darkColor: const Color.fromARGB(255, 10, 132, 255),
-        highContrastColor: const Color.fromARGB(255, 0, 64, 221),
-        darkHighContrastColor: const Color.fromARGB(255, 64, 156, 255),
-      ),
-      systemGreen: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 52, 199, 89),
-        darkColor: const Color.fromARGB(255, 48, 209, 88),
-        highContrastColor: const Color.fromARGB(255, 36, 138, 61),
-        darkHighContrastColor: const Color.fromARGB(255, 48, 219, 91),
-      ),
-      systemIndigo: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 88, 86, 214),
-        darkColor: const Color.fromARGB(255, 94, 92, 230),
-        highContrastColor: const Color.fromARGB(255, 54, 52, 163),
-        darkHighContrastColor: const Color.fromARGB(255, 125, 122, 255),
-      ),
-      systemOrange: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 255, 149, 0),
-        darkColor: const Color.fromARGB(255, 255, 159, 10),
-        highContrastColor: const Color.fromARGB(255, 201, 52, 0),
-        darkHighContrastColor: const Color.fromARGB(255, 255, 179, 64),
-      ),
-      systemPink: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 255, 45, 85),
-        darkColor: const Color.fromARGB(255, 255, 55, 95),
-        highContrastColor: const Color.fromARGB(255, 211, 15, 69),
-        darkHighContrastColor: const Color.fromARGB(255, 255, 100, 130),
-      ),
-      systemPurple: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 175, 82, 222),
-        darkColor: const Color.fromARGB(255, 191, 90, 242),
-        highContrastColor: const Color.fromARGB(255, 137, 68, 171),
-        darkHighContrastColor: const Color.fromARGB(255, 218, 143, 255),
-      ),
-      systemRed: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 255, 59, 48),
-        darkColor: const Color.fromARGB(255, 255, 69, 58),
-        highContrastColor: const Color.fromARGB(255, 215, 0, 21),
-        darkHighContrastColor: const Color.fromARGB(255, 255, 105, 97),
-      ),
-      systemTeal: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 90, 200, 250),
-        darkColor: const Color.fromARGB(255, 100, 210, 255),
-        highContrastColor: const Color.fromARGB(255, 0, 113, 164),
-        darkHighContrastColor: const Color.fromARGB(255, 112, 215, 255),
-      ),
-      systemYellow: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 255, 204, 0),
-        darkColor: const Color.fromARGB(255, 255, 214, 10),
-        highContrastColor: const Color.fromARGB(255, 160, 90, 0),
-        darkHighContrastColor: const Color.fromARGB(255, 255, 212, 38),
-      ),
-      systemGray: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 142, 142, 147),
-        darkColor: const Color.fromARGB(255, 142, 142, 147),
-        highContrastColor: const Color.fromARGB(255, 108, 108, 112),
-        darkHighContrastColor: const Color.fromARGB(255, 174, 174, 178),
-      ),
-      systemGray2: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 174, 174, 178),
-        darkColor: const Color.fromARGB(255, 99, 99, 102),
-        highContrastColor: const Color.fromARGB(255, 142, 142, 147),
-        darkHighContrastColor: const Color.fromARGB(255, 124, 124, 128),
-      ),
-      systemGray3: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 199, 199, 204),
-        darkColor: const Color.fromARGB(255, 72, 72, 74),
-        highContrastColor: const Color.fromARGB(255, 174, 174, 178),
-        darkHighContrastColor: const Color.fromARGB(255, 84, 84, 86),
-      ),
-      systemGray4: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 209, 209, 214),
-        darkColor: const Color.fromARGB(255, 58, 58, 60),
-        highContrastColor: const Color.fromARGB(255, 188, 188, 192),
-        darkHighContrastColor: const Color.fromARGB(255, 68, 68, 70),
-      ),
-      systemGray5: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 229, 229, 234),
-        darkColor: const Color.fromARGB(255, 44, 44, 46),
-        highContrastColor: const Color.fromARGB(255, 216, 216, 220),
-        darkHighContrastColor: const Color.fromARGB(255, 54, 54, 56),
-      ),
-      systemGray6: CupertinoDynamicColor.withBrightnessAndContrast(
-        color: const Color.fromARGB(255, 242, 242, 247),
-        darkColor: const Color.fromARGB(255, 28, 28, 30),
-        highContrastColor: const Color.fromARGB(255, 235, 235, 240),
-        darkHighContrastColor: const Color.fromARGB(255, 36, 36, 38),
-      ),
-    );
+    return widget?._data ?? (useFallbackValues ? _kSystemColorsFallback : null);
   }
 }
+
+// Fallback System Colors, extracted from:
+// https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#dynamic-system-colors
+// and iOS 13 beta.
+const CupertinoSystemColorsData _kSystemColorsFallback = CupertinoSystemColorsData(
+  label: CupertinoDynamicColor(
+    color: Color.fromARGB(255, 0, 0, 0),
+    darkColor: Color.fromARGB(255, 255, 255, 255),
+    highContrastColor: Color.fromARGB(255, 0, 0, 0),
+    darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
+    elevatedColor: Color.fromARGB(255, 0, 0, 0),
+    darkElevatedColor: Color.fromARGB(255, 255, 255, 255),
+    highContrastElevatedColor: Color.fromARGB(255, 0, 0, 0),
+    darkHighContrastElevatedColor: Color.fromARGB(255, 255, 255, 255),
+  ),
+  secondaryLabel: CupertinoDynamicColor(
+    color: Color.fromARGB(255, 0, 0, 0),
+    darkColor: Color.fromARGB(255, 255, 255, 255),
+    highContrastColor: Color.fromARGB(255, 0, 0, 0),
+    darkHighContrastColor: Color.fromARGB(255, 255, 255, 255),
+    elevatedColor: Color.fromARGB(255, 0, 0, 0),
+    darkElevatedColor: Color.fromARGB(255, 255, 255, 255),
+    highContrastElevatedColor: Color.fromARGB(255, 0, 0, 0),
+    darkHighContrastElevatedColor: Color.fromARGB(255, 255, 255, 255),
+  ),
+  tertiaryLabel: CupertinoDynamicColor(
+    color: Color.fromARGB(76, 60, 60, 67),
+    darkColor: Color.fromARGB(76, 235, 235, 245),
+    highContrastColor: Color.fromARGB(96, 60, 60, 67),
+    darkHighContrastColor: Color.fromARGB(96, 235, 235, 245),
+    elevatedColor: Color.fromARGB(76, 60, 60, 67),
+    darkElevatedColor: Color.fromARGB(76, 235, 235, 245),
+    highContrastElevatedColor: Color.fromARGB(96, 60, 60, 67),
+    darkHighContrastElevatedColor: Color.fromARGB(96, 235, 235, 245),
+  ),
+  quaternaryLabel: CupertinoDynamicColor(
+    color: Color.fromARGB(45, 60, 60, 67),
+    darkColor: Color.fromARGB(40, 235, 235, 245),
+    highContrastColor: Color.fromARGB(66, 60, 60, 67),
+    darkHighContrastColor: Color.fromARGB(61, 235, 235, 245),
+    elevatedColor: Color.fromARGB(45, 60, 60, 67),
+    darkElevatedColor: Color.fromARGB(40, 235, 235, 245),
+    highContrastElevatedColor: Color.fromARGB(66, 60, 60, 67),
+    darkHighContrastElevatedColor: Color.fromARGB(61, 235, 235, 245),
+  ),
+  systemFill: CupertinoDynamicColor(
+    color: Color.fromARGB(51, 120, 120, 128),
+    darkColor: Color.fromARGB(91, 120, 120, 128),
+    highContrastColor: Color.fromARGB(71, 120, 120, 128),
+    darkHighContrastColor: Color.fromARGB(112, 120, 120, 128),
+    elevatedColor: Color.fromARGB(51, 120, 120, 128),
+    darkElevatedColor: Color.fromARGB(91, 120, 120, 128),
+    highContrastElevatedColor: Color.fromARGB(71, 120, 120, 128),
+    darkHighContrastElevatedColor: Color.fromARGB(112, 120, 120, 128),
+  ),
+  secondarySystemFill: CupertinoDynamicColor(
+    color: Color.fromARGB(153, 60, 60, 67),
+    darkColor: Color.fromARGB(153, 235, 235, 245),
+    highContrastColor: Color.fromARGB(173, 60, 60, 67),
+    darkHighContrastColor: Color.fromARGB(173, 235, 235, 245),
+    elevatedColor: Color.fromARGB(153, 60, 60, 67),
+    darkElevatedColor: Color.fromARGB(153, 235, 235, 245),
+    highContrastElevatedColor: Color.fromARGB(173, 60, 60, 67),
+    darkHighContrastElevatedColor: Color.fromARGB(173, 235, 235, 245),
+  ),
+  tertiarySystemFill: CupertinoDynamicColor(
+    color: Color.fromARGB(30, 118, 118, 128),
+    darkColor: Color.fromARGB(61, 118, 118, 128),
+    highContrastColor: Color.fromARGB(51, 118, 118, 128),
+    darkHighContrastColor: Color.fromARGB(81, 118, 118, 128),
+    elevatedColor: Color.fromARGB(30, 118, 118, 128),
+    darkElevatedColor: Color.fromARGB(61, 118, 118, 128),
+    highContrastElevatedColor: Color.fromARGB(51, 118, 118, 128),
+    darkHighContrastElevatedColor: Color.fromARGB(81, 118, 118, 128),
+  ),
+  quaternarySystemFill: CupertinoDynamicColor(
+    color: Color.fromARGB(20, 116, 116, 128),
+    darkColor: Color.fromARGB(45, 118, 118, 128),
+    highContrastColor: Color.fromARGB(40, 116, 116, 128),
+    darkHighContrastColor: Color.fromARGB(66, 118, 118, 128),
+    elevatedColor: Color.fromARGB(20, 116, 116, 128),
+    darkElevatedColor: Color.fromARGB(45, 118, 118, 128),
+    highContrastElevatedColor: Color.fromARGB(40, 116, 116, 128),
+    darkHighContrastElevatedColor: Color.fromARGB(66, 118, 118, 128),
+  ),
+  placeholderText: CupertinoDynamicColor(
+    color: Color.fromARGB(76, 60, 60, 67),
+    darkColor: Color.fromARGB(76, 235, 235, 245),
+    highContrastColor: Color.fromARGB(96, 60, 60, 67),
+    darkHighContrastColor: Color.fromARGB(96, 235, 235, 245),
+    elevatedColor: Color.fromARGB(76, 60, 60, 67),
+    darkElevatedColor: Color.fromARGB(76, 235, 235, 245),
+    highContrastElevatedColor: Color.fromARGB(96, 60, 60, 67),
+    darkHighContrastElevatedColor: Color.fromARGB(96, 235, 235, 245),
+  ),
+  systemBackground: CupertinoDynamicColor(
+    color: Color.fromARGB(255, 255, 255, 255),
+    darkColor: Color.fromARGB(255, 0, 0, 0),
+    highContrastColor: Color.fromARGB(255, 255, 255, 255),
+    darkHighContrastColor: Color.fromARGB(255, 0, 0, 0),
+    elevatedColor: Color.fromARGB(255, 255, 255, 255),
+    darkElevatedColor: Color.fromARGB(255, 28, 28, 30),
+    highContrastElevatedColor: Color.fromARGB(255, 255, 255, 255),
+    darkHighContrastElevatedColor: Color.fromARGB(255, 36, 36, 38),
+  ),
+  secondarySystemBackground: CupertinoDynamicColor(
+    color: Color.fromARGB(255, 242, 242, 247),
+    darkColor: Color.fromARGB(255, 28, 28, 30),
+    highContrastColor: Color.fromARGB(255, 235, 235, 240),
+    darkHighContrastColor: Color.fromARGB(255, 36, 36, 38),
+    elevatedColor: Color.fromARGB(255, 242, 242, 247),
+    darkElevatedColor: Color.fromARGB(255, 44, 44, 46),
+    highContrastElevatedColor: Color.fromARGB(255, 235, 235, 240),
+    darkHighContrastElevatedColor: Color.fromARGB(255, 54, 54, 56),
+  ),
+  tertiarySystemBackground: CupertinoDynamicColor(
+    color: Color.fromARGB(255, 255, 255, 255),
+    darkColor: Color.fromARGB(255, 44, 44, 46),
+    highContrastColor: Color.fromARGB(255, 255, 255, 255),
+    darkHighContrastColor: Color.fromARGB(255, 54, 54, 56),
+    elevatedColor: Color.fromARGB(255, 255, 255, 255),
+    darkElevatedColor: Color.fromARGB(255, 58, 58, 60),
+    highContrastElevatedColor: Color.fromARGB(255, 255, 255, 255),
+    darkHighContrastElevatedColor: Color.fromARGB(255, 68, 68, 70),
+  ),
+  systemGroupedBackground: CupertinoDynamicColor(
+    color: Color.fromARGB(255, 242, 242, 247),
+    darkColor: Color.fromARGB(255, 0, 0, 0),
+    highContrastColor: Color.fromARGB(255, 235, 235, 240),
+    darkHighContrastColor: Color.fromARGB(255, 0, 0, 0),
+    elevatedColor: Color.fromARGB(255, 242, 242, 247),
+    darkElevatedColor: Color.fromARGB(255, 28, 28, 30),
+    highContrastElevatedColor: Color.fromARGB(255, 235, 235, 240),
+    darkHighContrastElevatedColor: Color.fromARGB(255, 36, 36, 38),
+  ),
+  secondarySystemGroupedBackground: CupertinoDynamicColor(
+    color: Color.fromARGB(255, 255, 255, 255),
+    darkColor: Color.fromARGB(255, 28, 28, 30),
+    highContrastColor: Color.fromARGB(255, 255, 255, 255),
+    darkHighContrastColor: Color.fromARGB(255, 36, 36, 38),
+    elevatedColor: Color.fromARGB(255, 255, 255, 255),
+    darkElevatedColor: Color.fromARGB(255, 44, 44, 46),
+    highContrastElevatedColor: Color.fromARGB(255, 255, 255, 255),
+    darkHighContrastElevatedColor: Color.fromARGB(255, 54, 54, 56),
+  ),
+  tertiarySystemGroupedBackground: CupertinoDynamicColor(
+    color: Color.fromARGB(255, 242, 242, 247),
+    darkColor: Color.fromARGB(255, 44, 44, 46),
+    highContrastColor: Color.fromARGB(255, 235, 235, 240),
+    darkHighContrastColor: Color.fromARGB(255, 54, 54, 56),
+    elevatedColor: Color.fromARGB(255, 242, 242, 247),
+    darkElevatedColor: Color.fromARGB(255, 58, 58, 60),
+    highContrastElevatedColor: Color.fromARGB(255, 235, 235, 240),
+    darkHighContrastElevatedColor: Color.fromARGB(255, 68, 68, 70),
+  ),
+  separator: CupertinoDynamicColor(
+    color: Color.fromARGB(73, 60, 60, 67),
+    darkColor: Color.fromARGB(153, 84, 84, 88),
+    highContrastColor: Color.fromARGB(94, 60, 60, 67),
+    darkHighContrastColor: Color.fromARGB(173, 84, 84, 88),
+    elevatedColor: Color.fromARGB(73, 60, 60, 67),
+    darkElevatedColor: Color.fromARGB(153, 84, 84, 88),
+    highContrastElevatedColor: Color.fromARGB(94, 60, 60, 67),
+    darkHighContrastElevatedColor: Color.fromARGB(173, 84, 84, 88),
+  ),
+  opaqueSeparator: CupertinoDynamicColor(
+    color: Color.fromARGB(255, 198, 198, 200),
+    darkColor: Color.fromARGB(255, 56, 56, 58),
+    highContrastColor: Color.fromARGB(255, 198, 198, 200),
+    darkHighContrastColor: Color.fromARGB(255, 56, 56, 58),
+    elevatedColor: Color.fromARGB(255, 198, 198, 200),
+    darkElevatedColor: Color.fromARGB(255, 56, 56, 58),
+    highContrastElevatedColor: Color.fromARGB(255, 198, 198, 200),
+    darkHighContrastElevatedColor: Color.fromARGB(255, 56, 56, 58),
+  ),
+  link: CupertinoDynamicColor(
+    color: Color.fromARGB(255, 0, 122, 255),
+    darkColor: Color.fromARGB(255, 9, 132, 255),
+    highContrastColor: Color.fromARGB(255, 0, 122, 255),
+    darkHighContrastColor: Color.fromARGB(255, 9, 132, 255),
+    elevatedColor: Color.fromARGB(255, 0, 122, 255),
+    darkElevatedColor: Color.fromARGB(255, 9, 132, 255),
+    highContrastElevatedColor: Color.fromARGB(255, 0, 122, 255),
+    darkHighContrastElevatedColor: Color.fromARGB(255, 9, 132, 255),
+  ),
+  systemBlue: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 0, 122, 255),
+    darkColor: Color.fromARGB(255, 10, 132, 255),
+    highContrastColor: Color.fromARGB(255, 0, 64, 221),
+    darkHighContrastColor: Color.fromARGB(255, 64, 156, 255),
+  ),
+  systemGreen: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 52, 199, 89),
+    darkColor: Color.fromARGB(255, 48, 209, 88),
+    highContrastColor: Color.fromARGB(255, 36, 138, 61),
+    darkHighContrastColor: Color.fromARGB(255, 48, 219, 91),
+  ),
+  systemIndigo: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 88, 86, 214),
+    darkColor: Color.fromARGB(255, 94, 92, 230),
+    highContrastColor: Color.fromARGB(255, 54, 52, 163),
+    darkHighContrastColor: Color.fromARGB(255, 125, 122, 255),
+  ),
+  systemOrange: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 255, 149, 0),
+    darkColor: Color.fromARGB(255, 255, 159, 10),
+    highContrastColor: Color.fromARGB(255, 201, 52, 0),
+    darkHighContrastColor: Color.fromARGB(255, 255, 179, 64),
+  ),
+  systemPink: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 255, 45, 85),
+    darkColor: Color.fromARGB(255, 255, 55, 95),
+    highContrastColor: Color.fromARGB(255, 211, 15, 69),
+    darkHighContrastColor: Color.fromARGB(255, 255, 100, 130),
+  ),
+  systemPurple: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 175, 82, 222),
+    darkColor: Color.fromARGB(255, 191, 90, 242),
+    highContrastColor: Color.fromARGB(255, 137, 68, 171),
+    darkHighContrastColor: Color.fromARGB(255, 218, 143, 255),
+  ),
+  systemRed: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 255, 59, 48),
+    darkColor: Color.fromARGB(255, 255, 69, 58),
+    highContrastColor: Color.fromARGB(255, 215, 0, 21),
+    darkHighContrastColor: Color.fromARGB(255, 255, 105, 97),
+  ),
+  systemTeal: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 90, 200, 250),
+    darkColor: Color.fromARGB(255, 100, 210, 255),
+    highContrastColor: Color.fromARGB(255, 0, 113, 164),
+    darkHighContrastColor: Color.fromARGB(255, 112, 215, 255),
+  ),
+  systemYellow: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 255, 204, 0),
+    darkColor: Color.fromARGB(255, 255, 214, 10),
+    highContrastColor: Color.fromARGB(255, 160, 90, 0),
+    darkHighContrastColor: Color.fromARGB(255, 255, 212, 38),
+  ),
+  systemGray: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 142, 142, 147),
+    darkColor: Color.fromARGB(255, 142, 142, 147),
+    highContrastColor: Color.fromARGB(255, 108, 108, 112),
+    darkHighContrastColor: Color.fromARGB(255, 174, 174, 178),
+  ),
+  systemGray2: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 174, 174, 178),
+    darkColor: Color.fromARGB(255, 99, 99, 102),
+    highContrastColor: Color.fromARGB(255, 142, 142, 147),
+    darkHighContrastColor: Color.fromARGB(255, 124, 124, 128),
+  ),
+  systemGray3: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 199, 199, 204),
+    darkColor: Color.fromARGB(255, 72, 72, 74),
+    highContrastColor: Color.fromARGB(255, 174, 174, 178),
+    darkHighContrastColor: Color.fromARGB(255, 84, 84, 86),
+  ),
+  systemGray4: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 209, 209, 214),
+    darkColor: Color.fromARGB(255, 58, 58, 60),
+    highContrastColor: Color.fromARGB(255, 188, 188, 192),
+    darkHighContrastColor: Color.fromARGB(255, 68, 68, 70),
+  ),
+  systemGray5: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 229, 229, 234),
+    darkColor: Color.fromARGB(255, 44, 44, 46),
+    highContrastColor: Color.fromARGB(255, 216, 216, 220),
+    darkHighContrastColor: Color.fromARGB(255, 54, 54, 56),
+  ),
+  systemGray6: CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color.fromARGB(255, 242, 242, 247),
+    darkColor: Color.fromARGB(255, 28, 28, 30),
+    highContrastColor: Color.fromARGB(255, 235, 235, 240),
+    darkHighContrastColor: Color.fromARGB(255, 36, 36, 38),
+  ),
+);

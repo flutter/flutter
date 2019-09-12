@@ -190,6 +190,12 @@ class DeviceManager {
           if (isDeviceSupportedForProject(device, flutterProject))
             device
       ];
+    } else if (devices.length == 1 &&
+             !hasSpecifiedDeviceId &&
+             !isDeviceSupportedForProject(devices.single, flutterProject)) {
+      // If there is only a single device but it is not supported, then return
+      // early.
+      return <Device>[];
     }
 
     // If there are still multiple devices and the user did not specify to run
@@ -478,6 +484,8 @@ class DebuggingOptions {
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
     this.observatoryPort,
+    this.hostname,
+    this.port,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo)
@@ -492,6 +500,8 @@ class DebuggingOptions {
       traceSystrace = false,
       dumpSkpOnShaderCompilation = false,
       verboseSystemLogs = false,
+      hostname = null,
+      port = null,
       observatoryPort = null;
 
   final bool debuggingEnabled;
@@ -508,6 +518,8 @@ class DebuggingOptions {
   final bool useTestFonts;
   final bool verboseSystemLogs;
   final int observatoryPort;
+  final String port;
+  final String hostname;
 
   bool get hasObservatoryPort => observatoryPort != null;
 }

@@ -14,7 +14,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
-import 'base/process_manager.dart';
+import 'base/process.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
@@ -143,8 +143,15 @@ class Doctor {
   List<ValidatorTask> startValidatorTasks() {
     final List<ValidatorTask> tasks = <ValidatorTask>[];
     for (DoctorValidator validator in validators) {
+      // We use an asyncGuard() here to be absolutely certain that
+      // DoctorValidators do not result in an uncaught exception. Since the
+      // Future returned by the asyncGuard() is not awaited, we pass an
+      // onError callback to it and translate errors into ValidationResults.
       final Future<ValidationResult> result =
-          asyncGuard<ValidationResult>(() => validator.validate());
+          asyncGuard<ValidationResult>(validator.validate,
+            onError: (Object exception, StackTrace stackTrace) {
+              return ValidationResult.crash(exception, stackTrace);
+            });
       tasks.add(ValidatorTask(validator, result));
     }
     return tasks;
@@ -600,7 +607,7 @@ class FlutterValidator extends DoctorValidator {
 bool _genSnapshotRuns(String genSnapshotPath) {
   const int kExpectedExitCode = 255;
   try {
-    return processManager.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
+    return processUtils.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
   } catch (error) {
     return false;
   }

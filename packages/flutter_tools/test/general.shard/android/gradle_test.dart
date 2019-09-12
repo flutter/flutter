@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -846,6 +847,109 @@ flutter:
     test('throws on unsupported versions', () {
       expect(() => getGradleVersionFor('3.6.0'),
           throwsA(predicate<Exception>((Exception e) => e is ToolExit)));
+    });
+  });
+
+  group('Gradle HTTP failures', () {
+    MemoryFileSystem fs;
+    Directory tempDir;
+    Directory gradleWrapperDirectory;
+    MockProcessManager mockProcessManager;
+    String gradleBinary;
+
+    setUp(() {
+      fs = MemoryFileSystem();
+      tempDir = fs.systemTempDirectory.createTempSync('artifacts_test.');
+      gradleBinary = platform.isWindows ? 'gradlew.bat' : 'gradlew';
+      gradleWrapperDirectory = fs.directory(
+        fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper'));
+      gradleWrapperDirectory.createSync(recursive: true);
+      gradleWrapperDirectory
+        .childFile(gradleBinary)
+        .writeAsStringSync('irrelevant');
+      gradleWrapperDirectory
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .createSync(recursive: true);
+      gradleWrapperDirectory
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.jar')
+        .writeAsStringSync('irrelevant');
+
+      mockProcessManager = MockProcessManager();
+    });
+
+    testUsingContext('throws toolExit if gradle fails while downloading', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      const String errorMessage = '''
+Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
+at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1872)
+at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1474)
+at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:254)
+at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
+at org.gradle.wrapper.Download.download(Download.java:44)
+at org.gradle.wrapper.Install\$1.call(Install.java:61)
+at org.gradle.wrapper.Install\$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        errorMessage,
+        1,
+      );
+      when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: errorMessage));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throw toolExit if gradle fails downloading with proxy error', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      const String errorMessage = '''
+Exception in thread "main" java.io.IOException: Unable to tunnel through proxy. Proxy returns "HTTP/1.1 400 Bad Request"
+at sun.net.www.protocol.http.HttpURLConnection.doTunneling(HttpURLConnection.java:2124)
+at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:183)
+at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1546)
+at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1474)
+at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:254)
+at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
+at org.gradle.wrapper.Download.download(Download.java:44)
+at org.gradle.wrapper.Install\$1.call(Install.java:61)
+at org.gradle.wrapper.Install\$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        errorMessage,
+        1,
+      );
+      when(mockProcessManager.run(cmd, environment: anyNamed('environment'), workingDirectory: null))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: errorMessage));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
     });
   });
 

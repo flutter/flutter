@@ -6,7 +6,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
-import '../base/process_manager.dart';
+import '../base/process.dart';
 import '../convert.dart';
 
 VisualStudio get visualStudio => context.get<VisualStudio>();
@@ -42,6 +42,22 @@ class VisualStudio {
   ///
   /// For instance: "15.4.27004.2002".
   String get fullVersion => _bestVisualStudioDetails[_fullVersionKey];
+
+  // Properties that determine the status of the installation. There might be
+  // Visual Studio versions that don't include them, so default to a "valid" value to
+  // avoid false negatives.
+
+  /// True there is complete installation of Visual Studio.
+  bool get isComplete => _bestVisualStudioDetails[_isCompleteKey] ?? false;
+
+  /// True if Visual Studio is launchable.
+  bool get isLaunchable => _bestVisualStudioDetails[_isLaunchableKey] ?? false;
+
+    /// True if the Visual Studio installation is as pre-release version.
+  bool get isPrerelease => _bestVisualStudioDetails[_isPrereleaseKey] ?? false;
+
+  /// True if a reboot is required to complete the Visual Studio installation.
+  bool get isRebootRequired => _bestVisualStudioDetails[_isRebootRequiredKey] ?? false;
 
   /// The name of the recommended Visual Studio installer workload.
   String get workloadDescription => 'Desktop development with C++';
@@ -120,31 +136,47 @@ class VisualStudio {
   /// The complete version.
   static const String _fullVersionKey = 'installationVersion';
 
+  /// Keys for the status of the installation.
+  static const String _isCompleteKey = 'isComplete';
+  static const String _isLaunchableKey = 'isLaunchable';
+  static const String _isRebootRequiredKey = 'isRebootRequired';
+
   /// The 'catalog' entry containing more details.
   static const String _catalogKey = 'catalog';
+
+  /// The key for a pre-release version.
+  static const String _isPrereleaseKey = 'isPrerelease';
 
   /// The user-friendly version.
   ///
   /// This key is under the 'catalog' entry.
   static const String _catalogDisplayVersionKey = 'productDisplayVersion';
 
+  /// vswhere argument keys
+  static const String _prereleaseKey = '-prerelease';
+
   /// Returns the details dictionary for the newest version of Visual Studio
   /// that includes all of [requiredComponents], if there is one.
-  Map<String, dynamic> _visualStudioDetails({Iterable<String> requiredComponents}) {
+  Map<String, dynamic> _visualStudioDetails(
+      {Iterable<String> requiredComponents, List<String> additionalArguments}) {
     final List<String> requirementArguments = requiredComponents == null
         ? <String>[]
         : <String>['-requires', ...requiredComponents];
     try {
-      final ProcessResult whereResult = processManager.runSync(<String>[
-        _vswherePath,
+      final List<String> defaultArguments = <String>[
         '-format', 'json',
         '-utf8',
         '-latest',
+      ];
+      final RunResult whereResult = processUtils.runSync(<String>[
+        _vswherePath,
+        ...defaultArguments,
+        ...?additionalArguments,
         ...?requirementArguments,
       ]);
       if (whereResult.exitCode == 0) {
-        final List<Map<String, dynamic>> installations = json.decode(whereResult.stdout)
-            .cast<Map<String, dynamic>>();
+        final List<Map<String, dynamic>> installations =
+            json.decode(whereResult.stdout).cast<Map<String, dynamic>>();
         if (installations.isNotEmpty) {
           return installations[0];
         }
@@ -157,12 +189,43 @@ class VisualStudio {
     return null;
   }
 
+  /// Checks if the given installation has issues that the user must resolve.
+  ///
+  /// Returns false if the required information is missing since older versions
+  /// of Visual Studio might not include them.
+  bool installationHasIssues(Map<String, dynamic>installationDetails) {
+    assert(installationDetails != null);
+    if (installationDetails[_isCompleteKey] != null && !installationDetails[_isCompleteKey]) {
+      return true;
+    }
+
+    if (installationDetails[_isLaunchableKey] != null && !installationDetails[_isLaunchableKey]) {
+      return true;
+    }
+
+    if (installationDetails[_isRebootRequiredKey] != null && installationDetails[_isRebootRequiredKey]) {
+      return true;
+    }
+
+    return false;
+  }
+
   /// Returns the details dictionary for the latest version of Visual Studio
   /// that has all required components.
   Map<String, dynamic> _cachedUsableVisualStudioDetails;
   Map<String, dynamic> get _usableVisualStudioDetails {
     _cachedUsableVisualStudioDetails ??=
         _visualStudioDetails(requiredComponents: _requiredComponents().keys);
+    // If a stable version is not found, try searching for a pre-release version.
+    _cachedUsableVisualStudioDetails ??= _visualStudioDetails(
+        requiredComponents: _requiredComponents().keys,
+        additionalArguments: <String>[_prereleaseKey]);
+    if (_cachedUsableVisualStudioDetails != null) {
+      if (installationHasIssues(_cachedUsableVisualStudioDetails)) {
+        _cachedAnyVisualStudioDetails = _cachedUsableVisualStudioDetails;
+        return null;
+      }
+    }
     return _cachedUsableVisualStudioDetails;
   }
 
@@ -170,7 +233,9 @@ class VisualStudio {
   /// regardless of components.
   Map<String, dynamic> _cachedAnyVisualStudioDetails;
   Map<String, dynamic> get _anyVisualStudioDetails {
-    _cachedAnyVisualStudioDetails ??= _visualStudioDetails();
+    // Search for all types of installations.
+    _cachedAnyVisualStudioDetails ??= _visualStudioDetails(
+        additionalArguments: <String>[_prereleaseKey, '-all']);
     return _cachedAnyVisualStudioDetails;
   }
 

@@ -94,17 +94,12 @@ class LockdownReturnCode {
 
 class IMobileDevice {
   IMobileDevice()
-      : _ideviceIdPath = artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios)
-          ?? 'idevice_id', // TODO(fujino): remove fallback once g3 updated
-        _ideviceinfoPath = artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios)
-          ?? 'ideviceinfo', // TODO(fujino): remove fallback once g3 updated
-        _idevicenamePath = artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios)
-          ?? 'idevicename', // TODO(fujino): remove fallback once g3 updated
-        _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios)
-          ?? 'idevicesyslog', // TODO(fujino): remove fallback once g3 updated
-        _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios)
-          ?? 'idevicescreenshot' { // TODO(fujino): remove fallback once g3 updated
-        }
+      : _ideviceIdPath = artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios),
+        _ideviceinfoPath = artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
+        _idevicenamePath = artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios),
+        _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
+        _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios);
+
   final String _ideviceIdPath;
   final String _ideviceinfoPath;
   final String _idevicenamePath;
@@ -112,7 +107,7 @@ class IMobileDevice {
   final String _idevicescreenshotPath;
 
   bool get isInstalled {
-    _isInstalled ??= exitsHappy(
+    _isInstalled ??= processUtils.exitsHappySync(
       <String>[
         _ideviceIdPath,
         '-h'
@@ -141,7 +136,7 @@ class IMobileDevice {
     final Map<String, String> executionEnv = Map<String, String>.fromEntries(
       <MapEntry<String, String>>[cache.dyLdLibEntry]
     );
-    final ProcessResult ideviceResult = (await runAsync(
+    final ProcessResult ideviceResult = (await processUtils.run(
       <String>[
         _ideviceinfoPath,
         '-u',
@@ -155,7 +150,7 @@ class IMobileDevice {
     }
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
-    final ProcessResult result = (await runAsync(
+    final ProcessResult result = (await processUtils.run(
       <String>[
         _ideviceIdPath,
         '-l',
@@ -166,7 +161,7 @@ class IMobileDevice {
       _isWorking = true;
     } else {
       // Check that we can look up the names of any attached devices.
-      _isWorking = await exitsHappyAsync(
+      _isWorking = await processUtils.exitsHappy(
         <String>[_idevicenamePath],
         environment: executionEnv,
       );
@@ -234,7 +229,7 @@ class IMobileDevice {
 
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID) {
-    return runCommand(
+    return processUtils.start(
       <String>[
         _idevicesyslogPath,
         '-u',
@@ -248,11 +243,12 @@ class IMobileDevice {
 
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
-    return runCheckedAsync(
+    return processUtils.run(
       <String>[
         _idevicescreenshotPath,
         outputFile.path
       ],
+      throwOnError: true,
       environment: Map<String, String>.fromEntries(
         <MapEntry<String, String>>[cache.dyLdLibEntry]
       ),
@@ -323,8 +319,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   Map<String, String> autoSigningConfigs;
-  if (codesign && buildForDevice)
+  if (codesign && buildForDevice) {
     autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+  }
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -445,7 +442,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
-  final RunResult buildResult = await runAsync(
+  final RunResult buildResult = await processUtils.run(
     buildCommands,
     workingDirectory: app.project.hostAppRoot.path,
     allowReentrantFlutter: true,
@@ -462,22 +459,42 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
   flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
-  // Run -showBuildSettings again but with the exact same parameters as the build.
-  final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(
-    (List<String>
-        .from(buildCommands)
-        ..add('-showBuildSettings'))
-        // Undocumented behavior: xcodebuild craps out if -showBuildSettings
-        // is used together with -allowProvisioningUpdates or
-        // -allowProvisioningDeviceRegistration and freezes forever.
-        .where((String buildCommand) {
-          return !const <String>[
-            '-allowProvisioningUpdates',
-            '-allowProvisioningDeviceRegistration',
-          ].contains(buildCommand);
-        }).toList(),
-    workingDirectory: app.project.hostAppRoot.path,
-  ));
+  // Run -showBuildSettings again but with the exact same parameters as the
+  // build. showBuildSettings is reported to ocassionally timeout. Here, we give
+  // it a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
+  // When there is a timeout, we retry once. See issue #35988.
+  final List<String> showBuildSettingsCommand = (List<String>
+      .from(buildCommands)
+      ..add('-showBuildSettings'))
+      // Undocumented behavior: xcodebuild craps out if -showBuildSettings
+      // is used together with -allowProvisioningUpdates or
+      // -allowProvisioningDeviceRegistration and freezes forever.
+      .where((String buildCommand) {
+        return !const <String>[
+          '-allowProvisioningUpdates',
+          '-allowProvisioningDeviceRegistration',
+        ].contains(buildCommand);
+      }).toList();
+  const Duration showBuildSettingsTimeout = Duration(minutes: 1);
+  Map<String, String> buildSettings;
+  try {
+    final RunResult showBuildSettingsResult = await processUtils.run(
+      showBuildSettingsCommand,
+      throwOnError: true,
+      workingDirectory: app.project.hostAppRoot.path,
+      timeout: showBuildSettingsTimeout,
+      timeoutRetries: 1,
+    );
+    final String showBuildSettings = showBuildSettingsResult.stdout.trim();
+    buildSettings = parseXcodeBuildSettings(showBuildSettings);
+  } on ProcessException catch (e) {
+    if (e.toString().contains('timed out')) {
+      BuildEvent('xcode-show-build-settings-timeout',
+        command: showBuildSettingsCommand.join(' '),
+      ).send();
+    }
+    rethrow;
+  }
 
   if (buildResult.exitCode != 0) {
     printStatus('Failed to build iOS app');
@@ -663,7 +680,10 @@ Future<void> _copyServiceFrameworks(List<Map<String, String>> services, Director
       continue;
     }
     // Shell out so permissions on the dylib are preserved.
-    await runCheckedAsync(<String>['/bin/cp', dylib.path, frameworksDirectory.path]);
+    await processUtils.run(
+      <String>['/bin/cp', dylib.path, frameworksDirectory.path],
+      throwOnError: true,
+    );
   }
 }
 

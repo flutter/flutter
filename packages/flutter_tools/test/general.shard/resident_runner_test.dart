@@ -298,6 +298,20 @@ void main() {
     Usage: () => MockUsage(),
   }));
 
+  test('ResidentRunner uses temp directory when there is no output dill path', () => testbed.run(() {
+    expect(residentRunner.artifactDirectory.path, contains('_fluttter_tool'));
+
+    final ResidentRunner otherRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      dillOutputPath: fs.path.join('foobar', 'app.dill'),
+    );
+    expect(otherRunner.artifactDirectory.path, contains('foobar'));
+  }));
+
   test('ResidentRunner printHelpDetails', () => testbed.run(() {
     when(mockDevice.supportsHotRestart).thenReturn(true);
     when(mockDevice.supportsScreenshot).thenReturn(true);

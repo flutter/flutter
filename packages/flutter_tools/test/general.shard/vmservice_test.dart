@@ -52,8 +52,11 @@ class MockPeer implements rpc.Peer {
 
   @override
   void sendNotification(String method, [ dynamic parameters ]) {
-    throw 'unexpected call to sendNotification';
+    // this does get called
+    sentNotifications.putIfAbsent(method, () => <dynamic>[]).add(parameters);
   }
+
+  Map<String, List<dynamic>> sentNotifications = <String, List<dynamic>>{};
 
   bool isolatesEnabled = false;
 
@@ -192,6 +195,12 @@ void main() {
         final MockPeer mockPeer = MockPeer();
         expect(mockPeer.returnedFromSendRequest, 0);
         final VMService vmService = VMService(mockPeer, null, null, null, null, null);
+        expect(mockPeer.sentNotifications, contains('registerService'));
+        final List<String> registeredServices =
+          mockPeer.sentNotifications['registerService']
+            .map((dynamic service) => (service as Map<String, String>)['service'])
+            .toList();
+        expect(registeredServices, contains('flutterVersion'));
         vmService.getVM().then((void value) { done = true; });
         expect(done, isFalse);
         expect(mockPeer.returnedFromSendRequest, 0);

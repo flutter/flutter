@@ -18,7 +18,6 @@ import 'convert.dart';
 import 'globals.dart';
 
 class FlutterVersion {
-  @visibleForTesting
   FlutterVersion([this._clock = const SystemClock()]) {
     _frameworkRevision = _runGit(gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '));
     _frameworkVersion = GitTagVersion.determine().frameworkVersionFor(_frameworkRevision);
@@ -539,7 +538,10 @@ String _runSync(List<String> command, { bool lenient = true }) {
 }
 
 String _runGit(String command) {
-  return runSync(command.split(' '), workingDirectory: Cache.flutterRoot);
+  return processUtils.runSync(
+    command.split(' '),
+    workingDirectory: Cache.flutterRoot,
+  ).stdout.trim();
 }
 
 /// Runs [command] in the root of the Flutter installation and returns the

@@ -8,7 +8,7 @@ import '../application_package.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process_manager.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../desktop.dart';
 import '../device.dart';
@@ -88,7 +88,7 @@ class WindowsDevice extends Device {
       );
     }
     await stopApp(package);
-    final Process process = await processManager.start(<String>[
+    final Process process = await processUtils.start(<String>[
       package.executable(debuggingOptions?.buildInfo?.mode)
     ]);
     if (debuggingOptions?.buildInfo?.isRelease == true) {
@@ -114,7 +114,9 @@ class WindowsDevice extends Device {
     if (process == null) {
       return false;
     }
-    final ProcessResult result = await processManager.run(<String>['Taskkill', '/PID', process.first, '/F']);
+    final RunResult result = await processUtils.run(
+      <String>['Taskkill', '/PID', process.first, '/F'],
+    );
     return result.exitCode == 0;
   }
 
@@ -163,7 +165,9 @@ final RegExp _whitespace = RegExp(r'\s+');
 @visibleForTesting
 List<String> runningProcess(String processName) {
   // TODO(jonahwilliams): find a way to do this without powershell.
-  final ProcessResult result = processManager.runSync(<String>['powershell', '-script="Get-CimInstance Win32_Process"']);
+  final RunResult result = processUtils.runSync(
+    <String>['powershell', '-script="Get-CimInstance Win32_Process"'],
+  );
   if (result.exitCode != 0) {
     return null;
   }

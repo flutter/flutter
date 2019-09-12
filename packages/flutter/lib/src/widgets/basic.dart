@@ -1184,7 +1184,7 @@ class Transform extends SingleChildRenderObjectWidget {
   ///   child: Container(
   ///     padding: const EdgeInsets.all(8.0),
   ///     color: const Color(0xFFE8581C),
-  ///     child: const Text('Bad Ideas'),
+  ///     child: const Text('Bad Idea Bears'),
   ///   ),
   /// )
   /// ```
@@ -3999,10 +3999,6 @@ class Flex extends MultiChildRenderObjectWidget {
 /// )
 /// ```
 ///
-/// You will see this issue when you run the app:
-///
-/// ![A screenshot of the error using the Row widget](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_error.png)
-///
 /// The row first asks its first child, the [FlutterLogo], to lay out, at
 /// whatever size the logo would like. The logo is friendly and happily decides
 /// to be 24 pixels to a side. This leaves lots of room for the next child. The
@@ -4015,11 +4011,10 @@ class Flex extends MultiChildRenderObjectWidget {
 /// have no more room available for my other children!", and gets angry and
 /// sprouts a yellow and black strip.
 ///
-/// {@tool sample}
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_error.png)
+///
 /// The fix is to wrap the second child in an [Expanded] widget, which tells the
 /// row that the child should be given the remaining room:
-///
-/// ![A screenshot of the Row widget after applying the fix](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_fixed.png)
 ///
 /// ```dart
 /// Row(
@@ -4032,7 +4027,6 @@ class Flex extends MultiChildRenderObjectWidget {
 ///   ],
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// Now, the row first asks the logo to lay out, and then asks the _icon_ to lay
 /// out. The [Icon], like the logo, is happy to take on a reasonable size (also
@@ -4041,6 +4035,8 @@ class Flex extends MultiChildRenderObjectWidget {
 /// the text exactly how wide to be: the exact width of the remaining space. The
 /// text, now happy to comply to a reasonable request, wraps the text within
 /// that width, and you end up with a paragraph split over several lines.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_fixed.png)
 ///
 /// ## Layout algorithm
 ///

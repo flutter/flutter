@@ -138,14 +138,13 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   /// Creates a [RenderView] object to be the root of the
   /// [RenderObject] rendering tree, and initializes it so that it
-  /// will be rendered when the engine is next ready to display a
-  /// frame.
+  /// will be rendered when the next frame is requested.
   ///
   /// Called automatically when the binding is created.
   void initRenderView() {
     assert(renderView == null);
     renderView = RenderView(configuration: createViewConfiguration(), window: window);
-    renderView.scheduleInitialFrame();
+    renderView.prepareInitialFrame();
   }
 
   /// The object that manages state about currently connected mice, for hover

@@ -1050,6 +1050,15 @@ void main() {
     validateDoublePropertyJsonSerialization(doubleWithUnit);
   });
 
+  test('double.infinity serialization test', () {
+    final DoubleProperty infProperty1 = DoubleProperty('double1', double.infinity);
+    validateDoublePropertyJsonSerialization(infProperty1);
+    expect(infProperty1.toString(), equals('double1: Infinity'));
+
+    final DoubleProperty infProperty2 = DoubleProperty('double2', double.negativeInfinity);
+    validateDoublePropertyJsonSerialization(infProperty2);
+    expect(infProperty2.toString(), equals('double2: -Infinity'));
+  });
 
   test('unsafe double property test', () {
     final DoubleProperty safe = DoubleProperty.lazy(

@@ -1837,4 +1837,71 @@ void main() {
     // Teardown.
     await gesture.removePointer();
   });
+
+  testWidgets('loses focus when disabled', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'InputChip');
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: InputChip(
+          focusNode: focusNode,
+          autofocus: true,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+          avatar: const CircleAvatar(child: Text('A')),
+          label: const Text('Chip A'),
+          onPressed: () { },
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: InputChip(
+          focusNode: focusNode,
+          autofocus: true,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+          avatar: const CircleAvatar(child: Text('A')),
+          label: const Text('Chip A'),
+          onPressed: null,
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('cannot be traversed to when disabled', (WidgetTester tester) async {
+    final FocusNode focusNode1 = FocusNode(debugLabel: 'InputChip 1');
+    final FocusNode focusNode2 = FocusNode(debugLabel: 'InputChip 2');
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: Column(
+          children: <Widget>[
+            InputChip(
+              focusNode: focusNode1,
+              autofocus: true,
+              label: const Text('Chip A'),
+              onPressed: () { },
+            ),
+            InputChip(
+              focusNode: focusNode2,
+              autofocus: true,
+              label: const Text('Chip B'),
+              onPressed: null,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(focusNode1.hasPrimaryFocus, isTrue);
+    expect(focusNode2.hasPrimaryFocus, isFalse);
+
+    expect(focusNode1.nextFocus(), isTrue);
+
+    await tester.pump();
+    expect(focusNode1.hasPrimaryFocus, isTrue);
+    expect(focusNode2.hasPrimaryFocus, isFalse);
+  });
 }

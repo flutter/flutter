@@ -1259,6 +1259,8 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///
 /// See also:
 ///
+///  * [AnimatedCrossFade], for fading between two children.
+///  * [AnimatedSwitcher], for fading between many children in sequence.
 ///  * [FadeTransition], an explicitly animated version of this widget, where
 ///    an [Animation] is provided by the caller instead of being built in.
 class AnimatedOpacity extends ImplicitlyAnimatedWidget {

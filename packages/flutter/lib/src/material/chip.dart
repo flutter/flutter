@@ -1728,6 +1728,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       onFocusChange: _handleFocus,
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
+      canRequestFocus: widget.isEnabled,
       child: Material(
         elevation: isTapping ? pressElevation : elevation,
         shadowColor: widget.selected ? selectedShadowColor : shadowColor,

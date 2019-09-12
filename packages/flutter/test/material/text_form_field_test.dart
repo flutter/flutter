@@ -184,34 +184,9 @@ void main() {
     );
 
     expect(_validateCalled, 1);
-    await tester.showKeyboard(find.byType(TextField));
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
     expect(_validateCalled, 2);
-  });
-
-  testWidgets('validate is not called if widget is disabled', (WidgetTester tester) async {
-    int _validateCalled = 0;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: TextFormField(
-              enabled: false,
-              autovalidate: true,
-              validator: (String value) { _validateCalled += 1; return null; },
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(_validateCalled, 0);
-    await tester.showKeyboard(find.byType(TextField));
-    await tester.enterText(find.byType(TextField), 'a');
-    await tester.pump();
-    expect(_validateCalled, 0);
   });
 
   testWidgets('validate is called if widget is enabled', (WidgetTester tester) async {
@@ -232,7 +207,6 @@ void main() {
     );
 
     expect(_validateCalled, 1);
-    await tester.showKeyboard(find.byType(TextField));
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
     expect(_validateCalled, 2);

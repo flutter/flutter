@@ -146,15 +146,20 @@ void main() {
     });
 
     testUsingOsxContext('build settings is empty when xcodebuild failed to get the build settings', () {
-      when(mockProcessManager.runSync(argThat(contains(xcodebuild))))
+      when(mockProcessManager.runSync(
+               argThat(contains(xcodebuild)),
+               workingDirectory: anyNamed('workingDirectory'),
+               environment: anyNamed('environment')))
           .thenReturn(ProcessResult(0, 1, '', ''));
       expect(xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
     });
 
     testUsingContext('build settings flakes', () async {
       const Duration delay = Duration(seconds: 1);
-      mockProcessManager.processFactory =
-          mocks.flakyProcessFactory(1, delay: delay + const Duration(seconds: 1));
+      mockProcessManager.processFactory = mocks.flakyProcessFactory(
+        flakes: 1,
+        delay: delay + const Duration(seconds: 1),
+      );
       expect(await xcodeProjectInterpreter.getBuildSettingsAsync(
                  '', '', timeout: delay),
              const <String, String>{});

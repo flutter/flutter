@@ -231,8 +231,12 @@ void main() {
     });
 
     group('example', () {
-      testInMemory('exists for plugin', () async {
+      testInMemory('exists for plugin in legacy format', () async {
         final FlutterProject project = await aPluginProject();
+        expect(project.hasExampleApp, isTrue);
+      });
+      testInMemory('exists for plugin in multi-platform format', () async {
+        final FlutterProject project = await aPluginProject(legacy: false);
         expect(project.hasExampleApp, isTrue);
       });
       testInMemory('does not exist for non-plugin', () async {
@@ -475,19 +479,37 @@ Future<FlutterProject> someProject() async {
   return FlutterProject.fromDirectory(directory);
 }
 
-Future<FlutterProject> aPluginProject() async {
+Future<FlutterProject> aPluginProject({bool legacy = true}) async {
   final Directory directory = fs.directory('plugin_project');
   directory.childDirectory('ios').createSync(recursive: true);
   directory.childDirectory('android').createSync(recursive: true);
   directory.childDirectory('example').createSync(recursive: true);
-  directory.childFile('pubspec.yaml').writeAsStringSync('''
+  String pluginPubSpec;
+  if (legacy) {
+    pluginPubSpec = '''
 name: my_plugin
 flutter:
   plugin:
     androidPackage: com.example
     pluginClass: MyPlugin
     iosPrefix: FLT
-''');
+''';
+  } else {
+    pluginPubSpec = '''
+name: my_plugin
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.example
+        pluginClass: MyPlugin
+      ios:
+        pluginClass: MyPlugin
+      macos:
+        pluginClass: MyPlugin
+''';
+  }
+  directory.childFile('pubspec.yaml').writeAsStringSync(pluginPubSpec);
   return FlutterProject.fromDirectory(directory);
 }
 

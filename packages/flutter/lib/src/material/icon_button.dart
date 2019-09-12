@@ -313,6 +313,7 @@ class IconButton extends StatelessWidget {
       child: Focus(
         focusNode: focusNode,
         autofocus: autofocus,
+        canRequestFocus: onPressed != null,
         child: InkResponse(
           onTap: onPressed,
           child: result,

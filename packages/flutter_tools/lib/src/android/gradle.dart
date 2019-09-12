@@ -10,7 +10,9 @@ import 'package:meta/meta.dart';
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -28,11 +30,39 @@ import '../reporting/reporting.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
-final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
+/// Gradle utils in the current [AppContext].
+GradleUtils get gradleUtils => context.get<GradleUtils>();
 
-GradleProject _cachedGradleAppProject;
-GradleProject _cachedGradleLibraryProject;
-String _cachedGradleExecutable;
+/// Provides utilities to run a Gradle task,
+/// such as finding the Gradle executable or constructing a Gradle project.
+class GradleUtils {
+  /// Empty constructor.
+  GradleUtils();
+
+  String _cachedExecutable;
+  /// Gets the Gradle executable path.
+  /// This is the `gradlew` or `gradlew.bat` script in the `android/` directory.
+  Future<String> getExecutable(FlutterProject project) async {
+    _cachedExecutable ??= await _initializeGradle(project);
+    return _cachedExecutable;
+  }
+
+  GradleProject _cachedAppProject;
+  /// Gets the [GradleProject] for the current [FlutterProject] if built as an app.
+  Future<GradleProject> get appProject async {
+    _cachedAppProject ??= await _readGradleProject(isLibrary: false);
+    return _cachedAppProject;
+  }
+
+  GradleProject _cachedLibraryProject;
+  /// Gets the [GradleProject] for the current [FlutterProject] if built as a library.
+  Future<GradleProject> get libraryProject async {
+    _cachedLibraryProject ??= await _readGradleProject(isLibrary: true);
+    return _cachedLibraryProject;
+  }
+}
+
+final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
 
 enum FlutterPluginVersion {
   none,
@@ -103,19 +133,10 @@ Future<File> getGradleAppOut(AndroidProject androidProject) async {
     case FlutterPluginVersion.managed:
       // Fall through. The managed plugin matches plugin v2 for now.
     case FlutterPluginVersion.v2:
-      return fs.file((await _gradleAppProject()).apkDirectory.childFile('app.apk'));
+      final GradleProject gradleProject = await gradleUtils.appProject;
+      return fs.file(gradleProject.apkDirectory.childFile('app.apk'));
   }
   return null;
-}
-
-Future<GradleProject> _gradleAppProject() async {
-  _cachedGradleAppProject ??= await _readGradleProject(isLibrary: false);
-  return _cachedGradleAppProject;
-}
-
-Future<GradleProject> _gradleLibraryProject() async {
-  _cachedGradleLibraryProject ??= await _readGradleProject(isLibrary: true);
-  return _cachedGradleLibraryProject;
 }
 
 /// Runs `gradlew dependencies`, ensuring that dependencies are resolved and
@@ -123,9 +144,10 @@ Future<GradleProject> _gradleLibraryProject() async {
 Future<void> checkGradleDependencies() async {
   final Status progress = logger.startProgress('Ensuring gradle dependencies are up to date...', timeout: timeoutConfiguration.slowOperation);
   final FlutterProject flutterProject = FlutterProject.current();
-  final String gradle = await _ensureGradle(flutterProject);
-  await runCheckedAsync(
-    <String>[gradle, 'dependencies'],
+  final String gradlew = await gradleUtils.getExecutable(flutterProject);
+  await processUtils.run(
+    <String>[gradlew, 'dependencies'],
+    throwOnError: true,
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
     environment: _gradleEnv,
   );
@@ -189,7 +211,8 @@ void createSettingsAarGradle(Directory androidDirectory) {
 // of calculating the app properties using Gradle. This may take minutes.
 Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
   final FlutterProject flutterProject = FlutterProject.current();
-  final String gradle = await _ensureGradle(flutterProject);
+  final String gradlew = await gradleUtils.getExecutable(flutterProject);
+
   updateLocalProperties(project: flutterProject);
 
   final FlutterManifest manifest = flutterProject.manifest;
@@ -212,13 +235,15 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
   // Get the properties and tasks from Gradle, so we can determinate the `buildDir`,
   // flavors and build types defined in the project. If gradle fails, then check if the failure is due to t
   try {
-    final RunResult propertiesRunResult = await runCheckedAsync(
-      <String>[gradle, isLibrary ? 'properties' : 'app:properties'],
+    final RunResult propertiesRunResult = await processUtils.run(
+      <String>[gradlew, isLibrary ? 'properties' : 'app:properties'],
+      throwOnError: true,
       workingDirectory: hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
-    final RunResult tasksRunResult = await runCheckedAsync(
-      <String>[gradle, isLibrary ? 'tasks': 'app:tasks', '--all', '--console=auto'],
+    final RunResult tasksRunResult = await processUtils.run(
+      <String>[gradlew, isLibrary ? 'tasks': 'app:tasks', '--all', '--console=auto'],
+      throwOnError: true,
       workingDirectory: hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
@@ -274,11 +299,6 @@ String _locateGradlewExecutable(Directory directory) {
   return null;
 }
 
-Future<String> _ensureGradle(FlutterProject project) async {
-  _cachedGradleExecutable ??= await _initializeGradle(project);
-  return _cachedGradleExecutable;
-}
-
 // Note: Gradle may be bootstrapped and possibly downloaded as a side-effect
 // of validating the Gradle executable. This may take several seconds.
 Future<String> _initializeGradle(FlutterProject project) async {
@@ -289,13 +309,29 @@ Future<String> _initializeGradle(FlutterProject project) async {
   injectGradleWrapperIfNeeded(android);
 
   final String gradle = _locateGradlewExecutable(android);
-  if (gradle == null)
+  if (gradle == null) {
+    status.stop();
     throwToolExit('Unable to locate gradlew script');
+  }
   printTrace('Using gradle from $gradle.');
   // Validates the Gradle executable by asking for its version.
   // Makes Gradle Wrapper download and install Gradle distribution, if needed.
-  await runCheckedAsync(<String>[gradle, '-v'], environment: _gradleEnv);
-  status.stop();
+  try {
+    await processUtils.run(
+      <String>[gradle, '-v'],
+      throwOnError: true,
+      environment: _gradleEnv,
+    );
+  } on ProcessException catch (e) {
+    final String error = e.toString();
+    if (error.contains('java.io.FileNotFoundException: https://downloads.gradle.org') ||
+        error.contains('java.io.IOException: Unable to tunnel through proxy')) {
+      throwToolExit('$gradle threw an error while trying to update itself.\n$e');
+    }
+    rethrow;
+  } finally {
+    status.stop();
+  }
   return gradle;
 }
 
@@ -492,17 +528,15 @@ Future<void> buildGradleProject({
   // from the local.properties file.
   updateLocalProperties(project: project, buildInfo: androidBuildInfo.buildInfo);
 
-  final String gradle = await _ensureGradle(project);
-
   switch (getFlutterPluginVersion(project.android)) {
     case FlutterPluginVersion.none:
       // Fall through. Pretend it's v1, and just go for it.
     case FlutterPluginVersion.v1:
-      return _buildGradleProjectV1(project, gradle);
+      return _buildGradleProjectV1(project);
     case FlutterPluginVersion.managed:
       // Fall through. Managed plugin builds the same way as plugin v2.
     case FlutterPluginVersion.v2:
-      return _buildGradleProjectV2(project, gradle, androidBuildInfo, target, isBuildingBundle);
+      return _buildGradleProjectV2(project, androidBuildInfo, target, isBuildingBundle);
   }
 }
 
@@ -516,9 +550,9 @@ Future<void> buildGradleAar({
 
   GradleProject gradleProject;
   if (manifest.isModule) {
-    gradleProject = await _gradleAppProject();
+    gradleProject = await gradleUtils.appProject;
   } else if (manifest.isPlugin) {
-    gradleProject = await _gradleLibraryProject();
+    gradleProject = await gradleUtils.libraryProject;
   } else {
     throwToolExit('AARs can only be built for plugin or module projects.');
   }
@@ -538,12 +572,11 @@ Future<void> buildGradleAar({
     multilineOutput: true,
   );
 
-  final String gradle = await _ensureGradle(project);
-  final String gradlePath = fs.file(gradle).absolute.path;
+  final String gradlew = await gradleUtils.getExecutable(project);
   final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
   final String initScript = fs.path.join(flutterRoot, 'packages','flutter_tools', 'gradle', 'aar_init_script.gradle');
   final List<String> command = <String>[
-    gradlePath,
+    gradlew,
     '-I=$initScript',
     '-Pflutter-root=$flutterRoot',
     '-Poutput-dir=${gradleProject.buildDirectory}',
@@ -572,7 +605,7 @@ Future<void> buildGradleAar({
   int exitCode = 1;
 
   try {
-    exitCode = await runCommandAndStreamOutput(
+    exitCode = await processUtils.stream(
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
@@ -601,7 +634,8 @@ Future<void> buildGradleAar({
   printStatus('Built ${fs.path.relative(repoDirectory.path)}.', color: TerminalColor.green);
 }
 
-Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async {
+Future<void> _buildGradleProjectV1(FlutterProject project) async {
+  final String gradlew = await gradleUtils.getExecutable(project);
   // Run 'gradlew build'.
   final Status status = logger.startProgress(
     'Running \'gradlew build\'...',
@@ -609,8 +643,8 @@ Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async 
     multilineOutput: true,
   );
   final Stopwatch sw = Stopwatch()..start();
-  final int exitCode = await runCommandAndStreamOutput(
-    <String>[fs.file(gradle).absolute.path, 'build'],
+  final int exitCode = await processUtils.stream(
+    <String>[fs.file(gradlew).absolute.path, 'build'],
     workingDirectory: project.android.hostAppGradleRoot.path,
     allowReentrantFlutter: true,
     environment: _gradleEnv,
@@ -661,12 +695,12 @@ void printUndefinedTask(GradleProject project, BuildInfo buildInfo) {
 
 Future<void> _buildGradleProjectV2(
   FlutterProject flutterProject,
-  String gradle,
   AndroidBuildInfo androidBuildInfo,
   String target,
   bool isBuildingBundle,
 ) async {
-  final GradleProject project = await _gradleAppProject();
+  final String gradlew = await gradleUtils.getExecutable(flutterProject);
+  final GradleProject project = await gradleUtils.appProject;
   final BuildInfo buildInfo = androidBuildInfo.buildInfo;
 
   String assembleTask;
@@ -685,8 +719,7 @@ Future<void> _buildGradleProjectV2(
     timeout: timeoutConfiguration.slowOperation,
     multilineOutput: true,
   );
-  final String gradlePath = fs.file(gradle).absolute.path;
-  final List<String> command = <String>[gradlePath];
+  final List<String> command = <String>[gradlew];
   if (logger.isVerbose) {
     command.add('-Pverbose=true');
   } else {
@@ -712,6 +745,8 @@ Future<void> _buildGradleProjectV2(
     command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
   if (androidBuildInfo.splitPerAbi)
     command.add('-Psplit-per-abi=true');
+  if (androidBuildInfo.proguard)
+    command.add('-Pproguard=true');
   if (androidBuildInfo.targetArchs.isNotEmpty) {
     final String targetPlatforms = androidBuildInfo.targetArchs
         .map(getPlatformNameForAndroidArch).join(',');
@@ -727,10 +762,11 @@ Future<void> _buildGradleProjectV2(
   }
   command.add(assembleTask);
   bool potentialAndroidXFailure = false;
+  bool potentialProguardFailure = false;
   final Stopwatch sw = Stopwatch()..start();
   int exitCode = 1;
   try {
-    exitCode = await runCommandAndStreamOutput(
+    exitCode = await processUtils.stream(
       command,
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
@@ -743,13 +779,17 @@ Future<void> _buildGradleProjectV2(
         if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
           potentialAndroidXFailure = true;
         }
+        // Proguard errors include this url.
+        if (!potentialProguardFailure && androidBuildInfo.proguard &&
+            line.contains('http://proguard.sourceforge.net')) {
+          potentialProguardFailure = true;
+        }
         // Always print the full line in verbose mode.
         if (logger.isVerbose) {
           return line;
         } else if (isAndroidXPluginWarning || !ndkMessageFilter.hasMatch(line)) {
           return null;
         }
-
         return line;
       },
     );
@@ -758,7 +798,13 @@ Future<void> _buildGradleProjectV2(
   }
 
   if (exitCode != 0) {
-    if (potentialAndroidXFailure) {
+    if (potentialProguardFailure) {
+      final String exclamationMark = terminal.color('[!]', TerminalColor.red);
+      printStatus('$exclamationMark Proguard may have failed to optimize the Java bytecode.', emphasis: true);
+      printStatus('To disable proguard, pass the `--no-proguard` flag to this command.', indent: 4);
+      printStatus('To learn more about Proguard, see: https://flutter.dev/docs/deployment/android#enabling-proguard', indent: 4);
+      BuildEvent('proguard-failure').send();
+    } else if (potentialAndroidXFailure) {
       printStatus('AndroidX incompatibilities may have caused this build to fail. See https://goo.gl/CP92wY.');
       BuildEvent('android-x-failure').send();
     }

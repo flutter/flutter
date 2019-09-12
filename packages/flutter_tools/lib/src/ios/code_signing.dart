@@ -96,8 +96,9 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   BuildableIOSApp iosApp,
 }) async {
   final Map<String, String> buildSettings = iosApp.project.buildSettings;
-  if (buildSettings == null)
+  if (buildSettings == null) {
     return null;
+  }
 
   // If the user already has it set in the project build settings itself,
   // continue with that.
@@ -114,16 +115,21 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
 
   // If the user's environment is missing the tools needed to find and read
   // certificates, abandon. Tools should be pre-equipped on macOS.
-  if (!exitsHappy(const <String>['which', 'security']) || !exitsHappy(const <String>['which', 'openssl']))
+  if (!await processUtils.exitsHappy(const <String>['which', 'security']) ||
+      !await processUtils.exitsHappy(const <String>['which', 'openssl'])) {
     return null;
+  }
 
   const List<String> findIdentityCommand =
       <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
 
   String findIdentityStdout;
   try {
-    findIdentityStdout = runCheckedSync(findIdentityCommand);
-  } catch (error) {
+    findIdentityStdout = (await processUtils.run(
+      findIdentityCommand,
+      throwOnError: true,
+    )).stdout.trim();
+  } on ProcessException catch (error) {
     printTrace('Unexpected failure from find-identity: $error.');
     return null;
   }
@@ -142,8 +148,9 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   final String signingIdentity = await _chooseSigningIdentity(validCodeSigningIdentities);
 
   // If none are chosen, return null.
-  if (signingIdentity == null)
+  if (signingIdentity == null) {
     return null;
+  }
 
   printStatus('Signing iOS app for device deployment using developer identity: "$signingIdentity"');
 
@@ -153,20 +160,23 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
           ?.group(1);
 
   // If `security`'s output format changes, we'd have to update the above regex.
-  if (signingCertificateId == null)
+  if (signingCertificateId == null) {
     return null;
+  }
 
   String signingCertificateStdout;
   try {
-    signingCertificateStdout = runCheckedSync(
-      <String>['security', 'find-certificate', '-c', signingCertificateId, '-p']
-    );
-  } catch (error) {
+    signingCertificateStdout = (await processUtils.run(
+      <String>['security', 'find-certificate', '-c', signingCertificateId, '-p'],
+      throwOnError: true,
+    )).stdout.trim();
+  } on ProcessException catch (error) {
     printTrace('Couldn\'t find the certificate: $error.');
     return null;
   }
 
-  final Process opensslProcess = await runCommand(const <String>['openssl', 'x509', '-subject']);
+  final Process opensslProcess = await processUtils.start(
+    const <String>['openssl', 'x509', '-subject']);
   await (opensslProcess.stdin..write(signingCertificateStdout)).close();
 
   final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);

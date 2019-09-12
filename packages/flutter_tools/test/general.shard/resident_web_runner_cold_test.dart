@@ -42,6 +42,9 @@ void main() {
         @required String target,
         @required FlutterProject flutterProject,
         @required BuildInfo buildInfo,
+        @required bool skipDwds,
+        @required String hostname,
+        @required String port,
       }) async {
         return mockWebFs;
       },
@@ -76,7 +79,6 @@ void main() {
     when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
       return true;
     });
-    when(mockWebFs.hardRefresh()).thenAnswer((Invocation _) async {  });
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
     expect(result.code, 0);

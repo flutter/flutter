@@ -349,7 +349,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],

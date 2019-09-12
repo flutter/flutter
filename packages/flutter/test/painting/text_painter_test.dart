@@ -789,5 +789,5 @@ void main() {
     expect(lines[1].lineNumber, 1);
     expect(lines[2].lineNumber, 2);
     expect(lines[3].lineNumber, 3);
-  }, skip: isBrowser);
+  }, skip: !isLinux);
 }

@@ -141,12 +141,16 @@ void main() {
     expect(material.clipBehavior, clipBehavior);
   });
 
-  testWidgets('BottomSheetThemeData.modalElevation takes priority over BottomSheetThemeData.elevation for modal bottom sheets', (WidgetTester tester) async {
+  testWidgets('Modal bottom sheet-specific parameters are used for modal bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
+    const Color modalBackgroundColor = Colors.yellow;
+    const Color persistentBackgroundColor = Colors.red;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
       elevation: persistentElevation,
       modalElevation: modalElevation,
+      backgroundColor: persistentBackgroundColor,
+      modalBackgroundColor: modalBackgroundColor,
     );
 
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
@@ -160,14 +164,19 @@ void main() {
       ),
     );
     expect(material.elevation, modalElevation);
+    expect(material.color, modalBackgroundColor);
   });
 
-  testWidgets('BottomSheetThemeData.elevation takes priority over BottomSheetThemeData.modalElevation for peristent bottom sheets', (WidgetTester tester) async {
+  testWidgets('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for peristent bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
+    const Color modalBackgroundColor = Colors.yellow;
+    const Color persistentBackgroundColor = Colors.red;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
       elevation: persistentElevation,
       modalElevation: modalElevation,
+      backgroundColor: persistentBackgroundColor,
+      modalBackgroundColor: modalBackgroundColor,
     );
 
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
@@ -181,12 +190,15 @@ void main() {
       ),
     );
     expect(material.elevation, persistentElevation);
+    expect(material.color, persistentBackgroundColor);
   });
 
-  testWidgets('BottomSheetThemeData.modalElevation doesn\'t apply to persistent bottom sheets', (WidgetTester tester) async {
+  testWidgets('Modal bottom sheet-specific parameters don\'t apply to persistent bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
+    const Color modalBackgroundColor = Colors.yellow;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
       modalElevation: modalElevation,
+      modalBackgroundColor: modalBackgroundColor,
     );
 
     await tester.pumpWidget(bottomSheetWithElevations(bottomSheetTheme));
@@ -200,6 +212,7 @@ void main() {
       ),
     );
     expect(material.elevation, 0);
+    expect(material.color, null);
   });
 }
 
