@@ -289,8 +289,8 @@ class RunCommand extends RunCommandBase {
         dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'],
         observatoryPort: observatoryPort,
         verboseSystemLogs: argResults['verbose-system-logs'],
-        hostname: featureFlags.isWebEnabled ? argResults['hostname'] : '',
-        port: featureFlags.isWebEnabled ? argResults['port'] : '',
+        hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] : '',
+        port: featureFlags.isWebEnabled ? argResults['web-port'] : '',
       );
     }
   }
