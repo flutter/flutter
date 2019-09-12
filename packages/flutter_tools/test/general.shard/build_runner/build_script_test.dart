@@ -9,72 +9,65 @@ import 'package:mockito/mockito.dart';
 import '../../src/common.dart';
 
 void main() {
-  test('FlutterWebShellBuilder correctly configures platform', () async {
-    final MockBuildStep mockBuildStep = MockBuildStep();
-    const FlutterWebShellBuilder builder = FlutterWebShellBuilder(
-      hasPlugins: false,
-      initializePlatform: true,
-    );
-    final AssetId inputId = AssetId('hello_world', 'lib/main.dart');
+  MockBuildStep mockBuildStep;
+  AssetId inputId;
+
+  setUp(() {
+    mockBuildStep = MockBuildStep();
+    inputId = AssetId('hello_world', 'lib/main.dart');
     when(mockBuildStep.inputId).thenReturn(inputId);
     when(mockBuildStep.readAsString(any)).thenAnswer((Invocation invocation) async {
       return 'void main() { }';
     });
 
+  });
+
+  test('FlutterWebShellBuilder correctly configures platform', () async {
+    const FlutterWebShellBuilder builder = FlutterWebShellBuilder(
+      hasPlugins: false,
+      initializePlatform: true,
+    );
+
     await builder.build(mockBuildStep);
 
-    verify(mockBuildStep.writeAsString(any, argThat(contains('if (true)')))).called(1);
+    verify(mockBuildStep.writeAsString(any, argThat(contains('if (true) '
+        '{\n    await ui.webOnlyInitializePlatform')))).called(1);
   });
 
   test('FlutterWebShellBuilder correctly configures does not platform', () async {
-    final MockBuildStep mockBuildStep = MockBuildStep();
     const FlutterWebShellBuilder builder = FlutterWebShellBuilder(
       hasPlugins: false,
       initializePlatform: false,
     );
-    final AssetId inputId = AssetId('hello_world', 'lib/main.dart');
-    when(mockBuildStep.inputId).thenReturn(inputId);
-    when(mockBuildStep.readAsString(any)).thenAnswer((Invocation invocation) async {
-      return 'void main() { }';
-    });
 
     await builder.build(mockBuildStep);
 
-    verify(mockBuildStep.writeAsString(any, argThat(contains('if (false)')))).called(1);
+    verify(mockBuildStep.writeAsString(any, argThat(contains('if (false) '
+        '{\n    await ui.webOnlyInitializePlatform')))).called(1);
   });
 
   test('FlutterWebShellBuilder correctly configures plugins', () async {
-    final MockBuildStep mockBuildStep = MockBuildStep();
     const FlutterWebShellBuilder builder = FlutterWebShellBuilder(
       hasPlugins: true,
       initializePlatform: true,
     );
-    final AssetId inputId = AssetId('hello_world', 'lib/main.dart');
-    when(mockBuildStep.inputId).thenReturn(inputId);
-    when(mockBuildStep.readAsString(any)).thenAnswer((Invocation invocation) async {
-      return 'void main() { }';
-    });
 
     await builder.build(mockBuildStep);
 
-    verify(mockBuildStep.writeAsString(any, argThat(contains('registerPlugins(webPluginRegistry)')))).called(1);
+    verify(mockBuildStep.writeAsString(any,
+        argThat(contains('registerPlugins(webPluginRegistry)')))).called(1);
   });
 
   test('FlutterWebShellBuilder correctly does not configure plugins', () async {
-    final MockBuildStep mockBuildStep = MockBuildStep();
     const FlutterWebShellBuilder builder = FlutterWebShellBuilder(
       hasPlugins: false,
       initializePlatform: true,
     );
-    final AssetId inputId = AssetId('hello_world', 'lib/main.dart');
-    when(mockBuildStep.inputId).thenReturn(inputId);
-    when(mockBuildStep.readAsString(any)).thenAnswer((Invocation invocation) async {
-      return 'void main() { }';
-    });
 
     await builder.build(mockBuildStep);
 
-    verify(mockBuildStep.writeAsString(any, argThat(isNot(contains('registerPlugins(webPluginRegistry)'))))).called(1);
+    verify(mockBuildStep.writeAsString(any,
+        argThat(isNot(contains('registerPlugins(webPluginRegistry)'))))).called(1);
   });
 }
 

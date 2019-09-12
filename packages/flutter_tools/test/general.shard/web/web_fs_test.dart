@@ -42,7 +42,7 @@ void main() {
     mockDwds = MockDwds();
     when(mockBuildDaemonCreator.startBuildDaemon(any, release: anyNamed('release'), initializePlatform: anyNamed('initializePlatform')))
       .thenAnswer((Invocation invocation) async {
-        lastInitializePlatform = invocation.namedArguments[#lastInitializePlatform];
+        lastInitializePlatform = invocation.namedArguments[#initializePlatform];
         return mockBuildDaemonClient;
       });
     when(mockOperatingSystemUtils.findFreePort()).thenAnswer((Invocation _) async {
