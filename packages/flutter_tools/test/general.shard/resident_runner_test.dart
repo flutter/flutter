@@ -35,6 +35,9 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
+      fs.file(fs.path.join('build', 'app.dill'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('ABC');
       residentRunner = HotRunner(
         <FlutterDevice>[
           mockFlutterDevice,
@@ -191,6 +194,10 @@ void main() {
     })).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
+  }));
+
+  test('ResidentRunner copies dill file from build output into temp directory', () => testbed.run(() async {
+    expect(residentRunner.artifactDirectory.childFile('app.dill').readAsStringSync(), 'ABC');
   }));
 
   test('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
