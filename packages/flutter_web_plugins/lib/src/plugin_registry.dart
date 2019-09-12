@@ -107,7 +107,9 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
       _handlers.remove(channel);
     else
       _handlers[channel] = handler;
-    drainChannelBuffers(channel);
+    ui.drainChannelBuffer(channel, (ByteData data, ui.PlatformMessageResponseCallback callback) async {
+      await handlePlatformMessage(channel, data, callback);
+    });
   }
 
   @override

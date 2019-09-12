@@ -55,17 +55,6 @@ abstract class BinaryMessenger {
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
   void setMockMessageHandler(String channel, Future<ByteData> handler(ByteData message));
-
-  /// Handles all the stored platform messages stored inside of the channel buffers.
-  ///
-  /// This method is intended to be called by implementations of [setMessageHandler] once
-  /// it is valid to get calls to [handlePlatformMessage] for the given channel.
-  void drainChannelBuffers(String channel) {
-    while (!ui.channelBuffers.isEmpty(channel)) {
-      final ui.StoredMessage message = ui.channelBuffers.pop(channel);
-      handlePlatformMessage(channel, message.data, message.callback);
-    }
-  }
 }
 
 /// The default instance of [BinaryMessenger].
