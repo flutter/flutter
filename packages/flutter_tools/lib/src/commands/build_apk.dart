@@ -30,7 +30,7 @@ class BuildApkCommand extends BuildSubCommand {
       )
       ..addFlag('proguard',
         negatable: true,
-        defaultsTo: true,
+        defaultsTo: false,
         help: 'Whether to enable Proguard on release mode. '
               'To learn more, see: https://flutter.dev/docs/deployment/android#enabling-proguard',
       )
