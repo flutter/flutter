@@ -190,7 +190,27 @@ class AndroidDevice extends Device {
       // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
       switch (await _getProperty('ro.product.cpu.abi')) {
         case 'arm64-v8a':
-          _platform = TargetPlatform.android_arm64;
+
+          //Original code assumed that CPU was enough. But you need to verify 64 bit OS as well.
+          String gabilist = await _getProperty('ro.product.cpu.abilist');
+          if (gabilist == null)
+          {
+            //Have not seen a device without an abilist in adb, but it is possible.
+            _platform = TargetPlatform.android_arm64;
+            break;            
+          }
+
+          //Confirm that our 64 bit arm cpu has a 64 bit OS running on it
+          if (gabilist.contains('arm64-v8a') == true)
+          {
+            _platform = TargetPlatform.android_arm64;
+          }
+          else
+          {
+            //Sorry Amazon Kindle Fire 8, You tried trick me, but you failed.
+            _platform = TargetPlatform.android_arm;
+          }
+
           break;
         case 'x86_64':
           _platform = TargetPlatform.android_x64;
