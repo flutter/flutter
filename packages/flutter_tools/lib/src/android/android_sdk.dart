@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart' show ProcessResult;
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -526,9 +525,9 @@ class AndroidSdk {
 
   /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
   static String findJavaBinary() {
-
-    if (android_studio.javaPath != null)
+    if (android_studio.javaPath != null) {
       return fs.path.join(android_studio.javaPath, 'bin', 'java');
+    }
 
     final String javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
     if (javaHomeEnv != null) {
@@ -540,7 +539,11 @@ class AndroidSdk {
     // See: http://stackoverflow.com/questions/14292698/how-do-i-check-if-the-java-jdk-is-installed-on-mac.
     if (platform.isMacOS) {
       try {
-        final String javaHomeOutput = runCheckedSync(<String>['/usr/libexec/java_home'], hideStdout: true);
+        final String javaHomeOutput = processUtils.runSync(
+          <String>['/usr/libexec/java_home'],
+          throwOnError: true,
+          hideStdout: true,
+        ).stdout.trim();
         if (javaHomeOutput != null) {
           final List<String> javaHomeOutputSplit = javaHomeOutput.split('\n');
           if ((javaHomeOutputSplit != null) && (javaHomeOutputSplit.isNotEmpty)) {
@@ -575,7 +578,10 @@ class AndroidSdk {
   String get sdkManagerVersion {
     if (!processManager.canRun(sdkManagerPath))
       throwToolExit('Android sdkmanager not found. Update to the latest Android SDK to resolve this.');
-    final ProcessResult result = processManager.runSync(<String>[sdkManagerPath, '--version'], environment: sdkManagerEnv);
+    final RunResult result = processUtils.runSync(
+      <String>[sdkManagerPath, '--version'],
+      environment: sdkManagerEnv,
+    );
     if (result.exitCode != 0) {
       printTrace('sdkmanager --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');
       return null;

@@ -21,6 +21,9 @@ class BackButtonMemoryTest extends MemoryTest {
   @override
   AndroidDevice get device => super.device;
 
+  @override
+  int get iterationCount => 5;
+
   /// Perform a series of back button suspend and resume cycles.
   @override
   Future<void> useMemory() async {

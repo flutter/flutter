@@ -9,6 +9,7 @@ import '../base/build.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/version.dart';
@@ -142,14 +143,18 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
 
         // Merge arch-specific App.frameworks into a multi-arch App.framework.
         if ((await Future.wait<int>(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
-          final Iterable<String> dylibs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
+          final Iterable<String> dylibs = iosBuilds.values.map<String>(
+              (String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
           fs.directory(fs.path.join(outputPath, 'App.framework'))..createSync();
-          await runCheckedAsync(<String>[
-            'lipo',
-            ...dylibs,
-            '-create',
-            '-output', fs.path.join(outputPath, 'App.framework', 'App'),
-          ]);
+          await processUtils.run(
+            <String>[
+              'lipo',
+              ...dylibs,
+              '-create',
+              '-output', fs.path.join(outputPath, 'App.framework', 'App'),
+            ],
+            throwOnError: true,
+          );
         } else {
           status?.cancel();
           exitCodes.forEach((DarwinArch iosArch, Future<int> exitCodeFuture) async {
@@ -173,10 +178,10 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
           throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');
         }
       }
-    } on String catch (error) {
-      // Catch the String exceptions thrown from the `runCheckedSync` methods below.
+    } on ProcessException catch (error) {
+      // Catch the String exceptions thrown from the `runSync` methods below.
       status?.cancel();
-      printError(error);
+      printError(error.toString());
       return null;
     }
     status?.stop();

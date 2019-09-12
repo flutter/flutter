@@ -24,7 +24,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
       ..addFlag('proguard',
         negatable: true,
-        defaultsTo: true,
+        defaultsTo: false,
         help: 'Whether to enable Proguard on release mode. '
               'To learn more, see: https://flutter.dev/docs/deployment/android#enabling-proguard',
       )

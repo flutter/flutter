@@ -1010,6 +1010,7 @@ class HotRunner extends ResidentRunner {
   Future<void> preExit() async {
     await _cleanupDevFS();
     await hotRunnerConfig.runPreShutdownOperations();
+    await super.preExit();
   }
 
   @override
