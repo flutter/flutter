@@ -18,11 +18,11 @@ class VisualStudio {
   /// Versions older than 2017 Update 2 won't be detected, so error messages to
   /// users should take into account that [false] may mean that the user may
   /// have an old version rather than no installation at all.
-  bool get isInstalled => _bestVisualStudioDetails != null;
+  bool get isInstalled => _bestVisualStudioDetails.isNotEmpty;
 
   /// True if there is a version of Visual Studio with all the components
   /// necessary to build the project.
-  bool get hasNecessaryComponents => _usableVisualStudioDetails != null;
+  bool get hasNecessaryComponents => _usableVisualStudioDetails.isNotEmpty;
 
   /// The name of the Visual Studio install.
   ///
@@ -32,8 +32,12 @@ class VisualStudio {
   /// The user-friendly version number of the Visual Studio install.
   ///
   /// For instance: "15.4.0".
-  String get displayVersion =>
-      _bestVisualStudioDetails[_catalogKey][_catalogDisplayVersionKey];
+  String get displayVersion {
+    if (_bestVisualStudioDetails[_catalogKey] == null) {
+      return null;
+    }
+    return _bestVisualStudioDetails[_catalogKey][_catalogDisplayVersionKey];
+  }
 
   /// The directory where Visual Studio is installed.
   String get installLocation => _bestVisualStudioDetails[_installationPathKey];
@@ -47,11 +51,25 @@ class VisualStudio {
   // Visual Studio versions that don't include them, so default to a "valid" value to
   // avoid false negatives.
 
-  /// True there is complete installation of Visual Studio.
-  bool get isComplete => _bestVisualStudioDetails[_isCompleteKey] ?? false;
+  /// True if there is a complete installation of Visual Studio.
+  ///
+  /// False if installation is not found.
+  bool get isComplete {
+    if (_bestVisualStudioDetails.isEmpty) {
+      return false;
+    }
+    return _bestVisualStudioDetails[_isCompleteKey] ?? true;
+  }
 
   /// True if Visual Studio is launchable.
-  bool get isLaunchable => _bestVisualStudioDetails[_isLaunchableKey] ?? false;
+  ///
+  /// False if installation is not found.
+  bool get isLaunchable {
+    if (_bestVisualStudioDetails.isEmpty) {
+      return false;
+    }
+    return _bestVisualStudioDetails[_isLaunchableKey] ?? true;
+  }
 
     /// True if the Visual Studio installation is as pre-release version.
   bool get isPrerelease => _bestVisualStudioDetails[_isPrereleaseKey] ?? false;
@@ -75,7 +93,7 @@ class VisualStudio {
   /// the components necessary to build.
   String get vcvarsPath {
     final Map<String, dynamic> details = _usableVisualStudioDetails;
-    if (details == null) {
+    if (details.isEmpty) {
       return null;
     }
     return fs.path.join(
@@ -211,39 +229,56 @@ class VisualStudio {
   }
 
   /// Returns the details dictionary for the latest version of Visual Studio
-  /// that has all required components.
+  /// that has all required components, or {} if there is no such installation.
+  ///
+  /// If no installation is found, the cached VS details are set to an empty map
+  /// to avoid repeating vswhere queries that have already not found an installation.
   Map<String, dynamic> _cachedUsableVisualStudioDetails;
   Map<String, dynamic> get _usableVisualStudioDetails {
-    _cachedUsableVisualStudioDetails ??=
+    if (_cachedUsableVisualStudioDetails != null) {
+      return _cachedUsableVisualStudioDetails;
+    }
+    Map<String, dynamic> visualStudioDetails =
         _visualStudioDetails(requiredComponents: _requiredComponents().keys);
     // If a stable version is not found, try searching for a pre-release version.
-    _cachedUsableVisualStudioDetails ??= _visualStudioDetails(
+    visualStudioDetails ??= _visualStudioDetails(
         requiredComponents: _requiredComponents().keys,
         additionalArguments: <String>[_prereleaseKey]);
-    if (_cachedUsableVisualStudioDetails != null) {
-      if (installationHasIssues(_cachedUsableVisualStudioDetails)) {
-        _cachedAnyVisualStudioDetails = _cachedUsableVisualStudioDetails;
-        return null;
+
+    if (visualStudioDetails != null) {
+      if (installationHasIssues(visualStudioDetails)) {
+        _cachedAnyVisualStudioDetails = visualStudioDetails;
+      } else {
+        _cachedUsableVisualStudioDetails = visualStudioDetails;
       }
     }
+    _cachedUsableVisualStudioDetails ??= <String, dynamic>{};
     return _cachedUsableVisualStudioDetails;
   }
 
   /// Returns the details dictionary of the latest version of Visual Studio,
-  /// regardless of components.
+  /// regardless of components, or {} if no such installation is found.
+  ///
+  /// If no installation is found, the cached
+  /// VS details are set to an empty map to avoid repeating vswhere queries that
+  /// have already not found an installation.
   Map<String, dynamic> _cachedAnyVisualStudioDetails;
   Map<String, dynamic> get _anyVisualStudioDetails {
     // Search for all types of installations.
     _cachedAnyVisualStudioDetails ??= _visualStudioDetails(
         additionalArguments: <String>[_prereleaseKey, '-all']);
+    // Add a sentinel empty value to avoid querying vswhere again.
+    _cachedAnyVisualStudioDetails ??= <String, dynamic>{};
     return _cachedAnyVisualStudioDetails;
   }
 
   /// Returns the details dictionary of the best available version of Visual
-  /// Studio. If there's a version that has all the required components, that
+  /// Studio.
+  ///
+  /// If there's a version that has all the required components, that
   /// will be returned, otherwise returs the lastest installed version (if any).
   Map<String, dynamic> get _bestVisualStudioDetails {
-    if (_usableVisualStudioDetails != null) {
+    if (_usableVisualStudioDetails.isNotEmpty) {
       return _usableVisualStudioDetails;
     }
     return _anyVisualStudioDetails;
