@@ -161,17 +161,17 @@ class _ZoomingPageTransition extends StatelessWidget {
     end: 1.0,
   );
 
-  // The new page begins at 95% size before increasing until its at full size.
+  // The new page begins at 85% size before increasing until its at full size.
   static final Tween<double> _primaryScaleTween = Tween<double>(
-    begin: 0.95,
+    begin: 0.85,
     end: 1.0,
   );
 
-  // The previous page begins at full size before expanding to 110% of its size
+  // The previous page begins at full size before expanding to 105% of its size
   // to create a 'zoom' effect.
   static final Tween<double> _secondaryScaleTween = Tween<double>(
     begin: 1.0,
-    end: 1.1,
+    end: 1.05,
   );
 
   // The scrim obscures the old page by becoming increasingly opaque.
@@ -180,8 +180,22 @@ class _ZoomingPageTransition extends StatelessWidget {
     end: 0.25,
   );
 
-  // The acceleration curve used by the animations in the transition.
-  static const Curve _transitionCurve = Cubic(0.20, 0.00, 0.00, 1.00);
+  // A curve sequence similar to the 'fastOutExtraSlowIn' curve used in the
+  // native transition.
+  static final TweenSequence<double> _scaleCurveSequence = TweenSequence<double>(
+    <TweenSequenceItem<double>>[
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: 0.0, end: 0.4)
+            .chain(CurveTween(curve: const Cubic(0.05, 0.0, 0.133333, 0.06))),
+        weight: 0.166666,
+      ),
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: 0.4, end: 1.0)
+            .chain(CurveTween(curve: const Cubic(0.208333, 0.82, 0.25, 1.0))),
+        weight: 1.0 - 0.166666,
+      ),
+    ],
+  );
 
   final Animation<double> animation;
   final Animation<double> secondaryAnimation;
@@ -189,36 +203,32 @@ class _ZoomingPageTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final CurvedAnimation primaryAnimation = CurvedAnimation(
-      parent: animation,
-      curve: _transitionCurve,
-      reverseCurve: _transitionCurve.flipped,
-    );
-
-    final CurvedAnimation primaryEntranceAnimation = CurvedAnimation(
-      parent: primaryAnimation,
-      curve: const Interval(0.5, 1.0),
-      reverseCurve: const Interval(0.0, 1.0),
-    );
 
     // Quickly fade in the new page.
-    final Animation<double> opacityAnimation = _opacityTween.animate(CurvedAnimation(
-      parent: primaryAnimation,
-      curve: const Interval(0.5, 0.6),
-      reverseCurve: const Interval(0.99, 1.0),
-    ));
+    final Animation<double> opacityAnimation = _opacityTween
+        .chain(_scaleCurveSequence)
+        .animate(CurvedAnimation(
+          parent: animation,
+          curve: Interval(0.2, 0.4),
+        ));
 
     // Scale in the new page.
-    final Animation<double> primaryScaleAnimation = _primaryScaleTween.animate(primaryEntranceAnimation);
+    final Animation<double> primaryScaleAnimation = _primaryScaleTween
+        .chain(_scaleCurveSequence)
+        .animate(animation);
 
     // "Zoom" into the new page by scaling the previous page.
-    final Animation<double> secondaryScaleAnimation = _secondaryScaleTween.animate(CurvedAnimation(
-      parent: secondaryAnimation,
-      curve: _transitionCurve,
-      reverseCurve: _transitionCurve.flipped,
-    ));
+    final Animation<double> secondaryScaleAnimation = _secondaryScaleTween
+        .chain(_scaleCurveSequence)
+        .animate(secondaryAnimation);
 
-    final Animation<double> scrimAnimation = _scrimOpacityTween.animate(primaryEntranceAnimation);
+    //final Animation<double> scrimAnimation = _scrimOpacityTween.animate(primaryEntranceAnimation);
+    final Animation<double> scrimAnimation = _scrimOpacityTween
+        .chain(_scaleCurveSequence)
+        .animate(CurvedAnimation(
+          parent: animation,
+          curve: Interval(0.4, 1.0),
+        ));
 
     return FadeTransition(
       opacity: opacityAnimation,
