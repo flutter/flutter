@@ -148,6 +148,25 @@ void main() {
       });
 
       group('fails', () {
+
+        test('and generates correct output in the correct location', () async {
+          await fs.file(fix('/golden.png')).writeAsBytes(_kColorFailurePngBytes);
+          try {
+            await doComparison();
+            fail('TestFailure expected but not thrown.');
+          } on TestFailure catch (error) {
+            expect(error.message, contains('% diff detected'));
+            final io.File master = fs.file('/failures/golden_masterImage.png');
+            final io.File test = fs.file('/failures/golden_testImage.png');
+            final io.File isolated = fs.file('/failures/golden_isolatedDiff.png');
+            final io.File masked = fs.file('/failures/golden_maskedDiff.png');
+            expect(master.existsSync(), isTrue);
+            expect(test.existsSync(), isTrue);
+            expect(isolated.existsSync(), isTrue);
+            expect(masked.existsSync(), isTrue);
+          }
+        });
+
         test('when golden file does not exist', () async {
           try {
             await doComparison();

@@ -129,7 +129,7 @@ class LocalFileComparator extends GoldenFileComparator {
       + '_'
       + failure
       + '.png';
-    return File(_path.join('failures', testName));
+    return File(_path.join(basedir.path, 'failures', testName));
   }
 }
 
