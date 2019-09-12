@@ -102,10 +102,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
 
   gpu_latch.Wait();
 
-  // Send dispatcher_maker to the engine constructor because shell won't have
-  // platform_view set until Shell::Setup is called later.
-  auto dispatcher_maker = platform_view->GetDispatcherMaker();
-
   // Create the engine on the UI thread.
   fml::AutoResetWaitableEvent ui_latch;
   std::unique_ptr<Engine> engine;
@@ -114,7 +110,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
       fml::MakeCopyable([&ui_latch,                                       //
                          &engine,                                         //
                          shell = shell.get(),                             //
-                         &dispatcher_maker,                               //
                          isolate_snapshot = std::move(isolate_snapshot),  //
                          shared_snapshot = std::move(shared_snapshot),    //
                          vsync_waiter = std::move(vsync_waiter),          //
@@ -129,7 +124,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                                                    std::move(vsync_waiter));
 
         engine = std::make_unique<Engine>(*shell,                       //
-                                          dispatcher_maker,             //
                                           *shell->GetDartVM(),          //
                                           std::move(isolate_snapshot),  //
                                           std::move(shared_snapshot),   //
@@ -730,11 +724,11 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   TRACE_FLOW_BEGIN("flutter", "PointerEvent", next_pointer_flow_id_);
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
-  task_runners_.GetUITaskRunner()->PostTask(
-      fml::MakeCopyable([engine = weak_engine_, packet = std::move(packet),
-                         flow_id = next_pointer_flow_id_]() mutable {
+  task_runners_.GetUITaskRunner()->PostTask(fml::MakeCopyable(
+      [engine = engine_->GetWeakPtr(), packet = std::move(packet),
+       flow_id = next_pointer_flow_id_] {
         if (engine) {
-          engine->DispatchPointerDataPacket(std::move(packet), flow_id);
+          engine->DispatchPointerDataPacket(*packet, flow_id);
         }
       }));
   next_pointer_flow_id_++;
