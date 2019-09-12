@@ -15,6 +15,7 @@
  */
 
 #include "font_skia.h"
+#include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkFont.h"
 
 #include <minikin/MinikinFont.h>
@@ -24,21 +25,14 @@ namespace {
 
 hb_blob_t* GetTable(hb_face_t* face, hb_tag_t tag, void* context) {
   SkTypeface* typeface = reinterpret_cast<SkTypeface*>(context);
-
-  const size_t table_size = typeface->getTableSize(tag);
-  if (table_size == 0)
-    return nullptr;
-  void* buffer = malloc(table_size);
-  if (buffer == nullptr)
-    return nullptr;
-
-  size_t actual_size = typeface->getTableData(tag, 0, table_size, buffer);
-  if (table_size != actual_size) {
-    free(buffer);
+  sk_sp<SkData> data = typeface->copyTableData(tag);
+  if (!data) {
     return nullptr;
   }
-  return hb_blob_create(reinterpret_cast<char*>(buffer), table_size,
-                        HB_MEMORY_MODE_WRITABLE, buffer, free);
+  SkData* rawData = data.release();
+  return hb_blob_create(reinterpret_cast<char*>(rawData->writable_data()),
+                        rawData->size(), HB_MEMORY_MODE_WRITABLE, rawData,
+                        [](void* ctx) { ((SkData*)ctx)->unref(); });
 }
 
 }  // namespace
