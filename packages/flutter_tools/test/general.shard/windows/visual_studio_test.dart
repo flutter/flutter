@@ -40,9 +40,20 @@ void main() {
     'isRebootRequired': false,
     'isComplete': true,
     'isLaunchable': true,
+    'isPrerelease': false,
     'catalog': <String, dynamic>{
       'productDisplayVersion': '15.9.12',
-      'productMilestoneIsPreRelease': true,
+    }
+  };
+
+  // A version of a response that doesn't include certain installation status
+  // information that might be missing in older Visual Studio versions.
+  const Map<String, dynamic> _oldResponse = <String, dynamic>{
+    'installationPath': visualStudioPath,
+    'displayName': 'Visual Studio Community 2017',
+    'installationVersion': '15.9.28307.665',
+    'catalog': <String, dynamic>{
+      'productDisplayVersion': '15.9.12',
     }
   };
 
@@ -173,6 +184,19 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
+    testUsingContext('isInstalled returns true even with missing status information', () {
+      setMockCompatibleVisualStudioInstallation(null);
+      setMockPrereleaseVisualStudioInstallation(null);
+      setMockAnyVisualStudioInstallation(_oldResponse);
+
+      visualStudio = VisualStudio();
+      expect(visualStudio.isInstalled, true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFilesystem,
+      Platform: () => windowsPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
+
     testUsingContext('isInstalled returns true when VS is present but missing components', () {
       setMockCompatibleVisualStudioInstallation(null);
       setMockPrereleaseVisualStudioInstallation(null);
@@ -191,14 +215,8 @@ void main() {
       setMockAnyVisualStudioInstallation(null);
 
       final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
-        ..addAll(<String, dynamic>{
-          'catalog': <String, dynamic>{
-            'productDisplayVersion': '15.9.12',
-            'productMilestoneIsPreRelease': true,
-          }
-        });
+        ..['isPrerelease'] = true;
       setMockPrereleaseVisualStudioInstallation(response);
-
 
       visualStudio = VisualStudio();
       expect(visualStudio.isInstalled, true);
