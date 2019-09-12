@@ -70,6 +70,7 @@ Future<int> runTests(
       projectDirectory: flutterProject.directory,
       testOutputDir: tempBuildDir,
       projectName: flutterProject.manifest.appName,
+      initializePlatform: true,
     );
     if (!result) {
       throwToolExit('Failed to compile tests');

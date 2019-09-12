@@ -101,7 +101,11 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     <BuilderFactory>[
       (BuilderOptions options) {
         final bool hasPlugins = options.config['hasPlugins'] == true;
-        return FlutterWebShellBuilder(hasPlugins: hasPlugins);
+        final bool initializePlatform = options.config['initializePlatform'] == true;
+        return FlutterWebShellBuilder(
+          hasPlugins: hasPlugins,
+          initializePlatform: initializePlatform,
+        );
       }
     ],
     core.toRoot(),
@@ -360,9 +364,12 @@ void setStackTraceMapper(StackTraceMapper mapper) {
 
 /// A shell builder which generates the web specific entrypoint.
 class FlutterWebShellBuilder implements Builder {
-  const FlutterWebShellBuilder({this.hasPlugins = false});
+  const FlutterWebShellBuilder({this.hasPlugins = false, this.initializePlatform = true});
 
   final bool hasPlugins;
+
+  /// Whether to call webOnlyInitializePlatform.
+  final bool initializePlatform;
 
   @override
   Future<void> build(BuildStep buildStep) async {
@@ -383,7 +390,9 @@ import "${path.url.basename(buildStep.inputId.path)}" as entrypoint;
 
 Future<void> main() async {
   registerPlugins(webPluginRegistry);
-  await ui.webOnlyInitializePlatform();
+  if ($initializePlatform) {
+    await ui.webOnlyInitializePlatform();
+  }
   entrypoint.main();
 }
 ''');
@@ -394,7 +403,9 @@ import 'dart:ui' as ui;
 import "${path.url.basename(buildStep.inputId.path)}" as entrypoint;
 
 Future<void> main() async {
-  await ui.webOnlyInitializePlatform();
+  if ($initializePlatform) {
+    await ui.webOnlyInitializePlatform();
+  }
   entrypoint.main();
 }
 ''');

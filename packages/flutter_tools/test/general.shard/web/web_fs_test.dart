@@ -83,6 +83,7 @@ void main() {
       target: fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
+      initializePlatform: false,
     );
 
     // The build daemon is told to build once.
