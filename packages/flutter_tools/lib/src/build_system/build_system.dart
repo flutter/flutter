@@ -146,11 +146,11 @@ abstract class Target {
     final File stamp = _findStampFile(environment);
     final List<String> inputPaths = <String>[];
     for (File input in inputs) {
-      inputPaths.add(input.resolveSymbolicLinksSync());
+      inputPaths.add(input.path);
     }
     final List<String> outputPaths = <String>[];
     for (File output in outputs) {
-      outputPaths.add(output.resolveSymbolicLinksSync());
+      outputPaths.add(output.path);
     }
     final Map<String, Object> result = <String, Object>{
       'inputs': inputPaths,
@@ -502,7 +502,7 @@ class _BuildInstance {
           outputFiles[output.path] = output;
         }
       } else {
-        printStatus('${node.target.name}: Starting');
+        printStatus('${node.target.name}: Starting due to ${node.invalidatedReasons}');
         await node.target.build(environment);
         printStatus('${node.target.name}: Complete');
 
@@ -653,8 +653,13 @@ class Node {
   /// Output file paths from the previous invocation of this build node.
   final Set<String> previousOutputs = <String>{};
 
-  /// Inout file paths from the previous invocation of this build node.
+  /// Input file paths from the previous invocation of this build node.
   final Set<String> previousInputs = <String>{};
+
+  /// One or more reasons why a task was invalidated.
+  ///
+  /// May be empty if the task was skipped.
+  final Set<InvalidedReason> invalidatedReasons = <InvalidedReason>{};
 
   /// Whether this node needs an action performed.
   bool get dirty => _dirty;
@@ -685,6 +690,7 @@ class Node {
       if (fileHashStore.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileHashStore.currentHashes[absolutePath];
         if (currentHash != previousHash) {
+          invalidatedReasons.add(InvalidedReason.inputChanged);
           _dirty = true;
         }
       } else {
@@ -698,11 +704,13 @@ class Node {
       // output paths changed.
       if (!currentOutputPaths.contains(previousOutput)) {
         _dirty = true;
+        invalidatedReasons.add(InvalidedReason.outputSetChanged);
         // if this isn't a current output file there is no reason to compute the hash.
         continue;
       }
       final File file = fs.file(previousOutput);
       if (!file.existsSync()) {
+        invalidatedReasons.add(InvalidedReason.outputMissing);
         _dirty = true;
         continue;
       }
@@ -711,6 +719,7 @@ class Node {
       if (fileHashStore.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileHashStore.currentHashes[absolutePath];
         if (currentHash != previousHash) {
+          invalidatedReasons.add(InvalidedReason.outputChanged);
           _dirty = true;
         }
       } else {
@@ -728,9 +737,25 @@ class Node {
     if (sourcesToHash.isNotEmpty) {
       final List<File> dirty = await fileHashStore.hashFiles(sourcesToHash);
       if (dirty.isNotEmpty) {
+        invalidatedReasons.add(InvalidedReason.inputChanged);
         _dirty = true;
       }
     }
     return !_dirty;
   }
+}
+
+/// A description of why a task was rerun.
+enum InvalidedReason {
+  /// An input file has an updated hash.
+  inputChanged,
+
+  /// An output file has an updated hash.
+  outputChanged,
+
+  /// An output file that is expected is missing.
+  outputMissing,
+
+  /// The set of expected output files changed.
+  outputSetChanged,
 }
