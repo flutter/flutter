@@ -106,10 +106,7 @@ class WebFs {
     await _connectedApps?.cancel();
   }
 
-  /// Retrieve the [DebugConnection] for the current application.
-  ///
-  /// if [useExtension] is true, will attempt to connect via the extension
-  /// stream.
+  /// Retrieve the [DebugConnection] for the current application
   Future<DebugConnection> runAndDebug() {
     final Completer<DebugConnection> firstConnection = Completer<DebugConnection>();
     _connectedApps = _dwds.connectedApps.listen((AppConnection appConnection) async {
