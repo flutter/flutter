@@ -828,17 +828,13 @@ class _RenderDecoration extends RenderBox {
     if (prefixIcon != null)
       visitor(prefixIcon);
 
-    if (isFocused) {
-      if (label != null) {
-        visitor(label);
-      }
-      if (hint != null) {
+    if (label != null) {
+      visitor(label);
+    }
+    if (hint != null) {
+      if (isFocused) {
         visitor(hint);
-      }
-    } else {
-      if (label != null) {
-        visitor(label);
-      } else if (hint != null) {
+      } else if (label == null) {
         visitor(hint);
       }
     }
