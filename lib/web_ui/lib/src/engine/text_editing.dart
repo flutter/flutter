@@ -667,13 +667,11 @@ class HybridTextEditing {
     /// to its CSS equivalent value.
     /// Converts index of TextAlign to enum value.
     _editingStyle = _EditingStyle(
-      textDirection: ui.TextDirection.values[textDirectionIndex],
-      fontSize: style['fontSize'],
-      textAlign: ui.TextAlign.values[textAlignIndex],
-      fontFamily: style['fontFamily'],
-      fontWeight:
-          fontWeightIndexToCss(fontWeightIndex: style['fontWeightIndex']),
-    );
+        textDirection: ui.TextDirection.values[textDirectionIndex],
+        fontSize: style['fontSize'],
+        textAlign: ui.TextAlign.values[textAlignIndex],
+        fontFamily: style['fontFamily'],
+        fontWeightIndex: style['fontWeightIndex']);
   }
 
   /// Size and transform of the editable text on the page.
@@ -767,8 +765,10 @@ class _EditingStyle {
     @required this.fontSize,
     @required this.textAlign,
     @required this.fontFamily,
-    this.fontWeight,
-  });
+    @required fontWeightIndex,
+  }) : this.fontWeight = (fontWeightIndex != null)
+            ? fontWeightIndexToCss(fontWeightIndex: fontWeightIndex)
+            : 'normal';
 
   /// This information will be used for changing the style of the hidden input
   /// element, which will match it's size to the size of the editable widget.
