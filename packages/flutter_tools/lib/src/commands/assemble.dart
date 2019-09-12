@@ -149,7 +149,7 @@ void writeListIfChanged(List<File> files, String path) {
   final StringBuffer buffer = StringBuffer();
   // These files are already sorted.
   for (File file in files) {
-    buffer.writeln(file.resolveSymbolicLinksSync());
+    buffer.writeln(file.path);
   }
   final String newContents = buffer.toString();
   if (!file.existsSync()) {
