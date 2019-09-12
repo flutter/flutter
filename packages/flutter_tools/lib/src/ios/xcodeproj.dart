@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -331,6 +332,10 @@ class XcodeProjectInterpreter {
   }
 
   Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
+    // The exit code returned by 'xcodebuild -list' when either:
+    // * -project is passed and the given project isn't there, or
+    // * no -project is passed and there isn't a project.
+    const int missingProjectExitCode = 66;
     final RunResult result = await processUtils.run(
       <String>[
         _executable,
@@ -338,8 +343,12 @@ class XcodeProjectInterpreter {
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],
       throwOnError: true,
+      whiteListFailures: (int c) => c == missingProjectExitCode,
       workingDirectory: projectPath,
     );
+    if (result.exitCode == missingProjectExitCode) {
+      throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
+    }
     return XcodeProjectInfo.fromXcodeBuildOutput(result.toString());
   }
 }
