@@ -32,7 +32,7 @@ class FuchsiaDevFinder {
       'list',
       '-full'
     ];
-    final RunResult result = await runAsync(command);
+    final RunResult result = await processUtils.run(command);
     if (result.exitCode != 0) {
       printError('dev_finder failed: ${result.stderr}');
       return null;
@@ -57,7 +57,7 @@ class FuchsiaDevFinder {
       '-device-limit', '1',
       deviceName
     ];
-    final RunResult result = await runAsync(command);
+    final RunResult result = await processUtils.run(command);
     if (result.exitCode != 0) {
       printError('dev_finder failed: ${result.stderr}');
       return null;
