@@ -4241,6 +4241,7 @@ void main() {
 
     expect(node.label, 'label\nhint');
     expect(node.value, 'value');
+    semantics.dispose();
   });
 
   testWidgets('TextField semantics always include label when no hint is given', (WidgetTester tester) async {
@@ -4271,6 +4272,7 @@ void main() {
 
     expect(node.label, 'label');
     expect(node.value, 'value');
+    semantics.dispose();
   });
 
   testWidgets('TextField semantics always include hint when no label is given', (WidgetTester tester) async {
@@ -4301,6 +4303,7 @@ void main() {
 
     expect(node.label, 'hint');
     expect(node.value, 'value');
+    semantics.dispose();
   });
 
   testWidgets('TextField semantics', (WidgetTester tester) async {
