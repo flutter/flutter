@@ -133,12 +133,12 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesWebOptions({ bool hide = true }) {
-    argParser.addOption('hostname',
+    argParser.addOption('web-hostname',
       defaultsTo: 'localhost',
       help: 'The hostname to serve web application on.',
       hide: hide,
     );
-    argParser.addOption('port',
+    argParser.addOption('web-port',
       defaultsTo: null,
       help: 'The host port to serve the web application from. If not provided, the tool '
         'will select a random open port on the host.',
