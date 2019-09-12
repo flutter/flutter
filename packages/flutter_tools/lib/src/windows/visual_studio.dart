@@ -32,7 +32,12 @@ class VisualStudio {
   /// The user-friendly version number of the Visual Studio install.
   ///
   /// For instance: "15.4.0".
-  String get displayVersion => _bestVisualStudioDetails[_catalogKey][_catalogDisplayVersionKey];
+  String get displayVersion {
+    if (_bestVisualStudioDetails[_catalogKey] == null) {
+      return null;
+    }
+    return _bestVisualStudioDetails[_catalogKey][_catalogDisplayVersionKey];
+  }
 
   /// The directory where Visual Studio is installed.
   String get installLocation => _bestVisualStudioDetails[_installationPathKey];

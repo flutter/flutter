@@ -196,6 +196,9 @@ void main() {
       expect(visualStudio.isRebootRequired, false);
       expect(visualStudio.isLaunchable, false);
       expect(visualStudio.displayName, null);
+      expect(visualStudio.displayVersion, null);
+      expect(visualStudio.installLocation, null);
+      expect(visualStudio.fullVersion, null);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFilesystem,
       Platform: () => windowsPlatform,
