@@ -27,8 +27,12 @@ void main() {
   MockBuildDaemonClient mockBuildDaemonClient;
   MockOperatingSystemUtils mockOperatingSystemUtils;
   bool lastInitializePlatform;
+  dynamic lastAddress;
+  int lastPort;
 
   setUp(() {
+    lastAddress = null;
+    lastPort = null;
     lastInitializePlatform = null;
     mockBuildDaemonCreator =  MockBuildDaemonCreator();
     mockChromeLauncher = MockChromeLauncher();
@@ -59,6 +63,8 @@ void main() {
         BuildDaemonCreator: () => mockBuildDaemonCreator,
         ChromeLauncher: () => mockChromeLauncher,
         HttpMultiServerFactory: () => (dynamic address, int port) async {
+          lastAddress = address;
+          lastPort = port;
           return mockHttpMultiServer;
         },
         DwdsFactory: () => ({
@@ -87,6 +93,8 @@ void main() {
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: true,
+      hostname: null,
+      port: null,
     );
 
     // The build daemon is told to build once.
@@ -105,6 +113,8 @@ void main() {
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
       initializePlatform: false,
+      hostname: null,
+      port: null,
     );
 
     // The build daemon is told to build once.
@@ -113,6 +123,22 @@ void main() {
     // .dart_tool directory is created.
     expect(flutterProject.dartTool.existsSync(), true);
     expect(lastInitializePlatform, false);
+  }));
+
+  test('Uses provided port number and hostname.', () => testbed.run(() async {
+    final FlutterProject flutterProject = FlutterProject.current();
+    await WebFs.start(
+      skipDwds: false,
+      target: fs.path.join('lib', 'main.dart'),
+      buildInfo: BuildInfo.debug,
+      flutterProject: flutterProject,
+      initializePlatform: false,
+      hostname: 'foo',
+      port: '1234',
+    );
+
+    expect(lastPort, 1234);
+    expect(lastAddress, contains('foo'));
   }));
 }
 

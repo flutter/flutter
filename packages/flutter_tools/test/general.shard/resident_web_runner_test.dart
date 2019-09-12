@@ -53,6 +53,8 @@ void main() {
         @required BuildInfo buildInfo,
         @required bool skipDwds,
         @required bool initializePlatform,
+        @required String hostname,
+        @required String port,
       }) async {
         return mockWebFs;
       },

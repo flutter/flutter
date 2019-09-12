@@ -64,7 +64,7 @@ class IOSDeploy {
     iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
     iosDeployEnv.addEntries(<MapEntry<String, String>>[cache.dyLdLibEntry]);
 
-    return await runCommandAndStreamOutput(
+    return await processUtils.stream(
       launchCommand,
       mapFunction: _monitorInstallationFailure,
       trace: true,
@@ -195,8 +195,9 @@ class IOSDevice extends Device {
   Future<bool> isAppInstalled(ApplicationPackage app) async {
     RunResult apps;
     try {
-      apps = await runCheckedAsync(
+      apps = await processUtils.run(
         <String>[_installerPath, '--list-apps'],
+        throwOnError: true,
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry],
         ),
@@ -220,8 +221,9 @@ class IOSDevice extends Device {
     }
 
     try {
-      await runCheckedAsync(
+      await processUtils.run(
         <String>[_installerPath, '-i', iosApp.deviceBundlePath],
+        throwOnError: true,
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry],
         ),
@@ -236,8 +238,9 @@ class IOSDevice extends Device {
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async {
     try {
-      await runCheckedAsync(
+      await processUtils.run(
         <String>[_installerPath, '-U', app.id],
+        throwOnError: true,
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry],
         ),
@@ -610,7 +613,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     while (!connected) {
       printTrace('attempting to forward device port $devicePort to host port $hostPort');
       // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
-      process = await runCommand(
+      process = await processUtils.start(
         <String>[
           device._iproxyPath,
           hostPort.toString(),

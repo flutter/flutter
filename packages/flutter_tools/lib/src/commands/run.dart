@@ -44,6 +44,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       ..addOption('route',
         help: 'Which route to load when running the app.',
       );
+    usesWebOptions(hide: !verboseHelp);
     usesTargetOption();
     usesPortOptions();
     usesIpv6Flag();
@@ -168,7 +169,7 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'No longer require an authentication code to connect to the VM '
               'service (not recommended).')
-      ..addFlag('initialize-platform',
+      ..addFlag('web-initialize-platform',
         negatable: true,
         defaultsTo: true,
         hide: true,
@@ -297,7 +298,9 @@ class RunCommand extends RunCommandBase {
         dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'],
         observatoryPort: observatoryPort,
         verboseSystemLogs: argResults['verbose-system-logs'],
-        initializePlatform: argResults['initialize-platform'],
+        initializePlatform: argResults['web-initialize-platform'],
+        hostname: featureFlags.isWebEnabled ? argResults['hostname'] : '',
+        port: featureFlags.isWebEnabled ? argResults['port'] : '',
       );
     }
   }

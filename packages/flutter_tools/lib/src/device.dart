@@ -485,6 +485,8 @@ class DebuggingOptions {
     this.verboseSystemLogs = false,
     this.observatoryPort,
     this.initializePlatform = true,
+    this.hostname,
+    this.port,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true })
@@ -499,6 +501,8 @@ class DebuggingOptions {
       traceSystrace = false,
       dumpSkpOnShaderCompilation = false,
       verboseSystemLogs = false,
+      hostname = null,
+      port = null,
       observatoryPort = null;
 
   final bool debuggingEnabled;
@@ -517,6 +521,8 @@ class DebuggingOptions {
   /// Whether to invoke webOnlyInitializePlatform in Flutter for web.
   final bool initializePlatform;
   final int observatoryPort;
+  final String port;
+  final String hostname;
 
   bool get hasObservatoryPort => observatoryPort != null;
 }

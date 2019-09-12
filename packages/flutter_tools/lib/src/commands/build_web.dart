@@ -18,7 +18,7 @@ class BuildWebCommand extends BuildSubCommand {
     usesTargetOption();
     usesPubOption();
     addBuildModeFlags();
-    argParser.addFlag('initialize-platform',
+    argParser.addFlag('web-initialize-platform',
         defaultsTo: true,
         negatable: true,
         hide: true,

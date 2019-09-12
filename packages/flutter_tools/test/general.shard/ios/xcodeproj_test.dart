@@ -146,7 +146,10 @@ void main() {
     });
 
     testUsingOsxContext('build settings is empty when xcodebuild failed to get the build settings', () {
-      when(mockProcessManager.runSync(argThat(contains(xcodebuild))))
+      when(mockProcessManager.runSync(
+               argThat(contains(xcodebuild)),
+               workingDirectory: anyNamed('workingDirectory'),
+               environment: anyNamed('environment')))
           .thenReturn(ProcessResult(0, 1, '', ''));
       expect(xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
     });

@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart' as io;
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -156,22 +157,25 @@ Future<void> pub(
   int code;
   while (true) {
     attempts += 1;
-    code = await runCommandAndStreamOutput(
+    code = await processUtils.stream(
       _pubCommand(arguments),
       workingDirectory: directory,
       mapFunction: filter,
       environment: _createPubEnvironment(context),
     );
-    if (code != 69) // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
+    if (code != 69) { // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
       break;
+    }
     printStatus('$failureMessage ($code) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
     await Future<void>.delayed(Duration(seconds: duration));
-    if (duration < 64)
+    if (duration < 64) {
       duration *= 2;
+    }
   }
   assert(code != null);
-  if (code != 0)
+  if (code != 0) {
     throwToolExit('$failureMessage ($code)', exitCode: code);
+  }
 }
 
 /// Runs pub in 'interactive' mode, directly piping the stdin stream of this
@@ -182,13 +186,26 @@ Future<void> pubInteractively(
   String directory,
 }) async {
   Cache.releaseLockEarly();
-  final int code = await runInteractively(
+  final io.Process process = await processUtils.start(
     _pubCommand(arguments),
     workingDirectory: directory,
     environment: _createPubEnvironment(PubContext.interactive),
   );
-  if (code != 0)
+
+  // Pipe the Flutter tool stdin to the pub stdin.
+  unawaited(process.stdin.addStream(io.stdin));
+
+  // Pipe the put stdout and stderr to the tool stdout and stderr.
+  await Future.wait<dynamic>(<Future<dynamic>>[
+    io.stdout.addStream(process.stdout),
+    io.stderr.addStream(process.stderr),
+  ]);
+
+  // Wait for pub to exit.
+  final int code = await process.exitCode;
+  if (code != 0) {
     throwToolExit('pub finished with exit code $code', exitCode: code);
+  }
 }
 
 /// The command used for running pub.

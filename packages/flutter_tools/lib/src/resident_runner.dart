@@ -236,24 +236,6 @@ class FlutterDevice {
     ));
   }
 
-  // Lists program elements changed in the most recent reload that have not
-  // since executed.
-  Future<List<ProgramElement>> unusedChangesInLastReload() async {
-    final List<Future<List<ProgramElement>>> reports =
-      <Future<List<ProgramElement>>>[];
-    for (FlutterView view in views)
-      reports.add(view.uiIsolate.getUnusedChangesInLastReload());
-    final List<ProgramElement> elements = <ProgramElement>[];
-    for (Future<List<ProgramElement>> report in reports) {
-      for (ProgramElement element in await report)
-        elements.add(ProgramElement(element.qualifiedName,
-                                        devFS.deviceUriToHostUri(element.uri),
-                                        element.line,
-                                        element.column));
-    }
-    return elements;
-  }
-
   Future<void> debugDumpApp() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterDebugDumpApp();
@@ -547,6 +529,16 @@ abstract class ResidentRunner {
        assetBundle = AssetBundleFactory.instance.createBundle() {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
+    }
+    // TODO(jonahwilliams): this is a temporary work around to regain some of
+    // the initialize from dill performance. Longer term, we should have a
+    // better way to determine where the appropriate dill file is, as this
+    // doesn't work for Android or macOS builds.}
+    if (dillOutputPath == null) {
+      final File existingDill = fs.file(fs.path.join('build', 'app.dill'));
+      if (existingDill.existsSync()) {
+        existingDill.copySync(fs.path.join(artifactDirectory.path, 'app.dill'));
+      }
     }
   }
 

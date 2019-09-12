@@ -145,8 +145,9 @@ Future<void> checkGradleDependencies() async {
   final Status progress = logger.startProgress('Ensuring gradle dependencies are up to date...', timeout: timeoutConfiguration.slowOperation);
   final FlutterProject flutterProject = FlutterProject.current();
   final String gradlew = await gradleUtils.getExecutable(flutterProject);
-  await runCheckedAsync(
+  await processUtils.run(
     <String>[gradlew, 'dependencies'],
+    throwOnError: true,
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
     environment: _gradleEnv,
   );
@@ -234,13 +235,15 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
   // Get the properties and tasks from Gradle, so we can determinate the `buildDir`,
   // flavors and build types defined in the project. If gradle fails, then check if the failure is due to t
   try {
-    final RunResult propertiesRunResult = await runCheckedAsync(
+    final RunResult propertiesRunResult = await processUtils.run(
       <String>[gradlew, isLibrary ? 'properties' : 'app:properties'],
+      throwOnError: true,
       workingDirectory: hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
-    final RunResult tasksRunResult = await runCheckedAsync(
+    final RunResult tasksRunResult = await processUtils.run(
       <String>[gradlew, isLibrary ? 'tasks': 'app:tasks', '--all', '--console=auto'],
+      throwOnError: true,
       workingDirectory: hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
@@ -306,22 +309,29 @@ Future<String> _initializeGradle(FlutterProject project) async {
   injectGradleWrapperIfNeeded(android);
 
   final String gradle = _locateGradlewExecutable(android);
-  if (gradle == null)
+  if (gradle == null) {
+    status.stop();
     throwToolExit('Unable to locate gradlew script');
+  }
   printTrace('Using gradle from $gradle.');
   // Validates the Gradle executable by asking for its version.
   // Makes Gradle Wrapper download and install Gradle distribution, if needed.
   try {
-    await runCheckedAsync(<String>[gradle, '-v'], environment: _gradleEnv);
-  } catch (e) {
-    if (e is ProcessException &&
-        e.toString().contains('java.io.FileNotFoundException: https://downloads.gradle.org') ||
-        e.toString().contains('java.io.IOException: Unable to tunnel through proxy')) {
+    await processUtils.run(
+      <String>[gradle, '-v'],
+      throwOnError: true,
+      environment: _gradleEnv,
+    );
+  } on ProcessException catch (e) {
+    final String error = e.toString();
+    if (error.contains('java.io.FileNotFoundException: https://downloads.gradle.org') ||
+        error.contains('java.io.IOException: Unable to tunnel through proxy')) {
       throwToolExit('$gradle threw an error while trying to update itself.\n$e');
     }
     rethrow;
+  } finally {
+    status.stop();
   }
-  status.stop();
   return gradle;
 }
 
@@ -595,7 +605,7 @@ Future<void> buildGradleAar({
   int exitCode = 1;
 
   try {
-    exitCode = await runCommandAndStreamOutput(
+    exitCode = await processUtils.stream(
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
@@ -633,7 +643,7 @@ Future<void> _buildGradleProjectV1(FlutterProject project) async {
     multilineOutput: true,
   );
   final Stopwatch sw = Stopwatch()..start();
-  final int exitCode = await runCommandAndStreamOutput(
+  final int exitCode = await processUtils.stream(
     <String>[fs.file(gradlew).absolute.path, 'build'],
     workingDirectory: project.android.hostAppGradleRoot.path,
     allowReentrantFlutter: true,
@@ -756,7 +766,7 @@ Future<void> _buildGradleProjectV2(
   final Stopwatch sw = Stopwatch()..start();
   int exitCode = 1;
   try {
-    exitCode = await runCommandAndStreamOutput(
+    exitCode = await processUtils.stream(
       command,
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,

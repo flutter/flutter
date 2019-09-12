@@ -122,7 +122,9 @@ abstract class UnpackMacOS extends Target {
     final Directory targetDirectory = environment
       .outputDir
       .childDirectory('FlutterMacOS.framework');
-
+    if (targetDirectory.existsSync()) {
+      targetDirectory.deleteSync(recursive: true);
+    }
     final ProcessResult result = await processManager
         .run(<String>['cp', '-R', basePath, targetDirectory.path]);
     if (result.exitCode != 0) {
@@ -285,6 +287,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
     Source.behavior(MacOSAssetBehavior())
   ];
 

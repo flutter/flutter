@@ -538,7 +538,10 @@ String _runSync(List<String> command, { bool lenient = true }) {
 }
 
 String _runGit(String command) {
-  return runSync(command.split(' '), workingDirectory: Cache.flutterRoot);
+  return processUtils.runSync(
+    command.split(' '),
+    workingDirectory: Cache.flutterRoot,
+  ).stdout.trim();
 }
 
 /// Runs [command] in the root of the Flutter installation and returns the
