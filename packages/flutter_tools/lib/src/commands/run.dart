@@ -299,8 +299,8 @@ class RunCommand extends RunCommandBase {
         observatoryPort: observatoryPort,
         verboseSystemLogs: argResults['verbose-system-logs'],
         initializePlatform: argResults['web-initialize-platform'],
-        hostname: featureFlags.isWebEnabled ? argResults['hostname'] : '',
-        port: featureFlags.isWebEnabled ? argResults['port'] : '',
+        hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] : '',
+        port: featureFlags.isWebEnabled ? argResults['web-port'] : '',
       );
     }
   }
