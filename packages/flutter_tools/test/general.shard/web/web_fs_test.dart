@@ -26,8 +26,12 @@ void main() {
   MockHttpMultiServer mockHttpMultiServer;
   MockBuildDaemonClient mockBuildDaemonClient;
   MockOperatingSystemUtils mockOperatingSystemUtils;
+  dynamic lastAddress;
+  int lastPort;
 
   setUp(() {
+    lastAddress = null;
+    lastPort = null;
     mockBuildDaemonCreator =  MockBuildDaemonCreator();
     mockChromeLauncher = MockChromeLauncher();
     mockHttpMultiServer = MockHttpMultiServer();
@@ -56,6 +60,8 @@ void main() {
         BuildDaemonCreator: () => mockBuildDaemonCreator,
         ChromeLauncher: () => mockChromeLauncher,
         HttpMultiServerFactory: () => (dynamic address, int port) async {
+          lastAddress = address;
+          lastPort = port;
           return mockHttpMultiServer;
         },
         DwdsFactory: () => ({
@@ -83,6 +89,8 @@ void main() {
       target: fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
+      hostname: null,
+      port: null,
     );
 
     // The build daemon is told to build once.
@@ -90,6 +98,21 @@ void main() {
 
     // .dart_tool directory is created.
     expect(flutterProject.dartTool.existsSync(), true);
+  }));
+
+  test('Uses provided port number and hostname.', () => testbed.run(() async {
+    final FlutterProject flutterProject = FlutterProject.current();
+    await WebFs.start(
+      skipDwds: false,
+      target: fs.path.join('lib', 'main.dart'),
+      buildInfo: BuildInfo.debug,
+      flutterProject: flutterProject,
+      hostname: 'foo',
+      port: '1234',
+    );
+
+    expect(lastPort, 1234);
+    expect(lastAddress, contains('foo'));
   }));
 }
 

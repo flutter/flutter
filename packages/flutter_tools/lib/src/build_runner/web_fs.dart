@@ -75,6 +75,8 @@ typedef WebFsFactory = Future<WebFs> Function({
   @required FlutterProject flutterProject,
   @required BuildInfo buildInfo,
   @required bool skipDwds,
+  @required String hostname,
+  @required String port,
 });
 
 /// The dev filesystem responsible for building and serving  web applications.
@@ -104,10 +106,10 @@ class WebFs {
     await _connectedApps?.cancel();
   }
 
-  /// Retrieve the [DebugConnection] for the current application.
+  /// Retrieve the [DebugConnection] for the current application
   Future<DebugConnection> runAndDebug() {
     final Completer<DebugConnection> firstConnection = Completer<DebugConnection>();
-    _connectedApps =  _dwds.connectedApps.listen((AppConnection appConnection) async {
+    _connectedApps = _dwds.connectedApps.listen((AppConnection appConnection) async {
       appConnection.runMain();
       final DebugConnection debugConnection = await _dwds.debugConnection(appConnection);
       if (!firstConnection.isCompleted) {
@@ -140,6 +142,8 @@ class WebFs {
     @required FlutterProject flutterProject,
     @required BuildInfo buildInfo,
     @required bool skipDwds,
+    @required String hostname,
+    @required String port,
   }) async {
     // workaround for https://github.com/flutter/flutter/issues/38290
     if (!flutterProject.dartTool.existsSync()) {
@@ -165,7 +169,7 @@ class WebFs {
     await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
     // Initialize the dwds server.
-    final int port = await os.findFreePort();
+    final int hostPort = port == null ? await os.findFreePort() : int.tryParse(port);
     // Map the bootstrap files to the correct package directory.
     final String targetBaseName = fs.path
       .withoutExtension(target).replaceFirst('lib${fs.path.separator}', '');
@@ -203,8 +207,8 @@ class WebFs {
     Dwds dwds;
     if (!skipDwds) {
       dwds = await dwdsFactory(
-        hostname: _kHostName,
-        applicationPort: port,
+        hostname: hostname ?? _kHostName,
+        applicationPort: hostPort,
         applicationTarget: kBuildTargetName,
         assetServerPort: daemonAssetPort,
         buildResults: filteredBuildResults,
@@ -224,13 +228,13 @@ class WebFs {
     Cascade cascade = Cascade();
     cascade = cascade.add(handler);
     cascade = cascade.add(_assetHandler(flutterProject));
-    final HttpServer server = await httpMultiServerFactory(_kHostName, port);
+    final HttpServer server = await httpMultiServerFactory(hostname ?? _kHostName, hostPort);
     shelf_io.serveRequests(server, cascade.handler);
     return WebFs(
       client,
       server,
       dwds,
-      'http://$_kHostName:$port/',
+      'http://$_kHostName:$hostPort/',
     );
   }
 
