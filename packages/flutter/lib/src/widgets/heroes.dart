@@ -360,7 +360,7 @@ class _HeroState extends State<Hero> {
 
   // When `keepPlaceholder` is true, the placeholder will continue to be shown
   // after the flight ends. Otherwise the child of the Hero will become visible
-  // and start to animate if it has animation.
+  // and its TickerMode will be re-enabled.
   void endFlight({ bool keepPlaceholder = false }) {
     if (!keepPlaceholder) {
       ensurePlaceholderIsHidden();
