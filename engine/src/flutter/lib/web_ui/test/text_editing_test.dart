@@ -472,22 +472,12 @@ void main() {
       textEditing.handleTextInput(codec.encodeMethodCall(setClient));
 
       final MethodCall setSizeAndTransform =
-          MethodCall('TextInput.setEditableSizeAndTransform', <String, dynamic>{
-        'width': 150,
-        'height': 50,
-        'transform':
-            Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList()
-      });
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
       textEditing.handleTextInput(codec.encodeMethodCall(setSizeAndTransform));
 
-      const MethodCall setStyle =
-          MethodCall('TextInput.setStyle', <String, dynamic>{
-        'fontSize': 12,
-        'fontFamily': 'sans-serif',
-        'textAlignIndex': 4,
-        'fontWeightIndex': 4,
-        'textDirectionIndex': 1,
-      });
+      final MethodCall setStyle =
+          configureSetStyleMethodCall(12, 'sans-serif', 4, 4, 1);
       textEditing.handleTextInput(codec.encodeMethodCall(setStyle));
 
       const MethodCall setEditingState =
@@ -514,6 +504,52 @@ void main() {
           'matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 10, 20, 30, 1)');
       expect(textEditing.editingElement.domElement.style.font,
           '500 12px sans-serif');
+
+      const MethodCall clearClient = MethodCall('TextInput.clearClient');
+      textEditing.handleTextInput(codec.encodeMethodCall(clearClient));
+
+      // Confirm that [HybridTextEditing] didn't send any messages.
+      expect(spy.messages, isEmpty);
+    });
+
+    test('input font set succesfully with null fontWeightIndex', () {
+      final MethodCall setClient = MethodCall(
+          'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
+      textEditing.handleTextInput(codec.encodeMethodCall(setClient));
+
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
+      textEditing.handleTextInput(codec.encodeMethodCall(setSizeAndTransform));
+
+      final MethodCall setStyle = configureSetStyleMethodCall(
+          12, 'sans-serif', 4, null /* fontWeightIndex */, 1);
+      textEditing.handleTextInput(codec.encodeMethodCall(setStyle));
+
+      const MethodCall setEditingState =
+          MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+      });
+      textEditing.handleTextInput(codec.encodeMethodCall(setEditingState));
+
+      const MethodCall show = MethodCall('TextInput.show');
+      textEditing.handleTextInput(codec.encodeMethodCall(show));
+
+      final HtmlElement domElement = textEditing.editingElement.domElement;
+
+      checkInputEditingState(domElement, 'abcd', 2, 3);
+
+      // Check if the location and styling is correct.
+      expect(
+          domElement.getBoundingClientRect(),
+          Rectangle<double>.fromPoints(const Point<double>(10.0, 20.0),
+              const Point<double>(160.0, 70.0)));
+      expect(domElement.style.transform,
+          'matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 10, 20, 30, 1)');
+      expect(
+          textEditing.editingElement.domElement.style.font, '12px sans-serif');
 
       const MethodCall clearClient = MethodCall('TextInput.clearClient');
       textEditing.handleTextInput(codec.encodeMethodCall(clearClient));
@@ -639,6 +675,26 @@ void main() {
       // Confirm that [HybridTextEditing] didn't send any more messages.
       expect(spy.messages, isEmpty);
     });
+  });
+}
+
+MethodCall configureSetStyleMethodCall(int fontSize, String fontFamily,
+    int textAlignIndex, int fontWeightIndex, int textDirectionIndex) {
+  return MethodCall('TextInput.setStyle', <String, dynamic>{
+    'fontSize': fontSize,
+    'fontFamily': fontFamily,
+    'textAlignIndex': textAlignIndex,
+    'fontWeightIndex': fontWeightIndex,
+    'textDirectionIndex': textDirectionIndex,
+  });
+}
+
+MethodCall configureSetSizeAndTransformMethodCall(
+    int width, int height, List<double> transform) {
+  return MethodCall('TextInput.setEditableSizeAndTransform', <String, dynamic>{
+    'width': width,
+    'height': height,
+    'transform': transform
   });
 }
 
