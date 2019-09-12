@@ -137,7 +137,7 @@ class ChromeDevice extends Device {
 
   @override
   Future<bool> stopApp(ApplicationPackage app) async {
-    await _chrome.close();
+    await _chrome?.close();
     return true;
   }
 

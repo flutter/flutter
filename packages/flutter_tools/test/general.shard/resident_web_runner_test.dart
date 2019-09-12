@@ -52,6 +52,8 @@ void main() {
         @required FlutterProject flutterProject,
         @required BuildInfo buildInfo,
         @required bool skipDwds,
+        @required String hostname,
+        @required String port,
       }) async {
         return mockWebFs;
       },
