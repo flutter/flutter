@@ -40,6 +40,7 @@ import 'package:test_core/src/runner/load_exception.dart'; // ignore: implementa
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     as wip;
 
+import 'chrome_installer.dart';
 import 'environment.dart' as env;
 
 /// The port number Chrome exposes for debugging.
@@ -854,6 +855,8 @@ class Chrome extends Browser {
   factory Chrome(Uri url, {bool debug = false}) {
     var remoteDebuggerCompleter = Completer<Uri>.sync();
     return Chrome._(() async {
+      final ChromeInstallation installation = await getOrInstallChrome(infoLog: _DevNull());
+
       final bool isChromeNoSandbox = Platform.environment['CHROME_NO_SANDBOX'] == 'true';
       var dir = createTempDir();
       var args = [
@@ -871,7 +874,7 @@ class Chrome extends Browser {
         '--remote-debugging-port=$_kChromeDevtoolsPort',
       ];
 
-      var process = await Process.start('google-chrome', args);
+      final Process process = await Process.start(installation.executable, args);
 
       remoteDebuggerCompleter.complete(getRemoteDebuggerUrl(
           Uri.parse('http://localhost:$_kChromeDevtoolsPort')));
@@ -885,4 +888,23 @@ class Chrome extends Browser {
 
   Chrome._(Future<Process> startBrowser(), this.remoteDebuggerUrl)
       : super(startBrowser);
+}
+
+/// A string sink that swallows all input.
+class _DevNull implements StringSink {
+  @override
+  void write(Object obj) {
+  }
+
+  @override
+  void writeAll(Iterable objects, [String separator = ""]) {
+  }
+
+  @override
+  void writeCharCode(int charCode) {
+  }
+
+  @override
+  void writeln([Object obj = ""]) {
+  }
 }
