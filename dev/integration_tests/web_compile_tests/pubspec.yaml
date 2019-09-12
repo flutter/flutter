@@ -1,0 +1,6 @@
+name: web_compile_tests
+
+dependencies:
+  flutter:
+    sdk: flutter
+
