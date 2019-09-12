@@ -64,13 +64,13 @@ Once you've uploaded the new version, also make sure to tag it with the updated
 timestamp and robolectric version (most likely still 3.8, unless you've migrated
 all the packages to 4+).
 
-    $ cipd set-tag flutter/android/robolectric --version=<new_version_hash> -tag=last_updated:<timestamp>
+    $ cipd set-tag flutter/android/robolectric_bundle --version=<new_version_hash> -tag=last_updated:<timestamp>
 
 Example of a last-updated timestamp: 2019-07-29T15:27:42-0700
 
 You can generate the same date format with `date +%Y-%m-%dT%T%z`.
 
-    $ cipd set-tag flutter/android/robolectric --version=<new_version_hash> -tag=robolectric_version:<robolectric_version>
+    $ cipd set-tag flutter/android/robolectric_bundle --version=<new_version_hash> -tag=robolectric_version:<robolectric_version>
 
 You can run `cipd describe flutter/android/robolectric_bundle
 --version=<new_version_hash>` to verify. You should see:
