@@ -52,6 +52,7 @@ void main() {
         @required FlutterProject flutterProject,
         @required BuildInfo buildInfo,
         @required bool skipDwds,
+        @required bool initializePlatform,
       }) async {
         return mockWebFs;
       },
