@@ -1051,24 +1051,6 @@ class HeapSpace extends ServiceObject {
   }
 }
 
-/// A function, field or class along with its source location.
-class ProgramElement {
-  ProgramElement(this.qualifiedName, this.uri, [this.line, this.column]);
-
-  final String qualifiedName;
-  final Uri uri;
-  final int line;
-  final int column;
-
-  @override
-  String toString() {
-    if (line == null)
-      return '$qualifiedName ($uri)';
-    else
-      return '$qualifiedName ($uri:$line)';
-  }
-}
-
 /// An isolate running inside the VM. Instances of the Isolate class are always
 /// canonicalized.
 class Isolate extends ServiceObjectOwner {
@@ -1198,53 +1180,6 @@ class Isolate extends ServiceObjectOwner {
   Future<Map<String, dynamic>> getObject(Map<String, dynamic> objectRef) {
     return invokeRpcRaw('getObject',
                         params: <String, dynamic>{'objectId': objectRef['id']});
-  }
-
-  Future<ProgramElement> _describeElement(Map<String, dynamic> elementRef) async {
-    String name = elementRef['name'];
-    Map<String, dynamic> owner = elementRef['owner'];
-    while (owner != null) {
-      final String ownerType = owner['type'];
-      if (ownerType == 'Library' || ownerType == '@Library')
-        break;
-      final String ownerName = owner['name'];
-      name = '$ownerName.$name';
-      owner = owner['owner'];
-    }
-
-    final Map<String, dynamic> fullElement = await getObject(elementRef);
-    final Map<String, dynamic> location = fullElement['location'];
-    final int tokenPos = location['tokenPos'];
-    final Map<String, dynamic> script = await getObject(location['script']);
-
-    // The engine's tag handler doesn't seem to create proper URIs.
-    Uri uri = Uri.parse(script['uri']);
-    if (uri.scheme == '')
-      uri = uri.replace(scheme: 'file');
-
-    // See https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md
-    for (List<int> lineTuple in script['tokenPosTable']) {
-      final int line = lineTuple[0];
-      for (int i = 1; i < lineTuple.length; i += 2) {
-        if (lineTuple[i] == tokenPos) {
-          final int column = lineTuple[i + 1];
-          return ProgramElement(name, uri, line, column);
-        }
-      }
-    }
-    return ProgramElement(name, uri);
-  }
-
-  // Lists program elements changed in the most recent reload that have not
-  // since executed.
-  Future<List<ProgramElement>> getUnusedChangesInLastReload() async {
-    final Map<String, dynamic> response =
-      await invokeRpcRaw('_getUnusedChangesInLastReload');
-    final List<Future<ProgramElement>> unusedElements =
-      <Future<ProgramElement>>[];
-    for (Map<String, dynamic> element in response['unused'])
-      unusedElements.add(_describeElement(element));
-    return Future.wait<ProgramElement>(unusedElements);
   }
 
   /// Resumes the isolate.
