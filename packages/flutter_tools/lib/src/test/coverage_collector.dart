@@ -11,7 +11,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process_manager.dart';
+import '../base/process.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../vmservice.dart';
@@ -150,7 +150,7 @@ class CoverageCollector extends TestWatcher {
       final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_test_coverage.');
       try {
         final File sourceFile = coverageFile.copySync(fs.path.join(tempDir.path, 'lcov.source.info'));
-        final ProcessResult result = processManager.runSync(<String>[
+        final RunResult result = processUtils.runSync(<String>[
           'lcov',
           '--add-tracefile', baseCoverageData,
           '--add-tracefile', sourceFile.path,

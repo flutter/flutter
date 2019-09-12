@@ -8,8 +8,7 @@ import 'dart:math' as math;
 import 'android/android_emulator.dart';
 import 'android/android_sdk.dart';
 import 'base/context.dart';
-import 'base/io.dart' show ProcessResult;
-import 'base/process_manager.dart';
+import 'base/process.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'ios/ios_emulators.dart';
@@ -118,7 +117,7 @@ class EmulatorManager {
       '-k', sdkId,
       '-d', device,
     ];
-    final ProcessResult runResult = processManager.runSync(args,
+    final RunResult runResult = processUtils.runSync(args,
         environment: androidSdk?.sdkManagerEnv);
     return CreateEmulatorResult(
       name,
@@ -139,10 +138,11 @@ class EmulatorManager {
       'device',
       '-c',
     ];
-    final ProcessResult runResult = processManager.runSync(args,
+    final RunResult runResult = processUtils.runSync(args,
         environment: androidSdk?.sdkManagerEnv);
-    if (runResult.exitCode != 0)
+    if (runResult.exitCode != 0) {
       return null;
+    }
 
     final List<String> availableDevices = runResult.stdout
         .split('\n')
@@ -165,7 +165,7 @@ class EmulatorManager {
       'avd',
       '-n', 'temp',
     ];
-    final ProcessResult runResult = processManager.runSync(args,
+    final RunResult runResult = processUtils.runSync(args,
         environment: androidSdk?.sdkManagerEnv);
 
     // Get the list of IDs that match our criteria
