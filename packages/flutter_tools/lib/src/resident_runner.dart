@@ -545,7 +545,6 @@ abstract class ResidentRunner {
           ? fs.systemTempDirectory.createTempSync('_fluttter_tool')
           : fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle() {
-
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
@@ -554,7 +553,7 @@ abstract class ResidentRunner {
     // better way to determine where the appropriate dill file is, as this
     // doesn't work for Android or macOS builds.}
     if (dillOutputPath == null) {
-      final File existingDill = fs.file(fs.path.join('output', 'app.dill'));
+      final File existingDill = fs.file(fs.path.join('build', 'app.dill'));
       if (existingDill.existsSync()) {
         existingDill.copySync(fs.path.join(artifactDirectory.path, 'app.dill'));
       }
