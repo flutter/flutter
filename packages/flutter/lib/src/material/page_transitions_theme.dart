@@ -209,7 +209,7 @@ class _ZoomingPageTransition extends StatelessWidget {
         .chain(_scaleCurveSequence)
         .animate(CurvedAnimation(
           parent: animation,
-          curve: Interval(0.2, 0.4),
+          curve: const Interval(0.2, 0.4),
         ));
 
     // Scale in the new page.
@@ -227,7 +227,7 @@ class _ZoomingPageTransition extends StatelessWidget {
         .chain(_scaleCurveSequence)
         .animate(CurvedAnimation(
           parent: animation,
-          curve: Interval(0.4, 1.0),
+          curve: const Interval(0.4, 1.0),
         ));
 
     return FadeTransition(
