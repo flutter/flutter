@@ -7,9 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0A57B3BD2323C4BD00DD9521 /* ScreenBeforeFlutter.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A57B3BC2323C4BD00DD9521 /* ScreenBeforeFlutter.m */; };
-		0A57B3BF2323C74200DD9521 /* FlutterEngine+ScenariosTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A57B3BE2323C74200DD9521 /* FlutterEngine+ScenariosTest.m */; };
-		0A57B3C22323D2D700DD9521 /* AppLifecycleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A57B3C12323D2D700DD9521 /* AppLifecycleTests.m */; };
 		0DB781EF22E931BE00E9B371 /* Flutter.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0DB781F122E933E800E9B371 /* Flutter.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0DB781FE22EA2C6D00E9B371 /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; };
@@ -87,11 +84,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0A57B3BB2323C4BD00DD9521 /* ScreenBeforeFlutter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScreenBeforeFlutter.h; sourceTree = "<group>"; };
-		0A57B3BC2323C4BD00DD9521 /* ScreenBeforeFlutter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ScreenBeforeFlutter.m; sourceTree = "<group>"; };
-		0A57B3BE2323C74200DD9521 /* FlutterEngine+ScenariosTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "FlutterEngine+ScenariosTest.m"; sourceTree = "<group>"; };
-		0A57B3C02323C74D00DD9521 /* FlutterEngine+ScenariosTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FlutterEngine+ScenariosTest.h"; sourceTree = "<group>"; };
-		0A57B3C12323D2D700DD9521 /* AppLifecycleTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppLifecycleTests.m; sourceTree = "<group>"; };
 		0DB781FC22EA2C0300E9B371 /* FlutterViewControllerTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FlutterViewControllerTest.m; sourceTree = "<group>"; };
 		244EA6CF230DBE8900B2D26E /* golden_platform_view_D21AP.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = golden_platform_view_D21AP.png; sourceTree = "<group>"; };
 		246B4E4122E3B5F700073EBF /* App.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = App.framework; sourceTree = "<group>"; };
@@ -175,10 +167,6 @@
 				248D76D322E388380012F0C1 /* Assets.xcassets */,
 				248D76D822E388380012F0C1 /* Info.plist */,
 				248D76D922E388380012F0C1 /* main.m */,
-				0A57B3BB2323C4BD00DD9521 /* ScreenBeforeFlutter.h */,
-				0A57B3BC2323C4BD00DD9521 /* ScreenBeforeFlutter.m */,
-				0A57B3BE2323C74200DD9521 /* FlutterEngine+ScenariosTest.m */,
-				0A57B3C02323C74D00DD9521 /* FlutterEngine+ScenariosTest.h */,
 			);
 			path = Scenarios;
 			sourceTree = "<group>";
@@ -189,7 +177,6 @@
 				248FDFC322FE7CD0009CC7CD /* FlutterEngineTest.m */,
 				0DB781FC22EA2C0300E9B371 /* FlutterViewControllerTest.m */,
 				248D76E522E388380012F0C1 /* Info.plist */,
-				0A57B3C12323D2D700DD9521 /* AppLifecycleTests.m */,
 			);
 			path = ScenariosTests;
 			sourceTree = "<group>";
@@ -286,16 +273,13 @@
 				TargetAttributes = {
 					248D76C622E388370012F0C1 = {
 						CreatedOnToolsVersion = 10.2.1;
-						LastSwiftMigration = 1030;
 					};
 					248D76DE22E388380012F0C1 = {
 						CreatedOnToolsVersion = 10.2.1;
-						LastSwiftMigration = 1030;
 						TestTargetID = 248D76C622E388370012F0C1;
 					};
 					248D76E922E388380012F0C1 = {
 						CreatedOnToolsVersion = 10.2.1;
-						LastSwiftMigration = 1030;
 						TestTargetID = 248D76C622E388370012F0C1;
 					};
 				};
@@ -356,8 +340,6 @@
 				248D76DA22E388380012F0C1 /* main.m in Sources */,
 				24F1FB89230B4579005ACE7C /* TextPlatformView.m in Sources */,
 				248D76CC22E388370012F0C1 /* AppDelegate.m in Sources */,
-				0A57B3BF2323C74200DD9521 /* FlutterEngine+ScenariosTest.m in Sources */,
-				0A57B3BD2323C4BD00DD9521 /* ScreenBeforeFlutter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -366,7 +348,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				0DB7820222EA493B00E9B371 /* FlutterViewControllerTest.m in Sources */,
-				0A57B3C22323D2D700DD9521 /* AppLifecycleTests.m in Sources */,
 				248FDFC422FE7CD0009CC7CD /* FlutterEngineTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -511,7 +492,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = S8QB4VV633;
