@@ -103,6 +103,7 @@ class LocalFileComparator extends GoldenFileComparator {
         diffs.forEach((String name, Object untypedImage) {
           final Image image = untypedImage;
           final File output = _getFailureFile(name, golden);
+          print('Comparator output: $output');
           output.parent.createSync(recursive: true);
           output.writeAsBytesSync(encodePng(image));
         });
