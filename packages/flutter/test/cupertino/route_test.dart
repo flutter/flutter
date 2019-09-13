@@ -347,7 +347,18 @@ void main() {
       tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(CupertinoPageScaffold))).dx,
       moreOrLessEquals(798, epsilon: 1),
     );
-    await tester.tap(find.text('push'));
+
+    // Use the navigator to push a route insetad of tapping the 'push' button.
+    // The topmost route (the one that's animating away), ignores input while
+    // the pop is underway because route.navigator.userGestureInProgress.
+    Navigator.push<void>(scaffoldKey.currentContext, CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return const CupertinoPageScaffold(
+          child: Center(child: Text('route')),
+        );
+      },
+    ));
+
     await tester.pumpAndSettle();
     expect(find.text('route'), findsOneWidget);
     expect(find.text('push'), findsNothing);
