@@ -43,6 +43,7 @@ void main() {
         @required FlutterProject flutterProject,
         @required BuildInfo buildInfo,
         @required bool skipDwds,
+        @required bool initializePlatform,
         @required String hostname,
         @required String port,
       }) async {
@@ -101,7 +102,6 @@ void main() {
   }));
 
 }
-
 
 class MockWebDevice extends Mock implements Device {}
 class MockBuildDaemonCreator extends Mock implements BuildDaemonCreator {}

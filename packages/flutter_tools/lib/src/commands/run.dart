@@ -169,6 +169,12 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'No longer require an authentication code to connect to the VM '
               'service (not recommended).')
+      ..addFlag('web-initialize-platform',
+        negatable: true,
+        defaultsTo: true,
+        hide: true,
+        help: 'Whether to automatically invoke webOnlyInitializePlatform.'
+      )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
       ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
       ..addMultiOption(FlutterOptions.kEnableExperiment,
@@ -274,7 +280,10 @@ class RunCommand extends RunCommandBase {
   DebuggingOptions _createDebuggingOptions() {
     final BuildInfo buildInfo = getBuildInfo();
     if (buildInfo.isRelease) {
-      return DebuggingOptions.disabled(buildInfo);
+      return DebuggingOptions.disabled(
+        buildInfo,
+        initializePlatform: argResults['web-initialize-platform'],
+      );
     } else {
       return DebuggingOptions.enabled(
         buildInfo,
@@ -289,6 +298,7 @@ class RunCommand extends RunCommandBase {
         dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'],
         observatoryPort: observatoryPort,
         verboseSystemLogs: argResults['verbose-system-logs'],
+        initializePlatform: argResults['web-initialize-platform'],
         hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] : '',
         port: featureFlags.isWebEnabled ? argResults['web-port'] : '',
       );
