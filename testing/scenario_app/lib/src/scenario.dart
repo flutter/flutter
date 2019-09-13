@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
 import 'dart:ui';
 
 /// A scenario to run for testing.
@@ -27,4 +28,19 @@ abstract class Scenario {
   ///
   /// See [Window.onMetricsChanged].
   void onMetricsChanged() {}
+
+  /// Called by the program when a pointer event is received.
+  ///
+  /// See [Window.onPointerDataPacket].
+  void onPointerDataPacket(PointerDataPacket packet) {}
+
+  /// Called by the program when an engine side platform channel message is
+  /// received.
+  ///
+  /// See [Window.onPlatformMessage].
+  void onPlatformMessage(
+    String name,
+    ByteData data,
+    PlatformMessageResponseCallback callback,
+  ) {}
 }
