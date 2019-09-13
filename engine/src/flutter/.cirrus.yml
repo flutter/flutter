@@ -1,13 +1,5 @@
 gcp_credentials: ENCRYPTED[987a78af29b91ce8489594c9ab3fec21845bbe5ba68294b8f6def3cf0d380830f06687a89ea69c87344c5ade369700fe]
 
-fail_task:
-  gke_container:
-   image: gcr.io/flutter-cirrus/build-engine-image:latest
-   cluster_name: build-32-cluster
-   zone: us-central1-a
-   namespace: default
-  fail_script: exit -1
-
 # LINUX
 task:
   gke_container:
