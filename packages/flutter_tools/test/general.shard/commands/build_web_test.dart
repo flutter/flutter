@@ -43,7 +43,8 @@ void main() {
       when(mockWebCompilationProxy.initialize(
         projectName: anyNamed('projectName'),
         projectDirectory: anyNamed('projectDirectory'),
-        mode: anyNamed('mode')
+        mode: anyNamed('mode'),
+        initializePlatform: anyNamed('initializePlatform')
       )).thenAnswer((Invocation invocation) {
         final String path = fs.path.join('.dart_tool', 'build', 'flutter_web', 'foo', 'lib', 'main_web_entrypoint.dart.js');
         fs.file(path).createSync(recursive: true);
@@ -65,6 +66,7 @@ void main() {
       FlutterProject.current(),
       fs.path.join('lib', 'main.dart'),
       BuildInfo.debug,
+      false,
     ), throwsA(isInstanceOf<ToolExit>()));
   }));
 
@@ -86,6 +88,7 @@ void main() {
       FlutterProject.current(),
       fs.path.join('lib', 'main.dart'),
       BuildInfo.debug,
+      false,
     );
   }));
 

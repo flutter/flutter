@@ -121,7 +121,7 @@ class UpgradeCommandRunner {
   }
 
   Future<void> flutterUpgradeContinue() async {
-    final int code = await runCommandAndStreamOutput(
+    final int code = await processUtils.stream(
       <String>[
         fs.path.join('bin', 'flutter'),
         'upgrade',
@@ -146,9 +146,11 @@ class UpgradeCommandRunner {
 
   Future<bool> hasUncomittedChanges() async {
     try {
-      final RunResult result = await runCheckedAsync(<String>[
-        'git', 'status', '-s'
-      ], workingDirectory: Cache.flutterRoot);
+      final RunResult result = await processUtils.run(
+        <String>['git', 'status', '-s'],
+        throwOnError: true,
+        workingDirectory: Cache.flutterRoot,
+      );
       return result.stdout.trim().isNotEmpty;
     } on ProcessException catch (error) {
       throwToolExit(
@@ -167,9 +169,11 @@ class UpgradeCommandRunner {
   /// Exits tool if there is no upstream.
   Future<void> verifyUpstreamConfigured() async {
     try {
-      await runCheckedAsync(<String>[
-        'git', 'rev-parse', '@{u}',
-      ], workingDirectory: Cache.flutterRoot);
+      await processUtils.run(
+        <String>[ 'git', 'rev-parse', '@{u}'],
+        throwOnError: true,
+        workingDirectory: Cache.flutterRoot,
+      );
     } catch (e) {
       throwToolExit(
         'Unable to upgrade Flutter: no origin repository configured. '
@@ -191,9 +195,11 @@ class UpgradeCommandRunner {
       tag = 'v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
     }
     try {
-      await runCheckedAsync(<String>[
-        'git', 'reset', '--hard', tag,
-      ], workingDirectory: Cache.flutterRoot);
+      await processUtils.run(
+        <String>['git', 'reset', '--hard', tag],
+        throwOnError: true,
+        workingDirectory: Cache.flutterRoot,
+      );
     } on ProcessException catch (error) {
       throwToolExit(
         'Unable to upgrade Flutter: The tool could not update to the version $tag. '
@@ -218,7 +224,7 @@ class UpgradeCommandRunner {
   /// If there haven't been any hot fixes or local changes, this is equivalent
   /// to a fast-forward.
   Future<void> attemptFastForward() async {
-    final int code = await runCommandAndStreamOutput(
+    final int code = await processUtils.stream(
       <String>['git', 'pull', '--ff'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) => matchesGitLine(line) ? null : line,
@@ -236,7 +242,7 @@ class UpgradeCommandRunner {
   Future<void> precacheArtifacts() async {
     printStatus('');
     printStatus('Upgrading engine...');
-    final int code = await runCommandAndStreamOutput(
+    final int code = await processUtils.stream(
       <String>[
         fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
       ],
@@ -263,7 +269,7 @@ class UpgradeCommandRunner {
   Future<void> runDoctor() async {
     printStatus('');
     printStatus('Running flutter doctor...');
-    await runCommandAndStreamOutput(
+    await processUtils.stream(
       <String>[
         fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor',
       ],

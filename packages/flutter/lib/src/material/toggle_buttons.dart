@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -166,6 +167,7 @@ class ToggleButtons extends StatelessWidget {
     @required this.isSelected,
     this.onPressed,
     this.textStyle,
+    this.constraints,
     this.color,
     this.selectedColor,
     this.disabledColor,
@@ -222,6 +224,14 @@ class ToggleButtons extends StatelessWidget {
   /// [selectedColor] or [disabledColor] depending on whether the buttons
   /// are active, selected, or disabled.
   final TextStyle textStyle;
+
+  /// Defines the button's size.
+  ///
+  /// Typically used to constrain the button's minimum size.
+  ///
+  /// If this property is null, then
+  /// BoxConstraints(minWidth: 48.0, minHeight: 48.0) is be used.
+  final BoxConstraints constraints;
 
   /// The color for descendant [Text] and [Icon] widgets if the button is
   /// enabled and not selected.
@@ -578,6 +588,7 @@ class ToggleButtons extends StatelessWidget {
           return _ToggleButton(
             selected: isSelected[index],
             textStyle: textStyle,
+            constraints: constraints,
             color: color,
             selectedColor: selectedColor,
             disabledColor: disabledColor,
@@ -645,6 +656,7 @@ class _ToggleButton extends StatelessWidget {
     Key key,
     this.selected = false,
     this.textStyle,
+    this.constraints,
     this.color,
     this.selectedColor,
     this.disabledColor,
@@ -670,6 +682,11 @@ class _ToggleButton extends StatelessWidget {
 
   /// The [TextStyle] to apply to any text that appears in this button.
   final TextStyle textStyle;
+
+  /// Defines the button's size.
+  ///
+  /// Typically used to constrain the button's minimum size.
+  final BoxConstraints constraints;
 
   /// The color for [Text] and [Icon] widgets if the button is enabled.
   ///
@@ -784,6 +801,7 @@ class _ToggleButton extends StatelessWidget {
     }
 
     final TextStyle currentTextStyle = textStyle ?? toggleButtonsTheme.textStyle ?? theme.textTheme.body1;
+    final BoxConstraints currentConstraints = constraints ?? toggleButtonsTheme.constraints ?? const BoxConstraints(minWidth: kMinInteractiveDimension, minHeight: kMinInteractiveDimension);
 
     final Widget result = ClipRRect(
       borderRadius: clipRadius,
@@ -791,6 +809,7 @@ class _ToggleButton extends StatelessWidget {
         textStyle: currentTextStyle.copyWith(
           color: currentColor,
         ),
+        constraints: currentConstraints,
         elevation: 0.0,
         highlightElevation: 0.0,
         fillColor: currentFillColor,

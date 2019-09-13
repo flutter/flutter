@@ -46,9 +46,13 @@ Future<void> buildMacOS({
 
   final Directory xcodeProject = flutterProject.macos.xcodeProject;
 
+  // If the standard project exists, specify it to getInfo to handle the case where there are
+  // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
+  // regardless of the project name so long as there is exactly one project.
+  final String xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
   final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(
     xcodeProject.parent.path,
-    projectFilename: xcodeProject.basename,
+    projectFilename: xcodeProjectName,
   );
   final String scheme = projectInfo.schemeFor(buildInfo);
   if (scheme == null) {
