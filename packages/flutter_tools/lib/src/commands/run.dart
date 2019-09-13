@@ -231,7 +231,7 @@ class RunCommand extends RunCommandBase {
       hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
     }
     if (iosProject != null && iosProject.exists) {
-      hostLanguage.add(iosProject.isSwift ? 'swift' : 'objc');
+      hostLanguage.add(await iosProject.isSwift ? 'swift' : 'objc');
     }
 
     return <CustomDimensions, String>{

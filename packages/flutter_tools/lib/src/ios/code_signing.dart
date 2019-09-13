@@ -95,7 +95,7 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-z
 Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   BuildableIOSApp iosApp,
 }) async {
-  final Map<String, String> buildSettings = iosApp.project.buildSettings;
+  final Map<String, String> buildSettings = await iosApp.project.buildSettings;
   if (buildSettings == null) {
     return null;
   }

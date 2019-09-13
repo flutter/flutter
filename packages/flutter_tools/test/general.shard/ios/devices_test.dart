@@ -295,8 +295,8 @@ void main() {
             projectDir.path,
           ]);
 
-          final IOSApp app =
-              AbsoluteBuildableIOSApp(FlutterProject.fromDirectory(projectDir).ios);
+          final IOSApp app = await AbsoluteBuildableIOSApp.fromProject(
+            FlutterProject.fromDirectory(projectDir).ios);
           final IOSDevice device = IOSDevice('123');
 
           // Pre-create the expected build products.
@@ -547,7 +547,7 @@ Runner(UIKit)[297] <Notice>: E is for enpitsu"
 
       final IOSDevice device = IOSDevice('123456');
       final DeviceLogReader logReader = device.getLogReader(
-        app: BuildableIOSApp(mockIosProject),
+        app: await BuildableIOSApp.fromProject(mockIosProject),
       );
 
       final List<String> lines = await logReader.logLines.toList();
@@ -572,7 +572,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
       final IOSDevice device = IOSDevice('123456');
       final DeviceLogReader logReader = device.getLogReader(
-        app: BuildableIOSApp(mockIosProject),
+        app: await BuildableIOSApp.fromProject(mockIosProject),
       );
 
       final List<String> lines = await logReader.logLines.toList();
@@ -630,7 +630,13 @@ flutter:
 }
 
 class AbsoluteBuildableIOSApp extends BuildableIOSApp {
-  AbsoluteBuildableIOSApp(IosProject project) : super(project);
+  AbsoluteBuildableIOSApp(IosProject project, String projectBundleId) :
+    super(project, projectBundleId);
+
+  static Future<AbsoluteBuildableIOSApp> fromProject(IosProject project) async {
+    final String projectBundleId = await project.productBundleIdentifier;
+    return AbsoluteBuildableIOSApp(project, projectBundleId);
+  }
 
   @override
   String get deviceBundlePath =>

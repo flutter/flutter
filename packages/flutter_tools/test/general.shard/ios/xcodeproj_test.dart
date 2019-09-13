@@ -145,13 +145,13 @@ void main() {
       expect(xcodeProjectInterpreter.isInstalled, isTrue);
     });
 
-    testUsingOsxContext('build settings is empty when xcodebuild failed to get the build settings', () {
+    testUsingOsxContext('build settings is empty when xcodebuild failed to get the build settings', () async {
       when(mockProcessManager.runSync(
                argThat(contains(xcodebuild)),
                workingDirectory: anyNamed('workingDirectory'),
                environment: anyNamed('environment')))
           .thenReturn(ProcessResult(0, 1, '', ''));
-      expect(xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
+      expect(await xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
     });
 
     testUsingContext('build settings flakes', () async {
@@ -160,7 +160,7 @@ void main() {
         flakes: 1,
         delay: delay + const Duration(seconds: 1),
       );
-      expect(await xcodeProjectInterpreter.getBuildSettingsAsync(
+      expect(await xcodeProjectInterpreter.getBuildSettings(
                  '', '', timeout: delay),
              const <String, String>{});
       // build settings times out and is killed once, then succeeds.
