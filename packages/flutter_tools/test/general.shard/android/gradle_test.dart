@@ -867,6 +867,13 @@ flutter:
       gradleWrapperDirectory
         .childFile(gradleBinary)
         .writeAsStringSync('irrelevant');
+      fs.currentDirectory
+        .childDirectory('android')
+        .createSync();
+      fs.currentDirectory
+        .childDirectory('android')
+        .childFile('gradle.properties')
+        .writeAsStringSync('irrelevant');
       gradleWrapperDirectory
         .childDirectory('gradle')
         .childDirectory('wrapper')
