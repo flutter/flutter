@@ -530,7 +530,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// dropdown's value. It should also call [State.setState] to rebuild the
 /// dropdown with the new value.
 ///
-/// {@tool snippet --template=stateful_widget_center}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
 /// This sample shows a `DropdownButton` with a customized icon, text style,
 /// and underline and whose value is one of "One", "Two", "Free", or "Four".

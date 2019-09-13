@@ -38,7 +38,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
 ///
-/// {@tool snippet --template=stateful_widget_center}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
 /// This sample shows an `IconButton` that uses the Material icon "volume_up" to
 /// increase the volume.
