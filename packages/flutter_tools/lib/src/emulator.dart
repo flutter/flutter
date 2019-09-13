@@ -80,26 +80,29 @@ class EmulatorManager {
     }
 
     final String device = await _getPreferredAvailableDevice();
-    if (device == null)
+    if (device == null) {
       return CreateEmulatorResult(name,
           success: false, error: 'No device definitions are available');
+    }
 
     final String sdkId = await _getPreferredSdkId();
-    if (sdkId == null)
+    if (sdkId == null) {
       return CreateEmulatorResult(name,
           success: false,
           error:
               'No suitable Android AVD system images are available. You may need to install these'
               ' using sdkmanager, for example:\n'
               '  sdkmanager "system-images;android-27;google_apis_playstore;x86"');
+    }
 
     // Cleans up error output from avdmanager to make it more suitable to show
     // to flutter users. Specifically:
     // - Removes lines that say "null" (!)
     // - Removes lines that tell the user to use '--force' to overwrite emulators
     String cleanError(String error) {
-      if (error == null || error.trim() == '')
+      if (error == null || error.trim() == '') {
         return null;
+      }
       return error
           .split('\n')
           .where((String l) => l.trim() != 'null')
@@ -226,10 +229,12 @@ abstract class Emulator {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other is! Emulator)
+    }
+    if (other is! Emulator) {
       return false;
+    }
     return id == other.id;
   }
 
@@ -239,8 +244,9 @@ abstract class Emulator {
   String toString() => name;
 
   static List<String> descriptions(List<Emulator> emulators) {
-    if (emulators.isEmpty)
+    if (emulators.isEmpty) {
       return <String>[];
+    }
 
     // Extract emulators information
     final List<List<String>> table = <List<String>>[];

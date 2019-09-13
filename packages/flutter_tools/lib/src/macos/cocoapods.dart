@@ -87,14 +87,16 @@ class CocoaPods {
     }
     try {
       final Version installedVersion = Version.parse(versionText);
-      if (installedVersion == null)
+      if (installedVersion == null) {
         return CocoaPodsStatus.unknownVersion;
-      if (installedVersion < Version.parse(cocoaPodsMinimumVersion))
+      }
+      if (installedVersion < Version.parse(cocoaPodsMinimumVersion)) {
         return CocoaPodsStatus.belowMinimumVersion;
-      else if (installedVersion < Version.parse(cocoaPodsRecommendedVersion))
+      }
+      if (installedVersion < Version.parse(cocoaPodsRecommendedVersion)) {
         return CocoaPodsStatus.belowRecommendedVersion;
-      else
-        return CocoaPodsStatus.recommended;
+      }
+      return CocoaPodsStatus.recommended;
     } on FormatException {
       return CocoaPodsStatus.notInstalled;
     }
@@ -242,8 +244,9 @@ class CocoaPods {
       final String content = file.readAsStringSync();
       final String include = '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
           .toLowerCase()}.xcconfig"';
-      if (!content.contains(include))
+      if (!content.contains(include)) {
         file.writeAsStringSync('$include\n$content', flush: true);
+      }
     }
   }
 
@@ -262,8 +265,9 @@ class CocoaPods {
   // 3. Pods/Manifest.lock doesn't exist (It is deleted when plugins change)
   // 4. Podfile.lock doesn't match Pods/Manifest.lock.
   bool _shouldRunPodInstall(XcodeBasedProject xcodeProject, bool dependenciesChanged) {
-    if (dependenciesChanged)
+    if (dependenciesChanged) {
       return true;
+    }
 
     final File podfileFile = xcodeProject.podfile;
     final File podfileLockFile = xcodeProject.podfileLock;
