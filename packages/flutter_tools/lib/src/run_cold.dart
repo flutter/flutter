@@ -52,8 +52,9 @@ class ColdRunner extends ResidentRunner {
     if (!prebuiltMode) {
       if (!fs.isFileSync(mainPath)) {
         String message = 'Tried to run $mainPath, but that file does not exist.';
-        if (target == null)
+        if (target == null) {
           message += '\nConsider using the -t option to specify the Dart file to start.';
+        }
         printError(message);
         return 1;
       }
@@ -64,8 +65,9 @@ class ColdRunner extends ResidentRunner {
         coldRunner: this,
         route: route,
       );
-      if (result != 0)
+      if (result != 0) {
         return result;
+      }
     }
 
     // Connect to observatory.
@@ -89,8 +91,9 @@ class ColdRunner extends ResidentRunner {
     printTrace('Application running.');
 
     for (FlutterDevice device in flutterDevices) {
-      if (device.vmServices == null)
+      if (device.vmServices == null) {
         continue;
+      }
       device.initLogReader();
       await device.refreshViews();
       printTrace('Connected to ${device.device.name}');
@@ -111,8 +114,9 @@ class ColdRunner extends ResidentRunner {
 
     appStartedCompleter?.complete();
 
-    if (stayResident && !traceStartup)
+    if (stayResident && !traceStartup) {
       return waitForAppToFinish();
+    }
     await cleanupAtFinish();
     return 0;
   }
@@ -203,8 +207,9 @@ class ColdRunner extends ResidentRunner {
   Future<void> preExit() async {
     for (FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
-      if (device.vmServices == null || device.vmServices.isEmpty)
+      if (device.vmServices == null || device.vmServices.isEmpty) {
         await device.device.stopApp(device.package);
+      }
     }
     await super.preExit();
   }

@@ -110,8 +110,9 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
     return null;
   }
 
-  if (isNotEmpty(buildSettings['PROVISIONING_PROFILE']))
+  if (isNotEmpty(buildSettings['PROVISIONING_PROFILE'])) {
     return null;
+  }
 
   // If the user's environment is missing the tools needed to find and read
   // certificates, abandon. Tools should be pre-equipped on macOS.
@@ -184,8 +185,9 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   // Don't care about the result.
   unawaited(opensslProcess.stderr.drain<String>());
 
-  if (await opensslProcess.exitCode != 0)
+  if (await opensslProcess.exitCode != 0) {
     return null;
+  }
 
   return <String, String>{
     'DEVELOPMENT_TEAM': _certificateOrganizationalUnitExtractionPattern
@@ -201,8 +203,9 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
     throwToolExit('No development certificates available to code sign app for device deployment');
   }
 
-  if (validCodeSigningIdentities.length == 1)
+  if (validCodeSigningIdentities.length == 1) {
     return validCodeSigningIdentities.first;
+  }
 
   if (validCodeSigningIdentities.length > 1) {
     final String savedCertChoice = config.getValue('ios-signing-cert');
@@ -218,8 +221,9 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
 
     // If terminal UI can't be used, just attempt with the first valid certificate
     // since we can't ask the user.
-    if (!terminal.usesTerminalUi)
+    if (!terminal.usesTerminalUi) {
       return validCodeSigningIdentities.first;
+    }
 
     final int count = validCodeSigningIdentities.length;
     printStatus(

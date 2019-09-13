@@ -143,8 +143,9 @@ class AndroidDevice extends Device {
   /// will be returned.
   @override
   Future<String> get emulatorId async {
-    if (!(await isLocalEmulator))
+    if (!(await isLocalEmulator)) {
       return null;
+    }
 
     // Emulators always have IDs in the format emulator-(port) where port is the
     // Android Console port number.
@@ -375,8 +376,10 @@ class AndroidDevice extends Device {
       return false;
     }
 
-    if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
+    if (!await _checkForSupportedAdbVersion() ||
+        !await _checkForSupportedAndroidVersion()) {
       return false;
+    }
 
     final Status status = logger.startProgress('Installing ${fs.path.relative(apk.file.path)}...', timeout: timeoutConfiguration.slowOperation);
     final RunResult installResult = await processUtils.run(
@@ -408,8 +411,10 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async {
-    if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
+    if (!await _checkForSupportedAdbVersion() ||
+        !await _checkForSupportedAndroidVersion()) {
       return false;
+    }
 
     String uninstallOut;
     try {
@@ -470,8 +475,10 @@ class AndroidDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
   }) async {
-    if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
+    if (!await _checkForSupportedAdbVersion() ||
+        !await _checkForSupportedAndroidVersion()) {
       return LaunchResult.failed();
+    }
 
     final TargetPlatform devicePlatform = await targetPlatform;
     if (!(devicePlatform == TargetPlatform.android_arm ||
@@ -522,8 +529,9 @@ class AndroidDevice extends Device {
     printTrace("Stopping app '${package.name}' on $name.");
     await stopApp(package);
 
-    if (!await _installLatestApp(package))
+    if (!await _installLatestApp(package)) {
       return LaunchResult.failed();
+    }
 
     final bool traceStartup = platformArgs['trace-startup'] ?? false;
     final AndroidApk apk = package;
@@ -591,8 +599,9 @@ class AndroidDevice extends Device {
       return LaunchResult.failed();
     }
 
-    if (!debuggingOptions.debuggingEnabled)
+    if (!debuggingOptions.debuggingEnabled) {
       return LaunchResult.succeeded();
+    }
 
     // Wait for the service protocol port here. This will complete once the
     // device has printed "Observatory is listening on...".
@@ -687,16 +696,18 @@ class AndroidDevice extends Device {
 Map<String, String> parseAdbDeviceProperties(String str) {
   final Map<String, String> properties = <String, String>{};
   final RegExp propertyExp = RegExp(r'\[(.*?)\]: \[(.*?)\]');
-  for (Match match in propertyExp.allMatches(str))
+  for (Match match in propertyExp.allMatches(str)) {
     properties[match.group(1)] = match.group(2);
+  }
   return properties;
 }
 
 /// Return the list of connected ADB devices.
 List<AndroidDevice> getAdbDevices() {
   final String adbPath = getAdbPath(androidSdk);
-  if (adbPath == null)
+  if (adbPath == null) {
     return <AndroidDevice>[];
+  }
   String text;
   try {
     text = processUtils.runSync(
@@ -718,8 +729,9 @@ List<AndroidDevice> getAdbDevices() {
 /// Get diagnostics about issues with any connected devices.
 Future<List<String>> getAdbDeviceDiagnostics() async {
   final String adbPath = getAdbPath(androidSdk);
-  if (adbPath == null)
+  if (adbPath == null) {
     return <String>[];
+  }
 
   final RunResult result = await processUtils.run(<String>[adbPath, 'devices', '-l']);
   if (result.exitCode != 0) {
@@ -752,8 +764,9 @@ void parseADBDeviceOutput(
 
   for (String line in text.trim().split('\n')) {
     // Skip lines like: * daemon started successfully *
-    if (line.startsWith('* daemon '))
+    if (line.startsWith('* daemon ')) {
       continue;
+    }
 
     // Skip lines about adb server and client version not matching
     if (line.startsWith(RegExp(r'adb server (version|is out of date)'))) {
@@ -761,8 +774,9 @@ void parseADBDeviceOutput(
       continue;
     }
 
-    if (line.startsWith('List of devices'))
+    if (line.startsWith('List of devices')) {
       continue;
+    }
 
     if (_kDeviceRegex.hasMatch(line)) {
       final Match match = _kDeviceRegex.firstMatch(line);
@@ -782,8 +796,9 @@ void parseADBDeviceOutput(
         }
       }
 
-      if (info['model'] != null)
+      if (info['model'] != null) {
         info['model'] = cleanAdbDeviceName(info['model']);
+      }
 
       if (deviceState == 'unauthorized') {
         diagnostics?.add(
@@ -856,8 +871,9 @@ class _AdbLogReader extends DeviceLogReader {
       _process.stdout.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
       _process.stderr.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
       _process.exitCode.whenComplete(() {
-        if (_linesController.hasListener)
+        if (_linesController.hasListener) {
           _linesController.close();
+        }
       });
     });
   }

@@ -136,8 +136,9 @@ List<String> _xcodeBuildSettingsLines({
   xcodeBuildSettings.add('FLUTTER_APPLICATION_PATH=${fs.path.normalize(project.directory.path)}');
 
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
-  if (targetOverride != null)
+  if (targetOverride != null) {
     xcodeBuildSettings.add('FLUTTER_TARGET=$targetOverride');
+  }
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
   xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory()}');
@@ -219,8 +220,9 @@ class XcodeProjectInterpreter {
       }
       _versionText = result.stdout.trim().replaceAll('\n', ', ');
       final Match match = _versionRegex.firstMatch(versionText);
-      if (match == null)
+      if (match == null) {
         return;
+      }
       final String version = match.group(1);
       final List<String> components = version.split('.');
       _majorVersion = int.parse(components[0]);
@@ -234,22 +236,25 @@ class XcodeProjectInterpreter {
 
   String _versionText;
   String get versionText {
-    if (_versionText == null)
+    if (_versionText == null) {
       _updateVersion();
+    }
     return _versionText;
   }
 
   int _majorVersion;
   int get majorVersion {
-    if (_majorVersion == null)
+    if (_majorVersion == null) {
       _updateVersion();
+    }
     return _majorVersion;
   }
 
   int _minorVersion;
   int get minorVersion {
-    if (_minorVersion == null)
+    if (_minorVersion == null) {
       _updateVersion();
+    }
     return _minorVersion;
   }
 
@@ -367,8 +372,9 @@ Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
 /// project and target.
 String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettings) {
   final Iterable<Match> matches = _varExpr.allMatches(str);
-  if (matches.isEmpty)
+  if (matches.isEmpty) {
     return str;
+  }
 
   return str.replaceAllMapped(_varExpr, (Match m) => xcodeBuildSettings[m[1]] ?? m[0]);
 }
@@ -400,8 +406,9 @@ class XcodeProjectInfo {
       }
       collector?.add(line.trim());
     }
-    if (schemes.isEmpty)
+    if (schemes.isEmpty) {
       schemes.add('Runner');
+    }
     return XcodeProjectInfo(targets, buildConfigurations, schemes);
   }
 
@@ -425,10 +432,10 @@ class XcodeProjectInfo {
   /// The expected build configuration for [buildInfo] and [scheme].
   static String expectedBuildConfigurationFor(BuildInfo buildInfo, String scheme) {
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
-    if (buildInfo.flavor == null)
+    if (buildInfo.flavor == null) {
       return baseConfiguration;
-    else
-      return baseConfiguration + '-$scheme';
+    }
+    return baseConfiguration + '-$scheme';
   }
 
   /// Checks whether the [buildConfigurations] contains the specified string, without
@@ -446,8 +453,9 @@ class XcodeProjectInfo {
   /// best match.
   String schemeFor(BuildInfo buildInfo) {
     final String expectedScheme = expectedSchemeFor(buildInfo);
-    if (schemes.contains(expectedScheme))
+    if (schemes.contains(expectedScheme)) {
       return expectedScheme;
+    }
     return _uniqueMatch(schemes, (String candidate) {
       return candidate.toLowerCase() == expectedScheme.toLowerCase();
     });
@@ -457,32 +465,35 @@ class XcodeProjectInfo {
   /// null, if there is no unique best match.
   String buildConfigurationFor(BuildInfo buildInfo, String scheme) {
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
-    if (hasBuildConfiguratinForBuildMode(expectedConfiguration))
+    if (hasBuildConfiguratinForBuildMode(expectedConfiguration)) {
       return expectedConfiguration;
+    }
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
     return _uniqueMatch(buildConfigurations, (String candidate) {
       candidate = candidate.toLowerCase();
-      if (buildInfo.flavor == null)
+      if (buildInfo.flavor == null) {
         return candidate == expectedConfiguration.toLowerCase();
-      else
-        return candidate.contains(baseConfiguration.toLowerCase()) && candidate.contains(scheme.toLowerCase());
+      }
+      return candidate.contains(baseConfiguration.toLowerCase()) && candidate.contains(scheme.toLowerCase());
     });
   }
 
   static String _baseConfigurationFor(BuildInfo buildInfo) {
-    if (buildInfo.isDebug)
+    if (buildInfo.isDebug) {
       return 'Debug';
-    if (buildInfo.isProfile)
+    }
+    if (buildInfo.isProfile) {
       return 'Profile';
+    }
     return 'Release';
   }
 
   static String _uniqueMatch(Iterable<String> strings, bool matches(String s)) {
     final List<String> options = strings.where(matches).toList();
-    if (options.length == 1)
+    if (options.length == 1) {
       return options.first;
-    else
-      return null;
+    }
+    return null;
   }
 
   @override

@@ -65,21 +65,25 @@ class ChannelCommand extends FlutterCommand {
       <String>['git', 'branch', '-r'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
-        if (verbose)
+        if (verbose) {
           rawOutput.add(line);
+        }
         final List<String> split = line.split('/');
-        if (split.length < 2)
+        if (split.length < 2) {
           return null;
+        }
         final String branchName = split[1];
         if (seenChannels.contains(branchName)) {
           return null;
         }
         seenChannels.add(branchName);
-        if (branchName == currentBranch)
+        if (branchName == currentBranch) {
           return '* $branchName';
+        }
         if (!branchName.startsWith('HEAD ') &&
-            (showAll || FlutterVersion.officialChannels.contains(branchName)))
+            (showAll || FlutterVersion.officialChannels.contains(branchName))) {
           return '  $branchName';
+        }
         return null;
       },
     );

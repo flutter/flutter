@@ -55,8 +55,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final String versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey];
 
     Version version;
-    if (versionString != null)
+    if (versionString != null) {
       version = Version.parse(versionString);
+    }
 
     String pathsSelectorValue;
     final Map<String, dynamic> jvmOptions = plistValues['JVMOptions'];
@@ -140,8 +141,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   @override
   int compareTo(AndroidStudio other) {
     final int result = version.compareTo(other.version);
-    if (result == 0)
+    if (result == 0) {
       return directory.compareTo(other.directory);
+    }
     return result;
   }
 
@@ -150,8 +152,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final String configuredStudio = config.getValue('android-studio-dir');
     if (configuredStudio != null) {
       String configuredStudioPath = configuredStudio;
-      if (platform.isMacOS && !configuredStudioPath.endsWith('Contents'))
+      if (platform.isMacOS && !configuredStudioPath.endsWith('Contents')) {
         configuredStudioPath = fs.path.join(configuredStudioPath, 'Contents');
+      }
       return AndroidStudio(configuredStudioPath,
           configured: configuredStudio);
     }
@@ -173,8 +176,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final List<FileSystemEntity> candidatePaths = <FileSystemEntity>[];
 
     void _checkForStudio(String path) {
-      if (!fs.isDirectorySync(path))
+      if (!fs.isDirectorySync(path)) {
         return;
+      }
       try {
         final Iterable<Directory> directories = fs
             .directory(path)
@@ -220,8 +224,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
     bool _hasStudioAt(String path, { Version newerThan }) {
       return studios.any((AndroidStudio studio) {
-        if (studio.directory != path)
+        if (studio.directory != path) {
           return false;
+        }
         if (newerThan != null) {
           return studio.version.compareTo(newerThan) >= 0;
         }

@@ -81,8 +81,9 @@ class DeviceManager {
 
   /// A user-specified device ID.
   String get specifiedDeviceId {
-    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all')
+    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all') {
       return null;
+    }
     return _specifiedDeviceId;
   }
 
@@ -115,8 +116,9 @@ class DeviceManager {
     }
 
     // Match on a id or name starting with [deviceId].
-    for (Device device in devices.where(startsWithDeviceId))
+    for (Device device in devices.where(startsWithDeviceId)) {
       yield device;
+    }
   }
 
   /// Return the list of connected devices, filtered by any user-specified device id.
@@ -421,10 +423,12 @@ abstract class Device {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other is! Device)
+    }
+    if (other is! Device) {
       return false;
+    }
     return id == other.id;
   }
 
@@ -432,8 +436,9 @@ abstract class Device {
   String toString() => name;
 
   static Stream<String> descriptions(List<Device> devices) async* {
-    if (devices.isEmpty)
+    if (devices.isEmpty) {
       return;
+    }
 
     // Extract device information
     final List<List<String>> table = <List<String>>[];
@@ -541,8 +546,9 @@ class LaunchResult {
   @override
   String toString() {
     final StringBuffer buf = StringBuffer('started=$started');
-    if (observatoryUri != null)
+    if (observatoryUri != null) {
       buf.write(', observatory=$observatoryUri');
+    }
     return buf.toString();
   }
 }

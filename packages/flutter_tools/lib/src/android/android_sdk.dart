@@ -46,8 +46,9 @@ const int minimumAndroidSdkVersion = 25;
 /// will work for those users who have Android Platform Tools installed but
 /// not the full SDK.
 String getAdbPath([ AndroidSdk existingSdk ]) {
-  if (existingSdk?.adbPath != null)
+  if (existingSdk?.adbPath != null) {
     return existingSdk.adbPath;
+  }
 
   final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
 
@@ -74,8 +75,9 @@ String getAvdPath() {
     platform.environment['ANDROID_AVD_HOME'],
   ];
 
-  if (platform.environment['HOME'] != null)
+  if (platform.environment['HOME'] != null) {
     searchPaths.add(fs.path.join(platform.environment['HOME'], '.android', 'avd'));
+  }
 
   if (platform.isWindows) {
     final String homeDrive = platform.environment['HOMEDRIVE'];
@@ -309,21 +311,26 @@ class AndroidSdk {
       } else if (platform.environment.containsKey(kAndroidSdkRoot)) {
         androidHomeDir = platform.environment[kAndroidSdkRoot];
       } else if (platform.isLinux) {
-        if (homeDirPath != null)
+        if (homeDirPath != null) {
           androidHomeDir = fs.path.join(homeDirPath, 'Android', 'Sdk');
+        }
       } else if (platform.isMacOS) {
-        if (homeDirPath != null)
+        if (homeDirPath != null) {
           androidHomeDir = fs.path.join(homeDirPath, 'Library', 'Android', 'sdk');
+        }
       } else if (platform.isWindows) {
-        if (homeDirPath != null)
+        if (homeDirPath != null) {
           androidHomeDir = fs.path.join(homeDirPath, 'AppData', 'Local', 'Android', 'sdk');
+        }
       }
 
       if (androidHomeDir != null) {
-        if (validSdkDirectory(androidHomeDir))
+        if (validSdkDirectory(androidHomeDir)) {
           return androidHomeDir;
-        if (validSdkDirectory(fs.path.join(androidHomeDir, 'sdk')))
+        }
+        if (validSdkDirectory(fs.path.join(androidHomeDir, 'sdk'))) {
           return fs.path.join(androidHomeDir, 'sdk');
+        }
       }
 
       // in build-tools/$version/aapt
@@ -332,8 +339,9 @@ class AndroidSdk {
         // Make sure we're using the aapt from the SDK.
         aaptBin = fs.file(aaptBin.resolveSymbolicLinksSync());
         final String dir = aaptBin.parent.parent.parent.path;
-        if (validSdkDirectory(dir))
+        if (validSdkDirectory(dir)) {
           return dir;
+        }
       }
 
       // in platform-tools/adb
@@ -342,8 +350,9 @@ class AndroidSdk {
         // Make sure we're using the adb from the SDK.
         adbBin = fs.file(adbBin.resolveSymbolicLinksSync());
         final String dir = adbBin.parent.parent.path;
-        if (validSdkDirectory(dir))
+        if (validSdkDirectory(dir)) {
           return dir;
+        }
       }
 
       return null;
@@ -405,8 +414,9 @@ class AndroidSdk {
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
   List<String> validateSdkWellFormed() {
-    if (adbPath == null || !processManager.canRun(adbPath))
+    if (adbPath == null || !processManager.canRun(adbPath)) {
       return <String>['Android SDK file not found: ${adbPath ?? 'adb'}.'];
+    }
 
     if (sdkVersions.isEmpty || latestVersion == null) {
       final StringBuffer msg = StringBuffer('No valid Android SDK platforms found in ${_platformsDir.path}.');
@@ -426,8 +436,9 @@ class AndroidSdk {
 
   String getPlatformToolsPath(String binaryName) {
     final String path = fs.path.join(directory, 'platform-tools', binaryName);
-    if (fs.file(path).existsSync())
+    if (fs.file(path).existsSync()) {
       return path;
+    }
     return null;
   }
 
@@ -438,8 +449,9 @@ class AndroidSdk {
     final List<String> searchFolders = <String>['emulator', 'tools'];
     for (final String folder in searchFolders) {
       final String path = fs.path.join(directory, folder, binaryName);
-      if (fs.file(path).existsSync())
+      if (fs.file(path).existsSync()) {
         return path;
+      }
     }
     return null;
   }
@@ -447,8 +459,9 @@ class AndroidSdk {
   String getAvdManagerPath() {
     final String binaryName = platform.isWindows ? 'avdmanager.bat' : 'avdmanager';
     final String path = fs.path.join(directory, 'tools', 'bin', binaryName);
-    if (fs.file(path).existsSync())
+    if (fs.file(path).existsSync()) {
       return path;
+    }
     return null;
   }
 
@@ -502,8 +515,9 @@ class AndroidSdk {
 
       buildToolsVersion ??= Version.primary(buildTools);
 
-      if (buildToolsVersion == null)
+      if (buildToolsVersion == null) {
         return null;
+      }
 
       return AndroidSdkVersion._(
         this,
@@ -576,8 +590,9 @@ class AndroidSdk {
 
   /// Returns the version of the Android SDK manager tool or null if not found.
   String get sdkManagerVersion {
-    if (!processManager.canRun(sdkManagerPath))
+    if (!processManager.canRun(sdkManagerPath)) {
       throwToolExit('Android sdkmanager not found. Update to the latest Android SDK to resolve this.');
+    }
     final RunResult result = processUtils.runSync(
       <String>[sdkManagerPath, '--version'],
       environment: sdkManagerEnv,
@@ -615,11 +630,13 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   String get aaptPath => getBuildToolsPath('aapt');
 
   List<String> validateSdkWellFormed() {
-    if (_exists(androidJarPath) != null)
+    if (_exists(androidJarPath) != null) {
       return <String>[_exists(androidJarPath)];
+    }
 
-    if (_canRun(aaptPath) != null)
+    if (_canRun(aaptPath) != null) {
       return <String>[_canRun(aaptPath)];
+    }
 
     return <String>[];
   }
@@ -639,14 +656,16 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   String toString() => '[${sdk.directory}, SDK version $sdkLevel, build-tools $buildToolsVersionName]';
 
   String _exists(String path) {
-    if (!fs.isFileSync(path))
+    if (!fs.isFileSync(path)) {
       return 'Android SDK file not found: $path.';
+    }
     return null;
   }
 
   String _canRun(String path) {
-    if (!processManager.canRun(path))
+    if (!processManager.canRun(path)) {
       return 'Android SDK file not found: $path.';
+    }
     return null;
   }
 }
