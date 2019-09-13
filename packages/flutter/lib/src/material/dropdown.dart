@@ -671,12 +671,8 @@ class DropdownButton<T> extends StatefulWidget {
   /// corresponds to but is unique from [DropdownMenuItem].
   ///
   /// ```dart
-  /// final List<String> items = <String>[
-  ///   '1',
-  ///   '2',
-  ///   '3',
-  /// ];
-  /// String selectedItem = 'One';
+  /// final List<String> items = <String>['1','2','3'];
+  /// String selectedItem = '1';
   ///
   /// @override
   /// Widget build(BuildContext context) {
@@ -687,12 +683,12 @@ class DropdownButton<T> extends StatefulWidget {
   ///       onChanged: (String string) => setState(() => selectedItem = string),
   ///       selectedItemBuilder: (BuildContext context) {
   ///         return items.map((String item) {
-  ///           return Text('Menu Item $item');
+  ///           return Text(item);
   ///         }).toList();
   ///       },
   ///       items: items.map((String item) {
   ///         return DropdownMenuItem<String>(
-  ///           child: Text(item),
+  ///           child: Text('Log $item'),
   ///           value: item,
   ///         );
   ///       }).toList(),
