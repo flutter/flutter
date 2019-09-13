@@ -286,8 +286,9 @@ class MockCrashReportSender extends MockClient {
             .split('--$boundary')
             .map<List<String>>((String part) {
           final Match nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
-          if (nameMatch == null)
+          if (nameMatch == null) {
             return null;
+          }
           final String name = nameMatch[1];
           final String value = part.split('\n').skip(2).join('\n').trim();
           return <String>[name, value];

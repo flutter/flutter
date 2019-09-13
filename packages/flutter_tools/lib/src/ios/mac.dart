@@ -181,8 +181,9 @@ class IMobileDevice {
           <MapEntry<String, String>>[cache.dyLdLibEntry]
         ),
       );
-      if (result.exitCode != 0)
+      if (result.exitCode != 0) {
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');
+      }
       return result.stdout;
     } on ProcessException {
       throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
@@ -203,8 +204,9 @@ class IMobileDevice {
           <MapEntry<String, String>>[cache.dyLdLibEntry]
         ),
       );
-      if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
+      if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found')) {
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}. Try unlocking attached devices.');
+      }
       if (result.exitCode == 255 && result.stderr != null && result.stderr.contains('Could not connect to lockdownd')) {
         if (result.stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
           throw const IOSDeviceNotTrustedError(
@@ -219,8 +221,9 @@ class IMobileDevice {
           );
         }
       }
-      if (result.exitCode != 0)
+      if (result.exitCode != 0) {
         throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
+      }
       return result.stdout.trim();
     } on ProcessException {
       throw ToolExit('Failed to invoke ideviceinfo. Run flutter doctor.');
@@ -265,11 +268,13 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool codesign = true,
 
 }) async {
-  if (!upgradePbxProjWithFlutterAssets(app.project))
+  if (!upgradePbxProjWithFlutterAssets(app.project)) {
     return XcodeBuildResult(success: false);
+  }
 
-  if (!_checkXcodeVersion())
+  if (!_checkXcodeVersion()) {
     return XcodeBuildResult(success: false);
+  }
 
 
   final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
@@ -545,8 +550,9 @@ String readGeneratedXcconfig(String appPath) {
   final String generatedXcconfigPath =
       fs.path.join(fs.currentDirectory.path, appPath, 'Flutter', 'Generated.xcconfig');
   final File generatedXcconfigFile = fs.file(generatedXcconfigPath);
-  if (!generatedXcconfigFile.existsSync())
+  if (!generatedXcconfigFile.existsSync()) {
     return null;
+  }
   return generatedXcconfigFile.readAsStringSync();
 }
 
@@ -636,8 +642,9 @@ class XcodeBuildExecution {
 const String _xcodeRequirement = 'Xcode $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion() {
-  if (!platform.isMacOS)
+  if (!platform.isMacOS) {
     return false;
+  }
   if (!xcodeProjectInterpreter.isInstalled) {
     printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
@@ -711,8 +718,9 @@ bool upgradePbxProjWithFlutterAssets(IosProject project) {
   for (final String line in lines) {
     final Match match = oldAssets.firstMatch(line);
     if (match != null) {
-      if (printedStatuses.add(match.group(1)))
+      if (printedStatuses.add(match.group(1))) {
         printStatus('Removing obsolete reference to ${match.group(1)} from ${project.hostAppBundleName}');
+      }
     } else {
       buffer.writeln(line);
     }

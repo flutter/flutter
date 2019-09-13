@@ -27,8 +27,9 @@ class FlutterManifest {
 
   /// Returns null on invalid manifest. Returns empty manifest on missing file.
   static FlutterManifest createFromPath(String path) {
-    if (path == null || !fs.isFileSync(path))
+    if (path == null || !fs.isFileSync(path)) {
       return _createFromYaml(null);
+    }
     final String manifest = fs.file(path).readAsStringSync();
     return createFromString(manifest);
   }
@@ -41,8 +42,9 @@ class FlutterManifest {
 
   static FlutterManifest _createFromYaml(dynamic yamlDocument) {
     final FlutterManifest pubspec = FlutterManifest._();
-    if (yamlDocument != null && !_validate(yamlDocument))
+    if (yamlDocument != null && !_validate(yamlDocument)) {
       return null;
+    }
 
     final Map<dynamic, dynamic> yamlMap = yamlDocument;
     if (yamlMap != null) {
@@ -99,10 +101,10 @@ class FlutterManifest {
   /// The build version name from the `pubspec.yaml` file.
   /// Can be null if version isn't set or has a wrong format.
   String get buildName {
-    if (appVersion != null && appVersion.contains('+'))
+    if (appVersion != null && appVersion.contains('+')) {
       return appVersion.split('+')?.elementAt(0);
-    else
-      return appVersion;
+    }
+    return appVersion;
   }
 
   /// The build version number from the `pubspec.yaml` file.
@@ -150,8 +152,9 @@ class FlutterManifest {
   /// module or plugin descriptor. Returns null, if there is no
   /// such declaration.
   String get androidPackage {
-    if (isModule)
+    if (isModule) {
       return _flutterDescriptor['module']['androidPackage'];
+    }
     if (isPlugin) {
       final YamlMap plugin = _flutterDescriptor['plugin'];
       if (plugin.containsKey('platforms')) {
@@ -166,8 +169,9 @@ class FlutterManifest {
   /// Returns the iOS bundle identifier declared by this manifest in its
   /// module descriptor. Returns null if there is no such declaration.
   String get iosBundleIdentifier {
-    if (isModule)
+    if (isModule) {
       return _flutterDescriptor['module']['iosBundleIdentifier'];
+    }
     return null;
   }
 
@@ -202,8 +206,9 @@ class FlutterManifest {
   }
 
   List<Font> _extractFonts() {
-    if (!_flutterDescriptor.containsKey('fonts'))
+    if (!_flutterDescriptor.containsKey('fonts')) {
       return <Font>[];
+    }
 
     final List<Font> fonts = <Font>[];
     for (Map<String, dynamic> fontFamily in _rawFontsDescriptor) {
@@ -232,8 +237,9 @@ class FlutterManifest {
           style: fontFile['style'],
         ));
       }
-      if (fontAssets.isNotEmpty)
+      if (fontAssets.isNotEmpty) {
         fonts.add(Font(fontFamily['family'], fontAssets));
+      }
     }
     return fonts;
   }
@@ -269,11 +275,13 @@ class FontAsset {
 
   Map<String, dynamic> get descriptor {
     final Map<String, dynamic> descriptor = <String, dynamic>{};
-    if (weight != null)
+    if (weight != null) {
       descriptor['weight'] = weight;
+    }
 
-    if (style != null)
+    if (style != null) {
       descriptor['style'] = style;
+    }
 
     descriptor['asset'] = assetUri.path;
     return descriptor;

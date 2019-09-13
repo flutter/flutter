@@ -648,8 +648,9 @@ class FakeIosDoctorProvider implements DoctorValidatorsProvider {
   List<Workflow> get workflows {
     if (_workflows == null) {
       _workflows = <Workflow>[];
-      if (iosWorkflow.appliesToHostPlatform)
+      if (iosWorkflow.appliesToHostPlatform) {
         _workflows.add(iosWorkflow);
+      }
     }
     return _workflows;
   }

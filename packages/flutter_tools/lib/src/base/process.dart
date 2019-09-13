@@ -126,10 +126,12 @@ class RunResult {
   @override
   String toString() {
     final StringBuffer out = StringBuffer();
-    if (processResult.stdout.isNotEmpty)
+    if (processResult.stdout.isNotEmpty) {
       out.writeln(processResult.stdout);
-    if (processResult.stderr.isNotEmpty)
+    }
+    if (processResult.stderr.isNotEmpty) {
       out.writeln(processResult.stderr);
+    }
     return out.toString().trimRight();
   }
 
@@ -436,14 +438,16 @@ class _DefaultProcessUtils implements ProcessUtils {
       .transform<String>(const LineSplitter())
       .where((String line) => filter == null || filter.hasMatch(line))
       .listen((String line) {
-        if (mapFunction != null)
+        if (mapFunction != null) {
           line = mapFunction(line);
+        }
         if (line != null) {
           final String message = '$prefix$line';
-          if (trace)
+          if (trace) {
             printTrace(message);
-          else
+          } else {
             printStatus(message, wrap: false);
+          }
         }
       });
     final StreamSubscription<String> stderrSubscription = process.stderr
@@ -451,10 +455,12 @@ class _DefaultProcessUtils implements ProcessUtils {
       .transform<String>(const LineSplitter())
       .where((String line) => filter == null || filter.hasMatch(line))
       .listen((String line) {
-        if (mapFunction != null)
+        if (mapFunction != null) {
           line = mapFunction(line);
-        if (line != null)
+        }
+        if (line != null) {
           printError('$prefix$line', wrap: false);
+        }
       });
 
     // Wait for stdout to be fully processed
@@ -504,10 +510,11 @@ class _DefaultProcessUtils implements ProcessUtils {
     Map<String, String> environment,
   ]) {
     if (allowReentrantFlutter) {
-      if (environment == null)
+      if (environment == null) {
         environment = <String, String>{'FLUTTER_ALREADY_LOCKED': 'true'};
-      else
+      } else {
         environment['FLUTTER_ALREADY_LOCKED'] = 'true';
+      }
     }
 
     return environment;

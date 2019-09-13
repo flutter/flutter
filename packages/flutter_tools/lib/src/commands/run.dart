@@ -189,12 +189,13 @@ class RunCommand extends RunCommandBase {
   Future<String> get usagePath async {
     final String command = await super.usagePath;
 
-    if (devices == null)
+    if (devices == null) {
       return command;
-    else if (devices.length > 1)
+    }
+    if (devices.length > 1) {
       return '$command/all';
-    else
-      return '$command/${getNameForTargetPlatform(await devices[0].targetPlatform)}';
+    }
+    return '$command/${getNameForTargetPlatform(await devices[0].targetPlatform)}';
   }
 
   @override
@@ -240,8 +241,9 @@ class RunCommand extends RunCommandBase {
   @override
   bool get shouldRunPub {
     // If we are running with a prebuilt application, do not run pub.
-    if (runningWithPrebuiltApplication)
+    if (runningWithPrebuiltApplication) {
       return false;
+    }
 
     return super.shouldRunPub;
   }
@@ -262,13 +264,16 @@ class RunCommand extends RunCommandBase {
   Future<void> validateCommand() async {
     // When running with a prebuilt application, no command validation is
     // necessary.
-    if (!runningWithPrebuiltApplication)
+    if (!runningWithPrebuiltApplication) {
       await super.validateCommand();
+    }
     devices = await findAllTargetDevices();
-    if (devices == null)
+    if (devices == null) {
       throwToolExit(null);
-    if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication)
+    }
+    if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit('Using -d all with --use-application-binary is not supported');
+    }
   }
 
   DebuggingOptions _createDebuggingOptions() {
@@ -306,8 +311,9 @@ class RunCommand extends RunCommandBase {
     writePidFile(argResults['pid-file']);
 
     if (argResults['machine']) {
-      if (devices.length > 1)
+      if (devices.length > 1) {
         throwToolExit('--machine does not support -d all.');
+      }
       final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
           notifyingLogger: NotifyingLogger(), logToStdout: true);
       AppInstance app;
@@ -330,8 +336,9 @@ class RunCommand extends RunCommandBase {
       }
       final DateTime appStartedTime = systemClock.now();
       final int result = await app.runner.waitForAppToFinish();
-      if (result != 0)
+      if (result != 0) {
         throwToolExit(null, exitCode: result);
+      }
       return FlutterCommandResult(
         ExitStatus.success,
         timingLabelParts: <String>['daemon'],
@@ -370,8 +377,9 @@ class RunCommand extends RunCommandBase {
 
     if (hotMode) {
       for (Device device in devices) {
-        if (!device.supportsHotReload)
+        if (!device.supportsHotReload) {
           throwToolExit('Hot reload is not supported by ${device.name}. Run with --no-hot.');
+        }
       }
     }
 

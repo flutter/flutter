@@ -102,10 +102,10 @@ class FlutterProject {
   }
 
   String _organizationNameFromPackageName(String packageName) {
-    if (packageName != null && 0 <= packageName.lastIndexOf('.'))
+    if (packageName != null && 0 <= packageName.lastIndexOf('.')) {
       return packageName.substring(0, packageName.lastIndexOf('.'));
-    else
-      return null;
+    }
+    return null;
   }
 
   /// The iOS sub project of this project.
@@ -302,8 +302,9 @@ class IosProject implements XcodeBasedProject {
 
   /// This parent folder of `Runner.xcodeproj`.
   Directory get hostAppRoot {
-    if (!isModule || _editableDirectory.existsSync())
+    if (!isModule || _editableDirectory.existsSync()) {
       return _editableDirectory;
+    }
     return ephemeralDirectory;
   }
 
@@ -397,8 +398,9 @@ class IosProject implements XcodeBasedProject {
   ///
   /// Returns null, if iOS tooling is unavailable.
   Map<String, String> get buildSettings {
-    if (!xcode.xcodeProjectInterpreter.isInstalled)
+    if (!xcode.xcodeProjectInterpreter.isInstalled) {
       return null;
+    }
     _buildSettings ??=
         xcode.xcodeProjectInterpreter.getBuildSettings(xcodeProject.path,
                                                        _hostAppBundleName);
@@ -409,8 +411,9 @@ class IosProject implements XcodeBasedProject {
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     _regenerateFromTemplateIfNeeded();
-    if (!_flutterLibRoot.existsSync())
+    if (!_flutterLibRoot.existsSync()) {
       return;
+    }
     await _updateGeneratedXcodeConfigIfNeeded();
   }
 
@@ -425,12 +428,14 @@ class IosProject implements XcodeBasedProject {
   }
 
   void _regenerateFromTemplateIfNeeded() {
-    if (!isModule)
+    if (!isModule) {
       return;
+    }
     final bool pubspecChanged = isOlderThanReference(entity: ephemeralDirectory, referenceFile: parent.pubspecFile);
     final bool toolingChanged = Cache.instance.isOlderThanToolsStamp(ephemeralDirectory);
-    if (!pubspecChanged && !toolingChanged)
+    if (!pubspecChanged && !toolingChanged) {
       return;
+    }
     _deleteIfExistsSync(ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
     // Add ephemeral host app, if a editable host app does not already exist.
@@ -444,8 +449,9 @@ class IosProject implements XcodeBasedProject {
 
   Future<void> makeHostAppEditable() async {
     assert(isModule);
-    if (_editableDirectory.existsSync())
+    if (_editableDirectory.existsSync()) {
       throwToolExit('iOS host app is already editable. To start fresh, delete the ios/ folder.');
+    }
     _deleteIfExistsSync(ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), _editableDirectory);
@@ -496,8 +502,9 @@ class AndroidProject {
   /// containing the `app/` subdirectory and the `settings.gradle` file that
   /// includes it in the overall Gradle project.
   Directory get hostAppGradleRoot {
-    if (!isModule || _editableHostAppDirectory.existsSync())
+    if (!isModule || _editableHostAppDirectory.existsSync()) {
       return _editableHostAppDirectory;
+    }
     return ephemeralDirectory;
   }
 
@@ -574,8 +581,9 @@ class AndroidProject {
 
   Future<void> makeHostAppEditable() async {
     assert(isModule);
-    if (_editableHostAppDirectory.existsSync())
+    if (_editableHostAppDirectory.existsSync()) {
       throwToolExit('Android host app is already editable. To start fresh, delete the android/ folder.');
+    }
     _regenerateLibrary();
     _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
@@ -636,8 +644,9 @@ class WebProject {
 
 /// Deletes [directory] with all content.
 void _deleteIfExistsSync(Directory directory) {
-  if (directory.existsSync())
+  if (directory.existsSync()) {
     directory.deleteSync(recursive: true);
+  }
 }
 
 
