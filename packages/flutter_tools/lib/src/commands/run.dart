@@ -274,7 +274,10 @@ class RunCommand extends RunCommandBase {
   DebuggingOptions _createDebuggingOptions() {
     final BuildInfo buildInfo = getBuildInfo();
     if (buildInfo.isRelease) {
-      return DebuggingOptions.disabled(buildInfo);
+      return DebuggingOptions.disabled(buildInfo,
+        hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] : '',
+        port: featureFlags.isWebEnabled ? argResults['web-port'] : '',
+      );
     } else {
       return DebuggingOptions.enabled(
         buildInfo,
