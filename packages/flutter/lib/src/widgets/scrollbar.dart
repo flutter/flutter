@@ -44,8 +44,8 @@ const double _kMinInteractiveSize = 48.0;
 class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Creates a scrollbar with customizations given by construction arguments.
   ScrollbarPainter({
-    @required this.color,
-    @required this.textDirection,
+    @required Color color,
+    @required TextDirection textDirection,
     @required this.thickness,
     @required this.fadeoutOpacityAnimation,
     this.padding = EdgeInsets.zero,
@@ -66,16 +66,37 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
        assert(padding != null),
        assert(padding.isNonNegative),
+       _color = color,
+       _textDirection = textDirection,
        minOverscrollLength = minOverscrollLength ?? minLength {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
 
   /// [Color] of the thumb. Mustn't be null.
-  final Color color;
+  Color get color => _color;
+  Color _color;
+  set color(Color value) {
+    assert(value != null);
+    if (color == value)
+      return;
+
+    _color = value;
+    notifyListeners();
+  }
 
   /// [TextDirection] of the [BuildContext] which dictates the side of the
   /// screen the scrollbar appears in (the trailing side). Mustn't be null.
-  final TextDirection textDirection;
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    assert(value != null);
+    if (textDirection == value)
+    return;
+
+    _textDirection = value;
+    notifyListeners();
+  }
+
 
   /// Thickness of the scrollbar in its cross-axis in logical pixels. Mustn't be null.
   double thickness;
@@ -162,8 +183,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   Paint get _paint {
-    return Paint()..color =
-        color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
+    return Paint()
+      ..color = color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
   }
 
   void _paintThumbCrossAxis(Canvas canvas, Size size, double thumbOffset, double thumbExtent, AxisDirection direction) {
