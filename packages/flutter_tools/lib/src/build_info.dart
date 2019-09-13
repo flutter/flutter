@@ -414,12 +414,15 @@ String getPlatformNameForAndroidArch(AndroidArch arch) {
 }
 
 HostPlatform getCurrentHostPlatform() {
-  if (platform.isMacOS)
+  if (platform.isMacOS) {
     return HostPlatform.darwin_x64;
-  if (platform.isLinux)
+  }
+  if (platform.isLinux) {
     return HostPlatform.linux_x64;
-  if (platform.isWindows)
+  }
+  if (platform.isWindows) {
     return HostPlatform.windows_x64;
+  }
 
   printError('Unsupported host platform, defaulting to Linux');
 
@@ -430,8 +433,9 @@ HostPlatform getCurrentHostPlatform() {
 String getBuildDirectory() {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null || config == null)
+  if (context == null || config == null) {
     return 'build';
+  }
 
   final String buildDir = config.getValue('build-dir') ?? 'build';
   if (fs.path.isAbsolute(buildDir)) {

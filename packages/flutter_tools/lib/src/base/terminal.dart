@@ -117,8 +117,9 @@ class AnsiTerminal {
 
   String bolden(String message) {
     assert(message != null);
-    if (!supportsColor || message.isEmpty)
+    if (!supportsColor || message.isEmpty) {
       return message;
+    }
     final StringBuffer buffer = StringBuffer();
     for (String line in message.split('\n')) {
       // If there were bolds or resetBolds in the string before, then nuke them:
@@ -136,8 +137,9 @@ class AnsiTerminal {
 
   String color(String message, TerminalColor color) {
     assert(message != null);
-    if (!supportsColor || color == null || message.isEmpty)
+    if (!supportsColor || color == null || message.isEmpty) {
       return message;
+    }
     final StringBuffer buffer = StringBuffer();
     final String colorCodes = _colorMap[color];
     for (String line in message.split('\n')) {
@@ -218,16 +220,18 @@ class AnsiTerminal {
     while (choice == null || choice.length > 1 || !acceptedCharacters.contains(choice)) {
       if (prompt != null) {
         printStatus(prompt, emphasis: true, newline: false);
-        if (displayAcceptedCharacters)
+        if (displayAcceptedCharacters) {
           printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
+        }
         printStatus(': ', emphasis: true, newline: false);
       }
       choice = await keystrokes.first;
       printStatus(choice);
     }
     singleCharMode = false;
-    if (defaultChoiceIndex != null && choice == '\n')
+    if (defaultChoiceIndex != null && choice == '\n') {
       choice = acceptedCharacters[defaultChoiceIndex];
+    }
     return choice;
   }
 }

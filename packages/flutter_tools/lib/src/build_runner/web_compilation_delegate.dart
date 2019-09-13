@@ -16,6 +16,9 @@ import 'package:path/path.dart' as path;
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../platform_plugins.dart';
+import '../plugins.dart';
+import '../project.dart';
 import '../web/compile.dart';
 import 'web_fs.dart';
 
@@ -28,18 +31,23 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     Directory projectDirectory,
     String testOutputDir,
     BuildMode mode,
-    String projectName
+    String projectName,
+    bool initializePlatform,
   }) async {
     // Create the .dart_tool directory if it doesn't exist.
     projectDirectory
       .childDirectory('.dart_tool')
       .createSync();
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDirectory);
+    final bool hasWebPlugins = findPlugins(flutterProject)
+        .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final BuildDaemonClient client = await buildDaemonCreator.startBuildDaemon(
       projectDirectory.path,
       release: mode == BuildMode.release,
       profile: mode == BuildMode.profile,
-      hasPlugins: false,
+      hasPlugins: hasWebPlugins,
       includeTests: true,
+      initializePlatform: initializePlatform,
     );
     client.startBuild();
     bool success = true;

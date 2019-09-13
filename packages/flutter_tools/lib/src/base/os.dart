@@ -41,8 +41,9 @@ abstract class OperatingSystemUtils {
   /// if `which` was not able to locate the binary.
   File which(String execName) {
     final List<File> result = _which(execName);
-    if (result == null || result.isEmpty)
+    if (result == null || result.isEmpty) {
       return null;
+    }
     return result.first;
   }
 
@@ -142,12 +143,14 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   List<File> _which(String execName, { bool all = false }) {
     final List<String> command = <String>['which'];
-    if (all)
+    if (all) {
       command.add('-a');
+    }
     command.add(execName);
     final ProcessResult result = processManager.runSync(command);
-    if (result.exitCode != 0)
+    if (result.exitCode != 0) {
       return const <File>[];
+    }
     final String stdout = result.stdout;
     return stdout.trim().split('\n').map<File>((String path) => fs.file(path.trim())).toList();
   }
@@ -234,11 +237,13 @@ class _WindowsUtils extends OperatingSystemUtils {
   List<File> _which(String execName, { bool all = false }) {
     // `where` always returns all matches, not just the first one.
     final ProcessResult result = processManager.runSync(<String>['where', execName]);
-    if (result.exitCode != 0)
+    if (result.exitCode != 0) {
       return const <File>[];
+    }
     final List<String> lines = result.stdout.trim().split('\n');
-    if (all)
+    if (all) {
       return lines.map<File>((String path) => fs.file(path.trim())).toList();
+    }
     return <File>[fs.file(lines.first.trim())];
   }
 
@@ -298,12 +303,14 @@ class _WindowsUtils extends OperatingSystemUtils {
   void _unpackArchive(Archive archive, Directory targetDirectory) {
     for (ArchiveFile archiveFile in archive.files) {
       // The archive package doesn't correctly set isFile.
-      if (!archiveFile.isFile || archiveFile.name.endsWith('/'))
+      if (!archiveFile.isFile || archiveFile.name.endsWith('/')) {
         continue;
+      }
 
       final File destFile = fs.file(fs.path.join(targetDirectory.path, archiveFile.name));
-      if (!destFile.parent.existsSync())
+      if (!destFile.parent.existsSync()) {
         destFile.parent.createSync(recursive: true);
+      }
       destFile.writeAsBytesSync(archiveFile.content);
     }
   }
@@ -320,10 +327,11 @@ class _WindowsUtils extends OperatingSystemUtils {
     if (_name == null) {
       final ProcessResult result = processManager.runSync(
           <String>['ver'], runInShell: true);
-      if (result.exitCode == 0)
+      if (result.exitCode == 0) {
         _name = result.stdout.trim();
-      else
+      } else {
         _name = super.name;
+      }
     }
     return _name;
   }
@@ -340,11 +348,13 @@ String findProjectRoot([ String directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fs.currentDirectory.path;
   while (true) {
-    if (fs.isFileSync(fs.path.join(directory, kProjectRootSentinel)))
+    if (fs.isFileSync(fs.path.join(directory, kProjectRootSentinel))) {
       return directory;
+    }
     final String parent = fs.path.dirname(directory);
-    if (directory == parent)
+    if (directory == parent) {
       return null;
+    }
     directory = parent;
   }
 }

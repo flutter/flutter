@@ -168,6 +168,7 @@ class ResidentWebRunner extends ResidentRunner {
         target: target,
         flutterProject: flutterProject,
         buildInfo: debuggingOptions.buildInfo,
+        initializePlatform: debuggingOptions.initializePlatform,
         hostname: debuggingOptions.hostname,
         port: debuggingOptions.port,
         skipDwds: device is WebServerDevice,

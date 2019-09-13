@@ -26,20 +26,23 @@ void main() {
   MockHttpMultiServer mockHttpMultiServer;
   MockBuildDaemonClient mockBuildDaemonClient;
   MockOperatingSystemUtils mockOperatingSystemUtils;
+  bool lastInitializePlatform;
   dynamic lastAddress;
   int lastPort;
 
   setUp(() {
     lastAddress = null;
     lastPort = null;
+    lastInitializePlatform = null;
     mockBuildDaemonCreator =  MockBuildDaemonCreator();
     mockChromeLauncher = MockChromeLauncher();
     mockHttpMultiServer = MockHttpMultiServer();
     mockBuildDaemonClient = MockBuildDaemonClient();
     mockOperatingSystemUtils = MockOperatingSystemUtils();
     mockDwds = MockDwds();
-    when(mockBuildDaemonCreator.startBuildDaemon(any, release: anyNamed('release')))
-      .thenAnswer((Invocation _) async {
+    when(mockBuildDaemonCreator.startBuildDaemon(any, release: anyNamed('release'), initializePlatform: anyNamed('initializePlatform')))
+      .thenAnswer((Invocation invocation) async {
+        lastInitializePlatform = invocation.namedArguments[#initializePlatform];
         return mockBuildDaemonClient;
       });
     when(mockOperatingSystemUtils.findFreePort()).thenAnswer((Invocation _) async {
@@ -89,6 +92,7 @@ void main() {
       target: fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
+      initializePlatform: true,
       hostname: null,
       port: null,
     );
@@ -98,6 +102,27 @@ void main() {
 
     // .dart_tool directory is created.
     expect(flutterProject.dartTool.existsSync(), true);
+    expect(lastInitializePlatform, true);
+  }));
+
+  test('Can create webFs from mocked interfaces with initializePlatform', () => testbed.run(() async {
+    final FlutterProject flutterProject = FlutterProject.current();
+    await WebFs.start(
+      skipDwds: false,
+      target: fs.path.join('lib', 'main.dart'),
+      buildInfo: BuildInfo.debug,
+      flutterProject: flutterProject,
+      initializePlatform: false,
+      hostname: null,
+      port: null,
+    );
+
+    // The build daemon is told to build once.
+    verify(mockBuildDaemonClient.startBuild()).called(1);
+
+    // .dart_tool directory is created.
+    expect(flutterProject.dartTool.existsSync(), true);
+    expect(lastInitializePlatform, false);
   }));
 
   test('Uses provided port number and hostname.', () => testbed.run(() async {
@@ -107,6 +132,7 @@ void main() {
       target: fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
+      initializePlatform: false,
       hostname: 'foo',
       port: '1234',
     );

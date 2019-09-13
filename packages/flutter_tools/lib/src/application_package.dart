@@ -501,8 +501,9 @@ class ApkManifestData {
   ApkManifestData._(this._data);
 
   static ApkManifestData parseFromXmlDump(String data) {
-    if (data == null || data.trim().isEmpty)
+    if (data == null || data.trim().isEmpty) {
       return null;
+    }
 
     final List<String> lines = data.split('\n');
     assert(lines.length > 3);

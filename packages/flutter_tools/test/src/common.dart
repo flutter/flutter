@@ -38,8 +38,9 @@ void tryToDelete(Directory directory) {
 /// environment variable is set, it will be returned. Otherwise, this will
 /// deduce the path from `platform.script`.
 String getFlutterRoot() {
-  if (platform.environment.containsKey('FLUTTER_ROOT'))
+  if (platform.environment.containsKey('FLUTTER_ROOT')) {
     return platform.environment['FLUTTER_ROOT'];
+  }
 
   Error invalidScript() => StateError('Invalid script: ${platform.script}');
 
@@ -51,8 +52,9 @@ String getFlutterRoot() {
     case 'data':
       final RegExp flutterTools = RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
       final Match match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
-      if (match == null)
+      if (match == null) {
         throw invalidScript();
+      }
       scriptUri = Uri.parse(match.group(1));
       break;
     default:
@@ -61,16 +63,18 @@ String getFlutterRoot() {
 
   final List<String> parts = fs.path.split(fs.path.fromUri(scriptUri));
   final int toolsIndex = parts.indexOf('flutter_tools');
-  if (toolsIndex == -1)
+  if (toolsIndex == -1) {
     throw invalidScript();
+  }
   final String toolsPath = fs.path.joinAll(parts.sublist(0, toolsIndex + 1));
   return fs.path.normalize(fs.path.join(toolsPath, '..', '..'));
 }
 
 CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
   final FlutterCommandRunner runner = FlutterCommandRunner();
-  if (command != null)
+  if (command != null) {
     runner.addCommand(command);
+  }
   return runner;
 }
 
@@ -87,10 +91,12 @@ void updateFileModificationTime(
 /// Matcher for functions that throw [ToolExit].
 Matcher throwsToolExit({ int exitCode, Pattern message }) {
   Matcher matcher = isToolExit;
-  if (exitCode != null)
+  if (exitCode != null) {
     matcher = allOf(matcher, (ToolExit e) => e.exitCode == exitCode);
-  if (message != null)
+  }
+  if (message != null) {
     matcher = allOf(matcher, (ToolExit e) => e.message.contains(message));
+  }
   return throwsA(matcher);
 }
 

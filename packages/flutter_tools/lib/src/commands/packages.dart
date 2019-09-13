@@ -112,8 +112,9 @@ class PackagesGetCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults.rest.length > 1)
+    if (argResults.rest.length > 1) {
       throwToolExit('Too many arguments.\n$usage');
+    }
 
     final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
     final String target = findProjectRoot(workingDirectory);
