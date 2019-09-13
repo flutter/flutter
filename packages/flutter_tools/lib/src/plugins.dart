@@ -383,6 +383,7 @@ Depends on all your plugins, and provides a function to register them.
   s.source_files =  "Classes", "Classes/**/*.{h,m}"
   s.source           = { :path => '.' }
   s.public_header_files = './Classes/**/*.h'
+  s.static_framework    = true
   s.dependency '{{framework}}'
   {{#plugins}}
   s.dependency '{{name}}'
