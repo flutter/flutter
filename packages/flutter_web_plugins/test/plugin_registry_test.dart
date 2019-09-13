@@ -4,6 +4,8 @@
 
 @TestOn('chrome') // Uses web-only Flutter SDK
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -31,13 +33,12 @@ void main() {
     setUp(() {
       TestWidgetsFlutterBinding.ensureInitialized();
       webPluginRegistry.registerMessageHandler();
-    });
-
-    test('Can register a plugin', () {
-      TestPlugin.calledMethods.clear();
-
       final Registrar registrar = webPluginRegistry.registrarFor(TestPlugin);
       TestPlugin.registerWith(registrar);
+    });
+
+    test('can register a plugin', () {
+      TestPlugin.calledMethods.clear();
 
       const MethodChannel frameworkChannel =
           MethodChannel('test_plugin', StandardMethodCodec());
@@ -46,12 +47,15 @@ void main() {
       expect(TestPlugin.calledMethods, <String>['test1']);
     });
 
-    test('Throws when trying to send a platform message to the framework', () {
+    test('can send a message from the plugin to the framework', () {
+    });
+
+    test('throws when trying to send a platform message to the framework', () {
       expect(() => pluginBinaryMessenger.send('test', ByteData(0)),
           throwsFlutterError);
     });
 
-    test('Throws when trying to set a mock handler', () {
+    test('throws when trying to set a mock handler', () {
       expect(
           () => pluginBinaryMessenger.setMockMessageHandler(
               'test', (ByteData data) async => ByteData(0)),
