@@ -456,7 +456,6 @@ tasks:
       Measures the runtime performance of backdrop filter blurs on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   complex_layout_scroll_perf_ios__timeline_summary:
     description: >
@@ -501,7 +500,6 @@ tasks:
     description: >
       Verifies that Flutter View can be used from an iOS project.
     stage: devicelab_ios
-    flaky: true
     required_agent_capabilities: ["mac/ios"]
 
   integration_ui_ios:
@@ -631,7 +629,6 @@ tasks:
       Measures the delta in performance of screen transitions without and
       with semantics enabled.
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   flutter_gallery__memory_nav:
