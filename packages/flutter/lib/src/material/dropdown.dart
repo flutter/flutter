@@ -658,12 +658,12 @@ class DropdownButton<T> extends StatefulWidget {
   /// {@endtemplate}
   final ValueChanged<T> onChanged;
 
-  /// A builder to generate custom dropdown buttons corresponding to the
+  /// A builder to customize the dropdown buttons corresponding to the
   /// [DropdownMenuItem]s in [items].
   ///
-  /// When a [DropdownMenuItem] is selected, this builder can be used to create
-  /// custom dropdown buttons. The widget that will be displayed from the list
-  /// corresponds to the [DropdownMenuItem] of the same index in [items].
+  /// When a [DropdownMenuItem] is selected, the widget that will be displayed
+  /// from the list corresponds to the [DropdownMenuItem] of the same index
+  /// in [items].
   ///
   /// {@tool snippet --template=stateful_widget_scaffold}
   ///
@@ -672,9 +672,9 @@ class DropdownButton<T> extends StatefulWidget {
   ///
   /// ```dart
   /// final List<String> items = <String>[
-  ///   'One',
-  ///   'Two',
-  ///   'Three',
+  ///   '1',
+  ///   '2',
+  ///   '3',
   /// ];
   /// String selectedItem = 'One';
   ///
@@ -686,16 +686,14 @@ class DropdownButton<T> extends StatefulWidget {
   ///       value: selectedItem,
   ///       onChanged: (String string) => setState(() => selectedItem = string),
   ///       selectedItemBuilder: (BuildContext context) {
-  ///         int index = 0;
-  ///         return items.map((String string) {
-  ///           index += 1;
-  ///           return Text('$string as an Arabic numeral: $index');
+  ///         return items.map((String item) {
+  ///           return Text('Menu Item $item');
   ///         }).toList();
   ///       },
-  ///       items: items.map((String string) {
+  ///       items: items.map((String item) {
   ///         return DropdownMenuItem<String>(
   ///           child: Text(string),
-  ///           value: string,
+  ///           value: item,
   ///         );
   ///       }).toList(),
   ///     ),
@@ -902,17 +900,20 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
-    List<Widget> items = <Widget>[];
-    if (_enabled && widget.selectedItemBuilder == null)
-      items = List<Widget>.from(widget.items);
-    else if (_enabled && widget.selectedItemBuilder != null)
-      items = widget.selectedItemBuilder(context).map((Widget item) {
-        return Container(
-          height: _kMenuItemHeight,
-          alignment: AlignmentDirectional.centerStart,
-          child: item,
-        );
-      }).toList();
+    List<Widget> items;
+    if (_enabled) {
+      items = widget.selectedItemBuilder == null
+        ? List<Widget>.from(widget.items)
+        : widget.selectedItemBuilder(context).map((Widget item) {
+          return Container(
+            height: _kMenuItemHeight,
+            alignment: AlignmentDirectional.centerStart,
+            child: item,
+          );
+        }).toList();
+    } else {
+      items = <Widget>[];
+    }
 
     int hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
