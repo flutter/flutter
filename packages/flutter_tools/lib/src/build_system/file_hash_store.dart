@@ -13,7 +13,7 @@ import '../convert.dart';
 import '../globals.dart';
 import 'build_system.dart';
 
-///
+/// An encoded representation of all file hashes.
 class FileStorage {
   FileStorage(this.version, this.files);
 
@@ -43,6 +43,7 @@ class FileStorage {
   }
 }
 
+/// A stored file hash and path.
 class FileHash {
   FileHash(this.path, this.hash);
 
