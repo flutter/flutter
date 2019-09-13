@@ -724,7 +724,7 @@ void main() {
           const Rect.fromLTRB(191.3333282470703, -0.916666666666668, 193.3333282470703, 17.083333015441895),
           const Radius.circular(2.0),
         ),
-        color: const Color(0xff8e8e93),
+        color: const Color(0xff999999),
       )
       ..rrect(
         rrect: RRect.fromRectAndRadius(
