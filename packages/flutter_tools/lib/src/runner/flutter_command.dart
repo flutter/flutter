@@ -132,6 +132,20 @@ abstract class FlutterCommand extends Command<void> {
     _requiresPubspecYaml = true;
   }
 
+  void usesWebOptions({ bool hide = true }) {
+    argParser.addOption('web-hostname',
+      defaultsTo: 'localhost',
+      help: 'The hostname to serve web application on.',
+      hide: hide,
+    );
+    argParser.addOption('web-port',
+      defaultsTo: null,
+      help: 'The host port to serve the web application from. If not provided, the tool '
+        'will select a random open port on the host.',
+      hide: hide,
+    );
+  }
+
   void usesTargetOption() {
     argParser.addOption('target',
       abbr: 't',

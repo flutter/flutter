@@ -23,13 +23,11 @@ class ColdRunner extends ResidentRunner {
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
     bool ipv6 = false,
-    bool usesTerminalUi = false,
     bool stayResident = true,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
              hotMode: false,
-             usesTerminalUi: usesTerminalUi,
              stayResident: stayResident,
              ipv6: ipv6);
 
@@ -208,5 +206,6 @@ class ColdRunner extends ResidentRunner {
       if (device.vmServices == null || device.vmServices.isEmpty)
         await device.device.stopApp(device.package);
     }
+    await super.preExit();
   }
 }

@@ -245,14 +245,18 @@ class _LeaveBehindListItem extends StatelessWidget {
         },
         background: Container(
           color: theme.primaryColor,
-          child: const ListTile(
-            leading: Icon(Icons.delete, color: Colors.white, size: 36.0),
+          child: const Center(
+            child: ListTile(
+              leading: Icon(Icons.delete, color: Colors.white, size: 36.0),
+            ),
           ),
         ),
         secondaryBackground: Container(
           color: theme.primaryColor,
-          child: const ListTile(
-            trailing: Icon(Icons.archive, color: Colors.white, size: 36.0),
+          child: const Center(
+            child: ListTile(
+              trailing: Icon(Icons.archive, color: Colors.white, size: 36.0),
+            ),
           ),
         ),
         child: Container(

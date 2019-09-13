@@ -135,6 +135,7 @@ class DefaultTextStyle extends InheritedTheme {
   final int maxLines;
 
   /// The strategy to use when calculating the width of the Text.
+  ///
   /// See [TextWidthBasis] for possible values and their implications.
   final TextWidthBasis textWidthBasis;
 
@@ -410,7 +411,7 @@ class Text extends StatelessWidget {
   /// ```
   final String semanticsLabel;
 
-  /// {@macro flutter.dart:ui.text.TextWidthBasis}
+  /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
   @override

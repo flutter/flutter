@@ -5,13 +5,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
 
-const Color _kDisabledBackground = Color(0xFFA9A9A9);
 // Measured against iOS 12 in Xcode.
-const Color _kDisabledForeground = Color(0xFFD1D1D1);
-
 const EdgeInsets _kButtonPadding = EdgeInsets.all(16.0);
 const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
   vertical: 14.0,
@@ -84,8 +82,8 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// Ignored if the [CupertinoButton] doesn't also have a [color].
   ///
-  /// Defaults to a standard iOS disabled color when [color] is specified and
-  /// [disabledColor] is null.
+  /// Defaults to [CupertinoSystemColors.quaternarySystemFill] when [color] is
+  /// specified and [disabledColor] is null.
   final Color disabledColor;
 
   /// The callback that is called when the button is tapped or otherwise activated.
@@ -206,15 +204,19 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     final bool enabled = widget.enabled;
-    final Color primaryColor = CupertinoTheme.of(context).primaryColor;
-    final Color backgroundColor = widget.color ?? (widget._filled ? primaryColor : null);
+    final CupertinoThemeData themeData = CupertinoTheme.of(context);
+    final Color primaryColor = themeData.primaryColor;
+    final Color backgroundColor = widget.color == null
+      ? (widget._filled ? primaryColor : null)
+      : CupertinoDynamicColor.resolve(widget.color, context);
+
     final Color foregroundColor = backgroundColor != null
-        ? CupertinoTheme.of(context).primaryContrastingColor
-        : enabled
-            ? primaryColor
-            : _kDisabledForeground;
-    final TextStyle textStyle =
-        CupertinoTheme.of(context).textTheme.textStyle.copyWith(color: foregroundColor);
+      ? themeData.primaryContrastingColor
+      : enabled
+        ? primaryColor
+        : CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).placeholderText, context);
+
+    final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -237,7 +239,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               decoration: BoxDecoration(
                 borderRadius: widget.borderRadius,
                 color: backgroundColor != null && !enabled
-                  ? widget.disabledColor ?? _kDisabledBackground
+                  ? CupertinoDynamicColor.resolve(widget.disabledColor ?? CupertinoSystemColors.of(context).quaternarySystemFill, context)
                   : backgroundColor,
               ),
               child: Padding(

@@ -582,19 +582,29 @@ class ClipRect extends SingleChildRenderObjectWidget {
   ///
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
-  const ClipRect({ Key key, this.clipper, this.clipBehavior = Clip.hardEdge, Widget child }) : super(key: key, child: child);
+  ///
+  /// The [clipBehavior] argument must not be null or [Clip.none].
+  const ClipRect({ Key key, this.clipper, this.clipBehavior = Clip.hardEdge, Widget child })
+      : assert(clipBehavior != null),
+        super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   final CustomClipper<Rect> clipper;
 
   /// {@macro flutter.clipper.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   @override
-  RenderClipRect createRenderObject(BuildContext context) => RenderClipRect(clipper: clipper, clipBehavior: clipBehavior);
+  RenderClipRect createRenderObject(BuildContext context) {
+    assert(clipBehavior != Clip.none);
+    return RenderClipRect(clipper: clipper, clipBehavior: clipBehavior);
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderClipRect renderObject) {
+    assert(clipBehavior != Clip.none);
     renderObject
       ..clipper = clipper
       ..clipBehavior = clipBehavior;
@@ -633,6 +643,8 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// right-angled corners.
   ///
   /// If [clipper] is non-null, then [borderRadius] is ignored.
+  ///
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   const ClipRRect({
     Key key,
     this.borderRadius,
@@ -655,13 +667,19 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   final CustomClipper<RRect> clipper;
 
   /// {@macro flutter.clipper.clipBehavior}
+  ///
+  /// Defaults to [Clip.antiAlias].
   final Clip clipBehavior;
 
   @override
-  RenderClipRRect createRenderObject(BuildContext context) => RenderClipRRect(borderRadius: borderRadius, clipper: clipper, clipBehavior: clipBehavior);
+  RenderClipRRect createRenderObject(BuildContext context) {
+    assert(clipBehavior != Clip.none);
+    return RenderClipRRect(borderRadius: borderRadius, clipper: clipper, clipBehavior: clipBehavior);
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderClipRRect renderObject) {
+    assert(clipBehavior != Clip.none);
     renderObject
       ..borderRadius = borderRadius
       ..clipBehavior = clipBehavior
@@ -693,7 +711,11 @@ class ClipOval extends SingleChildRenderObjectWidget {
   ///
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
-  const ClipOval({ Key key, this.clipper, this.clipBehavior = Clip.antiAlias, Widget child }) : super(key: key, child: child);
+  ///
+  /// The [clipBehavior] argument must not be null or [Clip.none].
+  const ClipOval({Key key, this.clipper, this.clipBehavior = Clip.antiAlias, Widget child})
+      : assert(clipBehavior != null),
+        super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   ///
@@ -707,13 +729,19 @@ class ClipOval extends SingleChildRenderObjectWidget {
   final CustomClipper<Rect> clipper;
 
   /// {@macro flutter.clipper.clipBehavior}
+  ///
+  /// Defaults to [Clip.antiAlias].
   final Clip clipBehavior;
 
   @override
-  RenderClipOval createRenderObject(BuildContext context) => RenderClipOval(clipper: clipper, clipBehavior: clipBehavior);
+  RenderClipOval createRenderObject(BuildContext context) {
+    assert(clipBehavior != Clip.none);
+    return RenderClipOval(clipper: clipper, clipBehavior: clipBehavior);
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderClipOval renderObject) {
+    assert(clipBehavior != Clip.none);
     renderObject
       ..clipper = clipper
       ..clipBehavior = clipBehavior;
@@ -754,12 +782,15 @@ class ClipPath extends SingleChildRenderObjectWidget {
   /// size and location of the child. However, rather than use this default,
   /// consider using a [ClipRect], which can achieve the same effect more
   /// efficiently.
+  ///
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   const ClipPath({
     Key key,
     this.clipper,
     this.clipBehavior = Clip.antiAlias,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : assert(clipBehavior != null),
+       super(key: key, child: child);
 
   /// Creates a shape clip.
   ///
@@ -771,6 +802,8 @@ class ClipPath extends SingleChildRenderObjectWidget {
     Clip clipBehavior = Clip.antiAlias,
     Widget child,
   }) {
+    assert(clipBehavior != null);
+    assert(clipBehavior != Clip.none);
     assert(shape != null);
     return Builder(
       key: key,
@@ -795,13 +828,19 @@ class ClipPath extends SingleChildRenderObjectWidget {
   final CustomClipper<Path> clipper;
 
   /// {@macro flutter.clipper.clipBehavior}
+  ///
+  /// Defaults to [Clip.antiAlias].
   final Clip clipBehavior;
 
   @override
-  RenderClipPath createRenderObject(BuildContext context) => RenderClipPath(clipper: clipper, clipBehavior: clipBehavior);
+  RenderClipPath createRenderObject(BuildContext context) {
+    assert(clipBehavior != Clip.none);
+    return RenderClipPath(clipper: clipper, clipBehavior: clipBehavior);
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderClipPath renderObject) {
+    assert(clipBehavior != Clip.none);
     renderObject
       ..clipper = clipper
       ..clipBehavior = clipBehavior;
@@ -838,8 +877,8 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   ///
   /// The [color] is required; physical things have a color.
   ///
-  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
-  /// Additionally, the [elevation] must be non-negative.
+  /// The [shape], [elevation], [color], [clipBehavior], and [shadowColor] must
+  /// not be null. Additionally, the [elevation] must be non-negative.
   const PhysicalModel({
     Key key,
     this.shape = BoxShape.rectangle,
@@ -853,12 +892,15 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
        assert(elevation != null && elevation >= 0.0),
        assert(color != null),
        assert(shadowColor != null),
+       assert(clipBehavior != null),
        super(key: key, child: child);
 
   /// The type of shape.
   final BoxShape shape;
 
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// The border radius of the rounded corners.
@@ -931,8 +973,8 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   ///
   /// The [color] is required; physical things have a color.
   ///
-  /// The [clipper], [elevation], [color], and [shadowColor] must not be null.
-  /// Additionally, the [elevation] must be non-negative.
+  /// The [clipper], [elevation], [color], [clipBehavior], and [shadowColor]
+  /// must not be null. Additionally, the [elevation] must be non-negative.
   const PhysicalShape({
     Key key,
     @required this.clipper,
@@ -956,6 +998,8 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   final CustomClipper<Path> clipper;
 
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// The z-coordinate relative to the parent at which to place this physical
@@ -1140,7 +1184,7 @@ class Transform extends SingleChildRenderObjectWidget {
   ///   child: Container(
   ///     padding: const EdgeInsets.all(8.0),
   ///     color: const Color(0xFFE8581C),
-  ///     child: const Text('Bad Ideas'),
+  ///     child: const Text('Bad Idea Bears'),
   ///   ),
   /// )
   /// ```
@@ -3955,10 +3999,6 @@ class Flex extends MultiChildRenderObjectWidget {
 /// )
 /// ```
 ///
-/// You will see this issue when you run the app:
-///
-/// ![A screenshot of the error using the Row widget](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_error.png)
-///
 /// The row first asks its first child, the [FlutterLogo], to lay out, at
 /// whatever size the logo would like. The logo is friendly and happily decides
 /// to be 24 pixels to a side. This leaves lots of room for the next child. The
@@ -3971,11 +4011,10 @@ class Flex extends MultiChildRenderObjectWidget {
 /// have no more room available for my other children!", and gets angry and
 /// sprouts a yellow and black strip.
 ///
-/// {@tool sample}
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_error.png)
+///
 /// The fix is to wrap the second child in an [Expanded] widget, which tells the
 /// row that the child should be given the remaining room:
-///
-/// ![A screenshot of the Row widget after applying the fix](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_fixed.png)
 ///
 /// ```dart
 /// Row(
@@ -3988,7 +4027,6 @@ class Flex extends MultiChildRenderObjectWidget {
 ///   ],
 /// )
 /// ```
-/// {@end-tool}
 ///
 /// Now, the row first asks the logo to lay out, and then asks the _icon_ to lay
 /// out. The [Icon], like the logo, is happy to take on a reasonable size (also
@@ -3997,6 +4035,8 @@ class Flex extends MultiChildRenderObjectWidget {
 /// the text exactly how wide to be: the exact width of the remaining space. The
 /// text, now happy to comply to a reasonable request, wraps the text within
 /// that width, and you end up with a paragraph split over several lines.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_fixed.png)
 ///
 /// ## Layout algorithm
 ///

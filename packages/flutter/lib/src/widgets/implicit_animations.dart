@@ -247,6 +247,8 @@ class TextStyleTween extends Tween<TextStyle> {
 /// usually named `AnimatedFoo`, where `Foo` is the name of the non-animated
 /// version of that widget. Commonly used implicitly animated widgets include:
 ///
+///  * [TweenAnimationBuilder], which animates any property expressed by
+///    a [Tween] to a specified target value.
 ///  * [AnimatedAlign], which is an implicitly animated version of [Align].
 ///  * [AnimatedContainer], which is an implicitly animated version of
 ///    [Container].
@@ -1257,6 +1259,8 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///
 /// See also:
 ///
+///  * [AnimatedCrossFade], for fading between two children.
+///  * [AnimatedSwitcher], for fading between many children in sequence.
 ///  * [FadeTransition], an explicitly animated version of this widget, where
 ///    an [Animation] is provided by the caller instead of being built in.
 class AnimatedOpacity extends ImplicitlyAnimatedWidget {
@@ -1270,6 +1274,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
     @required this.opacity,
     Curve curve = Curves.linear,
     @required Duration duration,
+    this.alwaysIncludeSemantics = false,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
        super(key: key, curve: curve, duration: duration);
 
@@ -1285,6 +1290,16 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   ///
   /// The opacity must not be null.
   final double opacity;
+
+  /// Whether the semantic information of the children is always included.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, regardless of the opacity settings the child semantic
+  /// information is exposed as if the widget were fully visible. This is
+  /// useful in cases where labels may be hidden during animations that
+  /// would otherwise contribute relevant semantics.
+  final bool alwaysIncludeSemantics;
 
   @override
   _AnimatedOpacityState createState() => _AnimatedOpacityState();
@@ -1315,6 +1330,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
     return FadeTransition(
       opacity: _opacityAnimation,
       child: widget.child,
+      alwaysIncludeSemantics: widget.alwaysIncludeSemantics,
     );
   }
 }
@@ -1448,9 +1464,9 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
 class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the properties of a [PhysicalModel].
   ///
-  /// The [child], [shape], [borderRadius], [elevation], [color], [shadowColor], [curve], and
-  /// [duration] arguments must not be null. Additionally, [elevation] must be
-  /// non-negative.
+  /// The [child], [shape], [borderRadius], [elevation], [color], [shadowColor],
+  /// [curve], [clipBehavior], and [duration] arguments must not be null.
+  /// Additionally, [elevation] must be non-negative.
   ///
   /// Animating [color] is optional and is controlled by the [animateColor] flag.
   ///
@@ -1490,6 +1506,8 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   final BoxShape shape;
 
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// The target border radius of the rounded corners for a rectangle shape.

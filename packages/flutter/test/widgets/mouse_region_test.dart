@@ -689,6 +689,45 @@ void main() {
       await gesture.removePointer();
     });
   });
+
+  testWidgets('RenderMouseRegion\'s debugFillProperties when default', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    RenderMouseRegion().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[
+      'parentData: MISSING',
+      'constraints: MISSING',
+      'size: MISSING',
+      'listeners: <none>'
+    ]);
+  });
+
+  testWidgets('RenderMouseRegion\'s debugFillProperties when full', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    RenderMouseRegion(
+      onEnter: (PointerEnterEvent event) {},
+      onExit: (PointerExitEvent event) {},
+      onHover: (PointerHoverEvent event) {},
+      child: RenderErrorBox(),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[
+      'parentData: MISSING',
+      'constraints: MISSING',
+      'size: MISSING',
+      'listeners: enter, hover, exit'
+    ]);
+  });
 }
 
 // This widget allows you to send a callback that is called during `onPaint.

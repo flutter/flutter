@@ -48,6 +48,11 @@ enum CustomDimensions {
   commandBuildAarProjectType,  // cd35
   buildEventCommand,  // cd36
   buildEventSettings,  // cd37
+  commandBuildApkTargetPlatform, // cd38
+  commandBuildApkBuildMode, // cd39
+  commandBuildApkSplitPerAbi, // cd40
+  commandBuildAppBundleTargetPlatform, // cd41
+  commandBuildAppBundleBuildMode, // cd42
 }
 
 String cdKey(CustomDimensions cd) => 'cd${cd.index + 1}';

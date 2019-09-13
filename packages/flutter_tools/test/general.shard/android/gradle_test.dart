@@ -3,13 +3,18 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -20,6 +25,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/mocks.dart';
 import '../../src/pubspec_schema.dart';
 
 void main() {
@@ -119,14 +125,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in release mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('foo_barRelease');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('foo_barRelease', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.release, 'foo_bar'));
       expect(bundle, isNotNull);
       expect(bundle.path, '/foo_barRelease/app.aab');
@@ -135,14 +134,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in release mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('fooRelease');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('fooRelease', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.release, 'foo'));
       expect(bundle, isNotNull);
       expect(bundle.path, '/fooRelease/app.aab');
@@ -151,14 +143,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when no flavor is used in release mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('release');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('release', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.release, null));
       expect(bundle, isNotNull);
       expect(bundle.path, '/release/app.aab');
@@ -167,14 +152,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in debug mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('foo_barDebug');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('foo_barDebug', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.debug, 'foo_bar'));
       expect(bundle, isNotNull);
       expect(bundle.path, '/foo_barDebug/app.aab');
@@ -183,14 +161,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in debug mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('fooDebug');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('fooDebug', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.debug, 'foo'));
       expect(bundle, isNotNull);
       expect(bundle.path, '/fooDebug/app.aab');
@@ -199,14 +170,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when no flavor is used in debug mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('debug');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('debug', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.debug, null));
       expect(bundle, isNotNull);
       expect(bundle.path, '/debug/app.aab');
@@ -215,14 +179,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when flavor contains underscores in profile mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('foo_barProfile');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('foo_barProfile', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.profile, 'foo_bar'));
       expect(bundle, isNotNull);
       expect(bundle.path, '/foo_barProfile/app.aab');
@@ -231,14 +188,7 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when flavor doesn\'t contain underscores in profile mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('fooProfile');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('fooProfile', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.profile, 'foo'));
       expect(bundle, isNotNull);
       expect(bundle.path, '/fooProfile/app.aab');
@@ -247,17 +197,64 @@ void main() {
     });
 
     testUsingContext('Finds app bundle when no flavor is used in profile mode', () {
-      final GradleProject gradleProject = MockGradleProject();
-      when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
-      when(gradleProject.bundleFileFor(any)).thenReturn('app.aab');
-
-      final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory('profile');
-      fs.directory(aabDirectory).createSync(recursive: true);
-      fs.file(fs.path.join(aabDirectory.path, 'app.aab')).writeAsStringSync('irrelevant');
-
+      final GradleProject gradleProject = generateFakeAppBundle('profile', 'app.aab');
       final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.profile, null));
       expect(bundle, isNotNull);
       expect(bundle.path, '/profile/app.aab');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('Finds app bundle in release mode - Gradle 3.5', () {
+      final GradleProject gradleProject = generateFakeAppBundle('release', 'app-release.aab');
+      final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.release, null));
+      expect(bundle, isNotNull);
+      expect(bundle.path, '/release/app-release.aab');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('Finds app bundle in profile mode - Gradle 3.5', () {
+      final GradleProject gradleProject = generateFakeAppBundle('profile', 'app-profile.aab');
+      final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.profile, null));
+      expect(bundle, isNotNull);
+      expect(bundle.path, '/profile/app-profile.aab');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('Finds app bundle in debug mode - Gradle 3.5', () {
+      final GradleProject gradleProject = generateFakeAppBundle('debug', 'app-debug.aab');
+      final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.debug, null));
+      expect(bundle, isNotNull);
+      expect(bundle.path, '/debug/app-debug.aab');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('Finds app bundle when flavor contains underscores in release mode - Gradle 3.5', () {
+      final GradleProject gradleProject = generateFakeAppBundle('foo_barRelease', 'app-foo_bar-release.aab');
+      final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.release, 'foo_bar'));
+      expect(bundle, isNotNull);
+      expect(bundle.path, '/foo_barRelease/app-foo_bar-release.aab');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('Finds app bundle when flavor contains underscores in profile mode - Gradle 3.5', () {
+      final GradleProject gradleProject = generateFakeAppBundle('foo_barProfile', 'app-foo_bar-profile.aab');
+      final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.profile, 'foo_bar'));
+      expect(bundle, isNotNull);
+      expect(bundle.path, '/foo_barProfile/app-foo_bar-profile.aab');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('Finds app bundle when flavor contains underscores in debug mode - Gradle 3.5', () {
+      final GradleProject gradleProject = generateFakeAppBundle('foo_barDebug', 'app-foo_bar-debug.aab');
+      final File bundle = findBundleFile(gradleProject, const BuildInfo(BuildMode.debug, 'foo_bar'));
+      expect(bundle, isNotNull);
+      expect(bundle.path, '/foo_barDebug/app-foo_bar-debug.aab');
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
     });
@@ -411,19 +408,6 @@ someOtherTask
               ]
             )
           ).isEmpty, isTrue);
-    });
-    test('should provide bundle file name for default build types', () {
-      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], '/some/dir');
-      expect(project.bundleFileFor(BuildInfo.debug), 'app.aab');
-      expect(project.bundleFileFor(BuildInfo.profile), 'app.aab');
-      expect(project.bundleFileFor(BuildInfo.release), 'app.aab');
-      expect(project.bundleFileFor(const BuildInfo(BuildMode.release, 'unknown')), 'app.aab');
-    });
-    test('should provide bundle file name for flavored build types', () {
-      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], '/some/dir');
-      expect(project.bundleFileFor(const BuildInfo(BuildMode.debug, 'free')), 'app.aab');
-      expect(project.bundleFileFor(const BuildInfo(BuildMode.release, 'paid')), 'app.aab');
-      expect(project.bundleFileFor(const BuildInfo(BuildMode.release, 'unknown')), 'app.aab');
     });
     test('should provide assemble task name for default build types', () {
       final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], '/some/dir');
@@ -865,6 +849,349 @@ flutter:
           throwsA(predicate<Exception>((Exception e) => e is ToolExit)));
     });
   });
+
+  group('Gradle HTTP failures', () {
+    MemoryFileSystem fs;
+    Directory tempDir;
+    Directory gradleWrapperDirectory;
+    MockProcessManager mockProcessManager;
+    String gradleBinary;
+
+    setUp(() {
+      fs = MemoryFileSystem();
+      tempDir = fs.systemTempDirectory.createTempSync('artifacts_test.');
+      gradleBinary = platform.isWindows ? 'gradlew.bat' : 'gradlew';
+      gradleWrapperDirectory = fs.directory(
+        fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper'));
+      gradleWrapperDirectory.createSync(recursive: true);
+      gradleWrapperDirectory
+        .childFile(gradleBinary)
+        .writeAsStringSync('irrelevant');
+      gradleWrapperDirectory
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .createSync(recursive: true);
+      gradleWrapperDirectory
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.jar')
+        .writeAsStringSync('irrelevant');
+
+      mockProcessManager = MockProcessManager();
+    });
+
+    testUsingContext('throws toolExit if gradle fails while downloading', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      const String errorMessage = '''
+Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
+at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1872)
+at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1474)
+at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:254)
+at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
+at org.gradle.wrapper.Download.download(Download.java:44)
+at org.gradle.wrapper.Install\$1.call(Install.java:61)
+at org.gradle.wrapper.Install\$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        errorMessage,
+        1,
+      );
+      when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: errorMessage));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throw toolExit if gradle fails downloading with proxy error', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      const String errorMessage = '''
+Exception in thread "main" java.io.IOException: Unable to tunnel through proxy. Proxy returns "HTTP/1.1 400 Bad Request"
+at sun.net.www.protocol.http.HttpURLConnection.doTunneling(HttpURLConnection.java:2124)
+at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:183)
+at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1546)
+at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1474)
+at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:254)
+at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
+at org.gradle.wrapper.Download.download(Download.java:44)
+at org.gradle.wrapper.Install\$1.call(Install.java:61)
+at org.gradle.wrapper.Install\$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        errorMessage,
+        1,
+      );
+      when(mockProcessManager.run(cmd, environment: anyNamed('environment'), workingDirectory: null))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: errorMessage));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+  });
+
+  group('injectGradleWrapperIfNeeded', () {
+    MemoryFileSystem memoryFileSystem;
+    Directory tempDir;
+    Directory gradleWrapperDirectory;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+      tempDir = memoryFileSystem.systemTempDirectory.createTempSync('artifacts_test.');
+      gradleWrapperDirectory = memoryFileSystem.directory(
+          memoryFileSystem.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper'));
+      gradleWrapperDirectory.createSync(recursive: true);
+      gradleWrapperDirectory
+        .childFile('gradlew')
+        .writeAsStringSync('irrelevant');
+      gradleWrapperDirectory
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .createSync(recursive: true);
+      gradleWrapperDirectory
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.jar')
+        .writeAsStringSync('irrelevant');
+    });
+
+    testUsingContext('Inject the wrapper when all files are missing', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+
+      injectGradleWrapperIfNeeded(sampleAppAndroid);
+
+      expect(sampleAppAndroid.childFile('gradlew').existsSync(), isTrue);
+
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.jar')
+        .existsSync(), isTrue);
+
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties')
+        .existsSync(), isTrue);
+
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties')
+        .readAsStringSync(),
+            'distributionBase=GRADLE_USER_HOME\n'
+            'distributionPath=wrapper/dists\n'
+            'zipStoreBase=GRADLE_USER_HOME\n'
+            'zipStorePath=wrapper/dists\n'
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-4.10.2-all.zip\n');
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => memoryFileSystem,
+    });
+
+    testUsingContext('Inject the wrapper when some files are missing', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+
+      // There's an existing gradlew
+      sampleAppAndroid.childFile('gradlew').writeAsStringSync('existing gradlew');
+
+      injectGradleWrapperIfNeeded(sampleAppAndroid);
+
+      expect(sampleAppAndroid.childFile('gradlew').existsSync(), isTrue);
+      expect(sampleAppAndroid.childFile('gradlew').readAsStringSync(),
+          equals('existing gradlew'));
+
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.jar')
+        .existsSync(), isTrue);
+
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties')
+        .existsSync(), isTrue);
+
+      expect(sampleAppAndroid
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties')
+        .readAsStringSync(),
+            'distributionBase=GRADLE_USER_HOME\n'
+            'distributionPath=wrapper/dists\n'
+            'zipStoreBase=GRADLE_USER_HOME\n'
+            'zipStorePath=wrapper/dists\n'
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-4.10.2-all.zip\n');
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => memoryFileSystem,
+    });
+
+    testUsingContext('Gives executable permission to gradle', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+
+      // Make gradlew in the wrapper executable.
+      os.makeExecutable(gradleWrapperDirectory.childFile('gradlew'));
+
+      injectGradleWrapperIfNeeded(sampleAppAndroid);
+
+      final File gradlew = sampleAppAndroid.childFile('gradlew');
+      expect(gradlew.existsSync(), isTrue);
+      expect(gradlew.statSync().modeString().contains('x'), isTrue);
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => memoryFileSystem,
+      OperatingSystemUtils: () => OperatingSystemUtils(),
+    });
+  });
+
+  group('gradle build', () {
+    MockAndroidSdk mockAndroidSdk;
+    MockAndroidStudio mockAndroidStudio;
+    MockLocalEngineArtifacts mockArtifacts;
+    MockProcessManager mockProcessManager;
+    FakePlatform android;
+    FileSystem fs;
+    Cache cache;
+
+    setUp(() {
+      fs = MemoryFileSystem();
+      mockAndroidSdk = MockAndroidSdk();
+      mockAndroidStudio = MockAndroidStudio();
+      mockArtifacts = MockLocalEngineArtifacts();
+      mockProcessManager = MockProcessManager();
+      android = fakePlatform('android');
+
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('artifacts_test.');
+      cache = Cache(rootOverride: tempDir);
+
+      final Directory gradleWrapperDirectory = tempDir
+          .childDirectory('bin')
+          .childDirectory('cache')
+          .childDirectory('artifacts')
+          .childDirectory('gradle_wrapper');
+      gradleWrapperDirectory.createSync(recursive: true);
+      gradleWrapperDirectory
+          .childFile('gradlew')
+          .writeAsStringSync('irrelevant');
+      gradleWrapperDirectory
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .createSync(recursive: true);
+      gradleWrapperDirectory
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.jar')
+        .writeAsStringSync('irrelevant');
+    });
+
+    testUsingContext('build aar uses selected local engine', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'android_arm'));
+
+      final File manifestFile = fs.file('path/to/project/pubspec.yaml');
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync('''
+        name: test
+        version: 1.0.0+1
+        dependencies:
+          flutter:
+            sdk: flutter
+        flutter:
+          module:
+            androidX: false
+            androidPackage: com.example.test
+            iosBundleIdentifier: com.example.test
+        '''
+      );
+
+      final File gradlew = fs.file('path/to/project/.android/gradlew');
+      gradlew.createSync(recursive: true);
+
+      when(mockProcessManager.run(
+          <String> ['/path/to/project/.android/gradlew', '-v'],
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+      )).thenAnswer(
+          (_) async => ProcessResult(1, 0, '5.1.1', ''),
+      );
+
+      // write schemaData otherwise pubspec.yaml file can't be loaded
+      writeEmptySchemaFile(fs);
+      fs.currentDirectory = 'path/to/project';
+
+      // Let any process start. Assert after.
+      when(mockProcessManager.start(
+        any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'))
+      ).thenAnswer((Invocation invocation) => Future<Process>.value(MockProcess()));
+      fs.directory('build/outputs/repo').createSync(recursive: true);
+
+      await buildGradleAar(
+        androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
+        project: FlutterProject.current(),
+        outputDir: 'build/',
+        target: ''
+      );
+
+      final List<String> actualGradlewCall = verify(mockProcessManager.start(
+        captureAny,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory')),
+      ).captured.single;
+
+      expect(actualGradlewCall, contains('/path/to/project/.android/gradlew'));
+      expect(actualGradlewCall, contains('-PlocalEngineOut=out/android_arm'));
+    }, overrides: <Type, Generator>{
+        AndroidSdk: () => mockAndroidSdk,
+        AndroidStudio: () => mockAndroidStudio,
+        Artifacts: () => mockArtifacts,
+        Cache: () => cache,
+        ProcessManager: () => mockProcessManager,
+        Platform: () => android,
+        FileSystem: () => fs,
+      });
+  });
+}
+
+/// Generates a fake app bundle at the location [directoryName]/[fileName].
+GradleProject generateFakeAppBundle(String directoryName, String fileName) {
+  final GradleProject gradleProject = MockGradleProject();
+  when(gradleProject.bundleDirectory).thenReturn(fs.currentDirectory);
+
+  final Directory aabDirectory = gradleProject.bundleDirectory.childDirectory(directoryName);
+  fs.directory(aabDirectory).createSync(recursive: true);
+  fs.file(fs.path.join(aabDirectory.path, fileName)).writeAsStringSync('irrelevant');
+  return gradleProject;
 }
 
 Platform fakePlatform(String name) {
@@ -875,3 +1202,5 @@ class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockGradleProject extends Mock implements GradleProject {}
+class MockitoAndroidSdk extends Mock implements AndroidSdk {}
+class MockAndroidStudio extends Mock implements AndroidStudio {}

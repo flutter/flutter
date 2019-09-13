@@ -56,6 +56,11 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
       callback: extension.call,
     );
   }
+
+  @override
+  BinaryMessenger createBinaryMessenger() {
+    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
+  }
 }
 
 /// Enables Flutter Driver VM service extension.

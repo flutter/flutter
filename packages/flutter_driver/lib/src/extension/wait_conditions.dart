@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../common/wait.dart';
 
@@ -32,7 +34,7 @@ abstract class WaitCondition {
 
 /// A condition that waits until no transient callbacks are scheduled.
 class _InternalNoTransientCallbacksCondition implements WaitCondition {
-  /// Creates an [InternalNoTransientCallbacksCondition] instance.
+  /// Creates an [_InternalNoTransientCallbacksCondition] instance.
   const _InternalNoTransientCallbacksCondition();
 
   /// Factory constructor to parse an [InternalNoTransientCallbacksCondition]
@@ -60,7 +62,7 @@ class _InternalNoTransientCallbacksCondition implements WaitCondition {
 
 /// A condition that waits until no pending frame is scheduled.
 class _InternalNoPendingFrameCondition implements WaitCondition {
-  /// Creates an [InternalNoPendingFrameCondition] instance.
+  /// Creates an [_InternalNoPendingFrameCondition] instance.
   const _InternalNoPendingFrameCondition();
 
   /// Factory constructor to parse an [InternalNoPendingFrameCondition] instance
@@ -88,7 +90,7 @@ class _InternalNoPendingFrameCondition implements WaitCondition {
 
 /// A condition that waits until the Flutter engine has rasterized the first frame.
 class _InternalFirstFrameRasterizedCondition implements WaitCondition {
-  /// Creates an [InternalFirstFrameRasterizedCondition] instance.
+  /// Creates an [_InternalFirstFrameRasterizedCondition] instance.
   const _InternalFirstFrameRasterizedCondition();
 
   /// Factory constructor to parse an [InternalNoPendingFrameCondition] instance
@@ -112,16 +114,48 @@ class _InternalFirstFrameRasterizedCondition implements WaitCondition {
   }
 }
 
+/// A condition that waits until no pending platform messages.
+class _InternalNoPendingPlatformMessagesCondition implements WaitCondition {
+  /// Creates an [_InternalNoPendingPlatformMessagesCondition] instance.
+  const _InternalNoPendingPlatformMessagesCondition();
+
+  /// Factory constructor to parse an [_InternalNoPendingPlatformMessagesCondition] instance
+  /// from the given [SerializableWaitCondition] instance.
+  ///
+  /// The [condition] argument must not be null.
+  factory _InternalNoPendingPlatformMessagesCondition.deserialize(SerializableWaitCondition condition) {
+    assert(condition != null);
+    if (condition.conditionName != 'NoPendingPlatformMessagesCondition')
+      throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+    return const _InternalNoPendingPlatformMessagesCondition();
+  }
+
+  @override
+  bool get condition {
+    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
+    return binaryMessenger.pendingMessageCount == 0;
+  }
+
+  @override
+  Future<void> wait() async {
+    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
+    while (!condition) {
+      await binaryMessenger.platformMessagesFinished;
+    }
+    assert(condition);
+  }
+}
+
 /// A combined condition that waits until all the given [conditions] are met.
 class _InternalCombinedCondition implements WaitCondition {
-  /// Creates an [InternalCombinedCondition] instance with the given list of
+  /// Creates an [_InternalCombinedCondition] instance with the given list of
   /// [conditions].
   ///
   /// The [conditions] argument must not be null.
   const _InternalCombinedCondition(this.conditions)
       : assert(conditions != null);
 
-  /// Factory constructor to parse an [InternalCombinedCondition] instance from
+  /// Factory constructor to parse an [_InternalCombinedCondition] instance from
   /// the given [SerializableWaitCondition] instance.
   ///
   /// The [condition] argument must not be null.
@@ -173,6 +207,8 @@ WaitCondition deserializeCondition(SerializableWaitCondition waitCondition) {
       return _InternalNoPendingFrameCondition.deserialize(waitCondition);
     case 'FirstFrameRasterizedCondition':
       return _InternalFirstFrameRasterizedCondition.deserialize(waitCondition);
+    case 'NoPendingPlatformMessagesCondition':
+      return _InternalNoPendingPlatformMessagesCondition.deserialize(waitCondition);
     case 'CombinedCondition':
       return _InternalCombinedCondition.deserialize(waitCondition);
   }

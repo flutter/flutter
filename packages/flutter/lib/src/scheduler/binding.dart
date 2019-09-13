@@ -194,8 +194,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    window.onBeginFrame = _handleBeginFrame;
-    window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     readInitialLifecycleStateFromNativeWindow();
 
@@ -656,6 +654,12 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
       scheduleFrame();
   }
 
+  @protected
+  void ensureFrameCallbacksRegistered() {
+    window.onBeginFrame ??= _handleBeginFrame;
+    window.onDrawFrame ??= _handleDrawFrame;
+  }
+
   /// Schedules a new frame using [scheduleFrame] if this object is not
   /// currently producing a frame.
   ///
@@ -717,6 +721,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         debugPrintStack(label: 'scheduleFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
+    ensureFrameCallbacksRegistered();
     window.scheduleFrame();
     _hasScheduledFrame = true;
   }

@@ -17,19 +17,20 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/mocks.dart' as mocks;
 import '../../src/pubspec_schema.dart';
 
 const String xcodebuild = '/usr/bin/xcodebuild';
 
 void main() {
   group('xcodebuild versioning', () {
-    MockProcessManager mockProcessManager;
+    mocks.MockProcessManager mockProcessManager;
     XcodeProjectInterpreter xcodeProjectInterpreter;
     FakePlatform macOS;
     FileSystem fs;
 
     setUp(() {
-      mockProcessManager = MockProcessManager();
+      mockProcessManager = mocks.MockProcessManager();
       xcodeProjectInterpreter = XcodeProjectInterpreter();
       macOS = fakePlatform('macos');
       fs = MemoryFileSystem();
@@ -145,11 +146,80 @@ void main() {
     });
 
     testUsingOsxContext('build settings is empty when xcodebuild failed to get the build settings', () {
-      when(mockProcessManager.runSync(argThat(contains(xcodebuild))))
+      when(mockProcessManager.runSync(
+               argThat(contains(xcodebuild)),
+               workingDirectory: anyNamed('workingDirectory'),
+               environment: anyNamed('environment')))
           .thenReturn(ProcessResult(0, 1, '', ''));
       expect(xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
     });
+
+    testUsingContext('build settings flakes', () async {
+      const Duration delay = Duration(seconds: 1);
+      mockProcessManager.processFactory = mocks.flakyProcessFactory(
+        flakes: 1,
+        delay: delay + const Duration(seconds: 1),
+      );
+      expect(await xcodeProjectInterpreter.getBuildSettingsAsync(
+                 '', '', timeout: delay),
+             const <String, String>{});
+      // build settings times out and is killed once, then succeeds.
+      verify(mockProcessManager.killPid(any)).called(1);
+      // The verbose logs should tell us something timed out.
+      expect(testLogger.traceText, contains('timed out'));
+    }, overrides: <Type, Generator>{
+      Platform: () => macOS,
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
   });
+
+  group('xcodebuild -list', () {
+    mocks.MockProcessManager mockProcessManager;
+    FakePlatform macOS;
+    FileSystem fs;
+
+    setUp(() {
+      mockProcessManager = mocks.MockProcessManager();
+      macOS = fakePlatform('macos');
+      fs = MemoryFileSystem();
+      fs.file(xcodebuild).createSync(recursive: true);
+    });
+
+    void testUsingOsxContext(String description, dynamic testMethod()) {
+      testUsingContext(description, testMethod, overrides: <Type, Generator>{
+        ProcessManager: () => mockProcessManager,
+        Platform: () => macOS,
+        FileSystem: () => fs,
+      });
+    }
+
+    testUsingOsxContext('getInfo returns something when xcodebuild -list succeeds', () async {
+      const String workingDirectory = '/';
+      when(mockProcessManager.run(<String>[xcodebuild, '-list'],
+          environment: anyNamed('environment'),
+          workingDirectory: workingDirectory)).thenAnswer((_) {
+        return Future<ProcessResult>.value(ProcessResult(1, 0, '', ''));
+      });
+      final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter();
+      expect(await xcodeProjectInterpreter.getInfo(workingDirectory), isNotNull);
+    });
+
+    testUsingOsxContext('getInfo throws a tool exit when it is unable to find a project', () async {
+      const String workingDirectory = '/';
+      const String stderr = 'Useful Xcode failure message about missing project.';
+      when(mockProcessManager.run(<String>[xcodebuild, '-list'],
+          environment: anyNamed('environment'),
+          workingDirectory: workingDirectory)).thenAnswer((_) {
+        return Future<ProcessResult>.value(ProcessResult(1, 66, '', stderr));
+      });
+      final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter();
+      expect(
+          () async => await xcodeProjectInterpreter.getInfo(workingDirectory),
+          throwsToolExit(message: stderr));
+    });
+  });
+
   group('Xcode project properties', () {
     test('properties from default project can be parsed', () {
       const String output = '''

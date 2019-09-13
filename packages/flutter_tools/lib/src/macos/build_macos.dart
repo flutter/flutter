@@ -44,19 +44,33 @@ Future<void> buildMacOS({
     flutterProject.macos.outputFileList.createSync(recursive: true);
   }
 
-  // Set debug or release mode.
-  String config = 'Debug';
-  if (buildInfo.isRelease) {
-    config = 'Release';
+  final Directory xcodeProject = flutterProject.macos.xcodeProject;
+
+  // If the standard project exists, specify it to getInfo to handle the case where there are
+  // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
+  // regardless of the project name so long as there is exactly one project.
+  final String xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
+  final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(
+    xcodeProject.parent.path,
+    projectFilename: xcodeProjectName,
+  );
+  final String scheme = projectInfo.schemeFor(buildInfo);
+  if (scheme == null) {
+    throwToolExit('Unable to find expected scheme in Xcode project.');
   }
-  // Run build script provided by application.
+  final String configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
+  if (configuration == null) {
+    throwToolExit('Unable to find expected configuration in Xcode project.');
+  }
+
+  // Run the Xcode build.
   final Stopwatch sw = Stopwatch()..start();
   final Process process = await processManager.start(<String>[
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
     '-workspace', flutterProject.macos.xcodeWorkspace.path,
-    '-configuration', '$config',
+    '-configuration', '$configuration',
     '-scheme', 'Runner',
     '-derivedDataPath', flutterBuildDir.absolute.path,
     'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',

@@ -105,7 +105,6 @@ class FlutterTesterDevice extends Device {
     @required DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;

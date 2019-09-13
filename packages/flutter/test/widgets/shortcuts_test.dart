@@ -167,8 +167,26 @@ void main() {
       final LogicalKeySet set2 = LogicalKeySet(
         LogicalKeyboardKey.keyA,
         LogicalKeyboardKey.keyB,
+        LogicalKeyboardKey.keyC,
+        LogicalKeyboardKey.keyD,
+      );
+      final LogicalKeySet set3 = LogicalKeySet(
+        LogicalKeyboardKey.keyD,
+        LogicalKeyboardKey.keyC,
+        LogicalKeyboardKey.keyB,
+        LogicalKeyboardKey.keyA,
+      );
+      final LogicalKeySet set4 = LogicalKeySet.fromSet(<LogicalKeyboardKey>{
+        LogicalKeyboardKey.keyD,
+        LogicalKeyboardKey.keyC,
+        LogicalKeyboardKey.keyB,
+        LogicalKeyboardKey.keyA,}
       );
       final Map<LogicalKeySet, String> map = <LogicalKeySet, String>{set1: 'one'};
+      expect(set2 == set3, isTrue);
+      expect(set2 == set4, isTrue);
+      expect(set2.hashCode == set3.hashCode, isTrue);
+      expect(set2.hashCode == set4.hashCode, isTrue);
       expect(map.containsKey(set1), isTrue);
       expect(map.containsKey(LogicalKeySet(LogicalKeyboardKey.keyA)), isTrue);
       expect(
@@ -176,6 +194,8 @@ void main() {
           equals(LogicalKeySet.fromSet(<LogicalKeyboardKey>{
             LogicalKeyboardKey.keyA,
             LogicalKeyboardKey.keyB,
+            LogicalKeyboardKey.keyC,
+            LogicalKeyboardKey.keyD,
           })));
     });
     test('$KeySet diagnostics work.', () {

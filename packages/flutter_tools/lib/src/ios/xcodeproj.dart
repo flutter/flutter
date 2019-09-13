@@ -7,18 +7,20 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 
 final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
@@ -209,7 +211,9 @@ class XcodeProjectInterpreter {
       return;
     }
     try {
-      final ProcessResult result = processManager.runSync(<String>[_executable, '-version']);
+      final RunResult result = processUtils.runSync(
+        <String>[_executable, '-version'],
+      );
       if (result.exitCode != 0) {
         return;
       }
@@ -249,25 +253,74 @@ class XcodeProjectInterpreter {
     return _minorVersion;
   }
 
+  /// Synchronously retrieve xcode build settings. Prefer using the async
+  /// version below.
   Map<String, String> getBuildSettings(String projectPath, String target) {
     try {
-      final String out = runCheckedSync(<String>[
-        _executable,
-        '-project',
-        fs.path.absolute(projectPath),
-        '-target',
-        target,
-        '-showBuildSettings',
-      ], workingDirectory: projectPath);
+      final String out = processUtils.runSync(
+        <String>[
+          _executable,
+          '-project',
+          fs.path.absolute(projectPath),
+          '-target',
+          target,
+          '-showBuildSettings',
+        ],
+        throwOnError: true,
+        workingDirectory: projectPath,
+      ).stdout.trim();
       return parseXcodeBuildSettings(out);
-    } catch(error) {
+    } on ProcessException catch (error) {
       printTrace('Unexpected failure to get the build settings: $error.');
       return const <String, String>{};
     }
   }
 
+  /// Asynchronously retrieve xcode build settings. This one is preferred for
+  /// new call-sites.
+  Future<Map<String, String>> getBuildSettingsAsync(
+      String projectPath, String target, {
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
+    final Status status = Status.withSpinner(
+      timeout: timeoutConfiguration.fastOperation,
+    );
+    final List<String> showBuildSettingsCommand = <String>[
+      _executable,
+      '-project',
+      fs.path.absolute(projectPath),
+      '-target',
+      target,
+      '-showBuildSettings',
+    ];
+    try {
+      // showBuildSettings is reported to ocassionally timeout. Here, we give it
+      // a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
+      // When there is a timeout, we retry once.
+      final RunResult result = await processUtils.run(
+        showBuildSettingsCommand,
+        throwOnError: true,
+        workingDirectory: projectPath,
+        timeout: timeout,
+        timeoutRetries: 1,
+      );
+      final String out = result.stdout.trim();
+      return parseXcodeBuildSettings(out);
+    } catch(error) {
+      if (error is ProcessException && error.toString().contains('timed out')) {
+        BuildEvent('xcode-show-build-settings-timeout',
+          command: showBuildSettingsCommand.join(' '),
+        ).send();
+      }
+      printTrace('Unexpected failure to get the build settings: $error.');
+      return const <String, String>{};
+    } finally {
+      status.stop();
+    }
+  }
+
   void cleanWorkspace(String workspacePath, String scheme) {
-    runSync(<String>[
+    processUtils.runSync(<String>[
       _executable,
       '-workspace',
       workspacePath,
@@ -278,10 +331,24 @@ class XcodeProjectInterpreter {
     ], workingDirectory: fs.currentDirectory.path);
   }
 
-  Future<XcodeProjectInfo> getInfo(String projectPath) async {
-    final RunResult result = await runCheckedAsync(<String>[
-      _executable, '-list',
-    ], workingDirectory: projectPath);
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
+    // The exit code returned by 'xcodebuild -list' when either:
+    // * -project is passed and the given project isn't there, or
+    // * no -project is passed and there isn't a project.
+    const int missingProjectExitCode = 66;
+    final RunResult result = await processUtils.run(
+      <String>[
+        _executable,
+        '-list',
+        if (projectFilename != null) ...<String>['-project', projectFilename],
+      ],
+      throwOnError: true,
+      whiteListFailures: (int c) => c == missingProjectExitCode,
+      workingDirectory: projectPath,
+    );
+    if (result.exitCode == missingProjectExitCode) {
+      throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
+    }
     return XcodeProjectInfo.fromXcodeBuildOutput(result.toString());
   }
 }

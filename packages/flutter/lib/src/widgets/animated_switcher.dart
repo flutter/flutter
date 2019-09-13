@@ -63,8 +63,8 @@ typedef AnimatedSwitcherTransitionBuilder = Widget Function(Widget child, Animat
 /// `currentChild`.
 typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, List<Widget> previousChildren);
 
-/// A widget that by default does a [FadeTransition] between a new widget and
-/// the widget previously set on the [AnimatedSwitcher] as a child.
+/// A widget that by default does a cross-fade between a new widget and the
+/// widget previously set on the [AnimatedSwitcher] as a child.
 ///
 /// If they are swapped fast enough (i.e. before [duration] elapses), more than
 /// one previous child can exist and be transitioning out while the newest one
@@ -140,7 +140,9 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 ///
 ///  * [AnimatedCrossFade], which only fades between two children, but also
 ///    interpolates their sizes, and is reversible.
-///  * [FadeTransition] which [AnimatedSwitcher] uses to perform the transition.
+///  * [AnimatedOpacity], which can be used to switch between nothingness and
+///    a given child by fading the child in and out.
+///  * [FadeTransition], which [AnimatedSwitcher] uses to perform the transition.
 class AnimatedSwitcher extends StatefulWidget {
   /// Creates an [AnimatedSwitcher].
   ///

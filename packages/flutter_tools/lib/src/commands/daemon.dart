@@ -426,7 +426,6 @@ class AppDomain extends Domain {
         <FlutterDevice>[flutterDevice],
         target: target,
         debuggingOptions: options,
-        usesTerminalUi: false,
         applicationBinary: applicationBinary,
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
@@ -440,7 +439,6 @@ class AppDomain extends Domain {
         target: target,
         debuggingOptions: options,
         applicationBinary: applicationBinary,
-        usesTerminalUi: false,
         ipv6: ipv6,
       );
     }
@@ -486,7 +484,7 @@ class AppDomain extends Domain {
 
     Completer<DebugConnectionInfo> connectionInfoCompleter;
 
-    if (runner.debuggingOptions.debuggingEnabled) {
+    if (runner.debuggingEnabled) {
       connectionInfoCompleter = Completer<DebugConnectionInfo>();
       // We don't want to wait for this future to complete and callbacks won't fail.
       // As it just writes to stdout.

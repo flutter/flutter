@@ -39,6 +39,7 @@ void main() {
     mockProcessManager = MockProcessManager();
     testbed = Testbed(setup: () {
       androidEnvironment = Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
         defines: <String, String>{
           kBuildMode: getNameForBuildMode(BuildMode.profile),
@@ -46,6 +47,7 @@ void main() {
         }
       );
       iosEnvironment = Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
         defines: <String, String>{
           kBuildMode: getNameForBuildMode(BuildMode.profile),
@@ -133,7 +135,7 @@ flutter_tools:lib/''');
       return const CompilerOutput('example', 0, <Uri>[]);
     });
 
-    await const KernelSnapshot().build(<File>[], androidEnvironment);
+    await const KernelSnapshot().build(androidEnvironment);
   }, overrides: <Type, Generator>{
     KernelCompilerFactory: () => MockKernelCompilerFactory(),
   }));
@@ -157,7 +159,8 @@ flutter_tools:lib/''');
       return const CompilerOutput('example', 0, <Uri>[]);
     });
 
-    await const KernelSnapshot().build(<File>[], Environment(
+    await const KernelSnapshot().build(Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
         defines: <String, String>{
       kBuildMode: 'debug',
@@ -245,14 +248,12 @@ flutter_tools:lib/''');
 
     when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
     when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
-    when(mockXcode.dsymutil(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
 
     final BuildResult result = await buildSystem.build(const AotAssemblyProfile(), iosEnvironment);
 
     expect(result.success, true);
     verify(mockXcode.cc(argThat(contains('-fembed-bitcode')))).called(1);
     verify(mockXcode.clang(argThat(contains('-fembed-bitcode')))).called(1);
-    verify(mockXcode.dsymutil(any)).called(1);
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
@@ -275,14 +276,12 @@ flutter_tools:lib/''');
 
     when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
     when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
-    when(mockXcode.dsymutil(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
 
     final BuildResult result = await buildSystem.build(const AotAssemblyProfile(), iosEnvironment);
 
     expect(result.success, true);
     verify(mockXcode.cc(argThat(contains('-fembed-bitcode')))).called(2);
     verify(mockXcode.clang(argThat(contains('-fembed-bitcode')))).called(2);
-    verify(mockXcode.dsymutil(any)).called(2);
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,

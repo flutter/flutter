@@ -1089,9 +1089,19 @@ mixin WidgetInspectorService {
       name: 'getRootWidgetSummaryTree',
       callback: _getRootWidgetSummaryTree,
     );
-    _registerServiceExtensionWithArg(
+    registerServiceExtension(
       name: 'getDetailsSubtree',
-      callback: _getDetailsSubtree,
+      callback: (Map<String, String> parameters) async {
+        assert(parameters.containsKey('objectGroup'));
+        final String subtreeDepth = parameters['subtreeDepth'];
+        return <String, Object>{
+          'result': _getDetailsSubtree(
+            parameters['arg'],
+            parameters['objectGroup'],
+            subtreeDepth != null ? int.parse(subtreeDepth) : 2,
+          ),
+        };
+      },
     );
     _registerServiceExtensionWithArg(
       name: 'getSelectedRenderObject',
@@ -1603,15 +1613,27 @@ mixin WidgetInspectorService {
   /// [DiagnosticsNode] object that `diagnosticsNodeId` references providing
   /// information needed for the details subtree view.
   ///
+  /// The number of levels of the subtree that should be returned is specified
+  /// by the [subtreeDepth] parameter. This value defaults to 2 for backwards
+  /// compatibility.
+  ///
   /// See also:
   ///
   ///  * [getChildrenDetailsSubtree], a method to get children of a node
   ///    in the details subtree.
-  String getDetailsSubtree(String id, String groupName) {
-    return _safeJsonEncode(_getDetailsSubtree( id, groupName));
+  String getDetailsSubtree(
+      String id,
+      String groupName, {
+      int subtreeDepth = 2,
+    }) {
+    return _safeJsonEncode(_getDetailsSubtree( id, groupName, subtreeDepth));
   }
 
-  Map<String, Object> _getDetailsSubtree(String id, String groupName) {
+  Map<String, Object> _getDetailsSubtree(
+      String id,
+      String groupName,
+      int subtreeDepth,
+  ) {
     final DiagnosticsNode root = toObject(id);
     if (root == null) {
       return null;
@@ -1621,7 +1643,7 @@ mixin WidgetInspectorService {
       _SerializationDelegate(
         groupName: groupName,
         summaryTree: false,
-        subtreeDepth: 2,  // TODO(jacobr): make subtreeDepth configurable.
+        subtreeDepth: subtreeDepth,
         includeProperties: true,
         service: this,
       ),

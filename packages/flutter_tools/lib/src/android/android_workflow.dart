@@ -259,7 +259,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     try {
-      final Process process = await runCommand(
+      final Process process = await processUtils.start(
         <String>[androidSdk.sdkManagerPath, '--licenses'],
         environment: androidSdk.sdkManagerEnv,
       );
@@ -302,7 +302,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     try {
-      final Process process = await runCommand(
+      final Process process = await processUtils.start(
         <String>[androidSdk.sdkManagerPath, '--licenses'],
         environment: androidSdk.sdkManagerEnv,
       );

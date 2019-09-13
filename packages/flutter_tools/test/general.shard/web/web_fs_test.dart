@@ -26,16 +26,23 @@ void main() {
   MockHttpMultiServer mockHttpMultiServer;
   MockBuildDaemonClient mockBuildDaemonClient;
   MockOperatingSystemUtils mockOperatingSystemUtils;
+  bool lastInitializePlatform;
+  dynamic lastAddress;
+  int lastPort;
 
   setUp(() {
+    lastAddress = null;
+    lastPort = null;
+    lastInitializePlatform = null;
     mockBuildDaemonCreator =  MockBuildDaemonCreator();
     mockChromeLauncher = MockChromeLauncher();
     mockHttpMultiServer = MockHttpMultiServer();
     mockBuildDaemonClient = MockBuildDaemonClient();
     mockOperatingSystemUtils = MockOperatingSystemUtils();
     mockDwds = MockDwds();
-    when(mockBuildDaemonCreator.startBuildDaemon(any, release: anyNamed('release')))
-      .thenAnswer((Invocation _) async {
+    when(mockBuildDaemonCreator.startBuildDaemon(any, release: anyNamed('release'), initializePlatform: anyNamed('initializePlatform')))
+      .thenAnswer((Invocation invocation) async {
+        lastInitializePlatform = invocation.namedArguments[#initializePlatform];
         return mockBuildDaemonClient;
       });
     when(mockOperatingSystemUtils.findFreePort()).thenAnswer((Invocation _) async {
@@ -46,11 +53,18 @@ void main() {
     });
     when(mockBuildDaemonCreator.assetServerPort(any)).thenReturn(4321);
     testbed = Testbed(
+      setup: () {
+        // Create an empty .packages file so we can read it when we check for
+        // plugins on WebFs.start()
+        fs.file('.packages').createSync();
+      },
       overrides: <Type, Generator>{
         OperatingSystemUtils: () => mockOperatingSystemUtils,
         BuildDaemonCreator: () => mockBuildDaemonCreator,
         ChromeLauncher: () => mockChromeLauncher,
         HttpMultiServerFactory: () => (dynamic address, int port) async {
+          lastAddress = address;
+          lastPort = port;
           return mockHttpMultiServer;
         },
         DwdsFactory: () => ({
@@ -72,17 +86,59 @@ void main() {
   });
 
   test('Can create webFs from mocked interfaces', () => testbed.run(() async {
+    final FlutterProject flutterProject = FlutterProject.current();
     await WebFs.start(
+      skipDwds: false,
       target: fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
-      flutterProject: FlutterProject.current(),
+      flutterProject: flutterProject,
+      initializePlatform: true,
+      hostname: null,
+      port: null,
     );
 
     // The build daemon is told to build once.
     verify(mockBuildDaemonClient.startBuild()).called(1);
 
-    // Chrome is launched based on port from above.
-    verify(mockChromeLauncher.launch('http://localhost:1234/')).called(1);
+    // .dart_tool directory is created.
+    expect(flutterProject.dartTool.existsSync(), true);
+    expect(lastInitializePlatform, true);
+  }));
+
+  test('Can create webFs from mocked interfaces with initializePlatform', () => testbed.run(() async {
+    final FlutterProject flutterProject = FlutterProject.current();
+    await WebFs.start(
+      skipDwds: false,
+      target: fs.path.join('lib', 'main.dart'),
+      buildInfo: BuildInfo.debug,
+      flutterProject: flutterProject,
+      initializePlatform: false,
+      hostname: null,
+      port: null,
+    );
+
+    // The build daemon is told to build once.
+    verify(mockBuildDaemonClient.startBuild()).called(1);
+
+    // .dart_tool directory is created.
+    expect(flutterProject.dartTool.existsSync(), true);
+    expect(lastInitializePlatform, false);
+  }));
+
+  test('Uses provided port number and hostname.', () => testbed.run(() async {
+    final FlutterProject flutterProject = FlutterProject.current();
+    await WebFs.start(
+      skipDwds: false,
+      target: fs.path.join('lib', 'main.dart'),
+      buildInfo: BuildInfo.debug,
+      flutterProject: flutterProject,
+      initializePlatform: false,
+      hostname: 'foo',
+      port: '1234',
+    );
+
+    expect(lastPort, 1234);
+    expect(lastAddress, contains('foo'));
   }));
 }
 

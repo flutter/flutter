@@ -753,13 +753,14 @@ void debugPrintStack({StackTrace stackTrace, String label, int maxFrames}) {
     debugPrint(label);
   stackTrace ??= StackTrace.current;
   Iterable<String> lines = stackTrace.toString().trimRight().split('\n');
-  if (   kIsWeb
-      && lines.isNotEmpty
-      && lines.first.contains('StackTrace.current')) {
+  if (kIsWeb && lines.isNotEmpty) {
     // Remove extra call to StackTrace.current for web platform.
     // TODO(ferhat): remove when https://github.com/flutter/flutter/issues/37635
     // is addressed.
-    lines = lines.skip(1);
+    lines = lines.skipWhile((String line) {
+      return line.contains('StackTrace.current') ||
+             line.contains('dart:sdk_internal');
+    });
   }
   if (maxFrames != null)
     lines = lines.take(maxFrames);

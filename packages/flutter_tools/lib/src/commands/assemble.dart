@@ -23,7 +23,6 @@ BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// All currently implemented targets.
 const List<Target> _kDefaultTargets = <Target>[
-  UnpackMacOS(),
   UnpackLinux(),
   UnpackWindows(),
   CopyAssets(),
@@ -33,7 +32,9 @@ const List<Target> _kDefaultTargets = <Target>[
   AotAssemblyProfile(),
   AotAssemblyRelease(),
   DebugMacOSFramework(),
-  DebugBundleFlutterAssets(),
+  DebugMacOSBundleFlutterAssets(),
+  ProfileMacOSBundleFlutterAssets(),
+  ReleaseMacOSBundleFlutterAssets(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -53,6 +54,10 @@ class AssembleCommand extends FlutterCommand {
         'separated file containing all outputs used will be written after a build.'
         ' This file is not included as a build input or output. This file is not'
         ' written if the build fails for any reason.');
+    argParser.addOption('output', abbr: 'o', help: 'A directory where output '
+        'files will be written. Must be either absolute or relative from the '
+        'root of the current Flutter project.',
+    );
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.'
@@ -82,7 +87,16 @@ class AssembleCommand extends FlutterCommand {
   /// The environmental configuration for a build invocation.
   Environment get environment {
     final FlutterProject flutterProject = FlutterProject.current();
+    String output = argResults['output'];
+    if (output == null) {
+      throwToolExit('--output directory is required for assemble.');
+    }
+    // If path is relative, make it absolute from flutter project.
+    if (fs.path.isRelative(output)) {
+      output = fs.path.join(flutterProject.directory.path, output);
+    }
     final Environment result = Environment(
+      outputDir: fs.directory(output),
       buildDir: flutterProject.directory
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build'),
@@ -135,7 +149,7 @@ void writeListIfChanged(List<File> files, String path) {
   final StringBuffer buffer = StringBuffer();
   // These files are already sorted.
   for (File file in files) {
-    buffer.writeln(file.resolveSymbolicLinksSync());
+    buffer.writeln(file.path);
   }
   final String newContents = buffer.toString();
   if (!file.existsSync()) {

@@ -184,24 +184,24 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           explicitChildNodes: true,
           label: localizations.popupMenuLabel,
           child: Material(
-              type: MaterialType.transparency,
-              textStyle: route.style,
-              child: ScrollConfiguration(
-                behavior: const _DropdownScrollBehavior(),
-                child: Scrollbar(
-                  child: ListView(
-                    controller: widget.route.scrollController,
-                    padding: kMaterialListPadding,
-                    itemExtent: _kMenuItemHeight,
-                    shrinkWrap: true,
-                    children: children,
-                  ),
+            type: MaterialType.transparency,
+            textStyle: route.style,
+            child: ScrollConfiguration(
+              behavior: const _DropdownScrollBehavior(),
+              child: Scrollbar(
+                child: ListView(
+                  controller: widget.route.scrollController,
+                  padding: kMaterialListPadding,
+                  itemExtent: _kMenuItemHeight,
+                  shrinkWrap: true,
+                  children: children,
                 ),
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 }
 
@@ -253,7 +253,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     double left;
     switch (textDirection) {
       case TextDirection.rtl:
-      left = buttonRect.right.clamp(0.0, size.width) - childSize.width;
+        left = buttonRect.right.clamp(0.0, size.width) - childSize.width;
         break;
       case TextDirection.ltr:
         left = buttonRect.left.clamp(0.0, size.width - childSize.width);
@@ -637,7 +637,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// if the first item were selected.
   final T value;
 
-  /// Displayed if [value] is null.
+  /// A placeholder widget that is displayed if no item is selected, i.e. if [value] is null.
   final Widget hint;
 
   /// A message to show when the dropdown is disabled.
@@ -645,12 +645,14 @@ class DropdownButton<T> extends StatefulWidget {
   /// Displayed if [items] or [onChanged] is null.
   final Widget disabledHint;
 
+  /// {@template flutter.material.dropdownButton.onChanged}
   /// Called when the user selects an item.
   ///
   /// If the [onChanged] callback is null or the list of [items] is null
   /// then the dropdown button will be disabled, i.e. its arrow will be
   /// displayed in grey and it will not respond to input. A disabled button
   /// will display the [disabledHint] widget if it is non-null.
+  /// {@endtemplate}
   final ValueChanged<T> onChanged;
 
   /// The z-coordinate at which to place the menu when open.
@@ -777,7 +779,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
     final TextDirection textDirection = Directionality.of(context);
     final EdgeInsetsGeometry menuMargin = ButtonTheme.of(context).alignedDropdown
-      ?_kAlignedMenuMargin
+      ? _kAlignedMenuMargin
       : _kUnalignedMenuMargin;
 
     assert(_dropdownRoute == null);
@@ -813,22 +815,20 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   Color get _iconColor {
     // These colors are not defined in the Material Design spec.
     if (_enabled) {
-      if (widget.iconEnabledColor != null) {
+      if (widget.iconEnabledColor != null)
         return widget.iconEnabledColor;
-      }
 
-      switch(Theme.of(context).brightness) {
+      switch (Theme.of(context).brightness) {
         case Brightness.light:
           return Colors.grey.shade700;
         case Brightness.dark:
           return Colors.white70;
       }
     } else {
-      if (widget.iconDisabledColor != null) {
+      if (widget.iconDisabledColor != null)
         return widget.iconDisabledColor;
-      }
 
-      switch(Theme.of(context).brightness) {
+      switch (Theme.of(context).brightness) {
         case Brightness.light:
           return Colors.grey.shade400;
         case Brightness.dark:
@@ -852,8 +852,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     final List<Widget> items = _enabled ? List<Widget>.from(widget.items) : <Widget>[];
     int hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
-      final Widget emplacedHint =
-        _enabled ? widget.hint : DropdownMenuItem<Widget>(child: widget.disabledHint ?? widget.hint);
+      final Widget emplacedHint = _enabled
+        ? widget.hint
+        : DropdownMenuItem<Widget>(child: widget.disabledHint ?? widget.hint);
       hintIndex = items.length;
       items.add(DefaultTextStyle(
         style: _textStyle.copyWith(color: Theme.of(context).hintColor),
@@ -893,7 +894,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            widget.isExpanded ? Expanded(child: innerItemsWidget) : innerItemsWidget,
+            widget.isExpanded
+              ? Expanded(child: innerItemsWidget)
+              : innerItemsWidget,
             IconTheme(
               data: IconThemeData(
                 color: _iconColor,
@@ -918,7 +921,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             child: widget.underline ?? Container(
               height: 1.0,
               decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Color(0xFFBDBDBD), width: 0.0))
+                border: Border(
+                  bottom: BorderSide(
+                    color: Color(0xFFBDBDBD),
+                    width: 0.0,
+                  ),
+                ),
               ),
             ),
           ),
@@ -947,38 +955,72 @@ class DropdownButtonFormField<T> extends FormField<T> {
     Key key,
     T value,
     @required List<DropdownMenuItem<T>> items,
-    this.onChanged,
-    InputDecoration decoration = const InputDecoration(),
+    Widget hint,
+    @required this.onChanged,
+    this.decoration = const InputDecoration(),
     FormFieldSetter<T> onSaved,
     FormFieldValidator<T> validator,
-    Widget hint,
-  }) : assert(decoration != null),
+    bool autovalidate = false,
+    Widget disabledHint,
+    int elevation = 8,
+    TextStyle style,
+    Widget icon,
+    Color iconDisabledColor,
+    Color iconEnabledColor,
+    double iconSize = 24.0,
+    bool isDense = false,
+    bool isExpanded = false,
+  }) : assert(items == null || items.isEmpty || value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
+       assert(decoration != null),
+       assert(elevation != null),
+       assert(iconSize != null),
+       assert(isDense != null),
+       assert(isExpanded != null),
        super(
          key: key,
          onSaved: onSaved,
          initialValue: value,
          validator: validator,
+         autovalidate: autovalidate,
          builder: (FormFieldState<T> field) {
-           final InputDecoration effectiveDecoration = decoration
-             .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+           final InputDecoration effectiveDecoration = decoration.applyDefaults(
+             Theme.of(field.context).inputDecorationTheme,
+           );
            return InputDecorator(
              decoration: effectiveDecoration.copyWith(errorText: field.errorText),
              isEmpty: value == null,
              child: DropdownButtonHideUnderline(
                child: DropdownButton<T>(
-                 isDense: true,
                  value: value,
                  items: items,
                  hint: hint,
-                 onChanged: field.didChange,
+                 onChanged: onChanged == null ? null : field.didChange,
+                 disabledHint: disabledHint,
+                 elevation: elevation,
+                 style: style,
+                 icon: icon,
+                 iconDisabledColor: iconDisabledColor,
+                 iconEnabledColor: iconEnabledColor,
+                 iconSize: iconSize,
+                 isDense: isDense,
+                 isExpanded: isExpanded,
                ),
              ),
            );
          }
        );
 
-  /// Called when the user selects an item.
+  /// {@macro flutter.material.dropdownButton.onChanged}
   final ValueChanged<T> onChanged;
+
+  /// The decoration to show around the dropdown button form field.
+  ///
+  /// By default, draws a horizontal line under the dropdown button field but can be
+  /// configured to show an icon, label, hint text, and error text.
+  ///
+  /// Specify null to remove the decoration entirely (including the
+  /// extra padding introduced by the decoration to save space for the labels).
+  final InputDecoration decoration;
 
   @override
   FormFieldState<T> createState() => _DropdownButtonFormFieldState<T>();
@@ -991,7 +1033,7 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
   @override
   void didChange(T value) {
     super.didChange(value);
-    if (widget.onChanged != null)
-      widget.onChanged(value);
+    assert(widget.onChanged != null);
+    widget.onChanged(value);
   }
 }

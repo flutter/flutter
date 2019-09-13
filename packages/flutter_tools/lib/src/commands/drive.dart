@@ -270,7 +270,6 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
     ),
     platformArgs: platformArgs,
     prebuiltApplication: !command.shouldBuild,
-    usesTerminalUi: false,
   );
 
   if (!result.started) {
@@ -293,7 +292,7 @@ Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
 
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
   final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
-  final int result = await runCommandAndStreamOutput(
+  final int result = await processUtils.stream(
     <String>[
       dartVmPath,
       ...dartVmFlags,

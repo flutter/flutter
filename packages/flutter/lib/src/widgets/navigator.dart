@@ -63,7 +63,7 @@ enum RoutePopDisposition {
 
   /// Delegate this to the next level of navigation.
   ///
-  /// If [Route.willPop] return [bubble] then the back button will be handled
+  /// If [Route.willPop] returns [bubble] then the back button will be handled
   /// by the [SystemNavigator], which will usually close the application.
   bubble,
 }
@@ -143,7 +143,7 @@ abstract class Route<T> {
   @mustCallSuper
   void didReplace(Route<dynamic> oldRoute) { }
 
-  /// Returns false if this route wants to veto a [Navigator.pop]. This method is
+  /// Returns whether this route wants to veto a [Navigator.pop]. This method is
   /// called by [Navigator.maybePop].
   ///
   /// By default, routes veto a pop if they're the first route in the history
@@ -783,6 +783,15 @@ class Navigator extends StatefulWidget {
   /// then the [Navigator] would push the following routes on startup: `/`,
   /// `/stocks`, `/stocks/HOOLI`. This enables deep linking while allowing the
   /// application to maintain a predictable route history.
+  ///
+  /// If any of the intermediate routes doesn't exist, it'll simply be skipped.
+  /// In the example above, if `/stocks` doesn't have a corresponding route in
+  /// the app, it'll be skipped and only `/` and `/stocks/HOOLI` will be pushed.
+  ///
+  /// That said, the full route has to map to something in the app in order for
+  /// this to work. In our example, `/stocks/HOOLI` has to map to a route in the
+  /// app. Otherwise, [initialRoute] will be ignored and [defaultRouteName] will
+  /// be used instead.
   final String initialRoute;
 
   /// Called to generate a route for a given [RouteSettings].
@@ -1295,12 +1304,18 @@ class Navigator extends StatefulWidget {
     return navigator != null && navigator.canPop();
   }
 
-  /// Returns the value of the current route's [Route.willPop] method for the
-  /// navigator that most tightly encloses the given context.
+  /// Tries to pop the current route of the navigator that most tightly encloses
+  /// the given context, while honoring the route's [Route.willPop]
+  /// state.
   ///
   /// {@template flutter.widgets.navigator.maybePop}
-  /// This method is typically called before a user-initiated [pop]. For example
-  /// on Android it's called by the binding for the system's back button.
+  /// Returns false if the route deferred to the next enclosing navigator
+  /// (possibly the system); otherwise, returns true (whether the route was
+  /// popped or not).
+  ///
+  /// This method is typically called to handle a user-initiated [pop]. For
+  /// example on Android it's called by the binding for the system's back
+  /// button.
   ///
   /// The `T` type argument is the type of the return value of the current
   /// route.
@@ -1509,9 +1524,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     if (initialRouteName.startsWith('/') && initialRouteName.length > 1) {
       initialRouteName = initialRouteName.substring(1); // strip leading '/'
       assert(Navigator.defaultRouteName == '/');
-      final List<String> plannedInitialRouteNames = <String>[
-        Navigator.defaultRouteName,
-      ];
       final List<Route<dynamic>> plannedInitialRoutes = <Route<dynamic>>[
         _routeNamed<dynamic>(Navigator.defaultRouteName, allowNull: true, arguments: null),
       ];
@@ -1520,22 +1532,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         String routeName = '';
         for (String part in routeParts) {
           routeName += '/$part';
-          plannedInitialRouteNames.add(routeName);
           plannedInitialRoutes.add(_routeNamed<dynamic>(routeName, allowNull: true, arguments: null));
         }
       }
-      if (plannedInitialRoutes.contains(null)) {
+      if (plannedInitialRoutes.last == null) {
         assert(() {
           FlutterError.reportError(
             FlutterErrorDetails(
               exception:
                 'Could not navigate to initial route.\n'
                 'The requested route name was: "/$initialRouteName"\n'
-                'The following routes were therefore attempted:\n'
-                ' * ${plannedInitialRouteNames.join("\n * ")}\n'
-                'This resulted in the following objects:\n'
-                ' * ${plannedInitialRoutes.join("\n * ")}\n'
-                'One or more of those objects was null, and therefore the initial route specified will be '
+                'There was no corresponding route in the app, and therefore the initial route specified will be '
                 'ignored and "${Navigator.defaultRouteName}" will be used instead.'
             ),
           );
@@ -1543,7 +1550,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         }());
         push(_routeNamed<Object>(Navigator.defaultRouteName, arguments: null));
       } else {
-        plannedInitialRoutes.forEach(push);
+        plannedInitialRoutes.where((Route<dynamic> route) => route != null).forEach(push);
       }
     } else {
       Route<Object> route;
@@ -2016,8 +2023,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     return _history.length > 1 || _history[0].willHandlePopInternally;
   }
 
-  /// Returns the value of the current route's [Route.willPop] method for the
-  /// navigator.
+  /// Tries to pop the current route, while honoring the route's [Route.willPop]
+  /// state.
   ///
   /// {@macro flutter.widgets.navigator.maybePop}
   ///

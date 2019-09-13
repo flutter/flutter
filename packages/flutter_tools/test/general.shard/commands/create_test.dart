@@ -43,8 +43,9 @@ void main() {
   FlutterVersion mockFlutterVersion;
   LoggingProcessManager loggingProcessManager;
 
-  setUpAll(() {
+  setUpAll(() async {
     Cache.disableLocking();
+    await _ensureFlutterToolsSnapshot();
   });
 
   setUp(() {
@@ -56,6 +57,10 @@ void main() {
 
   tearDown(() {
     tryToDelete(tempDir);
+  });
+
+  tearDownAll(() async {
+    await _restoreFlutterToolsSnapshot();
   });
 
   // Verify that we create a default project ('app') that is
@@ -116,20 +121,24 @@ void main() {
   testUsingContext('cannot create a project if non-empty non-project directory exists with .metadata', () async {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);
     await projectDir.absolute.childFile('.metadata').writeAsString('project_type: blag\n');
-    expect(
-        () async => await _createAndAnalyzeProject(projectDir, <String>[], <String>[], unexpectedPaths: <String>[
-              'android/',
-              'ios/',
-              '.android/',
-              '.ios/',
-            ]),
-        throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'));
+    expect(() async => await _createAndAnalyzeProject(
+        projectDir,
+        <String>[],
+        <String>[],
+        unexpectedPaths: <String>[
+          'android/',
+          'ios/',
+          '.android/',
+          '.ios/',
+        ]),
+      throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'));
   }, timeout: allowForRemotePubInvocation, overrides: noColorTerminalOverride);
 
   testUsingContext('Will create an app project if non-empty non-project directory exists without .metadata', () async {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);
     await projectDir.absolute.childDirectory('.idea').create(recursive: true);
-    await _createAndAnalyzeProject(projectDir,
+    await _createAndAnalyzeProject(
+      projectDir,
       <String>[
         '-i', 'objc', '-a', 'java'
       ], <String>[
@@ -148,7 +157,8 @@ void main() {
   testUsingContext('detects and recreates an app project correctly', () async {
     await projectDir.absolute.childDirectory('lib').create(recursive: true);
     await projectDir.absolute.childDirectory('ios').create(recursive: true);
-    await _createAndAnalyzeProject(projectDir,
+    await _createAndAnalyzeProject(
+      projectDir,
       <String>[
         '-i', 'objc', '-a', 'java'
       ], <String>[
@@ -1104,7 +1114,6 @@ void main() {
   });
 }
 
-
 Future<void> _createProject(
   Directory dir,
   List<String> createArgs,
@@ -1149,15 +1158,74 @@ Future<void> _createAndAnalyzeProject(
   await _analyzeProject(dir.path);
 }
 
-Future<void> _analyzeProject(String workingDir) async {
+Future<void> _ensureFlutterToolsSnapshot() async {
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',
   ));
+  final String flutterToolsSnapshotPath = fs.path.absolute(fs.path.join(
+    '..',
+    '..',
+    'bin',
+    'cache',
+    'flutter_tools.snapshot',
+  ));
+  final String dotPackages = fs.path.absolute(fs.path.join(
+    '.packages',
+  ));
+
+  final File snapshotFile = fs.file(flutterToolsSnapshotPath);
+  if (snapshotFile.existsSync()) {
+    snapshotFile.renameSync(flutterToolsSnapshotPath + '.bak');
+  }
+
+  final List<String> snapshotArgs = <String>[
+    ...dartVmFlags,
+    '--snapshot=$flutterToolsSnapshotPath',
+    '--packages=$dotPackages',
+    flutterToolsPath,
+  ];
+  final ProcessResult snapshotResult = await Process.run(
+    '../../bin/cache/dart-sdk/bin/dart',
+    snapshotArgs,
+  );
+  if (snapshotResult.exitCode != 0) {
+    print(snapshotResult.stdout);
+    print(snapshotResult.stderr);
+  }
+  expect(snapshotResult.exitCode, 0);
+}
+
+Future<void> _restoreFlutterToolsSnapshot() async {
+  final String flutterToolsSnapshotPath = fs.path.absolute(fs.path.join(
+    '..',
+    '..',
+    'bin',
+    'cache',
+    'flutter_tools.snapshot',
+  ));
+
+  final File snapshotBackup = fs.file(flutterToolsSnapshotPath + '.bak');
+  if (!snapshotBackup.existsSync()) {
+    // No backup to restore.
+    return;
+  }
+
+  snapshotBackup.renameSync(flutterToolsSnapshotPath);
+}
+
+Future<void> _analyzeProject(String workingDir) async {
+  final String flutterToolsSnapshotPath = fs.path.absolute(fs.path.join(
+    '..',
+    '..',
+    'bin',
+    'cache',
+    'flutter_tools.snapshot',
+  ));
 
   final List<String> args = <String>[
     ...dartVmFlags,
-    flutterToolsPath,
+    flutterToolsSnapshotPath,
     'analyze',
   ];
 
@@ -1174,9 +1242,12 @@ Future<void> _analyzeProject(String workingDir) async {
 }
 
 Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
-  final String flutterToolsPath = fs.path.absolute(fs.path.join(
+  final String flutterToolsSnapshotPath = fs.path.absolute(fs.path.join(
+    '..',
+    '..',
     'bin',
-    'flutter_tools.dart',
+    'cache',
+    'flutter_tools.snapshot',
   ));
 
   // While flutter test does get packages, it doesn't write version
@@ -1185,7 +1256,7 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
     '$dartSdkPath/bin/dart',
     <String>[
       ...dartVmFlags,
-      flutterToolsPath,
+      flutterToolsSnapshotPath,
       'packages',
       'get',
     ],
@@ -1194,7 +1265,7 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
 
   final List<String> args = <String>[
     ...dartVmFlags,
-    flutterToolsPath,
+    flutterToolsSnapshotPath,
     'test',
     '--no-color',
     if (target != null) target,
