@@ -1219,6 +1219,9 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       final File gradlew = fs.file('path/to/project/.android/gradlew');
       gradlew.createSync(recursive: true);
 
+      fs.file('path/to/project/.android/gradle.properties')
+        .writeAsStringSync('irrelevant');
+
       when(mockProcessManager.run(
           <String> ['/path/to/project/.android/gradlew', '-v'],
           workingDirectory: anyNamed('workingDirectory'),
