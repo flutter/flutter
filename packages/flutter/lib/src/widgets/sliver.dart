@@ -1555,7 +1555,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 /// Widget build(BuildContext context) {
 ///   return CustomScrollView(
 ///     /* These ScrollPhysics are the default for iOS */
-///     physics: BouncingScrollPhysics()
+///     physics: BouncingScrollPhysics(),
 ///     slivers: <Widget>[
 ///       SliverToBoxAdapter(
 ///         child: Container(
