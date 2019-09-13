@@ -156,7 +156,6 @@ void main() {
             fail('TestFailure expected but not thrown.');
           } on TestFailure catch (error) {
             expect(error.message, contains('% diff detected'));
-            print(error.message);
             print(comparator.basedir);
             print(fix('${comparator.basedir.path}failures/golden_masterImage.png'));
             final io.File master = fs.file(
