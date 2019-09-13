@@ -33,20 +33,9 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
 @property(nonatomic) NSTextInputContext* textInputContext;
 
 /**
- * A dictionary of text input models, one per client connection, keyed
- * by the client connection ID.
- */
-@property(nonatomic) NSMutableDictionary<NSNumber*, FlutterTextInputModel*>* textInputModels;
-
-/**
- * The currently active client connection ID.
- */
-@property(nonatomic, nullable) NSNumber* activeClientID;
-
-/**
  * The currently active text input model.
  */
-@property(nonatomic, readonly, nullable) FlutterTextInputModel* activeModel;
+@property(nonatomic, nullable) FlutterTextInputModel* activeModel;
 
 /**
  * The channel used to communicate with Flutter.
@@ -78,17 +67,12 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
     [_channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
       [weakSelf handleMethodCall:call result:result];
     }];
-    _textInputModels = [[NSMutableDictionary alloc] init];
     _textInputContext = [[NSTextInputContext alloc] initWithClient:self];
   }
   return self;
 }
 
 #pragma mark - Private
-
-- (FlutterTextInputModel*)activeModel {
-  return (_activeClientID == nil) ? nil : _textInputModels[_activeClientID];
-}
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   BOOL handled = YES;
@@ -102,19 +86,15 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
       return;
     }
     NSNumber* clientID = call.arguments[0];
-    if (clientID != nil &&
-        (_activeClientID == nil || ![_activeClientID isEqualToNumber:clientID])) {
-      _activeClientID = clientID;
-      // TODO: Do we need to preserve state across setClient calls?
-      FlutterTextInputModel* inputModel =
-          [[FlutterTextInputModel alloc] initWithClientID:clientID configuration:call.arguments[1]];
-      if (!inputModel) {
+    if (clientID != nil) {
+      self.activeModel = [[FlutterTextInputModel alloc] initWithClientID:clientID
+                                                           configuration:call.arguments[1]];
+      if (!self.activeModel) {
         result([FlutterError errorWithCode:@"error"
                                    message:@"Failed to create an input model"
                                    details:@"Configuration arguments might be missing"]);
         return;
       }
-      _textInputModels[_activeClientID] = inputModel;
     }
   } else if ([method isEqualToString:kShowMethod]) {
     [self.flutterViewController addKeyResponder:self];
@@ -123,7 +103,7 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
     [self.flutterViewController removeKeyResponder:self];
     [_textInputContext deactivate];
   } else if ([method isEqualToString:kClearClientMethod]) {
-    _activeClientID = nil;
+    self.activeModel = nil;
   } else if ([method isEqualToString:kSetEditingStateMethod]) {
     NSDictionary* state = call.arguments;
     self.activeModel.state = state;
@@ -143,7 +123,7 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
   }
 
   [_channel invokeMethod:kUpdateEditStateResponseMethod
-               arguments:@[ _activeClientID, _textInputModels[_activeClientID].state ]];
+               arguments:@[ self.activeModel.clientID, self.activeModel.state ]];
 }
 
 #pragma mark -
@@ -247,7 +227,7 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
       [self insertText:@"\n" replacementRange:self.activeModel.selectedRange];
     }
     [_channel invokeMethod:kPerformAction
-                 arguments:@[ _activeClientID, self.activeModel.inputAction ]];
+                 arguments:@[ self.activeModel.clientID, self.activeModel.inputAction ]];
   }
 }
 
