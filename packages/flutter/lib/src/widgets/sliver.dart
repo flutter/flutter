@@ -1452,7 +1452,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///   return CustomScrollView(
 ///     slivers: <Widget>[
 ///       SliverFixedExtentList(
-///         itemExtent: 130.0,
+///         itemExtent: 100.0,
 ///         delegate: SliverChildBuilderDelegate(
 ///           (BuildContext context, int index) {
 ///             return Container(
@@ -1461,7 +1461,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///                 : Colors.blue[200],
 ///             );
 ///           },
-///           childCount: 5,
+///           childCount: 3,
 ///         ),
 ///       ),
 ///       SliverFillRemaining(
@@ -1495,7 +1495,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///   return CustomScrollView(
 ///     slivers: <Widget>[
 ///       SliverFixedExtentList(
-///         itemExtent: 150.0,
+///         itemExtent: 130.0,
 ///         delegate: SliverChildBuilderDelegate(
 ///           (BuildContext context, int index) {
 ///             return Container(
@@ -1504,7 +1504,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///                 : Colors.orange[200],
 ///             );
 ///           },
-///           childCount: 7,
+///           childCount: 5,
 ///         ),
 ///       ),
 ///       SliverFillRemaining(
@@ -1542,6 +1542,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return CustomScrollView(
+///     /* These ScrollPhysics are the default for iOS */
+///     physics: BouncingScrollPhysics()
 ///     slivers: <Widget>[
 ///       SliverToBoxAdapter(
 ///         child: Container(
