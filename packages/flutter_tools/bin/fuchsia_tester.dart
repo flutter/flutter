@@ -161,8 +161,9 @@ Future<void> run(List<String> args) async {
       } else {
         fs.currentDirectory = testDirectory;
       }
-      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath], coverageDirectory: coverageDirectory))
+      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath], coverageDirectory: coverageDirectory)) {
         throwToolExit('Failed to collect coverage data');
+      }
     }
   } finally {
     tempDir.deleteSync(recursive: true);

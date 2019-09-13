@@ -47,8 +47,9 @@ class IOSSimulatorUtils {
   static IOSSimulatorUtils get instance => context.get<IOSSimulatorUtils>();
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
-    if (!xcode.isInstalledAndMeetsVersionCheck)
+    if (!xcode.isInstalledAndMeetsVersionCheck) {
       return <IOSSimulator>[];
+    }
 
     final List<SimDevice> connected = await SimControl.instance.getConnectedDevices();
     return connected.map<IOSSimulator>((SimDevice device) {
@@ -327,8 +328,9 @@ class IOSSimulator extends Device {
 
   @override
   String supportMessage() {
-    if (isSupported())
+    if (isSupported()) {
       return 'Supported';
+    }
 
     return _supportMessage ?? 'Unknown';
   }
@@ -353,35 +355,42 @@ class IOSSimulator extends Device {
         return LaunchResult.failed();
       }
     } else {
-      if (!await installApp(package))
+      if (!await installApp(package)) {
         return LaunchResult.failed();
+      }
     }
 
     // Prepare launch arguments.
     final List<String> args = <String>['--enable-dart-profiling'];
 
     if (debuggingOptions.debuggingEnabled) {
-      if (debuggingOptions.buildInfo.isDebug)
+      if (debuggingOptions.buildInfo.isDebug) {
         args.addAll(<String>[
           '--enable-checked-mode',
           '--verify-entry-points',
         ]);
-      if (debuggingOptions.startPaused)
+      }
+      if (debuggingOptions.startPaused) {
         args.add('--start-paused');
-      if (debuggingOptions.disableServiceAuthCodes)
+      }
+      if (debuggingOptions.disableServiceAuthCodes) {
         args.add('--disable-service-auth-codes');
-      if (debuggingOptions.skiaDeterministicRendering)
+      }
+      if (debuggingOptions.skiaDeterministicRendering) {
         args.add('--skia-deterministic-rendering');
-      if (debuggingOptions.useTestFonts)
+      }
+      if (debuggingOptions.useTestFonts) {
         args.add('--use-test-fonts');
+      }
       final int observatoryPort = debuggingOptions.observatoryPort ?? 0;
       args.add('--observatory-port=$observatoryPort');
     }
 
     ProtocolDiscovery observatoryDiscovery;
-    if (debuggingOptions.debuggingEnabled)
+    if (debuggingOptions.debuggingEnabled) {
       observatoryDiscovery = ProtocolDiscovery.observatory(
           getLogReader(app: package), ipv6: ipv6);
+    }
 
     // Launch the updated application in the simulator.
     try {
@@ -434,14 +443,16 @@ class IOSSimulator extends Device {
       targetOverride: mainPath,
       buildForDevice: false,
     );
-    if (!buildResult.success)
+    if (!buildResult.success) {
       throwToolExit('Could not build the application for the simulator.');
+    }
 
     // Step 2: Assert that the Xcode project was successfully built.
     final Directory bundle = fs.directory(app.simulatorBundlePath);
     final bool bundleExists = bundle.existsSync();
-    if (!bundleExists)
+    if (!bundleExists) {
       throwToolExit('Could not find the built application bundle at ${bundle.path}.');
+    }
 
     // Step 3: Install the updated bundle to the simulator.
     await SimControl.instance.install(id, fs.path.absolute(bundle.path));
@@ -504,8 +515,9 @@ class IOSSimulator extends Device {
   Future<void> ensureLogsExists() async {
     if (await sdkMajorVersion < 11) {
       final File logFile = fs.file(logFilePath);
-      if (!logFile.existsSync())
+      if (!logFile.existsSync()) {
         logFile.writeAsBytesSync(<int>[]);
+      }
     }
   }
 
@@ -594,8 +606,9 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     // We don't want to wait for the process or its callback. Best effort
     // cleanup in the callback.
     unawaited(_deviceProcess.exitCode.whenComplete(() {
-      if (_linesController.hasListener)
+      if (_linesController.hasListener) {
         _linesController.close();
+      }
     }));
   }
 
@@ -618,39 +631,48 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       final String content = match.group(4);
 
       // Filter out non-Flutter originated noise from the engine.
-      if (_appName != null && category != _appName)
+      if (_appName != null && category != _appName) {
         return null;
+      }
 
-      if (tag != null && tag != '(Flutter)')
+      if (tag != null && tag != '(Flutter)') {
         return null;
+      }
 
       // Filter out some messages that clearly aren't related to Flutter.
-      if (string.contains(': could not find icon for representation -> com.apple.'))
+      if (string.contains(': could not find icon for representation -> com.apple.')) {
         return null;
+      }
 
       // assertion failed: 15G1212 13E230: libxpc.dylib + 57882 [66C28065-C9DB-3C8E-926F-5A40210A6D1B]: 0x7d
-      if (content.startsWith('assertion failed: ') && content.contains(' libxpc.dylib '))
+      if (content.startsWith('assertion failed: ') && content.contains(' libxpc.dylib ')) {
         return null;
+      }
 
-      if (_appName == null)
+      if (_appName == null) {
         return '$category: $content';
-      else if (category == _appName)
+      } else if (category == _appName) {
         return content;
+      }
 
       return null;
     }
 
-    if (string.startsWith('Filtering the log data using '))
+    if (string.startsWith('Filtering the log data using ')) {
       return null;
+    }
 
-    if (string.startsWith('Timestamp                       (process)[PID]'))
+    if (string.startsWith('Timestamp                       (process)[PID]')) {
       return null;
+    }
 
-    if (_lastMessageSingleRegex.matchAsPrefix(string) != null)
+    if (_lastMessageSingleRegex.matchAsPrefix(string) != null) {
       return null;
+    }
 
-    if (RegExp(r'assertion failed: .* libxpc.dylib .* 0x7d$').matchAsPrefix(string) != null)
+    if (RegExp(r'assertion failed: .* libxpc.dylib .* 0x7d$').matchAsPrefix(string) != null) {
       return null;
+    }
 
     return string;
   }
@@ -665,13 +687,15 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       if (_lastLine != null) {
         int repeat = int.parse(multi.group(1));
         repeat = math.max(0, math.min(100, repeat));
-        for (int i = 1; i < repeat; i++)
+        for (int i = 1; i < repeat; i++) {
           _linesController.add(_lastLine);
+        }
       }
     } else {
       _lastLine = _filterDeviceLine(line);
-      if (_lastLine != null)
+      if (_lastLine != null) {
         _linesController.add(_lastLine);
+      }
     }
   }
 
@@ -682,12 +706,14 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   void _onSystemLine(String line) {
     printTrace('[SYS LOG] $line');
-    if (!_flutterRunnerRegex.hasMatch(line))
+    if (!_flutterRunnerRegex.hasMatch(line)) {
       return;
+    }
 
     final String filteredLine = _filterSystemLog(line);
-    if (filteredLine == null)
+    if (filteredLine == null) {
       return;
+    }
 
     _linesController.add(filteredLine);
   }
@@ -706,8 +732,9 @@ int compareIosVersions(String v1, String v2) {
   while (i < v1Fragments.length && i < v2Fragments.length) {
     final int v1Fragment = v1Fragments[i];
     final int v2Fragment = v2Fragments[i];
-    if (v1Fragment != v2Fragment)
+    if (v1Fragment != v2Fragment) {
       return v1Fragment.compareTo(v2Fragment);
+    }
     i += 1;
   }
   return v1Fragments.length.compareTo(v2Fragments.length);
@@ -731,8 +758,9 @@ int compareIphoneVersions(String id1, String id2) {
   final int v1 = int.parse(m1[1]);
   final int v2 = int.parse(m2[1]);
 
-  if (v1 != v2)
+  if (v1 != v2) {
     return v1.compareTo(v2);
+  }
 
   // Sorted in the least preferred first order.
   const List<String> qualifiers = <String>['-Plus', '', 's-Plus', 's'];

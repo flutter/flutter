@@ -81,12 +81,14 @@ class _ManifestAssetBundle implements AssetBundle {
 
   @override
   bool needsBuild({ String manifestPath = defaultManifestPath }) {
-    if (_lastBuildTimestamp == null)
+    if (_lastBuildTimestamp == null) {
       return true;
+    }
 
     final FileStat stat = fs.file(manifestPath).statSync();
-    if (stat.type == FileSystemEntityType.notFound)
+    if (stat.type == FileSystemEntityType.notFound) {
       return true;
+    }
 
     for (Directory directory in _wildcardDirectories.values) {
       final DateTime dateTime = directory.statSync().modified;
@@ -119,8 +121,9 @@ class _ManifestAssetBundle implements AssetBundle {
       printError('$e');
       return 1;
     }
-    if (flutterManifest == null)
+    if (flutterManifest == null) {
       return 1;
+    }
 
     // If the last build time isn't set before this early return, empty pubspecs will
     // hang on hot reload, as the incremental dill files will never be copied to the
@@ -164,11 +167,13 @@ class _ManifestAssetBundle implements AssetBundle {
       if (package != null && package.scheme == 'file') {
         final String packageManifestPath = fs.path.fromUri(package.resolve('../pubspec.yaml'));
         final FlutterManifest packageFlutterManifest = FlutterManifest.createFromPath(packageManifestPath);
-        if (packageFlutterManifest == null)
+        if (packageFlutterManifest == null) {
           continue;
+        }
         // Skip the app itself
-        if (packageFlutterManifest.appName == flutterManifest.appName)
+        if (packageFlutterManifest.appName == flutterManifest.appName) {
           continue;
+        }
         final String packageBasePath = fs.path.dirname(packageManifestPath);
 
         final Map<_Asset, List<_Asset>> packageAssets = _parseAssets(
@@ -179,8 +184,9 @@ class _ManifestAssetBundle implements AssetBundle {
           packageName: packageName,
         );
 
-        if (packageAssets == null)
+        if (packageAssets == null) {
           return 1;
+        }
         assetVariants.addAll(packageAssets);
 
         fonts.addAll(_parseFonts(
@@ -262,8 +268,9 @@ class _Asset {
   /// The delta between what the entryUri is and the relativeUri (e.g.,
   /// packages/flutter_gallery).
   Uri get symbolicPrefixUri {
-    if (entryUri == relativeUri)
+    if (entryUri == relativeUri) {
       return null;
+    }
     final int index = entryUri.path.indexOf(relativeUri.path);
     return index == -1 ? null : Uri(path: entryUri.path.substring(0, index));
   }
@@ -273,10 +280,12 @@ class _Asset {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(other, this))
+    if (identical(other, this)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     final _Asset otherAsset = other;
     return otherAsset.baseDir == baseDir
         && otherAsset.relativeUri == relativeUri
@@ -410,8 +419,9 @@ DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
 
   for (_Asset main in sortedKeys) {
     final List<String> variants = <String>[];
-    for (_Asset variant in assetVariants[main])
+    for (_Asset variant in assetVariants[main]) {
       variants.add(variant.entryUri.path);
+    }
     jsonObject[main.entryUri.path] = variants;
   }
   return DevFSStringContent(json.encode(jsonObject));
@@ -494,22 +504,25 @@ class _AssetDirectoryCache {
     final String assetName = fs.path.basename(assetPath);
     final String directory = fs.path.dirname(assetPath);
 
-    if (!fs.directory(directory).existsSync())
+    if (!fs.directory(directory).existsSync()) {
       return const <String>[];
+    }
 
     if (_cache[directory] == null) {
       final List<String> paths = <String>[];
       for (FileSystemEntity entity in fs.directory(directory).listSync(recursive: true)) {
         final String path = entity.path;
-        if (fs.isFileSync(path) && !_excluded.any((String exclude) => path.startsWith(exclude)))
+        if (fs.isFileSync(path) && !_excluded.any((String exclude) => path.startsWith(exclude))) {
           paths.add(path);
+        }
       }
 
       final Map<String, List<String>> variants = <String, List<String>>{};
       for (String path in paths) {
         final String variantName = fs.path.basename(path);
-        if (directory == fs.path.dirname(path))
+        if (directory == fs.path.dirname(path)) {
           continue;
+        }
         variants[variantName] ??= <String>[];
         variants[variantName].add(path);
       }
@@ -669,8 +682,9 @@ _Asset _resolveAsset(
     // The asset is referenced in the pubspec.yaml as
     // 'packages/PACKAGE_NAME/PATH/TO/ASSET .
     final _Asset packageAsset = _resolvePackageAsset(assetUri, packageMap);
-    if (packageAsset != null)
+    if (packageAsset != null) {
       return packageAsset;
+    }
   }
 
   return _Asset(
