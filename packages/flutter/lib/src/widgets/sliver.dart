@@ -1411,7 +1411,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///     [precedingScrollExtent] has not exceeded the main axis extent of the
 ///     viewport.
 ///
-/// //TODO(Piinks): animation 1
+/// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_sizes_child.mp4}
+///
 /// {@tool snippet --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] sizes its [child] to fill the
@@ -1448,7 +1449,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///  * [SliverFillRemaining] will defer to the size of its [child] if the
 ///    child's size exceeds the remaining space in the viewport.
 ///
-/// //TODO(Piinks): animation 2
+/// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_defers_to_child.mp4}
+///
 /// {@tool snippet --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] defers to the size of its [child]
@@ -1491,7 +1493,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 /// * [SliverFillRemaining] will defer to the size of its [child] if the
 ///   [precedingScrollExtent] exceeded the length of the viewport's main axis.
 ///
-/// //TODO(Piinks): animation 3
+/// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_scrolled_beyond.mp4}
+///
 /// {@tool snippet --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] defers to the size of its [child]
@@ -1539,7 +1542,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///   the size of the [child] to _stretch_, filling the overscroll area. It does
 ///   this regardless of the path chosen to provide the child's size.
 ///
-/// //TODO(Piinks): animation 4
+/// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_fill_overscroll.mp4}
+///
 /// {@tool snippet --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining]'s child stretches to fill the
