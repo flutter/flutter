@@ -348,7 +348,7 @@ void main() {
       moreOrLessEquals(798, epsilon: 1),
     );
 
-    // Use the navigator to push a route insetad of tapping the 'push' button.
+    // Use the navigator to push a route instead of tapping the 'push' button.
     // The topmost route (the one that's animating away), ignores input while
     // the pop is underway because route.navigator.userGestureInProgress.
     Navigator.push<void>(scaffoldKey.currentContext, CupertinoPageRoute<void>(
