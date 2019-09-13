@@ -127,7 +127,6 @@ function upgrade_flutter () {
 
     retry_upgrade
 
-    echo "$DART" $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
     "$DART" $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
     echo "$revision" > "$STAMP_PATH"
   fi
