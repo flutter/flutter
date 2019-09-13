@@ -692,7 +692,7 @@ class DropdownButton<T> extends StatefulWidget {
   ///       },
   ///       items: items.map((String item) {
   ///         return DropdownMenuItem<String>(
-  ///           child: Text(string),
+  ///           child: Text(item),
   ///           value: item,
   ///         );
   ///       }).toList(),
