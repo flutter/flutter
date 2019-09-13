@@ -246,6 +246,12 @@ def main():
       default=False,
       help='If set, disables LTO for the build.')
 
+  parser.add_argument(
+    '--skip-build',
+    action='store_true',
+    default=False,
+    help='If set, skips building and just creates packages.')
+
   args = parser.parse_args()
   RemoveDirectoryIfExists(_bucket_directory)
   build_mode = args.runtime_mode
@@ -261,7 +267,8 @@ def main():
       runtime_mode = runtime_modes[i]
       product = product_modes[i]
       if build_mode == 'all' or runtime_mode == build_mode:
-        BuildTarget(runtime_mode, arch, product, enable_lto)
+        if not args.skip_build:
+          BuildTarget(runtime_mode, arch, product, enable_lto)
         BuildBucket(runtime_mode, arch, product)
 
   ProcessCIPDPakcage(args.upload, args.engine_version)
