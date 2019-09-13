@@ -214,7 +214,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
       _handlers.remove(channel);
     else
       _handlers[channel] = handler;
-    ui.drainChannelBuffer(channel, (ByteData data, ui.PlatformMessageResponseCallback callback) async {
+    ui.channelBuffers.drain(channel, (ByteData data, ui.PlatformMessageResponseCallback callback) async {
       await handlePlatformMessage(channel, data, callback);
     });
   }
