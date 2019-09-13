@@ -50,7 +50,7 @@ class BuildWebCommand extends BuildSubCommand {
     final FlutterProject flutterProject = FlutterProject.current();
     final String target = argResults['target'];
     final BuildInfo buildInfo = getBuildInfo();
-    await buildWeb(flutterProject, target, buildInfo, argResults['initialize-platform']);
+    await buildWeb(flutterProject, target, buildInfo, argResults['web-initialize-platform']);
     return null;
   }
 }
