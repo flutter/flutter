@@ -92,7 +92,7 @@ class AndroidBuildInfo {
       AndroidArch.arm64_v8a,
     ],
     this.splitPerAbi = false,
-    this.proguard = false,
+    this.shrinking = false,
   });
 
   // The build info containing the mode and flavor.
@@ -105,8 +105,8 @@ class AndroidBuildInfo {
   /// will be produced.
   final bool splitPerAbi;
 
-  /// Whether to enable Proguard on release mode.
-  final bool proguard;
+  /// Whether to enable shrinking on release mode.
+  final bool shrinking;
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
