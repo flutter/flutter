@@ -1274,6 +1274,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
     @required this.opacity,
     Curve curve = Curves.linear,
     @required Duration duration,
+    this.alwaysIncludeSemantics = false,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
        super(key: key, curve: curve, duration: duration);
 
@@ -1289,6 +1290,16 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   ///
   /// The opacity must not be null.
   final double opacity;
+
+  /// Whether the semantic information of the children is always included.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, regardless of the opacity settings the child semantic
+  /// information is exposed as if the widget were fully visible. This is
+  /// useful in cases where labels may be hidden during animations that
+  /// would otherwise contribute relevant semantics.
+  final bool alwaysIncludeSemantics;
 
   @override
   _AnimatedOpacityState createState() => _AnimatedOpacityState();
@@ -1319,6 +1330,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
     return FadeTransition(
       opacity: _opacityAnimation,
       child: widget.child,
+      alwaysIncludeSemantics: widget.alwaysIncludeSemantics,
     );
   }
 }
