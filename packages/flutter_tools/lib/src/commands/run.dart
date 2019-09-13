@@ -282,7 +282,7 @@ class RunCommand extends RunCommandBase {
     if (buildInfo.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
-        initializePlatform: argResults['initialize-platform'],
+        initializePlatform: argResults['web-initialize-platform'],
       );
     } else {
       return DebuggingOptions.enabled(
