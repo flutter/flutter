@@ -500,7 +500,7 @@ class ApkManifestData {
       String childElement, String attributeName, String attributeValue) {
     final Iterable<_Element> allElements = baseElement.allElements(
         childElement).cast<_Element>();
-    bool isPresent;
+    bool isPresent = false;
     for (_Element oneElement in allElements) {
       final String elementAttributeValue = oneElement
           ?.firstAttribute(attributeName)
