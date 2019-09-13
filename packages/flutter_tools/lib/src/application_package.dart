@@ -500,17 +500,16 @@ class ApkManifestData {
       String childElement, String attributeName, String attributeValue) {
     final Iterable<_Element> allElements = baseElement.allElements(
         childElement).cast<_Element>();
-    bool isPresent = false;
     for (_Element oneElement in allElements) {
       final String elementAttributeValue = oneElement
           ?.firstAttribute(attributeName)
           ?.value;
-      isPresent = elementAttributeValue != null &&
-          elementAttributeValue.startsWith(attributeValue);
-      if (isPresent)
-        break;
+      if (elementAttributeValue != null &&
+          elementAttributeValue.startsWith(attributeValue)) {
+        return true;
+      }
     }
-    return isPresent;
+    return false;
   }
 
   static ApkManifestData parseFromXmlDump(String data) {
