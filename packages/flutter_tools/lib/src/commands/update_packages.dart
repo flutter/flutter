@@ -27,7 +27,6 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'test_api': '0.2.5',     //  |
   'test_core': '0.2.5',    //  |
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
-  'protobuf': '0.13.15' // TODO(jonahwilliams): remove usage and update.
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
