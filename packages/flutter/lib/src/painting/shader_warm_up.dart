@@ -193,8 +193,8 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
         ..clipRRect(ui.RRect.fromLTRBR(8, 8, 328, 248, const ui.Radius.circular(16)))
         ..drawRect(const ui.Rect.fromLTRB(10, 10, 320, 240), ui.Paint())
         ..restore();
-      canvas.translate(drawCallSpacing, 0.0);
+      canvas.translate(80.0, 0.0);
     }
-    canvas.translate(0.0, drawCallSpacing);
+    canvas.translate(0.0, 80.0);
   }
 }
