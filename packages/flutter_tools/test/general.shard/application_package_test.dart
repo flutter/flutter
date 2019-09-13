@@ -601,6 +601,7 @@ const String _aaptDataWithLauncherAndDefaultActivity =
               A: android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")
             E: category (line=46)
               A: android:name(0x01010003)="android.intent.category.DEFAULT" (Raw: "android.intent.category.DEFAULT")
+            E: category (line=47)
               A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")
 ''';
 
