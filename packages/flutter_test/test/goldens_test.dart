@@ -156,10 +156,18 @@ void main() {
             fail('TestFailure expected but not thrown.');
           } on TestFailure catch (error) {
             expect(error.message, contains('% diff detected'));
-            final io.File master = fs.file(fix('/failures/golden_masterImage.png'));
-            final io.File test = fs.file(fix('/failures/golden_testImage.png'));
-            final io.File isolated = fs.file(fix('/failures/golden_isolatedDiff.png'));
-            final io.File masked = fs.file(fix('/failures/golden_maskedDiff.png'));
+            final io.File master = fs.file(
+              fix('${comparator.basedir.path}failures/golden_masterImage.png')
+            );
+            final io.File test = fs.file(
+              fix('${comparator.basedir.path}failures/golden_testImage.png')
+            );
+            final io.File isolated = fs.file(
+              fix('${comparator.basedir.path}failures/golden_isolatedDiff.png')
+            );
+            final io.File masked = fs.file(
+              fix('${comparator.basedir.path}failures/golden_maskedDiff.png')
+            );
             expect(master.existsSync(), isTrue);
             expect(test.existsSync(), isTrue);
             expect(isolated.existsSync(), isTrue);
