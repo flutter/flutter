@@ -484,11 +484,12 @@ class DebuggingOptions {
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
     this.observatoryPort,
+    this.initializePlatform = true,
     this.hostname,
     this.port,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo)
+  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true })
     : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -517,6 +518,8 @@ class DebuggingOptions {
   final bool dumpSkpOnShaderCompilation;
   final bool useTestFonts;
   final bool verboseSystemLogs;
+  /// Whether to invoke webOnlyInitializePlatform in Flutter for web.
+  final bool initializePlatform;
   final int observatoryPort;
   final String port;
   final String hostname;
