@@ -156,7 +156,7 @@ Future<void> main() async {
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  device_info:\n  package_info:\n',
+        '\ndependencies:\n  device_info:\n  google_maps_flutter:\n', // One dynamic and one static framework.
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -192,7 +192,7 @@ Future<void> main() async {
       if (!podfileLockOutput.contains(':path: Flutter/engine')
         || !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant')
         || !podfileLockOutput.contains(':path: Flutter/.symlinks/device_info/ios')
-        || !podfileLockOutput.contains(':path: Flutter/.symlinks/package_info/ios')) {
+        || !podfileLockOutput.contains(':path: Flutter/.symlinks/google_maps_flutter/ios')) {
         return TaskResult.failure('Building ephemeral host app Podfile.lock does not contain expected pods');
       }
 

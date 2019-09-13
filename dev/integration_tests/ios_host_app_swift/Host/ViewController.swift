@@ -5,6 +5,7 @@ import FlutterPluginRegistrant
 class ViewController: UIViewController {
   var flutterEngine : FlutterEngine?;
   
+  // Boiler-plate add-to-app demo. Not integration tested anywhere.
   override func viewDidLoad() {
     super.viewDidLoad()
     let button = UIButton(type:UIButton.ButtonType.custom)
