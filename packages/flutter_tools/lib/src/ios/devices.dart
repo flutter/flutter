@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../mdns_observatory_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
@@ -384,7 +385,16 @@ class IOSDevice extends Device {
 
       try {
         printTrace('Application launched on the device. Waiting for observatory port.');
-        final Uri localUri = await observatoryDiscovery.uri;
+        // TODO TODO
+        //final Uri localUri = await observatoryDiscovery.uri;
+        final Uri localUri = await MDnsObservatoryDiscovery().getObservatoryUri(package.id, this);
+        //final MDnsObservatoryDiscoveryResult result = await MDnsObservatoryDiscovery().query(applicationId: package.id);
+        //Uri observatoryUri;
+        //if (result != null) {
+        //  final String ipv4Loopback = InternetAddress.loopbackIPv4.address; // TODO
+        //  final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
+        //  observatoryUri = await buildObservatoryUri(this, ipv4Loopback, result.port, result.authCode);
+        //}
         return LaunchResult.succeeded(observatoryUri: localUri);
       } catch (error) {
         printError('Failed to establish a debug connection with $id: $error');
