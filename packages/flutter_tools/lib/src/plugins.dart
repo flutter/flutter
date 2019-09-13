@@ -189,14 +189,17 @@ class Plugin {
 
 Plugin _pluginFromPubspec(String name, Uri packageRoot) {
   final String pubspecPath = fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
-  if (!fs.isFileSync(pubspecPath))
+  if (!fs.isFileSync(pubspecPath)) {
     return null;
+  }
   final dynamic pubspec = loadYaml(fs.file(pubspecPath).readAsStringSync());
-  if (pubspec == null)
+  if (pubspec == null) {
     return null;
+  }
   final dynamic flutterConfig = pubspec['flutter'];
-  if (flutterConfig == null || !flutterConfig.containsKey('plugin'))
+  if (flutterConfig == null || !flutterConfig.containsKey('plugin')) {
     return null;
+  }
   final String packageRootPath = fs.path.fromUri(packageRoot);
   printTrace('Found plugin $name at $packageRootPath');
   return Plugin.fromYaml(name, packageRootPath, flutterConfig['plugin']);
@@ -215,8 +218,9 @@ List<Plugin> findPlugins(FlutterProject project) {
   packages.forEach((String name, Uri uri) {
     final Uri packageRoot = uri.resolve('..');
     final Plugin plugin = _pluginFromPubspec(name, packageRoot);
-    if (plugin != null)
+    if (plugin != null) {
       plugins.add(plugin);
+    }
   });
   return plugins;
 }

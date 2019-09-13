@@ -109,8 +109,9 @@ class AttachCommand extends FlutterCommand {
   final String description = 'Attach to a running application.';
 
   int get debugPort {
-    if (argResults['debug-port'] == null)
+    if (argResults['debug-port'] == null) {
       return null;
+    }
     try {
       return int.parse(argResults['debug-port']);
     } catch (error) {
@@ -137,8 +138,9 @@ class AttachCommand extends FlutterCommand {
   @override
   Future<void> validateCommand() async {
     await super.validateCommand();
-    if (await findTargetDevice() == null)
+    if (await findTargetDevice() == null) {
       throwToolExit(null);
+    }
     debugPort;
     if (debugPort == null && debugUri == null && argResults.wasParsed(FlutterCommand.ipv6Flag)) {
       throwToolExit(
@@ -209,8 +211,9 @@ class AttachCommand extends FlutterCommand {
       if (device is FuchsiaDevice) {
         attachLogger = true;
         final String module = argResults['module'];
-        if (module == null)
+        if (module == null) {
           throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
+        }
         usesIpv6 = device.ipv6;
         FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
         try {

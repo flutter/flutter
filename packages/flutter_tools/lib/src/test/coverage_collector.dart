@@ -78,8 +78,9 @@ class CoverageCollector extends TestWatcher {
       });
     final Future<void> collectionComplete = collect(observatoryUri, libraryPredicate)
       .then<void>((Map<String, dynamic> result) {
-        if (result == null)
+        if (result == null) {
           throw Exception('Failed to collect coverage.');
+        }
         data = result;
       });
     await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
@@ -122,8 +123,9 @@ class CoverageCollector extends TestWatcher {
     );
     status.stop();
     printTrace('coverage information collection complete');
-    if (coverageData == null)
+    if (coverageData == null) {
       return false;
+    }
 
     final File coverageFile = fs.file(coveragePath)
       ..createSync(recursive: true)
@@ -139,10 +141,11 @@ class CoverageCollector extends TestWatcher {
 
       if (os.which('lcov') == null) {
         String installMessage = 'Please install lcov.';
-        if (platform.isLinux)
+        if (platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';
-        else if (platform.isMacOS)
+        } else if (platform.isMacOS) {
           installMessage = 'Consider running "brew install lcov".';
+        }
         printError('Missing "lcov" tool. Unable to merge coverage data.\n$installMessage');
         return false;
       }
@@ -156,8 +159,9 @@ class CoverageCollector extends TestWatcher {
           '--add-tracefile', sourceFile.path,
           '--output-file', coverageFile.path,
         ]);
-        if (result.exitCode != 0)
+        if (result.exitCode != 0) {
           return false;
+        }
       } finally {
         tempDir.deleteSync(recursive: true);
       }

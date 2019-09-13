@@ -302,8 +302,9 @@ Directory _newTempDir(FileSystem fs) {
 }
 
 void _cleanupTempDirs() {
-  while (_tempDirs.isNotEmpty)
+  while (_tempDirs.isNotEmpty) {
     tryToDelete(_tempDirs.removeLast());
+  }
 }
 
 Future<void> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash = false }) async {

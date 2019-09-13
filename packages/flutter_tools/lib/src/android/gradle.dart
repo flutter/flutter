@@ -477,8 +477,9 @@ void updateLocalProperties({
 
   final FlutterManifest manifest = project.manifest;
 
-  if (androidSdk != null)
+  if (androidSdk != null) {
     changeIfNecessary('sdk.dir', escapePath(androidSdk.directory));
+  }
 
   changeIfNecessary('flutter.sdk', escapePath(Cache.flutterRoot));
 
@@ -490,8 +491,9 @@ void updateLocalProperties({
     changeIfNecessary('flutter.versionCode', buildNumber?.toString());
   }
 
-  if (changed)
+  if (changed) {
     settings.writeContents(localProperties);
+  }
 }
 
 /// Writes standard Android local properties to the specified [properties] file.
@@ -652,16 +654,18 @@ Future<void> _buildGradleProjectV1(FlutterProject project) async {
   status.stop();
   flutterUsage.sendTiming('build', 'gradle-v1', Duration(milliseconds: sw.elapsedMilliseconds));
 
-  if (exitCode != 0)
+  if (exitCode != 0) {
     throwToolExit('Gradle build failed: $exitCode', exitCode: exitCode);
+  }
 
   printStatus('Built ${fs.path.relative(project.android.gradleAppOutV1File.path)}.');
 }
 
 String _hex(List<int> bytes) {
   final StringBuffer result = StringBuffer();
-  for (int part in bytes)
+  for (int part in bytes) {
     result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
+  }
   return result.toString();
 }
 
@@ -735,18 +739,24 @@ Future<void> _buildGradleProjectV2(
   }
   assert(buildInfo.trackWidgetCreation != null);
   command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
-  if (buildInfo.extraFrontEndOptions != null)
+  if (buildInfo.extraFrontEndOptions != null) {
     command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
-  if (buildInfo.extraGenSnapshotOptions != null)
+  }
+  if (buildInfo.extraGenSnapshotOptions != null) {
     command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions}');
-  if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty)
+  }
+  if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty) {
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
-  if (buildInfo.fileSystemScheme != null)
+  }
+  if (buildInfo.fileSystemScheme != null) {
     command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
-  if (androidBuildInfo.splitPerAbi)
+  }
+  if (androidBuildInfo.splitPerAbi) {
     command.add('-Psplit-per-abi=true');
-  if (androidBuildInfo.proguard)
+  }
+  if (androidBuildInfo.proguard) {
     command.add('-Pproguard=true');
+  }
   if (androidBuildInfo.targetArchs.isNotEmpty) {
     final String targetPlatforms = androidBuildInfo.targetArchs
         .map(getPlatformNameForAndroidArch).join(',');
@@ -814,8 +824,9 @@ Future<void> _buildGradleProjectV2(
 
   if (!isBuildingBundle) {
     final Iterable<File> apkFiles = findApkFiles(project, androidBuildInfo);
-    if (apkFiles.isEmpty)
+    if (apkFiles.isEmpty) {
       throwToolExit('Gradle build failed to produce an Android package.');
+    }
     // Copy the first APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
     // TODO(blasten): Handle multiple APKs.
     apkFiles.first.copySync(project.apkDirectory.childFile('app.apk').path);
@@ -836,8 +847,9 @@ Future<void> _buildGradleProjectV2(
     }
   } else {
     final File bundleFile = findBundleFile(project, buildInfo);
-    if (bundleFile == null)
+    if (bundleFile == null) {
       throwToolExit('Gradle build failed to produce an Android bundle package.');
+    }
 
     String appSize;
     if (buildInfo.mode == BuildMode.debug) {
@@ -853,28 +865,32 @@ Future<void> _buildGradleProjectV2(
 @visibleForTesting
 Iterable<File> findApkFiles(GradleProject project, AndroidBuildInfo androidBuildInfo) {
   final Iterable<String> apkFileNames = project.apkFilesFor(androidBuildInfo);
-  if (apkFileNames.isEmpty)
+  if (apkFileNames.isEmpty) {
     return const <File>[];
+  }
 
   return apkFileNames.expand<File>((String apkFileName) {
     File apkFile = project.apkDirectory.childFile(apkFileName);
-    if (apkFile.existsSync())
+    if (apkFile.existsSync()) {
       return <File>[apkFile];
+    }
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
     final String modeName = camelCase(buildInfo.modeName);
     apkFile = project.apkDirectory
         .childDirectory(modeName)
         .childFile(apkFileName);
-    if (apkFile.existsSync())
+    if (apkFile.existsSync()) {
       return <File>[apkFile];
+    }
     if (buildInfo.flavor != null) {
       // Android Studio Gradle plugin v3 adds flavor to path.
       apkFile = project.apkDirectory
           .childDirectory(buildInfo.flavor)
           .childDirectory(modeName)
           .childFile(apkFileName);
-      if (apkFile.existsSync())
+      if (apkFile.existsSync()) {
         return <File>[apkFile];
+      }
     }
     return const <File>[];
   });
@@ -949,8 +965,9 @@ class GradleProject {
       final Match match = _assembleTaskPattern.matchAsPrefix(s);
       if (match != null) {
         final String variant = match.group(1).toLowerCase();
-        if (!variant.endsWith('test'))
+        if (!variant.endsWith('test')) {
           variants.add(variant);
+        }
       }
     }
     final Set<String> buildTypes = <String>{};
@@ -966,8 +983,9 @@ class GradleProject {
         }
       }
     }
-    if (productFlavors.isEmpty)
+    if (productFlavors.isEmpty) {
       buildTypes.addAll(variants);
+    }
     return GradleProject(
         buildTypes.toList(),
         productFlavors.toList(),
@@ -1002,33 +1020,36 @@ class GradleProject {
 
   String _buildTypeFor(BuildInfo buildInfo) {
     final String modeName = camelCase(buildInfo.modeName);
-    if (buildTypes.contains(modeName.toLowerCase()))
+    if (buildTypes.contains(modeName.toLowerCase())) {
       return modeName;
+    }
     return null;
   }
 
   String _productFlavorFor(BuildInfo buildInfo) {
-    if (buildInfo.flavor == null)
+    if (buildInfo.flavor == null) {
       return productFlavors.isEmpty ? '' : null;
-    else if (productFlavors.contains(buildInfo.flavor))
+    } else if (productFlavors.contains(buildInfo.flavor)) {
       return buildInfo.flavor;
-    else
-      return null;
+    }
+    return null;
   }
 
   String assembleTaskFor(BuildInfo buildInfo) {
     final String buildType = _buildTypeFor(buildInfo);
     final String productFlavor = _productFlavorFor(buildInfo);
-    if (buildType == null || productFlavor == null)
+    if (buildType == null || productFlavor == null) {
       return null;
+    }
     return 'assemble${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
   }
 
   Iterable<String> apkFilesFor(AndroidBuildInfo androidBuildInfo) {
     final String buildType = _buildTypeFor(androidBuildInfo.buildInfo);
     final String productFlavor = _productFlavorFor(androidBuildInfo.buildInfo);
-    if (buildType == null || productFlavor == null)
+    if (buildType == null || productFlavor == null) {
       return const <String>[];
+    }
 
     final String flavorString = productFlavor.isEmpty ? '' : '-' + productFlavor;
     if (androidBuildInfo.splitPerAbi) {
@@ -1043,16 +1064,18 @@ class GradleProject {
   String bundleTaskFor(BuildInfo buildInfo) {
     final String buildType = _buildTypeFor(buildInfo);
     final String productFlavor = _productFlavorFor(buildInfo);
-    if (buildType == null || productFlavor == null)
+    if (buildType == null || productFlavor == null) {
       return null;
+    }
     return 'bundle${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
   }
 
   String aarTaskFor(BuildInfo buildInfo) {
     final String buildType = _buildTypeFor(buildInfo);
     final String productFlavor = _productFlavorFor(buildInfo);
-    if (buildType == null || productFlavor == null)
+    if (buildType == null || productFlavor == null) {
       return null;
+    }
     return 'assembleAar${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
   }
 }
