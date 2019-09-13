@@ -277,10 +277,10 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addShrinkingFlag() {
-    argParser.addFlag('shrinking',
+    argParser.addFlag('shrink',
       negatable: true,
       defaultsTo: true,
-      help: 'Whether to enable shrinking on release mode.'
+      help: 'Whether to enable code shrinking on release mode.'
             'When enabling shrinking, you also benefit from obfuscation, '
             'which shortens the names of your app’s classes and members, '
             'and optimization, which applies more aggressive strategies to '

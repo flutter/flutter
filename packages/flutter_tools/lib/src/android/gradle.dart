@@ -308,7 +308,7 @@ Future<String> _initializeGradle(FlutterProject project) async {
 
 
   // Update the project if needed.
-  // TODO(egarciad): This should be part of flutter migrate.
+  // TODO(egarciad): https://github.com/flutter/flutter/issues/40460.
   migrateToR8(android);
   injectGradleWrapperIfNeeded(android);
 
@@ -347,8 +347,8 @@ void migrateToR8(Directory directory) {
   if (!gradleProperties.existsSync()) {
     throwToolExit('Expected file ${gradleProperties.path}.');
   }
-  final String properiesContent = gradleProperties.readAsStringSync();
-  if (properiesContent.contains('android.enableR8')) {
+  final String propertiesContent = gradleProperties.readAsStringSync();
+  if (propertiesContent.contains('android.enableR8')) {
     printTrace('gradle.properties already sets `android.enableR8`');
     return;
   }
@@ -774,8 +774,8 @@ Future<void> _buildGradleProjectV2(
     command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
   if (androidBuildInfo.splitPerAbi)
     command.add('-Psplit-per-abi=true');
-  if (androidBuildInfo.shrinking)
-    command.add('-Pshrinking=true');
+  if (androidBuildInfo.shrink)
+    command.add('-Pshrink=true');
   if (androidBuildInfo.targetArchs.isNotEmpty) {
     final String targetPlatforms = androidBuildInfo.targetArchs
         .map(getPlatformNameForAndroidArch).join(',');
@@ -809,7 +809,7 @@ Future<void> _buildGradleProjectV2(
           potentialAndroidXFailure = true;
         }
         // R8 errors include references to this package.
-        if (!potentialR8Failure && androidBuildInfo.shrinking &&
+        if (!potentialR8Failure && androidBuildInfo.shrink &&
             line.contains('com.android.tools.r8')) {
           potentialR8Failure = true;
         }
@@ -830,7 +830,7 @@ Future<void> _buildGradleProjectV2(
     if (potentialR8Failure) {
       final String exclamationMark = terminal.color('[!]', TerminalColor.red);
       printStatus('$exclamationMark The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
-      printStatus('To disable the shrinker, pass the `--no-shrinking` flag to this command.', indent: 4);
+      printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
       printStatus('To learn more, see: https://developer.android.com/studio/build/shrink-code', indent: 4);
       BuildEvent('r8-failure').send();
     } else if (potentialAndroidXFailure) {

@@ -82,7 +82,7 @@ class BuildApkCommand extends BuildSubCommand {
       buildInfo,
       splitPerAbi: argResults['split-per-abi'],
       targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName),
-      shrinking: argResults['shrinking'],
+      shrink: argResults['shrink'],
     );
 
     if (buildInfo.isRelease && !androidBuildInfo.splitPerAbi && androidBuildInfo.targetArchs.length > 1) {

@@ -151,7 +151,7 @@ void main() {
           '-q',
           '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=false',
-          '-Pshrinking=true',
+          '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64',
           'assembleRelease',
         ],
@@ -167,14 +167,14 @@ void main() {
     },
     timeout: allowForCreateFlutterProject);
 
-    testUsingContext('shrinking is disabled when --no-shrinking is passed', () async {
+    testUsingContext('shrinking is disabled when --no-shrink is passed', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
 
       await expectLater(() async {
         await runBuildApkCommand(
           projectPath,
-          arguments: <String>['--no-shrinking'],
+          arguments: <String>['--no-shrink'],
         );
       }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
 
@@ -209,7 +209,7 @@ void main() {
           '-q',
           '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=false',
-          '-Pshrinking=true',
+          '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64',
           'assembleRelease',
         ],
@@ -236,7 +236,7 @@ void main() {
       expect(testLogger.statusText,
           contains('The shrinker may have failed to optimize the Java bytecode.'));
       expect(testLogger.statusText,
-          contains('To disable the shrinker, pass the `--no-shrinking` flag to this command.'));
+          contains('To disable the shrinker, pass the `--no-shrink` flag to this command.'));
       expect(testLogger.statusText,
           contains('To learn more, see: https://developer.android.com/studio/build/shrink-code'));
 
