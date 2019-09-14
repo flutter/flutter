@@ -88,14 +88,16 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await runCommandAndStreamOutput(
-      <String>[
-        fs.path.join('bin', 'flutter'),
-        'update-packages',
-      ],
+    if (argResults['flutter-repo']) {
+      await runCommandAndStreamOutput(
+        <String>[
+          fs.path.join('bin', 'flutter'),
+          'update-packages',
+        ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
-    );
+      );
+    }
 
     if (argResults['watch']) {
       await AnalyzeContinuously(
