@@ -288,6 +288,8 @@ class RunCommand extends RunCommandBase {
       return DebuggingOptions.disabled(
         buildInfo,
         initializePlatform: argResults['web-initialize-platform'],
+        hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] : '',
+        port: featureFlags.isWebEnabled ? argResults['web-port'] : '',
       );
     } else {
       return DebuggingOptions.enabled(
