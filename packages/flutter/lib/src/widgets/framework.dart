@@ -2237,10 +2237,8 @@ class BuildOwner {
   bool get _debugStateLocked => _debugStateLockLevel > 0;
 
   /// Whether this widget tree is in the build phase.
-  ///
-  /// Only valid when asserts are enabled.
-  bool get debugBuilding => _debugBuilding;
-  bool _debugBuilding = false;
+  bool get isBuilding => _isBuilding;
+  bool _isBuilding = false;
   Element _debugCurrentBuildTarget;
 
   /// Establishes a scope in which calls to [State.setState] are forbidden, and
@@ -2296,14 +2294,14 @@ class BuildOwner {
       return;
     assert(context != null);
     assert(_debugStateLockLevel >= 0);
-    assert(!_debugBuilding);
+    assert(!_isBuilding);
     assert(() {
       if (debugPrintBuildScope)
         debugPrint('buildScope called with context $context; dirty list is: $_dirtyElements');
       _debugStateLockLevel += 1;
-      _debugBuilding = true;
       return true;
     }());
+    _isBuilding = true;
     Timeline.startSync('Build', arguments: timelineWhitelistArguments);
     try {
       _scheduledFlushDirtyElements = true;
@@ -2386,9 +2384,9 @@ class BuildOwner {
       _scheduledFlushDirtyElements = false;
       _dirtyElementsNeedsResorting = null;
       Timeline.finishSync();
-      assert(_debugBuilding);
+      assert(_isBuilding);
+      _isBuilding = false;
       assert(() {
-        _debugBuilding = false;
         _debugStateLockLevel -= 1;
         if (debugPrintBuildScope)
           debugPrint('buildScope finished');
@@ -3282,7 +3280,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           describeElement('The size getter was called for the following element')
         ]);
       }
-      if (owner._debugBuilding) {
+      if (owner._isBuilding) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Cannot get size during build.'),
           ErrorDescription(
@@ -3654,7 +3652,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(owner != null);
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(() {
-      if (owner._debugBuilding) {
+      if (owner._isBuilding) {
         assert(owner._debugCurrentBuildTarget != null);
         assert(owner._debugStateLocked);
         if (_debugIsInScope(owner._debugCurrentBuildTarget))
