@@ -159,8 +159,12 @@ class FlutterPlugin implements Plugin<Project> {
                     "gradle", "flutter_proguard_rules.pro")
             project.android.buildTypes {
                 release {
+                    // Enables code shrinking, obfuscation, and optimization for only
+                    // your project's release build type.
                     minifyEnabled true
-                    useProguard true
+                    // Enables resource shrinking, which is performed by the
+                    // Android Gradle plugin.
+                    shrinkResources true
                     // Fallback to `android/app/proguard-rules.pro`.
                     // This way, custom Proguard rules can be configured as needed.
                     proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"

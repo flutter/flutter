@@ -277,6 +277,19 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
   }
 
+  void addShrinkingFlag() {
+    argParser.addFlag('shrink',
+      negatable: true,
+      defaultsTo: true,
+      help: 'Whether to enable code shrinking on release mode.'
+            'When enabling shrinking, you also benefit from obfuscation, '
+            'which shortens the names of your app’s classes and members, '
+            'and optimization, which applies more aggressive strategies to '
+            'further reduce the size of your app.'
+            'To learn more, see: https://developer.android.com/studio/build/shrink-code'
+      );
+  }
+
   void usesFuchsiaOptions({ bool hide = false }) {
     argParser.addOption(
       'target-model',
