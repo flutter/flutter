@@ -85,7 +85,7 @@ class FuchsiaKernelCompiler {
       fuchsiaArtifacts.kernelCompiler.path,
       ...flags,
     ];
-    final Process process = await runCommand(command);
+    final Process process = await processUtils.start(command);
     final Status status = logger.startProgress(
       'Building Fuchsia application...',
       timeout: null,

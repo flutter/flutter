@@ -4,6 +4,7 @@
 
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/process.dart';
 import '../convert.dart';
 import '../globals.dart';
@@ -27,10 +28,12 @@ class PlistParser {
   Map<String, dynamic> parseFile(String plistFilePath) {
     assert(plistFilePath != null);
     const String executable = '/usr/bin/plutil';
-    if (!fs.isFileSync(executable))
+    if (!fs.isFileSync(executable)) {
       throw const FileNotFoundException(executable);
-    if (!fs.isFileSync(plistFilePath))
+    }
+    if (!fs.isFileSync(plistFilePath)) {
       return const <String, dynamic>{};
+    }
 
     final String normalizedPlistPath = fs.path.absolute(plistFilePath);
 
@@ -38,9 +41,12 @@ class PlistParser {
       final List<String> args = <String>[
         executable, '-convert', 'json', '-o', '-', normalizedPlistPath,
       ];
-      final String jsonContent = runCheckedSync(args);
+      final String jsonContent = processUtils.runSync(
+        args,
+        throwOnError: true,
+      ).stdout.trim();
       return json.decode(jsonContent);
-    } catch (error) {
+    } on ProcessException catch (error) {
       printTrace('$error');
       return const <String, dynamic>{};
     }

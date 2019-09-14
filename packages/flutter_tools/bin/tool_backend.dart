@@ -8,7 +8,7 @@ import 'package:path/path.dart' as path; // ignore: package_path_import.
 /// Executes the required flutter tasks for a desktop build.
 Future<void> main(List<String> arguments) async {
   final String targetPlatform = arguments[0];
-  final String buildMode = arguments[1];
+  final String buildMode = arguments[1].toLowerCase();
 
   final String projectDirectory = Platform.environment['PROJECT_DIR'];
   final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] != null;
