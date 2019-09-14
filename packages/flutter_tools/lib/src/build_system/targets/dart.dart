@@ -201,8 +201,8 @@ class KernelSnapshot extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
     final String packagesPath = environment.projectDir.childFile('.packages').path;
-    // TODO(jonahwilliams): use a full file uri to remove Dart complaint about entrypoint.
-    final String targetFileUri = fs.file(targetFile).uri.toFilePath(windows: platform.isWindows);
+    final String targetFileUri = fs.file(targetFile).absolute.uri
+        .toFilePath(windows: platform.isWindows);
     final PackageUriMapper packageUriMapper = PackageUriMapper(targetFileUri,
         packagesPath, null, null);
 

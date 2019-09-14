@@ -103,7 +103,7 @@ class FileHashStore {
     FileStorage fileStorage;
     try {
       fileStorage = FileStorage.fromBuffer(data);
-    } on FormatException {
+    } catch (err) {
       printTrace('Filestorage format changed');
       _cacheFile.deleteSync();
       return;
