@@ -2350,4 +2350,45 @@ void main() {
     expect(find.text('Tab1'), findsOneWidget);
     expect(find.text('Tab2'), findsOneWidget);
   });
+
+  testWidgets('TabBar with elevation', (WidgetTester tester) async {
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: 1,
+    );
+
+    final GlobalKey tabBarKey = GlobalKey();
+    await tester.pumpWidget(
+      boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              key: tabBarKey,
+              controller: controller,
+              tabs: const <Widget>[Tab(text: 'TAB')],
+              elevation: 4.0
+            ),
+            Flexible(
+              child: TabBarView(
+                controller: controller,
+                children: const <Widget>[Text('PAGE')],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    var tabBar = find.byKey(tabBarKey);
+
+    expect(find.byType(Material), findsWidgets);
+    expect((find.descendant(
+        of: find.byType(Material),
+        matching: find.byType(Material))), findsOneWidget);
+    expect((find.descendant(
+        of: find.byType(Material),
+        matching: find.byType(Material))), rendersOnPhysicalModel(
+      elevation: 4.0,
+    ));
+  });
 }
