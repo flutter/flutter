@@ -9,9 +9,7 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../build_info.dart';
-import '../globals.dart';
 import '../project.dart';
-
 import 'android_sdk.dart';
 import 'gradle.dart';
 
@@ -126,19 +124,14 @@ class _AndroidBuilderImpl extends AndroidBuilder {
     if (androidSdk == null) {
       throwToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
     }
-    final List<String> validationResult = androidSdk.validateSdkWellFormed();
-    if (validationResult.isNotEmpty) {
-      for (String message in validationResult) {
-        printError(message, wrap: false);
-      }
-      throwToolExit('Try re-installing or updating your Android SDK.');
-    }
-    return buildGradleProject(
+    await buildGradleProject(
       project: project,
       androidBuildInfo: androidBuildInfo,
       target: target,
       isBuildingBundle: true,
     );
+    // Gradle may download SDK components. Re-initialize SDK to pick them up.
+    androidSdk.reinitialize();
   }
 }
 
