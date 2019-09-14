@@ -28,6 +28,8 @@ const EdgeInsets _kUnalignedButtonPadding = EdgeInsets.zero;
 const EdgeInsets _kAlignedMenuMargin = EdgeInsets.zero;
 const EdgeInsetsGeometry _kUnalignedMenuMargin = EdgeInsetsDirectional.only(start: 16.0, end: 24.0);
 
+typedef DropdownButtonBuilder = List<Widget> Function(BuildContext context);
+
 class _DropdownMenuPainter extends CustomPainter {
   _DropdownMenuPainter({
     this.color,
@@ -604,6 +606,7 @@ class DropdownButton<T> extends StatefulWidget {
   DropdownButton({
     Key key,
     @required this.items,
+    this.selectedItemBuilder,
     this.value,
     this.hint,
     this.disabledHint,
@@ -654,6 +657,50 @@ class DropdownButton<T> extends StatefulWidget {
   /// will display the [disabledHint] widget if it is non-null.
   /// {@endtemplate}
   final ValueChanged<T> onChanged;
+
+  /// A builder to customize the dropdown buttons corresponding to the
+  /// [DropdownMenuItem]s in [items].
+  ///
+  /// When a [DropdownMenuItem] is selected, the widget that will be displayed
+  /// from the list corresponds to the [DropdownMenuItem] of the same index
+  /// in [items].
+  ///
+  /// {@tool snippet --template=stateful_widget_scaffold}
+  ///
+  /// This sample shows a `DropdownButton` with a button with [Text] that
+  /// corresponds to but is unique from [DropdownMenuItem].
+  ///
+  /// ```dart
+  /// final List<String> items = <String>['1','2','3'];
+  /// String selectedItem = '1';
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Padding(
+  ///     padding: const EdgeInsets.symmetric(horizontal: 12.0),
+  ///     child: DropdownButton<String>(
+  ///       value: selectedItem,
+  ///       onChanged: (String string) => setState(() => selectedItem = string),
+  ///       selectedItemBuilder: (BuildContext context) {
+  ///         return items.map((String item) {
+  ///           return Text(item);
+  ///         }).toList();
+  ///       },
+  ///       items: items.map((String item) {
+  ///         return DropdownMenuItem<String>(
+  ///           child: Text('Log $item'),
+  ///           value: item,
+  ///         );
+  ///       }).toList(),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// If this callback is null, the [DropdownMenuItem] from [items]
+  /// that matches [value] will be displayed.
+  final DropdownButtonBuilder selectedItemBuilder;
 
   /// The z-coordinate at which to place the menu when open.
   ///
@@ -849,7 +896,21 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
-    final List<Widget> items = _enabled ? List<Widget>.from(widget.items) : <Widget>[];
+    List<Widget> items;
+    if (_enabled) {
+      items = widget.selectedItemBuilder == null
+        ? List<Widget>.from(widget.items)
+        : widget.selectedItemBuilder(context).map((Widget item) {
+          return Container(
+            height: _kMenuItemHeight,
+            alignment: AlignmentDirectional.centerStart,
+            child: item,
+          );
+        }).toList();
+    } else {
+      items = <Widget>[];
+    }
+
     int hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
       final Widget emplacedHint = _enabled
