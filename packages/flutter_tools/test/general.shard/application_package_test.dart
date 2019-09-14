@@ -103,6 +103,10 @@ void main() {
         platform.isWindows ? 'gradlew.bat' : 'gradlew',
       )..createSync(recursive: true);
 
+      project.android.hostAppGradleRoot
+        .childFile('gradle.properties')
+        .writeAsStringSync('irrelevant');
+
       final Directory gradleWrapperDir = fs.systemTempDirectory.createTempSync('gradle_wrapper.');
       when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
 

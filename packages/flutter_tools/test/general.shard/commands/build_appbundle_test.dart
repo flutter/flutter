@@ -75,7 +75,7 @@ void main() {
     }, timeout: allowForCreateFlutterProject);
   });
 
-  group('Flags', () {
+  group('Gradle', () {
     Directory tempDir;
     ProcessManager mockProcessManager;
     MockAndroidSdk mockAndroidSdk;
@@ -122,7 +122,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testUsingContext('proguard is enabled by default on release mode', () async {
+    testUsingContext('shrinking is enabled by default on release mode', () async {
       final String projectPath = await createProject(
           tempDir,
           arguments: <String>['--no-pub', '--template=app'],
@@ -138,7 +138,7 @@ void main() {
           '-q',
           '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=false',
-          '-Pproguard=true',
+          '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64',
           'bundleRelease',
         ],
@@ -152,10 +152,9 @@ void main() {
       GradleUtils: () => GradleUtils(),
       ProcessManager: () => mockProcessManager,
     },
-    skip: true,
     timeout: allowForCreateFlutterProject);
 
-    testUsingContext('proguard is disabled when --no-proguard is passed', () async {
+    testUsingContext('shrinking is disabled when --no-shrink is passed', () async {
       final String projectPath = await createProject(
           tempDir,
           arguments: <String>['--no-pub', '--template=app'],
@@ -164,7 +163,7 @@ void main() {
       await expectLater(() async {
         await runBuildAppBundleCommand(
           projectPath,
-          arguments: <String>['--no-proguard'],
+          arguments: <String>['--no-shrink'],
         );
       }, throwsToolExit(message: 'Gradle task bundleRelease failed with exit code 1'));
 
@@ -187,10 +186,9 @@ void main() {
       GradleUtils: () => GradleUtils(),
       ProcessManager: () => mockProcessManager,
     },
-    skip: true,
     timeout: allowForCreateFlutterProject);
 
-    testUsingContext('guides the user when proguard fails', () async {
+    testUsingContext('guides the user when the shrinker fails', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
 
@@ -200,22 +198,20 @@ void main() {
           '-q',
           '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=false',
-          '-Pproguard=true',
+          '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64',
           'bundleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       )).thenAnswer((_) {
-        const String proguardStdoutWarning =
-            'Warning: there were 6 unresolved references to program class members.'
-            'Your input classes appear to be inconsistent.'
-            'You may need to recompile the code.'
-            '(http://proguard.sourceforge.net/manual/troubleshooting.html#unresolvedprogramclassmember)';
+        const String r8StdoutWarning =
+            'Execution failed for task \':app:transformClassesAndResourcesWithR8ForStageInternal\'.'
+            '> com.android.tools.r8.CompilationFailedException: Compilation failed to complete';
         return Future<Process>.value(
           createMockProcess(
             exitCode: 1,
-            stdout: proguardStdoutWarning,
+            stdout: r8StdoutWarning,
           )
         );
       });
@@ -227,15 +223,15 @@ void main() {
       }, throwsToolExit(message: 'Gradle task bundleRelease failed with exit code 1'));
 
       expect(testLogger.statusText,
-          contains('Proguard may have failed to optimize the Java bytecode.'));
+          contains('The shrinker may have failed to optimize the Java bytecode.'));
       expect(testLogger.statusText,
-          contains('To disable proguard, pass the `--no-proguard` flag to this command.'));
+          contains('To disable the shrinker, pass the `--no-shrink` flag to this command.'));
       expect(testLogger.statusText,
-          contains('To learn more about Proguard, see: https://flutter.dev/docs/deployment/android#enabling-proguard'));
+          contains('To learn more, see: https://developer.android.com/studio/build/shrink-code'));
 
       verify(mockUsage.sendEvent(
         'build-appbundle',
-        'proguard-failure',
+        'r8-failure',
         parameters: anyNamed('parameters'),
       )).called(1);
     },
@@ -246,7 +242,6 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Usage: () => mockUsage,
     },
-    skip: true,
     timeout: allowForCreateFlutterProject);
   });
 }

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -13,6 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -867,6 +867,13 @@ flutter:
       gradleWrapperDirectory
         .childFile(gradleBinary)
         .writeAsStringSync('irrelevant');
+      fs.currentDirectory
+        .childDirectory('android')
+        .createSync();
+      fs.currentDirectory
+        .childDirectory('android')
+        .childFile('gradle.properties')
+        .writeAsStringSync('irrelevant');
       gradleWrapperDirectory
         .childDirectory('gradle')
         .childDirectory('wrapper')
@@ -1072,6 +1079,82 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     });
   });
 
+  group('migrateToR8', () {
+    MemoryFileSystem memoryFileSystem;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+    });
+
+    testUsingContext('throws ToolExit if gradle.properties doesn\'t exist', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+
+      expect(() {
+        migrateToR8(sampleAppAndroid);
+      }, throwsToolExit(message: 'Expected file ${sampleAppAndroid.path}'));
+
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+    });
+
+    testUsingContext('throws ToolExit if it cannot write gradle.properties', () {
+      final MockDirectory sampleAppAndroid = MockDirectory();
+      final MockFile gradleProperties = MockFile();
+
+      when(gradleProperties.path).thenReturn('foo/gradle.properties');
+      when(gradleProperties.existsSync()).thenReturn(true);
+      when(gradleProperties.readAsStringSync()).thenReturn('');
+      when(gradleProperties.writeAsStringSync('android.enableR8=true\n', mode: FileMode.append))
+        .thenThrow(const FileSystemException());
+
+      when(sampleAppAndroid.childFile('gradle.properties'))
+        .thenReturn(gradleProperties);
+
+      expect(() {
+        migrateToR8(sampleAppAndroid);
+      },
+      throwsToolExit(message:
+        'The tool failed to add `android.enableR8=true` to foo/gradle.properties. '
+        'Please update the file manually and try this command again.'));
+    });
+
+    testUsingContext('does not update gradle.properties if it already uses R8', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+      sampleAppAndroid.childFile('gradle.properties')
+        .writeAsStringSync('android.enableR8=true');
+
+      migrateToR8(sampleAppAndroid);
+
+      expect(testLogger.traceText,
+        contains('gradle.properties already sets `android.enableR8`'));
+      expect(sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+        equals('android.enableR8=true'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+    });
+
+    testUsingContext('sets android.enableR8=true', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+      sampleAppAndroid.childFile('gradle.properties')
+        .writeAsStringSync('org.gradle.jvmargs=-Xmx1536M\n');
+
+      migrateToR8(sampleAppAndroid);
+
+      expect(testLogger.traceText, contains('set `android.enableR8=true` in gradle.properties'));
+      expect(sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+        equals(
+          'org.gradle.jvmargs=-Xmx1536M\n'
+          'android.enableR8=true\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+    });
+  });
+
   group('gradle build', () {
     MockAndroidSdk mockAndroidSdk;
     MockAndroidStudio mockAndroidStudio;
@@ -1136,6 +1219,9 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       final File gradlew = fs.file('path/to/project/.android/gradlew');
       gradlew.createSync(recursive: true);
 
+      fs.file('path/to/project/.android/gradle.properties')
+        .writeAsStringSync('irrelevant');
+
       when(mockProcessManager.run(
           <String> ['/path/to/project/.android/gradlew', '-v'],
           workingDirectory: anyNamed('workingDirectory'),
@@ -1198,9 +1284,11 @@ Platform fakePlatform(String name) {
   return FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
 }
 
+class MockAndroidStudio extends Mock implements AndroidStudio {}
+class MockDirectory extends Mock implements Directory {}
+class MockFile extends Mock implements File {}
+class MockGradleProject extends Mock implements GradleProject {}
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
-class MockGradleProject extends Mock implements GradleProject {}
 class MockitoAndroidSdk extends Mock implements AndroidSdk {}
-class MockAndroidStudio extends Mock implements AndroidStudio {}
