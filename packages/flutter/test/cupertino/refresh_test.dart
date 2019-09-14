@@ -1403,6 +1403,50 @@ void main() {
         debugDefaultTargetPlatformOverride = null;
       },
     );
+
+    testWidgets('buildSimpleRefreshIndicator dark mode', (WidgetTester tester) async {
+      const CupertinoDynamicColor color = CupertinoColors.inactiveGray;
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.light),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Builder(
+              builder: (BuildContext context) {
+                return CupertinoSliverRefreshControl.buildSimpleRefreshIndicator(
+                  context,
+                  RefreshIndicatorMode.drag,
+                  10, 10, 10,
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.widget<Icon>(find.byType(Icon)).color.value, color.color.value);
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Builder(
+              builder: (BuildContext context) {
+                return CupertinoSliverRefreshControl.buildSimpleRefreshIndicator(
+                  context,
+                  RefreshIndicatorMode.drag,
+                  10, 10, 10,
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.widget<Icon>(find.byType(Icon)).color.value, color.darkColor.value);
+    });
   };
 
   group('UI tests long list', uiTestGroup);
