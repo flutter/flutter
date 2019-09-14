@@ -306,6 +306,10 @@ Future<String> _initializeGradle(FlutterProject project) async {
   final Status status = logger.startProgress('Initializing gradle...',
       timeout: timeoutConfiguration.slowOperation);
 
+
+  // Update the project if needed.
+  // TODO(egarciad): https://github.com/flutter/flutter/issues/40460.
+  migrateToR8(android);
   injectGradleWrapperIfNeeded(android);
 
   final String gradle = _locateGradlewExecutable(android);
@@ -333,6 +337,31 @@ Future<String> _initializeGradle(FlutterProject project) async {
     status.stop();
   }
   return gradle;
+}
+
+/// Migrates the Android's [directory] to R8.
+/// https://developer.android.com/studio/build/shrink-code
+@visibleForTesting
+void migrateToR8(Directory directory) {
+  final File gradleProperties = directory.childFile('gradle.properties');
+  if (!gradleProperties.existsSync()) {
+    throwToolExit('Expected file ${gradleProperties.path}.');
+  }
+  final String propertiesContent = gradleProperties.readAsStringSync();
+  if (propertiesContent.contains('android.enableR8')) {
+    printTrace('gradle.properties already sets `android.enableR8`');
+    return;
+  }
+  printTrace('set `android.enableR8=true` in gradle.properties');
+  try {
+    gradleProperties
+      .writeAsStringSync('android.enableR8=true\n', mode: FileMode.append);
+  } on FileSystemException {
+    throwToolExit(
+      'The tool failed to add `android.enableR8=true` to ${gradleProperties.path}. '
+      'Please update the file manually and try this command again.'
+    );
+  }
 }
 
 /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
@@ -754,8 +783,8 @@ Future<void> _buildGradleProjectV2(
   if (androidBuildInfo.splitPerAbi) {
     command.add('-Psplit-per-abi=true');
   }
-  if (androidBuildInfo.proguard) {
-    command.add('-Pproguard=true');
+  if (androidBuildInfo.shrink) {
+    command.add('-Pshrink=true');
   }
   if (androidBuildInfo.targetArchs.isNotEmpty) {
     final String targetPlatforms = androidBuildInfo.targetArchs
@@ -772,7 +801,7 @@ Future<void> _buildGradleProjectV2(
   }
   command.add(assembleTask);
   bool potentialAndroidXFailure = false;
-  bool potentialProguardFailure = false;
+  bool potentialR8Failure = false;
   final Stopwatch sw = Stopwatch()..start();
   int exitCode = 1;
   try {
@@ -789,10 +818,10 @@ Future<void> _buildGradleProjectV2(
         if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
           potentialAndroidXFailure = true;
         }
-        // Proguard errors include this url.
-        if (!potentialProguardFailure && androidBuildInfo.proguard &&
-            line.contains('http://proguard.sourceforge.net')) {
-          potentialProguardFailure = true;
+        // R8 errors include references to this package.
+        if (!potentialR8Failure && androidBuildInfo.shrink &&
+            line.contains('com.android.tools.r8')) {
+          potentialR8Failure = true;
         }
         // Always print the full line in verbose mode.
         if (logger.isVerbose) {
@@ -808,12 +837,12 @@ Future<void> _buildGradleProjectV2(
   }
 
   if (exitCode != 0) {
-    if (potentialProguardFailure) {
+    if (potentialR8Failure) {
       final String exclamationMark = terminal.color('[!]', TerminalColor.red);
-      printStatus('$exclamationMark Proguard may have failed to optimize the Java bytecode.', emphasis: true);
-      printStatus('To disable proguard, pass the `--no-proguard` flag to this command.', indent: 4);
-      printStatus('To learn more about Proguard, see: https://flutter.dev/docs/deployment/android#enabling-proguard', indent: 4);
-      BuildEvent('proguard-failure').send();
+      printStatus('$exclamationMark The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
+      printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
+      printStatus('To learn more, see: https://developer.android.com/studio/build/shrink-code', indent: 4);
+      BuildEvent('r8-failure').send();
     } else if (potentialAndroidXFailure) {
       printStatus('AndroidX incompatibilities may have caused this build to fail. See https://goo.gl/CP92wY.');
       BuildEvent('android-x-failure').send();
