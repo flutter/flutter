@@ -219,7 +219,9 @@ class PerfTest {
       }
 
       if (needsMeasureCpuGPu) {
-        data.addAll(await measureIosCpuGpu(deviceId: deviceId));
+        await inDirectory<void>('$testDirectory/build', () async {
+          data.addAll(await measureIosCpuGpu(deviceId: deviceId));
+        });
       }
 
       return TaskResult.success(data, benchmarkScoreKeys: <String>[

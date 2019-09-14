@@ -646,36 +646,21 @@ Future<Map<String, dynamic>> measureIosCpuGpu({
     Duration duration = const Duration(seconds: 10),
     String deviceId,
 }) async {
-  final String basePath = '${flutterDirectory.path}/bin/cache/pkg';
-  await inDirectory('$basePath', () async {
-    // We can do this more elegantly in the future (e.g., only delete and clone
-    // the repo if there isn't a clean one with the expected version hash).
-    // For now, this takes less than 1 second so we'll use brute-force to pull
-    // everything every time.
-    final Directory measureDir = dir('$basePath/measure').absolute;
-    if (exists(measureDir)) {
-      await measureDir.delete(recursive: true);
-    }
-    await _execAndCheck('git', <String>[
-      'clone',
-      'https://github.com/liyuqian/measure.git',
-    ]);
-  });
-  return await inDirectory<Map<String,dynamic>>('$basePath/measure', () async {
-    await _execAndCheck('pub', <String>['get']);
-    final int code = await dart(<String>[
-      'bin/main.dart',
-      'ioscpugpu',
-      'new',
-      '-u',
-      'resources/TraceUtility',
-      '-t',
-      'resources/CpuGpuTemplate.tracetemplate',
-      if (deviceId != null) ...<String>['-w', deviceId],
-      '-l',
-      '${duration.inMilliseconds}',
-    ]);
-    _checkExitCode(code);
-    return json.decode(File('$basePath/measure/result.json').readAsStringSync());
-  });
+  await _execAndCheck('pub', <String>[
+    'global',
+    'activate',
+    'gauge',
+  ]);
+
+  await _execAndCheck('pub', <String>[
+    'global',
+    'run',
+    'gauge',
+    'ioscpugpu',
+    'new',
+    if (deviceId != null) ...<String>['-w', deviceId],
+    '-l',
+    '${duration.inMilliseconds}',
+  ]);
+  return json.decode(file('$cwd/result.json').readAsStringSync());
 }
