@@ -840,8 +840,8 @@ flutter:
       expect(getGradleVersionFor('3.3.0'), '4.10.2');
       expect(getGradleVersionFor('3.3.2'), '4.10.2');
 
-      expect(getGradleVersionFor('3.4.0'), '5.1.1');
-      expect(getGradleVersionFor('3.5.0'), '5.1.1');
+      expect(getGradleVersionFor('3.4.0'), '5.6.2');
+      expect(getGradleVersionFor('3.5.0'), '5.6.2');
     });
 
     test('throws on unsupported versions', () {
@@ -1014,7 +1014,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
             'distributionPath=wrapper/dists\n'
             'zipStoreBase=GRADLE_USER_HOME\n'
             'zipStorePath=wrapper/dists\n'
-            'distributionUrl=https\\://services.gradle.org/distributions/gradle-4.10.2-all.zip\n');
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-5.6.2-all.zip\n');
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
@@ -1054,7 +1054,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
             'distributionPath=wrapper/dists\n'
             'zipStoreBase=GRADLE_USER_HOME\n'
             'zipStorePath=wrapper/dists\n'
-            'distributionUrl=https\\://services.gradle.org/distributions/gradle-4.10.2-all.zip\n');
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-5.6.2-all.zip\n');
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
