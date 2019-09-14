@@ -28,7 +28,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.android.tools.build:gradle:3.5.0'
     }
 }
 
@@ -970,26 +970,6 @@ class FlutterPluginTask extends DefaultTask {
             }
             if (verbose) {
                 args "--verbose"
-            }
-        }
-    }
-}
-
-gradle.useLogger(new FlutterEventLogger())
-
-class FlutterEventLogger extends BuildAdapter implements TaskExecutionListener {
-    String mostRecentTask = ""
-
-    void beforeExecute(Task task) {
-        mostRecentTask = task.name
-    }
-
-    void afterExecute(Task task, TaskState state) {}
-
-    void buildFinished(BuildResult result) {
-        if (result.failure != null) {
-            if (!(result.failure instanceof GradleException) || !mostRecentTask.startsWith(FlutterPlugin.FLUTTER_BUILD_PREFIX)) {
-                result.rethrowFailure()
             }
         }
     }
