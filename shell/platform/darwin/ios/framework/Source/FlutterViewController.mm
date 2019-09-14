@@ -25,6 +25,8 @@
 
 NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemanticsUpdate";
 
+NSNotificationName const FlutterViewControllerWillDealloc = @"FlutterViewControllerWillDealloc";
+
 // This is left a FlutterBinaryMessenger privately for now to give people a chance to notice the
 // change. Unfortunately unless you have Werror turned on, incompatible pointers as arguments are
 // just a warning.
@@ -521,7 +523,9 @@ typedef enum UIAccessibilityContrast : NSInteger {
 }
 
 - (void)dealloc {
-  [_engine.get() notifyViewControllerDeallocated];
+  [[NSNotificationCenter defaultCenter] postNotificationName:FlutterViewControllerWillDealloc
+                                                      object:self
+                                                    userInfo:nil];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [_ongoingTouches release];
   [super dealloc];

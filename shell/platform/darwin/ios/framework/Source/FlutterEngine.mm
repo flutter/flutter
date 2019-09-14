@@ -33,6 +33,7 @@
 @property(nonatomic, readonly) NSMutableDictionary* pluginPublications;
 
 @property(nonatomic, readwrite, copy) NSString* isolateId;
+@property(nonatomic, retain) id<NSObject> flutterViewControllerWillDeallocObserver;
 @end
 
 @interface FlutterEngineRegistrar : NSObject <FlutterPluginRegistrar>
@@ -111,6 +112,7 @@
 
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
   [center removeObserver:self name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+  [_flutterViewControllerWillDeallocObserver release];
 
   [super dealloc];
 }
@@ -167,12 +169,21 @@
   _viewController = [viewController getWeakPtr];
   self.iosPlatformView->SetOwnerViewController(_viewController);
   [self maybeSetupPlatformViewChannels];
+
+  self.flutterViewControllerWillDeallocObserver =
+      [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
+                                                        object:viewController
+                                                         queue:[NSOperationQueue mainQueue]
+                                                    usingBlock:^(NSNotification* note) {
+                                                      [self notifyViewControllerDeallocated];
+                                                    }];
 }
 
 - (void)notifyViewControllerDeallocated {
   if (!_allowHeadlessExecution) {
     [self destroyContext];
   }
+  _viewController.reset();
 }
 
 - (void)destroyContext {

@@ -12,6 +12,9 @@
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 
+FLUTTER_EXPORT
+extern NSNotificationName const FlutterViewControllerWillDealloc;
+
 @interface FlutterViewController ()
 
 - (fml::WeakPtr<FlutterViewController>)getWeakPtr;
