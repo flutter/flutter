@@ -30,7 +30,7 @@ import 'value_listenable_builder.dart';
 /// for every animation value until [Tween.end] is reached.
 ///
 /// A provided [onEnd] callback is called whenever an animation completes.
-/// Registering an [ImplicitlyAnimatedWidget.onEnd] callback my be useful to trigger an action (like
+/// Registering an [onEnd] callback my be useful to trigger an action (like
 /// another animation) at the end of the current animation.
 ///
 /// ## Performance optimizations
