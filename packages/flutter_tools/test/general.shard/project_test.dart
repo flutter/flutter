@@ -512,7 +512,11 @@ flutter:
         pluginClass: MyPlugin
       ios:
         pluginClass: MyPlugin
+      linux:
+        pluginClass: MyPlugin
       macos:
+        pluginClass: MyPlugin
+      windows:
         pluginClass: MyPlugin
 ''';
   }
