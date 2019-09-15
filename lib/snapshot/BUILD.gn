@@ -23,7 +23,7 @@ compiled_action("generate_snapshot_bin") {
   tool = "//third_party/dart/runtime/bin:gen_snapshot"
 
   if (is_fuchsia || is_fuchsia_host) {
-    platform_kernel = "//prebuilt/gallium/platform_strong.dill"
+    platform_kernel = "//prebuilt/gallium/flutter/artifacts/platform_strong.dill"
   } else {
     platform_kernel = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
   }
@@ -218,7 +218,7 @@ bin_to_linkable("platform_strong_dill_linkable") {
     ":kernel_platform_files",
   ]
   if (is_fuchsia || is_fuchsia_host) {
-    input = "//prebuilt/gallium/platform_strong.dill"
+    input = "//prebuilt/gallium/flutter/artifacts/platform_strong.dill"
   } else {
     input = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
   }
