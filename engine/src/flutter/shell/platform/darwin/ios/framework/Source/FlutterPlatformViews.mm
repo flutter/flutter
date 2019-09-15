@@ -252,7 +252,8 @@ UIView* FlutterPlatformViewsController::ReconstructClipViewsChain(int number_of_
   }
   // If there were not enough existing clip views, add more.
   while (clipIndex < number_of_clips) {
-    ChildClippingView* clippingView = [ChildClippingView new];
+    ChildClippingView* clippingView =
+        [[ChildClippingView alloc] initWithFrame:flutter_view_.get().bounds];
     [clippingView addSubview:head];
     head = clippingView;
     clipIndex++;
