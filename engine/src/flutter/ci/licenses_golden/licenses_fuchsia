@@ -1,4 +1,4 @@
-Signature: 9b4e75b319a315b5d67d4ea78259caae
+Signature: 3fc396028121b56f77381e39b4c6b966
 
 UNUSED LICENSES:
 
@@ -500,7 +500,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.posix.socket/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.simplecamera/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.speech/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
@@ -1317,7 +1316,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/settings.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/setup.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/system.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.simplecamera/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.speech/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/types.fidl
@@ -2006,7 +2004,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.posix.socket/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.simplecamera/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.speech/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
@@ -2695,7 +2692,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/surface/container.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/surface/surface.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/user_intelligence/user_intelligence_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/mdns.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.speech/speech_to_text.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/flat_namespace.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/commands.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/display_info.fidl
