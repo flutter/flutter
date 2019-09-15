@@ -18,6 +18,12 @@ class BuildWebCommand extends BuildSubCommand {
     usesTargetOption();
     usesPubOption();
     addBuildModeFlags();
+    argParser.addFlag('web-initialize-platform',
+        defaultsTo: true,
+        negatable: true,
+        hide: true,
+        help: 'Whether to automatically invoke webOnlyInitializePlatform.',
+    );
   }
 
   @override
@@ -44,7 +50,7 @@ class BuildWebCommand extends BuildSubCommand {
     final FlutterProject flutterProject = FlutterProject.current();
     final String target = argResults['target'];
     final BuildInfo buildInfo = getBuildInfo();
-    await buildWeb(flutterProject, target, buildInfo);
+    await buildWeb(flutterProject, target, buildInfo, argResults['web-initialize-platform']);
     return null;
   }
 }

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -13,7 +12,9 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -839,13 +840,123 @@ flutter:
       expect(getGradleVersionFor('3.3.0'), '4.10.2');
       expect(getGradleVersionFor('3.3.2'), '4.10.2');
 
-      expect(getGradleVersionFor('3.4.0'), '5.1.1');
-      expect(getGradleVersionFor('3.5.0'), '5.1.1');
+      expect(getGradleVersionFor('3.4.0'), '5.6.2');
+      expect(getGradleVersionFor('3.5.0'), '5.6.2');
     });
 
     test('throws on unsupported versions', () {
       expect(() => getGradleVersionFor('3.6.0'),
           throwsA(predicate<Exception>((Exception e) => e is ToolExit)));
+    });
+  });
+
+  group('Gradle HTTP failures', () {
+    MemoryFileSystem fs;
+    Directory tempDir;
+    Directory gradleWrapperDirectory;
+    MockProcessManager mockProcessManager;
+    String gradleBinary;
+
+    setUp(() {
+      fs = MemoryFileSystem();
+      tempDir = fs.systemTempDirectory.createTempSync('artifacts_test.');
+      gradleBinary = platform.isWindows ? 'gradlew.bat' : 'gradlew';
+      gradleWrapperDirectory = fs.directory(
+        fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper'));
+      gradleWrapperDirectory.createSync(recursive: true);
+      gradleWrapperDirectory
+        .childFile(gradleBinary)
+        .writeAsStringSync('irrelevant');
+      fs.currentDirectory
+        .childDirectory('android')
+        .createSync();
+      fs.currentDirectory
+        .childDirectory('android')
+        .childFile('gradle.properties')
+        .writeAsStringSync('irrelevant');
+      gradleWrapperDirectory
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .createSync(recursive: true);
+      gradleWrapperDirectory
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.jar')
+        .writeAsStringSync('irrelevant');
+
+      mockProcessManager = MockProcessManager();
+    });
+
+    testUsingContext('throws toolExit if gradle fails while downloading', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      const String errorMessage = '''
+Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
+at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1872)
+at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1474)
+at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:254)
+at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
+at org.gradle.wrapper.Download.download(Download.java:44)
+at org.gradle.wrapper.Install\$1.call(Install.java:61)
+at org.gradle.wrapper.Install\$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        errorMessage,
+        1,
+      );
+      when(mockProcessManager.run(cmd, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: errorMessage));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throw toolExit if gradle fails downloading with proxy error', () async {
+      final List<String> cmd = <String>[
+        fs.path.join(fs.currentDirectory.path, 'android', gradleBinary),
+        '-v',
+      ];
+      const String errorMessage = '''
+Exception in thread "main" java.io.IOException: Unable to tunnel through proxy. Proxy returns "HTTP/1.1 400 Bad Request"
+at sun.net.www.protocol.http.HttpURLConnection.doTunneling(HttpURLConnection.java:2124)
+at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:183)
+at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1546)
+at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1474)
+at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:254)
+at org.gradle.wrapper.Download.downloadInternal(Download.java:58)
+at org.gradle.wrapper.Download.download(Download.java:44)
+at org.gradle.wrapper.Install\$1.call(Install.java:61)
+at org.gradle.wrapper.Install\$1.call(Install.java:48)
+at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:65)
+at org.gradle.wrapper.Install.createDist(Install.java:48)
+at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
+at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
+      final ProcessException exception = ProcessException(
+        gradleBinary,
+        <String>['-v'],
+        errorMessage,
+        1,
+      );
+      when(mockProcessManager.run(cmd, environment: anyNamed('environment'), workingDirectory: null))
+        .thenThrow(exception);
+      await expectLater(() async {
+        await checkGradleDependencies();
+      }, throwsToolExit(message: errorMessage));
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache(rootOverride: tempDir),
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
     });
   });
 
@@ -903,7 +1014,7 @@ flutter:
             'distributionPath=wrapper/dists\n'
             'zipStoreBase=GRADLE_USER_HOME\n'
             'zipStorePath=wrapper/dists\n'
-            'distributionUrl=https\\://services.gradle.org/distributions/gradle-4.10.2-all.zip\n');
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-5.6.2-all.zip\n');
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
@@ -943,7 +1054,7 @@ flutter:
             'distributionPath=wrapper/dists\n'
             'zipStoreBase=GRADLE_USER_HOME\n'
             'zipStorePath=wrapper/dists\n'
-            'distributionUrl=https\\://services.gradle.org/distributions/gradle-4.10.2-all.zip\n');
+            'distributionUrl=https\\://services.gradle.org/distributions/gradle-5.6.2-all.zip\n');
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
@@ -965,6 +1076,82 @@ flutter:
       Cache: () => Cache(rootOverride: tempDir),
       FileSystem: () => memoryFileSystem,
       OperatingSystemUtils: () => OperatingSystemUtils(),
+    });
+  });
+
+  group('migrateToR8', () {
+    MemoryFileSystem memoryFileSystem;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+    });
+
+    testUsingContext('throws ToolExit if gradle.properties doesn\'t exist', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+
+      expect(() {
+        migrateToR8(sampleAppAndroid);
+      }, throwsToolExit(message: 'Expected file ${sampleAppAndroid.path}'));
+
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+    });
+
+    testUsingContext('throws ToolExit if it cannot write gradle.properties', () {
+      final MockDirectory sampleAppAndroid = MockDirectory();
+      final MockFile gradleProperties = MockFile();
+
+      when(gradleProperties.path).thenReturn('foo/gradle.properties');
+      when(gradleProperties.existsSync()).thenReturn(true);
+      when(gradleProperties.readAsStringSync()).thenReturn('');
+      when(gradleProperties.writeAsStringSync('android.enableR8=true\n', mode: FileMode.append))
+        .thenThrow(const FileSystemException());
+
+      when(sampleAppAndroid.childFile('gradle.properties'))
+        .thenReturn(gradleProperties);
+
+      expect(() {
+        migrateToR8(sampleAppAndroid);
+      },
+      throwsToolExit(message:
+        'The tool failed to add `android.enableR8=true` to foo/gradle.properties. '
+        'Please update the file manually and try this command again.'));
+    });
+
+    testUsingContext('does not update gradle.properties if it already uses R8', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+      sampleAppAndroid.childFile('gradle.properties')
+        .writeAsStringSync('android.enableR8=true');
+
+      migrateToR8(sampleAppAndroid);
+
+      expect(testLogger.traceText,
+        contains('gradle.properties already sets `android.enableR8`'));
+      expect(sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+        equals('android.enableR8=true'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+    });
+
+    testUsingContext('sets android.enableR8=true', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+      sampleAppAndroid.childFile('gradle.properties')
+        .writeAsStringSync('org.gradle.jvmargs=-Xmx1536M\n');
+
+      migrateToR8(sampleAppAndroid);
+
+      expect(testLogger.traceText, contains('set `android.enableR8=true` in gradle.properties'));
+      expect(sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+        equals(
+          'org.gradle.jvmargs=-Xmx1536M\n'
+          'android.enableR8=true\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
     });
   });
 
@@ -1032,6 +1219,9 @@ flutter:
       final File gradlew = fs.file('path/to/project/.android/gradlew');
       gradlew.createSync(recursive: true);
 
+      fs.file('path/to/project/.android/gradle.properties')
+        .writeAsStringSync('irrelevant');
+
       when(mockProcessManager.run(
           <String> ['/path/to/project/.android/gradlew', '-v'],
           workingDirectory: anyNamed('workingDirectory'),
@@ -1094,9 +1284,11 @@ Platform fakePlatform(String name) {
   return FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
 }
 
+class MockAndroidStudio extends Mock implements AndroidStudio {}
+class MockDirectory extends Mock implements Directory {}
+class MockFile extends Mock implements File {}
+class MockGradleProject extends Mock implements GradleProject {}
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
-class MockGradleProject extends Mock implements GradleProject {}
 class MockitoAndroidSdk extends Mock implements AndroidSdk {}
-class MockAndroidStudio extends Mock implements AndroidStudio {}

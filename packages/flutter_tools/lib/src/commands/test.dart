@@ -164,8 +164,9 @@ class TestCommand extends FastFlutterCommand {
       // We don't scan the entire package, only the test/ subdirectory, so that
       // files with names like like "hit_test.dart" don't get run.
       workDir = fs.directory('test');
-      if (!workDir.existsSync())
+      if (!workDir.existsSync()) {
         throwToolExit('Test directory "${workDir.path}" not found.');
+      }
       files = _findTests(workDir).toList();
       if (files.isEmpty) {
         throwToolExit(
@@ -242,13 +243,18 @@ class TestCommand extends FastFlutterCommand {
     );
 
     if (collector != null) {
-      if (!await collector.collectCoverageData(
-          argResults['coverage-path'], mergeCoverageData: argResults['merge-coverage']))
+      final bool collectionResult = await collector.collectCoverageData(
+        argResults['coverage-path'],
+        mergeCoverageData: argResults['merge-coverage'],
+      );
+      if (!collectionResult) {
         throwToolExit(null);
+      }
     }
 
-    if (result != 0)
+    if (result != 0) {
       throwToolExit(null);
+    }
     return const FlutterCommandResult(ExitStatus.success);
   }
 

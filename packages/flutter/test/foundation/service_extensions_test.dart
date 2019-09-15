@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome')
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -169,9 +167,14 @@ void main() {
       widgetInspectorExtensionCount += 2;
     }
 
+    // The following service extensions are disabled in web:
+    // 1. exit
+    // 2. saveCompilationTrace
+    // 3. showPerformanceOverlay
+    const int disabledExtensions = kIsWeb ? 3 : 0;
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 27 + widgetInspectorExtensionCount);
+    expect(binding.extensions.length, 27 + widgetInspectorExtensionCount - disabledExtensions);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
@@ -592,6 +595,12 @@ void main() {
   test('Service extensions - showPerformanceOverlay', () async {
     Map<String, dynamic> result;
 
+    // The performance overlay service extension is disabled on the web.
+    if (kIsWeb) {
+      expect(binding.extensions.containsKey('showPerformanceOverlay'), isFalse);
+      return;
+    }
+
     expect(binding.frameScheduled, isFalse);
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
     result = await binding.testExtension('showPerformanceOverlay', <String, String>{});
@@ -642,29 +651,29 @@ void main() {
     expect(binding.frameScheduled, isFalse);
     expect(timeDilation, 1.0);
     result = await binding.testExtension('timeDilation', <String, String>{});
-    expect(result, <String, String>{'timeDilation': '1.0'});
+    expect(result, <String, String>{'timeDilation': 1.0.toString()});
     expect(timeDilation, 1.0);
     expect(extensionChangedEvents, isEmpty);
     result = await binding.testExtension('timeDilation', <String, String>{'timeDilation': '100.0'});
-    expect(result, <String, String>{'timeDilation': '100.0'});
+    expect(result, <String, String>{'timeDilation': 100.0.toString()});
     expect(timeDilation, 100.0);
     expect(extensionChangedEvents.length, 1);
     extensionChangedEvent = extensionChangedEvents.last;
     expect(extensionChangedEvent['extension'], 'ext.flutter.timeDilation');
-    expect(extensionChangedEvent['value'], '100.0');
+    expect(extensionChangedEvent['value'], 100.0.toString());
     result = await binding.testExtension('timeDilation', <String, String>{});
-    expect(result, <String, String>{'timeDilation': '100.0'});
+    expect(result, <String, String>{'timeDilation': 100.0.toString()});
     expect(timeDilation, 100.0);
     expect(extensionChangedEvents.length, 1);
     result = await binding.testExtension('timeDilation', <String, String>{'timeDilation': '1.0'});
-    expect(result, <String, String>{'timeDilation': '1.0'});
+    expect(result, <String, String>{'timeDilation': 1.0.toString()});
     expect(timeDilation, 1.0);
     expect(extensionChangedEvents.length, 2);
     extensionChangedEvent = extensionChangedEvents.last;
     expect(extensionChangedEvent['extension'], 'ext.flutter.timeDilation');
-    expect(extensionChangedEvent['value'], '1.0');
+    expect(extensionChangedEvent['value'], 1.0.toString());
     result = await binding.testExtension('timeDilation', <String, String>{});
-    expect(result, <String, String>{'timeDilation': '1.0'});
+    expect(result, <String, String>{'timeDilation': 1.0.toString()});
     expect(timeDilation, 1.0);
     expect(extensionChangedEvents.length, 2);
     expect(binding.frameScheduled, isFalse);

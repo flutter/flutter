@@ -5,8 +5,7 @@
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/process_manager.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
@@ -284,7 +283,7 @@ class ArtifactUnpacker {
     _deleteFrameworkIfPresent(
         fs.path.join(targetDirectory, fs.path.basename(frameworkPath)));
 
-    final ProcessResult result = processManager
+    final RunResult result = processUtils
         .runSync(<String>['cp', '-R', frameworkPath, targetDirectory]);
     if (result.exitCode != 0) {
       throw Exception(

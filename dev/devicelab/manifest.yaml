@@ -327,14 +327,14 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  flutter_gallery_instrumentation_test:
-    description: >
-      Same as flutter_gallery__transition_perf but uses Android instrumentation
-      framework, and therefore does not require a host computer to run. This
-      test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
+  # flutter_gallery_instrumentation_test:
+  #   description: >
+  #     Same as flutter_gallery__transition_perf but uses Android instrumentation
+  #     framework, and therefore does not require a host computer to run. This
+  #     test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
+  #   flaky: true
 
   flutter_attach_test:
     description: >
@@ -456,7 +456,6 @@ tasks:
       Measures the runtime performance of backdrop filter blurs on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   complex_layout_scroll_perf_ios__timeline_summary:
     description: >
@@ -501,7 +500,6 @@ tasks:
     description: >
       Verifies that Flutter View can be used from an iOS project.
     stage: devicelab_ios
-    flaky: true
     required_agent_capabilities: ["mac/ios"]
 
   integration_ui_ios:
@@ -524,12 +522,12 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  macos_chrome_dev_mode:
-    description: >
-      Run flutter web on the devicelab and hot restart.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-    flaky: true # marked as flaky while infra is under heavy development
+  # macos_chrome_dev_mode:
+  #   description: >
+  #     Run flutter web on the devicelab and hot restart.
+  #   stage: devicelab_ios
+  #   required_agent_capabilities: ["mac/ios"]
+  #   flaky: true # marked as flaky while infra is under heavy development
 
   build_benchmark_ios:
     description: >
@@ -587,11 +585,11 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  run_without_leak_win:
-    description: >
-      Checks that `flutter run` does not leak dart.exe on Windows.
-    stage: devicelab_win
-    required_agent_capabilities: ["windows/android"]
+  # run_without_leak_win:
+  #   description: >
+  #     Checks that `flutter run` does not leak dart.exe on Windows.
+  #   stage: devicelab_win
+  #   required_agent_capabilities: ["windows/android"]
 
   # Tests running on Linux hosts
 
@@ -631,7 +629,6 @@ tasks:
       Measures the delta in performance of screen transitions without and
       with semantics enabled.
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   flutter_gallery__memory_nav:
@@ -658,23 +655,23 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  run_without_leak_linux:
-    description: >
-      Checks that `flutter run` does not leak dart on Linux.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
+  # run_without_leak_linux:
+  #   description: >
+  #     Checks that `flutter run` does not leak dart on Linux.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
+  #   flaky: true
 
-  run_without_leak_mac:
-    description: >
-      Checks that `flutter run` does not leak dart on macOS.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-    flaky: true
+  # run_without_leak_mac:
+  #   description: >
+  #     Checks that `flutter run` does not leak dart on macOS.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["mac/android"]
+  #   flaky: true
 
-  android_splash_screen_integration_test:
-    description: >
-      Runs end-to-end test of Flutter's Android splash behavior.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
+  # android_splash_screen_integration_test:
+  #   description: >
+  #     Runs end-to-end test of Flutter's Android splash behavior.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
+  #   flaky: true

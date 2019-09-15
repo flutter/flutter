@@ -180,11 +180,13 @@ class CreateCommand extends FlutterCommand {
   // many of the files could be missing, and we can't really tell definitively.
   _ProjectType _determineTemplateType(Directory projectDir) {
     yaml.YamlMap loadMetadata(Directory projectDir) {
-      if (!projectDir.existsSync())
+      if (!projectDir.existsSync()) {
         return null;
+      }
       final File metadataFile = fs.file(fs.path.join(projectDir.absolute.path, '.metadata'));
-      if (!metadataFile.existsSync())
+      if (!metadataFile.existsSync()) {
         return null;
+      }
       return yaml.loadYaml(metadataFile.readAsStringSync());
     }
 
@@ -293,8 +295,9 @@ class CreateCommand extends FlutterCommand {
       return null;
     }
 
-    if (argResults.rest.isEmpty)
+    if (argResults.rest.isEmpty) {
       throwToolExit('No option specified for the output directory.\n$usage', exitCode: 2);
+    }
 
     if (argResults.rest.length > 1) {
       String message = 'Multiple output directories specified.';
@@ -307,9 +310,10 @@ class CreateCommand extends FlutterCommand {
       throwToolExit(message, exitCode: 2);
     }
 
-    if (Cache.flutterRoot == null)
+    if (Cache.flutterRoot == null) {
       throwToolExit('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment '
         'variable was specified. Unable to find package:flutter.', exitCode: 2);
+    }
 
     await Cache.instance.updateAll(<DevelopmentArtifact>{ DevelopmentArtifact.universal });
 
@@ -317,12 +321,14 @@ class CreateCommand extends FlutterCommand {
 
     final String flutterPackagesDirectory = fs.path.join(flutterRoot, 'packages');
     final String flutterPackagePath = fs.path.join(flutterPackagesDirectory, 'flutter');
-    if (!fs.isFileSync(fs.path.join(flutterPackagePath, 'pubspec.yaml')))
+    if (!fs.isFileSync(fs.path.join(flutterPackagePath, 'pubspec.yaml'))) {
       throwToolExit('Unable to find package:flutter in $flutterPackagePath', exitCode: 2);
+    }
 
     final String flutterDriverPackagePath = fs.path.join(flutterRoot, 'packages', 'flutter_driver');
-    if (!fs.isFileSync(fs.path.join(flutterDriverPackagePath, 'pubspec.yaml')))
+    if (!fs.isFileSync(fs.path.join(flutterDriverPackagePath, 'pubspec.yaml'))) {
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
+    }
 
     final Directory projectDir = fs.directory(argResults.rest.first);
     final String projectDirPath = fs.path.normalize(projectDir.absolute.path);
@@ -358,13 +364,15 @@ class CreateCommand extends FlutterCommand {
     }
 
     String error = _validateProjectDir(projectDirPath, flutterRoot: flutterRoot, overwrite: argResults['overwrite']);
-    if (error != null)
+    if (error != null) {
       throwToolExit(error);
+    }
 
     final String projectName = argResults['project-name'] ?? fs.path.basename(projectDirPath);
     error = _validateProjectName(projectName);
-    if (error != null)
+    if (error != null) {
       throwToolExit(error);
+    }
 
     final Map<String, dynamic> templateContext = _templateContext(
       organization: organization,
@@ -751,8 +759,9 @@ String _validateProjectDir(String dirPath, { String flutterRoot, bool overwrite 
         '${overwrite ? ' Refusing to overwrite a file with a directory.' : ''}';
   }
 
-  if (overwrite)
+  if (overwrite) {
     return null;
+  }
 
   final FileSystemEntityType type = fs.typeSync(dirPath);
 
