@@ -14,6 +14,9 @@ class MockOnEndFunction implements Function {
   }
 }
 
+const Duration animationDuration = Duration(milliseconds:1000);
+const Duration additionalDelay = Duration(milliseconds:1);
+
 void main() {
   MockOnEndFunction mockOnEndFunction;
   const Key switchKey = Key('switchKey');
@@ -75,9 +78,9 @@ void main() {
 
     await tester.pump();
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1000));
+    await tester.pump(animationDuration);
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1));
+    await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
   });
 
@@ -92,9 +95,9 @@ void main() {
 
     await tester.pump();
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1000));
+    await tester.pump(animationDuration);
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1));
+    await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
   });
 
@@ -109,9 +112,9 @@ void main() {
 
     await tester.pump();
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1000));
+    await tester.pump(animationDuration);
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1));
+    await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
   });
 
@@ -126,9 +129,9 @@ void main() {
 
     await tester.pump();
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1000));
+    await tester.pump(animationDuration);
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1));
+    await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
   });
 
@@ -143,9 +146,9 @@ void main() {
 
     await tester.pump();
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1000));
+    await tester.pump(animationDuration);
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1));
+    await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
   });
 
@@ -160,9 +163,9 @@ void main() {
 
     await tester.pump();
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1000));
+    await tester.pump(animationDuration);
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1));
+    await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
   });
 
@@ -177,9 +180,9 @@ void main() {
 
     await tester.pump();
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1000));
+    await tester.pump(animationDuration);
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1));
+    await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
   });
 
@@ -194,9 +197,9 @@ void main() {
 
     await tester.pump();
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1000));
+    await tester.pump(animationDuration);
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1));
+    await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
   });
 
@@ -211,9 +214,9 @@ void main() {
 
     await tester.pump();
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1000));
+    await tester.pump(animationDuration);
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1));
+    await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
   });
 
@@ -228,9 +231,9 @@ void main() {
 
     await tester.pump();
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1000));
+    await tester.pump(animationDuration);
     expect(mockOnEndFunction.called, 0);
-    await tester.pump(const Duration(milliseconds:1));
+    await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
   });
 }
@@ -260,7 +263,7 @@ class TestAnimatedWidget extends StatefulWidget {
 abstract class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
   bool toggle = false;
   final Widget child = const Placeholder();
-  final Duration duration = const Duration(milliseconds: 1000);
+  final Duration duration = animationDuration;
 
   void onChanged(bool v) {
     setState(() {
