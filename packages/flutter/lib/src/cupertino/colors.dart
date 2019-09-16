@@ -77,7 +77,7 @@ class CupertinoColors {
   /// Used in iOS 13 for unselected selectables such as tab bar items in their
   /// inactive state or de-emphasized subtitles and details text.
   ///
-  /// Not the same gray as disabled buttons etc.
+  /// Not the same grey as disabled buttons etc.
   ///
   /// This is the disabled color in the iOS palette.
   static const Color inactiveGray = CupertinoDynamicColor.withBrightness(
@@ -211,13 +211,13 @@ class CupertinoColors {
     darkHighContrastColor: Color.fromARGB(255, 255, 212, 38),
   );
 
-  /// The base gray color.
+  /// The base grey color.
   ///
   /// See also:
   ///
   /// * [UIColor.systemGray](https://developer.apple.com/documentation/uikit/uicolor/3173143-systemgray),
   ///   the `UIKit` equivalent.
-  static const CupertinoDynamicColor systemGray = CupertinoDynamicColor.withBrightnessAndContrast(
+  static const CupertinoDynamicColor systemGrey = CupertinoDynamicColor.withBrightnessAndContrast(
     color: Color.fromARGB(255, 142, 142, 147),
     darkColor: Color.fromARGB(255, 142, 142, 147),
     highContrastColor: Color.fromARGB(255, 108, 108, 112),
@@ -230,7 +230,7 @@ class CupertinoColors {
   ///
   /// * [UIColor.systemGray2](https://developer.apple.com/documentation/uikit/uicolor/3255071-systemgray2),
   ///   the `UIKit` equivalent.
-  static const CupertinoDynamicColor systemGray2 = CupertinoDynamicColor.withBrightnessAndContrast(
+  static const CupertinoDynamicColor systemGrey2 = CupertinoDynamicColor.withBrightnessAndContrast(
     color: Color.fromARGB(255, 174, 174, 178),
     darkColor: Color.fromARGB(255, 99, 99, 102),
     highContrastColor: Color.fromARGB(255, 142, 142, 147),
@@ -243,7 +243,7 @@ class CupertinoColors {
   ///
   /// * [UIColor.systemGray3](https://developer.apple.com/documentation/uikit/uicolor/3255072-systemgray3),
   ///   the `UIKit` equivalent.
-  static const CupertinoDynamicColor systemGray3 = CupertinoDynamicColor.withBrightnessAndContrast(
+  static const CupertinoDynamicColor systemGrey3 = CupertinoDynamicColor.withBrightnessAndContrast(
     color: Color.fromARGB(255, 199, 199, 204),
     darkColor: Color.fromARGB(255, 72, 72, 74),
     highContrastColor: Color.fromARGB(255, 174, 174, 178),
@@ -256,7 +256,7 @@ class CupertinoColors {
   ///
   /// * [UIColor.systemGray4](https://developer.apple.com/documentation/uikit/uicolor/3255073-systemgray4),
   ///   the `UIKit` equivalent.
-  static const CupertinoDynamicColor systemGray4 = CupertinoDynamicColor.withBrightnessAndContrast(
+  static const CupertinoDynamicColor systemGrey4 = CupertinoDynamicColor.withBrightnessAndContrast(
     color: Color.fromARGB(255, 209, 209, 214),
     darkColor: Color.fromARGB(255, 58, 58, 60),
     highContrastColor: Color.fromARGB(255, 188, 188, 192),
@@ -269,7 +269,7 @@ class CupertinoColors {
   ///
   /// * [UIColor.systemGray5](https://developer.apple.com/documentation/uikit/uicolor/3255074-systemgray5),
   ///   the `UIKit` equivalent.
-  static const CupertinoDynamicColor systemGray5 = CupertinoDynamicColor.withBrightnessAndContrast(
+  static const CupertinoDynamicColor systemGrey5 = CupertinoDynamicColor.withBrightnessAndContrast(
     color: Color.fromARGB(255, 229, 229, 234),
     darkColor: Color.fromARGB(255, 44, 44, 46),
     highContrastColor: Color.fromARGB(255, 216, 216, 220),
@@ -282,7 +282,7 @@ class CupertinoColors {
   ///
   /// * [UIColor.systemGray6](https://developer.apple.com/documentation/uikit/uicolor/3255075-systemgray6),
   ///   the `UIKit` equivalent.
-  static const CupertinoDynamicColor systemGray6 = CupertinoDynamicColor.withBrightnessAndContrast(
+  static const CupertinoDynamicColor systemGrey6 = CupertinoDynamicColor.withBrightnessAndContrast(
     color: Color.fromARGB(255, 242, 242, 247),
     darkColor: Color.fromARGB(255, 28, 28, 30),
     highContrastColor: Color.fromARGB(255, 235, 235, 240),
@@ -577,8 +577,6 @@ class CupertinoColors {
 ///
 /// * [CupertinoUserInterfaceLevel], an [InheritedWidget] that may affect color
 /// resolution of a `CupertinoDynamicColor`.
-/// * [CupertinoSystemColors], an [InheritedWidget] that exposes system colors
-/// of iOS 13+.
 /// * https://developer.apple.com/documentation/uikit/uicolor/3238042-resolvedcolor.
 @immutable
 class CupertinoDynamicColor extends Color {
