@@ -266,9 +266,9 @@ abstract class CheckmarkableChipAttributes {
   /// Whether or not to show a check mark when [selected] is true.
   ///
   /// Defaults to true.
-  final bool showCheckmark;
+  bool get showCheckmark;
 
-  /// Color of the chip's check mark when a check mark is visible.
+  /// [Color] of the chip's check mark when a check mark is visible.
   ///
   /// This will override the color set by the platform's brightness setting.
   ///
@@ -2644,12 +2644,10 @@ class _RenderChip extends RenderBox {
     } else {
       switch (theme.brightness) {
         case Brightness.light:
-          paintColor = theme.showAvatar ? Colors.white : Colors.black.withAlpha(
-              _kCheckmarkAlpha);
+          paintColor = theme.showAvatar ? Colors.white : Colors.black.withAlpha(_kCheckmarkAlpha);
           break;
         case Brightness.dark:
-          paintColor = theme.showAvatar ? Colors.black : Colors.white.withAlpha(
-              _kCheckmarkAlpha);
+          paintColor = theme.showAvatar ? Colors.black : Colors.white.withAlpha(_kCheckmarkAlpha);
           break;
       }
     }
