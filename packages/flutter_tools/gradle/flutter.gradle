@@ -28,7 +28,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:3.2.1"
+        classpath 'com.android.tools.build:gradle:3.5.0'
     }
 }
 
@@ -158,13 +158,17 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        if (useProguard()) {
+        if (shouldShrink(project)) {
             String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                     "gradle", "flutter_proguard_rules.pro")
             project.android.buildTypes {
                 release {
+                    // Enables code shrinking, obfuscation, and optimization for only
+                    // your project's release build type.
                     minifyEnabled true
-                    useProguard true
+                    // Enables resource shrinking, which is performed by the
+                    // Android Gradle plugin.
+                    shrinkResources true
                     // Fallback to `android/app/proguard-rules.pro`.
                     // This way, custom Proguard rules can be configured as needed.
                     proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"
@@ -465,9 +469,9 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
-    private Boolean useProguard() {
-        if (project.hasProperty('proguard')) {
-            return project.property('proguard').toBoolean()
+    private static Boolean shouldShrink(Project project) {
+        if (project.hasProperty('shrink')) {
+            return project.property('shrink').toBoolean()
         }
         return false
     }
@@ -936,26 +940,6 @@ class FlutterPluginTask extends DefaultTask {
             }
             if (verbose) {
                 args "--verbose"
-            }
-        }
-    }
-}
-
-gradle.useLogger(new FlutterEventLogger())
-
-class FlutterEventLogger extends BuildAdapter implements TaskExecutionListener {
-    String mostRecentTask = ""
-
-    void beforeExecute(Task task) {
-        mostRecentTask = task.name
-    }
-
-    void afterExecute(Task task, TaskState state) {}
-
-    void buildFinished(BuildResult result) {
-        if (result.failure != null) {
-            if (!(result.failure instanceof GradleException) || !mostRecentTask.startsWith(FlutterPlugin.FLUTTER_BUILD_PREFIX)) {
-                result.rethrowFailure()
             }
         }
     }

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -14,7 +15,6 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -136,8 +136,9 @@ List<String> _xcodeBuildSettingsLines({
   xcodeBuildSettings.add('FLUTTER_APPLICATION_PATH=${fs.path.normalize(project.directory.path)}');
 
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
-  if (targetOverride != null)
+  if (targetOverride != null) {
     xcodeBuildSettings.add('FLUTTER_TARGET=$targetOverride');
+  }
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
   xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory()}');
@@ -211,14 +212,17 @@ class XcodeProjectInterpreter {
       return;
     }
     try {
-      final ProcessResult result = processManager.runSync(<String>[_executable, '-version']);
+      final RunResult result = processUtils.runSync(
+        <String>[_executable, '-version'],
+      );
       if (result.exitCode != 0) {
         return;
       }
       _versionText = result.stdout.trim().replaceAll('\n', ', ');
       final Match match = _versionRegex.firstMatch(versionText);
-      if (match == null)
+      if (match == null) {
         return;
+      }
       final String version = match.group(1);
       final List<String> components = version.split('.');
       _majorVersion = int.parse(components[0]);
@@ -232,47 +236,31 @@ class XcodeProjectInterpreter {
 
   String _versionText;
   String get versionText {
-    if (_versionText == null)
+    if (_versionText == null) {
       _updateVersion();
+    }
     return _versionText;
   }
 
   int _majorVersion;
   int get majorVersion {
-    if (_majorVersion == null)
+    if (_majorVersion == null) {
       _updateVersion();
+    }
     return _majorVersion;
   }
 
   int _minorVersion;
   int get minorVersion {
-    if (_minorVersion == null)
+    if (_minorVersion == null) {
       _updateVersion();
-    return _minorVersion;
-  }
-
-  /// Synchronously retrieve xcode build settings. Prefer using the async
-  /// version below.
-  Map<String, String> getBuildSettings(String projectPath, String target) {
-    try {
-      final String out = runCheckedSync(<String>[
-        _executable,
-        '-project',
-        fs.path.absolute(projectPath),
-        '-target',
-        target,
-        '-showBuildSettings',
-      ], workingDirectory: projectPath);
-      return parseXcodeBuildSettings(out);
-    } catch(error) {
-      printTrace('Unexpected failure to get the build settings: $error.');
-      return const <String, String>{};
     }
+    return _minorVersion;
   }
 
   /// Asynchronously retrieve xcode build settings. This one is preferred for
   /// new call-sites.
-  Future<Map<String, String>> getBuildSettingsAsync(
+  Future<Map<String, String>> getBuildSettings(
       String projectPath, String target, {
     Duration timeout = const Duration(minutes: 1),
   }) async {
@@ -291,8 +279,9 @@ class XcodeProjectInterpreter {
       // showBuildSettings is reported to ocassionally timeout. Here, we give it
       // a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
       // When there is a timeout, we retry once.
-      final RunResult result = await runCheckedAsync(
+      final RunResult result = await processUtils.run(
         showBuildSettingsCommand,
+        throwOnError: true,
         workingDirectory: projectPath,
         timeout: timeout,
         timeoutRetries: 1,
@@ -313,7 +302,7 @@ class XcodeProjectInterpreter {
   }
 
   void cleanWorkspace(String workspacePath, String scheme) {
-    runSync(<String>[
+    processUtils.runSync(<String>[
       _executable,
       '-workspace',
       workspacePath,
@@ -325,11 +314,23 @@ class XcodeProjectInterpreter {
   }
 
   Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
-    final RunResult result = await runCheckedAsync(<String>[
-      _executable,
-      '-list',
-      if (projectFilename != null) ...<String>['-project', projectFilename],
-    ], workingDirectory: projectPath);
+    // The exit code returned by 'xcodebuild -list' when either:
+    // * -project is passed and the given project isn't there, or
+    // * no -project is passed and there isn't a project.
+    const int missingProjectExitCode = 66;
+    final RunResult result = await processUtils.run(
+      <String>[
+        _executable,
+        '-list',
+        if (projectFilename != null) ...<String>['-project', projectFilename],
+      ],
+      throwOnError: true,
+      whiteListFailures: (int c) => c == missingProjectExitCode,
+      workingDirectory: projectPath,
+    );
+    if (result.exitCode == missingProjectExitCode) {
+      throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
+    }
     return XcodeProjectInfo.fromXcodeBuildOutput(result.toString());
   }
 }
@@ -348,8 +349,9 @@ Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
 /// project and target.
 String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettings) {
   final Iterable<Match> matches = _varExpr.allMatches(str);
-  if (matches.isEmpty)
+  if (matches.isEmpty) {
     return str;
+  }
 
   return str.replaceAllMapped(_varExpr, (Match m) => xcodeBuildSettings[m[1]] ?? m[0]);
 }
@@ -381,8 +383,9 @@ class XcodeProjectInfo {
       }
       collector?.add(line.trim());
     }
-    if (schemes.isEmpty)
+    if (schemes.isEmpty) {
       schemes.add('Runner');
+    }
     return XcodeProjectInfo(targets, buildConfigurations, schemes);
   }
 
@@ -406,10 +409,10 @@ class XcodeProjectInfo {
   /// The expected build configuration for [buildInfo] and [scheme].
   static String expectedBuildConfigurationFor(BuildInfo buildInfo, String scheme) {
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
-    if (buildInfo.flavor == null)
+    if (buildInfo.flavor == null) {
       return baseConfiguration;
-    else
-      return baseConfiguration + '-$scheme';
+    }
+    return baseConfiguration + '-$scheme';
   }
 
   /// Checks whether the [buildConfigurations] contains the specified string, without
@@ -427,8 +430,9 @@ class XcodeProjectInfo {
   /// best match.
   String schemeFor(BuildInfo buildInfo) {
     final String expectedScheme = expectedSchemeFor(buildInfo);
-    if (schemes.contains(expectedScheme))
+    if (schemes.contains(expectedScheme)) {
       return expectedScheme;
+    }
     return _uniqueMatch(schemes, (String candidate) {
       return candidate.toLowerCase() == expectedScheme.toLowerCase();
     });
@@ -438,32 +442,35 @@ class XcodeProjectInfo {
   /// null, if there is no unique best match.
   String buildConfigurationFor(BuildInfo buildInfo, String scheme) {
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
-    if (hasBuildConfiguratinForBuildMode(expectedConfiguration))
+    if (hasBuildConfiguratinForBuildMode(expectedConfiguration)) {
       return expectedConfiguration;
+    }
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
     return _uniqueMatch(buildConfigurations, (String candidate) {
       candidate = candidate.toLowerCase();
-      if (buildInfo.flavor == null)
+      if (buildInfo.flavor == null) {
         return candidate == expectedConfiguration.toLowerCase();
-      else
-        return candidate.contains(baseConfiguration.toLowerCase()) && candidate.contains(scheme.toLowerCase());
+      }
+      return candidate.contains(baseConfiguration.toLowerCase()) && candidate.contains(scheme.toLowerCase());
     });
   }
 
   static String _baseConfigurationFor(BuildInfo buildInfo) {
-    if (buildInfo.isDebug)
+    if (buildInfo.isDebug) {
       return 'Debug';
-    if (buildInfo.isProfile)
+    }
+    if (buildInfo.isProfile) {
       return 'Profile';
+    }
     return 'Release';
   }
 
   static String _uniqueMatch(Iterable<String> strings, bool matches(String s)) {
     final List<String> options = strings.where(matches).toList();
-    if (options.length == 1)
+    if (options.length == 1) {
       return options.first;
-    else
-      return null;
+    }
+    return null;
   }
 
   @override

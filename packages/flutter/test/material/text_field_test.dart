@@ -4212,6 +4212,100 @@ void main() {
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
+  testWidgets('TextField semantics include label when unfocused and label/hint when focused', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController(text: 'value');
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'hint',
+            labelText: 'label',
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+    expect(node.label, 'label');
+    expect(node.value, 'value');
+
+    // Focus text field.
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    expect(node.label, 'label\nhint');
+    expect(node.value, 'value');
+    semantics.dispose();
+  });
+
+  testWidgets('TextField semantics always include label when no hint is given', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController(text: 'value');
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'label',
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+    expect(node.label, 'label');
+    expect(node.value, 'value');
+
+    // Focus text field.
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    expect(node.label, 'label');
+    expect(node.value, 'value');
+    semantics.dispose();
+  });
+
+  testWidgets('TextField semantics always include hint when no label is given', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController(text: 'value');
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'hint',
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+    expect(node.label, 'hint');
+    expect(node.value, 'value');
+
+    // Focus text field.
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    expect(node.label, 'hint');
+    expect(node.value, 'value');
+    semantics.dispose();
+  });
+
   testWidgets('TextField semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = TextEditingController();
@@ -4769,7 +4863,7 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          label: 'hint',
+          label: 'label\nhint',
           id: 1,
           textDirection: TextDirection.ltr,
           textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),

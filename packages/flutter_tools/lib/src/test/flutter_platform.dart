@@ -418,8 +418,9 @@ class FlutterPlatform extends PlatformPlugin {
       });
       final Completer<WebSocket> webSocket = Completer<WebSocket>();
       server.listen((HttpRequest request) {
-        if (!webSocket.isCompleted)
-          webSocket.complete(WebSocketTransformer.upgrade(request));
+          if (!webSocket.isCompleted) {
+            webSocket.complete(WebSocketTransformer.upgrade(request));
+          }
         },
         onError: (dynamic error, dynamic stack) {
           // If you reach here, it's unlikely we're going to be able to really handle this well.
@@ -823,8 +824,9 @@ class FlutterPlatform extends PlatformPlugin {
       //
       // I mention this only so that you won't be tempted, as I was, to apply
       // the obvious simplification to this code and remove this entire feature.
-      if (observatoryPort != null)
+      if (observatoryPort != null) {
         command.add('--observatory-port=$observatoryPort');
+      }
       if (startPaused) {
         command.add('--start-paused');
       }

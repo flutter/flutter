@@ -10,7 +10,7 @@ import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/io.dart' show Process, SocketException;
+import 'base/io.dart' show SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
@@ -149,8 +149,9 @@ class Cache {
   /// POSIX flock semantics). Long-lived commands should release the lock by
   /// calling [Cache.releaseLockEarly] once they are no longer touching the cache.
   static Future<void> lock() async {
-    if (!_lockEnabled)
+    if (!_lockEnabled) {
       return;
+    }
     assert(_lock == null);
     final File lockFile =
         fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile'));
@@ -181,8 +182,9 @@ class Cache {
 
   /// Releases the lock. This is not necessary unless the process is long-lived.
   static void releaseLockEarly() {
-    if (!_lockEnabled || _lock == null)
+    if (!_lockEnabled || _lock == null) {
       return;
+    }
     _lock.closeSync();
     _lock = null;
   }
@@ -223,10 +225,11 @@ class Cache {
 
   /// Return the top-level directory in the cache; this is `bin/cache`.
   Directory getRoot() {
-    if (_rootOverride != null)
+    if (_rootOverride != null) {
       return fs.directory(fs.path.join(_rootOverride.path, 'bin', 'cache'));
-    else
+    } else {
       return fs.directory(fs.path.join(flutterRoot, 'bin', 'cache'));
+    }
   }
 
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
@@ -471,8 +474,9 @@ abstract class CachedArtifact extends ArtifactSet {
 
   String get _storageBaseUrl {
     final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
-    if (overrideUrl == null)
+    if (overrideUrl == null) {
       return 'https://storage.googleapis.com';
+    }
     _maybeWarnAboutStorageOverride(overrideUrl);
     return overrideUrl;
   }
@@ -521,8 +525,9 @@ abstract class CachedArtifact extends ArtifactSet {
 bool _hasWarnedAboutStorageOverride = false;
 
 void _maybeWarnAboutStorageOverride(String overrideUrl) {
-  if (_hasWarnedAboutStorageOverride)
+  if (_hasWarnedAboutStorageOverride) {
     return;
+  }
   logger.printStatus(
     'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
     emphasis: true,
@@ -894,7 +899,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
     try {
       final String gradleExecutable = gradle.absolute.path;
       final String flutterSdk = escapePath(Cache.flutterRoot);
-      final Process process = await runCommand(
+      final RunResult processResult = await processUtils.run(
         <String>[
           gradleExecutable,
           '-b', fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle'),
@@ -902,8 +907,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
           'resolveDependencies',
         ],
         environment: gradleEnv);
-      final int exitCode = await process.exitCode;
-      if (exitCode != 0) {
+      if (processResult.exitCode != 0) {
         printError('Failed to download the Android dependencies');
       }
     } finally {
@@ -984,12 +988,14 @@ class GradleWrapper extends CachedArtifact {
     }
     for (String scriptName in _gradleScripts) {
       final File scriptFile = fs.file(fs.path.join(wrapperDir.path, scriptName));
-      if (!scriptFile.existsSync())
+      if (!scriptFile.existsSync()) {
         return false;
+      }
     }
     final File gradleWrapperJar = fs.file(fs.path.join(wrapperDir.path, _gradleWrapper));
-    if (!gradleWrapperJar.existsSync())
+    if (!gradleWrapperJar.existsSync()) {
       return false;
+    }
     return true;
   }
 }

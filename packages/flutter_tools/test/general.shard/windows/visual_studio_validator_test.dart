@@ -26,6 +26,9 @@ void main() {
       when(mockVisualStudio.isLaunchable).thenReturn(true);
       when(mockVisualStudio.isRebootRequired).thenReturn(false);
       when(mockVisualStudio.hasNecessaryComponents).thenReturn(true);
+      when(mockVisualStudio.workloadDescription).thenReturn('Desktop development');
+      when(mockVisualStudio.necessaryComponentDescriptions(any)).thenReturn(<String>['A', 'B']);
+      when(mockVisualStudio.fullVersion).thenReturn('15.1');
     });
 
     testUsingContext('Emits a message when Visual Studio is a pre-release version', () async {
@@ -87,9 +90,6 @@ void main() {
 
     testUsingContext('Emits partial status when Visual Studio is installed without necessary components', () async {
       when(visualStudio.hasNecessaryComponents).thenReturn(false);
-      when(visualStudio.workloadDescription).thenReturn('Desktop development');
-      when(visualStudio.necessaryComponentDescriptions(any)).thenReturn(<String>['A', 'B']);
-      when(visualStudio.fullVersion).thenReturn('15.1');
       const VisualStudioValidator validator = VisualStudioValidator();
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
@@ -109,7 +109,12 @@ void main() {
       when(visualStudio.isInstalled).thenReturn(false);
       const VisualStudioValidator validator = VisualStudioValidator();
       final ValidationResult result = await validator.validate();
-      final ValidationMessage expectedMessage = ValidationMessage.error(userMessages.visualStudioMissing);
+      final ValidationMessage expectedMessage = ValidationMessage.error(
+        userMessages.visualStudioMissing(
+          visualStudio.workloadDescription,
+          visualStudio.necessaryComponentDescriptions(validator.majorVersion)
+        )
+      );
       expect(result.messages.contains(expectedMessage), true);
       expect(result.type, ValidationType.missing);
     }, overrides: <Type, Generator>{

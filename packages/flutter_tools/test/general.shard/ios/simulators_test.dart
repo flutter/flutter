@@ -338,7 +338,7 @@ void main() {
 
       final IOSSimulator device = IOSSimulator('123456', simulatorCategory: 'iOS 11.0');
       final DeviceLogReader logReader = device.getLogReader(
-        app: BuildableIOSApp(mockIosProject),
+        app: await BuildableIOSApp.fromProject(mockIosProject),
       );
 
       final List<String> lines = await logReader.logLines.toList();
