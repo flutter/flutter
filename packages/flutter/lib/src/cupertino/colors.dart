@@ -290,7 +290,8 @@ class CupertinoColors {
     darkHighContrastColor: Color.fromARGB(255, 36, 36, 38),
   );
 
-  /// The color for text labels containing primary content.
+  /// The color for text labels containing primary content, equivalent to
+  /// [UIColor.label](https://developer.apple.com/documentation/uikit/uicolor/3173131-label).
   static const CupertinoDynamicColor label = CupertinoDynamicColor(
     color: Color.fromARGB(255, 0, 0, 0),
     darkColor: Color.fromARGB(255, 255, 255, 255),
@@ -302,7 +303,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(255, 255, 255, 255),
   );
 
-  /// The color for text labels containing secondary content.
+  /// The color for text labels containing secondary content, equivalent to
+  /// [UIColor.secondaryLabel](https://developer.apple.com/documentation/uikit/uicolor/3173136-secondarylabel).
   static const CupertinoDynamicColor secondaryLabel = CupertinoDynamicColor(
     color: Color.fromARGB(255, 0, 0, 0),
     darkColor: Color.fromARGB(255, 255, 255, 255),
@@ -314,7 +316,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(255, 255, 255, 255),
   );
 
-  /// The color for text labels containing tertiary content.
+  /// The color for text labels containing tertiary content, equivalent to
+  /// [UIColor.tertiaryLabel](https://developer.apple.com/documentation/uikit/uicolor/3173153-tertiarylabel).
   static const CupertinoDynamicColor tertiaryLabel = CupertinoDynamicColor(
     color: Color.fromARGB(76, 60, 60, 67),
     darkColor: Color.fromARGB(76, 235, 235, 245),
@@ -326,7 +329,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(96, 235, 235, 245),
   );
 
-  /// The color for text labels containing quaternary content.
+  /// The color for text labels containing quaternary content, equivalent to
+  /// [UIColor.quaternaryLabel](https://developer.apple.com/documentation/uikit/uicolor/3173135-quaternarylabel).
   static const CupertinoDynamicColor quaternaryLabel = CupertinoDynamicColor(
     color: Color.fromARGB(45, 60, 60, 67),
     darkColor: Color.fromARGB(40, 235, 235, 245),
@@ -338,7 +342,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(61, 235, 235, 245),
   );
 
-  /// An overlay fill color for thin and small shapes.
+  /// An overlay fill color for thin and small shapes, equivalent to
+  /// [UIColor.systemFill](https://developer.apple.com/documentation/uikit/uicolor/3255070-systemfill).
   static const CupertinoDynamicColor systemFill = CupertinoDynamicColor(
     color: Color.fromARGB(51, 120, 120, 128),
     darkColor: Color.fromARGB(91, 120, 120, 128),
@@ -350,7 +355,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(112, 120, 120, 128),
   );
 
-  /// An overlay fill color for medium-size shapes.
+  /// An overlay fill color for medium-size shapes, equivalent to
+  /// [UIColor.secondarySystemFill](https://developer.apple.com/documentation/uikit/uicolor/3255069-secondarysystemfill).
   static const CupertinoDynamicColor secondarySystemFill = CupertinoDynamicColor(
     color: Color.fromARGB(40, 120, 120, 128),
     darkColor: Color.fromARGB(81, 120, 120, 128),
@@ -362,7 +368,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(102, 120, 120, 128),
   );
 
-  /// An overlay fill color for large shapes.
+  /// An overlay fill color for large shapes, equivalent to
+  /// [UIColor.tertiarySystemFill](https://developer.apple.com/documentation/uikit/uicolor/3255076-tertiarysystemfill).
   static const CupertinoDynamicColor tertiarySystemFill = CupertinoDynamicColor(
     color: Color.fromARGB(30, 118, 118, 128),
     darkColor: Color.fromARGB(61, 118, 118, 128),
@@ -374,7 +381,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(81, 118, 118, 128),
   );
 
-  /// An overlay fill color for large areas containing complex content.
+  /// An overlay fill color for large areas containing complex content, equivalent
+  /// to [UIColor.quaternarySystemFill](https://developer.apple.com/documentation/uikit/uicolor/3255068-quaternarysystemfill).
   static const CupertinoDynamicColor quaternarySystemFill = CupertinoDynamicColor(
     color: Color.fromARGB(20, 116, 116, 128),
     darkColor: Color.fromARGB(45, 118, 118, 128),
@@ -386,7 +394,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(66, 118, 118, 128),
   );
 
-  /// The color for placeholder text in controls or text views.
+  /// The color for placeholder text in controls or text views, equivalent to
+  /// [UIColor.placeholderText](https://developer.apple.com/documentation/uikit/uicolor/3173134-placeholdertext).
   static const CupertinoDynamicColor placeholderText = CupertinoDynamicColor(
     color: Color.fromARGB(76, 60, 60, 67),
     darkColor: Color.fromARGB(76, 235, 235, 245),
@@ -398,7 +407,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(96, 235, 235, 245),
   );
 
-  /// The color for the main background of your interface.
+  /// The color for the main background of your interface, equivalent to
+  /// [UIColor.systemBackground](https://developer.apple.com/documentation/uikit/uicolor/3173140-systembackground).
   ///
   /// Typically used for designs that have a white primary background in a light environment.
   static const CupertinoDynamicColor systemBackground = CupertinoDynamicColor(
@@ -412,7 +422,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(255, 36, 36, 38),
   );
 
-  /// The color for content layered on top of the main background.
+  /// The color for content layered on top of the main background, equivalent to
+  /// [UIColor.secondarySystemBackground](https://developer.apple.com/documentation/uikit/uicolor/3173137-secondarysystembackground).
   ///
   /// Typically used for designs that have a white primary background in a light environment.
   static const CupertinoDynamicColor secondarySystemBackground = CupertinoDynamicColor(
@@ -426,7 +437,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(255, 54, 54, 56),
   );
 
-  /// The color for content layered on top of secondary backgrounds.
+  /// The color for content layered on top of secondary backgrounds, equivalent
+  /// to [UIColor.tertiarySystemBackground](https://developer.apple.com/documentation/uikit/uicolor/3173154-tertiarysystembackground).
   ///
   /// Typically used for designs that have a white primary background in a light environment.
   static const CupertinoDynamicColor tertiarySystemBackground = CupertinoDynamicColor(
@@ -440,7 +452,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(255, 68, 68, 70),
   );
 
-  /// The color for the main background of your grouped interface.
+  /// The color for the main background of your grouped interface, equivalent to
+  /// [UIColor.systemGroupedBackground](https://developer.apple.com/documentation/uikit/uicolor/3173145-systemgroupedbackground).
   ///
   /// Typically used for grouped content, including table views and platter-based designs.
   static const CupertinoDynamicColor systemGroupedBackground = CupertinoDynamicColor(
@@ -454,7 +467,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(255, 36, 36, 38),
   );
 
-  /// The color for content layered on top of the main background of your grouped interface.
+  /// The color for content layered on top of the main background of your grouped interface,
+  /// equivalent to [UIColor.secondarySystemGroupedBackground](https://developer.apple.com/documentation/uikit/uicolor/3173138-secondarysystemgroupedbackground).
   ///
   /// Typically used for grouped content, including table views and platter-based designs.
   static const CupertinoDynamicColor secondarySystemGroupedBackground = CupertinoDynamicColor(
@@ -468,7 +482,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(255, 54, 54, 56),
   );
 
-  /// The color for content layered on top of secondary backgrounds of your grouped interface.
+  /// The color for content layered on top of secondary backgrounds of your grouped interface,
+  /// equivalent to [UIColor.tertiarySystemGroupedBackground](https://developer.apple.com/documentation/uikit/uicolor/3173155-tertiarysystemgroupedbackground).
   ///
   /// Typically used for grouped content, including table views and platter-based designs.
   static const CupertinoDynamicColor tertiarySystemGroupedBackground = CupertinoDynamicColor(
@@ -482,7 +497,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(255, 68, 68, 70),
   );
 
-  /// The color for thin borders or divider lines that allows some underlying content to be visible.
+  /// The color for thin borders or divider lines that allows some underlying content to be visible,
+  /// equivalent to [UIColor.separator](https://developer.apple.com/documentation/uikit/uicolor/3173139-separator).
   static const CupertinoDynamicColor separator = CupertinoDynamicColor(
     color: Color.fromARGB(73, 60, 60, 67),
     darkColor: Color.fromARGB(153, 84, 84, 88),
@@ -494,7 +510,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(173, 84, 84, 88),
   );
 
-  /// The color for borders or divider lines that hide any underlying content.
+  /// The color for borders or divider lines that hide any underlying content,
+  /// equivalent to [UIColor.opaqueSeparator](https://developer.apple.com/documentation/uikit/uicolor/3173133-opaqueseparator).
   static const CupertinoDynamicColor opaqueSeparator = CupertinoDynamicColor(
     color: Color.fromARGB(255, 198, 198, 200),
     darkColor: Color.fromARGB(255, 56, 56, 58),
@@ -506,7 +523,8 @@ class CupertinoColors {
     darkHighContrastElevatedColor: Color.fromARGB(255, 56, 56, 58),
   );
 
-  /// The color for links.
+  /// The color for links, equivalent to
+  /// [UIColor.link](https://developer.apple.com/documentation/uikit/uicolor/3173132-link).
   static const CupertinoDynamicColor link = CupertinoDynamicColor(
     color: Color.fromARGB(255, 0, 122, 255),
     darkColor: Color.fromARGB(255, 9, 132, 255),
