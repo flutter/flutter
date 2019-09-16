@@ -132,7 +132,7 @@ Future<void> _testConstrainedLabel(
   expect(chipSize.height, chipParentHeight);
 }
 
-Widget _selectedInputChip({Color checkmarkColor}) {
+Widget _selectedInputChip({ Color checkmarkColor }) {
   return InputChip(
     label: const Text('InputChip'),
     selected: true,
@@ -141,7 +141,7 @@ Widget _selectedInputChip({Color checkmarkColor}) {
   );
 }
 
-Widget _selectedFilterChip({Color checkmarkColor}) {
+Widget _selectedFilterChip({ Color checkmarkColor }) {
   return FilterChip(
     label: const Text('InputChip'),
     selected: true,
@@ -184,9 +184,7 @@ void _expectCheckmarkColor(Finder finder, Color color) {
       // check mark can be checked next.
       ..path()
       // The second path that is painted is the check mark.
-      ..path(
-        color: color,
-      ),
+      ..path(color: color),
   );
 }
 
