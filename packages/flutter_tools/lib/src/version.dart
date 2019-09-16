@@ -9,9 +9,7 @@ import 'package:meta/meta.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/io.dart';
 import 'base/process.dart';
-import 'base/process_manager.dart';
 import 'base/time.dart';
 import 'cache.dart';
 import 'convert.dart';
@@ -218,7 +216,7 @@ class FlutterVersion {
     String tentativeDescendantRevision,
     String tentativeAncestorRevision,
   }) {
-    final ProcessResult result = processManager.runSync(
+    final RunResult result = processUtils.runSync(
       <String>['git', 'merge-base', '--is-ancestor', tentativeAncestorRevision, tentativeDescendantRevision],
       workingDirectory: Cache.flutterRoot,
     );
@@ -533,7 +531,7 @@ class VersionCheckError implements Exception {
 /// If [lenient] is true and the command fails, returns an empty string.
 /// Otherwise, throws a [ToolExit] exception.
 String _runSync(List<String> command, { bool lenient = true }) {
-  final ProcessResult results = processManager.runSync(command, workingDirectory: Cache.flutterRoot);
+  final RunResult results = processUtils.runSync(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0) {
     return results.stdout.trim();
@@ -561,7 +559,7 @@ String _runGit(String command) {
 ///
 /// If the command fails, throws a [ToolExit] exception.
 Future<String> _run(List<String> command) async {
-  final ProcessResult results = await processManager.run(command, workingDirectory: Cache.flutterRoot);
+  final RunResult results = await processUtils.run(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0) {
     return results.stdout.trim();

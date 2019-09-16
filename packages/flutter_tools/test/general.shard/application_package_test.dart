@@ -209,9 +209,9 @@ void main() {
       OperatingSystemUtils: () => MockOperatingSystemUtils(),
     };
 
-    testUsingContext('Error on non-existing file', () {
+    testUsingContext('Error on non-existing file', () async {
       final PrebuiltIOSApp iosApp =
-          IOSApp.fromPrebuiltApp(fs.file('not_existing.ipa'));
+          await IOSApp.fromPrebuiltApp(fs.file('not_existing.ipa'));
       expect(iosApp, isNull);
       final BufferLogger logger = context.get<Logger>();
       expect(
@@ -220,19 +220,19 @@ void main() {
       );
     }, overrides: overrides);
 
-    testUsingContext('Error on non-app-bundle folder', () {
+    testUsingContext('Error on non-app-bundle folder', () async {
       fs.directory('regular_folder').createSync();
       final PrebuiltIOSApp iosApp =
-          IOSApp.fromPrebuiltApp(fs.file('regular_folder'));
+          await IOSApp.fromPrebuiltApp(fs.file('regular_folder'));
       expect(iosApp, isNull);
       final BufferLogger logger = context.get<Logger>();
       expect(
           logger.errorText, 'Folder "regular_folder" is not an app bundle.\n');
     }, overrides: overrides);
 
-    testUsingContext('Error on no info.plist', () {
+    testUsingContext('Error on no info.plist', () async {
       fs.directory('bundle.app').createSync();
-      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
+      final PrebuiltIOSApp iosApp = await IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
       expect(iosApp, isNull);
       final BufferLogger logger = context.get<Logger>();
       expect(
@@ -241,10 +241,10 @@ void main() {
       );
     }, overrides: overrides);
 
-    testUsingContext('Error on bad info.plist', () {
+    testUsingContext('Error on bad info.plist', () async {
       fs.directory('bundle.app').createSync();
       fs.file('bundle.app/Info.plist').writeAsStringSync(badPlistData);
-      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
+      final PrebuiltIOSApp iosApp = await IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
       expect(iosApp, isNull);
       final BufferLogger logger = context.get<Logger>();
       expect(
@@ -254,10 +254,10 @@ void main() {
       );
     }, overrides: overrides);
 
-    testUsingContext('Success with app bundle', () {
+    testUsingContext('Success with app bundle', () async {
       fs.directory('bundle.app').createSync();
       fs.file('bundle.app/Info.plist').writeAsStringSync(plistData);
-      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
+      final PrebuiltIOSApp iosApp = await IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
       final BufferLogger logger = context.get<Logger>();
       expect(logger.errorText, isEmpty);
       expect(iosApp.bundleDir.path, 'bundle.app');
@@ -265,10 +265,10 @@ void main() {
       expect(iosApp.bundleName, 'bundle.app');
     }, overrides: overrides);
 
-    testUsingContext('Bad ipa zip-file, no payload dir', () {
+    testUsingContext('Bad ipa zip-file, no payload dir', () async {
       fs.file('app.ipa').createSync();
-      when(os.unzip(fs.file('app.ipa'), any)).thenAnswer((Invocation _) { });
-      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
+      when(os.unzip(fs.file('app.ipa'), any)).thenAnswer((Invocation _) async { });
+      final PrebuiltIOSApp iosApp = await IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
       expect(iosApp, isNull);
       final BufferLogger logger = context.get<Logger>();
       expect(
@@ -277,9 +277,9 @@ void main() {
       );
     }, overrides: overrides);
 
-    testUsingContext('Bad ipa zip-file, two app bundles', () {
+    testUsingContext('Bad ipa zip-file, two app bundles', () async {
       fs.file('app.ipa').createSync();
-      when(os.unzip(any, any)).thenAnswer((Invocation invocation) {
+      when(os.unzip(any, any)).thenAnswer((Invocation invocation) async {
         final File zipFile = invocation.positionalArguments[0];
         if (zipFile.path != 'app.ipa') {
           return null;
@@ -292,16 +292,16 @@ void main() {
         fs.directory(bundlePath1).createSync(recursive: true);
         fs.directory(bundlePath2).createSync(recursive: true);
       });
-      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
+      final PrebuiltIOSApp iosApp = await IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
       expect(iosApp, isNull);
       final BufferLogger logger = context.get<Logger>();
       expect(logger.errorText,
           'Invalid prebuilt iOS ipa. Does not contain a single app bundle.\n');
     }, overrides: overrides);
 
-    testUsingContext('Success with ipa', () {
+    testUsingContext('Success with ipa', () async {
       fs.file('app.ipa').createSync();
-      when(os.unzip(any, any)).thenAnswer((Invocation invocation) {
+      when(os.unzip(any, any)).thenAnswer((Invocation invocation) async {
         final File zipFile = invocation.positionalArguments[0];
         if (zipFile.path != 'app.ipa') {
           return null;
@@ -314,7 +314,7 @@ void main() {
             .file(fs.path.join(bundleAppDir.path, 'Info.plist'))
             .writeAsStringSync(plistData);
       });
-      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
+      final PrebuiltIOSApp iosApp = await IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
       final BufferLogger logger = context.get<Logger>();
       expect(logger.errorText, isEmpty);
       expect(iosApp.bundleDir.path, endsWith('bundle.app'));

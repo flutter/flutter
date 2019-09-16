@@ -51,10 +51,10 @@ class Xcode {
 
   bool _eulaSigned;
   /// Has the EULA been signed?
-  bool get eulaSigned {
+  Future<bool> get eulaSigned async {
     if (_eulaSigned == null) {
       try {
-        final RunResult result = processUtils.runSync(
+        final RunResult result = await processUtils.run(
           <String>['/usr/bin/xcrun', 'clang'],
         );
         if (result.stdout != null && result.stdout.contains('license')) {

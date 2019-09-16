@@ -213,7 +213,7 @@ void main() {
       memoryFileSystem = MemoryFileSystem();
       mockCache = MockCache();
       mockOperatingSystemUtils = MockOperatingSystemUtils();
-      when(mockOperatingSystemUtils.verifyZip(any)).thenReturn(true);
+      when(mockOperatingSystemUtils.verifyZip(any)).thenAnswer((_) => Future<bool>.value(true));
     });
 
     testUsingContext('makes binary dirs readable and executable by all', () async {

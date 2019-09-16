@@ -448,9 +448,15 @@ abstract class CachedArtifact {
   Uri _toStorageUri(String path) => Uri.parse('$_storageBaseUrl/$path');
 
   /// Download an archive from the given [url] and unzip it to [location].
-  Future<void> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f), void extractor(File f, Directory d)) {
+  Future<void> _downloadArchive(
+    String message,
+    Uri url,
+    Directory location,
+    Future<bool> verifier(File f),
+    Future<void> extractor(File f, Directory d),
+  ) {
     return _withDownloadFile('${flattenNameSubdirs(url)}', (File tempFile) async {
-      if (!verifier(tempFile)) {
+      if (!await verifier(tempFile)) {
         final Status status = logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
         try {
           await _downloadFile(url, tempFile);
@@ -463,7 +469,7 @@ abstract class CachedArtifact {
         logger.printTrace('$message (cached)');
       }
       _ensureExists(location);
-      extractor(tempFile, location);
+      await extractor(tempFile, location);
     });
   }
 
@@ -627,7 +633,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
         if (frameworkZip.existsSync()) {
           final Directory framework = fs.directory(fs.path.join(dir.path, '$frameworkName.framework'));
           framework.createSync();
-          os.unzip(frameworkZip, framework);
+          await os.unzip(frameworkZip, framework);
         }
       }
     }

@@ -252,19 +252,19 @@ class FakeOperatingSystemUtils implements OperatingSystemUtils {
   File makePipe(String path) => null;
 
   @override
-  void zip(Directory data, File zipFile) { }
+  Future<void> zip(Directory data, File zipFile) async { }
 
   @override
-  void unzip(File file, Directory targetDirectory) { }
+  Future<void> unzip(File file, Directory targetDirectory) async { }
 
   @override
-  bool verifyZip(File file) => true;
+  Future<bool> verifyZip(File file) async => true;
 
   @override
-  void unpack(File gzippedTarFile, Directory targetDirectory) { }
+  Future<void> unpack(File gzippedTarFile, Directory targetDirectory) async { }
 
   @override
-  bool verifyGzip(File gzippedFile) => true;
+  Future<bool> verifyGzip(File gzippedFile) async => true;
 
   @override
   String get name => 'fake OS name and version';
@@ -342,7 +342,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  void cleanWorkspace(String workspacePath, String scheme) {
+  Future<void> cleanWorkspace(String workspacePath, String scheme) async {
   }
 
   @override

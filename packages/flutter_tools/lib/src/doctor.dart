@@ -597,7 +597,7 @@ class FlutterValidator extends DoctorValidator {
       artifacts.getArtifactPath(Artifact.genSnapshot);
 
     // Check that the binaries we downloaded for this platform actually run on it.
-    if (!_genSnapshotRuns(genSnapshotPath)) {
+    if (!await _genSnapshotRuns(genSnapshotPath)) {
       final StringBuffer buf = StringBuffer();
       buf.writeln(userMessages.flutterBinariesDoNotRun);
       if (platform.isLinux) {
@@ -613,10 +613,10 @@ class FlutterValidator extends DoctorValidator {
   }
 }
 
-bool _genSnapshotRuns(String genSnapshotPath) {
+Future<bool> _genSnapshotRuns(String genSnapshotPath) async {
   const int kExpectedExitCode = 255;
   try {
-    return processUtils.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
+    return (await processUtils.run(<String>[genSnapshotPath])).exitCode == kExpectedExitCode;
   } catch (error) {
     return false;
   }

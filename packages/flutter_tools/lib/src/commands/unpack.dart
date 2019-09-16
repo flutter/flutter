@@ -101,12 +101,12 @@ class UnpackCommand extends FlutterCommand {
     bool success = true;
     if (artifacts is LocalEngineArtifacts) {
       final LocalEngineArtifacts localEngineArtifacts = artifacts;
-      success = flutterArtifactFetcher.copyLocalBuildArtifacts(
+      success = await flutterArtifactFetcher.copyLocalBuildArtifacts(
         localEngineArtifacts.engineOutPath,
         targetDirectory,
       );
     } else {
-      success = flutterArtifactFetcher.copyCachedArtifacts(
+      success = await flutterArtifactFetcher.copyCachedArtifacts(
         targetDirectory,
       );
     }
@@ -132,7 +132,7 @@ class ArtifactUnpacker {
   ///
   /// Returns true if the artifacts were successfully copied, or were already
   /// present with the correct hash.
-  bool copyCachedArtifacts(String targetDirectory) {
+  Future<bool> copyCachedArtifacts(String targetDirectory) async {
     String cacheStamp;
     switch (platform) {
       case TargetPlatform.linux_x64:
@@ -166,7 +166,7 @@ class ArtifactUnpacker {
           'engine',
           flutterArtifactPlatformDirectory[platform],
         );
-        if (!_copyArtifactFiles(flutterCacheDirectory, targetDirectory)) {
+        if (!await _copyArtifactFiles(flutterCacheDirectory, targetDirectory)) {
           return false;
         }
         _setLastCopiedHash(targetDirectory, targetHash);
@@ -186,8 +186,8 @@ class ArtifactUnpacker {
   /// the version stamp, except that it pulls the artifact from a local engine
   /// build with the given [buildConfiguration] (e.g., host_debug_unopt) whose
   /// checkout is rooted at [engineRoot].
-  bool copyLocalBuildArtifacts(String buildOutput, String targetDirectory) {
-    if (!_copyArtifactFiles(buildOutput, targetDirectory)) {
+  Future<bool> copyLocalBuildArtifacts(String buildOutput, String targetDirectory) async {
+    if (!await _copyArtifactFiles(buildOutput, targetDirectory)) {
       return false;
     }
 
@@ -200,7 +200,7 @@ class ArtifactUnpacker {
 
   /// Copies the artifact files for [platform] from [sourceDirectory] to
   /// [targetDirectory].
-  bool _copyArtifactFiles(String sourceDirectory, String targetDirectory) {
+  Future<bool> _copyArtifactFiles(String sourceDirectory, String targetDirectory) async {
     final List<String> artifactFiles = artifactFilesByPlatform[platform];
     if (artifactFiles == null) {
       printError('Unsupported platform: $platform.');
@@ -215,7 +215,7 @@ class ArtifactUnpacker {
       // are just individual files, this isn't necessary since copying over
       // existing files will do the right thing.
       if (platform == TargetPlatform.darwin_x64) {
-        _copyMacOSFramework(
+        await _copyMacOSFramework(
             fs.path.join(sourceDirectory, artifactFiles[0]), targetDirectory);
       } else {
         for (final String entityName in artifactFiles) {
@@ -279,12 +279,12 @@ class ArtifactUnpacker {
   ///
   /// Removes any previous version of the framework that already exists in the
   /// target directory.
-  void _copyMacOSFramework(String frameworkPath, String targetDirectory) {
+  Future<void> _copyMacOSFramework(String frameworkPath, String targetDirectory) async {
     _deleteFrameworkIfPresent(
         fs.path.join(targetDirectory, fs.path.basename(frameworkPath)));
 
-    final RunResult result = processUtils
-        .runSync(<String>['cp', '-R', frameworkPath, targetDirectory]);
+    final RunResult result = await processUtils
+        .run(<String>['cp', '-R', frameworkPath, targetDirectory]);
     if (result.exitCode != 0) {
       throw Exception(
         'Failed to copy framework (exit ${result.exitCode}:\n'

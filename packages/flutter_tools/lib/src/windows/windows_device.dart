@@ -110,7 +110,7 @@ class WindowsDevice extends Device {
   @override
   Future<bool> stopApp(covariant WindowsApp app) async {
     // Assume debug for now.
-    final List<String> process = runningProcess(app.executable(BuildMode.debug));
+    final List<String> process = await runningProcess(app.executable(BuildMode.debug));
     if (process == null) {
       return false;
     }
@@ -163,9 +163,9 @@ final RegExp _whitespace = RegExp(r'\s+');
 ///
 /// This list contains the process name and id.
 @visibleForTesting
-List<String> runningProcess(String processName) {
+Future<List<String>> runningProcess(String processName) async {
   // TODO(jonahwilliams): find a way to do this without powershell.
-  final RunResult result = processUtils.runSync(
+  final RunResult result = await processUtils.run(
     <String>['powershell', '-script="Get-CimInstance Win32_Process"'],
   );
   if (result.exitCode != 0) {

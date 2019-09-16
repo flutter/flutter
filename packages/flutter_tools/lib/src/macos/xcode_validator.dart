@@ -36,7 +36,7 @@ class XcodeValidator extends DoctorValidator {
         ));
       }
 
-      if (!xcode.eulaSigned) {
+      if (!await xcode.eulaSigned) {
         xcodeStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(userMessages.xcodeEula));
       }

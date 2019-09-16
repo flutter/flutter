@@ -315,9 +315,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
       manifest.writeAsStringSync(buffer.toString(), flush: true);
 
       // ZIP the recording up once the recording has been serialized.
-      addShutdownHook(() {
+      addShutdownHook(() async {
         final File zipFile = getUniqueFile(fs.currentDirectory, 'bugreport', 'zip');
-        os.zip(tempDir, zipFile);
+        await os.zip(tempDir, zipFile);
         printStatus(userMessages.runnerBugReportFinished(zipFile.basename));
       }, ShutdownStage.POST_PROCESS_RECORDING);
       addShutdownHook(() => tempDir.deleteSync(recursive: true), ShutdownStage.CLEANUP);

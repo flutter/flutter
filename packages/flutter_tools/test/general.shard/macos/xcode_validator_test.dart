@@ -49,7 +49,7 @@ void main() {
       when(xcode.versionText)
           .thenReturn('Xcode 7.0.1\nBuild version 7C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
-      when(xcode.eulaSigned).thenReturn(true);
+      when(xcode.eulaSigned).thenAnswer((_) => Future<bool>.value(true));
       when(xcode.isSimctlInstalled).thenReturn(true);
       const XcodeValidator validator = XcodeValidator();
       final ValidationResult result = await validator.validate();
@@ -63,7 +63,7 @@ void main() {
       when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
-      when(xcode.eulaSigned).thenReturn(false);
+      when(xcode.eulaSigned).thenAnswer((_) => Future<bool>.value(false));
       when(xcode.isSimctlInstalled).thenReturn(true);
       const XcodeValidator validator = XcodeValidator();
       final ValidationResult result = await validator.validate();
@@ -77,7 +77,7 @@ void main() {
       when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
-      when(xcode.eulaSigned).thenReturn(true);
+      when(xcode.eulaSigned).thenAnswer((_) => Future<bool>.value(true));
       when(xcode.isSimctlInstalled).thenReturn(false);
       const XcodeValidator validator = XcodeValidator();
       final ValidationResult result = await validator.validate();
@@ -92,7 +92,7 @@ void main() {
       when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
-      when(xcode.eulaSigned).thenReturn(true);
+      when(xcode.eulaSigned).thenAnswer((_) => Future<bool>.value(true));
       when(xcode.isSimctlInstalled).thenReturn(true);
       const XcodeValidator validator = XcodeValidator();
       final ValidationResult result = await validator.validate();

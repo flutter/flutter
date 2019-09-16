@@ -22,7 +22,7 @@ class AndroidEmulators extends EmulatorDiscovery {
   bool get canListAnything => androidWorkflow.canListEmulators;
 
   @override
-  Future<List<Emulator>> get emulators async => getEmulatorAvds();
+  Future<List<Emulator>> get emulators => getEmulatorAvds();
 }
 
 class AndroidEmulator extends Emulator {
@@ -65,14 +65,14 @@ class AndroidEmulator extends Emulator {
 }
 
 /// Return the list of available emulator AVDs.
-List<AndroidEmulator> getEmulatorAvds() {
+Future<List<AndroidEmulator>> getEmulatorAvds() async {
   final String emulatorPath = getEmulatorPath(androidSdk);
   if (emulatorPath == null) {
     return <AndroidEmulator>[];
   }
 
-  final String listAvdsOutput = processUtils.runSync(
-    <String>[emulatorPath, '-list-avds']).stdout.trim();
+  final String listAvdsOutput = (await processUtils.run(
+    <String>[emulatorPath, '-list-avds'])).stdout.trim();
 
   final List<AndroidEmulator> emulators = <AndroidEmulator>[];
   if (listAvdsOutput != null) {

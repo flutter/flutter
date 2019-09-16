@@ -54,17 +54,17 @@ abstract class OperatingSystemUtils {
   /// Return the File representing a new pipe.
   File makePipe(String path);
 
-  void zip(Directory data, File zipFile);
+  Future<void> zip(Directory data, File zipFile);
 
-  void unzip(File file, Directory targetDirectory);
+  Future<void> unzip(File file, Directory targetDirectory);
 
   /// Returns true if the ZIP is not corrupt.
-  bool verifyZip(File file);
+  Future<bool> verifyZip(File file);
 
-  void unpack(File gzippedTarFile, Directory targetDirectory);
+  Future<void> unpack(File gzippedTarFile, Directory targetDirectory);
 
   /// Returns true if the gzip is not corrupt (does not check tar).
-  bool verifyGzip(File gzippedFile);
+  Future<bool> verifyGzip(File gzippedFile);
 
   /// Returns a pretty name string for the current operating system.
   ///
@@ -127,7 +127,7 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   void chmod(FileSystemEntity entity, String mode) {
     try {
-      final ProcessResult result = processManager.runSync(<String>['chmod', mode, entity.path]);
+      final RunResult result = processUtils.runSync(<String>['chmod', mode, entity.path]);
       if (result.exitCode != 0) {
         printTrace(
           'Error trying to run chmod on ${entity.absolute.path}'
@@ -147,7 +147,7 @@ class _PosixUtils extends OperatingSystemUtils {
       command.add('-a');
     }
     command.add(execName);
-    final ProcessResult result = processManager.runSync(command);
+    final RunResult result = processUtils.runSync(command);
     if (result.exitCode != 0) {
       return const <File>[];
     }
@@ -156,8 +156,8 @@ class _PosixUtils extends OperatingSystemUtils {
   }
 
   @override
-  void zip(Directory data, File zipFile) {
-    processUtils.runSync(
+  Future<void> zip(Directory data, File zipFile) async {
+    await processUtils.run(
       <String>['zip', '-r', '-q', zipFile.path, '.'],
       workingDirectory: data.path,
       throwOnError: true,
@@ -166,29 +166,29 @@ class _PosixUtils extends OperatingSystemUtils {
 
   // unzip -o -q zipfile -d dest
   @override
-  void unzip(File file, Directory targetDirectory) {
-    processUtils.runSync(
+  Future<void> unzip(File file, Directory targetDirectory) async {
+    await processUtils.run(
       <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
       throwOnError: true,
     );
   }
 
   @override
-  bool verifyZip(File zipFile) =>
-      processUtils.exitsHappySync(<String>['zip', '-T', zipFile.path]);
+  Future<bool> verifyZip(File zipFile) async =>
+      processUtils.exitsHappy(<String>['zip', '-T', zipFile.path]);
 
   // tar -xzf tarball -C dest
   @override
-  void unpack(File gzippedTarFile, Directory targetDirectory) {
-    processUtils.runSync(
+  Future<void> unpack(File gzippedTarFile, Directory targetDirectory) async {
+    await processUtils.run(
       <String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path],
       throwOnError: true,
     );
   }
 
   @override
-  bool verifyGzip(File gzippedFile) =>
-      processUtils.exitsHappySync(<String>['gzip', '-t', gzippedFile.path]);
+  Future<bool> verifyGzip(File gzippedFile) =>
+      processUtils.exitsHappy(<String>['gzip', '-t', gzippedFile.path]);
 
   @override
   File makePipe(String path) {
@@ -236,7 +236,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   List<File> _which(String execName, { bool all = false }) {
     // `where` always returns all matches, not just the first one.
-    final ProcessResult result = processManager.runSync(<String>['where', execName]);
+    final RunResult result = processUtils.runSync(<String>['where', execName]);
     if (result.exitCode != 0) {
       return const <File>[];
     }
@@ -248,7 +248,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   @override
-  void zip(Directory data, File zipFile) {
+  Future<void> zip(Directory data, File zipFile) async {
     final Archive archive = Archive();
     for (FileSystemEntity entity in data.listSync(recursive: true)) {
       if (entity is! File) {
@@ -263,13 +263,13 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   @override
-  void unzip(File file, Directory targetDirectory) {
+  Future<void> unzip(File file, Directory targetDirectory) async {
     final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
     _unpackArchive(archive, targetDirectory);
   }
 
   @override
-  bool verifyZip(File zipFile) {
+  Future<bool> verifyZip(File zipFile) async {
     try {
       ZipDecoder().decodeBytes(zipFile.readAsBytesSync(), verify: true);
     } on FileSystemException catch (_) {
@@ -281,7 +281,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   @override
-  void unpack(File gzippedTarFile, Directory targetDirectory) {
+  Future<void> unpack(File gzippedTarFile, Directory targetDirectory) async {
     final Archive archive = TarDecoder().decodeBytes(
       GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
     );
@@ -289,7 +289,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   @override
-  bool verifyGzip(File gzipFile) {
+  Future<bool> verifyGzip(File gzipFile) async {
     try {
       GZipDecoder().decodeBytes(gzipFile.readAsBytesSync(), verify: true);
     } on FileSystemException catch (_) {

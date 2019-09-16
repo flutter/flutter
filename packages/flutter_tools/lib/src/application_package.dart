@@ -44,7 +44,7 @@ class ApplicationPackageFactory {
           await checkGradleDependencies();
         }
         return applicationBinary == null
-            ? await AndroidApk.fromAndroidProject(FlutterProject.current().android)
+            ? AndroidApk.fromAndroidProject(FlutterProject.current().android)
             : AndroidApk.fromApk(applicationBinary);
       case TargetPlatform.ios:
         return applicationBinary == null
@@ -107,7 +107,7 @@ class AndroidApk extends ApplicationPackage {
        super(id: id);
 
   /// Creates a new AndroidApk from an existing APK.
-  factory AndroidApk.fromApk(File apk) {
+  static  Future<AndroidApk> fromApk(File apk) async {
     final String aaptPath = androidSdk?.latestVersion?.aaptPath;
     if (aaptPath == null) {
       printError(userMessages.aaptNotFound);
@@ -116,7 +116,7 @@ class AndroidApk extends ApplicationPackage {
 
     String apptStdout;
     try {
-      apptStdout = processUtils.runSync(
+      apptStdout = (await processUtils.run(
         <String>[
           aaptPath,
           'dump',
@@ -125,7 +125,7 @@ class AndroidApk extends ApplicationPackage {
           'AndroidManifest.xml',
         ],
         throwOnError: true,
-      ).stdout.trim();
+      )).stdout.trim();
     } on ProcessException catch (error) {
       printError('Failed to extract manifest from APK: $error.');
       return null;
@@ -269,7 +269,7 @@ abstract class IOSApp extends ApplicationPackage {
   IOSApp({@required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new IOSApp from an existing app bundle or IPA.
-  factory IOSApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
+  static Future<IOSApp> fromPrebuiltApp(FileSystemEntity applicationBinary) async {
     final FileSystemEntityType entityType = fs.typeSync(applicationBinary.path);
     if (entityType == FileSystemEntityType.notFound) {
       printError(
@@ -290,7 +290,7 @@ abstract class IOSApp extends ApplicationPackage {
       addShutdownHook(() async {
         await tempDir.delete(recursive: true);
       }, ShutdownStage.STILL_RECORDING);
-      os.unzip(fs.file(applicationBinary), tempDir);
+      await os.unzip(fs.file(applicationBinary), tempDir);
       final Directory payloadDir = fs.directory(
         fs.path.join(tempDir.path, 'Payload'),
       );

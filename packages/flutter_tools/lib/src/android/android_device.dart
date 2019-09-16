@@ -61,7 +61,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
   bool get canListAnything => androidWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async => getAdbDevices();
+  Future<List<Device>> pollingGetDevices() => getAdbDevices();
 
   @override
   Future<List<String>> getDiagnostics() async => getAdbDeviceDiagnostics();
@@ -703,17 +703,17 @@ Map<String, String> parseAdbDeviceProperties(String str) {
 }
 
 /// Return the list of connected ADB devices.
-List<AndroidDevice> getAdbDevices() {
+Future<List<AndroidDevice>> getAdbDevices() async {
   final String adbPath = getAdbPath(androidSdk);
   if (adbPath == null) {
     return <AndroidDevice>[];
   }
   String text;
   try {
-    text = processUtils.runSync(
+    text = (await processUtils.run(
       <String>[adbPath, 'devices', '-l'],
       throwOnError: true,
-    ).stdout.trim();
+    )).stdout.trim();
   } on ArgumentError catch (exception) {
     throwToolExit('Unable to find "adb", check your Android SDK installation and '
       'ANDROID_HOME environment variable: ${exception.message}');

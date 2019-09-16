@@ -167,26 +167,28 @@ void main() {
       ProcessManager: () => mockProcessManager
     });
 
-    testUsingContext('eulaSigned is false when clang is not installed', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
+    testUsingContext('eulaSigned is false when clang is not installed', () async {
+      when(mockProcessManager.run(<String>['/usr/bin/xcrun', 'clang']))
           .thenThrow(const ProcessException('/usr/bin/xcrun', <String>['clang']));
-      expect(xcode.eulaSigned, isFalse);
+      expect(await xcode.eulaSigned, isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('eulaSigned is false when clang output indicates EULA not yet accepted', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
-          .thenReturn(ProcessResult(1, 1, '', 'Xcode EULA has not been accepted.\nLaunch Xcode and accept the license.'));
-      expect(xcode.eulaSigned, isFalse);
+    testUsingContext('eulaSigned is false when clang output indicates EULA not yet accepted', () async {
+      when(mockProcessManager.run(<String>['/usr/bin/xcrun', 'clang']))
+          .thenAnswer((_) => Future<ProcessResult>.value(
+            ProcessResult(1, 1, '', 'Xcode EULA has not been accepted.\nLaunch Xcode and accept the license.')));
+      expect(await xcode.eulaSigned, isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('eulaSigned is true when clang output indicates EULA has been accepted', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
-          .thenReturn(ProcessResult(1, 1, '', 'clang: error: no input files'));
-      expect(xcode.eulaSigned, isTrue);
+    testUsingContext('eulaSigned is true when clang output indicates EULA has been accepted', () async {
+      when(mockProcessManager.run(<String>['/usr/bin/xcrun', 'clang']))
+          .thenAnswer((_) => Future<ProcessResult>.value(
+            ProcessResult(1, 1, '', 'clang: error: no input files')));
+      expect(await xcode.eulaSigned, isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
