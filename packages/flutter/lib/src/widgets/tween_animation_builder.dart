@@ -59,7 +59,7 @@ import 'value_listenable_builder.dart';
 ///
 /// ## Example Code
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 /// This example shows an [IconButton] that "zooms" in when the widget first
 /// builds (its size smoothly increases from 0 to 24) and whenever the button
 /// is pressed, it smoothly changes its size to the new target value of either
@@ -70,24 +70,22 @@ import 'value_listenable_builder.dart';
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: TweenAnimationBuilder(
-///       tween: Tween<double>(begin: 0, end: targetValue),
-///       duration: Duration(seconds: 1),
-///       builder: (BuildContext context, double size, Widget child) {
-///         return IconButton(
-///           iconSize: size,
-///           color: Colors.blue,
-///           icon: child,
-///           onPressed: () {
-///             setState(() {
-///               targetValue = targetValue == 24.0 ? 48.0 : 24.0;
-///             });
-///           },
-///         );
-///       },
-///       child: Icon(Icons.aspect_ratio),
-///     ),
+///   return TweenAnimationBuilder(
+///     tween: Tween<double>(begin: 0, end: targetValue),
+///     duration: Duration(seconds: 1),
+///     builder: (BuildContext context, double size, Widget child) {
+///       return IconButton(
+///         iconSize: size,
+///         color: Colors.blue,
+///         icon: child,
+///         onPressed: () {
+///           setState(() {
+///             targetValue = targetValue == 24.0 ? 48.0 : 24.0;
+///           });
+///         },
+///       );
+///     },
+///     child: Icon(Icons.aspect_ratio),
 ///   );
 /// }
 /// ```

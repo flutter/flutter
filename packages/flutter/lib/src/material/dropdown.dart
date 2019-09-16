@@ -532,7 +532,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// dropdown's value. It should also call [State.setState] to rebuild the
 /// dropdown with the new value.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
 /// This sample shows a `DropdownButton` with a customized icon, text style,
 /// and underline and whose value is one of "One", "Two", "Free", or "Four".
@@ -544,35 +544,31 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: DropdownButton<String>(
-///         value: dropdownValue,
-///         icon: Icon(Icons.arrow_downward),
-///         iconSize: 24,
-///         elevation: 16,
-///         style: TextStyle(
-///           color: Colors.deepPurple
-///         ),
-///         underline: Container(
-///           height: 2,
-///           color: Colors.deepPurpleAccent,
-///         ),
-///         onChanged: (String newValue) {
-///           setState(() {
-///             dropdownValue = newValue;
-///           });
-///         },
-///         items: <String>['One', 'Two', 'Free', 'Four']
-///           .map<DropdownMenuItem<String>>((String value) {
-///             return DropdownMenuItem<String>(
-///               value: value,
-///               child: Text(value),
-///             );
-///           })
-///           .toList(),
-///       ),
+///   return DropdownButton<String>(
+///     value: dropdownValue,
+///     icon: Icon(Icons.arrow_downward),
+///     iconSize: 24,
+///     elevation: 16,
+///     style: TextStyle(
+///       color: Colors.deepPurple
 ///     ),
+///     underline: Container(
+///       height: 2,
+///       color: Colors.deepPurpleAccent,
+///     ),
+///     onChanged: (String newValue) {
+///       setState(() {
+///         dropdownValue = newValue;
+///       });
+///     },
+///     items: <String>['One', 'Two', 'Free', 'Four']
+///       .map<DropdownMenuItem<String>>((String value) {
+///         return DropdownMenuItem<String>(
+///           value: value,
+///           child: Text(value),
+///         );
+///       })
+///       .toList(),
 ///   );
 /// }
 /// ```
