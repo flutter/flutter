@@ -214,7 +214,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       ? themeData.primaryContrastingColor
       : enabled
         ? primaryColor
-        : CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).placeholderText, context);
+        : CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context);
 
     final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
 
@@ -239,7 +239,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               decoration: BoxDecoration(
                 borderRadius: widget.borderRadius,
                 color: backgroundColor != null && !enabled
-                  ? CupertinoDynamicColor.resolve(widget.disabledColor ?? CupertinoSystemColors.of(context).quaternarySystemFill, context)
+                  ? CupertinoDynamicColor.resolve(widget.disabledColor ?? CupertinoColors.quaternarySystemFill, context)
                   : backgroundColor,
               ),
               child: Padding(
