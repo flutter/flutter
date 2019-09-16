@@ -72,7 +72,6 @@ class LocalFileComparator extends GoldenFileComparator {
     final path.Context context = _getPath(pathStyle);
     final String testFilePath = context.fromUri(testFile);
     final String testDirectoryPath = context.dirname(testFilePath);
-    print(' _getBaseDir: ${context.toUri(testDirectoryPath + context.separator)}');
     return context.toUri(testDirectoryPath + context.separator);
   }
 
@@ -104,7 +103,6 @@ class LocalFileComparator extends GoldenFileComparator {
         diffs.forEach((String name, Object untypedImage) {
           final Image image = untypedImage;
           final File output = _getFailureFile(name, golden);
-          print('Comparator output: $output');
           output.parent.createSync(recursive: true);
           output.writeAsBytesSync(encodePng(image));
         });

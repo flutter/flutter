@@ -151,15 +151,12 @@ void main() {
 
         test('and generates correct output in the correct location', () async {
           comparator = LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
-          print('comparator basedir: ${comparator.basedir}');
           await fs.file(fix('/golden.png')).writeAsBytes(_kColorFailurePngBytes);
           try {
             await doComparison();
             fail('TestFailure expected but not thrown.');
           } on TestFailure catch (error) {
             expect(error.message, contains('% diff detected'));
-            print(error.message);
-            print(fix('/failures/golden_masterImage.png'));
             final io.File master = fs.file(
               fix('/failures/golden_masterImage.png')
             );
