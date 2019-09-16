@@ -765,6 +765,81 @@ void main() {
       tester.getRect(find.text('Item 2')).center.dy,
     );
   });
+
+  testWidgets('Update PopupMenuItem layout while the menu is visible', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/39508.
+
+    final Key popupMenuButtonKey = UniqueKey();
+    final Type menuItemType = const PopupMenuItem<String>(child: Text('item')).runtimeType;
+
+    Widget buildFrame({
+      TextDirection textDirection = TextDirection.ltr,
+      double fontSize = 24,
+    }) {
+      return MaterialApp(
+        builder: (BuildContext context, Widget child) {
+          return Directionality(
+            textDirection: textDirection,
+            child: PopupMenuTheme(
+              data: PopupMenuTheme.of(context).copyWith(
+                textStyle: Theme.of(context).textTheme.subhead.copyWith(fontSize: fontSize),
+              ),
+              child: child,
+            ),
+          );
+        },
+        home: Scaffold(
+          body: PopupMenuButton<String>(
+            key: popupMenuButtonKey,
+            child: const Text('button'),
+            onSelected: (String result) { },
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  child: Text('Item 0'),
+                  value: '0',
+                ),
+                PopupMenuItem<String>(
+                  child: const Text('Item 1'),
+                  value: '1',
+                ),
+              ];
+            },
+          ),
+        ),
+      );
+    }
+
+    // Show the menu
+    await tester.pumpWidget(buildFrame());
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    // The menu items should have their default heights and horizontal alignment.
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 48);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 1')).height, 48);
+    expect(tester.getTopLeft(find.text('Item 0')).dx, 24);
+    expect(tester.getTopLeft(find.text('Item 1')).dx, 24);
+
+    // While the menu is up, change its font size to 64 (default is 16).
+    await tester.pumpWidget(buildFrame(fontSize: 64));
+    await tester.pumpAndSettle(); // Theme changes are animated.
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 128);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 1')).height, 128);
+    expect(tester.getSize(find.text('Item 0')).height, 128);
+    expect(tester.getSize(find.text('Item 1')).height, 128);
+    expect(tester.getTopLeft(find.text('Item 0')).dx, 24);
+    expect(tester.getTopLeft(find.text('Item 1')).dx, 24);
+
+    // While the menu is up, change the textDirection to rtl. Now menu items
+    // will be aligned right.
+    await tester.pumpWidget(buildFrame(textDirection: TextDirection.rtl));
+    await tester.pumpAndSettle(); // Theme changes are animated.
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 0')).height, 48);
+    expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 1')).height, 48);
+    expect(tester.getTopLeft(find.text('Item 0')).dx, 72);
+    expect(tester.getTopLeft(find.text('Item 1')).dx, 72);
+  });
 }
 
 class TestApp extends StatefulWidget {

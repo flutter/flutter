@@ -645,9 +645,9 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   @override
   bool shouldRelayout(_PopupMenuRouteLayout oldDelegate) {
     return position != oldDelegate.position
-        && selectedItemIndex != oldDelegate.selectedItemIndex
-        && textDirection != oldDelegate.textDirection
-        && listEquals(itemSizes, oldDelegate.itemSizes);
+        || selectedItemIndex != oldDelegate.selectedItemIndex
+        || textDirection != oldDelegate.textDirection
+        || listEquals(itemSizes, oldDelegate.itemSizes);
   }
 }
 
