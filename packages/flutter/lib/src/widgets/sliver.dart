@@ -1554,7 +1554,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return CustomScrollView(
-///     /* These ScrollPhysics are the default for iOS */
+///     // These ScrollPhysics are the default for iOS.
+///     // The fillOverscroll property of SliverFillRemaining is only relevant
+///     // for ScrollPhysics like this.
 ///     physics: BouncingScrollPhysics(),
 ///     slivers: <Widget>[
 ///       SliverToBoxAdapter(
@@ -1565,7 +1567,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///       ),
 ///       SliverFillRemaining(
 ///         hasScrollBody: false,
-///         // Switch for different behavior
+///         // Switch for different overscroll behavior in your layout.
 ///         fillOverscroll: true,
 ///         child: Container(
 ///           color: Colors.teal[100],
