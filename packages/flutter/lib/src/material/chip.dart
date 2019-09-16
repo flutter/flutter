@@ -245,6 +245,41 @@ abstract class DeletableChipAttributes {
   String get deleteButtonTooltipMessage;
 }
 
+/// An interface for material design chips that can have check marks.
+///
+/// The defaults mentioned in the documentation for each attribute are what
+/// the implementing classes typically use for defaults (but this class doesn't
+/// provide or enforce them).
+///
+/// See also:
+///
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
+///  * [FilterChip], uses tags or descriptive words as a way to filter content.
+///  * <https://material.io/design/components/chips.html>
+abstract class CheckmarkableChipAttributes {
+  // This class is intended to be used as an interface, and should not be
+  // extended directly.
+  factory CheckmarkableChipAttributes._() => null;
+
+  /// Whether or not to show a check mark when [selected] is true.
+  ///
+  /// For instance, the [ChoiceChip] sets this to false so that it can be
+  /// be selected without showing the check mark.
+  ///
+  /// Defaults to true.
+  final bool showCheckmark;
+
+  /// Color of the chip's check mark when a check mark is visible.
+  ///
+  /// This will override the color set by the platform's brightness setting.
+  ///
+  /// If null, it will defer to a color selected by the platform's brightness
+  /// setting.
+  Color get checkmarkColor;
+}
+
 /// An interface for material design chips that can be selected.
 ///
 /// The defaults mentioned in the documentation for each attribute are what
@@ -640,6 +675,7 @@ class InputChip extends StatelessWidget
         ChipAttributes,
         DeletableChipAttributes,
         SelectableChipAttributes,
+        CheckmarkableChipAttributes,
         DisabledChipAttributes,
         TappableChipAttributes {
   /// Creates an [InputChip].
@@ -679,6 +715,8 @@ class InputChip extends StatelessWidget
     this.elevation,
     this.shadowColor,
     this.selectedShadowColor,
+    this.showCheckmark,
+    this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(selected != null),
        assert(isEnabled != null),
@@ -742,6 +780,10 @@ class InputChip extends StatelessWidget
   @override
   final Color selectedShadowColor;
   @override
+  final bool showCheckmark;
+  @override
+  final Color checkmarkColor;
+  @override
   final ShapeBorder avatarBorder;
 
   @override
@@ -774,6 +816,8 @@ class InputChip extends StatelessWidget
       elevation: elevation,
       shadowColor: shadowColor,
       selectedShadowColor: selectedShadowColor,
+      showCheckmark: showCheckmark,
+      checkmarkColor: checkmarkColor,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
       avatarBorder: avatarBorder,
     );
@@ -1044,6 +1088,7 @@ class FilterChip extends StatelessWidget
     implements
         ChipAttributes,
         SelectableChipAttributes,
+        CheckmarkableChipAttributes,
         DisabledChipAttributes {
   /// Create a chip that acts like a checkbox.
   ///
@@ -1072,7 +1117,8 @@ class FilterChip extends StatelessWidget
     this.elevation,
     this.shadowColor,
     this.selectedShadowColor,
-    this.checkMarkColor,
+    this.showCheckmark,
+    this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(selected != null),
        assert(label != null),
@@ -1123,9 +1169,11 @@ class FilterChip extends StatelessWidget
   @override
   final Color selectedShadowColor;
   @override
+  final bool showCheckmark;
+  @override
+  final Color checkmarkColor;
+  @override
   final ShapeBorder avatarBorder;
-
-  final Color checkMarkColor;
 
   @override
   bool get isEnabled => onSelected != null;
@@ -1155,7 +1203,8 @@ class FilterChip extends StatelessWidget
       elevation: elevation,
       shadowColor: shadowColor,
       selectedShadowColor: selectedShadowColor,
-      checkMarkColor: checkMarkColor,
+      showCheckmark: showCheckmark,
+      checkmarkColor: checkmarkColor,
       avatarBorder: avatarBorder,
     );
   }
@@ -1337,6 +1386,7 @@ class RawChip extends StatefulWidget
         ChipAttributes,
         DeletableChipAttributes,
         SelectableChipAttributes,
+        CheckmarkableChipAttributes,
         DisabledChipAttributes,
         TappableChipAttributes {
   /// Creates a RawChip
@@ -1364,11 +1414,9 @@ class RawChip extends StatefulWidget
     this.pressElevation,
     this.tapEnabled = true,
     this.selected = false,
-    this.showCheckmark = true,
     this.isEnabled = true,
     this.disabledColor,
     this.selectedColor,
-    this.checkMarkColor,
     this.tooltip,
     this.shape,
     this.clipBehavior = Clip.none,
@@ -1379,6 +1427,8 @@ class RawChip extends StatefulWidget
     this.elevation,
     this.shadowColor,
     this.selectedShadowColor,
+    this.showCheckmark = true,
+    this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(label != null),
        assert(isEnabled != null),
@@ -1443,17 +1493,11 @@ class RawChip extends StatefulWidget
   @override
   final Color selectedShadowColor;
   @override
-  final CircleBorder avatarBorder;
-
-  /// Whether or not to show a check mark when [selected] is true.
-  ///
-  /// For instance, the [ChoiceChip] sets this to false so that it can be
-  /// be selected without showing the check mark.
-  ///
-  /// Defaults to true.
   final bool showCheckmark;
-
-  final Color checkMarkColor;
+  @override
+  final Color checkmarkColor;
+  @override
+  final CircleBorder avatarBorder;
 
   /// If set, this indicates that the chip should be disabled if all of the
   /// tap callbacks ([onSelected], [onPressed]) are null.
@@ -1726,7 +1770,8 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final double pressElevation = widget.pressElevation ?? chipTheme.pressElevation ?? _defaultPressElevation;
     final Color shadowColor = widget.shadowColor ?? chipTheme.shadowColor ?? _defaultShadowColor;
     final Color selectedShadowColor = widget.selectedShadowColor ?? chipTheme.selectedShadowColor ?? _defaultShadowColor;
-    final Color checkMarkColor = widget.checkMarkColor ?? chipTheme.checkMarkColor;
+    final Color checkmarkColor = widget.checkmarkColor ?? chipTheme.checkmarkColor;
+    final bool showCheckmark = widget.showCheckmark ?? chipTheme.showCheckmark ?? true;
 
     final TextStyle effectiveLabelStyle = widget.labelStyle ?? chipTheme.labelStyle;
     final Color resolvedLabelColor =  MaterialStateProperty.resolveAs<Color>(effectiveLabelStyle?.color, _states);
@@ -1787,8 +1832,8 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                   padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
                   labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
                   showAvatar: hasAvatar,
-                  showCheckmark: widget.showCheckmark,
-                  checkMarkColor: checkMarkColor,
+                  showCheckmark: showCheckmark,
+                  checkmarkColor: checkmarkColor,
                   canTapBody: canTap,
                 ),
                 value: widget.selected,
@@ -2057,7 +2102,7 @@ class _ChipRenderTheme {
     @required this.labelPadding,
     @required this.showAvatar,
     @required this.showCheckmark,
-    @required this.checkMarkColor,
+    @required this.checkmarkColor,
     @required this.canTapBody,
   });
 
@@ -2069,7 +2114,7 @@ class _ChipRenderTheme {
   final EdgeInsets labelPadding;
   final bool showAvatar;
   final bool showCheckmark;
-  final Color checkMarkColor;
+  final Color checkmarkColor;
   final bool canTapBody;
 
   @override
@@ -2089,7 +2134,7 @@ class _ChipRenderTheme {
         && typedOther.labelPadding == labelPadding
         && typedOther.showAvatar == showAvatar
         && typedOther.showCheckmark == showCheckmark
-        && typedOther.checkMarkColor == checkMarkColor
+        && typedOther.checkmarkColor == checkmarkColor
         && typedOther.canTapBody == canTapBody;
   }
 
@@ -2104,7 +2149,7 @@ class _ChipRenderTheme {
       labelPadding,
       showAvatar,
       showCheckmark,
-      checkMarkColor,
+      checkmarkColor,
       canTapBody,
     );
   }
@@ -2597,8 +2642,8 @@ class _RenderChip extends RenderBox {
 
   void _paintCheck(Canvas canvas, Offset origin, double size) {
     Color paintColor;
-    if (theme.checkMarkColor != null) {
-      paintColor = theme.checkMarkColor;
+    if (theme.checkmarkColor != null) {
+      paintColor = theme.checkmarkColor;
     } else {
       switch (theme.brightness) {
         case Brightness.light:
