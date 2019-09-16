@@ -175,18 +175,17 @@ Future<void> _pumpCheckmarkChip(
   );
 }
 
-void _expectCheckmarkColor(Finder finder, Color color, { bool isDark = false }) {
+void _expectCheckmarkColor(Finder finder, Color color) {
   expect(
     finder,
     paints
-      // Paints the selection overlay.
-      ..path(
-        color: isDark ? Colors.white.withAlpha(0x3d) : Colors.black.withAlpha(0x3d),
-      )
-      // Paints the check mark.
+      // The first path that is painted is the selection overlay. We do not care
+      // how it is painted but it has to be added it to this pattern so that the
+      // check mark can be checked next.
+      ..path()
+      // The second path that is painted is the check mark.
       ..path(
         color: color,
-        strokeWidth: 2.0,
       ),
   );
 }
@@ -2002,7 +2001,6 @@ void main() {
     _expectCheckmarkColor(
       find.byType(InputChip),
       Colors.white.withAlpha(0xde),
-      isDark: true,
     );
   });
 
@@ -2016,7 +2014,6 @@ void main() {
     _expectCheckmarkColor(
       find.byType(FilterChip),
       Colors.white.withAlpha(0xde),
-      isDark: true,
     );
   });
 
