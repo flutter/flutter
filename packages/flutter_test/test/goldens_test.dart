@@ -150,6 +150,8 @@ void main() {
       group('fails', () {
 
         test('and generates correct output in the correct location', () async {
+          comparator = LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
+          print('comparator basedir: ${comparator.basedir}');
           await fs.file(fix('/golden.png')).writeAsBytes(_kColorFailurePngBytes);
           try {
             await doComparison();

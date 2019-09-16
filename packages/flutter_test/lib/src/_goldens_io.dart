@@ -72,6 +72,7 @@ class LocalFileComparator extends GoldenFileComparator {
     final path.Context context = _getPath(pathStyle);
     final String testFilePath = context.fromUri(testFile);
     final String testDirectoryPath = context.dirname(testFilePath);
+    print(' _getBaseDir: ${context.toUri(testDirectoryPath + context.separator)}');
     return context.toUri(testDirectoryPath + context.separator);
   }
 
@@ -130,7 +131,10 @@ class LocalFileComparator extends GoldenFileComparator {
       + '_'
       + failure
       + '.png';
-    return File(basedir.path + path.separator + 'failures' + path.separator + testName);
+    return File(_path.join(
+      _path.fromUri(basedir),
+      _path.fromUri(Uri.parse('failures/$testName')),
+    ));
   }
 }
 
