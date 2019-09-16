@@ -26,7 +26,11 @@ import 'package:process/process.dart';
 
 import 'common.dart';
 
-final Generator kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Generator kNoColorTerminalPlatform = () {
+  return FakePlatform.fromPlatform(
+    const LocalPlatform()
+  )..stdoutSupportsAnsi = false;
+};
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
@@ -36,7 +40,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
       versionCode: 1,
       launchActivity: 'io.flutter.android.mock.MockActivity',
     ),
-    iOS: BuildableIOSApp(MockIosProject())
+    iOS: BuildableIOSApp(MockIosProject(), MockIosProject.bundleId)
   );
 }
 
@@ -513,8 +517,10 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
 }
 
 class MockIosProject extends Mock implements IosProject {
+  static const String bundleId = 'com.example.test';
+
   @override
-  String get productBundleIdentifier => 'com.example.test';
+  Future<String> get productBundleIdentifier async => bundleId;
 
   @override
   String get hostAppBundleName => 'Runner.app';
