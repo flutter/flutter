@@ -155,7 +155,7 @@ Future<void> _pumpCheckmarkChip<T>(
       onSelected: (bool _) { },
     );
   } else {
-    throw UnsupportedError('Unsupported chip type');
+    throw UnsupportedError('Chip type must be InputChip of FilterChip');
   }
 
   await tester.pumpWidget(
@@ -180,11 +180,11 @@ void _expectCheckmarkColor(Finder finder, Color color, { bool isDark = false }) 
   expect(
     finder,
     paints
-    // Paints the selection overlay.
+      // Paints the selection overlay.
       ..path(
         color: isDark ? Colors.white.withAlpha(0x3d) : Colors.black.withAlpha(0x3d),
       )
-    // Paints the check mark.
+      // Paints the check mark.
       ..path(
         color: color,
         strokeWidth: 2.0,
@@ -2020,74 +2020,74 @@ void main() {
   testWidgets('Input chip check mark color can be set by the chip theme', (WidgetTester tester) async {
     await _pumpCheckmarkChip<InputChip>(
       tester,
-      themeColor: const Color(0xFF00FF00),
+      themeColor: const Color(0xff00ff00),
     );
 
     _expectCheckmarkColor(
       find.byType(InputChip),
-      const Color(0xFF00FF00),
+      const Color(0xff00ff00),
     );
   });
 
   testWidgets('Filter chip check mark color can be set by the chip theme', (WidgetTester tester) async {
     await _pumpCheckmarkChip<FilterChip>(
       tester,
-      themeColor: const Color(0xFF00FF00),
+      themeColor: const Color(0xff00ff00),
     );
 
     _expectCheckmarkColor(
       find.byType(FilterChip),
-      const Color(0xFF00FF00),
+      const Color(0xff00ff00),
     );
   });
 
   testWidgets('Input chip check mark color can be set by the chip constructor', (WidgetTester tester) async {
     await _pumpCheckmarkChip<InputChip>(
       tester,
-      color: const Color(0xFF00FF00),
+      color: const Color(0xff00ff00),
     );
 
     _expectCheckmarkColor(
       find.byType(InputChip),
-      const Color(0xFF00FF00),
+      const Color(0xff00ff00),
     );
   });
 
   testWidgets('Filter chip check mark color can be set by the chip constructor', (WidgetTester tester) async {
     await _pumpCheckmarkChip<FilterChip>(
       tester,
-      color: const Color(0xFF00FF00),
+      color: const Color(0xff00ff00),
     );
 
     _expectCheckmarkColor(
       find.byType(FilterChip),
-      const Color(0xFF00FF00),
+      const Color(0xff00ff00),
     );
   });
 
   testWidgets('Input chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
     await _pumpCheckmarkChip<InputChip>(
       tester,
-      themeColor: const Color(0xFF00FF00),
-      color: const Color(0xFFFF0000),
+      themeColor: const Color(0xff00ff00),
+      color: const Color(0xffff0000),
     );
 
     _expectCheckmarkColor(
       find.byType(InputChip),
-      const Color(0xFFFF0000),
+      const Color(0xffff0000),
     );
   });
 
   testWidgets('Filter chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
     await _pumpCheckmarkChip<FilterChip>(
       tester,
-      themeColor: const Color(0xFF00FF00),
-      color: const Color(0xFFFF0000),
+      themeColor: const Color(0xff00ff00),
+      color: const Color(0xffff0000),
     );
 
     _expectCheckmarkColor(
       find.byType(FilterChip),
-      const Color(0xFFFF0000),
+      const Color(0xffff0000),
     );
   });
 }
