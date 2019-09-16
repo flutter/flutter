@@ -16,6 +16,7 @@
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
+#include "flutter/shell/common/pointer_data_dispatcher.h"
 #include "flutter/shell/common/surface.h"
 #include "flutter/shell/common/vsync_waiter.h"
 #include "third_party/skia/include/core/SkSize.h"
@@ -418,17 +419,23 @@ class PlatformView {
   ///
   virtual void ReleaseResourceContext() const;
 
+  //--------------------------------------------------------------------------
+  /// @brief      Returns a platform-specific PointerDataDispatcherMaker so the
+  ///             `Engien` can construct the PointerDataPacketDispatcher based
+  ///             on platforms.
+  virtual PointerDataDispatcherMaker GetDispatcherMaker();
+
   //----------------------------------------------------------------------------
   /// @brief      Returns a weak pointer to the platform view. Since the
-  ///             platform view may only be created, accessed and destroyed on
-  ///             the platform thread, any access to the platform view from a
-  ///             non-platform task runner needs a weak pointer to the platform
-  ///             view along with a reference to the platform task runner. A
-  ///             task must be posted to the platform task runner with the weak
-  ///             pointer captured in the same. The platform view method may
-  ///             only be called in the posted task once the weak pointer
-  ///             validity has been checked. This method is used by callers to
-  ///             obtain that weak pointer.
+  ///             platform view may only be created, accessed and destroyed
+  ///             on the platform thread, any access to the platform view
+  ///             from a non-platform task runner needs a weak pointer to
+  ///             the platform view along with a reference to the platform
+  ///             task runner. A task must be posted to the platform task
+  ///             runner with the weak pointer captured in the same. The
+  ///             platform view method may only be called in the posted task
+  ///             once the weak pointer validity has been checked. This
+  ///             method is used by callers to obtain that weak pointer.
   ///
   /// @return     The weak pointer to the platform view.
   ///
@@ -446,13 +453,14 @@ class PlatformView {
 
   //----------------------------------------------------------------------------
   /// @brief      Sets a callback that gets executed when the rasterizer renders
-  ///             the next frame. Due to the asynchronous nature of rendering in
-  ///             Flutter, embedders usually add a placeholder over the
-  ///             contents in which Flutter is going to render when Flutter is
-  ///             first initialized. This callback may be used as a signal to
-  ///             remove that placeholder. The callback is executed on the
-  ///             render task runner and not the platform task runner. It is
-  ///             the embedder's responsibility to re-thread as necessary.
+  ///             the next frame. Due to the asynchronous nature of
+  ///             rendering in Flutter, embedders usually add a placeholder
+  ///             over the contents in which Flutter is going to render when
+  ///             Flutter is first initialized. This callback may be used as
+  ///             a signal to remove that placeholder. The callback is
+  ///             executed on the render task runner and not the platform
+  ///             task runner. It is the embedder's responsibility to
+  ///             re-thread as necessary.
   ///
   /// @attention  The callback is executed on the render task runner and not the
   ///             platform task runner. Embedders must re-thread as necessary.
@@ -465,8 +473,8 @@ class PlatformView {
   //----------------------------------------------------------------------------
   /// @brief      Dispatches pointer events from the embedder to the
   ///             framework. Each pointer data packet may contain multiple
-  ///             pointer input events. Each call to this method wakes up the UI
-  ///             thread.
+  ///             pointer input events. Each call to this method wakes up
+  ///             the UI thread.
   ///
   /// @param[in]  packet  The pointer data packet to dispatch to the framework.
   ///
@@ -475,16 +483,17 @@ class PlatformView {
   //--------------------------------------------------------------------------
   /// @brief      Used by the embedder to specify a texture that it wants the
   ///             rasterizer to composite within the Flutter layer tree. All
-  ///             textures must have a unique identifier. When the rasterizer
-  ///             encounters an external texture within its hierarchy, it gives
-  ///             the embedder a chance to update that texture on the GPU thread
-  ///             before it composites the same on-screen.
+  ///             textures must have a unique identifier. When the
+  ///             rasterizer encounters an external texture within its
+  ///             hierarchy, it gives the embedder a chance to update that
+  ///             texture on the GPU thread before it composites the same
+  ///             on-screen.
   ///
   /// @attention  This method must only be called once per texture. When the
-  ///             texture is updated, calling `MarkTextureFrameAvailable` with
-  ///             the specified texture identifier is sufficient to make Flutter
-  ///             re-render the frame with the updated texture composited
-  ///             in-line.
+  ///             texture is updated, calling `MarkTextureFrameAvailable`
+  ///             with the specified texture identifier is sufficient to
+  ///             make Flutter re-render the frame with the updated texture
+  ///             composited in-line.
   ///
   /// @see        UnregisterTexture, MarkTextureFrameAvailable
   ///
@@ -494,10 +503,11 @@ class PlatformView {
   void RegisterTexture(std::shared_ptr<flutter::Texture> texture);
 
   //--------------------------------------------------------------------------
-  /// @brief      Used by the embedder to notify the rasterizer that it will no
-  ///             longer attempt to composite the specified texture within the
-  ///             layer tree. This allows the rasterizer to collect associated
-  ///             resources.
+  /// @brief      Used by the embedder to notify the rasterizer that it will
+  /// no
+  ///             longer attempt to composite the specified texture within
+  ///             the layer tree. This allows the rasterizer to collect
+  ///             associated resources.
   ///
   /// @attention  This call must only be called once per texture identifier.
   ///
@@ -514,13 +524,14 @@ class PlatformView {
   ///             of the previously registered texture have been updated.
   ///             Typically, Flutter will only render a frame if there is an
   ///             updated layer tree. However, in cases where the layer tree
-  ///             is static but one of the externally composited textures has
-  ///             been updated by the embedder, the embedder needs to notify
-  ///             the rasterizer to render a new frame. In such cases, the
-  ///             existing layer tree may be reused with the frame re-composited
-  ///             with all updated external textures. Unlike the calls to
-  ///             register and unregister the texture, this call must be made
-  ///             each time a new texture frame is available.
+  ///             is static but one of the externally composited textures
+  ///             has been updated by the embedder, the embedder needs to
+  ///             notify the rasterizer to render a new frame. In such
+  ///             cases, the existing layer tree may be reused with the
+  ///             frame re-composited with all updated external textures.
+  ///             Unlike the calls to register and unregister the texture,
+  ///             this call must be made each time a new texture frame is
+  ///             available.
   ///
   /// @see        RegisterTexture, UnregisterTexture
   ///
@@ -536,8 +547,8 @@ class PlatformView {
   SkISize size_;
   fml::WeakPtrFactory<PlatformView> weak_factory_;
 
-  // Unlike all other methods on the platform view, this is called on the GPU
-  // task runner.
+  // Unlike all other methods on the platform view, this is called on the
+  // GPU task runner.
   virtual std::unique_ptr<Surface> CreateRenderingSurface();
 
  private:
