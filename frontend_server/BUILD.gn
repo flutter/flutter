@@ -50,6 +50,7 @@ if (is_fuchsia_host || is_fuchsia) {
     training_args = [
       "--train",
       "--sdk-root=$flutter_patched_sdk",
+      rebase_path(main_dart),
     ]
 
     frontend_server_files =
