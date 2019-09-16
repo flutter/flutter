@@ -201,8 +201,7 @@ class KernelSnapshot extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
     final String packagesPath = environment.projectDir.childFile('.packages').path;
-    final String targetFileUri = fs.file(targetFile).absolute.uri
-        .toFilePath(windows: platform.isWindows);
+    final String targetFileUri = fs.file(targetFile).absolute.uri.toString();
     final PackageUriMapper packageUriMapper = PackageUriMapper(targetFileUri,
         packagesPath, null, null);
 
