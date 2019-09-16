@@ -236,7 +236,7 @@ void main() {
       pressElevation: 4.0,
       shadowColor: Colors.black,
       selectedShadowColor: Colors.black,
-      checkMarkColor: Colors.black,
+      checkmarkColor: Colors.black,
     );
     final ChipThemeData chipThemeWhite = ChipThemeData.fromDefaults(
       secondaryColor: Colors.white,
@@ -249,7 +249,7 @@ void main() {
       pressElevation: 10.0,
       shadowColor: Colors.white,
       selectedShadowColor: Colors.white,
-      checkMarkColor: Colors.white,
+      checkmarkColor: Colors.white,
     );
 
     final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5);
