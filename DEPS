@@ -538,7 +538,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/mac-amd64',
-        'version': 'tg1EmHYYNpqYZqyah8dNvW2z63D1D1yKyTq5ZFo5kXIC'
+        'version': 'xPX7ps3o0Jd0qQYdkF2JDNQGGo8Sc99oE8hqfqDOSIoC'
        }
      ],
      'condition': 'host_os == "mac"',
