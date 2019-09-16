@@ -78,7 +78,7 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// listener widgets for hover, focus, and press changes and call [builder] with the
 /// proper `Set<MaterialState>`.
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool snippet --template=stateless_widget_scaffold_center}
 ///
 /// This example shows how you can use [MaterialStateBuilder] to create a custom
 /// interactive button. When the button is hovered, the text gets an underline,
@@ -87,33 +87,31 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: MaterialStateBuilder(
-///       disabled: false,
-///       builder: (BuildContext context, Set<MaterialState> states) {
-///         final bool pressed = states.contains(MaterialState.pressed);
-///         final bool hovered = states.contains(MaterialState.hovered);
+///   return MaterialStateBuilder(
+///     disabled: false,
+///     builder: (BuildContext context, Set<MaterialState> states) {
+///       final bool pressed = states.contains(MaterialState.pressed);
+///       final bool hovered = states.contains(MaterialState.hovered);
 ///
-///         return RaisedButton(
-///           onPressed: () {},
-///           color: Colors.blue,
-///           shape: RoundedRectangleBorder(
-///             side: BorderSide(
-///               color: pressed ? Colors.yellow : Colors.white,
-///               width: hovered ? 2 : 1,
-///             ),
+///       return RaisedButton(
+///         onPressed: () {},
+///         color: Colors.blue,
+///         shape: RoundedRectangleBorder(
+///           side: BorderSide(
+///             color: pressed ? Colors.yellow : Colors.white,
+///             width: hovered ? 2 : 1,
 ///           ),
-///           child: Text(
-///             'Button',
-///             style: TextStyle(
-///               color: pressed ? Colors.yellow : Colors.white,
-///               decoration: hovered ? TextDecoration.underline : null,
-///               fontSize: 20.0,
-///             ),
+///         ),
+///         child: Text(
+///           'Button',
+///           style: TextStyle(
+///             color: pressed ? Colors.yellow : Colors.white,
+///             decoration: hovered ? TextDecoration.underline : null,
+///             fontSize: 20.0,
 ///           ),
-///         );
-///       },
-///     ),
+///         ),
+///       );
+///     },
 ///   );
 /// }
 /// ```
