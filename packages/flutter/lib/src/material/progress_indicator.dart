@@ -92,8 +92,8 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// {@endtemplate}
   final String semanticsValue;
 
-  Color _getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context).backgroundColor;
-  Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context).accentColor;
+  Color getBackgroundColor(BuildContext context) => backgroundColor ?? Theme.of(context).backgroundColor;
+  Color getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context).accentColor;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -101,7 +101,7 @@ abstract class ProgressIndicator extends StatefulWidget {
     properties.add(PercentProperty('value', value, showName: false, ifNull: '<indeterminate>'));
   }
 
-  Widget _buildSemanticsWrapper({
+  Widget buildSemanticsWrapper({
     @required BuildContext context,
     @required Widget child,
   }) {
@@ -281,7 +281,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
   }
 
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
-    return widget._buildSemanticsWrapper(
+    return widget.buildSemanticsWrapper(
       context: context,
       child: Container(
         constraints: const BoxConstraints(
@@ -290,8 +290,8 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
         ),
         child: CustomPaint(
           painter: _LinearProgressIndicatorPainter(
-            backgroundColor: widget._getBackgroundColor(context),
-            valueColor: widget._getValueColor(context),
+            backgroundColor: widget.getBackgroundColor(context),
+            valueColor: widget.getValueColor(context),
             value: widget.value, // may be null
             animationValue: animationValue, // ignored if widget.value is not null
             textDirection: textDirection,
@@ -483,7 +483,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   }
 
   Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
-    return widget._buildSemanticsWrapper(
+    return widget.buildSemanticsWrapper(
       context: context,
       child: Container(
         constraints: const BoxConstraints(
@@ -493,7 +493,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
         child: CustomPaint(
           painter: _CircularProgressIndicatorPainter(
             backgroundColor: widget.backgroundColor,
-            valueColor: widget._getValueColor(context),
+            valueColor: widget.getValueColor(context),
             value: widget.value, // may be null
             headValue: headValue, // remaining arguments are ignored if widget.value is not null
             tailValue: tailValue,
@@ -647,7 +647,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   @override
   Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
     final double arrowheadScale = widget.value == null ? 0.0 : (widget.value * 2.0).clamp(0.0, 1.0);
-    return widget._buildSemanticsWrapper(
+    return widget.buildSemanticsWrapper(
       context: context,
       child: Container(
         width: _indicatorSize,
@@ -661,7 +661,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
             padding: const EdgeInsets.all(12.0),
             child: CustomPaint(
               painter: _RefreshProgressIndicatorPainter(
-                valueColor: widget._getValueColor(context),
+                valueColor: widget.getValueColor(context),
                 value: null, // Draw the indeterminate progress indicator.
                 headValue: headValue,
                 tailValue: tailValue,
