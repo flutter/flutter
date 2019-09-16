@@ -297,7 +297,6 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   Widget build(BuildContext context) {
     return MaterialStateBuilder(
       disabled: !widget.enabled,
-      pressed: _pressed,
       builder: (BuildContext context, Set<MaterialState> states) {
         final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(widget.textStyle?.color, states);
         final ShapeBorder effectiveShape = MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, states);

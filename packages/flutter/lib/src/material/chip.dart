@@ -1687,7 +1687,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     assert(debugCheckHasMaterialLocalizations(context));
 
     return MaterialStateBuilder(
-      pressed: _isTapping,
       selected: widget.selected,
       disabled: !widget.isEnabled,
       builder: (BuildContext context, Set<MaterialState> states) {

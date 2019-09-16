@@ -313,7 +313,7 @@ void main() {
     await tester.pump();
     expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
     await tester.pump(const Duration(seconds: 1));
-    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 12.0);
   });
 
   testWidgets('FlatActionButton mini size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
