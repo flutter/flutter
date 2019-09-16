@@ -564,6 +564,14 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 granularities |= AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD;
             }
             result.setMovementGranularities(granularities);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && semanticsNode.maxValueLength >= 0) {
+                // Account for the fact that Flutter is counting Unicode scalar values and Android
+                // is counting UTF16 words.
+                final int length = semanticsNode.value == null ? 0 : semanticsNode.value.length();
+                int a = length - semanticsNode.currentValueLength + semanticsNode.maxValueLength;
+                result.setMaxTextLength(length - semanticsNode.currentValueLength + semanticsNode.maxValueLength);
+            }
+
         }
 
         // These are non-ops on older devices. Attempting to interact with the text will cause Talkback to read the
@@ -1719,6 +1727,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
         private int flags;
         private int actions;
+        private int maxValueLength;
+        private int currentValueLength;
         private int textSelectionBase;
         private int textSelectionExtent;
         private int platformViewId;
@@ -1858,6 +1868,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
             flags = buffer.getInt();
             actions = buffer.getInt();
+            maxValueLength = buffer.getInt();
+            currentValueLength = buffer.getInt();
             textSelectionBase = buffer.getInt();
             textSelectionExtent = buffer.getInt();
             platformViewId = buffer.getInt();

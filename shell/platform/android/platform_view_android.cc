@@ -227,7 +227,7 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
 void PlatformViewAndroid::UpdateSemantics(
     flutter::SemanticsNodeUpdates update,
     flutter::CustomAccessibilityActionUpdates actions) {
-  constexpr size_t kBytesPerNode = 39 * sizeof(int32_t);
+  constexpr size_t kBytesPerNode = 41 * sizeof(int32_t);
   constexpr size_t kBytesPerChild = sizeof(int32_t);
   constexpr size_t kBytesPerAction = 4 * sizeof(int32_t);
 
@@ -261,6 +261,8 @@ void PlatformViewAndroid::UpdateSemantics(
       buffer_int32[position++] = node.id;
       buffer_int32[position++] = node.flags;
       buffer_int32[position++] = node.actions;
+      buffer_int32[position++] = node.maxValueLength;
+      buffer_int32[position++] = node.currentValueLength;
       buffer_int32[position++] = node.textSelectionBase;
       buffer_int32[position++] = node.textSelectionExtent;
       buffer_int32[position++] = node.platformViewId;

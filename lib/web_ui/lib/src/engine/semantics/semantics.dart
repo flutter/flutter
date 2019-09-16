@@ -35,6 +35,8 @@ class SemanticsNodeUpdate {
     this.id,
     this.flags,
     this.actions,
+    this.maxValueLength,
+    this.currentValueLength,
     this.textSelectionBase,
     this.textSelectionExtent,
     this.platformViewId,
@@ -66,6 +68,12 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int actions;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final int maxValueLength;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final int currentValueLength;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int textSelectionBase;
