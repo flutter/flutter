@@ -37,8 +37,9 @@ class VersionCommand extends FlutterCommand {
   Future<List<String>> getTags() async {
     RunResult runResult;
     try {
-      runResult = await runCheckedAsync(
+      runResult = await processUtils.run(
         <String>['git', 'tag', '-l', 'v*', '--sort=-creatordate'],
+        throwOnError: true,
         workingDirectory: Cache.flutterRoot,
       );
     } on ProcessException catch (error) {
@@ -83,8 +84,9 @@ class VersionCommand extends FlutterCommand {
     }
 
     try {
-      await runCheckedAsync(
+      await processUtils.run(
         <String>['git', 'checkout', 'v$version'],
+        throwOnError: true,
         workingDirectory: Cache.flutterRoot,
       );
     } catch (e) {
@@ -101,7 +103,7 @@ class VersionCommand extends FlutterCommand {
     // if necessary.
     printStatus('');
     printStatus('Downloading engine...');
-    int code = await runCommandAndStreamOutput(<String>[
+    int code = await processUtils.stream(<String>[
       fs.path.join('bin', 'flutter'),
       '--no-color',
       'precache',
@@ -128,7 +130,7 @@ class VersionCommand extends FlutterCommand {
     // Run a doctor check in case system requirements have changed.
     printStatus('');
     printStatus('Running flutter doctor...');
-    code = await runCommandAndStreamOutput(
+    code = await processUtils.stream(
       <String>[
         fs.path.join('bin', 'flutter'),
         'doctor',

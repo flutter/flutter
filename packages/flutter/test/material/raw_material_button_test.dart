@@ -215,6 +215,7 @@ void main() {
     const Key key = Key('test');
     const Color focusColor = Color(0xff00ff00);
 
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -237,10 +238,83 @@ void main() {
     expect(box, paints..rect(color: focusColor));
   });
 
+  testWidgets('$RawMaterialButton loses focus when disabled.', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'RawMaterialButton');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: RawMaterialButton(
+            autofocus: true,
+            focusNode: focusNode,
+            onPressed: () {},
+            child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: RawMaterialButton(
+            focusNode: focusNode,
+            onPressed: null,
+            child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets("Disabled $RawMaterialButton can't be traversed to when disabled.", (WidgetTester tester) async {
+    final FocusNode focusNode1 = FocusNode(debugLabel: '$RawMaterialButton 1');
+    final FocusNode focusNode2 = FocusNode(debugLabel: '$RawMaterialButton 2');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Column(
+            children: <Widget>[
+              RawMaterialButton(
+                autofocus: true,
+                focusNode: focusNode1,
+                onPressed: () {},
+                child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+              ),
+              RawMaterialButton(
+                autofocus: true,
+                focusNode: focusNode2,
+                onPressed: null,
+                child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(focusNode1.hasPrimaryFocus, isTrue);
+    expect(focusNode2.hasPrimaryFocus, isFalse);
+
+    expect(focusNode1.nextFocus(), isTrue);
+    await tester.pump();
+
+    expect(focusNode1.hasPrimaryFocus, isTrue);
+    expect(focusNode2.hasPrimaryFocus, isFalse);
+  });
+
   testWidgets('$RawMaterialButton handles hover', (WidgetTester tester) async {
     const Key key = Key('test');
     const Color hoverColor = Color(0xff00ff00);
 
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     await tester.pumpWidget(
       MaterialApp(
         home: Center(

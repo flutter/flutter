@@ -4,14 +4,13 @@
 
 import 'dart:async';
 
-import 'package:build_daemon/data/build_status.dart';
-import 'package:build_daemon/data/build_target.dart';
-import 'package:build_runner_core/build_runner_core.dart' hide BuildStatus, OutputLocation;
-import 'package:build_daemon/data/server_log.dart';
-import 'package:build_daemon/data/build_status.dart' as build;
 import 'package:build_daemon/client.dart';
-import 'package:yaml/yaml.dart';
+import 'package:build_daemon/data/build_status.dart';
+import 'package:build_daemon/data/build_status.dart' as build;
+import 'package:build_daemon/data/build_target.dart';
+import 'package:build_daemon/data/server_log.dart';
 import 'package:crypto/crypto.dart' show md5;
+import 'package:yaml/yaml.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -22,9 +21,9 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../codegen.dart';
 import '../dart/pub.dart';
+import '../dart/sdk.dart';
 import '../globals.dart';
 import '../project.dart';
-import 'build_script_generator.dart';
 
 /// The minimum version of build_runner we can support in the flutter tool.
 const String kMinimumBuildRunnerVersion = '1.6.5';
@@ -42,7 +41,6 @@ class BuildRunner extends CodeGenerator {
   Future<void> generateBuildScript(FlutterProject flutterProject) async {
     final Directory entrypointDirectory = fs.directory(fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint'));
     final Directory generatedDirectory = fs.directory(fs.path.join(flutterProject.dartTool.path, 'flutter_tool'));
-    final File buildScript = entrypointDirectory.childFile('build.dart');
     final File buildSnapshot = entrypointDirectory.childFile('build.dart.snapshot');
     final File scriptIdFile = entrypointDirectory.childFile('id');
     final File syntheticPubspec = generatedDirectory.childFile('pubspec.yaml');
@@ -114,9 +112,13 @@ class BuildRunner extends CodeGenerator {
         scriptIdFile.createSync(recursive: true);
       }
       scriptIdFile.writeAsBytesSync(appliedBuilderDigest);
-      final PackageGraph packageGraph = PackageGraph.forPath(syntheticPubspec.parent.path);
-      final BuildScriptGenerator buildScriptGenerator = const BuildScriptGeneratorFactory().create(flutterProject, packageGraph);
-      await buildScriptGenerator.generateBuildScript();
+      final ProcessResult generateResult = await processManager.run(<String>[
+        sdkBinaryName('pub'), 'run', 'build_runner', 'generate-build-script'
+      ], workingDirectory: syntheticPubspec.parent.path);
+      if (generateResult.exitCode != 0) {
+        throwToolExit('Error generating build_script snapshot: ${generateResult.stderr}');
+      }
+      final File buildScript = fs.file(generateResult.stdout.trim());
       final ProcessResult result = await processManager.run(<String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--snapshot=${buildSnapshot.path}',

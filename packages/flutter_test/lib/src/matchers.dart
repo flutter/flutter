@@ -297,33 +297,60 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 ///
 /// For the case of a [Finder], the [Finder] must match exactly one widget and
 /// the rendered image of the first [RepaintBoundary] ancestor of the widget is
-/// treated as the image for the widget.
+/// treated as the image for the widget. As such, you may choose to wrap a test
+/// widget in a [RepaintBoundary] to specify a particular focus for the test.
 ///
-/// [key] may be either a [Uri] or a [String] representation of a URI.
+/// The [key] may be either a [Uri] or a [String] representation of a URI.
 ///
-/// [version] is a number that can be used to differentiate historical golden
-/// files. This parameter is optional. Version numbers are used in golden file
-/// tests for package:flutter. You can learn more about these tests [here]
-/// (https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
+/// The [version] is a number that can be used to differentiate historical
+/// golden files. This parameter is optional. Version numbers are used in golden
+/// file tests for package:flutter. You can learn more about these tests
+/// [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
 ///
 /// This is an asynchronous matcher, meaning that callers should use
 /// [expectLater] when using this matcher and await the future returned by
 /// [expectLater].
 ///
-/// ## Sample code
+/// ## Golden File Testing
+///
+/// The term __golden file__ refers to a master image that is considered the true
+/// rendering of a given widget, state, application, or other visual
+/// representation you have chosen to capture.
+///
+/// The master golden image files that are tested against can be created or
+/// updated by running `flutter test --update-goldens` on the test.
+///
+/// {@tool sample}
+/// Sample invocations of [matchesGoldenFile].
 ///
 /// ```dart
-/// await expectLater(find.text('Save'), matchesGoldenFile('save.png'));
-/// await expectLater(image, matchesGoldenFile('save.png'));
-/// await expectLater(imageFuture, matchesGoldenFile('save.png'));
-/// ```
+/// await expectLater(
+///   find.text('Save'),
+///   matchesGoldenFile('save.png'),
+/// );
 ///
-/// Golden image files can be created or updated by running `flutter test
-/// --update-goldens` on the test.
+/// await expectLater(
+///   image,
+///   matchesGoldenFile('save.png'),
+/// );
+///
+/// await expectLater(
+///   imageFuture,
+///   matchesGoldenFile('save.png'),
+///  );
+///
+/// await expectLater(
+///   find.byType(MyWidget),
+///   matchesGoldenFile('goldens/myWidget.png'),
+/// );
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
-///  * [goldenFileComparator], which acts as the backend for this matcher.
+///  * [GoldenFileComparator], which acts as the backend for this matcher.
+///  * [LocalFileComparator], which is the default [GoldenFileComparator]
+///    implementation for `flutter test`.
 ///  * [matchesReferenceImage], which should be used instead if you want to
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers

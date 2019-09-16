@@ -113,7 +113,7 @@ abstract class UnpackMacOS extends Target {
   List<Target> get dependencies => <Target>[];
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
@@ -125,7 +125,6 @@ abstract class UnpackMacOS extends Target {
     if (targetDirectory.existsSync()) {
       targetDirectory.deleteSync(recursive: true);
     }
-
     final ProcessResult result = await processManager
         .run(<String>['cp', '-R', basePath, targetDirectory.path]);
     if (result.exitCode != 0) {
@@ -191,7 +190,7 @@ class DebugMacOSFramework extends Target {
   String get name => 'debug_macos_framework';
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     final File outputFile = fs.file(fs.path.join(
         environment.buildDir.path, 'App.framework', 'App'));
     outputFile.createSync(recursive: true);
@@ -236,7 +235,7 @@ class CompileMacOSFramework extends Target {
   String get name => 'compile_macos_framework';
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
@@ -288,6 +287,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
     Source.behavior(MacOSAssetBehavior())
   ];
 
@@ -302,7 +302,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
   ];
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
@@ -325,11 +325,6 @@ abstract class MacOSBundleFlutterAssets extends Target {
     final Directory assetDirectory = outputDirectory
       .childDirectory('Resources')
       .childDirectory('flutter_assets');
-    // We're not smart enough to only remove assets that are removed. If
-    // anything changes blow away the whole directory.
-    if (assetDirectory.existsSync()) {
-      assetDirectory.deleteSync(recursive: true);
-    }
     assetDirectory.createSync(recursive: true);
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int result = await assetBundle.build(
@@ -415,7 +410,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       if (!currentVersion.existsSync()) {
         final String linkPath = fs.path.relative(outputDirectory.path,
             from: outputDirectory.parent.path);
-        currentVersion.createSync('$linkPath${fs.path.separator}');
+        currentVersion.createSync(linkPath);
       }
       // Create symlink to current resources.
       final Link currentResources = frameworkRootDirectory

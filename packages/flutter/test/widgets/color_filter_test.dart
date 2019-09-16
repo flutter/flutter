@@ -26,8 +26,7 @@ void main() {
   });
 
   testWidgets('Color filter - sepia', (WidgetTester tester) async {
-    // TODO(dnfield): This should be const. https://github.com/dart-lang/sdk/issues/37503
-    final ColorFilter sepia = ColorFilter.matrix(<double>[
+    const ColorFilter sepia = ColorFilter.matrix(<double>[
       0.39,  0.769, 0.189, 0, 0, //
       0.349, 0.686, 0.168, 0, 0, //
       0.272, 0.534, 0.131, 0, 0, //

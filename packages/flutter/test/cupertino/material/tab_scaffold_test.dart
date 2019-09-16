@@ -166,7 +166,7 @@ void main() {
       matching: find.byType(RichText),
     ));
     // Tab 2 should still be selected after changing theme.
-    expect(tab1.text.style.color, CupertinoColors.inactiveGray);
+    expect(tab1.text.style.color.value, 0xFF757575);
     final RichText tab2 = tester.widget(find.descendant(
       of: find.text('Tab 2'),
       matching: find.byType(RichText),

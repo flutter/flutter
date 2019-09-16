@@ -42,7 +42,7 @@ class _ImageLoaderState extends State<ImageLoader> {
   void initState() {
     // This is not an image, but we don't care since we're using a faked
     // http client.
-    final NetworkImage image = NetworkImage('https://github.com/flutter/flutter');
+    const NetworkImage image = NetworkImage('https://github.com/flutter/flutter');
     final ImageStream stream = image.resolve(ImageConfiguration.empty);
     ImageStreamListener listener;
     listener = ImageStreamListener(

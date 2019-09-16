@@ -175,7 +175,7 @@ abstract class DeletableChipAttributes {
   /// that the user tapped the delete button. In order to delete the chip, you
   /// have to do something similar to the following sample:
   ///
-  /// {@tool snippet --template=stateful_widget_scaffold}
+  /// {@tool snippet --template=stateful_widget_scaffold_center}
   ///
   /// This sample shows how to use [onDeleted] to remove an entry when the
   /// delete button is tapped.
@@ -231,7 +231,7 @@ abstract class DeletableChipAttributes {
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return Center(child: CastList());
+  ///   return CastList();
   /// }
   /// ```
   /// {@end-tool}
@@ -1728,6 +1728,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       onFocusChange: _handleFocus,
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
+      canRequestFocus: widget.isEnabled,
       child: Material(
         elevation: isTapping ? pressElevation : elevation,
         shadowColor: widget.selected ? selectedShadowColor : shadowColor,

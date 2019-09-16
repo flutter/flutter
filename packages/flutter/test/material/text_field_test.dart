@@ -3391,6 +3391,83 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('TextField loses focus when disabled', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'TextField');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              focusNode: focusNode,
+              autofocus: true,
+              maxLength: 10,
+              enabled: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              focusNode: focusNode,
+              autofocus: true,
+              maxLength: 10,
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets("Disabled TextField can't be traversed to when disabled.", (WidgetTester tester) async {
+    final FocusNode focusNode1 = FocusNode(debugLabel: 'TextField 1');
+    final FocusNode focusNode2 = FocusNode(debugLabel: 'TextField 2');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  focusNode: focusNode1,
+                  autofocus: true,
+                  maxLength: 10,
+                  enabled: true,
+                ),
+                TextField(
+                  focusNode: focusNode2,
+                  maxLength: 10,
+                  enabled: false,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(focusNode1.hasPrimaryFocus, isTrue);
+    expect(focusNode2.hasPrimaryFocus, isFalse);
+
+    expect(focusNode1.nextFocus(), isTrue);
+    await tester.pump();
+
+    expect(focusNode1.hasPrimaryFocus, isTrue);
+    expect(focusNode2.hasPrimaryFocus, isFalse);
+  });
+
   void sendFakeKeyEvent(Map<String, dynamic> data) {
     ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.keyEvent.name,
@@ -4135,6 +4212,100 @@ void main() {
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
+  testWidgets('TextField semantics include label when unfocused and label/hint when focused', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController(text: 'value');
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'hint',
+            labelText: 'label',
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+    expect(node.label, 'label');
+    expect(node.value, 'value');
+
+    // Focus text field.
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    expect(node.label, 'label\nhint');
+    expect(node.value, 'value');
+    semantics.dispose();
+  });
+
+  testWidgets('TextField semantics always include label when no hint is given', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController(text: 'value');
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'label',
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+    expect(node.label, 'label');
+    expect(node.value, 'value');
+
+    // Focus text field.
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    expect(node.label, 'label');
+    expect(node.value, 'value');
+    semantics.dispose();
+  });
+
+  testWidgets('TextField semantics always include hint when no label is given', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController(text: 'value');
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'hint',
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+    expect(node.label, 'hint');
+    expect(node.value, 'value');
+
+    // Focus text field.
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    expect(node.label, 'hint');
+    expect(node.value, 'value');
+    semantics.dispose();
+  });
+
   testWidgets('TextField semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = TextEditingController();
@@ -4692,7 +4863,7 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          label: 'hint',
+          label: 'label\nhint',
           id: 1,
           textDirection: TextDirection.ltr,
           textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),

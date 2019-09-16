@@ -14,7 +14,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
-import 'base/process_manager.dart';
+import 'base/process.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
@@ -98,26 +98,33 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     if (_workflows == null) {
       _workflows = <Workflow>[];
 
-      if (iosWorkflow.appliesToHostPlatform)
+      if (iosWorkflow.appliesToHostPlatform) {
         _workflows.add(iosWorkflow);
+      }
 
-      if (androidWorkflow.appliesToHostPlatform)
+      if (androidWorkflow.appliesToHostPlatform) {
         _workflows.add(androidWorkflow);
+      }
 
-      if (fuchsiaWorkflow.appliesToHostPlatform)
+      if (fuchsiaWorkflow.appliesToHostPlatform) {
         _workflows.add(fuchsiaWorkflow);
+      }
 
-      if (linuxWorkflow.appliesToHostPlatform)
+      if (linuxWorkflow.appliesToHostPlatform) {
         _workflows.add(linuxWorkflow);
+      }
 
-      if (macOSWorkflow.appliesToHostPlatform)
+      if (macOSWorkflow.appliesToHostPlatform) {
         _workflows.add(macOSWorkflow);
+      }
 
-      if (windowsWorkflow.appliesToHostPlatform)
+      if (windowsWorkflow.appliesToHostPlatform) {
         _workflows.add(windowsWorkflow);
+      }
 
-      if (webWorkflow.appliesToHostPlatform)
+      if (webWorkflow.appliesToHostPlatform) {
         _workflows.add(webWorkflow);
+      }
 
     }
     return _workflows;
@@ -143,8 +150,15 @@ class Doctor {
   List<ValidatorTask> startValidatorTasks() {
     final List<ValidatorTask> tasks = <ValidatorTask>[];
     for (DoctorValidator validator in validators) {
+      // We use an asyncGuard() here to be absolutely certain that
+      // DoctorValidators do not result in an uncaught exception. Since the
+      // Future returned by the asyncGuard() is not awaited, we pass an
+      // onError callback to it and translate errors into ValidationResults.
       final Future<ValidationResult> result =
-          asyncGuard<ValidationResult>(() => validator.validate());
+          asyncGuard<ValidationResult>(validator.validate,
+            onError: (Object exception, StackTrace stackTrace) {
+              return ValidationResult.crash(exception, stackTrace);
+            });
       tasks.add(ValidatorTask(validator, result));
     }
     return tasks;
@@ -225,8 +239,9 @@ class Doctor {
 
   /// Print information about the state of installed tooling.
   Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true }) async {
-    if (androidLicenses)
+    if (androidLicenses) {
       return AndroidLicenseValidator.runLicenseManager();
+    }
 
     if (!verbose) {
       printStatus('Doctor summary (to see all details, run flutter doctor -v):');
@@ -310,8 +325,9 @@ class Doctor {
   bool get canListAnything => workflows.any((Workflow workflow) => workflow.canListDevices);
 
   bool get canLaunchAnything {
-    if (FlutterTesterDevices.showFlutterTesterDevice)
+    if (FlutterTesterDevices.showFlutterTesterDevice) {
       return true;
+    }
     return workflows.any((Workflow workflow) => workflow.canLaunchDevices);
   }
 }
@@ -600,7 +616,7 @@ class FlutterValidator extends DoctorValidator {
 bool _genSnapshotRuns(String genSnapshotPath) {
   const int kExpectedExitCode = 255;
   try {
-    return processManager.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
+    return processUtils.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
   } catch (error) {
     return false;
   }
@@ -633,10 +649,12 @@ abstract class IntelliJValidator extends DoctorValidator {
   static final Version kMinIdeaVersion = Version(2017, 1, 0);
 
   static Iterable<DoctorValidator> get installedValidators {
-    if (platform.isLinux || platform.isWindows)
+    if (platform.isLinux || platform.isWindows) {
       return IntelliJValidatorOnLinuxAndWindows.installed;
-    if (platform.isMacOS)
+    }
+    if (platform.isMacOS) {
       return IntelliJValidatorOnMac.installed;
+    }
     return <DoctorValidator>[];
   }
 
@@ -669,12 +687,14 @@ abstract class IntelliJValidator extends DoctorValidator {
 
   void _validateIntelliJVersion(List<ValidationMessage> messages, Version minVersion) {
     // Ignore unknown versions.
-    if (minVersion == Version.unknown)
+    if (minVersion == Version.unknown) {
       return;
+    }
 
     final Version installedVersion = Version.parse(version);
-    if (installedVersion == null)
+    if (installedVersion == null) {
       return;
+    }
 
     if (installedVersion < minVersion) {
       messages.add(ValidationMessage.error(userMessages.intellijMinimumVersion(minVersion.toString())));
@@ -693,8 +713,9 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
 
   static Iterable<DoctorValidator> get installed {
     final List<DoctorValidator> validators = <DoctorValidator>[];
-    if (homeDirPath == null)
+    if (homeDirPath == null) {
       return validators;
+    }
 
     void addValidator(String title, String version, String installPath, String pluginsPath) {
       final IntelliJValidatorOnLinuxAndWindows validator =
@@ -702,8 +723,9 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
       for (int index = 0; index < validators.length; ++index) {
         final DoctorValidator other = validators[index];
         if (other is IntelliJValidatorOnLinuxAndWindows && validator.installPath == other.installPath) {
-          if (validator.version.compareTo(other.version) > 0)
+          if (validator.version.compareTo(other.version) > 0) {
             validators[index] = validator;
+          }
           return;
         }
       }

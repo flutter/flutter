@@ -71,8 +71,9 @@ abstract class FlutterTestDriver {
     } else {
       lastTime = time;
     }
-    if (_printDebugOutputToStdOut)
+    if (_printDebugOutputToStdOut) {
       print('$time$_logPrefix$line');
+    }
   }
 
   Future<void> _setupProcess(
@@ -82,10 +83,12 @@ abstract class FlutterTestDriver {
     File pidFile,
   }) async {
     final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    if (withDebugger)
+    if (withDebugger) {
       arguments.add('--start-paused');
-    if (_printDebugOutputToStdOut)
+    }
+    if (_printDebugOutputToStdOut) {
       arguments.add('--verbose');
+    }
     if (pidFile != null) {
       arguments.addAll(<String>['--pid-file', pidFile.path]);
     }
@@ -149,8 +152,9 @@ abstract class FlutterTestDriver {
   Future<int> quit() => _killGracefully();
 
   Future<int> _killGracefully() async {
-    if (_processPid == null)
+    if (_processPid == null) {
       return -1;
+    }
     _debugPrint('Sending SIGTERM to $_processPid..');
     ProcessSignal.SIGTERM.send(_processPid);
     return _process.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
@@ -216,8 +220,9 @@ abstract class FlutterTestDriver {
                 && event.kind.startsWith('Pause');
           })
           .listen((Event event) {
-            if (!pauseEvent.isCompleted)
+            if (!pauseEvent.isCompleted) {
               pauseEvent.complete(event);
+            }
           });
 
         // But also check if the isolate was already paused (only after we've set
@@ -252,8 +257,9 @@ abstract class FlutterTestDriver {
   }
 
   Future<Isolate> stepOverOrOverAsyncSuspension({ bool waitForNextPause = true }) async {
-    if (await isAtAsyncSuspension())
+    if (await isAtAsyncSuspension()) {
       return await stepOverAsync(waitForNextPause: waitForNextPause);
+    }
     return await stepOver(waitForNextPause: waitForNextPause);
   }
 
@@ -326,8 +332,9 @@ abstract class FlutterTestDriver {
     subscription = _stdout.stream.listen((String line) async {
       final dynamic json = parseFlutterResponse(line);
       _lastResponse = line;
-      if (json == null)
+      if (json == null) {
         return;
+      }
       if ((event != null && json['event'] == event) ||
           (id    != null && json['id']    == id)) {
         await subscription.cancel();
@@ -486,8 +493,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       final String wsUriString = debugPort['params']['wsUri'];
       _vmServiceWsUri = Uri.parse(wsUriString);
       await connectToVmService(pauseOnExceptions: pauseOnExceptions);
-      if (!startPaused)
+      if (!startPaused) {
         await resume(waitForNextPause: false);
+      }
     }
 
     // Now await the started event; if it had already happened the future will
@@ -499,8 +507,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   Future<void> hotReload() => _restart(fullRestart: false);
 
   Future<void> _restart({ bool fullRestart = false, bool pause = false }) async {
-    if (_currentRunningAppId == null)
+    if (_currentRunningAppId == null) {
       throw Exception('App has not started yet');
+    }
 
     _debugPrint('Performing ${ pause ? "paused " : "" }${ fullRestart ? "hot restart" : "hot reload" }...');
     final dynamic hotReloadResponse = await _sendRequest(
@@ -509,8 +518,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     );
     _debugPrint('${ fullRestart ? "Hot restart" : "Hot reload" } complete.');
 
-    if (hotReloadResponse == null || hotReloadResponse['code'] != 0)
+    if (hotReloadResponse == null || hotReloadResponse['code'] != 0) {
       _throwErrorResponse('Hot ${fullRestart ? 'restart' : 'reload'} request failed');
+    }
   }
 
   Future<int> detach() async {
@@ -586,8 +596,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     _process.stdin.writeln(jsonEncoded);
     final Map<String, dynamic> response = await responseFuture;
 
-    if (response['error'] != null || response['result'] == null)
+    if (response['error'] != null || response['result'] == null) {
       _throwErrorResponse('Unexpected error response');
+    }
 
     return response['result'];
   }
