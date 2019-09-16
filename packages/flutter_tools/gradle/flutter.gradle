@@ -154,7 +154,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        if (shouldUseProguard(project)) {
+        if (shouldShrinkResources(project)) {
             String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
                     "gradle", "flutter_proguard_rules.pro")
             project.android.buildTypes {
@@ -164,7 +164,8 @@ class FlutterPlugin implements Plugin<Project> {
                     minifyEnabled true
                     // Enables resource shrinking, which is performed by the
                     // Android Gradle plugin.
-                    shrinkResources true
+                    // NOTE: The resource shrinker can't be used for libraries.
+                    shrinkResources isBuiltAsApp(project)
                     // Fallback to `android/app/proguard-rules.pro`.
                     // This way, custom Proguard rules can be configured as needed.
                     proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"
@@ -393,11 +394,17 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
-    private static Boolean shouldUseProguard(Project project) {
-        if (project.hasProperty('proguard')) {
-            return project.property('proguard').toBoolean()
+    private static Boolean shouldShrinkResources(Project project) {
+        if (project.hasProperty("shrink")) {
+            return project.property("shrink").toBoolean()
         }
         return false
+    }
+
+    private static Boolean isBuiltAsApp(Project project) {
+        // Projects are built as applications when the they use the `com.android.application`
+        // plugin.
+        return project.plugins.hasPlugin("com.android.application");
     }
 
     private static Boolean buildPluginAsAar() {
