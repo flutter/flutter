@@ -81,12 +81,6 @@ class EngineWindow extends ui.Window {
     _browserHistory.locationStrategy = strategy;
   }
 
-  /// This setter is used by [WebNavigatorObserver] to update the url to
-  /// reflect the [Navigator]'s current route name.
-  set webOnlyRouteName(String routeName) {
-    _browserHistory.setRouteName(routeName);
-  }
-
   @override
   void sendPlatformMessage(
     String name,
