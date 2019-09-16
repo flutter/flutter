@@ -335,7 +335,7 @@ void main() {
       IconThemeData iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
       expect(textStyle.style.color, CupertinoColors.black);
-      expect(iconTheme.color, CupertinoColors.activeOrange);
+      expect(iconTheme.color.value, CupertinoColors.activeOrange.darkColor.value);
 
       await tester.tap(find.byIcon(const IconData(1)));
       await tester.pump();
@@ -344,7 +344,7 @@ void main() {
       textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
       iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
-      expect(textStyle.style.color, CupertinoColors.activeOrange);
+      expect(textStyle.style.color.value, CupertinoColors.activeOrange.darkColor.value);
       expect(iconTheme.color, CupertinoColors.black);
     },
   );

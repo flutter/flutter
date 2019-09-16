@@ -25,19 +25,19 @@ class CupertinoColors {
   /// buttons, selected tabs and your own chat bubbles.
   ///
   /// This is SystemBlue in the iOS palette.
-  static const Color activeBlue = systemBlue;
+  static const CupertinoDynamicColor activeBlue = systemBlue;
 
   /// iOS 13's default green color. Used to indicate active accents such as
   /// the switch in its on state and some accent buttons such as the call button
   /// and Apple Map's 'Go' button.
   ///
   /// This is SystemGreen in the iOS palette.
-  static const Color activeGreen = systemGreen;
+  static const CupertinoDynamicColor activeGreen = systemGreen;
 
   /// iOS 13's orange color.
   ///
   /// This is SystemOrange in the iOS palette.
-  static const Color activeOrange = systemOrange;
+  static const CupertinoDynamicColor activeOrange = systemOrange;
 
   /// Opaque white color. Used for backgrounds and fonts against dark backgrounds.
   ///
