@@ -281,7 +281,7 @@ abstract class SearchDelegate<T> {
   ///
   /// Defaults to null.
   final Duration debounceDuration;
-  
+
   /// [Animation] triggered when the search pages fades in or out.
   ///
   /// This animation is commonly used to animate [AnimatedIcon]s of
