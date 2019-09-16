@@ -50,6 +50,18 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   auto shell =
       std::unique_ptr<Shell>(new Shell(std::move(vm), task_runners, settings));
 
+  // Create the rasterizer on the GPU thread.
+  std::promise<std::unique_ptr<Rasterizer>> rasterizer_promise;
+  auto rasterizer_future = rasterizer_promise.get_future();
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners.GetGPUTaskRunner(), [&rasterizer_promise,   //
+                                        on_create_rasterizer,  //
+                                        shell = shell.get()    //
+  ]() {
+        TRACE_EVENT0("flutter", "ShellSetupGPUSubsystem");
+        rasterizer_promise.set_value(on_create_rasterizer(*shell));
+      });
+
   // Create the platform view on the platform thread (this thread).
   auto platform_view = on_create_platform_view(*shell.get());
   if (!platform_view || !platform_view->GetWeakPtr()) {
@@ -67,58 +79,41 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   // first because it has state that the other subsystems depend on. It must
   // first be booted and the necessary references obtained to initialize the
   // other subsystems.
-  fml::AutoResetWaitableEvent io_latch;
-  std::unique_ptr<ShellIOManager> io_manager;
+  std::promise<std::unique_ptr<ShellIOManager>> io_manager_promise;
+  auto io_manager_future = io_manager_promise.get_future();
+  std::promise<fml::WeakPtr<ShellIOManager>> weak_io_manager_promise;
+  auto weak_io_manager_future = weak_io_manager_promise.get_future();
   auto io_task_runner = shell->GetTaskRunners().GetIOTaskRunner();
   fml::TaskRunner::RunNowOrPostTask(
       io_task_runner,
-      [&io_latch,       //
-       &io_manager,     //
-       &platform_view,  //
-       io_task_runner   //
+      [&io_manager_promise,                          //
+       &weak_io_manager_promise,                     //
+       platform_view = platform_view->GetWeakPtr(),  //
+       io_task_runner                                //
   ]() {
         TRACE_EVENT0("flutter", "ShellSetupIOSubsystem");
-        io_manager = std::make_unique<ShellIOManager>(
+        auto io_manager = std::make_unique<ShellIOManager>(
             platform_view->CreateResourceContext(), io_task_runner);
-        io_latch.Signal();
+        weak_io_manager_promise.set_value(io_manager->GetWeakPtr());
+        io_manager_promise.set_value(std::move(io_manager));
       });
-  io_latch.Wait();
-
-  // Create the rasterizer on the GPU thread.
-  fml::AutoResetWaitableEvent gpu_latch;
-  std::unique_ptr<Rasterizer> rasterizer;
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners.GetGPUTaskRunner(), [&gpu_latch,            //
-                                        &rasterizer,           //
-                                        on_create_rasterizer,  //
-                                        shell = shell.get()    //
-  ]() {
-        TRACE_EVENT0("flutter", "ShellSetupGPUSubsystem");
-        if (auto new_rasterizer = on_create_rasterizer(*shell)) {
-          rasterizer = std::move(new_rasterizer);
-        }
-        gpu_latch.Signal();
-      });
-
-  gpu_latch.Wait();
 
   // Send dispatcher_maker to the engine constructor because shell won't have
   // platform_view set until Shell::Setup is called later.
   auto dispatcher_maker = platform_view->GetDispatcherMaker();
 
   // Create the engine on the UI thread.
-  fml::AutoResetWaitableEvent ui_latch;
-  std::unique_ptr<Engine> engine;
+  std::promise<std::unique_ptr<Engine>> engine_promise;
+  auto engine_future = engine_promise.get_future();
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetUITaskRunner(),
-      fml::MakeCopyable([&ui_latch,                                       //
-                         &engine,                                         //
+      fml::MakeCopyable([&engine_promise,                                 //
                          shell = shell.get(),                             //
                          &dispatcher_maker,                               //
                          isolate_snapshot = std::move(isolate_snapshot),  //
                          shared_snapshot = std::move(shared_snapshot),    //
                          vsync_waiter = std::move(vsync_waiter),          //
-                         io_manager = io_manager->GetWeakPtr()            //
+                         &weak_io_manager_future                          //
   ]() mutable {
         TRACE_EVENT0("flutter", "ShellSetupUISubsystem");
         const auto& task_runners = shell->GetTaskRunners();
@@ -128,27 +123,23 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         auto animator = std::make_unique<Animator>(*shell, task_runners,
                                                    std::move(vsync_waiter));
 
-        engine = std::make_unique<Engine>(*shell,                       //
-                                          dispatcher_maker,             //
-                                          *shell->GetDartVM(),          //
-                                          std::move(isolate_snapshot),  //
-                                          std::move(shared_snapshot),   //
-                                          task_runners,                 //
-                                          shell->GetSettings(),         //
-                                          std::move(animator),          //
-                                          std::move(io_manager)         //
-        );
-        ui_latch.Signal();
+        engine_promise.set_value(std::make_unique<Engine>(
+            *shell,                       //
+            dispatcher_maker,             //
+            *shell->GetDartVM(),          //
+            std::move(isolate_snapshot),  //
+            std::move(shared_snapshot),   //
+            task_runners,                 //
+            shell->GetSettings(),         //
+            std::move(animator),          //
+            weak_io_manager_future.get()  //
+            ));
       }));
 
-  ui_latch.Wait();
-  // We are already on the platform thread. So there is no platform latch to
-  // wait on.
-
   if (!shell->Setup(std::move(platform_view),  //
-                    std::move(engine),         //
-                    std::move(rasterizer),     //
-                    std::move(io_manager))     //
+                    engine_future.get(),       //
+                    rasterizer_future.get(),   //
+                    io_manager_future.get())   //
   ) {
     return nullptr;
   }
