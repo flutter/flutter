@@ -86,6 +86,7 @@ void commitScene(PersistedScene scene) {
     _debugPrintSurfaceStats(scene, _debugFrameNumber);
     _debugRepaintSurfaceStatsOverlay(scene);
   }
+
   assert(() {
     final List<String> validationErrors = <String>[];
     scene.debugValidate(validationErrors);

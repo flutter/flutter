@@ -850,12 +850,15 @@ class Chrome extends Browser {
   @override
   final Future<Uri> remoteDebuggerUrl;
 
+  static String version;
+
   /// Starts a new instance of Chrome open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Chrome(Uri url, {bool debug = false}) {
+    assert(version != null);
     var remoteDebuggerCompleter = Completer<Uri>.sync();
     return Chrome._(() async {
-      final ChromeInstallation installation = await getOrInstallChrome(infoLog: _DevNull());
+      final ChromeInstallation installation = await getOrInstallChrome(version, infoLog: _DevNull());
 
       final bool isChromeNoSandbox = Platform.environment['CHROME_NO_SANDBOX'] == 'true';
       var dir = createTempDir();

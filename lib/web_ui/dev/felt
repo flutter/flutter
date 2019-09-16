@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # felt: a command-line utility for building and testing Flutter web engine.
 #       It stands for Flutter Engine Local Tester.
@@ -44,4 +45,4 @@ then
   ninja -C $HOST_DEBUG_UNOPT_DIR
 fi
 
-(cd $WEB_UI_DIR && $DART_SDK_DIR/bin/dart dev/felt.dart $@)
+$DART_SDK_DIR/bin/dart "$DEV_DIR/felt.dart" $@
