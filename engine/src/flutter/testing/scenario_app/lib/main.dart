@@ -16,12 +16,7 @@ import 'src/scenario.dart';
 
 Map<String, Scenario> _scenarios = <String, Scenario>{
   'animated_color_square': AnimatedColorSquareScenario(window),
-  'platform_view': PlatformViewScenario(window, 'Hello from Scenarios (Platform View)', id: 0),
-  'platform_view_cliprect': PlatformViewClipRectScenario(window, 'PlatformViewClipRect', id: 1),
-  'platform_view_cliprrect': PlatformViewClipRRectScenario(window, 'PlatformViewClipRRect', id: 2),
-  'platform_view_clippath': PlatformViewClipPathScenario(window, 'PlatformViewClipPath', id: 3),
-  'platform_view_transform': PlatformViewTransformScenario(window, 'PlatformViewTransform', id: 4),
-  'platform_view_opacity': PlatformViewOpacityScenario(window, 'PlatformViewOpacity', id: 5),
+  'text_platform_view': PlatformViewScenario(window, 'Hello from Scenarios (Platform View)'),
   'poppable_screen': PoppableScreenScenario(window),
 };
 
