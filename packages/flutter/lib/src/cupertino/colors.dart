@@ -21,21 +21,20 @@ import 'theme.dart';
 class CupertinoColors {
   CupertinoColors._();
 
-  /// iOS 10's default blue color. Used to indicate active elements such as
+  /// iOS 13's default blue color. Used to indicate active elements such as
   /// buttons, selected tabs and your own chat bubbles.
   ///
   /// This is SystemBlue in the iOS palette.
   static const Color activeBlue = systemBlue;
 
-  /// iOS 10's default green color. Used to indicate active accents such as
+  /// iOS 13's default green color. Used to indicate active accents such as
   /// the switch in its on state and some accent buttons such as the call button
   /// and Apple Map's 'Go' button.
   ///
   /// This is SystemGreen in the iOS palette.
   static const Color activeGreen = systemGreen;
 
-  /// iOS 13's orange color. Used in place of the [activeBlue] color
-  /// as the default active elements' color when the theme's brightness is dark.
+  /// iOS 13's orange color.
   ///
   /// This is SystemOrange in the iOS palette.
   static const Color activeOrange = systemOrange;
@@ -86,7 +85,7 @@ class CupertinoColors {
     darkColor: Color(0xFF757575),
   );
 
-  /// Used for iOS 10 for destructive actions such as the delete actions in
+  /// Used for iOS 13 for destructive actions such as the delete actions in
   /// table view cells and dialogs.
   ///
   /// Not the same red as the camera shutter or springboard icon notifications
