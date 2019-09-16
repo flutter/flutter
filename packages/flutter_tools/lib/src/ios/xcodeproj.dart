@@ -258,32 +258,9 @@ class XcodeProjectInterpreter {
     return _minorVersion;
   }
 
-  /// Synchronously retrieve xcode build settings. Prefer using the async
-  /// version below.
-  Map<String, String> getBuildSettings(String projectPath, String target) {
-    try {
-      final String out = processUtils.runSync(
-        <String>[
-          _executable,
-          '-project',
-          fs.path.absolute(projectPath),
-          '-target',
-          target,
-          '-showBuildSettings',
-        ],
-        throwOnError: true,
-        workingDirectory: projectPath,
-      ).stdout.trim();
-      return parseXcodeBuildSettings(out);
-    } on ProcessException catch (error) {
-      printTrace('Unexpected failure to get the build settings: $error.');
-      return const <String, String>{};
-    }
-  }
-
   /// Asynchronously retrieve xcode build settings. This one is preferred for
   /// new call-sites.
-  Future<Map<String, String>> getBuildSettingsAsync(
+  Future<Map<String, String>> getBuildSettings(
       String projectPath, String target, {
     Duration timeout = const Duration(minutes: 1),
   }) async {
