@@ -88,13 +88,13 @@ class FlutterProject {
   /// The set of organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
   /// Gradle group ID.
-  Set<String> get organizationNames {
+  Future<Set<String>> get organizationNames async {
     final List<String> candidates = <String>[
-      ios.productBundleIdentifier,
+      await ios.productBundleIdentifier,
       android.applicationId,
       android.group,
       example.android.applicationId,
-      example.ios.productBundleIdentifier,
+      await example.ios.productBundleIdentifier,
     ];
     return Set<String>.from(candidates
         .map<String>(_organizationNameFromPackageName)
@@ -280,7 +280,7 @@ abstract class XcodeBasedProject {
   File get podManifestLock;
 
   /// True if the host app project is using Swift.
-  bool get isSwift;
+  Future<bool> get isSwift;
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -365,7 +365,7 @@ class IosProject implements XcodeBasedProject {
 
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
-  String get productBundleIdentifier {
+  Future<String> get productBundleIdentifier async {
     String fromPlist;
     try {
       fromPlist = PlistParser.instance.getValueFromFile(
@@ -386,24 +386,26 @@ class IosProject implements XcodeBasedProject {
     }
     if (fromPlist != null && xcode.xcodeProjectInterpreter.isInstalled) {
       // General case: perform variable substitution using build settings.
-      return xcode.substituteXcodeVariables(fromPlist, buildSettings);
+      return xcode.substituteXcodeVariables(fromPlist, await buildSettings);
     }
     return null;
   }
 
   @override
-  bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION') ?? false;
+  Future<bool> get isSwift async =>
+    (await buildSettings)?.containsKey('SWIFT_VERSION') ?? false;
 
   /// The build settings for the host app of this project, as a detached map.
   ///
   /// Returns null, if iOS tooling is unavailable.
-  Map<String, String> get buildSettings {
+  Future<Map<String, String>> get buildSettings async {
     if (!xcode.xcodeProjectInterpreter.isInstalled) {
       return null;
     }
-    _buildSettings ??=
-        xcode.xcodeProjectInterpreter.getBuildSettings(xcodeProject.path,
-                                                       _hostAppBundleName);
+    _buildSettings ??= await xcode.xcodeProjectInterpreter.getBuildSettings(
+      xcodeProject.path,
+      _hostAppBundleName,
+    );
     return _buildSettings;
   }
 
@@ -726,7 +728,7 @@ class MacOSProject implements XcodeBasedProject {
   Directory get xcodeWorkspace => _macOSDirectory.childDirectory('$_hostAppBundleName.xcworkspace');
 
   @override
-  bool get isSwift => true;
+  Future<bool> get isSwift async => true;
 
   /// The file where the Xcode build will write the name of the built app.
   ///
