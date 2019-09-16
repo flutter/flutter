@@ -15,7 +15,10 @@ application_snapshot("kernel_compiler") {
 
   dot_packages = rebase_path("//third_party/dart/.packages")
 
-  training_args = [ "--train" ]
+  training_args = [
+    "--train",
+    rebase_path(main_dart),
+  ]
 
   kernel_compiler_files =
       exec_script("//third_party/dart/tools/list_dart_files.py",

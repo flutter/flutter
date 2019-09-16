@@ -92,6 +92,11 @@ Future<int> starter(
   }
 
   if (options['train']) {
+    if (!options.rest.isNotEmpty) {
+      throw Exception('Must specify input.dart');
+    }
+
+    final String input = options.rest[0];
     final String sdkRoot = options['sdk-root'];
     final Directory temp = Directory.systemTemp.createTempSync('train_frontend_server');
     try {
@@ -105,7 +110,7 @@ Future<int> starter(
       ]);
       compiler ??= _FlutterFrontendCompiler(output);
 
-      await compiler.compile(Platform.script.toFilePath(), options);
+      await compiler.compile(input, options);
       compiler.acceptLastDelta();
       await compiler.recompileDelta();
       compiler.acceptLastDelta();
