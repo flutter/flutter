@@ -9,17 +9,25 @@
 
 namespace flutter {
 
-IOSSurfaceGL::IOSSurfaceGL(std::shared_ptr<IOSGLContext> context,
+IOSSurfaceGL::IOSSurfaceGL(fml::WeakPtr<IOSGLContext> onscreen_gl_context,
+                           fml::WeakPtr<IOSGLContext> resource_gl_context,
                            fml::scoped_nsobject<CAEAGLLayer> layer,
                            FlutterPlatformViewsController* platform_views_controller)
-    : IOSSurface(platform_views_controller), context_(context) {
-  render_target_ = context_->CreateRenderTarget(std::move(layer));
+    : IOSSurface(platform_views_controller),
+      onscreen_gl_context_(std::move(onscreen_gl_context)),
+      resource_gl_context_(std::move(resource_gl_context)) {
+  render_target_ = std::make_unique<IOSGLRenderTarget>(std::move(layer), onscreen_gl_context_,
+                                                       resource_gl_context_);
 }
 
 IOSSurfaceGL::IOSSurfaceGL(fml::scoped_nsobject<CAEAGLLayer> layer,
-                           std::shared_ptr<IOSGLContext> context)
-    : IOSSurface(nullptr), context_(context) {
-  render_target_ = context_->CreateRenderTarget(std::move(layer));
+                           fml::WeakPtr<IOSGLContext> onscreen_gl_context,
+                           fml::WeakPtr<IOSGLContext> resource_gl_context)
+    : IOSSurface(nullptr),
+      onscreen_gl_context_(std::move(onscreen_gl_context)),
+      resource_gl_context_(std::move(resource_gl_context)) {
+  render_target_ = std::make_unique<IOSGLRenderTarget>(std::move(layer), onscreen_gl_context_,
+                                                       resource_gl_context_);
 }
 
 IOSSurfaceGL::~IOSSurfaceGL() = default;
@@ -29,7 +37,7 @@ bool IOSSurfaceGL::IsValid() const {
 }
 
 bool IOSSurfaceGL::ResourceContextMakeCurrent() {
-  return context_->ResourceMakeCurrent();
+  return resource_gl_context_->MakeCurrent();
 }
 
 void IOSSurfaceGL::UpdateStorageSizeIfNecessary() {
@@ -60,7 +68,7 @@ bool IOSSurfaceGL::GLContextMakeCurrent() {
   if (!IsValid()) {
     return false;
   }
-  return render_target_->UpdateStorageSizeIfNecessary() && context_->MakeCurrent();
+  return render_target_->UpdateStorageSizeIfNecessary() && onscreen_gl_context_->MakeCurrent();
 }
 
 bool IOSSurfaceGL::GLContextClearCurrent() {
@@ -145,7 +153,8 @@ bool IOSSurfaceGL::SubmitFrame(GrContext* context) {
     return true;
   }
 
-  bool submitted = platform_views_controller->SubmitFrame(std::move(context), context_);
+  bool submitted = platform_views_controller->SubmitFrame(std::move(context), onscreen_gl_context_,
+                                                          resource_gl_context_);
   [CATransaction commit];
   return submitted;
 }
