@@ -34,7 +34,7 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   }
 
   /// Cache flutter configuration files in the linux directory.
-  linuxProject.cacheDirectory.childFile('generated_config')
+  linuxProject.generatedMakeConfigFile
     ..createSync(recursive: true)
     ..writeAsStringSync(buffer.toString());
 
@@ -52,7 +52,7 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   final Process process = await processManager.start(<String>[
     'make',
     '-C',
-    linuxProject.editableHostAppDirectory.path,
+    linuxProject.makeFile.parent.path,
   ], runInShell: true);
   final Status status = logger.startProgress(
     'Building Linux application...',
