@@ -9,13 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'theme.dart';
-
-const CupertinoDynamicColor _kDefaultSelectedColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFFFFFFF),
-  darkColor: Color(0xFF636366),
-);
 
 // Minimum padding from edges of the segmented control to edges of
 // encompassing widget.
@@ -92,7 +86,6 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
     this.unselectedColor,
     this.selectedColor,
     this.borderColor,
-    @deprecated
     this.pressedColor,
     this.padding,
   }) : assert(children != null),
@@ -226,12 +219,12 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   bool _updateColors() {
     assert(mounted, 'This should only be called after didUpdateDependencies');
     bool changed = false;
-    final Color selectedColor = CupertinoDynamicColor.resolve(widget.selectedColor ?? _kDefaultSelectedColor, context);
+    final Color selectedColor = widget.selectedColor ?? CupertinoTheme.of(context).primaryColor;
     if (_selectedColor != selectedColor) {
       changed = true;
       _selectedColor = selectedColor;
     }
-    final Color unselectedColor = CupertinoDynamicColor.resolve(widget.unselectedColor ?? CupertinoSystemColors.of(context).tertiarySystemFill, context);
+    final Color unselectedColor = widget.unselectedColor ?? CupertinoTheme.of(context).primaryContrastingColor;
     if (_unselectedColor != unselectedColor) {
       changed = true;
       _unselectedColor = unselectedColor;
