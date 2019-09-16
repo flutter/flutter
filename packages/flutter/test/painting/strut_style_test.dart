@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show StrutStyle;
-
 import 'package:flutter/painting.dart';
 import '../flutter_test_alternative.dart';
 
 void main() {
   test('StrutStyle diagnostics test', () {
-    final StrutStyle s0 = StrutStyle(
+    const StrutStyle s0 = StrutStyle(
       fontFamily: 'Serif',
       fontSize: 14,
     );
@@ -18,7 +16,7 @@ void main() {
       equals('StrutStyle(family: Serif, size: 14.0)'),
     );
 
-    final StrutStyle s1 = StrutStyle(
+    const StrutStyle s1 = StrutStyle(
       fontFamily: 'Serif',
       fontSize: 14,
       forceStrutHeight: true,
@@ -31,7 +29,7 @@ void main() {
       equals('StrutStyle(family: Serif, size: 14.0, <strut height forced>)'),
     );
 
-    final StrutStyle s2 = StrutStyle(
+    const StrutStyle s2 = StrutStyle(
       fontFamily: 'Serif',
       fontSize: 14,
       forceStrutHeight: false,
@@ -41,13 +39,13 @@ void main() {
       equals('StrutStyle(family: Serif, size: 14.0, <strut height normal>)'),
     );
 
-    final StrutStyle s3 = StrutStyle();
+    const StrutStyle s3 = StrutStyle();
     expect(
       s3.toString(),
       equals('StrutStyle'),
     );
 
-    final StrutStyle s4 = StrutStyle(
+    const StrutStyle s4 = StrutStyle(
       forceStrutHeight: false,
     );
     expect(
@@ -55,7 +53,7 @@ void main() {
       equals('StrutStyle(<strut height normal>)'),
     );
 
-    final StrutStyle s5 = StrutStyle(
+    const StrutStyle s5 = StrutStyle(
       forceStrutHeight: true,
     );
     expect(
