@@ -690,7 +690,7 @@ void main() {
     await tester.tap(find.text('Menu Button'));
   });
 
-  testWidgets('PopupMenuItem child height is a minium, child is vertically centered', (WidgetTester tester) async {
+  testWidgets('PopupMenuItem child height is a minimum, child is vertically centered', (WidgetTester tester) async {
     final Key popupMenuButtonKey = UniqueKey();
     final Type menuItemType = const PopupMenuItem<String>(child: Text('item')).runtimeType;
 
