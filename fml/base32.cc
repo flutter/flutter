@@ -24,22 +24,52 @@ std::pair<bool, std::string> Base32Encode(std::string_view input) {
   const size_t encoded_length = (input.size() * 8 + 4) / 5;
   output.reserve(encoded_length);
 
-  uint16_t bit_stream = (static_cast<uint8_t>(input[0]) << 8);
+  Base32EncodeConverter converter;
+  converter.Append(input[0]);
   size_t next_byte_index = 1;
-  int free_bits = 8;
 
-  while (free_bits < 16) {
-    output.push_back(kEncoding[(bit_stream & 0xf800) >> 11]);
-    bit_stream <<= 5;
-    free_bits += 5;
-
-    if (free_bits >= 8 && next_byte_index < input.size()) {
-      free_bits -= 8;
-      bit_stream += static_cast<uint8_t>(input[next_byte_index++]) << free_bits;
+  while (converter.CanExtract()) {
+    output.push_back(kEncoding[converter.Extract()]);
+    if (converter.CanAppend() && next_byte_index < input.size()) {
+      converter.Append(static_cast<uint8_t>(input[next_byte_index++]));
     }
   }
 
+  if (converter.BitsAvailable() > 0) {
+    output.push_back(kEncoding[converter.Peek()]);
+  }
+
   return {true, output};
+}
+
+static constexpr signed char kDecodeMap[] = {
+    // starting from ASCII 50 '2'
+    26, 27, 28, 29, 30, 31, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+    13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25};
+
+static constexpr int kDecodeMapSize =
+    sizeof(kDecodeMap) / sizeof(kDecodeMap[0]);
+
+std::pair<bool, std::string> Base32Decode(const std::string& input) {
+  std::string result;
+  Base32DecodeConverter converter;
+  for (char c : input) {
+    int map_index = c - '2';
+    if (map_index < 0 || map_index >= kDecodeMapSize ||
+        kDecodeMap[map_index] == -1) {
+      return {false, result};
+    }
+    converter.Append(kDecodeMap[map_index]);
+    if (converter.CanExtract()) {
+      result.push_back(converter.Extract());
+    }
+  }
+  if (converter.Peek() != 0) {
+    // The padding should always be zero. Return false if not.
+    return {false, result};
+  }
+  return {true, result};
 }
 
 }  // namespace fml
