@@ -242,7 +242,16 @@ class FlutterPlugin implements Plugin<Project> {
 
     private Properties getPluginList(Project project) {
         File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
-        return readPropertiesIfExist(pluginsFile)
+        Properties allPlugins = readPropertiesIfExist(pluginsFile)
+        Properties androidPlugins = new Properties()
+        allPlugins.each { name, path ->
+            File editableAndroidProject = new File(path, 'android' + File.pathSeparator + 'build.gradle')
+            if (editableAndroidProject.exists()) {
+                project.logger.error("$editableAndroidProject exists adding $name -> $path")
+                androidPlugins.setProperty(name, path)
+            }
+        }
+        return androidPlugins
     }
 
     private void addPluginTasks(Project project) {
