@@ -19,6 +19,7 @@ import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
+import '../mdns_discovery.dart';
 import '../observatory_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
