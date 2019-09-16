@@ -535,6 +535,12 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
+  simple_animation_perf_ios:
+    description: >
+      Measure CPU/GPU usage percentages of a simple animation.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
   smoke_catalina_start_up_ios:
     description: >
       A smoke test that runs on macOS Catalina, which is a clone of the Gallery startup latency test.
