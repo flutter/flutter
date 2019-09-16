@@ -101,6 +101,7 @@ abstract class SearchDelegate<T> {
   ///     searchFieldLabel: hintText,
   ///     keyboardType: TextInputType.text,
   ///     textInputAction: TextInputAction.search,
+  ///     debounceDuration: null,
   ///   );
   ///
   ///   @override
@@ -121,6 +122,7 @@ abstract class SearchDelegate<T> {
     this.searchFieldLabel,
     this.keyboardType,
     this.textInputAction = TextInputAction.search,
+    this.debounceDuration,
   });
 
   /// Suggestions shown in the body of the search page while the user types a
@@ -275,6 +277,11 @@ abstract class SearchDelegate<T> {
   /// Defaults to [TextInputAction.search].
   final TextInputAction textInputAction;
 
+  /// The certain amount of time that has to passed before rebuilding widget on query changed.
+  ///
+  /// Defaults to null.
+  final Duration debounceDuration;
+  
   /// [Animation] triggered when the search pages fades in or out.
   ///
   /// This animation is commonly used to animate [AnimatedIcon]s of
@@ -402,6 +409,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   // the text field.
   FocusNode focusNode = FocusNode();
 
+  Timer timer;
+
   @override
   void initState() {
     super.initState();
@@ -420,6 +429,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     widget.delegate._currentBodyNotifier.removeListener(_onSearchBodyChanged);
     widget.delegate._focusNode = null;
     focusNode.dispose();
+    timer?.cancel();
   }
 
   void _onAnimationStatusChanged(AnimationStatus status) {
@@ -452,9 +462,18 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   }
 
   void _onQueryChanged() {
-    setState(() {
-      // rebuild ourselves because query changed.
-    });
+    if (widget.delegate.debounceDuration == null) {
+      setState(() {
+        // rebuild ourselves because query changed.
+      });
+    } else {
+      timer?.cancel();
+      timer = Timer(widget.delegate.debounceDuration, () {
+        setState(() {
+          // rebuild ourselves because query changed and debounce duration has passed.
+        });
+      });
+    }
   }
 
   void _onSearchBodyChanged() {

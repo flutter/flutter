@@ -535,6 +535,31 @@ void main() {
     expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.done.toString());
   });
 
+  testWidgets('Search with debounce duration', (WidgetTester tester) async {
+    const Duration debounceDuration = Duration(seconds: 1);
+
+    final _TestSearchDelegate delegate = _TestSearchDelegate(debounceDuration: debounceDuration);
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    delegate.queriesForSuggestions.clear();
+
+    await tester.enterText(find.byType(TextField), 'Foo');
+    await tester.pumpAndSettle();
+
+    expect(delegate.query, 'Foo');
+    expect(delegate.queriesForSuggestions, hasLength(0));
+
+    await tester.pump(debounceDuration);
+
+    expect(delegate.queriesForSuggestions, <String>['Foo']);
+  });
+
   group('contributes semantics', () {
     TestSemantics buildExpected({ String routeName }) {
       return TestSemantics.root(
@@ -697,7 +722,8 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.actions = const <Widget>[],
     String searchHint,
     TextInputAction textInputAction = TextInputAction.search,
-  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction);
+    Duration debounceDuration,
+  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction, debounceDuration: debounceDuration);
 
   final String suggestions;
   final String result;
