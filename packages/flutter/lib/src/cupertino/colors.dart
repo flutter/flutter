@@ -352,14 +352,14 @@ class CupertinoColors {
 
   /// An overlay fill color for medium-size shapes.
   static const CupertinoDynamicColor secondarySystemFill = CupertinoDynamicColor(
-    color: Color.fromARGB(153, 60, 60, 67),
-    darkColor: Color.fromARGB(153, 235, 235, 245),
-    highContrastColor: Color.fromARGB(173, 60, 60, 67),
-    darkHighContrastColor: Color.fromARGB(173, 235, 235, 245),
-    elevatedColor: Color.fromARGB(153, 60, 60, 67),
-    darkElevatedColor: Color.fromARGB(153, 235, 235, 245),
-    highContrastElevatedColor: Color.fromARGB(173, 60, 60, 67),
-    darkHighContrastElevatedColor: Color.fromARGB(173, 235, 235, 245),
+    color: Color.fromARGB(40, 120, 120, 128),
+    darkColor: Color.fromARGB(81, 120, 120, 128),
+    highContrastColor: Color.fromARGB(61, 120, 120, 128),
+    darkHighContrastColor: Color.fromARGB(102, 120, 120, 128),
+    elevatedColor: Color.fromARGB(40, 120, 120, 128),
+    darkElevatedColor: Color.fromARGB(81, 120, 120, 128),
+    highContrastElevatedColor: Color.fromARGB(61, 120, 120, 128),
+    darkHighContrastElevatedColor: Color.fromARGB(102, 120, 120, 128),
   );
 
   /// An overlay fill color for large shapes.
