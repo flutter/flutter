@@ -133,13 +133,14 @@ class MDnsObservatoryDiscovery {
     }
   }
 
-  Future<Uri> getObservatoryUri(String applicationId, Device device) async {
+  Future<Uri> getObservatoryUri(String applicationId, Device device, [bool usesIpv6 = false]) async {
     final MDnsObservatoryDiscoveryResult result = await query(applicationId: applicationId);
     Uri observatoryUri;
     if (result != null) {
-      final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
-      // final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
-      observatoryUri = await buildObservatoryUri(device, ipv4Loopback, result.port, result.authCode);
+      final String host = usesIpv6
+        ? InternetAddress.loopbackIPv6.address
+        : InternetAddress.loopbackIPv4.address;
+      observatoryUri = await buildObservatoryUri(device, host, result.port, result.authCode);
     }
     return observatoryUri;
   }

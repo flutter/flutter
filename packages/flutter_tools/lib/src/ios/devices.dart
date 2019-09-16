@@ -19,9 +19,8 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../mdns_observatory_discovery.dart';
+import '../observatory_discovery.dart';
 import '../project.dart';
-import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'ios_workflow.dart';
@@ -351,21 +350,6 @@ class IOSDevice extends Device {
         'Installing and launching...',
         timeout: timeoutConfiguration.slowOperation);
     try {
-      ProtocolDiscovery observatoryDiscovery;
-      if (debuggingOptions.debuggingEnabled) {
-        // Debugging is enabled, look for the observatory server port post launch.
-        printTrace('Debugging is enabled, connecting to observatory');
-
-        // TODO(danrubel): The Android device class does something similar to this code below.
-        // The various Device subclasses should be refactored and common code moved into the superclass.
-        observatoryDiscovery = ProtocolDiscovery.observatory(
-          getLogReader(app: package),
-          portForwarder: portForwarder,
-          hostPort: debuggingOptions.observatoryPort,
-          ipv6: ipv6,
-        );
-      }
-
       final int installationResult = await IOSDeploy.instance.runApp(
         deviceId: id,
         bundlePath: bundle.path,
@@ -385,22 +369,11 @@ class IOSDevice extends Device {
 
       try {
         printTrace('Application launched on the device. Waiting for observatory port.');
-        // TODO TODO
-        //final Uri localUri = await observatoryDiscovery.uri;
-        final Uri localUri = await MDnsObservatoryDiscovery().getObservatoryUri(package.id, this);
-        //final MDnsObservatoryDiscoveryResult result = await MDnsObservatoryDiscovery().query(applicationId: package.id);
-        //Uri observatoryUri;
-        //if (result != null) {
-        //  final String ipv4Loopback = InternetAddress.loopbackIPv4.address; // TODO
-        //  final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
-        //  observatoryUri = await buildObservatoryUri(this, ipv4Loopback, result.port, result.authCode);
-        //}
+        final Uri localUri = await MDnsObservatoryDiscovery().getObservatoryUri(package.id, this, ipv6);
         return LaunchResult.succeeded(observatoryUri: localUri);
       } catch (error) {
         printError('Failed to establish a debug connection with $id: $error');
         return LaunchResult.failed();
-      } finally {
-        await observatoryDiscovery?.cancel();
       }
     } finally {
       installStatus.stop();
