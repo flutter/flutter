@@ -80,6 +80,7 @@
   }
 #else   // TARGET_IPHONE_SIMULATOR
   [_netService.get() stop];
+  [_netService.get() setDelegate:nil];
 #endif  // TARGET_IPHONE_SIMULATOR
 }
 
