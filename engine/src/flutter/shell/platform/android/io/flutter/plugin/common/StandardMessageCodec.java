@@ -221,7 +221,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
      * super for values that the extension does not handle.</p>
      */
     protected void writeValue(ByteArrayOutputStream stream, Object value) {
-        if (value == null) {
+        if (value == null || value.equals(null)) {
             stream.write(NULL);
         } else if (value == Boolean.TRUE) {
             stream.write(TRUE);
