@@ -131,7 +131,12 @@ class ChromeDevice extends Device {
   }) async {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
     // for the web initialization and server logic.
-    _chrome = await chromeLauncher.launch(platformArgs['uri']);
+    final String url = platformArgs['uri'];
+    if (!debuggingOptions.skipWebLaunch) {
+      _chrome = await chromeLauncher.launch(url);
+    } else {
+      printStatus('Waiting for connection from Dart debug extension at $url', emphasis: true);
+    }
     return LaunchResult.succeeded(observatoryUri: null);
   }
 

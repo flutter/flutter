@@ -30,6 +30,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
+import '../device.dart';
 import '../globals.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
@@ -108,14 +109,16 @@ class WebFs {
   }
 
   /// Retrieve the [DebugConnection] for the current application
-  Future<DebugConnection> runAndDebug() {
+  Future<DebugConnection> runAndDebug(DebuggingOptions debuggingOptions) {
     final Completer<DebugConnection> firstConnection = Completer<DebugConnection>();
     _connectedApps = _dwds.connectedApps.listen((AppConnection appConnection) async {
-      appConnection.runMain();
-      final DebugConnection debugConnection = await _dwds.debugConnection(appConnection);
+      final DebugConnection debugConnection = debuggingOptions.skipWebLaunch
+        ? await _dwds.extensionDebugConnections.stream.first
+        : await _dwds.debugConnection(appConnection);
       if (!firstConnection.isCompleted) {
         firstConnection.complete(debugConnection);
       }
+      appConnection.runMain();
     });
     return firstConnection.future;
   }

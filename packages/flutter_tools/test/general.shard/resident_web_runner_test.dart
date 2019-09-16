@@ -65,7 +65,7 @@ void main() {
     fs.file('pubspec.yaml').createSync();
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
-    when(mockWebFs.runAndDebug()).thenAnswer((Invocation _) async {
+    when(mockWebFs.runAndDebug(any)).thenAnswer((Invocation _) async {
       return mockDebugConnection;
     });
     when(mockWebFs.recompile()).thenAnswer((Invocation _) {

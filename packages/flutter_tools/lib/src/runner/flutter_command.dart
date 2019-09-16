@@ -144,6 +144,13 @@ abstract class FlutterCommand extends Command<void> {
         'will select a random open port on the host.',
       hide: hide,
     );
+    argParser.addFlag('web-skip-launch',
+      defaultsTo: false,
+      help: 'Whether to skip automatically launching browsers on web devices that do so. '
+      'Setting this to true allows using the debug chrome extension in environments that don\'t'
+      ' support the usual websocket connection.',
+      hide: hide,
+    );
   }
 
   void usesTargetOption() {
