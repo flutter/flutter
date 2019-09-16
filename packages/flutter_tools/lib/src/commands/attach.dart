@@ -247,8 +247,13 @@ class AttachCommand extends FlutterCommand {
         }
       }
     } else {
-      observatoryUri = await buildObservatoryUri(device,
-          debugUri?.host ?? hostname, devicePort ?? debugUri.port, debugUri?.path);
+      observatoryUri = await buildObservatoryUri(
+        device,
+        debugUri?.host ?? hostname,
+        devicePort ?? debugUri.port,
+        observatoryPort,
+        debugUri?.path,
+      );
     }
     try {
       final bool useHot = getBuildInfo().isDebug;

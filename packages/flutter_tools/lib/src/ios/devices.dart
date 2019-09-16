@@ -369,7 +369,7 @@ class IOSDevice extends Device {
 
       try {
         printTrace('Application launched on the device. Waiting for observatory port.');
-        final Uri localUri = await MDnsObservatoryDiscovery().getObservatoryUri(package.id, this, ipv6);
+        final Uri localUri = await MDnsObservatoryDiscovery().getObservatoryUri(package.id, this, ipv6, debuggingOptions.observatoryPort);
         return LaunchResult.succeeded(observatoryUri: localUri);
       } catch (error) {
         printError('Failed to establish a debug connection with $id: $error');

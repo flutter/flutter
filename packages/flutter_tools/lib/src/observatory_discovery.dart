@@ -133,14 +133,14 @@ class MDnsObservatoryDiscovery {
     }
   }
 
-  Future<Uri> getObservatoryUri(String applicationId, Device device, [bool usesIpv6 = false]) async {
+  Future<Uri> getObservatoryUri(String applicationId, Device device, [bool usesIpv6 = false, int observatoryPort]) async {
     final MDnsObservatoryDiscoveryResult result = await query(applicationId: applicationId);
     Uri observatoryUri;
     if (result != null) {
       final String host = usesIpv6
         ? InternetAddress.loopbackIPv6.address
         : InternetAddress.loopbackIPv4.address;
-      observatoryUri = await buildObservatoryUri(device, host, result.port, result.authCode);
+      observatoryUri = await buildObservatoryUri(device, host, result.port, observatoryPort, result.authCode);
     }
     return observatoryUri;
   }
@@ -153,7 +153,7 @@ class MDnsObservatoryDiscoveryResult {
 }
 
 Future<Uri> buildObservatoryUri(Device device,
-    String host, int devicePort, [String authCode]) async {
+    String host, int devicePort, [int observatoryPort, String authCode]) async {
   String path = '/';
   if (authCode != null) {
     path = authCode;
@@ -163,9 +163,7 @@ Future<Uri> buildObservatoryUri(Device device,
   if (!path.endsWith('/')) {
     path += '/';
   }
-  //TODO
-  //final int localPort = observatoryPort
-  //    ?? await device.portForwarder.forward(devicePort);
-  final int localPort = await device.portForwarder.forward(devicePort);
+  final int localPort = observatoryPort
+      ?? await device.portForwarder.forward(devicePort);
   return Uri(scheme: 'http', host: host, port: localPort, path: path);
 }
