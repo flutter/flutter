@@ -314,12 +314,18 @@ class SemanticsData extends Diagnosticable {
   /// The maximum number of characters that can be entered into an editable
   /// text field.
   ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
   /// This should only be set when [SemanticsFlag.isTextField] is set. Defaults
   /// to null, which means no limit is imposed on the text field.
   final int maxValueLength;
 
   /// The current number of characters that have been entered into an editable
   /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
   ///
   /// This should only be set when [SemanticsFlag.isTextField] is set. This must
   /// be set when [maxValueLength] is set.
@@ -787,12 +793,18 @@ class SemanticsProperties extends DiagnosticableTree {
   /// The maximum number of characters that can be entered into an editable
   /// text field.
   ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
   /// This should only be set when [textField] is true. Defaults to null,
   /// which means no limit is imposed on the text field.
   final int maxValueLength;
 
   /// The current number of characters that have been entered into an editable
   /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
   ///
   /// This should only be set when [textField] is true. Must be set when
   /// [maxValueLength] is set.
@@ -1772,6 +1784,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// The maximum number of characters that can be entered into an editable
   /// text field.
   ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
   /// This should only be set when [SemanticsFlag.isTextField] is set. Defaults
   /// to null, which means no limit is imposed on the text field.
   int get maxValueLength => _maxValueLength;
@@ -1779,6 +1794,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// The current number of characters that have been entered into an editable
   /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
   ///
   /// This should only be set when [SemanticsFlag.isTextField] is set. Must be
   /// set when [maxValueLength] is set.
@@ -3259,6 +3277,9 @@ class SemanticsConfiguration {
   /// The maximum number of characters that can be entered into an editable
   /// text field.
   ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
+  ///
   /// This should only be set when [isTextField] is true. Defaults to null,
   /// which means no limit is imposed on the text field.
   int get maxValueLength => _maxValueLength;
@@ -3272,6 +3293,9 @@ class SemanticsConfiguration {
 
   /// The current number of characters that have been entered into an editable
   /// text field.
+  ///
+  /// For the purpose of this function a character is defined as one Unicode
+  /// scalar value.
   ///
   /// This should only be set when [isTextField] is true. Must be set when
   /// [maxValueLength] is set.
