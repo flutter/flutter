@@ -158,12 +158,13 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   String get targetFile {
-    if (argResults.wasParsed('target'))
+    if (argResults.wasParsed('target')) {
       return argResults['target'];
-    else if (argResults.rest.isNotEmpty)
+    }
+    if (argResults.rest.isNotEmpty) {
       return argResults.rest.first;
-    else
-      return bundle.defaultMainPath;
+    }
+    return bundle.defaultMainPath;
   }
 
   void usesPubOption() {
@@ -276,6 +277,19 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
   }
 
+  void addShrinkingFlag() {
+    argParser.addFlag('shrink',
+      negatable: true,
+      defaultsTo: true,
+      help: 'Whether to enable code shrinking on release mode.'
+            'When enabling shrinking, you also benefit from obfuscation, '
+            'which shortens the names of your app’s classes and members, '
+            'and optimization, which applies more aggressive strategies to '
+            'further reduce the size of your app.'
+            'To learn more, see: https://developer.android.com/studio/build/shrink-code'
+      );
+  }
+
   void usesFuchsiaOptions({ bool hide = false }) {
     argParser.addOption(
       'target-model',
@@ -299,8 +313,9 @@ abstract class FlutterCommand extends Command<void> {
 
   BuildMode getBuildMode() {
     final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
-    if (modeFlags.where((bool flag) => flag).length > 1)
+    if (modeFlags.where((bool flag) => flag).length > 1) {
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
+    }
     if (argResults['debug']) {
       return BuildMode.debug;
     }
@@ -557,8 +572,9 @@ abstract class FlutterCommand extends Command<void> {
   /// then print an error message and return null.
   Future<Device> findTargetDevice() async {
     List<Device> deviceList = await findAllTargetDevices();
-    if (deviceList == null)
+    if (deviceList == null) {
       return null;
+    }
     if (deviceList.length > 1) {
       printStatus(userMessages.flutterSpecifyDevice);
       deviceList = await deviceManager.getAllConnectedDevices().toList();
@@ -585,15 +601,17 @@ abstract class FlutterCommand extends Command<void> {
       // Validate the current package map only if we will not be running "pub get" later.
       if (parent?.name != 'pub' && !(_usesPubOption && argResults['pub'])) {
         final String error = PackageMap(PackageMap.globalPackagesPath).checkValid();
-        if (error != null)
+        if (error != null) {
           throw ToolExit(error);
+        }
       }
     }
 
     if (_usesTargetOption) {
       final String targetPath = targetFile;
-      if (!fs.isFileSync(targetPath))
+      if (!fs.isFileSync(targetPath)) {
         throw ToolExit(userMessages.flutterTargetFileMissing(targetPath));
+      }
     }
   }
 

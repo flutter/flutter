@@ -75,13 +75,16 @@ class CupertinoColors {
   // Value derived from screenshot from the dark themed Apple Watch app.
   static const Color darkBackgroundGray = Color(0xFF171717);
 
-  /// Used in iOS 11 for unselected selectables such as tab bar items in their
+  /// Used in iOS 13 for unselected selectables such as tab bar items in their
   /// inactive state or de-emphasized subtitles and details text.
   ///
   /// Not the same gray as disabled buttons etc.
   ///
-  /// This is SystemGrayColor in the iOS palette.
-  static const Color inactiveGray = Color(0xFF8E8E93);
+  /// This is the disabled color in the iOS palette.
+  static const Color inactiveGray = CupertinoDynamicColor.withBrightness(
+    color: Color(0xFF999999),
+    darkColor: Color(0xFF757575),
+  );
 
   /// Used for iOS 10 for destructive actions such as the delete actions in
   /// table view cells and dialogs.

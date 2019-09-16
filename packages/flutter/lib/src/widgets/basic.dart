@@ -5496,7 +5496,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 /// This example makes a [Container] react to being touched, showing a count of
 /// the number of pointer downs and ups.
 ///
@@ -5531,28 +5531,26 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: ConstrainedBox(
-///       constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
-///       child: Listener(
-///         onPointerDown: _incrementDown,
-///         onPointerMove: _updateLocation,
-///         onPointerUp: _incrementUp,
-///         child: Container(
-///           color: Colors.lightBlueAccent,
-///           child: Column(
-///             mainAxisAlignment: MainAxisAlignment.center,
-///             children: <Widget>[
-///               Text('You have pressed or released in this area this many times:'),
-///               Text(
-///                 '$_downCounter presses\n$_upCounter releases',
-///                 style: Theme.of(context).textTheme.display1,
-///               ),
-///               Text(
-///                 'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
-///               ),
-///             ],
-///           ),
+///   return ConstrainedBox(
+///     constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
+///     child: Listener(
+///       onPointerDown: _incrementDown,
+///       onPointerMove: _updateLocation,
+///       onPointerUp: _incrementUp,
+///       child: Container(
+///         color: Colors.lightBlueAccent,
+///         child: Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
+///           children: <Widget>[
+///             Text('You have pressed or released in this area this many times:'),
+///             Text(
+///               '$_downCounter presses\n$_upCounter releases',
+///               style: Theme.of(context).textTheme.display1,
+///             ),
+///             Text(
+///               'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
+///             ),
+///           ],
 ///         ),
 ///       ),
 ///     ),
@@ -5745,7 +5743,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 /// This example makes a [Container] react to being entered by a mouse
 /// pointer, showing a count of the number of entries and exits.
 ///
@@ -5778,28 +5776,26 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: ConstrainedBox(
-///       constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
-///       child: MouseRegion(
-///         onEnter: _incrementEnter,
-///         onHover: _updateLocation,
-///         onExit: _incrementExit,
-///         child: Container(
-///           color: Colors.lightBlueAccent,
-///           child: Column(
-///             mainAxisAlignment: MainAxisAlignment.center,
-///             children: <Widget>[
-///               Text('You have entered or exited this box this many times:'),
-///               Text(
-///                 '$_enterCounter Entries\n$_exitCounter Exits',
-///                 style: Theme.of(context).textTheme.display1,
-///               ),
-///               Text(
-///                 'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
-///               ),
-///             ],
-///           ),
+///   return ConstrainedBox(
+///     constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
+///     child: MouseRegion(
+///       onEnter: _incrementEnter,
+///       onHover: _updateLocation,
+///       onExit: _incrementExit,
+///       child: Container(
+///         color: Colors.lightBlueAccent,
+///         child: Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
+///           children: <Widget>[
+///             Text('You have entered or exited this box this many times:'),
+///             Text(
+///               '$_enterCounter Entries\n$_exitCounter Exits',
+///               style: Theme.of(context).textTheme.display1,
+///             ),
+///             Text(
+///               'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
+///             ),
+///           ],
 ///         ),
 ///       ),
 ///     ),

@@ -27,16 +27,18 @@ void main() {
     BuildableIOSApp app;
     AnsiTerminal testTerminal;
 
-    setUp(() {
+    setUp(() async {
       mockProcessManager = MockProcessManager();
       mockConfig = MockConfig();
       mockIosProject = MockIosProject();
-      when(mockIosProject.buildSettings).thenReturn(<String, String>{
-        'For our purposes': 'a non-empty build settings map is valid',
+      when(mockIosProject.buildSettings).thenAnswer((_) {
+        return Future<Map<String, String>>.value(<String, String>{
+          'For our purposes': 'a non-empty build settings map is valid',
+        });
       });
       testTerminal = TestTerminal();
       testTerminal.usesTerminalUi = true;
-      app = BuildableIOSApp(mockIosProject);
+      app = await BuildableIOSApp.fromProject(mockIosProject);
     });
 
     testUsingContext('No auto-sign if Xcode project settings are not available', () async {
@@ -46,8 +48,10 @@ void main() {
     });
 
     testUsingContext('No discovery if development team specified in Xcode project', () async {
-      when(mockIosProject.buildSettings).thenReturn(<String, String>{
-        'DEVELOPMENT_TEAM': 'abc',
+      when(mockIosProject.buildSettings).thenAnswer((_) {
+        return Future<Map<String, String>>.value(<String, String>{
+          'DEVELOPMENT_TEAM': 'abc',
+        });
       });
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
       expect(signingConfigs, isNull);

@@ -359,7 +359,8 @@ class _HeroState extends State<Hero> {
   }
 
   // When `keepPlaceholder` is true, the placeholder will continue to be shown
-  // after the flight ends.
+  // after the flight ends. Otherwise the child of the Hero will become visible
+  // and its TickerMode will be re-enabled.
   void endFlight({ bool keepPlaceholder = false }) {
     if (!keepPlaceholder) {
       ensurePlaceholderIsHidden();
@@ -832,6 +833,13 @@ class HeroController extends NavigatorObserver {
       } else if (_flights[tag] != null) {
         _flights[tag].abort();
       }
+    }
+
+    // If the from hero is gone, the flight won't start and the to hero needs to
+    // be put on stage again.
+    for (Object tag in toHeroes.keys) {
+      if (fromHeroes[tag] == null)
+        toHeroes[tag].ensurePlaceholderIsHidden();
     }
   }
 

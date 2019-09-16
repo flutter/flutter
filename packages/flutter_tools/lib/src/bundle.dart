@@ -79,8 +79,9 @@ class BundleBuilder {
 
     DevFSContent kernelContent;
     if (!precompiledSnapshot) {
-      if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
+      if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty) {
         printTrace('Extra front-end options: $extraFrontEndOptions');
+      }
       ensureDirectoryExists(applicationKernelFilePath);
       final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
       final CompilerOutput compilerOutput = await kernelCompiler.compile(
@@ -109,8 +110,9 @@ class BundleBuilder {
       packagesPath: packagesPath,
       reportLicensedPackages: reportLicensedPackages,
     );
-    if (assets == null)
+    if (assets == null) {
       throwToolExit('Error building assets', exitCode: 1);
+    }
 
     await assemble(
       buildMode: buildMode,
@@ -141,8 +143,9 @@ Future<AssetBundle> buildAssets({
     includeDefaultFonts: includeDefaultFonts,
     reportLicensedPackages: reportLicensedPackages,
   );
-  if (result != 0)
+  if (result != 0) {
     return null;
+  }
 
   return assetBundle;
 }
@@ -177,8 +180,9 @@ Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
 ) async {
-  if (bundleDir.existsSync())
+  if (bundleDir.existsSync()) {
     bundleDir.deleteSync(recursive: true);
+  }
   bundleDir.createSync(recursive: true);
 
   // Limit number of open files to avoid running out of file descriptors.

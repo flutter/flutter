@@ -336,12 +336,15 @@ class CachedArtifacts extends Artifacts {
   }
 
   TargetPlatform get _currentHostPlatform {
-    if (platform.isMacOS)
+    if (platform.isMacOS) {
       return TargetPlatform.darwin_x64;
-    if (platform.isLinux)
+    }
+    if (platform.isLinux) {
       return TargetPlatform.linux_x64;
-    if (platform.isWindows)
+    }
+    if (platform.isWindows) {
       return TargetPlatform.windows_x64;
+    }
     throw UnimplementedError('Host OS not supported.');
   }
 }
@@ -439,8 +442,9 @@ class LocalEngineArtifacts extends Artifacts {
     final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot);
     for (String clangDir in clangDirs) {
       final String genSnapshotPath = fs.path.join(engineOutPath, clangDir, genSnapshotName);
-      if (processManager.canRun(genSnapshotPath))
+      if (processManager.canRun(genSnapshotPath)) {
         return genSnapshotPath;
+      }
     }
     throw Exception('Unable to find $genSnapshotName');
   }

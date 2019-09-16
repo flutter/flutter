@@ -97,6 +97,15 @@ follows:
   `stateful_widget_material`, except that it wraps the stateful widget with a
   `Scaffold`.
 
+- [`stateful_widget_scaffold_center`](stateful_widget_scaffold_center.tmpl) : Similar to
+  `stateful_widget_scaffold`, except that it wraps the stateful widget with a
+  `Scaffold` _and_ a `Center`.
+
 - [`stateless_widget_scaffold`](stateless_widget_scaffold.tmpl) : Similar to
   `stateless_widget_material`, except that it wraps the stateless widget with a
   `Scaffold`.
+
+- [`stateless_widget_scaffold_center`](stateless_widget_scaffold_center.tmpl) : Similar to
+  `stateless_widget_scaffold`, except that it wraps the stateless widget with a
+  `Scaffold` _and_ a `Center`.
+
