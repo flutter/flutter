@@ -41,7 +41,9 @@ task:
         $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
         cd $ENGINE_PATH/src/flutter/lib/web_ui
         $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
-        CHROME_NO_SANDBOX=true $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dart dev/felt.dart
+        export FELT="$ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dart dev/felt.dart"
+        $FELT check-licenses
+        CHROME_NO_SANDBOX=true $FELT test
       fetch_framework_script: |
         mkdir -p $FRAMEWORK_PATH
         cd $FRAMEWORK_PATH

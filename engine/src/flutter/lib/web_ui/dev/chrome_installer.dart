@@ -4,19 +4,30 @@
 
 import 'dart:io' as io;
 
+import 'package:args/args.dart';
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'environment.dart';
 
-void main(List<String> args) async {
-  Environment.commandLineArguments = args;
-  try {
-    await getOrInstallChrome();
-  } on ChromeInstallerException catch (error) {
-    io.stderr.writeln(error.toString());
-  }
+void addChromeVersionOption(ArgParser argParser) {
+  final String pinnedChromeVersion =
+      io.File(path.join(environment.webUiRootDir.path, 'dev', 'chrome.lock'))
+          .readAsStringSync()
+          .trim();
+
+  argParser
+    ..addOption(
+      'chrome-version',
+      defaultsTo: pinnedChromeVersion,
+      help: 'The Chrome version to use while running tests. If the requested '
+          'version has not been installed, it will be downloaded and installed '
+          'automatically. A specific Chrome build version number, such as 695653 '
+          'this use that version of Chrome. Value "latest" will use the latest '
+          'available build of Chrome, installing it if necessary. Value "system" '
+          'will use the manually installed version of Chrome on this computer.',
+    );
 }
 
 /// Returns the installation of Chrome, installing it if necessary.
@@ -31,8 +42,10 @@ void main(List<String> args) async {
 /// exact build nuber, such as 695653. Build numbers can be found here:
 ///
 /// https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=Linux_x64/
-Future<ChromeInstallation> getOrInstallChrome({String requestedVersion, StringSink infoLog}) async {
-  requestedVersion ??= environment.chromeVersion;
+Future<ChromeInstallation> getOrInstallChrome(
+  String requestedVersion, {
+  StringSink infoLog,
+}) async {
   infoLog ??= io.stdout;
 
   if (requestedVersion == 'system') {
