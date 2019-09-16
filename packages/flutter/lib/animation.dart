@@ -34,11 +34,12 @@
 ///
 /// Other objects can register listeners on an [Animation] to be informed
 /// whenever the animation value and/or the animation status changes. A [Widget]
-/// may register such a *value* listener to rebuild itself with the current
-/// animation value whenever that value changes. For example, a widget might
-/// listen to an animation to update its opacity to the animation's value every
-/// time that value changes. Likewise, registering a *status* listener may be
-/// useful to trigger another action when the current animation has ended.
+/// may register such a *value* listener via [Animation.addListener] to rebuild
+/// itself with the current animation value whenever that value changes. For
+/// example, a widget might listen to an animation to update its opacity to the
+/// animation's value every time that value changes. Likewise, registering a
+/// *status* listener via [Animation.addStatusListener] may be useful to trigger
+/// another action when the current animation has ended.
 ///
 /// As an example, the following video shows the changes over time in the
 /// current animation status and animation value for the opacity animation of a
@@ -55,7 +56,7 @@
 /// {@animation 420 100 https://flutter.github.io/assets-for-api-docs/assets/animation/animation_status_value.mp4}
 ///
 /// Although you can't instantiate [Animation] directly (it is an abstract
-/// class) you can create one using an [AnimationController].
+/// class), you can create one using an [AnimationController].
 ///
 ///
 /// ### Powering animations: AnimationController
@@ -72,8 +73,8 @@
 /// over the given duration from 0.0 to 1.0 when run in the forward direction.
 /// For many use cases you might want the value to be of a different type,
 /// change the range of the animation values, or change how the animation moves
-/// between values. This is achieved by wrapping the animation: An [Animatable]
-/// (see below) can be used to change the range of animation values to a
+/// between values. This is achieved by wrapping the animation: Wrapping it in
+/// an [Animatable] (see below) changes the range of animation values to a
 /// different range or type (for example to animate [Color]s or [Rect]s).
 /// Furthermore, a [Curve] can be applied to the animation by wrapping it in a
 /// [CurvedAnimation]. Instead of linearly increasing the animation value, a
