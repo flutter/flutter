@@ -38,7 +38,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
 /// This sample shows an `IconButton` that uses the Material icon "volume_up" to
 /// increase the volume.
@@ -49,24 +49,20 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: Column(
-///         mainAxisSize: MainAxisSize.min,
-///         children: <Widget>[
-///           IconButton(
-///             icon: Icon(Icons.volume_up),
-///             tooltip: 'Increase volume by 10',
-///             onPressed: () {
-///               setState(() {
-///                 _volume += 10;
-///               });
-///             },
-///           ),
-///           Text('Volume : $_volume')
-///         ],
+///   return Column(
+///     mainAxisSize: MainAxisSize.min,
+///     children: <Widget>[
+///       IconButton(
+///         icon: Icon(Icons.volume_up),
+///         tooltip: 'Increase volume by 10',
+///         onPressed: () {
+///           setState(() {
+///             _volume += 10;
+///           });
+///         },
 ///       ),
-///     ),
+///       Text('Volume : $_volume')
+///     ],
 ///   );
 /// }
 /// ```
