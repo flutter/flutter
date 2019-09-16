@@ -82,7 +82,7 @@
 /// [Curves.easeOutCubic] increases the animation value quickly at the beginning
 /// of the animation and then slows down until the target value is reached:
 ///
-/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_cubic.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_cubic.mp4}
 ///
 ///
 /// ### Animating different types: Animatable
@@ -112,7 +112,7 @@
 /// `Tween<double>`, and a [ColorTween] as the animation value runs from 0.0 to
 /// 1.0 and back to 0.0:
 ///
-/// {@animation 530 150 https://flutter.github.io/assets-for-api-docs/assets/animation/tweens.mp4}
+/// {@animation 530 150 https://flutter.github.io/assets-for-api-docs/assets/animation/tweens.mp4}
 ///
 /// An [Animation] or [AnimationController] can power multiple [Tween]s. For
 /// example, to animate the size and the color of a widget in parallel, create
@@ -142,7 +142,7 @@
 ///
 /// The following video shows the animation described in the previous paragraph:
 ///
-/// {@animation 646 250 https://flutter.github.io/assets-for-api-docs/assets/animation/tween_sequence.mp4}
+/// {@animation 646 250 https://flutter.github.io/assets-for-api-docs/assets/animation/tween_sequence.mp4}
 ///
 ///
 /// See also:
