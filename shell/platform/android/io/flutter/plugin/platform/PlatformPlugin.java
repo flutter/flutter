@@ -94,7 +94,7 @@ public class PlatformPlugin {
         }
 
         @Override
-        public void setSystemGestureExclusionRects(@NonNull ArrayList rects) {
+        public void setSystemGestureExclusionRects(@NonNull ArrayList<Rect> rects) {
             PlatformPlugin.this.setSystemGestureExclusionRects(rects);
         }
     };
