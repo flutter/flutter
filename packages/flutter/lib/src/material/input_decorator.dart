@@ -827,14 +827,18 @@ class _RenderDecoration extends RenderBox {
       visitor(prefix);
     if (prefixIcon != null)
       visitor(prefixIcon);
-    if (isFocused && hint != null) {
-      // Bypass opacity to always read hint when focused. This prevents the
-      // label from changing when text is entered.
-      final RenderProxyBox typedHint = hint;
-      visitor(typedHint.child);
-    } else if (!isFocused && label != null) {
+
+    if (label != null) {
       visitor(label);
     }
+    if (hint != null) {
+      if (isFocused) {
+        visitor(hint);
+      } else if (label == null) {
+        visitor(hint);
+      }
+    }
+
     if (input != null)
       visitor(input);
     if (suffixIcon != null)
@@ -2060,6 +2064,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
       duration: _kTransitionDuration,
       curve: _kTransitionCurve,
+      alwaysIncludeSemantics: true,
       child: Text(
         decoration.hintText,
         style: hintStyle,

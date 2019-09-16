@@ -191,8 +191,9 @@ void main() {
       ].expand<String>((List<String> list) => list);
       for (String path in allFiles) {
         final File file = fs.file(fs.path.join(projectPath, path));
-        if (file.existsSync())
+        if (file.existsSync()) {
           file.deleteSync();
+        }
       }
     }
 

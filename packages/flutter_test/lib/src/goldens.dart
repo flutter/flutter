@@ -7,8 +7,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
-import '_goldens_io.dart'
-  if (dart.library.html) '_goldens_web.dart' as _goldens;
+import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as _goldens;
 
 /// Compares image pixels against a golden image file.
 ///

@@ -75,6 +75,9 @@ typedef WebFsFactory = Future<WebFs> Function({
   @required FlutterProject flutterProject,
   @required BuildInfo buildInfo,
   @required bool skipDwds,
+  @required bool initializePlatform,
+  @required String hostname,
+  @required String port,
 });
 
 /// The dev filesystem responsible for building and serving  web applications.
@@ -104,10 +107,10 @@ class WebFs {
     await _connectedApps?.cancel();
   }
 
-  /// Retrieve the [DebugConnection] for the current application.
+  /// Retrieve the [DebugConnection] for the current application
   Future<DebugConnection> runAndDebug() {
     final Completer<DebugConnection> firstConnection = Completer<DebugConnection>();
-    _connectedApps =  _dwds.connectedApps.listen((AppConnection appConnection) async {
+    _connectedApps = _dwds.connectedApps.listen((AppConnection appConnection) async {
       appConnection.runMain();
       final DebugConnection debugConnection = await _dwds.debugConnection(appConnection);
       if (!firstConnection.isCompleted) {
@@ -140,16 +143,24 @@ class WebFs {
     @required FlutterProject flutterProject,
     @required BuildInfo buildInfo,
     @required bool skipDwds,
+    @required bool initializePlatform,
+    @required String hostname,
+    @required String port,
   }) async {
     // workaround for https://github.com/flutter/flutter/issues/38290
     if (!flutterProject.dartTool.existsSync()) {
       flutterProject.dartTool.createSync(recursive: true);
     }
-
-    final bool hasWebPlugins = findPlugins(flutterProject).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+    final bool hasWebPlugins = findPlugins(flutterProject)
+        .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     // Start the build daemon and run an initial build.
     final BuildDaemonClient client = await buildDaemonCreator
-      .startBuildDaemon(fs.currentDirectory.path, release: buildInfo.isRelease, profile: buildInfo.isProfile, hasPlugins: hasWebPlugins);
+      .startBuildDaemon(fs.currentDirectory.path,
+          release: buildInfo.isRelease,
+          profile: buildInfo.isProfile,
+          hasPlugins: hasWebPlugins,
+          initializePlatform: initializePlatform,
+      );
     client.startBuild();
     // Only provide relevant build results
     final Stream<BuildResult> filteredBuildResults = client.buildResults
@@ -165,7 +176,7 @@ class WebFs {
     await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
     // Initialize the dwds server.
-    final int port = await os.findFreePort();
+    final int hostPort = port == null ? await os.findFreePort() : int.tryParse(port);
     // Map the bootstrap files to the correct package directory.
     final String targetBaseName = fs.path
       .withoutExtension(target).replaceFirst('lib${fs.path.separator}', '');
@@ -203,8 +214,8 @@ class WebFs {
     Dwds dwds;
     if (!skipDwds) {
       dwds = await dwdsFactory(
-        hostname: _kHostName,
-        applicationPort: port,
+        hostname: hostname ?? _kHostName,
+        applicationPort: hostPort,
         applicationTarget: kBuildTargetName,
         assetServerPort: daemonAssetPort,
         buildResults: filteredBuildResults,
@@ -224,13 +235,13 @@ class WebFs {
     Cascade cascade = Cascade();
     cascade = cascade.add(handler);
     cascade = cascade.add(_assetHandler(flutterProject));
-    final HttpServer server = await httpMultiServerFactory(_kHostName, port);
+    final HttpServer server = await httpMultiServerFactory(hostname ?? _kHostName, hostPort);
     shelf_io.serveRequests(server, cascade.handler);
     return WebFs(
       client,
       server,
       dwds,
-      'http://$_kHostName:$port/',
+      'http://$_kHostName:$hostPort/',
     );
   }
 
@@ -336,11 +347,14 @@ class BuildDaemonCreator {
   static const String _ignoredLine3 = 'have your dependencies specified fully in your pubspec.yaml';
 
   /// Start a build daemon and register the web targets.
+  ///
+  /// [initializePlatform] controls whether we should invoke [webOnlyInitializePlatform].
   Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {
     bool release = false,
     bool profile = false,
     bool hasPlugins = false,
     bool includeTests = false,
+    bool initializePlatform = true,
   }) async {
     try {
       final BuildDaemonClient client = await _connectClient(
@@ -348,6 +362,7 @@ class BuildDaemonCreator {
         release: release,
         profile: profile,
         hasPlugins: hasPlugins,
+        initializePlatform: initializePlatform,
       );
       _registerBuildTargets(client, includeTests);
       return client;
@@ -380,7 +395,7 @@ class BuildDaemonCreator {
 
   Future<BuildDaemonClient> _connectClient(
     String workingDirectory,
-    { bool release, bool profile, bool hasPlugins }
+    { bool release, bool profile, bool hasPlugins, bool initializePlatform }
   ) {
     final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
     final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
@@ -402,6 +417,7 @@ class BuildDaemonCreator {
         '--define', 'flutter_tools:entrypoint=profile=$profile',
         '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
         '--define', 'flutter_tools:shell=hasPlugins=$hasPlugins',
+        '--define', 'flutter_tools:shell=initializePlatform=$initializePlatform'
       ],
       logHandler: (ServerLog serverLog) {
         switch (serverLog.level) {

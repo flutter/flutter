@@ -55,8 +55,9 @@ ReplayFileSystem getReplayFileSystem(String location) {
 /// Create the ancestor directories of a file path if they do not already exist.
 void ensureDirectoryExists(String filePath) {
   final String dirPath = fs.path.dirname(filePath);
-  if (fs.isDirectorySync(dirPath))
+  if (fs.isDirectorySync(dirPath)) {
     return;
+  }
   try {
     fs.directory(dirPath).createSync(recursive: true);
   } on FileSystemException catch (e) {
@@ -76,11 +77,13 @@ void copyDirectorySync(
     void onFileCopied(File srcFile, File destFile),
   }
 ) {
-  if (!srcDir.existsSync())
+  if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
+  }
 
-  if (!destDir.existsSync())
+  if (!destDir.existsSync()) {
     destDir.createSync(recursive: true);
+  }
 
   for (FileSystemEntity entity in srcDir.listSync()) {
     final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
@@ -122,8 +125,9 @@ Directory getRecordingSink(String dirname, String basename) {
       throwToolExit('Invalid record-to location: $dirname ("$basename" exists as non-directory)');
       break;
     case FileSystemEntityType.directory:
-      if (_kLocalFs.directory(location).listSync(followLinks: false).isNotEmpty)
+      if (_kLocalFs.directory(location).listSync(followLinks: false).isNotEmpty) {
         throwToolExit('Invalid record-to location: $dirname ("$basename" is not empty)');
+      }
       break;
     case FileSystemEntityType.notFound:
       _kLocalFs.directory(location).createSync(recursive: true);
@@ -140,8 +144,9 @@ Directory getRecordingSink(String dirname, String basename) {
 /// If the target directory does not exist, a [ToolExit] will be thrown.
 Directory getReplaySource(String dirname, String basename) {
   final Directory dir = _kLocalFs.directory(_kLocalFs.path.join(dirname, basename));
-  if (!dir.existsSync())
+  if (!dir.existsSync()) {
     throwToolExit('Invalid replay-from location: $dirname ("$basename" does not exist)');
+  }
   return dir;
 }
 
@@ -166,8 +171,9 @@ String escapePath(String path) => platform.isWindows ? path.replaceAll('\\', '\\
 ///
 /// Returns false, if [entity] exists, but [referenceFile] does not.
 bool isOlderThanReference({ @required FileSystemEntity entity, @required File referenceFile }) {
-  if (!entity.existsSync())
+  if (!entity.existsSync()) {
     return true;
+  }
   return referenceFile.existsSync()
       && referenceFile.lastModifiedSync().isAfter(entity.statSync().modified);
 }

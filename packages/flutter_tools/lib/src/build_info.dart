@@ -92,7 +92,7 @@ class AndroidBuildInfo {
       AndroidArch.arm64_v8a,
     ],
     this.splitPerAbi = false,
-    this.proguard = false,
+    this.shrink = false,
   });
 
   // The build info containing the mode and flavor.
@@ -105,8 +105,8 @@ class AndroidBuildInfo {
   /// will be produced.
   final bool splitPerAbi;
 
-  /// Whether to enable Proguard on release mode.
-  final bool proguard;
+  /// Whether to enable code shrinking on release mode.
+  final bool shrink;
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
@@ -414,12 +414,15 @@ String getPlatformNameForAndroidArch(AndroidArch arch) {
 }
 
 HostPlatform getCurrentHostPlatform() {
-  if (platform.isMacOS)
+  if (platform.isMacOS) {
     return HostPlatform.darwin_x64;
-  if (platform.isLinux)
+  }
+  if (platform.isLinux) {
     return HostPlatform.linux_x64;
-  if (platform.isWindows)
+  }
+  if (platform.isWindows) {
     return HostPlatform.windows_x64;
+  }
 
   printError('Unsupported host platform, defaulting to Linux');
 
@@ -430,8 +433,9 @@ HostPlatform getCurrentHostPlatform() {
 String getBuildDirectory() {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null || config == null)
+  if (context == null || config == null) {
     return 'build';
+  }
 
   final String buildDir = config.getValue('build-dir') ?? 'build';
   if (fs.path.isAbsolute(buildDir)) {

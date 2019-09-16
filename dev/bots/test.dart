@@ -281,17 +281,23 @@ Future<void> _runBuildTests() async {
     await _flutterBuildApk(examplePath);
     await _flutterBuildIpa(examplePath);
   }
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
+  // Web compilation tests.
+  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'), path.join('lib', 'main.dart'));
+  // Should fail to compile with dart:io.
+  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web_compile_tests'),
+    path.join('lib', 'dart_io_import.dart'),
+    expectNonZeroExit: true,
+  );
 
   print('${bold}DONE: All build tests successful.$reset');
 }
 
-Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
+Future<void> _flutterBuildDart2js(String relativePathToApplication, String target, { bool expectNonZeroExit = false }) async {
   print('Running Dart2JS build tests...');
   await runCommand(flutter,
-    <String>['build', 'web', '-v'],
+    <String>['build', 'web', '-v', '--target=$target'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
-    expectNonZeroExit: false,
+    expectNonZeroExit: expectNonZeroExit,
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
     }

@@ -168,9 +168,12 @@ class ResidentWebRunner extends ResidentRunner {
         target: target,
         flutterProject: flutterProject,
         buildInfo: debuggingOptions.buildInfo,
-        skipDwds: device is WebDevices,
+        initializePlatform: debuggingOptions.initializePlatform,
+        hostname: debuggingOptions.hostname,
+        port: debuggingOptions.port,
+        skipDwds: device is WebServerDevice,
       );
-      await device.startApp(package, mainPath: target, platformArgs: <String, Object>{
+      await device.startApp(package, mainPath: target, debuggingOptions: debuggingOptions, platformArgs: <String, Object>{
         'uri': _webFs.uri
       });
       if (supportsServiceProtocol) {
