@@ -691,8 +691,6 @@ void main() {
   });
 
   testWidgets('PopupMenuItem child height is a minium, child is vertically centered', (WidgetTester tester) async {
-    // This is a regression test for https://github.com/flutter/flutter/issues/39508.
-
     final Key popupMenuButtonKey = UniqueKey();
     final Type menuItemType = const PopupMenuItem<String>(child: Text('item')).runtimeType;
 
@@ -706,31 +704,39 @@ void main() {
               onSelected: (String result) { },
               itemBuilder: (BuildContext context) {
                 return <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>( // Item's height = 48 (height == minHeight is 48).
-                    child: Text('Item 0'),
+                  // This menu item's height will be 48 because the the default minimum height
+                  // is 48 and the height of the text is less than 48.
+                  const PopupMenuItem<String>(
                     value: '0',
+                    child: Text('Item 0'),
                   ),
-                  const PopupMenuItem<String>( // Item's height = 50 (height == minHeight is 50).
+                  // This menu item's height parameter specifies its minium height. The
+                  // overall height of the menu item will be 50 because the child's
+                  // height 40, is less than 50.
+                  const PopupMenuItem<String>(
                     height: 50,
+                    value: '1',
                     child: SizedBox(
                       height: 40,
                       child: Text('Item 1'),
                     ),
-                    value: '1',
                   ),
-                  const PopupMenuItem<String>( // Item's height = 75 (height == minHeight is 75).
+                  // This menu item's height parameter specifies its minium height, so the
+                  // overall height of the menu item will be 75.
+                  const PopupMenuItem<String>(
                     height: 75,
+                    value: '2',
                     child: SizedBox(
                       child: Text('Item 2'),
                     ),
-                    value: '2',
                   ),
-                  const PopupMenuItem<String>( // Item's height = 100.
+                  // This menu item's height will be 100.
+                  const PopupMenuItem<String>(
+                    value: '3',
                     child: SizedBox(
                       height: 100,
                       child: Text('Item 3'),
                     ),
-                    value: '3',
                   ),
                 ];
               },
@@ -767,8 +773,6 @@ void main() {
   });
 
   testWidgets('Update PopupMenuItem layout while the menu is visible', (WidgetTester tester) async {
-    // This is a regression test for https://github.com/flutter/flutter/issues/39508.
-
     final Key popupMenuButtonKey = UniqueKey();
     final Type menuItemType = const PopupMenuItem<String>(child: Text('item')).runtimeType;
 
@@ -796,12 +800,12 @@ void main() {
             itemBuilder: (BuildContext context) {
               return <PopupMenuEntry<String>>[
                 const PopupMenuItem<String>(
-                  child: Text('Item 0'),
                   value: '0',
+                  child: Text('Item 0'),
                 ),
-                PopupMenuItem<String>(
-                  child: const Text('Item 1'),
+                const PopupMenuItem<String>(
                   value: '1',
+                  child: Text('Item 1'),
                 ),
               ];
             },
