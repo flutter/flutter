@@ -647,7 +647,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     // If called when the old and new itemSizes have been initialized then
     // we expect them to have the same length because there's no practical
     // way to change length of the items list once the menu has been shown.
-    assert(itemSizes == null || oldDelegate.itemSizes == null || itemSizes.length == oldDelegate.itemSizes.length);
+    assert(itemSizes.length == oldDelegate.itemSizes.length);
 
     return position != oldDelegate.position
         || selectedItemIndex != oldDelegate.selectedItemIndex
