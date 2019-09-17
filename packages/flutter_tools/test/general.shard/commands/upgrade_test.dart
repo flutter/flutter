@@ -46,7 +46,7 @@ void main() {
         return Future<Process>.value(createMockProcess());
       });
       fakeCommandRunner.willHaveUncomittedChanges = false;
-      fakePlatform = FakePlatform()..environment = Map.unmodifiable(<String, String>{
+      fakePlatform = FakePlatform()..environment = Map<String, String>.unmodifiable(<String, String>{
         'ENV1': 'irrelevant',
         'ENV2': 'irrelevant',
       });
