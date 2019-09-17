@@ -188,6 +188,54 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// ```
 /// {@end-tool}
 ///
+/// ## Reading values
+///
+/// A common way to read a value from a TextField is to use the [onSubmitted]
+/// method, which is called when the user finishes editing and receives the
+/// current value in its callback.
+///
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// This sample shows an example of getting a value from a TextField via the
+/// [onSubmitted] method.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   final TextEditingController controller = TextEditingController();
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('TextField Demo'),
+///     ),
+///     body: Center(
+///       child: TextField(
+///         controller: controller,
+///         onSubmitted: (String value) async {
+///           await showDialog<void>(
+///             context: context,
+///             builder: (BuildContext context) {
+///               return AlertDialog(
+///                 title: const Text('Thanks!'),
+///                 content: Text ('You typed "$value".'),
+///                 actions: <Widget>[
+///                   FlatButton(
+///                     onPressed: () { Navigator.pop(context, null); },
+///                     child: const Text('OK'),
+///                   ),
+///                 ],
+///               );
+///             }
+///           );
+///         },
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// Keep in mind you can also always read the current string from a TextField's
+/// [TextEditingController] using [TextEditingController.text].
+///
 /// See also:
 ///
 ///  * <https://material.io/design/components/text-fields.html>
