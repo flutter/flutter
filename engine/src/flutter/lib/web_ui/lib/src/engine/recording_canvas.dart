@@ -7,6 +7,9 @@ part of engine;
 /// Enable this to print every command applied by a canvas.
 const bool _debugDumpPaintCommands = false;
 
+// Similar to [Offset.distance]
+double _getDistance(double x, double y) => math.sqrt(x * x + y * y);
+
 /// Records canvas commands to be applied to a [EngineCanvas].
 ///
 /// See [Canvas] for docs for these methods.
@@ -228,12 +231,31 @@ class RecordingCanvas {
   }
 
   void drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint paint) {
-    // If inner rect is not contained inside outer, flutter engine skips
-    // painting rectangle.
-    if (!(outer.contains(ui.Offset(inner.left, inner.top)) &&
-        outer.contains(ui.Offset(inner.right, inner.bottom)))) {
-      return;
+    // Ensure inner is fully contained within outer, by comparing its
+    // defining points (including its border radius)
+    ui.Rect innerRect = inner.outerRect;
+    if (outer.outerRect.intersect(innerRect) != innerRect) {
+      return; // inner is not fully contained within outer
     }
+
+    // Compare radius "length" of the rectangles that are going to be actually drawn
+    final ui.RRect scaledOuter = outer.scaleRadii();
+    final ui.RRect scaledInner = inner.scaleRadii();
+
+    final double outerTl = _getDistance(scaledOuter.tlRadiusX, scaledOuter.tlRadiusY);
+    final double outerTr = _getDistance(scaledOuter.trRadiusX, scaledOuter.trRadiusY);
+    final double outerBl = _getDistance(scaledOuter.blRadiusX, scaledOuter.blRadiusY);
+    final double outerBr = _getDistance(scaledOuter.brRadiusX, scaledOuter.brRadiusY);
+
+    final double innerTl = _getDistance(scaledInner.tlRadiusX, scaledInner.tlRadiusY);
+    final double innerTr = _getDistance(scaledInner.trRadiusX, scaledInner.trRadiusY);
+    final double innerBl = _getDistance(scaledInner.blRadiusX, scaledInner.blRadiusY);
+    final double innerBr = _getDistance(scaledInner.brRadiusX, scaledInner.brRadiusY);
+
+    if (innerTl >= outerTl || innerTr >= outerTr || innerBl >= outerBl || innerBr >= outerBr) {
+      return; // Some inner radius is overlapping some outer radius
+    }
+
     _hasArbitraryPaint = true;
     _didDraw = true;
     final double strokeWidth =
