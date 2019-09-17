@@ -688,8 +688,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   bool get _isEnabled =>  widget.enabled ?? widget.decoration?.enabled ?? true;
 
-  int get _currentLength => _effectiveController.value.text.runes.length;
-
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData themeData = Theme.of(context);
@@ -706,7 +704,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
     // If buildCounter was provided, use it to generate a counter widget.
     Widget counter;
-    final int currentLength = _currentLength;
+    final int currentLength = _effectiveController.value.text.runes.length;
     if (effectiveDecoration.counter == null
         && effectiveDecoration.counterText == null
         && widget.buildCounter != null) {
@@ -1036,27 +1034,18 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         child: child,
       );
     }
-    return IgnorePointer(
-      ignoring: !_isEnabled,
+
+    return Semantics(
+      onTap: () {
+        if (!_effectiveController.selection.isValid)
+          _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+        _requestKeyboard();
+      },
       child: MouseRegion(
         onEnter: _handleMouseEnter,
         onExit: _handleMouseExit,
-        child: AnimatedBuilder(
-          animation: controller, // changes the _currentLength
-          builder: (BuildContext context, Widget child) {
-            return Semantics(
-              maxValueLength: widget.maxLengthEnforced && widget.maxLength != null && widget.maxLength > 0
-                  ? widget.maxLength
-                  : null,
-              currentValueLength: _currentLength,
-              onTap: () {
-                if (!_effectiveController.selection.isValid)
-                  _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
-                _requestKeyboard();
-              },
-              child: child,
-            );
-          },
+        child: IgnorePointer(
+          ignoring: !_isEnabled,
           child: _selectionGestureDetectorBuilder.buildGestureDetector(
             behavior: HitTestBehavior.translucent,
             child: child,
