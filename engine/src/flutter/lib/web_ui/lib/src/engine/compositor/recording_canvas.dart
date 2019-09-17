@@ -221,6 +221,17 @@ class SkRecordingCanvas implements RecordingCanvas {
   }
 
   @override
+  void drawVertices(
+      ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
+    SkVertices skVertices = vertices;
+    skCanvas.callMethod('drawVertices', <js.JsObject>[
+      skVertices.skVertices,
+      makeSkBlendMode(blendMode),
+      makeSkPaint(paint)
+    ]);
+  }
+
+  @override
   bool get hasArbitraryPaint => true;
 
   @override

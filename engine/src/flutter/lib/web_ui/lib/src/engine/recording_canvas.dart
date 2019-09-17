@@ -347,6 +347,10 @@ class RecordingCanvas {
     _commands.add(PaintDrawShadow(path, color, elevation, transparentOccluder));
   }
 
+  void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
+    throw new UnimplementedError();
+  }
+
   int saveCount = 1;
 
   /// Prints the commands recorded by this canvas to the console.
