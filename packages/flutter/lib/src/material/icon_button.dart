@@ -43,6 +43,8 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// This sample shows an `IconButton` that uses the Material icon "volume_up" to
 /// increase the volume.
 ///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button.png)
+///
 /// ```dart preamble
 /// double _volume = 0.0;
 /// ```
@@ -87,21 +89,22 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 /// is a light shade of blue, it's a filled circle, and it's as big as the
 /// button is.
 ///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/icon_button_background.png)
+///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: Container(
+///   return Material(
+///     color: Colors.white,
+///     child: Center(
 ///       child: Ink(
-///         decoration: ShapeDecoration(
+///         decoration: const ShapeDecoration(
 ///           color: Colors.lightBlue,
 ///           shape: CircleBorder(),
 ///         ),
 ///         child: IconButton(
 ///           icon: Icon(Icons.android),
 ///           color: Colors.white,
-///           onPressed: () {
-///             print("filled background");
-///           },
+///           onPressed: () {},
 ///         ),
 ///       ),
 ///     ),
