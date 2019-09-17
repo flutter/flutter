@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "plugin_registrar.h"
+#include "plugin_registry.h"
 
 namespace flutter {
 
@@ -19,7 +20,7 @@ namespace flutter {
 // This is the primary wrapper class for the desktop C API.
 // If you use this class, you should not call any of the setup or teardown
 // methods in the C API directly, as this class will do that internally.
-class FlutterViewController {
+class FlutterViewController : public PluginRegistry {
  public:
   // There must be only one instance of this class in an application at any
   // given time, as Flutter does not support multiple engines in one process,
@@ -41,18 +42,11 @@ class FlutterViewController {
                                  const std::string& assets_path,
                                  const std::vector<std::string>& arguments);
 
-  ~FlutterViewController();
+  virtual ~FlutterViewController();
 
   // Prevent copying.
   FlutterViewController(FlutterViewController const&) = delete;
   FlutterViewController& operator=(FlutterViewController const&) = delete;
-
-  // Returns the FlutterDesktopPluginRegistrarRef to register a plugin with the
-  // given name.
-  //
-  // The name must be unique across the application.
-  FlutterDesktopPluginRegistrarRef GetRegistrarForPlugin(
-      const std::string& plugin_name);
 
   // Return backing HWND for manipulation in host application.
   HWND GetNativeWindow();
@@ -60,6 +54,10 @@ class FlutterViewController {
   // Must be called in run loop to enable the view to do work on each tick of
   // loop.
   void ProcessMessages();
+
+  // flutter::PluginRegistry:
+  FlutterDesktopPluginRegistrarRef GetRegistrarForPlugin(
+      const std::string& plugin_name) override;
 
  private:
   // The path to the ICU data file. Set at creation time since it is the same

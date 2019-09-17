@@ -17,6 +17,7 @@ core_cpp_client_wrapper_includes =
                     "include/flutter/method_codec.h",
                     "include/flutter/method_result.h",
                     "include/flutter/plugin_registrar.h",
+                    "include/flutter/plugin_registry.h",
                     "include/flutter/standard_message_codec.h",
                     "include/flutter/standard_method_codec.h",
                   ],
