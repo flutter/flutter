@@ -295,15 +295,26 @@ class FlutterPlugin implements Plugin<Project> {
         Closure addEmbeddingCompileOnlyDependency = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
             // Add the embedding as a compile only dependency to the plugin.
-            def dependency;
             if (flutterJar) {
-                dependency = project.files {
-                    flutterJar
-                }
-            } else {
-                dependency = "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion"
+                addCompileOnlyDependency(
+                    pluginProject,
+                    buildType.name,
+                    project.files {
+                        flutterJar
+                    }
+                )
+                return
             }
-            addCompileOnlyDependency(pluginProject, buildType.name, dependency)
+            addCompileOnlyDependency(
+                pluginProject,
+                buildType.name,
+                "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion",
+                {
+                    // We only need to expose io.flutter.plugin.*
+                    // No need for the embedding transitive dependencies.
+                    transitive = false
+                }
+            )
         }
         pluginProject.afterEvaluate {
             pluginProject.android.buildTypes {
@@ -487,7 +498,7 @@ class FlutterPlugin implements Plugin<Project> {
         return System.getProperty('build-plugins-as-aars') == 'true'
     }
 
-    private void addCompileOnlyDependency(Project project, String variantName, Object dependency) {
+    private void addCompileOnlyDependency(Project project, String variantName, Object dependency, Closure config = null) {
         if (project.state.failure) {
             return
         }
@@ -497,7 +508,7 @@ class FlutterPlugin implements Plugin<Project> {
         } else {
             configuration = "${variantName}Provided";
         }
-        project.dependencies.add(configuration, dependency)
+        project.dependencies.add(configuration, dependency, config)
     }
 
     private static void addApiDependencies(Project project, String variantName, Object dependency, Closure config = null) {
