@@ -272,16 +272,14 @@ class HotRunner extends ResidentRunner {
 
   Future<List<Uri>> _initDevFS() async {
     final String fsName = fs.path.basename(projectRootPath);
-    final List<Uri> devFSUris = <Uri>[];
-    for (FlutterDevice device in flutterDevices) {
-      final Uri uri = await device.setupDevFS(
-        fsName,
-        fs.directory(projectRootPath),
-        packagesFilePath: packagesFilePath,
-      );
-      devFSUris.add(uri);
-    }
-    return devFSUris;
+    return <Uri>[
+      for (FlutterDevice device in flutterDevices)
+        await device.setupDevFS(
+          fsName,
+          fs.directory(projectRootPath),
+          packagesFilePath: packagesFilePath,
+        ),
+    ];
   }
 
   Future<UpdateFSReport> _updateDevFS({ bool fullRestart = false }) async {
@@ -350,10 +348,9 @@ class HotRunner extends ResidentRunner {
     Uri packagesUri,
     Uri assetsDirectoryUri,
   ) {
-    final List<Future<void>> futures = <Future<void>>[];
-    for (FlutterView view in device.views) {
-      futures.add(view.runFromSource(entryUri, packagesUri, assetsDirectoryUri));
-    }
+    final List<Future<void>> futures = <Future<void>>[
+      for (FlutterView view in device.views) view.runFromSource(entryUri, packagesUri, assetsDirectoryUri),
+    ];
     final Completer<void> completer = Completer<void>();
     Future.wait(futures).whenComplete(() { completer.complete(null); });
     return completer.future;
@@ -833,18 +830,18 @@ class HotRunner extends ResidentRunner {
     assert(reassembleViews.isNotEmpty);
     printTrace('Reassembling application');
     bool failedReassemble = false;
-    final List<Future<void>> futures = <Future<void>>[];
-    for (FlutterView view in reassembleViews) {
-      futures.add(() async {
-        try {
-          await view.uiIsolate.flutterReassemble();
-        } catch (error) {
-          failedReassemble = true;
-          printError('Reassembling ${view.uiIsolate.name} failed: $error');
-          return;
-        }
-      }());
-    }
+    final List<Future<void>> futures = <Future<void>>[
+      for (FlutterView view in reassembleViews)
+        () async {
+          try {
+            await view.uiIsolate.flutterReassemble();
+          } catch (error) {
+            failedReassemble = true;
+            printError('Reassembling ${view.uiIsolate.name} failed: $error');
+            return;
+          }
+        }(),
+    ];
     final Future<void> reassembleFuture = Future.wait<void>(futures).then<void>((List<void> values) { });
     await reassembleFuture.timeout(
       const Duration(seconds: 2),

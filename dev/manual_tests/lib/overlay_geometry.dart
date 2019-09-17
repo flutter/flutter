@@ -179,26 +179,27 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> layers = <Widget>[
-      Scaffold(
-        appBar: AppBar(title: const Text('Tap a Card')),
-        body: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-          child: NotificationListener<ScrollNotification>(
-            onNotification: handleScrollNotification,
-            child: ListView.custom(
-              childrenDelegate: CardBuilder(
-                cardModels: cardModels,
-                onTapUp: handleTapUp,
+    return Stack(
+      children: <Widget>[
+        Scaffold(
+          appBar: AppBar(title: const Text('Tap a Card')),
+          body: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+            child: NotificationListener<ScrollNotification>(
+              onNotification: handleScrollNotification,
+              child: ListView.custom(
+                childrenDelegate: CardBuilder(
+                  cardModels: cardModels,
+                  onTapUp: handleTapUp,
+                ),
               ),
             ),
           ),
         ),
-      ),
-    ];
-    for (MarkerType type in markers.keys)
-      layers.add(Marker(type: type, position: markers[type]));
-    return Stack(children: layers);
+        for (MarkerType type in markers.keys)
+          Marker(type: type, position: markers[type]),
+      ],
+    );
   }
 }
 

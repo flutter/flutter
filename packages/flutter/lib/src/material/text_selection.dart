@@ -40,17 +40,13 @@ class _TextSelectionToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> items = <Widget>[];
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-
-    if (handleCut != null)
-      items.add(FlatButton(child: Text(localizations.cutButtonLabel), onPressed: handleCut));
-    if (handleCopy != null)
-      items.add(FlatButton(child: Text(localizations.copyButtonLabel), onPressed: handleCopy));
-    if (handlePaste != null)
-      items.add(FlatButton(child: Text(localizations.pasteButtonLabel), onPressed: handlePaste,));
-    if (handleSelectAll != null)
-      items.add(FlatButton(child: Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll));
+    final List<Widget> items = <Widget>[
+      if (handleCut != null) FlatButton(child: Text(localizations.cutButtonLabel), onPressed: handleCut),
+      if (handleCopy != null) FlatButton(child: Text(localizations.copyButtonLabel), onPressed: handleCopy),
+      if (handlePaste != null) FlatButton(child: Text(localizations.pasteButtonLabel), onPressed: handlePaste),
+      if (handleSelectAll != null) FlatButton(child: Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll),
+    ];
 
     // If there is no option available, build an empty widget.
     if (items.isEmpty) {

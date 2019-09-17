@@ -137,10 +137,9 @@ class FlutterDevice {
     if (vmServices == null || vmServices.isEmpty) {
       return Future<void>.value(null);
     }
-    final List<Future<void>> futures = <Future<void>>[];
-    for (VMService service in vmServices) {
-      futures.add(service.vm.refreshViews(waitForViews: true));
-    }
+    final List<Future<void>> futures = <Future<void>>[
+      for (VMService service in vmServices) service.vm.refreshViews(waitForViews: true),
+    ];
     await Future.wait(futures);
   }
 
@@ -221,16 +220,14 @@ class FlutterDevice {
   }) {
     final Uri deviceEntryUri = devFS.baseUri.resolveUri(fs.path.toUri(entryPath));
     final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
-    final List<Future<Map<String, dynamic>>> reports = <Future<Map<String, dynamic>>>[];
-    for (FlutterView view in views) {
-      final Future<Map<String, dynamic>> report = view.uiIsolate.reloadSources(
-        pause: pause,
-        rootLibUri: deviceEntryUri,
-        packagesUri: devicePackagesUri,
-      );
-      reports.add(report);
-    }
-    return reports;
+    return <Future<Map<String, dynamic>>>[
+      for (FlutterView view in views)
+        view.uiIsolate.reloadSources(
+          pause: pause,
+          rootLibUri: deviceEntryUri,
+          packagesUri: devicePackagesUri,
+        ),
+    ];
   }
 
   Future<void> resetAssetDirectory() async {
@@ -656,10 +653,9 @@ abstract class ResidentRunner {
   }
 
   Future<void> refreshViews() async {
-    final List<Future<void>> futures = <Future<void>>[];
-    for (FlutterDevice device in flutterDevices) {
-      futures.add(device.refreshViews());
-    }
+    final List<Future<void>> futures = <Future<void>>[
+      for (FlutterDevice device in flutterDevices) device.refreshViews(),
+    ];
     await Future.wait(futures);
   }
 
@@ -893,10 +889,9 @@ abstract class ResidentRunner {
   }
 
   Future<void> exitApp() async {
-    final List<Future<void>> futures = <Future<void>>[];
-    for (FlutterDevice device in flutterDevices) {
-      futures.add(device.exitApps());
-    }
+    final List<Future<void>> futures = <Future<void>>[
+      for (FlutterDevice device in flutterDevices)  device.exitApps(),
+    ];
     await Future.wait(futures);
     appFinished();
   }
