@@ -51,6 +51,7 @@ class MaterialButton extends StatelessWidget {
   const MaterialButton({
     Key key,
     @required this.onPressed,
+    this.onLongPress,
     this.onHighlightChanged,
     this.textTheme,
     this.textColor,
@@ -90,6 +91,9 @@ class MaterialButton extends StatelessWidget {
   ///
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
+
+  /// Called when the button is long-pressed.
+  final VoidCallback onLongPress;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
@@ -348,6 +352,7 @@ class MaterialButton extends StatelessWidget {
 
     return RawMaterialButton(
       onPressed: onPressed,
+      onLongPress: onLongPress,
       onHighlightChanged: onHighlightChanged,
       fillColor: buttonTheme.getFillColor(this),
       textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
@@ -378,6 +383,7 @@ class MaterialButton extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(ObjectFlagProperty<VoidCallback>('onLongPress', onLongPress, defaultValue: null));
     properties.add(DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
     properties.add(ColorProperty('textColor', textColor, defaultValue: null));
     properties.add(ColorProperty('disabledTextColor', disabledTextColor, defaultValue: null));

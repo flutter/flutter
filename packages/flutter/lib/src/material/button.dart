@@ -38,6 +38,7 @@ class RawMaterialButton extends StatefulWidget {
   const RawMaterialButton({
     Key key,
     @required this.onPressed,
+    this.onLongPress,
     this.onHighlightChanged,
     this.textStyle,
     this.fillColor,
@@ -77,6 +78,9 @@ class RawMaterialButton extends StatefulWidget {
   ///
   /// If this is set to null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
+
+  /// Called when the button is long-pressed.
+  final VoidCallback onLongPress;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
@@ -353,6 +357,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
             hoverColor: widget.hoverColor,
             onHover: _handleHoveredChanged,
             onTap: widget.onPressed,
+            onLongPress: widget.onLongPress,
             customBorder: effectiveShape,
             child: IconTheme.merge(
               data: IconThemeData(color: effectiveTextColor),

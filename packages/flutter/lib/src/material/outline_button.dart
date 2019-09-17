@@ -61,6 +61,7 @@ class OutlineButton extends MaterialButton {
   const OutlineButton({
     Key key,
     @required VoidCallback onPressed,
+    VoidCallback onLongPress,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -85,6 +86,7 @@ class OutlineButton extends MaterialButton {
        super(
          key: key,
          onPressed: onPressed,
+         onLongPress: onLongPress,
          textTheme: textTheme,
          textColor: textColor,
          disabledTextColor: disabledTextColor,
@@ -113,6 +115,7 @@ class OutlineButton extends MaterialButton {
   factory OutlineButton.icon({
     Key key,
     @required VoidCallback onPressed,
+    VoidCallback onLongPress,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -169,6 +172,7 @@ class OutlineButton extends MaterialButton {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     return _OutlineButton(
       onPressed: onPressed,
+      onLongPress: onLongPress,
       brightness: buttonTheme.getBrightness(this),
       textTheme: textTheme,
       textColor: buttonTheme.getTextColor(this),
@@ -207,6 +211,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
   _OutlineButtonWithIcon({
     Key key,
     @required VoidCallback onPressed,
+    VoidCallback onLongPress,
     ButtonTextTheme textTheme,
     Color textColor,
     Color disabledTextColor,
@@ -234,6 +239,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
        super(
          key: key,
          onPressed: onPressed,
+         onLongPress: onLongPress,
          textTheme: textTheme,
          textColor: textColor,
          disabledTextColor: disabledTextColor,
@@ -266,6 +272,7 @@ class _OutlineButton extends StatefulWidget {
   const _OutlineButton({
     Key key,
     @required this.onPressed,
+    this.onLongPress,
     this.brightness,
     this.textTheme,
     this.textColor,
@@ -292,6 +299,7 @@ class _OutlineButton extends StatefulWidget {
        super(key: key);
 
   final VoidCallback onPressed;
+  final VoidCallback onLongPress;
   final Brightness brightness;
   final ButtonTextTheme textTheme;
   final Color textColor;
@@ -440,6 +448,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           highlightColor: widget.highlightColor,
           disabledColor: Colors.transparent,
           onPressed: widget.onPressed,
+          onLongPress: widget.onLongPress,
           elevation: 0.0,
           disabledElevation: 0.0,
           focusElevation: 0.0,

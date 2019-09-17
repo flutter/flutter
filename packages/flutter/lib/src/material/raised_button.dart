@@ -108,6 +108,7 @@ class RaisedButton extends MaterialButton {
   const RaisedButton({
     Key key,
     @required VoidCallback onPressed,
+    VoidCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
     ButtonTextTheme textTheme,
     Color textColor,
@@ -142,6 +143,7 @@ class RaisedButton extends MaterialButton {
        super(
          key: key,
          onPressed: onPressed,
+         onLongPress: onLongPress,
          onHighlightChanged: onHighlightChanged,
          textTheme: textTheme,
          textColor: textColor,
@@ -179,6 +181,7 @@ class RaisedButton extends MaterialButton {
   factory RaisedButton.icon({
     Key key,
     @required VoidCallback onPressed,
+    VoidCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
     ButtonTextTheme textTheme,
     Color textColor,
@@ -209,6 +212,7 @@ class RaisedButton extends MaterialButton {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     return RawMaterialButton(
       onPressed: onPressed,
+      onLongPress: onLongPress,
       onHighlightChanged: onHighlightChanged,
       clipBehavior: clipBehavior,
       fillColor: buttonTheme.getFillColor(this),
@@ -252,6 +256,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
   _RaisedButtonWithIcon({
     Key key,
     @required VoidCallback onPressed,
+    VoidCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
     ButtonTextTheme textTheme,
     Color textColor,
@@ -284,6 +289,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
        super(
          key: key,
          onPressed: onPressed,
+         onLongPress: onLongPress,
          onHighlightChanged: onHighlightChanged,
          textTheme: textTheme,
          textColor: textColor,
