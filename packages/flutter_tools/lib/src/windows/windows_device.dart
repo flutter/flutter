@@ -87,7 +87,6 @@ class WindowsDevice extends Device {
         target: mainPath,
       );
     }
-    await stopApp(package);
     final Process process = await processUtils.start(<String>[
       package.executable(debuggingOptions?.buildInfo?.mode)
     ]);

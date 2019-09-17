@@ -37,7 +37,7 @@ or
   String cacheDirectory;
   switch (targetPlatform) {
     case 'linux-x64':
-      cacheDirectory = 'linux/flutter';
+      cacheDirectory = 'linux/flutter/ephemeral';
       break;
     case 'windows-x64':
       cacheDirectory = 'windows/flutter/ephemeral';
