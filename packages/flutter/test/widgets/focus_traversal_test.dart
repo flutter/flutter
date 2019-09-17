@@ -969,42 +969,49 @@ void main() {
 
       // Initial focus happens.
       expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       expect(Focus.of(upperRightKey.currentContext).hasPrimaryFocus, isTrue);
       // Initial focus happens.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       expect(Focus.of(lowerLeftKey.currentContext).hasPrimaryFocus, isTrue);
       // Initial focus happens.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       expect(Focus.of(lowerRightKey.currentContext).hasPrimaryFocus, isTrue);
       // Initial focus happens.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
 
-      expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
-      expect(Focus.of(upperRightKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
-      expect(Focus.of(lowerLeftKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       expect(Focus.of(lowerRightKey.currentContext).hasPrimaryFocus, isTrue);
       // Initial focus happens.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+      expect(Focus.of(lowerLeftKey.currentContext).hasPrimaryFocus, isTrue);
+      // Initial focus happens.
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+      expect(Focus.of(upperRightKey.currentContext).hasPrimaryFocus, isTrue);
+      // Initial focus happens.
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
 
       // Traverse in a direction
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       expect(Focus.of(upperRightKey.currentContext).hasPrimaryFocus, isTrue);
       // Initial focus happens.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       expect(Focus.of(lowerRightKey.currentContext).hasPrimaryFocus, isTrue);
       // Initial focus happens.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       expect(Focus.of(lowerLeftKey.currentContext).hasPrimaryFocus, isTrue);
       // Initial focus happens.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowUp);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
     });
   });
