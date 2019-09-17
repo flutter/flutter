@@ -27,6 +27,7 @@ import '../src/testbed.dart';
 void main() {
   Testbed testbed;
   MockFlutterWebFs mockWebFs;
+  MockFlutterWebFs failingWebFs;
   ResidentWebRunner residentWebRunner;
   MockDebugConnection mockDebugConnection;
   MockVmService mockVmService;
@@ -59,9 +60,11 @@ void main() {
         return mockWebFs;
       },
     });
+
+    failingWebFs = MockFlutterWebFs();
   });
 
-   void _setupMocks() {
+  void _setupMocks() {
     fs.file('pubspec.yaml').createSync();
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
@@ -79,6 +82,11 @@ void main() {
       return const Stream<Event>.empty();
     });
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
+
+    when(failingWebFs.runAndDebug()).thenAnswer((Invocation _) async {
+      scheduleMicrotask(() => throw 'Error');
+      return mockDebugConnection;
+    });
   }
 
   test('runner with web server device does not support debugging', () => testbed.run(() {
@@ -135,6 +143,43 @@ void main() {
     verify(mockVmService.registerService('reloadSources', 'FlutterTools')).called(1);
     expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
+  }));
+
+  test('Throw tool exit when webfs factory throws an async error.', () => testbed.run(() async {
+    _setupMocks();
+    expect(() => residentWebRunner.run(),
+           throwsToolExit(message: 'Failed to build application for the web.'));
+  }, overrides: <Type, Generator>{
+    WebFsFactory: () => ({
+      @required String target,
+      @required FlutterProject flutterProject,
+      @required BuildInfo buildInfo,
+      @required bool skipDwds,
+      @required bool initializePlatform,
+      @required String hostname,
+      @required String port,
+    }) async {
+      scheduleMicrotask(() => throw 'Error');
+      return mockWebFs;
+    },
+  }));
+
+  test('Throw tool exit when webfs runAndDebug throws an async error', () => testbed.run(() async {
+    _setupMocks();
+    expect(() => residentWebRunner.run(),
+           throwsToolExit(message: 'Failed to build application for the web.'));
+  }, overrides: <Type, Generator>{
+    WebFsFactory: () => ({
+      @required String target,
+      @required FlutterProject flutterProject,
+      @required BuildInfo buildInfo,
+      @required bool skipDwds,
+      @required bool initializePlatform,
+      @required String hostname,
+      @required String port,
+    }) async {
+      return failingWebFs;
+    },
   }));
 
   test('Can hot reload after attaching', () => testbed.run(() async {

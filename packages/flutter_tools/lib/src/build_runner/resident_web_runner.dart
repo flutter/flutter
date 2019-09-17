@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 
 import '../application_package.dart';
+import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -164,7 +165,7 @@ class ResidentWebRunner extends ResidentRunner {
     Status buildStatus;
     try {
       buildStatus = logger.startProgress('Building application for the web...', timeout: null);
-      _webFs = await webFsFactory(
+      _webFs = await asyncGuard<WebFs>(() => webFsFactory(
         target: target,
         flutterProject: flutterProject,
         buildInfo: debuggingOptions.buildInfo,
@@ -172,12 +173,17 @@ class ResidentWebRunner extends ResidentRunner {
         hostname: debuggingOptions.hostname,
         port: debuggingOptions.port,
         skipDwds: device is WebServerDevice,
-      );
-      await device.startApp(package, mainPath: target, debuggingOptions: debuggingOptions, platformArgs: <String, Object>{
-        'uri': _webFs.uri
-      });
+      ));
+      await asyncGuard<void>(() => device.startApp(
+        package,
+        mainPath: target,
+        debuggingOptions: debuggingOptions,
+        platformArgs: <String, Object>{
+          'uri': _webFs.uri
+        },
+      ));
       if (supportsServiceProtocol) {
-        _debugConnection = await _webFs.runAndDebug();
+        _debugConnection = await asyncGuard<DebugConnection>(_webFs.runAndDebug);
         unawaited(_debugConnection.onDone.whenComplete(exit));
       }
     } catch (err, stackTrace) {
