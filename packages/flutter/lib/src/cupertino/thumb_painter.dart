@@ -80,7 +80,7 @@ class CupertinoThumbPainter {
     );
 
     for (BoxShadow shadow in shadows)
-      canvas.drawRRect(rrect, shadow.toPaint());
+      canvas.drawRRect(rrect.shift(shadow.offset), shadow.toPaint());
 
     if (rect.shortestSide > 1) {
       canvas.drawRRect(
