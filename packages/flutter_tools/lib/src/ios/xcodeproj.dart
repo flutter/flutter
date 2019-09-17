@@ -183,16 +183,15 @@ List<String> _xcodeBuildSettingsLines({
     buildNumber ??= validatedBuildNumberForPlatform(TargetPlatform.ios, buildNameToParse);
   }
 
-  if (buildNameIsMissing && buildNumberIsMissing) {
-    printError('Warning: Missing build name (CFBundleShortVersionString), defaulting to $defaultBuildName.\n'
-        'Missing build number (CFBundleVersion), defaulting to $defaultBuildNumber.\nSet a build name and '
-        'number in the pubspec.yaml version before submitting to the App Store.');
-  } else if (buildNameIsMissing) {
-    printError('Warning: Missing build name (CFBundleShortVersionString), defaulting to $defaultBuildName.\n'
-        'Set a build name in the pubspec.yaml version before submitting to the App Store.');
-  } else if (buildNumberIsMissing) {
-    printError('Warning: Missing build number (CFBundleVersion), defaulting to $defaultBuildNumber.\n'
-        'Set a build number in the pubspec.yaml version before submitting to the App Store.');
+  if (buildNameIsMissing) {
+    printError('Warning: Missing build name (CFBundleShortVersionString), defaulting to $defaultBuildName.');
+  }
+  if (buildNumberIsMissing) {
+    printError('Warning: Missing build number (CFBundleVersion), defaulting to $defaultBuildNumber.');
+  }
+  if (buildNameIsMissing || buildNumberIsMissing) {
+    printError('Action Required: You must set a build name and number in the pubspec.yaml '
+               'file version field before submitting to the App Store.');
   }
 
   if (buildName == null && buildNumber == null) {
