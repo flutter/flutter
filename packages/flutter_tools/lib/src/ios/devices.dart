@@ -351,6 +351,20 @@ class IOSDevice extends Device {
         'Installing and launching...',
         timeout: timeoutConfiguration.slowOperation);
     try {
+      ProtocolDiscovery observatoryDiscovery;
+      if (debuggingOptions.debuggingEnabled) {
+        // Debugging is enabled, look for the observatory server port post launch.
+        printTrace('Debugging is enabled, connecting to observatory');
+
+        // TODO(danrubel): The Android device class does something similar to this code below.
+        // The various Device subclasses should be refactored and common code moved into the superclass.
+        observatoryDiscovery = ProtocolDiscovery.observatory(
+          getLogReader(app: package),
+          portForwarder: portForwarder,
+          hostPort: debuggingOptions.observatoryPort,
+          ipv6: ipv6,
+        );
+      }
       final int installationResult = await IOSDeploy.instance.runApp(
         deviceId: id,
         bundlePath: bundle.path,
@@ -381,12 +395,6 @@ class IOSDevice extends Device {
 
       // Fallback to manual protocol discovery
       printTrace('mDNS lookup failed, attempting fallback protocol discovery.');
-      final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(
-        getLogReader(app: package),
-        portForwarder: portForwarder,
-        hostPort: debuggingOptions.observatoryPort,
-        ipv6: ipv6,
-      );
       try {
         printTrace('Waiting for observatory port.');
         localUri = await observatoryDiscovery.uri;
