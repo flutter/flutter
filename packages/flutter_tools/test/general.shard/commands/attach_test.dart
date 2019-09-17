@@ -46,13 +46,11 @@ void main() {
       const int hostPort = 42;
 
       MockDeviceLogReader mockLogReader;
-      MockMDnsObservatoryDiscovery mockMDnsObservatoryDiscovery;
       MockPortForwarder portForwarder;
       MockAndroidDevice device;
 
       setUp(() {
         mockLogReader = MockDeviceLogReader();
-        mockMDnsObservatoryDiscovery = MockMDnsObservatoryDiscovery();
         portForwarder = MockPortForwarder();
         device = MockAndroidDevice();
         when(device.portForwarder)
