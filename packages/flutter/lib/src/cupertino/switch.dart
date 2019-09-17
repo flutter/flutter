@@ -474,7 +474,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     config.isToggled = _value;
   }
 
-  final CupertinoThumbPainter _thumbPainter = CupertinoThumbPainter();
+  final CupertinoThumbPainter _thumbPainter = const CupertinoThumbPainter.switchThumb();
 
   @override
   void paint(PaintingContext context, Offset offset) {

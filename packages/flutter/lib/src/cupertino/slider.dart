@@ -474,8 +474,6 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
       _drag.addPointer(event);
   }
 
-  final CupertinoThumbPainter _thumbPainter = CupertinoThumbPainter();
-
   @override
   void paint(PaintingContext context, Offset offset) {
     double visualPosition;
@@ -514,7 +512,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     }
 
     final Offset thumbCenter = Offset(trackActive, trackCenter);
-    _thumbPainter.paint(canvas, Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));
+    const CupertinoThumbPainter().paint(canvas, Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));
   }
 
   @override
