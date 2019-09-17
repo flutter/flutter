@@ -505,15 +505,12 @@ class BoxConstraints extends Constraints {
         ]);
       }
       if (minWidth.isNaN || maxWidth.isNaN || minHeight.isNaN || maxHeight.isNaN) {
-        final List<String> affectedFieldsList = <String>[];
-        if (minWidth.isNaN)
-          affectedFieldsList.add('minWidth');
-        if (maxWidth.isNaN)
-          affectedFieldsList.add('maxWidth');
-        if (minHeight.isNaN)
-          affectedFieldsList.add('minHeight');
-        if (maxHeight.isNaN)
-          affectedFieldsList.add('maxHeight');
+        final List<String> affectedFieldsList = <String>[
+          if (minWidth.isNaN) 'minWidth',
+          if (maxWidth.isNaN) 'maxWidth',
+          if (minHeight.isNaN) 'minHeight',
+          if (maxHeight.isNaN) 'maxHeight',
+        ];
         assert(affectedFieldsList.isNotEmpty);
         if (affectedFieldsList.length > 1)
           affectedFieldsList.add('and ${affectedFieldsList.removeLast()}');
@@ -1711,8 +1708,9 @@ abstract class RenderBox extends RenderObject {
           (!sizedByParent && debugDoingThisLayout))
         return true;
       assert(!debugDoingThisResize);
-      final List<DiagnosticsNode> information = <DiagnosticsNode>[];
-      information.add(ErrorSummary('RenderBox size setter called incorrectly.'));
+      final List<DiagnosticsNode> information = <DiagnosticsNode>[
+        ErrorSummary('RenderBox size setter called incorrectly.'),
+      ];
       if (debugDoingThisLayout) {
         assert(sizedByParent);
         information.add(ErrorDescription('It appears that the size setter was called from performLayout().'));

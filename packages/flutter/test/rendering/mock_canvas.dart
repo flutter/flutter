@@ -444,15 +444,14 @@ class _PathMatcher extends Matcher {
       return false;
     }
     final Path path = object;
-    final List<String> errors = <String>[];
-    for (Offset offset in includes) {
-      if (!path.contains(offset))
-        errors.add('Offset $offset should be inside the path, but is not.');
-    }
-    for (Offset offset in excludes) {
-      if (path.contains(offset))
-        errors.add('Offset $offset should be outside the path, but is not.');
-    }
+    final List<String> errors = <String>[
+      for (Offset offset in includes)
+        if (!path.contains(offset))
+          'Offset $offset should be inside the path, but is not.',
+      for (Offset offset in excludes)
+        if (path.contains(offset))
+          'Offset $offset should be outside the path, but is not.',
+    ];
     if (errors.isEmpty)
       return true;
     matchState[this] = 'Not all the given points were inside or outside the path as expected:\n  ${errors.join("\n  ")}';
@@ -1458,9 +1457,10 @@ class _FunctionPaintPredicate extends _PaintPredicate {
 
   @override
   String toString() {
-    final List<String> adjectives = <String>[];
-    for (int index = 0; index < arguments.length; index += 1)
-      adjectives.add(arguments[index] != null ? _valueName(arguments[index]) : '...');
+    final List<String> adjectives = <String>[
+      for (int index = 0; index < arguments.length; index += 1)
+        arguments[index] != null ? _valueName(arguments[index]) : '...',
+    ];
     return '${_symbolName(symbol)}(${adjectives.join(", ")})';
   }
 }

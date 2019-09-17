@@ -263,10 +263,9 @@ void main() {
     ];
     final List<int> expectedResults = <int>[0, -1, 1, 0];
     assert(tests.length == expectedResults.length);
-    final List<int> results = <int>[];
-    for (List<SemanticsSortKey> tuple in tests) {
-      results.add(tuple[0].compareTo(tuple[1]));
-    }
+    final List<int> results = <int>[
+      for (List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
+    ];
     expect(results, orderedEquals(expectedResults));
   });
 
@@ -279,10 +278,9 @@ void main() {
     ];
     final List<int> expectedResults = <int>[0, -1, 1, 0];
     assert(tests.length == expectedResults.length);
-    final List<int> results = <int>[];
-    for (List<SemanticsSortKey> tuple in tests) {
-      results.add(tuple[0].compareTo(tuple[1]));
-    }
+    final List<int> results = <int>[
+      for (List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
+    ];
     expect(results, orderedEquals(expectedResults));
   });
 

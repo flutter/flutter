@@ -425,13 +425,10 @@ class GalleryOptionsPage extends StatelessWidget {
         options.showPerformanceOverlay == null)
       return const <Widget>[];
 
-    final List<Widget> items = <Widget>[
+    return <Widget>[
       const Divider(),
       const _Heading('Diagnostics'),
-    ];
-
-    if (options.showOffscreenLayersCheckerboard != null) {
-      items.add(
+      if (options.showOffscreenLayersCheckerboard != null)
         _BooleanItem(
           'Highlight offscreen layers',
           options.showOffscreenLayersCheckerboard,
@@ -439,10 +436,7 @@ class GalleryOptionsPage extends StatelessWidget {
             onOptionsChanged(options.copyWith(showOffscreenLayersCheckerboard: value));
           },
         ),
-      );
-    }
-    if (options.showRasterCacheImagesCheckerboard != null) {
-      items.add(
+      if (options.showRasterCacheImagesCheckerboard != null)
         _BooleanItem(
           'Highlight raster cache images',
           options.showRasterCacheImagesCheckerboard,
@@ -450,10 +444,7 @@ class GalleryOptionsPage extends StatelessWidget {
             onOptionsChanged(options.copyWith(showRasterCacheImagesCheckerboard: value));
           },
         ),
-      );
-    }
-    if (options.showPerformanceOverlay != null) {
-      items.add(
+      if (options.showPerformanceOverlay != null)
         _BooleanItem(
           'Show performance overlay',
           options.showPerformanceOverlay,
@@ -461,10 +452,7 @@ class GalleryOptionsPage extends StatelessWidget {
             onOptionsChanged(options.copyWith(showPerformanceOverlay: value));
           },
         ),
-      );
-    }
-
-    return items;
+    ];
   }
 
   @override
