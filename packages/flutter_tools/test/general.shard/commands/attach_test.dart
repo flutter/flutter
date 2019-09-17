@@ -75,28 +75,6 @@ void main() {
         mockLogReader.dispose();
       });
 
-      testUsingContext('finds observatory port via mDNS for ios device', () async {
-        final IOSDevice iosDevice = MockIOSDevice();
-        final Uri uri = Uri(
-          scheme: 'http',
-          host: '127.0.0.1',
-          port: 1234,
-          path: 'observatory',
-        );
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
-          .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
-        testDeviceManager.addDevice(iosDevice);
-        await createTestCommandRunner(AttachCommand()).run(<String>['attach']);
-        // This verifies that .getObservatoryUri() returned a non-null value
-        verifyNever(
-          portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')),
-        );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        Logger: () => logger,
-        MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
-      });
-
       testUsingContext('finds observatory port and forwards', () async {
         when(device.getLogReader()).thenAnswer((_) {
           // Now that the reader is used, start writing messages to it.
