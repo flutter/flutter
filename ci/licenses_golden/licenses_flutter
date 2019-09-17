@@ -573,9 +573,11 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/Andro
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/DrawableSplashScreen.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivity.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivityAndFragmentDelegate.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivityLaunchConfigs.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterEngineConfigurator.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterEngineProvider.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterFragment.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterFragmentActivity.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterSplashView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterSurfaceView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterTextureView.java
