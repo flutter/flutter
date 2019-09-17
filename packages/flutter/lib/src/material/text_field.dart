@@ -203,11 +203,13 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// TextEditingController _controller;
 ///
 /// void initState() {
+///   super.initState();
 ///   _controller = TextEditingController();
 /// }
 ///
 /// void dispose() {
 ///   _controller.dispose();
+///   super.dispose();
 /// }
 ///
 /// Widget build(BuildContext context) {
@@ -241,8 +243,9 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///
 /// In addition to [onSubmitted], [onEditingComplete] is also called when the
 /// user finishes editing. It differs in that passing [onEditingComplete]
-/// prevents the default behavior of focus and submission of changes to the
-/// controller.
+/// prevents the default focus and controller behavior. By default, changes will
+/// be submitted to the controller and then, if the user executed a completion
+/// action like pressing "done", the focus will be given up.
 ///
 /// Keep in mind you can also always read the current string from a TextField's
 /// [TextEditingController] using [TextEditingController.text].

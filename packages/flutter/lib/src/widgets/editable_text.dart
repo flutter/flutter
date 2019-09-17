@@ -771,11 +771,13 @@ class EditableText extends StatefulWidget {
   /// TextEditingController _controller;
   ///
   /// void initState() {
+  ///   super.initState();
   ///   _controller = TextEditingController();
   /// }
   ///
   /// void dispose() {
   ///   _controller.dispose();
+  ///   super.dispose();
   /// }
   ///
   /// Widget build(BuildContext context) {
