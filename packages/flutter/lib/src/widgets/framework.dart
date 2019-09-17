@@ -2238,6 +2238,9 @@ class BuildOwner {
 
   /// Whether this widget tree is in the build phase.
   bool get isBuilding => _isBuilding;
+  /// Whether this widget tree is in the build phase.
+  @Deprecated('use BuildOwner.isBuilding instead')
+  bool get debugBuilding => _isBuilding;
   bool _isBuilding = false;
   Element _debugCurrentBuildTarget;
 
