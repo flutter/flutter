@@ -197,7 +197,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// {@tool dartpad --template=stateful_widget_material}
 ///
 /// This sample shows how to get a value from a TextField via the [onSubmitted]
-/// method.
+/// callback.
 ///
 /// ```dart
 /// TextEditingController _controller;
@@ -241,11 +241,14 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// ```
 /// {@end-tool}
 ///
-/// In addition to [onSubmitted], [onEditingComplete] is also called when the
-/// user finishes editing. It differs in that passing [onEditingComplete]
-/// prevents the default focus and controller behavior. By default, changes will
-/// be submitted to the controller and then, if the user executed a completion
-/// action like pressing "done", the focus will be given up.
+/// For most applications the [onSubmitted] callback will be sufficient for
+/// reacting to user input.
+///
+/// The [onEditingComplete] callback also runs when the user finishes editing.
+/// It's different from [onSubmitted] because it has a default value which
+/// updates the text controller and yields the keyboard focus. Applications that
+/// require different behavior can override the default [onEditingComplete]
+/// callback.
 ///
 /// Keep in mind you can also always read the current string from a TextField's
 /// [TextEditingController] using [TextEditingController.text].
