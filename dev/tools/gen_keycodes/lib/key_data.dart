@@ -27,7 +27,7 @@ class KeyData {
     String androidKeyCodeHeader,
     String androidNameMap,
     String glfwKeyCodeHeader,
-    String glfwNameMap
+    String glfwNameMap,
   )   : assert(chromiumHidCodes != null),
         assert(androidKeyboardLayout != null),
         assert(androidKeyCodeHeader != null),
