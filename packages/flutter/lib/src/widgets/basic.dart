@@ -6196,8 +6196,6 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool hidden,
     bool image,
     bool liveRegion,
-    int maxValueLength,
-    int currentValueLength,
     String label,
     String value,
     String increasedValue,
@@ -6249,8 +6247,6 @@ class Semantics extends SingleChildRenderObjectWidget {
       hidden: hidden,
       image: image,
       liveRegion: liveRegion,
-      maxValueLength: maxValueLength,
-      currentValueLength: currentValueLength,
       label: label,
       value: value,
       increasedValue: increasedValue,
@@ -6354,8 +6350,6 @@ class Semantics extends SingleChildRenderObjectWidget {
       readOnly: properties.readOnly,
       focused: properties.focused,
       liveRegion: properties.liveRegion,
-      maxValueLength: properties.maxValueLength,
-      currentValueLength: properties.currentValueLength,
       inMutuallyExclusiveGroup: properties.inMutuallyExclusiveGroup,
       obscured: properties.obscured,
       multiline: properties.multiline,
@@ -6428,8 +6422,6 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..hidden = properties.hidden
       ..image = properties.image
       ..liveRegion = properties.liveRegion
-      ..maxValueLength = properties.maxValueLength
-      ..currentValueLength = properties.currentValueLength
       ..label = properties.label
       ..value = properties.value
       ..increasedValue = properties.increasedValue

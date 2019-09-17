@@ -525,8 +525,6 @@ void main() {
         scrollExtentMin: null,
         platformViewId: 105,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
-        currentValueLength: 10,
-        maxValueLength: 15,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode();
       node.data = data;
@@ -537,8 +535,6 @@ void main() {
          elevation: 3.0,
          thickness: 4.0,
          platformViewId: 105,
-         currentValueLength: 10,
-         maxValueLength: 15,
          /* Flags */
          hasCheckedState: true,
          isChecked: true,

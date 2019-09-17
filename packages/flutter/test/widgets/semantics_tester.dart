@@ -442,8 +442,6 @@ class SemanticsTester {
     double scrollPosition,
     double scrollExtentMax,
     double scrollExtentMin,
-    int currentValueLength,
-    int maxValueLength,
     SemanticsNode ancestor,
   }) {
     bool checkNode(SemanticsNode node) {
@@ -473,12 +471,6 @@ class SemanticsTester {
         return false;
       if (scrollExtentMin != null && !nearEqual(node.scrollExtentMin, scrollExtentMin, 0.1))
         return false;
-      if (currentValueLength != null && node.currentValueLength != currentValueLength) {
-        return false;
-      }
-      if (maxValueLength != null && node.maxValueLength != maxValueLength) {
-        return false;
-      }
       return true;
     }
 
@@ -721,19 +713,7 @@ class _IncludesNodeWith extends Matcher {
     this.scrollPosition,
     this.scrollExtentMax,
     this.scrollExtentMin,
-    this.maxValueLength,
-    this.currentValueLength,
-}) : assert(
-       label != null ||
-       value != null ||
-       actions != null ||
-       flags != null ||
-       scrollPosition != null ||
-       scrollExtentMax != null ||
-       scrollExtentMin != null ||
-       maxValueLength != null ||
-       currentValueLength != null
-     );
+}) : assert(label != null || value != null || actions != null || flags != null || scrollPosition != null || scrollExtentMax != null || scrollExtentMin != null);
 
   final String label;
   final String value;
@@ -744,8 +724,6 @@ class _IncludesNodeWith extends Matcher {
   final double scrollPosition;
   final double scrollExtentMax;
   final double scrollExtentMin;
-  final int currentValueLength;
-  final int maxValueLength;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -759,8 +737,6 @@ class _IncludesNodeWith extends Matcher {
       scrollPosition: scrollPosition,
       scrollExtentMax: scrollExtentMax,
       scrollExtentMin: scrollExtentMin,
-      currentValueLength: currentValueLength,
-      maxValueLength: maxValueLength,
     ).isNotEmpty;
   }
 
@@ -785,8 +761,6 @@ class _IncludesNodeWith extends Matcher {
       if (scrollPosition != null) 'scrollPosition "$scrollPosition"',
       if (scrollExtentMax != null) 'scrollExtentMax "$scrollExtentMax"',
       if (scrollExtentMin != null) 'scrollExtentMin "$scrollExtentMin"',
-      if (currentValueLength != null) 'currentValueLength "$currentValueLength"',
-      if (maxValueLength != null) 'maxValueLength "$maxValueLength"',
     ];
     return strings.join(', ');
   }
@@ -806,8 +780,6 @@ Matcher includesNodeWith({
   double scrollPosition,
   double scrollExtentMax,
   double scrollExtentMin,
-  int maxValueLength,
-  int currentValueLength,
 }) {
   return _IncludesNodeWith(
     label: label,
@@ -819,7 +791,5 @@ Matcher includesNodeWith({
     scrollPosition: scrollPosition,
     scrollExtentMax: scrollExtentMax,
     scrollExtentMin: scrollExtentMin,
-    maxValueLength: maxValueLength,
-    currentValueLength: currentValueLength,
   );
 }
