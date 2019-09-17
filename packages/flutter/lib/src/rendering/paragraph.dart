@@ -614,7 +614,6 @@ class RenderParagraph extends RenderBox
     // If you remove this call, make sure that changing the textAlign still
     // works properly.
     _layoutTextWithConstraints(constraints);
-
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
         final Paint paint = Paint()
