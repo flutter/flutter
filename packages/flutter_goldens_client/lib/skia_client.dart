@@ -19,6 +19,7 @@ import 'package:process/process.dart';
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
+const String _kFlutterGoldDashboard = 'https://flutter-gold.skia.org';
 
 /// Doc
 class SkiaGoldClient {
@@ -132,8 +133,8 @@ class SkiaGoldClient {
     ];
 
     if (imgtestInitArguments.contains(null)) {
-      final StringBuffer buf = StringBuffer();
-      buf.writeln('Null argument for Skia Gold imgtest init:');
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Null argument for Skia Gold imgtest init:');
       imgtestInitArguments.forEach(buf.writeln);
       throw NonZeroExitCode(1, buf.toString());
     }
@@ -174,18 +175,25 @@ class SkiaGoldClient {
   }
 
   /// Doc
-  Future<List<int>> getMasterBytes(String testName) async {
+  Future<List<int>>getMasterBytes(String testName) async {
     List<int> masterImageBytes;
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
+
       final io.HttpClient client = io.HttpClient();
 
       testName = _cleanTestName(testName);
       final Uri requestForDigest = Uri.parse(
         'https://flutter-gold.skia.org/json/search?'
-          'fdiffmax=-1&fref=false&frgbamax=255&frgbamin=0&head=true&include=true'
-          '&limit=50&master=false&match=name&metric=combined&neg=false&offset=0'
-          '&pos=true&query=Platform%3D${platform.operatingSystem}%26name%3D$testName%26'
-          'source_type%3Dflutter&sort=desc&unt=true',
+          'fdiffmax=-1&fref=false&frgbamax=255&frgbamin=0'
+          '&head=true'      // Goldens @ head
+          '&include=true'   // Include ignored tests
+          '&limit=50&master=false&match=name&metric=combined'
+          '&neg=false'      // No negative digests
+          '&offset=0'
+          '&pos=true'       // Get positive digests
+          '&query=Platform%3D${platform.operatingSystem}%26name%3D$testName%26'
+          'source_type%3Dflutter&sort=desc'
+          '&unt=false',     // No untriaged digests
       );
       SkiaGoldDigest masterDigest;
 
@@ -193,30 +201,56 @@ class SkiaGoldClient {
         await client.getUrl(requestForDigest)
           .then((io.HttpClientRequest request) => request.close())
           .then((io.HttpClientResponse response) async {
-          final String responseBody = await response.transform(utf8.decoder)
-            .join();
-          final Map<String, dynamic> skiaJson = json.decode(responseBody);
+          final String responseBody = await response.transform(utf8.decoder).join();
+          final Map<String,dynamic> skiaJson = json.decode(responseBody);
 
           if (skiaJson['digests'].length > 1) {
-            print('Triage breakdown!');
-            // TODO(Piinks): Throw with guidance
+
+            final StringBuffer buf = StringBuffer()
+              ..writeln('There is more than one digest available for golden')
+              ..writeln('test: $testName. Triage may have broken down.')
+              ..writeln('Check $_kFlutterGoldDashboard to validate the')
+              ..writeln('current status of this test.');
+            throw NonZeroExitCode(1, buf.toString());
+
+          } else if (skiaJson['digests'].length == 0) {
+
+            print('No digests provided by Skia Gold for test: $testName. '
+              'This may be a new test. If this is an unexpected result, check'
+              ' $_kFlutterGoldDashboard.'
+            );
+
           }
-          masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
+          masterDigest = null;//SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
+          assert(masterDigest != null);
         });
-      } catch (_) {
-        print('Digest Request Failed.');
-        // TODO(Piinks): Output similar to skip, network connection may be
-        //  unavailable, i.e. airplane mode
+      } catch(e) {
+        e = e.toString();
+        if (e.contains('triage')) {
+          rethrow;
+        } else if (e.contains('masterDigest != null')) {
+          rethrow;
+        } else {
+          // i.e. Don't break people running local tests in airplane mode.
+          print('Baselines are not available from Skia Gold, you may not be'
+            'connected to the internet. Skipping test: $testName.');
+          masterImageBytes = <int>[0];
+        }
       }
 
+      if (masterImageBytes == <int>[0])
+        return;
+
       if (!masterDigest.isValid(platform, testName)) {
-        print('Invalid digest!');
-        // TODO(Piinks): Throw with guidance
+        final StringBuffer buf = StringBuffer()
+          ..writeln('Invalid digest returned for golden test: $testName.')
+          ..writeln('Check $_kFlutterGoldDashboard to validate the')
+          ..writeln('current status of this test.');
+        throw NonZeroExitCode(1, buf.toString());
       }
 
       final Uri requestForImage = Uri.parse(
-        'https://flutter-gold.skia.org/img/images/${masterDigest
-          .imageHash}.png',
+        'https://flutter-gold.skia.org/img/images/${masterDigest.imageHash}.png',
       );
 
       try {
@@ -226,15 +260,48 @@ class SkiaGoldClient {
           final List<List<int>> byteList = await response.toList();
           masterImageBytes = byteList.expand((List<int> x) => x).toList();
         });
-      } catch (_) {
-        print('Image Request Failed');
-        // TODO(Piinks): Output similar to skip, network connection may be
-        //  unavailable, i.e. airplane mode
+      } catch(e) {
+        rethrow;
       }
     },
       SkiaGoldHttpOverrides(),
     );
     return masterImageBytes;
+  }
+
+  /// Doc - for PreSubmit comparator
+  Future<bool> testIsIgnoredForPullRequest(String pullRequest, String testName) async {
+    bool ignoreIsActive = false;
+    testName = _cleanTestName(testName);
+    await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
+      final io.HttpClient client = io.HttpClient();
+
+      final Uri requestForIgnores = Uri.parse('https://flutter-gold.skia.org/json/ignores');
+      Map<String, dynamic> ignoredTest;
+      try {
+        await client.getUrl(requestForIgnores)
+          .then((io.HttpClientRequest request) => request.close())
+          .then((io.HttpClientResponse response) async {
+          final String responseBody = await response.transform(utf8.decoder).join();
+          final List<Map<String, dynamic>> skiaJson = json.decode(responseBody);
+          for(int i = 0; i < skiaJson.length; i++) {
+            ignoredTest = skiaJson[i];
+            final List<String> ignoredQueries = ignoredTest['query'].split('&');
+            final String ignoredPullRequest = ignoredTest['note']
+              .split['/']
+              .last();
+            if (ignoredQueries.contains('name=$testName') && ignoredPullRequest == pullRequest) {
+              ignoreIsActive = true;
+            }
+          }
+        });
+      } catch(_) {
+        rethrow;
+      }
+    },
+      SkiaGoldHttpOverrides(),
+    );
+    return ignoreIsActive;
   }
 
   /// Returns the current commit hash of the Flutter repository.

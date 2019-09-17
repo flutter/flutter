@@ -239,11 +239,20 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = addPrefix(golden);
     final List<int> goldenBytes = await skiaClient.getMasterBytes(golden.path);
+    // Check signal from golden bytes, could use [0] for skip test, or [1] for
+    // something else... not network connection available etc.
     final ComparisonResult result = GoldenFileComparator.compareLists(
       imageBytes,
       goldenBytes,
     );
-    // TODO(Piinks): If !result.passed return skiaClient.testIsIgnoredForPR
+
+    if (!result.passed) {
+      return skiaClient.testIsIgnoredForPullRequest(
+        platform.environment['CIRRUS_PR'] ?? '',
+        golden.path,
+      );
+    }
+
     return result.passed;
   }
 
