@@ -864,12 +864,6 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.liveRegion != null) {
       config.liveRegion = properties.liveRegion;
     }
-    if (properties.maxValueLength != null) {
-      config.maxValueLength = properties.maxValueLength;
-    }
-    if (properties.currentValueLength != null) {
-      config.currentValueLength = properties.currentValueLength;
-    }
     if (properties.toggled != null) {
       config.isToggled = properties.toggled;
     }
