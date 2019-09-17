@@ -1,3 +1,7 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 
 import 'package:flutter/services.dart';
@@ -10,6 +14,11 @@ import 'plugin_registry.dart';
 /// [EventChannel] receives a stream of events from platform plugins, this
 /// channel sends a stream of events to the handler listening on the
 /// framework-side.
+///
+/// The channel [name] must not be null. If no [codec] is provided, then
+/// [StandardMethodCodec] is used. If no [binaryMessenger] is provided, then
+/// [pluginBinaryMessenger], which sends messages to the framework-side,
+/// is used.
 class PluginEventChannel<T> {
   /// Creates a new plugin event channel.
   const PluginEventChannel(
@@ -20,13 +29,21 @@ class PluginEventChannel<T> {
         assert(codec != null),
         _binaryMessenger = binaryMessenger;
 
-  /// The logical channel on which communication happens, not null.
+  /// The logical channel on which communication happens.
+  ///
+  /// This must not be null.
   final String name;
 
-  /// The message codec used by this channel, not null.
+  /// The message codec used by this channel.
+  ///
+  /// This must not be null. This defaults to [StandardMethodCodec].
   final MethodCodec codec;
 
-  /// The messenger used by this channel to send platform messages, not null.
+  /// The messenger used by this channel to send platform messages.
+  ///
+  /// This must not be null. If not provided, defaults to
+  /// [pluginBinaryMessenger], which sends messages from the platform-side
+  /// to the framework-side.
   BinaryMessenger get binaryMessenger =>
       _binaryMessenger ?? pluginBinaryMessenger;
   final BinaryMessenger _binaryMessenger;
