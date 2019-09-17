@@ -389,7 +389,7 @@ class IOSDevice extends Device {
           package.id,
           this,
           ipv6,
-          debuggingOptions.observatoryPort
+          debuggingOptions.observatoryPort,
         );
         if (localUri != null) {
           return LaunchResult.succeeded(observatoryUri: localUri);
@@ -399,7 +399,7 @@ class IOSDevice extends Device {
       }
 
       // Fallback to manual protocol discovery
-      printTrace('mDNS lookup failed, attempting fallback protocol discovery.');
+      printTrace('mDNS lookup failed, attempting fallback to reading device log.');
       try {
         printTrace('Waiting for observatory port.');
         localUri = await observatoryDiscovery.uri;
