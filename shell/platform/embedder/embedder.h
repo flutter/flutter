@@ -282,6 +282,14 @@ typedef struct {
   bool fbo_reset_after_present;
   /// The transformation to apply to the render target before any rendering
   /// operations. This callback is optional.
+  /// @attention      When using a custom compositor, the layer offset and sizes
+  ///                 will be affected by this transformation. It will be
+  ///                 embedder responsibility to render contents at the
+  ///                 transformed offset and size. This is useful for embedders
+  ///                 that want to render transformed contents directly into
+  ///                 hardware overlay planes without having to apply extra
+  ///                 transformations to layer contents (which may necessitate
+  ///                 an expensive off-screen render pass).
   TransformationCallback surface_transformation;
   ProcResolver gl_proc_resolver;
   /// When the embedder specifies that a texture has a frame available, the

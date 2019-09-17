@@ -19,6 +19,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
+#include "flutter/testing/assertions_skia.h"
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -41,6 +42,7 @@ TEST_F(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
   fml::AutoResetWaitableEvent latch;
   context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
   EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
   // Wait for the root isolate to launch.
@@ -50,6 +52,7 @@ TEST_F(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
 
 TEST_F(EmbedderTest, CanLaunchAndShutdownMultipleTimes) {
   EmbedderConfigBuilder builder(GetEmbedderContext());
+  builder.SetSoftwareRendererConfig();
   for (size_t i = 0; i < 3; ++i) {
     auto engine = builder.LaunchEngine();
     ASSERT_TRUE(engine.is_valid());
@@ -65,6 +68,7 @@ TEST_F(EmbedderTest, CanInvokeCustomEntrypoint) {
   };
   context.AddNativeCallback("SayHiFromCustomEntrypoint", entrypoint);
   EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
   builder.SetDartEntrypoint("customEntrypoint");
   auto engine = builder.LaunchEngine();
   latch.Wait();
@@ -103,6 +107,7 @@ TEST_F(EmbedderTest, CanInvokeCustomEntrypointMacro) {
       }));
 
   EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
   builder.SetDartEntrypoint("customEntrypoint1");
   auto engine = builder.LaunchEngine();
   latch1.Wait();
@@ -192,6 +197,7 @@ TEST_F(EmbedderTest, CanSpecifyCustomTaskRunner) {
     EmbedderConfigBuilder builder(context);
     const auto task_runner_description =
         test_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetSoftwareRendererConfig();
     builder.SetPlatformTaskRunner(&task_runner_description);
     builder.SetDartEntrypoint("invokePlatformTaskRunner");
     std::scoped_lock lock(engine_mutex);
@@ -231,7 +237,7 @@ TEST(EmbedderTestNoFixture, CanGetCurrentTimeInNanoseconds) {
 
 TEST_F(EmbedderTest, CanCreateOpenGLRenderingEngine) {
   EmbedderConfigBuilder builder(GetEmbedderContext());
-  builder.SetOpenGLRendererConfig();
+  builder.SetOpenGLRendererConfig(SkISize::Make(1, 1));
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
 }
@@ -246,6 +252,7 @@ TEST_F(EmbedderTest, IsolateServiceIdSent) {
 
   thread.GetTaskRunner()->PostTask([&]() {
     EmbedderConfigBuilder builder(context);
+    builder.SetSoftwareRendererConfig();
     builder.SetDartEntrypoint("main");
     builder.SetPlatformMessageCallback(
         [&](const FlutterPlatformMessage* message) {
@@ -281,6 +288,7 @@ TEST_F(EmbedderTest, IsolateServiceIdSent) {
 TEST_F(EmbedderTest, CanCreateAndCollectCallbacks) {
   auto& context = GetEmbedderContext();
   EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
   builder.SetDartEntrypoint("platform_messages_response");
   context.AddNativeCallback(
       "SignalNativeTest",
@@ -318,6 +326,7 @@ TEST_F(EmbedderTest, PlatformMessagesCanReceiveResponse) {
     captures.thread_id = std::this_thread::get_id();
     auto& context = GetEmbedderContext();
     EmbedderConfigBuilder builder(context);
+    builder.SetSoftwareRendererConfig();
     builder.SetDartEntrypoint("platform_messages_response");
 
     fml::AutoResetWaitableEvent ready;
@@ -373,7 +382,7 @@ TEST_F(EmbedderTest, PlatformMessagesCanReceiveResponse) {
 TEST_F(EmbedderTest, PlatformMessagesCanBeSentWithoutResponseHandles) {
   auto& context = GetEmbedderContext();
   EmbedderConfigBuilder builder(context);
-
+  builder.SetSoftwareRendererConfig();
   builder.SetDartEntrypoint("platform_messages_no_response");
 
   const std::string message_data = "Hello but don't call me back.";
@@ -418,7 +427,7 @@ TEST_F(EmbedderTest, PlatformMessagesCanBeSentWithoutResponseHandles) {
 TEST_F(EmbedderTest, NullPlatformMessagesCanBeSent) {
   auto& context = GetEmbedderContext();
   EmbedderConfigBuilder builder(context);
-
+  builder.SetSoftwareRendererConfig();
   builder.SetDartEntrypoint("null_platform_messages");
 
   fml::AutoResetWaitableEvent ready, message;
@@ -460,7 +469,7 @@ TEST_F(EmbedderTest, NullPlatformMessagesCanBeSent) {
 TEST_F(EmbedderTest, InvalidPlatformMessages) {
   auto& context = GetEmbedderContext();
   EmbedderConfigBuilder builder(context);
-
+  builder.SetSoftwareRendererConfig();
   auto engine = builder.LaunchEngine();
 
   ASSERT_TRUE(engine.is_valid());
@@ -484,7 +493,7 @@ TEST_F(EmbedderTest, InvalidPlatformMessages) {
 TEST_F(EmbedderTest, VMShutsDownWhenNoEnginesInProcess) {
   auto& context = GetEmbedderContext();
   EmbedderConfigBuilder builder(context);
-
+  builder.SetSoftwareRendererConfig();
   const auto launch_count = DartVM::GetVMLaunchCount();
 
   {
@@ -510,6 +519,7 @@ TEST_F(EmbedderTest, VMAndIsolateSnapshotSizesAreRedundantInAOTMode) {
   }
   auto& context = GetEmbedderContext();
   EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
 
   // The fixture sets this up correctly. Intentionally mess up the args.
   builder.GetProjectArgs().vm_snapshot_data_size = 0;
@@ -530,6 +540,7 @@ TEST_F(EmbedderTest,
        MustPreventEngineLaunchWhenRequiredCompositorArgsAreAbsent) {
   auto& context = GetEmbedderContext();
   EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(1, 1));
   builder.SetCompositor();
   builder.GetCompositor().create_backing_store_callback = nullptr;
   builder.GetCompositor().collect_backing_store_callback = nullptr;
@@ -545,7 +556,10 @@ TEST_F(EmbedderTest,
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLFramebuffer) {
   auto& context = GetEmbedderContext();
 
-  context.SetupCompositor();
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("can_composite_platform_views");
 
   context.GetCompositor().SetRenderTargetType(
       EmbedderTestCompositor::RenderTargetType::kOpenGLFramebuffer);
@@ -607,10 +621,6 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLFramebuffer) {
         latch.CountDown();
       });
 
-  EmbedderConfigBuilder builder(context);
-  builder.SetOpenGLRendererConfig();
-  builder.SetCompositor();
-  builder.SetDartEntrypoint("can_composite_platform_views");
   context.AddNativeCallback(
       "SignalNativeTest",
       CREATE_NATIVE_ENTRY(
@@ -637,7 +647,10 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLFramebuffer) {
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLTexture) {
   auto& context = GetEmbedderContext();
 
-  context.SetupCompositor();
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("can_composite_platform_views");
 
   context.GetCompositor().SetRenderTargetType(
       EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
@@ -699,10 +712,6 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLTexture) {
         latch.CountDown();
       });
 
-  EmbedderConfigBuilder builder(context);
-  builder.SetOpenGLRendererConfig();
-  builder.SetCompositor();
-  builder.SetDartEntrypoint("can_composite_platform_views");
   context.AddNativeCallback(
       "SignalNativeTest",
       CREATE_NATIVE_ENTRY(
@@ -729,7 +738,10 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToOpenGLTexture) {
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToSoftwareBuffer) {
   auto& context = GetEmbedderContext();
 
-  context.SetupCompositor();
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("can_composite_platform_views");
 
   context.GetCompositor().SetRenderTargetType(
       EmbedderTestCompositor::RenderTargetType::kSoftwareBuffer);
@@ -791,10 +803,6 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderToSoftwareBuffer) {
         latch.CountDown();
       });
 
-  EmbedderConfigBuilder builder(context);
-  builder.SetOpenGLRendererConfig();
-  builder.SetCompositor();
-  builder.SetDartEntrypoint("can_composite_platform_views");
   context.AddNativeCallback(
       "SignalNativeTest",
       CREATE_NATIVE_ENTRY(
@@ -944,7 +952,10 @@ static bool ImageMatchesFixture(const std::string& fixture_file_name,
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
   auto& context = GetEmbedderContext();
 
-  context.SetupCompositor();
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("can_composite_platform_views_with_known_scene");
 
   context.GetCompositor().SetRenderTargetType(
       EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
@@ -1083,10 +1094,6 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
         return surface->makeImageSnapshot();
       });
 
-  EmbedderConfigBuilder builder(context);
-  builder.SetOpenGLRendererConfig();
-  builder.SetCompositor();
-  builder.SetDartEntrypoint("can_composite_platform_views_with_known_scene");
   context.AddNativeCallback(
       "SignalNativeTest",
       CREATE_NATIVE_ENTRY(
@@ -1120,7 +1127,10 @@ TEST_F(EmbedderTest,
        CompositorMustBeAbleToRenderKnownSceneWithSoftwareCompositor) {
   auto& context = GetEmbedderContext();
 
-  context.SetupCompositor();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("can_composite_platform_views_with_known_scene");
 
   context.GetCompositor().SetRenderTargetType(
       EmbedderTestCompositor::RenderTargetType::kSoftwareBuffer);
@@ -1261,10 +1271,6 @@ TEST_F(EmbedderTest,
         return surface->makeImageSnapshot();
       });
 
-  EmbedderConfigBuilder builder(context);
-  builder.SetSoftwareRendererConfig();
-  builder.SetCompositor();
-  builder.SetDartEntrypoint("can_composite_platform_views_with_known_scene");
   context.AddNativeCallback(
       "SignalNativeTest",
       CREATE_NATIVE_ENTRY(
@@ -1297,6 +1303,12 @@ TEST_F(EmbedderTest,
 TEST_F(EmbedderTest, CustomCompositorMustWorkWithCustomTaskRunner) {
   auto& context = GetEmbedderContext();
 
+  EmbedderConfigBuilder builder(context);
+
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("can_composite_platform_views");
+
   auto platform_task_runner = CreateNewThread("test_platform_thread");
   static std::mutex engine_mutex;
   UniqueEngine engine;
@@ -1310,8 +1322,6 @@ TEST_F(EmbedderTest, CustomCompositorMustWorkWithCustomTaskRunner) {
         }
         ASSERT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
       });
-
-  context.SetupCompositor();
 
   context.GetCompositor().SetRenderTargetType(
       EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
@@ -1376,12 +1386,8 @@ TEST_F(EmbedderTest, CustomCompositorMustWorkWithCustomTaskRunner) {
   const auto task_runner_description =
       test_task_runner.GetFlutterTaskRunnerDescription();
 
-  EmbedderConfigBuilder builder(context);
-
   builder.SetPlatformTaskRunner(&task_runner_description);
-  builder.SetOpenGLRendererConfig();
-  builder.SetCompositor();
-  builder.SetDartEntrypoint("can_composite_platform_views");
+
   context.AddNativeCallback(
       "SignalNativeTest",
       CREATE_NATIVE_ENTRY(
@@ -1422,7 +1428,11 @@ TEST_F(EmbedderTest, CustomCompositorMustWorkWithCustomTaskRunner) {
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithRootLayerOnly) {
   auto& context = GetEmbedderContext();
 
-  context.SetupCompositor();
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint(
+      "can_composite_platform_views_with_root_layer_only");
 
   context.GetCompositor().SetRenderTargetType(
       EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
@@ -1459,11 +1469,6 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithRootLayerOnly) {
         latch.CountDown();
       });
 
-  EmbedderConfigBuilder builder(context);
-  builder.SetOpenGLRendererConfig();
-  builder.SetCompositor();
-  builder.SetDartEntrypoint(
-      "can_composite_platform_views_with_root_layer_only");
   context.AddNativeCallback(
       "SignalNativeTest",
       CREATE_NATIVE_ENTRY(
@@ -1493,7 +1498,11 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithRootLayerOnly) {
 TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithPlatformLayerOnBottom) {
   auto& context = GetEmbedderContext();
 
-  context.SetupCompositor();
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint(
+      "can_composite_platform_views_with_platform_layer_on_bottom");
 
   context.GetCompositor().SetRenderTargetType(
       EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
@@ -1572,11 +1581,6 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithPlatformLayerOnBottom) {
         return surface->makeImageSnapshot();
       });
 
-  EmbedderConfigBuilder builder(context);
-  builder.SetOpenGLRendererConfig();
-  builder.SetCompositor();
-  builder.SetDartEntrypoint(
-      "can_composite_platform_views_with_platform_layer_on_bottom");
   context.AddNativeCallback(
       "SignalNativeTest",
       CREATE_NATIVE_ENTRY(
@@ -1599,6 +1603,645 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithPlatformLayerOnBottom) {
       "compositor_with_platform_layer_on_bottom.png", scene_image));
 
   ASSERT_EQ(context.GetCompositor().GetBackingStoresCount(), 1u);
+}
+
+//------------------------------------------------------------------------------
+/// Test the layer structure and pixels rendered when using a custom compositor
+/// with a root surface transformation.
+///
+TEST_F(EmbedderTest,
+       CompositorMustBeAbleToRenderKnownSceneWithRootSurfaceTransformation) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(600, 800));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("can_composite_platform_views_with_known_scene");
+
+  context.GetCompositor().SetRenderTargetType(
+      EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
+
+  // This must match the transformation provided in the
+  // |CanRenderGradientWithoutCompositorWithXform| test to ensure that
+  // transforms are consistent respected.
+  const auto root_surface_transformation =
+      SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
+
+  context.SetRootSurfaceTransformation(root_surface_transformation);
+
+  fml::CountDownLatch latch(6);
+
+  sk_sp<SkImage> scene_image;
+  context.SetNextSceneCallback([&](sk_sp<SkImage> scene) {
+    scene_image = std::move(scene);
+    latch.CountDown();
+  });
+
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 5u);
+
+        // Layer Root
+        {
+          FlutterBackingStore backing_store = *layers[0]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(600.0, 800.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[0], layer);
+        }
+
+        // Layer 1
+        {
+          FlutterPlatformView platform_view = {};
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 1;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(150.0, 50.0);
+          layer.offset = FlutterPointMake(20.0, 730.0);
+
+          ASSERT_EQ(*layers[1], layer);
+        }
+
+        // Layer 2
+        {
+          FlutterBackingStore backing_store = *layers[2]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(600.0, 800.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[2], layer);
+        }
+
+        // Layer 3
+        {
+          FlutterPlatformView platform_view = {};
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 2;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(150.0, 50.0);
+          layer.offset = FlutterPointMake(40.0, 710.0);
+
+          ASSERT_EQ(*layers[3], layer);
+        }
+
+        // Layer 4
+        {
+          FlutterBackingStore backing_store = *layers[4]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeTexture;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(600.0, 800.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[4], layer);
+        }
+
+        latch.CountDown();
+      });
+
+  context.GetCompositor().SetPlatformViewRendererCallback(
+      [&](const FlutterLayer& layer, GrContext* context) -> sk_sp<SkImage> {
+        auto surface = CreateRenderSurface(layer, context);
+        auto canvas = surface->getCanvas();
+        FML_CHECK(canvas != nullptr);
+
+        switch (layer.platform_view->identifier) {
+          case 1: {
+            SkPaint paint;
+            // See dart test for total order.
+            paint.setColor(SK_ColorGREEN);
+            paint.setAlpha(127);
+            const auto& rect =
+                SkRect::MakeWH(layer.size.width, layer.size.height);
+            canvas->drawRect(rect, paint);
+            latch.CountDown();
+          } break;
+          case 2: {
+            SkPaint paint;
+            // See dart test for total order.
+            paint.setColor(SK_ColorMAGENTA);
+            paint.setAlpha(127);
+            const auto& rect =
+                SkRect::MakeWH(layer.size.width, layer.size.height);
+            canvas->drawRect(rect, paint);
+            latch.CountDown();
+          } break;
+          default:
+            // Asked to render an unknown platform view.
+            FML_CHECK(false)
+                << "Test was asked to composite an unknown platform view.";
+        }
+
+        return surface->makeImageSnapshot();
+      });
+
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  // Flutter still thinks it is 800 x 600. Only the root surface is rotated.
+  event.width = 800;
+  event.height = 600;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  latch.Wait();
+
+  ASSERT_TRUE(ImageMatchesFixture("compositor_root_surface_xformation.png",
+                                  scene_image));
+}
+
+TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositor) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+
+  builder.SetDartEntrypoint("can_render_scene_without_custom_compositor");
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+
+  fml::CountDownLatch latch(1);
+
+  sk_sp<SkImage> renderered_scene;
+  context.SetNextSceneCallback([&](auto image) {
+    renderered_scene = std::move(image);
+    latch.CountDown();
+  });
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  latch.Wait();
+
+  ASSERT_NE(renderered_scene, nullptr);
+
+  ASSERT_TRUE(ImageMatchesFixture("scene_without_custom_compositor.png",
+                                  renderered_scene));
+}
+
+TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositorWithTransformation) {
+  auto& context = GetEmbedderContext();
+
+  const auto root_surface_transformation =
+      SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
+
+  context.SetRootSurfaceTransformation(root_surface_transformation);
+
+  EmbedderConfigBuilder builder(context);
+
+  builder.SetDartEntrypoint("can_render_scene_without_custom_compositor");
+  builder.SetOpenGLRendererConfig(SkISize::Make(600, 800));
+
+  fml::CountDownLatch latch(1);
+
+  sk_sp<SkImage> renderered_scene;
+  context.SetNextSceneCallback([&](auto image) {
+    renderered_scene = std::move(image);
+    latch.CountDown();
+  });
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+
+  // Flutter still thinks it is 800 x 600.
+  event.width = 800;
+  event.height = 600;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  latch.Wait();
+
+  ASSERT_NE(renderered_scene, nullptr);
+
+  ASSERT_TRUE(ImageMatchesFixture(
+      "scene_without_custom_compositor_with_xform.png", renderered_scene));
+}
+
+TEST_F(EmbedderTest, CanRenderGradientWithoutCompositor) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+
+  builder.SetDartEntrypoint("render_gradient");
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  fml::CountDownLatch latch(1);
+
+  sk_sp<SkImage> renderered_scene;
+  context.SetNextSceneCallback([&](auto image) {
+    renderered_scene = std::move(image);
+    latch.CountDown();
+  });
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  latch.Wait();
+
+  ASSERT_NE(renderered_scene, nullptr);
+
+  ASSERT_TRUE(ImageMatchesFixture("gradient.png", renderered_scene));
+}
+
+TEST_F(EmbedderTest, CanRenderGradientWithoutCompositorWithXform) {
+  auto& context = GetEmbedderContext();
+
+  const auto root_surface_transformation =
+      SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
+
+  context.SetRootSurfaceTransformation(root_surface_transformation);
+
+  EmbedderConfigBuilder builder(context);
+
+  const auto surface_size = SkISize::Make(600, 800);
+
+  builder.SetDartEntrypoint("render_gradient");
+  builder.SetOpenGLRendererConfig(surface_size);
+
+  fml::CountDownLatch latch(1);
+
+  sk_sp<SkImage> renderered_scene;
+  context.SetNextSceneCallback([&](auto image) {
+    renderered_scene = std::move(image);
+    latch.CountDown();
+  });
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  // Flutter still thinks it is 800 x 600.
+  event.width = 800;
+  event.height = 600;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  latch.Wait();
+
+  ASSERT_NE(renderered_scene, nullptr);
+
+  ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", renderered_scene));
+}
+
+TEST_F(EmbedderTest, CanRenderGradientWithCompositor) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+
+  builder.SetDartEntrypoint("render_gradient");
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  fml::CountDownLatch latch(1);
+
+  sk_sp<SkImage> renderered_scene;
+  context.SetNextSceneCallback([&](auto image) {
+    renderered_scene = std::move(image);
+    latch.CountDown();
+  });
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  latch.Wait();
+
+  ASSERT_NE(renderered_scene, nullptr);
+
+  ASSERT_TRUE(ImageMatchesFixture("gradient.png", renderered_scene));
+}
+
+TEST_F(EmbedderTest, CanRenderGradientWithCompositorWithXform) {
+  auto& context = GetEmbedderContext();
+
+  // This must match the transformation provided in the
+  // |CanRenderGradientWithoutCompositorWithXform| test to ensure that
+  // transforms are consistent respected.
+  const auto root_surface_transformation =
+      SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
+
+  context.SetRootSurfaceTransformation(root_surface_transformation);
+
+  EmbedderConfigBuilder builder(context);
+
+  builder.SetDartEntrypoint("render_gradient");
+  builder.SetOpenGLRendererConfig(SkISize::Make(600, 800));
+  builder.SetCompositor();
+  fml::CountDownLatch latch(1);
+
+  sk_sp<SkImage> renderered_scene;
+  context.SetNextSceneCallback([&](auto image) {
+    renderered_scene = std::move(image);
+    latch.CountDown();
+  });
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  // Flutter still thinks it is 800 x 600.
+  event.width = 800;
+  event.height = 600;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  latch.Wait();
+
+  ASSERT_NE(renderered_scene, nullptr);
+
+  ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", renderered_scene));
+}
+
+TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+
+  builder.SetDartEntrypoint("render_gradient_on_non_root_backing_store");
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
+  builder.SetCompositor();
+  fml::CountDownLatch latch(1);
+
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 3u);
+
+        // Layer Root
+        {
+          FlutterBackingStore backing_store = *layers[0]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[0], layer);
+        }
+
+        // Layer 1
+        {
+          FlutterPlatformView platform_view = {};
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 1;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(100.0, 200.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[1], layer);
+        }
+
+        // Layer 2
+        {
+          FlutterBackingStore backing_store = *layers[2]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(800.0, 600.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[2], layer);
+        }
+      });
+
+  context.GetCompositor().SetPlatformViewRendererCallback(
+      [&](const FlutterLayer& layer, GrContext* context) -> sk_sp<SkImage> {
+        auto surface = CreateRenderSurface(layer, context);
+        auto canvas = surface->getCanvas();
+        FML_CHECK(canvas != nullptr);
+
+        switch (layer.platform_view->identifier) {
+          case 1: {
+            FML_CHECK(layer.size.width == 100);
+            FML_CHECK(layer.size.height == 200);
+            // This is occluded anyway. We just want to make sure we see this.
+          } break;
+          default:
+            // Asked to render an unknown platform view.
+            FML_CHECK(false)
+                << "Test was asked to composite an unknown platform view.";
+        }
+
+        return surface->makeImageSnapshot();
+      });
+
+  sk_sp<SkImage> renderered_scene;
+  context.SetNextSceneCallback([&](auto image) {
+    renderered_scene = std::move(image);
+    latch.CountDown();
+  });
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  latch.Wait();
+
+  ASSERT_NE(renderered_scene, nullptr);
+
+  ASSERT_TRUE(ImageMatchesFixture("gradient.png", renderered_scene));
+}
+
+TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
+  auto& context = GetEmbedderContext();
+
+  // This must match the transformation provided in the
+  // |CanRenderGradientWithoutCompositorWithXform| test to ensure that
+  // transforms are consistent respected.
+  const auto root_surface_transformation =
+      SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
+
+  context.SetRootSurfaceTransformation(root_surface_transformation);
+
+  EmbedderConfigBuilder builder(context);
+
+  builder.SetDartEntrypoint("render_gradient_on_non_root_backing_store");
+  builder.SetOpenGLRendererConfig(SkISize::Make(600, 800));
+  builder.SetCompositor();
+  fml::CountDownLatch latch(1);
+
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 3u);
+
+        // Layer Root
+        {
+          FlutterBackingStore backing_store = *layers[0]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(600.0, 800.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[0], layer);
+        }
+
+        // Layer 1
+        {
+          FlutterPlatformView platform_view = {};
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 1;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(200.0, 100.0);
+          layer.offset = FlutterPointMake(0.0, 700.0);
+
+          ASSERT_EQ(*layers[1], layer);
+        }
+
+        // Layer 2
+        {
+          FlutterBackingStore backing_store = *layers[2]->backing_store;
+          backing_store.type = kFlutterBackingStoreTypeOpenGL;
+          backing_store.did_update = true;
+          backing_store.open_gl.type = kFlutterOpenGLTargetTypeFramebuffer;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+          layer.backing_store = &backing_store;
+          layer.size = FlutterSizeMake(600.0, 800.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[2], layer);
+        }
+      });
+
+  context.GetCompositor().SetPlatformViewRendererCallback(
+      [&](const FlutterLayer& layer, GrContext* context) -> sk_sp<SkImage> {
+        auto surface = CreateRenderSurface(layer, context);
+        auto canvas = surface->getCanvas();
+        FML_CHECK(canvas != nullptr);
+
+        switch (layer.platform_view->identifier) {
+          case 1: {
+            FML_CHECK(layer.size.width == 200);
+            FML_CHECK(layer.size.height == 100);
+            // This is occluded anyway. We just want to make sure we see this.
+          } break;
+          default:
+            // Asked to render an unknown platform view.
+            FML_CHECK(false)
+                << "Test was asked to composite an unknown platform view.";
+        }
+
+        return surface->makeImageSnapshot();
+      });
+
+  sk_sp<SkImage> renderered_scene;
+  context.SetNextSceneCallback([&](auto image) {
+    renderered_scene = std::move(image);
+    latch.CountDown();
+  });
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  // Flutter still thinks it is 800 x 600.
+  event.width = 800;
+  event.height = 600;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  latch.Wait();
+
+  ASSERT_NE(renderered_scene, nullptr);
+
+  ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", renderered_scene));
 }
 
 }  // namespace testing

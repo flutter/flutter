@@ -46,6 +46,12 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
     return reinterpret_cast<EmbedderTestContext*>(context)->GLGetProcAddress(
         name);
   };
+  opengl_renderer_config_.fbo_reset_after_present = true;
+  opengl_renderer_config_.surface_transformation =
+      [](void* context) -> FlutterTransformation {
+    return reinterpret_cast<EmbedderTestContext*>(context)
+        ->GetRootSurfaceTransformation();
+  };
 
   software_renderer_config_.struct_size = sizeof(FlutterSoftwareRendererConfig);
   software_renderer_config_.surface_present_callback =
@@ -70,7 +76,6 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
   AddCommandLineArgument("embedder_unittest");
 
   if (preference == InitializationPreference::kInitialize) {
-    SetSoftwareRendererConfig();
     SetAssetsPath();
     SetSnapshots();
     SetIsolateCreateCallbackHook();
@@ -85,15 +90,20 @@ FlutterProjectArgs& EmbedderConfigBuilder::GetProjectArgs() {
   return project_args_;
 }
 
-void EmbedderConfigBuilder::SetSoftwareRendererConfig() {
+void EmbedderConfigBuilder::SetSoftwareRendererConfig(SkISize surface_size) {
   renderer_config_.type = FlutterRendererType::kSoftware;
   renderer_config_.software = software_renderer_config_;
+
+  // TODO(chinmaygarde): The compositor still uses a GL surface for operation.
+  // Once this is no longer the case, don't setup the GL surface when using the
+  // software renderer config.
+  context_.SetupOpenGLSurface(surface_size);
 }
 
-void EmbedderConfigBuilder::SetOpenGLRendererConfig() {
+void EmbedderConfigBuilder::SetOpenGLRendererConfig(SkISize surface_size) {
   renderer_config_.type = FlutterRendererType::kOpenGL;
   renderer_config_.open_gl = opengl_renderer_config_;
-  context_.SetupOpenGLSurface();
+  context_.SetupOpenGLSurface(surface_size);
 }
 
 void EmbedderConfigBuilder::SetAssetsPath() {

@@ -85,9 +85,14 @@ test_fixtures("fixtures") {
   dart_main = "fixtures/main.dart"
   fixtures = [
     "fixtures/compositor.png",
+    "fixtures/gradient.png",
+    "fixtures/gradient_xform.png",
     "fixtures/compositor_software.png",
     "fixtures/compositor_with_platform_layer_on_bottom.png",
     "fixtures/compositor_with_root_layer_only.png",
+    "fixtures/compositor_root_surface_xformation.png",
+    "fixtures/scene_without_custom_compositor.png",
+    "fixtures/scene_without_custom_compositor_with_xform.png",
   ]
 }
 
@@ -119,6 +124,7 @@ if (current_toolchain == host_toolchain) {
       "$flutter_root/runtime",
       "$flutter_root/testing:dart",
       "$flutter_root/testing:opengl",
+      "$flutter_root/testing:skia",
       "//third_party/skia",
       "//third_party/tonic",
     ]

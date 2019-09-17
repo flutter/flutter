@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_context.h"
 
 #include "flutter/runtime/dart_vm.h"
+#include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
@@ -57,6 +58,10 @@ const fml::Mapping* EmbedderTestContext::GetIsolateSnapshotData() const {
 const fml::Mapping* EmbedderTestContext::GetIsolateSnapshotInstructions()
     const {
   return isolate_snapshot_instructions_.get();
+}
+
+void EmbedderTestContext::SetRootSurfaceTransformation(SkMatrix matrix) {
+  root_surface_transformation_ = matrix;
 }
 
 void EmbedderTestContext::AddIsolateCreateCallback(fml::closure closure) {
@@ -126,10 +131,9 @@ EmbedderTestContext::GetUpdateSemanticsCustomActionCallbackHook() {
   };
 }
 
-void EmbedderTestContext::SetupOpenGLSurface() {
-  if (!gl_surface_) {
-    gl_surface_ = std::make_unique<TestGLSurface>();
-  }
+void EmbedderTestContext::SetupOpenGLSurface(SkISize surface_size) {
+  FML_CHECK(!gl_surface_);
+  gl_surface_ = std::make_unique<TestGLSurface>(surface_size);
 }
 
 bool EmbedderTestContext::GLMakeCurrent() {
@@ -143,16 +147,11 @@ bool EmbedderTestContext::GLClearCurrent() {
 }
 
 bool EmbedderTestContext::GLPresent() {
-  gl_surface_present_count_++;
   FML_CHECK(gl_surface_) << "GL surface must be initialized.";
+  gl_surface_present_count_++;
 
-  if (next_scene_callback_) {
-    auto raster_snapshot = gl_surface_->GetRasterSurfaceSnapshot();
-    FML_CHECK(raster_snapshot);
-    auto callback = next_scene_callback_;
-    next_scene_callback_ = nullptr;
-    callback(std::move(raster_snapshot));
-  }
+  FireRootSurfacePresentCallbackIfPresent(
+      [&]() { return gl_surface_->GetRasterSurfaceSnapshot(); });
 
   if (!gl_surface_->Present()) {
     return false;
@@ -176,18 +175,21 @@ void* EmbedderTestContext::GLGetProcAddress(const char* name) {
   return gl_surface_->GetProcAddress(name);
 }
 
+FlutterTransformation EmbedderTestContext::GetRootSurfaceTransformation() {
+  return FlutterTransformationMake(root_surface_transformation_);
+}
+
 void EmbedderTestContext::SetupCompositor() {
-  if (compositor_) {
-    return;
-  }
-  SetupOpenGLSurface();
-  compositor_ =
-      std::make_unique<EmbedderTestCompositor>(gl_surface_->GetGrContext());
+  FML_CHECK(!compositor_) << "Already ssetup a compositor in this context.";
+  FML_CHECK(gl_surface_)
+      << "Setup the GL surface before setting up a compositor.";
+  compositor_ = std::make_unique<EmbedderTestCompositor>(
+      gl_surface_->GetSurfaceSize(), gl_surface_->GetGrContext());
 }
 
 EmbedderTestCompositor& EmbedderTestContext::GetCompositor() {
   FML_CHECK(compositor_)
-      << "Accessed the compositor on a context where one was not setup. Used "
+      << "Accessed the compositor on a context where one was not setup. Use "
          "the config builder to setup a context with a custom compositor.";
   return *compositor_;
 }
@@ -203,8 +205,10 @@ void EmbedderTestContext::SetNextSceneCallback(
 
 bool EmbedderTestContext::SofwarePresent(sk_sp<SkImage> image) {
   software_surface_present_count_++;
-  software_surface_ = std::move(image);
-  return software_surface_ != nullptr;
+
+  FireRootSurfacePresentCallbackIfPresent([image] { return image; });
+
+  return true;
 }
 
 size_t EmbedderTestContext::GetGLSurfacePresentCount() const {
@@ -213,6 +217,16 @@ size_t EmbedderTestContext::GetGLSurfacePresentCount() const {
 
 size_t EmbedderTestContext::GetSoftwareSurfacePresentCount() const {
   return software_surface_present_count_;
+}
+
+void EmbedderTestContext::FireRootSurfacePresentCallbackIfPresent(
+    std::function<sk_sp<SkImage>(void)> image_callback) {
+  if (!next_scene_callback_) {
+    return;
+  }
+  auto callback = next_scene_callback_;
+  next_scene_callback_ = nullptr;
+  callback(image_callback());
 }
 
 }  // namespace testing

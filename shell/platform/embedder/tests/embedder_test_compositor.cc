@@ -11,8 +11,10 @@
 namespace flutter {
 namespace testing {
 
-EmbedderTestCompositor::EmbedderTestCompositor(sk_sp<GrContext> context)
-    : context_(context) {
+EmbedderTestCompositor::EmbedderTestCompositor(SkISize surface_size,
+                                               sk_sp<GrContext> context)
+    : surface_size_(surface_size), context_(context) {
+  FML_CHECK(!surface_size_.isEmpty()) << "Surface size must not be empty";
   FML_CHECK(context_);
 }
 
@@ -61,8 +63,7 @@ bool EmbedderTestCompositor::UpdateOffscrenComposition(
     size_t layers_count) {
   last_composition_ = nullptr;
 
-  auto surface_size = SkISize::Make(800, 600);
-  const auto image_info = SkImageInfo::MakeN32Premul(surface_size);
+  const auto image_info = SkImageInfo::MakeN32Premul(surface_size_);
 
   auto surface = type_ == RenderTargetType::kSoftwareBuffer
                      ? SkSurface::MakeRaster(image_info)
@@ -169,16 +170,16 @@ bool EmbedderTestCompositor::CreateFramebufferRenderSurface(
   const auto image_info =
       SkImageInfo::MakeN32Premul(config->size.width, config->size.height);
 
-  auto surface =
-      SkSurface::MakeRenderTarget(context_.get(),            // context
-                                  SkBudgeted::kNo,           // budgeted
-                                  image_info,                // image info
-                                  1,                         // sample count
-                                  kTopLeft_GrSurfaceOrigin,  // surface origin
-                                  nullptr,  // surface properties
-                                  false     // mipmaps
+  auto surface = SkSurface::MakeRenderTarget(
+      context_.get(),               // context
+      SkBudgeted::kNo,              // budgeted
+      image_info,                   // image info
+      1,                            // sample count
+      kBottomLeft_GrSurfaceOrigin,  // surface origin
+      nullptr,                      // surface properties
+      false                         // mipmaps
 
-      );
+  );
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not create render target for compositor layer.";
@@ -219,16 +220,16 @@ bool EmbedderTestCompositor::CreateTextureRenderSurface(
   const auto image_info =
       SkImageInfo::MakeN32Premul(config->size.width, config->size.height);
 
-  auto surface =
-      SkSurface::MakeRenderTarget(context_.get(),            // context
-                                  SkBudgeted::kNo,           // budgeted
-                                  image_info,                // image info
-                                  1,                         // sample count
-                                  kTopLeft_GrSurfaceOrigin,  // surface origin
-                                  nullptr,  // surface properties
-                                  false     // mipmaps
+  auto surface = SkSurface::MakeRenderTarget(
+      context_.get(),               // context
+      SkBudgeted::kNo,              // budgeted
+      image_info,                   // image info
+      1,                            // sample count
+      kBottomLeft_GrSurfaceOrigin,  // surface origin
+      nullptr,                      // surface properties
+      false                         // mipmaps
 
-      );
+  );
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not create render target for compositor layer.";

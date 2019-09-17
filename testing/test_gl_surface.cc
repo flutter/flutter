@@ -10,6 +10,7 @@
 #include <sstream>
 #include <string>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/gl/GrGLAssembleInterface.h"
@@ -79,10 +80,8 @@ static std::string GetEGLError() {
   return stream.str();
 }
 
-constexpr size_t kTestGLSurfaceWidth = 800;
-constexpr size_t kTestGLSurfaceHeight = 600;
-
-TestGLSurface::TestGLSurface() {
+TestGLSurface::TestGLSurface(SkISize surface_size)
+    : surface_size_(surface_size) {
   display_ = ::eglGetDisplay(EGL_DEFAULT_DISPLAY);
   FML_CHECK(display_ != EGL_NO_DISPLAY);
 
@@ -113,24 +112,31 @@ TestGLSurface::TestGLSurface() {
   FML_CHECK(num_config == 1) << GetEGLError();
 
   {
-    const EGLint surface_attributes[] = {
-        EGL_WIDTH,  kTestGLSurfaceWidth,   //
-        EGL_HEIGHT, kTestGLSurfaceHeight,  //
+    const EGLint onscreen_surface_attributes[] = {
+        EGL_WIDTH,  surface_size_.width(),   //
+        EGL_HEIGHT, surface_size_.height(),  //
         EGL_NONE,
     };
 
-    onscreen_surface_ =
-        ::eglCreatePbufferSurface(display_,           // display connection
-                                  config,             // config
-                                  surface_attributes  // surface attributes
-        );
+    onscreen_surface_ = ::eglCreatePbufferSurface(
+        display_,                    // display connection
+        config,                      // config
+        onscreen_surface_attributes  // surface attributes
+    );
     FML_CHECK(onscreen_surface_ != EGL_NO_SURFACE) << GetEGLError();
+  }
 
-    offscreen_surface_ =
-        ::eglCreatePbufferSurface(display_,           // display connection
-                                  config,             // config
-                                  surface_attributes  // surface attributes
-        );
+  {
+    const EGLint offscreen_surface_attributes[] = {
+        EGL_WIDTH,  1,  //
+        EGL_HEIGHT, 1,  //
+        EGL_NONE,
+    };
+    offscreen_surface_ = ::eglCreatePbufferSurface(
+        display_,                     // display connection
+        config,                       // config
+        offscreen_surface_attributes  // surface attributes
+    );
     FML_CHECK(offscreen_surface_ != EGL_NO_SURFACE) << GetEGLError();
   }
 
@@ -178,8 +184,8 @@ TestGLSurface::~TestGLSurface() {
   FML_CHECK(result == EGL_TRUE);
 }
 
-SkISize TestGLSurface::GetSize() const {
-  return SkISize::Make(kTestGLSurfaceWidth, kTestGLSurfaceHeight);
+const SkISize& TestGLSurface::GetSurfaceSize() const {
+  return surface_size_;
 }
 
 bool TestGLSurface::MakeCurrent() {
@@ -289,25 +295,29 @@ sk_sp<GrContext> TestGLSurface::CreateGrContext() {
 }
 
 sk_sp<SkSurface> TestGLSurface::GetOnscreenSurface() {
+  FML_CHECK(::eglGetCurrentContext() != EGL_NO_CONTEXT);
+
   GrGLFramebufferInfo framebuffer_info = {};
   framebuffer_info.fFBOID = GetFramebuffer();
+#if OS_MACOSX
   framebuffer_info.fFormat = GR_GL_RGBA8;
-
-  const auto size = GetSize();
+#else
+  framebuffer_info.fFormat = GR_GL_BGRA8;
+#endif
 
   GrBackendRenderTarget backend_render_target(
-      size.width(),     // width
-      size.height(),    // height
-      1,                // sample count
-      8,                // stencil bits
-      framebuffer_info  // framebuffer info
+      surface_size_.width(),   // width
+      surface_size_.height(),  // height
+      1,                       // sample count
+      8,                       // stencil bits
+      framebuffer_info         // framebuffer info
   );
 
   SkSurfaceProps surface_properties(
       SkSurfaceProps::InitType::kLegacyFontHost_InitType);
 
   auto surface = SkSurface::MakeFromBackendRenderTarget(
-      GetGrContext().get(),         //  context
+      GetGrContext().get(),         // context
       backend_render_target,        // backend render target
       kBottomLeft_GrSurfaceOrigin,  // surface origin
       kN32_SkColorType,             // color type

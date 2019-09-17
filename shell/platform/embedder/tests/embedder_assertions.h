@@ -247,4 +247,18 @@ inline FlutterSize FlutterSizeMake(double width, double height) {
   return size;
 }
 
+inline FlutterTransformation FlutterTransformationMake(const SkMatrix& matrix) {
+  FlutterTransformation transformation = {};
+  transformation.scaleX = matrix[SkMatrix::kMScaleX];
+  transformation.skewX = matrix[SkMatrix::kMSkewX];
+  transformation.transX = matrix[SkMatrix::kMTransX];
+  transformation.skewY = matrix[SkMatrix::kMSkewY];
+  transformation.scaleY = matrix[SkMatrix::kMScaleY];
+  transformation.transY = matrix[SkMatrix::kMTransY];
+  transformation.pers0 = matrix[SkMatrix::kMPersp0];
+  transformation.pers1 = matrix[SkMatrix::kMPersp1];
+  transformation.pers2 = matrix[SkMatrix::kMPersp2];
+  return transformation;
+}
+
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_ASSERTIONS_H_
