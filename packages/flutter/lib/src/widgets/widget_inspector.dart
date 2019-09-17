@@ -2267,30 +2267,29 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[];
-    children.add(GestureDetector(
-      onTap: _handleTap,
-      onPanDown: _handlePanDown,
-      onPanEnd: _handlePanEnd,
-      onPanUpdate: _handlePanUpdate,
-      behavior: HitTestBehavior.opaque,
-      excludeFromSemantics: true,
-      child: IgnorePointer(
-        ignoring: isSelectMode,
-        key: _ignorePointerKey,
-        ignoringSemantics: false,
-        child: widget.child,
+    return Stack(children: <Widget>[
+      GestureDetector(
+        onTap: _handleTap,
+        onPanDown: _handlePanDown,
+        onPanEnd: _handlePanEnd,
+        onPanUpdate: _handlePanUpdate,
+        behavior: HitTestBehavior.opaque,
+        excludeFromSemantics: true,
+        child: IgnorePointer(
+          ignoring: isSelectMode,
+          key: _ignorePointerKey,
+          ignoringSemantics: false,
+          child: widget.child,
+        ),
       ),
-    ));
-    if (!isSelectMode && widget.selectButtonBuilder != null) {
-      children.add(Positioned(
-        left: _kInspectButtonMargin,
-        bottom: _kInspectButtonMargin,
-        child: widget.selectButtonBuilder(context, _handleEnableSelect),
-      ));
-    }
-    children.add(_InspectorOverlay(selection: selection));
-    return Stack(children: children);
+      if (!isSelectMode && widget.selectButtonBuilder != null)
+        Positioned(
+          left: _kInspectButtonMargin,
+          bottom: _kInspectButtonMargin,
+          child: widget.selectButtonBuilder(context, _handleEnableSelect),
+        ),
+      _InspectorOverlay(selection: selection),
+    ]);
   }
 }
 

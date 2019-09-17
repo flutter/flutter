@@ -751,25 +751,17 @@ class _IncludesNodeWith extends Matcher {
   }
 
   String get _configAsString {
-    final List<String> strings = <String>[];
-    if (label != null)
-      strings.add('label "$label"');
-    if (value != null)
-      strings.add('value "$value"');
-    if (hint != null)
-      strings.add('hint "$hint"');
-    if (textDirection != null)
-      strings.add(' (${describeEnum(textDirection)})');
-    if (actions != null)
-      strings.add('actions "${actions.join(', ')}"');
-    if (flags != null)
-      strings.add('flags "${flags.join(', ')}"');
-    if (scrollPosition != null)
-      strings.add('scrollPosition "$scrollPosition"');
-    if (scrollExtentMax != null)
-      strings.add('scrollExtentMax "$scrollExtentMax"');
-    if (scrollExtentMin != null)
-      strings.add('scrollExtentMin "$scrollExtentMin"');
+    final List<String> strings = <String>[
+      if (label != null) 'label "$label"',
+      if (value != null) 'value "$value"',
+      if (hint != null) 'hint "$hint"',
+      if (textDirection != null) ' (${describeEnum(textDirection)})',
+      if (actions != null) 'actions "${actions.join(', ')}"',
+      if (flags != null) 'flags "${flags.join(', ')}"',
+      if (scrollPosition != null) 'scrollPosition "$scrollPosition"',
+      if (scrollExtentMax != null) 'scrollExtentMax "$scrollExtentMax"',
+      if (scrollExtentMin != null) 'scrollExtentMin "$scrollExtentMin"',
+    ];
     return strings.join(', ');
   }
 }

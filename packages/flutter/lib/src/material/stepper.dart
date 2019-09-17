@@ -480,32 +480,27 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildHeaderText(int index) {
-    final List<Widget> children = <Widget>[
-      AnimatedDefaultTextStyle(
-        style: _titleStyle(index),
-        duration: kThemeAnimationDuration,
-        curve: Curves.fastOutSlowIn,
-        child: widget.steps[index].title,
-      ),
-    ];
-
-    if (widget.steps[index].subtitle != null)
-      children.add(
-        Container(
-          margin: const EdgeInsets.only(top: 2.0),
-          child: AnimatedDefaultTextStyle(
-            style: _subtitleStyle(index),
-            duration: kThemeAnimationDuration,
-            curve: Curves.fastOutSlowIn,
-            child: widget.steps[index].subtitle,
-          ),
-        ),
-      );
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
-      children: children,
+      children: <Widget>[
+        AnimatedDefaultTextStyle(
+          style: _titleStyle(index),
+          duration: kThemeAnimationDuration,
+          curve: Curves.fastOutSlowIn,
+          child: widget.steps[index].title,
+        ),
+        if (widget.steps[index].subtitle != null)
+          Container(
+            margin: const EdgeInsets.only(top: 2.0),
+            child: AnimatedDefaultTextStyle(
+              style: _subtitleStyle(index),
+              duration: kThemeAnimationDuration,
+              curve: Curves.fastOutSlowIn,
+              child: widget.steps[index].subtitle,
+            ),
+          ),
+      ],
     );
   }
 
@@ -577,46 +572,39 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVertical() {
-    final List<Widget> children = <Widget>[];
-
-    for (int i = 0; i < widget.steps.length; i += 1) {
-      children.add(
-        Column(
-          key: _keys[i],
-          children: <Widget>[
-            InkWell(
-              onTap: widget.steps[i].state != StepState.disabled ? () {
-                // In the vertical case we need to scroll to the newly tapped
-                // step.
-                Scrollable.ensureVisible(
-                  _keys[i].currentContext,
-                  curve: Curves.fastOutSlowIn,
-                  duration: kThemeAnimationDuration,
-                );
-
-                if (widget.onStepTapped != null)
-                  widget.onStepTapped(i);
-              } : null,
-              child: _buildVerticalHeader(i),
-            ),
-            _buildVerticalBody(i),
-          ],
-        )
-      );
-    }
-
     return ListView(
       shrinkWrap: true,
       physics: widget.physics,
-      children: children,
+      children: <Widget>[
+        for (int i = 0; i < widget.steps.length; i += 1)
+          Column(
+            key: _keys[i],
+            children: <Widget>[
+              InkWell(
+                onTap: widget.steps[i].state != StepState.disabled ? () {
+                  // In the vertical case we need to scroll to the newly tapped
+                  // step.
+                  Scrollable.ensureVisible(
+                    _keys[i].currentContext,
+                    curve: Curves.fastOutSlowIn,
+                    duration: kThemeAnimationDuration,
+                  );
+
+                  if (widget.onStepTapped != null)
+                    widget.onStepTapped(i);
+                } : null,
+                child: _buildVerticalHeader(i),
+              ),
+              _buildVerticalBody(i),
+            ],
+          ),
+      ],
     );
   }
 
   Widget _buildHorizontal() {
-    final List<Widget> children = <Widget>[];
-
-    for (int i = 0; i < widget.steps.length; i += 1) {
-      children.add(
+    final List<Widget> children = <Widget>[
+      for (int i = 0; i < widget.steps.length; i += 1) ...<Widget>[
         InkResponse(
           onTap: widget.steps[i].state != StepState.disabled ? () {
             if (widget.onStepTapped != null)
@@ -637,10 +625,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             ],
           ),
         ),
-      );
-
-      if (!_isLast(i)) {
-        children.add(
+        if (!_isLast(i))
           Expanded(
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -648,9 +633,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               color: Colors.grey.shade400,
             ),
           ),
-        );
-      }
-    }
+      ],
+    ];
 
     return Column(
       children: <Widget>[

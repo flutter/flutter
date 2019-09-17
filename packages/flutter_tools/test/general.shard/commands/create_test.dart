@@ -1134,17 +1134,14 @@ Future<void> _createProject(
     return fs.typeSync(fullPath) != FileSystemEntityType.notFound;
   }
 
-  final List<String> failures = <String>[];
-  for (String path in expectedPaths) {
-    if (!pathExists(path)) {
-      failures.add('Path "$path" does not exist.');
-    }
-  }
-  for (String path in unexpectedPaths) {
-    if (pathExists(path)) {
-      failures.add('Path "$path" exists when it shouldn\'t.');
-    }
-  }
+  final List<String> failures = <String>[
+    for (String path in expectedPaths)
+      if (!pathExists(path))
+        'Path "$path" does not exist.',
+    for (String path in unexpectedPaths)
+      if (pathExists(path))
+        'Path "$path" exists when it shouldn\'t.',
+  ];
   expect(failures, isEmpty, reason: failures.join('\n'));
 }
 

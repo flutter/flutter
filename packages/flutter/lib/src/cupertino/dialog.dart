@@ -174,16 +174,17 @@ class CupertinoAlertDialog extends StatelessWidget {
   final ScrollController actionScrollController;
 
   Widget _buildContent(BuildContext context) {
-    final List<Widget> children = <Widget>[];
-
-    if (title != null || content != null) {
-      final Widget titleSection = _CupertinoAlertContentSection(
-        title: title,
-        content: content,
-        scrollController: scrollController,
-      );
-      children.add(Flexible(flex: 3, child: titleSection));
-    }
+    final List<Widget> children = <Widget>[
+      if (title != null || content != null)
+        Flexible(
+          flex: 3,
+          child: _CupertinoAlertContentSection(
+            title: title,
+            content: content,
+            scrollController: scrollController,
+          ),
+        ),
+    ];
 
     return Container(
       color: CupertinoDynamicColor.resolve(_kDialogColor, context),
@@ -597,16 +598,10 @@ class _RenderCupertinoDialog extends RenderBox {
   }
 
   @override
-  List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> value = <DiagnosticsNode>[];
-    if (contentSection != null) {
-      value.add(contentSection.toDiagnosticsNode(name: 'content'));
-    }
-    if (actionsSection != null) {
-      value.add(actionsSection.toDiagnosticsNode(name: 'actions'));
-    }
-    return value;
-  }
+  List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
+    if (contentSection != null) contentSection.toDiagnosticsNode(name: 'content'),
+    if (actionsSection != null) actionsSection.toDiagnosticsNode(name: 'actions'),
+  ];
 
   @override
   double computeMinIntrinsicWidth(double height) {

@@ -44,12 +44,11 @@ class TextParentData extends ContainerBoxParentData<RenderBox> {
 
   @override
   String toString() {
-    final List<String> values = <String>[];
-    if (offset != null)
-      values.add('offset=$offset');
-    if (scale != null)
-      values.add('scale=$scale');
-    values.add(super.toString());
+    final List<String> values = <String>[
+      if (offset != null) 'offset=$offset',
+      if (scale != null) 'scale=$scale',
+      super.toString(),
+    ];
     return values.join('; ');
   }
 }
