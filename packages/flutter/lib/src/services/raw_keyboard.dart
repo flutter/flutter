@@ -513,7 +513,7 @@ class RawKeyboard {
     return _keysPressed.toSet();
   }
 
-  /// Clear the list of keys that are down.
+  /// Clears the list of keys returned from [keysPressed].
   ///
   /// This is used by the testing framework to make sure tests are hermetic.
   @visibleForTesting

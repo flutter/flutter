@@ -25,7 +25,19 @@ LogicalKeyboardKey _getSynonym(LogicalKeyboardKey origKey) {
   return origKey;
 }
 
+bool _osIsSupported(String platform) {
+  switch (platform) {
+    case 'android':
+    case 'fuchsia':
+    case 'macos':
+    case 'linux':
+      return true;
+  }
+  return false;
+}
+
 int _getScanCode(LogicalKeyboardKey key, String platform) {
+  assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
   int scanCode;
   Map<int, PhysicalKeyboardKey> map;
   switch (platform) {
@@ -41,9 +53,6 @@ int _getScanCode(LogicalKeyboardKey key, String platform) {
     case 'linux':
       map = kLinuxToPhysicalKey;
       break;
-    default:
-      assert(false, 'Platform $platform not supported for key simulation');
-      break;
   }
   for (int code in map.keys) {
     if (key.debugName == map[code].debugName) {
@@ -55,6 +64,7 @@ int _getScanCode(LogicalKeyboardKey key, String platform) {
 }
 
 int _getKeyCode(LogicalKeyboardKey key, String platform) {
+  assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
   int keyCode;
   Map<int, LogicalKeyboardKey> map;
   switch (platform) {
@@ -70,9 +80,6 @@ int _getKeyCode(LogicalKeyboardKey key, String platform) {
     case 'linux':
       map = kGlfwToLogicalKey;
       break;
-    default:
-      assert(false, 'Platform $platform not supported for key simulation');
-      break;
   }
   for (int code in map.keys) {
     if (key.debugName == map[code].debugName) {
@@ -84,6 +91,8 @@ int _getKeyCode(LogicalKeyboardKey key, String platform) {
 }
 
 Map<String, dynamic> _getKeyData(LogicalKeyboardKey key, {String platform, bool isDown = true}) {
+  assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
+
   key = _getSynonym(key);
 
   assert(key.debugName != null);
@@ -121,9 +130,6 @@ Map<String, dynamic> _getKeyData(LogicalKeyboardKey key, {String platform, bool 
       result['characters'] = key.keyLabel;
       result['charactersIgnoringModifiers'] = key.keyLabel;
       result['modifiers'] = _getMacOsModifierFlags(key, isDown);
-      break;
-    default:
-      assert(false, 'Platform $platform not supported for key simulation');
       break;
   }
   return result;
@@ -184,16 +190,16 @@ int _getGlfwModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
   } else {
     pressed.remove(newKey);
   }
-  if (pressed.contains(LogicalKeyboardKey.shiftLeft) || pressed.contains(LogicalKeyboardKey.shift) || pressed.contains(LogicalKeyboardKey.shiftRight)) {
+  if (pressed.contains(LogicalKeyboardKey.shiftLeft) || pressed.contains(LogicalKeyboardKey.shiftRight)) {
     result |= GLFWKeyHelper.modifierShift;
   }
-  if (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.meta) || pressed.contains(LogicalKeyboardKey.metaRight)) {
+  if (pressed.contains(LogicalKeyboardKey.metaLeft) || pressed.contains(LogicalKeyboardKey.metaRight)) {
     result |= GLFWKeyHelper.modifierMeta;
   }
-  if (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.control) || pressed.contains(LogicalKeyboardKey.controlRight)) {
+  if (pressed.contains(LogicalKeyboardKey.controlLeft) || pressed.contains(LogicalKeyboardKey.controlRight)) {
     result |= GLFWKeyHelper.modifierControl;
   }
-  if (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.alt) || pressed.contains(LogicalKeyboardKey.altRight)) {
+  if (pressed.contains(LogicalKeyboardKey.altLeft) || pressed.contains(LogicalKeyboardKey.altRight)) {
     result |= GLFWKeyHelper.modifierAlt;
   }
   if (pressed.contains(LogicalKeyboardKey.capsLock)) {
@@ -314,10 +320,18 @@ int _getMacOsModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system.
+/// system. Defaults to the operating system that the test is running on. Some
+/// platforms (e.g. Windows, iOS) are not yet supported.
+///
+/// Keys that are down when the test completes are cleared after each test.
+///
+/// See also:
+///
+///  - [simulateKeyUpEvent] to simulate the corresponding key up event.
 Future<void> simulateKeyDownEvent(LogicalKeyboardKey key, {String platform}) async {
   return TestAsyncUtils.guard<void>(() async {
     platform ??= Platform.operatingSystem;
+    assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
 
     final Map<String, dynamic> data = _getKeyData(key, platform: platform, isDown: true);
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
@@ -335,10 +349,16 @@ Future<void> simulateKeyDownEvent(LogicalKeyboardKey key, {String platform}) asy
 ///
 /// Specify `platform` as one of the platforms allowed in
 /// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system.
+/// system. Defaults to the operating system that the test is running on. Some
+/// platforms (e.g. Windows, iOS) are not yet supported.
+///
+/// See also:
+///
+///  - [simulateKeyDownEvent] to simulate the corresponding key down event.
 Future<void> simulateKeyUpEvent(LogicalKeyboardKey key, {String platform}) async {
   return TestAsyncUtils.guard<void>(() async {
     platform ??= Platform.operatingSystem;
+    assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
 
     final Map<String, dynamic> data = _getKeyData(key, platform: platform, isDown: false);
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
