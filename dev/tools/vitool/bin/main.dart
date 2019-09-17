@@ -18,32 +18,32 @@ void main(List<String> args) {
       'help',
       abbr: 'h',
       negatable: false,
-      help: 'Display the tool\'s usage instructions and quit.'
+      help: 'Display the tool\'s usage instructions and quit.',
   );
 
   parser.addOption(
       'output',
       abbr: 'o',
-      help: 'Target path to write the generated Dart file to.'
+      help: 'Target path to write the generated Dart file to.',
   );
 
   parser.addOption(
       'asset-name',
       abbr: 'n',
-      help: 'Name to be used for the generated constant.'
+      help: 'Name to be used for the generated constant.',
   );
 
   parser.addOption(
       'part-of',
       abbr: 'p',
-      help: 'Library name to add a dart \'part of\' clause for.'
+      help: 'Library name to add a dart \'part of\' clause for.',
   );
 
   parser.addOption(
       'header',
       abbr: 'd',
       help: 'File whose contents are to be prepended to the beginning of '
-            'the generated Dart file; this can be used for a license comment.'
+            'the generated Dart file; this can be used for a license comment.',
   );
 
   parser.addFlag(
@@ -51,7 +51,7 @@ void main(List<String> args) {
       abbr: 'c',
       defaultsTo: true,
       help: 'Whether to include the following comment after the header:\n'
-            '$kCodegenComment'
+            '$kCodegenComment',
   );
 
   final ArgResults argResults = parser.parse(args);
