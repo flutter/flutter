@@ -250,8 +250,8 @@ class SkiaGoldClient {
         await httpClient.getUrl(requestForImage)
           .then((io.HttpClientRequest request) => request.close())
           .then((io.HttpClientResponse response) async {
-          final List<List<int>> byteList = await response.toList();
-          masterImageBytes = byteList.expand((List<int> x) => x).toList();
+            final List<List<int>> byteList = await response.toList();
+            masterImageBytes = byteList.expand((List<int> x) => x).toList();
         });
       } catch(e) {
         rethrow;

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
@@ -16,6 +17,13 @@ const String _kFlutterRoot = '/flutter';
 const String _kRepositoryRoot = '$_kFlutterRoot/bin/cache/pkg/goldens';
 const String _kVersionFile = '$_kFlutterRoot/bin/internal/goldens.version';
 const String _kGoldensVersion = '123456abcdef';
+
+// 1x1 transparent pixel
+const List<int> _kTestPngBytes =
+<int>[137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+  1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 11, 73, 68, 65, 84,
+  120, 1, 99, 97, 0, 2, 0, 0, 25, 0, 5, 144, 240, 54, 245, 0, 0, 0, 0, 73, 69,
+  78, 68, 174, 66, 96, 130];
 
 void main() {
   MemoryFileSystem fs;
@@ -114,5 +122,158 @@ void main() {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
+
 class MockSkiaGoldClient extends Mock implements SkiaGoldClient {}
+
 class MockLocalFileComparator extends Mock implements LocalFileComparator {}
+
+String digestResponseTemplate() {
+  return '''
+  {
+  "digests": [
+    {
+      "test": "flutter.golden_test.1",
+      "digest": "aa748136c70cefdda646df5be0ae189d",
+      "status": "positive",
+      "paramset": {
+        "Platform": [
+          "macos"
+        ],
+        "ext": [
+          "png"
+        ],
+        "name": [
+          "flutter.golden_test.1"
+        ],
+        "source_type": [
+          "flutter"
+        ]
+      },
+      "traces": {
+        "tileSize": 200,
+        "traces": [
+          {
+            "data": [
+              {
+                "x": 0,
+                "y": 0,
+                "s": 1
+              },
+              {
+                "x": 1,
+                "y": 0,
+                "s": 1
+              },
+              {
+                "x": 2,
+                "y": 0,
+                "s": 1
+              },
+            ],
+            "label": ",Platform=macos,name=flutter.golden_test.1,source_type=flutter,",
+            "params": {
+              "Platform": "macos",
+              "ext": "png",
+              "name": "flutter.golden_test.1",
+              "source_type": "flutter"
+            }
+          }
+        ],
+        "digests": [
+          {
+            "digest": "aa748136c70cefdda646df5be0ae189d",
+            "status": "positive"
+          },
+          {
+            "digest": "0b9795b218a8e367b552dcea55c8d589",
+            "status": "positive"
+          }
+        ]
+      },
+      "closestRef": "pos",
+      "refDiffs": {
+        "neg": null,
+        "pos": {
+          "numDiffPixels": 999,
+          "pixelDiffPercent": 0.4995,
+          "maxRGBADiffs": [
+            86,
+            86,
+            86,
+            0
+          ],
+          "dimDiffer": false,
+          "diffs": {
+            "combined": 0.381955,
+            "percent": 0.4995,
+            "pixel": 999
+          },
+          "digest": "c3312ad1479f50caf3754b42a42740c5",
+          "status": "positive",
+          "paramset": {
+            "Platform": [
+              "linux"
+            ],
+            "ext": [
+              "png"
+            ],
+            "name": [
+              "flutter.golden_test.1"
+            ],
+            "source_type": [
+              "flutter"
+            ]
+          },
+          "n": 167
+        }
+      }
+    }
+  ],
+  "offset": 0,
+  "size": 1,
+  "commits": [
+    {
+      "commit_time": 1567407452,
+      "hash": "7bc4074ff3887845d8a558a078ed878ab821cde9",
+      "author": "Contributor A (contribA@getMail.com)"
+    },
+    {
+      "commit_time": 1567412246,
+      "hash": "43e7c5590092d9c173d032618175f991976f9e09",
+      "author": "Contributor B (contribB@getMail.com)"
+    },
+    {
+      "commit_time": 1567412442,
+      "hash": "2b7e59b9c0267d3f90ddd8b2cb10c1431c79137d",
+      "author": "Contributor C (contribC@getMail.com)"
+    },
+  ],
+  "issue": null
+}
+
+  ''';
+}
+
+String ignoreResponseTemplate({String pullRequestNumber = '0000'}) {
+  return '''
+    [
+      {
+        "id": "7579425228619212078",
+        "name": "contributor@getMail.com",
+        "updatedBy": "contributor@getMail.com",
+        "expires": "2019-09-06T21:28:18.815336Z",
+        "query": "ext=png&name=widgets.golden_file_test",
+        "note": "https://github.com/flutter/flutter/pull/$pullRequestNumber"
+      }
+    ]
+  ''';
+}
+
+Stream<List<int>> imageResponseTemplate() {
+  return Stream<List<int>>.fromIterable(<List<int>>[
+    <int>[137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+      1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 11, 73, 68, 65],
+    <int>[84, 120, 1, 99, 97, 0, 2, 0, 0, 25, 0, 5, 144, 240, 54, 245, 0, 0, 0,
+      0, 73, 69, 78, 68, 174, 66, 96, 130],
+  ]);
+}
