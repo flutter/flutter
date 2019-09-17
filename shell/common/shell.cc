@@ -1268,6 +1268,7 @@ bool Shell::OnServiceProtocolGetDisplayRefreshRate(
     rapidjson::Document& response) {
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
   response.SetObject();
+  response.AddMember("type", "DisplayRefreshRate", response.GetAllocator());
   response.AddMember("fps", engine_->GetDisplayRefreshRate(),
                      response.GetAllocator());
   return true;
