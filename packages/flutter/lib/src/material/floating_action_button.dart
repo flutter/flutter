@@ -58,10 +58,10 @@ class _DefaultHeroTag {
 /// action button.
 ///
 /// {@tool snippet --template=stateless_widget_material}
-/// This example shows how to make a simple [FloatingActionButton] in a
+/// This example shows how to display a [FloatingActionButton] in a
 /// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
 ///
-/// ![A screenshot of a green floating action button with a navigation icon](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button.png)
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -87,9 +87,9 @@ class _DefaultHeroTag {
 /// {@tool snippet --template=stateless_widget_material}
 /// This example shows how to make an extended [FloatingActionButton] in a
 /// [Scaffold], with a  pink [backgroundColor], a thumbs up [Icon] and a
-/// [Text] label.
+/// [Text] label that reads "Approve".
 ///
-/// ![A screenshot of a pink floating action button with a thumbs up icon and a label that reads "Approve"](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_label.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_label.png)
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
