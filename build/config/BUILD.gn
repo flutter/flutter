@@ -4,9 +4,9 @@
 
 import("//build/config/allocator.gni")
 import("//build/config/crypto.gni")
+import("//build/config/dcheck_always_on.gni")
 import("//build/config/features.gni")
 import("//build/config/ui.gni")
-import("//build/config/dcheck_always_on.gni")
 
 declare_args() {
   # When set, turns off the (normally-on) iterator debugging and related stuff
@@ -70,9 +70,6 @@ config("feature_flags") {
   }
   if (is_msan) {
     defines += [ "MEMORY_SANITIZER" ]
-  }
-  if (is_fnl) {
-    defines += [ "HAVE_SYS_QUEUE_H_=0" ]
   }
 }
 

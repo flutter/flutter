@@ -186,7 +186,6 @@ declare_args() {
 if (current_os == "win") {
   is_android = false
   is_chromeos = false
-  is_fnl = false
   is_fuchsia = false
   is_fuchsia_host = false
   is_ios = false
@@ -197,7 +196,6 @@ if (current_os == "win") {
 } else if (current_os == "mac") {
   is_android = false
   is_chromeos = false
-  is_fnl = false
   is_fuchsia = false
   is_fuchsia_host = false
   is_ios = false
@@ -208,7 +206,6 @@ if (current_os == "win") {
 } else if (current_os == "android") {
   is_android = true
   is_chromeos = false
-  is_fnl = false
   is_fuchsia = false
   is_fuchsia_host = false
   is_ios = false
@@ -219,7 +216,6 @@ if (current_os == "win") {
 } else if (current_os == "chromeos") {
   is_android = false
   is_chromeos = true
-  is_fnl = false
   is_fuchsia = false
   is_fuchsia_host = false
   is_ios = false
@@ -233,7 +229,6 @@ if (current_os == "win") {
   # Posix variant.
   is_android = false
   is_chromeos = false
-  is_fnl = false
   is_fuchsia = false
   is_fuchsia_host = false
   is_ios = false
@@ -244,7 +239,6 @@ if (current_os == "win") {
 } else if (current_os == "ios") {
   is_android = false
   is_chromeos = false
-  is_fnl = false
   is_fuchsia = false
   is_fuchsia_host = false
   is_ios = true
@@ -255,7 +249,6 @@ if (current_os == "win") {
 } else if (current_os == "linux") {
   is_android = false
   is_chromeos = false
-  is_fnl = false
   is_fuchsia = false
   is_fuchsia_host = false
   is_ios = false
@@ -266,7 +259,6 @@ if (current_os == "win") {
 } else if (current_os == "fuchsia" || target_os == "fuchsia") {
   is_android = false
   is_chromeos = false
-  is_fnl = false
   is_fuchsia = true
   is_fuchsia_host = false
   is_ios = false
@@ -326,9 +318,7 @@ if (is_posix) {
   ]
 }
 
-if (is_fnl) {
-  _native_compiler_configs += [ "//build/config/fnl:sdk" ]
-} else if (is_linux) {
+if (is_linux) {
   _native_compiler_configs += [ "//build/config/linux:sdk" ]
 } else if (is_mac) {
   _native_compiler_configs += [ "//build/config/mac:sdk" ]
@@ -505,9 +495,6 @@ if (custom_toolchain != "") {
   }
   if (is_chromeos && cros_use_custom_toolchain) {
     set_default_toolchain("//build/toolchain/cros:target")
-  }
-  if (is_fnl) {
-    set_default_toolchain("//build/toolchain/fnl:target")
   }
 } else if (is_mac) {
   host_toolchain = "//build/toolchain/mac:clang_x64"
