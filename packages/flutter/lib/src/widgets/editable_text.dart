@@ -808,7 +808,7 @@ class EditableText extends StatefulWidget {
   ///             );
   ///           },
   ///         ),
-  //        ],
+  ///       ],
   ///     ),
   ///   );
   /// }
