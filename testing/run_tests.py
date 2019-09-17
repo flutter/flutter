@@ -71,13 +71,18 @@ def RunEngineExecutable(build_dir, executable_name, filter, flags=[], cwd=buildr
 def RunCCTests(build_dir, filter):
   print "Running Engine Unit-tests."
 
-  RunEngineExecutable(build_dir, 'client_wrapper_glfw_unittests', filter)
+  shuffle_flags = [
+    "--gtest_shuffle",
+    "--gtest_repeat=2",
+  ]
 
-  RunEngineExecutable(build_dir, 'client_wrapper_unittests', filter)
+  RunEngineExecutable(build_dir, 'client_wrapper_glfw_unittests', filter, shuffle_flags)
+
+  RunEngineExecutable(build_dir, 'client_wrapper_unittests', filter, shuffle_flags)
 
   # https://github.com/flutter/flutter/issues/36294
   if not IsWindows():
-    RunEngineExecutable(build_dir, 'embedder_unittests', filter)
+    RunEngineExecutable(build_dir, 'embedder_unittests', filter, shuffle_flags)
 
   flow_flags = ['--gtest_filter=-PerformanceOverlayLayer.Gold']
   if IsLinux():
@@ -85,25 +90,25 @@ def RunCCTests(build_dir, filter):
       '--golden-dir=%s' % golden_dir,
       '--font-file=%s' % roboto_font_path,
     ]
-  RunEngineExecutable(build_dir, 'flow_unittests', filter, flow_flags)
+  RunEngineExecutable(build_dir, 'flow_unittests', filter, flow_flags + shuffle_flags)
 
-  RunEngineExecutable(build_dir, 'fml_unittests', filter, [ time_sensitve_test_flag ])
+  RunEngineExecutable(build_dir, 'fml_unittests', filter, [ time_sensitve_test_flag ] + shuffle_flags)
 
-  RunEngineExecutable(build_dir, 'runtime_unittests', filter)
+  RunEngineExecutable(build_dir, 'runtime_unittests', filter, shuffle_flags)
 
   # https://github.com/flutter/flutter/issues/36295
   if not IsWindows():
-    RunEngineExecutable(build_dir, 'shell_unittests', filter)
+    RunEngineExecutable(build_dir, 'shell_unittests', filter, shuffle_flags)
 
-  RunEngineExecutable(build_dir, 'ui_unittests', filter)
+  RunEngineExecutable(build_dir, 'ui_unittests', filter, shuffle_flags)
 
   # These unit-tests are Objective-C and can only run on Darwin.
   if IsMac():
-    RunEngineExecutable(build_dir, 'flutter_channels_unittests', filter)
+    RunEngineExecutable(build_dir, 'flutter_channels_unittests', filter, shuffle_flags)
 
   # https://github.com/flutter/flutter/issues/36296
   if IsLinux():
-    RunEngineExecutable(build_dir, 'txt_unittests', filter, [ fonts_dir_flag ])
+    RunEngineExecutable(build_dir, 'txt_unittests', filter, [ fonts_dir_flag ] + shuffle_flags)
 
 
 def RunEngineBenchmarks(build_dir, filter):

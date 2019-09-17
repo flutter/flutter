@@ -218,6 +218,7 @@ TEST_F(EmbedderTest, CanSpecifyCustomTaskRunner) {
   kill_latch.Wait();
 
   ASSERT_TRUE(signaled_once);
+  signaled_once = false;
 }
 
 TEST(EmbedderTestNoFixture, CanGetCurrentTimeInNanoseconds) {
