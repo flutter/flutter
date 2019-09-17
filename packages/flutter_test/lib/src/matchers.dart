@@ -482,93 +482,53 @@ Matcher matchesSemantics({
   List<CustomSemanticsAction> customActions,
   List<Matcher> children,
 }) {
-  final List<SemanticsFlag> flags = <SemanticsFlag>[];
-  if (hasCheckedState)
-    flags.add(SemanticsFlag.hasCheckedState);
-  if (isChecked)
-    flags.add(SemanticsFlag.isChecked);
-  if (isSelected)
-    flags.add(SemanticsFlag.isSelected);
-  if (isButton)
-    flags.add(SemanticsFlag.isButton);
-  if (isTextField)
-    flags.add(SemanticsFlag.isTextField);
-  if (isReadOnly)
-    flags.add(SemanticsFlag.isReadOnly);
-  if (isFocused)
-    flags.add(SemanticsFlag.isFocused);
-  if (hasEnabledState)
-    flags.add(SemanticsFlag.hasEnabledState);
-  if (isEnabled)
-    flags.add(SemanticsFlag.isEnabled);
-  if (isInMutuallyExclusiveGroup)
-    flags.add(SemanticsFlag.isInMutuallyExclusiveGroup);
-  if (isHeader)
-    flags.add(SemanticsFlag.isHeader);
-  if (isObscured)
-    flags.add(SemanticsFlag.isObscured);
-  if (isMultiline)
-    flags.add(SemanticsFlag.isMultiline);
-  if (namesRoute)
-    flags.add(SemanticsFlag.namesRoute);
-  if (scopesRoute)
-    flags.add(SemanticsFlag.scopesRoute);
-  if (isHidden)
-    flags.add(SemanticsFlag.isHidden);
-  if (isImage)
-    flags.add(SemanticsFlag.isImage);
-  if (isLiveRegion)
-    flags.add(SemanticsFlag.isLiveRegion);
-  if (hasToggledState)
-    flags.add(SemanticsFlag.hasToggledState);
-  if (isToggled)
-    flags.add(SemanticsFlag.isToggled);
-  if (hasImplicitScrolling)
-    flags.add(SemanticsFlag.hasImplicitScrolling);
+  final List<SemanticsFlag> flags = <SemanticsFlag>[
+    if (hasCheckedState) SemanticsFlag.hasCheckedState,
+    if (isChecked) SemanticsFlag.isChecked,
+    if (isSelected) SemanticsFlag.isSelected,
+    if (isButton) SemanticsFlag.isButton,
+    if (isTextField) SemanticsFlag.isTextField,
+    if (isReadOnly) SemanticsFlag.isReadOnly,
+    if (isFocused) SemanticsFlag.isFocused,
+    if (hasEnabledState) SemanticsFlag.hasEnabledState,
+    if (isEnabled) SemanticsFlag.isEnabled,
+    if (isInMutuallyExclusiveGroup) SemanticsFlag.isInMutuallyExclusiveGroup,
+    if (isHeader) SemanticsFlag.isHeader,
+    if (isObscured) SemanticsFlag.isObscured,
+    if (isMultiline) SemanticsFlag.isMultiline,
+    if (namesRoute) SemanticsFlag.namesRoute,
+    if (scopesRoute) SemanticsFlag.scopesRoute,
+    if (isHidden) SemanticsFlag.isHidden,
+    if (isImage) SemanticsFlag.isImage,
+    if (isLiveRegion) SemanticsFlag.isLiveRegion,
+    if (hasToggledState) SemanticsFlag.hasToggledState,
+    if (isToggled) SemanticsFlag.isToggled,
+    if (hasImplicitScrolling) SemanticsFlag.hasImplicitScrolling,
+  ];
 
-  final List<SemanticsAction> actions = <SemanticsAction>[];
-  if (hasTapAction)
-    actions.add(SemanticsAction.tap);
-  if (hasLongPressAction)
-    actions.add(SemanticsAction.longPress);
-  if (hasScrollLeftAction)
-    actions.add(SemanticsAction.scrollLeft);
-  if (hasScrollRightAction)
-    actions.add(SemanticsAction.scrollRight);
-  if (hasScrollUpAction)
-    actions.add(SemanticsAction.scrollUp);
-  if (hasScrollDownAction)
-    actions.add(SemanticsAction.scrollDown);
-  if (hasIncreaseAction)
-    actions.add(SemanticsAction.increase);
-  if (hasDecreaseAction)
-    actions.add(SemanticsAction.decrease);
-  if (hasShowOnScreenAction)
-    actions.add(SemanticsAction.showOnScreen);
-  if (hasMoveCursorForwardByCharacterAction)
-    actions.add(SemanticsAction.moveCursorForwardByCharacter);
-  if (hasMoveCursorBackwardByCharacterAction)
-    actions.add(SemanticsAction.moveCursorBackwardByCharacter);
-  if (hasSetSelectionAction)
-    actions.add(SemanticsAction.setSelection);
-  if (hasCopyAction)
-    actions.add(SemanticsAction.copy);
-  if (hasCutAction)
-    actions.add(SemanticsAction.cut);
-  if (hasPasteAction)
-    actions.add(SemanticsAction.paste);
-  if (hasDidGainAccessibilityFocusAction)
-    actions.add(SemanticsAction.didGainAccessibilityFocus);
-  if (hasDidLoseAccessibilityFocusAction)
-    actions.add(SemanticsAction.didLoseAccessibilityFocus);
-  if (customActions != null && customActions.isNotEmpty)
-    actions.add(SemanticsAction.customAction);
-  if (hasDismissAction)
-    actions.add(SemanticsAction.dismiss);
-  if (hasMoveCursorForwardByWordAction)
-    actions.add(SemanticsAction.moveCursorForwardByWord);
-  if (hasMoveCursorBackwardByWordAction)
-    actions.add(SemanticsAction.moveCursorBackwardByWord);
+  final List<SemanticsAction> actions = <SemanticsAction>[
+    if (hasTapAction) SemanticsAction.tap,
+    if (hasLongPressAction) SemanticsAction.longPress,
+    if (hasScrollLeftAction) SemanticsAction.scrollLeft,
+    if (hasScrollRightAction) SemanticsAction.scrollRight,
+    if (hasScrollUpAction) SemanticsAction.scrollUp,
+    if (hasScrollDownAction) SemanticsAction.scrollDown,
+    if (hasIncreaseAction) SemanticsAction.increase,
+    if (hasDecreaseAction) SemanticsAction.decrease,
+    if (hasShowOnScreenAction) SemanticsAction.showOnScreen,
+    if (hasMoveCursorForwardByCharacterAction) SemanticsAction.moveCursorForwardByCharacter,
+    if (hasMoveCursorBackwardByCharacterAction) SemanticsAction.moveCursorBackwardByCharacter,
+    if (hasSetSelectionAction) SemanticsAction.setSelection,
+    if (hasCopyAction) SemanticsAction.copy,
+    if (hasCutAction) SemanticsAction.cut,
+    if (hasPasteAction) SemanticsAction.paste,
+    if (hasDidGainAccessibilityFocusAction) SemanticsAction.didGainAccessibilityFocus,
+    if (hasDidLoseAccessibilityFocusAction) SemanticsAction.didLoseAccessibilityFocus,
+    if (customActions != null && customActions.isNotEmpty) SemanticsAction.customAction,
+    if (hasDismissAction) SemanticsAction.dismiss,
+    if (hasMoveCursorForwardByWordAction) SemanticsAction.moveCursorForwardByWord,
+    if (hasMoveCursorBackwardByWordAction) SemanticsAction.moveCursorBackwardByWord,
+  ];
   SemanticsHintOverrides hintOverrides;
   if (onTapHint != null || onLongPressHint != null)
     hintOverrides = SemanticsHintOverrides(
@@ -1883,11 +1843,11 @@ class _MatchesSemanticsData extends Matcher {
       for (SemanticsAction action in actions)
         actionBits |= action.index;
       if (actionBits != data.actions) {
-        final List<String> actionSummary = <String>[];
-        for (SemanticsAction action in SemanticsAction.values.values) {
-          if ((data.actions & action.index) != 0)
-            actionSummary.add(describeEnum(action));
-        }
+        final List<String> actionSummary = <String>[
+          for (SemanticsAction action in SemanticsAction.values.values)
+            if ((data.actions & action.index) != 0)
+              describeEnum(action),
+        ];
         return failWithDescription(matchState, 'actions were: $actionSummary');
       }
     }
@@ -1917,11 +1877,11 @@ class _MatchesSemanticsData extends Matcher {
       for (SemanticsFlag flag in flags)
         flagBits |= flag.index;
       if (flagBits != data.flags) {
-        final List<String> flagSummary = <String>[];
-        for (SemanticsFlag flag in SemanticsFlag.values.values) {
-          if ((data.flags & flag.index) != 0)
-            flagSummary.add(describeEnum(flag));
-        }
+        final List<String> flagSummary = <String>[
+          for (SemanticsFlag flag in SemanticsFlag.values.values)
+            if ((data.flags & flag.index) != 0)
+              describeEnum(flag),
+        ];
         return failWithDescription(matchState, 'flags were: $flagSummary');
       }
     }

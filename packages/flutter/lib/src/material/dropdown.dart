@@ -28,6 +28,8 @@ const EdgeInsets _kUnalignedButtonPadding = EdgeInsets.zero;
 const EdgeInsets _kAlignedMenuMargin = EdgeInsets.zero;
 const EdgeInsetsGeometry _kUnalignedMenuMargin = EdgeInsetsDirectional.only(start: 16.0, end: 24.0);
 
+typedef DropdownButtonBuilder = List<Widget> Function(BuildContext context);
+
 class _DropdownMenuPainter extends CustomPainter {
   _DropdownMenuPainter({
     this.color,
@@ -530,47 +532,44 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// dropdown's value. It should also call [State.setState] to rebuild the
 /// dropdown with the new value.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
-/// This sample shows a `DropdownButton` with a customized icon, text style,
-/// and underline and whose value is one of "One", "Two", "Free", or "Four".
+/// This sample shows a `DropdownButton` with a large arrow icon,
+/// purple text style, and bold purple underline, whose value is one of "One",
+/// "Two", "Free", or "Four".
 ///
-/// ![A screenshot of the dropdown button](https://flutter.github.io/assets-for-api-docs/assets/material/dropdown_button.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/dropdown_button.png)
 ///
 /// ```dart
 /// String dropdownValue = 'One';
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: DropdownButton<String>(
-///         value: dropdownValue,
-///         icon: Icon(Icons.arrow_downward),
-///         iconSize: 24,
-///         elevation: 16,
-///         style: TextStyle(
-///           color: Colors.deepPurple
-///         ),
-///         underline: Container(
-///           height: 2,
-///           color: Colors.deepPurpleAccent,
-///         ),
-///         onChanged: (String newValue) {
-///           setState(() {
-///             dropdownValue = newValue;
-///           });
-///         },
-///         items: <String>['One', 'Two', 'Free', 'Four']
-///           .map<DropdownMenuItem<String>>((String value) {
-///             return DropdownMenuItem<String>(
-///               value: value,
-///               child: Text(value),
-///             );
-///           })
-///           .toList(),
-///       ),
+///   return DropdownButton<String>(
+///     value: dropdownValue,
+///     icon: Icon(Icons.arrow_downward),
+///     iconSize: 24,
+///     elevation: 16,
+///     style: TextStyle(
+///       color: Colors.deepPurple
 ///     ),
+///     underline: Container(
+///       height: 2,
+///       color: Colors.deepPurpleAccent,
+///     ),
+///     onChanged: (String newValue) {
+///       setState(() {
+///         dropdownValue = newValue;
+///       });
+///     },
+///     items: <String>['One', 'Two', 'Free', 'Four']
+///       .map<DropdownMenuItem<String>>((String value) {
+///         return DropdownMenuItem<String>(
+///           value: value,
+///           child: Text(value),
+///         );
+///       })
+///       .toList(),
 ///   );
 /// }
 /// ```
@@ -604,6 +603,7 @@ class DropdownButton<T> extends StatefulWidget {
   DropdownButton({
     Key key,
     @required this.items,
+    this.selectedItemBuilder,
     this.value,
     this.hint,
     this.disabledHint,
@@ -654,6 +654,50 @@ class DropdownButton<T> extends StatefulWidget {
   /// will display the [disabledHint] widget if it is non-null.
   /// {@endtemplate}
   final ValueChanged<T> onChanged;
+
+  /// A builder to customize the dropdown buttons corresponding to the
+  /// [DropdownMenuItem]s in [items].
+  ///
+  /// When a [DropdownMenuItem] is selected, the widget that will be displayed
+  /// from the list corresponds to the [DropdownMenuItem] of the same index
+  /// in [items].
+  ///
+  /// {@tool snippet --template=stateful_widget_scaffold}
+  ///
+  /// This sample shows a `DropdownButton` with a button with [Text] that
+  /// corresponds to but is unique from [DropdownMenuItem].
+  ///
+  /// ```dart
+  /// final List<String> items = <String>['1','2','3'];
+  /// String selectedItem = '1';
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Padding(
+  ///     padding: const EdgeInsets.symmetric(horizontal: 12.0),
+  ///     child: DropdownButton<String>(
+  ///       value: selectedItem,
+  ///       onChanged: (String string) => setState(() => selectedItem = string),
+  ///       selectedItemBuilder: (BuildContext context) {
+  ///         return items.map((String item) {
+  ///           return Text(item);
+  ///         }).toList();
+  ///       },
+  ///       items: items.map((String item) {
+  ///         return DropdownMenuItem<String>(
+  ///           child: Text('Log $item'),
+  ///           value: item,
+  ///         );
+  ///       }).toList(),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// If this callback is null, the [DropdownMenuItem] from [items]
+  /// that matches [value] will be displayed.
+  final DropdownButtonBuilder selectedItemBuilder;
 
   /// The z-coordinate at which to place the menu when open.
   ///
@@ -849,7 +893,21 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
-    final List<Widget> items = _enabled ? List<Widget>.from(widget.items) : <Widget>[];
+    List<Widget> items;
+    if (_enabled) {
+      items = widget.selectedItemBuilder == null
+        ? List<Widget>.from(widget.items)
+        : widget.selectedItemBuilder(context).map((Widget item) {
+          return Container(
+            height: _kMenuItemHeight,
+            alignment: AlignmentDirectional.centerStart,
+            child: item,
+          );
+        }).toList();
+    } else {
+      items = <Widget>[];
+    }
+
     int hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
       final Widget emplacedHint = _enabled
@@ -894,9 +952,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            widget.isExpanded
-              ? Expanded(child: innerItemsWidget)
-              : innerItemsWidget,
+            if (widget.isExpanded)
+              Expanded(child: innerItemsWidget)
+            else
+              innerItemsWidget,
             IconTheme(
               data: IconThemeData(
                 color: _iconColor,

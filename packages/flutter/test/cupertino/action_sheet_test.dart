@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -113,8 +112,6 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    // Draw the overlay using the light variant.
-    expect(find.byType(CupertinoActionSheet), paints..rect(color: const Color(0x66000000)));
     expect(
       actionTextStyle('action').color.value,
       const Color.fromARGB(255, 0, 122, 255).value,
@@ -123,8 +120,6 @@ void main() {
     stateSetter(() { brightness = Brightness.dark; });
     await tester.pump();
 
-    // Draw the overlay using the dark variant.
-    expect(find.byType(CupertinoActionSheet), paints..rect(color: const Color(0x99000000)));
     expect(
       actionTextStyle('action').color.value,
       const Color.fromARGB(255, 10, 132, 255).value,

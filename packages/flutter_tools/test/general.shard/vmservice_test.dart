@@ -74,8 +74,9 @@ class MockPeer implements rpc.Peer {
 
   @override
   Future<dynamic> sendRequest(String method, [ dynamic parameters ]) async {
-    if (method == 'getVM')
+    if (method == 'getVM') {
       await _getVMLatch;
+    }
     await Future<void>.delayed(Duration.zero);
     returnedFromSendRequest += 1;
     if (method == 'getVM') {

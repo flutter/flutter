@@ -70,6 +70,7 @@ Future<int> runTests(
       projectDirectory: flutterProject.directory,
       testOutputDir: tempBuildDir,
       projectName: flutterProject.manifest.appName,
+      initializePlatform: true,
     );
     if (!result) {
       throwToolExit('Failed to compile tests');
@@ -95,8 +96,9 @@ Future<int> runTests(
 
   // Configure package:test to use the Flutter engine for child processes.
   final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
-  if (!processManager.canRun(shellPath))
+  if (!processManager.canRun(shellPath)) {
     throwToolExit('Cannot find Flutter shell at $shellPath');
+  }
 
   final InternetAddressType serverType =
       ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;

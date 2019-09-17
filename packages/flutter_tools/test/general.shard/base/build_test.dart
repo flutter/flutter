@@ -58,8 +58,9 @@ class _FakeGenSnapshot implements GenSnapshot {
     _depfilePath = depfilePath;
     _additionalArgs = additionalArgs.toList();
 
-    if (!succeed)
+    if (!succeed) {
       return 1;
+    }
     outputs.forEach((String filePath, String fileContent) {
       fs.file(filePath).writeAsString(fileContent);
     });

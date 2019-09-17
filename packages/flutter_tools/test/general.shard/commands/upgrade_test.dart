@@ -2,42 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-
-Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr = '' }) {
-  final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[
-    utf8.encode(stdout),
-  ]);
-  final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(<List<int>>[
-    utf8.encode(stderr),
-  ]);
-  final Process process = MockProcess();
-
-  when(process.stdout).thenAnswer((_) => stdoutStream);
-  when(process.stderr).thenAnswer((_) => stderrStream);
-  when(process.exitCode).thenAnswer((_) => Future<int>.value(exitCode));
-  return process;
-}
+import '../../src/mocks.dart';
 
 void main() {
   group('UpgradeCommandRunner', () {
     FakeUpgradeCommandRunner fakeCommandRunner;
     UpgradeCommandRunner realCommandRunner;
     MockProcessManager processManager;
+    FakePlatform fakePlatform;
     final MockFlutterVersion flutterVersion = MockFlutterVersion();
     const GitTagVersion gitTagVersion = GitTagVersion(1, 2, 3, 4, 5, 'asd');
     when(flutterVersion.channel).thenReturn('dev');
@@ -59,9 +46,13 @@ void main() {
         return Future<Process>.value(createMockProcess());
       });
       fakeCommandRunner.willHaveUncomittedChanges = false;
+      fakePlatform = FakePlatform()..environment = <String, String>{
+        'ENV1': 'irrelevant',
+        'ENV2': 'irrelevant',
+      };
     });
 
-    test('throws on unknown tag, official branch,  noforce', () async {
+    testUsingContext('throws on unknown tag, official branch,  noforce', () async {
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         false,
         false,
@@ -69,6 +60,8 @@ void main() {
         flutterVersion,
       );
       expect(result, throwsA(isInstanceOf<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
     });
 
     testUsingContext('does not throw on unknown tag, official branch, force', () async {
@@ -81,9 +74,10 @@ void main() {
       expect(await result, null);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
     });
 
-    test('throws tool exit with uncommitted changes', () async {
+    testUsingContext('throws tool exit with uncommitted changes', () async {
       fakeCommandRunner.willHaveUncomittedChanges = true;
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         false,
@@ -92,6 +86,8 @@ void main() {
         flutterVersion,
       );
       expect(result, throwsA(isA<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
     });
 
     testUsingContext('does not throw tool exit with uncommitted changes and force', () async {
@@ -106,6 +102,7 @@ void main() {
       expect(await result, null);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
     });
 
     testUsingContext('Doesn\'t throw on known tag, dev branch, no force', () async {
@@ -118,6 +115,7 @@ void main() {
       expect(await result, null);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
     });
 
     testUsingContext('verifyUpstreamConfigured', () async {
@@ -132,6 +130,57 @@ void main() {
       await realCommandRunner.verifyUpstreamConfigured();
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
+    });
+
+    testUsingContext('flutterUpgradeContinue passes env variables to child process', () async {
+      await realCommandRunner.flutterUpgradeContinue();
+
+      final VerificationResult result = verify(processManager.start(
+        <String>[
+          fs.path.join('bin', 'flutter'),
+          'upgrade',
+          '--continue',
+          '--no-version-check',
+        ],
+        environment: captureAnyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      ));
+
+      expect(result.captured.first, fakePlatform.environment);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
+    });
+
+    testUsingContext('precacheArtifacts passes env variables to child process', () async {
+      final List<String> precacheCommand = <String>[
+        fs.path.join('bin', 'flutter'),
+        '--no-color',
+        '--no-version-check',
+        'precache',
+      ];
+
+      when(processManager.start(
+        precacheCommand,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((Invocation invocation) async {
+        return Future<Process>.value(createMockProcess());
+      });
+
+      await realCommandRunner.precacheArtifacts();
+
+      final VerificationResult result = verify(processManager.start(
+        precacheCommand,
+        environment: captureAnyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      ));
+
+      expect(result.captured.first, fakePlatform.environment);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
     });
   });
 

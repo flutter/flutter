@@ -19,6 +19,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     usesPubOption();
     usesBuildNumberOption();
     usesBuildNameOption();
+    addShrinkingFlag();
 
     argParser
       ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
@@ -63,7 +64,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(getBuildInfo(),
-      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName)
+      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName),
+      shrink: argResults['shrink'],
     );
     await androidBuilder.buildAab(
       project: FlutterProject.current(),

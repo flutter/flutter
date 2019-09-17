@@ -69,7 +69,10 @@ class GenSnapshot {
       outputFilter = (String line) => line != kStripWarning ? line : null;
     }
 
-    return runCommandAndStreamOutput(<String>[snapshotterPath, ...args], mapFunction: outputFilter);
+    return processUtils.stream(
+      <String>[snapshotterPath, ...args],
+      mapFunction: outputFilter,
+    );
   }
 }
 
@@ -285,8 +288,9 @@ class AOTSnapshotter {
 
     printTrace('Compiling Dart to kernel: $mainPath');
 
-    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
+    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty) {
       printTrace('Extra front-end options: $extraFrontEndOptions');
+    }
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
@@ -316,8 +320,9 @@ class AOTSnapshotter {
   }
 
   bool _isValidAotPlatform(TargetPlatform platform, BuildMode buildMode) {
-    if (buildMode == BuildMode.debug)
+    if (buildMode == BuildMode.debug) {
       return false;
+    }
     return const <TargetPlatform>[
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,

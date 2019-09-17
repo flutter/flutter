@@ -1123,12 +1123,11 @@ void _unhandledJsonRpcError(dynamic error, dynamic stack) {
 
 String _getWebSocketUrl(String url) {
   Uri uri = Uri.parse(url);
-  final List<String> pathSegments = <String>[];
-  // If there's an authentication code (default), we need to add it to our path.
-  if (uri.pathSegments.isNotEmpty) {
-    pathSegments.add(uri.pathSegments.first);
-  }
-  pathSegments.add('ws');
+  final List<String> pathSegments = <String>[
+    // If there's an authentication code (default), we need to add it to our path.
+    if (uri.pathSegments.isNotEmpty) uri.pathSegments.first,
+    'ws',
+  ];
   if (uri.scheme == 'http')
     uri = uri.replace(scheme: 'ws', pathSegments: pathSegments);
   return uri.toString();
