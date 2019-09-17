@@ -47,11 +47,12 @@ namespace flutter {
 #define DECLARE_FUNCTION(name, count) \
   extern void name(Dart_NativeArguments args);
 
-#define BUILTIN_NATIVE_LIST(V) \
-  V(Logger_PrintString, 1)     \
-  V(SaveCompilationTrace, 0)   \
-  V(ScheduleMicrotask, 1)      \
-  V(GetCallbackHandle, 1)      \
+#define BUILTIN_NATIVE_LIST(V)  \
+  V(Logger_PrintString, 1)      \
+  V(Logger_PrintDebugString, 1) \
+  V(SaveCompilationTrace, 0)    \
+  V(ScheduleMicrotask, 1)       \
+  V(GetCallbackHandle, 1)       \
   V(GetCallbackFromHandle, 1)
 
 BUILTIN_NATIVE_LIST(DECLARE_FUNCTION);
@@ -150,6 +151,12 @@ void DartRuntimeHooks::Install(bool is_ui_isolate,
   InitDartCore(builtin, script_uri);
   InitDartAsync(builtin, is_ui_isolate);
   InitDartIO(builtin, script_uri);
+}
+
+void Logger_PrintDebugString(Dart_NativeArguments args) {
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+  Logger_PrintString(args);
+#endif
 }
 
 // Implementation of native functions which are used for some

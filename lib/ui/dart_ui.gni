@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 dart_ui_files = [
+  "$flutter_root/lib/ui/channel_buffers.dart",
   "$flutter_root/lib/ui/compositing.dart",
   "$flutter_root/lib/ui/geometry.dart",
   "$flutter_root/lib/ui/hash_codes.dart",

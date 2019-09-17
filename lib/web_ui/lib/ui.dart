@@ -23,6 +23,7 @@ export 'src/engine.dart'
         webOnlyInitializeEngine;
 
 part 'src/ui/canvas.dart';
+part 'src/ui/channel_buffers.dart';
 part 'src/ui/compositing.dart';
 part 'src/ui/geometry.dart';
 part 'src/ui/hash_codes.dart';
