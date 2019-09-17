@@ -331,7 +331,7 @@ class ChipThemeData extends Diagnosticable {
   /// Whether or not to show a check mark when [selected] is true.
   ///
   /// For instance, the [ChoiceChip] sets this to false so that it can be
-  /// be selected without showing the check mark.
+  /// selected without showing the check mark.
   ///
   /// Defaults to true.
   final bool showCheckmark;
