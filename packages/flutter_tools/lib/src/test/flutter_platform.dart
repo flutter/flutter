@@ -813,38 +813,26 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
     assert(!startPaused || enableObservatory);
-    final List<String> command = <String>[executable];
-    if (enableObservatory) {
-      // Some systems drive the _FlutterPlatform class in an unusual way, where
-      // only one test file is processed at a time, and the operating
-      // environment hands out specific ports ahead of time in a cooperative
-      // manner, where we're only allowed to open ports that were given to us in
-      // advance like this. For those esoteric systems, we have this feature
-      // whereby you can create _FlutterPlatform with a pair of ports.
-      //
-      // I mention this only so that you won't be tempted, as I was, to apply
-      // the obvious simplification to this code and remove this entire feature.
-      if (observatoryPort != null) {
-        command.add('--observatory-port=$observatoryPort');
-      }
-      if (startPaused) {
-        command.add('--start-paused');
-      }
-      if (disableServiceAuthCodes) {
-        command.add('--disable-service-auth-codes');
-      }
-    } else {
-      command.add('--disable-observatory');
-    }
-    if (host.type == InternetAddressType.IPv6) {
-      command.add('--ipv6');
-    }
-
-    if (icudtlPath != null) {
-      command.add('--icu-data-file-path=$icudtlPath');
-    }
-
-    command.addAll(<String>[
+    final List<String> command = <String>[
+      executable,
+      if (enableObservatory) ...<String>[
+        // Some systems drive the _FlutterPlatform class in an unusual way, where
+        // only one test file is processed at a time, and the operating
+        // environment hands out specific ports ahead of time in a cooperative
+        // manner, where we're only allowed to open ports that were given to us in
+        // advance like this. For those esoteric systems, we have this feature
+        // whereby you can create _FlutterPlatform with a pair of ports.
+        //
+        // I mention this only so that you won't be tempted, as I was, to apply
+        // the obvious simplification to this code and remove this entire feature.
+        if (observatoryPort != null) '--observatory-port=$observatoryPort',
+        if (startPaused) '--start-paused',
+        if (disableServiceAuthCodes) '--disable-service-auth-codes',
+      ]
+      else
+        '--disable-observatory',
+      if (host.type == InternetAddressType.IPv6) '--ipv6',
+      if (icudtlPath != null) '--icu-data-file-path=$icudtlPath',
       '--enable-checked-mode',
       '--verify-entry-points',
       '--enable-software-rendering',
@@ -854,7 +842,8 @@ class FlutterPlatform extends PlatformPlugin {
       '--use-test-fonts',
       '--packages=$packages',
       testPath,
-    ]);
+    ];
+
     printTrace(command.join(' '));
     // If the FLUTTER_TEST environment variable has been set, then pass it on
     // for package:flutter_test to handle the value.
@@ -869,11 +858,9 @@ class FlutterPlatform extends PlatformPlugin {
       'FONTCONFIG_FILE': _fontConfigFile.path,
       'SERVER_PORT': serverPort.toString(),
       'APP_NAME': flutterProject?.manifest?.appName ?? '',
+      if (buildTestAssets)
+        'UNIT_TEST_ASSETS': fs.path.join(flutterProject?.directory?.path ?? '', 'build', 'unit_test_assets'),
     };
-    if (buildTestAssets) {
-      environment['UNIT_TEST_ASSETS'] = fs.path.join(
-        flutterProject?.directory?.path ?? '', 'build', 'unit_test_assets');
-    }
     return processManager.start(command, environment: environment);
   }
 

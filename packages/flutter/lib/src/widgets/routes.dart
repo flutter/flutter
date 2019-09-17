@@ -589,11 +589,10 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   @override
   void initState() {
     super.initState();
-    final List<Listenable> animations = <Listenable>[];
-    if (widget.route.animation != null)
-      animations.add(widget.route.animation);
-    if (widget.route.secondaryAnimation != null)
-      animations.add(widget.route.secondaryAnimation);
+    final List<Listenable> animations = <Listenable>[
+      if (widget.route.animation != null) widget.route.animation,
+      if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation,
+    ];
     _listenable = Listenable.merge(animations);
     if (widget.route.isCurrent) {
       widget.route.navigator.focusScopeNode.setFirstFocus(focusScopeNode);

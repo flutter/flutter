@@ -433,17 +433,13 @@ class InkResponse extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> gestures = <String>[];
-    if (onTap != null)
-      gestures.add('tap');
-    if (onDoubleTap != null)
-      gestures.add('double tap');
-    if (onLongPress != null)
-      gestures.add('long press');
-    if (onTapDown != null)
-      gestures.add('tap down');
-    if (onTapCancel != null)
-      gestures.add('tap cancel');
+    final List<String> gestures = <String>[
+      if (onTap != null) 'tap',
+      if (onDoubleTap != null) 'double tap',
+      if (onLongPress != null) 'long press',
+      if (onTapDown != null) 'tap down',
+      if (onTapCancel != null) 'tap cancel',
+    ];
     properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
     properties.add(DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
     properties.add(DiagnosticsProperty<BoxShape>(

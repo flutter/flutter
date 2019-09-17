@@ -64,11 +64,9 @@ void main(List<String> args) {
     return;
   }
 
-  final List<FrameData> frames = <FrameData>[];
-  for (String filePath in argResults.rest) {
-    final FrameData data = interpretSvg(filePath);
-    frames.add(data);
-  }
+  final List<FrameData> frames = <FrameData>[
+    for (String filePath in argResults.rest) interpretSvg(filePath),
+  ];
 
   final StringBuffer generatedSb = StringBuffer();
 

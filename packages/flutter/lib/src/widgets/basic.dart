@@ -5714,17 +5714,13 @@ class _PointerListener extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> listeners = <String>[];
-    if (onPointerDown != null)
-      listeners.add('down');
-    if (onPointerMove != null)
-      listeners.add('move');
-    if (onPointerUp != null)
-      listeners.add('up');
-    if (onPointerCancel != null)
-      listeners.add('cancel');
-    if (onPointerSignal != null)
-      listeners.add('signal');
+    final List<String> listeners = <String>[
+      if (onPointerDown != null) 'down',
+      if (onPointerMove != null) 'move',
+      if (onPointerUp != null) 'up',
+      if (onPointerCancel != null) 'cancel',
+      if (onPointerSignal != null) 'signal',
+    ];
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(EnumProperty<HitTestBehavior>('behavior', behavior));
   }
