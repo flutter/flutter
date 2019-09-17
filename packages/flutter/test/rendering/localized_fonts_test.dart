@@ -49,10 +49,7 @@ void main() {
 
       await expectLater(
         find.byType(RichText),
-        matchesGoldenFile(
-          'localized_fonts.rich_text.styled_text_span.png',
-          version: null,
-        ),
+        matchesGoldenFile('localized_fonts.rich_text.styled_text_span.png'),
       );
     },
   );
@@ -103,10 +100,7 @@ void main() {
 
       await expectLater(
         find.byType(Row),
-        matchesGoldenFile(
-          'localized_fonts.text_ambient_locale.chars.png',
-          version: null,
-        ),
+        matchesGoldenFile('localized_fonts.text_ambient_locale.chars.png'),
       );
     },
   );
@@ -149,10 +143,7 @@ void main() {
 
       await expectLater(
         find.byType(Row),
-        matchesGoldenFile(
-          'localized_fonts.text_explicit_locale.chars.png',
-          version: null,
-        ),
+        matchesGoldenFile('localized_fonts.text_explicit_locale.chars.png'),
       );
     },
   );
