@@ -7,7 +7,7 @@
 
 @implementation ScreenBeforeFlutter
 
-FlutterEngine* _engine;
+@synthesize engine = _engine;
 
 - (id)initWithEngineRunCompletion:(void (^)(void))engineRunCompletion {
   self = [super init];
