@@ -19,11 +19,8 @@ void main() {
     );
     expect(a.serialize(), <String, String>{
       'finderType': 'Ancestor',
-      'of_finderType': 'ByType',
-      'of_type': 'Text',
-      'matching_finderType': 'ByValueKey',
-      'matching_keyValueString': 'hello',
-      'matching_keyValueType': 'String',
+      'of': '{"finderType":"ByType","type":"Text"}',
+      'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
       'matchRoot': 'true',
       'firstMatchOnly': 'true',
     });
@@ -32,11 +29,8 @@ void main() {
   test('Ancestor finder deserialize', () {
     final Map<String, String> serialized = <String, String>{
       'finderType': 'Ancestor',
-      'of_finderType': 'ByType',
-      'of_type': 'Text',
-      'matching_finderType': 'ByValueKey',
-      'matching_keyValueString': 'hello',
-      'matching_keyValueType': 'String',
+      'of': '{"finderType":"ByType","type":"Text"}',
+      'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
       'matchRoot': 'true',
       'firstMatchOnly': 'true',
     };
@@ -60,11 +54,8 @@ void main() {
     );
     expect(a.serialize(), <String, String>{
       'finderType': 'Descendant',
-      'of_finderType': 'ByType',
-      'of_type': 'Text',
-      'matching_finderType': 'ByValueKey',
-      'matching_keyValueString': 'hello',
-      'matching_keyValueType': 'String',
+      'of': '{"finderType":"ByType","type":"Text"}',
+      'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
       'matchRoot': 'true',
       'firstMatchOnly': 'true',
     });
@@ -73,11 +64,8 @@ void main() {
   test('Descendant finder deserialize', () {
     final Map<String, String> serialized = <String, String>{
       'finderType': 'Descendant',
-      'of_finderType': 'ByType',
-      'of_type': 'Text',
-      'matching_finderType': 'ByValueKey',
-      'matching_keyValueString': 'hello',
-      'matching_keyValueType': 'String',
+      'of': '{"finderType":"ByType","type":"Text"}',
+      'matching': '{"finderType":"ByValueKey","keyValueString":"hello","keyValueType":"String"}',
       'matchRoot': 'true',
       'firstMatchOnly': 'true',
     };
