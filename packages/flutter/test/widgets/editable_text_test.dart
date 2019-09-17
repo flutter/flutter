@@ -661,6 +661,72 @@ void main() {
     expect(find.text('CUT'), findsNothing);
   });
 
+  testWidgets('can dynamically disable select all option in toolbar - cupertino', (WidgetTester tester) async {
+    // Regression test: https://github.com/flutter/flutter/issues/40711
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          toolbarOptions: const ToolbarOptions(
+            selectAll: false,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: cupertinoTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+      tester.state<EditableTextState>(find.byType(EditableText));
+    await tester.tap(find.byType(EditableText));
+    await tester.pump();
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('Select All'), findsNothing);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+  });
+
+  testWidgets('can dynamically disable select all option in toolbar - material', (WidgetTester tester) async {
+    // Regression test: https://github.com/flutter/flutter/issues/40711
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            selectAll: false,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+      tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Select something. Doesn't really matter what.
+    state.renderEditable.selectWordsInRange(
+      from: const Offset(0, 0),
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('SELECT ALL'), findsNothing);
+    expect(find.text('COPY'), findsOneWidget);
+    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('CUT'), findsNothing);
+  });
+
   testWidgets('cut and paste are disabled in read only mode even if explicit set', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
