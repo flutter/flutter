@@ -239,6 +239,11 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// ```
 /// {@end-tool}
 ///
+/// In addition to [onSubmitted], [onEditingComplete] is also called when the
+/// user finishes editing. It differs in that passing [onEditingComplete]
+/// prevents the default behavior of focus and submission of changes to the
+/// controller.
+///
 /// Keep in mind you can also always read the current string from a TextField's
 /// [TextEditingController] using [TextEditingController.text].
 ///
