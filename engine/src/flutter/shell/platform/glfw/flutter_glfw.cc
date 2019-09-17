@@ -739,9 +739,10 @@ void FlutterDesktopWindowSetPixelRatioOverride(
 bool FlutterDesktopRunWindowEventLoopWithTimeout(
     FlutterDesktopWindowControllerRef controller,
     uint32_t timeout_milliseconds) {
-  auto wait_duration = timeout_milliseconds == 0
-                           ? std::chrono::milliseconds::max()
-                           : std::chrono::milliseconds(timeout_milliseconds);
+  std::chrono::nanoseconds wait_duration =
+      timeout_milliseconds == 0
+          ? std::chrono::nanoseconds::max()
+          : std::chrono::milliseconds(timeout_milliseconds);
   controller->event_loop->WaitForEvents(wait_duration);
 
   return !glfwWindowShouldClose(controller->window.get());

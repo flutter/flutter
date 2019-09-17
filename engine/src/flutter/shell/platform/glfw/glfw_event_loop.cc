@@ -63,9 +63,12 @@ void GLFWEventLoop::WaitForEvents(std::chrono::nanoseconds max_wait) {
     // Make sure the seconds are not integral.
     using Seconds = std::chrono::duration<double, std::ratio<1>>;
 
-    std::lock_guard<std::mutex> lock(task_queue_mutex_);
-    const auto next_wake = task_queue_.empty() ? TaskTimePoint::max()
-                                               : task_queue_.top().fire_time;
+    TaskTimePoint next_wake;
+    {
+      std::lock_guard<std::mutex> lock(task_queue_mutex_);
+      next_wake = task_queue_.empty() ? TaskTimePoint::max()
+                                      : task_queue_.top().fire_time;
+    }
 
     const auto duration_to_wait = std::chrono::duration_cast<Seconds>(
         std::min(next_wake - now, max_wait));
@@ -84,7 +87,7 @@ void GLFWEventLoop::WaitForEvents(std::chrono::nanoseconds max_wait) {
 GLFWEventLoop::TaskTimePoint GLFWEventLoop::TimePointFromFlutterTime(
     uint64_t flutter_target_time_nanos) {
   const auto now = TaskTimePoint::clock::now();
-  const auto flutter_duration =
+  const int64_t flutter_duration =
       flutter_target_time_nanos - FlutterEngineGetCurrentTime();
   return now + std::chrono::nanoseconds(flutter_duration);
 }
