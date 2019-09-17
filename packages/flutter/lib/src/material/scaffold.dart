@@ -811,7 +811,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// within the [Scaffold]. The [FloatingActionButton] is connected to a
 /// callback that increments a counter.
 ///
-/// ![A screenshot of the Scaffold widget with a body and floating action button](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold.png)
+/// ![The Scaffold has a white background with a blue AppBar at the top. A blue FloatingActionButton is positioned at the bottom right corner of the Scaffold.](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold.png)
 ///
 /// ```dart
 /// int _count = 0;
@@ -835,12 +835,12 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// {@end-tool}
 ///
 /// {@tool snippet --template=stateful_widget_material}
-/// This example shows a [Scaffold] with a [backgroundColor], [body] and
-/// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
-/// to center the text within the [Scaffold]. The [FloatingActionButton] is
-/// connected to a callback that increments a counter.
+/// This example shows a [Scaffold] with a blueGrey [backgroundColor], [body]
+/// and [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in
+/// order to center the text within the [Scaffold]. The [FloatingActionButton]
+/// is connected to a callback that increments a counter.
 ///
-/// ![A screenshot of the Scaffold widget example with a background color](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold_background_color.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold_background_color.png)
 ///
 /// ```dart
 /// int _count = 0;
@@ -872,7 +872,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [FloatingActionButtonLocation.centerDocked]. The [FloatingActionButton] is
 /// connected to a callback that increments a counter.
 ///
-/// ![A screenshot of the Scaffold widget with a bottom navigation bar and docked floating action button](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold_bottom_app_bar.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold_bottom_app_bar.png)
 ///
 /// ```dart
 /// int _count = 0;
