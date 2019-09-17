@@ -224,7 +224,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///                 content: Text ('You typed "$value".'),
 ///                 actions: <Widget>[
 ///                   FlatButton(
-///                     onPressed: () { Navigator.pop(context, null); },
+///                     onPressed: () { Navigator.pop(context); },
 ///                     child: const Text('OK'),
 ///                   ),
 ///                 ],

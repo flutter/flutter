@@ -780,30 +780,35 @@ class EditableText extends StatefulWidget {
   ///
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
-  ///     body: Center(
-  ///       child: TextField(
-  ///         controller: _controller,
-  ///         onChanged: (String value) async {
-  ///           if (value != '13') {
-  ///             return;
-  ///           }
-  ///           await showDialog<void>(
-  ///             context: context,
-  ///             builder: (BuildContext context) {
-  ///               return AlertDialog(
-  ///                 title: const Text('Thats correct!'),
-  ///                 content: Text ('13 is the right answer.'),
-  ///                 actions: <Widget>[
-  ///                   FlatButton(
-  ///                     onPressed: () { Navigator.pop(context, null); },
-  ///                     child: const Text('OK'),
-  ///                   ),
-  ///                 ],
-  ///               );
-  ///             },
-  ///           );
-  ///         },
-  ///       ),
+  ///     body: Column(
+  ///       mainAxisAlignment: MainAxisAlignment.center,
+  ///       children: <Widget>[
+  ///         const Text('What number comes next in the sequence?'),
+  ///         const Text('1, 1, 2, 3, 5, 8...?'),
+  ///         TextField(
+  ///           controller: _controller,
+  ///           onChanged: (String value) async {
+  ///             if (value != '13') {
+  ///               return;
+  ///             }
+  ///             await showDialog<void>(
+  ///               context: context,
+  ///               builder: (BuildContext context) {
+  ///                 return AlertDialog(
+  ///                   title: const Text('Thats correct!'),
+  ///                   content: Text ('13 is the right answer.'),
+  ///                   actions: <Widget>[
+  ///                     FlatButton(
+  ///                       onPressed: () { Navigator.pop(context); },
+  ///                       child: const Text('OK'),
+  ///                     ),
+  ///                   ],
+  ///                 );
+  ///               },
+  ///             );
+  ///           },
+  ///         ),
+  //        ],
   ///     ),
   ///   );
   /// }
