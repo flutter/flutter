@@ -3367,68 +3367,6 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Disabled text field does not have tap action', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: Center(
-            child: TextField(
-              maxLength: 10,
-              enabled: false,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
-
-    semantics.dispose();
-  });
-
-  testWidgets('currentValueLength/maxValueLength are in the tree', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: TextField(
-              controller: controller,
-              maxLength: 10,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(semantics, includesNodeWith(
-      flags: <SemanticsFlag>[SemanticsFlag.isTextField],
-      maxValueLength: 10,
-      currentValueLength: 0,
-    ));
-
-    await tester.showKeyboard(find.byType(TextField));
-    const String testValue = '123';
-    tester.testTextInput.updateEditingValue(const TextEditingValue(
-      text: testValue,
-      selection: TextSelection.collapsed(offset: 3),
-      composing: TextRange(start: 0, end: testValue.length),
-    ));
-    await tester.pump();
-
-    expect(semantics, includesNodeWith(
-      flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused],
-      maxValueLength: 10,
-      currentValueLength: 3,
-    ));
-
-    semantics.dispose();
-  });
-
   testWidgets('Read only TextField identifies as read only text field in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
