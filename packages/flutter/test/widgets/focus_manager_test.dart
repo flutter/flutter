@@ -486,8 +486,7 @@ void main() {
       expect(lastMode, isNull);
       focusManager.highlightStrategy = FocusHighlightStrategy.automatic;
       expect(focusManager.highlightMode, equals(FocusHighlightMode.touch));
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
+      await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
       expect(callCount, equals(1));
       expect(lastMode, FocusHighlightMode.traditional);
       expect(focusManager.highlightMode, equals(FocusHighlightMode.traditional));

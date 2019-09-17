@@ -30,8 +30,7 @@ void main() {
     focusNode.requestFocus();
     await tester.idle();
 
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
+    await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
     await tester.idle();
 
     expect(events.length, 2);
@@ -63,8 +62,7 @@ void main() {
     focusNode.requestFocus();
     await tester.idle();
 
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
+    await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
     await tester.idle();
 
     expect(events.length, 2);
@@ -72,8 +70,7 @@ void main() {
 
     await tester.pumpWidget(Container());
 
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
+    await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
 
     await tester.idle();
 
