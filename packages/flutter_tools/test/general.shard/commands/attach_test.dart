@@ -286,7 +286,7 @@ void main() {
       when(portForwarder.unforward(any))
         .thenAnswer((_) async => null);
       when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
-          .thenAnswer((_) async => 0);
+        .thenAnswer((_) async => 0);
       when(mockHotRunnerFactory.build(
         any,
         target: anyNamed('target'),
