@@ -120,16 +120,12 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
           CupertinoDialogAction(
             child: const Text('Discard'),
             isDestructiveAction: true,
-            onPressed: () {
-              Navigator.pop(context, 'Discard');
-            },
+            onPressed: () => Navigator.pop(context, 'Discard'),
           ),
           CupertinoDialogAction(
             child: const Text('Cancel'),
             isDefaultAction: true,
-            onPressed: () {
-              Navigator.pop(context, 'Cancel');
-            },
+            onPressed: () => Navigator.pop(context, 'Cancel'),
           ),
         ],
       ),
@@ -146,15 +142,11 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
         actions: <Widget>[
           CupertinoDialogAction(
             child: const Text('Don\'t Allow'),
-            onPressed: () {
-              Navigator.pop(context, 'Disallow');
-            },
+            onPressed: () => Navigator.pop(context, 'Disallow'),
           ),
           CupertinoDialogAction(
             child: const Text('Allow'),
-            onPressed: () {
-              Navigator.pop(context, 'Allow');
-            },
+            onPressed: () => Navigator.pop(context, 'Allow'),
           ),
         ],
       ),
@@ -182,29 +174,21 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
         actions: <Widget>[
           CupertinoActionSheetAction(
             child: const Text('Profiteroles'),
-            onPressed: () {
-              Navigator.pop(context, 'Profiteroles');
-            },
+            onPressed: () => Navigator.pop(context, 'Profiteroles'),
           ),
           CupertinoActionSheetAction(
             child: const Text('Cannolis'),
-            onPressed: () {
-              Navigator.pop(context, 'Cannolis');
-            },
+            onPressed: () => Navigator.pop(context, 'Cannolis'),
           ),
           CupertinoActionSheetAction(
             child: const Text('Trifle'),
-            onPressed: () {
-              Navigator.pop(context, 'Trifle');
-            },
+            onPressed: () => Navigator.pop(context, 'Trifle'),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           child: const Text('Cancel'),
           isDefaultAction: true,
-          onPressed: () {
-            Navigator.pop(context, 'Cancel');
-          },
+          onPressed: () => Navigator.pop(context, 'Cancel'),
         ),
       ),
     );
