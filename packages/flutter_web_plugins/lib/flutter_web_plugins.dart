@@ -3,3 +3,4 @@
 // found in the LICENSE file.
 
 export 'src/plugin_registry.dart';
+export 'src/plugin_event_channel.dart';

@@ -44,15 +44,28 @@ void main() {
           MethodChannel('test_plugin', StandardMethodCodec());
       frameworkChannel.invokeMethod<void>('test1');
 
-      expect(TestPlugin.calledMethods, <String>['test1']);
+      expect(TestPlugin.calledMethods, equals(['test1']));
     });
 
-    test('can send a message from the plugin to the framework', () {
-    });
+    test('can send a message from the plugin to the framework', () async {
+      const StandardMessageCodec codec = StandardMessageCodec();
 
-    test('throws when trying to send a platform message to the framework', () {
-      expect(() => pluginBinaryMessenger.send('test', ByteData(0)),
-          throwsFlutterError);
+      final List<String> loggedMessages = <String>[];
+      ServicesBinding.instance.defaultBinaryMessenger
+          .setMessageHandler('test_send', (ByteData data) {
+        loggedMessages.add(codec.decodeMessage(data));
+      });
+
+      await pluginBinaryMessenger.send(
+          'test_send', codec.encodeMessage('hello'));
+      expect(loggedMessages, equals(['hello']));
+
+      await pluginBinaryMessenger.send(
+          'test_send', codec.encodeMessage('world'));
+      expect(loggedMessages, equals(['hello', 'world']));
+
+      ServicesBinding.instance.defaultBinaryMessenger
+          .setMessageHandler('test_send', null);
     });
 
     test('throws when trying to set a mock handler', () {
