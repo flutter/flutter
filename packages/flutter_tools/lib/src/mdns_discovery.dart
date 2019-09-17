@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:multicast_dns/multicast_dns.dart';
 
 import 'base/common.dart';
+import 'base/context.dart';
 import 'base/io.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -26,6 +27,8 @@ class MDnsObservatoryDiscovery {
   final MDnsClient client;
 
   static const String dartObservatoryName = '_dartobservatory._tcp.local';
+
+  static MDnsObservatoryDiscovery get instance => context.get<MDnsObservatoryDiscovery>();
 
   /// Executes an mDNS query for a Dart Observatory.
   ///
