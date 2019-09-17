@@ -10,8 +10,9 @@ import 'plugin_registry.dart';
 /// [EventChannel] receives a stream of events from platform plugins, this
 /// channel sends a stream of events to the handler listening on the
 /// framework-side.
-class PluginEventChannel {
-  PluginEventChannel(
+class PluginEventChannel<T> {
+  /// Creates a new plugin event channel.
+  const PluginEventChannel(
     this.name, [
     this.codec = const StandardMethodCodec(),
     BinaryMessenger binaryMessenger,
@@ -31,8 +32,8 @@ class PluginEventChannel {
   final BinaryMessenger _binaryMessenger;
 
   /// Set the stream controller for this event channel.
-  set controller(StreamController controller) {
-    final _EventChannelHandler handler = _EventChannelHandler(
+  set controller(StreamController<T> controller) {
+    final _EventChannelHandler<T> handler = _EventChannelHandler<T>(
       name,
       codec,
       controller,
@@ -43,15 +44,15 @@ class PluginEventChannel {
   }
 }
 
-class _EventChannelHandler {
+class _EventChannelHandler<T> {
   _EventChannelHandler(this.name, this.codec, this.controller, this.messenger);
 
   final String name;
   final MethodCodec codec;
-  final StreamController controller;
+  final StreamController<T> controller;
   final BinaryMessenger messenger;
 
-  StreamSubscription subscription;
+  StreamSubscription<T> subscription;
 
   Future<ByteData> handle(ByteData message) {
     final MethodCall call = codec.decodeMethodCall(message);

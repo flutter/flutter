@@ -5,9 +5,7 @@
 @TestOn('chrome') // Uses web-only Flutter SDK
 
 import 'dart:async';
-import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -38,10 +36,11 @@ void main() {
     });
 
     test('can send events to an $EventChannel', () async {
-      EventChannel listeningChannel = EventChannel('test');
-      PluginEventChannel sendingChannel = PluginEventChannel('test');
+      const EventChannel listeningChannel = EventChannel('test');
+      const PluginEventChannel<String> sendingChannel =
+          PluginEventChannel<String>('test');
 
-      StreamController<String> controller = StreamController();
+      final StreamController<String> controller = StreamController<String>();
       sendingChannel.controller = controller;
 
       expect(listeningChannel.receiveBroadcastStream(),
@@ -53,10 +52,11 @@ void main() {
     });
 
     test('can send errors to an $EventChannel', () async {
-      EventChannel listeningChannel = EventChannel('test2');
-      PluginEventChannel sendingChannel = PluginEventChannel('test2');
+      const EventChannel listeningChannel = EventChannel('test2');
+      const PluginEventChannel<String> sendingChannel =
+          PluginEventChannel<String>('test2');
 
-      StreamController<String> controller = StreamController();
+      final StreamController<String> controller = StreamController<String>();
       sendingChannel.controller = controller;
 
       expect(
@@ -69,11 +69,12 @@ void main() {
     });
 
     test('receives a listen event', () async {
-      EventChannel listeningChannel = EventChannel('test3');
-      PluginEventChannel sendingChannel = PluginEventChannel('test3');
+      const EventChannel listeningChannel = EventChannel('test3');
+      const PluginEventChannel<String> sendingChannel =
+          PluginEventChannel<String>('test3');
 
-      StreamController<String> controller =
-          StreamController(onListen: expectAsync0<void>(() {}, count: 1));
+      final StreamController<String> controller = StreamController<String>(
+          onListen: expectAsync0<void>(() {}, count: 1));
       sendingChannel.controller = controller;
 
       expect(listeningChannel.receiveBroadcastStream(),
@@ -84,16 +85,19 @@ void main() {
     });
 
     test('receives a cancel event', () async {
-      EventChannel listeningChannel = EventChannel('test4');
-      PluginEventChannel sendingChannel = PluginEventChannel('test4');
+      const EventChannel listeningChannel = EventChannel('test4');
+      const PluginEventChannel<String> sendingChannel =
+          PluginEventChannel<String>('test4');
 
-      StreamController<String> controller =
-          StreamController(onCancel: expectAsync0<void>(() {}));
+      final StreamController<String> controller =
+          StreamController<String>(onCancel: expectAsync0<void>(() {}));
       sendingChannel.controller = controller;
 
-      final Stream eventStream = listeningChannel.receiveBroadcastStream();
-      StreamSubscription subscription;
-      subscription = eventStream.listen(expectAsync1<void, dynamic>((dynamic x) {
+      final Stream<dynamic> eventStream =
+          listeningChannel.receiveBroadcastStream();
+      StreamSubscription<dynamic> subscription;
+      subscription =
+          eventStream.listen(expectAsync1<void, dynamic>((dynamic x) {
         expect(x, equals('hello'));
         subscription.cancel();
       }));
