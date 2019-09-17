@@ -762,21 +762,27 @@ class EditableText extends StatefulWidget {
   /// and selection, one can add a listener to its [controller] with
   /// [TextEditingController.addListener].
   ///
-  /// {@tool dartpad --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material}
   ///
-  /// This example shows how onChanged could be used to check the value in the
-  /// input as the user types it.
+  /// This example shows how onChanged could be used to check the TextField's
+  /// current value each time the user inserts or deletes a character.
   ///
   /// ```dart
+  /// TextEditingController _controller;
+  ///
+  /// void initState() {
+  ///   _controller = TextEditingController();
+  /// }
+  ///
+  /// void dispose() {
+  ///   _controller.dispose();
+  /// }
+  ///
   /// Widget build(BuildContext context) {
-  ///   final TextEditingController controller = TextEditingController();
   ///   return Scaffold(
-  ///     appBar: AppBar(
-  ///       title: const Text('TextField Demo'),
-  ///     ),
   ///     body: Center(
   ///       child: TextField(
-  ///         controller: controller,
+  ///         controller: _controller,
   ///         onChanged: (String value) async {
   ///           if (value != '13') {
   ///             return;

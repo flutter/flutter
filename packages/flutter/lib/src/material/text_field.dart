@@ -191,24 +191,30 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// ## Reading values
 ///
 /// A common way to read a value from a TextField is to use the [onSubmitted]
-/// method, which is called when the user finishes editing and receives the
-/// current value in its callback.
+/// callback. This callback is applied to the text field's current value when
+/// the user finishes editing.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 ///
 /// This sample shows how to get a value from a TextField via the [onSubmitted]
 /// method.
 ///
 /// ```dart
+/// TextEditingController _controller;
+///
+/// void initState() {
+///   _controller = TextEditingController();
+/// }
+///
+/// void dispose() {
+///   _controller.dispose();
+/// }
+///
 /// Widget build(BuildContext context) {
-///   final TextEditingController controller = TextEditingController();
 ///   return Scaffold(
-///     appBar: AppBar(
-///       title: const Text('TextField Demo'),
-///     ),
 ///     body: Center(
 ///       child: TextField(
-///         controller: controller,
+///         controller: _controller,
 ///         onSubmitted: (String value) async {
 ///           await showDialog<void>(
 ///             context: context,
