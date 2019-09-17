@@ -324,7 +324,7 @@ class SkiaGoldClient {
   String _getKeysJSON() {
     return json.encode(
       <String, dynamic>{
-        'Platform': platform.operatingSystem,
+        'Platform' : platform.operatingSystem,
       }
     );
   }
