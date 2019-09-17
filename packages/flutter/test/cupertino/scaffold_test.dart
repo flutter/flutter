@@ -66,55 +66,36 @@ void main() {
     );
 
     BuildContext childContext;
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(
-          platformBrightness: Brightness.light,
-          viewInsets: EdgeInsets.only(top: 20),
-        ),
-        child: CupertinoPageScaffold(
-          backgroundColor: backgroundColor,
-          navigationBar: const CupertinoNavigationBar(
-            middle: Text('Title'),
-            backgroundColor: dynamicColor,
+    Widget scaffoldWithBrightness(Brightness brightness) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(
+            platformBrightness: brightness,
+            viewInsets: const EdgeInsets.only(top: 20),
           ),
-          child: Builder(
-            builder: (BuildContext context) {
-              childContext = context;
-              return Container();
-            },
+          child: CupertinoPageScaffold(
+            backgroundColor: backgroundColor,
+            navigationBar: const CupertinoNavigationBar(
+              middle: Text('Title'),
+              backgroundColor: dynamicColor,
+            ),
+            child: Builder(
+              builder: (BuildContext context) {
+                childContext = context;
+                return Container();
+              },
+            ),
           ),
         ),
-      ),
-    ));
+      );
+    }
+    await tester.pumpWidget(scaffoldWithBrightness(Brightness.light));
 
     expect(MediaQuery.of(childContext).padding.top, 0);
     expect(find.byType(CupertinoPageScaffold), paints..rect(color: backgroundColor.color));
 
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(
-          platformBrightness: Brightness.dark,
-          viewInsets: EdgeInsets.only(top: 20),
-        ),
-        child: CupertinoPageScaffold(
-          backgroundColor: backgroundColor,
-          navigationBar: const CupertinoNavigationBar(
-            middle: Text('Title'),
-            backgroundColor: dynamicColor,
-          ),
-          child: Builder(
-            builder: (BuildContext context) {
-              childContext = context;
-              return Container();
-            },
-          ),
-        ),
-      ),
-    ));
-
+    await tester.pumpWidget(scaffoldWithBrightness(Brightness.dark));
 
     expect(MediaQuery.of(childContext).padding.top, greaterThan(0));
     expect(find.byType(CupertinoPageScaffold), paints..rect(color: backgroundColor.darkColor));
