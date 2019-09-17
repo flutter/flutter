@@ -149,7 +149,7 @@ Future<void> checkGradleDependencies() async {
     <String>[gradlew, 'dependencies'],
     throwOnError: true,
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
-    environment: _gradleEnv,
+    environment: gradleEnv,
   );
   androidSdk.reinitialize();
   progress.stop();
@@ -239,13 +239,13 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
       <String>[gradlew, if (isLibrary) 'properties' else 'app:properties'],
       throwOnError: true,
       workingDirectory: hostAppGradleRoot.path,
-      environment: _gradleEnv,
+      environment: gradleEnv,
     );
     final RunResult tasksRunResult = await processUtils.run(
       <String>[gradlew, if (isLibrary) 'tasks' else 'app:tasks', '--all', '--console=auto'],
       throwOnError: true,
       workingDirectory: hostAppGradleRoot.path,
-      environment: _gradleEnv,
+      environment: gradleEnv,
     );
     project = GradleProject.fromAppProperties(propertiesRunResult.stdout, tasksRunResult.stdout);
   } catch (exception) {
@@ -324,7 +324,7 @@ Future<String> _initializeGradle(FlutterProject project) async {
     await processUtils.run(
       <String>[gradle, '-v'],
       throwOnError: true,
-      environment: _gradleEnv,
+      environment: gradleEnv,
     );
   } on ProcessException catch (e) {
     final String error = e.toString();
@@ -640,7 +640,7 @@ Future<void> buildGradleAar({
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
-      environment: _gradleEnv,
+      environment: gradleEnv,
       mapFunction: (String line) {
         // Always print the full line in verbose mode.
         if (logger.isVerbose) {
@@ -678,7 +678,7 @@ Future<void> _buildGradleProjectV1(FlutterProject project) async {
     <String>[fs.file(gradlew).absolute.path, 'build'],
     workingDirectory: project.android.hostAppGradleRoot.path,
     allowReentrantFlutter: true,
-    environment: _gradleEnv,
+    environment: gradleEnv,
   );
   status.stop();
   flutterUsage.sendTiming('build', 'gradle-v1', Duration(milliseconds: sw.elapsedMilliseconds));
@@ -809,7 +809,7 @@ Future<void> _buildGradleProjectV2(
       command,
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
-      environment: _gradleEnv,
+      environment: gradleEnv,
       // TODO(mklim): if AndroidX warnings are no longer required, this
       // mapFunction and all its associated variabled can be replaced with just
       // `filter: ndkMessagefilter`.
@@ -961,7 +961,8 @@ File findBundleFile(GradleProject project, BuildInfo buildInfo) {
   return null;
 }
 
-Map<String, String> get _gradleEnv {
+/// The environment variables needed to run Gradle.
+Map<String, String> get gradleEnv {
   final Map<String, String> env = Map<String, String>.from(platform.environment);
   if (javaPath != null) {
     // Use java bundled with Android Studio.
