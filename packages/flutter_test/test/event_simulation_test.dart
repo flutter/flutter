@@ -26,10 +26,8 @@ void main() {
     await tester.idle();
 
     for (String platform in platforms) {
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift, platform: platform);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift, platform: platform);
+      await tester.sendKeyEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+      await tester.sendKeyEvent(LogicalKeyboardKey.shift, platform: platform);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA, platform: platform);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.keyA, platform: platform);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.numpad1, platform: platform);

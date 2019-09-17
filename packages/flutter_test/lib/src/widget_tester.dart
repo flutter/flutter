@@ -721,6 +721,33 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     });
   }
 
+  /// Simulates sending physical key down and up events through the system channel.
+  ///
+  /// This only simulates key events coming from a physical keyboard, not from a
+  /// soft keyboard.
+  ///
+  /// Specify `platform` as one of the platforms allowed in
+  /// [Platform.operatingSystem] to make the event appear to be from that type
+  /// of system. Defaults to "android". Must not be null. Some platforms (e.g.
+  /// Windows, iOS) are not yet supported.
+  ///
+  /// Keys that are down when the test completes are cleared after each test.
+  ///
+  /// This method sends both the key down and the key up events, to simulate a
+  /// key press. To simulate individual down and/or up events, see
+  /// [sendKeyDownEvent] and [sendKeyUpEvent].
+  ///
+  /// See also:
+  ///
+  ///  - [sendKeyDownEvent] to simulate only a key down event.
+  ///  - [sendKeyUpEvent] to simulate only a key up event.
+  Future<void> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+    assert(platform != null);
+    // Internally wrapped in async guard.
+    await simulateKeyDownEvent(key, platform: platform);
+    return await simulateKeyUpEvent(key, platform: platform);
+  }
+
   /// Simulates sending a physical key down event through the system channel.
   ///
   /// This only simulates key down events coming from a physical keyboard, not
@@ -728,7 +755,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// Specify `platform` as one of the platforms allowed in
   /// [Platform.operatingSystem] to make the event appear to be from that type
-  /// of system. Defaults to "android". May not be null. Some platforms (e.g.
+  /// of system. Defaults to "android". Must not be null. Some platforms (e.g.
   /// Windows, iOS) are not yet supported.
   ///
   /// Keys that are down when the test completes are cleared after each test.
@@ -736,7 +763,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// See also:
   ///
   ///  - [sendKeyUpEvent] to simulate the corresponding key up event.
-  Future<void> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android' }) {
+  ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
+  Future<void> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyDownEvent(key, platform: platform);
@@ -754,7 +782,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// See also:
   ///
   ///  - [sendKeyDownEvent] to simulate the corresponding key down event.
-  Future<void> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) {
+  ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
+  Future<void> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
     assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyUpEvent(key, platform: platform);
