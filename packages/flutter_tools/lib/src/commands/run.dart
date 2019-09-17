@@ -225,14 +225,12 @@ class RunCommand extends RunCommandBase {
     final String modeName = getBuildInfo().modeName;
     final AndroidProject androidProject = FlutterProject.current().android;
     final IosProject iosProject = FlutterProject.current().ios;
-    final List<String> hostLanguage = <String>[];
-
-    if (androidProject != null && androidProject.existsSync()) {
-      hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
-    }
-    if (iosProject != null && iosProject.exists) {
-      hostLanguage.add(await iosProject.isSwift ? 'swift' : 'objc');
-    }
+    final List<String> hostLanguage = <String>[
+      if (androidProject != null && androidProject.existsSync())
+        if (androidProject.isKotlin) 'kotlin' else 'java',
+      if (iosProject != null && iosProject.exists)
+        if (await iosProject.isSwift) 'swift' else 'objc',
+    ];
 
     return <CustomDimensions, String>{
       CustomDimensions.commandRunIsEmulator: '$isEmulator',
@@ -400,22 +398,21 @@ class RunCommand extends RunCommandBase {
         argResults[FlutterOptions.kEnableExperiment].isNotEmpty) {
       expFlags = argResults[FlutterOptions.kEnableExperiment];
     }
-    final List<FlutterDevice> flutterDevices = <FlutterDevice>[];
     final FlutterProject flutterProject = FlutterProject.current();
-    for (Device device in devices) {
-      final FlutterDevice flutterDevice = await FlutterDevice.create(
-        device,
-        flutterProject: flutterProject,
-        trackWidgetCreation: argResults['track-widget-creation'],
-        fileSystemRoots: argResults['filesystem-root'],
-        fileSystemScheme: argResults['filesystem-scheme'],
-        viewFilter: argResults['isolate-filter'],
-        experimentalFlags: expFlags,
-        target: argResults['target'],
-        buildMode: getBuildMode(),
-      );
-      flutterDevices.add(flutterDevice);
-    }
+    final List<FlutterDevice> flutterDevices = <FlutterDevice>[
+      for (Device device in devices)
+        await FlutterDevice.create(
+          device,
+          flutterProject: flutterProject,
+          trackWidgetCreation: argResults['track-widget-creation'],
+          fileSystemRoots: argResults['filesystem-root'],
+          fileSystemScheme: argResults['filesystem-scheme'],
+          viewFilter: argResults['isolate-filter'],
+          experimentalFlags: expFlags,
+          target: argResults['target'],
+          buildMode: getBuildMode(),
+        ),
+    ];
     // Only support "web mode" with a single web device due to resident runner
     // refactoring required otherwise.
     final bool webMode = featureFlags.isWebEnabled &&
@@ -490,12 +487,16 @@ class RunCommand extends RunCommandBase {
     return FlutterCommandResult(
       ExitStatus.success,
       timingLabelParts: <String>[
-        hotMode ? 'hot' : 'cold',
+        if (hotMode) 'hot' else 'cold',
         getModeName(getBuildMode()),
-        devices.length == 1
-            ? getNameForTargetPlatform(await devices[0].targetPlatform)
-            : 'multiple',
-        devices.length == 1 && await devices[0].isLocalEmulator ? 'emulator' : null,
+        if (devices.length == 1)
+          getNameForTargetPlatform(await devices[0].targetPlatform)
+        else
+          'multiple',
+        if (devices.length == 1 && await devices[0].isLocalEmulator)
+          'emulator'
+        else
+          null,
       ],
       endTimeOverride: appStartedTime,
     );

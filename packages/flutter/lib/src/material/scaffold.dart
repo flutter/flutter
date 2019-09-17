@@ -749,46 +749,40 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[];
-
-    if (_previousController.status != AnimationStatus.dismissed) {
-      if (_isExtendedFloatingActionButton(_previousChild)) {
-        children.add(FadeTransition(
-          opacity: _previousScaleAnimation,
-          child: _previousChild,
-        ));
-      } else {
-        children.add(ScaleTransition(
-          scale: _previousScaleAnimation,
-          child: RotationTransition(
-            turns: _previousRotationAnimation,
-            child: _previousChild,
-          ),
-        ));
-      }
-    }
-
-    if (_isExtendedFloatingActionButton(widget.child)) {
-      children.add(ScaleTransition(
-        scale: _extendedCurrentScaleAnimation,
-        child: FadeTransition(
-          opacity: _currentScaleAnimation,
-          child: widget.child,
-        ),
-      ));
-    } else {
-      children.add(ScaleTransition(
-        scale: _currentScaleAnimation,
-        child: RotationTransition(
-          turns: _currentRotationAnimation,
-          child: widget.child,
-        ),
-      ));
-    }
-
     return Stack(
       alignment: Alignment.centerRight,
-      children: children,
+      children: <Widget>[
+        if (_previousController.status != AnimationStatus.dismissed)
+          if (_isExtendedFloatingActionButton(_previousChild))
+            FadeTransition(
+              opacity: _previousScaleAnimation,
+              child: _previousChild,
+            )
+          else
+            ScaleTransition(
+              scale: _previousScaleAnimation,
+              child: RotationTransition(
+                turns: _previousRotationAnimation,
+                child: _previousChild,
+              ),
+            ),
+        if (_isExtendedFloatingActionButton(widget.child))
+          ScaleTransition(
+            scale: _extendedCurrentScaleAnimation,
+            child: FadeTransition(
+              opacity: _currentScaleAnimation,
+              child: widget.child,
+            ),
+          )
+        else
+          ScaleTransition(
+            scale: _currentScaleAnimation,
+            child: RotationTransition(
+              turns: _currentRotationAnimation,
+              child: widget.child,
+            ),
+          ),
+      ],
     );
   }
 

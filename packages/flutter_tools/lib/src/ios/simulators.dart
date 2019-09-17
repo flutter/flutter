@@ -361,30 +361,20 @@ class IOSSimulator extends Device {
     }
 
     // Prepare launch arguments.
-    final List<String> args = <String>['--enable-dart-profiling'];
-
-    if (debuggingOptions.debuggingEnabled) {
-      if (debuggingOptions.buildInfo.isDebug) {
-        args.addAll(<String>[
+    final List<String> args = <String>[
+      '--enable-dart-profiling',
+      if (debuggingOptions.debuggingEnabled) ...<String>[
+        if (debuggingOptions.buildInfo.isDebug) ...<String>[
           '--enable-checked-mode',
           '--verify-entry-points',
-        ]);
-      }
-      if (debuggingOptions.startPaused) {
-        args.add('--start-paused');
-      }
-      if (debuggingOptions.disableServiceAuthCodes) {
-        args.add('--disable-service-auth-codes');
-      }
-      if (debuggingOptions.skiaDeterministicRendering) {
-        args.add('--skia-deterministic-rendering');
-      }
-      if (debuggingOptions.useTestFonts) {
-        args.add('--use-test-fonts');
-      }
-      final int observatoryPort = debuggingOptions.observatoryPort ?? 0;
-      args.add('--observatory-port=$observatoryPort');
-    }
+        ],
+        if (debuggingOptions.startPaused) '--start-paused',
+        if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
+        if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
+        if (debuggingOptions.useTestFonts) '--use-test-fonts',
+        '--observatory-port=${debuggingOptions.observatoryPort ?? 0}',
+      ]
+    ];
 
     ProtocolDiscovery observatoryDiscovery;
     if (debuggingOptions.debuggingEnabled) {

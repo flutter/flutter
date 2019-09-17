@@ -236,13 +236,13 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
   // flavors and build types defined in the project. If gradle fails, then check if the failure is due to t
   try {
     final RunResult propertiesRunResult = await processUtils.run(
-      <String>[gradlew, isLibrary ? 'properties' : 'app:properties'],
+      <String>[gradlew, if (isLibrary) 'properties' else 'app:properties'],
       throwOnError: true,
       workingDirectory: hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
     final RunResult tasksRunResult = await processUtils.run(
-      <String>[gradlew, isLibrary ? 'tasks': 'app:tasks', '--all', '--console=auto'],
+      <String>[gradlew, if (isLibrary) 'tasks' else 'app:tasks', '--all', '--console=auto'],
       throwOnError: true,
       workingDirectory: hostAppGradleRoot.path,
       environment: _gradleEnv,

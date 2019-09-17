@@ -951,9 +951,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            widget.isExpanded
-              ? Expanded(child: innerItemsWidget)
-              : innerItemsWidget,
+            if (widget.isExpanded)
+              Expanded(child: innerItemsWidget)
+            else
+              innerItemsWidget,
             IconTheme(
               data: IconThemeData(
                 color: _iconColor,

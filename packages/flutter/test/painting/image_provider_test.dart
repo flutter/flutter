@@ -237,11 +237,11 @@ void main() {
       });
 
       test('Notifies listeners of chunk events', () async {
-        final List<Uint8List> chunks = <Uint8List>[];
         const int chunkSize = 8;
-        for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize) {
-          chunks.add(Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()));
-        }
+        final List<Uint8List> chunks = <Uint8List>[
+          for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize)
+            Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()),
+        ];
         final Completer<void> imageAvailable = Completer<void>();
         final MockHttpClientRequest request = MockHttpClientRequest();
         final MockHttpClientResponse response = MockHttpClientResponse();
