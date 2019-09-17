@@ -95,7 +95,9 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
     final ComparisonResult result = GoldenFileComparator.compareLists(
-      imageBytes, goldenBytes);
+      imageBytes,
+      goldenBytes,
+    );
 
     if (!result.passed) {
       generateFailureOutput(result, golden, basedir);
@@ -132,6 +134,7 @@ class LocalComparisonOutput {
     throw test_package.TestFailure('Golden "$golden": ${result.error}$additionalFeedback');
   }
 
+  /// Doc
   File getFailureFile(String failure, Uri golden, Uri basedir) {
     final String fileName = golden.pathSegments[0];
     final String testName = fileName.split(path.extension(fileName))[0]

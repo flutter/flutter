@@ -239,8 +239,10 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = addPrefix(golden);
     final List<int> goldenBytes = await skiaClient.getMasterBytes(golden.path);
-    final ComparisonResult result = GoldenFileComparator
-      .compareLists<Uint8List>(imageBytes, goldenBytes);
+    final ComparisonResult result = GoldenFileComparator.compareLists(
+      imageBytes,
+      goldenBytes,
+    );
     // TODO(Piinks): If !result.passed return skiaClient.testIsIgnoredForPR
     return result.passed;
   }
@@ -260,9 +262,9 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   FlutterLocalFileComparator(
     final Uri basedir,
     final SkiaGoldClient skiaClient, {
-      final FileSystem fs = const LocalFileSystem(),
-      final Platform platform = const LocalPlatform(),
-    }) : super(
+    final FileSystem fs = const LocalFileSystem(),
+    final Platform platform = const LocalPlatform(),
+  }) : super(
     basedir,
     skiaClient,
     fs: fs,
@@ -276,9 +278,9 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   /// purposes only.
   static Future<FlutterGoldenFileComparator> fromDefaultComparator(
     final Platform platform, {
-      SkiaGoldClient goldens,
-      LocalFileComparator defaultComparator,
-    }) async {
+    SkiaGoldClient goldens,
+    LocalFileComparator defaultComparator,
+  }) async {
 
     defaultComparator ??= goldenFileComparator;
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
@@ -296,8 +298,10 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = addPrefix(golden);
     final List<int> goldenBytes = await skiaClient.getMasterBytes(golden.path);
-    final ComparisonResult result = GoldenFileComparator
-      .compareLists<Uint8List>(imageBytes, goldenBytes);
+    final ComparisonResult result = GoldenFileComparator.compareLists(
+      imageBytes,
+      goldenBytes,
+    );
 
     if (!result.passed) {
       generateFailureOutput(result, golden, basedir);

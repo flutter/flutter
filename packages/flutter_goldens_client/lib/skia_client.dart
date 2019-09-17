@@ -182,10 +182,9 @@ class SkiaGoldClient {
       testName = _cleanTestName(testName);
       final Uri requestForDigest = Uri.parse(
         'https://flutter-gold.skia.org/json/search?'
-          'fdiffmax=-1&fref=false&frgbamax=255&frgbamin=0&head=true&include=false'
+          'fdiffmax=-1&fref=false&frgbamax=255&frgbamin=0&head=true&include=true'
           '&limit=50&master=false&match=name&metric=combined&neg=false&offset=0'
-          '&pos=true&query=Platform%3D${platform
-          .operatingSystem}%26name%3D$testName%26'
+          '&pos=true&query=Platform%3D${platform.operatingSystem}%26name%3D$testName%26'
           'source_type%3Dflutter&sort=desc&unt=true',
       );
       SkiaGoldDigest masterDigest;
