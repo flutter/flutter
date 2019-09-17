@@ -196,8 +196,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
-/// This sample shows an example of getting a value from a TextField via the
-/// [onSubmitted] method.
+/// This sample shows how to get a value from a TextField via the [onSubmitted]
+/// method.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
@@ -223,7 +223,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///                   ),
 ///                 ],
 ///               );
-///             }
+///             },
 ///           );
 ///         },
 ///       ),
