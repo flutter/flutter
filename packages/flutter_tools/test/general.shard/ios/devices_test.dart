@@ -195,7 +195,7 @@ void main() {
         ProcessManager: () => mockProcessManager,
       });
 
-      testUsingContext(' succeeds in debug mode by falling back to manual protocol discovery', () async {
+      testUsingContext(' succeeds in debug mode when mDNS fails by falling back to manual protocol discovery', () async {
         final IOSDevice device = IOSDevice('123');
         device.portForwarder = mockPortForwarder;
         device.setLogReader(mockApp, mockLogReader);
@@ -224,6 +224,35 @@ void main() {
         ProcessManager: () => mockProcessManager,
       });
 
+      testUsingContext(' fails in debug mode when mDNS fails and when Observatory URI is malformed', () async {
+        final IOSDevice device = IOSDevice('123');
+        device.portForwarder = mockPortForwarder;
+        device.setLogReader(mockApp, mockLogReader);
+
+        // Now that the reader is used, start writing messages to it.
+        Timer.run(() {
+          mockLogReader.addLine('Foo');
+          mockLogReader.addLine('Observatory listening on http:/:/127.0.0.1:$devicePort');
+        });
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+          .thenAnswer((Invocation invocation) => Future<Uri>.value(null));
+
+        final LaunchResult launchResult = await device.startApp(mockApp,
+            prebuiltApplication: true,
+            debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
+            platformArgs: <String, dynamic>{},
+        );
+        expect(launchResult.started, isFalse);
+        expect(launchResult.hasObservatory, isFalse);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => mockArtifacts,
+        Cache: () => mockCache,
+        FileSystem: () => mockFileSystem,
+        MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
+        Platform: () => macPlatform,
+        ProcessManager: () => mockProcessManager,
+      });
+
       testUsingContext(' succeeds in release mode', () async {
         final IOSDevice device = IOSDevice('123');
         final LaunchResult launchResult = await device.startApp(mockApp,
@@ -241,32 +270,6 @@ void main() {
         Platform: () => macPlatform,
         ProcessManager: () => mockProcessManager,
       });
-
-      //testUsingContext(' fails in debug mode when Observatory URI is malformed', () async {
-      //  final IOSDevice device = IOSDevice('123');
-      //  device.portForwarder = mockPortForwarder;
-      //  device.setLogReader(mockApp, mockLogReader);
-
-      //  // Now that the reader is used, start writing messages to it.
-      //  Timer.run(() {
-      //    mockLogReader.addLine('Foo');
-      //    mockLogReader.addLine('Observatory listening on http:/:/127.0.0.1:$devicePort');
-      //  });
-
-      //  final LaunchResult launchResult = await device.startApp(mockApp,
-      //      prebuiltApplication: true,
-      //      debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
-      //      platformArgs: <String, dynamic>{},
-      //  );
-      //  expect(launchResult.started, isFalse);
-      //  expect(launchResult.hasObservatory, isFalse);
-      //}, overrides: <Type, Generator>{
-      //  Artifacts: () => mockArtifacts,
-      //  Cache: () => mockCache,
-      //  FileSystem: () => mockFileSystem,
-      //  Platform: () => macPlatform,
-      //  ProcessManager: () => mockProcessManager,
-      //});
 
       void testNonPrebuilt({
         @required bool showBuildSettingsFlakes,
