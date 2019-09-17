@@ -27,7 +27,9 @@ class SkiaGoldClient {
     this.fs = const LocalFileSystem(),
     this.process = const LocalProcessManager(),
     this.platform = const LocalPlatform(),
-  });
+    io.HttpClient httpClient,
+  }) : assert(workDirectory != null),
+      httpClient = httpClient ?? io.HttpClient();
 
   /// The file system to use for storing the local clone of the repository.
   ///
@@ -47,6 +49,9 @@ class SkiaGoldClient {
   /// can be replaced by a mock process manager that doesn't really create
   /// sub-processes.
   final ProcessManager process;
+
+  /// Doc
+  final io.HttpClient httpClient;
 
   /// The local [Directory] within the [comparisonRoot] for the current test
   /// context. In this directory, the client will create image and json files
@@ -179,30 +184,26 @@ class SkiaGoldClient {
     List<int> masterImageBytes;
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
 
-      final io.HttpClient client = io.HttpClient();
-
       testName = _cleanTestName(testName);
       final Uri requestForDigest = Uri.parse(
         'https://flutter-gold.skia.org/json/search?'
-          'fdiffmax=-1&fref=false&frgbamax=255&frgbamin=0'
-          '&head=true'      // Goldens @ head
-          '&include=true'   // Include ignored tests
-          '&limit=50&master=false&match=name&metric=combined'
-          '&neg=false'      // No negative digests
-          '&offset=0'
-          '&pos=true'       // Get positive digests
+          'source_type%3Dflutter'
+          '&head=true'     // Goldens @ head
+          '&include=true'  // Include ignored tests
+          '&pos=true'      // Get positive digests
+          '&neg=false'     // No negative digests
+          '&unt=false'     // No untriaged digests
           '&query=Platform%3D${platform.operatingSystem}%26name%3D$testName%26'
-          'source_type%3Dflutter&sort=desc'
-          '&unt=false',     // No untriaged digests
       );
-      SkiaGoldDigest masterDigest;
 
+      SkiaGoldDigest masterDigest;
+      String rawResponse;
       try {
-        await client.getUrl(requestForDigest)
+        await httpClient.getUrl(requestForDigest)
           .then((io.HttpClientRequest request) => request.close())
           .then((io.HttpClientResponse response) async {
-          final String responseBody = await response.transform(utf8.decoder).join();
-          final Map<String,dynamic> skiaJson = json.decode(responseBody);
+          rawResponse = await response.transform(utf8.decoder).join();
+          final Map<String,dynamic> skiaJson = json.decode(rawResponse);
 
           if (skiaJson['digests'].length > 1) {
 
@@ -221,21 +222,13 @@ class SkiaGoldClient {
             );
 
           }
-          masterDigest = null;//SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
+          masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]); //null?
           assert(masterDigest != null);
         });
-      } catch(e) {
-        e = e.toString();
-        if (e.contains('triage')) {
-          rethrow;
-        } else if (e.contains('masterDigest != null')) {
-          rethrow;
-        } else {
-          // i.e. Don't break people running local tests in airplane mode.
-          print('Baselines are not available from Skia Gold, you may not be'
-            'connected to the internet. Skipping test: $testName.');
-          masterImageBytes = <int>[0];
-        }
+      } on FormatException catch(_) {
+        print('Formatting error detected in response from Flutter Gold.'
+          'rawResponse: $rawResponse');
+        rethrow;
       }
 
       if (masterImageBytes == <int>[0])
@@ -254,7 +247,7 @@ class SkiaGoldClient {
       );
 
       try {
-        await client.getUrl(requestForImage)
+        await httpClient.getUrl(requestForImage)
           .then((io.HttpClientRequest request) => request.close())
           .then((io.HttpClientResponse response) async {
           final List<List<int>> byteList = await response.toList();
@@ -273,29 +266,33 @@ class SkiaGoldClient {
   Future<bool> testIsIgnoredForPullRequest(String pullRequest, String testName) async {
     bool ignoreIsActive = false;
     testName = _cleanTestName(testName);
+    String rawResponse;
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
-      final io.HttpClient client = io.HttpClient();
+      final Uri requestForIgnores = Uri.parse(
+        'https://flutter-gold.skia.org/json/ignores'
+      );
 
-      final Uri requestForIgnores = Uri.parse('https://flutter-gold.skia.org/json/ignores');
-      Map<String, dynamic> ignoredTest;
       try {
-        await client.getUrl(requestForIgnores)
+        await httpClient.getUrl(requestForIgnores)
           .then((io.HttpClientRequest request) => request.close())
           .then((io.HttpClientResponse response) async {
-          final String responseBody = await response.transform(utf8.decoder).join();
-          final List<Map<String, dynamic>> skiaJson = json.decode(responseBody);
-          for(int i = 0; i < skiaJson.length; i++) {
-            ignoredTest = skiaJson[i];
-            final List<String> ignoredQueries = ignoredTest['query'].split('&');
-            final String ignoredPullRequest = ignoredTest['note']
-              .split['/']
-              .last();
-            if (ignoredQueries.contains('name=$testName') && ignoredPullRequest == pullRequest) {
-              ignoreIsActive = true;
+            rawResponse = await response.transform(utf8.decoder).join();
+            final List<dynamic> ignores = json.decode(rawResponse);
+            for(Map<String, dynamic> ignore in ignores) {
+              final List<String> ignoredQueries = ignore['query'].split('&');
+              final String ignoredPullRequest = ignore['note']
+                .split['/']
+                .last;
+              if (ignoredQueries.contains('name=$testName') &&
+                ignoredPullRequest == pullRequest) {
+                ignoreIsActive = true;
+                break;
+              }
             }
-          }
-        });
-      } catch(_) {
+          });
+      } on FormatException catch(_) {
+        print('Formatting error detected in response from Flutter Gold.'
+          'rawResponse: $rawResponse');
         rethrow;
       }
     },
