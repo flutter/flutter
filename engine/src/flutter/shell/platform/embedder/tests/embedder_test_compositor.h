@@ -22,7 +22,7 @@ class EmbedderTestCompositor {
     kSoftwareBuffer,
   };
 
-  EmbedderTestCompositor(sk_sp<GrContext> context);
+  EmbedderTestCompositor(SkISize surface_size, sk_sp<GrContext> context);
 
   ~EmbedderTestCompositor();
 
@@ -59,6 +59,7 @@ class EmbedderTestCompositor {
   size_t GetBackingStoresCount() const;
 
  private:
+  const SkISize surface_size_;
   sk_sp<GrContext> context_;
   RenderTargetType type_ = RenderTargetType::kOpenGLFramebuffer;
   PlatformViewRendererCallback platform_view_renderer_callback_;

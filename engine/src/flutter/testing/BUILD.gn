@@ -47,6 +47,19 @@ source_set("dart") {
   ]
 }
 
+source_set("skia") {
+  testonly = true
+
+  sources = [
+    "$flutter_root/testing/assertions_skia.h",
+  ]
+
+  public_deps = [
+    ":testing_lib",
+    "//third_party/skia",
+  ]
+}
+
 if (current_toolchain == host_toolchain) {
   source_set("opengl") {
     testonly = true
@@ -59,8 +72,8 @@ if (current_toolchain == host_toolchain) {
     ]
 
     deps = [
+      ":skia",
       "$flutter_root/fml",
-      "//third_party/skia",
       "//third_party/swiftshader_flutter:swiftshader",
     ]
   }

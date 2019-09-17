@@ -15,11 +15,11 @@ namespace testing {
 
 class TestGLSurface {
  public:
-  TestGLSurface();
+  TestGLSurface(SkISize surface_size);
 
   ~TestGLSurface();
 
-  SkISize GetSize() const;
+  const SkISize& GetSurfaceSize() const;
 
   bool MakeCurrent();
 
@@ -50,6 +50,7 @@ class TestGLSurface {
   using EGLContext = void*;
   using EGLSurface = void*;
 
+  const SkISize surface_size_;
   EGLDisplay display_;
   EGLContext onscreen_context_;
   EGLContext offscreen_context_;

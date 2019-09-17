@@ -234,7 +234,8 @@ void ShellTest::AddNativeCallback(std::string name,
 
 ShellTestPlatformView::ShellTestPlatformView(PlatformView::Delegate& delegate,
                                              TaskRunners task_runners)
-    : PlatformView(delegate, std::move(task_runners)) {}
+    : PlatformView(delegate, std::move(task_runners)),
+      gl_surface_(SkISize::Make(800, 600)) {}
 
 ShellTestPlatformView::~ShellTestPlatformView() = default;
 

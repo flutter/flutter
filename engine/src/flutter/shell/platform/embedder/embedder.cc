@@ -171,6 +171,13 @@ InferOpenGLPlatformViewCreationCallback(
                                    transformation.pers2    //
           );
         };
+
+    // If there is an external view embedder, ask it to apply the surface
+    // transformation to its surfaces as well.
+    if (external_view_embedder) {
+      external_view_embedder->SetSurfaceTransformationCallback(
+          gl_surface_transformation_callback);
+    }
   }
 
   flutter::GPUSurfaceGLDelegate::GLProcResolver gl_proc_resolver = nullptr;
@@ -296,13 +303,13 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
       SkSurfaceProps::InitType::kLegacyFontHost_InitType);
 
   auto surface = SkSurface::MakeFromBackendTexture(
-      context,                   // context
-      backend_texture,           // back-end texture
-      kTopLeft_GrSurfaceOrigin,  // surface origin
-      1,                         // sample count
-      kN32_SkColorType,          // color type
-      SkColorSpace::MakeSRGB(),  // color space
-      &surface_properties,       // surface properties
+      context,                      // context
+      backend_texture,              // back-end texture
+      kBottomLeft_GrSurfaceOrigin,  // surface origin
+      1,                            // sample count
+      kN32_SkColorType,             // color type
+      SkColorSpace::MakeSRGB(),     // color space
+      &surface_properties,          // surface properties
       static_cast<SkSurface::TextureReleaseProc>(
           texture->destruction_callback),  // release proc
       texture->user_data                   // release context
@@ -337,12 +344,12 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
       SkSurfaceProps::InitType::kLegacyFontHost_InitType);
 
   auto surface = SkSurface::MakeFromBackendRenderTarget(
-      context,                   //  context
-      backend_render_target,     // backend render target
-      kTopLeft_GrSurfaceOrigin,  // surface origin
-      kN32_SkColorType,          // color type
-      SkColorSpace::MakeSRGB(),  // color space
-      &surface_properties,       // surface properties
+      context,                      //  context
+      backend_render_target,        // backend render target
+      kBottomLeft_GrSurfaceOrigin,  // surface origin
+      kN32_SkColorType,             // color type
+      SkColorSpace::MakeSRGB(),     // color space
+      &surface_properties,          // surface properties
       static_cast<SkSurface::RenderTargetReleaseProc>(
           framebuffer->destruction_callback),  // release proc
       framebuffer->user_data                   // release context

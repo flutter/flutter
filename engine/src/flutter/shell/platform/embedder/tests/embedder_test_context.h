@@ -42,6 +42,8 @@ class EmbedderTestContext {
 
   const fml::Mapping* GetIsolateSnapshotInstructions() const;
 
+  void SetRootSurfaceTransformation(SkMatrix matrix);
+
   void AddIsolateCreateCallback(fml::closure closure);
 
   void AddNativeCallback(const char* name, Dart_NativeFunction function);
@@ -53,8 +55,6 @@ class EmbedderTestContext {
 
   void SetPlatformMessageCallback(
       std::function<void(const FlutterPlatformMessage*)> callback);
-
-  void SetupCompositor();
 
   EmbedderTestCompositor& GetCompositor();
 
@@ -80,9 +80,9 @@ class EmbedderTestContext {
   SemanticsActionCallback update_semantics_custom_action_callback_;
   std::function<void(const FlutterPlatformMessage*)> platform_message_callback_;
   std::unique_ptr<TestGLSurface> gl_surface_;
-  sk_sp<SkImage> software_surface_;
   std::unique_ptr<EmbedderTestCompositor> compositor_;
   NextSceneCallback next_scene_callback_;
+  SkMatrix root_surface_transformation_;
   size_t gl_surface_present_count_ = 0;
   size_t software_surface_present_count_ = 0;
 
@@ -94,11 +94,13 @@ class EmbedderTestContext {
   static FlutterUpdateSemanticsCustomActionCallback
   GetUpdateSemanticsCustomActionCallbackHook();
 
+  void SetupCompositor();
+
   void FireIsolateCreateCallbacks();
 
   void SetNativeResolver();
 
-  void SetupOpenGLSurface();
+  void SetupOpenGLSurface(SkISize surface_size);
 
   bool GLMakeCurrent();
 
@@ -112,9 +114,14 @@ class EmbedderTestContext {
 
   void* GLGetProcAddress(const char* name);
 
+  FlutterTransformation GetRootSurfaceTransformation();
+
   void PlatformMessageCallback(const FlutterPlatformMessage* message);
 
   bool SofwarePresent(sk_sp<SkImage> image);
+
+  void FireRootSurfacePresentCallbackIfPresent(
+      std::function<sk_sp<SkImage>(void)> image_callback);
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContext);
 };

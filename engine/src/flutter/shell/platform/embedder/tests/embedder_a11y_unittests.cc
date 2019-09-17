@@ -65,6 +65,7 @@ TEST_F(Embedder11yTest, A11yTreeIsConsistent) {
           })));
 
   EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
   builder.SetDartEntrypoint("a11y_main");
 
   auto engine = builder.LaunchEngine();
