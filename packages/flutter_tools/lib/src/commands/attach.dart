@@ -228,7 +228,7 @@ class AttachCommand extends FlutterCommand {
         observatoryUri = await MDnsObservatoryDiscovery.instance.getObservatoryUri(
           appId,
           device,
-          usesIpv6
+          usesIpv6,
         );
       }
       // If MDNS discovery fails or we're not on iOS, fallback to ProtocolDiscovery.

@@ -13,12 +13,12 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:multicast_dns/multicast_dns.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -46,11 +46,13 @@ void main() {
       const int hostPort = 42;
 
       MockDeviceLogReader mockLogReader;
+      MockMDnsObservatoryDiscovery mockMDnsObservatoryDiscovery;
       MockPortForwarder portForwarder;
       MockAndroidDevice device;
 
       setUp(() {
         mockLogReader = MockDeviceLogReader();
+        mockMDnsObservatoryDiscovery = MockMDnsObservatoryDiscovery();
         portForwarder = MockPortForwarder();
         device = MockAndroidDevice();
         when(device.portForwarder)
@@ -71,6 +73,28 @@ void main() {
 
       tearDown(() {
         mockLogReader.dispose();
+      });
+
+      testUsingContext('finds observatory port via mDNS for ios device', () async {
+        final IOSDevice iosDevice = MockIOSDevice();
+        final Uri uri = Uri(
+          scheme: 'http',
+          host: '127.0.0.1',
+          port: 1234,
+          path: 'observatory',
+        );
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+          .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
+        testDeviceManager.addDevice(iosDevice);
+        await createTestCommandRunner(AttachCommand()).run(<String>['attach']);
+        // This verifies that .getObservatoryUri() returned a non-null value
+        verifyNever(
+          portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        Logger: () => logger,
+        MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
       });
 
       testUsingContext('finds observatory port and forwards', () async {
@@ -467,14 +491,13 @@ void main() {
       FileSystem: () => testFileSystem,
     });
   });
-
 }
 
-class MockPortForwarder extends Mock implements DevicePortForwarder {}
-
 class MockHotRunner extends Mock implements HotRunner {}
-
 class MockHotRunnerFactory extends Mock implements HotRunnerFactory {}
+class MockIOSDevice extends Mock implements IOSDevice {}
+class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
+class MockPortForwarder extends Mock implements DevicePortForwarder {}
 
 class StreamLogger extends Logger {
   @override
