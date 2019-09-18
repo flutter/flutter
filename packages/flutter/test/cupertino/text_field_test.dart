@@ -1291,7 +1291,6 @@ void main() {
   });
 
 
-
   testWidgets('text field toolbar options correctly changes options', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: "Atwater Peel Sherbrooke Bonaventure",
