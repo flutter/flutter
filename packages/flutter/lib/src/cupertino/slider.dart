@@ -268,7 +268,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       value: value,
       divisions: divisions,
       activeColor: activeColor,
-      trackColor: CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).systemFill, context),
+      trackColor: CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context),
       onChanged: onChanged,
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
@@ -283,7 +283,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = value
       ..divisions = divisions
       ..activeColor = activeColor
-      ..trackColor = CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).systemFill, context)
+      ..trackColor = CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context)
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
