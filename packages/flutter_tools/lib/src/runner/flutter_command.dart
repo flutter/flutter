@@ -263,12 +263,21 @@ abstract class FlutterCommand extends Command<void> {
             'Normally there\'s only one, but when adding Flutter to a pre-existing app it\'s possible to create multiple.');
   }
 
-  void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false }) {
+  void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false, bool excludeDebug = false }) {
+    assert(() {
+      // If we don't default to release, ensure that we support debug mode.
+      if (!defaultToRelease && excludeDebug) {
+        return false;
+      }
+      return true;
+    }());
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
-    argParser.addFlag('debug',
-      negatable: false,
-      help: 'Build a debug version of your app${defaultToRelease ? '' : ' (default mode)'}.');
+    if (!excludeDebug) {
+      argParser.addFlag('debug',
+        negatable: false,
+        help: 'Build a debug version of your app${defaultToRelease ? '' : ' (default mode)'}.');
+    }
     argParser.addFlag('profile',
       negatable: false,
       help: 'Build a version of your app specialized for performance profiling.');
