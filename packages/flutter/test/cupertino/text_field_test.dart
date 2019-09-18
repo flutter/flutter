@@ -1303,7 +1303,7 @@ void main() {
           children: <Widget>[
             CupertinoTextField(
               controller: controller,
-              toolbarOptions: ToolbarOptions(selectAll: false),
+              toolbarOptions: const ToolbarOptions(selectAll: false),
             ),
           ],
         ),
