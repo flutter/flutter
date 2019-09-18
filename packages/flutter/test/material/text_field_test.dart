@@ -575,11 +575,6 @@ void main() {
 
     final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
 
-    // This tap just puts the cursor somewhere different than where the double
-    // tap will occur to test that the double tap moves the existing cursor first.
-    await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
-    await tester.pump(const Duration(milliseconds: 500));
-
     await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
     await tester.pump(const Duration(milliseconds: 50));
 
