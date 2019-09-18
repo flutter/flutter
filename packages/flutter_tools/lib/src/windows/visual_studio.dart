@@ -129,7 +129,7 @@ class VisualStudio {
     // if a known older version is requested.
     String cppToolchainDescription = 'MSVC v142 - VS 2019 C++ x64/x86 build tools';
     if (visualStudioMajorVersion == 15) {
-      cppToolchainDescription = 'VC++ 2017 version 15.9 v14.16 latest v141 tools';
+      cppToolchainDescription = 'VC++ 2017 version 15.9 v14.## latest v141 tools';
     }
     cppToolchainDescription += '\n - If there are multiple versions, install the latest one';
     return <String, String>{
