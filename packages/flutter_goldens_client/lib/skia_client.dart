@@ -199,27 +199,23 @@ class SkiaGoldClient {
       SkiaGoldDigest masterDigest;
       String rawResponse;
       try {
-        await httpClient.getUrl(requestForDigest)
-          .then((io.HttpClientRequest request) => request.close())
-          .then((io.HttpClientResponse response) async {
-            rawResponse = await utf8.decodeStream(response);
-            final Map<String, dynamic> skiaJson = json.decode(rawResponse);
+        final io.HttpClientRequest request = await httpClient.getUrl(requestForDigest);
+        final io.HttpClientResponse response = await request.close();
+        rawResponse = await utf8.decodeStream(response);
+        final Map<String, dynamic> skiaJson = json.decode(rawResponse);
 
-            if (skiaJson['digests'].length > 1) {
-
-              final StringBuffer buf = StringBuffer()
-                ..writeln('There is more than one digest available for golden')
-                ..writeln('test: $testName. Triage may have broken down.')
-                ..writeln('Check $_kFlutterGoldDashboard to validate the')
-                ..writeln('current status of this test.');
-              throw NonZeroExitCode(1, buf.toString());
-
-            } else if (skiaJson['digests'].length == 0) {
-              masterDigest = const SkiaGoldDigest(testName: 'New');
-            } else {
-              masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
-            }
-        });
+        if (skiaJson['digests'].length > 1) {
+          final StringBuffer buf = StringBuffer()
+            ..writeln('There is more than one digest available for golden')
+            ..writeln('test: $testName. Triage may have broken down.')
+            ..writeln('Check $_kFlutterGoldDashboard to validate the')
+            ..writeln('current status of this test.');
+          throw NonZeroExitCode(1, buf.toString());
+        } else if (skiaJson['digests'].length == 0) {
+          masterDigest = const SkiaGoldDigest(testName: 'New');
+        } else {
+          masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
+        }
       } on FormatException catch(_) {
         print('Formatting error detected in response from Flutter Gold.'
           'rawResponse: $rawResponse');
@@ -241,11 +237,10 @@ class SkiaGoldClient {
       );
 
       try {
-        await httpClient.getUrl(requestForImage)
-          .then((io.HttpClientRequest request) => request.close())
-          .then((io.HttpClientResponse response) async {
-            await response.forEach((List<int> bytes) => masterImageBytes.addAll(bytes));
-        });
+        final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
+        final io.HttpClientResponse response = await request.close();
+        await response.forEach((List<int> bytes) => masterImageBytes.addAll(bytes));
+
       } catch(e) {
         rethrow;
       }
@@ -266,21 +261,19 @@ class SkiaGoldClient {
       );
 
       try {
-        await httpClient.getUrl(requestForIgnores)
-          .then((io.HttpClientRequest request) => request.close())
-          .then((io.HttpClientResponse response) async {
-            rawResponse = await utf8.decodeStream(response);
-            final List<dynamic> ignores = json.decode(rawResponse);
-            for(Map<String, dynamic> ignore in ignores) {
-              final List<String> ignoredQueries = ignore['query'].split('&');
-              final String ignoredPullRequest = ignore['note'].split('/').last;
-              if (ignoredQueries.contains('name=$testName') &&
-                ignoredPullRequest == pullRequest) {
-                ignoreIsActive = true;
-                break;
-              }
-            }
-          });
+        final io.HttpClientRequest request = await httpClient.getUrl(requestForIgnores);
+        final io.HttpClientResponse response = await request.close();
+        rawResponse = await utf8.decodeStream(response);
+        final List<dynamic> ignores = json.decode(rawResponse);
+        for(Map<String, dynamic> ignore in ignores) {
+          final List<String> ignoredQueries = ignore['query'].split('&');
+          final String ignoredPullRequest = ignore['note'].split('/').last;
+          if (ignoredQueries.contains('name=$testName') &&
+            ignoredPullRequest == pullRequest) {
+            ignoreIsActive = true;
+            break;
+          }
+        }
       } on FormatException catch(_) {
         print('Formatting error detected in response from Flutter Gold.'
           'rawResponse: $rawResponse');

@@ -83,20 +83,28 @@ void main() {
     });
 
     group('Request Handling', () {
-      test('throws for triage breakdown when digests > 1', () async {
-        const String testName = 'flutter.golden_test.1.png';
-        final Uri url = Uri.parse(
+      String testName;
+      String pullRequestNumber;
+      Uri url;
+      MockHttpClientRequest mockHttpRequest;
+
+      setUp(() {
+        testName = 'flutter.golden_test.1.png';
+        pullRequestNumber = '1234';
+        url = Uri.parse(
           'https://flutter-gold.skia.org/json/search?source_type%3Dflutter'
             '&head=true&include=true&pos=true&neg=false&unt=false'
             '&query=Platform%3Dmacos%26name%3Dflutter.golden_test.1%26'
         );
+        mockHttpRequest = MockHttpClientRequest();
+        when(mockHttpClient.getUrl(url))
+          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
+      });
 
-        final MockHttpClientRequest mockHttpRequest = MockHttpClientRequest();
+      test('throws for triage breakdown when digests > 1', () async {
         final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
           utf8.encode(digestResponseTemplate(includeExtraDigests: true))
         );
-        when(mockHttpClient.getUrl(url))
-          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
         when(mockHttpRequest.close())
           .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
 
@@ -109,19 +117,9 @@ void main() {
       });
 
       test('returns empty bytes for new tests without a baseline', () async {
-        const String testName = 'flutter.golden_test.1.png';
-        final Uri url = Uri.parse(
-          'https://flutter-gold.skia.org/json/search?source_type%3Dflutter'
-            '&head=true&include=true&pos=true&neg=false&unt=false'
-            '&query=Platform%3Dmacos%26name%3Dflutter.golden_test.1%26'
-        );
-
-        final MockHttpClientRequest mockHttpRequest = MockHttpClientRequest();
         final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
           utf8.encode(digestResponseTemplate(returnEmptyDigest: true))
         );
-        when(mockHttpClient.getUrl(url))
-          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
         when(mockHttpRequest.close())
           .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
 
@@ -130,10 +128,9 @@ void main() {
       });
 
       test('validates SkiaDigest', () {
-        const String testName = 'flutter.golden_test.1';
         final Map<String, dynamic> skiaJson = json.decode(digestResponseTemplate());
         final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
-        expect(digest.isValid(platform, testName), isTrue);
+        expect(digest.isValid(platform, 'flutter.golden_test.1'), isTrue);
       });
 
       test('detects invalid digests SkiaDigest', () {
@@ -146,19 +143,9 @@ void main() {
       });
 
       test('throws for invalid SkiaDigest', () async {
-        const String testName = 'flutter.golden_test.1.png';
-        final Uri url = Uri.parse(
-          'https://flutter-gold.skia.org/json/search?source_type%3Dflutter'
-            '&head=true&include=true&pos=true&neg=false&unt=false'
-            '&query=Platform%3Dmacos%26name%3Dflutter.golden_test.1%26'
-        );
-
-        final MockHttpClientRequest mockHttpRequest = MockHttpClientRequest();
         final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
           utf8.encode(digestResponseTemplate(testName: 'flutter.golden_test.2'))
         );
-        when(mockHttpClient.getUrl(url))
-          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
         when(mockHttpRequest.close())
           .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
 
@@ -171,106 +158,74 @@ void main() {
       });
 
       test('image bytes are processed properly', () async {
-//        const String testName = 'flutter.golden_test.1.png';
-//        final Uri digestUrl = Uri.parse(
-//          'https://flutter-gold.skia.org/json/search?source_type%3Dflutter'
-//            '&head=true&include=true&pos=true&neg=false&unt=false'
-//            '&query=Platform%3Dmacos%26name%3Dflutter.golden_test.1%26'
-//        );
-//        final Uri imageUrl = Uri.parse(
-//          'https://flutter-gold.skia.org/img/images/88e2cc3398bd55b55df35cfe14d557c1.png'
-//        );
-//
-//        final MockHttpClientRequest mockDigestRequest = MockHttpClientRequest();
-//        final MockHttpClientResponse mockDigestResponse = MockHttpClientResponse(
-//          utf8.encode(digestResponseTemplate())
-//        );
-//        when(mockHttpClient.getUrl(digestUrl))
-//          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockDigestRequest));
-//        when(mockDigestRequest.close())
-//          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockDigestResponse));
-//
-//        final MockHttpClientRequest mockImageRequest = MockHttpClientRequest();
-//        final MockHttpImageResponse mockImageResponse = MockHttpImageResponse(
-//          imageResponseTemplate()
-//        );
-//        when(mockHttpClient.getUrl(imageUrl))
-//          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockImageRequest));
-//        when(mockImageRequest.close())
-//          .thenAnswer((_) => Future<MockHttpImageResponse>.value(mockImageResponse));
-//
-//        final List<int> masterBytes = await skiaClient.getMasterBytes(testName);
-//        print(masterBytes);
-//
-//        expect(masterBytes, equals(_kTestPngBytes));
-      });
-
-      test('ignore returns true for ignored test and ignored pull request number', () async {
-        const String testName = 'flutter.golden_test.1.png';
-        const String pullRequestNumber = '1234';
-        final Uri url = Uri.parse('https://flutter-gold.skia.org/json/ignores');
-
-        final MockHttpClientRequest mockHttpRequest = MockHttpClientRequest();
-        final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
-          utf8.encode(ignoreResponseTemplate(pullRequestNumber: pullRequestNumber))
+        final Uri imageUrl = Uri.parse(
+          'https://flutter-gold.skia.org/img/images/88e2cc3398bd55b55df35cfe14d557c1.png'
         );
-        when(mockHttpClient.getUrl(url))
-          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
+        final MockHttpClientResponse mockDigestResponse = MockHttpClientResponse(
+          utf8.encode(digestResponseTemplate())
+        );
         when(mockHttpRequest.close())
-          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockDigestResponse));
 
-        expect(
-          await skiaClient.testIsIgnoredForPullRequest(
-            pullRequestNumber,
-            testName,
-          ),
-          isTrue,
+        final MockHttpClientRequest mockImageRequest = MockHttpClientRequest();
+        final MockHttpImageResponse mockImageResponse = MockHttpImageResponse(
+          imageResponseTemplate()
         );
+        when(mockHttpClient.getUrl(imageUrl))
+          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockImageRequest));
+        when(mockImageRequest.close())
+          .thenAnswer((_) => Future<MockHttpImageResponse>.value(mockImageResponse));
+
+        final List<int> masterBytes = await skiaClient.getMasterBytes(testName);
+
+        expect(masterBytes, equals(_kTestPngBytes));
       });
+      group('ignores', () {
+        Uri url;
+        MockHttpClientRequest mockHttpRequest;
+        MockHttpClientResponse mockHttpResponse;
 
-      test('ignore returns false for not ignored test and ignored pull request number', () async {
-        const String testName = 'flutter.golden_test.1.png';
-        const String pullRequestNumber = '1234';
-        final Uri url = Uri.parse('https://flutter-gold.skia.org/json/ignores');
+        setUp(() {
+          url = Uri.parse('https://flutter-gold.skia.org/json/ignores');
+          mockHttpRequest = MockHttpClientRequest();
+          mockHttpResponse = MockHttpClientResponse(utf8.encode(
+              ignoreResponseTemplate(pullRequestNumber: pullRequestNumber)
+          ));
+          when(mockHttpClient.getUrl(url))
+            .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
+          when(mockHttpRequest.close())
+            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+        });
 
-        final MockHttpClientRequest mockHttpRequest = MockHttpClientRequest();
-        final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
-          utf8.encode(ignoreResponseTemplate(pullRequestNumber: pullRequestNumber))
-        );
-        when(mockHttpClient.getUrl(url))
-          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
-        when(mockHttpRequest.close())
-          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+        test('returns true for ignored test and ignored pull request number', () async {
+          expect(
+            await skiaClient.testIsIgnoredForPullRequest(
+              pullRequestNumber,
+              testName,
+            ),
+            isTrue,
+          );
+        });
 
-        expect(
-          await skiaClient.testIsIgnoredForPullRequest(
-            '5678',
-            testName,
-          ),
-          isFalse,
-        );
-      });
+        test('returns false for not ignored test and ignored pull request number', () async {
+          expect(
+            await skiaClient.testIsIgnoredForPullRequest(
+              '5678',
+              testName,
+            ),
+            isFalse,
+          );
+        });
 
-      test('ignore returns false for ignored test and not ignored pull request number', () async {
-        const String pullRequestNumber = '1234';
-        final Uri url = Uri.parse('https://flutter-gold.skia.org/json/ignores');
-
-        final MockHttpClientRequest mockHttpRequest = MockHttpClientRequest();
-        final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
-          utf8.encode(ignoreResponseTemplate(pullRequestNumber: pullRequestNumber))
-        );
-        when(mockHttpClient.getUrl(url))
-          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
-        when(mockHttpRequest.close())
-          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
-
-        expect(
-          await skiaClient.testIsIgnoredForPullRequest(
-            pullRequestNumber,
-            'failure.png',
-          ),
-          isFalse,
-        );
+        test('returns false for ignored test and not ignored pull request number', () async {
+         expect(
+            await skiaClient.testIsIgnoredForPullRequest(
+              pullRequestNumber,
+              'failure.png',
+            ),
+            isFalse,
+          );
+        });
       });
     });
   });
@@ -482,8 +437,6 @@ class MockProcessManager extends Mock implements ProcessManager {}
 
 class MockSkiaGoldClient extends Mock implements SkiaGoldClient {}
 
-class MockGoldenFileComparator extends Mock implements GoldenFileComparator {}
-
 class MockLocalFileComparator extends Mock implements LocalFileComparator {}
 
 class MockHttpClient extends Mock implements HttpClient {}
@@ -513,13 +466,7 @@ class MockHttpImageResponse extends Mock implements HttpClientResponse {
   final List<List<int>> response;
 
   @override
-  StreamSubscription<List<int>> listen(
-    void onData(List<int> event), {
-      Function onError,
-      void onDone(),
-      bool cancelOnError,
-    }) {
-    return Stream<List<int>>.fromIterable(response)
-      .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  Future<void> forEach(void action(List<int> element)) async {
+    response.forEach(action);
   }
 }
