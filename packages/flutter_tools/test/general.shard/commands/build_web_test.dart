@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -40,8 +41,10 @@ void main() {
       fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       when(mockWebCompilationProxy.initialize(
+        projectName: anyNamed('projectName'),
         projectDirectory: anyNamed('projectDirectory'),
-        mode: anyNamed('mode')
+        mode: anyNamed('mode'),
+        initializePlatform: anyNamed('initializePlatform')
       )).thenAnswer((Invocation invocation) {
         final String path = fs.path.join('.dart_tool', 'build', 'flutter_web', 'foo', 'lib', 'main_web_entrypoint.dart.js');
         fs.file(path).createSync(recursive: true);
@@ -63,6 +66,7 @@ void main() {
       FlutterProject.current(),
       fs.path.join('lib', 'main.dart'),
       BuildInfo.debug,
+      false,
     ), throwsA(isInstanceOf<ToolExit>()));
   }));
 
@@ -84,6 +88,7 @@ void main() {
       FlutterProject.current(),
       fs.path.join('lib', 'main.dart'),
       BuildInfo.debug,
+      false,
     );
   }));
 
@@ -94,6 +99,18 @@ void main() {
         throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
+  }));
+
+  test('hidden if feature flag is not enabled', () => testbed.run(() async {
+    expect(BuildWebCommand().hidden, true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
+  }));
+
+  test('not hidden if feature flag is enabled', () => testbed.run(() async {
+    expect(BuildWebCommand().hidden, false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
   }));
 }
 

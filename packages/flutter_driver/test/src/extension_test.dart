@@ -652,10 +652,10 @@ void main() {
     }
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-            child: const Text('Hello World', key: ValueKey<String>('Text'))
+            child: Text('Hello World', key: ValueKey<String>('Text'))
         ),
       ),
     );

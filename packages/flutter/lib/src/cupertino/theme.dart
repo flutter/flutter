@@ -248,7 +248,7 @@ class CupertinoThemeData extends Diagnosticable {
   /// It will be called in [CupertinoTheme.of].
   @protected
   CupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
-    Color convertColor(Color color) => color == null ? null : CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+    Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
     return copyWith(
       primaryColor: convertColor(primaryColor),
@@ -329,9 +329,7 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
 
   @override
   _NoDefaultCupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
-    Color convertColor(Color color) => color == null
-      ? null
-      : CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+    Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
     return _NoDefaultCupertinoThemeData(
       brightness,

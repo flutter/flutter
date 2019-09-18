@@ -89,6 +89,11 @@ class Plugin {
           MacOSPlugin.fromYaml(name, platformsYaml[MacOSPlugin.kConfigKey]);
     }
 
+    if (platformsYaml[WebPlugin.kConfigKey] != null) {
+      platforms[WebPlugin.kConfigKey] =
+          WebPlugin.fromYaml(name, platformsYaml[WebPlugin.kConfigKey]);
+    }
+
     return Plugin(
       name: name,
       path: path,
@@ -184,14 +189,17 @@ class Plugin {
 
 Plugin _pluginFromPubspec(String name, Uri packageRoot) {
   final String pubspecPath = fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
-  if (!fs.isFileSync(pubspecPath))
+  if (!fs.isFileSync(pubspecPath)) {
     return null;
+  }
   final dynamic pubspec = loadYaml(fs.file(pubspecPath).readAsStringSync());
-  if (pubspec == null)
+  if (pubspec == null) {
     return null;
+  }
   final dynamic flutterConfig = pubspec['flutter'];
-  if (flutterConfig == null || !flutterConfig.containsKey('plugin'))
+  if (flutterConfig == null || !flutterConfig.containsKey('plugin')) {
     return null;
+  }
   final String packageRootPath = fs.path.fromUri(packageRoot);
   printTrace('Found plugin $name at $packageRootPath');
   return Plugin.fromYaml(name, packageRootPath, flutterConfig['plugin']);
@@ -210,8 +218,9 @@ List<Plugin> findPlugins(FlutterProject project) {
   packages.forEach((String name, Uri uri) {
     final Uri packageRoot = uri.resolve('..');
     final Plugin plugin = _pluginFromPubspec(name, packageRoot);
-    if (plugin != null)
+    if (plugin != null) {
       plugins.add(plugin);
+    }
   });
   return plugins;
 }
@@ -344,8 +353,9 @@ const String _objcPluginRegistryImplementationTemplate = '''//
 const String _swiftPluginRegistryTemplate = '''//
 //  Generated file. Do not edit.
 //
-import Foundation
+
 import {{framework}}
+import Foundation
 
 {{#plugins}}
 import {{name}}
@@ -377,11 +387,32 @@ Depends on all your plugins, and provides a function to register them.
   s.source_files =  "Classes", "Classes/**/*.{h,m}"
   s.source           = { :path => '.' }
   s.public_header_files = './Classes/**/*.h'
+  s.static_framework    = true
+  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   s.dependency '{{framework}}'
   {{#plugins}}
   s.dependency '{{name}}'
   {{/plugins}}
 end
+''';
+
+const String _dartPluginRegistryTemplate = '''//
+// Generated file. Do not edit.
+//
+import 'dart:ui';
+
+{{#plugins}}
+import 'package:{{name}}/{{file}}';
+{{/plugins}}
+
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+
+void registerPlugins(PluginRegistry registry) {
+{{#plugins}}
+  {{class}}.registerWith(registry.registrarFor({{class}}));
+{{/plugins}}
+  registry.registerMessageHandler();
+}
 ''';
 
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -439,6 +470,27 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
   );
 }
 
+Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+  final List<Map<String, dynamic>> webPlugins = _extractPlatformMaps(plugins, WebPlugin.kConfigKey);
+  final Map<String, dynamic> context = <String, dynamic>{
+    'plugins': webPlugins,
+  };
+  final String registryDirectory = project.web.libDirectory.path;
+  final String filePath = fs.path.join(registryDirectory, 'generated_plugin_registrant.dart');
+  if (webPlugins.isEmpty) {
+    final File file = fs.file(filePath);
+    if (file.existsSync()) {
+      file.deleteSync();
+    }
+  } else {
+    _renderTemplateToFile(
+      _dartPluginRegistryTemplate,
+      context,
+      filePath,
+    );
+  }
+}
+
 /// Rewrites the `.flutter-plugins` file of [project] based on the plugin
 /// dependencies declared in `pubspec.yaml`.
 ///
@@ -489,6 +541,9 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
       cocoaPods.addPodsDependencyToFlutterXcconfig(subproject);
     }
   }
+  }
+  if (featureFlags.isWebEnabled && project.web.existsSync()) {
+    await _writeWebPluginRegistrant(project, plugins);
   }
 }
 

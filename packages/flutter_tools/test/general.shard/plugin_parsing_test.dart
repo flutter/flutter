@@ -42,7 +42,10 @@ void main() {
           '  package: com.flutter.dev\n'
           '  pluginClass: ASamplePlugin\n'
           ' ios:\n'
-          '  pluginClass: ISamplePlugin\n';
+          '  pluginClass: ISamplePlugin\n'
+          ' web:\n'
+          '  pluginClass: WSamplePlugin\n'
+          '  fileName: web_plugin.dart\n';
 
       final dynamic pluginYaml = loadYaml(pluginYamlRaw);
       final Plugin plugin =
@@ -53,6 +56,7 @@ void main() {
       final MacOSPlugin macOSPlugin =
           plugin.platforms[MacOSPlugin.kConfigKey];
       final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey];
+      final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey];
       final String androidPluginClass = androidPlugin.pluginClass;
       final String iosPluginClass = iosPlugin.pluginClass;
 
@@ -61,6 +65,8 @@ void main() {
       expect(iosPlugin.classPrefix, '');
       expect(androidPlugin.package, 'com.flutter.dev');
       expect(macOSPlugin.pluginClass, 'MSamplePlugin');
+      expect(webPlugin.pluginClass, 'WSamplePlugin');
+      expect(webPlugin.fileName, 'web_plugin.dart');
     });
   });
 }

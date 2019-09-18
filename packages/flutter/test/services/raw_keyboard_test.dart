@@ -450,6 +450,22 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
     });
+    test('Unprintable keyboard keys are correctly translated', () {
+      final RawKeyEvent leftArrowKey = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'macos',
+        'keyCode': 0x0000007B,
+        'characters': '',
+        'charactersIgnoringModifiers': '', // NSLeftArrowFunctionKey = 0xF702
+        'character': null,
+        'modifiers': RawKeyEventDataMacOs.modifierFunction,
+      });
+      final RawKeyEventDataMacOs data = leftArrowKey.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowLeft));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
+      expect(data.logicalKey.keyLabel, isNull);
+    });
+
   });
   group('RawKeyEventDataLinux-GFLW', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{

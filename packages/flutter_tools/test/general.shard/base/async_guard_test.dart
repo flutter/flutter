@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/async_guard.dart';
+import 'package:flutter_tools/src/base/common.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
 
@@ -23,6 +25,17 @@ Future<void> syncAndAsyncError() {
   final Completer<void> errorCompleter = Completer<void>();
   errorCompleter.completeError('Async Doom', StackTrace.current);
   throw 'Sync Doom';
+}
+
+Future<void> delayedThrow(FakeAsync time) {
+  final Future<void> result =
+      Future<void>.delayed(const Duration(milliseconds: 10))
+      .then((_) {
+    throw 'Delayed Doom';
+  });
+  time.elapse(const Duration(seconds: 1));
+  time.flushMicrotasks();
+  return result;
 }
 
 void main() {
@@ -130,5 +143,77 @@ void main() {
 
     expect(caughtByZone, false);
     expect(caughtByHandler, true);
+  });
+
+  test('asyncError is missed when catchError is attached too late', () async {
+    bool caughtByZone = false;
+    bool caughtByHandler = false;
+    bool caughtByCatchError = false;
+
+    final Completer<void> completer = Completer<void>();
+    await FakeAsync().run((FakeAsync time) {
+      unawaited(runZoned(() async {
+        final Future<void> f = asyncGuard<void>(() => delayedThrow(time))
+            .catchError((Object e, StackTrace s) {
+          caughtByCatchError = true;
+        });
+        try {
+          await f;
+        } on String {
+          caughtByHandler = true;
+        }
+        if (!completer.isCompleted) {
+          completer.complete(null);
+        }
+      }, onError: (Object e, StackTrace s) {
+        caughtByZone = true;
+        if (!completer.isCompleted) {
+          completer.complete(null);
+        }
+      }));
+      time.elapse(const Duration(seconds: 1));
+      time.flushMicrotasks();
+      return completer.future;
+    });
+
+    expect(caughtByZone, true);
+    expect(caughtByHandler, false);
+    expect(caughtByCatchError, true);
+  });
+
+  test('asyncError is propagated correctly with onError callback', () async {
+    bool caughtByZone = false;
+    bool caughtByHandler = false;
+    bool caughtByOnError = false;
+
+    final Completer<void> completer = Completer<void>();
+    await FakeAsync().run((FakeAsync time) {
+      unawaited(runZoned(() async {
+        final Future<void> f = asyncGuard<void>(() => delayedThrow(time),
+            onError: (Object e, StackTrace s) {
+          caughtByOnError = true;
+        });
+        try {
+          await f;
+        } catch (e) {
+          caughtByHandler = true;
+        }
+        if (!completer.isCompleted) {
+          completer.complete(null);
+        }
+      }, onError: (Object e, StackTrace s) {
+        caughtByZone = true;
+        if (!completer.isCompleted) {
+          completer.complete(null);
+        }
+      }));
+      time.elapse(const Duration(seconds: 1));
+      time.flushMicrotasks();
+      return completer.future;
+    });
+
+    expect(caughtByZone, false);
+    expect(caughtByHandler, false);
+    expect(caughtByOnError, true);
   });
 }

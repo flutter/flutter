@@ -141,7 +141,13 @@ class ShapeDecoration extends Decoration {
   /// The image is drawn over the [color] or [gradient].
   final DecorationImage image;
 
-  /// A list of shadows cast by this shape behind the shape.
+  /// A list of shadows cast by the [shape].
+  ///
+  /// See also:
+  ///
+  ///  * [kElevationToShadow], for some predefined shadows used in Material
+  ///    Design.
+  ///  * [PhysicalModel], a widget for showing shadows.
   final List<BoxShadow> shadows;
 
   /// The shape to fill the [color], [gradient], and [image] into and to cast as

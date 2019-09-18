@@ -278,10 +278,12 @@ class KernelCompiler {
       '--strong',
       '--target=$targetModel',
     ];
-    if (trackWidgetCreation)
+    if (trackWidgetCreation) {
       command.add('--track-widget-creation');
-    if (!linkPlatformKernelIn)
+    }
+    if (!linkPlatformKernelIn) {
       command.add('--no-link-platform');
+    }
     if (aot) {
       command.add('--aot');
       command.add('--tfa');
@@ -319,8 +321,9 @@ class KernelCompiler {
       command.addAll(<String>[ '--platform', platformDill]);
     }
 
-    if (extraFrontEndOptions != null)
+    if (extraFrontEndOptions != null) {
       command.addAll(extraFrontEndOptions);
+    }
 
     command.add(mainUri?.toString() ?? mainPath);
 
@@ -440,8 +443,9 @@ class ResidentCompiler {
        _unsafePackageSerialization = unsafePackageSerialization,
        _experimentalFlags = experimentalFlags {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
-    if (!_sdkRoot.endsWith('/'))
+    if (!_sdkRoot.endsWith('/')) {
       _sdkRoot = '$_sdkRoot/';
+    }
   }
 
   final bool _trackWidgetCreation;
@@ -646,8 +650,9 @@ class ResidentCompiler {
 
     // 'compile-expression' should be invoked after compiler has been started,
     // program was compiled.
-    if (_server == null)
+    if (_server == null) {
       return null;
+    }
 
     final String inputKey = Uuid().generateV4();
     _server.stdin.writeln('compile-expression $inputKey');
@@ -723,8 +728,9 @@ class ResidentCompiler {
   String _doMapFilename(String filename, PackageUriMapper packageUriMapper) {
     if (packageUriMapper != null) {
       final Uri packageUri = packageUriMapper.map(filename);
-      if (packageUri != null)
+      if (packageUri != null) {
         return packageUri.toString();
+      }
     }
 
     if (_fileSystemRoots != null) {

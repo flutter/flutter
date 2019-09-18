@@ -281,17 +281,23 @@ Future<void> _runBuildTests() async {
     await _flutterBuildApk(examplePath);
     await _flutterBuildIpa(examplePath);
   }
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
+  // Web compilation tests.
+  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'), path.join('lib', 'main.dart'));
+  // Should fail to compile with dart:io.
+  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web_compile_tests'),
+    path.join('lib', 'dart_io_import.dart'),
+    expectNonZeroExit: true,
+  );
 
   print('${bold}DONE: All build tests successful.$reset');
 }
 
-Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
+Future<void> _flutterBuildDart2js(String relativePathToApplication, String target, { bool expectNonZeroExit = false }) async {
   print('Running Dart2JS build tests...');
   await runCommand(flutter,
-    <String>['build', 'web', '-v'],
+    <String>['build', 'web', '-v', '--target=$target'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
-    expectNonZeroExit: false,
+    expectNonZeroExit: expectNonZeroExit,
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
     }
@@ -463,8 +469,8 @@ Future<void> _runTests() async {
 Future<void> _runWebTests() async {
   // TODO(yjbanov): re-enable when web test cirrus flakiness is resolved
   await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
-    'test/foundation/',
     // TODO(yjbanov): re-enable when flakiness is resolved
+    // 'test/foundation/',
     // 'test/physics/',
     // 'test/rendering/',
     // 'test/services/',
@@ -474,6 +480,7 @@ Future<void> _runWebTests() async {
     // 'test/widgets/',
     // 'test/material/',
   ]);
+  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter_web_plugins'), tests: <String>['test']);
 }
 
 Future<void> _runCoverage() async {
@@ -1011,6 +1018,7 @@ Future<void> _androidGradleTests(String subShard) async {
   if (subShard == 'gradle1') {
     await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
     await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
+    await _runDevicelabTest('gradle_r8_test', env: env);
   }
   if (subShard == 'gradle2') {
     await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
