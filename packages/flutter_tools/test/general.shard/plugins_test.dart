@@ -26,7 +26,7 @@ void main() {
 
   setUp(() async {
     fs = MemoryFileSystem();
-  
+
     // Add basic properties to the Flutter project and subprojects
     flutterProject = MockFlutterProject();
     when(flutterProject.directory).thenReturn(fs.directory('/'));
