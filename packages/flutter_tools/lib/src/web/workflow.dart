@@ -19,10 +19,10 @@ class WebWorkflow extends Workflow {
   bool get appliesToHostPlatform => featureFlags.isWebEnabled && (platform.isWindows || platform.isMacOS || platform.isLinux);
 
   @override
-  bool get canLaunchDevices => featureFlags.isWebEnabled && canFindChrome();
+  bool get canLaunchDevices => featureFlags.isWebEnabled;
 
   @override
-  bool get canListDevices => featureFlags.isWebEnabled && canFindChrome();
+  bool get canListDevices => featureFlags.isWebEnabled;
 
   @override
   bool get canListEmulators => false;

@@ -156,6 +156,7 @@ class ChromeDevice extends Device {
 class WebDevices extends PollingDeviceDiscovery {
   WebDevices() : super('chrome');
 
+  final bool _chromeIsAvailable = canFindChrome();
   final ChromeDevice _webDevice = ChromeDevice();
   final WebServerDevice _webServerDevice = WebServerDevice();
 
@@ -165,7 +166,8 @@ class WebDevices extends PollingDeviceDiscovery {
   @override
   Future<List<Device>> pollingGetDevices() async {
     return <Device>[
-      _webDevice,
+      if (_chromeIsAvailable)
+        _webDevice,
       _webServerDevice,
     ];
   }
