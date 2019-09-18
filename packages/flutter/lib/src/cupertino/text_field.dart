@@ -33,8 +33,14 @@ const BoxDecoration _kDefaultRoundedBorderDecoration = BoxDecoration(
 
 // Value extracted via color reader from iOS simulator.
 const Color _kSelectionHighlightColor = Color(0x667FAACF);
-const Color _kInactiveTextColor = Color(0xFFC2C2C2);
-const Color _kDisabledBackground = Color(0xFFFAFAFA);
+const CupertinoDynamicColor _kInactiveTextColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x4D3C3C43),
+  darkColor: Color(0x4DEBEBF5),
+);
+const Color _kDisabledBackground = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFFAFAFA),
+  darkColor: Color(0xFF050505),
+);
 
 // An eyeballed value that moves the cursor slightly left of where it is
 // rendered for text on Android so it's positioning more accurately matches the
@@ -778,12 +784,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                 if (widget.onChanged != null && textChanged)
                   widget.onChanged(_effectiveController.text);
               } : null,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 6.0),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6.0),
                 child: Icon(
                   CupertinoIcons.clear_thick_circled,
                   size: 18.0,
-                  color: _kInactiveTextColor,
+                  color: CupertinoDynamicColor.resolve(_kInactiveTextColor, context)?.withAlpha(60),
                 ),
               ),
             ),
@@ -807,17 +813,29 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
     }
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
-    final TextStyle textStyle = themeData.textTheme.textStyle.merge(widget.style);
-    final TextStyle placeholderStyle = textStyle.merge(widget.placeholderStyle);
-    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
-    final Color cursorColor = widget.cursorColor ?? themeData.primaryColor;
-    final Color disabledColor = CupertinoTheme.of(context).brightness == Brightness.light
-      ? _kDisabledBackground
-      : CupertinoColors.darkBackgroundGray;
 
-    final BoxDecoration effectiveDecoration = enabled
-      ? widget.decoration
-      : widget.decoration?.copyWith(color: widget.decoration?.color ?? disabledColor);
+    final TextStyle resolvedStyle = widget.style?.copyWith(
+      color: CupertinoDynamicColor.resolve(widget.style?.color, context),
+      backgroundColor: CupertinoDynamicColor.resolve(widget.style?.backgroundColor, context),
+    );
+
+    final TextStyle textStyle = themeData.textTheme.textStyle.merge(resolvedStyle);
+
+    final TextStyle resolvedPlaceholderStyle = widget.placeholderStyle?.copyWith(
+      color: CupertinoDynamicColor.resolve(widget.placeholderStyle?.color, context),
+      backgroundColor: CupertinoDynamicColor.resolve(widget.placeholderStyle?.backgroundColor, context),
+    );
+
+    final TextStyle placeholderStyle = textStyle.merge(resolvedPlaceholderStyle);
+
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
+    final Color cursorColor = CupertinoDynamicColor.resolve(widget.cursorColor, context) ?? themeData.primaryColor;
+    final Color disabledColor = CupertinoDynamicColor.resolve(_kDisabledBackground, context);
+
+    final Color decorationColor = CupertinoDynamicColor.resolve(widget.decoration?.color, context);
+    final BoxDecoration effectiveDecoration = widget.decoration.copyWith(
+      color: enabled ? decorationColor : (decorationColor ?? disabledColor),
+    );
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,
@@ -857,7 +875,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           cursorOpacityAnimates: true,
           cursorOffset: cursorOffset,
           paintCursorAboveText: true,
-          backgroundCursorColor: CupertinoColors.inactiveGray,
+          backgroundCursorColor: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context),
           scrollPadding: widget.scrollPadding,
           keyboardAppearance: keyboardAppearance,
           dragStartBehavior: widget.dragStartBehavior,
