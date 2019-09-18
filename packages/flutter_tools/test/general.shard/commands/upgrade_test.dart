@@ -46,10 +46,10 @@ void main() {
         return Future<Process>.value(createMockProcess());
       });
       fakeCommandRunner.willHaveUncomittedChanges = false;
-      fakePlatform = FakePlatform()..environment = <String, String>{
+      fakePlatform = FakePlatform()..environment = Map<String, String>.unmodifiable(<String, String>{
         'ENV1': 'irrelevant',
         'ENV2': 'irrelevant',
-      };
+      });
     });
 
     testUsingContext('throws on unknown tag, official branch,  noforce', () async {
@@ -147,7 +147,8 @@ void main() {
         workingDirectory: anyNamed('workingDirectory'),
       ));
 
-      expect(result.captured.first, fakePlatform.environment);
+      expect(result.captured.first,
+          <String, String>{ 'FLUTTER_ALREADY_LOCKED': 'true', ...fakePlatform.environment });
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
@@ -177,7 +178,8 @@ void main() {
         workingDirectory: anyNamed('workingDirectory'),
       ));
 
-      expect(result.captured.first, fakePlatform.environment);
+      expect(result.captured.first,
+          <String, String>{ 'FLUTTER_ALREADY_LOCKED': 'true', ...fakePlatform.environment });
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
