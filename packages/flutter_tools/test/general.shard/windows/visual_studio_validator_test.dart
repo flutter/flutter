@@ -33,6 +33,8 @@ void main() {
       when(mockVisualStudio.isRebootRequired).thenReturn(false);
       when(mockVisualStudio.hasNecessaryComponents).thenReturn(true);
     }
+
+    // Assigns default values for a missing VS installation.
     void _configureMockVisualStudioAsNotInstalled() {
       when(mockVisualStudio.isInstalled).thenReturn(false);
       when(mockVisualStudio.isPrerelease).thenReturn(false);
