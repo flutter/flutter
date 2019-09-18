@@ -521,7 +521,7 @@ void main() {
                 opacity: 0.5,
                 child: TextField(
                   decoration: InputDecoration(hintText: 'Placeholder'),
-                  toolbarOptions: ToolbarOptions(selectAll: false),
+                  toolbarOptions: ToolbarOptions(copy: true),
                 ),
               ),
             ),
@@ -551,7 +551,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     // Sanity check that the toolbar widget exists and does not inclue [Select All].
-    expect(find.text('SELECT ALL'), findsNothing);
+    expect(find.text('COPY'), findsOneWidget);
   }, skip: isBrowser);
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
