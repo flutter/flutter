@@ -2276,7 +2276,7 @@ Future<void> main() async {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/38183.
-  testWidgets('invalidate user gesture driven flights when the gesture is invalid', (WidgetTester tester) async {
+  testWidgets('Remove user gesture driven flights when the gesture is invalid', (WidgetTester tester) async {
     transitionFromUserGestures = true;
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(

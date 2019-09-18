@@ -732,18 +732,23 @@ class HeroController extends NavigatorObserver {
     if (navigator.userGestureInProgress)
       return;
 
-    bool isStaleGesture(_HeroFlight flight) {
+    // If the user horizontal drag gesture initiated the flight (i.e. the back swipe)
+    // didn't move towards the pop direction at all, the animation will not play
+    // and thus the status update callback _handleAnimationUpdate will never be
+    // called when the gesture finishes. In this case the initiated flight needs
+    // to be manually invalidated.
+    bool isInvalidFlight(_HeroFlight flight) {
       return flight.manifest.isUserGestureTransition
           && flight.manifest.type == HeroFlightDirection.pop
-          && flight._proxyAnimation.value == 0
-          && flight._proxyAnimation.status == AnimationStatus.dismissed;
+          && flight._proxyAnimation.isDismissed;
     }
 
     final List<_HeroFlight> invalidFlights = _flights.values
-      .where(isStaleGesture)
+      .where(isInvalidFlight)
       .toList(growable: false);
 
-    // Treat these invalidated flights as dismissed.
+    // Treat these invalidated flights as dismissed. Calling _handleAnimationUpdate
+    // will also remove the flight from _flights.
     for (_HeroFlight flight in invalidFlights) {
       flight._handleAnimationUpdate(AnimationStatus.dismissed);
     }
