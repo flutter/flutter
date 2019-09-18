@@ -234,7 +234,8 @@ class RecordingCanvas {
     // Ensure inner is fully contained within outer, by comparing its
     // defining points (including its border radius)
     ui.Rect innerRect = inner.outerRect;
-    if (outer.outerRect.intersect(innerRect) != innerRect) {
+    ui.Rect outerRect = outer.outerRect;
+    if (outerRect == innerRect || outerRect.intersect(innerRect) != innerRect) {
       return; // inner is not fully contained within outer
     }
 
@@ -252,7 +253,7 @@ class RecordingCanvas {
     final double innerBl = _getDistance(scaledInner.blRadiusX, scaledInner.blRadiusY);
     final double innerBr = _getDistance(scaledInner.brRadiusX, scaledInner.brRadiusY);
 
-    if (innerTl >= outerTl || innerTr >= outerTr || innerBl >= outerBl || innerBr >= outerBr) {
+    if (innerTl > outerTl || innerTr > outerTr || innerBl > outerBl || innerBr > outerBr) {
       return; // Some inner radius is overlapping some outer radius
     }
 
