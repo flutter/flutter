@@ -508,9 +508,9 @@ void main() {
     );
   }, skip: isBrowser);
 
-  testWidgets('text field toolbar options correctly changes options',
+  testWidgets('text field toolbar options correctly changes options (iOS)',
       (WidgetTester tester) async {
-     final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -551,8 +551,43 @@ void main() {
       const TextSelection(baseOffset: 8, extentOffset: 12),
     );
 
-    // Selected text shows 3 toolbar buttons.
+    // Selected text shows 1 toolbar button.
     expect(find.byType(CupertinoButton), findsNWidgets(1));
+  }, skip: isBrowser);
+
+  testWidgets('text field toolbar options correctly changes options (Android)',
+      (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+              toolbarOptions: const ToolbarOptions(copy: true),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+    // This tap just puts the cursor somewhere different than where the double
+    // tap will occur to test that the double tap moves the existing cursor first.
+    await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+    await tester.pump();
+
+    // Selected text shows 2 toolbar buttons.
+    expect(find.byType(FlatButton), findsNWidgets(2));
   }, skip: isBrowser);
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
