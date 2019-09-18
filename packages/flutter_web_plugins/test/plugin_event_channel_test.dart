@@ -10,24 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-class TestPlugin {
-  static void registerWith(Registrar registrar) {
-    final MethodChannel channel = MethodChannel(
-      'test_plugin',
-      const StandardMethodCodec(),
-      registrar.messenger,
-    );
-    final TestPlugin testPlugin = TestPlugin();
-    channel.setMethodCallHandler(testPlugin.handleMethodCall);
-  }
-
-  static final List<String> calledMethods = <String>[];
-
-  Future<void> handleMethodCall(MethodCall call) async {
-    calledMethods.add(call.method);
-  }
-}
-
 void main() {
   group('Plugin Event Channel', () {
     setUp(() {
