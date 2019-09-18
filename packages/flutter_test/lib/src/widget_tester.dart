@@ -743,9 +743,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///  - [sendKeyUpEvent] to simulate only a key up event.
   Future<void> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
     assert(platform != null);
-    // Internally wrapped in async guard.
     await simulateKeyDownEvent(key, platform: platform);
-    return await simulateKeyUpEvent(key, platform: platform);
+    // Internally wrapped in async guard.
+    return simulateKeyUpEvent(key, platform: platform);
   }
 
   /// Simulates sending a physical key down event through the system channel.

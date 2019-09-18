@@ -419,8 +419,7 @@ void main() {
 
       Future<void> sendEvent() async {
         receivedAnEvent.clear();
-        await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
-        await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
+        await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
       }
 
       final BuildContext context = await setupWidget(tester);

@@ -34,9 +34,9 @@ void main() {
     await tester.idle();
 
     expect(events.length, 2);
-    expect(events[1].runtimeType, equals(RawKeyUpEvent));
-    expect(events[1].data.runtimeType, equals(RawKeyEventDataFuchsia));
-    final RawKeyEventDataFuchsia typedData = events[1].data;
+    expect(events[0].runtimeType, equals(RawKeyDownEvent));
+    expect(events[0].data.runtimeType, equals(RawKeyEventDataFuchsia));
+    final RawKeyEventDataFuchsia typedData = events[0].data;
     expect(typedData.hidUsage, 0x700e3);
     expect(typedData.codePoint, 0x0);
     expect(typedData.modifiers, RawKeyEventDataFuchsia.modifierLeftMeta);
