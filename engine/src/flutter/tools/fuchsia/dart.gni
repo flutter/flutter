@@ -1,16 +1,13 @@
-# Copyright 2013 The Flutter Authors. All rights reserved.
+# Copyright 2018 The Fuchsia Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-engine_gen_snapshot = "//third_party/dart/runtime/bin:gen_snapshot"
-engine_gen_snapshot_product =
-    "//third_party/dart/runtime/bin:gen_snapshot_product"
+gen_snapshot = "//third_party/dart/runtime/bin:gen_snapshot"
+gen_snapshot_product = "//third_party/dart/runtime/bin:gen_snapshot_product"
 
-engine_observatory_target =
+observatory_target =
     "//third_party/dart/runtime/observatory:observatory_archive"
-engine_observatory_archive_dir =
-    get_label_info(engine_observatory_target, "target_gen_dir")
-engine_observatory_archive_name =
-    get_label_info(engine_observatory_target, "name")
-engine_observatory_archive_file =
-    "${engine_observatory_archive_dir}/${engine_observatory_archive_name}.tar"
+observatory_archive_dir = get_label_info(observatory_target, "target_gen_dir")
+observatory_archive_name = get_label_info(observatory_target, "name")
+observatory_archive_file =
+    "${observatory_archive_dir}/${observatory_archive_name}.tar"
