@@ -1294,7 +1294,7 @@ void main() {
 
   testWidgets('text field toolbar options correctly changes options', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
-      text: "j'aime la poutine",
+      text: "Atwater Peel Sherbrooke Bonaventure",
     );
     await tester.pumpWidget(
       CupertinoApp(
@@ -1302,25 +1302,34 @@ void main() {
           children: <Widget>[
             CupertinoTextField(
               controller: controller,
-              toolbarOptions: const ToolbarOptions(selectAll: true),
+              toolbarOptions: const ToolbarOptions(copy: true),
             ),
           ],
         ),
       ),
     );
 
-    await tester.longPressAt(
-      tester.getTopRight(find.text("j'aime la poutine"))
-    );
+      // Long press to put the cursor after the "w".
+      const int index = 3;
+      await tester.longPressAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: index),
+      );
 
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
+      // Double tap on the same location to select the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
 
-    // Sanity check that the toolbar widget exists and does not inclue [Select All].
-    expect(find.text('Select All'), findsOneWidget);
-    expect(find.text('Copy'), findsNothing);
-    expect(find.text('Paste'), findsNothing);
-    expect(find.text('Cut'), findsNothing);
+      // Selected text shows 1 toolbar button.
+      expect(find.byType(CupertinoButton), findsNWidgets(1));
   });
   testWidgets('Read only text field', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'readonly');
