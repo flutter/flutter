@@ -202,37 +202,34 @@ class SkiaGoldClient {
         await httpClient.getUrl(requestForDigest)
           .then((io.HttpClientRequest request) => request.close())
           .then((io.HttpClientResponse response) async {
-          rawResponse = await response.transform(utf8.decoder).join();
-          final Map<String,dynamic> skiaJson = json.decode(rawResponse);
+            rawResponse = await utf8.decodeStream(response);
+            final Map<String,dynamic> skiaJson = json.decode(rawResponse);
 
-          if (skiaJson['digests'].length > 1) {
+            if (skiaJson['digests'].length > 1) {
 
-            final StringBuffer buf = StringBuffer()
-              ..writeln('There is more than one digest available for golden')
-              ..writeln('test: $testName. Triage may have broken down.')
-              ..writeln('Check $_kFlutterGoldDashboard to validate the')
-              ..writeln('current status of this test.');
-            throw NonZeroExitCode(1, buf.toString());
+              final StringBuffer buf = StringBuffer()
+                ..writeln('There is more than one digest available for golden')
+                ..writeln('test: $testName. Triage may have broken down.')
+                ..writeln('Check $_kFlutterGoldDashboard to validate the')
+                ..writeln('current status of this test.');
+              throw NonZeroExitCode(1, buf.toString());
 
-          } else if (skiaJson['digests'].length == 0) {
+            } else if (skiaJson['digests'].length == 0) {
+              print('No digests provided by Skia Gold for test: $testName. '
+                'This may be a new test. If this is an unexpected result, check'
+                ' $_kFlutterGoldDashboard.'
+              );
+              masterImageBytes = <int>[0];
+              return;
+            }
 
-            print('No digests provided by Skia Gold for test: $testName. '
-              'This may be a new test. If this is an unexpected result, check'
-              ' $_kFlutterGoldDashboard.'
-            );
-
-          }
-          masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]); //null?
-          assert(masterDigest != null);
+            masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
         });
       } on FormatException catch(_) {
         print('Formatting error detected in response from Flutter Gold.'
           'rawResponse: $rawResponse');
         rethrow;
       }
-
-      if (masterImageBytes == <int>[0])
-        return;
 
       if (!masterDigest.isValid(platform, testName)) {
         final StringBuffer buf = StringBuffer()

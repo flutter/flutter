@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -14,57 +16,44 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 const String _kFlutterRoot = '/flutter';
-const String _kRepositoryRoot = '$_kFlutterRoot/bin/cache/pkg/goldens';
-const String _kVersionFile = '$_kFlutterRoot/bin/internal/goldens.version';
 const String _kGoldensVersion = '123456abcdef';
 
 // 1x1 transparent pixel
-const List<int> _kTestPngBytes =
-<int>[137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
-  1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 11, 73, 68, 65, 84,
-  120, 1, 99, 97, 0, 2, 0, 0, 25, 0, 5, 144, 240, 54, 245, 0, 0, 0, 0, 73, 69,
-  78, 68, 174, 66, 96, 130];
+//const List<int> _kTestPngBytes =
+//<int>[137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+//  1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 11, 73, 68, 65, 84,
+//  120, 1, 99, 97, 0, 2, 0, 0, 25, 0, 5, 144, 240, 54, 245, 0, 0, 0, 0, 73, 69,
+//  78, 68, 174, 66, 96, 130];
 
 void main() {
   MemoryFileSystem fs;
   FakePlatform platform;
   MockProcessManager process;
+  MockHttpClient mockHttpClient;
 
   setUp(() {
     fs = MemoryFileSystem();
-    platform = FakePlatform(environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot});
+    platform = FakePlatform(
+      environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
+      operatingSystem: 'macos'
+    );
     process = MockProcessManager();
+    mockHttpClient = MockHttpClient();
     fs.directory(_kFlutterRoot).createSync(recursive: true);
-    fs.directory(_kRepositoryRoot).createSync(recursive: true);
-    fs.file(_kVersionFile).createSync(recursive: true);
-    fs.file(_kVersionFile).writeAsStringSync(_kGoldensVersion);
   });
 
   group('SkiaGoldClient', () {
-    SkiaGoldClient goldens;
-
-    // Mock HttpClient calls
-    // - request for digest
-    //   - digests > 1 = triage breakdown
-    //   - digests == 0 new test
-    //   - digest validation
-    // - request for image bytes
-    // - request for ignores
-    // Add templates
-    // - skia Gold responses
-    //   - digest
-    //   - image bytes
-    //   - ignores
-    // - test image bytes
+    SkiaGoldClient skiaClient;
 
     setUp(() {
       final Directory workDirectory = fs.directory('/workDirectory')
         ..createSync(recursive: true);
-      goldens = SkiaGoldClient(
+      skiaClient = SkiaGoldClient(
         workDirectory,
         fs: fs,
         process: process,
         platform: platform,
+        httpClient: mockHttpClient,
       );
     });
 
@@ -73,20 +62,90 @@ void main() {
         fs.file('/workDirectory/temp/auth_opt.json')
           ..createSync(recursive: true);
         when(process.run(any))
-          .thenAnswer((_) => Future<io.ProcessResult>
-            .value(io.ProcessResult(123, 0, '', '')));
-        await goldens.auth();
+          .thenAnswer((_) => Future<ProcessResult>
+            .value(ProcessResult(123, 0, '', '')));
+        await skiaClient.auth();
 
-        // Verify that we spawned no process calls
         verifyNever(process.run(
             captureAny,
             workingDirectory: captureAnyNamed('workingDirectory'),
         ));
       });
     });
+
+    group('Request Handling', () {
+      test('throws for triage breakdown when digests > 1', () async {
+        const String testName = 'flutter.golden_test.1.png';
+        final Uri url = Uri.parse(
+          'https://flutter-gold.skia.org/json/search?source_type%3Dflutter'
+            '&head=true&include=true&pos=true&neg=false&unt=false'
+            '&query=Platform%3Dmacos%26name%3Dflutter.golden_test.1%26'
+        );
+
+        final MockHttpClientRequest mockHttpRequest = MockHttpClientRequest();
+        final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
+          utf8.encode(digestResponseTemplate(includeExtraDigests: true))
+        );
+        when(mockHttpClient.getUrl(url))
+          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
+        when(mockHttpRequest.close())
+          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+
+        try {
+          await skiaClient.getMasterBytes(testName);
+          fail('TestFailure expected but not thrown.');
+        } catch (error) {
+          expect(error.stderr, contains('There is more than one digest available'));
+        }
+      });
+
+      test('returns signal bytes for new tests without a baseline', () async {
+//        const String testName = 'flutter.golden_test.1.png';
+//        final Uri url = Uri.parse(
+//          'https://flutter-gold.skia.org/json/search?source_type%3Dflutter'
+//            '&head=true&include=true&pos=true&neg=false&unt=false'
+//            '&query=Platform%3Dmacos%26name%3Dflutter.golden_test.1%26'
+//        );
+//
+//        final MockHttpClientRequest mockHttpRequest = MockHttpClientRequest();
+//        final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
+//          utf8.encode(digestResponseTemplate(returnEmptyDigest: true))
+//        );
+//        when(mockHttpClient.getUrl(url))
+//          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
+//        when(mockHttpRequest.close())
+//          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+//
+//        final List<int> imageBytes = await skiaClient.getMasterBytes(testName);
+//        expect(imageBytes, <int>[0]);
+      });
+
+      test('validates SkiaDigest', () {
+
+      });
+
+      test('throws for invalid SkiaDigest', () {
+
+      });
+
+      test('image bytes are decoded properly', () {
+
+      });
+    });
   });
 
   group('FlutterGoldenFileComparator', () {
+    FlutterSkiaGoldFileComparator comparator;
+
+    setUp(() {
+      comparator = FlutterSkiaGoldFileComparator(
+        Uri.parse('flutter/test'),
+        MockSkiaGoldClient(),
+        fs: fs,
+        platform: platform,
+      );
+    });
+
     test('calculates the basedir correctly', () async {
       final MockLocalFileComparator defaultComparator = MockLocalFileComparator();
       final Directory flutterRoot = fs.directory(platform.environment['FLUTTER_ROOT'])
@@ -95,31 +154,65 @@ void main() {
       final Directory basedir = FlutterGoldenFileComparator.getBaseDirectory(defaultComparator, platform);
       expect(basedir.uri, fs.directory('/flutter/bin/cache/pkg/skia_goldens/baz').uri);
     });
-  });
 
-  group('FlutterSkiaGoldFileComparator', () {
-    FlutterSkiaGoldFileComparator comparator;
-
-    setUp(() {
-      final Directory flutterRoot = fs.directory('/path/to/flutter')..createSync(recursive: true);
-      final Directory goldensRoot = flutterRoot.childDirectory('bin/cache/goldens')..createSync(recursive: true);
-      final Directory testDirectory = goldensRoot.childDirectory('test/foo/bar')..createSync(recursive: true);
-      comparator = FlutterSkiaGoldFileComparator(
-        testDirectory.uri,
-        MockSkiaGoldClient(),
-        fs: fs,
-        platform: platform,
-      );
+    test('ignores version number', () {
+      final Uri key = comparator.getTestUri(Uri.parse('foo.png'), 1);
+      expect(key, Uri.parse('foo.png'));
     });
 
-    group('getTestUri', () {
-      test('ignores version number', () {
-        final Uri key = comparator.getTestUri(Uri.parse('foo.png'), 1);
-        expect(key, Uri.parse('foo.png'));
+    test('prefixes golden file names with associated libraries', () {
+
+    });
+
+    group('FlutterSkiaGoldFileComparator', () {
+      test('correctly determines testing environment', () {
+
+      });
+
+      test('throws for non-existent golden file', () async {
+//        try {
+//          await comparator.compare(Uint8List.fromList(<int>[1, 2, 3]), Uri.parse('test.png'));
+//          fail('TestFailure expected but not thrown');
+//        } on TestFailure catch (error) {
+//          expect(error.message, contains('Could not be compared against non-existent file'));
+//        }
+      });
+    });
+
+    group('FlutterPreSubmitFileComparator', () {
+      test('correctly determines testing environment', () {
+
+      });
+
+      test('passes test that is ignored for this PR', () {
+
+      });
+
+      test('fails test that is not ignored for this PR', () {
+
+      });
+
+      test('fails test that is ignored, but not for given PR', () {
+
+      });
+
+      test('passes non-existent baseline for new test', () {
+
+      });
+    });
+
+    group('FlutterLocalFileComparator', () {
+      test('correctly determines testing environment', () {
+
+      });
+
+      test('passes non-existent baseline for new test', () {
+
       });
     });
   });
 }
+
 
 class MockProcessManager extends Mock implements ProcessManager {}
 
@@ -127,13 +220,37 @@ class MockSkiaGoldClient extends Mock implements SkiaGoldClient {}
 
 class MockLocalFileComparator extends Mock implements LocalFileComparator {}
 
-String digestResponseTemplate() {
+class MockHttpClient extends Mock implements HttpClient {}
+
+class MockHttpClientRequest extends Mock implements HttpClientRequest {}
+
+class MockHttpClientResponse extends Mock implements HttpClientResponse {
+  MockHttpClientResponse(this.response);
+
+  final Uint8List response;
+
+  @override
+  StreamSubscription<Uint8List> listen(
+    void onData(Uint8List event), {
+      Function onError,
+      void onDone(),
+      bool cancelOnError,
+    }) {
+    return Stream<Uint8List>.fromFuture(Future<Uint8List>.value(response))
+      .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
+}
+
+String digestResponseTemplate({
+  bool includeExtraDigests = false,
+  bool returnEmptyDigest = false,
+}) {
   return '''
   {
-  "digests": [
+  "digests": [${returnEmptyDigest ? '' : '''
     {
-      "test": "flutter.golden_test.1",
-      "digest": "aa748136c70cefdda646df5be0ae189d",
+      "test": "cupertino.text_field_cursor_test.cupertino.1",
+      "digest": "88e2cc3398bd55b55df35cfe14d557c1",
       "status": "positive",
       "paramset": {
         "Platform": [
@@ -143,7 +260,7 @@ String digestResponseTemplate() {
           "png"
         ],
         "name": [
-          "flutter.golden_test.1"
+          "cupertino.text_field_cursor_test.cupertino.1"
         ],
         "source_type": [
           "flutter"
@@ -157,35 +274,36 @@ String digestResponseTemplate() {
               {
                 "x": 0,
                 "y": 0,
-                "s": 1
+                "s": 0
               },
               {
                 "x": 1,
                 "y": 0,
-                "s": 1
+                "s": 0
               },
               {
                 "x": 2,
                 "y": 0,
-                "s": 1
+                "s": 0
               },
+              {
+                "x": 3,
+                "y": 0,
+                "s": 0
+              }
             ],
-            "label": ",Platform=macos,name=flutter.golden_test.1,source_type=flutter,",
+            "label": ",Platform=macos,name=cupertino.text_field_cursor_test.cupertino.1,source_type=flutter,",
             "params": {
               "Platform": "macos",
               "ext": "png",
-              "name": "flutter.golden_test.1",
+              "name": "cupertino.text_field_cursor_test.cupertino.1",
               "source_type": "flutter"
             }
           }
         ],
         "digests": [
           {
-            "digest": "aa748136c70cefdda646df5be0ae189d",
-            "status": "positive"
-          },
-          {
-            "digest": "0b9795b218a8e367b552dcea55c8d589",
+            "digest": "88e2cc3398bd55b55df35cfe14d557c1",
             "status": "positive"
           }
         ]
@@ -194,63 +312,146 @@ String digestResponseTemplate() {
       "refDiffs": {
         "neg": null,
         "pos": {
-          "numDiffPixels": 999,
-          "pixelDiffPercent": 0.4995,
+          "numDiffPixels": 541,
+          "pixelDiffPercent": 4.663793,
           "maxRGBADiffs": [
-            86,
-            86,
-            86,
-            0
+            0,
+            128,
+            255,
+            112
           ],
           "dimDiffer": false,
           "diffs": {
-            "combined": 0.381955,
-            "percent": 0.4995,
-            "pixel": 999
+            "combined": 1.6742188,
+            "percent": 4.663793,
+            "pixel": 541
           },
-          "digest": "c3312ad1479f50caf3754b42a42740c5",
+          "digest": "e4ac039c7b3112d7dada8e7c0a4e0501",
           "status": "positive",
           "paramset": {
             "Platform": [
-              "linux"
+              "windows"
             ],
             "ext": [
               "png"
             ],
             "name": [
-              "flutter.golden_test.1"
+              "cupertino.text_field_cursor_test.cupertino.1"
             ],
             "source_type": [
               "flutter"
             ]
           },
-          "n": 167
+          "n": 191
+        }
+      }
+    }${includeExtraDigests ? ''',
+    {
+      "test": "cupertino.text_field_cursor_test.cupertino.1",
+      "digest": "88e2cc3398bd55b55df35cfe14d557c1",
+      "status": "positive",
+      "paramset": {
+        "Platform": [
+          "macos"
+        ],
+        "ext": [
+          "png"
+        ],
+        "name": [
+          "cupertino.text_field_cursor_test.cupertino.1"
+        ],
+        "source_type": [
+          "flutter"
+        ]
+      },
+      "traces": {
+        "tileSize": 200,
+        "traces": [
+          {
+            "data": [
+              {
+                "x": 0,
+                "y": 0,
+                "s": 0
+              }
+            ],
+            "label": ",Platform=macos,name=cupertino.text_field_cursor_test.cupertino.1,source_type=flutter,",
+            "params": {
+              "Platform": "macos",
+              "ext": "png",
+              "name": "cupertino.text_field_cursor_test.cupertino.1",
+              "source_type": "flutter"
+            }
+          }
+        ],
+        "digests": [
+          {
+            "digest": "88e2cc3398bd55b55df35cfe14d557c1",
+            "status": "positive"
+          }
+        ]
+      },
+      "closestRef": "pos",
+      "refDiffs": {
+        "neg": null,
+        "pos": {
+          "numDiffPixels": 541,
+          "pixelDiffPercent": 4.663793,
+          "maxRGBADiffs": [
+            0,
+            128,
+            255,
+            112
+          ],
+          "dimDiffer": false,
+          "diffs": {
+            "combined": 1.6742188,
+            "percent": 4.663793,
+            "pixel": 541
+          },
+          "digest": "e4ac039c7b3112d7dada8e7c0a4e0501",
+          "status": "positive",
+          "paramset": {
+            "Platform": [
+              "windows"
+            ],
+            "ext": [
+              "png"
+            ],
+            "name": [
+              "cupertino.text_field_cursor_test.cupertino.1"
+            ],
+            "source_type": [
+              "flutter"
+            ]
+          },
+          "n": 191
         }
       }
     }
+    ''' : ''} '''}
   ],
   "offset": 0,
   "size": 1,
   "commits": [
     {
-      "commit_time": 1567407452,
-      "hash": "7bc4074ff3887845d8a558a078ed878ab821cde9",
-      "author": "Contributor A (contribA@getMail.com)"
-    },
-    {
-      "commit_time": 1567412246,
-      "hash": "43e7c5590092d9c173d032618175f991976f9e09",
-      "author": "Contributor B (contribB@getMail.com)"
-    },
-    {
       "commit_time": 1567412442,
       "hash": "2b7e59b9c0267d3f90ddd8b2cb10c1431c79137d",
-      "author": "Contributor C (contribC@getMail.com)"
+      "author": "engine-flutter-autoroll (engine-flutter-autoroll@skia.org)"
     },
+    {
+      "commit_time": 1567418861,
+      "hash": "ec1ea2b38ab1773f2c412e303a8cda0792a980ca",
+      "author": "engine-flutter-autoroll (engine-flutter-autoroll@skia.org)"
+    },
+    {
+      "commit_time": 1567434521,
+      "hash": "d30e4228afd633e4f6d2ed217a926e8983161379",
+      "author": "engine-flutter-autoroll (engine-flutter-autoroll@skia.org)"
+    }
   ],
   "issue": null
 }
-
   ''';
 }
 

@@ -239,8 +239,10 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = addPrefix(golden);
     final List<int> goldenBytes = await skiaClient.getMasterBytes(golden.path);
-    // Check signal from golden bytes, could use [0] for skip test, or [1] for
-    // something else... not network connection available etc.
+    if (goldenBytes == <int>[0]) {
+      // There is no baseline for this test
+      return true;
+    }
     final ComparisonResult result = GoldenFileComparator.compareLists(
       imageBytes,
       goldenBytes,
@@ -307,6 +309,10 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = addPrefix(golden);
     final List<int> goldenBytes = await skiaClient.getMasterBytes(golden.path);
+    if (goldenBytes == <int>[0]) {
+      // There is no baseline for this test
+      return true;
+    }
     final ComparisonResult result = GoldenFileComparator.compareLists(
       imageBytes,
       goldenBytes,
