@@ -317,6 +317,7 @@ class Descendant extends SerializableFinder {
     @required this.of,
     @required this.matching,
     this.matchRoot = false,
+    this.firstMatchOnly = false,
   });
 
   /// The finder specifying the widget of which the descendant is to be found.
@@ -328,6 +329,9 @@ class Descendant extends SerializableFinder {
   /// Whether the widget matching [of] will be considered for a match.
   final bool matchRoot;
 
+  /// If true then only the first descendant matching `matching` will be returned.
+  final bool firstMatchOnly;
+
   @override
   String get finderType => 'Descendant';
 
@@ -338,6 +342,7 @@ class Descendant extends SerializableFinder {
         ..addAll(matching.serialize().map((String key, String value) => MapEntry<String, String>('matching_$key', value)))
         ..addAll(<String, String>{
           'matchRoot': matchRoot ? 'true' : 'false',
+          'firstMatchOnly': firstMatchOnly ? 'true' : 'false',
         });
   }
 
@@ -359,6 +364,7 @@ class Descendant extends SerializableFinder {
       of: SerializableFinder.deserialize(of),
       matching: SerializableFinder.deserialize(matching),
       matchRoot: other['matchRoot'] == 'true',
+      firstMatchOnly: other['firstMatchOnly'] == 'true',
     );
   }
 }
@@ -374,6 +380,7 @@ class Ancestor extends SerializableFinder {
     @required this.of,
     @required this.matching,
     this.matchRoot = false,
+    this.firstMatchOnly = false,
   });
 
   /// The finder specifying the widget of which the ancestor is to be found.
@@ -385,6 +392,9 @@ class Ancestor extends SerializableFinder {
   /// Whether the widget matching [of] will be considered for a match.
   final bool matchRoot;
 
+  /// If true then only the first ancestor matching `matching` will be returned.
+  final bool firstMatchOnly;
+
   @override
   String get finderType => 'Ancestor';
 
@@ -395,6 +405,7 @@ class Ancestor extends SerializableFinder {
       ..addAll(matching.serialize().map((String key, String value) => MapEntry<String, String>('matching_$key', value)))
       ..addAll(<String, String>{
         'matchRoot': matchRoot ? 'true' : 'false',
+        'firstMatchOnly': firstMatchOnly ? 'true' : 'false',
       });
   }
 
@@ -416,6 +427,7 @@ class Ancestor extends SerializableFinder {
       of: SerializableFinder.deserialize(of),
       matching: SerializableFinder.deserialize(matching),
       matchRoot: other['matchRoot'] == 'true',
+      firstMatchOnly: other['firstMatchOnly'] == 'true',
     );
   }
 }
