@@ -188,6 +188,71 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// ```
 /// {@end-tool}
 ///
+/// ## Reading values
+///
+/// A common way to read a value from a TextField is to use the [onSubmitted]
+/// callback. This callback is applied to the text field's current value when
+/// the user finishes editing.
+///
+/// {@tool dartpad --template=stateful_widget_material}
+///
+/// This sample shows how to get a value from a TextField via the [onSubmitted]
+/// callback.
+///
+/// ```dart
+/// TextEditingController _controller;
+///
+/// void initState() {
+///   super.initState();
+///   _controller = TextEditingController();
+/// }
+///
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
+///
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: TextField(
+///         controller: _controller,
+///         onSubmitted: (String value) async {
+///           await showDialog<void>(
+///             context: context,
+///             builder: (BuildContext context) {
+///               return AlertDialog(
+///                 title: const Text('Thanks!'),
+///                 content: Text ('You typed "$value".'),
+///                 actions: <Widget>[
+///                   FlatButton(
+///                     onPressed: () { Navigator.pop(context); },
+///                     child: const Text('OK'),
+///                   ),
+///                 ],
+///               );
+///             },
+///           );
+///         },
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// For most applications the [onSubmitted] callback will be sufficient for
+/// reacting to user input.
+///
+/// The [onEditingComplete] callback also runs when the user finishes editing.
+/// It's different from [onSubmitted] because it has a default value which
+/// updates the text controller and yields the keyboard focus. Applications that
+/// require different behavior can override the default [onEditingComplete]
+/// callback.
+///
+/// Keep in mind you can also always read the current string from a TextField's
+/// [TextEditingController] using [TextEditingController.text].
+///
 /// See also:
 ///
 ///  * <https://material.io/design/components/text-fields.html>
