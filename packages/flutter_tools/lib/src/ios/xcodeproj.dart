@@ -159,19 +159,51 @@ List<String> _xcodeBuildSettingsLines({
   }
 
   final String buildNameToParse = buildInfo?.buildName ?? project.manifest.buildName;
-  final String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse);
-  if (buildName != null) {
-    xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');
+  final bool buildNameIsMissing = buildNameToParse == null || buildNameToParse.isEmpty;
+  String buildName;
+  const String defaultBuildName = '1.0.0';
+  if (buildNameIsMissing) {
+    buildName = defaultBuildName;
+  } else {
+    buildName = validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse);
   }
 
-  String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildInfo?.buildNumber ?? project.manifest.buildNumber);
-  // Drop back to parsing build name if build number is not present. Build number is optional in the manifest, but
-  // FLUTTER_BUILD_NUMBER is required as the backing value for the required CFBundleVersion.
-  buildNumber ??= validatedBuildNumberForPlatform(TargetPlatform.ios, buildNameToParse);
+  final String buildNumberToParse = buildInfo?.buildNumber ?? project.manifest.buildNumber;
+  final bool buildNumberIsMissing =
+      (buildNumberToParse == null || buildNumberToParse.isEmpty) && buildNameIsMissing;
+  String buildNumber;
 
-  if (buildNumber != null) {
-    xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
+  const String defaultBuildNumber = '1';
+  if (buildNumberIsMissing) {
+    buildNumber = defaultBuildNumber;
+  } else {
+    buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse);
+    // Drop back to parsing build name if build number is not present. Build number is optional in the manifest, but
+    // FLUTTER_BUILD_NUMBER is required as the backing value for the required CFBundleVersion.
+    buildNumber ??= validatedBuildNumberForPlatform(TargetPlatform.ios, buildNameToParse);
   }
+
+  if (buildNameIsMissing) {
+    printError('Warning: Missing build name (CFBundleShortVersionString), defaulting to $defaultBuildName.');
+  }
+  if (buildNumberIsMissing) {
+    printError('Warning: Missing build number (CFBundleVersion), defaulting to $defaultBuildNumber.');
+  }
+  if (buildNameIsMissing || buildNumberIsMissing) {
+    printError('Action Required: You must set a build name and number in the pubspec.yaml '
+               'file version field before submitting to the App Store.');
+  }
+
+  if (buildName == null && buildNumber == null) {
+    throwToolExit('Cannot parse build number $buildNumberToParse or build name $buildNameToParse, check pubspec.yaml version.');
+  } else if (buildName == null) {
+    throwToolExit('Cannot parse build name $buildNameToParse, check pubspec.yaml version.');
+  } else if (buildNumber == null) {
+    throwToolExit('Cannot parse build number $buildNumberToParse, check pubspec.yaml version.');
+  }
+
+  xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');
+  xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
