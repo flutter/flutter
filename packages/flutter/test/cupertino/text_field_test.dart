@@ -1290,6 +1290,60 @@ void main() {
     expect(text.style.fontWeight, FontWeight.w400);
   });
 
+
+
+  testWidgets('text field toolbar options correctly changes options', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: "j'aime la poutine",
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+              toolbarOptions: ToolbarOptions(selectAll: false),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.longPressAt(
+      tester.getTopRight(find.text("j'aime la poutine"))
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Change the theme.
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          brightness: Brightness.dark,
+          textTheme: CupertinoTextThemeData(
+            textStyle: TextStyle(fontSize: 100, fontWeight: FontWeight.w800),
+          ),
+        ),
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.longPressAt(
+      tester.getTopRight(find.text("j'aime la poutine"))
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Sanity check that the toolbar widget exists and does not inclue [Select All].
+    expect(find.text('Select All'), findsNothing);
+  });
   testWidgets('Read only text field', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'readonly');
 

@@ -550,17 +550,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.pump(const Duration(seconds: 1));
 
-    // Sanity check that the toolbar widget exists.
+    // Sanity check that the toolbar widget exists and does not inclue [Select All].
     expect(find.text('SELECT ALL'), findsNothing);
-
-    await expectLater(
-      // The toolbar exists in the Overlay above the MaterialApp.
-      find.byType(Overlay),
-      matchesGoldenFile(
-        'text_field_opacity_test.0.png',
-        version: 3,
-      ),
-    );
   }, skip: isBrowser);
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
