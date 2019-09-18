@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'scroll_metrics.dart';
 
@@ -48,7 +49,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     @required TextDirection textDirection,
     @required this.thickness,
     @required this.fadeoutOpacityAnimation,
-    this.padding = EdgeInsets.zero,
+    EdgeInsets padding = EdgeInsets.zero,
     this.mainAxisMargin = 0.0,
     this.crossAxisMargin = 0.0,
     this.radius,
@@ -68,6 +69,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(padding.isNonNegative),
        _color = color,
        _textDirection = textDirection,
+       _padding = padding,
        minOverscrollLength = minOverscrollLength ?? minLength {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
@@ -91,12 +93,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   set textDirection(TextDirection value) {
     assert(value != null);
     if (textDirection == value)
-    return;
+      return;
 
     _textDirection = value;
     notifyListeners();
   }
-
 
   /// Thickness of the scrollbar in its cross-axis in logical pixels. Mustn't be null.
   double thickness;
@@ -131,7 +132,17 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// Defaults to [EdgeInsets.zero]. Must not be null and offsets from all four
   /// directions must be greater than or equal to zero.
-  final EdgeInsets padding;
+  EdgeInsets get padding => _padding;
+  EdgeInsets _padding;
+  set padding(EdgeInsets value) {
+    assert(value != null);
+    if (padding == value)
+      return;
+
+    _padding = value;
+    notifyListeners();
+  }
+
 
   /// The preferred smallest size the scrollbar can shrink to when the total
   /// scrollable extent is large, the current visible viewport is small, and the

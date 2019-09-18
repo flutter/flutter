@@ -474,8 +474,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     config.isToggled = _value;
   }
 
-  final CupertinoThumbPainter _thumbPainter = const CupertinoThumbPainter.switchThumb();
-
   @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
@@ -525,7 +523,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     );
 
     context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (PaintingContext innerContext, Offset offset) {
-      _thumbPainter.paint(innerContext.canvas, thumbBounds);
+      const CupertinoThumbPainter.switchThumb().paint(innerContext.canvas, thumbBounds);
     });
   }
 

@@ -20,7 +20,7 @@ const Duration _kScrollbarResizeDuration = Duration(milliseconds: 150);
 // Extracted from iOS 13.1 beta using Debug View Hierarchy.
 const Color _kScrollbarColor = CupertinoDynamicColor.withBrightness(
   color: Color(0x59000000),
-  darkColor:Color(0x80FFFFFF),
+  darkColor: Color(0x80FFFFFF),
 );
 const double _kScrollbarThickness = 3;
 const double _kScrollbarThicknessDragging = 8.0;
@@ -146,10 +146,15 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _painter ??= _buildCupertinoScrollbarPainter(context);
-    _painter
-      ..textDirection = Directionality.of(context)
-      ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context);
+    if (_painter == null) {
+      _painter = _buildCupertinoScrollbarPainter(context);
+    }
+    else {
+      _painter
+        ..textDirection = Directionality.of(context)
+        ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)
+        ..padding = MediaQuery.of(context).padding;
+    }
   }
 
   /// Returns a [ScrollbarPainter] visually styled like the iOS scrollbar.
