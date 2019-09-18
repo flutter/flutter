@@ -18,6 +18,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -118,6 +119,31 @@ void _updateGeneratedEnvironmentVariablesScript({
   os.chmod(generatedModuleBuildPhaseScript, '755');
 }
 
+/// Build name parsed and validated from build info and manifest. Used for CFBundleShortVersionString.
+String parsedBuildName({
+  @required FlutterManifest manifest,
+  @required BuildInfo buildInfo,
+}) {
+  final String buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
+  return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse);
+}
+
+/// Build number parsed and validated from build info and manifest. Used for CFBundleVersion.
+String parsedBuildNumber({
+  @required FlutterManifest manifest,
+  @required BuildInfo buildInfo,
+}) {
+  String buildNumberToParse = buildInfo?.buildNumber ?? manifest.buildNumber;
+  final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse);
+  if (buildNumber != null && buildNumber.isNotEmpty) {
+    return buildNumber;
+  }
+  // Drop back to parsing build name if build number is not present. Build number is optional in the manifest, but
+  // FLUTTER_BUILD_NUMBER is required as the backing value for the required CFBundleVersion.
+  buildNumberToParse = buildInfo?.buildName ?? manifest.buildName;
+  return validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse);
+}
+
 /// List of lines of build settings. Example: 'FLUTTER_BUILD_DIR=build'
 List<String> _xcodeBuildSettingsLines({
   @required FlutterProject project,
@@ -158,51 +184,11 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('FLUTTER_FRAMEWORK_DIR=$frameworkDir');
   }
 
-  final String buildNameToParse = buildInfo?.buildName ?? project.manifest.buildName;
-  final bool buildNameIsMissing = buildNameToParse == null || buildNameToParse.isEmpty;
-  String buildName;
-  const String defaultBuildName = '1.0.0';
-  if (buildNameIsMissing) {
-    buildName = defaultBuildName;
-  } else {
-    buildName = validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse);
-  }
 
-  final String buildNumberToParse = buildInfo?.buildNumber ?? project.manifest.buildNumber;
-  final bool buildNumberIsMissing =
-      (buildNumberToParse == null || buildNumberToParse.isEmpty) && buildNameIsMissing;
-  String buildNumber;
-
-  const String defaultBuildNumber = '1';
-  if (buildNumberIsMissing) {
-    buildNumber = defaultBuildNumber;
-  } else {
-    buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse);
-    // Drop back to parsing build name if build number is not present. Build number is optional in the manifest, but
-    // FLUTTER_BUILD_NUMBER is required as the backing value for the required CFBundleVersion.
-    buildNumber ??= validatedBuildNumberForPlatform(TargetPlatform.ios, buildNameToParse);
-  }
-
-  if (buildNameIsMissing) {
-    printError('Warning: Missing build name (CFBundleShortVersionString), defaulting to $defaultBuildName.');
-  }
-  if (buildNumberIsMissing) {
-    printError('Warning: Missing build number (CFBundleVersion), defaulting to $defaultBuildNumber.');
-  }
-  if (buildNameIsMissing || buildNumberIsMissing) {
-    printError('Action Required: You must set a build name and number in the pubspec.yaml '
-               'file version field before submitting to the App Store.');
-  }
-
-  if (buildName == null && buildNumber == null) {
-    throwToolExit('Cannot parse build number $buildNumberToParse or build name $buildNameToParse, check pubspec.yaml version.');
-  } else if (buildName == null) {
-    throwToolExit('Cannot parse build name $buildNameToParse, check pubspec.yaml version.');
-  } else if (buildNumber == null) {
-    throwToolExit('Cannot parse build number $buildNumberToParse, check pubspec.yaml version.');
-  }
-
+  final String buildName = parsedBuildName(manifest: project.manifest, buildInfo: buildInfo) ?? '1.0.0';
   xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');
+
+  final String buildNumber = parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
   if (artifacts is LocalEngineArtifacts) {
