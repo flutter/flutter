@@ -5,29 +5,11 @@
 assert(is_fuchsia)
 import("//build/fuchsia/sdk.gni")
 
-config("config") {
-  include_dirs = [ "../../.." ]
-}
+# TODO(dnfield): Remove this once Dart rules have been fixed:
+# https://dart-review.googlesource.com/c/sdk/+/117770
 
-source_set("cpp") {
-  public_configs = [ ":config" ]
+group("cpp") {
+  visibility = [ "//third_party/dart/runtime/vm:*" ]
 
-  sources = [
-    "component_context.cc",
-    "component_context.h",
-    "file_descriptor.cc",
-    "file_descriptor.h",
-    "outgoing_directory.cc",
-    "outgoing_directory.h",
-    "service_directory.cc",
-    "service_directory.h",
-    "termination_reason.cc",
-    "termination_reason.h",
-  ]
-
-  public_deps = [
-    "$fuchsia_sdk_root/fidl:fuchsia.io",
-    "$fuchsia_sdk_root/fidl:fuchsia.sys",
-    "$fuchsia_sdk_root/pkg:fdio",
-  ]
+  public_deps = [ "$fuchsia_sdk_root/pkg:sys_cpp" ]
 }

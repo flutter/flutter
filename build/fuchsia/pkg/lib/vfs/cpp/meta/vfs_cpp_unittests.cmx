@@ -1,5 +1,0 @@
-{
-    "program": {
-        "binary": "test/vfs_cpp_unittests"
-    }
-}

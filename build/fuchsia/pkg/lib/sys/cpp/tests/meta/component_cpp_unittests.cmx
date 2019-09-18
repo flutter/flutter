@@ -1,5 +1,0 @@
-{
-    "program": {
-        "binary": "test/component_cpp_unittests"
-    }
-}
