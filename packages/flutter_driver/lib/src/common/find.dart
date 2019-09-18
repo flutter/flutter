@@ -408,7 +408,7 @@ class Ancestor extends SerializableFinder {
     final Map<String, String> jsonOfMatcher =
         Map<String, String>.from(jsonDecode(json['of']));
     final Map<String, String> jsonMatchingMatcher =
-    Map<String, String>.from(jsonDecode(json['matching']));
+        Map<String, String>.from(jsonDecode(json['matching']));
     return Ancestor(
       of: SerializableFinder.deserialize(jsonOfMatcher),
       matching: SerializableFinder.deserialize(jsonMatchingMatcher),
