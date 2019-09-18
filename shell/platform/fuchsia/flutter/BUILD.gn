@@ -101,7 +101,7 @@ template("jit_runner") {
     if (!product) {
       deps += [
         "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:flutter_jit_runner",
-        engine_observatory_target,
+        observatory_target,
       ]
     }
 
@@ -119,7 +119,7 @@ template("jit_runner") {
     if (!product) {
       resources += [
         {
-          path = rebase_path(engine_observatory_archive_file)
+          path = rebase_path(observatory_archive_file)
           dest = "observatory.tar"
         },
         {
@@ -182,7 +182,7 @@ template("aot_runner") {
     if (!product) {
       deps += [
         "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:flutter_aot_runner",
-        engine_observatory_target,
+        observatory_target,
       ]
     }
 
@@ -200,7 +200,7 @@ template("aot_runner") {
     if (!product) {
       resources += [
         {
-          path = rebase_path(engine_observatory_archive_file)
+          path = rebase_path(observatory_archive_file)
           dest = "observatory.tar"
         },
         {
