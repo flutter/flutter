@@ -953,21 +953,20 @@ class SliverPhysicalParentData extends ParentData {
 class SliverPhysicalContainerParentData extends SliverPhysicalParentData with ContainerParentDataMixin<RenderSliver> { }
 
 List<DiagnosticsNode> _debugCompareFloats(String labelA, double valueA, String labelB, double valueB) {
-  final List<DiagnosticsNode> information = <DiagnosticsNode>[];
-  if (valueA.toStringAsFixed(1) != valueB.toStringAsFixed(1)) {
-    information..add(ErrorDescription(
-      'The $labelA is ${valueA.toStringAsFixed(1)}, but '
-      'the $labelB is ${valueB.toStringAsFixed(1)}.'
-    ));
-  } else {
-    information
-      ..add(ErrorDescription('The $labelA is $valueA, but the $labelB is $valueB.'))
-      ..add(ErrorHint(
+  return <DiagnosticsNode>[
+    if (valueA.toStringAsFixed(1) != valueB.toStringAsFixed(1))
+      ErrorDescription(
+        'The $labelA is ${valueA.toStringAsFixed(1)}, but '
+        'the $labelB is ${valueB.toStringAsFixed(1)}.'
+      )
+    else ...<DiagnosticsNode>[
+      ErrorDescription('The $labelA is $valueA, but the $labelB is $valueB.'),
+      ErrorHint(
         'Maybe you have fallen prey to floating point rounding errors, and should explicitly '
         'apply the min() or max() functions, or the clamp() method, to the $labelB?'
-      ));
-  }
-  return information;
+      ),
+    ],
+  ];
 }
 
 /// Base class for the render objects that implement scroll effects in viewports.
@@ -1146,13 +1145,11 @@ abstract class RenderSliver extends RenderObject {
 
       final List<DiagnosticsNode> information = <DiagnosticsNode>[
         ErrorSummary('RenderSliver geometry setter called incorrectly.'),
-        violation
+        violation,
+        if (hint != null) hint,
+        contract,
+        describeForError('The RenderSliver in question is'),
       ];
-      if (hint != null)
-        information.add(hint);
-      information.add(contract);
-      information.add(describeForError('The RenderSliver in question is'));
-
       throw FlutterError.fromParts(information);
     }());
     _geometry = value;

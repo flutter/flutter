@@ -26,8 +26,9 @@ void main() {
     });
 
     tearDown(() {
-      if (daemon != null)
+      if (daemon != null) {
         return daemon.shutdown();
+      }
       notifyingLogger.dispose();
     });
 

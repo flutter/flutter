@@ -57,15 +57,18 @@ class PubContext {
 }
 
 bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
-  if (!dotPackages.existsSync())
+  if (!dotPackages.existsSync()) {
     return true;
+  }
   final DateTime dotPackagesLastModified = dotPackages.lastModifiedSync();
-  if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified))
+  if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified)) {
     return true;
+  }
   final File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
   if (flutterToolsStamp.existsSync() &&
-      flutterToolsStamp.lastModifiedSync().isAfter(dotPackagesLastModified))
+      flutterToolsStamp.lastModifiedSync().isAfter(dotPackagesLastModified)) {
     return true;
+  }
   return false;
 }
 
@@ -86,8 +89,9 @@ Future<void> pubGet({
   final File dotPackages = fs.file(fs.path.join(directory, '.packages'));
 
   if (!skipPubspecYamlCheck && !pubSpecYaml.existsSync()) {
-    if (!skipIfAbsent)
+    if (!skipIfAbsent) {
       throwToolExit('$directory: no pubspec.yaml found');
+    }
     return;
   }
 
@@ -119,8 +123,9 @@ Future<void> pubGet({
     }
   }
 
-  if (!dotPackages.existsSync())
+  if (!dotPackages.existsSync()) {
     throwToolExit('$directory: pub did not create .packages file.');
+  }
 
   if (dotPackages.lastModifiedSync().isBefore(pubSpecYaml.lastModifiedSync())) {
     throwToolExit('$directory: pub did not update .packages file (pubspec.yaml timestamp: ${pubSpecYaml.lastModifiedSync()}; .packages timestamp: ${dotPackages.lastModifiedSync()}).');
@@ -150,8 +155,9 @@ Future<void> pub(
 }) async {
   showTraceForErrors ??= isRunningOnBot;
 
-  if (showTraceForErrors)
+  if (showTraceForErrors) {
     arguments.insert(0, '--trace');
+  }
   int attempts = 0;
   int duration = 1;
   int code;
@@ -276,9 +282,10 @@ String _filterOverrideWarnings(String message) {
   //   Warning: You are using these overridden dependencies:
   //   ! analyzer 0.29.0-alpha.0 from path ../../bin/cache/dart-sdk/lib/analyzer
   //   ! front_end 0.1.0-alpha.0 from path ../../bin/cache/dart-sdk/lib/front_end
-  if (message == 'Warning: You are using these overridden dependencies:')
+  if (message == 'Warning: You are using these overridden dependencies:') {
     return null;
-  if (message.contains(_analyzerWarning))
+  } if (message.contains(_analyzerWarning)) {
     return null;
+  }
   return message;
 }

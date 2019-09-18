@@ -363,22 +363,22 @@ class SemanticsData extends Diagnosticable {
     properties.add(TransformProperty('transform', transform, showName: false, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
-    final List<String> actionSummary = <String>[];
-    for (SemanticsAction action in SemanticsAction.values.values) {
-      if ((actions & action.index) != 0)
-        actionSummary.add(describeEnum(action));
-    }
+    final List<String> actionSummary = <String>[
+      for (SemanticsAction action in SemanticsAction.values.values)
+        if ((actions & action.index) != 0)
+          describeEnum(action),
+    ];
     final List<String> customSemanticsActionSummary = customSemanticsActionIds
       .map<String>((int actionId) => CustomSemanticsAction.getAction(actionId).label)
       .toList();
     properties.add(IterableProperty<String>('actions', actionSummary, ifEmpty: null));
     properties.add(IterableProperty<String>('customActions', customSemanticsActionSummary, ifEmpty: null));
 
-    final List<String> flagSummary = <String>[];
-    for (SemanticsFlag flag in SemanticsFlag.values.values) {
-      if ((flags & flag.index) != 0)
-        flagSummary.add(describeEnum(flag));
-    }
+    final List<String> flagSummary = <String>[
+      for (SemanticsFlag flag in SemanticsFlag.values.values)
+        if ((flags & flag.index) != 0)
+          describeEnum(flag),
+    ];
     properties.add(IterableProperty<String>('flags', flagSummary, ifEmpty: null));
     properties.add(StringProperty('label', label, defaultValue: ''));
     properties.add(StringProperty('value', value, defaultValue: ''));

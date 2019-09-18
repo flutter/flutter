@@ -74,8 +74,9 @@ void main() {
       Cache.flutterRoot = '../..';
       final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--name', 'inc.*de']);
-      if (!result.stdout.contains('+1: All tests passed'))
+      if (!result.stdout.contains('+1: All tests passed')) {
         fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
+      }
       expect(result.exitCode, 0);
     });
 
@@ -83,8 +84,9 @@ void main() {
       Cache.flutterRoot = '../..';
       final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--plain-name', 'include']);
-      if (!result.stdout.contains('+1: All tests passed'))
+      if (!result.stdout.contains('+1: All tests passed')) {
         fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
+      }
       expect(result.exitCode, 0);
     });
 
@@ -96,10 +98,12 @@ void main() {
           (!result.stdout.contains('test 0: starting shell process')) ||
           (!result.stdout.contains('test 0: deleting temporary directory')) ||
           (!result.stdout.contains('test 0: finished')) ||
-          (!result.stdout.contains('test package returned with exit code 0')))
+          (!result.stdout.contains('test package returned with exit code 0'))) {
         fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
-      if (result.stderr.isNotEmpty)
+      }
+      if (result.stderr.isNotEmpty) {
         fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
+      }
       expect(result.exitCode, 0);
     });
 
@@ -111,10 +115,12 @@ void main() {
           (!result.stdout.contains('test 0: starting shell process')) ||
           (!result.stdout.contains('test 0: deleting temporary directory')) ||
           (!result.stdout.contains('test 0: finished')) ||
-          (!result.stdout.contains('test package returned with exit code 0')))
+          (!result.stdout.contains('test package returned with exit code 0'))) {
         fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
-      if (result.stderr.isNotEmpty)
+      }
+      if (result.stderr.isNotEmpty) {
         fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
+      }
       expect(result.exitCode, 0);
     });
 
@@ -131,11 +137,13 @@ Future<void> _testFile(
   exitCode ??= isNonZero;
   final String fullTestExpectation = fs.path.join(testDirectory, '${testName}_expectation.txt');
   final File expectationFile = fs.file(fullTestExpectation);
-  if (!expectationFile.existsSync())
+  if (!expectationFile.existsSync()) {
     fail('missing expectation file: $expectationFile');
+  }
 
-  while (_testExclusionLock != null)
+  while (_testExclusionLock != null) {
     await _testExclusionLock;
+  }
 
   final ProcessResult exec = await _runFlutterTest(
     testName,
@@ -146,10 +154,12 @@ Future<void> _testFile(
 
   expect(exec.exitCode, exitCode);
   final List<String> output = exec.stdout.split('\n');
-  if (output.first == 'Waiting for another flutter command to release the startup lock...')
+  if (output.first == 'Waiting for another flutter command to release the startup lock...') {
     output.removeAt(0);
-  if (output.first.startsWith('Running "flutter pub get" in'))
+  }
+  if (output.first.startsWith('Running "flutter pub get" in')) {
     output.removeAt(0);
+  }
   output.add('<<stderr>>');
   output.addAll(exec.stderr.split('\n'));
   final List<String> expectations = fs.file(fullTestExpectation).readAsLinesSync();
@@ -198,8 +208,9 @@ Future<void> _testFile(
     outputLineNumber += 1;
   }
   expect(allowSkip, isFalse);
-  if (!haveSeenStdErrMarker)
+  if (!haveSeenStdErrMarker) {
     expect(exec.stderr, '');
+  }
 }
 
 Future<ProcessResult> _runFlutterTest(
@@ -214,14 +225,16 @@ Future<ProcessResult> _runFlutterTest(
     // Test everything in the directory.
     testPath = testDirectory;
     final Directory directoryToTest = fs.directory(testPath);
-    if (!directoryToTest.existsSync())
+    if (!directoryToTest.existsSync()) {
       fail('missing test directory: $directoryToTest');
+    }
   } else {
     // Test just a specific test file.
      testPath = fs.path.join(testDirectory, '${testName}_test.dart');
     final File testFile = fs.file(testPath);
-    if (!testFile.existsSync())
+    if (!testFile.existsSync()) {
       fail('missing test file: $testFile');
+    }
   }
 
   final List<String> args = <String>[
@@ -233,8 +246,9 @@ Future<ProcessResult> _runFlutterTest(
     testPath
   ];
 
-  while (_testExclusionLock != null)
+  while (_testExclusionLock != null) {
     await _testExclusionLock;
+  }
 
   final Completer<void> testExclusionCompleter = Completer<void>();
   _testExclusionLock = testExclusionCompleter.future;

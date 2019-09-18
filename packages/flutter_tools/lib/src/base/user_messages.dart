@@ -190,9 +190,10 @@ class UserMessages {
       'Visual Studio is missing necessary components. Please re-run the '
       'Visual Studio installer for the "$workload" workload, and include these components:\n'
       '  ${components.join('\n  ')}';
-  String get visualStudioMissing =>
+  String visualStudioMissing(String workload, List<String> components) =>
       'Visual Studio not installed; this is necessary for Windows development.\n'
-      'Download at https://visualstudio.microsoft.com/downloads/.';
+      'Download at https://visualstudio.microsoft.com/downloads/.\n'
+      'Please install the "$workload" workload, including following components:\n  ${components.join('\n  ')}';
   String get visualStudioIsPrerelease => 'The current Visual Studio installation is a pre-release version. It may not be '
       'supported by Flutter yet.';
   String get visualStudioNotLaunchable =>

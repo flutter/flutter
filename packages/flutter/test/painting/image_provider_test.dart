@@ -483,10 +483,10 @@ HttpClient respondErrorOnAny() {
 }
 
 List<Uint8List> createChunks(int chunkSize) {
-  final List<Uint8List> chunks = <Uint8List>[];
-  for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize) {
-    chunks.add(Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()));
-  }
+  final List<Uint8List> chunks = <Uint8List>[
+    for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize)
+      Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()),
+  ];
   return chunks;
 }
 

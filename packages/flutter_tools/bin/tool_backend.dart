@@ -8,7 +8,7 @@ import 'package:path/path.dart' as path; // ignore: package_path_import.
 /// Executes the required flutter tasks for a desktop build.
 Future<void> main(List<String> arguments) async {
   final String targetPlatform = arguments[0];
-  final String buildMode = arguments[1];
+  final String buildMode = arguments[1].toLowerCase();
 
   final String projectDirectory = Platform.environment['PROJECT_DIR'];
   final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] != null;
@@ -37,7 +37,7 @@ or
   String cacheDirectory;
   switch (targetPlatform) {
     case 'linux-x64':
-      cacheDirectory = 'linux/flutter';
+      cacheDirectory = 'linux/flutter/ephemeral';
       break;
     case 'windows-x64':
       cacheDirectory = 'windows/flutter/ephemeral';
