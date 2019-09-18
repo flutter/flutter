@@ -1,2 +1,3 @@
 # Failed screenshot files
-.*.png
+*.out.png
+*.diff.png
