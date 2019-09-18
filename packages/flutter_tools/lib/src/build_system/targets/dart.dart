@@ -201,9 +201,7 @@ class KernelSnapshot extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
     final String packagesPath = environment.projectDir.childFile('.packages').path;
-    final String targetFileUri = fs.file(targetFile).absolute.path;
-    final PackageUriMapper packageUriMapper = PackageUriMapper(targetFileUri,
-        packagesPath, null, null);
+    final String targetFileAbsolute = fs.file(targetFile).absolute.path;
 
     final CompilerOutput output = await compiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
@@ -214,7 +212,7 @@ class KernelSnapshot extends Target {
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       packagesPath: packagesPath,
       linkPlatformKernelIn: buildMode == BuildMode.release,
-      mainPath: packageUriMapper.map(targetFileUri)?.toString() ?? targetFile,
+      mainPath: targetFileAbsolute,
     );
     if (output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');
