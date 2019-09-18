@@ -552,6 +552,9 @@ void main() {
 
     // Sanity check that the toolbar widget exists and does include [Select All].
     expect(find.text('COPY'), findsOneWidget);
+    expect(find.text('CUT'), findsNothing);
+    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('SELECT ALL'), findsNothing);
     
   }, skip: isBrowser);
 
