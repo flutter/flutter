@@ -550,7 +550,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.pump(const Duration(seconds: 1));
 
-    // Sanity check that the toolbar widget exists and does not inclue [Select All].
+    // Sanity check that the toolbar widget exists and does include [Select All].
     expect(find.text('COPY'), findsOneWidget);
   }, skip: isBrowser);
 
