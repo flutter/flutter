@@ -1,4 +1,4 @@
-Signature: 1b5f47ed20d6f30d22cffd59efe3d10b
+Signature: e5136241e7d1a7cdc94c3d790980a77e
 
 UNUSED LICENSES:
 
@@ -3328,6 +3328,7 @@ FILE: ../../../third_party/skia/src/core/SkStrikeSpec.h
 FILE: ../../../third_party/skia/src/core/SkVMBlitter.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVMath.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVMath.h
+FILE: ../../../third_party/skia/src/core/SkZip.h
 FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrBaseContextPriv.h
@@ -3828,8 +3829,11 @@ FILE: ../../../third_party/skia/src/gpu/GrUtil.h
 FILE: ../../../third_party/skia/src/gpu/GrWaitRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrWaitRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrColorMatrixFragmentProcessor.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrSaturateProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrColorMatrixFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrColorMatrixFragmentProcessor.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrSaturateProcessor.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrSaturateProcessor.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrQuadBuffer.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrQuadUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/geometry/GrQuadUtils.h
