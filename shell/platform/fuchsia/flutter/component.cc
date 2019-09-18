@@ -11,6 +11,7 @@
 #include <lib/fdio/directory.h>
 #include <lib/fdio/namespace.h>
 #include <lib/ui/scenic/cpp/view_token_pair.h>
+#include <lib/vfs/cpp/composed_service_dir.h>
 #include <lib/vfs/cpp/remote_dir.h>
 #include <lib/vfs/cpp/service.h>
 #include <sys/stat.h>
@@ -27,7 +28,6 @@
 #include "runtime/dart/utils/tempfs.h"
 #include "runtime/dart/utils/vmo.h"
 
-#include "service_provider_dir.h"
 #include "task_observers.h"
 #include "task_runner_adapter.h"
 #include "thread.h"
@@ -163,8 +163,8 @@ Application::Application(
   fdio_service_connect_at(directory_ptr_.channel().get(), "svc",
                           request.release());
 
-  auto service_provider_dir = std::make_unique<ServiceProviderDir>();
-  service_provider_dir->set_fallback(std::move(flutter_public_dir));
+  auto composed_service_dir = std::make_unique<vfs::ComposedServiceDir>();
+  composed_service_dir->set_fallback(std::move(flutter_public_dir));
 
   // Clone and check if client is servicing the directory.
   directory_ptr_->Clone(fuchsia::io::OPEN_FLAG_DESCRIBE |
@@ -201,7 +201,7 @@ Application::Application(
   // All launch arguments have been read. Perform service binding and
   // final settings configuration. The next call will be to create a view
   // for this application.
-  service_provider_dir->AddService(
+  composed_service_dir->AddService(
       fuchsia::ui::app::ViewProvider::Name_,
       std::make_unique<vfs::Service>(
           [this](zx::channel channel, async_dispatcher_t* dispatcher) {
@@ -210,7 +210,7 @@ Application::Application(
                           std::move(channel)));
           }));
 
-  outgoing_dir_->AddEntry("svc", std::move(service_provider_dir));
+  outgoing_dir_->AddEntry("svc", std::move(composed_service_dir));
 
   // Setup the application controller binding.
   if (application_controller_request) {

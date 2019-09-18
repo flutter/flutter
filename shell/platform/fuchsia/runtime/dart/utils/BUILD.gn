@@ -35,8 +35,8 @@ source_set("utils") {
     "$fuchsia_sdk_root/pkg:memfs",
     "$fuchsia_sdk_root/pkg:syslog",
     "$fuchsia_sdk_root/pkg:zx",
-    "$fuchsia_sdk_root/pkg/lib/sys/cpp",
-    "$fuchsia_sdk_root/pkg/lib/vfs/cpp",
+    "$fuchsia_sdk_root/pkg:sys_cpp",
+    "$fuchsia_sdk_root/pkg:vfs_cpp",
     "//third_party/tonic",
   ]
 
