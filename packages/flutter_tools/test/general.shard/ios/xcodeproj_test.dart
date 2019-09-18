@@ -646,24 +646,6 @@ flutter:
         expectedBuildNumber: '1',
       );
     });
-
-    testUsingOsxContext('fail when build name cannot be parsed', () async {
-      const String manifest = '''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: 'abc', buildNumber: '1');
-
-      const String stderr = 'Cannot parse build name abc, check pubspec.yaml version.';
-      expect(() async => await checkBuildVersion(
-        manifestString: manifest,
-        buildInfo: buildInfo
-      ),
-      throwsToolExit(message: stderr));
-    });
   });
 }
 
