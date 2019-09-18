@@ -13,11 +13,12 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:multicast_dns/multicast_dns.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -261,7 +262,7 @@ void main() {
       when(portForwarder.unforward(any))
         .thenAnswer((_) async => null);
       when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
-          .thenAnswer((_) async => 0);
+        .thenAnswer((_) async => 0);
       when(mockHotRunnerFactory.build(
         any,
         target: anyNamed('target'),
@@ -466,137 +467,13 @@ void main() {
       FileSystem: () => testFileSystem,
     });
   });
-
-  group('mDNS Discovery', () {
-    final int year3000 = DateTime(3000).millisecondsSinceEpoch;
-
-    MDnsClient getMockClient(
-      List<PtrResourceRecord> ptrRecords,
-      Map<String, List<SrvResourceRecord>> srvResponse,
-    ) {
-      final MDnsClient client = MockMDnsClient();
-
-      when(client.lookup<PtrResourceRecord>(
-        ResourceRecordQuery.serverPointer(MDnsObservatoryDiscovery.dartObservatoryName),
-      )).thenAnswer((_) => Stream<PtrResourceRecord>.fromIterable(ptrRecords));
-
-      for (final MapEntry<String, List<SrvResourceRecord>> entry in srvResponse.entries) {
-        when(client.lookup<SrvResourceRecord>(
-          ResourceRecordQuery.service(entry.key),
-        )).thenAnswer((_) => Stream<SrvResourceRecord>.fromIterable(entry.value));
-      }
-      return client;
-    }
-
-    testUsingContext('No ports available', () async {
-      final MDnsClient client = getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
-
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await portDiscovery.query())?.port;
-      expect(port, isNull);
-    });
-
-    testUsingContext('One port available, no appId', () async {
-      final MDnsClient client = getMockClient(
-        <PtrResourceRecord>[
-          PtrResourceRecord('foo', year3000, domainName: 'bar'),
-        ],
-        <String, List<SrvResourceRecord>>{
-          'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
-          ],
-        },
-      );
-
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await portDiscovery.query())?.port;
-      expect(port, 123);
-    });
-
-    testUsingContext('Multiple ports available, without appId', () async {
-      final MDnsClient client = getMockClient(
-        <PtrResourceRecord>[
-          PtrResourceRecord('foo', year3000, domainName: 'bar'),
-          PtrResourceRecord('baz', year3000, domainName: 'fiz'),
-        ],
-        <String, List<SrvResourceRecord>>{
-          'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
-          ],
-          'fiz': <SrvResourceRecord>[
-            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
-          ],
-        },
-      );
-
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      expect(() => portDiscovery.query(), throwsToolExit());
-    });
-
-    testUsingContext('Multiple ports available, with appId', () async {
-      final MDnsClient client = getMockClient(
-        <PtrResourceRecord>[
-          PtrResourceRecord('foo', year3000, domainName: 'bar'),
-          PtrResourceRecord('baz', year3000, domainName: 'fiz'),
-        ],
-        <String, List<SrvResourceRecord>>{
-          'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
-          ],
-          'fiz': <SrvResourceRecord>[
-            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
-          ],
-        },
-      );
-
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await portDiscovery.query(applicationId: 'fiz'))?.port;
-      expect(port, 321);
-    });
-
-    testUsingContext('Multiple ports available per process, with appId', () async {
-      final MDnsClient client = getMockClient(
-        <PtrResourceRecord>[
-          PtrResourceRecord('foo', year3000, domainName: 'bar'),
-          PtrResourceRecord('baz', year3000, domainName: 'fiz'),
-        ],
-        <String, List<SrvResourceRecord>>{
-          'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000, port: 1234, weight: 1, priority: 1, target: 'appId'),
-            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
-          ],
-          'fiz': <SrvResourceRecord>[
-            SrvResourceRecord('fiz', year3000, port: 4321, weight: 1, priority: 1, target: 'local'),
-            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
-          ],
-        },
-      );
-
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
-      expect(port, 1234);
-    });
-
-    testUsingContext('Query returns null', () async {
-      final MDnsClient client = getMockClient(
-        <PtrResourceRecord>[],
-         <String, List<SrvResourceRecord>>{},
-      );
-
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
-      expect(port, isNull);
-    });
-  });
 }
 
-class MockMDnsClient extends Mock implements MDnsClient {}
-
-class MockPortForwarder extends Mock implements DevicePortForwarder {}
-
 class MockHotRunner extends Mock implements HotRunner {}
-
 class MockHotRunnerFactory extends Mock implements HotRunnerFactory {}
+class MockIOSDevice extends Mock implements IOSDevice {}
+class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
+class MockPortForwarder extends Mock implements DevicePortForwarder {}
 
 class StreamLogger extends Logger {
   @override
