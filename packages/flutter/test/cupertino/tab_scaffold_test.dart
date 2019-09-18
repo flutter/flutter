@@ -920,6 +920,55 @@ void main() {
     expect(message, contains('with 3 tabs'));
   });
 
+  testWidgets("Don't replace focus nodes for existing tabs when changing tab count", (WidgetTester tester) async {
+    final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+
+    final List<FocusScopeNode> scopes = List<FocusScopeNode>(5);
+    await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+            ),
+            controller: controller,
+            tabBuilder: (BuildContext context, int index) {
+              scopes[index] = FocusScope.of(context);
+              return Container();
+            },
+          ),
+        )
+    );
+
+    for (int i = 0; i < 3; i++) {
+      controller.index = i;
+      await tester.pump();
+    }
+    await tester.pump();
+
+    final List<FocusScopeNode> newScopes = List<FocusScopeNode>(5);
+    await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(5, tabGenerator),
+            ),
+            controller: controller,
+            tabBuilder: (BuildContext context, int index) {
+              newScopes[index] = FocusScope.of(context);
+              return Container();
+            },
+          ),
+        )
+    );
+    for (int i = 0; i < 5; i++) {
+      controller.index = i;
+      await tester.pump();
+    }
+    await tester.pump();
+
+    expect(scopes.sublist(0, 3), equals(newScopes.sublist(0, 3)));
+  });
+
   testWidgets('Current tab index cannot go below zero or be null', (WidgetTester tester) async {
     void expectAssertionError(VoidCallback callback, String errorMessage) {
       try {
