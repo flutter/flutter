@@ -15,6 +15,7 @@ void main() {
       of: of,
       matching: matching,
       matchRoot: true,
+      firstMatchOnly: true,
     );
     expect(a.serialize(), <String, String>{
       'finderType': 'Ancestor',
@@ -23,7 +24,8 @@ void main() {
       'matching_finderType': 'ByValueKey',
       'matching_keyValueString': 'hello',
       'matching_keyValueType': 'String',
-      'matchRoot': 'true'
+      'matchRoot': 'true',
+      'firstMatchOnly': 'true',
     });
   });
 
@@ -35,13 +37,15 @@ void main() {
       'matching_finderType': 'ByValueKey',
       'matching_keyValueString': 'hello',
       'matching_keyValueType': 'String',
-      'matchRoot': 'true'
+      'matchRoot': 'true',
+      'firstMatchOnly': 'true',
     };
 
     final Ancestor a = Ancestor.deserialize(serialized);
     expect(a.of, isA<ByType>());
     expect(a.matching, isA<ByValueKey>());
     expect(a.matchRoot, isTrue);
+    expect(a.firstMatchOnly, isTrue);
   });
 
   test('Descendant finder serialize', () {
@@ -52,6 +56,7 @@ void main() {
       of: of,
       matching: matching,
       matchRoot: true,
+      firstMatchOnly: true,
     );
     expect(a.serialize(), <String, String>{
       'finderType': 'Descendant',
@@ -60,7 +65,8 @@ void main() {
       'matching_finderType': 'ByValueKey',
       'matching_keyValueString': 'hello',
       'matching_keyValueType': 'String',
-      'matchRoot': 'true'
+      'matchRoot': 'true',
+      'firstMatchOnly': 'true',
     });
   });
 
@@ -72,12 +78,14 @@ void main() {
       'matching_finderType': 'ByValueKey',
       'matching_keyValueString': 'hello',
       'matching_keyValueType': 'String',
-      'matchRoot': 'true'
+      'matchRoot': 'true',
+      'firstMatchOnly': 'true',
     };
 
     final Descendant a = Descendant.deserialize(serialized);
     expect(a.of, isA<ByType>());
     expect(a.matching, isA<ByValueKey>());
     expect(a.matchRoot, isTrue);
+    expect(a.firstMatchOnly, isTrue);
   });
 }
