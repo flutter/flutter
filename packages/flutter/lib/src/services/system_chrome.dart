@@ -222,7 +222,7 @@ class SystemChrome {
   /// The empty list causes the application to defer to the operating system
   /// default.
   ///
-  /// **Important:** This setting will only be respected on iPads if multitasking is disabled for your app.
+  /// **Important:** This setting will only be respected on iPad if multitasking is disabled for your app.
   /// See: https://github.com/flutter/flutter/issues/27235
   static Future<void> setPreferredOrientations(List<DeviceOrientation> orientations) async {
     await SystemChannels.platform.invokeMethod<void>(
