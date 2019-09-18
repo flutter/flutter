@@ -2,3 +2,7 @@ body {
   margin: 0;
   padding: 0;
 }
+
+iframe {
+  border: none;
+}

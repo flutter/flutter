@@ -10,6 +10,7 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
+import 'package:image/image.dart';
 import 'package:package_resolver/package_resolver.dart';
 import 'package:path/path.dart' as p;
 import 'package:pedantic/pedantic.dart';
@@ -42,9 +43,13 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 
 import 'chrome_installer.dart';
 import 'environment.dart' as env;
+import 'goldens.dart';
 
 /// The port number Chrome exposes for debugging.
 const int _kChromeDevtoolsPort = 12345;
+const int _kMaxScreenshotWidth = 1024;
+const int _kMaxScreenshotHeight = 1024;
+const double _kMaxDiffRateFailure = 1.0/100000; // 0.001%
 
 class BrowserPlatform extends PlatformPlugin {
   /// Starts the server.
@@ -137,58 +142,80 @@ class BrowserPlatform extends PlatformPlugin {
     final Map<String, dynamic> requestData = json.decode(payload);
     final String filename = requestData['filename'];
     final bool write = requestData['write'];
-    final String result = await _diffScreenshot(filename, write);
+    final Map<String, dynamic> region = requestData['region'];
+    final String result = await _diffScreenshot(filename, write, region);
     return shelf.Response.ok(json.encode(result));
   }
 
-  Future<String> _diffScreenshot(String filename, bool write) async {
+  Future<String> _diffScreenshot(String filename, bool write, [ Map<String, dynamic> region ]) async {
     const String _kGoldensDirectory = 'test/golden_files';
+
+    // Bail out fast if golden doesn't exist, and user doesn't want to create it.
+    final File file = File(p.join(_kGoldensDirectory, filename));
+    if (!file.existsSync() && !write) {
+      return '''
+Golden file $filename does not exist.
+
+To automatically create this file call matchGoldenFile('$filename', write: true).
+''';
+    }
+
     final wip.ChromeConnection chromeConnection =
         wip.ChromeConnection('localhost', _kChromeDevtoolsPort);
     final wip.ChromeTab chromeTab = await chromeConnection.getTab(
         (wip.ChromeTab chromeTab) => chromeTab.url.contains('localhost'));
     final wip.WipConnection wipConnection = await chromeTab.connect();
+
+    Map<String, dynamic> captureScreenshotParameters = null;
+    if (region != null) {
+      captureScreenshotParameters = {
+        'format': 'png',
+        'clip': {
+          'x': region['x'],
+          'y': region['y'],
+          'width': region['width'],
+          'height': region['height'],
+          'scale': 1, // This is NOT the DPI of the page, instead it's the "zoom level".
+        },
+      };
+    }
+    // To tweak DPI we need to send an additional Emulation.setDeviceMetricsOverride. See:
+    // https://chromedevtools.github.io/devtools-protocol/tot/Emulation
     final wip.WipResponse response =
-        await wipConnection.sendCommand('Page.captureScreenshot');
-    final Uint8List bytes = base64.decode(response.result['data']);
-    final File file = File(p.join(_kGoldensDirectory, filename));
+        await wipConnection.sendCommand('Page.captureScreenshot', captureScreenshotParameters);
+
+    // Compare screenshots
+    final Image screenshot = decodePng(base64.decode(response.result['data']));
+
     if (write) {
-      file.writeAsBytesSync(bytes, flush: true);
+      // Don't even bother with the comparison, just write and return
+      file.writeAsBytesSync(encodePng(screenshot), flush: true);
       return 'Golden file $filename was updated. You can remove "write: true" in the call to matchGoldenFile.';
     }
-    if (!file.existsSync()) {
-      return '''
-  Golden file $filename does not exist.
 
-  To automatically create this file call matchGoldenFile('$filename', write: true).
-  ''';
-    }
-    final List<int> goldenBytes = file.readAsBytesSync();
-    final int lengths = bytes.length;
-    for (int i = 0; i < lengths; i++) {
-      if (goldenBytes[i] != bytes[i]) {
-        if (write) {
-          file.writeAsBytesSync(bytes, flush: true);
-          return 'Golden file $filename was updated. You can remove "write: true" in the call to matchGoldenFile.';
-        } else {
-          final File failedFile = File(p.join(file.parent.path, '.${p.basename(file.path)}'));
-          failedFile.writeAsBytesSync(bytes, flush: true);
+    ImageDiff diff = ImageDiff(golden: decodeNamedImage(file.readAsBytesSync(), filename), other: screenshot);
 
-          // TODO(yjbanov): do not fail Cirrus builds. They currently fail because Chrome produces
-          //                different pictures. We need to pin Chrome versions and use a fuzzy image
-          //                comparator.
-          if (Platform.environment['CIRRUS_CI'] == 'true') {
-            return 'OK';
-          }
+    if (diff.rate > 0) { // Images are different, so produce some debug info
+      final File failedFile = File(p.join(file.parent.path, '${p.basenameWithoutExtension(file.path)}.out.png'));
+      failedFile.writeAsBytesSync(encodePng(screenshot), flush: true);
 
-          return '''
-  Golden file ${file.path} did not match the image generated by the test.
+      final File failedDiff = File(p.join(file.parent.path, '${p.basenameWithoutExtension(file.path)}.diff.png'));
+      failedDiff.writeAsBytesSync(encodePng(diff.diff), flush:true);
 
-  The generated image was written to ${failedFile.path}.
+      final String printableDiffFilesInfo = getPrintableDiffFilesInfo(diff.rate, _kMaxDiffRateFailure, filename, failedFile.path, failedDiff.path);
 
-  To update the golden file call matchGoldenFile('$filename', write: true).
-  ''';
+      if (diff.rate < _kMaxDiffRateFailure) { // Warn user
+        print('[WARN] Golden file ${file.path} is slightly different from the image generated by this test!\n${printableDiffFilesInfo}');
+        return 'OK'; // But test success!
+      } else {
+        // TODO(yjbanov): do not fail Cirrus builds. They currently fail because Chrome produces
+        //                different pictures. We need to pin Chrome versions and use a fuzzy image
+        //                comparator.
+        if (Platform.environment['CIRRUS_CI'] == 'true') {
+          return 'OK';
         }
+        // Fail test
+        return 'Golden file ${file.path} is too different from the image generated by the test!\n${printableDiffFilesInfo}';
       }
     }
     return 'OK';
@@ -867,6 +894,7 @@ class Chrome extends Browser {
         url.toString(),
         if (!debug) '--headless',
         if (isChromeNoSandbox) '--no-sandbox',
+        '--window-size=$_kMaxScreenshotWidth,$_kMaxScreenshotHeight', // When headless, this is the actual size of the viewport
         '--disable-extensions',
         '--disable-popup-blocking',
         '--bwsi',
