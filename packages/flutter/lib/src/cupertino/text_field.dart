@@ -833,7 +833,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final Color disabledColor = CupertinoDynamicColor.resolve(_kDisabledBackground, context);
 
     final Color decorationColor = CupertinoDynamicColor.resolve(widget.decoration?.color, context);
-    final BoxDecoration effectiveDecoration = widget.decoration.copyWith(
+    final BoxDecoration effectiveDecoration = widget.decoration?.copyWith(
       color: enabled ? decorationColor : (decorationColor ?? disabledColor),
     );
 

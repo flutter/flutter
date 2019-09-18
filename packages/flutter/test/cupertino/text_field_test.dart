@@ -583,7 +583,7 @@ void main() {
       );
 
       final Text placeholder = tester.widget(find.text('placeholder'));
-      expect(placeholder.style.color, const Color(0xFFC2C2C2));
+      expect(placeholder.style.color.value, 0x4D3C3C43);
 
       await tester.enterText(find.byType(CupertinoTextField), 'input');
       await tester.pump();
