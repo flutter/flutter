@@ -14,6 +14,7 @@ import 'package:platform/platform.dart';
 import 'package:flutter_goldens_client/skia_client.dart';
 export 'package:flutter_goldens_client/skia_client.dart';
 
+const String _kFlutterGoldDashboard = 'https://flutter-gold.skia.org';
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
@@ -100,9 +101,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// Returns the golden [File] identified by the given [Uri].
   @protected
   File getGoldenFile(Uri uri) {
-    assert(basedir.scheme == 'file');
     final File goldenFile = fs.directory(basedir).childFile(fs.file(uri).path);
-    assert(goldenFile.uri.scheme == 'file');
     return goldenFile;
   }
 
@@ -175,11 +174,8 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = addPrefix(golden);
     await update(golden, imageBytes);
-
     final File goldenFile = getGoldenFile(golden);
-    if (!goldenFile.existsSync()) {
-      throw TestFailure('Could not be compared against non-existent file: "$golden"');
-    }
+
     return await skiaClient.imgtestAdd(golden.path, goldenFile);
   }
 
@@ -239,17 +235,18 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = addPrefix(golden);
     final List<int> goldenBytes = await skiaClient.getMasterBytes(golden.path);
-    if (goldenBytes == <int>[0]) {
+    if (goldenBytes.isEmpty) {
       // There is no baseline for this test
       return true;
     }
+
     final ComparisonResult result = GoldenFileComparator.compareLists(
       imageBytes,
       goldenBytes,
     );
 
     if (!result.passed) {
-      return skiaClient.testIsIgnoredForPullRequest(
+      return await skiaClient.testIsIgnoredForPullRequest(
         platform.environment['CIRRUS_PR'] ?? '',
         golden.path,
       );
@@ -309,8 +306,12 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = addPrefix(golden);
     final List<int> goldenBytes = await skiaClient.getMasterBytes(golden.path);
-    if (goldenBytes == <int>[0]) {
+    if (goldenBytes.isEmpty) {
       // There is no baseline for this test
+      print('No digests provided by Skia Gold for test: $golden. '
+        'This may be a new test. If this is an unexpected result, check'
+        ' $_kFlutterGoldDashboard.'
+      );
       return true;
     }
     final ComparisonResult result = GoldenFileComparator.compareLists(

@@ -181,7 +181,7 @@ class SkiaGoldClient {
 
   /// Doc
   Future<List<int>>getMasterBytes(String testName) async {
-    List<int> masterImageBytes;
+    final List<int> masterImageBytes = <int>[];
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
 
       testName = _cleanTestName(testName);
@@ -203,7 +203,7 @@ class SkiaGoldClient {
           .then((io.HttpClientRequest request) => request.close())
           .then((io.HttpClientResponse response) async {
             rawResponse = await utf8.decodeStream(response);
-            final Map<String,dynamic> skiaJson = json.decode(rawResponse);
+            final Map<String, dynamic> skiaJson = json.decode(rawResponse);
 
             if (skiaJson['digests'].length > 1) {
 
@@ -215,15 +215,10 @@ class SkiaGoldClient {
               throw NonZeroExitCode(1, buf.toString());
 
             } else if (skiaJson['digests'].length == 0) {
-              print('No digests provided by Skia Gold for test: $testName. '
-                'This may be a new test. If this is an unexpected result, check'
-                ' $_kFlutterGoldDashboard.'
-              );
-              masterImageBytes = <int>[0];
-              return;
+              masterDigest = const SkiaGoldDigest(testName: 'New');
+            } else {
+              masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
             }
-
-            masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
         });
       } on FormatException catch(_) {
         print('Formatting error detected in response from Flutter Gold.'
@@ -231,7 +226,9 @@ class SkiaGoldClient {
         rethrow;
       }
 
-      if (!masterDigest.isValid(platform, testName)) {
+      if (masterDigest.testName == 'New') {
+        return;
+      } else if (!masterDigest.isValid(platform, testName)) {
         final StringBuffer buf = StringBuffer()
           ..writeln('Invalid digest returned for golden test: $testName.')
           ..writeln('Check $_kFlutterGoldDashboard to validate the')
@@ -247,8 +244,7 @@ class SkiaGoldClient {
         await httpClient.getUrl(requestForImage)
           .then((io.HttpClientRequest request) => request.close())
           .then((io.HttpClientResponse response) async {
-            final List<List<int>> byteList = await response.toList();
-            masterImageBytes = byteList.expand((List<int> x) => x).toList();
+            await response.forEach((List<int> bytes) => masterImageBytes.addAll(bytes));
         });
       } catch(e) {
         rethrow;
@@ -273,13 +269,11 @@ class SkiaGoldClient {
         await httpClient.getUrl(requestForIgnores)
           .then((io.HttpClientRequest request) => request.close())
           .then((io.HttpClientResponse response) async {
-            rawResponse = await response.transform(utf8.decoder).join();
+            rawResponse = await utf8.decodeStream(response);
             final List<dynamic> ignores = json.decode(rawResponse);
             for(Map<String, dynamic> ignore in ignores) {
               final List<String> ignoredQueries = ignore['query'].split('&');
-              final String ignoredPullRequest = ignore['note']
-                .split['/']
-                .last;
+              final String ignoredPullRequest = ignore['note'].split('/').last;
               if (ignoredQueries.contains('name=$testName') &&
                 ignoredPullRequest == pullRequest) {
                 ignoreIsActive = true;

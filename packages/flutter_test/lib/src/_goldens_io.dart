@@ -170,8 +170,6 @@ ComparisonResult compareLists(List<int> test, List<int> master) {
   final int width = testImage.width;
   final int height = testImage.height;
 
-  print('$width X $height');
-
   if (width != masterImage.width || height != masterImage.height) {
     return ComparisonResult(
       passed: false,
