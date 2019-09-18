@@ -186,9 +186,10 @@ class EmbeddedViewParams {
 
 enum class PostPrerollResult { kResubmitFrame, kSuccess };
 
-// This is only used on iOS when running in a non headless mode,
-// in this case ExternalViewEmbedder is a reference to the
-// FlutterPlatformViewsController which is owned by FlutterViewController.
+// Facilitates embedding of platform views within the flow layer tree.
+//
+// Used on iOS and on embedded platforms that provide a system compositor
+// as part of the project arguments.
 class ExternalViewEmbedder {
   // TODO(cyanglaz): Make embedder own the `EmbeddedViewParams`.
 
