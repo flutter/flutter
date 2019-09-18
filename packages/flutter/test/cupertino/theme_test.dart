@@ -129,10 +129,10 @@ void main() {
       ));
 
       expect(theme.brightness, Brightness.dark);
-      expect(theme.primaryColor, CupertinoColors.activeGreen);
+      expect(theme.primaryColor.value, CupertinoColors.systemGreen.darkColor.value);
       // Now check calculated derivatives.
-      expect(theme.textTheme.actionTextStyle.color, CupertinoColors.activeGreen);
-      expect(theme.scaffoldBackgroundColor, CupertinoColors.black);
+      expect(theme.textTheme.actionTextStyle.color.value, CupertinoColors.systemGreen.darkColor.value);
+      expect(theme.scaffoldBackgroundColor.value, CupertinoColors.black.value);
     },
   );
 

@@ -171,7 +171,7 @@ void main() {
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
     ));
-    expect(tab2.text.style.color, CupertinoColors.destructiveRed);
+    expect(tab2.text.style.color.value, CupertinoColors.systemRed.darkColor.value);
   });
 
   testWidgets('dark mode background color', (WidgetTester tester) async {
