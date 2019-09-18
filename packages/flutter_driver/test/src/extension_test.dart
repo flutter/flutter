@@ -573,6 +573,39 @@ void main() {
     expect(await result, null);
   });
 
+  testWidgets('descendant finder firstMatchOnly', (WidgetTester tester) async {
+    flutterDriverLog.listen((LogRecord _) {}); // Silence logging.
+    final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+
+    Future<String> getDescendantText() async {
+      final Map<String, Object> arguments = GetText(Descendant(
+        of: ByValueKey('column'),
+        matching: const ByType('Text'),
+        firstMatchOnly: true,
+      ), timeout: const Duration(seconds: 1)).serialize();
+      final Map<String, dynamic> result = await extension.call(arguments);
+      if (result['isError']) {
+        return null;
+      }
+      return GetTextResult.fromJson(result['response']).text;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Column(
+          key: const ValueKey<String>('column'),
+          children: const <Widget>[
+            Text('Hello1', key: ValueKey<String>('text1')),
+            Text('Hello2', key: ValueKey<String>('text2')),
+            Text('Hello3', key: ValueKey<String>('text3')),
+          ],
+        ),
+      ),
+    );
+
+    expect(await getDescendantText(), 'Hello1');
+  });
+
   testWidgets('ancestor finder', (WidgetTester tester) async {
     flutterDriverLog.listen((LogRecord _) {}); // Silence logging.
     final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
@@ -640,6 +673,54 @@ void main() {
     result = getAncestorTopLeft(of: 'leftchild', matching: 'righttchild');
     await tester.pump(const Duration(seconds: 2));
     expect(await result, null);
+  });
+
+  testWidgets('ancestor finder firstMatchOnly', (WidgetTester tester) async {
+    flutterDriverLog.listen((LogRecord _) {}); // Silence logging.
+    final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+
+    Future<Offset> getAncestorTopLeft() async {
+      final Map<String, Object> arguments = GetOffset(Ancestor(
+        of: ByValueKey('leaf'),
+        matching: const ByType('Container'),
+        firstMatchOnly: true,
+      ), OffsetType.topLeft, timeout: const Duration(seconds: 1)).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
+      if (response['isError']) {
+        return null;
+      }
+      final GetOffsetResult result = GetOffsetResult.fromJson(response['response']);
+      return Offset(result.dx, result.dy);
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Container(
+            height: 200,
+            width: 200,
+            child: Center(
+              child: Container(
+                height: 100,
+                width: 100,
+                child: Center(
+                  child: Container(
+                    key: const ValueKey<String>('leaf'),
+                    height: 50,
+                    width: 50,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      await getAncestorTopLeft(),
+      const Offset((800 - 100) / 2, (600 - 100) / 2),
+    );
   });
 
   testWidgets('GetDiagnosticsTree', (WidgetTester tester) async {
