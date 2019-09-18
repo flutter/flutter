@@ -11,7 +11,6 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import 'project_test.dart';
 
 class MockFlutterProject extends Mock implements FlutterProject {}
 class MockIosProject extends Mock implements IosProject {}
@@ -66,7 +65,7 @@ flutter:
   group('refreshPlugins', () {
     testUsingContext('Refreshing the plugin list is a no-op when the plugins list stays empty', () {
       refreshPluginsList(flutterProject);
-      expectNotExists(flutterProject.flutterPluginsFile);
+      expect(flutterProject.flutterPluginsFile.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -76,7 +75,7 @@ flutter:
       when(iosProject.existsSync()).thenReturn(false);
       when(macosProject.existsSync()).thenReturn(false);
       refreshPluginsList(flutterProject);
-      expectNotExists(flutterProject.flutterPluginsFile);
+      expect(flutterProject.flutterPluginsFile.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -86,7 +85,7 @@ flutter:
       when(iosProject.existsSync()).thenReturn(false);
       when(macosProject.existsSync()).thenReturn(false);
       refreshPluginsList(flutterProject);
-      expectExists(flutterProject.flutterPluginsFile);
+      expect(flutterProject.flutterPluginsFile.existsSync(), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -98,8 +97,8 @@ flutter:
       when(iosProject.existsSync()).thenReturn(true);
       when(macosProject.existsSync()).thenReturn(true);
       refreshPluginsList(flutterProject);
-      expectNotExists(iosProject.podManifestLock);
-      expectNotExists(macosProject.podManifestLock);
+      expect(iosProject.podManifestLock.existsSync(), false);
+      expect(macosProject.podManifestLock.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
