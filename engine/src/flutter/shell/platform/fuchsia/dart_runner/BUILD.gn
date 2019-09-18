@@ -57,11 +57,11 @@ template("runner") {
              "$fuchsia_sdk_root/pkg:async-loop",
              "$fuchsia_sdk_root/pkg:async-loop-cpp",
              "$fuchsia_sdk_root/pkg:fidl_cpp",
+             "$fuchsia_sdk_root/pkg:sys_cpp",
              "$fuchsia_sdk_root/pkg:syslog",
              "$fuchsia_sdk_root/pkg:trace",
              "$fuchsia_sdk_root/pkg:trace-provider-so",
-             "$fuchsia_sdk_root/pkg/lib/sys/cpp",
-             "$fuchsia_sdk_root/pkg/lib/vfs/cpp",
+             "$fuchsia_sdk_root/pkg:vfs_cpp",
              "//third_party/tonic",
            ] + dart_deps + extra_deps
   }
