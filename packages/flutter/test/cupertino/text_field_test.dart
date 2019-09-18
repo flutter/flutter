@@ -1318,6 +1318,9 @@ void main() {
 
     // Sanity check that the toolbar widget exists and does not inclue [Select All].
     expect(find.text('Select All'), findsOneWidget);
+    expect(find.text('Copy'), findsNothing);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
   });
   testWidgets('Read only text field', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'readonly');
