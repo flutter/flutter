@@ -55,7 +55,8 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// [update].
   final Uri basedir;
 
-  /// Doc
+  /// A client for uploading image tests and making baseline requests to the
+  /// Flutter Gold Dashboard.
   final SkiaGoldClient skiaClient;
 
   /// The file system used to perform file access.
@@ -124,9 +125,12 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
 ///
 ///  * [GoldenFileComparator], the abstract class that
 ///    [FlutterGoldenFileComparator] implements.
-///  * [FlutterGoldensRepositoryFileComparator], another
-///    [FlutterGoldenFileComparator] that tests golden images using the
-///    flutter/goldens repository.
+///  * [FlutterPreSubmitFileComparator], another
+///    [FlutterGoldenFileComparator] that tests golden images before changes are
+///    merged into the master branch.
+///  * [FlutterLocalFileComparator], another
+///    [FlutterGoldenFileComparator] that tests golden images locally on your
+///    current machine.
 class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
   /// Creates a [FlutterSkiaGoldFileComparator] that will test golden file
   /// images against Skia Gold.
@@ -193,9 +197,29 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
   }
 }
 
-/// DOC
+/// A [FlutterGoldenFileComparator] for testing golden images before changes are
+/// merged into the master branch.
+///
+/// This comparator utilizes the [SkiaGoldClient] to request baseline images for
+/// the given device under test for comparison. This comparator is only
+/// initialized during pre-submit testing on Cirrus CI.
+///
+/// See also:
+///
+///  * [GoldenFileComparator], the abstract class that
+///    [FlutterGoldenFileComparator] implements.
+///  * [FlutterSkiaGoldFileComparator], another
+///    [FlutterGoldenFileComparator] that uploads tests to the Skia Gold
+///    dashboard.
+///  * [FlutterLocalFileComparator], another
+///    [FlutterGoldenFileComparator] that tests golden images locally on your
+///    current machine.
 class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
-  /// Doc
+  /// Creates a [FlutterPresubmitFileComparator] that will test golden file
+  /// images against baselines requested from Flutter Gold.
+  ///
+  /// The [fs] and [platform] parameters useful in tests, where the default file
+  /// system and platform can be replaced by mock instances.
   FlutterPreSubmitFileComparator(
     final Uri basedir,
     final SkiaGoldClient skiaClient, {
@@ -264,9 +288,32 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   }
 }
 
-/// Doc
+/// A [FlutterGoldenFileComparator] for testing golden images locally on your
+/// current machine.
+///
+/// This comparator utilizes the [SkiaGoldClient] to request baseline images for
+/// the given device under test for comparison. This comparator is only
+/// initialized when running tests locally, and is intended to serve as a smoke
+/// test during development. As such, it will not be able to detect unintended
+/// changes on other machines until it they are tested using the
+/// [FlutterPreSubmitFileComparator].
+///
+/// See also:
+///
+///  * [GoldenFileComparator], the abstract class that
+///    [FlutterGoldenFileComparator] implements.
+///  * [FlutterSkiaGoldFileComparator], another
+///    [FlutterGoldenFileComparator] that uploads tests to the Skia Gold
+///    dashboard.
+///  * [FlutterPresubmitFileComparator], another
+///    [FlutterGoldenFileComparator] that tests golden images before changes are
+///    merged into the master branch.
 class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalComparisonOutput {
-  /// Doc
+  /// Creates a [FlutterLocalFileComparator] that will test golden file
+  /// images against baselines requested from Flutter Gold.
+  ///
+  /// The [fs] and [platform] parameters useful in tests, where the default file
+  /// system and platform can be replaced by mock instances.
   FlutterLocalFileComparator(
     final Uri basedir,
     final SkiaGoldClient skiaClient, {

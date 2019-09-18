@@ -21,7 +21,8 @@ const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 const String _kFlutterGoldDashboard = 'https://flutter-gold.skia.org';
 
-/// Doc
+/// A client for uploading image tests and making baseline requests to the
+/// Flutter Gold Dashboard.
 class SkiaGoldClient {
   SkiaGoldClient(this.workDirectory, {
     this.fs = const LocalFileSystem(),
@@ -50,7 +51,7 @@ class SkiaGoldClient {
   /// sub-processes.
   final ProcessManager process;
 
-  /// Doc
+  /// A client for making Http requests to the Flutter Gold dashboard.
   final io.HttpClient httpClient;
 
   /// The local [Directory] within the [comparisonRoot] for the current test
@@ -61,9 +62,10 @@ class SkiaGoldClient {
   /// be null.
   final Directory workDirectory;
 
-  /// Doc
-  Directory get _flutterRoot =>
-    fs.directory(platform.environment[_kFlutterRootKey]);
+  /// The local [Directory] where the Flutter repository is hosted.
+  ///
+  /// Uses the [fs] file system.
+  Directory get _flutterRoot => fs.directory(platform.environment[_kFlutterRootKey]);
 
   /// The path to the local [Directory] where the goldctl tool is hosted.
   ///
@@ -179,7 +181,15 @@ class SkiaGoldClient {
     return true;
   }
 
-  /// Doc
+  /// Returns a list of bytes representing the golden image retrieved from the
+  /// Flutter Gold dashboard.
+  ///
+  /// Requests to Flutter Gold return a digest of information for the given
+  /// test. If more than one digest is returned, or if the digest is invalid,
+  /// this will throw an error.
+  ///
+  /// If no baseline digest is returned from Flutter Gold, it will assumed that
+  /// it is a new test and return an empty list.
   Future<List<int>>getMasterBytes(String testName) async {
     final List<int> masterImageBytes = <int>[];
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
@@ -250,7 +260,13 @@ class SkiaGoldClient {
     return masterImageBytes;
   }
 
-  /// Doc - for PreSubmit comparator
+  /// Returns a boolean value for whether or not the given test and current pull
+  /// request are ignored on Flutter Gold.
+  ///
+  /// This is only relevant when used by the [FlutterPreSubmitFileComparator].
+  /// In order to land a change to an exiting golden file, an ignore must be set
+  /// up in Flutter Gold. This will serve as a flag to permit the change to
+  /// land, and protect against any unwanted changes.
   Future<bool> testIsIgnoredForPullRequest(String pullRequest, String testName) async {
     bool ignoreIsActive = false;
     testName = _cleanTestName(testName);
@@ -313,7 +329,8 @@ class SkiaGoldClient {
     );
   }
 
-  /// Doc
+  /// Removes the file extension from the [fileName] to represent the test name
+  /// properly.
   String _cleanTestName(String fileName) {
     return fileName.split(path.extension(fileName.toString()))[0];
   }
@@ -329,12 +346,11 @@ class SkiaGoldClient {
   }
 }
 
-/// Doc
+/// Used to make HttpRequests during testing.
 class SkiaGoldHttpOverrides extends io.HttpOverrides {}
 
-/// Doc
+/// A digest returned from a request to the Flutter Gold dashboard.
 class SkiaGoldDigest {
-  /// Doc
   const SkiaGoldDigest({
     this.imageHash,
     this.paramSet,
@@ -342,7 +358,7 @@ class SkiaGoldDigest {
     this.status,
   });
 
-  /// Doc
+  /// Create a digest from requested json.
   factory SkiaGoldDigest.fromJson(Map<String, dynamic> json) {
     if (json == null)
       return null;
@@ -367,7 +383,7 @@ class SkiaGoldDigest {
   /// Status of the given digest, e.g. positive or untriaged.
   final String status;
 
-  /// Doc
+  /// Validates a given digest against the current testing conditions.
   bool isValid(Platform platform, String name) {
     return imageHash != null
       && paramSet['Platform'].contains(platform.operatingSystem)
