@@ -140,6 +140,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
       <Builder Function(BuilderOptions)>[
         (BuilderOptions builderOptions) => KernelBuilder(
               platformSdk: builderOptions.config['flutterWebSdk'],
+              useIncrementalCompiler: true,
               summaryOnly: true,
               sdkKernelPath: path.join('kernel', 'flutter_ddc_sdk.dill'),
               outputExtension: ddcKernelExtension,
@@ -148,7 +149,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               kernelTargetName: 'ddc',
             ),
         (BuilderOptions builderOptions) => DevCompilerBuilder(
-              useIncrementalCompiler: false,
+              useIncrementalCompiler: true,
               platform: flutterWebPlatform,
               platformSdk: builderOptions.config['flutterWebSdk'],
               sdkKernelPath: path.url.join('kernel', 'flutter_ddc_sdk.dill'),
