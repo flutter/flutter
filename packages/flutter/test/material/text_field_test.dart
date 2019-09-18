@@ -510,27 +510,49 @@ void main() {
 
   testWidgets('text field toolbar options correctly changes options',
       (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+     final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.iOS),
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+                toolbarOptions: const ToolbarOptions(copy: true),
+              ),
+            ),
+          ),
+        ),
+      );
 
-    await tester.pumpWidget(overlay(
-      child: TextField(
-        controller: controller,
-        toolbarOptions: const ToolbarOptions(copy: true),
-      ),
-    ));
-    await tester.enterText(find.byType(TextField), 'abcde fghi');
-    await skipPastScrollingAnimation(tester);
+    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
 
-    // Long press to select text.
-    final Offset bPos = textOffsetToPosition(tester, 1);
-    await tester.longPressAt(bPos, pointer: 7);
+    // This tap just puts the cursor somewhere different than where the double
+    // tap will occur to test that the double tap moves the existing cursor first.
+    await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+    await tester.pump(const Duration(milliseconds: 50));
+    // First tap moved the cursor.
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(
+          offset: 8, affinity: TextAffinity.downstream),
+    );
+    await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
     await tester.pump();
 
-    // Sanity check that the toolbar widget exists and does include [COPY].
-    expect(find.text('COPY'), findsOneWidget);
-    expect(find.text('CUT'), findsNothing);
-    expect(find.text('PASTE'), findsNothing);
-    // expect(find.text('SELECT ALL'), findsNothing);
+    // Second tap selects the word around the cursor.
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 8, extentOffset: 12),
+    );
+
+    // Selected text shows 3 toolbar buttons.
+    expect(find.byType(CupertinoButton), findsNWidgets(1));
   }, skip: isBrowser);
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
