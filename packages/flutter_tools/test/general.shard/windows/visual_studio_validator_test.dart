@@ -32,6 +32,8 @@ void main() {
       when(mockVisualStudio.isLaunchable).thenReturn(true);
       when(mockVisualStudio.isRebootRequired).thenReturn(false);
       when(mockVisualStudio.hasNecessaryComponents).thenReturn(true);
+      when(mockVisualStudio.fullVersion).thenReturn('15.1');
+      when(mockVisualStudio.displayName).thenReturn('Visual Studio Community 2019');
     }
 
     // Assigns default values for a missing VS installation.
@@ -110,6 +112,9 @@ void main() {
       _configureMockVisualStudioAsInstalled();
       const VisualStudioValidator validator = VisualStudioValidator();
       final ValidationResult result = await validator.validate();
+      final ValidationMessage expectedDisplayNameMessage = ValidationMessage(
+        userMessages.visualStudioVersion(visualStudio.displayName, visualStudio.fullVersion));
+      expect(result.messages.contains(expectedDisplayNameMessage), true);
       expect(result.type, ValidationType.installed);
     }, overrides: <Type, Generator>{
       VisualStudio: () => mockVisualStudio,
