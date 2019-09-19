@@ -1,4 +1,4 @@
-Signature: 049d68c084861a8c07c610aaf1f6cdd1
+Signature: 24768936479edc02b29762d8a34dcea5
 
 UNUSED LICENSES:
 
@@ -7451,6 +7451,8 @@ FILE: ../../../third_party/dart/runtime/tools/dartfuzz/gen_api_table.dart
 FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.html
 FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.js
 FILE: ../../../third_party/dart/runtime/tools/run_clang_tidy.dart
+FILE: ../../../third_party/dart/runtime/vm/bss_relocs.cc
+FILE: ../../../third_party/dart/runtime/vm/bss_relocs.h
 FILE: ../../../third_party/dart/runtime/vm/catch_entry_moves_test.cc
 FILE: ../../../third_party/dart/runtime/vm/class_id.h
 FILE: ../../../third_party/dart/runtime/vm/code_comments.cc
@@ -9625,7 +9627,6 @@ FILE: ../../../third_party/dart/sdk/lib/developer/profiler.dart
 FILE: ../../../third_party/dart/sdk/lib/io/process.dart
 FILE: ../../../third_party/dart/sdk/lib/io/service_object.dart
 FILE: ../../../third_party/dart/sdk/lib/isolate/capability.dart
-FILE: ../../../third_party/dart/sdk/lib/profiler/profiler.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/preambles/d8.js
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/preambles/jsshell.js
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/linked_hash_map.dart
@@ -9636,7 +9637,6 @@ FILE: ../../../third_party/dart/sdk_nnbd/lib/developer/profiler.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/io/process.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/io/service_object.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/isolate/capability.dart
-FILE: ../../../third_party/dart/sdk_nnbd/lib/profiler/profiler.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2014, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
