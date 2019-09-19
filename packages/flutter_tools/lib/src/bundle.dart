@@ -189,7 +189,7 @@ Future<void> buildWithAssemble({
 }
 
 void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
-   for (File outputFile in files) {
+  for (File outputFile in files) {
     if (platform.isWindows) {
       // Paths in a depfile have to be escaped on windows.
       final String escapedPath = outputFile.path.replaceAll(r'\', r'\\');
