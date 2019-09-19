@@ -87,21 +87,18 @@ void main() {
 
   group('GenSnapshot', () {
     GenSnapshot genSnapshot;
-    BufferLogger mockLogger;
     MockArtifacts mockArtifacts;
     MockProcessManager mockProcessManager;
     MockProcess mockProc;
 
     setUp(() async {
       genSnapshot = const GenSnapshot();
-      mockLogger = BufferLogger();
       mockArtifacts = MockArtifacts();
       mockProcessManager = MockProcessManager();
       mockProc = MockProcess();
     });
 
     final Map<Type, Generator> contextOverrides = <Type, Generator>{
-      Logger: () => mockLogger,
       Artifacts: () => mockArtifacts,
       ProcessManager: () => mockProcessManager,
     };
@@ -119,7 +116,7 @@ void main() {
       await genSnapshot.run(
           snapshotType:
               SnapshotType(TargetPlatform.android_x64, BuildMode.release),
-          iosArch: null,
+          darwinArch: null,
           additionalArgs: <String>['--additional_arg']);
       verify(mockProcessManager.start(<String>[
         'gen_snapshot',
@@ -143,7 +140,7 @@ void main() {
       when(mockProc.stderr).thenAnswer((_) => const Stream<List<int>>.empty());
       await genSnapshot.run(
           snapshotType: SnapshotType(TargetPlatform.ios, BuildMode.release),
-          iosArch: IOSArch.armv7,
+          darwinArch: DarwinArch.armv7,
           additionalArgs: <String>['--additional_arg']);
       verify(mockProcessManager.start(<String>[
         'gen_snapshot_armv7',
@@ -167,7 +164,7 @@ void main() {
       when(mockProc.stderr).thenAnswer((_) => const Stream<List<int>>.empty());
       await genSnapshot.run(
           snapshotType: SnapshotType(TargetPlatform.ios, BuildMode.release),
-          iosArch: IOSArch.arm64,
+          darwinArch: DarwinArch.arm64,
           additionalArgs: <String>['--additional_arg']);
       verify(mockProcessManager.start(<String>[
         'gen_snapshot_arm64',
@@ -198,16 +195,16 @@ void main() {
       await genSnapshot.run(
           snapshotType:
               SnapshotType(TargetPlatform.android_x64, BuildMode.release),
-          iosArch: null,
+          darwinArch: null,
           additionalArgs: <String>['--strip']);
       verify(mockProcessManager.start(
               <String>['gen_snapshot', '--causal_async_stacks', '--strip'],
               workingDirectory: anyNamed('workingDirectory'),
               environment: anyNamed('environment')))
           .called(1);
-      expect(mockLogger.errorText, contains('ABC'));
-      expect(mockLogger.errorText, isNot(contains('ELF library')));
-      expect(mockLogger.errorText, contains('XYZ'));
+      expect(testLogger.errorText, contains('ABC'));
+      expect(testLogger.errorText, isNot(contains('ELF library')));
+      expect(testLogger.errorText, contains('XYZ'));
     }, overrides: contextOverrides);
   });
 
