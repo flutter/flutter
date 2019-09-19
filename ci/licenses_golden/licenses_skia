@@ -1,4 +1,4 @@
-Signature: f9408fc447605fa361acfd80fcff1feb
+Signature: fd364cc8acfef7a20d3d08a1e4c8bd2e
 
 UNUSED LICENSES:
 
@@ -3397,6 +3397,7 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlSemaphore.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlSemaphore.mm
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSecondaryCBDrawContext.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSecondaryCBDrawContext.h
+FILE: ../../../third_party/skia/src/image/SkSurface_GpuMtl.mm
 FILE: ../../../third_party/skia/src/shaders/SkRTShader.cpp
 FILE: ../../../third_party/skia/src/shaders/SkRTShader.h
 FILE: ../../../third_party/skia/src/sksl/SkSLDefines.h
