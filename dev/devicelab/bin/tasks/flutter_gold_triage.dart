@@ -14,18 +14,14 @@ Future<TaskResult> getTriageCount() async {
   final HttpClient skiaClient = HttpClient();
   int digestCount = 0;
   try {
-    await skiaClient.getUrl(Uri.parse(
+    final HttpClientRequest request = await skiaClient.getUrl(Uri.parse(
       'https://flutter-gold.skia.org/json/byblame?query=source_type%3Dflutter'
-    ))
-      .then((HttpClientRequest request) => request.close())
-      .then((HttpClientResponse response) async {
-        final String responseBody = await response
-          .transform(utf8.decoder)
-          .join();
-        final Map<String, dynamic> json = jsonDecode(responseBody);
-        final List<dynamic> digests = json['data'];
-        digestCount = digests.length;
-      });
+    ));
+    final HttpClientResponse response = await request.close();
+    final String responseBody = await response.transform(utf8.decoder).join();
+    final Map<String, dynamic> json = jsonDecode(responseBody);
+    final List<dynamic> digests = json['data'];
+    digestCount = digests.length;
   } catch(e) {
     return TaskResult.failure(e.toString());
   }
