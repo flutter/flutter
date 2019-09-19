@@ -12,7 +12,7 @@ fi
 
 # Note that for flutter's packaged command-line binaries, this tool will return
 # an error, even if the file in question is signed, because it is not
-# recognized as an app. Thus, we have to patter-match on the tool's stderr.
+# recognized as an app. Thus, we have to pattern-match on the tool's stderr.
 OUT=$(spctl -vvv --assess --type exec $1 2>&1)
 EXIT_CODE=$?
 
