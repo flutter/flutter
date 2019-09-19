@@ -125,7 +125,7 @@ abstract class FlutterCommand extends Command<void> {
   bool get shouldRunPub => _usesPubOption && argResults['pub'];
 
   bool get shouldUpdateCache => true;
-  
+
   bool _excludeDebug = false;
 
   BuildMode _defaultBuildMode;
