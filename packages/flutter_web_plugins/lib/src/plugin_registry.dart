@@ -80,6 +80,8 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
       final MessageHandler handler = _handlers[channel];
       if (handler != null) {
         response = await handler(data);
+      } else {
+        ui.channelBuffers.push(channel, data, callback);
       }
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
@@ -119,6 +121,9 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
       _handlers.remove(channel);
     else
       _handlers[channel] = handler;
+    ui.channelBuffers.drain(channel, (ByteData data, ui.PlatformMessageResponseCallback callback) async {
+      await handlePlatformMessage(channel, data, callback);
+    });
   }
 
   @override
