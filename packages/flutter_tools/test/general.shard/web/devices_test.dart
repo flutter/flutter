@@ -61,32 +61,33 @@ void main() {
   });
 
   testUsingContext('Chrome device is listed when Chrome is available', () async {
-    when(mockProcessManager.canRun(any)).thenReturn(false);
-    when(mockProcessManager.canRun(argThat(contains('chrome')))).thenReturn(true);
+    when(mockChromeLauncher.canFindChrome()).thenReturn(true);
 
     final WebDevices deviceDiscoverer = WebDevices();
     final List<Device> devices = await deviceDiscoverer.pollingGetDevices();
     expect(devices, contains(isInstanceOf<ChromeDevice>()));
+  }, overrides: <Type, Generator>{
+    ChromeLauncher: () => mockChromeLauncher,
   });
 
   testUsingContext('Chrome device is not listed when Chrome is not available', () async {
-    when(mockProcessManager.canRun(any)).thenReturn(false);
+    when(mockChromeLauncher.canFindChrome()).thenReturn(false);
 
     final WebDevices deviceDiscoverer = WebDevices();
     final List<Device> devices = await deviceDiscoverer.pollingGetDevices();
     expect(devices, isNot(contains(isInstanceOf<ChromeDevice>())));
   }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
+    ChromeLauncher: () => mockChromeLauncher,
   });
 
   testUsingContext('Web Server device is listed even when Chrome is not available', () async {
-    when(mockProcessManager.canRun(any)).thenReturn(false);
+    when(mockChromeLauncher.canFindChrome()).thenReturn(false);
 
     final WebDevices deviceDiscoverer = WebDevices();
     final List<Device> devices = await deviceDiscoverer.pollingGetDevices();
     expect(devices, contains(isInstanceOf<WebServerDevice>()));
   }, overrides: <Type, Generator>{
-    ProcessManager: () => mockProcessManager,
+    ChromeLauncher: () => mockChromeLauncher,
   });
 
   testUsingContext('Chrome invokes version command on non-Windows platforms', () async{

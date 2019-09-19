@@ -4,10 +4,8 @@
 
 import '../base/context.dart';
 import '../base/platform.dart';
-import '../base/process_manager.dart';
 import '../doctor.dart';
 import '../features.dart';
-import 'chrome.dart';
 
 /// The  web workflow instance.
 WebWorkflow get webWorkflow => context.get<WebWorkflow>();
@@ -26,14 +24,4 @@ class WebWorkflow extends Workflow {
 
   @override
   bool get canListEmulators => false;
-}
-
-/// Whether we can locate the chrome executable.
-bool canFindChrome() {
-  final String chrome = findChromeExecutable();
-  try {
-    return processManager.canRun(chrome);
-  } on ArgumentError {
-    return false;
-  }
 }
