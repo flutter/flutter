@@ -38,7 +38,9 @@
   self.continueAfterFailure = NO;
 }
 
-- (void)testDismissedFlutterViewControllerNotRespondingToApplicationLifecycle {
+// TODD(dnfield): Unskip this when https://github.com/flutter/flutter/issues/40817
+// is resolved.
+- (void)skip_testDismissedFlutterViewControllerNotRespondingToApplicationLifecycle {
   XCTestExpectation* engineStartedExpectation = [self expectationWithDescription:@"Engine started"];
 
   // Let the engine finish booting (at the end of which the channels are properly set-up) before
