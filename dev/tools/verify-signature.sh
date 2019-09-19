@@ -14,8 +14,11 @@ fi
 # an error, even if the file in question is signed, because it is not
 # recognized as an app. Thus, we have to patter-match on the tool's stderr.
 OUT=$(spctl -vvv --assess --type exec $1 2>&1)
+EXIT_CODE=$?
 
-if [[ "$OUT" =~ 'the code is valid but does not seem to be an app' ]]; then
+if [ $EXIT_CODE -eq 0 ]; then
+  echo "$1 appears to be signed."
+elif [[ "$OUT" =~ 'the code is valid but does not seem to be an app' ]]; then
   echo "$1 appears to be signed."
 elif [[ "$OUT" =~ 'no usable signature' ]]; then
   echo "$1 does not appear to be signed."
