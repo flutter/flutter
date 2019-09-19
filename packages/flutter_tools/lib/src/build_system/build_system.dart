@@ -10,6 +10,7 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../cache.dart';
@@ -20,6 +21,9 @@ import 'file_hash_store.dart';
 import 'source.dart';
 
 export 'source.dart';
+
+/// The [BuildSystem] instance.
+BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// Configuration for the build system itself.
 class BuildSystemConfig {
@@ -497,14 +501,14 @@ class _BuildInstance {
       }
       if (canSkip) {
         skipped = true;
-        printStatus('Skipping target: ${node.target.name}');
+        printTrace('Skipping target: ${node.target.name}');
         for (File output in node.outputs) {
           outputFiles[output.path] = output;
         }
       } else {
-        printStatus('${node.target.name}: Starting due to ${node.invalidatedReasons}');
+        printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
         await node.target.build(environment);
-        printStatus('${node.target.name}: Complete');
+        printTrace('${node.target.name}: Complete');
 
         // Update hashes for output files.
         await fileCache.hashFiles(node.outputs);
@@ -515,7 +519,10 @@ class _BuildInstance {
         // Delete outputs from previous stages that are no longer a part of the build.
         for (String previousOutput in node.previousOutputs) {
           if (!outputFiles.containsKey(previousOutput)) {
-            fs.file(previousOutput).deleteSync();
+            final File previousFile = fs.file(previousOutput);
+            if (previousFile.existsSync()) {
+              previousFile.deleteSync();
+            }
           }
         }
       }
