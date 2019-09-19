@@ -927,6 +927,7 @@ Future<void> _buildGradleProjectV2(
 /// Returns [true] if the current app uses AndroidX.
 // TODO(egarciad): https://github.com/flutter/flutter/issues/40800
 // Remove `FlutterManifest.usesAndroidX` and provide a unified `AndroidProject.usesAndroidX`.
+@visibleForTesting
 bool isAppUsingAndroidX(Directory androidDirectory) {
   final File properties = androidDirectory.childFile('gradle.properties');
   if (!properties.existsSync()) {
@@ -936,6 +937,7 @@ bool isAppUsingAndroidX(Directory androidDirectory) {
 }
 
 /// Builds the plugins as AARs.
+@visibleForTesting
 Future<void> buildPluginsAsAar(
   FlutterProject flutterProject,
   AndroidBuildInfo androidBuildInfo, {
