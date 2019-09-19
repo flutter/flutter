@@ -40,7 +40,7 @@ void main() {
     binding.defaultBinaryMessenger.setMessageHandler(channel, (ByteData message) async {
       expect(_getString(message), payload);
       didDrainData= true;
-      return null;      
+      return null;
     });
     // Flush the event queue.
     await Future<void>((){});
