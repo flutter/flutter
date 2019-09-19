@@ -31,4 +31,6 @@ class FlutterActivityLaunchConfigs {
     /** Indicates a FlutterActivity with a transparent background. */
     transparent
   }
+
+  private FlutterActivityLaunchConfigs() {}
 }

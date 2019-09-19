@@ -19,11 +19,9 @@ import android.view.View;
 import android.view.Window;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
-import io.flutter.plugin.common.ActivityLifecycleListener;
 
 /**
  * Android implementation of the platform plugin.
