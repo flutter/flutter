@@ -117,9 +117,12 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   }
 }
 
-/// Doc
+/// A class for use in golden file comparators that run locally and provide
+/// output.
 class LocalComparisonOutput {
-  /// Doc
+  /// Writes out diffs from the [ComparisonResult] of a golden file test.
+  ///
+  /// Will throw an error if a null result is provided.
   void generateFailureOutput(ComparisonResult result, Uri golden, Uri basedir) {
     String additionalFeedback = '';
     if (result.diffs != null) {
@@ -134,7 +137,7 @@ class LocalComparisonOutput {
     throw test_package.TestFailure('Golden "$golden": ${result.error}$additionalFeedback');
   }
 
-  /// Doc
+  /// Returns the appropriate file for a given diff from a [ComparisonResult].
   File getFailureFile(String failure, Uri golden, Uri basedir) {
     final String fileName = golden.pathSegments[0];
     final String testName = fileName.split(path.extension(fileName))[0]
