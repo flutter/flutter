@@ -455,18 +455,9 @@ void Application::AttemptVMLaunchWithCurrentSettings(
           application_assets_directory_.get() /* /pkg/data */,
           "isolate_snapshot_instructions.bin", true));
 
-  shared_snapshot_ = fml::MakeRefCounted<flutter::DartSnapshot>(
-      CreateWithContentsOfFile(
-          application_assets_directory_.get() /* /pkg/data */,
-          "shared_snapshot_data.bin", false),
-      CreateWithContentsOfFile(
-          application_assets_directory_.get() /* /pkg/data */,
-          "shared_snapshot_instructions.bin", true));
-
   auto vm = flutter::DartVMRef::Create(settings_,               //
                                        std::move(vm_snapshot),  //
-                                       isolate_snapshot_,       //
-                                       shared_snapshot_         //
+                                       isolate_snapshot_        //
   );
   FML_CHECK(vm) << "Mut be able to initialize the VM.";
 }
@@ -544,7 +535,6 @@ void Application::CreateView(
       runner_incoming_services_,     // Runner incoming services
       settings_,                     // settings
       std::move(isolate_snapshot_),  // isolate snapshot
-      std::move(shared_snapshot_),   // shared snapshot
       scenic::ToViewToken(std::move(view_token)),  // view token
       std::move(view_ref_control),                 // view ref control
       std::move(view_ref),                         // view ref

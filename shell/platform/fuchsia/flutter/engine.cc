@@ -45,7 +45,6 @@ Engine::Engine(Delegate& delegate,
                std::shared_ptr<sys::ServiceDirectory> runner_services,
                flutter::Settings settings,
                fml::RefPtr<const flutter::DartSnapshot> isolate_snapshot,
-               fml::RefPtr<const flutter::DartSnapshot> shared_snapshot,
                fuchsia::ui::views::ViewToken view_token,
                fuchsia::ui::views::ViewRefControl view_ref_control,
                fuchsia::ui::views::ViewRef view_ref,
@@ -222,20 +221,16 @@ Engine::Engine(Delegate& delegate,
     isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
   }
 
-  if (!shared_snapshot) {
-    shared_snapshot = flutter::DartSnapshot::Empty();
-  }
-
   {
     TRACE_EVENT0("flutter", "CreateShell");
     shell_ = flutter::Shell::Create(
-        task_runners,                 // host task runners
-        settings_,                    // shell launch settings
-        std::move(isolate_snapshot),  // isolate snapshot
-        std::move(shared_snapshot),   // shared snapshot
-        on_create_platform_view,      // platform view create callback
-        on_create_rasterizer,         // rasterizer create callback
-        std::move(vm)                 // vm reference
+        task_runners,                    // host task runners
+        settings_,                       // shell launch settings
+        std::move(isolate_snapshot),     // isolate snapshot
+        flutter::DartSnapshot::Empty(),  // shared snapshot
+        on_create_platform_view,         // platform view create callback
+        on_create_rasterizer,            // rasterizer create callback
+        std::move(vm)                    // vm reference
     );
   }
 
