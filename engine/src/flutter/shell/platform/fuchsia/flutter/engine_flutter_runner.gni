@@ -117,6 +117,7 @@ template("flutter_runner") {
              "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
              "$fuchsia_sdk_root/fidl:fuchsia.ui.scenic",
              "$fuchsia_sdk_root/pkg:async-cpp",
+             "$fuchsia_sdk_root/pkg:async-default",
              "$fuchsia_sdk_root/pkg:async-loop",
              "$fuchsia_sdk_root/pkg:async-loop-cpp",
              "$fuchsia_sdk_root/pkg:fdio",

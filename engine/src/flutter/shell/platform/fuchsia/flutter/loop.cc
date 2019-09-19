@@ -5,6 +5,7 @@
 #include "loop.h"
 
 #include <lib/async-loop/loop.h>
+#include <lib/async/default.h>
 
 #include "task_observers.h"
 
@@ -17,11 +18,21 @@ static void LoopEpilogue(async_loop_t*, void*) {
 }
 
 constexpr async_loop_config_t kAttachedLoopConfig = {
+    .default_accessors =
+        {
+            .getter = async_get_default_dispatcher,
+            .setter = async_set_default_dispatcher,
+        },
     .make_default_for_current_thread = true,
     .epilogue = &LoopEpilogue,
 };
 
 constexpr async_loop_config_t kDetachedLoopConfig = {
+    .default_accessors =
+        {
+            .getter = async_get_default_dispatcher,
+            .setter = async_set_default_dispatcher,
+        },
     .make_default_for_current_thread = false,
     .epilogue = &LoopEpilogue,
 };
