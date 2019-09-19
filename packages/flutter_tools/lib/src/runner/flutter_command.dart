@@ -126,6 +126,8 @@ abstract class FlutterCommand extends Command<void> {
 
   bool get shouldUpdateCache => true;
 
+  bool _excludeDebug = false;
+
   BuildMode _defaultBuildMode;
 
   void requiresPubspecYaml() {
@@ -263,12 +265,17 @@ abstract class FlutterCommand extends Command<void> {
             'Normally there\'s only one, but when adding Flutter to a pre-existing app it\'s possible to create multiple.');
   }
 
-  void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false }) {
+  void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false, bool excludeDebug = false }) {
+    // A release build must be the default if a debug build is not possible.
+    assert(defaultToRelease || !excludeDebug);
+    _excludeDebug = excludeDebug;
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
-    argParser.addFlag('debug',
-      negatable: false,
-      help: 'Build a debug version of your app${defaultToRelease ? '' : ' (default mode)'}.');
+    if (!excludeDebug) {
+      argParser.addFlag('debug',
+        negatable: false,
+        help: 'Build a debug version of your app${defaultToRelease ? '' : ' (default mode)'}.');
+    }
     argParser.addFlag('profile',
       negatable: false,
       help: 'Build a version of your app specialized for performance profiling.');
@@ -312,11 +319,12 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   BuildMode getBuildMode() {
-    final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
+    final bool debugResult = _excludeDebug ? false : argResults['debug'];
+    final List<bool> modeFlags = <bool>[debugResult, argResults['profile'], argResults['release']];
     if (modeFlags.where((bool flag) => flag).length > 1) {
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
     }
-    if (argResults['debug']) {
+    if (debugResult) {
       return BuildMode.debug;
     }
     if (argResults['profile']) {
