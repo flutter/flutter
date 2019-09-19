@@ -25,7 +25,7 @@ void main() {
     return utf8.decode(list);
   }
 
-  test('foobar', () async {
+  test('does drain channel buffers', () async {
     const String channel = 'foo';
     final TestChannelBuffersFlutterBinding binding = TestChannelBuffersFlutterBinding();
     expect(binding.defaultBinaryMessenger, isNotNull);
