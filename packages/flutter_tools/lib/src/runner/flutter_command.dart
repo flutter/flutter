@@ -264,13 +264,8 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false, bool excludeDebug = false }) {
-    assert(() {
-      // If we don't default to release, ensure that we support debug mode.
-      if (!defaultToRelease && excludeDebug) {
-        return false;
-      }
-      return true;
-    }());
+    // A release build must be the default if a debug build is not possible.
+    assert(defaultToRelease || !excludeDebug);
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     if (!excludeDebug) {
