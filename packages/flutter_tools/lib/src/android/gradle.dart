@@ -979,7 +979,8 @@ Future<void> buildPluginsAsAar(
         outputDir: buildDirectory,
       );
     } on ToolExit {
-      // Log the plugin entry in `.flutter-plugins`.
+      // Log the entire plugin entry in `.flutter-plugins` since it
+      // includes the plugin name and the version.
       BuildEvent('plugin-aar-failure', eventError: plugin).send();
       throwToolExit('The plugin $pluginName could not be built due to the issue above. ');
     }
