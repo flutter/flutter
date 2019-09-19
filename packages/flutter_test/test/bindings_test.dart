@@ -15,7 +15,7 @@ void main() {
     });
   });
 
-  group('AutomatedWidgetsBinding ', () {
+  group(AutomatedTestWidgetsFlutterBinding, () {
     test('allows setting defaultTestTimeout to 5 minutes', () {
       final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
       binding.defaultTestTimeout = test_package.Timeout(Duration(minutes: 5));
