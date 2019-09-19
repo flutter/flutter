@@ -31,27 +31,43 @@ void main() {
     setUp(() {
       TestWidgetsFlutterBinding.ensureInitialized();
       webPluginRegistry.registerMessageHandler();
-    });
-
-    test('Can register a plugin', () {
-      TestPlugin.calledMethods.clear();
-
       final Registrar registrar = webPluginRegistry.registrarFor(TestPlugin);
       TestPlugin.registerWith(registrar);
+    });
+
+    test('can register a plugin', () {
+      TestPlugin.calledMethods.clear();
 
       const MethodChannel frameworkChannel =
           MethodChannel('test_plugin', StandardMethodCodec());
       frameworkChannel.invokeMethod<void>('test1');
 
-      expect(TestPlugin.calledMethods, <String>['test1']);
+      expect(TestPlugin.calledMethods, equals(<String>['test1']));
     });
 
-    test('Throws when trying to send a platform message to the framework', () {
-      expect(() => pluginBinaryMessenger.send('test', ByteData(0)),
-          throwsFlutterError);
+    test('can send a message from the plugin to the framework', () async {
+      const StandardMessageCodec codec = StandardMessageCodec();
+
+      final List<String> loggedMessages = <String>[];
+      ServicesBinding.instance.defaultBinaryMessenger
+          .setMessageHandler('test_send', (ByteData data) {
+        loggedMessages.add(codec.decodeMessage(data));
+        return null;
+      });
+
+      await pluginBinaryMessenger.send(
+          'test_send', codec.encodeMessage('hello'));
+      expect(loggedMessages, equals(<String>['hello']));
+
+      await pluginBinaryMessenger.send(
+          'test_send', codec.encodeMessage('world'));
+      expect(loggedMessages, equals(<String>['hello', 'world']));
+
+      ServicesBinding.instance.defaultBinaryMessenger
+          .setMessageHandler('test_send', null);
     });
 
-    test('Throws when trying to set a mock handler', () {
+    test('throws when trying to set a mock handler', () {
       expect(
           () => pluginBinaryMessenger.setMockMessageHandler(
               'test', (ByteData data) async => ByteData(0)),
