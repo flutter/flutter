@@ -149,7 +149,7 @@ Future<void> checkGradleDependencies() async {
     <String>[gradlew, 'dependencies'],
     throwOnError: true,
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
-    environment: _gradleEnv,
+    environment: gradleEnv,
   );
   androidSdk.reinitialize();
   progress.stop();
@@ -236,16 +236,16 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
   // flavors and build types defined in the project. If gradle fails, then check if the failure is due to t
   try {
     final RunResult propertiesRunResult = await processUtils.run(
-      <String>[gradlew, isLibrary ? 'properties' : 'app:properties'],
+      <String>[gradlew, if (isLibrary) 'properties' else 'app:properties'],
       throwOnError: true,
       workingDirectory: hostAppGradleRoot.path,
-      environment: _gradleEnv,
+      environment: gradleEnv,
     );
     final RunResult tasksRunResult = await processUtils.run(
-      <String>[gradlew, isLibrary ? 'tasks': 'app:tasks', '--all', '--console=auto'],
+      <String>[gradlew, if (isLibrary) 'tasks' else 'app:tasks', '--all', '--console=auto'],
       throwOnError: true,
       workingDirectory: hostAppGradleRoot.path,
-      environment: _gradleEnv,
+      environment: gradleEnv,
     );
     project = GradleProject.fromAppProperties(propertiesRunResult.stdout, tasksRunResult.stdout);
   } catch (exception) {
@@ -306,6 +306,10 @@ Future<String> _initializeGradle(FlutterProject project) async {
   final Status status = logger.startProgress('Initializing gradle...',
       timeout: timeoutConfiguration.slowOperation);
 
+
+  // Update the project if needed.
+  // TODO(egarciad): https://github.com/flutter/flutter/issues/40460.
+  migrateToR8(android);
   injectGradleWrapperIfNeeded(android);
 
   final String gradle = _locateGradlewExecutable(android);
@@ -320,7 +324,7 @@ Future<String> _initializeGradle(FlutterProject project) async {
     await processUtils.run(
       <String>[gradle, '-v'],
       throwOnError: true,
-      environment: _gradleEnv,
+      environment: gradleEnv,
     );
   } on ProcessException catch (e) {
     final String error = e.toString();
@@ -333,6 +337,31 @@ Future<String> _initializeGradle(FlutterProject project) async {
     status.stop();
   }
   return gradle;
+}
+
+/// Migrates the Android's [directory] to R8.
+/// https://developer.android.com/studio/build/shrink-code
+@visibleForTesting
+void migrateToR8(Directory directory) {
+  final File gradleProperties = directory.childFile('gradle.properties');
+  if (!gradleProperties.existsSync()) {
+    throwToolExit('Expected file ${gradleProperties.path}.');
+  }
+  final String propertiesContent = gradleProperties.readAsStringSync();
+  if (propertiesContent.contains('android.enableR8')) {
+    printTrace('gradle.properties already sets `android.enableR8`');
+    return;
+  }
+  printTrace('set `android.enableR8=true` in gradle.properties');
+  try {
+    gradleProperties
+      .writeAsStringSync('android.enableR8=true\n', mode: FileMode.append);
+  } on FileSystemException {
+    throwToolExit(
+      'The tool failed to add `android.enableR8=true` to ${gradleProperties.path}. '
+      'Please update the file manually and try this command again.'
+    );
+  }
 }
 
 /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
@@ -374,7 +403,7 @@ bool _isWithinVersionRange(String targetVersion, {String min, String max}) {
       parsedTargetVersion <= Version.parse(max);
 }
 
-const String defaultGradleVersion = '4.10.2';
+const String defaultGradleVersion = '5.6.2';
 
 /// Returns the Gradle version that is required by the given Android Gradle plugin version
 /// by picking the largest compatible version from
@@ -411,7 +440,7 @@ String getGradleVersionFor(String androidPluginVersion) {
     return '4.10.2';
   }
   if (_isWithinVersionRange(androidPluginVersion, min: '3.4.0', max: '3.5.0')) {
-    return '5.1.1';
+    return '5.6.2';
   }
   throwToolExit('Unsuported Android Plugin version: $androidPluginVersion.');
   return '';
@@ -611,7 +640,7 @@ Future<void> buildGradleAar({
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
-      environment: _gradleEnv,
+      environment: gradleEnv,
       mapFunction: (String line) {
         // Always print the full line in verbose mode.
         if (logger.isVerbose) {
@@ -649,7 +678,7 @@ Future<void> _buildGradleProjectV1(FlutterProject project) async {
     <String>[fs.file(gradlew).absolute.path, 'build'],
     workingDirectory: project.android.hostAppGradleRoot.path,
     allowReentrantFlutter: true,
-    environment: _gradleEnv,
+    environment: gradleEnv,
   );
   status.stop();
   flutterUsage.sendTiming('build', 'gradle-v1', Duration(milliseconds: sw.elapsedMilliseconds));
@@ -754,8 +783,8 @@ Future<void> _buildGradleProjectV2(
   if (androidBuildInfo.splitPerAbi) {
     command.add('-Psplit-per-abi=true');
   }
-  if (androidBuildInfo.proguard) {
-    command.add('-Pproguard=true');
+  if (androidBuildInfo.shrink) {
+    command.add('-Pshrink=true');
   }
   if (androidBuildInfo.targetArchs.isNotEmpty) {
     final String targetPlatforms = androidBuildInfo.targetArchs
@@ -772,7 +801,7 @@ Future<void> _buildGradleProjectV2(
   }
   command.add(assembleTask);
   bool potentialAndroidXFailure = false;
-  bool potentialProguardFailure = false;
+  bool potentialR8Failure = false;
   final Stopwatch sw = Stopwatch()..start();
   int exitCode = 1;
   try {
@@ -780,7 +809,7 @@ Future<void> _buildGradleProjectV2(
       command,
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
-      environment: _gradleEnv,
+      environment: gradleEnv,
       // TODO(mklim): if AndroidX warnings are no longer required, this
       // mapFunction and all its associated variabled can be replaced with just
       // `filter: ndkMessagefilter`.
@@ -789,10 +818,10 @@ Future<void> _buildGradleProjectV2(
         if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
           potentialAndroidXFailure = true;
         }
-        // Proguard errors include this url.
-        if (!potentialProguardFailure && androidBuildInfo.proguard &&
-            line.contains('http://proguard.sourceforge.net')) {
-          potentialProguardFailure = true;
+        // R8 errors include references to this package.
+        if (!potentialR8Failure && androidBuildInfo.shrink &&
+            line.contains('com.android.tools.r8')) {
+          potentialR8Failure = true;
         }
         // Always print the full line in verbose mode.
         if (logger.isVerbose) {
@@ -808,12 +837,12 @@ Future<void> _buildGradleProjectV2(
   }
 
   if (exitCode != 0) {
-    if (potentialProguardFailure) {
+    if (potentialR8Failure) {
       final String exclamationMark = terminal.color('[!]', TerminalColor.red);
-      printStatus('$exclamationMark Proguard may have failed to optimize the Java bytecode.', emphasis: true);
-      printStatus('To disable proguard, pass the `--no-proguard` flag to this command.', indent: 4);
-      printStatus('To learn more about Proguard, see: https://flutter.dev/docs/deployment/android#enabling-proguard', indent: 4);
-      BuildEvent('proguard-failure').send();
+      printStatus('$exclamationMark The shrinker may have failed to optimize the Java bytecode.', emphasis: true);
+      printStatus('To disable the shrinker, pass the `--no-shrink` flag to this command.', indent: 4);
+      printStatus('To learn more, see: https://developer.android.com/studio/build/shrink-code', indent: 4);
+      BuildEvent('r8-failure').send();
     } else if (potentialAndroidXFailure) {
       printStatus('AndroidX incompatibilities may have caused this build to fail. See https://goo.gl/CP92wY.');
       BuildEvent('android-x-failure').send();
@@ -932,7 +961,8 @@ File findBundleFile(GradleProject project, BuildInfo buildInfo) {
   return null;
 }
 
-Map<String, String> get _gradleEnv {
+/// The environment variables needed to run Gradle.
+Map<String, String> get gradleEnv {
   final Map<String, String> env = Map<String, String>.from(platform.environment);
   if (javaPath != null) {
     // Use java bundled with Android Studio.

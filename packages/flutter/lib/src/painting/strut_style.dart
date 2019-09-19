@@ -578,10 +578,11 @@ class StrutStyle extends Diagnosticable {
     super.debugFillProperties(properties);
     if (debugLabel != null)
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel));
-    final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
-    styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
-    styles.add(IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null));
-    styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
+    final List<DiagnosticsNode> styles = <DiagnosticsNode>[
+      StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false),
+      IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null),
+      DoubleProperty('${prefix}size', fontSize, defaultValue: null),
+    ];
     String weightDescription;
     if (fontWeight != null) {
       weightDescription = 'w${fontWeight.index + 1}00';
@@ -597,7 +598,7 @@ class StrutStyle extends Diagnosticable {
     ));
     styles.add(EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
     styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
-    styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, defaultValue: null));
+    styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, defaultValue: null, ifTrue: '$prefix<strut height forced>', ifFalse: '$prefix<strut height normal>'));
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
     styles.forEach(properties.add);

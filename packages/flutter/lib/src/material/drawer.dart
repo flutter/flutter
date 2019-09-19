@@ -55,6 +55,59 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// drawer children are often constructed with [ListTile]s, often concluding
 /// with an [AboutListTile].
 ///
+/// The [AppBar] automatically displays an appropriate [IconButton] to show the
+/// [Drawer] when a [Drawer] is available in the [Scaffold]. The [Scaffold]
+/// automatically handles the edge-swipe gesture to show the drawer.
+///
+/// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/drawer.mp4}
+///
+/// {@tool sample}
+/// This example shows how to create a [Scaffold] that contains an [AppBar] and
+/// a [Drawer]. A user taps the "menu" icon in the [AppBar] to open the
+/// [Drawer]. The [Drawer] displays four items: A header and three menu items.
+/// The [Drawer] displays the four items using a [ListView], which allows the
+/// user to scroll through the items if need be.
+///
+/// ```dart
+/// Scaffold(
+///   appBar: AppBar(
+///     title: const Text('Drawer Demo'),
+///   ),
+///   drawer: Drawer(
+///     child: ListView(
+///       padding: EdgeInsets.zero,
+///       children: const <Widget>[
+///         DrawerHeader(
+///           decoration: BoxDecoration(
+///             color: Colors.blue,
+///           ),
+///           child: Text(
+///             'Drawer Header',
+///             style: TextStyle(
+///               color: Colors.white,
+///               fontSize: 24,
+///             ),
+///           ),
+///         ),
+///         ListTile(
+///           leading: Icon(Icons.message),
+///           title: Text('Messages'),
+///         ),
+///         ListTile(
+///           leading: Icon(Icons.account_circle),
+///           title: Text('Profile'),
+///         ),
+///         ListTile(
+///           leading: Icon(Icons.settings),
+///           title: Text('Settings'),
+///         ),
+///       ],
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// An open drawer can be closed by calling [Navigator.pop]. For example
 /// a drawer item might close the drawer when tapped:
 ///
@@ -68,10 +121,6 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 ///   },
 /// );
 /// ```
-///
-/// The [AppBar] automatically displays an appropriate [IconButton] to show the
-/// [Drawer] when a [Drawer] is available in the [Scaffold]. The [Scaffold]
-/// automatically handles the edge-swipe gesture to show the drawer.
 ///
 /// See also:
 ///

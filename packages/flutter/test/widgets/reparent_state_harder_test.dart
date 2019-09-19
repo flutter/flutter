@@ -29,17 +29,17 @@ class OrderSwitcherState extends State<OrderSwitcher> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[];
-    if (_aFirst) {
-      children.add(KeyedSubtree(child: widget.a));
-      children.add(widget.b);
-    } else {
-      children.add(KeyedSubtree(child: widget.b));
-      children.add(widget.a);
-    }
     return Stack(
       textDirection: TextDirection.ltr,
-      children: children,
+      children: _aFirst
+        ? <Widget>[
+            KeyedSubtree(child: widget.a),
+            widget.b,
+          ]
+        : <Widget>[
+            KeyedSubtree(child: widget.b),
+            widget.a
+          ],
     );
   }
 }

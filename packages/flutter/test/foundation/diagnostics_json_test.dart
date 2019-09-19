@@ -246,16 +246,13 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   final DiagnosticsTreeStyle style;
 
   @override
-  List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    for (TestTree child in this.children) {
-      children.add(child.toDiagnosticsNode(
+  List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
+    for (TestTree child in children)
+      child.toDiagnosticsNode(
         name: 'child ${child.name}',
         style: child.style,
-      ));
-    }
-    return children;
-  }
+      ),
+  ];
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

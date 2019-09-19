@@ -371,9 +371,9 @@ void main() {
 
   testWidgets('Dropdown screen edges', (WidgetTester tester) async {
     int value = 4;
-    final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
-    for (int i = 0; i < 20; ++i)
-      items.add(DropdownMenuItem<int>(value: i, child: Text('$i')));
+    final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[
+      for (int i = 0; i < 20; ++i) DropdownMenuItem<int>(value: i, child: Text('$i')),
+    ];
 
     void handleChanged(int newValue) {
       value = newValue;
@@ -1317,7 +1317,51 @@ void main() {
     expect(tester.widget<DecoratedBox>(decoratedBox).decoration, defaultDecoration);
   });
 
-    testWidgets('Dropdown form field with autovalidation test', (WidgetTester tester) async {
+  testWidgets('DropdownButton selectedItemBuilder builds custom buttons', (WidgetTester tester) async {
+    const List<String> items = <String>[
+      'One',
+      'Two',
+      'Three',
+    ];
+    String selectedItem = items[0];
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            home: Scaffold(
+              body: DropdownButton<String>(
+                value: selectedItem,
+                onChanged: (String string) => setState(() => selectedItem = string),
+                selectedItemBuilder: (BuildContext context) {
+                  int index = 0;
+                  return items.map((String string) {
+                    index += 1;
+                    return Text('$string as an Arabic numeral: $index');
+                  }).toList();
+                },
+                items: items.map((String string) {
+                  return DropdownMenuItem<String>(
+                    child: Text(string),
+                    value: string,
+                  );
+                }).toList(),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(find.text('One as an Arabic numeral: 1'), findsOneWidget);
+    await tester.tap(find.text('One as an Arabic numeral: 1'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Two'));
+    await tester.pumpAndSettle();
+    expect(find.text('Two as an Arabic numeral: 2'), findsOneWidget);
+  });
+
+  testWidgets('Dropdown form field with autovalidation test', (WidgetTester tester) async {
     String value = 'one';
     int _validateCalled = 0;
 

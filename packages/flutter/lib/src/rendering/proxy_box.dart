@@ -3456,15 +3456,12 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> gestures = <String>[];
-    if (onTap != null)
-      gestures.add('tap');
-    if (onLongPress != null)
-      gestures.add('long press');
-    if (onHorizontalDragUpdate != null)
-      gestures.add('horizontal scroll');
-    if (onVerticalDragUpdate != null)
-      gestures.add('vertical scroll');
+    final List<String> gestures = <String>[
+      if (onTap != null) 'tap',
+      if (onLongPress != null) 'long press',
+      if (onHorizontalDragUpdate != null) 'horizontal scroll',
+      if (onVerticalDragUpdate != null) 'vertical scroll',
+    ];
     if (gestures.isEmpty)
       gestures.add('<none>');
     properties.add(IterableProperty<String>('gestures', gestures));
@@ -3500,6 +3497,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool hidden,
     bool image,
     bool liveRegion,
+    int maxValueLength,
+    int currentValueLength,
     String label,
     String value,
     String increasedValue,
@@ -3547,6 +3546,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _scopesRoute = scopesRoute,
        _namesRoute = namesRoute,
        _liveRegion = liveRegion,
+       _maxValueLength = maxValueLength,
+       _currentValueLength = currentValueLength,
        _hidden = hidden,
        _image = image,
        _onDismiss = onDismiss,
@@ -3799,6 +3800,28 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_liveRegion == value)
       return;
     _liveRegion = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.maxValueLength] semantic to the given
+  /// value.
+  int get maxValueLength => _maxValueLength;
+  int _maxValueLength;
+  set maxValueLength(int value) {
+    if (_maxValueLength == value)
+      return;
+    _maxValueLength = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.currentValueLength] semantic to the
+  /// given value.
+  int get currentValueLength => _currentValueLength;
+  int _currentValueLength;
+  set currentValueLength(int value) {
+    if (_currentValueLength == value)
+      return;
+    _currentValueLength = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4373,6 +4396,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.namesRoute = namesRoute;
     if (liveRegion != null)
       config.liveRegion = liveRegion;
+    if (maxValueLength != null) {
+      config.maxValueLength = maxValueLength;
+    }
+    if (currentValueLength != null) {
+      config.currentValueLength = currentValueLength;
+    }
     if (textDirection != null)
       config.textDirection = textDirection;
     if (sortKey != null)

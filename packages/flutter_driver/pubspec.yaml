@@ -5,7 +5,7 @@ author: Flutter Authors <flutter-dev@googlegroups.com>
 
 environment:
   # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
   file: 5.0.10

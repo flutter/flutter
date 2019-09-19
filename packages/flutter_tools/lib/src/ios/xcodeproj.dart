@@ -18,6 +18,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -118,6 +119,31 @@ void _updateGeneratedEnvironmentVariablesScript({
   os.chmod(generatedModuleBuildPhaseScript, '755');
 }
 
+/// Build name parsed and validated from build info and manifest. Used for CFBundleShortVersionString.
+String parsedBuildName({
+  @required FlutterManifest manifest,
+  @required BuildInfo buildInfo,
+}) {
+  final String buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
+  return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse);
+}
+
+/// Build number parsed and validated from build info and manifest. Used for CFBundleVersion.
+String parsedBuildNumber({
+  @required FlutterManifest manifest,
+  @required BuildInfo buildInfo,
+}) {
+  String buildNumberToParse = buildInfo?.buildNumber ?? manifest.buildNumber;
+  final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse);
+  if (buildNumber != null && buildNumber.isNotEmpty) {
+    return buildNumber;
+  }
+  // Drop back to parsing build name if build number is not present. Build number is optional in the manifest, but
+  // FLUTTER_BUILD_NUMBER is required as the backing value for the required CFBundleVersion.
+  buildNumberToParse = buildInfo?.buildName ?? manifest.buildName;
+  return validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse);
+}
+
 /// List of lines of build settings. Example: 'FLUTTER_BUILD_DIR=build'
 List<String> _xcodeBuildSettingsLines({
   @required FlutterProject project,
@@ -158,20 +184,12 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('FLUTTER_FRAMEWORK_DIR=$frameworkDir');
   }
 
-  final String buildNameToParse = buildInfo?.buildName ?? project.manifest.buildName;
-  final String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse);
-  if (buildName != null) {
-    xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');
-  }
 
-  String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildInfo?.buildNumber ?? project.manifest.buildNumber);
-  // Drop back to parsing build name if build number is not present. Build number is optional in the manifest, but
-  // FLUTTER_BUILD_NUMBER is required as the backing value for the required CFBundleVersion.
-  buildNumber ??= validatedBuildNumberForPlatform(TargetPlatform.ios, buildNameToParse);
+  final String buildName = parsedBuildName(manifest: project.manifest, buildInfo: buildInfo) ?? '1.0.0';
+  xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');
 
-  if (buildNumber != null) {
-    xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
-  }
+  final String buildNumber = parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
+  xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
@@ -258,32 +276,9 @@ class XcodeProjectInterpreter {
     return _minorVersion;
   }
 
-  /// Synchronously retrieve xcode build settings. Prefer using the async
-  /// version below.
-  Map<String, String> getBuildSettings(String projectPath, String target) {
-    try {
-      final String out = processUtils.runSync(
-        <String>[
-          _executable,
-          '-project',
-          fs.path.absolute(projectPath),
-          '-target',
-          target,
-          '-showBuildSettings',
-        ],
-        throwOnError: true,
-        workingDirectory: projectPath,
-      ).stdout.trim();
-      return parseXcodeBuildSettings(out);
-    } on ProcessException catch (error) {
-      printTrace('Unexpected failure to get the build settings: $error.');
-      return const <String, String>{};
-    }
-  }
-
   /// Asynchronously retrieve xcode build settings. This one is preferred for
   /// new call-sites.
-  Future<Map<String, String>> getBuildSettingsAsync(
+  Future<Map<String, String>> getBuildSettings(
       String projectPath, String target, {
     Duration timeout = const Duration(minutes: 1),
   }) async {

@@ -79,7 +79,6 @@ class MacOSDevice extends Device {
     bool prebuiltApplication = false,
     bool ipv6 = false,
   }) async {
-    // Stop any running applications with the same executable.
     if (!prebuiltApplication) {
       Cache.releaseLockEarly();
       await buildMacOS(
@@ -96,9 +95,7 @@ class MacOSDevice extends Device {
       return LaunchResult.failed();
     }
 
-    // Make sure to call stop app after we've built.
     _lastBuiltMode = debuggingOptions?.buildInfo?.mode;
-    await stopApp(package);
     final Process process = await processManager.start(<String>[
       executable
     ]);

@@ -249,15 +249,15 @@ abstract class Emulator {
     }
 
     // Extract emulators information
-    final List<List<String>> table = <List<String>>[];
-    for (Emulator emulator in emulators) {
-      table.add(<String>[
-        emulator.id ?? '',
-        emulator.name ?? '',
-        emulator.manufacturer ?? '',
-        emulator.platformType?.toString() ?? '',
-      ]);
-    }
+    final List<List<String>> table = <List<String>>[
+      for (Emulator emulator in emulators)
+        <String>[
+          emulator.id ?? '',
+          emulator.name ?? '',
+          emulator.manufacturer ?? '',
+          emulator.platformType?.toString() ?? '',
+        ],
+    ];
 
     // Calculate column widths
     final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);

@@ -556,9 +556,6 @@ class _UnderlinesState extends State<Underlines> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> lines = <Widget>[_wrap(null)];
-    for (TextDecorationStyle style in TextDecorationStyle.values)
-      lines.add(_wrap(style));
     final Size size = MediaQuery.of(context).size;
     return Container(
       color: Colors.black,
@@ -572,7 +569,10 @@ class _UnderlinesState extends State<Underlines> {
                   vertical: size.height * 0.1,
                 ),
                 child: ListBody(
-                  children: lines,
+                  children: <Widget>[
+                    _wrap(null),
+                    for (TextDecorationStyle style in TextDecorationStyle.values) _wrap(style),
+                  ],
                 ),
               ),
             ),
@@ -647,9 +647,6 @@ class _FallbackState extends State<Fallback> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> lines = <Widget>[];
-    for (String font in androidFonts)
-      lines.add(Text(multiScript, style: style.copyWith(fontFamily: font, fontSize: math.exp(_fontSize))));
     final Size size = MediaQuery.of(context).size;
     return Container(
       color: Colors.black,
@@ -666,7 +663,16 @@ class _FallbackState extends State<Fallback> {
                   ),
                   child: IntrinsicWidth(
                     child: ListBody(
-                      children: lines,
+                      children: <Widget>[
+                        for (String font in androidFonts)
+                          Text(
+                            multiScript,
+                            style: style.copyWith(
+                              fontFamily: font,
+                              fontSize: math.exp(_fontSize),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),

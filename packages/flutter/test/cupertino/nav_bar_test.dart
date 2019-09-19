@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 int count = 0;
@@ -50,16 +51,35 @@ void main() {
     expect(tester.getCenter(find.text('Page 2')).dx, 400.0);
   });
 
-  testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
+  testWidgets('Opaque background does not add blur effects, non-opaque background adds blur effects', (WidgetTester tester) async {
+    const CupertinoDynamicColor background = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFFE5E5E5),
+      darkColor: Color(0xF3E5E5E5),
+    );
+
     await tester.pumpWidget(
       const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.light),
         home: CupertinoNavigationBar(
           middle: Text('Title'),
-          backgroundColor: Color(0xFFE5E5E5),
+          backgroundColor: background,
         ),
       ),
     );
     expect(find.byType(BackdropFilter), findsNothing);
+    expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.color));
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoNavigationBar(
+          middle: Text('Title'),
+          backgroundColor: background,
+        ),
+      ),
+    );
+    expect(find.byType(BackdropFilter), findsOneWidget);
+    expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.darkColor));
   });
 
   testWidgets('Non-opaque background adds blur effects', (WidgetTester tester) async {
@@ -801,7 +821,7 @@ void main() {
         find.byType(RepaintBoundary).last,
         matchesGoldenFile(
           'nav_bar_test.standard_title.png',
-          version: 1,
+          version: 2,
         ),
       );
     },
@@ -835,7 +855,7 @@ void main() {
         find.byType(RepaintBoundary).last,
         matchesGoldenFile(
           'nav_bar_test.large_title.png',
-          version: 1,
+          version: 2,
         ),
       );
     },
