@@ -1200,16 +1200,20 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
   group('buildPluginsAsAar', () {
     FileSystem fs;
     MockProcessManager mockProcessManager;
+    MockAndroidSdk mockAndroidSdk;
 
     setUp(() {
       fs = MemoryFileSystem();
-      mockProcessManager = MockProcessManager();
 
+      mockProcessManager = MockProcessManager();
       when(mockProcessManager.run(
         any,
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
+
+      mockAndroidSdk = MockAndroidSdk();
+      when(mockAndroidSdk.directory).thenReturn('irrelevant');
     });
 
     testUsingContext('calls gradle', () async {
@@ -1290,7 +1294,7 @@ plugin2=${plugin2.path}
       ).called(1);
 
     }, overrides: <Type, Generator>{
-      AndroidSdk: () => MockAndroidSdk(),
+      AndroidSdk: () => mockAndroidSdk,
       FileSystem: () => fs,
       GradleUtils: () => FakeGradleUtils(),
       ProcessManager: () => mockProcessManager,

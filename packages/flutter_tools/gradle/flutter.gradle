@@ -288,9 +288,6 @@ class FlutterPlugin implements Plugin<Project> {
 
     // Adds the plugin AAR dependency to the app project.
     private void configurePluginAar(String pluginName, String pluginPath, Project project) {
-        if (useLocalEngine()) {
-            throw new GradleException("Local engine isn't supported when building the plugins as AAR")
-        }
         // Extract the group id from the plugin's build.gradle.
         // This is `group '<group-id>'`
         File pluginBuildFile = project.file(Paths.get(pluginPath, "android", "build.gradle"));

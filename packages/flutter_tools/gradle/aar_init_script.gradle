@@ -40,26 +40,32 @@ void configureProject(Project project, File outputDir) {
             }
         }
     }
-    // Check if the project uses the Flutter plugin (defined in flutter.gradle).
-    Boolean usesFlutterPlugin = project.plugins.find { it.class.name == "FlutterPlugin" } != null
+    if (!project.property("is-plugin").toBoolean()) {
+        return
+    }
+    if (project.hasProperty('localEngineOut')) {
+        // TODO(egarciad): Support local engine.
+        // This most likely requires refactoring `flutter.gradle`, so the logic can be reused.
+        throw new GradleException(
+            "Local engine isn't supported when building the plugins as AAR. " +
+            "See: https://github.com/flutter/flutter/issues/40866")
+    }
 
-    if (!usesFlutterPlugin) {
-        // This is a Flutter plugin project.
-        project.repositories {
-            maven {
-                url "http://download.flutter.io"
-            }
+    // This is a Flutter plugin project. Plugin projects don't apply the Flutter Gradle plugin,
+    // as a result, add the dependency on the embedding.
+    project.repositories {
+        maven {
+            url "http://download.flutter.io"
         }
-        String engineVersion = Paths.get(getFlutterRoot(project), "bin", "internal", "engine.version")
-            .toFile().text.trim()
-        project.dependencies {
-            // Add the embedding dependency.
-            // NOTE: There's no support for local engine.
-            compileOnly ("io.flutter:flutter_embedding_release:1.0.0-$engineVersion") {
-                // We only need to expose io.flutter.plugin.*
-                // No need for the embedding transitive dependencies.
-                transitive = false
-            }
+    }
+    String engineVersion = Paths.get(getFlutterRoot(project), "bin", "internal", "engine.version")
+        .toFile().text.trim()
+    project.dependencies {
+        // Add the embedding dependency.
+        compileOnly ("io.flutter:flutter_embedding_release:1.0.0-$engineVersion") {
+            // We only need to expose io.flutter.plugin.*
+            // No need for the embedding transitive dependencies.
+            transitive = false
         }
     }
 }
