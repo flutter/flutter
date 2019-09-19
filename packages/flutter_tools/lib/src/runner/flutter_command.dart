@@ -319,7 +319,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   BuildMode getBuildMode() {
-    final bool debugResult = _excludeDebug ? false : argResults['debug']
+    final bool debugResult = _excludeDebug ? false : argResults['debug'];
     final List<bool> modeFlags = <bool>[debugResult, argResults['profile'], argResults['release']];
     if (modeFlags.where((bool flag) => flag).length > 1) {
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
