@@ -41,12 +41,16 @@ class _TextSelectionToolbar extends StatefulWidget {
   final VoidCallback handleSelectAll;
 
   @override
-  __TextSelectionToolbarState createState() => __TextSelectionToolbarState();
+  _TextSelectionToolbarState createState() => _TextSelectionToolbarState();
 }
 
-class __TextSelectionToolbarState extends State<_TextSelectionToolbar> {
-  // effective when items > 3
-  bool flipToMenu = false;
+class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
+  // TODO(imlegend19): Add animations for opening the submenu and reduce the length of the toolbar, https://github.com/flutter/flutter/issues/35826
+
+  // Any menu items that overflow the screen are placed into a
+  // submenu. If this happens, this bool indicates whether or not
+  // the menu is open.
+  bool _submenuIsOpen = false;
 
   @override
   Widget build(BuildContext context) {
@@ -56,12 +60,14 @@ class __TextSelectionToolbarState extends State<_TextSelectionToolbar> {
 
     if (widget.handleCut != null)
       items.add(FlatButton(
-          child: Text(localizations.cutButtonLabel),
-          onPressed: widget.handleCut));
+        child: Text(localizations.cutButtonLabel),
+        onPressed: widget.handleCut,
+      ));
     if (widget.handleCopy != null)
       items.add(FlatButton(
-          child: Text(localizations.copyButtonLabel),
-          onPressed: widget.handleCopy));
+        child: Text(localizations.copyButtonLabel),
+        onPressed: widget.handleCopy,
+      ));
     if (widget.handlePaste != null)
       items.add(FlatButton(
         child: Text(localizations.pasteButtonLabel),
@@ -69,8 +75,9 @@ class __TextSelectionToolbarState extends State<_TextSelectionToolbar> {
       ));
     if (widget.handleSelectAll != null)
       items.add(FlatButton(
-          child: Text(localizations.selectAllButtonLabel),
-          onPressed: widget.handleSelectAll));
+        child: Text(localizations.selectAllButtonLabel),
+        onPressed: widget.handleSelectAll,
+      ));
 
     // If there is no option available, build an empty widget.
     if (items.isEmpty) {
@@ -84,17 +91,18 @@ class __TextSelectionToolbarState extends State<_TextSelectionToolbar> {
         items[0],
         items[1],
         items[2],
-        IconButton(
-          icon: const Icon(Icons.more_vert),
+        FlatButton.icon(
           onPressed: () {
             setState(() {
-              flipToMenu = true;
+              _submenuIsOpen = true;
             });
           },
-        ),
+          icon: const Icon(Icons.more_vert),
+          label: Text(''),
+        )
       ];
 
-      if (flipToMenu) {
+      if (_submenuIsOpen) {
         return _buildSelectionMenu(localizations.selectAllButtonLabel);
       } else {
         return _buildSelectionToolbar(displayItems);
@@ -118,7 +126,7 @@ class __TextSelectionToolbarState extends State<_TextSelectionToolbar> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
               setState(() {
-                flipToMenu = false;
+                _submenuIsOpen = false;
               });
             },
           ),
@@ -146,7 +154,10 @@ class __TextSelectionToolbarState extends State<_TextSelectionToolbar> {
 /// screen.
 class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
   _TextSelectionToolbarLayout(
-      this.screenSize, this.globalEditableRegion, this.position);
+    this.screenSize,
+    this.globalEditableRegion,
+    this.position,
+  );
 
   /// The size of the screen at the time that the toolbar was last laid out.
   final Size screenSize;
@@ -276,7 +287,8 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
       height: _kHandleSize,
       child: CustomPaint(
         painter: _TextSelectionHandlePainter(
-            color: Theme.of(context).textSelectionHandleColor),
+          color: Theme.of(context).textSelectionHandleColor,
+        ),
       ),
     );
 
