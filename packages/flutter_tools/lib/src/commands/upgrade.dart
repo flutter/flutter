@@ -131,7 +131,7 @@ class UpgradeCommandRunner {
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
-      environment: platform.environment,
+      environment: Map<String, String>.of(platform.environment),
     );
     if (code != 0) {
       throwToolExit(null, exitCode: code);
@@ -250,7 +250,7 @@ class UpgradeCommandRunner {
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
-      environment: platform.environment,
+      environment: Map<String, String>.of(platform.environment),
     );
     if (code != 0) {
       throwToolExit(null, exitCode: code);

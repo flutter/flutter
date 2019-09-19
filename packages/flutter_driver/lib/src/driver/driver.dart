@@ -1199,22 +1199,30 @@ class CommonFinders {
   ///
   /// If the `matchRoot` argument is true then the widget specified by `of` will
   /// be considered for a match. The argument defaults to false.
+  ///
+  /// If `firstMatchOnly` is true then only the first ancestor matching
+  /// `matching` will be returned. Defaults to false.
   SerializableFinder ancestor({
     @required SerializableFinder of,
     @required SerializableFinder matching,
     bool matchRoot = false,
-  }) => Ancestor(of: of, matching: matching, matchRoot: matchRoot);
+    bool firstMatchOnly = false,
+  }) => Ancestor(of: of, matching: matching, matchRoot: matchRoot, firstMatchOnly: firstMatchOnly);
 
   /// Finds the widget that is an descendant of the `of` parameter and that
   /// matches the `matching` parameter.
   ///
   /// If the `matchRoot` argument is true then the widget specified by `of` will
   /// be considered for a match. The argument defaults to false.
+  ///
+  /// If `firstMatchOnly` is true then only the first descendant matching
+  /// `matching` will be returned. Defaults to false.
   SerializableFinder descendant({
     @required SerializableFinder of,
     @required SerializableFinder matching,
     bool matchRoot = false,
-  }) => Descendant(of: of, matching: matching, matchRoot: matchRoot);
+    bool firstMatchOnly = false,
+  }) => Descendant(of: of, matching: matching, matchRoot: matchRoot, firstMatchOnly: firstMatchOnly);
 }
 
 /// An immutable 2D floating-point offset used by Flutter Driver.

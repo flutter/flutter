@@ -2,10 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+class MockOnEndFunction implements Function {
+  int called = 0;
+
+  void call() {
+    called++;
+  }
+}
+
+const Duration animationDuration = Duration(milliseconds:1000);
+const Duration additionalDelay = Duration(milliseconds:1);
+
 void main() {
+  MockOnEndFunction mockOnEndFunction;
+  const Key switchKey = Key('switchKey');
+
+  setUp(() {
+    mockOnEndFunction = MockOnEndFunction();
+  });
+
   testWidgets('BoxConstraintsTween control test', (WidgetTester tester) async {
     final BoxConstraintsTween tween = BoxConstraintsTween(
       begin: BoxConstraints.tight(const Size(20.0, 50.0)),
@@ -47,4 +66,355 @@ void main() {
     final Matrix4 result = tween.lerp(0.25);
     expect(result, equals(Matrix4.translationValues(11.0, 21.0, 31.0)));
   });
+
+  testWidgets('AnimatedContainer onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedContainerWidgetState(),)
+    ));
+
+    final Finder widgetFinder = find.byKey(switchKey);
+
+    await tester.tap(widgetFinder);
+
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
+  });
+
+  testWidgets('AnimatedPadding onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedPaddingWidgetState(),)
+    ));
+
+    final Finder widgetFinder = find.byKey(switchKey);
+
+    await tester.tap(widgetFinder);
+
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
+  });
+
+  testWidgets('AnimatedAlign onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedAlignWidgetState(),)
+    ));
+
+    final Finder widgetFinder = find.byKey(switchKey);
+
+    await tester.tap(widgetFinder);
+
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
+  });
+
+  testWidgets('AnimatedPositioned onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedPositionedWidgetState(),)
+    ));
+
+    final Finder widgetFinder = find.byKey(switchKey);
+
+    await tester.tap(widgetFinder);
+
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
+  });
+
+  testWidgets('AnimatedPositionedDirectional onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedPositionedDirectionalWidgetState(),)
+    ));
+
+    final Finder widgetFinder = find.byKey(switchKey);
+
+    await tester.tap(widgetFinder);
+
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
+  });
+
+  testWidgets('AnimatedOpacity onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedOpacityWidgetState(),)
+    ));
+
+    final Finder widgetFinder = find.byKey(switchKey);
+
+    await tester.tap(widgetFinder);
+
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
+  });
+
+  testWidgets('AnimatedDefaultTextStyle onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedDefaultTextStyleWidgetState(),)
+    ));
+
+    final Finder widgetFinder = find.byKey(switchKey);
+
+    await tester.tap(widgetFinder);
+
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
+  });
+
+  testWidgets('AnimatedPhysicalModel onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedPhysicalModelWidgetState(),)
+    ));
+
+    final Finder widgetFinder = find.byKey(switchKey);
+
+    await tester.tap(widgetFinder);
+
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
+  });
+
+  testWidgets('TweenAnimationBuilder onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestTweenAnimationBuilderWidgetState(),)
+    ));
+
+    final Finder widgetFinder = find.byKey(switchKey);
+
+    await tester.tap(widgetFinder);
+
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
+  });
+
+  testWidgets('AnimatedTheme onEnd callback test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+        child: TestAnimatedWidget(callback: mockOnEndFunction, switchKey: switchKey, state: _TestAnimatedThemeWidgetState(),)
+    ));
+
+    final Finder widgetFinder = find.byKey(switchKey);
+
+    await tester.tap(widgetFinder);
+
+    await tester.pump();
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(animationDuration);
+    expect(mockOnEndFunction.called, 0);
+    await tester.pump(additionalDelay);
+    expect(mockOnEndFunction.called, 1);
+  });
+}
+
+Widget wrap({Widget child}) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Material(
+      child: Center(child: child),
+    ),
+  );
+}
+
+class TestAnimatedWidget extends StatefulWidget {
+  const TestAnimatedWidget({this.callback, this.switchKey, this.state});
+  @required
+  final VoidCallback callback;
+  @required
+  final Key switchKey;
+  @required
+  final State<StatefulWidget> state;
+
+  @override
+  State<StatefulWidget> createState() => state;
+}
+
+abstract class _TestAnimatedWidgetState extends State<TestAnimatedWidget> {
+  bool toggle = false;
+  final Widget child = const Placeholder();
+  final Duration duration = animationDuration;
+
+  void onChanged(bool v) {
+    setState(() {
+      toggle = v;
+    });
+  }
+
+  Widget getAnimatedWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget animatedWidget = getAnimatedWidget();
+
+    return Stack(
+      children: <Widget>[
+        animatedWidget,
+        Switch(key: widget.switchKey, value: toggle, onChanged: onChanged),
+      ],
+    );
+  }
+}
+
+
+class _TestAnimatedContainerWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return AnimatedContainer(
+      child: child,
+      duration: duration,
+      onEnd: widget.callback,
+      width: toggle ? 10 : 20,
+    );
+  }
+}
+
+class _TestAnimatedPaddingWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return AnimatedPadding(
+      child: child,
+      duration: duration,
+      onEnd: widget.callback,
+      padding:
+      toggle ? const EdgeInsets.all(8.0) : const EdgeInsets.all(16.0),
+    );
+  }
+}
+
+class _TestAnimatedAlignWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return AnimatedAlign(
+      child: child,
+      duration: duration,
+      onEnd: widget.callback,
+      alignment: toggle ? Alignment.topLeft : Alignment.bottomRight,
+    );
+  }
+}
+
+class _TestAnimatedPositionedWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return AnimatedPositioned(
+      child: child,
+      duration: duration,
+      onEnd: widget.callback,
+      left: toggle ? 10 : 20,
+    );
+  }
+}
+
+class _TestAnimatedPositionedDirectionalWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return AnimatedPositionedDirectional(
+      child: child,
+      duration: duration,
+      onEnd: widget.callback,
+      start: toggle ? 10 : 20,
+    );
+  }
+}
+
+class _TestAnimatedOpacityWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return AnimatedOpacity(
+      child: child,
+      duration: duration,
+      onEnd: widget.callback,
+      opacity: toggle ? 0.1 : 0.9,
+    );
+  }
+}
+
+class _TestAnimatedDefaultTextStyleWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return AnimatedDefaultTextStyle(
+        child: child,
+        duration: duration,
+        onEnd: widget.callback,
+        style: toggle
+            ? const TextStyle(fontStyle: FontStyle.italic)
+            : const TextStyle(fontStyle: FontStyle.normal));
+  }
+}
+
+class _TestAnimatedPhysicalModelWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return AnimatedPhysicalModel(
+      child: child,
+      duration: duration,
+      onEnd: widget.callback,
+      color: toggle ? Colors.red : Colors.green,
+      elevation: 0,
+      shadowColor: Colors.blue,
+      shape: BoxShape.rectangle,
+    );
+  }
+}
+
+class _TestTweenAnimationBuilderWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return TweenAnimationBuilder<double>(
+        child: child,
+        tween: Tween<double>(begin: 1, end: 2),
+        duration: duration,
+        onEnd: widget.callback,
+        builder: (BuildContext context, double size, Widget child) {
+          return Container(
+            child: child,
+            width: size,
+            height: size,
+          );
+        }
+    );
+  }
+}
+
+class _TestAnimatedThemeWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return AnimatedTheme(
+      child: child,
+      data: toggle ? ThemeData.dark() : ThemeData.light(),
+      duration: duration,
+      onEnd: widget.callback,
+    );
+  }
 }

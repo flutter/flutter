@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'bottom_tab_bar.dart';
 import 'theme.dart';
@@ -258,12 +259,12 @@ class CupertinoTabScaffold extends StatefulWidget {
 
   /// An [IndexedWidgetBuilder] that's called when tabs become active.
   ///
-  /// The widgets built by [IndexedWidgetBuilder] is typically a [CupertinoTabView]
-  /// in order to achieve the parallel hierarchies information architecture seen
-  /// on iOS apps with tab bars.
+  /// The widgets built by [IndexedWidgetBuilder] are typically a
+  /// [CupertinoTabView] in order to achieve the parallel hierarchical
+  /// information architecture seen on iOS apps with tab bars.
   ///
-  /// When the tab becomes inactive, its content is still cached in the widget
-  /// tree [Offstage] and its animations disabled.
+  /// When the tab becomes inactive, its content is cached in the widget tree
+  /// [Offstage] and its animations disabled.
   ///
   /// Content can slide under the [tabBar] when they're translucent.
   /// In that case, the child's [BuildContext]'s [MediaQuery] will have a
@@ -351,7 +352,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
     Widget content = _TabSwitchingView(
       currentTabIndex: _controller.index,
-      tabNumber: widget.tabBar.items.length,
+      tabCount: widget.tabBar.items.length,
       tabBuilder: widget.tabBuilder,
     );
     EdgeInsets contentPadding = EdgeInsets.zero;
@@ -444,14 +445,14 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 class _TabSwitchingView extends StatefulWidget {
   const _TabSwitchingView({
     @required this.currentTabIndex,
-    @required this.tabNumber,
+    @required this.tabCount,
     @required this.tabBuilder,
   }) : assert(currentTabIndex != null),
-       assert(tabNumber != null && tabNumber > 0),
+       assert(tabCount != null && tabCount > 0),
        assert(tabBuilder != null);
 
   final int currentTabIndex;
-  final int tabNumber;
+  final int tabCount;
   final IndexedWidgetBuilder tabBuilder;
 
   @override
@@ -459,13 +460,19 @@ class _TabSwitchingView extends StatefulWidget {
 }
 
 class _TabSwitchingViewState extends State<_TabSwitchingView> {
-  List<bool> shouldBuildTab;
-  List<FocusScopeNode> tabFocusNodes;
+  final List<bool> shouldBuildTab = <bool>[];
+  final List<FocusScopeNode> tabFocusNodes = <FocusScopeNode>[];
+
+  // When focus nodes are no longer needed, we need to dispose of them, but we
+  // can't be sure that nothing else is listening to them until this widget is
+  // disposed of, so when they are no longer needed, we move them to this list,
+  // and dispose of them when we dispose of this widget.
+  final List<FocusScopeNode> discardedNodes = <FocusScopeNode>[];
 
   @override
   void initState() {
     super.initState();
-    shouldBuildTab = List<bool>.filled(widget.tabNumber, false, growable: true);
+    shouldBuildTab.addAll(List<bool>.filled(widget.tabCount, false));
   }
 
   @override
@@ -483,21 +490,30 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
     // - new tabs are appended to the tab list, or
     // - some trailing tabs are removed.
     // If the above assumption is not true, some tabs may lose their state.
-    final int lengthDiff = widget.tabNumber - shouldBuildTab.length;
+    final int lengthDiff = widget.tabCount - shouldBuildTab.length;
     if (lengthDiff > 0) {
       shouldBuildTab.addAll(List<bool>.filled(lengthDiff, false));
     } else if (lengthDiff < 0) {
-      shouldBuildTab.removeRange(widget.tabNumber, shouldBuildTab.length);
+      shouldBuildTab.removeRange(widget.tabCount, shouldBuildTab.length);
     }
     _focusActiveTab();
   }
 
+  // Will focus the active tab if the FocusScope above it has focus already.  If
+  // not, then it will just mark it as the preferred focus for that scope.
   void _focusActiveTab() {
-    if (tabFocusNodes?.length != widget.tabNumber) {
-      tabFocusNodes = List<FocusScopeNode>.generate(
-        widget.tabNumber,
-        (int index) => FocusScopeNode(debugLabel: 'Tab Focus Scope $index'),
-      );
+    if (tabFocusNodes.length != widget.tabCount) {
+      if (tabFocusNodes.length > widget.tabCount) {
+        discardedNodes.addAll(tabFocusNodes.sublist(widget.tabCount));
+        tabFocusNodes.removeRange(widget.tabCount, tabFocusNodes.length);
+      } else {
+        tabFocusNodes.addAll(
+          List<FocusScopeNode>.generate(
+            widget.tabCount - tabFocusNodes.length,
+              (int index) => FocusScopeNode(debugLabel: '${describeIdentity(widget)} Tab ${index + tabFocusNodes.length}'),
+          ),
+        );
+      }
     }
     FocusScope.of(context).setFirstFocus(tabFocusNodes[widget.currentTabIndex]);
   }
@@ -507,6 +523,9 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
     for (FocusScopeNode focusScopeNode in tabFocusNodes) {
       focusScopeNode.dispose();
     }
+    for (FocusScopeNode focusScopeNode in discardedNodes) {
+      focusScopeNode.dispose();
+    }
     super.dispose();
   }
 
@@ -514,7 +533,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
-      children: List<Widget>.generate(widget.tabNumber, (int index) {
+      children: List<Widget>.generate(widget.tabCount, (int index) {
         final bool active = index == widget.currentTabIndex;
         shouldBuildTab[index] = active || shouldBuildTab[index];
 
@@ -524,9 +543,9 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
             enabled: active,
             child: FocusScope(
               node: tabFocusNodes[index],
-              child: shouldBuildTab[index]
-                ? widget.tabBuilder(context, index)
-                : Container(),
+              child: Builder(builder: (BuildContext context) {
+                return shouldBuildTab[index] ? widget.tabBuilder(context, index) : Container();
+              }),
             ),
           ),
         );

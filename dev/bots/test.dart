@@ -1021,6 +1021,7 @@ Future<void> _androidGradleTests(String subShard) async {
     await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
     await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
     await _runDevicelabTest('gradle_r8_test', env: env);
+    await _runDevicelabTest('gradle_non_android_plugin_test', env: env);
   }
   if (subShard == 'gradle2') {
     await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
