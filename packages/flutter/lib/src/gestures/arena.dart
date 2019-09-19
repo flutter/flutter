@@ -33,7 +33,7 @@ abstract class GestureArenaMember {
   void rejectGesture(int pointer);
 }
 
-/// An interface to information to an arena.
+/// An interface to pass information to an arena.
 ///
 /// A given [GestureArenaMember] can have multiple entries in multiple arenas
 /// with different pointer ids.

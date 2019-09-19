@@ -57,7 +57,7 @@ class OutlineButton extends MaterialButton {
   /// Create an outline button.
   ///
   /// The [highlightElevation] argument must be null or a positive value
-  /// and the [clipBehavior] argument must not be null.
+  /// and the [autofocus] and [clipBehavior] arguments must not be null.
   const OutlineButton({
     Key key,
     @required VoidCallback onPressed,
@@ -75,10 +75,13 @@ class OutlineButton extends MaterialButton {
     this.highlightedBorderColor,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
-    Clip clipBehavior,
+    Clip clipBehavior = Clip.none,
     FocusNode focusNode,
+    bool autofocus = false,
     Widget child,
   }) : assert(highlightElevation == null || highlightElevation >= 0.0),
+       assert(clipBehavior != null),
+       assert(autofocus != null),
        super(
          key: key,
          onPressed: onPressed,
@@ -95,6 +98,7 @@ class OutlineButton extends MaterialButton {
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
+         autofocus: autofocus,
          child: child,
        );
 
@@ -105,7 +109,7 @@ class OutlineButton extends MaterialButton {
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
   /// The [highlightElevation] argument must be null or a positive value. The
-  /// [icon], [label], and [clipBehavior] arguments must not be null.
+  /// [icon], [label], [autofocus], and [clipBehavior] arguments must not be null.
   factory OutlineButton.icon({
     Key key,
     @required VoidCallback onPressed,
@@ -125,6 +129,7 @@ class OutlineButton extends MaterialButton {
     ShapeBorder shape,
     Clip clipBehavior,
     FocusNode focusNode,
+    bool autofocus,
     @required Widget icon,
     @required Widget label,
   }) = _OutlineButtonWithIcon;
@@ -216,11 +221,14 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
     BorderSide borderSide,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
-    Clip clipBehavior,
+    Clip clipBehavior = Clip.none,
     FocusNode focusNode,
+    bool autofocus = false,
     @required Widget icon,
     @required Widget label,
   }) : assert(highlightElevation == null || highlightElevation >= 0.0),
+       assert(clipBehavior != null),
+       assert(autofocus != null),
        assert(icon != null),
        assert(label != null),
        super(
@@ -242,6 +250,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
+         autofocus: autofocus,
          child: Row(
            mainAxisSize: MainAxisSize.min,
            children: <Widget>[
@@ -272,11 +281,14 @@ class _OutlineButton extends StatefulWidget {
     @required this.highlightedBorderColor,
     this.padding,
     this.shape,
-    this.clipBehavior,
+    this.clipBehavior = Clip.none,
     this.focusNode,
+    this.autofocus = false,
     this.child,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
        assert(highlightedBorderColor != null),
+       assert(clipBehavior != null),
+       assert(autofocus != null),
        super(key: key);
 
   final VoidCallback onPressed;
@@ -297,6 +309,7 @@ class _OutlineButton extends StatefulWidget {
   final ShapeBorder shape;
   final Clip clipBehavior;
   final FocusNode focusNode;
+  final bool autofocus;
   final Widget child;
 
   bool get enabled => onPressed != null;

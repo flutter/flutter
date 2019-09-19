@@ -19,6 +19,9 @@ const double _kHandleSize = 22.0;
 // viewport.
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 44.0;
+// Padding when positioning toolbar below selection.
+const double _kToolbarContentDistanceBelow = 16.0;
+const double _kToolbarContentDistance = 8.0;
 
 /// Manages a copy/paste text selection toolbar.
 class _TextSelectionToolbar extends StatelessWidget {
@@ -37,17 +40,13 @@ class _TextSelectionToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> items = <Widget>[];
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-
-    if (handleCut != null)
-      items.add(FlatButton(child: Text(localizations.cutButtonLabel), onPressed: handleCut));
-    if (handleCopy != null)
-      items.add(FlatButton(child: Text(localizations.copyButtonLabel), onPressed: handleCopy));
-    if (handlePaste != null)
-      items.add(FlatButton(child: Text(localizations.pasteButtonLabel), onPressed: handlePaste,));
-    if (handleSelectAll != null)
-      items.add(FlatButton(child: Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll));
+    final List<Widget> items = <Widget>[
+      if (handleCut != null) FlatButton(child: Text(localizations.cutButtonLabel), onPressed: handleCut),
+      if (handleCopy != null) FlatButton(child: Text(localizations.copyButtonLabel), onPressed: handleCopy),
+      if (handlePaste != null) FlatButton(child: Text(localizations.pasteButtonLabel), onPressed: handlePaste),
+      if (handleSelectAll != null) FlatButton(child: Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll),
+    ];
 
     // If there is no option available, build an empty widget.
     if (items.isEmpty) {
@@ -152,18 +151,16 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     // The toolbar should appear below the TextField
     // when there is not enough space above the TextField to show it.
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint = (endpoints.length > 1)
-        ? endpoints[1]
-        : null;
-    final double x = (endTextSelectionPoint == null)
-        ? startTextSelectionPoint.point.dx
-        : (startTextSelectionPoint.point.dx + endTextSelectionPoint.point.dx) / 2.0;
-    final double availableHeight
-        = globalEditableRegion.top - MediaQuery.of(context).padding.top - _kToolbarScreenPadding;
-    final double y = (availableHeight < _kToolbarHeight)
-        ? startTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight + _kToolbarScreenPadding
-        : startTextSelectionPoint.point.dy - globalEditableRegion.height;
-    final Offset preciseMidpoint = Offset(x, y);
+    final double toolbarHeightNeeded = MediaQuery.of(context).padding.top
+      + _kToolbarScreenPadding
+      + _kToolbarHeight
+      + _kToolbarContentDistance;
+    final double availableHeight = globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
+    final bool fitsAbove = toolbarHeightNeeded <= availableHeight;
+    final double y = fitsAbove
+        ? startTextSelectionPoint.point.dy - _kToolbarContentDistance - textLineHeight
+        : startTextSelectionPoint.point.dy + _kToolbarHeight + _kToolbarContentDistanceBelow;
+    final Offset preciseMidpoint = Offset(position.dx, y);
 
     return ConstrainedBox(
       constraints: BoxConstraints.tight(globalEditableRegion.size),
@@ -237,8 +234,9 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     // Android allows SelectAll when selection is not collapsed, unless
     // everything has already been selected.
     final TextEditingValue value = delegate.textEditingValue;
-    return value.text.isNotEmpty &&
-      !(value.selection.start == 0 && value.selection.end == value.text.length);
+    return delegate.selectAllEnabled &&
+           value.text.isNotEmpty &&
+           !(value.selection.start == 0 && value.selection.end == value.text.length);
   }
 }
 

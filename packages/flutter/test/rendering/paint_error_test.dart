@@ -16,17 +16,11 @@ void main() {
   // compatible with existing tests in object_test.dart.
   test('reentrant paint error', () {
     FlutterErrorDetails errorDetails;
-    final FlutterExceptionHandler oldHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
-      errorDetails = details;
-    };
     final RenderBox root = TestReentrantPaintingErrorRenderBox();
-    try {
-      layout(root);
-      pumpFrame(phase: EnginePhase.paint);
-    } finally {
-      FlutterError.onError = oldHandler;
-    }
+    layout(root, onErrors: () {
+      errorDetails = renderer.takeFlutterErrorDetails();
+    });
+    pumpFrame(phase: EnginePhase.paint);
 
     expect(errorDetails, isNotNull);
     expect(errorDetails.stack, isNotNull);

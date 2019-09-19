@@ -824,6 +824,7 @@ void main() {
     const Duration customWaitDuration = Duration(milliseconds: 500);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(1.0, 1.0));
     await tester.pump();
     await gesture.moveTo(Offset.zero);
@@ -865,13 +866,13 @@ void main() {
     // Wait for it to disappear.
     await tester.pump(const Duration(milliseconds: 0)); // Should immediately disappear
     expect(find.text(tooltipText), findsNothing);
-    await gesture.removePointer();
   });
 
   testWidgets('Tooltip waitDuration - TooltipTheme', (WidgetTester tester) async {
     const Duration customWaitDuration = Duration(milliseconds: 500);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(const Offset(1.0, 1.0));
     await tester.pump();
     await gesture.moveTo(Offset.zero);
@@ -909,7 +910,6 @@ void main() {
     // Wait for it to disappear.
     await tester.pump(const Duration(milliseconds: 0)); // Should immediately disappear
     expect(find.text(tooltipText), findsNothing);
-    await gesture.removePointer();
   });
 
   testWidgets('Tooltip showDuration - ThemeData.tooltipTheme', (WidgetTester tester) async {

@@ -505,15 +505,12 @@ class BoxConstraints extends Constraints {
         ]);
       }
       if (minWidth.isNaN || maxWidth.isNaN || minHeight.isNaN || maxHeight.isNaN) {
-        final List<String> affectedFieldsList = <String>[];
-        if (minWidth.isNaN)
-          affectedFieldsList.add('minWidth');
-        if (maxWidth.isNaN)
-          affectedFieldsList.add('maxWidth');
-        if (minHeight.isNaN)
-          affectedFieldsList.add('minHeight');
-        if (maxHeight.isNaN)
-          affectedFieldsList.add('maxHeight');
+        final List<String> affectedFieldsList = <String>[
+          if (minWidth.isNaN) 'minWidth',
+          if (maxWidth.isNaN) 'maxWidth',
+          if (minHeight.isNaN) 'minHeight',
+          if (maxHeight.isNaN) 'maxHeight',
+        ];
         assert(affectedFieldsList.isNotEmpty);
         if (affectedFieldsList.length > 1)
           affectedFieldsList.add('and ${affectedFieldsList.removeLast()}');
@@ -1142,7 +1139,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// [constraints] given by the parent to the child were tight constraints.)
 ///
 /// For [RenderBox] classes that do not inherit from [RenderProxyBox], once they
-/// have laid out their children, should also position them, by setting the
+/// have laid out their children, they should also position them, by setting the
 /// [BoxParentData.offset] field of each child's [parentData] object.
 ///
 /// #### Layout of non-RenderBox children
@@ -1711,8 +1708,9 @@ abstract class RenderBox extends RenderObject {
           (!sizedByParent && debugDoingThisLayout))
         return true;
       assert(!debugDoingThisResize);
-      final List<DiagnosticsNode> information = <DiagnosticsNode>[];
-      information.add(ErrorSummary('RenderBox size setter called incorrectly.'));
+      final List<DiagnosticsNode> information = <DiagnosticsNode>[
+        ErrorSummary('RenderBox size setter called incorrectly.'),
+      ];
       if (debugDoingThisLayout) {
         assert(sizedByParent);
         information.add(ErrorDescription('It appears that the size setter was called from performLayout().'));
@@ -2076,11 +2074,11 @@ abstract class RenderBox extends RenderObject {
   /// This [RenderBox] is responsible for checking whether the given position is
   /// within its bounds.
   ///
-  /// If transforming is necessary, [HitTestResult.addWithPaintTransform],
-  /// [HitTestResult.addWithPaintOffset], or [HitTestResult.addWithRawTransform] need
-  /// to be invoked by the caller to record the required transform operations
-  /// in the [HitTestResult]. These methods will also help with applying the
-  /// transform to `position`.
+  /// If transforming is necessary, [BoxHitTestResult.addWithPaintTransform],
+  /// [BoxHitTestResult.addWithPaintOffset], or
+  /// [BoxHitTestResult.addWithRawTransform] need to be invoked by the caller
+  /// to record the required transform operations in the [HitTestResult]. These
+  /// methods will also help with applying the transform to `position`.
   ///
   /// Hit testing requires layout to be up-to-date but does not require painting
   /// to be up-to-date. That means a render object can rely upon [performLayout]

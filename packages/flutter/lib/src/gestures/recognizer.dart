@@ -255,6 +255,18 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
       entry.resolve(disposition);
   }
 
+  /// Resolves this recognizer's participation in the given gesture arena with
+  /// the given disposition.
+  @protected
+  @mustCallSuper
+  void resolvePointer(int pointer, GestureDisposition disposition) {
+    final GestureArenaEntry entry = _entries[pointer];
+    if (entry != null) {
+      entry.resolve(disposition);
+      _entries.remove(pointer);
+    }
+  }
+
   @override
   void dispose() {
     resolve(GestureDisposition.rejected);

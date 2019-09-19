@@ -1547,4 +1547,38 @@ void main() {
     final RenderBox renderObject = tester.renderObject<RenderBox>(find.byType(Slider));
     expect(renderObject.size.height, 200);
   });
+
+  testWidgets(
+      'Slider implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    const Slider(
+      activeColor: Colors.blue,
+      divisions: 10,
+      inactiveColor: Colors.grey,
+      label: 'Set a value',
+      max: 100.0,
+      min: 0.0,
+      onChanged: null,
+      onChangeEnd: null,
+      onChangeStart: null,
+      semanticFormatterCallback: null,
+      value: 50.0,
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString()).toList();
+
+    expect(description, <String>[
+      'value: 50.0',
+      'disabled',
+      'min: 0.0',
+      'max: 100.0',
+      'divisions: 10',
+      'label: "Set a value"',
+      'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
+      'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
+    ]);
+  });
 }

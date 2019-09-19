@@ -156,7 +156,7 @@ Future<void> main() async {
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  device_info:\n  package_info:\n',
+        '\ndependencies:\n  device_info:\n  google_maps_flutter:\n', // One dynamic and one static framework.
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -185,6 +185,15 @@ Future<void> main() async {
 
       if (!ephemeralHostAppWithCocoaPodsBuilt) {
         return TaskResult.failure('Failed to build ephemeral host .app with CocoaPods');
+      }
+
+      final File podfileLockFile = File(path.join(projectDir.path, '.ios', 'Podfile.lock'));
+      final String podfileLockOutput = podfileLockFile.readAsStringSync();
+      if (!podfileLockOutput.contains(':path: Flutter/engine')
+        || !podfileLockOutput.contains(':path: Flutter/FlutterPluginRegistrant')
+        || !podfileLockOutput.contains(':path: Flutter/.symlinks/device_info/ios')
+        || !podfileLockOutput.contains(':path: Flutter/.symlinks/google_maps_flutter/ios')) {
+        return TaskResult.failure('Building ephemeral host app Podfile.lock does not contain expected pods');
       }
 
       section('Clean build');
@@ -223,18 +232,18 @@ Future<void> main() async {
         return TaskResult.failure('Failed to build editable host .app');
       }
 
-      section('Add to existing iOS app');
+      section('Add to existing iOS Objective-C app');
 
-      final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
-      mkdir(hostApp);
+      final Directory objectiveCHostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
+      mkdir(objectiveCHostApp);
       recursiveCopy(
         Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_host_app')),
-        hostApp,
+        objectiveCHostApp,
       );
 
-      final File analyticsOutputFile = File(path.join(tempDir.path, 'analytics.log'));
-
-      await inDirectory(hostApp, () async {
+      final File objectiveCAnalyticsOutputFile = File(path.join(tempDir.path, 'analytics-objc.log'));
+      final Directory objectiveCBuildDirectory = Directory(path.join(tempDir.path, 'build-objc'));
+      await inDirectory(objectiveCHostApp, () async {
         await exec('pod', <String>['install']);
         await exec(
           'xcodebuild',
@@ -249,36 +258,37 @@ Future<void> main() async {
             'CODE_SIGNING_REQUIRED=NO',
             'CODE_SIGN_IDENTITY=-',
             'EXPANDED_CODE_SIGN_IDENTITY=-',
-            'CONFIGURATION_BUILD_DIR=${tempDir.path}',
+            'CONFIGURATION_BUILD_DIR=${objectiveCBuildDirectory.path}',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           environment: <String, String> {
-            'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
-          }
+            'FLUTTER_ANALYTICS_LOG_FILE': objectiveCAnalyticsOutputFile.path,
+          },
         );
       });
 
       final bool existingAppBuilt = exists(File(path.join(
-        tempDir.path,
+        objectiveCBuildDirectory.path,
         'Host.app',
         'Host',
       )));
       if (!existingAppBuilt) {
-        return TaskResult.failure('Failed to build existing app .app');
+        return TaskResult.failure('Failed to build existing Objective-C app .app');
       }
 
-      final String analyticsOutput = analyticsOutputFile.readAsStringSync();
-      if (!analyticsOutput.contains('cd24: ios')
-          || !analyticsOutput.contains('cd25: true')
-          || !analyticsOutput.contains('viewName: build/bundle')) {
+      final String objectiveCAnalyticsOutput = objectiveCAnalyticsOutputFile.readAsStringSync();
+      if (!objectiveCAnalyticsOutput.contains('cd24: ios')
+          || !objectiveCAnalyticsOutput.contains('cd25: true')
+          || !objectiveCAnalyticsOutput.contains('viewName: build/bundle')) {
         return TaskResult.failure(
-          'Building outer app produced the following analytics: "$analyticsOutput"'
+          'Building outer Objective-C app produced the following analytics: "$objectiveCAnalyticsOutput"'
           'but not the expected strings: "cd24: ios", "cd25: true", "viewName: build/bundle"'
         );
       }
 
-      section('Fail building existing iOS app if flutter script fails');
+      section('Fail building existing Objective-C iOS app if flutter script fails');
       int xcodebuildExitCode = 0;
-      await inDirectory(hostApp, () async {
+      await inDirectory(objectiveCHostApp, () async {
         xcodebuildExitCode = await exec(
           'xcodebuild',
           <String>[
@@ -293,14 +303,70 @@ Future<void> main() async {
             'CODE_SIGNING_REQUIRED=NO',
             'CODE_SIGN_IDENTITY=-',
             'EXPANDED_CODE_SIGN_IDENTITY=-',
-            'CONFIGURATION_BUILD_DIR=${tempDir.path}',
+            'CONFIGURATION_BUILD_DIR=${objectiveCBuildDirectory.path}',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
-          canFail: true
+          canFail: true,
         );
       });
 
       if (xcodebuildExitCode != 65) { // 65 returned on PhaseScriptExecution failure.
-        return TaskResult.failure('Host app build succeeded though flutter script failed');
+        return TaskResult.failure('Host Objective-C app build succeeded though flutter script failed');
+      }
+
+      section('Add to existing iOS Swift app');
+
+      final Directory swiftHostApp = Directory(path.join(tempDir.path, 'hello_host_app_swift'));
+      mkdir(swiftHostApp);
+      recursiveCopy(
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_host_app_swift')),
+        swiftHostApp,
+      );
+
+      final File swiftAnalyticsOutputFile = File(path.join(tempDir.path, 'analytics-swift.log'));
+      final Directory swiftBuildDirectory = Directory(path.join(tempDir.path, 'build-swift'));
+
+      await inDirectory(swiftHostApp, () async {
+        await exec('pod', <String>['install']);
+        await exec(
+          'xcodebuild',
+          <String>[
+            '-workspace',
+            'Host.xcworkspace',
+            '-scheme',
+            'Host',
+            '-configuration',
+            'Debug',
+            'CODE_SIGNING_ALLOWED=NO',
+            'CODE_SIGNING_REQUIRED=NO',
+            'CODE_SIGN_IDENTITY=-',
+            'EXPANDED_CODE_SIGN_IDENTITY=-',
+            'CONFIGURATION_BUILD_DIR=${swiftBuildDirectory.path}',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+          ],
+          environment: <String, String> {
+            'FLUTTER_ANALYTICS_LOG_FILE': swiftAnalyticsOutputFile.path,
+          },
+        );
+      });
+
+      final bool existingSwiftAppBuilt = exists(File(path.join(
+        swiftBuildDirectory.path,
+        'Host.app',
+        'Host',
+      )));
+      if (!existingSwiftAppBuilt) {
+        return TaskResult.failure('Failed to build existing Swift app .app');
+      }
+
+      final String swiftAnalyticsOutput = swiftAnalyticsOutputFile.readAsStringSync();
+      if (!swiftAnalyticsOutput.contains('cd24: ios')
+          || !swiftAnalyticsOutput.contains('cd25: true')
+          || !swiftAnalyticsOutput.contains('viewName: build/bundle')) {
+        return TaskResult.failure(
+          'Building outer Swift app produced the following analytics: "$swiftAnalyticsOutput"'
+          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: build/bundle"'
+        );
       }
 
       return TaskResult.success(null);
@@ -317,7 +383,7 @@ Future<bool> _isAppAotBuild(Directory app) async {
     app.path,
     'Frameworks',
     'App.framework',
-    'App'
+    'App',
   );
 
   final String symbolTable = await eval(
@@ -336,7 +402,7 @@ Future<bool> _hasDebugSymbols(Directory app) async {
     app.path,
     'Frameworks',
     'App.framework',
-    'App'
+    'App',
   );
 
   final String symbolTable = await eval(

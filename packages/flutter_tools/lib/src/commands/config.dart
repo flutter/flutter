@@ -23,7 +23,6 @@ class ConfigCommand extends FlutterCommand {
     argParser.addFlag('clear-ios-signing-cert',
       negatable: false,
       help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
-    argParser.addOption('gradle-dir', help: 'The gradle install directory.');
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
     argParser.addOption('build-dir', help: 'The relative path to override a projects build directory',
@@ -87,8 +86,9 @@ class ConfigCommand extends FlutterCommand {
           }
           return '  $key: ${config.getValue(key)} $configFooter';
         }).join('\n');
-    if (values.isEmpty)
+    if (values.isEmpty) {
       values = '  No settings have been configured.';
+    }
     return
       '\nSettings:\n$values\n\n'
       'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
@@ -120,17 +120,17 @@ class ConfigCommand extends FlutterCommand {
       printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
 
-    if (argResults.wasParsed('gradle-dir'))
-      _updateConfig('gradle-dir', argResults['gradle-dir']);
-
-    if (argResults.wasParsed('android-sdk'))
+    if (argResults.wasParsed('android-sdk')) {
       _updateConfig('android-sdk', argResults['android-sdk']);
+    }
 
-    if (argResults.wasParsed('android-studio-dir'))
+    if (argResults.wasParsed('android-studio-dir')) {
       _updateConfig('android-studio-dir', argResults['android-studio-dir']);
+    }
 
-    if (argResults.wasParsed('clear-ios-signing-cert'))
+    if (argResults.wasParsed('clear-ios-signing-cert')) {
       _updateConfig('ios-signing-cert', '');
+    }
 
     if (argResults.wasParsed('build-dir')) {
       final String buildDir = argResults['build-dir'];
@@ -151,8 +151,9 @@ class ConfigCommand extends FlutterCommand {
       }
     }
 
-    if (argResults.arguments.isEmpty)
+    if (argResults.arguments.isEmpty) {
       printStatus(usage);
+    }
 
     return null;
   }

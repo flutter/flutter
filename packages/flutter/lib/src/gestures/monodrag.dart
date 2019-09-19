@@ -251,8 +251,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
     if (event is PointerMoveEvent) {
       if (event.buttons != _initialButtons) {
-        resolve(GestureDisposition.rejected);
-        stopTrackingPointer(event.pointer);
+        _giveUpPointer(event.pointer);
         return;
       }
       if (_state == _DragState.accepted) {
@@ -278,7 +277,12 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           resolve(GestureDisposition.accepted);
       }
     }
-    stopTrackingIfPointerNoLongerDown(event);
+    if (event is PointerUpEvent || event is PointerCancelEvent) {
+      _giveUpPointer(
+        event.pointer,
+        reject: event is PointerCancelEvent || _state ==_DragState.possible,
+      );
+    }
   }
 
   @override
@@ -325,7 +329,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void rejectGesture(int pointer) {
-    stopTrackingPointer(pointer);
+    _giveUpPointer(pointer);
   }
 
   @override
@@ -347,6 +351,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     _velocityTrackers.clear();
     _initialButtons = null;
     _state = _DragState.ready;
+  }
+
+  void _giveUpPointer(int pointer, {bool reject = true}) {
+    stopTrackingPointer(pointer);
+    if (reject) {
+      if (_velocityTrackers.containsKey(pointer)) {
+        _velocityTrackers.remove(pointer);
+        resolvePointer(pointer, GestureDisposition.rejected);
+      }
+    }
   }
 
   void _checkDown() {

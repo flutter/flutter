@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -120,8 +121,8 @@ class NetworkAssetBundle extends AssetBundle {
         'Unable to load asset: $key\n'
         'HTTP status code: ${response.statusCode}'
       );
-    final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-    return bytes.buffer.asByteData();
+    final TransferableTypedData transferable = await getHttpClientResponseBytes(response);
+    return transferable.materialize().asByteData();
   }
 
   /// Retrieve a string from the asset bundle, parse it with the given function,
@@ -216,7 +217,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
   Future<ByteData> load(String key) async {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
     final ByteData asset =
-        await defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
+        await defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData()); // ignore: deprecated_member_use_from_same_package
     if (asset == null)
       throw FlutterError('Unable to load asset: $key');
     return asset;

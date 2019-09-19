@@ -39,6 +39,7 @@ void main() {
     mockProcessManager = MockProcessManager();
     testbed = Testbed(setup: () {
       androidEnvironment = Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
         defines: <String, String>{
           kBuildMode: getNameForBuildMode(BuildMode.profile),
@@ -46,6 +47,7 @@ void main() {
         }
       );
       iosEnvironment = Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
         defines: <String, String>{
           kBuildMode: getNameForBuildMode(BuildMode.profile),
@@ -112,6 +114,60 @@ flutter_tools:lib/''');
         androidEnvironment..defines.remove(kBuildMode));
 
     expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
+  }));
+
+  test('kernel_snapshot does not use track widget creation on profile builds', () => testbed.run(() async {
+    final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
+    when(kernelCompilerFactory.create(any)).thenAnswer((Invocation _) async {
+      return mockKernelCompiler;
+    });
+    when(mockKernelCompiler.compile(
+      sdkRoot: anyNamed('sdkRoot'),
+      aot: anyNamed('aot'),
+      trackWidgetCreation: false,
+      targetModel: anyNamed('targetModel'),
+      targetProductVm: anyNamed('targetProductVm'),
+      outputFilePath: anyNamed('outputFilePath'),
+      depFilePath: anyNamed('depFilePath'),
+      packagesPath: anyNamed('packagesPath'),
+      mainPath: anyNamed('mainPath')
+    )).thenAnswer((Invocation _) async {
+      return const CompilerOutput('example', 0, <Uri>[]);
+    });
+
+    await const KernelSnapshot().build(androidEnvironment);
+  }, overrides: <Type, Generator>{
+    KernelCompilerFactory: () => MockKernelCompilerFactory(),
+  }));
+
+  test('kernel_snapshot does use track widget creation on debug builds', () => testbed.run(() async {
+    final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
+    when(kernelCompilerFactory.create(any)).thenAnswer((Invocation _) async {
+      return mockKernelCompiler;
+    });
+    when(mockKernelCompiler.compile(
+      sdkRoot: anyNamed('sdkRoot'),
+      aot: anyNamed('aot'),
+      trackWidgetCreation: true,
+      targetModel: anyNamed('targetModel'),
+      targetProductVm: anyNamed('targetProductVm'),
+      outputFilePath: anyNamed('outputFilePath'),
+      depFilePath: anyNamed('depFilePath'),
+      packagesPath: anyNamed('packagesPath'),
+      mainPath: anyNamed('mainPath')
+    )).thenAnswer((Invocation _) async {
+      return const CompilerOutput('example', 0, <Uri>[]);
+    });
+
+    await const KernelSnapshot().build(Environment(
+        outputDir: fs.currentDirectory,
+        projectDir: fs.currentDirectory,
+        defines: <String, String>{
+      kBuildMode: 'debug',
+      kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+    }));
+  }, overrides: <Type, Generator>{
+    KernelCompilerFactory: () => MockKernelCompilerFactory(),
   }));
 
   test('aot_elf_profile Produces correct output directory', () => testbed.run(() async {
@@ -192,14 +248,12 @@ flutter_tools:lib/''');
 
     when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
     when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
-    when(mockXcode.dsymutil(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
 
     final BuildResult result = await buildSystem.build(const AotAssemblyProfile(), iosEnvironment);
 
     expect(result.success, true);
     verify(mockXcode.cc(argThat(contains('-fembed-bitcode')))).called(1);
     verify(mockXcode.clang(argThat(contains('-fembed-bitcode')))).called(1);
-    verify(mockXcode.dsymutil(any)).called(1);
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
@@ -222,14 +276,12 @@ flutter_tools:lib/''');
 
     when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
     when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
-    when(mockXcode.dsymutil(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
 
     final BuildResult result = await buildSystem.build(const AotAssemblyProfile(), iosEnvironment);
 
     expect(result.success, true);
     verify(mockXcode.cc(argThat(contains('-fembed-bitcode')))).called(2);
     verify(mockXcode.clang(argThat(contains('-fembed-bitcode')))).called(2);
-    verify(mockXcode.dsymutil(any)).called(2);
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
@@ -270,10 +322,10 @@ class MockXcode extends Mock implements Xcode {}
 class FakeGenSnapshot implements GenSnapshot {
   List<String> lastCallAdditionalArgs;
   @override
-  Future<int> run({SnapshotType snapshotType, IOSArch iosArch, Iterable<String> additionalArgs = const <String>[]}) async {
+  Future<int> run({SnapshotType snapshotType, DarwinArch darwinArch, Iterable<String> additionalArgs = const <String>[]}) async {
     lastCallAdditionalArgs = additionalArgs.toList();
     final Directory out = fs.file(lastCallAdditionalArgs.last).parent;
-    if (iosArch == null) {
+    if (darwinArch == null) {
       out.childFile('app.so').createSync();
       out.childFile('gen_snapshot.d').createSync();
       return 0;
@@ -321,3 +373,6 @@ class FakeKernelCompiler implements KernelCompiler {
       return CompilerOutput(outputFilePath, 0, null);
   }
 }
+
+class MockKernelCompilerFactory extends Mock implements KernelCompilerFactory {}
+class MockKernelCompiler extends Mock implements KernelCompiler {}

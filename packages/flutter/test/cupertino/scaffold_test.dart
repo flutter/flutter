@@ -25,7 +25,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Center)), const Offset(0.0, 0.0));
   });
 
-testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
+  testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
     BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -433,5 +433,80 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
     expect(tester.getTopLeft(find.text('0')).dy, 64);
     expect(tester.getTopLeft(find.text('6')).dy, 364);
     expect(find.text('12'), findsNothing);
+  });
+
+  testWidgets('resizeToAvoidBottomInset is supported even when no navigationBar', (WidgetTester tester) async {
+    Widget buildFrame(bool showNavigationBar, bool showKeyboard) {
+      return CupertinoApp(
+        home: MediaQuery(
+          data: MediaQueryData(
+            padding: EdgeInsets.zero,
+            viewPadding: const EdgeInsets.only(bottom: 20),
+            viewInsets: EdgeInsets.only(bottom: showKeyboard ? 300 : 20),
+          ),
+          child: CupertinoPageScaffold(
+            resizeToAvoidBottomInset: true,
+            navigationBar: showNavigationBar ? const CupertinoNavigationBar(
+              middle: Text('Title'),
+            ) : null,
+            child: const Center(
+              child: CupertinoTextField(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // When there is a nav bar and no keyboard.
+    await tester.pumpWidget(buildFrame(true, false));
+    final Offset positionNoInsetWithNavBar = tester.getTopLeft(find.byType(CupertinoTextField));
+
+    // When there is a nav bar and keyboard, the CupertinoTextField moves up.
+    await tester.pumpWidget(buildFrame(true, true));
+    await tester.pumpAndSettle();
+    final Offset positionWithInsetWithNavBar = tester.getTopLeft(find.byType(CupertinoTextField));
+    expect(positionWithInsetWithNavBar.dy, lessThan(positionNoInsetWithNavBar.dy));
+
+    // When there is no nav bar and no keyboard, the CupertinoTextField is still
+    // centered.
+    await tester.pumpWidget(buildFrame(false, false));
+    final Offset positionNoInsetNoNavBar = tester.getTopLeft(find.byType(CupertinoTextField));
+    expect(positionNoInsetNoNavBar, equals(positionNoInsetWithNavBar));
+
+    // When there is a keyboard but no nav bar, the CupertinoTextField also
+    // moves up to the same position as when there is a keyboard and nav bar.
+    await tester.pumpWidget(buildFrame(false, true));
+    await tester.pumpAndSettle();
+    final Offset positionWithInsetNoNavBar = tester.getTopLeft(find.byType(CupertinoTextField));
+    expect(positionWithInsetNoNavBar.dy, lessThan(positionNoInsetNoNavBar.dy));
+    expect(positionWithInsetNoNavBar, equals(positionWithInsetWithNavBar));
+  });
+
+  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(builder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
+            child: const CupertinoPageScaffold(
+              navigationBar: CupertinoNavigationBar(
+                middle: Text('middle'),
+                leading: Text('leading'),
+                trailing: Text('trailing'),
+              ),
+              child: Text('content'),
+            ),
+          );
+        }),
+      ),
+    );
+    final Iterable<RichText> richTextList = tester.widgetList<RichText>(
+      find.descendant(of: find.byType(CupertinoNavigationBar), matching: find.byType(RichText)),
+    );
+
+    expect(richTextList.length, greaterThan(0));
+    expect(richTextList.any((RichText text) => text.textScaleFactor != 1), isFalse);
+
+    expect(tester.widget<RichText>(find.descendant(of: find.text('content'), matching: find.byType(RichText))).textScaleFactor, 99);
   });
 }

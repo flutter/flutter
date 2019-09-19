@@ -72,12 +72,14 @@ class _AccountDetails extends StatefulWidget {
     @required this.accountEmail,
     this.onTap,
     this.isOpen,
+    this.arrowColor,
   }) : super(key: key);
 
   final Widget accountName;
   final Widget accountEmail;
   final VoidCallback onTap;
   final bool isOpen;
+  final Color arrowColor;
 
   @override
   _AccountDetailsState createState() => _AccountDetailsState();
@@ -132,71 +134,63 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
     assert(debugCheckHasMaterialLocalizations(context));
 
     final ThemeData theme = Theme.of(context);
-    final List<Widget> children = <Widget>[];
-
-    if (widget.accountName != null) {
-      final Widget accountNameLine = LayoutId(
-        id: _AccountDetailsLayout.accountName,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0),
-          child: DefaultTextStyle(
-            style: theme.primaryTextTheme.body2,
-            overflow: TextOverflow.ellipsis,
-            child: widget.accountName,
-          ),
-        ),
-      );
-      children.add(accountNameLine);
-    }
-
-    if (widget.accountEmail != null) {
-      final Widget accountEmailLine = LayoutId(
-        id: _AccountDetailsLayout.accountEmail,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0),
-          child: DefaultTextStyle(
-            style: theme.primaryTextTheme.body1,
-            overflow: TextOverflow.ellipsis,
-            child: widget.accountEmail,
-          ),
-        ),
-      );
-      children.add(accountEmailLine);
-    }
-    if (widget.onTap != null) {
-      final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-      final Widget dropDownIcon = LayoutId(
-        id: _AccountDetailsLayout.dropdownIcon,
-        child: Semantics(
-          container: true,
-          button: true,
-          onTap: widget.onTap,
-          child: SizedBox(
-            height: _kAccountDetailsHeight,
-            width: _kAccountDetailsHeight,
-            child: Center(
-              child: Transform.rotate(
-                angle: _animation.value * math.pi,
-                child: Icon(
-                  Icons.arrow_drop_down,
-                  color: Colors.white,
-                  semanticLabel: widget.isOpen
-                    ? localizations.hideAccountsLabel
-                    : localizations.showAccountsLabel,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-      children.add(dropDownIcon);
-    }
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     Widget accountDetails = CustomMultiChildLayout(
       delegate: _AccountDetailsLayout(
         textDirection: Directionality.of(context),
       ),
-      children: children,
+      children: <Widget>[
+        if (widget.accountName != null)
+          LayoutId(
+            id: _AccountDetailsLayout.accountName,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2.0),
+              child: DefaultTextStyle(
+                style: theme.primaryTextTheme.body2,
+                overflow: TextOverflow.ellipsis,
+                child: widget.accountName,
+              ),
+            ),
+          ),
+        if (widget.accountEmail != null)
+          LayoutId(
+            id: _AccountDetailsLayout.accountEmail,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2.0),
+              child: DefaultTextStyle(
+                style: theme.primaryTextTheme.body1,
+                overflow: TextOverflow.ellipsis,
+                child: widget.accountEmail,
+              ),
+            ),
+          ),
+        if (widget.onTap != null)
+          LayoutId(
+            id: _AccountDetailsLayout.dropdownIcon,
+            child: Semantics(
+              container: true,
+              button: true,
+              onTap: widget.onTap,
+              child: SizedBox(
+                height: _kAccountDetailsHeight,
+                width: _kAccountDetailsHeight,
+                child: Center(
+                  child: Transform.rotate(
+                    angle: _animation.value * math.pi,
+                    child: Icon(
+                      Icons.arrow_drop_down,
+                      color: widget.arrowColor,
+                      semanticLabel: widget.isOpen
+                        ? localizations.hideAccountsLabel
+                        : localizations.showAccountsLabel,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
 
     if (widget.onTap != null) {
@@ -314,6 +308,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     @required this.accountName,
     @required this.accountEmail,
     this.onDetailsPressed,
+    this.arrowColor = Colors.white,
   }) : super(key: key);
 
   /// The header's background. If decoration is null then a [BoxDecoration]
@@ -343,6 +338,9 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   /// A callback that is called when the horizontal area which contains the
   /// [accountName] and [accountEmail] is tapped.
   final VoidCallback onDetailsPressed;
+
+  /// The [Color] of the arrow icon.
+  final Color arrowColor;
 
   @override
   _UserAccountsDrawerHeaderState createState() => _UserAccountsDrawerHeaderState();
@@ -390,6 +388,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
                 accountEmail: widget.accountEmail,
                 isOpen: _isOpen,
                 onTap: widget.onDetailsPressed == null ? null : _handleDetailsPressed,
+                arrowColor: widget.arrowColor,
               ),
             ],
           ),

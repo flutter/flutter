@@ -31,17 +31,26 @@ class RawKeyboardListener extends StatefulWidget {
   ///
   /// For text entry, consider using a [EditableText], which integrates with
   /// on-screen keyboards and input method editors (IMEs).
+  ///
+  /// The [focusNode] and [child] arguments are required and must not be null.
+  ///
+  /// The [autofocus] argument must not be null.
   const RawKeyboardListener({
     Key key,
     @required this.focusNode,
-    @required this.onKey,
+    this.autofocus = false,
+    this.onKey,
     @required this.child,
   }) : assert(focusNode != null),
+       assert(autofocus != null),
        assert(child != null),
        super(key: key);
 
-  /// Controls whether this widget has keyboard focus.
+  /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
 
   /// Called whenever this widget receives a raw keyboard event.
   final ValueChanged<RawKeyEvent> onKey;
@@ -113,5 +122,11 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   }
 
   @override
-  Widget build(BuildContext context) => Focus(focusNode: widget.focusNode, child: widget.child);
+  Widget build(BuildContext context) {
+    return Focus(
+      focusNode: widget.focusNode,
+      autofocus: widget.autofocus,
+      child: widget.child,
+    );
+  }
 }

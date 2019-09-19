@@ -76,7 +76,6 @@ class LinuxDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
     _lastBuiltMode = debuggingOptions.buildInfo.mode;
@@ -87,7 +86,6 @@ class LinuxDevice extends Device {
         target: mainPath,
       );
     }
-    await stopApp(package);
     final Process process = await processManager.start(<String>[
       package.executable(debuggingOptions?.buildInfo?.mode)
     ]);

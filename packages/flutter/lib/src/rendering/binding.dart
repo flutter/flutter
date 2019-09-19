@@ -138,14 +138,13 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   /// Creates a [RenderView] object to be the root of the
   /// [RenderObject] rendering tree, and initializes it so that it
-  /// will be rendered when the engine is next ready to display a
-  /// frame.
+  /// will be rendered when the next frame is requested.
   ///
   /// Called automatically when the binding is created.
   void initRenderView() {
     assert(renderView == null);
     renderView = RenderView(configuration: createViewConfiguration(), window: window);
-    renderView.scheduleInitialFrame();
+    renderView.prepareInitialFrame();
   }
 
   /// The object that manages state about currently connected mice, for hover
@@ -242,12 +241,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   // Creates a [MouseTracker] which manages state about currently connected
   // mice, for hover notification.
   MouseTracker _createMouseTracker() {
-    return MouseTracker(pointerRouter, (Offset offset) {
-      // Layer hit testing is done using device pixels, so we have to convert
-      // the logical coordinates of the event location back to device pixels
-      // here.
-      return renderView.layer.findAll<MouseTrackerAnnotation>(offset * window.devicePixelRatio);
-    });
+    return MouseTracker(pointerRouter, renderView.hitTestMouseTrackers);
   }
 
   void _handleSemanticsEnabledChanged() {

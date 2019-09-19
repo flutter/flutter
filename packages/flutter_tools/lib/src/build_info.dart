@@ -92,6 +92,7 @@ class AndroidBuildInfo {
       AndroidArch.arm64_v8a,
     ],
     this.splitPerAbi = false,
+    this.shrink = false,
   });
 
   // The build info containing the mode and flavor.
@@ -103,6 +104,9 @@ class AndroidBuildInfo {
   /// build artifact. When this is true, multiple build artifacts (one per ABI)
   /// will be produced.
   final bool splitPerAbi;
+
+  /// Whether to enable code shrinking on release mode.
+  final bool shrink;
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
@@ -148,6 +152,9 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
+    if (tmpBuildNumber.isEmpty) {
+      return null;
+    }
     final List<String> segments = tmpBuildNumber
         .split('.')
         .where((String segment) => segment.isNotEmpty)
@@ -192,6 +199,9 @@ String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String build
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
+    if (tmpBuildName.isEmpty) {
+      return null;
+    }
     final List<String> segments = tmpBuildName
         .split('.')
         .where((String segment) => segment.isNotEmpty)
@@ -265,12 +275,13 @@ enum TargetPlatform {
   web_javascript,
 }
 
-/// iOS target device architecture.
+/// iOS and macOS target device architecture.
 //
 // TODO(cbracken): split TargetPlatform.ios into ios_armv7, ios_arm64.
-enum IOSArch {
+enum DarwinArch {
   armv7,
   arm64,
+  x86_64,
 }
 
 enum AndroidArch {
@@ -281,27 +292,29 @@ enum AndroidArch {
 }
 
 /// The default set of iOS device architectures to build for.
-const List<IOSArch> defaultIOSArchs = <IOSArch>[
-  IOSArch.arm64,
+const List<DarwinArch> defaultIOSArchs = <DarwinArch>[
+  DarwinArch.arm64,
 ];
 
-String getNameForIOSArch(IOSArch arch) {
+String getNameForDarwinArch(DarwinArch arch) {
   switch (arch) {
-    case IOSArch.armv7:
+    case DarwinArch.armv7:
       return 'armv7';
-    case IOSArch.arm64:
+    case DarwinArch.arm64:
       return 'arm64';
+    case DarwinArch.x86_64:
+      return 'x86_64';
   }
   assert(false);
   return null;
 }
 
-IOSArch getIOSArchForName(String arch) {
+DarwinArch getIOSArchForName(String arch) {
   switch (arch) {
     case 'armv7':
-      return IOSArch.armv7;
+      return DarwinArch.armv7;
     case 'arm64':
-      return IOSArch.arm64;
+      return DarwinArch.arm64;
   }
   assert(false);
   return null;
@@ -407,12 +420,15 @@ String getPlatformNameForAndroidArch(AndroidArch arch) {
 }
 
 HostPlatform getCurrentHostPlatform() {
-  if (platform.isMacOS)
+  if (platform.isMacOS) {
     return HostPlatform.darwin_x64;
-  if (platform.isLinux)
+  }
+  if (platform.isLinux) {
     return HostPlatform.linux_x64;
-  if (platform.isWindows)
+  }
+  if (platform.isWindows) {
     return HostPlatform.windows_x64;
+  }
 
   printError('Unsupported host platform, defaulting to Linux');
 
@@ -423,8 +439,9 @@ HostPlatform getCurrentHostPlatform() {
 String getBuildDirectory() {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null || config == null)
+  if (context == null || config == null) {
     return 'build';
+  }
 
   final String buildDir = config.getValue('build-dir') ?? 'build';
   if (fs.path.isAbsolute(buildDir)) {

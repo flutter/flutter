@@ -846,6 +846,69 @@ void main() {
     expect(() => controller.stop(), throwsAssertionError);
     expect(() => controller.forward(), throwsAssertionError);
     expect(() => controller.reverse(), throwsAssertionError);
-
   });
+
+  test('Simulations run forward', () {
+    final List<AnimationStatus> statuses = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+      duration: const Duration(seconds: 1),
+    )..addStatusListener((AnimationStatus status) {
+      statuses.add(status);
+    });
+
+    controller.animateWith(TestSimulation());
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(seconds: 2));
+    expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
+  });
+
+  test('Simulations run forward even after a reverse run', () {
+    final List<AnimationStatus> statuses = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+      duration: const Duration(seconds: 1),
+    )..addStatusListener((AnimationStatus status) {
+      statuses.add(status);
+    });
+    controller.reverse(from: 1.0);
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(seconds: 2));
+    expect(statuses, <AnimationStatus>[AnimationStatus.completed, AnimationStatus.reverse, AnimationStatus.dismissed]);
+    statuses.clear();
+
+    controller.animateWith(TestSimulation());
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(seconds: 2));
+    expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
+  });
+
+  test('Repeating animation with reverse: true report as forward and reverse', () {
+    final List<AnimationStatus> statuses = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+      duration: const Duration(seconds: 1),
+    )..addStatusListener((AnimationStatus status) {
+      statuses.add(status);
+    });
+
+    controller.repeat(reverse: true);
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 999));
+    expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
+    statuses.clear();
+    tick(const Duration(seconds: 1));
+    expect(statuses, <AnimationStatus>[AnimationStatus.reverse]);
+  });
+}
+
+class TestSimulation extends Simulation {
+  @override
+  double dx(double time) => time;
+
+  @override
+  bool isDone(double time) => false;
+
+  @override
+  double x(double time) => time;
 }

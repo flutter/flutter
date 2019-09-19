@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -79,9 +79,9 @@ class PlaceholderDimensions {
   }
 }
 
-/// The different ways of considering the width of one or more lines of text.
+/// The different ways of measuring the width of one or more lines of text.
 ///
-/// See [Text.widthType].
+/// See [Text.textWidthBasis], for example.
 enum TextWidthBasis {
   /// Multiline text will take up the full width given by the parent. For single
   /// line text, only the minimum amount of width needed to contain the text
@@ -323,7 +323,9 @@ class TextPainter {
     _needsLayout = true;
   }
 
-  /// {@macro flutter.dart:ui.text.TextWidthBasis}
+  /// {@template flutter.painting.textPainter.textWidthBasis}
+  /// Defines how to measure the width of the rendered text.
+  /// {@endtemplate}
   TextWidthBasis get textWidthBasis => _textWidthBasis;
   TextWidthBasis _textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
@@ -782,6 +784,10 @@ class TextPainter {
       offset: rect != null ? Offset(rect.left, rect.top) : _emptyOffset,
       fullHeight: rect != null ? rect.bottom - rect.top : null,
     );
+
+    // Cache the input parameters to prevent repeat work later.
+    _previousCaretPosition = position;
+    _previousCaretPrototype = caretPrototype;
   }
 
   /// Returns a list of rects that bound the given selection.
@@ -811,5 +817,25 @@ class TextPainter {
     assert(!_needsLayout);
     final List<int> indices = _paragraph.getWordBoundary(position.offset);
     return TextRange(start: indices[0], end: indices[1]);
+  }
+
+  /// Returns the full list of [LineMetrics] that describe in detail the various
+  /// metrics of each laid out line.
+  ///
+  /// The [LineMetrics] list is presented in the order of the lines they represent.
+  /// For example, the first line is in the zeroth index.
+  ///
+  /// [LineMetrics] contains measurements such as ascent, descent, baseline, and
+  /// width for the line as a whole, and may be useful for aligning additional
+  /// widgets to a particular line.
+  ///
+  /// Valid only after [layout] has been called.
+  ///
+  /// This can potentially return a large amount of data, so it is not recommended
+  /// to repeatedly call this. Instead, cache the results. The cached results
+  /// should be invalidated upon the next sucessful [layout].
+  List<ui.LineMetrics> computeLineMetrics() {
+    assert(!_needsLayout);
+    return _paragraph.computeLineMetrics();
   }
 }

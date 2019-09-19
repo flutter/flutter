@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 export 'backdrop_demo.dart';
+export 'banner_demo.dart';
 export 'bottom_app_bar_demo.dart';
 export 'bottom_navigation_demo.dart';
 export 'buttons_demo.dart';

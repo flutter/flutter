@@ -42,9 +42,6 @@ class FuchsiaKernelCompiler {
         fs.path.relative(packagesFile, from: fsRoot);
     final String manifestPath = fs.path.join(outDir, '$appName.dilpmanifest');
     List<String> flags = <String>[
-      // https://github.com/dart-lang/sdk/issues/36639:
-      // Remove when new constant eval supports dilp files.
-      '--enable-experiment=no-constant-update-2018',
       '--target', 'flutter_runner',
       '--platform', fuchsiaArtifacts.platformKernelDill.path,
       '--filesystem-scheme', 'main-root',
@@ -88,7 +85,7 @@ class FuchsiaKernelCompiler {
       fuchsiaArtifacts.kernelCompiler.path,
       ...flags,
     ];
-    final Process process = await runCommand(command);
+    final Process process = await processUtils.start(command);
     final Status status = logger.startProgress(
       'Building Fuchsia application...',
       timeout: null,

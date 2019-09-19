@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 import 'message_codec.dart';
 import 'system_channels.dart';
@@ -725,4 +726,15 @@ abstract class PlatformViewController {
   ///
   /// See also [PlatformViewRegistry] which is a helper for managing platform view ids.
   int get viewId;
+
+  /// Dispatches the `event` to the platform view.
+  void dispatchPointerEvent(PointerEvent event);
+
+  /// Disposes the platform view.
+  ///
+  /// The [PlatformViewController] is unusable after calling dispose.
+  void dispose();
+
+  /// Clears the view's focus on the platform side.
+  void clearFocus();
 }

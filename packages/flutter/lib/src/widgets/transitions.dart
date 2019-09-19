@@ -917,6 +917,11 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// }
 /// ```
 /// {@end-tool}
+///
+/// See also:
+///
+///  * [TweenAnimationBuilder], which animates a property to a target value
+///    without requiring manual management of an [AnimationController].
 class AnimatedBuilder extends AnimatedWidget {
   /// Creates an animated builder.
   ///

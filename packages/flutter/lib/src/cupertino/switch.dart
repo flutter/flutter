@@ -425,7 +425,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   }
 
   void _emitVibration() {
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         HapticFeedback.lightImpact();
         break;

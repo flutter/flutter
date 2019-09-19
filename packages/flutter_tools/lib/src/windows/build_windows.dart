@@ -22,6 +22,7 @@ import 'visual_studio.dart';
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {String target}) async {
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot,
+    'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,
     'PROJECT_DIR': windowsProject.project.directory.path,
     'TRACK_WIDGET_CREATION': (buildInfo?.trackWidgetCreation == true).toString(),
   };
@@ -40,6 +41,15 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
   if (vcvarsScript == null) {
     throwToolExit('Unable to find suitable Visual Studio toolchain. '
         'Please run `flutter doctor` for more details.');
+  }
+
+  if (!buildInfo.isDebug) {
+    const String warning = '🚧 ';
+    printStatus(warning * 20);
+    printStatus('Warning: Only debug is currently implemented for Windows. This is effectively a debug build.');
+    printStatus('See https://github.com/flutter/flutter/issues/38477 for details and updates.');
+    printStatus(warning * 20);
+    printStatus('');
   }
 
   final String buildScript = fs.path.join(

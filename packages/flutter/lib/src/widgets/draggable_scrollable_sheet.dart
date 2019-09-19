@@ -44,7 +44,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// between the range of minChildSize and maxChildSize (as percentages of the
 /// parent container's height) as long as the builder creates a widget which
 /// uses the provided [ScrollController]. If the widget created by the
-/// [ScrollableWidgetBuilder] does not use provided [ScrollController], the
+/// [ScrollableWidgetBuilder] does not use the provided [ScrollController], the
 /// sheet will remain at the initialChildSize.
 ///
 /// By default, the widget will expand its non-occupied area to fill available
