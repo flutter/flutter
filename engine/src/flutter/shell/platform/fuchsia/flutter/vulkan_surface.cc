@@ -32,8 +32,8 @@ bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
   FML_DCHECK(out_vulkan_image != nullptr);
 
   // The image creation parameters need to be the same as those in scenic
-  // (garnet/lib/ui/gfx/resources/gpu_image.cc and
-  // garnet/public/lib/escher/util/image_utils.cc) or else the different vulkan
+  // (src/ui/scenic/lib/gfx/resources/gpu_image.cc and
+  // src/ui/lib/escher/util/image_utils.cc) or else the different vulkan
   // devices may interpret the bytes differently.
   // TODO(SCN-1369): Use API to coordinate this with scenic.
   out_vulkan_image->vk_external_image_create_info = {
@@ -235,9 +235,14 @@ bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrContext> context,
     }
   }
 
+  VkMemoryDedicatedAllocateInfo dedicated_allocate_info = {
+      .sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO,
+      .pNext = nullptr,
+      .image = vulkan_image_.vk_image,
+      .buffer = VK_NULL_HANDLE};
   VkExportMemoryAllocateInfoKHR export_allocate_info = {
       .sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO_KHR,
-      .pNext = nullptr,
+      .pNext = &dedicated_allocate_info,
       .handleTypes =
           VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA};
 
