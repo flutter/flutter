@@ -125,6 +125,8 @@ abstract class FlutterCommand extends Command<void> {
   bool get shouldRunPub => _usesPubOption && argResults['pub'];
 
   bool get shouldUpdateCache => true;
+  
+  bool _excludeDebug = false;
 
   BuildMode _defaultBuildMode;
 
@@ -266,6 +268,7 @@ abstract class FlutterCommand extends Command<void> {
   void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false, bool excludeDebug = false }) {
     // A release build must be the default if a debug build is not possible.
     assert(defaultToRelease || !excludeDebug);
+    _excludeDebug = excludeDebug;
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     if (!excludeDebug) {
@@ -316,9 +319,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   BuildMode getBuildMode() {
-    final bool debugResult = argResults.wasParsed('debug')
-      ? argResults['debug']
-      : false;
+    final bool debugResult = _excludeDebug ? false : argResults['debug']
     final List<bool> modeFlags = <bool>[debugResult, argResults['profile'], argResults['release']];
     if (modeFlags.where((bool flag) => flag).length > 1) {
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
