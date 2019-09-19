@@ -16,6 +16,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'slider_theme.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 // Examples can assume:
 // RangeValues _rangeValues = RangeValues(0.3, 0.7);
@@ -126,7 +127,8 @@ class RangeSlider extends StatefulWidget {
     this.labels,
     this.activeColor,
     this.inactiveColor,
-    this.semanticFormatterCallback
+    this.semanticFormatterCallback,
+    this.materialTapTargetSize,
   }) : assert(values != null),
        assert(min != null),
        assert(max != null),
@@ -332,6 +334,15 @@ class RangeSlider extends StatefulWidget {
   /// {@end-tool}
   final RangeSemanticFormatterCallback semanticFormatterCallback;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   // Touch width for the tap boundary of the slider thumbs.
   static const double _minTouchTargetWidth = kMinInteractiveDimension;
 
@@ -354,6 +365,7 @@ class RangeSlider extends StatefulWidget {
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
     properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('semanticFormatterCallback', semanticFormatterCallback));
+    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
   }
 }
 
@@ -598,6 +610,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.onChangeEnd,
     this.state,
     this.semanticFormatterCallback,
+    this.materialTapTargetSize,
   }) : super(key: key);
 
   final RangeValues values;
@@ -610,6 +623,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<RangeValues> onChangeEnd;
   final RangeSemanticFormatterCallback semanticFormatterCallback;
   final _RangeSliderState state;
+  final MaterialTapTargetSize materialTapTargetSize;
 
   @override
   _RenderRangeSlider createRenderObject(BuildContext context) {

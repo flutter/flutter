@@ -1549,6 +1549,7 @@ void main() {
       onChangeStart: null,
       semanticFormatterCallback: null,
       values: const RangeValues(25.0, 75.0),
+      materialTapTargetSize: MaterialTapTargetSize.padded,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -1565,7 +1566,8 @@ void main() {
       'label1: "lowerValue"',
       'label2: "upperValue"',
       'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
-      'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))'
+      'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
+      'materialTapTargetSize: MaterialTapTargetSize.padded',
     ]);
   });
 }

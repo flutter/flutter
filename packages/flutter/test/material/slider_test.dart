@@ -1564,6 +1564,7 @@ void main() {
       onChangeStart: null,
       semanticFormatterCallback: null,
       value: 50.0,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -1579,6 +1580,7 @@ void main() {
       'label: "Set a value"',
       'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
       'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
+      'materialTapTargetSize: MaterialTapTargetSize.padded'
     ]);
   });
 }
