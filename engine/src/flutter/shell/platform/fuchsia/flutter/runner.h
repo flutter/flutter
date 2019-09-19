@@ -17,7 +17,6 @@
 #include "component.h"
 #include "flutter/fml/macros.h"
 #include "lib/fidl/cpp/binding_set.h"
-#include "runner_context.h"
 #include "runtime/dart/utils/vmservice_object.h"
 #include "thread.h"
 
@@ -45,7 +44,7 @@ class Runner final : public fuchsia::sys::Runner {
     ActiveApplication() = default;
   };
 
-  std::unique_ptr<RunnerContext> runner_context_;
+  std::unique_ptr<sys::ComponentContext> context_;
   fidl::BindingSet<fuchsia::sys::Runner> active_applications_bindings_;
   std::unordered_map<const Application*, ActiveApplication>
       active_applications_;
