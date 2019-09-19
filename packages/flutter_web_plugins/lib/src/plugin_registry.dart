@@ -96,8 +96,20 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
   /// Sends a platform message from the platform side back to the framework.
   @override
   Future<ByteData> send(String channel, ByteData message) {
-    throw FlutterError(
-        'Cannot send messages from the platform side to the framework.');
+    final Completer<ByteData> completer = Completer<ByteData>();
+    ui.window.onPlatformMessage(channel, message, (ByteData reply) {
+      try {
+        completer.complete(reply);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'flutter web shell',
+          context: ErrorDescription('during a plugin-to-framework message'),
+        ));
+      }
+    });
+    return completer.future;
   }
 
   @override
