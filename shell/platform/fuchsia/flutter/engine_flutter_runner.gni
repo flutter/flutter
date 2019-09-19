@@ -60,8 +60,6 @@ template("flutter_runner") {
       "platform_view.h",
       "runner.cc",
       "runner.h",
-      "runner_context.cc",
-      "runner_context.h",
       "session_connection.cc",
       "session_connection.h",
       "surface.cc",
