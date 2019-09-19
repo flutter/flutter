@@ -235,31 +235,6 @@ void main() {
     expect(environment.buildDir.childFile('foo.out').existsSync(), false);
   }));
 
-  test('Does not crash when filesytem and cache are out of sync', () => testbed.run(() async {
-    final TestTarget testTarget = TestTarget((Environment envionment) async {
-      environment.buildDir.childFile('foo.out').createSync();
-    })
-      ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
-      ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/foo.out')];
-    fs.file('foo.dart').createSync();
-
-    await buildSystem.build(testTarget, environment);
-
-    expect(environment.buildDir.childFile('foo.out').existsSync(), true);
-    environment.buildDir.childFile('foo.out').deleteSync();
-
-    final TestTarget testTarget2 = TestTarget((Environment envionment) async {
-      environment.buildDir.childFile('bar.out').createSync();
-    })
-      ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
-      ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/bar.out')];
-
-    await buildSystem.build(testTarget2, environment);
-
-    expect(environment.buildDir.childFile('bar.out').existsSync(), true);
-    expect(environment.buildDir.childFile('foo.out').existsSync(), false);
-  }));
-
   test('reruns build if stamp is corrupted', () => testbed.run(() async {
     final TestTarget testTarget = TestTarget((Environment envionment) async {
       environment.buildDir.childFile('foo.out').createSync();
