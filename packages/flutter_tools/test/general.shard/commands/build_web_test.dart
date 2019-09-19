@@ -92,6 +92,15 @@ void main() {
     );
   }));
 
+  test('Refuses to build a debug build for web', () => testbed.run(() async {
+    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
+
+    expect(() => runner.run(<String>['build', 'web', '--debug']),
+        throwsA(isInstanceOf<UsageException>()));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+  }));
+
   test('Refuses to build for web when feature is disabled', () => testbed.run(() async {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
