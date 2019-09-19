@@ -689,7 +689,7 @@ class ReportedDurationTest {
       _device = null;
 
       final Map<String, dynamic> reportedDuration = <String, dynamic>{
-        'duration': duration
+        'duration': duration,
       };
       _device = null;
 

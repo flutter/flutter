@@ -228,7 +228,7 @@ Future<void> _runToolCoverage() async {
       environment: <String, String>{
         'FLUTTER_ROOT': flutterRoot,
         'SUBSHARD': subshards[i],
-      }
+      },
     );
   }
 }
@@ -299,7 +299,7 @@ Future<void> _flutterBuildDart2js(String relativePathToApplication, String targe
     expectNonZeroExit: expectNonZeroExit,
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
-    }
+    },
   );
   print('Done.');
 }
@@ -554,7 +554,7 @@ Future<void> _buildRunnerTest(
       args,
       workingDirectory: workingDirectory,
       environment: pubEnvironment,
-      beforeExit: formatter.finish
+      beforeExit: formatter.finish,
     );
     await _processTestOutput(formatter, testOutput, tableData);
   } else {
@@ -563,7 +563,7 @@ Future<void> _buildRunnerTest(
       args,
       workingDirectory:workingDirectory,
       environment:pubEnvironment,
-      removeLine: (String line) => line.contains('[INFO]')
+      removeLine: (String line) => line.contains('[INFO]'),
     );
   }
 }
