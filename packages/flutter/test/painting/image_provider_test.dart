@@ -144,11 +144,26 @@ void main() {
     });
 
     group(NetworkImage, () {
+      MockHttpClient httpClient;
+
+      setUp(() {
+        httpClient = MockHttpClient();
+        debugNetworkImageHttpClientProvider = () => httpClient;
+      });
+
+      tearDown(() {
+        debugNetworkImageHttpClientProvider = null;
+      });
+
       test('Expect thrown exception with statusCode', () async {
         final int errorStatusCode = HttpStatus.notFound;
         const String requestUrl = 'foo-url';
 
-        debugNetworkImageHttpClientProvider = returnErrorStatusCode;
+        final MockHttpClientRequest request = MockHttpClientRequest();
+        final MockHttpClientResponse response = MockHttpClientResponse();
+        when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
+        when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
+        when(response.statusCode).thenReturn(errorStatusCode);
 
         final Completer<dynamic> caughtError = Completer<dynamic>();
 
@@ -173,40 +188,32 @@ void main() {
       });
 
       test('Uses the HttpClient provided by debugNetworkImageHttpClientProvider if set', () async {
-        debugNetworkImageHttpClientProvider = throwOnAnyClient1;
-
+        when(httpClient.getUrl(any)).thenThrow('client1');
         final List<dynamic> capturedErrors = <dynamic>[];
 
         Future<void> loadNetworkImage() async {
           final NetworkImage networkImage = NetworkImage(nonconst('foo'));
-          final Completer<bool> completer = Completer<bool>();
-          networkImage.load(networkImage).addListener(ImageStreamListener(
-            (ImageInfo image, bool synchronousCall) {
-              completer.complete(true);
-            },
+          final ImageStreamCompleter completer = networkImage.load(networkImage);
+          completer.addListener(ImageStreamListener(
+            (ImageInfo image, bool synchronousCall) { },
             onError: (dynamic error, StackTrace stackTrace) {
               capturedErrors.add(error);
-              completer.complete(false);
             },
           ));
-          await completer.future;
+          await Future<void>.value();
         }
 
         await loadNetworkImage();
-        expect(capturedErrors, isNotNull);
-        expect(capturedErrors.length, 1);
-        expect(capturedErrors[0], equals('client1'));
-
-        debugNetworkImageHttpClientProvider = throwOnAnyClient2;
+        expect(capturedErrors, <dynamic>['client1']);
+        final MockHttpClient client2 = MockHttpClient();
+        when(client2.getUrl(any)).thenThrow('client2');
+        debugNetworkImageHttpClientProvider = () => client2;
         await loadNetworkImage();
-        expect(capturedErrors, isNotNull);
-        expect(capturedErrors.length, 2);
-        expect(capturedErrors[0], equals('client1'));
-        expect(capturedErrors[1], equals('client2'));
+        expect(capturedErrors, <dynamic>['client1', 'client2']);
       }, skip: isBrowser);
 
       test('Propagates http client errors during resolve()', () async {
-        debugNetworkImageHttpClientProvider = throwErrorOnAny;
+        when(httpClient.getUrl(any)).thenThrow(Error());
         bool uncaught = false;
 
         await runZoned(() async {
@@ -230,16 +237,40 @@ void main() {
       });
 
       test('Notifies listeners of chunk events', () async {
-        debugNetworkImageHttpClientProvider = respondOnAny;
-
         const int chunkSize = 8;
-        final List<Uint8List> chunks = createChunks(chunkSize);
-
+        final List<Uint8List> chunks = <Uint8List>[
+          for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize)
+            Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()),
+        ];
         final Completer<void> imageAvailable = Completer<void>();
+        final MockHttpClientRequest request = MockHttpClientRequest();
+        final MockHttpClientResponse response = MockHttpClientResponse();
+        when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
+        when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
+        when(response.statusCode).thenReturn(HttpStatus.ok);
+        when(response.contentLength).thenReturn(kTransparentImage.length);
+        when(response.listen(
+          any,
+          onDone: anyNamed('onDone'),
+          onError: anyNamed('onError'),
+          cancelOnError: anyNamed('cancelOnError'),
+        )).thenAnswer((Invocation invocation) {
+          final void Function(List<int>) onData = invocation.positionalArguments[0];
+          final void Function(Object) onError = invocation.namedArguments[#onError];
+          final void Function() onDone = invocation.namedArguments[#onDone];
+          final bool cancelOnError = invocation.namedArguments[#cancelOnError];
+
+          return Stream<Uint8List>.fromIterable(chunks).listen(
+            onData,
+            onDone: onDone,
+            onError: onError,
+            cancelOnError: cancelOnError,
+          );
+        });
+
         final ImageProvider imageProvider = NetworkImage(nonconst('foo'));
         final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
         final List<ImageChunkEvent> events = <ImageChunkEvent>[];
-
         result.addListener(ImageStreamListener(
           (ImageInfo image, bool synchronousCall) {
             imageAvailable.complete();
@@ -258,69 +289,6 @@ void main() {
           expect(events[i].expectedTotalBytes, kTransparentImage.length);
         }
       }, skip: isBrowser);
-
-      test('Uses http request headers', () async {
-        debugNetworkImageHttpClientProvider = respondOnAnyWithHeaders;
-
-        final Completer<bool> imageAvailable = Completer<bool>();
-        final ImageProvider imageProvider = NetworkImage(nonconst('foo'),
-          headers: const <String, String>{'flutter': 'flutter'},
-        );
-        final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-        result.addListener(ImageStreamListener(
-              (ImageInfo image, bool synchronousCall) {
-            imageAvailable.complete(true);
-          },
-          onError: (dynamic error, StackTrace stackTrace) {
-            imageAvailable.completeError(error, stackTrace);
-          },
-        ));
-        expect(await imageAvailable.future, isTrue);
-      }, skip: isBrowser);
-
-      test('Handles http stream errors', () async {
-        debugNetworkImageHttpClientProvider = respondErrorOnAny;
-
-        final Completer<String> imageAvailable = Completer<String>();
-        final ImageProvider imageProvider = NetworkImage(nonconst('bar'));
-        final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-        final List<ImageChunkEvent> events = <ImageChunkEvent>[];
-
-        result.addListener(ImageStreamListener(
-          (ImageInfo image, bool synchronousCall) {
-            imageAvailable.complete(null);
-          },
-          onChunk: (ImageChunkEvent event) {
-            events.add(event);
-          },
-          onError: (dynamic error, StackTrace stackTrace) {
-            imageAvailable.complete(error);
-          },
-        ));
-        final String error = await imageAvailable.future;
-        expect(error, 'failed chunk');
-      }, skip: isBrowser);
-
-      test('Handles http connection errors', () async {
-        debugNetworkImageHttpClientProvider = respondErrorOnConnection;
-
-        final Completer<dynamic> imageAvailable = Completer<dynamic>();
-        final ImageProvider imageProvider = NetworkImage(nonconst('baz'));
-        final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-        result.addListener(ImageStreamListener(
-              (ImageInfo image, bool synchronousCall) {
-            imageAvailable.complete(null);
-          },
-          onError: (dynamic error, StackTrace stackTrace) {
-            imageAvailable.complete(error);
-          },
-        ));
-        final dynamic err = await imageAvailable.future;
-        expect(err, const TypeMatcher<NetworkImageLoadException>()
-            .having((NetworkImageLoadException e) => e.toString(), 'e', startsWith('HTTP request failed'))
-            .having((NetworkImageLoadException e) => e.statusCode, 'statusCode', HttpStatus.badGateway)
-            .having((NetworkImageLoadException e) => e.uri.toString(), 'uri', endsWith('/baz')));
-      }, skip: isBrowser);
     });
   });
 }
@@ -328,169 +296,3 @@ void main() {
 class MockHttpClient extends Mock implements HttpClient {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
-class MockHttpHeaders extends Mock implements HttpHeaders {}
-
-HttpClient returnErrorStatusCode() {
-  final int errorStatusCode = HttpStatus.notFound;
-
-  debugNetworkImageHttpClientProvider = returnErrorStatusCode;
-
-  final MockHttpClientRequest request = MockHttpClientRequest();
-  final MockHttpClientResponse response = MockHttpClientResponse();
-  final MockHttpClient httpClient = MockHttpClient();
-  when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
-  when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
-  when(response.statusCode).thenReturn(errorStatusCode);
-
-  return httpClient;
-}
-
-HttpClient throwOnAnyClient1() {
-  final MockHttpClient httpClient = MockHttpClient();
-  when(httpClient.getUrl(any)).thenThrow('client1');
-  return httpClient;
-}
-
-HttpClient throwOnAnyClient2() {
-  final MockHttpClient httpClient = MockHttpClient();
-  when(httpClient.getUrl(any)).thenThrow('client2');
-  return httpClient;
-}
-
-HttpClient throwErrorOnAny() {
-  final MockHttpClient httpClient = MockHttpClient();
-  when(httpClient.getUrl(any)).thenThrow(Exception());
-  return httpClient;
-}
-
-HttpClient respondOnAny() {
-  const int chunkSize = 8;
-  final List<Uint8List> chunks = createChunks(chunkSize);
-  final MockHttpClientRequest request = MockHttpClientRequest();
-  final MockHttpClientResponse response = MockHttpClientResponse();
-  final MockHttpClient httpClient = MockHttpClient();
-  when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
-  when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
-  when(response.statusCode).thenReturn(HttpStatus.ok);
-  when(response.contentLength).thenReturn(kTransparentImage.length);
-  when(response.listen(
-    any,
-    onDone: anyNamed('onDone'),
-    onError: anyNamed('onError'),
-    cancelOnError: anyNamed('cancelOnError'),
-  )).thenAnswer((Invocation invocation) {
-    final void Function(Uint8List) onData = invocation.positionalArguments[0];
-    final void Function(Object) onError = invocation.namedArguments[#onError];
-    final void Function() onDone = invocation.namedArguments[#onDone];
-    final bool cancelOnError = invocation.namedArguments[#cancelOnError];
-
-    return Stream<Uint8List>.fromIterable(chunks).listen(
-      onData,
-      onDone: onDone,
-      onError: onError,
-      cancelOnError: cancelOnError,
-    );
-  });
-  return httpClient;
-}
-
-HttpClient respondOnAnyWithHeaders() {
-  final List<Invocation> invocations = <Invocation>[];
-
-  const int chunkSize = 8;
-  final List<Uint8List> chunks = createChunks(chunkSize);
-  final MockHttpClientRequest request = MockHttpClientRequest();
-  final MockHttpClientResponse response = MockHttpClientResponse();
-  final MockHttpClient httpClient = MockHttpClient();
-  final MockHttpHeaders headers = MockHttpHeaders();
-  when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
-  when(request.headers).thenReturn(headers);
-  when(headers.add(any, any)).thenAnswer((Invocation invocation) {
-    invocations.add(invocation);
-  });
-
-  when(request.close()).thenAnswer((Invocation invocation) {
-    if (invocations.length == 1 &&
-        invocations[0].positionalArguments.length == 2 &&
-        invocations[0].positionalArguments[0] == 'flutter' &&
-        invocations[0].positionalArguments[1] == 'flutter') {
-      return Future<HttpClientResponse>.value(response);
-    } else {
-      return Future<HttpClientResponse>.value(null);
-    }
-  });
-  when(response.statusCode).thenReturn(HttpStatus.ok);
-  when(response.contentLength).thenReturn(kTransparentImage.length);
-  when(response.listen(
-    any,
-    onDone: anyNamed('onDone'),
-    onError: anyNamed('onError'),
-    cancelOnError: anyNamed('cancelOnError'),
-  )).thenAnswer((Invocation invocation) {
-    final void Function(Uint8List) onData = invocation.positionalArguments[0];
-    final void Function(Object) onError = invocation.namedArguments[#onError];
-    final void Function() onDone = invocation.namedArguments[#onDone];
-    final bool cancelOnError = invocation.namedArguments[#cancelOnError];
-
-    return Stream<Uint8List>.fromIterable(chunks).listen(
-      onData,
-      onDone: onDone,
-      onError: onError,
-      cancelOnError: cancelOnError,
-    );
-  });
-  return httpClient;
-}
-
-HttpClient respondErrorOnConnection() {
-  final MockHttpClientRequest request = MockHttpClientRequest();
-  final MockHttpClientResponse response = MockHttpClientResponse();
-  final MockHttpClient httpClient = MockHttpClient();
-  when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
-  when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
-  when(response.statusCode).thenReturn(HttpStatus.badGateway);
-  return httpClient;
-}
-
-HttpClient respondErrorOnAny() {
-  const int chunkSize = 8;
-  final MockHttpClientRequest request = MockHttpClientRequest();
-  final MockHttpClientResponse response = MockHttpClientResponse();
-  final MockHttpClient httpClient = MockHttpClient();
-  when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
-  when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
-  when(response.statusCode).thenReturn(HttpStatus.ok);
-  when(response.contentLength).thenReturn(kTransparentImage.length);
-  when(response.listen(
-    any,
-    onDone: anyNamed('onDone'),
-    onError: anyNamed('onError'),
-    cancelOnError: anyNamed('cancelOnError'),
-  )).thenAnswer((Invocation invocation) {
-    final void Function(Uint8List) onData = invocation.positionalArguments[0];
-    final void Function(Object) onError = invocation.namedArguments[#onError];
-    final void Function() onDone = invocation.namedArguments[#onDone];
-    final bool cancelOnError = invocation.namedArguments[#cancelOnError];
-
-    return createRottenChunks(chunkSize).listen(
-      onData,
-      onDone: onDone,
-      onError: onError,
-      cancelOnError: cancelOnError,
-    );
-  });
-  return httpClient;
-}
-
-List<Uint8List> createChunks(int chunkSize) {
-  final List<Uint8List> chunks = <Uint8List>[
-    for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize)
-      Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()),
-  ];
-  return chunks;
-}
-
-Stream<Uint8List> createRottenChunks(int chunkSize) async* {
-  yield Uint8List.fromList(kTransparentImage.take(chunkSize).toList());
-  throw 'failed chunk';
-}
