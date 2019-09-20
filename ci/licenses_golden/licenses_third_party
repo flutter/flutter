@@ -1,4 +1,4 @@
-Signature: aefef952c94d4d72c8d1bdab183b9a76
+Signature: 2e9aa907c94f456b55acfc3bac3c34cf
 
 UNUSED LICENSES:
 
@@ -716,6 +716,8 @@ FILE: ../../../third_party/vulkan/include/vulkan/vulkan_xcb.h
 FILE: ../../../third_party/vulkan/include/vulkan/vulkan_xlib.h
 FILE: ../../../third_party/vulkan/include/vulkan/vulkan_xlib_xrandr.h
 FILE: ../../../third_party/wuffs/cmd/commonflags/commonflags.go
+FILE: ../../../third_party/wuffs/cmd/ractool/data.go
+FILE: ../../../third_party/wuffs/cmd/ractool/gen.go
 FILE: ../../../third_party/wuffs/cmd/ractool/main.go
 FILE: ../../../third_party/wuffs/cmd/wuffs-c/genlib.go
 FILE: ../../../third_party/wuffs/cmd/wuffs-c/main.go
@@ -778,17 +780,35 @@ FILE: ../../../third_party/wuffs/lang/token/token.go
 FILE: ../../../third_party/wuffs/lang/wuffsroot/wuffsroot.go
 FILE: ../../../third_party/wuffs/lib/base38/base38.go
 FILE: ../../../third_party/wuffs/lib/base38/base38_test.go
+FILE: ../../../third_party/wuffs/lib/cgozlib/cgozlib.go
+FILE: ../../../third_party/wuffs/lib/cgozlib/cgozlib_test.go
+FILE: ../../../third_party/wuffs/lib/cgozlib/notcgo.go
+FILE: ../../../third_party/wuffs/lib/cgozstd/cgozstd.go
+FILE: ../../../third_party/wuffs/lib/cgozstd/cgozstd_test.go
+FILE: ../../../third_party/wuffs/lib/cgozstd/notcgo.go
+FILE: ../../../third_party/wuffs/lib/compression/compression.go
+FILE: ../../../third_party/wuffs/lib/compression/compression_test.go
 FILE: ../../../third_party/wuffs/lib/flatecut/flatecut.go
 FILE: ../../../third_party/wuffs/lib/flatecut/flatecut_test.go
 FILE: ../../../third_party/wuffs/lib/interval/interval.go
 FILE: ../../../third_party/wuffs/lib/interval/interval_test.go
 FILE: ../../../third_party/wuffs/lib/interval/radial_test.go
+FILE: ../../../third_party/wuffs/lib/rac/chunk_reader.go
+FILE: ../../../third_party/wuffs/lib/rac/chunk_writer.go
+FILE: ../../../third_party/wuffs/lib/rac/conc_reader.go
 FILE: ../../../third_party/wuffs/lib/rac/example_test.go
 FILE: ../../../third_party/wuffs/lib/rac/rac.go
+FILE: ../../../third_party/wuffs/lib/rac/rac_test.go
+FILE: ../../../third_party/wuffs/lib/rac/reader.go
 FILE: ../../../third_party/wuffs/lib/rac/writer.go
-FILE: ../../../third_party/wuffs/lib/rac/writer_test.go
+FILE: ../../../third_party/wuffs/lib/raczlib/example_test.go
+FILE: ../../../third_party/wuffs/lib/raczlib/make_cgo.go
+FILE: ../../../third_party/wuffs/lib/raczlib/make_notcgo.go
 FILE: ../../../third_party/wuffs/lib/raczlib/raczlib.go
-FILE: ../../../third_party/wuffs/lib/raczlib/writer.go
+FILE: ../../../third_party/wuffs/lib/raczlib/raczlib_test.go
+FILE: ../../../third_party/wuffs/lib/raczstd/example_test.go
+FILE: ../../../third_party/wuffs/lib/raczstd/raczstd.go
+FILE: ../../../third_party/wuffs/lib/readerat/readerat.go
 FILE: ../../../third_party/wuffs/lib/zlibcut/example_test.go
 FILE: ../../../third_party/wuffs/lib/zlibcut/zlibcut.go
 FILE: ../../../third_party/wuffs/lib/zlibcut/zlibcut_test.go
@@ -813,6 +833,7 @@ FILE: ../../../third_party/wuffs/script/print-crc32-example.go
 FILE: ../../../third_party/wuffs/script/print-crc32-magic-numbers.go
 FILE: ../../../third_party/wuffs/script/print-deflate-magic-numbers.go
 FILE: ../../../third_party/wuffs/script/print-lzw-example.go
+FILE: ../../../third_party/wuffs/script/rac-random-seek-test.go
 FILE: ../../../third_party/wuffs/script/wuffs-deflate-decoder-decode-huffman.c
 FILE: ../../../third_party/wuffs/std/adler32/common_adler32.wuffs
 FILE: ../../../third_party/wuffs/std/crc32/common_crc32.wuffs
