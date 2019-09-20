@@ -127,14 +127,14 @@ void main() {
         );
         return Future<ProcessResult>.value(result);
       });
-      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceLockdownError>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
       Artifacts: () => mockArtifacts,
     });
 
-    testUsingContext('getInfoForDevice throws ToolExit lockdownd fails for unknown reason', () async {
+    testUsingContext('getInfoForDevice throws IOSDeviceLockdownError when lockdownd fails for unknown reason', () async {
       when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
       when(mockProcessManager.run(
         <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
@@ -148,7 +148,7 @@ void main() {
         );
         return Future<ProcessResult>.value(result);
       });
-      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsToolExit());
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceLockdownError>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
@@ -169,7 +169,7 @@ void main() {
         );
         return Future<ProcessResult>.value(result);
       });
-      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceLockdownError>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,

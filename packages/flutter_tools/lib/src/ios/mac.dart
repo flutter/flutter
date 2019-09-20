@@ -44,9 +44,9 @@ class IOSDeviceNotFoundError implements Exception {
 }
 
 /// Exception representing an attempt to find information on an iOS device
-/// that failed because the user had not paired the device with the host yet.
-class IOSDeviceNotTrustedError implements Exception {
-  const IOSDeviceNotTrustedError(this.message, this.lockdownCode);
+/// that failed.
+class IOSDeviceLockdownError implements Exception {
+  const IOSDeviceLockdownError(this.message, this.lockdownCode);
 
   /// The error message to show to the user.
   final String message;
@@ -210,20 +210,23 @@ class IMobileDevice {
       }
       if (result.exitCode == 255 && result.stderr != null && result.stderr.contains('Could not connect to lockdownd')) {
         if (result.stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
-          throw const IOSDeviceNotTrustedError(
+          throw const IOSDeviceLockdownError(
             'Device info unavailable. Is the device asking to "Trust This Computer?"',
             LockdownReturnCode.pairingDialogResponsePending,
           );
         }
         if (result.stderr.contains('error code -${LockdownReturnCode.invalidHostId.code}')) {
-          throw const IOSDeviceNotTrustedError(
+          throw const IOSDeviceLockdownError(
             'Device info unavailable. Device pairing "trust" may have been revoked.',
             LockdownReturnCode.invalidHostId,
           );
         }
       }
       if (result.exitCode != 0) {
-        throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
+        throw IOSDeviceLockdownError(
+          'ideviceinfo returned an error:\n${result.stderr}',
+          LockdownReturnCode.invalidHostId,
+        );
       }
       return result.stdout.trim();
     } on ProcessException {
