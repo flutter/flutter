@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:typed_data';
 
 /// Signature for getting notified when chunks of bytes are received while
@@ -23,11 +22,11 @@ import 'dart:typed_data';
 /// returned to the client and the total size of the response may not be known
 /// until the request has been fully processed).
 ///
-/// This is used in [getHttpClientResponseBytes].
+/// This is used in [consolidateHttpClientResponseBytes].
 typedef BytesReceivedCallback = void Function(int cumulative, int total);
 
 /// Efficiently converts the response body of an [HttpClientResponse] into a
-/// [TransferableTypedData].
+/// [Uint8List].
 ///
 /// The future returned will forward any error emitted by `response`.
 ///
@@ -44,13 +43,13 @@ typedef BytesReceivedCallback = void Function(int cumulative, int total);
 /// bytes from this method (assuming the response is sending compressed bytes),
 /// set both [HttpClient.autoUncompress] to false and the `autoUncompress`
 /// parameter to false.
-Future<TransferableTypedData> getHttpClientResponseBytes(
+Future<Uint8List> consolidateHttpClientResponseBytes(
   HttpClientResponse response, {
   bool autoUncompress = true,
   BytesReceivedCallback onBytesReceived,
 }) {
   assert(autoUncompress != null);
-  final Completer<TransferableTypedData> completer = Completer<TransferableTypedData>.sync();
+  final Completer<Uint8List> completer = Completer<Uint8List>.sync();
 
   final _OutputBuffer output = _OutputBuffer();
   ByteConversionSink sink = output;
@@ -90,54 +89,41 @@ Future<TransferableTypedData> getHttpClientResponseBytes(
     }
   }, onDone: () {
     sink.close();
-    completer.complete(TransferableTypedData.fromList(output.chunks));
+    completer.complete(output.bytes);
   }, onError: completer.completeError, cancelOnError: true);
 
   return completer.future;
 }
 
-/// Efficiently converts the response body of an [HttpClientResponse] into a
-/// [Uint8List].
-///
-/// (This method is deprecated - use [getHttpClientResponseBytes] instead.)
-///
-/// The future returned will forward any error emitted by `response`.
-///
-/// The `onBytesReceived` callback, if specified, will be invoked for every
-/// chunk of bytes that is received while consolidating the response bytes.
-/// If the callback throws an error, processing of the response will halt, and
-/// the returned future will complete with the error that was thrown by the
-/// callback. For more information on how to interpret the parameters to the
-/// callback, see the documentation on [BytesReceivedCallback].
-///
-/// If the `response` is gzipped and the `autoUncompress` parameter is true,
-/// this will automatically un-compress the bytes in the returned list if it
-/// hasn't already been done via [HttpClient.autoUncompress]. To get compressed
-/// bytes from this method (assuming the response is sending compressed bytes),
-/// set both [HttpClient.autoUncompress] to false and the `autoUncompress`
-/// parameter to false.
-@Deprecated('Use getHttpClientResponseBytes instead')
-Future<Uint8List> consolidateHttpClientResponseBytes(
-  HttpClientResponse response, {
-  bool autoUncompress = true,
-  BytesReceivedCallback onBytesReceived,
-}) async {
-  final TransferableTypedData bytes = await getHttpClientResponseBytes(
-    response,
-    autoUncompress: autoUncompress,
-    onBytesReceived: onBytesReceived,
-  );
-  return bytes.materialize().asUint8List();
-}
-
 class _OutputBuffer extends ByteConversionSinkBase {
-  final List<Uint8List> chunks = <Uint8List>[];
+  List<List<int>> _chunks = <List<int>>[];
+  int _contentLength = 0;
+  Uint8List _bytes;
 
   @override
   void add(List<int> chunk) {
-    chunks.add(chunk);
+    assert(_bytes == null);
+    _chunks.add(chunk);
+    _contentLength += chunk.length;
   }
 
   @override
-  void close() {}
+  void close() {
+    if (_bytes != null) {
+      // We've already been closed; this is a no-op
+      return;
+    }
+    _bytes = Uint8List(_contentLength);
+    int offset = 0;
+    for (List<int> chunk in _chunks) {
+      _bytes.setRange(offset, offset + chunk.length, chunk);
+      offset += chunk.length;
+    }
+    _chunks = null;
+  }
+
+  Uint8List get bytes {
+    assert(_bytes != null);
+    return _bytes;
+  }
 }
