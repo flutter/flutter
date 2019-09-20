@@ -101,18 +101,6 @@ void ShellTest::RunEngine(Shell* shell, RunConfiguration configuration) {
   latch.Wait();
 }
 
-void ShellTest::RestartEngine(Shell* shell, RunConfiguration configuration) {
-  fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(
-      shell->GetTaskRunners().GetUITaskRunner(),
-      [shell, &latch, &configuration]() {
-        bool restarted = shell->engine_->Restart(std::move(configuration));
-        ASSERT_TRUE(restarted);
-        latch.Signal();
-      });
-  latch.Wait();
-}
-
 void ShellTest::PumpOneFrame(Shell* shell) {
   // Set viewport to nonempty, and call Animator::BeginFrame to make the layer
   // tree pipeline nonempty. Without either of this, the layer tree below
@@ -141,16 +129,6 @@ void ShellTest::PumpOneFrame(Shell* shell) {
         runtime_delegate->Render(std::move(layer_tree));
         latch.Signal();
       });
-  latch.Wait();
-}
-
-void ShellTest::DispatchFakePointerData(Shell* shell) {
-  fml::AutoResetWaitableEvent latch;
-  shell->GetTaskRunners().GetPlatformTaskRunner()->PostTask([&latch, shell]() {
-    auto packet = std::make_unique<PointerDataPacket>(1);
-    shell->OnPlatformViewDispatchPointerDataPacket(std::move(packet));
-    latch.Signal();
-  });
   latch.Wait();
 }
 
@@ -242,13 +220,6 @@ ShellTestPlatformView::~ShellTestPlatformView() = default;
 // |PlatformView|
 std::unique_ptr<Surface> ShellTestPlatformView::CreateRenderingSurface() {
   return std::make_unique<GPUSurfaceGL>(this, true);
-}
-
-// |PlatformView|
-PointerDataDispatcherMaker ShellTestPlatformView::GetDispatcherMaker() {
-  return [](DefaultPointerDataDispatcher::Delegate& delegate) {
-    return std::make_unique<SmoothPointerDataDispatcher>(delegate);
-  };
 }
 
 // |GPUSurfaceGLDelegate|
