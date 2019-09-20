@@ -275,6 +275,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
       startPaused: true,
       observatoryPort: command.observatoryPort,
       verboseSystemLogs: command.verboseSystemLogs,
+      cacheSkSL: command.cacheSkSL,
     ),
     platformArgs: platformArgs,
     prebuiltApplication: !command.shouldBuild,

@@ -486,6 +486,7 @@ class DebuggingOptions {
     this.traceSkia = false,
     this.traceSystrace = false,
     this.dumpSkpOnShaderCompilation = false,
+    this.cacheSkSL = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
     this.observatoryPort,
@@ -506,6 +507,7 @@ class DebuggingOptions {
       traceSkia = false,
       traceSystrace = false,
       dumpSkpOnShaderCompilation = false,
+      cacheSkSL = false,
       verboseSystemLogs = false,
       observatoryPort = null,
       browserLaunch = true;
@@ -521,6 +523,7 @@ class DebuggingOptions {
   final bool traceSkia;
   final bool traceSystrace;
   final bool dumpSkpOnShaderCompilation;
+  final bool cacheSkSL;
   final bool useTestFonts;
   final bool verboseSystemLogs;
   /// Whether to invoke webOnlyInitializePlatform in Flutter for web.
