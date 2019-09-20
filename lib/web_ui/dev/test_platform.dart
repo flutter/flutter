@@ -49,7 +49,7 @@ import 'goldens.dart';
 const int _kChromeDevtoolsPort = 12345;
 const int _kMaxScreenshotWidth = 1024;
 const int _kMaxScreenshotHeight = 1024;
-const double _kMaxDiffRateFailure = 1.0/100000; // 0.001%
+const double _kMaxDiffRateFailure = 0.211/100; // 0.211%
 
 class BrowserPlatform extends PlatformPlugin {
   /// Starts the server.
