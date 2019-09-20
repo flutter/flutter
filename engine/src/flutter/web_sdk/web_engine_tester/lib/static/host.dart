@@ -184,8 +184,8 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
   _iframes[id] = iframe;
   iframe
     ..src = url
-    ..width = '500'
-    ..height = '500';
+    ..width = '1000'
+    ..height = '1000';
   document.body.children.add(iframe);
 
   // Use this to communicate securely with the iframe.
