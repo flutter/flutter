@@ -926,7 +926,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// ```
 /// {@end-tool}
 ///
-/// ![A spinning container.](https://flutter.github.io/assets-for-api-docs/assets/widgets/aniamted_builder.mp4)
+/// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/widgets/aniamted_builder.mp4}
 ///
 /// See also:
 ///
