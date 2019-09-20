@@ -1262,9 +1262,9 @@ plugin2=${plugin2.path}
         buildDirectory: buildDirectory.path,
       );
 
-      final String initScript = fs.path.join(Cache.flutterRoot, 'packages',
+      final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
+      final String initScript = fs.path.join(flutterRoot, 'packages',
           'flutter_tools', 'gradle', 'aar_init_script.gradle');
-      final String flutterRoot = fs.path.join(Cache.flutterRoot);
       verify(mockProcessManager.run(
         <String>[
           'gradlew',
