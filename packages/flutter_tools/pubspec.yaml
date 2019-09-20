@@ -35,7 +35,7 @@ dependencies:
   web_socket_channel: 1.0.15
   webkit_inspection_protocol: 0.5.0
   xml: 3.5.0
-  yaml: 2.1.16
+  yaml: 2.2.0
   flutter_goldens_client:
     path: ../flutter_goldens_client
 
@@ -127,4 +127,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 509a
+# PUBSPEC CHECKSUM: 5564
