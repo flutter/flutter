@@ -36,7 +36,6 @@ task:
         cd $ENGINE_PATH/src
         ./flutter/testing/run_tests.sh host_debug_unopt
       test_web_engine_script: |
-        google-chrome --version
         cd $ENGINE_PATH/src/flutter/web_sdk/web_engine_tester
         $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
         cd $ENGINE_PATH/src/flutter/lib/web_ui
@@ -44,6 +43,9 @@ task:
         export FELT="$ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dart dev/felt.dart"
         $FELT check-licenses
         CHROME_NO_SANDBOX=true $FELT test
+      always:
+        web_engine_test_artifacts:
+          path: test_results/*
       fetch_framework_script: |
         mkdir -p $FRAMEWORK_PATH
         cd $FRAMEWORK_PATH
