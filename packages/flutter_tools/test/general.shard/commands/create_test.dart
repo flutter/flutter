@@ -410,7 +410,7 @@ void main() {
   }, timeout: allowForRemotePubInvocation);
 
 
-  testUsingContext('androidx is used by default in an app project', () async {
+  testUsingContext('androidx app project', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -418,7 +418,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--androidx', projectDir.path]);
 
     void expectExists(String relPath) {
       expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
@@ -452,7 +452,7 @@ void main() {
     expect(actualContents.contains('useAndroidX'), false);
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext('androidx is used by default in a module project', () async {
+  testUsingContext('androidx app module', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -460,7 +460,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--template=module', '--no-pub', projectDir.path]);
+    await runner.run(<String>['create', '--template=module', '--no-pub', '--androidx', projectDir.path]);
 
     final FlutterProject project = FlutterProject.fromDirectory(projectDir);
     expect(
@@ -469,7 +469,7 @@ void main() {
     );
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext('non androidx module', () async {
+  testUsingContext('non androidx app module', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -486,7 +486,7 @@ void main() {
     );
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext('androidx is used by default in a plugin project', () async {
+  testUsingContext('androidx plugin project', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -494,7 +494,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--androidx', projectDir.path]);
 
     void expectExists(String relPath) {
       expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
