@@ -627,16 +627,23 @@ class FlutterPlugin implements Plugin<Project> {
                     dependsOn cleanPackageAssets
                     into packageAssets.outputDir
                 } else {
-                    dependsOn variant.mergeAssets
-                    dependsOn "clean${variant.mergeAssets.name.capitalize()}"
-                    variant.mergeAssets.mustRunAfter("clean${variant.mergeAssets.name.capitalize()}")
-                    into variant.mergeAssets.outputDir
+                    // `variant.mergeAssets` will be removed at the end of 2019.
+                    def mergeAssets = variant.hasProperty("mergeAssetsProvider") ?
+                        variant.mergeAssetsProvider.get() : variant.mergeAssets
+                    dependsOn mergeAssets
+                    dependsOn "clean${mergeAssets.name.capitalize()}"
+                    mergeAssets.mustRunAfter("clean${mergeAssets.name.capitalize()}")
+                    into mergeAssets.outputDir
                 }
                 compileTasks.each { flutterTask ->
                     with flutterTask.assets
                 }
             }
-            variant.outputs.first().processResources.dependsOn(copyFlutterAssetsTask)
+            def variantOutput = variant.outputs.first()
+            // `variantOutput.processResources` will be removed at the end of 2019.
+            def processResources = variantOutput.hasProperty("processResourcesProvider") ?
+                variantOutput.processResourcesProvider.get() : variantOutput.processResources
+            processResources.dependsOn(copyFlutterAssetsTask)
         }
         if (project.android.hasProperty("applicationVariants")) {
             project.android.applicationVariants.all addFlutterDeps
