@@ -94,7 +94,7 @@ FlutterPlatform installHook({
   Uri projectRootDirectory,
   FlutterProject flutterProject,
   String icudtlPath,
-  PlatformPluginRegistration platformPluginRegistration
+  PlatformPluginRegistration platformPluginRegistration,
 }) {
   assert(enableObservatory || (!startPaused && observatoryPort == null));
 
@@ -104,7 +104,7 @@ FlutterPlatform installHook({
       <Runtime>[Runtime.vm],
         () {
         return platform;
-      }
+      },
     );
   };
   final FlutterPlatform platform = FlutterPlatform(

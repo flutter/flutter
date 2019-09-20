@@ -46,7 +46,7 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
         'build',
         'flutter_web',
         flutterProject.manifest.appName,
-        '${fs.path.withoutExtension(target)}_web_entrypoint.dart.js'
+        '${fs.path.withoutExtension(target)}_web_entrypoint.dart.js',
       );
       fs.file(outputPath).copySync(fs.path.join(outputDir.path, 'main.dart.js'));
       fs.file('$outputPath.map').copySync(fs.path.join(outputDir.path, 'main.dart.js.map'));

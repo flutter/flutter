@@ -93,7 +93,7 @@ void main() {
     when(mockFlutterDevice.connect(
       reloadSources: anyNamed('reloadSources'),
       restart: anyNamed('restart'),
-      compileExpression: anyNamed('compileExpression')
+      compileExpression: anyNamed('compileExpression'),
     )).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.setupDevFS(any, any, packagesFilePath: anyNamed('packagesFilePath')))
       .thenAnswer((Invocation invocation) async {
@@ -223,7 +223,7 @@ void main() {
     expect(verify(flutterUsage.sendEvent('hot', 'reload',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
-                   getNameForTargetPlatform(TargetPlatform.android_arm))
+                   getNameForTargetPlatform(TargetPlatform.android_arm)),
     );
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
@@ -253,7 +253,7 @@ void main() {
     expect(verify(flutterUsage.sendEvent('hot', 'restart',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
-                   getNameForTargetPlatform(TargetPlatform.android_arm))
+                   getNameForTargetPlatform(TargetPlatform.android_arm)),
     );
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),

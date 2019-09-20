@@ -384,7 +384,7 @@ class HotRunner extends ResidentRunner {
 
   Future<OperationResult> _restartFromSources({
     String reason,
-    bool benchmarkMode = false
+    bool benchmarkMode = false,
   }) async {
     if (!_isPaused()) {
       printTrace('Refreshing active FlutterViews before restarting.');
@@ -520,7 +520,7 @@ class HotRunner extends ResidentRunner {
     bool fullRestart = false,
     bool pauseAfterRestart = false,
     String reason,
-    bool benchmarkMode = false
+    bool benchmarkMode = false,
   }) async {
     String targetPlatform;
     String sdkName;
@@ -663,7 +663,7 @@ class HotRunner extends ResidentRunner {
     bool emulator,
     bool pause = false,
     String reason,
-    void Function(String message) onSlow
+    void Function(String message) onSlow,
   }) async {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
