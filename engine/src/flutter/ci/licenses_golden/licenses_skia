@@ -1,4 +1,4 @@
-Signature: b8b6d42c21a66758623c6ce56b7bac2f
+Signature: 7847181e7e6cde1af4ab06479d0286a4
 
 UNUSED LICENSES:
 
@@ -3785,6 +3785,7 @@ FILE: ../../../third_party/skia/gm/crbug_908646.cpp
 FILE: ../../../third_party/skia/gm/crbug_946965.cpp
 FILE: ../../../third_party/skia/gm/patharcto.cpp
 FILE: ../../../third_party/skia/gm/runtimecolorfilter.cpp
+FILE: ../../../third_party/skia/gm/runtimefunctions.cpp
 FILE: ../../../third_party/skia/gm/runtimeshader.cpp
 FILE: ../../../third_party/skia/gm/skbug_9319.cpp
 FILE: ../../../third_party/skia/include/effects/SkImageFilters.h
