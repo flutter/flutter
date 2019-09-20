@@ -25,7 +25,7 @@ int main(int argc, char const* argv[]) {
   }
 
   // Set up the process-wide /tmp memfs.
-  dart_utils::SetupRunnerTemp();
+  dart_utils::RunnerTemp runner_temp;
 
   FML_DLOG(INFO) << "Flutter application services initialized.";
 
