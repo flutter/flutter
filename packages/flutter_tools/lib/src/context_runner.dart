@@ -104,6 +104,7 @@ Future<T> runInContext<T>(
       MacOSWorkflow: () => const MacOSWorkflow(),
       MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
       OperatingSystemUtils: () => OperatingSystemUtils(),
+      ProcessInfo: () => ProcessInfo(),
       ProcessUtils: () => ProcessUtils(),
       SimControl: () => SimControl(),
       Stdio: () => const Stdio(),
