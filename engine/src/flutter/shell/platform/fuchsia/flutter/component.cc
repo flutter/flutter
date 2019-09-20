@@ -110,7 +110,7 @@ Application::Application(
   }
 
   // Setup /tmp to be mapped to the process-local memfs.
-  dart_utils::SetupComponentTemp(fdio_ns_.get());
+  dart_utils::RunnerTemp::SetupComponent(fdio_ns_.get());
 
   // LaunchInfo::flat_namespace optional.
   for (size_t i = 0; i < startup_info.flat_namespace.paths.size(); ++i) {

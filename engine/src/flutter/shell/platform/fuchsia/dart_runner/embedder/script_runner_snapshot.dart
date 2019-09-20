@@ -28,4 +28,4 @@ import 'package:lib.app.dart/app.dart';
 import 'package:fidl/fidl.dart';
 
 // From //sdk/fidl/fuchsia.modular
-import 'package:fidl_fuchsia_modular/fidl.dart';
+import 'package:fidl_fuchsia_modular/fidl_async.dart';

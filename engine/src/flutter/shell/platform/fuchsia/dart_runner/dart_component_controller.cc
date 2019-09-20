@@ -56,6 +56,11 @@ void AfterTask(async_loop_t*, void*) {
 }
 
 constexpr async_loop_config_t kLoopConfig = {
+    .default_accessors =
+        {
+            .getter = async_get_default_dispatcher,
+            .setter = async_set_default_dispatcher,
+        },
     .make_default_for_current_thread = true,
     .epilogue = &AfterTask,
 };
@@ -157,7 +162,7 @@ bool DartComponentController::SetupNamespace() {
     return false;
   }
 
-  dart_utils::SetupComponentTemp(namespace_);
+  dart_utils::RunnerTemp::SetupComponent(namespace_);
 
   for (size_t i = 0; i < flat->paths.size(); ++i) {
     if (flat->paths.at(i) == kTmpPath) {
