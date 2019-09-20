@@ -418,11 +418,10 @@ DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
     ..sort(_byBasename);
 
   for (_Asset main in sortedKeys) {
-    final List<String> variants = <String>[];
-    for (_Asset variant in assetVariants[main]) {
-      variants.add(variant.entryUri.path);
-    }
-    jsonObject[main.entryUri.path] = variants;
+    jsonObject[main.entryUri.path] = <String>[
+      for (_Asset variant in assetVariants[main])
+        variant.entryUri.path,
+    ];
   }
   return DevFSStringContent(json.encode(jsonObject));
 }

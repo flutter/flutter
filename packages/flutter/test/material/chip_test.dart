@@ -74,8 +74,10 @@ Widget _wrapForChip({
   Widget child,
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
+    theme: ThemeData(brightness: brightness),
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
@@ -128,6 +130,62 @@ Future<void> _testConstrainedLabel(
   final Size chipSize = tester.getSize(find.byType(Chip));
   expect(chipSize.width, chipParentWidth);
   expect(chipSize.height, chipParentHeight);
+}
+
+Widget _selectedInputChip({ Color checkmarkColor }) {
+  return InputChip(
+    label: const Text('InputChip'),
+    selected: true,
+    showCheckmark: true,
+    checkmarkColor: checkmarkColor,
+  );
+}
+
+Widget _selectedFilterChip({ Color checkmarkColor }) {
+  return FilterChip(
+    label: const Text('InputChip'),
+    selected: true,
+    showCheckmark: true,
+    checkmarkColor: checkmarkColor,
+    onSelected: (bool _) { },
+  );
+}
+
+Future<void> _pumpCheckmarkChip(
+  WidgetTester tester, {
+  @required Widget chip,
+  Color themeColor,
+  Brightness brightness = Brightness.light,
+}) async {
+  await tester.pumpWidget(
+    _wrapForChip(
+      brightness: brightness,
+      child: Builder(
+        builder: (BuildContext context) {
+          final ChipThemeData chipTheme = ChipTheme.of(context);
+          return ChipTheme(
+            data: themeColor == null ? chipTheme : chipTheme.copyWith(
+              checkmarkColor: themeColor,
+            ),
+            child: chip,
+          );
+        },
+      )
+    )
+  );
+}
+
+void _expectCheckmarkColor(Finder finder, Color color) {
+  expect(
+    finder,
+    paints
+      // The first path that is painted is the selection overlay. We do not care
+      // how it is painted but it has to be added it to this pattern so that the
+      // check mark can be checked next.
+      ..path()
+      // The second path that is painted is the check mark.
+      ..path(color: color),
+  );
 }
 
 void main() {
@@ -1903,5 +1961,133 @@ void main() {
     await tester.pump();
     expect(focusNode1.hasPrimaryFocus, isTrue);
     expect(focusNode2.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+    await _pumpCheckmarkChip(
+      tester,
+      chip: _selectedInputChip(),
+      brightness: Brightness.light,
+    );
+
+    _expectCheckmarkColor(
+      find.byType(InputChip),
+      Colors.black.withAlpha(0xde),
+    );
+  });
+
+  testWidgets('Filter chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+    await _pumpCheckmarkChip(
+      tester,
+      chip: _selectedFilterChip(),
+      brightness: Brightness.light,
+    );
+
+    _expectCheckmarkColor(
+      find.byType(FilterChip),
+      Colors.black.withAlpha(0xde),
+    );
+  });
+
+  testWidgets('Input chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+    await _pumpCheckmarkChip(
+      tester,
+      chip: _selectedInputChip(),
+      brightness: Brightness.dark,
+    );
+
+    _expectCheckmarkColor(
+      find.byType(InputChip),
+      Colors.white.withAlpha(0xde),
+    );
+  });
+
+  testWidgets('Filter chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+    await _pumpCheckmarkChip(
+      tester,
+      chip: _selectedFilterChip(),
+      brightness: Brightness.dark,
+    );
+
+    _expectCheckmarkColor(
+      find.byType(FilterChip),
+      Colors.white.withAlpha(0xde),
+    );
+  });
+
+  testWidgets('Input chip check mark color can be set by the chip theme', (WidgetTester tester) async {
+    await _pumpCheckmarkChip(
+      tester,
+      chip: _selectedInputChip(),
+      themeColor: const Color(0xff00ff00),
+    );
+
+    _expectCheckmarkColor(
+      find.byType(InputChip),
+      const Color(0xff00ff00),
+    );
+  });
+
+  testWidgets('Filter chip check mark color can be set by the chip theme', (WidgetTester tester) async {
+    await _pumpCheckmarkChip(
+      tester,
+      chip: _selectedFilterChip(),
+      themeColor: const Color(0xff00ff00),
+    );
+
+    _expectCheckmarkColor(
+      find.byType(FilterChip),
+      const Color(0xff00ff00),
+    );
+  });
+
+  testWidgets('Input chip check mark color can be set by the chip constructor', (WidgetTester tester) async {
+    await _pumpCheckmarkChip(
+      tester,
+      chip: _selectedInputChip(checkmarkColor: const Color(0xff00ff00)),
+    );
+
+    _expectCheckmarkColor(
+      find.byType(InputChip),
+      const Color(0xff00ff00),
+    );
+  });
+
+  testWidgets('Filter chip check mark color can be set by the chip constructor', (WidgetTester tester) async {
+    await _pumpCheckmarkChip(
+      tester,
+      chip: _selectedFilterChip(checkmarkColor: const Color(0xff00ff00)),
+    );
+
+    _expectCheckmarkColor(
+      find.byType(FilterChip),
+      const Color(0xff00ff00),
+    );
+  });
+
+  testWidgets('Input chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
+    await _pumpCheckmarkChip(
+      tester,
+      chip: _selectedInputChip(checkmarkColor: const Color(0xffff0000)),
+      themeColor: const Color(0xff00ff00),
+    );
+
+    _expectCheckmarkColor(
+      find.byType(InputChip),
+      const Color(0xffff0000),
+    );
+  });
+
+  testWidgets('Filter chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
+    await _pumpCheckmarkChip(
+      tester,
+      chip: _selectedFilterChip(checkmarkColor: const Color(0xffff0000)),
+      themeColor: const Color(0xff00ff00),
+    );
+
+    _expectCheckmarkColor(
+      find.byType(FilterChip),
+      const Color(0xffff0000),
+    );
   });
 }

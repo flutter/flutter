@@ -147,22 +147,22 @@ class Doctor {
 
   /// Return a list of [ValidatorTask] objects and starts validation on all
   /// objects in [validators].
-  List<ValidatorTask> startValidatorTasks() {
-    final List<ValidatorTask> tasks = <ValidatorTask>[];
-    for (DoctorValidator validator in validators) {
-      // We use an asyncGuard() here to be absolutely certain that
-      // DoctorValidators do not result in an uncaught exception. Since the
-      // Future returned by the asyncGuard() is not awaited, we pass an
-      // onError callback to it and translate errors into ValidationResults.
-      final Future<ValidationResult> result =
-          asyncGuard<ValidationResult>(validator.validate,
-            onError: (Object exception, StackTrace stackTrace) {
-              return ValidationResult.crash(exception, stackTrace);
-            });
-      tasks.add(ValidatorTask(validator, result));
-    }
-    return tasks;
-  }
+  List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[
+    for (DoctorValidator validator in validators)
+      ValidatorTask(
+        validator,
+        // We use an asyncGuard() here to be absolutely certain that
+        // DoctorValidators do not result in an uncaught exception. Since the
+        // Future returned by the asyncGuard() is not awaited, we pass an
+        // onError callback to it and translate errors into ValidationResults.
+        asyncGuard<ValidationResult>(
+          validator.validate,
+          onError: (Object exception, StackTrace stackTrace) {
+            return ValidationResult.crash(exception, stackTrace);
+          },
+        ),
+      ),
+  ];
 
   List<Workflow> get workflows {
     return DoctorValidatorsProvider.instance.workflows;
@@ -398,12 +398,13 @@ class GroupedValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<ValidatorTask> tasks = <ValidatorTask>[];
-    for (DoctorValidator validator in subValidators) {
-      final Future<ValidationResult> result =
-          asyncGuard<ValidationResult>(() => validator.validate());
-      tasks.add(ValidatorTask(validator, result));
-    }
+    final List<ValidatorTask> tasks = <ValidatorTask>[
+      for (DoctorValidator validator in subValidators)
+        ValidatorTask(
+          validator,
+          asyncGuard<ValidationResult>(() => validator.validate()),
+        ),
+    ];
 
     final List<ValidationResult> results = <ValidationResult>[];
     for (ValidatorTask subValidator in tasks) {
