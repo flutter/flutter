@@ -545,6 +545,11 @@ class _RenderSegmentedControl<T> extends RenderBox
        ) {
          addAll(children);
          thumbController.addListener(markNeedsPaint);
+         thumbScaleController.addListener(() {
+           thumbScale = thumbScaleTween.evaluate(thumbScaleController);
+           print(_thumbScale);
+         });
+
          _drag
           ..onDown = _onDown
           ..onEnd = _onEnd;
@@ -560,7 +565,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   // Unscaled Thumb Rect;
   Tween<Rect> _currentThumbTween;
   final AnimationController thumbController;
-  final Tween<double> thumbScaleTween = Tween<double>(begin: 1, end: 0.9);
+  final Tween<double> thumbScaleTween = Tween<double>(begin: 1, end: 0.6);
   final AnimationController thumbScaleController;
 
   int get selectedIndex => _selectedIndex;
@@ -648,27 +653,38 @@ class _RenderSegmentedControl<T> extends RenderBox
   }
 
   Offset localDragOffset;
+  bool startedOnSelectedSegment;
+
+  int indexFromLocation(Offset location) {
+    switch (textDirection) {
+      case TextDirection.ltr:
+        return (localDragOffset.dx / (size.width / childCount)).floor();
+      case TextDirection.rtl:
+        return ((size.width - localDragOffset.dx) / (size.width / childCount)).floor();
+    }
+    return 0;
+  }
 
   void _onDown(DragDownDetails details) {
     assert(size.contains(details.localPosition));
     localDragOffset = details.localPosition;
+    final int index = indexFromLocation(localDragOffset);
+    startedOnSelectedSegment = index == selectedIndex;
+
+    if (startedOnSelectedSegment) {
+      thumbScaleController.forward();
+    }
   }
 
   void _onEnd(DragEndDetails details) {
     if (localDragOffset == null || !size.contains(localDragOffset)) {
       return;
     }
+    selectedIndex = indexFromLocation(localDragOffset);
 
-    double xOffsetFromStart;
-    switch (textDirection) {
-      case TextDirection.ltr:
-        xOffsetFromStart = localDragOffset.dx;
-        break;
-      case TextDirection.rtl:
-        xOffsetFromStart = size.width - localDragOffset.dx;
-        break;
+    if (startedOnSelectedSegment) {
+      thumbScaleController.reverse();
     }
-    selectedIndex = (xOffsetFromStart / (size.width / childCount)).floor();
   }
 
   @override
