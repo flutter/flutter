@@ -11,6 +11,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'theme.dart';
 
 // Minimum padding from edges of the segmented control to edges of
@@ -638,12 +639,36 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   double get totalSeparatorWidth => (_kSeparatorInset.horizontal + _kSeparatorWidth) * (childCount - 1);
 
-  void _onDown(DragDownDetails details) {
+  @override
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    assert(debugHandleEvent(event, entry));
+    if (event is PointerDownEvent) {
+      _drag.addPointer(event);
+    }
+  }
 
+  Offset localDragOffset;
+
+  void _onDown(DragDownDetails details) {
+    assert(size.contains(details.localPosition));
+    localDragOffset = details.localPosition;
   }
 
   void _onEnd(DragEndDetails details) {
+    if (localDragOffset == null || !size.contains(localDragOffset)) {
+      return;
+    }
 
+    double xOffsetFromStart;
+    switch (textDirection) {
+      case TextDirection.ltr:
+        xOffsetFromStart = localDragOffset.dx;
+        break;
+      case TextDirection.rtl:
+        xOffsetFromStart = size.width - localDragOffset.dx;
+        break;
+    }
+    selectedIndex = (xOffsetFromStart / (size.width / childCount)).floor();
   }
 
   @override
@@ -729,12 +754,15 @@ class _RenderSegmentedControl<T> extends RenderBox
     });
   }
 
+  List<RenderBox> children;
+
   @override
   void performLayout() {
     double childWidth = (constraints.minWidth - totalSeparatorWidth) / childCount;
     double maxHeight = _kMinSegmentedControlHeight;
 
-    for (RenderBox child in getChildrenAsList()) {
+    children = getChildrenAsList();
+    for (RenderBox child in children) {
       childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity));
     }
 
