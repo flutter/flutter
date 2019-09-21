@@ -49,3 +49,10 @@ class CupertinoThumbPainter {
     canvas.drawRRect(rrect, Paint()..color = color);
   }
 }
+
+/// Paints an iOS-style segmented control thumb.
+///
+/// Used by [CupertinoSegmentedControl].
+class CupertinoSegmentedControlThumbPainter {
+
+}
