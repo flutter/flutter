@@ -453,10 +453,10 @@ const String _cppPluginRegistryImplementationTemplate = '''//
 //  Generated file. Do not edit.
 //
 
-#include "plugin_registrant.h"
+#include "generated_plugin_registrant.h"
 
 {{#plugins}}
-#import <{{filename}}.h>
+#include <{{filename}}.h>
 {{/plugins}}
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
