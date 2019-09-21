@@ -602,14 +602,14 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
   // TODO(stuartmorgan): Revisit the conditions here once the plans for handling
   // desktop in existing projects are in place. For now, ignore checkProjects
   // on desktop and always treat it as true.
+  if (featureFlags.isLinuxEnabled && project.linux.existsSync()) {
+    await _writeLinuxPluginRegistrant(project, plugins);
+  }
   if (featureFlags.isMacOSEnabled && project.macos.existsSync()) {
     await _writeMacOSPluginRegistrant(project, plugins);
   }
   if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
     await _writeWindowsPluginRegistrant(project, plugins);
-  }
-  if (featureFlags.isLinuxEnabled && project.linux.existsSync()) {
-    await _writeLinuxPluginRegistrant(project, plugins);
   }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
   if (!project.isModule && (!checkProjects || subproject.existsSync())) {
