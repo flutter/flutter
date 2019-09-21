@@ -88,6 +88,11 @@ class Plugin {
           IOSPlugin.fromYaml(name, platformsYaml[IOSPlugin.kConfigKey]);
     }
 
+    if (platformsYaml[LinuxPlugin.kConfigKey] != null) {
+      platforms[LinuxPlugin.kConfigKey] =
+          LinuxPlugin.fromYaml(name, platformsYaml[LinuxPlugin.kConfigKey]);
+    }
+
     if (platformsYaml[MacOSPlugin.kConfigKey] != null) {
       platforms[MacOSPlugin.kConfigKey] =
           MacOSPlugin.fromYaml(name, platformsYaml[MacOSPlugin.kConfigKey]);
@@ -96,6 +101,11 @@ class Plugin {
     if (platformsYaml[WebPlugin.kConfigKey] != null) {
       platforms[WebPlugin.kConfigKey] =
           WebPlugin.fromYaml(name, platformsYaml[WebPlugin.kConfigKey]);
+    }
+
+    if (platformsYaml[WindowsPlugin.kConfigKey] != null) {
+      platforms[WindowsPlugin.kConfigKey] =
+          WindowsPlugin.fromYaml(name, platformsYaml[WindowsPlugin.kConfigKey]);
     }
 
     return Plugin(
