@@ -693,6 +693,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
+    this.isPluginAsAarEnabled = false,
 });
 
   @override
@@ -706,4 +707,7 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isWindowsEnabled;
+
+  @override
+  final bool isPluginAsAarEnabled;
 }
