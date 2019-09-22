@@ -502,10 +502,14 @@ void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   final List<Plugin> plugins = findPlugins(project);
   final bool changed = _writeFlutterPluginsList(project, plugins);
   if (changed) {
-    if (checkProjects && !project.ios.existsSync()) {
-      return;
+    if (!checkProjects || project.ios.existsSync()) {
+      cocoaPods.invalidatePodInstallOutput(project.ios);
     }
-    cocoaPods.invalidatePodInstallOutput(project.ios);
+    // TODO(stuartmorgan): Potentially add checkProjects once a decision has
+    // made about how to handle macOS in existing projects.
+    if (project.macos.existsSync()) {
+      cocoaPods.invalidatePodInstallOutput(project.macos);
+    }
   }
 }
 
