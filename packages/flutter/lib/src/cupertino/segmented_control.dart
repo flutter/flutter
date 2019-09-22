@@ -46,7 +46,7 @@ const double _kSeparatorWidth = 1;
 
 const SpringDescription _kSegmentedControlSpringDescription = SpringDescription(mass: 1, stiffness: 503.551, damping: 44.8799);
 
-const Duration _kSpringAnimationDuration = Duration(milliseconds: 410000);
+const Duration _kSpringAnimationDuration = Duration(milliseconds: 410);
 
 /// An iOS-style segmented control.
 ///
@@ -231,6 +231,8 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   Color _borderColor;
   Color _pressedColor;
 
+  TextDirection textDirection;
+
   AnimationController createAnimationController() {
     return AnimationController(
       duration: _kFadeDuration,
@@ -304,6 +306,8 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    textDirection = Directionality.of(context);
 
     if (_updateColors()) {
       _updateAnimationControllers();
@@ -385,10 +389,23 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   Widget build(BuildContext context) {
     final List<Widget> _gestureChildren = <Widget>[];
     final List<Color> _backgroundColors = <Color>[];
+
     int index = 0;
     int selectedIndex;
     int pressedIndex;
-    for (T currentKey in widget.children.keys) {
+
+    Iterable<T> keys;
+
+    switch (textDirection) {
+      case TextDirection.ltr:
+        keys = widget.children.keys;
+        break;
+      case TextDirection.rtl:
+        keys = widget.children.keys.toList().reversed;
+        break;
+    }
+
+    for (T currentKey in keys) {
       selectedIndex = (widget.groupValue == currentKey) ? index : selectedIndex;
       pressedIndex = (_pressedKey == currentKey) ? index : pressedIndex;
 
@@ -467,7 +484,6 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderSegmentedControl<T>(
-      textDirection: Directionality.of(context),
       selectedIndex: selectedIndex,
       pressedIndex: pressedIndex,
       backgroundColors: backgroundColors,
@@ -479,7 +495,6 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderSegmentedControl<T> renderObject) {
     renderObject
-      ..textDirection = Directionality.of(context)
       ..selectedIndex = selectedIndex
       ..pressedIndex = pressedIndex
       ..thumbColor = CupertinoDynamicColor.resolve(_kThumbColor, context)
@@ -488,8 +503,6 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
 }
 
 class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<RenderBox> { }
-
-typedef _NextChild = RenderBox Function(RenderBox child);
 
 // The behavior of a UISegmentedControl as observed on iOS 13.1:
 //
@@ -523,13 +536,10 @@ class _RenderSegmentedControl<T> extends RenderBox
     List<RenderBox> children,
     @required int selectedIndex,
     @required int pressedIndex,
-    @required TextDirection textDirection,
     @required List<Color> backgroundColors,
     @required Color thumbColor,
     @required this.vsync,
-  }) : assert(textDirection != null),
-       _textDirection = textDirection,
-       _selectedIndex = selectedIndex,
+  }) : _selectedIndex = selectedIndex,
        _pressedIndex = pressedIndex,
        _backgroundColors = backgroundColors,
        _thumbColor = thumbColor,
@@ -540,19 +550,20 @@ class _RenderSegmentedControl<T> extends RenderBox
        ),
        thumbScaleController = AnimationController(
          duration: _kSpringAnimationDuration,
-         value: 0,
+         value: 1,
+         lowerBound: 0.95,
+         upperBound: 1,
          vsync: vsync,
        ) {
          addAll(children);
          thumbController.addListener(markNeedsPaint);
-         thumbScaleController.addListener(() {
-           thumbScale = thumbScaleTween.evaluate(thumbScaleController);
-           print(_thumbScale);
-         });
+         thumbScaleController.addListener(markNeedsPaint);
 
          _drag
           ..onDown = _onDown
-          ..onEnd = _onEnd;
+          ..onUpdate = _onUpdate
+          ..onEnd = _onEnd
+          ..onCancel = _onCancel;
        }
 
   final TickerProvider vsync;
@@ -600,16 +611,6 @@ class _RenderSegmentedControl<T> extends RenderBox
     markNeedsPaint();
   }
 
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
-  set textDirection(TextDirection value) {
-    if (_textDirection == value) {
-      return;
-    }
-    _textDirection = value;
-    markNeedsLayout();
-  }
-
   List<Color> get backgroundColors => _backgroundColors;
   List<Color> _backgroundColors;
   set backgroundColors(List<Color> value) {
@@ -655,15 +656,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   Offset localDragOffset;
   bool startedOnSelectedSegment;
 
-  int indexFromLocation(Offset location) {
-    switch (textDirection) {
-      case TextDirection.ltr:
-        return (localDragOffset.dx / (size.width / childCount)).floor();
-      case TextDirection.rtl:
-        return ((size.width - localDragOffset.dx) / (size.width / childCount)).floor();
-    }
-    return 0;
-  }
+  int indexFromLocation(Offset location) => (localDragOffset.dx / (size.width / childCount)).floor();
 
   void _onDown(DragDownDetails details) {
     assert(size.contains(details.localPosition));
@@ -672,18 +665,30 @@ class _RenderSegmentedControl<T> extends RenderBox
     startedOnSelectedSegment = index == selectedIndex;
 
     if (startedOnSelectedSegment) {
-      thumbScaleController.forward();
+      thumbScaleController.reverse();
+    }
+  }
+
+  void _onUpdate(DragUpdateDetails details) {
+    localDragOffset = details.localPosition;
+
+    if (startedOnSelectedSegment) {
+      selectedIndex = indexFromLocation(localDragOffset);
     }
   }
 
   void _onEnd(DragEndDetails details) {
-    if (localDragOffset == null || !size.contains(localDragOffset)) {
-      return;
-    }
-    selectedIndex = indexFromLocation(localDragOffset);
-
     if (startedOnSelectedSegment) {
-      thumbScaleController.reverse();
+      thumbScaleController.forward();
+    }
+    if (localDragOffset != null && size.contains(localDragOffset)) {
+      selectedIndex = indexFromLocation(localDragOffset);
+    }
+  }
+
+  void _onCancel() {
+    if (startedOnSelectedSegment) {
+      thumbScaleController.forward();
     }
   }
 
@@ -751,34 +756,12 @@ class _RenderSegmentedControl<T> extends RenderBox
     }
   }
 
-  // visit the child render boxes from left to right.
-  void _visitFromLeft(_NextChild nextChild, RenderBox leftChild, void Function(RenderBox) callback) {
-    RenderBox child = leftChild;
-    while (child != null) {
-      callback(child);
-      child = nextChild(child);
-    }
-  }
-
-  void _layoutRects(_NextChild nextChild, RenderBox leftChild) {
-    double start = 0.0;
-    _visitFromLeft(nextChild, leftChild, (RenderBox child) {
-        final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
-        final Offset childOffset = Offset(start, 0.0);
-        childParentData.offset = childOffset;
-        start += child.size.width + _kSeparatorWidth + _kSeparatorInset.horizontal;
-    });
-  }
-
-  List<RenderBox> children;
-
   @override
   void performLayout() {
     double childWidth = (constraints.minWidth - totalSeparatorWidth) / childCount;
     double maxHeight = _kMinSegmentedControlHeight;
 
-    children = getChildrenAsList();
-    for (RenderBox child in children) {
+    for (RenderBox child in getChildrenAsList()) {
       childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity));
     }
 
@@ -808,19 +791,15 @@ class _RenderSegmentedControl<T> extends RenderBox
       child = childAfter(child);
     }
 
-    switch (textDirection) {
-      case TextDirection.rtl:
-        _layoutRects(
-          childBefore,
-          lastChild,
-        );
-        break;
-      case TextDirection.ltr:
-        _layoutRects(
-          childAfter,
-          firstChild,
-        );
-        break;
+    double start = 0.0;
+    child = firstChild;
+
+    while (child != null) {
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
+      final Offset childOffset = Offset(start, 0.0);
+      childParentData.offset = childOffset;
+      start += child.size.width + _kSeparatorWidth + _kSeparatorInset.horizontal;
+      child = childAfter(child);
     }
 
     size = constraints.constrain(Size(childWidth * childCount + totalSeparatorWidth, maxHeight));
@@ -844,10 +823,12 @@ class _RenderSegmentedControl<T> extends RenderBox
       _currentThumbRect = _currentThumbTween?.evaluate(thumbController)
                         ?? unscaledThumbTargetRect;
 
+      final double thumbScale = thumbScaleController.value;
+
       final Rect thumbRect = Rect.fromCenter(
         center: _currentThumbRect.center,
-        width: _currentThumbRect.width * _thumbScale,
-        height: _currentThumbRect.height * _thumbScale,
+        width: _currentThumbRect.width * thumbScale,
+        height: _currentThumbRect.height * thumbScale,
       );
 
       _paintThumb(context, offset, thumbRect);
