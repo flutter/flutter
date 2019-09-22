@@ -855,8 +855,41 @@ class _RenderSegmentedControl<T> extends RenderBox
   }
 
   void _paintThumb(PaintingContext context, Offset offset, Rect thumbRect) {
+    // Colors extracted from https://developer.apple.com/design/resources/.
+    const List<BoxShadow> thumbShadow = <BoxShadow> [
+      BoxShadow(
+        color: Color(0x1F000000),
+        offset: Offset(0, 3),
+        blurRadius: 8,
+      ),
+      BoxShadow(
+        color: Color(0x0A000000),
+        offset: Offset(0, 3),
+        blurRadius: 1,
+      ),
+    ];
+
+    final RRect thumbRRect = RRect.fromRectAndRadius(
+      thumbRect.shift(offset),
+      const Radius.circular(_kThumbCornerRadius),
+    );
+
+    for (BoxShadow shadow in thumbShadow) {
+      context.canvas.drawRRect(
+        thumbRRect.shift(shadow.offset),
+        shadow.toPaint(),
+      );
+    }
+
     context.canvas.drawRRect(
-      RRect.fromRectAndRadius(thumbRect.shift(offset), const Radius.circular(_kThumbCornerRadius)),
+      thumbRRect.inflate(0.5),
+      Paint()
+        ..style = PaintingStyle.fill
+        ..color = const Color(0x0A000000),
+    );
+
+    context.canvas.drawRRect(
+      thumbRRect,
       Paint()
         ..style = PaintingStyle.fill
         ..color = thumbColor,
