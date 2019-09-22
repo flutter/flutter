@@ -178,8 +178,15 @@ To automatically create this file call matchGoldenFile('$filename', write: true)
         },
       };
     }
-    // To tweak DPI we need to send an additional Emulation.setDeviceMetricsOverride. See:
+
+    // Setting hardware-independent screen parameters:
     // https://chromedevtools.github.io/devtools-protocol/tot/Emulation
+    await wipConnection.sendCommand('Emulation.setDeviceMetricsOverride', {
+      'width': _kMaxScreenshotWidth,
+      'height': _kMaxScreenshotHeight,
+      'deviceScaleFactor': 1,
+      'mobile': false,
+    });
     final wip.WipResponse response =
         await wipConnection.sendCommand('Page.captureScreenshot', captureScreenshotParameters);
 

@@ -8,19 +8,19 @@ import 'package:args/args.dart';
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:yaml/yaml.dart';
 
 import 'environment.dart';
 
 void addChromeVersionOption(ArgParser argParser) {
-  final String pinnedChromeVersion =
-      io.File(path.join(environment.webUiRootDir.path, 'dev', 'chrome.lock'))
-          .readAsStringSync()
-          .trim();
+  final io.File lockFile = io.File(path.join(environment.webUiRootDir.path, 'dev', 'chrome_lock.yaml'));
+  final YamlMap lock = loadYaml(lockFile.readAsStringSync());
+  final int pinnedChromeVersion = _PlatformBinding.instance.getChromeBuild(lock);
 
   argParser
     ..addOption(
       'chrome-version',
-      defaultsTo: pinnedChromeVersion,
+      defaultsTo: '$pinnedChromeVersion',
       help: 'The Chrome version to use while running tests. If the requested '
           'version has not been installed, it will be downloaded and installed '
           'automatically. A specific Chrome build version number, such as 695653 '
@@ -34,7 +34,7 @@ void addChromeVersionOption(ArgParser argParser) {
 ///
 /// If [requestedVersion] is null, uses the version specified on the
 /// command-line. If not specified on the command-line, uses the version
-/// specified in the "chrome.lock" file.
+/// specified in the "chrome_lock.yaml" file.
 ///
 /// If [requestedVersion] is not null, installs that version. The value
 /// may be "latest" (the latest available build of Chrome), "system"
@@ -162,7 +162,7 @@ class ChromeInstaller {
 
     return ChromeInstallation(
       version: version,
-      executable: path.join(versionDir.path, 'chrome-linux', 'chrome'),
+      executable: _PlatformBinding.instance.getExecutablePath(versionDir),
     );
   }
 
@@ -172,7 +172,7 @@ class ChromeInstaller {
     }
 
     versionDir.createSync(recursive: true);
-    final String url = 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2F$version%2Fchrome-linux.zip?alt=media';
+    final String url = _PlatformBinding.instance.getDownloadUrl(version);
     final StreamedResponse download = await client.send(Request(
       'GET',
       Uri.parse(url),
@@ -225,4 +225,48 @@ Future<String> fetchLatestChromeVersion() async {
   } finally {
     client.close();
   }
+}
+
+abstract class _PlatformBinding {
+  static _PlatformBinding get instance {
+    if (_instance == null) {
+      if (io.Platform.isLinux) {
+        _instance = _LinuxBinding();
+      } else if (io.Platform.isMacOS) {
+        _instance = _MacBinding();
+      } else {
+        throw '${io.Platform.operatingSystem} is not supported';
+      }
+    }
+    return _instance;
+  }
+  static _PlatformBinding _instance;
+
+  int getChromeBuild(YamlMap chromeLock);
+  String getDownloadUrl(String version);
+  String getExecutablePath(io.Directory versionDir);
+}
+
+const String _kBaseDownloadUrl = 'https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o';
+
+class _LinuxBinding implements _PlatformBinding {
+  @override
+  int getChromeBuild(YamlMap chromeLock) => chromeLock['Linux'];
+
+  @override
+  String getDownloadUrl(String version) => '$_kBaseDownloadUrl/Linux_x64%2F$version%2Fchrome-linux.zip?alt=media';
+
+  @override
+  String getExecutablePath(io.Directory versionDir) => path.join(versionDir.path, 'chrome-linux', 'chrome');
+}
+
+class _MacBinding implements _PlatformBinding {
+  @override
+  int getChromeBuild(YamlMap chromeLock) => chromeLock['Mac'];
+
+  @override
+  String getDownloadUrl(String version) => '$_kBaseDownloadUrl/Mac%2F$version%2Fchrome-mac.zip?alt=media';
+
+  @override
+  String getExecutablePath(io.Directory versionDir) => path.join(versionDir.path, 'chrome-mac', 'Chromium.app', 'Contents', 'MacOS', 'Chromium');
 }
