@@ -774,6 +774,10 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
 void DartIsolate::DartIsolateShutdownCallback(
     std::shared_ptr<DartIsolate>* isolate_group_data,
     std::shared_ptr<DartIsolate>* isolate_data) {
+  TRACE_EVENT0("flutter", "DartIsolate::DartIsolateShutdownCallback");
+  FML_DLOG(INFO) << "DartIsolateShutdownCallback"
+                 << " isolate_group_data " << isolate_group_data
+                 << " isolate_data " << isolate_data;
   isolate_group_data->get()->OnShutdownCallback();
 }
 

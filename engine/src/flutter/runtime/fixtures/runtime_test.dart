@@ -52,8 +52,8 @@ void secondaryIsolateMain(String message) {
 
 @pragma('vm:entry-point')
 void testCanLaunchSecondaryIsolate() {
-  Isolate.spawn(secondaryIsolateMain, 'Hello from root isolate.');
-  notifyNative();
+  final onExit = RawReceivePort((_) { notifyNative(); });
+  Isolate.spawn(secondaryIsolateMain, 'Hello from root isolate.', onExit: onExit.sendPort);
 }
 
 @pragma('vm:entry-point')
