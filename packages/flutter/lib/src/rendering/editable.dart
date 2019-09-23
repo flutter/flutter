@@ -638,7 +638,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void systemFontsDidChange() {
     super.systemFontsDidChange();
     _textPainter.markNeedsLayout();
-    _textLayoutLastWidth = null;
+    _textLayoutLastMaxWidth = null;
+    _textLayoutLastMinWidth = null;
   }
 
   /// The text to display.
