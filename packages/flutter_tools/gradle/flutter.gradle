@@ -8,8 +8,6 @@ import com.android.builder.model.AndroidProject
 import com.android.build.OutputFile
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -258,65 +256,29 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private void configurePlugins() {
         if (!buildPluginAsAar()) {
-            getPluginList().each this.&configurePluginProject
+            getPluginList().each this.&configurePlugin
             return
         }
-        if (useLocalEngine()) {
-            throw new GradleException("Local engine isn't supported when building the plugins as AAR")
-        }
-        List<Project> projects = [project]
-        // Module projects set the `hostProjects` extra property in `include_flutter.groovy`.
-        // This is required to set the local repository in each host app project.
-        if (project.ext.has("hostProjects")) {
-            projects.addAll(project.ext.get("hostProjects"))
-        }
-        // Configure the repository for the plugins.
-        projects.each { hostProject ->
-            hostProject.repositories {
-                maven {
-                    url "${getPluginBuildDir()}/outputs/repo"
-                }
+        addPluginTasks()
+        List<String> tasksToExecute = project.gradle.startParameter.taskNames
+        Set buildTypes = getBuildTypesForTasks(tasksToExecute)
+        if (tasksToExecute.contains("clean")) {
+            // Because the plugins are built during configuration, the task "clean"
+            // cannot run in conjunction with an assembly task.
+            if (!buildTypes.empty) {
+                throw new GradleException("Can't run the clean task along with other assemble tasks")
             }
         }
-        getPluginList().each { pluginName, pluginPath ->
-            configurePluginAar(pluginName, pluginPath, project)
+        // Build plugins when a task "assembly*" will be called later.
+        if (!buildTypes.empty) {
+            // Build the plugin during configuration.
+            // This is required when Jetifier is enabled, otherwise the implementation dependency
+            // cannot be added.
+            buildAarPlugins(buildTypes)
         }
     }
 
-    private static final Pattern GROUP_PATTERN = ~/group\s+\'(.+)\'/
-    private static final Pattern PROJECT_NAME_PATTERN = ~/rootProject\.name\s+=\s+\'(.+)\'/
-
-    // Adds the plugin AAR dependency to the app project.
-    private void configurePluginAar(String pluginName, String pluginPath, Project project) {
-        // Extract the group id from the plugin's build.gradle.
-        // This is `group '<group-id>'`
-        File pluginBuildFile = project.file(Paths.get(pluginPath, "android", "build.gradle"));
-        if (!pluginBuildFile.exists()) {
-            throw new GradleException("Plugin $pluginName doesn't have the required file $pluginBuildFile.")
-        }
-
-        Matcher groupParts = GROUP_PATTERN.matcher(pluginBuildFile.text)
-        assert groupParts.count == 1
-        assert groupParts.hasGroup()
-        String groupId = groupParts[0][1]
-
-        // Extract the artifact name from the plugin's settings.gradle.
-        // This is `rootProject.name = '<artifact-name>'`
-        File pluginSettings = project.file(Paths.get(pluginPath, "android", "settings.gradle"));
-        if (!pluginSettings.exists()) {
-            throw new GradleException("Plugin $pluginName doesn't have the required file $pluginSettings.")
-        }
-        Matcher projectNameParts = PROJECT_NAME_PATTERN.matcher(pluginSettings.text)
-        assert projectNameParts.count == 1
-        assert projectNameParts.hasGroup()
-        String artifactId = "${projectNameParts[0][1]}_release"
-
-        assert !groupId.empty
-        project.dependencies.add("api", "$groupId:$artifactId:+")
-    }
-
-    // Adds the plugin project dependency to the app project .
-    private void configurePluginProject(String name, String _) {
+    private void configurePlugin(String name, String _) {
         Project pluginProject = project.rootProject.findProject(":$name")
         if (pluginProject == null) {
             project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
@@ -379,6 +341,93 @@ class FlutterPlugin implements Plugin<Project> {
             // https://github.com/flutter/flutter/issues/40784
         }
         return androidPlugins
+    }
+
+    private void addPluginTasks() {
+        Properties plugins = getPluginList()
+        project.android.buildTypes.each { buildType ->
+            plugins.each { name, path ->
+                String buildModeValue = buildType.debuggable ? "debug" : "release"
+                List<String> taskNameParts = ["build", "plugin", buildModeValue]
+                taskNameParts.addAll(name.split("_"))
+                String taskName = toCammelCase(taskNameParts)
+                // Build types can be extended. For example, a build type can extend the `debug` mode.
+                // In such cases, prevent creating the same task.
+                if (project.tasks.findByName(taskName) == null) {
+                    project.tasks.create(name: taskName, type: FlutterPluginTask) {
+                        flutterExecutable this.flutterExecutable
+                        buildMode buildModeValue
+                        verbose isVerbose()
+                        pluginDir project.file(path)
+                        sourceDir project.file(project.flutter.source)
+                        intermediateDir getPluginBuildDir()
+                    }
+                }
+            }
+        }
+    }
+
+    private void buildAarPlugins(Set buildTypes) {
+        List<Project> projects = [project]
+        // Module projects set the `hostProjects` extra property in `include_flutter.groovy`.
+        // This is required to set the local repository in each host app project.
+        if (project.ext.has("hostProjects")) {
+            projects.addAll(project.ext.get("hostProjects"))
+        }
+        projects.each { hostProject ->
+            hostProject.repositories {
+                maven {
+                    url "${getPluginBuildDir()}/outputs/repo"
+                }
+            }
+        }
+        buildTypes.each { buildType ->
+            project.tasks.withType(FlutterPluginTask).all { pluginTask ->
+                String buildMode = buildType.debuggable ? "debug" : "release"
+                if (pluginTask.buildMode != buildMode) {
+                    return
+                }
+                pluginTask.execute()
+                pluginTask.intermediateDir.eachFileRecurse(FILES) { file ->
+                    if (file.name != "maven-metadata.xml") {
+                        return
+                    }
+                    def mavenMetadata = new XmlParser().parse(file)
+                    String groupId = mavenMetadata.groupId.text()
+                    String artifactId = mavenMetadata.artifactId.text()
+
+                    if (!artifactId.endsWith(buildMode)) {
+                        return
+                    }
+                    // Add the plugin dependency based on the Maven metadata.
+                    addApiDependencies(project, buildType.name, "$groupId:$artifactId:+@aar", {
+                        transitive = true
+                    })
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns a set with the build type names that apply to the given list of tasks
+     * required to configure the plugin dependencies.
+     */
+    private Set getBuildTypesForTasks(List<String> tasksToExecute) {
+        Set buildTypes = []
+        tasksToExecute.each { task ->
+            project.android.buildTypes.each { buildType ->
+                if (task == "androidDependencies" || task.endsWith("dependencies")) {
+                    // The tasks to query the dependencies includes all the build types.
+                    buildTypes.add(buildType)
+                } else if (task.endsWith("assemble")) {
+                    // The `assemble` task includes all the build types.
+                    buildTypes.add(buildType)
+                } else if (task.endsWith(buildType.name.capitalize())) {
+                    buildTypes.add(buildType)
+                }
+            }
+        }
+        return buildTypes
     }
 
     private static String toCammelCase(List<String> parts) {
@@ -876,5 +925,58 @@ class FlutterTask extends BaseFlutterTask {
     @TaskAction
     void build() {
         buildBundle()
+    }
+}
+
+class FlutterPluginTask extends DefaultTask {
+    File flutterExecutable
+    @Optional @Input
+    Boolean verbose
+    @Input
+    String buildMode
+    @Input
+    File pluginDir
+    @Input
+    File intermediateDir
+    File sourceDir
+
+    @InputFiles
+    FileCollection getSourceFiles() {
+        return project.fileTree(
+            dir: sourceDir,
+            exclude: ["android", "ios"],
+            include: ["pubspec.yaml"]
+        )
+    }
+
+    @OutputDirectory
+    File getOutputDirectory() {
+        return intermediateDir
+    }
+
+    @TaskAction
+    void build() {
+        intermediateDir.mkdirs()
+        project.exec {
+            executable flutterExecutable.absolutePath
+            workingDir pluginDir
+            args "build", "aar"
+            args "--quiet"
+            args "--suppress-analytics"
+            args "--output-dir", "${intermediateDir}"
+            switch (buildMode) {
+                case 'release':
+                    args "--release"
+                    break
+                case 'debug':
+                    args "--debug"
+                    break
+                default:
+                    assert false
+            }
+            if (verbose) {
+                args "--verbose"
+            }
+        }
     }
 }

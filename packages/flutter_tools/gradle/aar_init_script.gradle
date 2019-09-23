@@ -7,7 +7,6 @@
 // destination of the local repository.
 // The local repository will contain the AAR and POM files.
 
-import java.nio.file.Paths
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.maven.MavenDeployer
@@ -40,32 +39,16 @@ void configureProject(Project project, File outputDir) {
             }
         }
     }
-    if (!project.property("is-plugin").toBoolean()) {
-        return
-    }
-    if (project.hasProperty('localEngineOut')) {
-        // TODO(egarciad): Support local engine.
-        // This most likely requires refactoring `flutter.gradle`, so the logic can be reused.
-        throw new GradleException(
-            "Local engine isn't supported when building the plugins as AAR. " +
-            "See: https://github.com/flutter/flutter/issues/40866")
-    }
-
-    // This is a Flutter plugin project. Plugin projects don't apply the Flutter Gradle plugin,
-    // as a result, add the dependency on the embedding.
-    project.repositories {
-        maven {
-            url "http://download.flutter.io"
-        }
-    }
-    String engineVersion = Paths.get(getFlutterRoot(project), "bin", "internal", "engine.version")
-        .toFile().text.trim()
-    project.dependencies {
-        // Add the embedding dependency.
-        compileOnly ("io.flutter:flutter_embedding_release:1.0.0-$engineVersion") {
-            // We only need to expose io.flutter.plugin.*
-            // No need for the embedding transitive dependencies.
-            transitive = false
+    // Check if the project uses the Flutter plugin (defined in flutter.gradle).
+    Boolean usesFlutterPlugin = project.plugins.find { it.class.name == "FlutterPlugin" } != null
+    if (!usesFlutterPlugin) {
+        project.dependencies {
+            // Some plugins don't include `annotations` and they don't set
+            // `android.useAndroidX=true` in `gradle.properties`.
+            compileOnly "androidx.annotation:annotation:+"
+            compileOnly "com.android.support:support-annotations:+"
+            // The Flutter plugin already adds `flutter.jar`.
+            compileOnly project.files("${getFlutterRoot(project)}/bin/cache/artifacts/engine/android-arm-release/flutter.jar")
         }
     }
 }
