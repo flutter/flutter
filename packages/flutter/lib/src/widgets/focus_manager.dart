@@ -637,7 +637,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// will be moved to the node that the [enclosingScope] thinks should have it,
   /// based on its history of nodes that were set as first focus on it using
   /// [FocusScopeNode.setFirstFocus].
-  void unfocus({bool focusPrevious = false}) {
+  void unfocus({ bool focusPrevious = false }) {
     assert(focusPrevious != null);
     if (!hasFocus && (_manager != null && _manager._nextFocus != this)) {
       return;

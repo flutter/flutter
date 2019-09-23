@@ -638,8 +638,9 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isReversing = widget.route.animation?.status == AnimationStatus.reverse;
-    focusScopeNode.canRequestFocus = !isReversing;
+    final bool ignoreEvents = widget.route.animation?.status == AnimationStatus.reverse ||
+        widget.route.navigator.userGestureInProgress;
+    focusScopeNode.canRequestFocus = !ignoreEvents;
     return _ModalScopeStatus(
       route: widget.route,
       isCurrent: widget.route.isCurrent, // _routeSetState is called if this updates
