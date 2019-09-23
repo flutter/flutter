@@ -1,4 +1,4 @@
-Signature: bbfc49d6c1f618ea0fcbc684ad260e7c
+Signature: 77f229e55f075830ce3a83b322f842f9
 
 UNUSED LICENSES:
 
@@ -959,7 +959,7 @@ FILE: ../../../third_party/skia/samplecode/SampleGlyphTransform.cpp
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
 FILE: ../../../third_party/skia/src/c/sk_imageinfo.cpp
 FILE: ../../../third_party/skia/src/codec/SkEncodedInfo.cpp
-FILE: ../../../third_party/skia/src/codec/SkOrientationMarker.cpp
+FILE: ../../../third_party/skia/src/codec/SkParseEncodedOrigin.cpp
 FILE: ../../../third_party/skia/src/codec/SkWuffsCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkWuffsCodec.h
 FILE: ../../../third_party/skia/src/core/SkBlurPriv.h
@@ -1495,7 +1495,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/infra.expected/infra_tests.js
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-NVIDIA_Shield-GPU-TegraX1-arm64-Release-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus5-GPU-Adreno330-arm-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus5x-GPU-Adreno418-arm64-Release-All-Android_NoGPUThreads.json
-FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus5x-GPU-Adreno418-arm64-Release-All-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus7-CPU-Tegra3-arm-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-P30-GPU-MaliG76-arm64-Release-All-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Pixel3a-GPU-Adreno615-arm64-Release-All-Android.json
@@ -1514,6 +1513,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Mac10.13-C
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Mac10.13-Clang-MacMini7.1-GPU-IntelIris5100-x86_64-Release-All-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Ubuntu17-GCC-Golo-GPU-QuadroP400-x86_64-Release-All-Valgrind_SK_CPU_LIMIT_SSE41.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-ANGLE.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-ShuttleA-GPU-GTX660-x86_64-Release-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-iOS-Clang-iPadPro-GPU-PowerVRGT7800-arm64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-iOS-Clang-iPhone6-GPU-PowerVRGX6450-arm64-Release-All-Metal.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/trybot.json
@@ -1557,7 +1557,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-MotoG4-CPU-Snapdragon617-arm-Release-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-NVIDIA_Shield-GPU-TegraX1-arm64-Debug-All-Android_CCPR.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus5-GPU-Adreno330-arm-Release-All-Android.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus5x-GPU-Adreno418-arm-Release-All-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus7-CPU-Tegra3-arm-Release-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel-GPU-Adreno530-arm-Debug-All-Android_ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel-GPU-Adreno530-arm64-Debug-All-Android_Vulkan.json
