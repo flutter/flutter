@@ -81,7 +81,7 @@ class KernelSnapshot extends Target {
   List<Target> get dependencies => <Target>[];
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     final KernelCompiler compiler = await kernelCompilerFactory.create(
       FlutterProject.fromDirectory(environment.projectDir),
     );
@@ -118,7 +118,7 @@ abstract class AotElfBase extends Target {
   const AotElfBase();
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
     final String outputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {

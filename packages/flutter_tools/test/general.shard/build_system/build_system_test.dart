@@ -40,7 +40,7 @@ void main() {
     when(mockPlatform.isWindows).thenReturn(false);
 
     /// Create various testing targets.
-    fooTarget = TestTarget((List<File> inputFiles, Environment environment) async {
+    fooTarget = TestTarget((Environment environment) async {
       environment
         .buildDir
         .childFile('out')
@@ -56,7 +56,7 @@ void main() {
         Source.pattern('{BUILD_DIR}/out'),
       ]
       ..dependencies = <Target>[];
-    barTarget = TestTarget((List<File> inputFiles, Environment environment) async {
+    barTarget = TestTarget((Environment environment) async {
       environment.buildDir
         .childFile('bar')
         ..createSync(recursive: true)
@@ -71,7 +71,7 @@ void main() {
         Source.pattern('{BUILD_DIR}/bar'),
       ]
       ..dependencies = <Target>[];
-    fizzTarget = TestTarget((List<File> inputFiles, Environment environment) async {
+    fizzTarget = TestTarget((Environment environment) async {
       throw Exception('something bad happens');
     })
       ..name = 'fizz'
@@ -82,7 +82,7 @@ void main() {
         Source.pattern('{BUILD_DIR}/fizz'),
       ]
       ..dependencies = <Target>[fooTarget];
-    sharedTarget = TestTarget((List<File> inputFiles, Environment environment) async {
+    sharedTarget = TestTarget((Environment environment) async {
       shared += 1;
     })
       ..name = 'shared'
@@ -116,7 +116,7 @@ void main() {
   }));
 
   test('Throws exception if it does not produce a specified output', () => testbed.run(() async {
-    final Target badTarget = TestTarget((List<File> inputFiles, Environment environment) async {})
+    final Target badTarget = TestTarget((Environment environment) async {})
       ..inputs = const <Source>[
         Source.pattern('{PROJECT_DIR}/foo.dart'),
       ]
@@ -126,7 +126,7 @@ void main() {
     final BuildResult result = await buildSystem.build(badTarget, environment);
 
     expect(result.hasException, true);
-    expect(result.exceptions.values.single.exception, isInstanceOf<MissingOutputException>());
+    expect(result.exceptions.values.single.exception, isInstanceOf<FileSystemException>());
   }));
 
   test('Saves a stamp file with inputs and outputs', () => testbed.run(() async {
@@ -211,6 +211,52 @@ void main() {
     expect(shared, 1);
   }));
 
+  test('Automatically cleans old outputs when dag changes', () => testbed.run(() async {
+    final TestTarget testTarget = TestTarget((Environment envionment) async {
+      environment.buildDir.childFile('foo.out').createSync();
+    })
+      ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
+      ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/foo.out')];
+    fs.file('foo.dart').createSync();
+
+    await buildSystem.build(testTarget, environment);
+
+    expect(environment.buildDir.childFile('foo.out').existsSync(), true);
+
+    final TestTarget testTarget2 = TestTarget((Environment envionment) async {
+      environment.buildDir.childFile('bar.out').createSync();
+    })
+      ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
+      ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/bar.out')];
+
+    await buildSystem.build(testTarget2, environment);
+
+    expect(environment.buildDir.childFile('bar.out').existsSync(), true);
+    expect(environment.buildDir.childFile('foo.out').existsSync(), false);
+  }));
+
+  test('reruns build if stamp is corrupted', () => testbed.run(() async {
+    final TestTarget testTarget = TestTarget((Environment envionment) async {
+      environment.buildDir.childFile('foo.out').createSync();
+    })
+      ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
+      ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/foo.out')];
+    fs.file('foo.dart').createSync();
+    await buildSystem.build(testTarget, environment);
+
+    // invalid JSON
+    environment.buildDir.childFile('test.stamp').writeAsStringSync('{X');
+    await buildSystem.build(testTarget, environment);
+
+    // empty file
+    environment.buildDir.childFile('test.stamp').writeAsStringSync('');
+    await buildSystem.build(testTarget, environment);
+
+    // invalid format
+    environment.buildDir.childFile('test.stamp').writeAsStringSync('{"inputs": 2, "outputs": 3}');
+    await buildSystem.build(testTarget, environment);
+  }));
+
 
   test('handles a throwing build action', () => testbed.run(() async {
     final BuildResult result = await buildSystem.build(fizzTarget, environment);
@@ -251,10 +297,10 @@ T nonconst<T>(T input) => input;
 class TestTarget extends Target {
   TestTarget([this._build]);
 
-  final Future<void> Function(List<File> inputFiles, Environment environment) _build;
+  final Future<void> Function(Environment environment) _build;
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) => _build(inputFiles, environment);
+  Future<void> build(Environment environment) => _build(environment);
 
   @override
   List<Target> dependencies = <Target>[];

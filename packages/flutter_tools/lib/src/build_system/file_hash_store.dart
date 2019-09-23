@@ -9,9 +9,58 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 
 import '../base/file_system.dart';
+import '../convert.dart';
 import '../globals.dart';
 import 'build_system.dart';
-import 'filecache.pb.dart' as pb;
+
+/// An encoded representation of all file hashes.
+class FileStorage {
+  FileStorage(this.version, this.files);
+
+  factory FileStorage.fromBuffer(Uint8List buffer) {
+    final Map<String, Object> json = jsonDecode(utf8.decode(buffer));
+    final int version = json['version'];
+    final List<Object> rawCachedFiles = json['files'];
+    final List<FileHash> cachedFiles = <FileHash>[
+      for (Map<String, Object> rawFile in rawCachedFiles)
+        FileHash.fromJson(rawFile)
+    ];
+    return FileStorage(version, cachedFiles);
+  }
+
+  final int version;
+  final List<FileHash> files;
+
+  List<int> toBuffer() {
+    final Map<String, Object> json = <String, Object>{
+      'version': version,
+      'files': <Object>[
+        for (FileHash file in files)
+          file.toJson()
+      ],
+    };
+    return utf8.encode(jsonEncode(json));
+  }
+}
+
+/// A stored file hash and path.
+class FileHash {
+  FileHash(this.path, this.hash);
+
+  factory FileHash.fromJson(Map<String, Object> json) {
+    return FileHash(json['path'], json['hash']);
+  }
+
+  final String path;
+  final String hash;
+
+  Object toJson() {
+    return <String, Object>{
+      'path': path,
+      'hash': hash,
+    };
+  }
+}
 
 /// A globally accessible cache of file hashes.
 ///
@@ -42,7 +91,7 @@ class FileHashStore {
   static const String _kFileCache = '.filecache';
 
   // The current version of the file cache storage format.
-  static const int _kVersion = 1;
+  static const int _kVersion = 2;
 
   /// Read file hashes from disk.
   void initialize() {
@@ -51,12 +100,19 @@ class FileHashStore {
       return;
     }
     final List<int> data = _cacheFile.readAsBytesSync();
-    final pb.FileStorage fileStorage = pb.FileStorage.fromBuffer(data);
+    FileStorage fileStorage;
+    try {
+      fileStorage = FileStorage.fromBuffer(data);
+    } on FormatException {
+      printTrace('Filestorage format changed');
+      _cacheFile.deleteSync();
+      return;
+    }
     if (fileStorage.version != _kVersion) {
       _cacheFile.deleteSync();
       return;
     }
-    for (pb.FileHash fileHash in fileStorage.files) {
+    for (FileHash fileHash in fileStorage.files) {
       previousHashes[fileHash.path] = fileHash.hash;
     }
     printTrace('Done initializing file store');
@@ -65,22 +121,22 @@ class FileHashStore {
   /// Persist file hashes to disk.
   void persist() {
     printTrace('Persisting file store');
-    final pb.FileStorage fileStorage = pb.FileStorage();
-    fileStorage.version = _kVersion;
     final File file = _cacheFile;
     if (!file.existsSync()) {
       file.createSync();
     }
+    final List<FileHash> fileHashes = <FileHash>[];
     for (MapEntry<String, String> entry in currentHashes.entries) {
       previousHashes[entry.key] = entry.value;
     }
     for (MapEntry<String, String> entry in previousHashes.entries) {
-      final pb.FileHash fileHash = pb.FileHash();
-      fileHash.path = entry.key;
-      fileHash.hash = entry.value;
-      fileStorage.files.add(fileHash);
+      fileHashes.add(FileHash(entry.key, entry.value));
     }
-    final Uint8List buffer = fileStorage.writeToBuffer();
+    final FileStorage fileStorage = FileStorage(
+      _kVersion,
+      fileHashes,
+    );
+    final Uint8List buffer = fileStorage.toBuffer();
     file.writeAsBytesSync(buffer);
     printTrace('Done persisting file store');
   }

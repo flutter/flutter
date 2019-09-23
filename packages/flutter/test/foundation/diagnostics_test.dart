@@ -22,16 +22,13 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   final DiagnosticsTreeStyle style;
 
   @override
-  List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    for (TestTree child in this.children) {
-      children.add(child.toDiagnosticsNode(
+  List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
+    for (TestTree child in children)
+      child.toDiagnosticsNode(
         name: 'child ${child.name}',
         style: child.style,
-      ));
-    }
-    return children;
-  }
+      ),
+  ];
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1050,6 +1047,15 @@ void main() {
     validateDoublePropertyJsonSerialization(doubleWithUnit);
   });
 
+  test('double.infinity serialization test', () {
+    final DoubleProperty infProperty1 = DoubleProperty('double1', double.infinity);
+    validateDoublePropertyJsonSerialization(infProperty1);
+    expect(infProperty1.toString(), equals('double1: Infinity'));
+
+    final DoubleProperty infProperty2 = DoubleProperty('double2', double.negativeInfinity);
+    validateDoublePropertyJsonSerialization(infProperty2);
+    expect(infProperty2.toString(), equals('double2: -Infinity'));
+  });
 
   test('unsafe double property test', () {
     final DoubleProperty safe = DoubleProperty.lazy(

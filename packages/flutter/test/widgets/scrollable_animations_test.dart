@@ -8,15 +8,12 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Does not animate if already at target position', (WidgetTester tester) async {
-    final List<Widget> textWidgets = <Widget>[];
-    for (int i = 0; i < 80; i++)
-      textWidgets.add(Text('$i', textDirection: TextDirection.ltr));
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          children: textWidgets,
+          children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
           controller: controller,
         ),
       ),
@@ -31,15 +28,12 @@ void main() {
   });
 
   testWidgets('Does not animate if already at target position within tolerance', (WidgetTester tester) async {
-    final List<Widget> textWidgets = <Widget>[];
-    for (int i = 0; i < 80; i++)
-      textWidgets.add(Text('$i', textDirection: TextDirection.ltr));
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          children: textWidgets,
+          children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
           controller: controller,
         ),
       ),
@@ -57,15 +51,12 @@ void main() {
   });
 
   testWidgets('Animates if going to a position outside of tolerance', (WidgetTester tester) async {
-    final List<Widget> textWidgets = <Widget>[];
-    for (int i = 0; i < 80; i++)
-      textWidgets.add(Text('$i', textDirection: TextDirection.ltr));
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          children: textWidgets,
+          children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
           controller: controller,
         ),
       ),

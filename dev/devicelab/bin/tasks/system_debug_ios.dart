@@ -44,7 +44,7 @@ Future<void> checkNoWarningHostLaunch(String deviceId) async {
     '--verbose-system-logs',
     '-d',
     deviceId,
-    'lib/empty.dart'
+    'lib/empty.dart',
   ]);
 
   expect(!output.contains(expectedWarning));
@@ -84,9 +84,9 @@ Future<void> checkWarningHomeScreenLaunch(String deviceId) async {
     '--verbose-system-logs',
     '-d',
     deviceId,
-    'lib/empty.dart'
+    'lib/empty.dart',
   ], environment: <String, String>{
-    'FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE': 'true'
+    'FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE': 'true',
   });
   expect(output.contains(expectedWarning));
 }

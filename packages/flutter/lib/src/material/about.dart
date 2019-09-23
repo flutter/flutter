@@ -33,6 +33,77 @@ import 'theme.dart';
 ///
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
+/// {@tool snippet --template=stateless_widget_material}
+///
+/// This sample shows two ways to open [AboutDialog]. The first one
+/// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
+///
+/// ```dart
+///
+///  Widget build(BuildContext context) {
+///    final TextStyle textStyle = Theme.of(context).textTheme.body1;
+///    final List<Widget> aboutBoxChildren = <Widget>[
+///      SizedBox(height: 24),
+///      RichText(
+///        text: TextSpan(
+///          children: <TextSpan>[
+///            TextSpan(
+///              style: textStyle,
+///              text: 'Flutter is Google’s UI toolkit for building beautiful, '
+///              'natively compiled applications for mobile, web, and desktop '
+///              'from a single codebase. Learn more about Flutter at '
+///            ),
+///            TextSpan(
+///              style: textStyle.copyWith(color: Theme.of(context).accentColor),
+///              text: 'https://flutter.dev'
+///            ),
+///            TextSpan(
+///              style: textStyle,
+///              text: '.'
+///            ),
+///          ],
+///        ),
+///      ),
+///    ];
+///
+///    return Scaffold(
+///      appBar: AppBar(
+///        title: Text('Show About Example'),
+///      ),
+///      drawer: Drawer(
+///        child: SingleChildScrollView(
+///          child: SafeArea(
+///            child: AboutListTile(
+///              icon: Icon(Icons.info),
+///              applicationIcon: FlutterLogo(),
+///              applicationName: 'Show About Example',
+///              applicationVersion: 'August 2019',
+///              applicationLegalese: '© 2019 The Chromium Authors',
+///              aboutBoxChildren: aboutBoxChildren,
+///            ),
+///          ),
+///        ),
+///      ),
+///      body: Center(
+///        child: RaisedButton(
+///          child: Text('Show About Example'),
+///          onPressed: () {
+///            showAboutDialog(
+///              context: context,
+///              applicationIcon: FlutterLogo(),
+///              applicationName: 'Show About Example',
+///              applicationVersion: 'August 2019',
+///              applicationLegalese: '© 2019 The Chromium Authors',
+///              children: aboutBoxChildren,
+///            );
+///          },
+///        ),
+///      ),
+///    );
+///}
+/// ```
+/// {@end-tool}
+///
 class AboutListTile extends StatelessWidget {
   /// Creates a list tile for showing an about box.
   ///

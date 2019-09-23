@@ -730,44 +730,38 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       valueListenable: _effectiveController,
       child: editableText,
       builder: (BuildContext context, TextEditingValue text, Widget child) {
-        final List<Widget> rowChildren = <Widget>[];
-
-        // Insert a prefix at the front if the prefix visibility mode matches
-        // the current text state.
-        if (_showPrefixWidget(text)) {
-          rowChildren.add(widget.prefix);
-        }
-
-        final List<Widget> stackChildren = <Widget>[];
-
-        // In the middle part, stack the placeholder on top of the main EditableText
-        // if needed.
-        if (widget.placeholder != null && text.text.isEmpty) {
-          stackChildren.add(
-            SizedBox(
-              width: double.infinity,
-              child: Padding(
-                padding: widget.padding,
-                child: Text(
-                  widget.placeholder,
-                  maxLines: widget.maxLines,
-                  overflow: TextOverflow.ellipsis,
-                  style: placeholderStyle,
-                  textAlign: widget.textAlign,
-                ),
-              ),
+        return Row(children: <Widget>[
+          // Insert a prefix at the front if the prefix visibility mode matches
+          // the current text state.
+          if (_showPrefixWidget(text)) widget.prefix,
+          // In the middle part, stack the placeholder on top of the main EditableText
+          // if needed.
+          Expanded(
+            child: Stack(
+              children: <Widget>[
+                if (widget.placeholder != null && text.text.isEmpty)
+                  SizedBox(
+                    width: double.infinity,
+                    child: Padding(
+                      padding: widget.padding,
+                      child: Text(
+                        widget.placeholder,
+                        maxLines: widget.maxLines,
+                        overflow: TextOverflow.ellipsis,
+                        style: placeholderStyle,
+                        textAlign: widget.textAlign,
+                      ),
+                    ),
+                  ),
+                child,
+              ],
             ),
-          );
-        }
-
-        rowChildren.add(Expanded(child: Stack(children: stackChildren..add(child))));
-
-        // First add the explicit suffix if the suffix visibility mode matches.
-        if (_showSuffixWidget(text)) {
-          rowChildren.add(widget.suffix);
-        // Otherwise, try to show a clear button if its visibility mode matches.
-        } else if (_showClearButton(text)) {
-          rowChildren.add(
+          ),
+          // First add the explicit suffix if the suffix visibility mode matches.
+          if (_showSuffixWidget(text))
+            widget.suffix
+          // Otherwise, try to show a clear button if its visibility mode matches.
+          else if (_showClearButton(text))
             GestureDetector(
               key: _clearGlobalKey,
               onTap: widget.enabled ?? true ? () {
@@ -787,10 +781,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                 ),
               ),
             ),
-          );
-        }
-
-        return Row(children: rowChildren);
+        ]);
       },
     );
   }

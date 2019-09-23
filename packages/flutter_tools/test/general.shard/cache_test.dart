@@ -10,6 +10,7 @@ import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -265,13 +266,11 @@ void main() {
     MemoryFileSystem memoryFileSystem;
     MockProcessManager processManager;
     MockCache mockCache;
-    MockProcess mockProcess;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem();
       processManager = MockProcessManager();
       mockCache = MockCache();
-      mockProcess = MockProcess();
     });
 
     test('development artifact', () async {
@@ -291,17 +290,16 @@ void main() {
       fs.file(fs.path.join(gradleWrapperDir.path, 'gradlew')).writeAsStringSync('irrelevant');
       fs.file(fs.path.join(gradleWrapperDir.path, 'gradlew.bat')).writeAsStringSync('irrelevant');
 
-      when(processManager.start(any))
-          .thenAnswer((Invocation invocation){
-            final List<String> args = invocation.positionalArguments[0];
-            expect(args.length, 6);
-            expect(args[1], '-b');
-            expect(args[2].endsWith('resolve_dependencies.gradle'), isTrue);
-            expect(args[5], 'resolveDependencies');
-
-            return Future<Process>.value(mockProcess);
-          });
-      when(mockProcess.exitCode).thenAnswer((_) async => 0);
+      when(processManager.run(any, environment: captureAnyNamed('environment')))
+        .thenAnswer((Invocation invocation) {
+          final List<String> args = invocation.positionalArguments[0];
+          expect(args.length, 6);
+          expect(args[1], '-b');
+          expect(args[2].endsWith('resolve_dependencies.gradle'), isTrue);
+          expect(args[5], 'resolveDependencies');
+          expect(invocation.namedArguments[#environment], gradleEnv);
+          return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
+        });
 
       await mavenArtifacts.update();
 
@@ -339,7 +337,6 @@ class FakeCachedArtifact extends EngineCachedArtifact {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcess extends Mock implements Process {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockFile extends Mock implements File {}
 class MockDirectory extends Mock implements Directory {}

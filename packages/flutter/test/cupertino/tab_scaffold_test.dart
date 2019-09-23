@@ -76,7 +76,7 @@ void main() {
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
     ));
-    expect(tab2.text.style.color, CupertinoColors.inactiveGray);
+    expect(tab2.text.style.color.value, 0xFF999999);
 
     await tester.tap(find.text('Tab 2'));
     await tester.pump();
@@ -86,7 +86,7 @@ void main() {
       of: find.text('Tab 1'),
       matching: find.byType(RichText),
     ));
-    expect(tab1.text.style.color, CupertinoColors.inactiveGray);
+    expect(tab1.text.style.color.value, 0xFF999999);
     tab2 = tester.widget(find.descendant(
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
@@ -373,7 +373,7 @@ void main() {
       matching: find.byType(RichText),
     ));
     // Tab 2 should still be selected after changing theme.
-    expect(tab1.text.style.color, CupertinoColors.inactiveGray);
+    expect(tab1.text.style.color.value, 0xFF757575);
     final RichText tab2 = tester.widget(find.descendant(
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
@@ -918,6 +918,55 @@ void main() {
     final String message = tester.takeException().toString();
     expect(message, contains('current index ${controller.index}'));
     expect(message, contains('with 3 tabs'));
+  });
+
+  testWidgets("Don't replace focus nodes for existing tabs when changing tab count", (WidgetTester tester) async {
+    final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+
+    final List<FocusScopeNode> scopes = List<FocusScopeNode>(5);
+    await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+            ),
+            controller: controller,
+            tabBuilder: (BuildContext context, int index) {
+              scopes[index] = FocusScope.of(context);
+              return Container();
+            },
+          ),
+        )
+    );
+
+    for (int i = 0; i < 3; i++) {
+      controller.index = i;
+      await tester.pump();
+    }
+    await tester.pump();
+
+    final List<FocusScopeNode> newScopes = List<FocusScopeNode>(5);
+    await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(5, tabGenerator),
+            ),
+            controller: controller,
+            tabBuilder: (BuildContext context, int index) {
+              newScopes[index] = FocusScope.of(context);
+              return Container();
+            },
+          ),
+        )
+    );
+    for (int i = 0; i < 5; i++) {
+      controller.index = i;
+      await tester.pump();
+    }
+    await tester.pump();
+
+    expect(scopes.sublist(0, 3), equals(newScopes.sublist(0, 3)));
   });
 
   testWidgets('Current tab index cannot go below zero or be null', (WidgetTester tester) async {

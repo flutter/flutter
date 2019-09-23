@@ -28,7 +28,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:3.2.1"
+        classpath 'com.android.tools.build:gradle:3.5.0'
     }
 }
 
@@ -132,15 +132,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-        // Add custom build types
-        project.android.buildTypes {
-            profile {
-                initWith debug
-                if (it.hasProperty('matchingFallbacks')) {
-                    matchingFallbacks = ['debug', 'release']
-                }
-            }
-        }
+
         String flutterRootPath = resolveProperty("flutter.sdk", System.env.FLUTTER_ROOT)
         if (flutterRootPath == null) {
             throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file or with a FLUTTER_ROOT environment variable.")
@@ -156,8 +148,38 @@ class FlutterPlugin implements Plugin<Project> {
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
 
+        // Add custom build types.
+        project.android.buildTypes {
+            profile {
+                initWith debug
+                if (it.hasProperty("matchingFallbacks")) {
+                    matchingFallbacks = ["debug", "release"]
+                }
+            }
+        }
+
+        if (shouldShrinkResources(project)) {
+            String flutterProguardRules = Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools",
+                    "gradle", "flutter_proguard_rules.pro")
+            project.android.buildTypes {
+                release {
+                    // Enables code shrinking, obfuscation, and optimization for only
+                    // your project's release build type.
+                    minifyEnabled true
+                    // Enables resource shrinking, which is performed by the
+                    // Android Gradle plugin.
+                    // NOTE: The resource shrinker can't be used for libraries.
+                    shrinkResources isBuiltAsApp(project)
+                    // Fallback to `android/app/proguard-rules.pro`.
+                    // This way, custom Proguard rules can be configured as needed.
+                    proguardFiles project.android.getDefaultProguardFile("proguard-android.txt"), flutterProguardRules, "proguard-rules.pro"
+                }
+            }
+        }
+
         if (useLocalEngine()) {
-            File engineOut = project.file(project.property('localEngineOut'))
+            String engineOutPath = project.property('localEngineOut')
+            File engineOut = project.file(engineOutPath)
             if (!engineOut.isDirectory()) {
                 throw new GradleException('localEngineOut must point to a local engine build')
             }
@@ -273,15 +295,26 @@ class FlutterPlugin implements Plugin<Project> {
         Closure addEmbeddingCompileOnlyDependency = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
             // Add the embedding as a compile only dependency to the plugin.
-            def dependency;
             if (flutterJar) {
-                dependency = project.files {
-                    flutterJar
-                }
-            } else {
-                dependency = "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion"
+                addCompileOnlyDependency(
+                    pluginProject,
+                    buildType.name,
+                    project.files {
+                        flutterJar
+                    }
+                )
+                return
             }
-            addCompileOnlyDependency(pluginProject, buildType.name, dependency)
+            addCompileOnlyDependency(
+                pluginProject,
+                buildType.name,
+                "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion",
+                {
+                    // We only need to expose io.flutter.plugin.*
+                    // No need for the embedding transitive dependencies.
+                    transitive = false
+                }
+            )
         }
         pluginProject.afterEvaluate {
             pluginProject.android.buildTypes {
@@ -296,7 +329,18 @@ class FlutterPlugin implements Plugin<Project> {
 
     private Properties getPluginList() {
         File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
-        return readPropertiesIfExist(pluginsFile)
+        Properties allPlugins = readPropertiesIfExist(pluginsFile)
+        Properties androidPlugins = new Properties()
+        allPlugins.each { name, path ->
+            File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
+            if (editableAndroidProject.exists()) {
+                androidPlugins.setProperty(name, path)
+            }
+            // TODO(amirh): log an error if this plugin was specified to be an Android
+            // plugin according to the new schema, and was missing a build.gradle file.
+            // https://github.com/flutter/flutter/issues/40784
+        }
+        return androidPlugins
     }
 
     private void addPluginTasks() {
@@ -448,11 +492,24 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
+    private static Boolean shouldShrinkResources(Project project) {
+        if (project.hasProperty("shrink")) {
+            return project.property("shrink").toBoolean()
+        }
+        return false
+    }
+
+    private static Boolean isBuiltAsApp(Project project) {
+        // Projects are built as applications when the they use the `com.android.application`
+        // plugin.
+        return project.plugins.hasPlugin("com.android.application");
+    }
+
     private static Boolean buildPluginAsAar() {
         return System.getProperty('build-plugins-as-aars') == 'true'
     }
 
-    private void addCompileOnlyDependency(Project project, String variantName, Object dependency) {
+    private void addCompileOnlyDependency(Project project, String variantName, Object dependency, Closure config = null) {
         if (project.state.failure) {
             return
         }
@@ -462,7 +519,7 @@ class FlutterPlugin implements Plugin<Project> {
         } else {
             configuration = "${variantName}Provided";
         }
-        project.dependencies.add(configuration, dependency)
+        project.dependencies.add(configuration, dependency, config)
     }
 
     private static void addApiDependencies(Project project, String variantName, Object dependency, Closure config = null) {
@@ -619,16 +676,23 @@ class FlutterPlugin implements Plugin<Project> {
                     dependsOn cleanPackageAssets
                     into packageAssets.outputDir
                 } else {
-                    dependsOn variant.mergeAssets
-                    dependsOn "clean${variant.mergeAssets.name.capitalize()}"
-                    variant.mergeAssets.mustRunAfter("clean${variant.mergeAssets.name.capitalize()}")
-                    into variant.mergeAssets.outputDir
+                    // `variant.mergeAssets` will be removed at the end of 2019.
+                    def mergeAssets = variant.hasProperty("mergeAssetsProvider") ?
+                        variant.mergeAssetsProvider.get() : variant.mergeAssets
+                    dependsOn mergeAssets
+                    dependsOn "clean${mergeAssets.name.capitalize()}"
+                    mergeAssets.mustRunAfter("clean${mergeAssets.name.capitalize()}")
+                    into mergeAssets.outputDir
                 }
                 compileTasks.each { flutterTask ->
                     with flutterTask.assets
                 }
             }
-            variant.outputs.first().processResources.dependsOn(copyFlutterAssetsTask)
+            def variantOutput = variant.outputs.first()
+            // `variantOutput.processResources` will be removed at the end of 2019.
+            def processResources = variantOutput.hasProperty("processResourcesProvider") ?
+                variantOutput.processResourcesProvider.get() : variantOutput.processResources
+            processResources.dependsOn(copyFlutterAssetsTask)
         }
         if (project.android.hasProperty("applicationVariants")) {
             project.android.applicationVariants.all addFlutterDeps
@@ -912,26 +976,6 @@ class FlutterPluginTask extends DefaultTask {
             }
             if (verbose) {
                 args "--verbose"
-            }
-        }
-    }
-}
-
-gradle.useLogger(new FlutterEventLogger())
-
-class FlutterEventLogger extends BuildAdapter implements TaskExecutionListener {
-    String mostRecentTask = ""
-
-    void beforeExecute(Task task) {
-        mostRecentTask = task.name
-    }
-
-    void afterExecute(Task task, TaskState state) {}
-
-    void buildFinished(BuildResult result) {
-        if (result.failure != null) {
-            if (!(result.failure instanceof GradleException) || !mostRecentTask.startsWith(FlutterPlugin.FLUTTER_BUILD_PREFIX)) {
-                result.rethrowFailure()
             }
         }
     }
