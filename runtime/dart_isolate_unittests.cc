@@ -360,6 +360,7 @@ TEST_F(DartIsolateTest, CanSaveCompilationTrace) {
 
 TEST_F(DartIsolateTest, CanLaunchSecondaryIsolates) {
   fml::CountDownLatch latch(3);
+  fml::AutoResetWaitableEvent child_shutdown_latch;
   AddNativeCallback("NotifyNative",
                     CREATE_NATIVE_ENTRY(([&latch](Dart_NativeArguments args) {
                       latch.CountDown();
@@ -371,14 +372,18 @@ TEST_F(DartIsolateTest, CanLaunchSecondaryIsolates) {
         ASSERT_EQ("Hello from code is secondary isolate.", message);
         latch.CountDown();
       })));
-  const auto settings = CreateSettingsForFixture();
+  auto settings = CreateSettingsForFixture();
+  settings.isolate_shutdown_callback = [&child_shutdown_latch]() {
+    child_shutdown_latch.Signal();
+  };
   auto vm_ref = DartVMRef::Create(settings);
   auto isolate = RunDartCodeInIsolate(vm_ref, settings, CreateNewThread(),
                                       "testCanLaunchSecondaryIsolate", {});
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
-
-  latch.Wait();
+  child_shutdown_latch.Wait();  // wait for child isolate to shutdown first
+  latch.Wait();  // wait for last NotifyNative called by main isolate
+  // root isolate will be auto-shutdown
 }
 
 TEST_F(DartIsolateTest, CanRecieveArguments) {
