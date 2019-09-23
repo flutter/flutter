@@ -82,14 +82,10 @@ class CupertinoThumbPainter {
     for (BoxShadow shadow in shadows)
       canvas.drawRRect(rrect.shift(shadow.offset), shadow.toPaint());
 
-    if (rect.shortestSide > 1) {
-      canvas.drawRRect(
-        rrect,
-        Paint()..color = _kThumbBorderColor,
-      );
-      canvas.drawRRect(rrect.inflate(-0.5), Paint()..color = color);
-    } else {
-      canvas.drawRRect(rrect, Paint()..color = color);
-    }
+    canvas.drawRRect(
+      rrect.inflate(0.5),
+      Paint()..color = _kThumbBorderColor,
+    );
+    canvas.drawRRect(rrect, Paint()..color = color);
   }
 }
