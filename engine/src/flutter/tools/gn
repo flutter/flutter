@@ -209,9 +209,6 @@ def to_gn_args(args):
     if args.target_triple:
       gn_args['custom_target_triple'] = args.target_triple
 
-    if args.toolchain_prefix:
-      gn_args['toolchain_prefix'] = args.toolchain_prefix
-
     goma_dir = os.environ.get('GOMA_DIR')
     goma_home_dir = os.path.join(os.getenv('HOME', ''), 'goma')
 
@@ -308,7 +305,6 @@ def parse_args(args):
   parser.add_argument('--target-sysroot', type=str)
   parser.add_argument('--target-toolchain', type=str)
   parser.add_argument('--target-triple', type=str)
-  parser.add_argument('--toolchain-prefix', type=str)
   parser.add_argument('--operator-new-alignment', dest='operator_new_alignment', type=str, default=None)
 
   parser.add_argument('--enable-vulkan', action='store_true', default=False)
