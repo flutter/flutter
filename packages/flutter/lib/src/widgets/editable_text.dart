@@ -1703,9 +1703,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     updateKeepAlive();
   }
 
-  Size _lastSize;
-  Matrix4 _lastTransform;
-
   void _updateSizeAndTransform() {
     if (_hasInputConnection) {
       final Size size = renderEditable.size;
