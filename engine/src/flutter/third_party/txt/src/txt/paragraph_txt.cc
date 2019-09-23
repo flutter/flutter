@@ -415,6 +415,9 @@ bool ParagraphTxt::ComputeBidiRuns(std::vector<BidiRun>* result) {
   //
   // This only applies to the final whitespace at the end as other whitespace is
   // no longer ambiguous when surrounded by additional text.
+
+  // TODO(garyq): Handle this in the text editor caret code instead at layout
+  // level.
   bool has_trailing_whitespace = false;
   int32_t bidi_run_start, bidi_run_length;
   if (bidi_run_count > 1) {
@@ -427,8 +430,17 @@ bool ParagraphTxt::ComputeBidiRuns(std::vector<BidiRun>* result) {
       U16_GET(text_.data(), 0, bidi_run_start + bidi_run_length - 1,
               static_cast<int>(text_.size()), last_char);
       if (u_hasBinaryProperty(last_char, UCHAR_WHITE_SPACE)) {
-        has_trailing_whitespace = true;
-        bidi_run_count--;
+        // Check if the trailing whitespace occurs before the previous run or
+        // not. If so, this trailing whitespace was a leading whitespace.
+        int32_t second_last_bidi_run_start, second_last_bidi_run_length;
+        ubidi_getVisualRun(bidi.get(), bidi_run_count - 2,
+                           &second_last_bidi_run_start,
+                           &second_last_bidi_run_length);
+        if (bidi_run_start ==
+            second_last_bidi_run_start + second_last_bidi_run_length) {
+          has_trailing_whitespace = true;
+          bidi_run_count--;
+        }
       }
     }
   }
