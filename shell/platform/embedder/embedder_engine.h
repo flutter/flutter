@@ -67,6 +67,8 @@ class EmbedderEngine {
                     fml::TimePoint frame_start_time,
                     fml::TimePoint frame_target_time);
 
+  bool ReloadSystemFonts();
+
   bool PostRenderThreadTask(fml::closure task);
 
   bool RunTask(const FlutterTask* task);

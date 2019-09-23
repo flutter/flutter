@@ -129,7 +129,9 @@ Win32Window::MessageHandler(HWND hwnd,
         current_height_ = height;
         window->HandleResize(width, height);
         break;
-
+      case WM_FONTCHANGE:
+        window->OnFontChange();
+        break;
       case WM_MOUSEMOVE:
         xPos = GET_X_LPARAM(lparam);
         yPos = GET_Y_LPARAM(lparam);

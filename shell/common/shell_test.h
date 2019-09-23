@@ -51,6 +51,8 @@ class ShellTest : public ThreadTest {
   static bool GetNeedsReportTimings(Shell* shell);
   static void SetNeedsReportTimings(Shell* shell, bool value);
 
+  std::shared_ptr<txt::FontCollection> GetFontCollection(Shell* shell);
+
   // Do not assert |UnreportedTimingsCount| to be positive in any tests.
   // Otherwise those tests will be flaky as the clearing of unreported timings
   // is unpredictive.

@@ -235,6 +235,17 @@ TEST(EmbedderTestNoFixture, CanGetCurrentTimeInNanoseconds) {
   ASSERT_LT((point2 - point1), fml::TimeDelta::FromMilliseconds(1));
 }
 
+TEST_F(EmbedderTest, CanReloadSystemFonts) {
+  auto& context = GetEmbedderContext();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  auto result = FlutterEngineReloadSystemFonts(engine.get());
+  ASSERT_EQ(result, kSuccess);
+}
+
 TEST_F(EmbedderTest, CanCreateOpenGLRenderingEngine) {
   EmbedderConfigBuilder builder(GetEmbedderContext());
   builder.SetOpenGLRendererConfig(SkISize::Make(1, 1));

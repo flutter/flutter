@@ -285,6 +285,16 @@ class Shell final : public PlatformView::Delegate,
   fml::Status WaitForFirstFrame(fml::TimeDelta timeout);
 
   //----------------------------------------------------------------------------
+  /// @brief      Used by embedders to reload the system fonts in
+  /// FontCollection.
+  ///             It also clears the cached font families and send system
+  ///             channel message to framework to rebuild affected widgets.
+  ///
+  /// @return     Returns if shell reloads system fonts successfully.
+  ///
+  bool ReloadSystemFonts();
+
+  //----------------------------------------------------------------------------
   /// @brief      Used by embedders to get the last error from the Dart UI
   ///             Isolate, if one exists.
   ///

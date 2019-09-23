@@ -97,8 +97,11 @@ class Win32Window {
   // Called when mouse scrollwheel input occurs.
   virtual void OnScroll(double delta_x, double delta_y) = 0;
 
-  // Called when the user closes the Windows
+  // Called when the user closes the Windows.
   virtual void OnClose() = 0;
+
+  // Called when the system font change.
+  virtual void OnFontChange() = 0;
 
   UINT GetCurrentDPI();
 

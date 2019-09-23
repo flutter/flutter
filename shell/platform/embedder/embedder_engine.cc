@@ -186,6 +186,10 @@ bool EmbedderEngine::OnVsyncEvent(intptr_t baton,
                                               frame_target_time);
 }
 
+bool EmbedderEngine::ReloadSystemFonts() {
+  return shell_->ReloadSystemFonts();
+}
+
 bool EmbedderEngine::PostRenderThreadTask(fml::closure task) {
   if (!IsValid()) {
     return false;

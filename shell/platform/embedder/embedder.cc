@@ -1279,6 +1279,22 @@ FlutterEngineResult FlutterEngineOnVsync(FLUTTER_API_SYMBOL(FlutterEngine)
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineReloadSystemFonts(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+  }
+
+  TRACE_EVENT0("flutter", "FlutterEngineReloadSystemFonts");
+
+  if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)
+           ->ReloadSystemFonts()) {
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency);
+  }
+
+  return kSuccess;
+}
+
 void FlutterEngineTraceEventDurationBegin(const char* name) {
   fml::tracing::TraceEvent0("flutter", name);
 }

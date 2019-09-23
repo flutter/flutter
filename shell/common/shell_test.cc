@@ -144,6 +144,11 @@ bool ShellTest::GetNeedsReportTimings(Shell* shell) {
   return shell->needs_report_timings_;
 }
 
+std::shared_ptr<txt::FontCollection> ShellTest::GetFontCollection(
+    Shell* shell) {
+  return shell->weak_engine_->GetFontCollection().GetFontCollection();
+}
+
 Settings ShellTest::CreateSettingsForFixture() {
   Settings settings;
   settings.leak_vm = false;

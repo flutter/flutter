@@ -1201,6 +1201,17 @@ FlutterEngineResult FlutterEngineOnVsync(FLUTTER_API_SYMBOL(FlutterEngine)
                                          uint64_t frame_target_time_nanos);
 
 //------------------------------------------------------------------------------
+/// @brief      Reloads the system fonts in engine.
+///
+/// @param[in]  engine.                  A running engine instance.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineReloadSystemFonts(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine);
+
+//------------------------------------------------------------------------------
 /// @brief      A profiling utility. Logs a trace duration begin event to the
 ///             timeline. If the timeline is unavailable or disabled, this has
 ///             no effect. Must be balanced with an duration end event (via
