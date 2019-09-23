@@ -44,7 +44,7 @@ HttpClient sampleHttpProvider() {
   return httpClient;
 }
 
-void main() async {
+Future<void> main() async {
   group(NetworkImage, ()
   {
     setUpAll(() async {
@@ -55,14 +55,16 @@ void main() async {
     testWidgets('Ensure images are loaded', (WidgetTester tester) async {
       debugNetworkImageHttpClientProvider = sampleHttpProvider;
 
-      await tester.pumpWidget(MyApp(0));
+      await tester.pumpWidget(const MyApp(0));
 
       final Finder allImages = find.byType(Image);
       expect(allImages, findsNWidgets(50));
 
       for (Element e in allImages.evaluate()) {
-        await tester.runAsync(() async =>
-            await precacheImage((e.widget as Image).image, e));
+        await tester.runAsync(() async {
+          final Image image = e.widget;
+          await precacheImage(image.image, e);
+        });
       }
 
       await tester.pumpAndSettle();

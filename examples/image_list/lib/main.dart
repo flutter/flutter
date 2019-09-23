@@ -154,7 +154,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    controllers.forEach((controller) => controller.dispose());
+    for (AnimationController controller in controllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 }
