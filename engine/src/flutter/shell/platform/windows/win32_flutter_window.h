@@ -54,6 +54,9 @@ class Win32FlutterWindow : public Win32Window {
   void OnPointerUp(double x, double y) override;
 
   // |Win32Window|
+  void OnPointerLeave() override;
+
+  // |Win32Window|
   void OnChar(char32_t code_point) override;
 
   // |Win32Window|
@@ -104,6 +107,13 @@ class Win32FlutterWindow : public Win32Window {
 
   // Reports mouse release to Flutter engine.
   void SendPointerUp(double x, double y);
+
+  // Reports mouse left the window client area.
+  //
+  // Win32 api doesn't have "mouse enter" event. Therefore, there is no
+  // SendPointerEnter method. A mouse enter event is tracked then the "move"
+  // event is called.
+  void SendPointerLeave();
 
   // Reports a keyboard character to Flutter engine.
   void SendChar(char32_t code_point);

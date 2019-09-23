@@ -88,6 +88,9 @@ class Win32Window {
   // down to up
   virtual void OnPointerUp(double x, double y) = 0;
 
+  // Called when the mouse leaves the window.
+  virtual void OnPointerLeave() = 0;
+
   // Called when character input occurs.
   virtual void OnChar(char32_t code_point) = 0;
 
@@ -110,6 +113,9 @@ class Win32Window {
   UINT GetCurrentHeight();
 
  private:
+  // Activates tracking for a "mouse leave" event.
+  void TrackMouseLeaveEvent(HWND hwnd);
+
   // Stores new width and height and calls |OnResize| to notify inheritors
   void HandleResize(UINT width, UINT height);
 
@@ -133,6 +139,9 @@ class Win32Window {
   // aspects of win32 High DPI handling across different OS versions.
   std::unique_ptr<Win32DpiHelper> dpi_helper_ =
       std::make_unique<Win32DpiHelper>();
+
+  // Set to true to be notified when the mouse leaves the window.
+  bool tracking_mouse_leave_ = false;
 };
 
 }  // namespace flutter

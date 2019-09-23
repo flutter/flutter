@@ -98,6 +98,17 @@ LRESULT CALLBACK Win32Window::WndProc(HWND const window,
   return DefWindowProc(window, message, wparam, lparam);
 }
 
+void Win32Window::TrackMouseLeaveEvent(HWND hwnd) {
+  if (!tracking_mouse_leave_) {
+    TRACKMOUSEEVENT tme;
+    tme.cbSize = sizeof(tme);
+    tme.hwndTrack = hwnd;
+    tme.dwFlags = TME_LEAVE;
+    TrackMouseEvent(&tme);
+    tracking_mouse_leave_ = true;
+  }
+}
+
 LRESULT
 Win32Window::MessageHandler(HWND hwnd,
                             UINT const message,
@@ -120,7 +131,6 @@ Win32Window::MessageHandler(HWND hwnd,
         window->OnClose();
         return 0;
         break;
-
       case WM_SIZE:
         width = LOWORD(lparam);
         height = HIWORD(lparam);
@@ -133,11 +143,19 @@ Win32Window::MessageHandler(HWND hwnd,
         window->OnFontChange();
         break;
       case WM_MOUSEMOVE:
+        window->TrackMouseLeaveEvent(hwnd);
+
         xPos = GET_X_LPARAM(lparam);
         yPos = GET_Y_LPARAM(lparam);
-
         window->OnPointerMove(static_cast<double>(xPos),
                               static_cast<double>(yPos));
+        break;
+      case WM_MOUSELEAVE:;
+        window->OnPointerLeave();
+        // Once the tracked event is received, the TrackMouseEvent function
+        // resets. Set to false to make sure it's called once mouse movement is
+        // detected again.
+        tracking_mouse_leave_ = false;
         break;
       case WM_LBUTTONDOWN:
         xPos = GET_X_LPARAM(lparam);
