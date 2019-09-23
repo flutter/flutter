@@ -310,6 +310,7 @@ Future<String> _initializeGradle(FlutterProject project) async {
   // Update the project if needed.
   // TODO(egarciad): https://github.com/flutter/flutter/issues/40460.
   migrateToR8(android);
+  disableDexingArtifactTransform(android);
   injectGradleWrapperIfNeeded(android);
 
   final String gradle = _locateGradlewExecutable(android);
@@ -359,6 +360,33 @@ void migrateToR8(Directory directory) {
   } on FileSystemException {
     throwToolExit(
       'The tool failed to add `android.enableR8=true` to ${gradleProperties.path}. '
+      'Please update the file manually and try this command again.'
+    );
+  }
+}
+
+/// Disables dexing artifact transform in Gradle 3.5.0.
+///
+/// This is a new feature in Gradle that doesn't work for Flutter builds. See
+/// https://github.com/flutter/flutter/issues/40126.
+@visibleForTesting
+void disableDexingArtifactTransform(Directory directory) {
+  final File gradleProperties = directory.childFile('gradle.properties');
+  if (!gradleProperties.existsSync()) {
+    throwToolExit('Expected file ${gradleProperties.path}.');
+  }
+  final String propertiesContent = gradleProperties.readAsStringSync();
+  if (propertiesContent.contains('android.enableDexingArtifactTransform')) {
+    printTrace('gradle.properties already sets `android.enableDexingArtifactTransform`');
+    return;
+  }
+  printTrace('set `android.enableDexingArtifactTransform=false` in gradle.properties');
+  try {
+    gradleProperties
+      .writeAsStringSync('android.enableDexingArtifactTransform=false\n', mode: FileMode.append);
+  } on FileSystemException {
+    throwToolExit(
+      'The tool failed to add `android.enableDexingArtifactTransform=false` to ${gradleProperties.path}. '
       'Please update the file manually and try this command again.'
     );
   }

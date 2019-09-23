@@ -1155,6 +1155,82 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     });
   });
 
+  group('disableDexingArtifactTransform', () {
+    MemoryFileSystem memoryFileSystem;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+    });
+
+    testUsingContext('throws ToolExit if gradle.properties doesn\'t exist', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+
+      expect(() {
+        disableDexingArtifactTransform(sampleAppAndroid);
+      }, throwsToolExit(message: 'Expected file ${sampleAppAndroid.path}'));
+
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+    });
+
+    testUsingContext('throws ToolExit if it cannot write gradle.properties', () {
+      final MockDirectory sampleAppAndroid = MockDirectory();
+      final MockFile gradleProperties = MockFile();
+
+      when(gradleProperties.path).thenReturn('foo/gradle.properties');
+      when(gradleProperties.existsSync()).thenReturn(true);
+      when(gradleProperties.readAsStringSync()).thenReturn('');
+      when(gradleProperties.writeAsStringSync('android.enableDexingArtifactTransform=false\n', mode: FileMode.append))
+        .thenThrow(const FileSystemException());
+
+      when(sampleAppAndroid.childFile('gradle.properties'))
+        .thenReturn(gradleProperties);
+
+      expect(() {
+        disableDexingArtifactTransform(sampleAppAndroid);
+      },
+      throwsToolExit(message:
+        'The tool failed to add `android.enableDexingArtifactTransform=false` to foo/gradle.properties. '
+        'Please update the file manually and try this command again.'));
+    });
+
+    testUsingContext('does not update gradle.properties if it\'s already set disableDexingArtifactTransform', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+      sampleAppAndroid.childFile('gradle.properties')
+        .writeAsStringSync('android.enableDexingArtifactTransform=true');
+
+      disableDexingArtifactTransform(sampleAppAndroid);
+
+      expect(testLogger.traceText,
+        contains('gradle.properties already sets `android.enableDexingArtifactTransform`'));
+      expect(sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+        equals('android.enableDexingArtifactTransform=true'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+    });
+
+    testUsingContext('sets android.enableDexingArtifactTransform=false', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+      sampleAppAndroid.childFile('gradle.properties')
+        .writeAsStringSync('org.gradle.jvmargs=-Xmx1536M\n');
+
+      disableDexingArtifactTransform(sampleAppAndroid);
+
+      expect(testLogger.traceText, contains('set `android.enableDexingArtifactTransform=false` in gradle.properties'));
+      expect(sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+        equals(
+          'org.gradle.jvmargs=-Xmx1536M\n'
+          'android.enableDexingArtifactTransform=false\n'
+        )
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+    });
+  });
+
   group('gradle build', () {
     MockAndroidSdk mockAndroidSdk;
     MockAndroidStudio mockAndroidStudio;
