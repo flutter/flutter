@@ -231,7 +231,7 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
       divisions: widget.divisions,
       activeColor: CupertinoDynamicColor.resolve(
         widget.activeColor ?? CupertinoTheme.of(context).primaryColor,
-        context
+        context,
       ),
       onChanged: widget.onChanged != null ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,

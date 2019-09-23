@@ -221,7 +221,7 @@ void main() {
                 text: 'First line!',
                 style: TextStyle(
                     fontSize: 14,
-                    fontFamily: 'Roboto'
+                    fontFamily: 'Roboto',
                 ),
                 children: <TextSpan>[
                   TextSpan(
@@ -265,7 +265,7 @@ void main() {
                 text: 'First line!',
                 style: TextStyle(
                     fontSize: 14,
-                    fontFamily: 'Roboto'
+                    fontFamily: 'Roboto',
                 ),
                 children: <InlineSpan>[
                   WidgetSpan(
@@ -335,7 +335,7 @@ void main() {
       boilerplate(
         child: const SelectableText(
           text,
-          textWidthBasis: TextWidthBasis.parent
+          textWidthBasis: TextWidthBasis.parent,
         ),
       )
     );
@@ -346,7 +346,7 @@ void main() {
       boilerplate(
         child: const SelectableText(
           text,
-          textWidthBasis: TextWidthBasis.longestLine
+          textWidthBasis: TextWidthBasis.longestLine,
         ),
       )
     );
@@ -649,7 +649,7 @@ void main() {
           child: SelectableText(
             'abc def ghi',
             dragStartBehavior: DragStartBehavior.down,
-            style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0)
+            style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
           ),
         ),
       ),
@@ -1200,7 +1200,7 @@ void main() {
             ),
             SelectableText(
                 'text 2',
-                key: key2
+                key: key2,
             ),
           ],
         ),
@@ -1241,7 +1241,7 @@ void main() {
           SemanticsFlag.isReadOnly,
           SemanticsFlag.isMultiline,
         ]
-      )
+      ),
     );
 
     semantics.dispose();
@@ -1952,7 +1952,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
-            SemanticsAction.longPress
+            SemanticsAction.longPress,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isReadOnly,

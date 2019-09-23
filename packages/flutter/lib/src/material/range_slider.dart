@@ -126,7 +126,7 @@ class RangeSlider extends StatefulWidget {
     this.labels,
     this.activeColor,
     this.inactiveColor,
-    this.semanticFormatterCallback
+    this.semanticFormatterCallback,
   }) : assert(values != null),
        assert(min != null),
        assert(max != null),
@@ -373,17 +373,17 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     enableController = AnimationController(
       duration: enableAnimationDuration,
       vsync: this,
-      value: widget.onChanged != null ? 1.0 : 0.0
+      value: widget.onChanged != null ? 1.0 : 0.0,
     );
     startPositionController = AnimationController(
       duration: Duration.zero,
       vsync: this,
-      value: _unlerp(widget.values.start)
+      value: _unlerp(widget.values.start),
     );
     endPositionController = AnimationController(
       duration: Duration.zero,
       vsync: this,
-      value: _unlerp(widget.values.end)
+      value: _unlerp(widget.values.end),
     );
   }
 
@@ -1151,7 +1151,7 @@ class _RenderRangeSlider extends RenderBox {
         parentBox: this,
         offset: offset,
         sliderTheme: _sliderTheme,
-        isDiscrete: isDiscrete
+        isDiscrete: isDiscrete,
     );
     final Offset startThumbCenter = Offset(trackRect.left + startVisualPosition * trackRect.width, trackRect.center.dy);
     final Offset endThumbCenter = Offset(trackRect.left + endVisualPosition * trackRect.width, trackRect.center.dy);
@@ -1166,7 +1166,7 @@ class _RenderRangeSlider extends RenderBox {
         startThumbCenter: startThumbCenter,
         endThumbCenter: endThumbCenter,
         isDiscrete: isDiscrete,
-        isEnabled: isEnabled
+        isEnabled: isEnabled,
     );
 
     if (!_overlayAnimation.isDismissed) {

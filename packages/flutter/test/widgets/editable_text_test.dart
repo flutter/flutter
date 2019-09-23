@@ -1875,7 +1875,7 @@ void main() {
                       actions: <SemanticsAction>[
                         SemanticsAction.moveCursorBackwardByCharacter,
                         SemanticsAction.setSelection,
-                        SemanticsAction.moveCursorBackwardByWord
+                        SemanticsAction.moveCursorBackwardByWord,
                       ],
                       value: expectedValue,
                       textDirection: TextDirection.ltr,
@@ -2292,7 +2292,7 @@ void main() {
         'fontWeightIndex': 5,
         'textAlignIndex': 4,
         'textDirectionIndex': 0,
-      })
+      }),
     );
   });
 

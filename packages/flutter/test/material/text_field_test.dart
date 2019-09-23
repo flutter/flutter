@@ -978,8 +978,9 @@ void main() {
     // Update selection from [0 to 8] to [1 to 7].
     controller = TextEditingController.fromValue(
       controller.value.copyWith(selection: const TextSelection(
-          baseOffset: 1, extentOffset: 7
-      ))
+        baseOffset: 1,
+        extentOffset: 7,
+      )),
     );
 
     // Mark entry to be dirty in order to trigger overlay update.
@@ -995,7 +996,7 @@ void main() {
     final TextEditingController controller = TextEditingController.fromValue(
         const TextEditingValue(
             text: 'readonly',
-            composing: TextRange(start: 0, end: 8) // Simulate text composing.
+            composing: TextRange(start: 0, end: 8), // Simulate text composing.
         )
     );
 
@@ -3447,7 +3448,7 @@ void main() {
 
     expect(
       semantics,
-      includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isReadOnly])
+      includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isReadOnly]),
     );
 
     semantics.dispose();
@@ -3606,7 +3607,7 @@ void main() {
       tester.testTextInput.updateEditingValue(const TextEditingValue(
         text: testValue,
         selection: TextSelection.collapsed(offset: 3),
-        composing: TextRange(start: 0, end: testValue.length)
+        composing: TextRange(start: 0, end: testValue.length),
       ));
       await tester.pump();
 

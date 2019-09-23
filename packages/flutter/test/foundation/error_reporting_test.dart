@@ -146,7 +146,7 @@ Future<void> main() async {
       informationCollector: () sync* {
         yield ErrorDescription('line 1 of extra information');
         yield ErrorDescription('line 2 of extra information\n'); // the trailing newlines here are intentional
-      }
+      },
     ));
     expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'

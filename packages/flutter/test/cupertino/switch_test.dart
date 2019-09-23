@@ -425,7 +425,7 @@ void main() {
             dragStartBehavior: DragStartBehavior.down,
             onChanged: null,
           ),
-        )
+        ),
       ),
     );
 
@@ -443,7 +443,7 @@ void main() {
             dragStartBehavior: DragStartBehavior.down,
             onChanged: (bool newValue) {},
           ),
-        )
+        ),
       ),
     );
 
@@ -461,7 +461,7 @@ void main() {
             dragStartBehavior: DragStartBehavior.down,
             onChanged: (bool newValue) {},
           ),
-        )
+        ),
       ),
     );
 
@@ -474,7 +474,7 @@ void main() {
             dragStartBehavior: DragStartBehavior.down,
             onChanged: null,
           ),
-        )
+        ),
       ),
     );
 
@@ -492,7 +492,7 @@ void main() {
             dragStartBehavior: DragStartBehavior.down,
             onChanged: null,
           ),
-        )
+        ),
       ),
     );
 
@@ -505,7 +505,7 @@ void main() {
             dragStartBehavior: DragStartBehavior.down,
             onChanged: (bool newValue) {},
           ),
-        )
+        ),
       ),
     );
 

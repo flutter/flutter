@@ -213,7 +213,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     final double thumbExtent = math.max(
       math.min(_trackExtent, minOverscrollLength),
-      _trackExtent * fractionVisible
+      _trackExtent * fractionVisible,
     );
 
     final double fractionOverscrolled = 1.0 - _lastMetrics.extentInside / _lastMetrics.viewportDimension;

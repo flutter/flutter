@@ -96,7 +96,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           }
           debugCheckElevationsEnabled = value;
           return _forceRepaint();
-        }
+        },
       );
       registerSignalServiceExtension(
         name: 'debugDumpLayerTree',

@@ -580,7 +580,7 @@ class _LicensePageState extends State<LicensePage> {
                       child: Center(
                         child: CircularProgressIndicator(),
                       ),
-                    )
+                    ),
                 ],
               ),
             ),
