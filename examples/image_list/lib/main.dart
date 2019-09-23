@@ -60,6 +60,7 @@ class MyHomePage extends StatefulWidget {
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
+
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
@@ -88,14 +89,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
   }
 
+  List<AnimationController> controllers;
+
   @override
   Widget build(BuildContext context) {
-    final List<AnimationController> controllers = List<AnimationController>(IMAGES);
+    controllers = List<AnimationController>(IMAGES);
     for (int i = 0; i < IMAGES; i++) {
       controllers[i] = AnimationController(
         duration: const Duration(milliseconds: 3600),
         vsync: this,
-      )..repeat();
+      )..animateTo(1.0);
     }
     final List<Completer<bool>> completers = List<Completer<bool>>(IMAGES);
     for (int i = 0; i < IMAGES; i++) {
@@ -147,5 +150,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               child: createImage(i + 1, completers[i]))));
     }
     return list;
+  }
+
+  @override
+  void dispose() {
+    controllers.forEach((controller) => controller.dispose());
+    super.dispose();
   }
 }
