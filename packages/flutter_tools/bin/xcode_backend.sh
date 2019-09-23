@@ -267,6 +267,8 @@ BuildApp() {
     --target-platform=ios                                                   \
     --target="${target_path}"                                               \
     --${build_mode}                                                         \
+    --flavor=${FLUTTER_FLAVOR}                                              \
+    --flavor-assets-dir=${FLUTTER_FLAVOR_ASSETS_DIR}                        \
     --depfile="${build_dir}/snapshot_blob.bin.d"                            \
     --asset-dir="${derived_dir}/App.framework/${assets_path}"               \
     ${precompilation_flag}                                                  \

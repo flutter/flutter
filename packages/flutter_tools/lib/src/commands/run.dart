@@ -32,6 +32,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
     usesFlavorOption();
+    usesFlavorAssetsDirOption();
     argParser
       ..addFlag('trace-startup',
         negatable: false,

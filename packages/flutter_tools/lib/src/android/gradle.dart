@@ -519,6 +519,8 @@ void updateLocalProperties({
 
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
+    changeIfNecessary('flutter.flavor', buildInfo.flavor);
+    changeIfNecessary('flutter.flavor-assets-dir', buildInfo.flavorAssetsDir);
     final String buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, buildInfo.buildName ?? manifest.buildName);
     changeIfNecessary('flutter.versionName', buildName);
     final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.android_arm, buildInfo.buildNumber ?? manifest.buildNumber);

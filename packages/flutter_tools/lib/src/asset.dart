@@ -42,6 +42,8 @@ abstract class AssetBundle {
 
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
+    String flavor,
+    String flavorAssetsDir,
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     String packagesPath,
@@ -105,6 +107,8 @@ class _ManifestAssetBundle implements AssetBundle {
 
   @override
   Future<int> build({
+    String flavor,
+    String flavorAssetsDir,
     String manifestPath = defaultManifestPath,
     String assetDirPath,
     String packagesPath,
@@ -148,6 +152,8 @@ class _ManifestAssetBundle implements AssetBundle {
       flutterManifest,
       wildcardDirectories,
       assetBasePath,
+      flavor: flavor,
+      flavorAssetsDir: flavorAssetsDir,
       excludeDirs: <String>[assetDirPath, getBuildDirectory()],
     );
 
@@ -181,6 +187,8 @@ class _ManifestAssetBundle implements AssetBundle {
           packageFlutterManifest,
           wildcardDirectories,
           packageBasePath,
+          flavor: flavor,
+          flavorAssetsDir: flavorAssetsDir,
           packageName: packageName,
         );
 
@@ -562,6 +570,8 @@ Map<_Asset, List<_Asset>> _parseAssets(
   FlutterManifest flutterManifest,
   List<Uri> wildcardDirectories,
   String assetBase, {
+  String flavor,
+  String flavorAssetsDir,
   List<String> excludeDirs = const <String>[],
   String packageName,
 }) {
@@ -570,6 +580,10 @@ Map<_Asset, List<_Asset>> _parseAssets(
   final _AssetDirectoryCache cache = _AssetDirectoryCache(excludeDirs);
   for (Uri assetUri in flutterManifest.assets) {
     if (assetUri.toString().endsWith('/')) {
+      // Skip other flavor's assets.
+      if (_skipParseAssets(flavor, flavorAssetsDir, assetUri)) {
+        continue;
+      }
       wildcardDirectories.add(assetUri);
       _parseAssetsFromFolder(packageMap, flutterManifest, assetBase,
           cache, result, assetUri,
@@ -600,6 +614,12 @@ Map<_Asset, List<_Asset>> _parseAssets(
   }
 
   return result;
+}
+
+bool _skipParseAssets(String flavor, String flavorAssetsDir, Uri assetUri) {
+  return flavor != null && flavorAssetsDir != null &&
+      assetUri.toString().startsWith(flavorAssetsDir + '/') &&
+      !assetUri.toString().contains('/' + flavor + '/');
 }
 
 void _parseAssetsFromFolder(

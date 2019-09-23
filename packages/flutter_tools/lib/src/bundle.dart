@@ -58,6 +58,8 @@ class BundleBuilder {
   Future<void> build({
     TargetPlatform platform,
     BuildMode buildMode,
+    String flavor,
+    String flavorAssetsDir,
     String mainPath,
     String manifestPath = defaultManifestPath,
     String applicationKernelFilePath,
@@ -122,6 +124,8 @@ class BundleBuilder {
     }
 
     final AssetBundle assets = await buildAssets(
+      flavor: flavor,
+      flavorAssetsDir: flavorAssetsDir,
       manifestPath: manifestPath,
       assetDirPath: assetDirPath,
       packagesPath: packagesPath,
@@ -205,6 +209,8 @@ void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
 }
 
 Future<AssetBundle> buildAssets({
+  String flavor,
+  String flavorAssetsDir,
   String manifestPath,
   String assetDirPath,
   String packagesPath,
@@ -217,6 +223,8 @@ Future<AssetBundle> buildAssets({
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(
+    flavor: flavor,
+    flavorAssetsDir: flavorAssetsDir,
     manifestPath: manifestPath,
     assetDirPath: assetDirPath,
     packagesPath: packagesPath,

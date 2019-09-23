@@ -18,6 +18,7 @@ class BuildApkCommand extends BuildSubCommand {
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     usesFlavorOption();
+    usesFlavorAssetsDirOption();
     usesPubOption();
     usesBuildNumberOption();
     usesBuildNameOption();

@@ -17,6 +17,7 @@ class BuildIOSCommand extends BuildSubCommand {
   BuildIOSCommand() {
     usesTargetOption();
     usesFlavorOption();
+    usesFlavorAssetsDirOption();
     usesPubOption();
     usesBuildNumberOption();
     usesBuildNameOption();

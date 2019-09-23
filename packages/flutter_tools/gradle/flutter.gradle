@@ -583,6 +583,8 @@ class FlutterPlugin implements Plugin<Project> {
                     flutterRoot this.flutterRoot
                     flutterExecutable this.flutterExecutable
                     buildMode variantBuildMode
+                    flavor resolveProperty("flutter.flavor", null)
+                    flavorAssetsDir resolveProperty("flutter.flavor-assets-dir", null)
                     localEngine this.localEngine
                     localEngineSrcPath this.localEngineSrcPath
                     abi PLATFORM_ARCH_MAP[targetArch]
@@ -703,6 +705,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     File flutterRoot
     File flutterExecutable
     String buildMode
+    String flavor
+    String flavorAssetsDir
     String localEngine
     String localEngineSrcPath
     @Input
@@ -797,6 +801,12 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "--target-platform", "${targetPlatform}"
             if (verbose) {
                 args "--verbose"
+            }
+            if (flavor != null) {
+                args "--flavor", flavor
+            }
+            if (flavorAssetsDir != null) {
+                args "--flavor-assets-dir", flavorAssetsDir
             }
             if (fileSystemRoots != null) {
                 for (root in fileSystemRoots) {

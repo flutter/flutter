@@ -17,6 +17,8 @@ import 'build.dart';
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({bool verboseHelp = false, this.bundleBuilder}) {
     usesTargetOption();
+    usesFlavorOption();
+    usesFlavorAssetsDirOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -122,6 +124,8 @@ class BuildBundleCommand extends BuildSubCommand {
     await bundleBuilder.build(
       platform: platform,
       buildMode: buildMode,
+      flavor: argResults['flavor'],
+      flavorAssetsDir: argResults['flavor-assets-dir'],
       mainPath: targetFile,
       manifestPath: argResults['manifest'],
       depfilePath: argResults['depfile'],

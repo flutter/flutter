@@ -16,6 +16,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     usesTargetOption();
     addBuildModeFlags();
     usesFlavorOption();
+    usesFlavorAssetsDirOption();
     usesPubOption();
     usesBuildNumberOption();
     usesBuildNameOption();

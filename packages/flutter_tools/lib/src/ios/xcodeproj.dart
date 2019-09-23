@@ -215,6 +215,15 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('TRACK_WIDGET_CREATION=true');
   }
 
+  if (buildInfo.flavor != null) {
+    xcodeBuildSettings.add('FLUTTER_FLAVOR=${buildInfo.flavor}');
+  }
+
+  if (buildInfo.flavorAssetsDir != null) {
+    xcodeBuildSettings.add(
+        'FLUTTER_FLAVOR_ASSETS_DIR=${buildInfo.flavorAssetsDir}');
+  }
+
   return xcodeBuildSettings;
 }
 

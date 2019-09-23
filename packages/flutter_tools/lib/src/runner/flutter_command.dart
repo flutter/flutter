@@ -353,6 +353,15 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesFlavorAssetsDirOption() {
+    argParser.addOption(
+        'flavor-assets-dir',
+        help: 'Directory for storing different flavor\'s assets.\n'
+            'When compiling, only the specified flavor directory '
+            'will be loaded from this directory.'
+    );
+  }
+
   void usesTrackWidgetCreation({ bool hasEffect = true, @required bool verboseHelp }) {
     argParser.addFlag(
       'track-widget-creation',
@@ -392,6 +401,9 @@ abstract class FlutterCommand extends Command<void> {
       argParser.options.containsKey('flavor')
         ? argResults['flavor']
         : null,
+      flavorAssetsDir: argParser.options.containsKey('flavor-assets-dir')
+          ? argResults['flavor-assets-dir']
+          : null,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)

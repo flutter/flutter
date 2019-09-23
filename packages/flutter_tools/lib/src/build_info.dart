@@ -13,6 +13,7 @@ class BuildInfo {
   const BuildInfo(
     this.mode,
     this.flavor, {
+    this.flavorAssetsDir,
     this.trackWidgetCreation = false,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
@@ -31,6 +32,22 @@ class BuildInfo {
   /// `assemblePaidRelease`), and the Xcode build configuration will be
   /// Mode-Flavor (e.g. Release-Paid).
   final String flavor;
+
+  /// Directory for storing different flavors assets. when parse assets
+  /// only the flavor specified in the flavorAssetsDir will be parsed.
+  /// The flavorAssetsDir should only contain directories with the name
+  /// of the flavors.
+  ///
+  /// If there are three flavors of var1, var2, var3, and set
+  /// --flavor-assets-dir equals assets_flavor, directory structure should like this:
+  ///
+  /// assets_flavor/var1/
+  /// assets_flavor/var2/
+  /// assets_flavor/var3/
+  ///
+  /// when assign --flavor equals var1, the final product only contains
+  /// the assets in the var1 directory.
+  final String flavorAssetsDir;
 
   final List<String> fileSystemRoots;
   final String fileSystemScheme;
