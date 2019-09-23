@@ -82,7 +82,10 @@ class PointerBinding {
 
   void _onPointerData(List<ui.PointerData> data) {
     final ui.PointerDataPacket packet = ui.PointerDataPacket(data: data);
-    ui.window?.onPointerDataPacket(packet);
+    final ui.PointerDataPacketCallback callback = ui.window.onPointerDataPacket;
+    if (callback != null) {
+      callback(packet);
+    }
   }
 }
 
