@@ -653,8 +653,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     widget.route.animation,
                     widget.route.secondaryAnimation,
                     IgnorePointer(
-                      ignoring: widget.route.navigator.userGestureInProgress
-                        || widget.route.animation?.status == AnimationStatus.reverse,
+                      ignoring: widget.route.animation?.status == AnimationStatus.reverse,
                       child: child,
                     ),
                   );
