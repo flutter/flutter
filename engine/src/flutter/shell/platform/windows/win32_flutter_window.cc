@@ -147,6 +147,13 @@ void Win32FlutterWindow::OnClose() {
   messageloop_running_ = false;
 }
 
+void Win32FlutterWindow::OnFontChange() {
+  if (engine_ == nullptr) {
+    return;
+  }
+  FlutterEngineReloadSystemFonts(engine_);
+}
+
 // Sends new size information to FlutterEngine.
 void Win32FlutterWindow::SendWindowMetrics() {
   if (engine_ == nullptr) {

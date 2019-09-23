@@ -26,6 +26,8 @@
 #include "flutter/shell/common/skia_event_tracer_impl.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/vsync_waiter.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/tonic/common/log.h"
@@ -33,6 +35,9 @@
 namespace flutter {
 
 constexpr char kSkiaChannel[] = "flutter/skia";
+constexpr char kSystemChannel[] = "flutter/system";
+constexpr char kTypeKey[] = "type";
+constexpr char kFontChange[] = "fontsChange";
 
 std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     DartVMRef vm,
@@ -1349,6 +1354,37 @@ fml::Status Shell::WaitForFirstFrame(fml::TimeDelta timeout) {
   } else {
     return fml::Status(fml::StatusCode::kDeadlineExceeded, "timeout");
   }
+}
+
+bool Shell::ReloadSystemFonts() {
+  FML_DCHECK(is_setup_);
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+
+  if (!engine_) {
+    return false;
+  }
+  engine_->GetFontCollection().GetFontCollection()->SetupDefaultFontManager();
+  engine_->GetFontCollection().GetFontCollection()->ClearFontFamilyCache();
+  // After system fonts are reloaded, we send a system channel message
+  // to notify flutter framework.
+  rapidjson::Document document;
+  document.SetObject();
+  auto& allocator = document.GetAllocator();
+  rapidjson::Value message_value;
+  message_value.SetString(kFontChange, allocator);
+  document.AddMember(kTypeKey, message_value, allocator);
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  document.Accept(writer);
+  std::string message = buffer.GetString();
+  fml::RefPtr<PlatformMessage> fontsChangeMessage =
+      fml::MakeRefCounted<flutter::PlatformMessage>(
+          kSystemChannel, std::vector<uint8_t>(message.begin(), message.end()),
+          nullptr);
+
+  OnPlatformViewDispatchPlatformMessage(fontsChangeMessage);
+  return true;
 }
 
 }  // namespace flutter

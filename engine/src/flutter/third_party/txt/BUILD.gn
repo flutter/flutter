@@ -160,6 +160,8 @@ source_set("txt") {
     sources += [ "src/txt/platform_linux.cc" ]
   } else if (is_fuchsia) {
     sources += [ "src/txt/platform_fuchsia.cc" ]
+  } else if (is_win) {
+    sources += [ "src/txt/platform_windows.cc" ]
   } else {
     sources += [ "src/txt/platform.cc" ]
   }

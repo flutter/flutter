@@ -65,6 +65,9 @@ class Win32FlutterWindow : public Win32Window {
   // |Win32Window|
   void OnClose();
 
+  // |Win32Window|
+  void OnFontChange() override;
+
   // Configures the window instance with an instance of a running Flutter engine
   // returning a configured FlutterDesktopWindowControllerRef.
   void SetState(FLUTTER_API_SYMBOL(FlutterEngine) state);
