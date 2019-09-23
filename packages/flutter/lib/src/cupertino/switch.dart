@@ -9,7 +9,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/binding.dart' show SemanticsBinding;
 
 import 'colors.dart';
 import 'thumb_painter.dart';
@@ -512,7 +511,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     canvas.drawRRect(trackRRect, paint);
 
-    if (_enableOnOffLabels) {
+    if (_enableOnOffLabels || true) {
       final Paint activePaint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.25
