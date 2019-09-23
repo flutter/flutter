@@ -875,7 +875,8 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///
 /// This code defines a widget called `Spinner` that spins a green square
 /// continually. It is built with an [AnimatedBuilder] and makes use of the
-/// [child] feature to avoid having to rebuild the [Container] each time.
+/// [child] feature to avoid having to rebuild the [Container] each time. The
+/// resulting animation is shown below the code.
 ///
 /// ```dart
 /// class Spinner extends StatefulWidget {
@@ -905,7 +906,14 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///   Widget build(BuildContext context) {
 ///     return AnimatedBuilder(
 ///       animation: _controller,
-///       child: Container(width: 200.0, height: 200.0, color: Colors.green),
+///       child: Container(
+///         width: 200.0,
+///         height: 200.0,
+///         color: Colors.green,
+///         child: const Center(
+///           child: Text('Wee'),
+///         ),
+///       ),
 ///       builder: (BuildContext context, Widget child) {
 ///         return Transform.rotate(
 ///           angle: _controller.value * 2.0 * math.pi,
@@ -917,6 +925,8 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// }
 /// ```
 /// {@end-tool}
+///
+/// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_builder.mp4}
 ///
 /// See also:
 ///
