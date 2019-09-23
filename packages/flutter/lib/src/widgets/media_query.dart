@@ -102,7 +102,6 @@ class MediaQueryData {
     this.highContrast = false,
     this.disableAnimations = false,
     this.boldText = false,
-    this.enableOnOffSwitchLabels = false,
   });
 
   /// Creates data for a media query based on the given window.
@@ -125,7 +124,6 @@ class MediaQueryData {
       invertColors = window.accessibilityFeatures.invertColors,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
       boldText = window.accessibilityFeatures.boldText,
-      enableOnOffSwitchLabels = false, // TODO(brandondiamond): obtain from platform.
       highContrast = false,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
@@ -343,14 +341,6 @@ class MediaQueryData {
   ///  * [Window.AccessibilityFeatures], where the setting originates.
   final bool boldText;
 
-  /// Whether the platform is requesting that switches be drawn with graphical
-  /// on/off labels.
-  ///
-  /// See also:
-  ///
-  /// * [Window.AccessibilityFeatures], where the setting originates.
-  final bool enableOnOffSwitchLabels;
-
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
@@ -375,7 +365,6 @@ class MediaQueryData {
     bool invertColors,
     bool accessibleNavigation,
     bool boldText,
-    bool enableOnOffSwitchLabels,
   }) {
     return MediaQueryData(
       size: size ?? this.size,
@@ -393,7 +382,6 @@ class MediaQueryData {
       disableAnimations: disableAnimations ?? this.disableAnimations,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
-      enableOnOffSwitchLabels: enableOnOffSwitchLabels ?? this.enableOnOffSwitchLabels,
     );
   }
 
@@ -561,8 +549,7 @@ class MediaQueryData {
         && typedOther.disableAnimations == disableAnimations
         && typedOther.invertColors == invertColors
         && typedOther.accessibleNavigation == accessibleNavigation
-        && typedOther.boldText == boldText
-        && typedOther.enableOnOffSwitchLabels == enableOnOffSwitchLabels;
+        && typedOther.boldText == boldText;
   }
 
   @override
@@ -582,7 +569,6 @@ class MediaQueryData {
       invertColors,
       accessibleNavigation,
       boldText,
-      enableOnOffSwitchLabels,
     );
   }
 
@@ -603,7 +589,6 @@ class MediaQueryData {
              'disableAnimations: $disableAnimations, '
              'invertColors: $invertColors, '
              'boldText: $boldText'
-             'enableOnOffSwitchLabels: $enableOnOffSwitchLabels'
            ')';
   }
 }
@@ -840,12 +825,6 @@ class MediaQuery extends InheritedWidget {
   /// ancestor, or false if no such ancestor exists.
   static bool boldTextOverride(BuildContext context) {
     return MediaQuery.of(context, nullOk: true)?.boldText ?? false;
-  }
-
-  /// Returns the enableOnOffSwitchLabels accessibility setting for the nearest
-  /// MediaQuery ancestor, or false if no such ancestor exists.
-  static bool onOffSwitchLabelsEnabled(BuildContext context) {
-    return MediaQuery.of(context, nullOk: true)?.enableOnOffSwitchLabels ?? false;
   }
 
   @override

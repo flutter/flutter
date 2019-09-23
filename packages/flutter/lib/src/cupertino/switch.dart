@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/binding.dart' show SemanticsBinding;
 
 import 'colors.dart';
 import 'thumb_painter.dart';
@@ -144,7 +145,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         onChanged: widget.onChanged,
         vsync: this,
         dragStartBehavior: widget.dragStartBehavior,
-        enableOnOffLabels: MediaQuery.onOffSwitchLabelsEnabled(context)
+        enableOnOffLabels: SemanticsBinding.instance.accessibilityFeatures.onOffSwitchLabels,
       ),
     );
   }
@@ -205,7 +206,8 @@ const double _kSwitchHeight = 39.0;
 const double _kSwitchLabelRadius = 5.0;
 const double _kSwitchLabelOffset = 12.0;
 const Color _kSwitchLabelActiveColor = CupertinoColors.white;
-const Color _kSwitchLabelInactiveColor = CupertinoColors.contrastingGray;
+// Measured using the color dropper in Xcode.
+const Color _kSwitchLabelInactiveColor = Color(0xFFB3B3B3);
 // Opacity of a disabled switch, as eye-balled from iOS Simulator on Mac.
 const double _kCupertinoSwitchDisabledOpacity = 0.5;
 
