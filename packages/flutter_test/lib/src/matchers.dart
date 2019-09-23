@@ -433,6 +433,8 @@ Matcher matchesSemantics({
   double elevation,
   double thickness,
   int platformViewId,
+  int maxValueLength,
+  int currentValueLength,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -552,6 +554,8 @@ Matcher matchesSemantics({
     platformViewId: platformViewId,
     customActions: customActions,
     hintOverrides: hintOverrides,
+    currentValueLength: currentValueLength,
+    maxValueLength: maxValueLength,
     children: children,
   );
 }
@@ -1745,6 +1749,8 @@ class _MatchesSemanticsData extends Matcher {
     this.elevation,
     this.thickness,
     this.platformViewId,
+    this.maxValueLength,
+    this.currentValueLength,
     this.customActions,
     this.hintOverrides,
     this.children,
@@ -1765,6 +1771,8 @@ class _MatchesSemanticsData extends Matcher {
   final double elevation;
   final double thickness;
   final int platformViewId;
+  final int maxValueLength;
+  final int currentValueLength;
   final List<Matcher> children;
 
   @override
@@ -1796,6 +1804,10 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with thickness: $thickness');
     if (platformViewId != null)
       description.add(' with platformViewId: $platformViewId');
+    if (maxValueLength != null)
+      description.add(' with maxValueLength: $maxValueLength');
+    if (currentValueLength != null)
+      description.add(' with currentValueLength: $currentValueLength');
     if (customActions != null)
       description.add(' with custom actions: $customActions');
     if (hintOverrides != null)
@@ -1838,6 +1850,10 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'thickness was: ${data.thickness}');
     if (platformViewId != null && platformViewId != data.platformViewId)
       return failWithDescription(matchState, 'platformViewId was: ${data.platformViewId}');
+    if (currentValueLength != null && currentValueLength != data.currentValueLength)
+      return failWithDescription(matchState, 'currentValueLength was: ${data.currentValueLength}');
+    if (maxValueLength != null && maxValueLength != data.maxValueLength)
+      return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
     if (actions != null) {
       int actionBits = 0;
       for (SemanticsAction action in actions)

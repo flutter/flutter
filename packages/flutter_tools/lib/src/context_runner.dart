@@ -45,6 +45,7 @@ import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcode.dart';
 import 'macos/xcode_validator.dart';
+import 'mdns_discovery.dart';
 import 'reporting/reporting.dart';
 import 'run_hot.dart';
 import 'version.dart';
@@ -101,6 +102,7 @@ Future<T> runInContext<T>(
       LinuxWorkflow: () => const LinuxWorkflow(),
       Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
       MacOSWorkflow: () => const MacOSWorkflow(),
+      MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
       OperatingSystemUtils: () => OperatingSystemUtils(),
       ProcessUtils: () => ProcessUtils(),
       SimControl: () => SimControl(),

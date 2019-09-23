@@ -130,7 +130,7 @@ Future<void> main() async {
         // for arm and arm64.
         final List<String> targetPlatforms = <String>[
           'android-arm',
-          'android-arm64'
+          'android-arm64',
         ];
         for (final String targetPlatform in targetPlatforms) {
           final String androidArmSnapshotPath = path.join(

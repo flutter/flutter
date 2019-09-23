@@ -329,7 +329,18 @@ class FlutterPlugin implements Plugin<Project> {
 
     private Properties getPluginList() {
         File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
-        return readPropertiesIfExist(pluginsFile)
+        Properties allPlugins = readPropertiesIfExist(pluginsFile)
+        Properties androidPlugins = new Properties()
+        allPlugins.each { name, path ->
+            File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
+            if (editableAndroidProject.exists()) {
+                androidPlugins.setProperty(name, path)
+            }
+            // TODO(amirh): log an error if this plugin was specified to be an Android
+            // plugin according to the new schema, and was missing a build.gradle file.
+            // https://github.com/flutter/flutter/issues/40784
+        }
+        return androidPlugins
     }
 
     private void addPluginTasks() {
@@ -665,16 +676,23 @@ class FlutterPlugin implements Plugin<Project> {
                     dependsOn cleanPackageAssets
                     into packageAssets.outputDir
                 } else {
-                    dependsOn variant.mergeAssets
-                    dependsOn "clean${variant.mergeAssets.name.capitalize()}"
-                    variant.mergeAssets.mustRunAfter("clean${variant.mergeAssets.name.capitalize()}")
-                    into variant.mergeAssets.outputDir
+                    // `variant.mergeAssets` will be removed at the end of 2019.
+                    def mergeAssets = variant.hasProperty("mergeAssetsProvider") ?
+                        variant.mergeAssetsProvider.get() : variant.mergeAssets
+                    dependsOn mergeAssets
+                    dependsOn "clean${mergeAssets.name.capitalize()}"
+                    mergeAssets.mustRunAfter("clean${mergeAssets.name.capitalize()}")
+                    into mergeAssets.outputDir
                 }
                 compileTasks.each { flutterTask ->
                     with flutterTask.assets
                 }
             }
-            variant.outputs.first().processResources.dependsOn(copyFlutterAssetsTask)
+            def variantOutput = variant.outputs.first()
+            // `variantOutput.processResources` will be removed at the end of 2019.
+            def processResources = variantOutput.hasProperty("processResourcesProvider") ?
+                variantOutput.processResourcesProvider.get() : variantOutput.processResources
+            processResources.dependsOn(copyFlutterAssetsTask)
         }
         if (project.android.hasProperty("applicationVariants")) {
             project.android.applicationVariants.all addFlutterDeps

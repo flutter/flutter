@@ -629,6 +629,23 @@ flutter:
         expectedBuildNumber: '3',
       );
     });
+
+    testUsingOsxContext('default build name and number when version is missing', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null);
+      await checkBuildVersion(
+        manifestString: manifest,
+        buildInfo: buildInfo,
+        expectedBuildName: '1.0.0',
+        expectedBuildNumber: '1',
+      );
+    });
   });
 }
 
