@@ -660,6 +660,7 @@ tasks:
       Checks the number of un-triaged image digests from Flutter Gold.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   # run_without_leak_linux:
   #   description: >
