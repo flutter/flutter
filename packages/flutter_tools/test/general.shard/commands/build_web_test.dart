@@ -44,7 +44,7 @@ void main() {
         projectName: anyNamed('projectName'),
         projectDirectory: anyNamed('projectDirectory'),
         mode: anyNamed('mode'),
-        initializePlatform: anyNamed('initializePlatform')
+        initializePlatform: anyNamed('initializePlatform'),
       )).thenAnswer((Invocation invocation) {
         final String path = fs.path.join('.dart_tool', 'build', 'flutter_web', 'foo', 'lib', 'main_web_entrypoint.dart.js');
         fs.file(path).createSync(recursive: true);

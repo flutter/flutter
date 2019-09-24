@@ -65,8 +65,8 @@ void main() {
     for (Platform platform in unsupportedPlatforms) {
       testUsingContext('throws UnsupportedError exception if instantiated on ${platform.operatingSystem}', () {
         expect(
-            () { IOSDevice('device-123'); },
-            throwsA(isInstanceOf<AssertionError>())
+          () { IOSDevice('device-123'); },
+          throwsA(isInstanceOf<AssertionError>()),
         );
       }, overrides: <Type, Generator>{
         Platform: () => platform,
@@ -95,7 +95,7 @@ void main() {
       // const String appId = '789';
       const MapEntry<String, String> libraryEntry = MapEntry<String, String>(
           'DYLD_LIBRARY_PATH',
-          '/path/to/libraries'
+          '/path/to/libraries',
       );
       final Map<String, String> env = Map<String, String>.fromEntries(
           <MapEntry<String, String>>[libraryEntry]
@@ -149,7 +149,7 @@ void main() {
         when(mockProcessManager.run(
           installArgs,
           workingDirectory: anyNamed('workingDirectory'),
-          environment: env
+          environment: env,
         )).thenAnswer(
           (_) => Future<ProcessResult>.value(ProcessResult(1, 0, '', ''))
         );
@@ -381,8 +381,8 @@ void main() {
       const String installerPath = '/path/to/ideviceinstaller';
       const String appId = '789';
       const MapEntry<String, String> libraryEntry = MapEntry<String, String>(
-          'DYLD_LIBRARY_PATH',
-          '/path/to/libraries'
+        'DYLD_LIBRARY_PATH',
+        '/path/to/libraries',
       );
       final Map<String, String> env = Map<String, String>.fromEntries(
           <MapEntry<String, String>>[libraryEntry]

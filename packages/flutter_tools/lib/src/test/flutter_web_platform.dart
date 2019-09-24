@@ -248,7 +248,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         .resolve('static/index.html')
         .replace(queryParameters: <String, String>{
       'managerUrl': webSocketUrl.toString(),
-      'debug': _config.pauseAfterLoad.toString()
+      'debug': _config.pauseAfterLoad.toString(),
     });
 
     printTrace('Serving tests at $hostUrl');
@@ -551,12 +551,16 @@ class BrowserManager {
   /// If [mapper] is passed, it's used to map stack traces for errors coming
   /// from this test suite.
   Future<RunnerSuite> load(
-      String path, Uri url, SuiteConfiguration suiteConfig, Object message,
-      {StackTraceMapper mapper}) async {
+    String path,
+    Uri url,
+    SuiteConfiguration suiteConfig,
+    Object message, {
+    StackTraceMapper mapper,
+  }) async {
     url = url.replace(
         fragment: Uri.encodeFull(jsonEncode(<String, Object>{
       'metadata': suiteConfig.metadata.serialize(),
-      'browser': _runtime.identifier
+      'browser': _runtime.identifier,
     })));
 
     final int suiteID = _suiteID++;
@@ -585,7 +589,7 @@ class BrowserManager {
         'command': 'loadSuite',
         'url': url.toString(),
         'id': suiteID,
-        'channel': suiteChannelID
+        'channel': suiteChannelID,
       });
 
       try {

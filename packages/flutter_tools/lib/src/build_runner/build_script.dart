@@ -190,7 +190,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     ),
   ),
   core.applyPostProcess('flutter_tools:module_cleanup', moduleCleanup,
-      defaultGenerateFor: const InputSet())
+      defaultGenerateFor: const InputSet()),
 ];
 
 /// The entrypoint to this build script.
