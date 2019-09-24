@@ -170,4 +170,138 @@ void main() {
     expect(theme.applyElevationOverlayColor, isTrue);
   });
 
+  testWidgets('ThemeData.copyWith return appropriate value', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData.light();
+    final ThemeData darkTheme = ThemeData.dark();
+
+    final ThemeData themeDataCopy = theme.copyWith(
+      brightness: darkTheme.brightness,
+      primaryColor: darkTheme.primaryColor,
+      primaryColorBrightness: darkTheme.primaryColorBrightness,
+      primaryColorLight: darkTheme.primaryColorLight,
+      primaryColorDark: darkTheme.primaryColorDark,
+      accentColor: darkTheme.accentColor,
+      accentColorBrightness: darkTheme.accentColorBrightness,
+      canvasColor: darkTheme.canvasColor,
+      scaffoldBackgroundColor: darkTheme.scaffoldBackgroundColor,
+      bottomAppBarColor: darkTheme.bottomAppBarColor,
+      cardColor: darkTheme.cardColor,
+      dividerColor: darkTheme.dividerColor,
+      focusColor: darkTheme.focusColor,
+      hoverColor: darkTheme.hoverColor,
+      highlightColor: darkTheme.highlightColor,
+      splashColor: darkTheme.splashColor,
+      splashFactory: darkTheme.splashFactory,
+      selectedRowColor: darkTheme.selectedRowColor,
+      unselectedWidgetColor: darkTheme.unselectedWidgetColor,
+      disabledColor: darkTheme.disabledColor,
+      buttonTheme: darkTheme.buttonTheme,
+      toggleButtonsTheme: darkTheme.toggleButtonsTheme,
+      buttonColor: darkTheme.buttonColor,
+      secondaryHeaderColor: darkTheme.secondaryHeaderColor,
+      textSelectionColor: darkTheme.textSelectionColor,
+      cursorColor: darkTheme.cursorColor,
+      textSelectionHandleColor: darkTheme.textSelectionHandleColor,
+      backgroundColor: darkTheme.backgroundColor,
+      dialogBackgroundColor: darkTheme.dialogBackgroundColor,
+      indicatorColor: darkTheme.indicatorColor,
+      hintColor : darkTheme.hintColor ,
+      errorColor : darkTheme.errorColor ,
+      toggleableActiveColor : darkTheme.toggleableActiveColor ,
+      textTheme : darkTheme.textTheme ,
+      primaryTextTheme : darkTheme.primaryTextTheme ,
+      accentTextTheme : darkTheme.accentTextTheme ,
+      inputDecorationTheme : darkTheme.inputDecorationTheme ,
+      iconTheme : darkTheme.iconTheme ,
+      primaryIconTheme : darkTheme.primaryIconTheme ,
+      accentIconTheme : darkTheme.accentIconTheme ,
+      sliderTheme : darkTheme.sliderTheme ,
+      tabBarTheme : darkTheme.tabBarTheme ,
+      tooltipTheme : darkTheme.tooltipTheme ,
+      cardTheme : darkTheme.cardTheme ,
+      chipTheme : darkTheme.chipTheme ,
+      platform : darkTheme.platform ,
+      materialTapTargetSize : darkTheme.materialTapTargetSize ,
+      applyElevationOverlayColor : darkTheme.applyElevationOverlayColor ,
+      pageTransitionsTheme : darkTheme.pageTransitionsTheme ,
+      appBarTheme : darkTheme.appBarTheme ,
+      bottomAppBarTheme : darkTheme.bottomAppBarTheme ,
+      colorScheme : darkTheme.colorScheme ,
+      dialogTheme : darkTheme.dialogTheme ,
+      floatingActionButtonTheme : darkTheme.floatingActionButtonTheme ,
+      typography : darkTheme.typography ,
+      cupertinoOverrideTheme : darkTheme.cupertinoOverrideTheme ,
+      snackBarTheme : darkTheme.snackBarTheme ,
+      bottomSheetTheme : darkTheme.bottomSheetTheme ,
+      bannerTheme : darkTheme.bannerTheme ,
+      dividerTheme : darkTheme.dividerTheme ,
+      buttonBarTheme : darkTheme.buttonBarTheme ,
+    );
+
+    expect(themeDataCopy.brightness, equals(darkTheme.brightness));
+    expect(themeDataCopy.primaryColor, equals(darkTheme.primaryColor));
+    expect(themeDataCopy.primaryColorBrightness, equals(darkTheme.primaryColorBrightness));
+    expect(themeDataCopy.primaryColorLight, equals(darkTheme.primaryColorLight));
+    expect(themeDataCopy.primaryColorDark, equals(darkTheme.primaryColorDark));
+    expect(themeDataCopy.accentColor, equals(darkTheme.accentColor));
+    expect(themeDataCopy.accentColorBrightness, equals(darkTheme.accentColorBrightness));
+    expect(themeDataCopy.canvasColor, equals(darkTheme.canvasColor));
+    expect(themeDataCopy.scaffoldBackgroundColor, equals(darkTheme.scaffoldBackgroundColor));
+    expect(themeDataCopy.bottomAppBarColor, equals(darkTheme.bottomAppBarColor));
+    expect(themeDataCopy.canvasColor, equals(darkTheme.canvasColor));
+    expect(themeDataCopy.scaffoldBackgroundColor, equals(darkTheme.scaffoldBackgroundColor));
+    expect(themeDataCopy.bottomAppBarColor, equals(darkTheme.bottomAppBarColor));
+    expect(themeDataCopy.cardColor, equals(darkTheme.cardColor));
+    expect(themeDataCopy.dividerColor, equals(darkTheme.dividerColor));
+    expect(themeDataCopy.focusColor, equals(darkTheme.focusColor));
+    expect(themeDataCopy.focusColor, equals(darkTheme.focusColor));
+    expect(themeDataCopy.hoverColor, equals(darkTheme.hoverColor));
+    expect(themeDataCopy.highlightColor, equals(darkTheme.highlightColor));
+    expect(themeDataCopy.splashColor, equals(darkTheme.splashColor));
+    expect(themeDataCopy.splashFactory, equals(darkTheme.splashFactory));
+    expect(themeDataCopy.selectedRowColor, equals(darkTheme.selectedRowColor));
+    expect(themeDataCopy.unselectedWidgetColor, equals(darkTheme.unselectedWidgetColor));
+    expect(themeDataCopy.disabledColor, equals(darkTheme.disabledColor));
+    expect(themeDataCopy.buttonTheme, equals(darkTheme.buttonTheme));
+    expect(themeDataCopy.toggleButtonsTheme, equals(darkTheme.toggleButtonsTheme));
+    expect(themeDataCopy.buttonColor, equals(darkTheme.buttonColor));
+    expect(themeDataCopy.secondaryHeaderColor, equals(darkTheme.secondaryHeaderColor));
+    expect(themeDataCopy.textSelectionColor, equals(darkTheme.textSelectionColor));
+    expect(themeDataCopy.cursorColor, equals(darkTheme.cursorColor));
+    expect(themeDataCopy.textSelectionColor, equals(darkTheme.textSelectionColor));
+    expect(themeDataCopy.cursorColor, equals(darkTheme.cursorColor));
+    expect(themeDataCopy.textSelectionHandleColor, equals(darkTheme.textSelectionHandleColor));
+    expect(themeDataCopy.backgroundColor, equals(darkTheme.backgroundColor));
+    expect(themeDataCopy.dialogBackgroundColor, equals(darkTheme.dialogBackgroundColor));
+    expect(themeDataCopy.indicatorColor, equals(darkTheme.indicatorColor));
+    expect(themeDataCopy.hintColor, equals(darkTheme.hintColor));
+    expect(themeDataCopy.errorColor, equals(darkTheme.errorColor));
+    expect(themeDataCopy.toggleableActiveColor, equals(darkTheme.accentColor));
+    expect(themeDataCopy.textTheme, equals(darkTheme.textTheme));
+    expect(themeDataCopy.primaryTextTheme, equals(darkTheme.primaryTextTheme));
+    expect(themeDataCopy.accentTextTheme, equals(darkTheme.accentTextTheme));
+    expect(themeDataCopy.sliderTheme, equals(darkTheme.sliderTheme));
+    expect(themeDataCopy.tabBarTheme, equals(darkTheme.tabBarTheme));
+    expect(themeDataCopy.tooltipTheme, equals(darkTheme.tooltipTheme));
+    expect(themeDataCopy.cardTheme, equals(darkTheme.cardTheme));
+    expect(themeDataCopy.chipTheme, equals(darkTheme.chipTheme));
+    expect(themeDataCopy.platform, equals(darkTheme.platform));
+    expect(themeDataCopy.materialTapTargetSize, equals(darkTheme.materialTapTargetSize));
+    expect(themeDataCopy.applyElevationOverlayColor, equals(darkTheme.applyElevationOverlayColor));
+    expect(themeDataCopy.pageTransitionsTheme, equals(darkTheme.pageTransitionsTheme));
+    expect(themeDataCopy.appBarTheme, equals(darkTheme.appBarTheme));
+    expect(themeDataCopy.bottomAppBarTheme, equals(darkTheme.bottomAppBarTheme));
+    expect(themeDataCopy.colorScheme, equals(darkTheme.colorScheme));
+    expect(themeDataCopy.dialogTheme, equals(darkTheme.dialogTheme));
+    expect(themeDataCopy.floatingActionButtonTheme, equals(darkTheme.floatingActionButtonTheme));
+    expect(themeDataCopy.typography, equals(darkTheme.typography));
+    expect(themeDataCopy.cupertinoOverrideTheme, equals(darkTheme.cupertinoOverrideTheme));
+    expect(themeDataCopy.snackBarTheme, equals(darkTheme.snackBarTheme));
+    expect(themeDataCopy.bottomSheetTheme, equals(darkTheme.bottomSheetTheme));
+    expect(themeDataCopy.popupMenuTheme, equals(darkTheme.popupMenuTheme));
+    expect(themeDataCopy.bannerTheme, equals(darkTheme.bannerTheme));
+    expect(themeDataCopy.dividerTheme, equals(darkTheme.dividerTheme));
+    expect(themeDataCopy.buttonBarTheme, equals(darkTheme.buttonBarTheme));
+  });
+
 }
