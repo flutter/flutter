@@ -2798,7 +2798,7 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
     ];
   }
   final List<DiagnosticsNode> nodes = <DiagnosticsNode>[];
-  element.visitAncestorElements((Element ancestor) {
+  bool processElement(Element ancestor) {
     // TODO(chunhtai): should print out all the widgets that are about to cross
     // package boundaries.
     if (_isLocalCreationLocation(ancestor)) {
@@ -2814,7 +2814,9 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
       return false;
     }
     return true;
-  });
+  }
+  if (processElement(element))
+    element.visitAncestorElements(processElement);
   return nodes;
 }
 
