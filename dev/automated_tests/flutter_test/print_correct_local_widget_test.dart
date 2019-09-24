@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Rendering Error', (WidgetTester tester) async {
-    // this should fail
+    // This should fail with user created widget = Row.
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
