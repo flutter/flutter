@@ -395,7 +395,7 @@ class _HeroState extends State<Hero> {
         child: TickerMode(
           enabled: !showPlaceholder,
           child: KeyedSubtree(key: _key, child: widget.child),
-        )
+        ),
       ),
     );
   }

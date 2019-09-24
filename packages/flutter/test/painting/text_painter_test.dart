@@ -660,7 +660,7 @@ void main() {
         WidgetSpan(child: SizedBox(width: 50, height: 30)),
         WidgetSpan(child: SizedBox(width: 50, height: 30)),
         WidgetSpan(child: SizedBox(width: 50, height: 30)),
-      ]
+      ],
     );
 
     // We provide dimensions for the widgets

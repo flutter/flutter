@@ -654,7 +654,7 @@ class ContainerLayer extends Layer {
           predecessor.toDiagnosticsNode(name: 'after layer', style: DiagnosticsTreeStyle.errorProperty),
           ErrorDescription('which occupies the same area at a higher elevation.'),
         ];
-      }
+      },
     ));
     return <PictureLayer>[
       _highlightConflictingLayer(predecessor),

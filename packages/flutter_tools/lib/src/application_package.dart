@@ -328,7 +328,7 @@ abstract class IOSApp extends ApplicationPackage {
     );
   }
 
-  factory IOSApp.fromIosProject(IosProject project) {
+  static Future<IOSApp> fromIosProject(IosProject project) {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       return null;
     }
@@ -345,7 +345,7 @@ abstract class IOSApp extends ApplicationPackage {
       printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
       return null;
     }
-    return BuildableIOSApp(project);
+    return BuildableIOSApp.fromProject(project);
   }
 
   @override
@@ -357,7 +357,13 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  BuildableIOSApp(this.project) : super(projectBundleId: project.productBundleIdentifier);
+  BuildableIOSApp(this.project, String projectBundleId)
+    : super(projectBundleId: projectBundleId);
+
+  static Future<BuildableIOSApp> fromProject(IosProject project) async {
+    final String projectBundleId = await project.productBundleIdentifier;
+    return BuildableIOSApp(project, projectBundleId);
+  }
 
   final IosProject project;
 
@@ -416,7 +422,7 @@ class ApplicationPackageStore {
         android ??= await AndroidApk.fromAndroidProject(FlutterProject.current().android);
         return android;
       case TargetPlatform.ios:
-        iOS ??= IOSApp.fromIosProject(FlutterProject.current().ios);
+        iOS ??= await IOSApp.fromIosProject(FlutterProject.current().ios);
         return iOS;
       case TargetPlatform.fuchsia:
         fuchsia ??= FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia);

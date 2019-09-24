@@ -247,7 +247,7 @@ void main() {
           color: bgColor,
           disabledColor: inactive,
           onPressed: () { },
-        ))
+        )),
       ),
     );
 
@@ -265,7 +265,7 @@ void main() {
           color: bgColor,
           disabledColor: inactive,
           onPressed: null,
-        ))
+        )),
       ),
     );
 

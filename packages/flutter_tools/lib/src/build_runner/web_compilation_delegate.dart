@@ -131,7 +131,7 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
         }
       }
       final String generatedRoot = fs.path.join(
-        generatedDirectory.path, packageGraph.root.name
+        generatedDirectory.path, packageGraph.root.name,
       );
       if (!fs.isDirectorySync(generatedRoot)) {
         return;

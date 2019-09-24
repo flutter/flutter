@@ -44,12 +44,11 @@ class TextParentData extends ContainerBoxParentData<RenderBox> {
 
   @override
   String toString() {
-    final List<String> values = <String>[];
-    if (offset != null)
-      values.add('offset=$offset');
-    if (scale != null)
-      values.add('scale=$scale');
-    values.add(super.toString());
+    final List<String> values = <String>[
+      if (offset != null) 'offset=$offset',
+      if (scale != null) 'scale=$scale',
+      super.toString(),
+    ];
     return values.join('; ');
   }
 }
@@ -483,7 +482,7 @@ class RenderParagraph extends RenderBox
         BoxConstraints(
           maxWidth: constraints.maxWidth,
         ),
-        parentUsesSize: true
+        parentUsesSize: true,
       );
       double baselineOffset;
       switch (_placeholderSpans[childIndex].alignment) {
@@ -517,7 +516,7 @@ class RenderParagraph extends RenderBox
       final TextParentData textParentData = child.parentData;
       textParentData.offset = Offset(
         _textPainter.inlinePlaceholderBoxes[childIndex].left,
-        _textPainter.inlinePlaceholderBoxes[childIndex].top
+        _textPainter.inlinePlaceholderBoxes[childIndex].top,
       );
       textParentData.scale = _textPainter.inlinePlaceholderScales[childIndex];
       child = childAfter(child);

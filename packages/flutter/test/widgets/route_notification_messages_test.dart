@@ -68,7 +68,7 @@ void main() {
           'routePushed',
           arguments: <String, dynamic>{
             'previousRouteName': null,
-            'routeName': '/'
+            'routeName': '/',
           },
         ));
 
@@ -83,7 +83,7 @@ void main() {
           'routePushed',
           arguments: <String, dynamic>{
             'previousRouteName': '/',
-            'routeName': '/A'
+            'routeName': '/A',
           },
         ));
 
@@ -98,7 +98,7 @@ void main() {
           'routePopped',
           arguments: <String, dynamic>{
             'previousRouteName': '/',
-            'routeName': '/A'
+            'routeName': '/A',
           },
         ));
   });
@@ -137,7 +137,7 @@ void main() {
           'routePushed',
           arguments: <String, dynamic>{
             'previousRouteName': null,
-            'routeName': '/'
+            'routeName': '/',
           },
         ));
 
@@ -152,7 +152,7 @@ void main() {
           'routePushed',
           arguments: <String, dynamic>{
             'previousRouteName': '/',
-            'routeName': '/A'
+            'routeName': '/A',
           },
         ));
 
@@ -167,7 +167,7 @@ void main() {
           'routeReplaced',
           arguments: <String, dynamic>{
             'previousRouteName': '/A',
-            'routeName': '/B'
+            'routeName': '/B',
           },
         ));
   });

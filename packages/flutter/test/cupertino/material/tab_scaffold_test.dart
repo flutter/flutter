@@ -232,7 +232,7 @@ void main() {
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
                   10,
-                  (int i) => BottomNavigationBarItem(icon: const ImageIcon(TestImageProvider(24, 23)), title: Text('$i'))
+                  (int i) => BottomNavigationBarItem(icon: const ImageIcon(TestImageProvider(24, 23)), title: Text('$i')),
                 ),
               ),
               tabBuilder: (BuildContext context, int index) => const Text('content'),

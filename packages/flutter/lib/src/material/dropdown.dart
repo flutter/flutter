@@ -534,10 +534,11 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///
 /// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
-/// This sample shows a `DropdownButton` with a customized icon, text style,
-/// and underline and whose value is one of "One", "Two", "Free", or "Four".
+/// This sample shows a `DropdownButton` with a large arrow icon,
+/// purple text style, and bold purple underline, whose value is one of "One",
+/// "Two", "Free", or "Four".
 ///
-/// ![A screenshot of the dropdown button](https://flutter.github.io/assets-for-api-docs/assets/material/dropdown_button.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/dropdown_button.png)
 ///
 /// ```dart
 /// String dropdownValue = 'One';
@@ -951,9 +952,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            widget.isExpanded
-              ? Expanded(child: innerItemsWidget)
-              : innerItemsWidget,
+            if (widget.isExpanded)
+              Expanded(child: innerItemsWidget)
+            else
+              innerItemsWidget,
             IconTheme(
               data: IconThemeData(
                 color: _iconColor,
@@ -1064,7 +1066,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                ),
              ),
            );
-         }
+         },
        );
 
   /// {@macro flutter.material.dropdownButton.onChanged}

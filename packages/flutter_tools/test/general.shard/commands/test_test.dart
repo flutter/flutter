@@ -243,7 +243,7 @@ Future<ProcessResult> _runFlutterTest(
     'test',
     '--no-color',
     ...extraArguments,
-    testPath
+    testPath,
   ];
 
   while (_testExclusionLock != null) {

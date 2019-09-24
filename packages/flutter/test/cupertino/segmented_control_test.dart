@@ -138,7 +138,7 @@ void main() {
           segmentedControlRect.topLeft.translate(
             effectivePadding.topLeft.dx,
             effectivePadding.topLeft.dy,
-          )
+          ),
       );
       expect(
         tester.getBottomLeft(find.byWidget(children[0])),

@@ -41,7 +41,9 @@ void main() {
     projectUnderTest.dartTool.createSync(recursive: true);
     projectUnderTest.android.ephemeralDirectory.createSync(recursive: true);
     projectUnderTest.ios.ephemeralDirectory.createSync(recursive: true);
+    projectUnderTest.linux.ephemeralDirectory.createSync(recursive: true);
     projectUnderTest.macos.ephemeralDirectory.createSync(recursive: true);
+    projectUnderTest.windows.ephemeralDirectory.createSync(recursive: true);
   });
 
   group(CleanCommand, () {
@@ -53,7 +55,9 @@ void main() {
       expect(projectUnderTest.dartTool.existsSync(), isFalse);
       expect(projectUnderTest.android.ephemeralDirectory.existsSync(), isFalse);
       expect(projectUnderTest.ios.ephemeralDirectory.existsSync(), isFalse);
+      expect(projectUnderTest.linux.ephemeralDirectory.existsSync(), isFalse);
       expect(projectUnderTest.macos.ephemeralDirectory.existsSync(), isFalse);
+      expect(projectUnderTest.windows.ephemeralDirectory.existsSync(), isFalse);
 
       verify(xcodeProjectInterpreter.cleanWorkspace(any, 'Runner')).called(2);
     }, overrides: <Type, Generator>{

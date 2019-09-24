@@ -82,12 +82,11 @@ Future<Map<String, dynamic>> runTask(
 }
 
 Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
-  final List<String> pathSegments = <String>[];
-  if (vmServiceUri.pathSegments.isNotEmpty) {
+  final List<String> pathSegments = <String>[
     // Add authentication code.
-    pathSegments.add(vmServiceUri.pathSegments[0]);
-  }
-  pathSegments.add('ws');
+    if (vmServiceUri.pathSegments.isNotEmpty) vmServiceUri.pathSegments[0],
+    'ws',
+  ];
   final String url = vmServiceUri.replace(scheme: 'ws', pathSegments:
       pathSegments).toString();
   final Stopwatch stopwatch = Stopwatch()..start();
