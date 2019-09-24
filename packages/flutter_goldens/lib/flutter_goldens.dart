@@ -252,31 +252,38 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
+    goldens.getExpectations();
     return FlutterPreSubmitFileComparator(baseDirectory.uri, goldens);
   }
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = addPrefix(golden);
-    final List<int> goldenBytes = await skiaClient.getMasterBytes(golden.path);
-    if (goldenBytes.isEmpty) {
+    final List<String> testExpectations = skiaClient.expectations[golden];
+
+    if (testExpectations.isEmpty) {
       // There is no baseline for this test
       return true;
     }
 
-    final ComparisonResult result = GoldenFileComparator.compareLists(
-      imageBytes,
-      goldenBytes,
-    );
+    ComparisonResult result;
+    for (String expectation in testExpectations) {
+      final List<int> goldenBytes = await skiaClient.getImageBytes(expectation);
 
-    if (!result.passed) {
-      return await skiaClient.testIsIgnoredForPullRequest(
-        platform.environment['CIRRUS_PR'] ?? '',
-        golden.path,
+      result = GoldenFileComparator.compareLists(
+        imageBytes,
+        goldenBytes,
       );
+
+      if (result.passed) {
+        return true;
+      }
     }
 
-    return result.passed;
+    return skiaClient.testIsIgnoredForPullRequest(
+      platform.environment['CIRRUS_PR'] ?? '',
+      golden.path,
+    );
   }
 
   /// Decides based on the current environment whether goldens tests should be
@@ -346,29 +353,43 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
+    goldens.getExpectations();
     return FlutterLocalFileComparator(baseDirectory.uri, goldens);
   }
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = addPrefix(golden);
-    final List<int> goldenBytes = await skiaClient.getMasterBytes(golden.path);
-    if (goldenBytes.isEmpty) {
+    final List<String> testExpectations = skiaClient.expectations[golden];
+
+    if (testExpectations == null) {
       // There is no baseline for this test
-      print('No digests provided by Skia Gold for test: $golden. '
+      print('No expectations provided by Skia Gold for test: $golden. '
         'This may be a new test. If this is an unexpected result, check'
-        ' $_kFlutterGoldDashboard.'
+        ' $_kFlutterGoldDashboard.\n'
+        'Image output found at $basedir'
       );
+      update(golden, imageBytes);
       return true;
     }
-    final ComparisonResult result = GoldenFileComparator.compareLists(
-      imageBytes,
-      goldenBytes,
-    );
 
-    if (!result.passed) {
-      generateFailureOutput(result, golden, basedir);
+    ComparisonResult result;
+    for (String expectation in testExpectations) {
+      final List<int> goldenBytes = await skiaClient.getImageBytes(expectation);
+
+      result = GoldenFileComparator.compareLists(
+        imageBytes,
+        goldenBytes,
+      );
+
+      if (result.passed) {
+        return true;
+      } else if (await skiaClient.isValidDigestForExpectation(golden.path, expectation)) {
+        break;
+      }
     }
-    return result.passed;
+    generateFailureOutput(result, golden, basedir);
+    return false;
   }
 }
+

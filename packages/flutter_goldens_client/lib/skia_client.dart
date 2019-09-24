@@ -62,6 +62,9 @@ class SkiaGoldClient {
   /// be null.
   final Directory workDirectory;
 
+  /// TODO(Piinks): Doc
+  Map<String, dynamic> expectations;
+
   /// The local [Directory] where the Flutter repository is hosted.
   ///
   /// Uses the [fs] file system.
@@ -170,7 +173,7 @@ class SkiaGoldClient {
       '--work-dir', workDirectory
         .childDirectory('temp')
         .path,
-      '--test-name', _cleanTestName(testName),
+      '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
     ];
 
@@ -181,75 +184,45 @@ class SkiaGoldClient {
     return true;
   }
 
-  /// Returns a list of bytes representing the golden image retrieved from the
-  /// Flutter Gold dashboard.
-  ///
-  /// Requests to Flutter Gold return a digest of information for the given
-  /// test. If more than one digest is returned, or if the digest is invalid,
-  /// this will throw an error.
-  ///
-  /// If no baseline digest is returned from Flutter Gold, it will assumed that
-  /// it is a new test and return an empty list.
-  Future<List<int>>getMasterBytes(String testName) async {
-    final List<int> masterImageBytes = <int>[];
+  /// TODO(Piinks): Doc
+  Future<void> getExpectations() async {
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
-
-      testName = _cleanTestName(testName);
-      final Uri requestForDigest = Uri.parse(
-        'https://flutter-gold.skia.org/json/search?'
-          'source_type%3Dflutter'
-          '&head=true'     // Goldens @ head
-          '&include=true'  // Include ignored tests
-          '&pos=true'      // Get positive digests
-          '&neg=false'     // No negative digests
-          '&unt=false'     // No untriaged digests
-          '&query=Platform%3D${platform.operatingSystem}%26name%3D$testName%26'
+      final Uri requestForExpectations = Uri.parse(
+        'https://flutter-gold.skia.org/json/expectations/commit/HEAD'
       );
-
-      SkiaGoldDigest masterDigest;
       String rawResponse;
       try {
-        final io.HttpClientRequest request = await httpClient.getUrl(requestForDigest);
+        final io.HttpClientRequest request = await httpClient.getUrl(requestForExpectations);
         final io.HttpClientResponse response = await request.close();
         rawResponse = await utf8.decodeStream(response);
         final Map<String, dynamic> skiaJson = json.decode(rawResponse);
-
-        if (skiaJson['digests'].length > 1) {
-          final StringBuffer buf = StringBuffer()
-            ..writeln('There is more than one digest available for golden')
-            ..writeln('test: $testName. Triage may have broken down.')
-            ..writeln('Check $_kFlutterGoldDashboard to validate the')
-            ..writeln('current status of this test.');
-          throw NonZeroExitCode(1, buf.toString());
-        } else if (skiaJson['digests'].length == 0) {
-          masterDigest = const SkiaGoldDigest(testName: 'New');
-        } else {
-          masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
-        }
+        expectations = skiaJson['master'];
+        print(expectations);
       } on FormatException catch(_) {
         print('Formatting error detected in response from Flutter Gold.'
           'rawResponse: $rawResponse');
         rethrow;
       }
+    },
+      SkiaGoldHttpOverrides(),
+    );
+  }
 
-      if (masterDigest.testName == 'New') {
-        return;
-      } else if (!masterDigest.isValid(platform, testName)) {
-        final StringBuffer buf = StringBuffer()
-          ..writeln('Invalid digest returned for golden test: $testName.')
-          ..writeln('Check $_kFlutterGoldDashboard to validate the')
-          ..writeln('current status of this test.');
-        throw NonZeroExitCode(1, buf.toString());
-      }
-
+  /// Returns a list of bytes representing the golden image retrieved from the
+  /// Flutter Gold dashboard.
+  ///
+  /// The provided image hash represents an expectation from Flutter Gold.
+  Future<List<int>>getImageBytes(String imageHash) async {
+    final List<int> imageBytes = <int>[];
+    await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForImage = Uri.parse(
-        'https://flutter-gold.skia.org/img/images/${masterDigest.imageHash}.png',
+        'https://flutter-gold.skia.org/img/images/$imageHash.png',
       );
 
       try {
         final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
         final io.HttpClientResponse response = await request.close();
-        await response.forEach((List<int> bytes) => masterImageBytes.addAll(bytes));
+        await response.forEach((List<int> bytes) => imageBytes.addAll(bytes));
 
       } catch(e) {
         rethrow;
@@ -257,7 +230,7 @@ class SkiaGoldClient {
     },
       SkiaGoldHttpOverrides(),
     );
-    return masterImageBytes;
+    return imageBytes;
   }
 
   /// Returns a boolean value for whether or not the given test and current pull
@@ -269,7 +242,7 @@ class SkiaGoldClient {
   /// land, and protect against any unwanted changes.
   Future<bool> testIsIgnoredForPullRequest(String pullRequest, String testName) async {
     bool ignoreIsActive = false;
-    testName = _cleanTestName(testName);
+    testName = cleanTestName(testName);
     String rawResponse;
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForIgnores = Uri.parse(
@@ -299,6 +272,35 @@ class SkiaGoldClient {
       SkiaGoldHttpOverrides(),
     );
     return ignoreIsActive;
+  }
+
+  /// TODO(Piinks): Doc
+  Future<bool> isValidDigestForExpectation(String expectation, String testName) async {
+    bool isValid = false;
+    testName = cleanTestName(testName);
+    String rawResponse;
+    await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
+      final Uri requestForDigest = Uri.parse(
+        'https://flutter-gold.skia.org/json/details?test=$testName&digest=$expectation'
+      );
+
+      try {
+        final io.HttpClientRequest request = await httpClient.getUrl(requestForDigest);
+        final io.HttpClientResponse response = await request.close();
+        rawResponse = await utf8.decodeStream(response);
+        final Map<String, dynamic> skiaJson = json.decode(rawResponse);
+        SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+        isValid = digest.isValid(platform, testName, expectation);
+
+      } on FormatException catch(_) {
+        print('Formatting error detected in response from Flutter Gold.'
+          'rawResponse: $rawResponse');
+        rethrow;
+      }
+    },
+      SkiaGoldHttpOverrides(),
+    );
+    return isValid;
   }
 
   /// Returns the current commit hash of the Flutter repository.
@@ -331,7 +333,7 @@ class SkiaGoldClient {
 
   /// Removes the file extension from the [fileName] to represent the test name
   /// properly.
-  String _cleanTestName(String fileName) {
+  String cleanTestName(String fileName) {
     return fileName.split(path.extension(fileName.toString()))[0];
   }
 
@@ -384,16 +386,16 @@ class SkiaGoldDigest {
   final String status;
 
   /// Validates a given digest against the current testing conditions.
-  bool isValid(Platform platform, String name) {
-    return imageHash != null
+  bool isValid(Platform platform, String name, String expectation) {
+    return imageHash == expectation
       && paramSet['Platform'].contains(platform.operatingSystem)
       && testName == name
       && status == 'positive';
     }
   }
 
-  /// Exception that signals a process' exit with a non-zero exit code.
-  class NonZeroExitCode implements Exception {
+/// Exception that signals a process' exit with a non-zero exit code.
+class NonZeroExitCode implements Exception {
   /// Create an exception that represents a non-zero exit code.
   ///
   /// The first argument must be non-zero.
@@ -410,3 +412,52 @@ class SkiaGoldDigest {
   @override
   String toString() => 'Exit code $exitCode: $stderr';
 }
+
+
+//      testName = _cleanTestName(testName);
+//      final Uri requestForDigest = Uri.parse(
+//        'https://flutter-gold.skia.org/json/search?'
+//          'source_type%3Dflutter'
+//          '&head=true'     // Goldens @ head
+//          '&include=true'  // Include ignored tests
+//          '&pos=true'      // Get positive digests
+//          '&neg=false'     // No negative digests
+//          '&unt=false'     // No untriaged digests
+//          '&query=Platform%3D${platform.operatingSystem}%26name%3D$testName%26'
+//      );
+//
+//      SkiaGoldDigest masterDigest;
+//      String rawResponse;
+//      try {
+//        final io.HttpClientRequest request = await httpClient.getUrl(requestForDigest);
+//        final io.HttpClientResponse response = await request.close();
+//        rawResponse = await utf8.decodeStream(response);
+//        final Map<String, dynamic> skiaJson = json.decode(rawResponse);
+//
+//        if (skiaJson['digests'].length > 1) {
+//          final StringBuffer buf = StringBuffer()
+//            ..writeln('There is more than one digest available for golden')
+//            ..writeln('test: $testName. Triage may have broken down.')
+//            ..writeln('Check $_kFlutterGoldDashboard to validate the')
+//            ..writeln('current status of this test.');
+//          throw NonZeroExitCode(1, buf.toString());
+//        } else if (skiaJson['digests'].length == 0) {
+//          masterDigest = const SkiaGoldDigest(testName: 'New');
+//        } else {
+//          masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
+//        }
+//      } on FormatException catch(_) {
+//        print('Formatting error detected in response from Flutter Gold.'
+//          'rawResponse: $rawResponse');
+//        rethrow;
+//      }
+//
+//      if (masterDigest.testName == 'New') {
+//        return;
+//      } else if (!masterDigest.isValid(platform, testName)) {
+//        final StringBuffer buf = StringBuffer()
+//          ..writeln('Invalid digest returned for golden test: $testName.')
+//          ..writeln('Check $_kFlutterGoldDashboard to validate the')
+//          ..writeln('current status of this test.');
+//        throw NonZeroExitCode(1, buf.toString());
+//      }
