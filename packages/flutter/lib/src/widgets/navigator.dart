@@ -2239,8 +2239,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     route.dispose();
   }
 
-  int _userGesturesInProgressCount = 0;
   int get _userGesturesInProgress => _userGesturesInProgressCount;
+  int _userGesturesInProgressCount = 0;
   set _userGesturesInProgress(int value) {
     _userGesturesInProgressCount = value;
     userGestureInProgressNotifier.value = _userGesturesInProgress > 0;
