@@ -77,7 +77,7 @@ class FuchsiaSdk {
         '-F',
         fuchsiaArtifacts.sshConfig.absolute.path,
         id,
-        remoteCommand
+        remoteCommand,
       ];
       processManager.start(cmd).then((Process newProcess) {
         if (controller.isClosed) {

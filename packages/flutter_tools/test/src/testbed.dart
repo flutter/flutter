@@ -34,7 +34,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger to avoid color codes.
   Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
-  FlutterVersion: () => FakeFlutterVersion() // prevent requirement to mock git for test runner.
+  FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
 };
 
 /// Manages interaction with the tool injection and runner system.
@@ -110,7 +110,7 @@ class Testbed {
               final Timer result = parent.createPeriodicTimer(zone, period, timer);
               timers[result] = StackTrace.current;
               return result;
-            }
+            },
           ),
           body: () async {
             Cache.flutterRoot = '';

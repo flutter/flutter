@@ -672,7 +672,7 @@ void main() {
                         context: context,
                         items: <PopupMenuItem<int>>[
                           const PopupMenuItem<int>(
-                              value: 1, child: Text('1')
+                              value: 1, child: Text('1'),
                           ),
                         ],
                       );

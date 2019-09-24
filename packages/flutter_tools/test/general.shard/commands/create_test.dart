@@ -140,18 +140,21 @@ void main() {
     await _createAndAnalyzeProject(
       projectDir,
       <String>[
-        '-i', 'objc', '-a', 'java'
-      ], <String>[
-      'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-      'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-      'flutter_project.iml',
-      'ios/Flutter/AppFrameworkInfo.plist',
-      'ios/Runner/AppDelegate.m',
-      'ios/Runner/GeneratedPluginRegistrant.h',
-    ], unexpectedPaths: <String>[
-      '.android/',
-      '.ios/',
-    ]);
+        '-i', 'objc', '-a', 'java',
+      ],
+      <String>[
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'flutter_project.iml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+      ],
+      unexpectedPaths: <String>[
+        '.android/',
+        '.ios/',
+      ],
+    );
   }, timeout: allowForRemotePubInvocation);
 
   testUsingContext('detects and recreates an app project correctly', () async {
@@ -160,18 +163,21 @@ void main() {
     await _createAndAnalyzeProject(
       projectDir,
       <String>[
-        '-i', 'objc', '-a', 'java'
-      ], <String>[
-      'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-      'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-      'flutter_project.iml',
-      'ios/Flutter/AppFrameworkInfo.plist',
-      'ios/Runner/AppDelegate.m',
-      'ios/Runner/GeneratedPluginRegistrant.h',
-    ], unexpectedPaths: <String>[
-      '.android/',
-      '.ios/',
-    ]);
+        '-i', 'objc', '-a', 'java',
+      ],
+      <String>[
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'flutter_project.iml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+      ],
+      unexpectedPaths: <String>[
+        '.android/',
+        '.ios/',
+      ],
+    );
   }, timeout: allowForRemotePubInvocation);
 
   testUsingContext('detects and recreates a plugin project correctly', () async {
@@ -180,8 +186,9 @@ void main() {
     return _createAndAnalyzeProject(
       projectDir,
       <String>[
-        '-i', 'objc', '-a', 'java'
-      ], <String>[
+        '-i', 'objc', '-a', 'java',
+      ],
+      <String>[
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'example/ios/Runner/AppDelegate.h',
@@ -528,6 +535,58 @@ void main() {
     expect(actualContents.contains('useAndroidX'), false);
   }, timeout: allowForCreateFlutterProject);
 
+  testUsingContext('app supports macOS if requested', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--macos', projectDir.path]);
+
+    expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), true);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('app does not include macOS by default', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), false);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('plugin supports macOS if requested', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--macos', projectDir.path]);
+
+    expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), true);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('plugin does not include macOS by default', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), false);
+  }, timeout: allowForCreateFlutterProject);
+
   testUsingContext('has correct content and formatting with module template', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
@@ -869,7 +928,7 @@ void main() {
         '--template=app',
         '--org', 'com.bar.foo',
         '-i', 'objc',
-        '-a', 'java'
+        '-a', 'java',
       ],
       <String>[],
     );

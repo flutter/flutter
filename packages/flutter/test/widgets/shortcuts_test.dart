@@ -6,17 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/services/keyboard_key.dart';
-import 'package:flutter/src/services/keyboard_maps.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-void sendFakeKeyEvent(Map<String, dynamic> data) {
-  ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-    SystemChannels.keyEvent.name,
-    SystemChannels.keyEvent.codec.encodeMessage(data),
-    (ByteData data) {},
-  );
-}
 
 typedef PostInvokeCallback = void Function({Action action, Intent intent, FocusNode focusNode, ActionDispatcher dispatcher});
 
@@ -72,34 +63,6 @@ class TestShortcutManager extends ShortcutManager {
     keys.add(event.logicalKey);
     return super.handleKeypress(context, event, keysPressed: keysPressed);
   }
-}
-
-void testKeypress(LogicalKeyboardKey key) {
-  assert(key.debugName != null);
-  int keyCode;
-  kAndroidToLogicalKey.forEach((int code, LogicalKeyboardKey codeKey) {
-    if (key == codeKey) {
-      keyCode = code;
-    }
-  });
-  assert(keyCode != null, 'Key $key not found in Android key map');
-  int scanCode;
-  kAndroidToPhysicalKey.forEach((int code, PhysicalKeyboardKey codeKey) {
-    if (key.debugName == codeKey.debugName) {
-      scanCode = code;
-    }
-  });
-  assert(scanCode != null, 'Physical key for $key not found in Android key map');
-  sendFakeKeyEvent(<String, dynamic>{
-    'type': 'keydown',
-    'keymap': 'android',
-    'keyCode': keyCode,
-    'plainCodePoint': 0,
-    'codePoint': 0,
-    'character': null,
-    'scanCode': scanCode,
-    'metaState': 0,
-  });
 }
 
 void main() {
@@ -248,7 +211,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(containerKey.currentContext), isNotNull);
-      testKeypress(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
     });
@@ -284,7 +247,7 @@ void main() {
       );
       await tester.pump();
       expect(Shortcuts.of(containerKey.currentContext), isNotNull);
-      testKeypress(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
     });

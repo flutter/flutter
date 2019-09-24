@@ -283,7 +283,7 @@ void main() {
             TestSemantics(
               label: 'world',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[SemanticsAction.tap]
+              actions: <SemanticsAction>[SemanticsAction.tap],
             ),
           ],
         ),

@@ -2849,13 +2849,13 @@ typedef RangeSemanticFormatterCallback = String Function(RangeValues values);
 ///
 /// Override [RangeSlider.thumbSelector] for custom thumb selection.
 typedef RangeThumbSelector = Thumb Function(
-    TextDirection textDirection,
-    RangeValues values,
-    double tapValue,
-    Size thumbSize,
-    Size trackSize,
-    double dx
-    );
+  TextDirection textDirection,
+  RangeValues values,
+  double tapValue,
+  Size thumbSize,
+  Size trackSize,
+  double dx,
+);
 
 /// Object for representing range slider thumb values.
 ///

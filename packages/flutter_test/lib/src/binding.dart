@@ -796,6 +796,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _pendingExceptionDetails = null;
     _parentZone = null;
     buildOwner.focusManager = FocusManager();
+    // Disabling the warning because @visibleForTesting doesn't take the testing
+    // framework itself into account, but we don't want it visible outside of
+    // tests.
+    // ignore: invalid_use_of_visible_for_testing_member
+    RawKeyboard.instance.clearKeysPressed();
     assert(!RendererBinding.instance.mouseTracker.mouseIsConnected,
         'The MouseTracker thinks that there is still a mouse connected, which indicates that a '
         'test has not removed the mouse pointer which it added. Call removePointer on the '

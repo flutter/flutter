@@ -402,7 +402,7 @@ class _TestTweenAnimationBuilderWidgetState extends _TestAnimatedWidgetState {
             width: size,
             height: size,
           );
-        }
+        },
     );
   }
 }

@@ -153,7 +153,7 @@ class Theme extends StatelessWidget {
           data: data.iconTheme,
           child: child,
         ),
-      )
+      ),
     );
   }
 

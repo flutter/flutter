@@ -115,7 +115,7 @@ void main() {
             capturedContext = context;
             return Container();
           }
-        )
+        ),
       )
     );
     expect(ButtonBarTheme.of(capturedContext), equals(buttonBarTheme));
@@ -141,7 +141,7 @@ void main() {
               ),
             );
           }
-        )
+        ),
       )
     );
     expect(ButtonBarTheme.of(capturedContext), equals(buttonBarTheme));

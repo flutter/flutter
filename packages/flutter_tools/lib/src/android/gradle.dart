@@ -266,7 +266,7 @@ Future<GradleProject> _readGradleProject(
     project = GradleProject(
       <String>['debug', 'profile', 'release'],
       <String>[],
-      fs.path.join(flutterProject.android.hostAppGradleRoot.path, 'app', 'build')
+      fs.path.join(flutterProject.android.hostAppGradleRoot.path, 'app', 'build'),
     );
   }
   status.stop();

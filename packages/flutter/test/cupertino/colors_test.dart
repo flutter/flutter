@@ -12,7 +12,7 @@ import '../rendering/mock_canvas.dart';
 class DependentWidget extends StatelessWidget {
   const DependentWidget({
     Key key,
-    this.color
+    this.color,
   }) : super(key: key);
 
   final Color color;
@@ -110,7 +110,7 @@ void main() {
         darkHighContrastColor: color5,
         highContrastElevatedColor: color6,
         darkHighContrastElevatedColor: color7,
-      )
+      ),
     );
 
     expect(notSoDynamicColor1, isNot(vibrancyDependentColor1));
@@ -139,7 +139,7 @@ void main() {
       'elevatedColor = Color(0xff000002), '
       'darkElevatedColor = Color(0xff000004), '
       'highContrastElevatedColor = Color(0xff000006), '
-      'darkHighContrastElevatedColor = Color(0xff000007))'
+      'darkHighContrastElevatedColor = Color(0xff000007))',
     );
     expect(notSoDynamicColor1.toString(), 'CupertinoDynamicColor(*color = Color(0xff000000)*)');
     expect(vibrancyDependentColor1.toString(), 'CupertinoDynamicColor(*color = Color(0xff000001)*, darkColor = Color(0xff000000))');
@@ -656,11 +656,11 @@ void main() {
   group('CupertinoSystemColors', () {
     const Color dynamicColor0 = CupertinoDynamicColor.withBrightness(
       color: Color(0x00000000),
-      darkColor: Color(0x00000000)
+      darkColor: Color(0x00000000),
     );
     const Color dynamicColor1 = CupertinoDynamicColor.withBrightness(
       color: Color(0x00000001),
-      darkColor: Color(0x00000000)
+      darkColor: Color(0x00000000),
     );
 
     const CupertinoSystemColorsData system0 = CupertinoSystemColorsData(

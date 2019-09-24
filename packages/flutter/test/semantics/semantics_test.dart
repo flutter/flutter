@@ -79,7 +79,7 @@ void main() {
 
       node.updateWith(
         config: config,
-        childrenInInversePaintOrder: children
+        childrenInInversePaintOrder: children,
       );
 
       children.add( SemanticsNode()
@@ -92,7 +92,7 @@ void main() {
         try {
           node.updateWith(
             config: config,
-            childrenInInversePaintOrder: children
+            childrenInInversePaintOrder: children,
           );
         } on FlutterError catch (e) {
           error = e;
@@ -106,7 +106,7 @@ void main() {
         ));
         expect(
           error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.'
+          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.',
         );
       }
 
@@ -118,7 +118,7 @@ void main() {
             ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
           SemanticsNode()
             ..isMergedIntoParent = true
-            ..rect = const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0)
+            ..rect = const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0),
         ];
         node.updateWith(
           config: config,
@@ -133,7 +133,7 @@ void main() {
             ..rect = const Rect.fromLTRB(40.0, 14.0, 20.0, 20.0);
           node.updateWith(
             config: config,
-            childrenInInversePaintOrder: modifiedChildren
+            childrenInInversePaintOrder: modifiedChildren,
           );
         } on FlutterError catch (e) {
           error = e;
@@ -157,7 +157,7 @@ void main() {
 
         expect(
           error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.'
+          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.',
         );
         // Two previous children and two new children.
         expect(error.diagnostics.where((DiagnosticsNode node) => node.value is SemanticsNode).length, 4);
