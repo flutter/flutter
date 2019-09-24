@@ -236,7 +236,7 @@ void main() {
   }));
 
   test('Does not crash when filesytem and cache are out of sync', () => testbed.run(() async {
-    final TestTarget testTarget = TestTarget((Environment envionment) async {
+    final TestTarget testTarget = TestTarget((Environment environment) async {
       environment.buildDir.childFile('foo.out').createSync();
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
@@ -248,7 +248,7 @@ void main() {
     expect(environment.buildDir.childFile('foo.out').existsSync(), true);
     environment.buildDir.childFile('foo.out').deleteSync();
 
-    final TestTarget testTarget2 = TestTarget((Environment envionment) async {
+    final TestTarget testTarget2 = TestTarget((Environment environment) async {
       environment.buildDir.childFile('bar.out').createSync();
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]

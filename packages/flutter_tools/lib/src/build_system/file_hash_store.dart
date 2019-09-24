@@ -123,7 +123,7 @@ class FileHashStore {
     printTrace('Persisting file store');
     final File file = _cacheFile;
     if (!file.existsSync()) {
-      file.createSync();
+      file.createSync(recursive: true);
     }
     final List<FileHash> fileHashes = <FileHash>[];
     for (MapEntry<String, String> entry in currentHashes.entries) {
