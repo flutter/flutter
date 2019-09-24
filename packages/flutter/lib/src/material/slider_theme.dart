@@ -951,6 +951,17 @@ abstract class SliderComponentShape {
   /// Returns the preferred size of the shape, based on the given conditions.
   Size getPreferredSize(bool isEnabled, bool isDiscrete);
 
+  /// Clears the path so that shapes with opacity can be drawn correctly.
+  void clearPath({
+    PaintingContext context,
+    Offset center,
+    bool isEnabled,
+    bool isDiscrete,
+  }) {
+    // Override this if the pixels in the way of this path should be cleared
+    // before drawing it.
+  }
+
   /// Paints the shape, taking into account the state passed to it.
   ///
   /// {@macro flutter.material.slider.shape.context}
@@ -1563,8 +1574,8 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 
     // Assign the track segment paints, which are left: active, right: inactive,
     // but reversed for right to left text.
-    final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor , end: sliderTheme.activeTrackColor);
-    final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor , end: sliderTheme.inactiveTrackColor);
+    final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor, end: sliderTheme.activeTrackColor);
+    final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation);
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation);
     Paint leftTrackPaint;
@@ -1588,13 +1599,21 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       isDiscrete: isDiscrete,
     );
 
-    final Size thumbSize = sliderTheme.thumbShape.getPreferredSize(isEnabled, isDiscrete);
-    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRect.height / 2, trackRect.top, thumbCenter.dx - thumbSize.width / 2, trackRect.bottom);
+    context.canvas.saveLayer(trackRect, Paint());
+    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRect.height / 2, trackRect.top, thumbCenter.dx, trackRect.bottom);
     if (!leftTrackSegment.isEmpty)
       context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
-    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx + thumbSize.width / 2, trackRect.top, trackRect.right, trackRect.bottom);
+    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx, trackRect.top, trackRect.right, trackRect.bottom);
     if (!rightTrackSegment.isEmpty)
       context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
+
+    sliderTheme.thumbShape.clearPath(
+      context: context,
+      center: thumbCenter,
+      isEnabled: isEnabled,
+      isDiscrete: isDiscrete,
+    );
+    context.canvas.restore();
   }
 }
 
@@ -1683,6 +1702,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     );
 
     // The arc rects create a semi-circle with radius equal to track height.
+    context.canvas.saveLayer(trackRect, Paint());
     final Rect leftTrackArcRect = Rect.fromLTWH(trackRect.left, trackRect.top, trackRect.height, trackRect.height);
     if (!leftTrackArcRect.isEmpty)
       context.canvas.drawArc(leftTrackArcRect, math.pi / 2, math.pi, false, leftTrackPaint);
@@ -1690,13 +1710,20 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     if (!rightTrackArcRect.isEmpty)
       context.canvas.drawArc(rightTrackArcRect, -math.pi / 2, math.pi, false, rightTrackPaint);
 
-    final Size thumbSize = sliderTheme.thumbShape.getPreferredSize(isEnabled, isDiscrete);
-    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRect.height / 2, trackRect.top, thumbCenter.dx - thumbSize.width / 2, trackRect.bottom);
+    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRect.height / 2, trackRect.top, thumbCenter.dx, trackRect.bottom);
     if (!leftTrackSegment.isEmpty)
       context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
-    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx + thumbSize.width / 2, trackRect.top, trackRect.right, trackRect.bottom);
+    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx, trackRect.top, trackRect.right, trackRect.bottom);
     if (!rightTrackSegment.isEmpty)
       context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
+
+    sliderTheme.thumbShape.clearPath(
+      context: context,
+      center: thumbCenter,
+      isEnabled: isEnabled,
+      isDiscrete: isDiscrete,
+    );
+    context.canvas.restore();
   }
 }
 
@@ -2217,6 +2244,8 @@ class RoundSliderThumbShape extends SliderComponentShape {
   const RoundSliderThumbShape({
     this.enabledThumbRadius = 10.0,
     this.disabledThumbRadius,
+    this.elevation = 1.0,
+    this.pressedElevation = 6.0,
   });
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
@@ -2231,9 +2260,36 @@ class RoundSliderThumbShape extends SliderComponentShape {
   final double disabledThumbRadius;
   double get _disabledThumbRadius =>  disabledThumbRadius ?? enabledThumbRadius;
 
+  /// The resting elevation adds shadow to the unpressed thumb.
+  ///
+  /// The default is 1.
+  final double elevation;
+
+  /// The pressed elevation adds shadow to the pressed thumb.
+  ///
+  /// The default is 6.
+  final double pressedElevation;
+
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
     return Size.fromRadius(isEnabled == true ? enabledThumbRadius : _disabledThumbRadius);
+  }
+
+  void clearPath({
+    PaintingContext context,
+    Offset center,
+    bool isEnabled,
+    bool isDiscrete,
+  }) {
+    if (!isEnabled) {
+      final Size thumbSize = getPreferredSize(isDiscrete, isDiscrete);
+      context.canvas.drawCircle(
+        center,
+        thumbSize.width / 2,
+        Paint()
+          ..blendMode = BlendMode.clear,
+      );
+    }
   }
 
   @override
@@ -2265,10 +2321,21 @@ class RoundSliderThumbShape extends SliderComponentShape {
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.thumbColor,
     );
+    final Tween<double> elevationTween = Tween<double>(
+      begin: elevation,
+      end: pressedElevation,
+    );
+
+    final evaluatedElevation = elevationTween.evaluate(activationAnimation);
+    final radius = radiusTween.evaluate(enableAnimation);
+    Path path = Path()..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
+    canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
+
     canvas.drawCircle(
-      center,
-      radiusTween.evaluate(enableAnimation),
-      Paint()..color = colorTween.evaluate(enableAnimation),
+        center,
+        radiusTween.evaluate(enableAnimation),
+        Paint()
+          ..color = colorTween.evaluate(enableAnimation)
     );
   }
 }

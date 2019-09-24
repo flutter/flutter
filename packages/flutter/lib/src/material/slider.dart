@@ -478,7 +478,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
 
   static const double _defaultTrackHeight = 4;
-  static const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape();
+//  static const double _defaultTrackHeight = 12;
+//  static const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape();
+  static const SliderTrackShape _defaultTrackShape = RectangularSliderTrackShape();
   static const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape();
   static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
   static const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape();
@@ -1080,7 +1082,8 @@ class _RenderSlider extends RenderBox {
       sliderTheme: _sliderTheme,
       isDiscrete: isDiscrete,
     );
-    final Offset thumbCenter = Offset(trackRect.left + visualPosition * trackRect.width, trackRect.center.dy);
+    final Offset thumbCenter = Offset(
+        trackRect.left + visualPosition * trackRect.width, trackRect.center.dy);
 
     _sliderTheme.trackShape.paint(
       context,
@@ -1110,10 +1113,12 @@ class _RenderSlider extends RenderBox {
     }
 
     if (isDiscrete) {
-      final double tickMarkWidth = _sliderTheme.tickMarkShape.getPreferredSize(
+      final double tickMarkWidth = _sliderTheme.tickMarkShape
+          .getPreferredSize(
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,
-      ).width;
+      )
+          .width;
       final double adjustedTrackWidth = trackRect.width - tickMarkWidth;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {
@@ -1122,7 +1127,8 @@ class _RenderSlider extends RenderBox {
           final double value = i / divisions;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
-          final double dx = trackRect.left + value * adjustedTrackWidth + tickMarkWidth / 2;
+          final double dx = trackRect.left + value * adjustedTrackWidth +
+              tickMarkWidth / 2;
           final Offset tickMarkOffset = Offset(dx, dy);
           _sliderTheme.tickMarkShape.paint(
             context,
@@ -1138,7 +1144,8 @@ class _RenderSlider extends RenderBox {
       }
     }
 
-    if (isInteractive && label != null && !_valueIndicatorAnimation.isDismissed) {
+    if (isInteractive && label != null &&
+        !_valueIndicatorAnimation.isDismissed) {
       if (showValueIndicator) {
         _sliderTheme.valueIndicatorShape.paint(
           context,
