@@ -477,7 +477,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     return widget.max > widget.min ? (value - widget.min) / (widget.max - widget.min) : 0.0;
   }
 
-  static const double _defaultTrackHeight = 2;
+  static const double _defaultTrackHeight = 4;
   static const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape();
   static const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape();
   static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
