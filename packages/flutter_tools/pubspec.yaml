@@ -21,7 +21,7 @@ dependencies:
   json_rpc_2: 2.1.0
   linter: 0.1.93
   meta: 1.1.7
-  multicast_dns: 0.2.0
+  multicast_dns: 0.2.1
   mustache: 1.1.1
   package_config: 1.1.0
   platform: 2.2.1
@@ -136,4 +136,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: f467
+# PUBSPEC CHECKSUM: 2168
