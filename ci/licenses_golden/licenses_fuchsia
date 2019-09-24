@@ -1,4 +1,4 @@
-Signature: b24a024038e2f937ad8cb0f18dc49529
+Signature: f1344b02f420e3878d5c42410a100b10
 
 UNUSED LICENSES:
 
@@ -10,6 +10,7 @@ USED LICENSES:
 LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/COPYRIGHT.musl
 TYPE: LicenseType.mit
+FILE: ../../../fuchsia/sdk/linux/.versions/core.cipd_version
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_core_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_object_lifetimes.so
@@ -705,6 +706,7 @@ obstacle to adoption, that text has been removed.
 LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../fuchsia/sdk/linux/.versions/core.cipd_version
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_core_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_object_lifetimes.so
@@ -1548,6 +1550,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/LICENSE.vulkan
 TYPE: LicenseType.apache
+FILE: ../../../fuchsia/sdk/linux/.versions/core.cipd_version
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_core_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_object_lifetimes.so
