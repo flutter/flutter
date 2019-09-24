@@ -1,4 +1,4 @@
-Signature: 64469c8b4201f617252414c18c3fd44d
+Signature: 3be4898d42fc943cefa24af65ef716fc
 
 UNUSED LICENSES:
 
@@ -4974,6 +4974,7 @@ FILE: ../../../third_party/skia/experimental/xform/SkXform.h
 FILE: ../../../third_party/skia/experimental/xform/XContext.cpp
 FILE: ../../../third_party/skia/gm/crbug_918512.cpp
 FILE: ../../../third_party/skia/gm/fpcoordinateoverride.cpp
+FILE: ../../../third_party/skia/gm/inverseclip.cpp
 FILE: ../../../third_party/skia/gm/labyrinth.cpp
 FILE: ../../../third_party/skia/gm/preservefillrule.cpp
 FILE: ../../../third_party/skia/gm/tilemodes_alpha.cpp
