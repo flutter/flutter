@@ -713,7 +713,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             ErrorDescription(
               'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
               '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
-            )
+            ),
           ]);
         }());
         totalFlex += childParentData.flex;
@@ -979,7 +979,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           'than the available space, consider clipping it with a ClipRect widget '
           'before putting it in the flex, or using a scrollable container rather '
           'than a Flex, like a ListView.'
-        )
+        ),
       ];
 
       // Simulate a child rect that overflows by the right amount. This child

@@ -380,7 +380,7 @@ void main() {
                     ..onTapDown = (_) {logs.add('tapDown');}
                     ..onTapCancel = () {logs.add('WRONG');}
                     ..onSecondaryTapDown = (_) {logs.add('WRONG');};
-                }
+                },
               ),
               child: Container(),
             ),
@@ -452,7 +452,7 @@ void main() {
                     ..onLongPressUp = () {logs.add('LPUp');}
                     ..onLongPressEnd = (_) {logs.add('LPEnd');}
                     ..onLongPressMoveUpdate = (_) {logs.add('WRONG');};
-                }
+                },
               ),
               child: Container(),
             ),
@@ -537,7 +537,7 @@ void main() {
               ..onEnd = (_) {logs.add('HEnd');}
               ..onUpdate = (_) {logs.add('HUpdate');}
               ..onCancel = () {logs.add('WRONG');};
-          }
+          },
         )..addAll(_buildGestureMap(
           () => PanGestureRecognizer(),
           (PanGestureRecognizer pan) {
@@ -547,7 +547,7 @@ void main() {
               ..onEnd = (_) {logs.add('PEnd');}
               ..onUpdate = (_) {logs.add('PUpdate');}
               ..onCancel = () {logs.add('WRONG');};
-          }
+          },
         ));
         await tester.pumpWidget(
           Center(
@@ -628,7 +628,7 @@ void main() {
               ..onEnd = (_) {logs.add('VEnd');}
               ..onUpdate = (_) {logs.add('VUpdate');}
               ..onCancel = () {logs.add('WRONG');};
-          }
+          },
         )..addAll(_buildGestureMap(
           () => PanGestureRecognizer(),
           (PanGestureRecognizer pan) {
@@ -638,7 +638,7 @@ void main() {
               ..onEnd = (_) {logs.add('PEnd');}
               ..onUpdate = (_) {logs.add('PUpdate');}
               ..onCancel = () {logs.add('WRONG');};
-          }
+          },
         ));
         await tester.pumpWidget(
           Center(

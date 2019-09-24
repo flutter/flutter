@@ -339,7 +339,7 @@ class _BodyBuilder extends StatelessWidget {
     Key key,
     @required this.extendBody,
     @required this.extendBodyBehindAppBar,
-    @required this.body
+    @required this.body,
   }) : assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
        assert(body != null),
@@ -2139,7 +2139,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       widget.body == null ? null : _BodyBuilder(
         extendBody: widget.extendBody,
         extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-        body: widget.body
+        body: widget.body,
       ),
       _ScaffoldSlot.body,
       removeLeftPadding: false,
@@ -2450,7 +2450,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       child:  NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
         child: bottomSheet,
-      )
+      ),
     );
   }
 
@@ -2463,7 +2463,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           return Align(
             alignment: AlignmentDirectional.topStart,
             heightFactor: widget.animationController.value,
-            child: child
+            child: child,
           );
         },
         child: _wrapBottomSheet(

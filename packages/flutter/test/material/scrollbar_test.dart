@@ -22,7 +22,7 @@ class TestCanvas implements Canvas {
 Widget _buildBoilerplate({
     TextDirection textDirection = TextDirection.ltr,
     EdgeInsets padding = EdgeInsets.zero,
-    Widget child
+    Widget child,
 }) {
   return Directionality(
     textDirection: textDirection,

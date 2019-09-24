@@ -204,13 +204,15 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         } else {
           // We will have to find it manually.
           int possibleFirstIndex = firstIndex - 1;
-          while (possibleFirstIndex > 0 &&
+          while (
+            possibleFirstIndex > 0 &&
             !addInitialChild(
               index: possibleFirstIndex,
-              layoutOffset: indexToLayoutOffset(itemExtent, possibleFirstIndex)
+              layoutOffset: indexToLayoutOffset(itemExtent, possibleFirstIndex),
             )
-          )
+          ) {
             possibleFirstIndex -= 1;
+          }
           max = possibleFirstIndex * itemExtent;
         }
         geometry = SliverGeometry(
@@ -283,7 +285,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         lastIndex: lastIndex,
         leadingScrollOffset: leadingScrollOffset,
         trailingScrollOffset: trailingScrollOffset,
-      )
+      ),
     );
 
     final double paintExtent = calculatePaintOffset(

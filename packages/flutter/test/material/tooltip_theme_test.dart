@@ -89,7 +89,7 @@ void main() {
       'decoration: BoxDecoration(color: Color(0xffffffff))',
       'textStyle: TextStyle(inherit: true, decoration: TextDecoration.underline)',
       'wait duration: 0:00:00.100000',
-      'show duration: 0:00:00.200000'
+      'show duration: 0:00:00.200000',
     ]);
   });
 
@@ -588,7 +588,7 @@ void main() {
         tooltipTheme: const TooltipThemeData(
           textStyle: TextStyle(
             color: Colors.orange,
-            decoration: TextDecoration.underline
+            decoration: TextDecoration.underline,
           ),
         ),
       ),
@@ -619,7 +619,7 @@ void main() {
         child: Tooltip(
           textStyle: const TextStyle(
             color: Colors.orange,
-            decoration: TextDecoration.underline
+            decoration: TextDecoration.underline,
           ),
           key: key,
           message: tooltipText,

@@ -1313,7 +1313,7 @@ abstract class RenderBox extends RenderObject {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The height argument to getMinIntrinsicWidth was null.'),
           ErrorDescription('The argument to getMinIntrinsicWidth must not be negative or null.'),
-          ErrorHint('If you do not have a specific height in mind, then pass double.infinity instead.')
+          ErrorHint('If you do not have a specific height in mind, then pass double.infinity instead.'),
         ]);
       }
       if (height < 0.0) {
@@ -1454,7 +1454,7 @@ abstract class RenderBox extends RenderObject {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The height argument to getMaxIntrinsicWidth was null.'),
           ErrorDescription('The argument to getMaxIntrinsicWidth must not be negative or null.'),
-          ErrorHint('If you do not have a specific height in mind, then pass double.infinity instead.')
+          ErrorHint('If you do not have a specific height in mind, then pass double.infinity instead.'),
         ]);
       }
       if (height < 0.0) {
@@ -1465,7 +1465,7 @@ abstract class RenderBox extends RenderObject {
             'If you perform computations on another height before passing it to '
             'getMaxIntrinsicWidth, consider using math.max() or double.clamp() '
             'to force the value into the valid range.'
-          )
+          ),
         ]);
       }
       return true;
@@ -1532,7 +1532,7 @@ abstract class RenderBox extends RenderObject {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The width argument to getMinIntrinsicHeight was null.'),
           ErrorDescription('The argument to getMinIntrinsicHeight must not be negative or null.'),
-          ErrorHint('If you do not have a specific width in mind, then pass double.infinity instead.')
+          ErrorHint('If you do not have a specific width in mind, then pass double.infinity instead.'),
         ]);
       }
       if (width < 0.0) {
@@ -1543,7 +1543,7 @@ abstract class RenderBox extends RenderObject {
             'If you perform computations on another width before passing it to '
             'getMinIntrinsicHeight, consider using math.max() or double.clamp() '
             'to force the value into the valid range.'
-          )
+          ),
         ]);
       }
       return true;
@@ -1607,7 +1607,7 @@ abstract class RenderBox extends RenderObject {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The width argument to getMaxIntrinsicHeight was null.'),
           ErrorDescription('The argument to getMaxIntrinsicHeight must not be negative or null.'),
-          ErrorHint('If you do not have a specific width in mind, then pass double.infinity instead.')
+          ErrorHint('If you do not have a specific width in mind, then pass double.infinity instead.'),
         ]);
       }
       if (width < 0.0) {
@@ -1618,7 +1618,7 @@ abstract class RenderBox extends RenderObject {
             'If you perform computations on another width before passing it to '
             'getMaxIntrinsicHeight, consider using math.max() or double.clamp() '
             'to force the value into the valid range.'
-          )
+          ),
         ]);
       }
       return true;
@@ -1794,7 +1794,7 @@ abstract class RenderBox extends RenderObject {
                 'It is important to tell the framework if the size will be used or not '
                 'as several important performance optimizations can be made if the '
                 'size will not be used by the parent.'
-              )
+              ),
             ]);
           }
         }
@@ -1921,7 +1921,7 @@ abstract class RenderBox extends RenderObject {
           ErrorSummary('RenderBox did not set its size during layout.'),
           contract,
           ErrorDescription('It appears that this did not happen; layout completed, but the size property is still null.'),
-          DiagnosticsProperty<RenderBox>('The RenderBox in question is', this, style: DiagnosticsTreeStyle.errorProperty)
+          DiagnosticsProperty<RenderBox>('The RenderBox in question is', this, style: DiagnosticsTreeStyle.errorProperty),
         ]);
       }
       // verify that the size is not infinite
@@ -1932,7 +1932,7 @@ abstract class RenderBox extends RenderObject {
             'This probably means that it is a render object that tries to be '
             'as big as possible, but it was put inside another render object '
             'that allows its children to pick their own size.'
-          )
+          ),
         ];
         if (!constraints.hasBoundedWidth) {
           RenderBox node = this;
@@ -2055,7 +2055,7 @@ abstract class RenderBox extends RenderObject {
             'RenderBox subclasses need to either override performLayout() to '
             'set a size and lay out any children, or, set sizedByParent to true '
             'so that performResize() sizes the render object.'
-          )
+          ),
         ]);
       }
       return true;
@@ -2103,7 +2103,7 @@ abstract class RenderBox extends RenderObject {
               'to perform a hit test during the layout phase itself, make sure '
               'you only hit test nodes that have completed layout (e.g. the node\'s '
               'children, after their layout() method has been called).'
-            )
+            ),
           ]);
         }
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -2194,7 +2194,7 @@ abstract class RenderBox extends RenderObject {
             'Since $runtimeType does not in fact use that ParentData class for its children, it must '
             'provide an implementation of applyPaintTransform that supports the specific ParentData '
             'subclass used by its children (which apparently is ${child.parentData.runtimeType}).'
-         )
+          ),
         ]);
       }
       return true;

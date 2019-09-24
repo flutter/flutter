@@ -395,8 +395,8 @@ class EditableText extends StatefulWidget {
       copy: true,
       cut: true,
       paste: true,
-      selectAll: true
-    )
+      selectAll: true,
+    ),
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),

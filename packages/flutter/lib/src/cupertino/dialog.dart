@@ -1159,7 +1159,7 @@ class CupertinoDialogAction extends StatelessWidget {
     TextStyle style = _kCupertinoDialogActionStyle.copyWith(
       color: CupertinoDynamicColor.resolve(
         isDestructiveAction ?  CupertinoSystemColors.of(context).systemRed : CupertinoSystemColors.of(context).systemBlue,
-        context
+        context,
       ),
     );
     style = style.merge(textStyle);
