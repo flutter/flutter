@@ -110,70 +110,70 @@ class RenderListBody extends RenderBox
     double mainAxisExtent = 0.0;
     RenderBox child = firstChild;
     switch (axisDirection) {
-    case AxisDirection.right:
-      final BoxConstraints innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
-      while (child != null) {
-        child.layout(innerConstraints, parentUsesSize: true);
-        final ListBodyParentData childParentData = child.parentData;
-        childParentData.offset = Offset(mainAxisExtent, 0.0);
-        mainAxisExtent += child.size.width;
-        assert(child.parentData == childParentData);
-        child = childParentData.nextSibling;
-      }
-      size = constraints.constrain(Size(mainAxisExtent, constraints.maxHeight));
-      break;
-    case AxisDirection.left:
-      final BoxConstraints innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
-      while (child != null) {
-        child.layout(innerConstraints, parentUsesSize: true);
-        final ListBodyParentData childParentData = child.parentData;
-        mainAxisExtent += child.size.width;
-        assert(child.parentData == childParentData);
-        child = childParentData.nextSibling;
-      }
-      double position = 0.0;
-      child = firstChild;
-      while (child != null) {
-        final ListBodyParentData childParentData = child.parentData;
-        position += child.size.width;
-        childParentData.offset = Offset(mainAxisExtent - position, 0.0);
-        assert(child.parentData == childParentData);
-        child = childParentData.nextSibling;
-      }
-      size = constraints.constrain(Size(mainAxisExtent, constraints.maxHeight));
-      break;
-    case AxisDirection.down:
-      final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
-      while (child != null) {
-        child.layout(innerConstraints, parentUsesSize: true);
-        final ListBodyParentData childParentData = child.parentData;
-        childParentData.offset = Offset(0.0, mainAxisExtent);
-        mainAxisExtent += child.size.height;
-        assert(child.parentData == childParentData);
-        child = childParentData.nextSibling;
-      }
-      size = constraints.constrain(Size(constraints.maxWidth, mainAxisExtent));
-      break;
-    case AxisDirection.up:
-      final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
-      while (child != null) {
-        child.layout(innerConstraints, parentUsesSize: true);
-        final ListBodyParentData childParentData = child.parentData;
-        mainAxisExtent += child.size.height;
-        assert(child.parentData == childParentData);
-        child = childParentData.nextSibling;
-      }
-      double position = 0.0;
-      child = firstChild;
-      while (child != null) {
-        final ListBodyParentData childParentData = child.parentData;
-        position += child.size.height;
-        childParentData.offset = Offset(0.0, mainAxisExtent - position);
-        assert(child.parentData == childParentData);
-        child = childParentData.nextSibling;
-      }
-      size = constraints.constrain(Size(constraints.maxWidth, mainAxisExtent));
-      break;
+      case AxisDirection.right:
+        final BoxConstraints innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
+        while (child != null) {
+          child.layout(innerConstraints, parentUsesSize: true);
+          final ListBodyParentData childParentData = child.parentData;
+          childParentData.offset = Offset(mainAxisExtent, 0.0);
+          mainAxisExtent += child.size.width;
+          assert(child.parentData == childParentData);
+          child = childParentData.nextSibling;
+        }
+        size = constraints.constrain(Size(mainAxisExtent, constraints.maxHeight));
+        break;
+      case AxisDirection.left:
+        final BoxConstraints innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
+        while (child != null) {
+          child.layout(innerConstraints, parentUsesSize: true);
+          final ListBodyParentData childParentData = child.parentData;
+          mainAxisExtent += child.size.width;
+          assert(child.parentData == childParentData);
+          child = childParentData.nextSibling;
+        }
+        double position = 0.0;
+        child = firstChild;
+        while (child != null) {
+          final ListBodyParentData childParentData = child.parentData;
+          position += child.size.width;
+          childParentData.offset = Offset(mainAxisExtent - position, 0.0);
+          assert(child.parentData == childParentData);
+          child = childParentData.nextSibling;
+        }
+        size = constraints.constrain(Size(mainAxisExtent, constraints.maxHeight));
+        break;
+      case AxisDirection.down:
+        final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
+        while (child != null) {
+          child.layout(innerConstraints, parentUsesSize: true);
+          final ListBodyParentData childParentData = child.parentData;
+          childParentData.offset = Offset(0.0, mainAxisExtent);
+          mainAxisExtent += child.size.height;
+          assert(child.parentData == childParentData);
+          child = childParentData.nextSibling;
+        }
+        size = constraints.constrain(Size(constraints.maxWidth, mainAxisExtent));
+        break;
+      case AxisDirection.up:
+        final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
+        while (child != null) {
+          child.layout(innerConstraints, parentUsesSize: true);
+          final ListBodyParentData childParentData = child.parentData;
+          mainAxisExtent += child.size.height;
+          assert(child.parentData == childParentData);
+          child = childParentData.nextSibling;
+        }
+        double position = 0.0;
+        child = firstChild;
+        while (child != null) {
+          final ListBodyParentData childParentData = child.parentData;
+          position += child.size.height;
+          childParentData.offset = Offset(0.0, mainAxisExtent - position);
+          assert(child.parentData == childParentData);
+          child = childParentData.nextSibling;
+        }
+        size = constraints.constrain(Size(constraints.maxWidth, mainAxisExtent));
+        break;
     }
     assert(size.isFinite);
   }

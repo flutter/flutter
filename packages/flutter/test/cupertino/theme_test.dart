@@ -137,22 +137,22 @@ void main() {
   );
 
   testWidgets("Theme has default IconThemeData, which is derived from the theme's primary color", (WidgetTester tester) async {
-      const Color primaryColor = CupertinoColors.destructiveRed;
-      const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
+    const Color primaryColor = CupertinoColors.destructiveRed;
+    const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
 
-      final IconThemeData resultingIconTheme = await testIconTheme(tester, themeData);
+    final IconThemeData resultingIconTheme = await testIconTheme(tester, themeData);
 
-      expect(resultingIconTheme.color, themeData.primaryColor);
+    expect(resultingIconTheme.color, themeData.primaryColor);
   });
 
   testWidgets('IconTheme.of creates a dependency on iconTheme', (WidgetTester tester) async {
-      IconThemeData iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.destructiveRed));
+    IconThemeData iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.destructiveRed));
 
-      expect(buildCount, 1);
-      expect(iconTheme.color, CupertinoColors.destructiveRed);
+    expect(buildCount, 1);
+    expect(iconTheme.color, CupertinoColors.destructiveRed);
 
-      iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.activeOrange));
-      expect(buildCount, 2);
-      expect(iconTheme.color, CupertinoColors.activeOrange);
+    iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.activeOrange));
+    expect(buildCount, 2);
+    expect(iconTheme.color, CupertinoColors.activeOrange);
   });
 }

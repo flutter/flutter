@@ -733,10 +733,10 @@ class AsyncCrashingValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() {
     const Duration delay = Duration(seconds: 1);
-    final Future<ValidationResult> result = Future<ValidationResult>
-        .delayed(delay).then((_) {
-      throw 'fatal error';
-    });
+    final Future<ValidationResult> result = Future<ValidationResult>.delayed(delay)
+      .then((_) {
+        throw 'fatal error';
+      });
     _time.elapse(const Duration(seconds: 1));
     _time.flushMicrotasks();
     return result;

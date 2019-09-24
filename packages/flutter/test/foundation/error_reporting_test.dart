@@ -60,8 +60,8 @@ Future<void> main() async {
       library: 'error handling test',
       context: ErrorDescription('testing the error handling logic'),
       informationCollector: () sync* {
-       yield ErrorDescription('line 1 of extra information');
-       yield ErrorHint('line 2 of extra information\n');
+        yield ErrorDescription('line 1 of extra information');
+        yield ErrorHint('line 2 of extra information\n');
       },
     ));
     expect(console.join('\n'), matches(

@@ -480,8 +480,8 @@ class _AppBarState extends State<AppBar> {
       switch (theme.platform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
-           namesRoute = true;
-           break;
+          namesRoute = true;
+          break;
         case TargetPlatform.iOS:
           break;
       }

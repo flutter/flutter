@@ -482,7 +482,7 @@ void main() {
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.5);
   });
 
-    testWidgets('Switch turns opaque after becoming enabled', (WidgetTester tester) async {
+  testWidgets('Switch turns opaque after becoming enabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,

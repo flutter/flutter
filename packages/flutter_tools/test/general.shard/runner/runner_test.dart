@@ -37,7 +37,8 @@ void main() {
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
-      unawaited(runZoned<Future<void>>(() {
+      unawaited(runZoned<Future<void>>(
+        () {
           unawaited(runner.run(
             <String>['test'],
             <FlutterCommand>[
@@ -52,7 +53,8 @@ void main() {
         onError: (Object error) {
           expect(error, 'test exit');
           completer.complete();
-        }));
+        },
+      ));
       await completer.future;
 
       // This is the main check of this test.

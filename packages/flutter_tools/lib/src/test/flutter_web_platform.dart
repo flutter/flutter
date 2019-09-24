@@ -282,17 +282,18 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   @override
   Future<void> close() => _closeMemo.runOnce(() async {
-        final List<Future<dynamic>> futures = _browserManagers.values
-            .map<Future<dynamic>>((Future<BrowserManager> future) async {
-          final BrowserManager result = await future;
-          if (result == null) {
-            return;
-          }
-          await result.close();
-        }).toList();
-        futures.add(_server.close());
-        await Future.wait<void>(futures);
-      });
+    final List<Future<dynamic>> futures = _browserManagers.values
+      .map<Future<dynamic>>((Future<BrowserManager> future) async {
+        final BrowserManager result = await future;
+        if (result == null) {
+          return;
+        }
+        await result.close();
+      })
+      .toList();
+    futures.add(_server.close());
+    await Future.wait<void>(futures);
+  });
 }
 
 class OneOffHandler {
@@ -414,18 +415,19 @@ class BrowserManager {
     // Whenever we get a message, no matter which child channel it's for, we the
     // know browser is still running code which means the user isn't debugging.
     _channel = MultiChannel<dynamic>(
-        webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object> stream) {
-      return stream.map((Object message) {
-        if (!_closed) {
-          _timer.reset();
-        }
-        for (RunnerSuiteController controller in _controllers) {
-          controller.setDebugging(false);
-        }
+      webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object> stream) {
+        return stream.map((Object message) {
+          if (!_closed) {
+            _timer.reset();
+          }
+          for (RunnerSuiteController controller in _controllers) {
+            controller.setDebugging(false);
+          }
 
-        return message;
-      });
-    }));
+          return message;
+        });
+      }),
+    );
 
     _environment = _loadBrowserEnvironment();
     _channel.stream.listen(_onMessage, onDone: close);
@@ -579,10 +581,11 @@ class BrowserManager {
     final VirtualChannel<dynamic> virtualChannel = _channel.virtualChannel();
     final int suiteChannelID = virtualChannel.id;
     final StreamChannel<dynamic> suiteChannel = virtualChannel.transformStream(
-        StreamTransformer<dynamic, dynamic>.fromHandlers(handleDone: (EventSink<dynamic> sink) {
-      closeIframe();
-      sink.close();
-    }));
+      StreamTransformer<dynamic, dynamic>.fromHandlers(handleDone: (EventSink<dynamic> sink) {
+        closeIframe();
+        sink.close();
+      }),
+    );
 
     return await _pool.withResource<RunnerSuite>(() async {
       _channel.sink.add(<String, Object>{

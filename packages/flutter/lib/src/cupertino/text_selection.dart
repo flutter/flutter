@@ -225,9 +225,9 @@ class _ToolbarRenderBox extends RenderShiftedBox {
   @override
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
-        if (child == null) {
-          return true;
-        }
+      if (child == null) {
+        return true;
+      }
 
       _debugPaint ??= Paint()
       ..shader = ui.Gradient.linear(

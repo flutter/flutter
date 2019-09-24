@@ -413,7 +413,7 @@ void main() {
     //         │           │
     // ────────────────────────────
     testWidgets('non-rect partially overlapping, wrong painting order, check disabled', (WidgetTester tester) async {
-       final List<Widget> children = <Widget>[
+      final List<Widget> children = <Widget>[
         Positioned.fromRect(
           rect: const Rect.fromLTWH(150, 150, 150, 150),
           child: Container(

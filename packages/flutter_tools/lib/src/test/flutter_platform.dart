@@ -102,7 +102,7 @@ FlutterPlatform installHook({
   platformPluginRegistration ??= (FlutterPlatform platform) {
     hack.registerPlatformPlugin(
       <Runtime>[Runtime.vm],
-        () {
+      () {
         return platform;
       },
     );
@@ -417,7 +417,8 @@ class FlutterPlatform extends PlatformPlugin {
         await server.close(force: true);
       });
       final Completer<WebSocket> webSocket = Completer<WebSocket>();
-      server.listen((HttpRequest request) {
+      server.listen(
+        (HttpRequest request) {
           if (!webSocket.isCompleted) {
             webSocket.complete(WebSocketTransformer.upgrade(request));
           }
