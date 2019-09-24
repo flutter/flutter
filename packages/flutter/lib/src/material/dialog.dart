@@ -303,22 +303,9 @@ class AlertDialog extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
     final DialogTheme dialogTheme = DialogTheme.of(context);
-    final List<Widget> children = <Widget>[];
-    String label = semanticLabel;
 
-    if (title != null) {
-      children.add(Padding(
-        padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
-        child: DefaultTextStyle(
-          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
-          child: Semantics(
-            child: title,
-            namesRoute: true,
-            container: true,
-          ),
-        ),
-      ));
-    } else {
+    String label = semanticLabel;
+    if (title == null) {
       switch (theme.platform) {
         case TargetPlatform.iOS:
           label = semanticLabel;
@@ -329,29 +316,38 @@ class AlertDialog extends StatelessWidget {
       }
     }
 
-    if (content != null) {
-      children.add(Flexible(
-        child: Padding(
-          padding: contentPadding,
-          child: DefaultTextStyle(
-            style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
-            child: content,
-          ),
-        ),
-      ));
-    }
-
-    if (actions != null) {
-      children.add(ButtonBar(
-        children: actions,
-      ));
-    }
-
     Widget dialogChild = IntrinsicWidth(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children,
+        children: <Widget>[
+          if (title != null)
+            Padding(
+              padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
+              child: DefaultTextStyle(
+                style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
+                child: Semantics(
+                  child: title,
+                  namesRoute: true,
+                  container: true,
+                ),
+              ),
+            ),
+          if (content != null)
+            Flexible(
+              child: Padding(
+                padding: contentPadding,
+                child: DefaultTextStyle(
+                  style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
+                  child: content,
+                ),
+              ),
+            ),
+          if (actions != null)
+            ButtonBar(
+              children: actions,
+            ),
+        ],
       ),
     );
 
@@ -584,20 +580,10 @@ class SimpleDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final List<Widget> body = <Widget>[];
-    String label = semanticLabel;
-
     final ThemeData theme = Theme.of(context);
 
-    if (title != null) {
-      body.add(Padding(
-        padding: titlePadding,
-        child: DefaultTextStyle(
-          style: theme.textTheme.title,
-          child: Semantics(namesRoute: true, child: title),
-        ),
-      ));
-    } else {
+    String label = semanticLabel;
+    if (title == null) {
       switch (theme.platform) {
         case TargetPlatform.iOS:
           label = semanticLabel;
@@ -608,15 +594,6 @@ class SimpleDialog extends StatelessWidget {
       }
     }
 
-    if (children != null) {
-      body.add(Flexible(
-        child: SingleChildScrollView(
-          padding: contentPadding,
-          child: ListBody(children: children),
-        ),
-      ));
-    }
-
     Widget dialogChild = IntrinsicWidth(
       stepWidth: 56.0,
       child: ConstrainedBox(
@@ -624,7 +601,23 @@ class SimpleDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: body,
+          children: <Widget>[
+            if (title != null)
+              Padding(
+                padding: titlePadding,
+                child: DefaultTextStyle(
+                  style: theme.textTheme.title,
+                  child: Semantics(namesRoute: true, child: title),
+                ),
+              ),
+            if (children != null)
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: contentPadding,
+                  child: ListBody(children: children),
+                ),
+              ),
+          ],
         ),
       ),
     );

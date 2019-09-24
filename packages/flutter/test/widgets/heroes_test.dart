@@ -948,7 +948,7 @@ Future<void> main() async {
                     key: heroBCKey,
                     height: 150.0,
                     child: const Text('Hero'),
-                  )
+                  ),
                 ),
               ),
               const SizedBox(height: 800.0),
@@ -973,7 +973,7 @@ Future<void> main() async {
                     key: heroABKey,
                     height: 200.0,
                     child: const Text('Hero'),
-                  )
+                  ),
                 ),
               ),
               FlatButton(
@@ -986,7 +986,7 @@ Future<void> main() async {
                   child: Container(
                     height: 150.0,
                     child: const Text('Hero'),
-                  )
+                  ),
                 ),
               ),
               const SizedBox(height: 800.0),
@@ -1013,7 +1013,7 @@ Future<void> main() async {
                         height: 100.0,
                         width: 100.0,
                         child: const Text('Hero'),
-                      )
+                      ),
                     ),
                   ),
                   FlatButton(
@@ -1055,12 +1055,12 @@ Future<void> main() async {
     bool _isVisible(Element node) {
       bool isVisible = true;
       node.visitAncestorElements((Element ancestor) {
-          final RenderObject r = ancestor.renderObject;
-          if (r is RenderOpacity && r.opacity == 0) {
-            isVisible = false;
-            return false;
-          }
-          return true;
+        final RenderObject r = ancestor.renderObject;
+        if (r is RenderOpacity && r.opacity == 0) {
+          isVisible = false;
+          return false;
+        }
+        return true;
       });
       return isVisible;
     }
@@ -2126,9 +2126,9 @@ Future<void> main() async {
                 width: 10,
                 height: 10,
                 child: Text('1'),
-              )
-            ]
-          )
+              ),
+            ],
+          ),
         ),
       );
 
@@ -2192,16 +2192,16 @@ Future<void> main() async {
                   child: Image(
                     image: imageProvider,
                     key: imageKey1,
-                  )
-                )
+                  ),
+                ),
               ),
               const SizedBox(
                 width: 10,
                 height: 10,
                 child: Text('1'),
-              )
-            ]
-          )
+              ),
+            ],
+          ),
         ),
       );
 
@@ -2216,45 +2216,96 @@ Future<void> main() async {
                   image: imageProvider,
                   key: imageKey2,
                 )
-              )
+              ),
             ),
           );
         }
       );
 
-    // Load image before measuring the `Rect` of the `RenderImage`.
-    imageProvider.complete();
-    await tester.pump();
-    final RenderImage renderImage = tester.renderObject(
-      find.descendant(of: find.byKey(imageKey1), matching: find.byType(RawImage))
-    );
+      // Load image before measuring the `Rect` of the `RenderImage`.
+      imageProvider.complete();
+      await tester.pump();
+      final RenderImage renderImage = tester.renderObject(
+        find.descendant(of: find.byKey(imageKey1), matching: find.byType(RawImage))
+      );
 
-    // Before push image1 should be laid out correctly.
-    expect(renderImage.size, const Size(100, 100));
+      // Before push image1 should be laid out correctly.
+      expect(renderImage.size, const Size(100, 100));
 
-    navigatorKey.currentState.push(route2);
-    await tester.pump();
+      navigatorKey.currentState.push(route2);
+      await tester.pump();
 
-    final TestGesture gesture = await tester.startGesture(const Offset(0.01, 300));
-    await tester.pump();
+      final TestGesture gesture = await tester.startGesture(const Offset(0.01, 300));
+      await tester.pump();
 
-    // Move (almost) across the screen, to make the animation as close to finish
-    // as possible.
-    await gesture.moveTo(const Offset(800, 200));
-    await tester.pump();
+      // Move (almost) across the screen, to make the animation as close to finish
+      // as possible.
+      await gesture.moveTo(const Offset(800, 200));
+      await tester.pump();
 
-    // image1 should snap to the top left corner of the Row widget.
-    expect(
-      tester.getRect(find.byKey(imageKey1, skipOffstage: false)),
-      rectMoreOrLessEquals(tester.getTopLeft(find.widgetWithText(Row, '1')) & const Size(100, 100), epsilon: 0.01)
-    );
+      // image1 should snap to the top left corner of the Row widget.
+      expect(
+        tester.getRect(find.byKey(imageKey1, skipOffstage: false)),
+        rectMoreOrLessEquals(tester.getTopLeft(find.widgetWithText(Row, '1')) & const Size(100, 100), epsilon: 0.01),
+      );
 
-    // Text should respect the correct final size of image1.
-    expect(
-      tester.getTopRight(find.byKey(imageKey1, skipOffstage: false)).dx,
-      moreOrLessEquals(tester.getTopLeft(find.text('1')).dx, epsilon: 0.01)
-    );
-  });
+      // Text should respect the correct final size of image1.
+      expect(
+        tester.getTopRight(find.byKey(imageKey1, skipOffstage: false)).dx,
+        moreOrLessEquals(tester.getTopLeft(find.text('1')).dx, epsilon: 0.01),
+      );
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/40239.
+  testWidgets(
+    'In a pop transition, when fromHero is null, the to hero should eventually become visible',
+    (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+      StateSetter setState;
+      bool shouldDisplayHero = true;
+      await tester.pumpWidget(
+        CupertinoApp(
+          navigatorKey: navigatorKey,
+          home: Hero(
+            tag: navigatorKey,
+            child: const Placeholder(),
+          ),
+        ),
+      );
+
+      final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return CupertinoPageScaffold(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return shouldDisplayHero
+                  ? Hero(tag: navigatorKey, child: const Text('text'))
+                  : const SizedBox();
+              },
+            ),
+          );
+        },
+      );
+
+      navigatorKey.currentState.push(route2);
+      await tester.pumpAndSettle();
+
+      expect(find.text('text'), findsOneWidget);
+      expect(find.byType(Placeholder), findsNothing);
+
+      setState(() { shouldDisplayHero = false; });
+      await tester.pumpAndSettle();
+
+      expect(find.text('text'), findsNothing);
+
+      navigatorKey.currentState.pop();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Placeholder), findsOneWidget);
+    },
+  );
 
   testWidgets('popped hero uses fastOutSlowIn curve', (WidgetTester tester) async {
     final Key container1 = UniqueKey();

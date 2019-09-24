@@ -90,8 +90,6 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> stacked = <Widget>[];
-
     Widget paddedContent = widget.child;
 
     final MediaQueryData existingMediaQuery = MediaQuery.of(context);
@@ -157,44 +155,40 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
       );
     }
 
-    // The main content being at the bottom is added to the stack first.
-    stacked.add(PrimaryScrollController(
-      controller: _primaryScrollController,
-      child: paddedContent,
-    ));
-
-    if (widget.navigationBar != null) {
-      stacked.add(Positioned(
-        top: 0.0,
-        left: 0.0,
-        right: 0.0,
-        child: MediaQuery(
-          data: existingMediaQuery.copyWith(textScaleFactor: 1),
-          child: widget.navigationBar,
-        ),
-      ));
-    }
-
-    // Add a touch handler the size of the status bar on top of all contents
-    // to handle scroll to top by status bar taps.
-    stacked.add(Positioned(
-      top: 0.0,
-      left: 0.0,
-      right: 0.0,
-      height: existingMediaQuery.padding.top,
-      child: GestureDetector(
-          excludeFromSemantics: true,
-          onTap: _handleStatusBarTap,
-        ),
-      ),
-    );
-
     return DecoratedBox(
       decoration: BoxDecoration(
         color: widget.backgroundColor ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
       ),
       child: Stack(
-        children: stacked,
+        children: <Widget>[
+          // The main content being at the bottom is added to the stack first.
+          PrimaryScrollController(
+            controller: _primaryScrollController,
+            child: paddedContent,
+          ),
+          if (widget.navigationBar != null)
+            Positioned(
+              top: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: MediaQuery(
+                data: existingMediaQuery.copyWith(textScaleFactor: 1),
+                child: widget.navigationBar,
+              ),
+            ),
+          // Add a touch handler the size of the status bar on top of all contents
+          // to handle scroll to top by status bar taps.
+          Positioned(
+            top: 0.0,
+            left: 0.0,
+            right: 0.0,
+            height: existingMediaQuery.padding.top,
+            child: GestureDetector(
+              excludeFromSemantics: true,
+              onTap: _handleStatusBarTap,
+            ),
+          ),
+        ],
       ),
     );
   }

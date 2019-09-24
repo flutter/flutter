@@ -620,9 +620,91 @@ void main() {
       tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(Scaffold))).dx,
       moreOrLessEquals(798, epsilon: 1),
     );
-    await tester.tap(find.text('push'));
+
+    // Use the navigator to push a route instead of tapping the 'push' button.
+    // The topmost route (the one that's animating away), ignores input while
+    // the pop is underway because route.navigator.userGestureInProgress.
+    Navigator.push<void>(scaffoldKey.currentContext, MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return const Scaffold(
+          body: Center(child: Text('route')),
+        );
+      },
+    ));
+
     await tester.pumpAndSettle();
     expect(find.text('route'), findsOneWidget);
     expect(find.text('push'), findsNothing);
+  });
+
+  testWidgets('During back swipe the route ignores input', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/39989
+
+    final GlobalKey homeScaffoldKey = GlobalKey();
+    final GlobalKey pageScaffoldKey = GlobalKey();
+    int homeTapCount = 0;
+    int pageTapCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          key: homeScaffoldKey,
+          body: GestureDetector(
+            onTap: () {
+              homeTapCount += 1;
+            }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(homeScaffoldKey));
+    expect(homeTapCount, 1);
+    expect(pageTapCount, 0);
+
+    Navigator.push<void>(homeScaffoldKey.currentContext, MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return Scaffold(
+          key: pageScaffoldKey,
+          appBar: AppBar(title: const Text('Page')),
+          body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: GestureDetector(
+              onTap: () {
+                pageTapCount += 1;
+              }
+            ),
+          ),
+        );
+      },
+    ));
+
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(pageScaffoldKey));
+    expect(homeTapCount, 1);
+    expect(pageTapCount, 1);
+
+    // Start the basic iOS back-swipe dismiss transition. Drag the pushed
+    // "page" route halfway across the screen. The underlying "home" will
+    // start sliding in from the left.
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5, 300));
+    await gesture.moveBy(const Offset(400, 0));
+    await tester.pump();
+    expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
+    expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
+
+    // Tapping on the "page" route doesn't trigger the GestureDetector because
+    // it's being dragged.
+    await tester.tap(find.byKey(pageScaffoldKey));
+    expect(homeTapCount, 1);
+    expect(pageTapCount, 1);
+
+    // Tapping the "page" route's back button doesn't do anything either.
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
+    expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
   });
 }

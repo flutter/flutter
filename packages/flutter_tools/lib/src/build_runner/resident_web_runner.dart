@@ -33,7 +33,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     String target,
     @required FlutterProject flutterProject,
     @required bool ipv6,
-    @required DebuggingOptions debuggingOptions
+    @required DebuggingOptions debuggingOptions,
   }) {
     return ResidentWebRunner(
       device,
@@ -168,6 +168,7 @@ class ResidentWebRunner extends ResidentRunner {
         target: target,
         flutterProject: flutterProject,
         buildInfo: debuggingOptions.buildInfo,
+        initializePlatform: debuggingOptions.initializePlatform,
         hostname: debuggingOptions.hostname,
         port: debuggingOptions.port,
         skipDwds: device is WebServerDevice,

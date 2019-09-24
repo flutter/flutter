@@ -74,6 +74,7 @@ typedef WebFsFactory = Future<WebFs> Function({
   @required FlutterProject flutterProject,
   @required BuildInfo buildInfo,
   @required bool skipDwds,
+  @required bool initializePlatform,
   @required String hostname,
   @required String port,
 });
@@ -141,6 +142,7 @@ class WebFs {
     @required FlutterProject flutterProject,
     @required BuildInfo buildInfo,
     @required bool skipDwds,
+    @required bool initializePlatform,
     @required String hostname,
     @required String port,
   }) async {
@@ -148,11 +150,16 @@ class WebFs {
     if (!flutterProject.dartTool.existsSync()) {
       flutterProject.dartTool.createSync(recursive: true);
     }
-
-    final bool hasWebPlugins = findPlugins(flutterProject).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+    final bool hasWebPlugins = findPlugins(flutterProject)
+        .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     // Start the build daemon and run an initial build.
     final BuildDaemonClient client = await buildDaemonCreator
-      .startBuildDaemon(fs.currentDirectory.path, release: buildInfo.isRelease, profile: buildInfo.isProfile, hasPlugins: hasWebPlugins);
+      .startBuildDaemon(fs.currentDirectory.path,
+          release: buildInfo.isRelease,
+          profile: buildInfo.isProfile,
+          hasPlugins: hasWebPlugins,
+          initializePlatform: initializePlatform,
+      );
     client.startBuild();
     // Only provide relevant build results
     final Stream<BuildResult> filteredBuildResults = client.buildResults
@@ -249,7 +256,7 @@ class WebFs {
           'lib',
           'dev_compiler',
           'web',
-          'dart_stack_trace_mapper.js'
+          'dart_stack_trace_mapper.js',
         ));
         return Response.ok(file.readAsBytesSync(), headers: <String, String>{
           'Content-Type': 'text/javascript',
@@ -287,7 +294,7 @@ class WebFs {
           'dev_compiler',
           'kernel',
           'amd',
-          'require.js'
+          'require.js',
         ));
         return Response.ok(file.readAsBytesSync(), headers: <String, String>{
           'Content-Type': 'text/javascript',
@@ -368,11 +375,14 @@ class BuildDaemonCreator {
   static const String _ignoredLine3 = 'have your dependencies specified fully in your pubspec.yaml';
 
   /// Start a build daemon and register the web targets.
+  ///
+  /// [initializePlatform] controls whether we should invoke [webOnlyInitializePlatform].
   Future<BuildDaemonClient> startBuildDaemon(String workingDirectory, {
     bool release = false,
     bool profile = false,
     bool hasPlugins = false,
     bool includeTests = false,
+    bool initializePlatform = true,
   }) async {
     try {
       final BuildDaemonClient client = await _connectClient(
@@ -380,6 +390,7 @@ class BuildDaemonCreator {
         release: release,
         profile: profile,
         hasPlugins: hasPlugins,
+        initializePlatform: initializePlatform,
       );
       _registerBuildTargets(client, includeTests);
       return client;
@@ -411,9 +422,12 @@ class BuildDaemonCreator {
   }
 
   Future<BuildDaemonClient> _connectClient(
-    String workingDirectory,
-    { bool release, bool profile, bool hasPlugins }
-  ) {
+    String workingDirectory, {
+    bool release,
+    bool profile,
+    bool hasPlugins,
+    bool initializePlatform,
+  }) {
     final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
     final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
     final String flutterWebSdk = artifacts.getArtifactPath(Artifact.flutterWebSdk);
@@ -434,6 +448,7 @@ class BuildDaemonCreator {
         '--define', 'flutter_tools:entrypoint=profile=$profile',
         '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
         '--define', 'flutter_tools:shell=hasPlugins=$hasPlugins',
+        '--define', 'flutter_tools:shell=initializePlatform=$initializePlatform',
       ],
       logHandler: (ServerLog serverLog) {
         switch (serverLog.level) {

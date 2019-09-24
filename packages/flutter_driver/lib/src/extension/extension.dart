@@ -335,19 +335,21 @@ class FlutterDriverExtension {
   }
 
   Finder _createAncestorFinder(Ancestor arguments) {
-    return find.ancestor(
+    final Finder finder = find.ancestor(
       of: _createFinder(arguments.of),
       matching: _createFinder(arguments.matching),
       matchRoot: arguments.matchRoot,
     );
+    return arguments.firstMatchOnly ? finder.first : finder;
   }
 
   Finder _createDescendantFinder(Descendant arguments) {
-    return find.descendant(
+    final Finder finder = find.descendant(
       of: _createFinder(arguments.of),
       matching: _createFinder(arguments.matching),
       matchRoot: arguments.matchRoot,
     );
+    return arguments.firstMatchOnly ? finder.first : finder;
   }
 
   Finder _createFinder(SerializableFinder finder) {

@@ -110,8 +110,9 @@ class DevFSFileContent extends DevFSContent {
   bool get isModified {
     final FileStat _oldFileStat = _fileStat;
     _stat();
-    if (_oldFileStat == null && _fileStat == null)
+    if (_oldFileStat == null && _fileStat == null) {
       return false;
+    }
     return _oldFileStat == null || _fileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
   }
 
@@ -119,8 +120,9 @@ class DevFSFileContent extends DevFSContent {
   bool isModifiedAfter(DateTime time) {
     final FileStat _oldFileStat = _fileStat;
     _stat();
-    if (_oldFileStat == null && _fileStat == null)
+    if (_oldFileStat == null && _fileStat == null) {
       return false;
+    }
     return time == null
         || _oldFileStat == null
         || _fileStat == null
@@ -129,8 +131,9 @@ class DevFSFileContent extends DevFSContent {
 
   @override
   int get size {
-    if (_fileStat == null)
+    if (_fileStat == null) {
       _stat();
+    }
     // Can still be null if the file wasn't found.
     return _fileStat?.size ?? 0;
   }
@@ -289,8 +292,9 @@ class _DevFSHttpWriter {
       _startWrite(deviceUri, content);
       _inFlight += 1;
     }
-    if ((_inFlight == 0) && (!_completer.isCompleted) && _outstanding.isEmpty)
+    if ((_inFlight == 0) && (!_completer.isCompleted) && _outstanding.isEmpty) {
       _completer.complete();
+    }
   }
 
   Future<void> _startWrite(
@@ -394,8 +398,9 @@ class DevFS {
       _baseUri = await _operations.create(fsName);
     } on rpc.RpcException catch (rpcException) {
       // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h
-      if (rpcException.code != 1001)
+      if (rpcException.code != 1001) {
         rethrow;
+      }
       printTrace('DevFS: Creating failed. Destroying and trying again');
       await destroy();
       _baseUri = await _operations.create(fsName);

@@ -43,7 +43,7 @@ void main() {
     'isPrerelease': false,
     'catalog': <String, dynamic>{
       'productDisplayVersion': '15.9.12',
-    }
+    },
   };
 
   // A version of a response that doesn't include certain installation status
@@ -54,7 +54,7 @@ void main() {
     'installationVersion': '15.9.28307.665',
     'catalog': <String, dynamic>{
       'productDisplayVersion': '15.9.12',
-    }
+    },
   };
 
   // Arguments for a vswhere query to search for an installation with the required components.
@@ -178,6 +178,27 @@ void main() {
 
       visualStudio = VisualStudio();
       expect(visualStudio.isInstalled, false);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFilesystem,
+      Platform: () => windowsPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('VisualStudio getters return the right values if no installation is found', () {
+      setMockCompatibleVisualStudioInstallation(null);
+      setMockPrereleaseVisualStudioInstallation(null);
+      setMockAnyVisualStudioInstallation(null);
+
+      visualStudio = VisualStudio();
+      expect(visualStudio.isInstalled, false);
+      expect(visualStudio.hasNecessaryComponents, false);
+      expect(visualStudio.isComplete, false);
+      expect(visualStudio.isRebootRequired, false);
+      expect(visualStudio.isLaunchable, false);
+      expect(visualStudio.displayName, null);
+      expect(visualStudio.displayVersion, null);
+      expect(visualStudio.installLocation, null);
+      expect(visualStudio.fullVersion, null);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFilesystem,
       Platform: () => windowsPlatform,

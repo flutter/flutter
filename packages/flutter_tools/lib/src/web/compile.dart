@@ -19,7 +19,7 @@ import '../reporting/reporting.dart';
 /// The [WebCompilationProxy] instance.
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
 
-Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo buildInfo) async {
+Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo buildInfo, bool initializePlatform) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
   }
@@ -33,6 +33,7 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
       projectDirectory: FlutterProject.current().directory,
       mode: buildInfo.mode,
       projectName: flutterProject.manifest.appName,
+      initializePlatform: initializePlatform,
     );
     if (result) {
       // Places assets adjacent to the web stuff.
@@ -46,7 +47,7 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
         'build',
         'flutter_web',
         flutterProject.manifest.appName,
-        '${fs.path.withoutExtension(target)}_web_entrypoint.dart.js'
+        '${fs.path.withoutExtension(target)}_web_entrypoint.dart.js',
       );
       // Check for deferred import outputs.
       final File dart2jsArchive = fs.file(fs.path.join(
@@ -98,6 +99,7 @@ class WebCompilationProxy {
     @required String projectName,
     String testOutputDir,
     BuildMode mode,
+    bool initializePlatform,
   }) async {
     throw UnimplementedError();
   }

@@ -35,7 +35,7 @@ const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
 final List<String> kWindowsPrefixes = <String>[
   platform.environment['LOCALAPPDATA'],
   platform.environment['PROGRAMFILES'],
-  platform.environment['PROGRAMFILES(X86)']
+  platform.environment['PROGRAMFILES(X86)'],
 ];
 
 /// Find the chrome executable on the current platform.

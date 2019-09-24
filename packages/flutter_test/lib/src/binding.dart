@@ -19,8 +19,7 @@ import 'package:test_api/test_api.dart' as test_package;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vector_math/vector_math_64.dart';
 
-import '_binding_io.dart'
-  if (dart.library.html) '_binding_web.dart' as binding;
+import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;
 import 'goldens.dart';
 import 'platform.dart';
 import 'stack_manipulation.dart';
@@ -797,6 +796,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _pendingExceptionDetails = null;
     _parentZone = null;
     buildOwner.focusManager = FocusManager();
+    // Disabling the warning because @visibleForTesting doesn't take the testing
+    // framework itself into account, but we don't want it visible outside of
+    // tests.
+    // ignore: invalid_use_of_visible_for_testing_member
+    RawKeyboard.instance.clearKeysPressed();
     assert(!RendererBinding.instance.mouseTracker.mouseIsConnected,
         'The MouseTracker thinks that there is still a mouse connected, which indicates that a '
         'test has not removed the mouse pointer which it added. Call removePointer on the '

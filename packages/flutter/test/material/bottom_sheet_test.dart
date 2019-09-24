@@ -309,7 +309,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: Text('body'))
+        body: const Center(child: Text('body')),
       )
     ));
 
@@ -380,7 +380,7 @@ void main() {
             BottomNavigationBarItem(
               icon: Icon(Icons.style),
               title: Text('Item 2'),
-            )
+            ),
           ],
         ),
       ),
@@ -409,7 +409,7 @@ void main() {
             BottomNavigationBarItem(
               icon: Icon(Icons.style),
               title: Text('Item 2'),
-            )
+            ),
           ],
         ),
       ),
@@ -447,7 +447,7 @@ class _TestPage extends StatelessWidget {
               builder: (_) => const Text('Modal bottom sheet'),
             );
           }
-        }
+        },
       ),
     );
   }

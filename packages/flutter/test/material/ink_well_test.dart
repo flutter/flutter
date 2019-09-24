@@ -105,7 +105,7 @@ void main() {
               highlightColor: const Color(0xf00fffff),
               onTap: () {},
               onLongPress: () {},
-              onHover: (bool hover) {}
+              onHover: (bool hover) {},
             ),
           ),
         ),
@@ -139,7 +139,7 @@ void main() {
                 highlightColor: const Color(0xf00fffff),
                 onTap: () {},
                 onLongPress: () {},
-                onHover: (bool hover) {}
+                onHover: (bool hover) {},
               ),
             ),
           ),
@@ -174,7 +174,7 @@ void main() {
                   highlightColor: const Color(0xf00fffff),
                   onTap: () {},
                   onLongPress: () {},
-                  onHover: (bool hover) {}
+                  onHover: (bool hover) {},
               ),
             ),
           ),

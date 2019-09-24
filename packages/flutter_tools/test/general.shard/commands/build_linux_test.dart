@@ -100,7 +100,7 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'linux']
     );
-    expect(fs.file('linux/flutter/generated_config').existsSync(), true);
+    expect(fs.file('linux/flutter/ephemeral/generated_config.mk').existsSync(), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,

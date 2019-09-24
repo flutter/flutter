@@ -29,10 +29,10 @@ Future<void> syncAndAsyncError() {
 
 Future<void> delayedThrow(FakeAsync time) {
   final Future<void> result =
-      Future<void>.delayed(const Duration(milliseconds: 10))
+    Future<void>.delayed(const Duration(milliseconds: 10))
       .then((_) {
-    throw 'Delayed Doom';
-  });
+        throw 'Delayed Doom';
+      });
   time.elapse(const Duration(seconds: 1));
   time.flushMicrotasks();
   return result;
@@ -154,9 +154,9 @@ void main() {
     await FakeAsync().run((FakeAsync time) {
       unawaited(runZoned(() async {
         final Future<void> f = asyncGuard<void>(() => delayedThrow(time))
-            .catchError((Object e, StackTrace s) {
-          caughtByCatchError = true;
-        });
+          .catchError((Object e, StackTrace s) {
+            caughtByCatchError = true;
+          });
         try {
           await f;
         } on String {
@@ -189,10 +189,12 @@ void main() {
     final Completer<void> completer = Completer<void>();
     await FakeAsync().run((FakeAsync time) {
       unawaited(runZoned(() async {
-        final Future<void> f = asyncGuard<void>(() => delayedThrow(time),
-            onError: (Object e, StackTrace s) {
-          caughtByOnError = true;
-        });
+        final Future<void> f = asyncGuard<void>(
+          () => delayedThrow(time),
+          onError: (Object e, StackTrace s) {
+            caughtByOnError = true;
+          },
+        );
         try {
           await f;
         } catch (e) {

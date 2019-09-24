@@ -86,8 +86,9 @@ String snakeCase(String str, [ String sep = '_' ]) {
 }
 
 String toTitleCase(String str) {
-  if (str.isEmpty)
+  if (str.isEmpty) {
     return str;
+  }
   return str.substring(0, 1).toUpperCase() + str.substring(1);
 }
 
@@ -108,8 +109,9 @@ File getUniqueFile(Directory dir, String baseName, String ext) {
   while (true) {
     final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
     final File file = fs.file(fs.path.join(dir.path, name));
-    if (!file.existsSync())
+    if (!file.existsSync()) {
       return file;
+    }
     i++;
   }
 }
@@ -189,11 +191,13 @@ class SettingsFile {
   SettingsFile.parse(String contents) {
     for (String line in contents.split('\n')) {
       line = line.trim();
-      if (line.startsWith('#') || line.isEmpty)
+      if (line.startsWith('#') || line.isEmpty) {
         continue;
+      }
       final int index = line.indexOf('=');
-      if (index != -1)
+      if (index != -1) {
         values[line.substring(0, index)] = line.substring(index + 1);
+      }
     }
   }
 
@@ -270,8 +274,9 @@ class Poller {
   Timer _timer;
 
   Future<void> _handleCallback() async {
-    if (_canceled)
+    if (_canceled) {
       return;
+    }
 
     try {
       await callback();
@@ -279,8 +284,9 @@ class Poller {
       printTrace('Error from poller: $error');
     }
 
-    if (!_canceled)
+    if (!_canceled) {
       _timer = Timer(pollingInterval, _handleCallback);
+    }
   }
 
   /// Cancels the poller.

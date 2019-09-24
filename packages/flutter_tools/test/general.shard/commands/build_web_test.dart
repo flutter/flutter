@@ -49,7 +49,8 @@ void main() {
       when(mockWebCompilationProxy.initialize(
         projectName: anyNamed('projectName'),
         projectDirectory: anyNamed('projectDirectory'),
-        mode: anyNamed('mode')
+        mode: anyNamed('mode'),
+        initializePlatform: anyNamed('initializePlatform'),
       )).thenAnswer((Invocation invocation) {
         final String prefix = fs.path.join('.dart_tool', 'build', 'flutter_web', 'foo', 'lib');
         final String path = fs.path.join(prefix, 'main_web_entrypoint.dart.js');
@@ -60,7 +61,6 @@ void main() {
           final TarEncoder encoder = TarEncoder();
           final Archive archive = Archive()
             ..addFile(ArchiveFile.noCompress('main_web_entrypoint.1.dart.js', bytes.length, bytes));
-          final List<int> buffer = encoder.encode(archive);
           fs.file(fs.path.join(prefix, 'main_web_entrypoint.dart.js.tar.gz'))
             ..writeAsBytes(encoder.encode(archive));
         }
@@ -80,6 +80,7 @@ void main() {
       FlutterProject.current(),
       fs.path.join('lib', 'main.dart'),
       BuildInfo.release,
+      false,
     );
 
     expect(fs.file(fs.path.join('build', 'web', 'main_web_entrypoint.1.dart.js')), exists);
@@ -93,6 +94,7 @@ void main() {
       FlutterProject.current(),
       fs.path.join('lib', 'main.dart'),
       BuildInfo.debug,
+      false,
     ), throwsA(isInstanceOf<ToolExit>()));
   }));
 
@@ -106,6 +108,15 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
     );
     expect(await runner.run(), 1);
+  }));
+
+  test('Refuses to build a debug build for web', () => testbed.run(() async {
+    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
+
+    expect(() => runner.run(<String>['build', 'web', '--debug']),
+        throwsA(isInstanceOf<UsageException>()));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
   }));
 
   test('Refuses to build for web when feature is disabled', () => testbed.run(() async {

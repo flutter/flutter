@@ -75,13 +75,16 @@ class CupertinoColors {
   // Value derived from screenshot from the dark themed Apple Watch app.
   static const Color darkBackgroundGray = Color(0xFF171717);
 
-  /// Used in iOS 11 for unselected selectables such as tab bar items in their
+  /// Used in iOS 13 for unselected selectables such as tab bar items in their
   /// inactive state or de-emphasized subtitles and details text.
   ///
   /// Not the same gray as disabled buttons etc.
   ///
-  /// This is SystemGrayColor in the iOS palette.
-  static const Color inactiveGray = Color(0xFF8E8E93);
+  /// This is the disabled color in the iOS palette.
+  static const Color inactiveGray = CupertinoDynamicColor.withBrightness(
+    color: Color(0xFF999999),
+    darkColor: Color(0xFF757575),
+  );
 
   /// Used for iOS 10 for destructive actions such as the delete actions in
   /// table view cells and dialogs.
@@ -1011,14 +1014,14 @@ const CupertinoSystemColorsData _kSystemColorsFallback = CupertinoSystemColorsDa
     darkHighContrastElevatedColor: Color.fromARGB(112, 120, 120, 128),
   ),
   secondarySystemFill: CupertinoDynamicColor(
-    color: Color.fromARGB(153, 60, 60, 67),
-    darkColor: Color.fromARGB(153, 235, 235, 245),
-    highContrastColor: Color.fromARGB(173, 60, 60, 67),
-    darkHighContrastColor: Color.fromARGB(173, 235, 235, 245),
-    elevatedColor: Color.fromARGB(153, 60, 60, 67),
-    darkElevatedColor: Color.fromARGB(153, 235, 235, 245),
-    highContrastElevatedColor: Color.fromARGB(173, 60, 60, 67),
-    darkHighContrastElevatedColor: Color.fromARGB(173, 235, 235, 245),
+    color: Color.fromARGB(40, 120, 120, 128),
+    darkColor: Color.fromARGB(81, 120, 120, 128),
+    highContrastColor: Color.fromARGB(61, 120, 120, 128),
+    darkHighContrastColor: Color.fromARGB(102, 120, 120, 128),
+    elevatedColor: Color.fromARGB(40, 120, 120, 128),
+    darkElevatedColor: Color.fromARGB(81, 120, 120, 128),
+    highContrastElevatedColor: Color.fromARGB(61, 120, 120, 128),
+    darkHighContrastElevatedColor: Color.fromARGB(102, 120, 120, 128),
   ),
   tertiarySystemFill: CupertinoDynamicColor(
     color: Color.fromARGB(30, 118, 118, 128),

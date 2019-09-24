@@ -1677,7 +1677,7 @@ EdgeInsets _itemPadding(WidgetTester tester, IconData icon) {
   return tester.widget<Padding>(
       find.descendant(
         of: find.ancestor(of: find.byIcon(icon), matching: find.byType(InkResponse)),
-        matching: find.byType(Padding)
+        matching: find.byType(Padding),
       ).first,
     ).padding.resolve(TextDirection.ltr);
 }

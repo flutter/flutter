@@ -75,22 +75,25 @@ class VMPlatform extends PlatformPlugin {
     }));
     final ServiceProtocolInfo info = await Service.controlWebServer(enable: true);
     final dynamic channel = IsolateChannel<Object>.connectReceive(receivePort)
-        .transformStream(StreamTransformer<Object, Object>.fromHandlers(handleDone: (EventSink<Object> sink) async {
-      try {
-        // this will throw if collection fails.
-        await coverageCollector.collectCoverageIsolate(info.serverUri);
-      } finally {
-        isolate.kill(priority: Isolate.immediate);
-        isolate = null;
-        sink.close();
-        completer.complete();
-      }
-    }, handleError: (dynamic error, StackTrace stackTrace, EventSink<Object> sink) {
-      isolate.kill(priority: Isolate.immediate);
-      isolate = null;
-      sink.close();
-      completer.complete();
-    }));
+      .transformStream(StreamTransformer<Object, Object>.fromHandlers(
+        handleDone: (EventSink<Object> sink) async {
+          try {
+            // this will throw if collection fails.
+            await coverageCollector.collectCoverageIsolate(info.serverUri);
+          } finally {
+            isolate.kill(priority: Isolate.immediate);
+            isolate = null;
+            sink.close();
+            completer.complete();
+          }
+        },
+        handleError: (dynamic error, StackTrace stackTrace, EventSink<Object> sink) {
+          isolate.kill(priority: Isolate.immediate);
+          isolate = null;
+          sink.close();
+          completer.complete();
+        },
+      ));
 
     VMEnvironment environment;
     final RunnerSuiteController controller = deserializeSuite(

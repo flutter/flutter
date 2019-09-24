@@ -113,7 +113,7 @@ class BuildRunner extends CodeGenerator {
       }
       scriptIdFile.writeAsBytesSync(appliedBuilderDigest);
       final ProcessResult generateResult = await processManager.run(<String>[
-        sdkBinaryName('pub'), 'run', 'build_runner', 'generate-build-script'
+        sdkBinaryName('pub'), 'run', 'build_runner', 'generate-build-script',
       ], workingDirectory: syntheticPubspec.parent.path);
       if (generateResult.exitCode != 0) {
         throwToolExit('Error generating build_script snapshot: ${generateResult.stderr}');
@@ -173,7 +173,7 @@ class BuildRunner extends CodeGenerator {
           if (log.message != null) {
             printTrace(log.message);
           }
-        }
+        },
       );
     } finally {
       status.stop();

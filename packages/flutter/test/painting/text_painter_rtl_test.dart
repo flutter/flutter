@@ -127,10 +127,11 @@ void main() {
       // The list is currently in the wrong order (so selection boxes will paint in the wrong order).
     );
 
-    final List<List<TextBox>> list = <List<TextBox>>[];
     textSpan = painter.text;
-    for (int index = 0; index < textSpan.text.length; index += 1)
-      list.add(painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)));
+    final List<List<TextBox>> list = <List<TextBox>>[
+      for (int index = 0; index < textSpan.text.length; index += 1)
+        painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)),
+    ];
     expect(list, const <List<TextBox>>[
       <TextBox>[], // U+202E, non-printing Unicode bidi formatting character
       <TextBox>[TextBox.fromLTRBD(230.0, 0.0, 240.0, 10.0, TextDirection.rtl)],
@@ -390,10 +391,11 @@ void main() {
       skip: skipExpectsWithKnownBugs, // horizontal offsets are one pixel off in places; vertical offsets are good
     );
 
-    final List<List<TextBox>> list = <List<TextBox>>[];
-    for (int index = 0; index < 5+4+5; index += 1)
-      list.add(painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)));
-    print(list);
+    final List<List<TextBox>> list = <List<TextBox>>[
+      for (int index = 0; index < 5+4+5; index += 1)
+        painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)),
+    ];
+
     expect(list, const <List<TextBox>>[
       <TextBox>[TextBox.fromLTRBD(0.0, 8.0, 10.0, 18.0, TextDirection.ltr)],
       <TextBox>[TextBox.fromLTRBD(10.0, 8.0, 20.0, 18.0, TextDirection.ltr)],

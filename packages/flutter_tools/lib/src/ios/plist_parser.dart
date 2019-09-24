@@ -28,10 +28,12 @@ class PlistParser {
   Map<String, dynamic> parseFile(String plistFilePath) {
     assert(plistFilePath != null);
     const String executable = '/usr/bin/plutil';
-    if (!fs.isFileSync(executable))
+    if (!fs.isFileSync(executable)) {
       throw const FileNotFoundException(executable);
-    if (!fs.isFileSync(plistFilePath))
+    }
+    if (!fs.isFileSync(plistFilePath)) {
       return const <String, dynamic>{};
+    }
 
     final String normalizedPlistPath = fs.path.absolute(plistFilePath);
 
