@@ -652,9 +652,18 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     context,
                     widget.route.animation,
                     widget.route.secondaryAnimation,
-                    IgnorePointer(
-                      ignoring: widget.route.navigator.userGestureInProgress
-                        || widget.route.animation?.status == AnimationStatus.reverse,
+                    // This additional AnimatedBuilder is include because if the
+                    // value of the userGestureInProgressNotifier changes, it's
+                    // only necessary to rebuild the IgnorePointer widget.
+                    AnimatedBuilder(
+                      animation: widget.route.navigator.userGestureInProgressNotifier,
+                      builder: (BuildContext context, Widget child) {
+                        return IgnorePointer(
+                          ignoring: widget.route.navigator.userGestureInProgress
+                            || widget.route.animation?.status == AnimationStatus.reverse,
+                          child: child,
+                        );
+                      },
                       child: child,
                     ),
                   );
