@@ -102,7 +102,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         Platform: () => mockPlatform,
-      }
+      },
     );
   });
 

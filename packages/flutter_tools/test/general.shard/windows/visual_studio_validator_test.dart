@@ -112,7 +112,7 @@ void main() {
       final ValidationMessage expectedMessage = ValidationMessage.error(
         userMessages.visualStudioMissing(
           visualStudio.workloadDescription,
-          visualStudio.necessaryComponentDescriptions(validator.majorVersion)
+          visualStudio.necessaryComponentDescriptions(validator.majorVersion),
         )
       );
       expect(result.messages.contains(expectedMessage), true);
