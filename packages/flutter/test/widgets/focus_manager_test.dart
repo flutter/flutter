@@ -2,21 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-void sendFakeKeyEvent(Map<String, dynamic> data) {
-  ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-    SystemChannels.keyEvent.name,
-    SystemChannels.keyEvent.codec.encodeMessage(data),
-    (ByteData data) {},
-  );
-}
 
 void main() {
   final GlobalKey widgetKey = GlobalKey();
@@ -426,15 +417,9 @@ void main() {
         return false;
       }
 
-      void sendEvent() {
+      Future<void> sendEvent() async {
         receivedAnEvent.clear();
-        sendFakeKeyEvent(<String, dynamic>{
-          'type': 'keydown',
-          'keymap': 'fuchsia',
-          'hidUsage': 0x04,
-          'codePoint': 0x64,
-          'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
-        });
+        await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
       }
 
       final BuildContext context = await setupWidget(tester);
@@ -465,21 +450,21 @@ void main() {
       child4.requestFocus();
       await tester.pump();
       shouldHandle.addAll(<FocusNode>{scope2, parent2, child2, child4});
-      sendEvent();
+      await sendEvent();
       expect(receivedAnEvent, equals(<FocusNode>{child4}));
       shouldHandle.remove(child4);
-      sendEvent();
+      await sendEvent();
       expect(receivedAnEvent, equals(<FocusNode>{parent2}));
       shouldHandle.remove(parent2);
-      sendEvent();
+      await sendEvent();
       expect(receivedAnEvent, equals(<FocusNode>{scope2}));
       shouldHandle.clear();
-      sendEvent();
+      await sendEvent();
       expect(receivedAnEvent, isEmpty);
       child1.requestFocus();
       await tester.pump();
       shouldHandle.addAll(<FocusNode>{scope2, parent2, child2, child4});
-      sendEvent();
+      await sendEvent();
       // Since none of the focused nodes handle this event, nothing should
       // receive it.
       expect(receivedAnEvent, isEmpty);
@@ -500,13 +485,7 @@ void main() {
       expect(lastMode, isNull);
       focusManager.highlightStrategy = FocusHighlightStrategy.automatic;
       expect(focusManager.highlightMode, equals(FocusHighlightMode.touch));
-      sendFakeKeyEvent(<String, dynamic>{
-        'type': 'keydown',
-        'keymap': 'fuchsia',
-        'hidUsage': 0x04,
-        'codePoint': 0x64,
-        'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
-      });
+      await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
       expect(callCount, equals(1));
       expect(lastMode, FocusHighlightMode.traditional);
       expect(focusManager.highlightMode, equals(FocusHighlightMode.traditional));

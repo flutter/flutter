@@ -1247,30 +1247,6 @@ void main() {
     semantics.dispose();
   });
 
-  void sendFakeKeyEvent(Map<String, dynamic> data) {
-    ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-      SystemChannels.keyEvent.name,
-      SystemChannels.keyEvent.codec.encodeMessage(data),
-          (ByteData data) { },
-    );
-  }
-
-  void sendKeyEventWithCode(int code, bool down, bool shiftDown, bool ctrlDown) {
-
-    int metaState = shiftDown ? 1 : 0;
-    if (ctrlDown)
-      metaState |= 1 << 12;
-
-    sendFakeKeyEvent(<String, dynamic>{
-      'type': down ? 'keydown' : 'keyup',
-      'keymap': 'android',
-      'keyCode': code,
-      'hidUsage': 0x04,
-      'codePoint': 0x64,
-      'metaState': metaState,
-    });
-  }
-
   group('Keyboard Tests', () {
     TextEditingController controller;
 
@@ -1300,7 +1276,8 @@ void main() {
     testWidgets('Shift test 1', (WidgetTester tester) async {
       await setupWidget(tester, 'a big house');
 
-      sendKeyEventWithCode(21, true, true, false);     // LEFT_ARROW keydown, SHIFT_ON
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
     });
 
@@ -1310,7 +1287,8 @@ void main() {
       controller.selection = const TextSelection.collapsed(offset: 3);
       await tester.pump();
 
-      sendKeyEventWithCode(22, true, true, false);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
     });
@@ -1318,7 +1296,9 @@ void main() {
     testWidgets('Control Shift test', (WidgetTester tester) async {
       await setupWidget(tester, 'their big house');
 
-      sendKeyEventWithCode(21, true, true, true);         // LEFT_ARROW keydown SHIFT_ON, CONTROL_ON
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
 
       await tester.pumpAndSettle();
 
@@ -1328,14 +1308,16 @@ void main() {
     testWidgets('Down and up test', (WidgetTester tester) async {
       await setupWidget(tester, 'a big house');
 
-      sendKeyEventWithCode(19, true, true, false);         // UP_ARROW keydown
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 11);
 
-      sendKeyEventWithCode(19, false, true, false);          // UP_ARROW keyup
-      await tester.pumpAndSettle();
-      sendKeyEventWithCode(20, true, true, false);           // DOWN_ARROW keydown
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowUp);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
@@ -1348,50 +1330,50 @@ void main() {
       await tester.pump();
 
       for (int i = 0; i < 5; i += 1) {
-        sendKeyEventWithCode(22, true, false, false);             // RIGHT_ARROW keydown
-        await tester.pumpAndSettle();
-        sendKeyEventWithCode(22, false, false, false);            // RIGHT_ARROW keyup
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
         await tester.pumpAndSettle();
       }
-      sendKeyEventWithCode(20, true, true, false);               // DOWN_ARROW keydown
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(20, false, true, false);              // DOWN_ARROW keyup
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 12);
 
-      sendKeyEventWithCode(20, true, true, false);                 // DOWN_ARROW keydown
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(20, false, true, false);                // DOWN_ARROW keyup
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 32);
 
-      sendKeyEventWithCode(19, true, true, false);               // UP_ARROW keydown
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(19, false, true, false);              // UP_ARROW keyup
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 12);
 
-      sendKeyEventWithCode(19, true, true, false);               // UP_ARROW keydown
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(19, false, true, false);              // UP_ARROW keyup
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
 
-      sendKeyEventWithCode(19, true, true, false);               // UP_ARROW keydown
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(19, false, true, false);              // UP_ARROW keyup
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
     });
   });
-
-  const int _kCKeyCode = 31;
-  const int _kAKeyCode = 29;
 
   testWidgets('Copy test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -1432,24 +1414,23 @@ void main() {
     await tester.pump();
 
     // Select the first 5 characters
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     for (int i = 0; i < 5; i += 1) {
-      sendKeyEventWithCode(22, true, true, false);             // RIGHT_ARROW keydown shift
-      await tester.pumpAndSettle();
-      sendKeyEventWithCode(22, false, false, false);           // RIGHT_ARROW keyup
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
     }
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
     // Copy them
-    sendKeyEventWithCode(_kCKeyCode, true, false, true);    // keydown control
-    await tester.pumpAndSettle();
-    sendKeyEventWithCode(_kCKeyCode, false, false, false);  // keyup control
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
     await tester.pumpAndSettle();
 
     expect(clipboardContent, 'a big');
 
-    sendKeyEventWithCode(22, true, false, false);              // RIGHT_ARROW keydown
-    await tester.pumpAndSettle();
-    sendKeyEventWithCode(22, false, false, false);             // RIGHT_ARROW keyup
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
   });
 
@@ -1479,9 +1460,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Select All
-    sendKeyEventWithCode(_kAKeyCode, true, false, true);    // keydown control A
-    await tester.pumpAndSettle();
-    sendKeyEventWithCode(_kAKeyCode, false, false, true);   // keyup control A
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 0);
@@ -1528,10 +1509,13 @@ void main() {
     await tester.tap(find.byType(EditableText).first);
     await tester.pumpAndSettle();
 
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     for (int i = 0; i < 5; i += 1) {
-      sendKeyEventWithCode(21, true, true, false); // LEFT_ARROW keydown
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pumpAndSettle();
     }
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pumpAndSettle();
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 5);
 
@@ -1562,10 +1546,12 @@ void main() {
       ),
     );
 
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     for (int i = 0; i < 5; i += 1) {
-      sendKeyEventWithCode(21, true, true, false); // LEFT_ARROW keydown
-      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     }
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pumpAndSettle();
 
     editableTextWidget = tester.widget(find.byType(EditableText).last);
     c1 = editableTextWidget.controller;
@@ -1617,10 +1603,13 @@ void main() {
     await tester.tap(find.byType(SelectableText).first);
     await tester.pumpAndSettle();
 
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     for (int i = 0; i < 5; i += 1) {
-      sendKeyEventWithCode(21, true, true, false); // LEFT_ARROW keydown
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pumpAndSettle();
     }
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pumpAndSettle();
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 5);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, 0);
@@ -1628,10 +1617,13 @@ void main() {
     await tester.tap(find.byType(SelectableText).last);
     await tester.pumpAndSettle();
 
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     for (int i = 0; i < 5; i += 1) {
-      sendKeyEventWithCode(21, true, true, false); // LEFT_ARROW keydown
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pumpAndSettle();
     }
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pumpAndSettle();
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, 5);
