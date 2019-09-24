@@ -1068,6 +1068,27 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
+          helperText: kHelper3,
+          helperMaxLines: 2,
+          errorText: null,          
+          filled: true,
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 88.0));
+    expect(tester.getTopLeft(find.text(kHelper3)), const Offset(12.0, 64.0));
+    expect(tester.getBottomLeft(find.text(kHelper3)), const Offset(12.0, 88.0));
+
+    // Overall height for this InputDecorator is 12 less than the first
+    // one, 88dps, because helperText only occupies two lines.
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
           helperText: kHelper2,
           helperMaxLines: 3,
           errorText: null,
