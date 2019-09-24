@@ -36,9 +36,6 @@ class FeatureFlags {
   /// Whether flutter desktop for Windows is enabled.
   bool get isWindowsEnabled => _isEnabled(flutterWindowsDesktopFeature);
 
-  /// Whether plugins are built as AARs in app projects.
-  bool get isPluginAsAarEnabled => _isEnabled(flutterBuildPluginAsAarFeature);
-
   // Calculate whether a particular feature is enabled for the current channel.
   static bool _isEnabled(Feature feature) {
     final String currentChannel = FlutterVersion.instance.channel;

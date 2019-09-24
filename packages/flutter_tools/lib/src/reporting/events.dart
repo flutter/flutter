@@ -125,6 +125,7 @@ class BuildEvent extends UsageEvent {
   BuildEvent(String parameter, {
     this.command,
     this.settings,
+    this.eventError,
   }) : super(
     'build' +
       (FlutterCommand.current == null ? '' : '-${FlutterCommand.current.name}'),
@@ -132,6 +133,7 @@ class BuildEvent extends UsageEvent {
 
   final String command;
   final String settings;
+  final String eventError;
 
   @override
   void send() {
@@ -140,6 +142,8 @@ class BuildEvent extends UsageEvent {
         CustomDimensions.buildEventCommand: command,
       if (settings != null)
         CustomDimensions.buildEventSettings: settings,
+      if (eventError != null)
+        CustomDimensions.buildEventError: eventError,
     });
     flutterUsage.sendEvent(category, parameter, parameters: parameters);
   }
