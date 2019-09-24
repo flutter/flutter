@@ -274,17 +274,17 @@ Future<void> verifyCrashReportSent(RequestInfo crashInfo, {
 
 class MockCrashReportSender extends MockClient {
   MockCrashReportSender(RequestInfo crashInfo) : super((Request request) async {
-      MockCrashReportSender.sendCalls++;
-      crashInfo.method = request.method;
-      crashInfo.uri = request.url;
+    MockCrashReportSender.sendCalls++;
+    crashInfo.method = request.method;
+    crashInfo.uri = request.url;
 
-      // A very ad-hoc multipart request parser. Good enough for this test.
-      String boundary = request.headers['Content-Type'];
-      boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
-      crashInfo.fields = Map<String, String>.fromIterable(
-        utf8.decode(request.bodyBytes)
-            .split('--$boundary')
-            .map<List<String>>((String part) {
+    // A very ad-hoc multipart request parser. Good enough for this test.
+    String boundary = request.headers['Content-Type'];
+    boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
+    crashInfo.fields = Map<String, String>.fromIterable(
+      utf8.decode(request.bodyBytes)
+        .split('--$boundary')
+        .map<List<String>>((String part) {
           final Match nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
           if (nameMatch == null) {
             return null;
@@ -293,29 +293,28 @@ class MockCrashReportSender extends MockClient {
           final String value = part.split('\n').skip(2).join('\n').trim();
           return <String>[name, value];
         })
-            .where((List<String> pair) => pair != null),
-        key: (dynamic key) {
-          final List<String> pair = key;
-          return pair[0];
-        },
-        value: (dynamic value) {
-          final List<String> pair = value;
-          return pair[1];
-        },
-      );
+        .where((List<String> pair) => pair != null),
+      key: (dynamic key) {
+        final List<String> pair = key;
+        return pair[0];
+      },
+      value: (dynamic value) {
+        final List<String> pair = value;
+        return pair[1];
+      },
+    );
 
-      return Response(
-        'test-report-id',
-        200,
-      );
-    });
+    return Response(
+      'test-report-id',
+      200,
+    );
+  });
 
   static int sendCalls = 0;
 }
 
 class CrashingCrashReportSender extends MockClient {
-  CrashingCrashReportSender(Object exception)
-      : super((Request request) async {
+  CrashingCrashReportSender(Object exception) : super((Request request) async {
     throw exception;
   });
 }

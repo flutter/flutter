@@ -58,7 +58,7 @@ void main() {
     expect(theme.data.borderWidth, null);
   });
 
-   testWidgets('Default ToggleButtonsThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ToggleButtonsThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData().debugFillProperties(builder);
 
@@ -90,12 +90,12 @@ void main() {
       borderWidth: 2.0,
     ).debugFillProperties(builder);
 
-     final List<String> description = builder.properties
+    final List<String> description = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-     expect(description, <String>[
+    expect(description, <String>[
       'textStyle.inherit: true',
       'textStyle.size: 10.0',
       'constraints: BoxConstraints(0.0<=w<=Infinity, 10.0<=h<=20.0)',

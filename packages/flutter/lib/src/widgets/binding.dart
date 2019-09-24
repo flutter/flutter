@@ -876,7 +876,10 @@ void runApp(Widget app) {
 void debugDumpApp() {
   assert(WidgetsBinding.instance != null);
   String mode = 'RELEASE MODE';
-  assert(() { mode = 'CHECKED MODE'; return true; }());
+  assert(() {
+    mode = 'CHECKED MODE';
+    return true;
+  }());
   debugPrint('${WidgetsBinding.instance.runtimeType} - $mode');
   if (WidgetsBinding.instance.renderViewElement != null) {
     debugPrint(WidgetsBinding.instance.renderViewElement.toStringDeep());

@@ -505,7 +505,7 @@ class ValidationResult {
         return terminal.color(leadingBox, TerminalColor.green);
       case ValidationType.notAvailable:
       case ValidationType.partial:
-       return terminal.color(leadingBox, TerminalColor.yellow);
+        return terminal.color(leadingBox, TerminalColor.yellow);
     }
     return null;
   }

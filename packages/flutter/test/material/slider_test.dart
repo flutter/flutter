@@ -1548,8 +1548,7 @@ void main() {
     expect(renderObject.size.height, 200);
   });
 
-  testWidgets(
-      'Slider implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const Slider(

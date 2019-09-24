@@ -138,9 +138,11 @@ Use the 'android' tool to install them:
       hardware = 'goldfish';
       buildCharacteristics = 'unused';
       exitCode = -1;
-      when(mockProcessManager.run(argThat(contains('getprop')),
-          stderrEncoding: anyNamed('stderrEncoding'),
-          stdoutEncoding: anyNamed('stdoutEncoding'))).thenAnswer((_) {
+      when(mockProcessManager.run(
+        argThat(contains('getprop')),
+        stderrEncoding: anyNamed('stderrEncoding'),
+        stdoutEncoding: anyNamed('stdoutEncoding'),
+      )).thenAnswer((_) {
         final StringBuffer buf = StringBuffer()
           ..writeln('[ro.hardware]: [$hardware]')..writeln(
               '[ro.build.characteristics]: [$buildCharacteristics]');
@@ -215,9 +217,11 @@ Use the 'android' tool to install them:
     setUp(() {
       hardware = 'unknown';
       buildCharacteristics = 'unused';
-      when(mockProcessManager.run(argThat(contains('getprop')),
-          stderrEncoding: anyNamed('stderrEncoding'),
-          stdoutEncoding: anyNamed('stdoutEncoding'))).thenAnswer((_) {
+      when(mockProcessManager.run(
+        argThat(contains('getprop')),
+        stderrEncoding: anyNamed('stderrEncoding'),
+        stdoutEncoding: anyNamed('stdoutEncoding'),
+      )).thenAnswer((_) {
         final StringBuffer buf = StringBuffer()
           ..writeln('[ro.hardware]: [$hardware]')
           ..writeln('[ro.build.characteristics]: [$buildCharacteristics]');
@@ -312,9 +316,11 @@ flutter:
     setUp(() {
       hardware = 'goldfish'; // Known emulator
       socketWasCreated = false;
-      when(mockProcessManager.run(argThat(contains('getprop')),
-          stderrEncoding: anyNamed('stderrEncoding'),
-          stdoutEncoding: anyNamed('stdoutEncoding'))).thenAnswer((_) {
+      when(mockProcessManager.run(
+        argThat(contains('getprop')),
+        stderrEncoding: anyNamed('stderrEncoding'),
+        stdoutEncoding: anyNamed('stdoutEncoding'),
+      )).thenAnswer((_) {
         final StringBuffer buf = StringBuffer()
           ..writeln('[ro.hardware]: [$hardware]');
         final ProcessResult result = ProcessResult(1, 0, buf.toString(), '');

@@ -60,13 +60,13 @@ void main() {
       } else if (platform.isLinux) {
         hostPlatform = HostPlatform.linux_x64;
       } else if (platform.isMacOS) {
-          hostPlatform = HostPlatform.darwin_x64;
+        hostPlatform = HostPlatform.darwin_x64;
       } else {
         assert(false);
       }
-        final String skyEngineLine = platform.isWindows
-          ? r'sky_engine:file:///C:/bin/cache/pkg/sky_engine/lib/'
-          : 'sky_engine:file:///bin/cache/pkg/sky_engine/lib/';
+      final String skyEngineLine = platform.isWindows
+        ? r'sky_engine:file:///C:/bin/cache/pkg/sky_engine/lib/'
+        : 'sky_engine:file:///bin/cache/pkg/sky_engine/lib/';
       fs.file('.packages')
         ..createSync()
         ..writeAsStringSync('''
@@ -368,9 +368,10 @@ class FakeKernelCompiler implements KernelCompiler {
     String fileSystemScheme,
     bool targetProductVm = false,
     String platformDill,
-    String initializeFromDill}) async {
-      fs.file(outputFilePath).createSync(recursive: true);
-      return CompilerOutput(outputFilePath, 0, null);
+    String initializeFromDill,
+  }) async {
+    fs.file(outputFilePath).createSync(recursive: true);
+    return CompilerOutput(outputFilePath, 0, null);
   }
 }
 

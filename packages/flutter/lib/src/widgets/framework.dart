@@ -1208,7 +1208,10 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   @mustCallSuper
   void dispose() {
     assert(_debugLifecycleState == _StateLifecycle.ready);
-    assert(() { _debugLifecycleState = _StateLifecycle.defunct; return true; }());
+    assert(() {
+      _debugLifecycleState = _StateLifecycle.defunct;
+      return true;
+    }());
   }
 
   /// Describes the part of the user interface represented by this widget.
@@ -1756,7 +1759,10 @@ class _InactiveElements {
     element.deactivate();
     assert(element._debugLifecycleState == _ElementLifecycle.inactive);
     element.visitChildren(_deactivateRecursively);
-    assert(() { element.debugDeactivated(); return true; }());
+    assert(() {
+      element.debugDeactivated();
+      return true;
+    }());
   }
 
   void add(Element element) {
@@ -2926,7 +2932,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       key._register(this);
     }
     _updateInheritance();
-    assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; }());
+    assert(() {
+      _debugLifecycleState = _ElementLifecycle.active;
+      return true;
+    }());
   }
 
   /// Change the widget used to configure this element.
@@ -3082,7 +3091,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       final Element newChild = _retakeInactiveElement(key, newWidget);
       if (newChild != null) {
         assert(newChild._parent == null);
-        assert(() { _debugCheckForCycles(newChild); return true; }());
+        assert(() {
+          _debugCheckForCycles(newChild);
+          return true;
+        }());
         newChild._activateWithParent(this, newSlot);
         final Element updatedChild = updateChild(newChild, newWidget, newSlot);
         assert(newChild == updatedChild);
@@ -3090,7 +3102,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       }
     }
     final Element newChild = newWidget.createElement();
-    assert(() { _debugCheckForCycles(newChild); return true; }());
+    assert(() {
+      _debugCheckForCycles(newChild);
+      return true;
+    }());
     newChild.mount(this, newSlot);
     assert(newChild._debugLifecycleState == _ElementLifecycle.active);
     return newChild;
@@ -3191,7 +3206,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _dependencies?.clear();
     _hadUnsatisfiedDependencies = false;
     _updateInheritance();
-    assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; }());
+    assert(() {
+      _debugLifecycleState = _ElementLifecycle.active;
+      return true;
+    }());
     if (_dirty)
       owner.scheduleBuildFor(this);
     if (hadDependencies)
@@ -3228,7 +3246,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }
     _inheritedWidgets = null;
     _active = false;
-    assert(() { _debugLifecycleState = _ElementLifecycle.inactive; return true; }());
+    assert(() {
+      _debugLifecycleState = _ElementLifecycle.inactive;
+      return true;
+    }());
   }
 
   /// Called, in debug mode, after children have been deactivated (see [deactivate]).
@@ -3260,7 +3281,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       final GlobalKey key = widget.key;
       key._unregister(this);
     }
-    assert(() { _debugLifecycleState = _ElementLifecycle.defunct; return true; }());
+    assert(() {
+      _debugLifecycleState = _ElementLifecycle.defunct;
+      return true;
+    }());
   }
 
   @override
@@ -4075,9 +4099,15 @@ class StatefulElement extends ComponentElement {
     } finally {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }
-    assert(() { _state._debugLifecycleState = _StateLifecycle.initialized; return true; }());
+    assert(() {
+      _state._debugLifecycleState = _StateLifecycle.initialized;
+      return true;
+    }());
     _state.didChangeDependencies();
-    assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; }());
+    assert(() {
+      _state._debugLifecycleState = _StateLifecycle.ready;
+      return true;
+    }());
     super._firstBuild();
   }
 
@@ -4740,7 +4770,10 @@ abstract class RenderObjectElement extends Element {
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     _renderObject = widget.createRenderObject(this);
-    assert(() { _debugUpdateRenderObjectOwner(); return true; }());
+    assert(() {
+      _debugUpdateRenderObjectOwner();
+      return true;
+    }());
     assert(_slot == newSlot);
     attachRenderObject(newSlot);
     _dirty = false;
@@ -4750,7 +4783,10 @@ abstract class RenderObjectElement extends Element {
   void update(covariant RenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    assert(() { _debugUpdateRenderObjectOwner(); return true; }());
+    assert(() {
+      _debugUpdateRenderObjectOwner();
+      return true;
+    }());
     widget.updateRenderObject(this, renderObject);
     _dirty = false;
   }

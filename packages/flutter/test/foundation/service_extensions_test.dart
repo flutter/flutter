@@ -443,17 +443,26 @@ void main() {
       return ByteData(5); // 0x0000000000
     });
     bool data;
-    data = await rootBundle.loadStructuredData<bool>('test', (String value) async { expect(value, '\x00\x00\x00\x00\x00'); return true; });
+    data = await rootBundle.loadStructuredData<bool>('test', (String value) async {
+      expect(value, '\x00\x00\x00\x00\x00');
+      return true;
+    });
     expect(data, isTrue);
     expect(completed, isTrue);
     completed = false;
-    data = await rootBundle.loadStructuredData('test', (String value) async { expect(true, isFalse); return null; });
+    data = await rootBundle.loadStructuredData('test', (String value) async {
+      expect(true, isFalse);
+      return null;
+    });
     expect(data, isTrue);
     expect(completed, isFalse);
     result = await binding.testExtension('evict', <String, String>{'value': 'test'});
     expect(result, <String, String>{'value': ''});
     expect(completed, isFalse);
-    data = await rootBundle.loadStructuredData<bool>('test', (String value) async { expect(value, '\x00\x00\x00\x00\x00'); return false; });
+    data = await rootBundle.loadStructuredData<bool>('test', (String value) async {
+      expect(value, '\x00\x00\x00\x00\x00');
+      return false;
+    });
     expect(data, isFalse);
     expect(completed, isTrue);
     ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);

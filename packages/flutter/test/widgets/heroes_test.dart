@@ -1055,12 +1055,12 @@ Future<void> main() async {
     bool _isVisible(Element node) {
       bool isVisible = true;
       node.visitAncestorElements((Element ancestor) {
-          final RenderObject r = ancestor.renderObject;
-          if (r is RenderOpacity && r.opacity == 0) {
-            isVisible = false;
-            return false;
-          }
-          return true;
+        final RenderObject r = ancestor.renderObject;
+        if (r is RenderOpacity && r.opacity == 0) {
+          isVisible = false;
+          return false;
+        }
+        return true;
       });
       return isVisible;
     }
@@ -2222,39 +2222,40 @@ Future<void> main() async {
         }
       );
 
-    // Load image before measuring the `Rect` of the `RenderImage`.
-    imageProvider.complete();
-    await tester.pump();
-    final RenderImage renderImage = tester.renderObject(
-      find.descendant(of: find.byKey(imageKey1), matching: find.byType(RawImage))
-    );
+      // Load image before measuring the `Rect` of the `RenderImage`.
+      imageProvider.complete();
+      await tester.pump();
+      final RenderImage renderImage = tester.renderObject(
+        find.descendant(of: find.byKey(imageKey1), matching: find.byType(RawImage))
+      );
 
-    // Before push image1 should be laid out correctly.
-    expect(renderImage.size, const Size(100, 100));
+      // Before push image1 should be laid out correctly.
+      expect(renderImage.size, const Size(100, 100));
 
-    navigatorKey.currentState.push(route2);
-    await tester.pump();
+      navigatorKey.currentState.push(route2);
+      await tester.pump();
 
-    final TestGesture gesture = await tester.startGesture(const Offset(0.01, 300));
-    await tester.pump();
+      final TestGesture gesture = await tester.startGesture(const Offset(0.01, 300));
+      await tester.pump();
 
-    // Move (almost) across the screen, to make the animation as close to finish
-    // as possible.
-    await gesture.moveTo(const Offset(800, 200));
-    await tester.pump();
+      // Move (almost) across the screen, to make the animation as close to finish
+      // as possible.
+      await gesture.moveTo(const Offset(800, 200));
+      await tester.pump();
 
-    // image1 should snap to the top left corner of the Row widget.
-    expect(
-      tester.getRect(find.byKey(imageKey1, skipOffstage: false)),
-      rectMoreOrLessEquals(tester.getTopLeft(find.widgetWithText(Row, '1')) & const Size(100, 100), epsilon: 0.01),
-    );
+      // image1 should snap to the top left corner of the Row widget.
+      expect(
+        tester.getRect(find.byKey(imageKey1, skipOffstage: false)),
+        rectMoreOrLessEquals(tester.getTopLeft(find.widgetWithText(Row, '1')) & const Size(100, 100), epsilon: 0.01),
+      );
 
-    // Text should respect the correct final size of image1.
-    expect(
-      tester.getTopRight(find.byKey(imageKey1, skipOffstage: false)).dx,
-      moreOrLessEquals(tester.getTopLeft(find.text('1')).dx, epsilon: 0.01),
-    );
-  });
+      // Text should respect the correct final size of image1.
+      expect(
+        tester.getTopRight(find.byKey(imageKey1, skipOffstage: false)).dx,
+        moreOrLessEquals(tester.getTopLeft(find.text('1')).dx, epsilon: 0.01),
+      );
+    },
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/40239.
   testWidgets(

@@ -193,9 +193,9 @@ void main() {
         Actions(
           actions: <LocalKey, ActionFactory>{
             TestAction.key: () => TestAction(onInvoke: (FocusNode node, Intent intent) {
-                  invoked = true;
-                  return true;
-                }),
+              invoked = true;
+              return true;
+            }),
           },
           child: Shortcuts(
             manager: testManager,

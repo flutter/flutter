@@ -1027,7 +1027,10 @@ class PipelineOwner {
       Timeline.startSync('Semantics');
     }
     assert(_semanticsOwner != null);
-    assert(() { _debugDoingSemantics = true; return true; }());
+    assert(() {
+      _debugDoingSemantics = true;
+      return true;
+    }());
     try {
       final List<RenderObject> nodesToProcess = _nodesNeedingSemantics.toList()
         ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
@@ -1039,7 +1042,10 @@ class PipelineOwner {
       _semanticsOwner.sendSemanticsUpdate();
     } finally {
       assert(_nodesNeedingSemantics.isEmpty);
-      assert(() { _debugDoingSemantics = false; return true; }());
+      assert(() {
+        _debugDoingSemantics = false;
+        return true;
+      }());
       if (!kReleaseMode) {
         Timeline.finishSync();
       }
@@ -1681,14 +1687,23 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return true;
     }());
     if (sizedByParent) {
-      assert(() { _debugDoingThisResize = true; return true; }());
+      assert(() {
+        _debugDoingThisResize = true;
+        return true;
+      }());
       try {
         performResize();
-        assert(() { debugAssertDoesMeetConstraints(); return true; }());
+        assert(() {
+          debugAssertDoesMeetConstraints();
+          return true;
+        }());
       } catch (e, stack) {
         _debugReportException('performResize', e, stack);
       }
-      assert(() { _debugDoingThisResize = false; return true; }());
+      assert(() {
+        _debugDoingThisResize = false;
+        return true;
+      }());
     }
     RenderObject debugPreviousActiveLayout;
     assert(() {
@@ -1700,7 +1715,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     try {
       performLayout();
       markNeedsSemanticsUpdate();
-      assert(() { debugAssertDoesMeetConstraints(); return true; }());
+      assert(() {
+        debugAssertDoesMeetConstraints();
+        return true;
+      }());
     } catch (e, stack) {
       _debugReportException('performLayout', e, stack);
     }
