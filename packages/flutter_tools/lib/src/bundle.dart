@@ -11,6 +11,7 @@ import 'artifacts.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/platform.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/targets/dart.dart';
@@ -175,18 +176,28 @@ Future<void> buildWithAssemble({
 
   // Output depfile format:
   final StringBuffer buffer = StringBuffer();
-  for (File outputFile in result.outputFiles) {
-    buffer.write('${outputFile.path} ');
-  }
-  buffer.write(':');
-  for (File inputFile in result.inputFiles) {
-    buffer.write('${inputFile.path} ');
-  }
+  buffer.write('flutter_bundle');
+  _writeFilesToBuffer(result.outputFiles, buffer);
+  buffer.write(': ');
+  _writeFilesToBuffer(result.inputFiles, buffer);
+
   final File depfile = fs.file(depfilePath);
-  if (depfile.parent.existsSync()) {
+  if (!depfile.parent.existsSync()) {
     depfile.parent.createSync(recursive: true);
   }
   depfile.writeAsStringSync(buffer.toString());
+}
+
+void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
+  for (File outputFile in files) {
+    if (platform.isWindows) {
+      // Paths in a depfile have to be escaped on windows.
+      final String escapedPath = outputFile.path.replaceAll(r'\', r'\\');
+      buffer.write(' $escapedPath');
+    } else {
+      buffer.write(' ${outputFile.path}');
+    }
+  }
 }
 
 Future<AssetBundle> buildAssets({

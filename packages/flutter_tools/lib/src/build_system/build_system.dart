@@ -519,7 +519,10 @@ class _BuildInstance {
         // Delete outputs from previous stages that are no longer a part of the build.
         for (String previousOutput in node.previousOutputs) {
           if (!outputFiles.containsKey(previousOutput)) {
-            fs.file(previousOutput).deleteSync();
+            final File previousFile = fs.file(previousOutput);
+            if (previousFile.existsSync()) {
+              previousFile.deleteSync();
+            }
           }
         }
       }

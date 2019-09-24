@@ -228,9 +228,7 @@ Future<void> main() async {
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
-    } catch (e, st) {
-      print(e);
-      print(st);
+    } catch (e) {
       return TaskResult.failure(e.toString());
     }
   });
