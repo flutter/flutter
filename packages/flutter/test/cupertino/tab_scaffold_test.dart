@@ -443,7 +443,7 @@ void main() {
         tabBuilder: (BuildContext context, int index) {
           return const Placeholder();
         },
-      )
+      ),
     );
 
     await tester.pumpWidget(
@@ -452,7 +452,7 @@ void main() {
           data: const MediaQueryData(
             viewInsets: EdgeInsets.only(bottom: 20.0),
           ),
-          child: child
+          child: child,
         ),
       ),
     );
@@ -739,7 +739,7 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
           ),
           controller: controller,
-          tabBuilder: (BuildContext context, int index) => const Placeholder()
+          tabBuilder: (BuildContext context, int index) => const Placeholder(),
         ),
       ),
     );
@@ -756,7 +756,7 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
           ),
           controller: controller,
-          tabBuilder: (BuildContext context, int index) => const Placeholder()
+          tabBuilder: (BuildContext context, int index) => const Placeholder(),
         ),
       ),
     );
@@ -867,7 +867,7 @@ void main() {
                         onPaint: () => tabsPainted0.add(index)
                       )
                     );
-                  }
+                  },
                 ),
               ]
             )
@@ -1041,7 +1041,7 @@ void main() {
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
                   10,
-                  (int i) => BottomNavigationBarItem(icon: const ImageIcon(TestImageProvider(24, 23)), title: Text('$i'))
+                  (int i) => BottomNavigationBarItem(icon: const ImageIcon(TestImageProvider(24, 23)), title: Text('$i')),
                 ),
               ),
               tabBuilder: (BuildContext context, int index) => const Text('content'),

@@ -605,7 +605,7 @@ void main() {
               ),
               placeholderStyle: TextStyle(
                 color: Color(0xAAFFFFFF),
-                fontWeight: FontWeight.w600
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -2741,7 +2741,7 @@ void main() {
       toolbarTopLeft = tester.getTopLeft(find.text('Paste'));
       textFieldTopLeft = tester.getTopLeft(find.byType(CupertinoTextField));
       expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
-    }
+    },
   );
 
   testWidgets('text field respects keyboardAppearance from theme', (WidgetTester tester) async {
@@ -2927,7 +2927,7 @@ void main() {
                 enabled: false,
               ),
             )
-          )
+          ),
         )
       )
     );
@@ -3035,7 +3035,7 @@ void main() {
       state = tester.state<EditableTextState>(find.byType(EditableText));
       state.renderEditable.selectPositionAt(
         from: tester.getTopRight(find.byType(CupertinoApp)),
-        cause: SelectionChangedCause.tap
+        cause: SelectionChangedCause.tap,
       );
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
@@ -3096,7 +3096,7 @@ void main() {
       state = tester.state<EditableTextState>(find.byType(EditableText));
       state.renderEditable.selectPositionAt(
         from: tester.getCenter(find.byType(EditableText)),
-        cause: SelectionChangedCause.tap
+        cause: SelectionChangedCause.tap,
       );
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
@@ -3167,7 +3167,7 @@ void main() {
       state.renderEditable.selectPositionAt(
         from: textOffsetToPosition(tester, 0),
         to: textOffsetToPosition(tester, 4),
-        cause: SelectionChangedCause.tap
+        cause: SelectionChangedCause.tap,
       );
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
@@ -3238,7 +3238,7 @@ void main() {
       state.renderEditable.selectPositionAt(
         from: textOffsetToPosition(tester, 0),
         to: textOffsetToPosition(tester, 10),
-        cause: SelectionChangedCause.tap
+        cause: SelectionChangedCause.tap,
       );
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();

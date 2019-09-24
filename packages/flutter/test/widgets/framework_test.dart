@@ -132,7 +132,7 @@ void main() {
         '- Container-[<1>]\n'
         '- Container-[<2>]\n'
         'A GlobalKey can only be specified on one widget at a time in the widget tree.'
-      )
+      ),
     );
   });
 
@@ -161,7 +161,7 @@ void main() {
         '  SizedBox-[GlobalKey#00000 problematic]\n'
         '  Placeholder-[GlobalKey#00000 problematic]\n'
         'A GlobalKey can only be specified on one widget at a time in the widget tree.'
-      )
+      ),
     );
   });
 
@@ -190,7 +190,7 @@ void main() {
         '  Container-[GlobalKey#00000 problematic]\n'
         '  Placeholder-[GlobalKey#00000 problematic]\n'
         'A GlobalKey can only be specified on one widget at a time in the widget tree.'
-      )
+      ),
     );
   });
 

@@ -214,7 +214,7 @@ void main() {
       Map<String, dynamic> result;
       binding.testExtension(
         'debugCheckElevationsEnabled',
-        <String, String>{'enabled': '$newValue'}
+        <String, String>{'enabled': '$newValue'},
       ).then((Map<String, dynamic> answer) => result = answer);
       await binding.flushMicrotasks();
       expect(binding.frameScheduled, lastValue != newValue);

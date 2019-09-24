@@ -948,7 +948,7 @@ Future<void> main() async {
                     key: heroBCKey,
                     height: 150.0,
                     child: const Text('Hero'),
-                  )
+                  ),
                 ),
               ),
               const SizedBox(height: 800.0),
@@ -973,7 +973,7 @@ Future<void> main() async {
                     key: heroABKey,
                     height: 200.0,
                     child: const Text('Hero'),
-                  )
+                  ),
                 ),
               ),
               FlatButton(
@@ -986,7 +986,7 @@ Future<void> main() async {
                   child: Container(
                     height: 150.0,
                     child: const Text('Hero'),
-                  )
+                  ),
                 ),
               ),
               const SizedBox(height: 800.0),
@@ -1013,7 +1013,7 @@ Future<void> main() async {
                         height: 100.0,
                         width: 100.0,
                         child: const Text('Hero'),
-                      )
+                      ),
                     ),
                   ),
                   FlatButton(
@@ -2126,9 +2126,9 @@ Future<void> main() async {
                 width: 10,
                 height: 10,
                 child: Text('1'),
-              )
-            ]
-          )
+              ),
+            ],
+          ),
         ),
       );
 
@@ -2192,16 +2192,16 @@ Future<void> main() async {
                   child: Image(
                     image: imageProvider,
                     key: imageKey1,
-                  )
-                )
+                  ),
+                ),
               ),
               const SizedBox(
                 width: 10,
                 height: 10,
                 child: Text('1'),
-              )
-            ]
-          )
+              ),
+            ],
+          ),
         ),
       );
 
@@ -2216,7 +2216,7 @@ Future<void> main() async {
                   image: imageProvider,
                   key: imageKey2,
                 )
-              )
+              ),
             ),
           );
         }
@@ -2246,13 +2246,13 @@ Future<void> main() async {
     // image1 should snap to the top left corner of the Row widget.
     expect(
       tester.getRect(find.byKey(imageKey1, skipOffstage: false)),
-      rectMoreOrLessEquals(tester.getTopLeft(find.widgetWithText(Row, '1')) & const Size(100, 100), epsilon: 0.01)
+      rectMoreOrLessEquals(tester.getTopLeft(find.widgetWithText(Row, '1')) & const Size(100, 100), epsilon: 0.01),
     );
 
     // Text should respect the correct final size of image1.
     expect(
       tester.getTopRight(find.byKey(imageKey1, skipOffstage: false)).dx,
-      moreOrLessEquals(tester.getTopLeft(find.text('1')).dx, epsilon: 0.01)
+      moreOrLessEquals(tester.getTopLeft(find.text('1')).dx, epsilon: 0.01),
     );
   });
 

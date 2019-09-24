@@ -259,7 +259,7 @@ class _DayPeriodControl extends StatelessWidget {
               heightFactor: 1,
               child: Semantics(
                 selected: amSelected,
-                child: Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle)
+                child: Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle),
               ),
             ),
           ),
@@ -467,9 +467,8 @@ class _MinuteControl extends StatelessWidget {
 _TimePickerHeaderFormat _buildHeaderFormat(
   TimeOfDayFormat timeOfDayFormat,
   _TimePickerFragmentContext context,
-  Orientation orientation
+  Orientation orientation,
 ) {
-
   // Creates an hour fragment.
   _TimePickerHeaderFragment hour() {
     return _TimePickerHeaderFragment(

@@ -1133,7 +1133,7 @@ void main() {
               BottomNavigationBarItem(
                 icon: Icon(Icons.add),
                 title: Text('test'),
-              )
+              ),
             ]
           ),
         ),

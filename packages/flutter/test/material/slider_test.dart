@@ -582,7 +582,7 @@ void main() {
         overlayColor: Color(0xff000010),
         thumbColor: Color(0xff000011),
         valueIndicatorColor: Color(0xff000012),
-      )
+      ),
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
     double value = 0.45;

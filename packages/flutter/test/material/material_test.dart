@@ -276,7 +276,7 @@ void main() {
             ),
             child: buildMaterial(
                 color: Colors.cyan,
-                elevation: 8.0
+                elevation: 8.0,
             ),
           )
       );

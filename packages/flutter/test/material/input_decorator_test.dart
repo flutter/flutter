@@ -3289,7 +3289,7 @@ void main() {
           Offset(inputDecoratorWidth - smallerBorderRadiusScaled, 0.0),
         ],
       )
-      ..restore()
+      ..restore(),
     );
   });
 

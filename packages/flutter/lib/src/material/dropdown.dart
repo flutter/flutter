@@ -1066,7 +1066,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                ),
              ),
            );
-         }
+         },
        );
 
   /// {@macro flutter.material.dropdownButton.onChanged}
