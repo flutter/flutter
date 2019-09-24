@@ -456,7 +456,7 @@ void main() {
           expect(e, error);
           expect(errorCount, 0);
           errorCount++;
-        }
+        },
       );
 
       debugDefaultTargetPlatformOverride = null;

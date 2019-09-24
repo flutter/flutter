@@ -482,7 +482,7 @@ class RenderParagraph extends RenderBox
         BoxConstraints(
           maxWidth: constraints.maxWidth,
         ),
-        parentUsesSize: true
+        parentUsesSize: true,
       );
       double baselineOffset;
       switch (_placeholderSpans[childIndex].alignment) {
@@ -516,7 +516,7 @@ class RenderParagraph extends RenderBox
       final TextParentData textParentData = child.parentData;
       textParentData.offset = Offset(
         _textPainter.inlinePlaceholderBoxes[childIndex].left,
-        _textPainter.inlinePlaceholderBoxes[childIndex].top
+        _textPainter.inlinePlaceholderBoxes[childIndex].top,
       );
       textParentData.scale = _textPainter.inlinePlaceholderScales[childIndex];
       child = childAfter(child);

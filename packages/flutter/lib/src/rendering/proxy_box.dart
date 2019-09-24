@@ -1660,7 +1660,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
          child: child,
          elevation: elevation,
          color: color,
-         shadowColor: shadowColor
+         shadowColor: shadowColor,
        );
 
   @override
@@ -1802,7 +1802,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
          color: color,
          shadowColor: shadowColor,
          clipper: clipper,
-         clipBehavior: clipBehavior
+         clipBehavior: clipBehavior,
        );
 
   @override

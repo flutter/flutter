@@ -133,7 +133,7 @@ void main() {
           includeProperties: true,
           propertyFilter: (List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
             return nodes.whereType<StringProperty>().toList();
-          }
+          },
       ));
       final List<Map<String, Object>> properties = result['properties'];
       expect(properties, hasLength(3));
@@ -152,7 +152,7 @@ void main() {
             return <DiagnosticsNode>[
               StringProperty('foo', 'bar'),
             ];
-          }
+          },
       ));
       final List<Map<String, Object>> properties = result['properties'];
       expect(properties, hasLength(1));
@@ -164,7 +164,7 @@ void main() {
           subtreeDepth: 1,
           childFilter: (List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
             return nodes.where((DiagnosticsNode node) => node.getProperties().isEmpty).toList();
-          }
+          },
       ));
       final List<Map<String, Object>> children = result['children'];
       expect(children, hasLength(1));
@@ -175,7 +175,7 @@ void main() {
           subtreeDepth: 1,
           childFilter: (List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
             return nodes.expand((DiagnosticsNode node) => node.getChildren()).toList();
-          }
+          },
       ));
       final List<Map<String, Object>> children = result['children'];
       expect(children, hasLength(3));
@@ -188,7 +188,7 @@ void main() {
           includeProperties: true,
           nodeTruncator: (List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
             return nodes.take(2).toList();
-          }
+          },
       ));
       final List<Map<String, Object>> children = result['children'];
       expect(children, hasLength(3));
@@ -205,7 +205,7 @@ void main() {
           includeProperties: true,
           nodeDelegator: (DiagnosticsNode node, DiagnosticsSerializationDelegate delegate) {
             return delegate.copyWith(includeProperties: false);
-          }
+          },
       ));
       final List<Map<String, Object>> properties = result['properties'];
       expect(properties, hasLength(7));

@@ -356,7 +356,7 @@ void main() {
                   onDateTimeChanged: (DateTime d) => newDateTime = d,
                   initialDateTime: DateTime(2018, 10, 10, 10, 3),
                   minuteInterval: 3,
-                )
+                ),
               ),
             )
           )
@@ -887,7 +887,7 @@ void main() {
                 mode: CupertinoDatePickerMode.dateAndTime,
                 initialDateTime: DateTime(2019, 1, 1, 4),
                 onDateTimeChanged: (_) {},
-              )
+              ),
             ),
           )
         )
@@ -914,7 +914,7 @@ void main() {
                   initialDateTime: DateTime(2019, 1, 1, 4),
                   onDateTimeChanged: (_) {},
                 ),
-              )
+              ),
             ),
           )
         )
@@ -963,7 +963,7 @@ void main() {
                 initialTimerDuration: const Duration(hours: 23, minutes: 59),
                 onTimerDurationChanged: (_) {},
               ),
-            )
+            ),
           ),
         ),
       ),

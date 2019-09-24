@@ -1276,7 +1276,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         // users. Inspector users can see the full tree by clicking on the
         // render object so this may not be that useful.
         yield describeForError('RenderObject', style: DiagnosticsTreeStyle.truncateChildren);
-      }
+      },
     ));
   }
 
@@ -2143,7 +2143,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           ErrorDescription(
             'Since this typically indicates an infinite recursion, it is '
             'disallowed.'
-          )
+          ),
         ]);
       }
       return true;
@@ -2175,7 +2175,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           ),
           ErrorHint(
             'This usually indicates an error in the Flutter framework itself.'
-          )
+          ),
         ]);
       }
       return true;
@@ -2860,7 +2860,7 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
             'was created by',
             child.debugCreator,
             style: DiagnosticsTreeStyle.errorProperty,
-          )
+          ),
         ]);
       }
       return true;
@@ -3235,7 +3235,7 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
     library: library,
     context: context,
     informationCollector: informationCollector,
-    silent: silent
+    silent: silent,
   );
 
   /// The RenderObject that was being processed when the exception was caught.
@@ -3779,11 +3779,11 @@ class _SemanticsGeometry {
 class DiagnosticsDebugCreator extends DiagnosticsProperty<Object> {
   /// Create a [DiagnosticsProperty] with its [value] initialized to input
   /// [RenderObject.debugCreator].
-  DiagnosticsDebugCreator(Object value):
-    assert(value != null),
-    super(
-      'debugCreator',
-      value,
-      level: DiagnosticLevel.hidden
-    );
+  DiagnosticsDebugCreator(Object value)
+    : assert(value != null),
+      super(
+        'debugCreator',
+        value,
+        level: DiagnosticLevel.hidden,
+      );
 }
