@@ -191,7 +191,7 @@ class NestedScrollView extends StatefulWidget {
     @required this.body,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : coordinator = NestedScrollCoordinator(),
-        assert(scrollDirection != null),
+       assert(scrollDirection != null),
        assert(reverse != null),
        assert(headerSliverBuilder != null),
        assert(body != null),
