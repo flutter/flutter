@@ -981,7 +981,7 @@ void main() {
 
   testWidgets(
     'tapping clear button also calls onChanged when text not empty',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       String value = 'text entry';
       final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
@@ -2409,7 +2409,7 @@ void main() {
 
   testWidgets(
     'Double tap shows handles and toolbar if selection is not collapsed',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2438,7 +2438,7 @@ void main() {
 
   testWidgets(
     'Double tap shows toolbar but not handles if selection is collapsed',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2467,7 +2467,7 @@ void main() {
 
   testWidgets(
     'Mouse long press does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2499,7 +2499,7 @@ void main() {
 
   testWidgets(
     'Mouse double tap does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );

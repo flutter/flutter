@@ -29,8 +29,7 @@ void main() {
     expect(popupMenuTheme.textStyle, null);
   });
 
-  testWidgets('Default PopupMenuThemeData debugFillProperties',
-          (WidgetTester tester) async {
+  testWidgets('Default PopupMenuThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const PopupMenuThemeData().debugFillProperties(builder);
 
@@ -42,8 +41,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('PopupMenuThemeData implements debugFillProperties',
-          (WidgetTester tester) async {
+  testWidgets('PopupMenuThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     PopupMenuThemeData(
       color: const Color(0xFFFFFFFF),

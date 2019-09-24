@@ -368,8 +368,7 @@ void main() {
       return discoveryProtocol.uri;
     }
 
-    testUsingContext('can find flutter view with matching isolate name',
-        () async {
+    testUsingContext('can find flutter view with matching isolate name', () async {
       const String expectedIsolateName = 'foobar';
       final Uri uri = await findUri(<MockFlutterView>[
         MockFlutterView(null), // no ui isolate.
@@ -380,8 +379,7 @@ void main() {
           uri.toString(), 'http://${InternetAddress.loopbackIPv4.address}:0/');
     });
 
-    testUsingContext('can handle flutter view without matching isolate name',
-        () async {
+    testUsingContext('can handle flutter view without matching isolate name', () async {
       const String expectedIsolateName = 'foobar';
       final Future<Uri> uri = findUri(<MockFlutterView>[
         MockFlutterView(null), // no ui isolate.

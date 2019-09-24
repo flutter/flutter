@@ -1723,10 +1723,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     final LocalHistoryEntry entry = isPersistent
       ? null
       : LocalHistoryEntry(onRemove: () {
-        if (!removedEntry) {
-          _removeCurrentBottomSheet();
-        }
-      });
+          if (!removedEntry) {
+            _removeCurrentBottomSheet();
+          }
+        });
 
     bottomSheet = _StandardBottomSheet(
       key: bottomSheetKey,

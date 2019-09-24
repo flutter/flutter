@@ -6899,7 +6899,7 @@ void main() {
 
   testWidgets(
     'Tap in empty text field does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
 
       await tester.pumpWidget(
@@ -6944,7 +6944,7 @@ void main() {
 
   testWidgets(
     'Long press in empty text field shows handles and toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
 
       await tester.pumpWidget(
@@ -6991,7 +6991,7 @@ void main() {
 
   testWidgets(
     'Double tap in empty text field shows toolbar but not handles',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
 
       await tester.pumpWidget(
@@ -7016,7 +7016,7 @@ void main() {
 
   testWidgets(
     'Mouse tap does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -7049,7 +7049,7 @@ void main() {
 
   testWidgets(
     'Mouse long press does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -7082,7 +7082,7 @@ void main() {
 
   testWidgets(
     'Mouse double tap does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );

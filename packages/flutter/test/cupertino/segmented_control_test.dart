@@ -494,22 +494,24 @@ void main() {
   });
 
   testWidgets(
-      'Background color of child should change on selection, '
-      'and should not change when tapped again', (WidgetTester tester) async {
-    await tester.pumpWidget(setupSimpleSegmentedControl());
+    'Background color of child should change on selection, '
+    'and should not change when tapped again',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    expect(getBackgroundColor(tester, 1), CupertinoColors.white);
+      expect(getBackgroundColor(tester, 1), CupertinoColors.white);
 
-    await tester.tap(find.text('Child 2'));
-    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+      await tester.tap(find.text('Child 2'));
+      await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
+      expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
 
-    await tester.tap(find.text('Child 2'));
-    await tester.pump();
+      await tester.tap(find.text('Child 2'));
+      await tester.pump();
 
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
-  });
+      expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
+    },
+  );
 
   testWidgets(
     'Children can be non-Text or Icon widgets (in this case, '
