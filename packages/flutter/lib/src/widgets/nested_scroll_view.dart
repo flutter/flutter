@@ -181,7 +181,7 @@ class NestedScrollView extends StatefulWidget {
   ///
   /// The [reverse], [headerSliverBuilder], and [body] arguments must not be
   /// null.
-  const NestedScrollView({
+  NestedScrollView({
     Key key,
     this.controller,
     this.scrollDirection = Axis.vertical,
@@ -190,7 +190,8 @@ class NestedScrollView extends StatefulWidget {
     @required this.headerSliverBuilder,
     @required this.body,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(scrollDirection != null),
+  }) : coordinator = NestedScrollCoordinator(),
+        assert(scrollDirection != null),
        assert(reverse != null),
        assert(headerSliverBuilder != null),
        assert(body != null),
@@ -256,6 +257,13 @@ class NestedScrollView extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+  
+  /// This contains the [ScrollController]s for the outer and inner parts
+  /// of the [NestedScrollView] and will be populated once the state has
+  /// been created.
+  /// The property allows you to access the scroll positions of the
+  /// inner and outer [ScrollController]s individually.
+  final NestedScrollCoordinator coordinator;
 
   /// Returns the [SliverOverlapAbsorberHandle] of the nearest ancestor
   /// [NestedScrollView].
@@ -290,31 +298,34 @@ class NestedScrollView extends StatefulWidget {
 class _NestedScrollViewState extends State<NestedScrollView> {
   final SliverOverlapAbsorberHandle _absorberHandle = SliverOverlapAbsorberHandle();
 
-  _NestedScrollCoordinator _coordinator;
-
   @override
   void initState() {
+    print('_NestedScrollViewState.initState');
+    widget.coordinator.assign(this, widget.controller, _handleHasScrolledBodyChanged);
     super.initState();
-    _coordinator = _NestedScrollCoordinator(this, widget.controller, _handleHasScrolledBodyChanged);
   }
 
   @override
   void didChangeDependencies() {
+    print('_NestedScrollViewState.didChangeDependencies');
+    widget.coordinator.setParent(widget.controller);
     super.didChangeDependencies();
-    _coordinator.setParent(widget.controller);
   }
 
   @override
   void didUpdateWidget(NestedScrollView oldWidget) {
-    super.didUpdateWidget(oldWidget);
+    print('_NestedScrollViewState.didUpdateWidget');
+    if (oldWidget.coordinator != widget.coordinator)
+      widget.coordinator.copy(oldWidget.coordinator);
     if (oldWidget.controller != widget.controller)
-      _coordinator.setParent(widget.controller);
+      widget.coordinator.setParent(widget.controller);
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
   void dispose() {
-    _coordinator.dispose();
-    _coordinator = null;
+    print('_NestedScrollViewState.dispose');
+    widget.coordinator.dispose();
     super.dispose();
   }
 
@@ -323,10 +334,10 @@ class _NestedScrollViewState extends State<NestedScrollView> {
   void _handleHasScrolledBodyChanged() {
     if (!mounted)
       return;
-    final bool newHasScrolledBody = _coordinator.hasScrolledBody;
+    final bool newHasScrolledBody = widget.coordinator.hasScrolledBody;
     if (_lastHasScrolledBody != newHasScrolledBody) {
       setState(() {
-        // _coordinator.hasScrolledBody changed (we use it in the build method)
+        // widget.coordinator.hasScrolledBody changed (we use it in the build method)
         // (We record _lastHasScrolledBody in the build() method, rather than in
         // this setState call, because the build() method may be called more
         // often than just from here, and we want to only call setState when the
@@ -337,11 +348,12 @@ class _NestedScrollViewState extends State<NestedScrollView> {
 
   @override
   Widget build(BuildContext context) {
+    print('_NestedScrollViewState.build ${widget.coordinator.innerController}');
     return _InheritedNestedScrollView(
       state: this,
       child: Builder(
         builder: (BuildContext context) {
-          _lastHasScrolledBody = _coordinator.hasScrolledBody;
+          _lastHasScrolledBody = widget.coordinator.hasScrolledBody;
           return _NestedScrollViewCustomScrollView(
             dragStartBehavior: widget.dragStartBehavior,
             scrollDirection: widget.scrollDirection,
@@ -349,10 +361,10 @@ class _NestedScrollViewState extends State<NestedScrollView> {
             physics: widget.physics != null
                 ? widget.physics.applyTo(const ClampingScrollPhysics())
                 : const ClampingScrollPhysics(),
-            controller: _coordinator._outerController,
+            controller: widget.coordinator.outerController,
             slivers: widget._buildSlivers(
               context,
-              _coordinator._innerController,
+              widget.coordinator.innerController,
               _lastHasScrolledBody,
             ),
             handle: _absorberHandle,
@@ -465,28 +477,41 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
 
 typedef _NestedScrollActivityGetter = ScrollActivity Function(_NestedScrollPosition position);
 
-class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldController {
-  _NestedScrollCoordinator(this._state, this._parent, this._onHasScrolledBodyChanged) {
+class NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldController {
+  _NestedScrollViewState _state;
+  ScrollController _parent;
+  VoidCallback _onHasScrolledBodyChanged;
+
+  _NestedScrollController outerController;
+  _NestedScrollController innerController;
+  
+  void assign(_NestedScrollViewState state, ScrollController parent, VoidCallback onHasScrolledBodyChanged) {
+    this._state = state;
+    this._parent = parent;
+    this._onHasScrolledBodyChanged = onHasScrolledBodyChanged;
+
     final double initialScrollOffset = _parent?.initialScrollOffset ?? 0.0;
-    _outerController = _NestedScrollController(this, initialScrollOffset: initialScrollOffset, debugLabel: 'outer');
-    _innerController = _NestedScrollController(this, initialScrollOffset: 0.0, debugLabel: 'inner');
+    outerController = _NestedScrollController(this, initialScrollOffset: initialScrollOffset, debugLabel: 'outer');
+    innerController = _NestedScrollController(this, initialScrollOffset: 0.0, debugLabel: 'inner');
+    print('NestedScrollCoordinator.assign $innerController');
   }
 
-  final _NestedScrollViewState _state;
-  ScrollController _parent;
-  final VoidCallback _onHasScrolledBodyChanged;
-
-  _NestedScrollController _outerController;
-  _NestedScrollController _innerController;
+  void copy(NestedScrollCoordinator coordinator) {
+    _state = coordinator._state;
+    _parent = coordinator._parent;
+    _onHasScrolledBodyChanged = coordinator._onHasScrolledBodyChanged;
+    outerController = coordinator.outerController;
+    innerController = coordinator.innerController;
+  }
 
   _NestedScrollPosition get _outerPosition {
-    if (!_outerController.hasClients)
+    if (!outerController.hasClients)
       return null;
-    return _outerController.nestedPositions.single;
+    return outerController.nestedPositions.single;
   }
 
   Iterable<_NestedScrollPosition> get _innerPositions {
-    return _innerController.nestedPositions;
+    return innerController.nestedPositions;
   }
 
   bool get canScrollBody {
@@ -837,12 +862,12 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   void dispose() {
     _currentDrag?.dispose();
     _currentDrag = null;
-    _outerController.dispose();
-    _innerController.dispose();
+    outerController.dispose();
+    innerController.dispose();
   }
 
   @override
-  String toString() => '$runtimeType(outer=$_outerController; inner=$_innerController)';
+  String toString() => '$runtimeType(outer=$outerController; inner=$innerController)';
 }
 
 class _NestedScrollController extends ScrollController {
@@ -852,7 +877,7 @@ class _NestedScrollController extends ScrollController {
     String debugLabel,
   }) : super(initialScrollOffset: initialScrollOffset, debugLabel: debugLabel);
 
-  final _NestedScrollCoordinator coordinator;
+  final NestedScrollCoordinator coordinator;
 
   @override
   ScrollPosition createScrollPosition(
@@ -909,7 +934,7 @@ class _NestedScrollController extends ScrollController {
 
 // The _NestedScrollPosition is used by both the inner and outer viewports of a
 // NestedScrollView. It tracks the offset to use for those viewports, and knows
-// about the _NestedScrollCoordinator, so that when activities are triggered on
+// about the NestedScrollCoordinator, so that when activities are triggered on
 // this class, they can defer, or be influenced by, the coordinator.
 class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDelegate {
   _NestedScrollPosition({
@@ -933,7 +958,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     saveScrollOffset(); // in case we didn't restore but could, so that we don't restore it later
   }
 
-  final _NestedScrollCoordinator coordinator;
+  final NestedScrollCoordinator coordinator;
 
   TickerProvider get vsync => context.vsync;
 
@@ -1149,7 +1174,7 @@ class _NestedInnerBallisticScrollActivity extends BallisticScrollActivity {
     TickerProvider vsync,
   ) : super(position, simulation, vsync);
 
-  final _NestedScrollCoordinator coordinator;
+  final NestedScrollCoordinator coordinator;
 
   @override
   _NestedScrollPosition get delegate => super.delegate;
@@ -1181,7 +1206,7 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
       assert(metrics.maxRange > metrics.minRange),
       super(position, simulation, vsync);
 
-  final _NestedScrollCoordinator coordinator;
+  final NestedScrollCoordinator coordinator;
   final _NestedScrollMetrics metrics;
 
   @override
