@@ -811,15 +811,9 @@ void main() {
           debugLabel: 'Scope',
           child: Column(
             children: <Widget>[
-              Focus(
-                  focusNode: focusTop,
-                  child: Container(width: 100, height: 100)),
-              Focus(
-                  focusNode: focusCenter,
-                  child: Container(width: 100, height: 100)),
-              Focus(
-                  focusNode: focusBottom,
-                  child: Container(width: 100, height: 100)),
+              Focus(focusNode: focusTop, child: Container(width: 100, height: 100)),
+              Focus(focusNode: focusCenter, child: Container(width: 100, height: 100)),
+              Focus(focusNode: focusBottom, child: Container(width: 100, height: 100)),
             ],
           ),
         ),
@@ -841,12 +835,8 @@ void main() {
           debugLabel: 'Scope',
           child: Column(
             children: <Widget>[
-              Focus(
-                  focusNode: focusTop,
-                  child: Container(width: 100, height: 100)),
-              Focus(
-                  focusNode: focusBottom,
-                  child: Container(width: 100, height: 100)),
+              Focus(focusNode: focusTop, child: Container(width: 100, height: 100)),
+              Focus(focusNode: focusBottom, child: Container(width: 100, height: 100)),
             ],
           ),
         ),

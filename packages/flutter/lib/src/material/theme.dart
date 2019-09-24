@@ -153,7 +153,7 @@ class Theme extends StatelessWidget {
           data: data.iconTheme,
           child: child,
         ),
-      )
+      ),
     );
   }
 
@@ -164,7 +164,7 @@ class Theme extends StatelessWidget {
   }
 }
 
-class _InheritedTheme extends InheritedWidget {
+class _InheritedTheme extends InheritedTheme {
   const _InheritedTheme({
     Key key,
     @required this.theme,
@@ -173,6 +173,12 @@ class _InheritedTheme extends InheritedWidget {
        super(key: key, child: child);
 
   final Theme theme;
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final _InheritedTheme ancestorTheme = context.ancestorWidgetOfExactType(_InheritedTheme);
+    return identical(this, ancestorTheme) ? child : Theme(data: theme.data, child: child);
+  }
 
   @override
   bool updateShouldNotify(_InheritedTheme old) => theme.data != old.theme.data;
@@ -221,10 +227,11 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
     this.isMaterialAppTheme = false,
     Curve curve = Curves.linear,
     Duration duration = kThemeAnimationDuration,
+    VoidCallback onEnd,
     @required this.child,
   }) : assert(child != null),
        assert(data != null),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;

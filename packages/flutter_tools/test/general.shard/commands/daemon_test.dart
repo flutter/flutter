@@ -26,8 +26,9 @@ void main() {
     });
 
     tearDown(() {
-      if (daemon != null)
+      if (daemon != null) {
         return daemon.shutdown();
+      }
       notifyingLogger.dispose();
     });
 
@@ -316,7 +317,7 @@ class MockAndroidWorkflow extends AndroidWorkflow {
 }
 
 class MockIOSWorkflow extends IOSWorkflow {
-  MockIOSWorkflow({ this.canListDevices =true });
+  MockIOSWorkflow({ this.canListDevices = true });
 
   @override
   final bool canListDevices;

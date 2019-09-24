@@ -132,6 +132,8 @@ void main() {
   });
 
   test('Flutter.Frame event fired', () async {
+    // use frameTimings. https://github.com/flutter/flutter/issues/38838
+    // ignore: deprecated_member_use
     window.onReportTimings(<FrameTiming>[FrameTiming(<int>[
       // build start, build finish
       10000, 15000,

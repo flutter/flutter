@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -77,7 +78,7 @@ void testUsingContext(
           HttpClient: () => MockHttpClient(),
           IOSSimulatorUtils: () {
             final MockIOSSimulatorUtils mock = MockIOSSimulatorUtils();
-            when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
+            when(mock.getAttachedDevices()).thenAnswer((Invocation _) async => <IOSSimulator>[]);
             return mock;
           },
           OutputPreferences: () => OutputPreferences(showColor: false),
@@ -86,8 +87,9 @@ void testUsingContext(
           SimControl: () => MockSimControl(),
           Usage: () => FakeUsage(),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
-          FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
+          FileSystem: () => const LocalFileSystemBlockingSetCurrentDirectory(),
           TimeoutConfiguration: () => const TimeoutConfiguration(),
+          PlistParser: () => FakePlistParser(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -127,8 +129,9 @@ void testUsingContext(
 void _printBufferedErrors(AppContext testContext) {
   if (testContext.get<Logger>() is BufferLogger) {
     final BufferLogger bufferLogger = testContext.get<Logger>();
-    if (bufferLogger.errorText.isNotEmpty)
+    if (bufferLogger.errorText.isNotEmpty) {
       print(bufferLogger.errorText);
+    }
     bufferLogger.clear();
   }
 }
@@ -140,8 +143,9 @@ class FakeDeviceManager implements DeviceManager {
 
   @override
   String get specifiedDeviceId {
-    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all')
+    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all') {
       return null;
+    }
     return _specifiedDeviceId;
   }
 
@@ -227,7 +231,7 @@ class FakeDoctor extends Doctor {
 
 class MockSimControl extends Mock implements SimControl {
   MockSimControl() {
-    when(getConnectedDevices()).thenReturn(<SimDevice>[]);
+    when(getConnectedDevices()).thenAnswer((Invocation _) async => <SimDevice>[]);
   }
 }
 
@@ -329,12 +333,20 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   int get minorVersion => 2;
 
   @override
-  Map<String, String> getBuildSettings(String projectPath, String target) {
+  Future<Map<String, String>> getBuildSettings(
+    String projectPath,
+    String target, {
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
     return <String, String>{};
   }
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+  void cleanWorkspace(String workspacePath, String scheme) {
+  }
+
+  @override
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],
@@ -356,7 +368,17 @@ class MockClock extends Mock implements SystemClock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 
+class FakePlistParser implements PlistParser {
+  @override
+  Map<String, dynamic> parseFile(String plistFilePath) => const <String, dynamic>{};
+
+  @override
+  String getValueFromFile(String plistFilePath, String key) => null;
+}
+
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
+  const LocalFileSystemBlockingSetCurrentDirectory();
+
   @override
   set currentDirectory(dynamic value) {
     throw 'fs.currentDirectory should not be set on the local file system during '

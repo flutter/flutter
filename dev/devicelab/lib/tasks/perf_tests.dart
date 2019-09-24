@@ -122,7 +122,7 @@ TaskFunction createBasicMaterialCompileTest() {
       await flutter('create', options: <String>['--template=app', sampleAppName]);
     });
 
-    if (!(await sampleDir.exists()))
+    if (!sampleDir.existsSync())
       throw 'Failed to create default Flutter app in ${sampleDir.path}';
 
     return CompileTest(sampleDir.path).run();
@@ -689,7 +689,7 @@ class ReportedDurationTest {
       _device = null;
 
       final Map<String, dynamic> reportedDuration = <String, dynamic>{
-        'duration': duration
+        'duration': duration,
       };
       _device = null;
 

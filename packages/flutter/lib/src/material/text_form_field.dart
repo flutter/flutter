@@ -38,6 +38,10 @@ import 'theme.dart';
 ///
 /// Creates a [TextFormField] with an [InputDecoration] and validator function.
 ///
+/// ![If the user enters valid text, the TextField appears normally without any warnings to the user](https://flutter.github.io/assets-for-api-docs/assets/material/text_form_field.png)
+///
+/// ![If the user enters invalid text, the error message returned from the validator function is displayed in dark red underneath the input](https://flutter.github.io/assets-for-api-docs/assets/material/text_form_field_error.png)
+///
 /// ```dart
 /// TextFormField(
 ///   decoration: const InputDecoration(
@@ -87,6 +91,7 @@ class TextFormField extends FormField<String> {
     StrutStyle strutStyle,
     TextDirection textDirection,
     TextAlign textAlign = TextAlign.start,
+    TextAlignVertical textAlignVertical,
     bool autofocus = false,
     bool readOnly = false,
     ToolbarOptions toolbarOptions,
@@ -162,6 +167,7 @@ class TextFormField extends FormField<String> {
         style: style,
         strutStyle: strutStyle,
         textAlign: textAlign,
+        textAlignVertical: textAlignVertical,
         textDirection: textDirection,
         textCapitalization: textCapitalization,
         autofocus: autofocus,

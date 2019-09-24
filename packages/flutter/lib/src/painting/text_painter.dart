@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -79,9 +79,9 @@ class PlaceholderDimensions {
   }
 }
 
-/// The different ways of considering the width of one or more lines of text.
+/// The different ways of measuring the width of one or more lines of text.
 ///
-/// See [Text.widthType].
+/// See [Text.textWidthBasis], for example.
 enum TextWidthBasis {
   /// Multiline text will take up the full width given by the parent. For single
   /// line text, only the minimum amount of width needed to contain the text
@@ -161,6 +161,17 @@ class TextPainter {
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
 
+  /// Marks this text painter's layout information as dirty and removes cached
+  /// information.
+  ///
+  /// Uses this method to notify text painter to relayout in the case of
+  /// layout changes in engine. In most cases, updating text painter properties
+  /// in framework will automatically invoke this method.
+  void markNeedsLayout() {
+    _paragraph = null;
+    _needsLayout = true;
+  }
+
   /// The (potentially styled) text to paint.
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
@@ -180,8 +191,7 @@ class TextPainter {
     if (_text?.style != value?.style)
       _layoutTemplate = null;
     _text = value;
-    _paragraph = null;
-    _needsLayout = true;
+    markNeedsLayout();
   }
 
   /// How the text should be aligned horizontally.
@@ -196,8 +206,7 @@ class TextPainter {
     if (_textAlign == value)
       return;
     _textAlign = value;
-    _paragraph = null;
-    _needsLayout = true;
+    markNeedsLayout();
   }
 
   /// The default directionality of the text.
@@ -221,9 +230,8 @@ class TextPainter {
     if (_textDirection == value)
       return;
     _textDirection = value;
-    _paragraph = null;
+    markNeedsLayout();
     _layoutTemplate = null; // Shouldn't really matter, but for strict correctness...
-    _needsLayout = true;
   }
 
   /// The number of font pixels for each logical pixel.
@@ -239,9 +247,8 @@ class TextPainter {
     if (_textScaleFactor == value)
       return;
     _textScaleFactor = value;
-    _paragraph = null;
+    markNeedsLayout();
     _layoutTemplate = null;
-    _needsLayout = true;
   }
 
   /// The string used to ellipsize overflowing text. Setting this to a non-empty
@@ -267,8 +274,7 @@ class TextPainter {
     if (_ellipsis == value)
       return;
     _ellipsis = value;
-    _paragraph = null;
-    _needsLayout = true;
+    markNeedsLayout();
   }
 
   /// The locale used to select region-specific glyphs.
@@ -278,8 +284,7 @@ class TextPainter {
     if (_locale == value)
       return;
     _locale = value;
-    _paragraph = null;
-    _needsLayout = true;
+    markNeedsLayout();
   }
 
   /// An optional maximum number of lines for the text to span, wrapping if
@@ -297,8 +302,7 @@ class TextPainter {
     if (_maxLines == value)
       return;
     _maxLines = value;
-    _paragraph = null;
-    _needsLayout = true;
+    markNeedsLayout();
   }
 
   /// {@template flutter.painting.textPainter.strutStyle}
@@ -319,11 +323,12 @@ class TextPainter {
     if (_strutStyle == value)
       return;
     _strutStyle = value;
-    _paragraph = null;
-    _needsLayout = true;
+    markNeedsLayout();
   }
 
-  /// {@macro flutter.dart:ui.text.TextWidthBasis}
+  /// {@template flutter.painting.textPainter.textWidthBasis}
+  /// Defines how to measure the width of the rendered text.
+  /// {@endtemplate}
   TextWidthBasis get textWidthBasis => _textWidthBasis;
   TextWidthBasis _textWidthBasis;
   set textWidthBasis(TextWidthBasis value) {
@@ -331,8 +336,7 @@ class TextPainter {
     if (_textWidthBasis == value)
       return;
     _textWidthBasis = value;
-    _paragraph = null;
-    _needsLayout = true;
+    markNeedsLayout();
   }
 
 
@@ -380,8 +384,7 @@ class TextPainter {
       return placeholderCount;
     }() == value.length);
     _placeholderDimensions = value;
-    _needsLayout = true;
-    _paragraph = null;
+    markNeedsLayout();
   }
   List<PlaceholderDimensions> _placeholderDimensions;
 
@@ -782,6 +785,10 @@ class TextPainter {
       offset: rect != null ? Offset(rect.left, rect.top) : _emptyOffset,
       fullHeight: rect != null ? rect.bottom - rect.top : null,
     );
+
+    // Cache the input parameters to prevent repeat work later.
+    _previousCaretPosition = position;
+    _previousCaretPrototype = caretPrototype;
   }
 
   /// Returns a list of rects that bound the given selection.
@@ -811,5 +818,25 @@ class TextPainter {
     assert(!_needsLayout);
     final List<int> indices = _paragraph.getWordBoundary(position.offset);
     return TextRange(start: indices[0], end: indices[1]);
+  }
+
+  /// Returns the full list of [LineMetrics] that describe in detail the various
+  /// metrics of each laid out line.
+  ///
+  /// The [LineMetrics] list is presented in the order of the lines they represent.
+  /// For example, the first line is in the zeroth index.
+  ///
+  /// [LineMetrics] contains measurements such as ascent, descent, baseline, and
+  /// width for the line as a whole, and may be useful for aligning additional
+  /// widgets to a particular line.
+  ///
+  /// Valid only after [layout] has been called.
+  ///
+  /// This can potentially return a large amount of data, so it is not recommended
+  /// to repeatedly call this. Instead, cache the results. The cached results
+  /// should be invalidated upon the next sucessful [layout].
+  List<ui.LineMetrics> computeLineMetrics() {
+    assert(!_needsLayout);
+    return _paragraph.computeLineMetrics();
   }
 }

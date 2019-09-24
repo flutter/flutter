@@ -20,6 +20,8 @@ Future<void> main() async {
   final int port = httpServer.port;
   print('Listening on port $port.');
 
+  // Initializes bindings before using any platform channels.
+  WidgetsFlutterBinding.ensureInitialized();
   final ByteData byteData = await rootBundle.load('images/coast.jpg');
   final Uint8List bytes = byteData.buffer
       .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);

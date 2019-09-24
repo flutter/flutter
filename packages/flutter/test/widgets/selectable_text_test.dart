@@ -122,6 +122,7 @@ double getOpacity(WidgetTester tester, Finder finder) {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
@@ -220,7 +221,7 @@ void main() {
                 text: 'First line!',
                 style: TextStyle(
                     fontSize: 14,
-                    fontFamily: 'Roboto'
+                    fontFamily: 'Roboto',
                 ),
                 children: <TextSpan>[
                   TextSpan(
@@ -264,7 +265,7 @@ void main() {
                 text: 'First line!',
                 style: TextStyle(
                     fontSize: 14,
-                    fontFamily: 'Roboto'
+                    fontFamily: 'Roboto',
                 ),
                 children: <InlineSpan>[
                   WidgetSpan(
@@ -334,7 +335,7 @@ void main() {
       boilerplate(
         child: const SelectableText(
           text,
-          textWidthBasis: TextWidthBasis.parent
+          textWidthBasis: TextWidthBasis.parent,
         ),
       )
     );
@@ -345,7 +346,7 @@ void main() {
       boilerplate(
         child: const SelectableText(
           text,
-          textWidthBasis: TextWidthBasis.longestLine
+          textWidthBasis: TextWidthBasis.longestLine,
         ),
       )
     );
@@ -549,6 +550,7 @@ void main() {
     const int eIndex = 5;
     final Offset ePos = textOffsetToPosition(tester, eIndex);
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();
@@ -556,8 +558,6 @@ void main() {
     // The cursor is placed just like a regular tap.
     expect(editableText.controller.selection.baseOffset, eIndex);
     expect(editableText.controller.selection.extentOffset, eIndex);
-
-    await gesture.removePointer();
   });
 
   testWidgets('selectable text basic', (WidgetTester tester) async {
@@ -631,6 +631,7 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, 8);
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pump();
@@ -639,8 +640,6 @@ void main() {
 
     expect(controller.selection.baseOffset, 5);
     expect(controller.selection.extentOffset, 8);
-
-    await gesture.removePointer();
   });
 
   testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
@@ -650,7 +649,7 @@ void main() {
           child: SelectableText(
             'abc def ghi',
             dragStartBehavior: DragStartBehavior.down,
-            style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0)
+            style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
           ),
         ),
       ),
@@ -670,6 +669,7 @@ void main() {
 
     // Drag from 'c' to 'g'.
     final TestGesture gesture = await tester.startGesture(cPos, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pumpAndSettle();
@@ -693,8 +693,6 @@ void main() {
     expect(selectionChangedCount, 1);
     expect(controller.selection.baseOffset, 2);
     expect(controller.selection.extentOffset, 9);
-
-    await gesture.removePointer();
   });
 
   testWidgets('Dragging in opposite direction also works', (WidgetTester tester) async {
@@ -715,6 +713,7 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, 8);
 
     final TestGesture gesture = await tester.startGesture(gPos, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(ePos);
     await tester.pump();
@@ -723,8 +722,6 @@ void main() {
 
     expect(controller.selection.baseOffset, 5);
     expect(controller.selection.extentOffset, 8);
-
-    await gesture.removePointer();
   });
 
   testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {
@@ -745,6 +742,7 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester,8);
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.moveTo(gPos);
     await tester.pump();
@@ -752,8 +750,6 @@ void main() {
 
     expect(controller.selection.baseOffset, 5);
     expect(controller.selection.extentOffset,8);
-
-    await gesture.removePointer();
   });
 
   testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
@@ -1163,7 +1159,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
-    expect(topLeft.dx, equals(278.0));
+    expect(topLeft.dx, equals(399.0));
   });
 
   testWidgets('Can align to center within center', (WidgetTester tester) async {
@@ -1204,7 +1200,7 @@ void main() {
             ),
             SelectableText(
                 'text 2',
-                key: key2
+                key: key2,
             ),
           ],
         ),
@@ -1245,35 +1241,11 @@ void main() {
           SemanticsFlag.isReadOnly,
           SemanticsFlag.isMultiline,
         ]
-      )
+      ),
     );
 
     semantics.dispose();
   });
-
-  void sendFakeKeyEvent(Map<String, dynamic> data) {
-    defaultBinaryMessenger.handlePlatformMessage(
-      SystemChannels.keyEvent.name,
-      SystemChannels.keyEvent.codec.encodeMessage(data),
-          (ByteData data) { },
-    );
-  }
-
-  void sendKeyEventWithCode(int code, bool down, bool shiftDown, bool ctrlDown) {
-
-    int metaState = shiftDown ? 1 : 0;
-    if (ctrlDown)
-      metaState |= 1 << 12;
-
-    sendFakeKeyEvent(<String, dynamic>{
-      'type': down ? 'keydown' : 'keyup',
-      'keymap': 'android',
-      'keyCode': code,
-      'hidUsage': 0x04,
-      'codePoint': 0x64,
-      'metaState': metaState,
-    });
-  }
 
   group('Keyboard Tests', () {
     TextEditingController controller;
@@ -1304,7 +1276,8 @@ void main() {
     testWidgets('Shift test 1', (WidgetTester tester) async {
       await setupWidget(tester, 'a big house');
 
-      sendKeyEventWithCode(21, true, true, false);     // LEFT_ARROW keydown, SHIFT_ON
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
     });
 
@@ -1314,7 +1287,8 @@ void main() {
       controller.selection = const TextSelection.collapsed(offset: 3);
       await tester.pump();
 
-      sendKeyEventWithCode(22, true, true, false);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
     });
@@ -1322,7 +1296,9 @@ void main() {
     testWidgets('Control Shift test', (WidgetTester tester) async {
       await setupWidget(tester, 'their big house');
 
-      sendKeyEventWithCode(21, true, true, true);         // LEFT_ARROW keydown SHIFT_ON, CONTROL_ON
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
 
       await tester.pumpAndSettle();
 
@@ -1332,14 +1308,16 @@ void main() {
     testWidgets('Down and up test', (WidgetTester tester) async {
       await setupWidget(tester, 'a big house');
 
-      sendKeyEventWithCode(19, true, true, false);         // UP_ARROW keydown
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 11);
 
-      sendKeyEventWithCode(19, false, true, false);          // UP_ARROW keyup
-      await tester.pumpAndSettle();
-      sendKeyEventWithCode(20, true, true, false);           // DOWN_ARROW keydown
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowUp);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
@@ -1352,57 +1330,56 @@ void main() {
       await tester.pump();
 
       for (int i = 0; i < 5; i += 1) {
-        sendKeyEventWithCode(22, true, false, false);             // RIGHT_ARROW keydown
-        await tester.pumpAndSettle();
-        sendKeyEventWithCode(22, false, false, false);            // RIGHT_ARROW keyup
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
         await tester.pumpAndSettle();
       }
-      sendKeyEventWithCode(20, true, true, false);               // DOWN_ARROW keydown
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(20, false, true, false);              // DOWN_ARROW keyup
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 12);
 
-      sendKeyEventWithCode(20, true, true, false);                 // DOWN_ARROW keydown
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(20, false, true, false);                // DOWN_ARROW keyup
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 32);
 
-      sendKeyEventWithCode(19, true, true, false);               // UP_ARROW keydown
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(19, false, true, false);              // UP_ARROW keyup
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 12);
 
-      sendKeyEventWithCode(19, true, true, false);               // UP_ARROW keydown
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(19, false, true, false);              // UP_ARROW keyup
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
 
-      sendKeyEventWithCode(19, true, true, false);               // UP_ARROW keydown
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(19, false, true, false);              // UP_ARROW keyup
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
     });
   });
 
-  const int _kCKeyCode = 31;
-  const int _kAKeyCode = 29;
-
   testWidgets('Copy test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     String clipboardContent = '';
-    SystemChannels.platform
-        .setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
         clipboardContent = methodCall.arguments['text'];
       else if (methodCall.method == 'Clipboard.getData')
@@ -1436,24 +1413,23 @@ void main() {
     await tester.pump();
 
     // Select the first 5 characters
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     for (int i = 0; i < 5; i += 1) {
-      sendKeyEventWithCode(22, true, true, false);             // RIGHT_ARROW keydown shift
-      await tester.pumpAndSettle();
-      sendKeyEventWithCode(22, false, false, false);           // RIGHT_ARROW keyup
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pumpAndSettle();
     }
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
 
     // Copy them
-    sendKeyEventWithCode(_kCKeyCode, true, false, true);    // keydown control
-    await tester.pumpAndSettle();
-    sendKeyEventWithCode(_kCKeyCode, false, false, false);  // keyup control
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlRight);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyC);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyC);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlRight);
     await tester.pumpAndSettle();
 
     expect(clipboardContent, 'a big');
 
-    sendKeyEventWithCode(22, true, false, false);              // RIGHT_ARROW keydown
-    await tester.pumpAndSettle();
-    sendKeyEventWithCode(22, false, false, false);             // RIGHT_ARROW keyup
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
   });
 
@@ -1483,9 +1459,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Select All
-    sendKeyEventWithCode(_kAKeyCode, true, false, true);    // keydown control A
-    await tester.pumpAndSettle();
-    sendKeyEventWithCode(_kAKeyCode, false, false, true);   // keyup control A
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 0);
@@ -1532,10 +1508,13 @@ void main() {
     await tester.tap(find.byType(EditableText).first);
     await tester.pumpAndSettle();
 
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     for (int i = 0; i < 5; i += 1) {
-      sendKeyEventWithCode(21, true, true, false); // LEFT_ARROW keydown
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pumpAndSettle();
     }
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pumpAndSettle();
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 5);
 
@@ -1566,10 +1545,12 @@ void main() {
       ),
     );
 
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     for (int i = 0; i < 5; i += 1) {
-      sendKeyEventWithCode(21, true, true, false); // LEFT_ARROW keydown
-      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     }
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pumpAndSettle();
 
     editableTextWidget = tester.widget(find.byType(EditableText).last);
     c1 = editableTextWidget.controller;
@@ -1621,10 +1602,13 @@ void main() {
     await tester.tap(find.byType(SelectableText).first);
     await tester.pumpAndSettle();
 
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     for (int i = 0; i < 5; i += 1) {
-      sendKeyEventWithCode(21, true, true, false); // LEFT_ARROW keydown
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pumpAndSettle();
     }
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pumpAndSettle();
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 5);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, 0);
@@ -1632,10 +1616,13 @@ void main() {
     await tester.tap(find.byType(SelectableText).last);
     await tester.pumpAndSettle();
 
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     for (int i = 0; i < 5; i += 1) {
-      sendKeyEventWithCode(21, true, true, false); // LEFT_ARROW keydown
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pumpAndSettle();
     }
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pumpAndSettle();
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, 5);
@@ -1956,7 +1943,7 @@ void main() {
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
-            SemanticsAction.longPress
+            SemanticsAction.longPress,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isReadOnly,
@@ -2320,7 +2307,7 @@ void main() {
 
   testWidgets(
     'tap moves cursor to the edge of the word it tapped on (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2352,7 +2339,7 @@ void main() {
 
   testWidgets(
     'tap moves cursor to the position tapped (Android)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -2384,7 +2371,7 @@ void main() {
 
   testWidgets(
     'two slow taps do not trigger a word selection (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2419,7 +2406,7 @@ void main() {
 
   testWidgets(
     'double tap selects word and first tap of double tap moves cursor (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2465,7 +2452,7 @@ void main() {
 
   testWidgets(
     'double tap selects word and first tap of double tap moves cursor and shows toolbar (Android)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -2510,7 +2497,7 @@ void main() {
 
   testWidgets(
     'double tap on top of cursor also selects word (Android)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -2559,7 +2546,7 @@ void main() {
 
   testWidgets(
     'double tap hold selects word (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2606,7 +2593,7 @@ void main() {
 
   testWidgets(
     'tap after a double tap select is not affected (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2653,7 +2640,7 @@ void main() {
 
   testWidgets(
     'long press moves cursor to the exact long press position and shows toolbar (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2686,7 +2673,7 @@ void main() {
 
   testWidgets(
     'long press selects word and shows toolbar (Android)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
 
       await tester.pumpWidget(
         const MaterialApp(
@@ -2718,7 +2705,7 @@ void main() {
 
   testWidgets(
     'long press tap cannot initiate a double tap (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2754,7 +2741,7 @@ void main() {
 
   testWidgets(
     'long press drag moves the cursor under the drag and shows toolbar on lift (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2910,7 +2897,7 @@ void main() {
 
   testWidgets(
     'long tap after a double tap select is not affected (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2954,7 +2941,7 @@ void main() {
 //convert
   testWidgets(
     'double tap after a long tap is not affected (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2996,7 +2983,7 @@ void main() {
 
   testWidgets(
     'double tap chains work (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -3250,7 +3237,7 @@ void main() {
 
   testWidgets(
     'strut basic single line',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -3273,7 +3260,7 @@ void main() {
 
   testWidgets(
     'strut TextStyle increases height',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -3320,7 +3307,7 @@ void main() {
 
   testWidgets(
     'strut basic multi line',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -3344,7 +3331,7 @@ void main() {
 
   testWidgets(
     'strut no force small strut',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -3376,7 +3363,7 @@ void main() {
 
   testWidgets(
     'strut no force large strut',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -3405,7 +3392,7 @@ void main() {
 
   testWidgets(
     'strut height override',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -3434,7 +3421,7 @@ void main() {
 
   testWidgets(
     'strut forces field taller',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -3481,22 +3468,22 @@ void main() {
     Offset topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 4)).topLeft,
     );
-    expect(topLeft.dx, equals(306));
+    expect(topLeft.dx, equals(427));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 3)).topLeft,
     );
-    expect(topLeft.dx, equals(292));
+    expect(topLeft.dx, equals(413));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
-    expect(topLeft.dx, equals(278));
+    expect(topLeft.dx, equals(399));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 1)).topLeft,
     );
-    expect(topLeft.dx, equals(264));
+    expect(topLeft.dx, equals(385));
   });
 
   testWidgets('Caret indexes into trailing whitespace center align', (WidgetTester tester) async {
@@ -3517,33 +3504,32 @@ void main() {
     Offset topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 7)).topLeft,
     );
-    expect(topLeft.dx, equals(362));
+    expect(topLeft.dx, equals(469));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 8)).topLeft,
     );
-    // Caret is capped at text length.
-    expect(topLeft.dx, equals(362));
+    expect(topLeft.dx, equals(483));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 4)).topLeft,
     );
-    expect(topLeft.dx, equals(334));
+    expect(topLeft.dx, equals(427));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 3)).topLeft,
     );
-    expect(topLeft.dx, equals(320));
+    expect(topLeft.dx, equals(413));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
-    expect(topLeft.dx, equals(306));
+    expect(topLeft.dx, equals(399));
 
     topLeft = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 1)).topLeft,
     );
-    expect(topLeft.dx, equals(292));
+    expect(topLeft.dx, equals(385));
   });
 
   testWidgets('selection handles are rendered and not faded away', (WidgetTester tester) async {
@@ -3649,7 +3635,7 @@ void main() {
 
   testWidgets(
     'Mouse tap does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3665,6 +3651,7 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
+      addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.up();
       await tester.pump();
@@ -3672,14 +3659,12 @@ void main() {
       final EditableTextState editableText = tester.state(find.byType(EditableText));
       expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
       expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
-
-      await gesture.removePointer();
     },
   );
 
   testWidgets(
     'Mouse long press does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3695,6 +3680,7 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
+      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(seconds: 2));
       await gesture.up();
       await tester.pump();
@@ -3702,14 +3688,12 @@ void main() {
       final EditableTextState editableText = tester.state(find.byType(EditableText));
       expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
       expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
-
-      await gesture.removePointer();
     },
   );
 
   testWidgets(
     'Mouse double tap does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3725,6 +3709,7 @@ void main() {
         pointer: 7,
         kind: PointerDeviceKind.mouse,
       );
+      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
@@ -3736,8 +3721,6 @@ void main() {
       final EditableTextState editableText = tester.state(find.byType(EditableText));
       expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
       expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
-
-      await gesture.removePointer();
     },
   );
 }

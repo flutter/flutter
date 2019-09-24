@@ -279,7 +279,7 @@ abstract class RawKeyEvent extends Diagnosticable {
       case 'linux':
         data = RawKeyEventDataLinux(
             keyHelper: KeyHelper(message['toolkit'] ?? ''),
-            codePoint: message['codePoint'] ?? 0,
+            unicodeScalarValues: message['unicodeScalarValues'] ?? 0,
             keyCode: message['keyCode'] ?? 0,
             scanCode: message['scanCode'] ?? 0,
             modifiers: message['modifiers'] ?? 0);
@@ -511,5 +511,13 @@ class RawKeyboard {
   /// Returns the set of keys currently pressed.
   Set<LogicalKeyboardKey> get keysPressed {
     return _keysPressed.toSet();
+  }
+
+  /// Clears the list of keys returned from [keysPressed].
+  ///
+  /// This is used by the testing framework to make sure tests are hermetic.
+  @visibleForTesting
+  void clearKeysPressed() {
+    _keysPressed.clear();
   }
 }

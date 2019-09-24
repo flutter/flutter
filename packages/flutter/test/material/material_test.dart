@@ -276,7 +276,7 @@ void main() {
             ),
             child: buildMaterial(
                 color: Colors.cyan,
-                elevation: 8.0
+                elevation: 8.0,
             ),
           )
       );
@@ -298,6 +298,22 @@ void main() {
       );
 
       expect(find.byKey(materialKey), hasNoImmediateClip);
+    });
+
+    testWidgets('Null clipBehavior asserts', (WidgetTester tester) async {
+      final GlobalKey materialKey = GlobalKey();
+      Future<void> doPump() async {
+        await tester.pumpWidget(
+            Material(
+              key: materialKey,
+              type: MaterialType.transparency,
+              child: const SizedBox(width: 100.0, height: 100.0),
+              clipBehavior: null,
+            )
+        );
+      }
+
+      expect(() async => doPump(), throwsAssertionError);
     });
 
     testWidgets('clips to bounding rect by default given Clip.antiAlias', (WidgetTester tester) async {

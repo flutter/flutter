@@ -10,8 +10,8 @@ import '../rendering/mock_canvas.dart';
 Widget _buildSingleChildScrollViewWithScrollbar({
   TextDirection textDirection = TextDirection.ltr,
   EdgeInsets padding = EdgeInsets.zero,
-  Widget child}
-) {
+  Widget child,
+}) {
   return Directionality(
     textDirection: textDirection,
     child: MediaQuery(

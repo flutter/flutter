@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -39,7 +41,7 @@ class KeySet<T extends KeyboardKey> extends Diagnosticable {
     T key3,
     T key4,
   ])  : assert(key1 != null),
-        _keys = <T>{key1} {
+        _keys = HashSet<T>()..add(key1) {
     int count = 1;
     if (key2 != null) {
       _keys.add(key2);
@@ -74,11 +76,14 @@ class KeySet<T extends KeyboardKey> extends Diagnosticable {
       : assert(keys != null),
         assert(keys.isNotEmpty),
         assert(!keys.contains(null)),
-        _keys = keys;
+        _keys = HashSet<T>.from(keys);
 
   /// Returns an unmodifiable view of the [KeyboardKey]s in this [KeySet].
   Set<T> get keys => UnmodifiableSetView<T>(_keys);
-  final Set<T> _keys;
+  // This needs to be a hash set to be sure that the hashCode accessor returns
+  // consistent results. LinkedHashSet (the default Set implementation) depends
+  // upon insertion order, and HashSet does not.
+  final HashSet<T> _keys;
 
   @override
   bool operator ==(Object other) {
@@ -340,7 +345,7 @@ class _ShortcutsState extends State<Shortcuts> {
   @override
   Widget build(BuildContext context) {
     return Focus(
-      skipTraversal: true,
+      canRequestFocus: false,
       onKey: _handleOnKey,
       child: _ShortcutsMarker(
         manager: manager,

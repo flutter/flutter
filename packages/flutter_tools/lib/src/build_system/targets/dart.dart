@@ -64,6 +64,7 @@ class KernelSnapshot extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
+    Source.pattern('{PROJECT_DIR}/.packages'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
     Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and in .packages
     Source.artifact(Artifact.platformKernelDill),
@@ -80,7 +81,7 @@ class KernelSnapshot extends Target {
   List<Target> get dependencies => <Target>[];
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     final KernelCompiler compiler = await kernelCompilerFactory.create(
       FlutterProject.fromDirectory(environment.projectDir),
     );
@@ -96,12 +97,13 @@ class KernelSnapshot extends Target {
     final CompilerOutput output = await compiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
       aot: buildMode != BuildMode.debug,
-      trackWidgetCreation: false,
+      trackWidgetCreation: buildMode == BuildMode.debug,
       targetModel: TargetModel.flutter,
       targetProductVm: buildMode == BuildMode.release,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       depFilePath: null,
       packagesPath: packagesPath,
+      linkPlatformKernelIn: buildMode == BuildMode.release,
       mainPath: packageUriMapper.map(targetFile)?.toString() ?? targetFile,
     );
     if (output.errorCount != 0) {
@@ -116,7 +118,7 @@ abstract class AotElfBase extends Target {
   const AotElfBase();
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
+  Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
     final String outputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {

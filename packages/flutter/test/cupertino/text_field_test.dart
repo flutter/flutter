@@ -125,6 +125,7 @@ class PathPointsMatcher extends Matcher {
 
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
@@ -604,7 +605,7 @@ void main() {
               ),
               placeholderStyle: TextStyle(
                 color: Color(0xAAFFFFFF),
-                fontWeight: FontWeight.w600
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -980,7 +981,7 @@ void main() {
 
   testWidgets(
     'tapping clear button also calls onChanged when text not empty',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       String value = 'text entry';
       final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
@@ -2293,6 +2294,7 @@ void main() {
     final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
 
     final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pump();
@@ -2301,8 +2303,6 @@ void main() {
 
     expect(controller.selection.baseOffset, testValue.indexOf('e'));
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
-
-    await gesture.removePointer();
   });
 
   testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
@@ -2335,6 +2335,7 @@ void main() {
 
     // Drag from 'c' to 'g'.
     final TestGesture gesture = await tester.startGesture(cPos, kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pumpAndSettle();
@@ -2358,8 +2359,6 @@ void main() {
     expect(selectionChangedCount, 1);
     expect(controller.selection.baseOffset, 2);
     expect(controller.selection.extentOffset, 9);
-
-    await gesture.removePointer();
   });
 
   testWidgets('Tap does not show handles nor toolbar', (WidgetTester tester) async {
@@ -2410,7 +2409,7 @@ void main() {
 
   testWidgets(
     'Double tap shows handles and toolbar if selection is not collapsed',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2439,7 +2438,7 @@ void main() {
 
   testWidgets(
     'Double tap shows toolbar but not handles if selection is collapsed',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2468,7 +2467,7 @@ void main() {
 
   testWidgets(
     'Mouse long press does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2487,6 +2486,7 @@ void main() {
         textFieldPos,
         kind: PointerDeviceKind.mouse,
       );
+      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(seconds: 2));
       await gesture.up();
       await tester.pump();
@@ -2494,14 +2494,12 @@ void main() {
       final EditableTextState editableText = tester.state(find.byType(EditableText));
       expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
       expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
-
-      await gesture.removePointer();
     },
   );
 
   testWidgets(
     'Mouse double tap does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2540,6 +2538,7 @@ void main() {
         hPos,
         kind: PointerDeviceKind.mouse,
       );
+      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
@@ -2550,8 +2549,6 @@ void main() {
 
       expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
       expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
-
-      await gesture.removePointer();
     },
   );
 
@@ -2744,7 +2741,7 @@ void main() {
       toolbarTopLeft = tester.getTopLeft(find.text('Paste'));
       textFieldTopLeft = tester.getTopLeft(find.byType(CupertinoTextField));
       expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
-    }
+    },
   );
 
   testWidgets('text field respects keyboardAppearance from theme', (WidgetTester tester) async {
@@ -2930,7 +2927,7 @@ void main() {
                 enabled: false,
               ),
             )
-          )
+          ),
         )
       )
     );
@@ -3038,7 +3035,7 @@ void main() {
       state = tester.state<EditableTextState>(find.byType(EditableText));
       state.renderEditable.selectPositionAt(
         from: tester.getTopRight(find.byType(CupertinoApp)),
-        cause: SelectionChangedCause.tap
+        cause: SelectionChangedCause.tap,
       );
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
@@ -3099,7 +3096,7 @@ void main() {
       state = tester.state<EditableTextState>(find.byType(EditableText));
       state.renderEditable.selectPositionAt(
         from: tester.getCenter(find.byType(EditableText)),
-        cause: SelectionChangedCause.tap
+        cause: SelectionChangedCause.tap,
       );
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
@@ -3170,7 +3167,7 @@ void main() {
       state.renderEditable.selectPositionAt(
         from: textOffsetToPosition(tester, 0),
         to: textOffsetToPosition(tester, 4),
-        cause: SelectionChangedCause.tap
+        cause: SelectionChangedCause.tap,
       );
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
@@ -3241,7 +3238,7 @@ void main() {
       state.renderEditable.selectPositionAt(
         from: textOffsetToPosition(tester, 0),
         to: textOffsetToPosition(tester, 10),
-        cause: SelectionChangedCause.tap
+        cause: SelectionChangedCause.tap,
       );
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();

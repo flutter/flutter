@@ -206,12 +206,9 @@ class SystemUiOverlayStyle {
   }
 }
 
-List<String> _stringify(List<dynamic> list) {
-  final List<String> result = <String>[];
-  for (dynamic item in list)
-    result.add(item.toString());
-  return result;
-}
+List<String> _stringify(List<dynamic> list) => <String>[
+  for (dynamic item in list) item.toString(),
+];
 
 /// Controls specific aspects of the operating system's graphical interface and
 /// how it interacts with the application.

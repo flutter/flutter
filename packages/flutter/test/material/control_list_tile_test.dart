@@ -19,21 +19,6 @@ Widget wrap({ Widget child }) {
 }
 
 void main() {
-  testWidgets('CheckboxListTile control test', (WidgetTester tester) async {
-    final List<dynamic> log = <dynamic>[];
-    await tester.pumpWidget(wrap(
-      child: CheckboxListTile(
-        value: true,
-        onChanged: (bool value) { log.add(value); },
-        title: const Text('Hello'),
-      ),
-    ));
-    await tester.tap(find.text('Hello'));
-    log.add('-');
-    await tester.tap(find.byType(Checkbox));
-    expect(log, equals(<dynamic>[false, '-', false]));
-  });
-
   testWidgets('RadioListTile should initialize according to groupValue', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int selectedValue;

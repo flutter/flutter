@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
-import 'package:test_api/test_api.dart' as test_package show TestFailure;
+import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as _goldens;
 
-/// Compares rasterized image bytes against a golden image file.
+/// Compares image pixels against a golden image file.
 ///
 /// Instances of this comparator will be used as the backend for
 /// [matchesGoldenFile].
@@ -20,15 +19,44 @@ import 'package:test_api/test_api.dart' as test_package show TestFailure;
 /// fake async constraints that are normally imposed on widget tests (i.e. the
 /// need or the ability to call [WidgetTester.pump] to advance the microtask
 /// queue).
+///
+/// ## What is Golden File Testing?
+///
+/// The term __golden file__ refers to a master image that is considered the true
+/// rendering of a given widget, state, application, or other visual
+/// representation you have chosen to capture.
+///
+/// By keeping a master reference of visual aspects of your application, you can
+/// prevent unintended changes as you develop by testing against them.
+///
+/// Here, a minor code change has altered the appearance of a widget. A golden
+/// file test has compared the image generated at the time of the test to the
+/// golden master file that was generated earlier. The test has identified the
+/// change, preventing unintended modifications.
+///
+/// |  Sample                        |  Image |
+/// |--------------------------------|--------|
+/// |  Golden Master Image           | ![A golden master image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_masterImage.png)  |
+/// |  Difference                    | ![The pixel difference](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_isolatedDiff.png)  |
+/// |  Test image after modification | ![Test image](https://flutter.github.io/assets-for-api-docs/assets/flutter-test/goldens/widget_testImage.png) |
+///
+/// See also:
+///
+///  * [LocalFileComparator] for the default [GoldenFileComparator]
+///    implementation for `flutter test`.
+///  * [matchesGoldenFile], the function from [flutter_test] that invokes the
+///    comparator.
 abstract class GoldenFileComparator {
-  /// Compares [imageBytes] against the golden file identified by [golden].
+  /// Compares the pixels of decoded png [imageBytes] against the golden file
+  /// identified by [golden].
   ///
   /// The returned future completes with a boolean value that indicates whether
-  /// [imageBytes] matches the golden file's bytes within the tolerance defined
-  /// by the comparator.
+  /// the pixels decoded from [imageBytes] match the golden file's pixels.
   ///
   /// In the case of comparison mismatch, the comparator may choose to throw a
-  /// [TestFailure] if it wants to control the failure message.
+  /// [TestFailure] if it wants to control the failure message, often in the
+  /// form of a [ComparisonResult] that provides detailed information about the
+  /// mismatch.
   ///
   /// The method by which [golden] is located and by which its bytes are loaded
   /// is left up to the implementation class. For instance, some implementations
@@ -65,17 +93,23 @@ abstract class GoldenFileComparator {
         .join() + '.' + version.toString() + extension
     );
   }
+
+  /// Returns a [ComparisonResult] to describe the pixel differential of the
+  /// [test] and [master] image bytes provided.
+  static ComparisonResult compareLists(List<int> test, List<int> master) {
+    return _goldens.compareLists(test, master);
+  }
 }
 
-/// Compares rasterized image bytes against a golden image file.
+/// Compares pixels against those of a golden image file.
 ///
 /// This comparator is used as the backend for [matchesGoldenFile].
 ///
 /// When using `flutter test`, a comparator implemented by [LocalFileComparator]
 /// is used if no other comparator is specified. It treats the golden key as
 /// a relative path from the test file's directory. It will then load the
-/// golden file's bytes from disk and perform a byte-for-byte comparison of the
-/// encoded PNGs, returning true only if there's an exact match.
+/// golden file's bytes from disk and perform a pixel-for-pixel comparison of
+/// the decoded PNGs, returning true only if there's an exact match.
 ///
 /// When using `flutter test --update-goldens`, the [LocalFileComparator]
 /// updates the files on disk to match the rendering.
@@ -86,10 +120,8 @@ abstract class GoldenFileComparator {
 ///
 /// Callers may choose to override the default comparator by setting this to a
 /// custom comparator during test set-up (or using directory-level test
-/// configuration). For example, some projects may wish to install a more
-/// intelligent comparator that knows how to decode the PNG images to raw
-/// pixels and compare pixel vales, reporting specific differences between the
-/// images.
+/// configuration). For example, some projects may wish to install a comparator
+/// with tolerance levels for allowable differences.
 ///
 /// See also:
 ///
@@ -153,88 +185,29 @@ class TrivialComparator implements GoldenFileComparator {
   }
 }
 
-/// The default [GoldenFileComparator] implementation for `flutter test`.
+/// The result of a pixel comparison test.
 ///
-/// This comparator loads golden files from the local file system, treating the
-/// golden key as a relative path from the test file's directory.
-///
-/// This comparator performs a very simplistic comparison, doing a byte-for-byte
-/// comparison of the encoded PNGs, returning true only if there's an exact
-/// match. This means it will fail the test if two PNGs represent the same
-/// pixels but are encoded differently.
-///
-/// When using `flutter test --update-goldens`, [LocalFileComparator]
-/// updates the files on disk to match the rendering.
-class LocalFileComparator extends GoldenFileComparator {
-  /// Creates a new [LocalFileComparator] for the specified [testFile].
+/// The [ComparisonResult] will always indicate if a test has [passed]. The
+/// optional [error] and [diffs] parameters provide further information about
+/// the result of a failing test.
+class ComparisonResult {
+  /// Creates a new [ComparisonResult] for the current test.
+  ComparisonResult({
+    @required this.passed,
+    this.error,
+    this.diffs,
+  }) : assert(passed != null);
+
+  /// Indicates whether or not a pixel comparison test has failed.
   ///
-  /// Golden file keys will be interpreted as file paths relative to the
-  /// directory in which [testFile] resides.
-  ///
-  /// The [testFile] URL must represent a file.
-  LocalFileComparator(Uri testFile, {path.Style pathStyle})
-    : basedir = _getBasedir(testFile, pathStyle),
-      _path = _getPath(pathStyle);
+  /// This value cannot be null.
+  final bool passed;
 
-  static path.Context _getPath(path.Style style) {
-    return path.Context(style: style ?? path.Style.platform);
-  }
+  /// Error message used to describe the cause of the pixel comparison failure.
+  final String error;
 
-  static Uri _getBasedir(Uri testFile, path.Style pathStyle) {
-    final path.Context context = _getPath(pathStyle);
-    final String testFilePath = context.fromUri(testFile);
-    final String testDirectoryPath = context.dirname(testFilePath);
-    return context.toUri(testDirectoryPath + context.separator);
-  }
-
-  /// The directory in which the test was loaded.
-  ///
-  /// Golden file keys will be interpreted as file paths relative to this
-  /// directory.
-  final Uri basedir;
-
-  /// Path context exists as an instance variable rather than just using the
-  /// system path context in order to support testing, where we can spoof the
-  /// platform to test behaviors with arbitrary path styles.
-  final path.Context _path;
-
-  @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    final File goldenFile = _getFile(golden);
-    if (!goldenFile.existsSync()) {
-      throw test_package.TestFailure('Could not be compared against non-existent file: "$golden"');
-    }
-    final List<int> goldenBytes = await goldenFile.readAsBytes();
-    return _areListsEqual<int>(imageBytes, goldenBytes);
-  }
-
-  @override
-  Future<void> update(Uri golden, Uint8List imageBytes) async {
-    final File goldenFile = _getFile(golden);
-    await goldenFile.parent.create(recursive: true);
-    await goldenFile.writeAsBytes(imageBytes, flush: true);
-  }
-
-  File _getFile(Uri golden) {
-    return File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
-  }
-
-  static bool _areListsEqual<T>(List<T> list1, List<T> list2) {
-    if (identical(list1, list2)) {
-      return true;
-    }
-    if (list1 == null || list2 == null) {
-      return false;
-    }
-    final int length = list1.length;
-    if (length != list2.length) {
-      return false;
-    }
-    for (int i = 0; i < length; i++) {
-      if (list1[i] != list2[i]) {
-        return false;
-      }
-    }
-    return true;
-  }
+  /// Map containing differential images to illustrate found variants in pixel
+  /// values in the execution of the pixel test.
+  // TODO(jonahwilliams): fix type signature when image is updated to support web.
+  final Map<String, Object> diffs;
 }

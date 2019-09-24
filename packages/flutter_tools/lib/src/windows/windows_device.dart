@@ -8,7 +8,7 @@ import '../application_package.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process_manager.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../desktop.dart';
 import '../device.dart';
@@ -78,7 +78,6 @@ class WindowsDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
     if (!prebuiltApplication) {
@@ -88,8 +87,7 @@ class WindowsDevice extends Device {
         target: mainPath,
       );
     }
-    await stopApp(package);
-    final Process process = await processManager.start(<String>[
+    final Process process = await processUtils.start(<String>[
       package.executable(debuggingOptions?.buildInfo?.mode)
     ]);
     if (debuggingOptions?.buildInfo?.isRelease == true) {
@@ -115,7 +113,9 @@ class WindowsDevice extends Device {
     if (process == null) {
       return false;
     }
-    final ProcessResult result = await processManager.run(<String>['Taskkill', '/PID', process.first, '/F']);
+    final RunResult result = await processUtils.run(
+      <String>['Taskkill', '/PID', process.first, '/F'],
+    );
     return result.exitCode == 0;
   }
 
@@ -156,7 +156,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
   Future<List<String>> getDiagnostics() async => const <String>[];
 }
 
-final RegExp _whitespace = RegExp(r'\w+');
+final RegExp _whitespace = RegExp(r'\s+');
 
 /// Returns the running process matching `process` name.
 ///
@@ -164,7 +164,9 @@ final RegExp _whitespace = RegExp(r'\w+');
 @visibleForTesting
 List<String> runningProcess(String processName) {
   // TODO(jonahwilliams): find a way to do this without powershell.
-  final ProcessResult result = processManager.runSync(<String>['powershell', '-script="Get-CimInstance Win32_Process"']);
+  final RunResult result = processUtils.runSync(
+    <String>['powershell', '-script="Get-CimInstance Win32_Process"'],
+  );
   if (result.exitCode != 0) {
     return null;
   }
@@ -174,8 +176,15 @@ List<String> runningProcess(String processName) {
       continue;
     }
     final List<String> parts = process.split(_whitespace);
+
+    final String processPid = parts[0];
+    final String currentRunningProcessPid = pid.toString();
+    // Don't kill the flutter tool process
+    if (processPid == currentRunningProcessPid) {
+      continue;
+    }
     final List<String> data = <String>[
-      parts[0], // ID
+      processPid, // ID
       parts[1], // Name
     ];
     return data;

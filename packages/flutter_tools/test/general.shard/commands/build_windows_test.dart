@@ -6,10 +6,13 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/commands/build_windows.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -126,7 +129,7 @@ void main() {
     );
 
     // Spot-check important elements from the properties file.
-    final File propsFile = fs.file(r'C:\windows\flutter\Generated.props');
+    final File propsFile = fs.file(r'C:\windows\flutter\ephemeral\Generated.props');
     expect(propsFile.existsSync(), true);
     final xml.XmlDocument props = xml.parse(propsFile.readAsStringSync());
     expect(props.findAllElements('PropertyGroup').first.getAttribute('Label'), 'UserMacros');
@@ -138,6 +141,56 @@ void main() {
     Platform: () => windowsPlatform,
     VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('Release build prints an under-construction warning', () async {
+    final BuildCommand command = BuildCommand();
+    applyMocksToCommand(command);
+    fs.file(solutionPath).createSync(recursive: true);
+    when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+
+    when(mockProcessManager.start(<String>[
+      r'C:\packages\flutter_tools\bin\vs_build.bat',
+      vcvarsPath,
+      fs.path.basename(solutionPath),
+      'Release',
+    ], workingDirectory: fs.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
+      return mockProcess;
+    });
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'windows']
+    );
+
+    final BufferLogger bufferLogger = logger;
+    expect(bufferLogger.statusText, contains('🚧'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => memoryFilesystem,
+    ProcessManager: () => mockProcessManager,
+    Platform: () => windowsPlatform,
+    VisualStudio: () => mockVisualStudio,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('hidden when not enabled on Windows host', () {
+    when(platform.isWindows).thenReturn(true);
+
+    expect(BuildWindowsCommand().hidden, true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
+     Platform: () => MockPlatform(),
+  });
+
+  testUsingContext('Not hidden when enabled and on Windows host', () {
+    when(platform.isWindows).thenReturn(true);
+
+    expect(BuildWindowsCommand().hidden, false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    Platform: () => MockPlatform(),
   });
 }
 

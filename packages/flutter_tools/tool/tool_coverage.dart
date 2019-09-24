@@ -16,7 +16,7 @@ import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
 import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
-import 'package:vm_service_client/vm_service_client.dart';
+import 'package:vm_service_client/vm_service_client.dart'; // ignore: deprecated_member_use
 import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/platform.dart'; // ignore: implementation_imports
@@ -75,22 +75,25 @@ class VMPlatform extends PlatformPlugin {
     }));
     final ServiceProtocolInfo info = await Service.controlWebServer(enable: true);
     final dynamic channel = IsolateChannel<Object>.connectReceive(receivePort)
-        .transformStream(StreamTransformer<Object, Object>.fromHandlers(handleDone: (EventSink<Object> sink) async {
-      try {
-        // this will throw if collection fails.
-        await coverageCollector.collectCoverageIsolate(info.serverUri);
-      } finally {
-        isolate.kill(priority: Isolate.immediate);
-        isolate = null;
-        sink.close();
-        completer.complete();
-      }
-    }, handleError: (dynamic error, StackTrace stackTrace, EventSink<Object> sink) {
-      isolate.kill(priority: Isolate.immediate);
-      isolate = null;
-      sink.close();
-      completer.complete();
-    }));
+      .transformStream(StreamTransformer<Object, Object>.fromHandlers(
+        handleDone: (EventSink<Object> sink) async {
+          try {
+            // this will throw if collection fails.
+            await coverageCollector.collectCoverageIsolate(info.serverUri);
+          } finally {
+            isolate.kill(priority: Isolate.immediate);
+            isolate = null;
+            sink.close();
+            completer.complete();
+          }
+        },
+        handleError: (dynamic error, StackTrace stackTrace, EventSink<Object> sink) {
+          isolate.kill(priority: Isolate.immediate);
+          isolate = null;
+          sink.close();
+          completer.complete();
+        },
+      ));
 
     VMEnvironment environment;
     final RunnerSuiteController controller = deserializeSuite(

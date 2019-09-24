@@ -708,21 +708,17 @@ class _DiffTester {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     TestSemantics createExpectations(List<String> labels) {
-      final List<TestSemantics> children = <TestSemantics>[];
-      for (String label in labels) {
-        children.add(
-          TestSemantics(
-            rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-            label: label,
-          ),
-        );
-      }
-
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics.rootChild(
             rect: TestSemantics.fullScreen,
-            children: children,
+            children: <TestSemantics>[
+              for (String label in labels)
+                TestSemantics(
+                  rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+                  label: label,
+                ),
+            ],
           ),
         ],
       );

@@ -190,8 +190,8 @@ void main() {
 
     // Make child wider and higher than the viewport.
     setState(() {
-        childWidth = 900.0;
-        childHeight = 900.0;
+      childWidth = 900.0;
+      childHeight = 900.0;
     });
 
     await tester.pump();
@@ -294,9 +294,7 @@ void main() {
     expect(built, 2);
   });
 
-  testWidgets('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited',
-    (WidgetTester tester) async {
-
+  testWidgets('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
     int built = 0;
     final Widget target = Directionality(
       textDirection: TextDirection.ltr,

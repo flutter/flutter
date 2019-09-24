@@ -489,30 +489,77 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// `future?.asStream()`, except that snapshots with `ConnectionState.active`
 /// may appear for the latter, depending on how the stream is implemented.
 ///
-/// {@tool sample}
+/// {@animation 200 150 https://flutter.github.io/assets-for-api-docs/assets/widgets/future_builder.mp4}
 ///
-/// This sample shows a [FutureBuilder] configuring a text label to show the
-/// state of an asynchronous calculation returning a string. Assume the
-/// `_calculation` field is set by pressing a button elsewhere in the UI.
+/// {@animation 200 150 https://flutter.github.io/assets-for-api-docs/assets/widgets/future_builder_error.mp4}
+///
+/// {@tool snippet --template=stateful_widget_material}
+///
+/// This sample shows a [FutureBuilder] that displays a loading spinner while it
+/// loads data. It displays a success icon and text if the [Future] completes
+/// with a result, or an error icon and text if the [Future] completes with an
+/// error. Assume the `_calculation` field is set by pressing a button elsewhere
+/// in the UI.
 ///
 /// ```dart
-/// FutureBuilder<String>(
-///   future: _calculation, // a previously-obtained Future<String> or null
-///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-///     switch (snapshot.connectionState) {
-///       case ConnectionState.none:
-///         return Text('Press button to start.');
-///       case ConnectionState.active:
-///       case ConnectionState.waiting:
-///         return Text('Awaiting result...');
-///       case ConnectionState.done:
-///         if (snapshot.hasError)
-///           return Text('Error: ${snapshot.error}');
-///         return Text('Result: ${snapshot.data}');
-///     }
-///     return null; // unreachable
-///   },
-/// )
+/// Future<String> _calculation = Future<String>.delayed(
+///   Duration(seconds: 2),
+///   () => 'Data Loaded',
+/// );
+///
+/// Widget build(BuildContext context) {
+///   return FutureBuilder<String>(
+///     future: _calculation, // a previously-obtained Future<String> or null
+///     builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+///       List<Widget> children;
+///
+///       if (snapshot.hasData) {
+///         children = <Widget>[
+///           Icon(
+///             Icons.check_circle_outline,
+///             color: Colors.green,
+///             size: 60,
+///           ),
+///           Padding(
+///             padding: const EdgeInsets.only(top: 16),
+///             child: Text('Result: ${snapshot.data}'),
+///           )
+///         ];
+///       } else if (snapshot.hasError) {
+///         children = <Widget>[
+///           Icon(
+///             Icons.error_outline,
+///             color: Colors.red,
+///             size: 60,
+///           ),
+///           Padding(
+///             padding: const EdgeInsets.only(top: 16),
+///             child: Text('Error: ${snapshot.error}'),
+///           )
+///         ];
+///       } else {
+///         children = <Widget>[
+///           SizedBox(
+///             child: CircularProgressIndicator(),
+///             width: 60,
+///             height: 60,
+///           ),
+///           const Padding(
+///             padding: EdgeInsets.only(top: 16),
+///             child: Text('Awaiting result...'),
+///           )
+///         ];
+///       }
+///       return Center(
+///         child: Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
+///           crossAxisAlignment: CrossAxisAlignment.center,
+///           children: children,
+///         ),
+///       );
+///     },
+///   );
+/// }
 /// ```
 /// {@end-tool}
 // TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed

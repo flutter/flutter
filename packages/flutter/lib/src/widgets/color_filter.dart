@@ -55,6 +55,6 @@ class _ColorFilterRenderObject extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.pushColorFilter(offset, colorFilter, super.paint);
+    layer = context.pushColorFilter(offset, colorFilter, super.paint, oldLayer: layer);
   }
 }

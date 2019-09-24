@@ -32,10 +32,10 @@ void main() {
       verboseLogger.printTrace('Oooh, I do I do I do');
       verboseLogger.printError('Helpless!');
 
-      expect(mockLogger.statusText, matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Hey Hey Hey Hey\n'
-                                             r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Oooh, I do I do I do\n$'));
+      expect(mockLogger.statusText, matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Hey Hey Hey Hey\n'
+                                             r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Oooh, I do I do I do\n$'));
       expect(mockLogger.traceText, '');
-      expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Helpless!\n$'));
+      expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Helpless!\n$'));
     }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: false),
       Platform: _kNoAnsiPlatform,
@@ -51,12 +51,12 @@ void main() {
 
       expect(
           mockLogger.statusText,
-          matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Hey Hey Hey Hey$resetBold'
-                  r'\n\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Oooh, I do I do I do\n$'));
+          matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] ' '${bold}Hey Hey Hey Hey$resetBold'
+                  r'\n\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Oooh, I do I do I do\n$'));
       expect(mockLogger.traceText, '');
       expect(
           mockLogger.errorText,
-          matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Helpless!$resetBold$resetColor' r'\n$'));
+          matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] ' '${bold}Helpless!$resetBold$resetColor' r'\n$'));
     }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: true),
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
@@ -681,10 +681,10 @@ void main() {
       logger.startProgress('AAA', timeout: timeoutConfiguration.fastOperation)..stop();
       logger.startProgress('BBB', timeout: timeoutConfiguration.fastOperation)..stop();
       expect(outputStdout(), <Matcher>[
-        matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] AAA$'),
-        matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] AAA \(completed.*\)$'),
-        matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] BBB$'),
-        matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] BBB \(completed.*\)$'),
+        matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] AAA$'),
+        matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] AAA \(completed.*\)$'),
+        matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] BBB$'),
+        matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] BBB \(completed.*\)$'),
         matches(r'^$'),
       ]);
     }, overrides: <Type, Generator>{

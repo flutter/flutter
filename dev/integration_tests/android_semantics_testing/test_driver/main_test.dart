@@ -10,6 +10,16 @@ import 'package:android_semantics_testing/android_semantics_testing.dart';
 
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 import 'package:flutter_driver/flutter_driver.dart';
+import 'package:path/path.dart' as path;
+
+String adbPath() {
+  final String androidHome = io.Platform.environment['ANDROID_HOME'] ?? io.Platform.environment['ANDROID_SDK_ROOT'];
+  if (androidHome == null) {
+    return 'adb';
+  } else {
+    return path.join(androidHome, 'platform-tools', 'adb');
+  }
+}
 
 void main() {
   group('AccessibilityBridge', () {
@@ -23,7 +33,7 @@ void main() {
     setUpAll(() async {
       driver = await FlutterDriver.connect();
       // Say the magic words..
-      final io.Process run = await io.Process.start('adb', const <String>[
+      final io.Process run = await io.Process.start(adbPath(), const <String>[
         'shell',
         'settings',
         'put',
@@ -36,7 +46,7 @@ void main() {
 
     tearDownAll(() async {
       // ... And turn it off again
-      final io.Process run = await io.Process.start('adb', const <String>[
+      final io.Process run = await io.Process.start(adbPath(), const <String>[
         'shell',
         'settings',
         'put',
@@ -54,7 +64,11 @@ void main() {
       });
 
       test('TextField has correct Android semantics', () async {
-        final SerializableFinder normalTextField = find.byValueKey(normalTextFieldKeyValue);
+        final SerializableFinder normalTextField = find.descendant(
+          of: find.byValueKey(normalTextFieldKeyValue),
+          matching: find.byType('Semantics'),
+          firstMatchOnly: true,
+        );
         expect(await getSemantics(normalTextField), hasAndroidSemantics(
           className: AndroidClassName.editText,
           isEditable: true,
@@ -102,7 +116,11 @@ void main() {
       });
 
       test('password TextField has correct Android semantics', () async {
-        final SerializableFinder passwordTextField = find.byValueKey(passwordTextFieldKeyValue);
+        final SerializableFinder passwordTextField = find.descendant(
+          of: find.byValueKey(passwordTextFieldKeyValue),
+          matching: find.byType('Semantics'),
+          firstMatchOnly: true,
+        );
         expect(await getSemantics(passwordTextField), hasAndroidSemantics(
           className: AndroidClassName.editText,
           isEditable: true,
