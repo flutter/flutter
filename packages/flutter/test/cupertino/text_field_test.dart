@@ -605,7 +605,7 @@ void main() {
               ),
               placeholderStyle: TextStyle(
                 color: Color(0xAAFFFFFF),
-                fontWeight: FontWeight.w600
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -981,7 +981,7 @@ void main() {
 
   testWidgets(
     'tapping clear button also calls onChanged when text not empty',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       String value = 'text entry';
       final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
@@ -2409,7 +2409,7 @@ void main() {
 
   testWidgets(
     'Double tap shows handles and toolbar if selection is not collapsed',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2438,7 +2438,7 @@ void main() {
 
   testWidgets(
     'Double tap shows toolbar but not handles if selection is collapsed',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2467,7 +2467,7 @@ void main() {
 
   testWidgets(
     'Mouse long press does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2499,7 +2499,7 @@ void main() {
 
   testWidgets(
     'Mouse double tap does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'abc def ghi',
       );
@@ -2741,7 +2741,7 @@ void main() {
       toolbarTopLeft = tester.getTopLeft(find.text('Paste'));
       textFieldTopLeft = tester.getTopLeft(find.byType(CupertinoTextField));
       expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
-    }
+    },
   );
 
   testWidgets('text field respects keyboardAppearance from theme', (WidgetTester tester) async {
@@ -2927,7 +2927,7 @@ void main() {
                 enabled: false,
               ),
             )
-          )
+          ),
         )
       )
     );
@@ -3035,7 +3035,7 @@ void main() {
       state = tester.state<EditableTextState>(find.byType(EditableText));
       state.renderEditable.selectPositionAt(
         from: tester.getTopRight(find.byType(CupertinoApp)),
-        cause: SelectionChangedCause.tap
+        cause: SelectionChangedCause.tap,
       );
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
@@ -3096,7 +3096,7 @@ void main() {
       state = tester.state<EditableTextState>(find.byType(EditableText));
       state.renderEditable.selectPositionAt(
         from: tester.getCenter(find.byType(EditableText)),
-        cause: SelectionChangedCause.tap
+        cause: SelectionChangedCause.tap,
       );
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
@@ -3167,7 +3167,7 @@ void main() {
       state.renderEditable.selectPositionAt(
         from: textOffsetToPosition(tester, 0),
         to: textOffsetToPosition(tester, 4),
-        cause: SelectionChangedCause.tap
+        cause: SelectionChangedCause.tap,
       );
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
@@ -3238,7 +3238,7 @@ void main() {
       state.renderEditable.selectPositionAt(
         from: textOffsetToPosition(tester, 0),
         to: textOffsetToPosition(tester, 10),
-        cause: SelectionChangedCause.tap
+        cause: SelectionChangedCause.tap,
       );
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();

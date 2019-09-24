@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
@@ -47,11 +48,11 @@ class IOSDeploy {
       bundlePath,
       '--no-wifi',
       '--justlaunch',
+      if (launchArguments.isNotEmpty) ...<String>[
+        '--args',
+        '${launchArguments.join(" ")}',
+      ],
     ];
-    if (launchArguments.isNotEmpty) {
-      launchCommand.add('--args');
-      launchCommand.add('${launchArguments.join(" ")}');
-    }
 
     // Push /usr/bin to the front of PATH to pick up default system python, package 'six'.
     //
@@ -64,7 +65,7 @@ class IOSDeploy {
     iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
     iosDeployEnv.addEntries(<MapEntry<String, String>>[cache.dyLdLibEntry]);
 
-    return await runCommandAndStreamOutput(
+    return await processUtils.stream(
       launchCommand,
       mapFunction: _monitorInstallationFailure,
       trace: true,
@@ -132,7 +133,7 @@ class IOSDevice extends Device {
     );
     _iproxyPath = artifacts.getArtifactPath(
       Artifact.iproxy,
-      platform: TargetPlatform.ios
+      platform: TargetPlatform.ios,
     );
   }
 
@@ -167,14 +168,16 @@ class IOSDevice extends Device {
     if (!platform.isMacOS) {
       throw UnsupportedError('Control of iOS devices or simulators only supported on Mac OS.');
     }
-    if (!iMobileDevice.isInstalled)
+    if (!iMobileDevice.isInstalled) {
       return <IOSDevice>[];
+    }
 
     final List<IOSDevice> devices = <IOSDevice>[];
     for (String id in (await iMobileDevice.getAvailableDeviceIDs()).split('\n')) {
       id = id.trim();
-      if (id.isEmpty)
+      if (id.isEmpty) {
         continue;
+      }
 
       try {
         final String deviceName = await iMobileDevice.getInfoForDevice(id, 'DeviceName');
@@ -195,8 +198,9 @@ class IOSDevice extends Device {
   Future<bool> isAppInstalled(ApplicationPackage app) async {
     RunResult apps;
     try {
-      apps = await runCheckedAsync(
+      apps = await processUtils.run(
         <String>[_installerPath, '--list-apps'],
+        throwOnError: true,
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry],
         ),
@@ -220,8 +224,9 @@ class IOSDevice extends Device {
     }
 
     try {
-      await runCheckedAsync(
+      await processUtils.run(
         <String>[_installerPath, '-i', iosApp.deviceBundlePath],
+        throwOnError: true,
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry],
         ),
@@ -236,8 +241,9 @@ class IOSDevice extends Device {
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async {
     try {
-      await runCheckedAsync(
+      await processUtils.run(
         <String>[_installerPath, '-U', app.id],
+        throwOnError: true,
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry],
         ),
@@ -284,8 +290,9 @@ class IOSDevice extends Device {
         return LaunchResult.failed();
       }
     } else {
-      if (!await installApp(package))
+      if (!await installApp(package)) {
         return LaunchResult.failed();
+      }
     }
 
     // Step 2: Check that the application exists at the specified path.
@@ -297,51 +304,29 @@ class IOSDevice extends Device {
     }
 
     // Step 3: Attempt to install the application on the device.
-    final List<String> launchArguments = <String>['--enable-dart-profiling'];
-
-    if (debuggingOptions.startPaused)
-      launchArguments.add('--start-paused');
-
-    if (debuggingOptions.disableServiceAuthCodes)
-      launchArguments.add('--disable-service-auth-codes');
-
-    if (debuggingOptions.dartFlags.isNotEmpty) {
-      final String dartFlags = debuggingOptions.dartFlags;
-      launchArguments.add('--dart-flags="$dartFlags"');
-    }
-
-    if (debuggingOptions.useTestFonts)
-      launchArguments.add('--use-test-fonts');
-
-    // "--enable-checked-mode" and "--verify-entry-points" should always be
-    // passed when we launch debug build via "ios-deploy". However, we don't
-    // pass them if a certain environment variable is set to enable the
-    // "system_debug_ios" integration test in the CI, which simulates a
-    // home-screen launch.
-    if (debuggingOptions.debuggingEnabled &&
-        platform.environment['FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE'] != 'true') {
-      launchArguments.add('--enable-checked-mode');
-      launchArguments.add('--verify-entry-points');
-    }
-
-    if (debuggingOptions.enableSoftwareRendering)
-      launchArguments.add('--enable-software-rendering');
-
-    if (debuggingOptions.skiaDeterministicRendering)
-      launchArguments.add('--skia-deterministic-rendering');
-
-    if (debuggingOptions.traceSkia)
-      launchArguments.add('--trace-skia');
-
-    if (debuggingOptions.dumpSkpOnShaderCompilation)
-      launchArguments.add('--dump-skp-on-shader-compilation');
-
-    if (debuggingOptions.verboseSystemLogs) {
-      launchArguments.add('--verbose-logging');
-    }
-
-    if (platformArgs['trace-startup'] ?? false)
-      launchArguments.add('--trace-startup');
+    final List<String> launchArguments = <String>[
+      '--enable-dart-profiling',
+      if (debuggingOptions.startPaused) '--start-paused',
+      if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
+      if (debuggingOptions.dartFlags.isNotEmpty) '--dart-flags="${debuggingOptions.dartFlags}"',
+      if (debuggingOptions.useTestFonts) '--use-test-fonts',
+      // "--enable-checked-mode" and "--verify-entry-points" should always be
+      // passed when we launch debug build via "ios-deploy". However, we don't
+      // pass them if a certain environment variable is set to enable the
+      // "system_debug_ios" integration test in the CI, which simulates a
+      // home-screen launch.
+      if (debuggingOptions.debuggingEnabled &&
+          platform.environment['FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE'] != 'true') ...<String>[
+        '--enable-checked-mode',
+        '--verify-entry-points',
+      ],
+      if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
+      if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
+      if (debuggingOptions.traceSkia) '--trace-skia',
+      if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
+      if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
+      if (platformArgs['trace-startup'] ?? false) '--trace-startup',
+    ];
 
     final Status installStatus = logger.startProgress(
         'Installing and launching...',
@@ -361,7 +346,6 @@ class IOSDevice extends Device {
           ipv6: ipv6,
         );
       }
-
       final int installationResult = await IOSDeploy.instance.runApp(
         deviceId: id,
         bundlePath: bundle.path,
@@ -379,16 +363,36 @@ class IOSDevice extends Device {
         return LaunchResult.succeeded();
       }
 
+      Uri localUri;
       try {
         printTrace('Application launched on the device. Waiting for observatory port.');
-        final Uri localUri = await observatoryDiscovery.uri;
-        return LaunchResult.succeeded(observatoryUri: localUri);
+        localUri = await MDnsObservatoryDiscovery.instance.getObservatoryUri(
+          package.id,
+          this,
+          ipv6,
+          debuggingOptions.observatoryPort,
+        );
+        if (localUri != null) {
+          return LaunchResult.succeeded(observatoryUri: localUri);
+        }
       } catch (error) {
         printError('Failed to establish a debug connection with $id: $error');
-        return LaunchResult.failed();
+      }
+
+      // Fallback to manual protocol discovery
+      printTrace('mDNS lookup failed, attempting fallback to reading device log.');
+      try {
+        printTrace('Waiting for observatory port.');
+        localUri = await observatoryDiscovery.uri;
+        if (localUri != null) {
+          return LaunchResult.succeeded(observatoryUri: localUri);
+        }
+      } catch (error) {
+        printError('Failed to establish a debug connection with $id: $error');
       } finally {
         await observatoryDiscovery?.cancel();
       }
+      return LaunchResult.failed();
     } finally {
       installStatus.stop();
     }
@@ -544,8 +548,9 @@ class _IOSDeviceLogReader extends DeviceLogReader {
       _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
       _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
       _process.exitCode.whenComplete(() {
-        if (_linesController.hasListener)
+        if (_linesController.hasListener) {
           _linesController.close();
+        }
       });
     });
   }
@@ -601,8 +606,9 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
   @override
   Future<int> forward(int devicePort, { int hostPort }) async {
     final bool autoselect = hostPort == null || hostPort == 0;
-    if (autoselect)
+    if (autoselect) {
       hostPort = 1024;
+    }
 
     Process process;
 
@@ -610,7 +616,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     while (!connected) {
       printTrace('attempting to forward device port $devicePort to host port $hostPort');
       // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
-      process = await runCommand(
+      process = await processUtils.start(
         <String>[
           device._iproxyPath,
           hostPort.toString(),
@@ -626,8 +632,9 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
       if (!connected) {
         if (autoselect) {
           hostPort += 1;
-          if (hostPort > 65535)
+          if (hostPort > 65535) {
             throw Exception('Could not find open port on host.');
+          }
         } else {
           throw Exception('Port $hostPort is not available.');
         }

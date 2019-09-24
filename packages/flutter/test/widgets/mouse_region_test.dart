@@ -703,7 +703,7 @@ void main() {
       'parentData: MISSING',
       'constraints: MISSING',
       'size: MISSING',
-      'listeners: <none>'
+      'listeners: <none>',
     ]);
   });
 
@@ -725,7 +725,7 @@ void main() {
       'parentData: MISSING',
       'constraints: MISSING',
       'size: MISSING',
-      'listeners: enter, hover, exit'
+      'listeners: enter, hover, exit',
     ]);
   });
 }

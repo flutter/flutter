@@ -82,7 +82,7 @@ class BuildBundleCommand extends BuildSubCommand {
     }
     return <CustomDimensions, String>{
       CustomDimensions.commandBuildBundleTargetPlatform: argResults['target-platform'],
-      CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}'
+      CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}',
     };
   }
 

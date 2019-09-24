@@ -288,28 +288,6 @@ class SnackBar extends StatelessWidget {
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double snackBarPadding = isFloatingSnackBar ? 16.0 : 24.0;
 
-    final List<Widget> children = <Widget>[
-      SizedBox(width: snackBarPadding),
-      Expanded(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding),
-          child: DefaultTextStyle(
-            style: contentTextStyle,
-            child: content,
-          ),
-        ),
-      ),
-    ];
-    if (action != null) {
-      children.add(ButtonTheme(
-        textTheme: ButtonTextTheme.accent,
-        minWidth: 64.0,
-        padding: EdgeInsets.symmetric(horizontal: snackBarPadding),
-        child: action,
-      ));
-    } else {
-      children.add(SizedBox(width: snackBarPadding));
-    }
     final CurvedAnimation heightAnimation = CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
     final CurvedAnimation fadeInAnimation = CurvedAnimation(parent: animation, curve: _snackBarFadeInCurve);
     final CurvedAnimation fadeOutAnimation = CurvedAnimation(
@@ -322,8 +300,28 @@ class SnackBar extends StatelessWidget {
       top: false,
       bottom: !isFloatingSnackBar,
       child: Row(
-        children: children,
         crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          SizedBox(width: snackBarPadding),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding),
+              child: DefaultTextStyle(
+                style: contentTextStyle,
+                child: content,
+              ),
+            ),
+          ),
+          if (action != null)
+            ButtonTheme(
+              textTheme: ButtonTextTheme.accent,
+              minWidth: 64.0,
+              padding: EdgeInsets.symmetric(horizontal: snackBarPadding),
+              child: action,
+            )
+          else
+            SizedBox(width: snackBarPadding),
+        ],
       ),
     );
 

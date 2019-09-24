@@ -149,7 +149,7 @@ void main() {
           'flutter',
           'dummy',
           const Duration(milliseconds: 1000),
-          null
+          null,
         ],
       );
     },

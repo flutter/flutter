@@ -86,7 +86,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
     @required AndroidBuildInfo androidBuildInfo,
     @required String target,
   }) async {
-     if (!project.android.isUsingGradle) {
+    if (!project.android.isUsingGradle) {
       throwToolExit(
           'The build process for Android has changed, and the current project configuration '
               'is no longer valid. Please consult\n\n'

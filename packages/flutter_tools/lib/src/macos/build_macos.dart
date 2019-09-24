@@ -38,7 +38,7 @@ Future<void> buildMacOS({
   await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
   // If the xcfilelists do not exist, create empty version.
   if (!flutterProject.macos.inputFileList.existsSync()) {
-     flutterProject.macos.inputFileList.createSync(recursive: true);
+    flutterProject.macos.inputFileList.createSync(recursive: true);
   }
   if (!flutterProject.macos.outputFileList.existsSync()) {
     flutterProject.macos.outputFileList.createSync(recursive: true);
@@ -46,9 +46,13 @@ Future<void> buildMacOS({
 
   final Directory xcodeProject = flutterProject.macos.xcodeProject;
 
+  // If the standard project exists, specify it to getInfo to handle the case where there are
+  // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
+  // regardless of the project name so long as there is exactly one project.
+  final String xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
   final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(
     xcodeProject.parent.path,
-    projectFilename: xcodeProject.basename,
+    projectFilename: xcodeProjectName,
   );
   final String scheme = projectInfo.schemeFor(buildInfo);
   if (scheme == null) {

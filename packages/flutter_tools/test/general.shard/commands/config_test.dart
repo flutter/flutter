@@ -61,7 +61,7 @@ void main() {
 
       await commandRunner.run(<String>[
         'config',
-        '--build-dir=foo'
+        '--build-dir=foo',
       ]);
 
       expect(getBuildDirectory(), 'foo');
@@ -73,7 +73,7 @@ void main() {
 
       expect(() => commandRunner.run(<String>[
         'config',
-        '--build-dir=/foo'
+        '--build-dir=/foo',
       ]), throwsA(isInstanceOf<ToolExit>()));
     });
 
@@ -86,7 +86,7 @@ void main() {
         '--enable-web',
         '--enable-linux-desktop',
         '--enable-windows-desktop',
-        '--enable-macos-desktop'
+        '--enable-macos-desktop',
       ]);
 
       expect(Config.instance.getValue('enable-web'), true);
@@ -108,7 +108,7 @@ void main() {
         '--no-enable-web',
         '--no-enable-linux-desktop',
         '--no-enable-windows-desktop',
-        '--no-enable-macos-desktop'
+        '--no-enable-macos-desktop',
       ]);
 
       expect(Config.instance.getValue('enable-web'), false);
@@ -131,7 +131,7 @@ void main() {
         '--enable-web',
         '--enable-linux-desktop',
         '--enable-windows-desktop',
-        '--enable-macos-desktop'
+        '--enable-macos-desktop',
       ]);
 
       await commandRunner.run(<String>[
