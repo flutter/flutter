@@ -56,7 +56,8 @@ class TextParentData extends ContainerBoxParentData<RenderBox> {
 /// A render object that displays a paragraph of text.
 class RenderParagraph extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, TextParentData>,
-             RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
+             RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
+                  RelayoutWhenSystemFontsChangeMixin {
   /// Creates a paragraph render object.
   ///
   /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
@@ -458,6 +459,12 @@ class RenderParagraph extends RenderBox
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
     _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.infinity);
+  }
+
+  @override
+  void systemFontsDidChange() {
+    super.systemFontsDidChange();
+    _textPainter.markNeedsLayout();
   }
 
   void _layoutTextWithConstraints(BoxConstraints constraints) {

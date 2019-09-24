@@ -3231,6 +3231,40 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   }
 }
 
+/// Mixin for [RenderObject] that will call [systemFontsDidChange] whenever the
+/// system fonts change.
+///
+/// System fonts can change when the OS install or remove a font. Use this mixin if
+/// the [RenderObject] uses [TextPainter] or [Paragraph] to correctly update the
+/// text when it happens.
+mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
+
+  /// A callback that is called when system fonts have changed.
+  ///
+  /// By default, [markNeedsLayout] is called on the [RenderObject]
+  /// implementing this mixin.
+  ///
+  /// Subclass should override this method to clear any extra cache that depend
+  /// on font-related metrics.
+  @protected
+  @mustCallSuper
+  void systemFontsDidChange() {
+    markNeedsLayout();
+  }
+
+  @override
+  void attach(covariant Object owner) {
+    super.attach(owner);
+    PaintingBinding.instance.systemFonts.addListener(systemFontsDidChange);
+  }
+
+  @override
+  void detach() {
+    PaintingBinding.instance.systemFonts.removeListener(systemFontsDidChange);
+    super.detach();
+  }
+}
+
 /// Variant of [FlutterErrorDetails] with extra fields for the rendering
 /// library.
 class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
