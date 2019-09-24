@@ -52,7 +52,7 @@ void main() {
     });
   });
 
-   void _setupMocks() {
+  void _setupMocks() {
     fs.file('pubspec.yaml').createSync();
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
@@ -73,7 +73,7 @@ void main() {
   test('Can full restart after attaching', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -88,7 +88,7 @@ void main() {
   test('Fails on compilation errors in hot restart', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;

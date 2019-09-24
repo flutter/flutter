@@ -176,7 +176,10 @@ void main() {
           child: Center(
             child: TextFormField(
               autovalidate: true,
-              validator: (String value) { _validateCalled++; return null; },
+              validator: (String value) {
+                _validateCalled++;
+                return null;
+              },
             ),
           ),
         ),
@@ -199,7 +202,10 @@ void main() {
             child: TextFormField(
               enabled: true,
               autovalidate: true,
-              validator: (String value) { _validateCalled += 1; return null; },
+              validator: (String value) {
+                _validateCalled += 1;
+                return null;
+              },
             ),
           ),
         ),

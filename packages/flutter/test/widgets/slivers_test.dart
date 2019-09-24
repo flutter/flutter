@@ -34,7 +34,7 @@ Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) 
           SliverFixedExtentList(
             itemExtent: 900,
             delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
+              (BuildContext context, int index) {
                 return Center(
                   key: ValueKey<String>(items[index]),
                   child: KeepAlive(
@@ -268,7 +268,9 @@ void main() {
     expect(find.text('4'), findsOneWidget);
   });
 
-  testWidgets('SliverGrid Correctly layout children after rearranging', (WidgetTester tester) async {
+  testWidgets(
+    'SliverGrid Correctly layout children after rearranging',
+    (WidgetTester tester) async {
       await tester.pumpWidget(const TestSliverGrid(
         <Widget>[
           Text('item0', key: Key('0')),
@@ -299,7 +301,9 @@ void main() {
     },
   );
 
-  testWidgets('SliverFixedExtentList Correctly layout children after rearranging', (WidgetTester tester) async {
+  testWidgets(
+    'SliverFixedExtentList Correctly layout children after rearranging',
+    (WidgetTester tester) async {
       await tester.pumpWidget(const TestSliverFixedExtentList(
           <Widget>[
             Text('item0', key: Key('0')),
@@ -363,7 +367,7 @@ void main() {
             SliverFixedExtentList(
               itemExtent: 200,
               delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
+                (BuildContext context, int index) {
                   if (index <= 6) {
                     return Center(child: Text('Page $index'));
                   }
@@ -395,7 +399,7 @@ void main() {
             SliverFixedExtentList(
               itemExtent: 200,
               delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
+                (BuildContext context, int index) {
                   if (index <= 6) {
                     return Center(child: Text('Page $index'));
                   }

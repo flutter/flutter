@@ -1339,7 +1339,7 @@ class _RenderCupertinoDialogActions extends RenderBox
   final Paint _pressedButtonBackgroundPaint;
   set dialogPressedColor(Color value) {
     if (value == _pressedButtonBackgroundPaint.color)
-    return;
+      return;
 
     _pressedButtonBackgroundPaint.color = value;
     markNeedsPaint();
@@ -1348,7 +1348,7 @@ class _RenderCupertinoDialogActions extends RenderBox
   final Paint _dividerPaint;
   set dividerColor(Color value) {
     if (value == _dividerPaint.color)
-    return;
+      return;
 
     _dividerPaint.color = value;
     markNeedsPaint();

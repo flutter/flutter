@@ -805,15 +805,15 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoPageScaffold(
           child: Builder(builder: (BuildContext context) {
-              return GestureDetector(
-                onTap: () async {
-                  await showCupertinoModalPopup<void>(
-                    context: context,
-                    builder: (BuildContext context) => const SizedBox(),
-                  );
-                },
-                child: const Text('tap'),
-              );
+            return GestureDetector(
+              onTap: () async {
+                await showCupertinoModalPopup<void>(
+                  context: context,
+                  builder: (BuildContext context) => const SizedBox(),
+                );
+              },
+              child: const Text('tap'),
+            );
           }),
         ),
       ),
