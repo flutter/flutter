@@ -1,4 +1,4 @@
-Signature: 49768f7e25c686fbce984b4e042c1e24
+Signature: b925b1c5dcb43bc7db1377c9339cbe3f
 
 UNUSED LICENSES:
 
@@ -7445,6 +7445,8 @@ FILE: ../../../third_party/dart/benchmarks/FfiStruct/dart/FfiStruct.dart
 FILE: ../../../third_party/dart/benchmarks/Isolate/dart/Isolate.dart
 FILE: ../../../third_party/dart/runtime/bin/abi_version.h
 FILE: ../../../third_party/dart/runtime/bin/abi_version_in.cc
+FILE: ../../../third_party/dart/runtime/bin/elf_loader.cc
+FILE: ../../../third_party/dart/runtime/bin/elf_loader.h
 FILE: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_extension.cc
 FILE: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_extension_dllmain_win.cc
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/ffi_test_dynamic_library.cc
@@ -7463,6 +7465,7 @@ FILE: ../../../third_party/dart/runtime/llvm_codegen/bit/test.cc
 FILE: ../../../third_party/dart/runtime/llvm_codegen/codegen/main.cc
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/tree_map.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/timeline_base.dart
+FILE: ../../../third_party/dart/runtime/platform/elf.h
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_api_table.dart
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_ffiapi.dart
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/gen_api_table.dart
