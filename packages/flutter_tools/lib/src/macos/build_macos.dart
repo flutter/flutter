@@ -44,9 +44,16 @@ Future<void> buildMacOS({
     flutterProject.macos.outputFileList.createSync(recursive: true);
   }
 
-  final Directory xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
+  final Directory xcodeProject = flutterProject.macos.xcodeProject;
 
-  final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path);
+  // If the standard project exists, specify it to getInfo to handle the case where there are
+  // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
+  // regardless of the project name so long as there is exactly one project.
+  final String xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
+  final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(
+    xcodeProject.parent.path,
+    projectFilename: xcodeProjectName,
+  );
   final String scheme = projectInfo.schemeFor(buildInfo);
   if (scheme == null) {
     throwToolExit('Unable to find expected scheme in Xcode project.');
@@ -62,7 +69,7 @@ Future<void> buildMacOS({
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
-    '-workspace', xcodeWorkspace.path,
+    '-workspace', flutterProject.macos.xcodeWorkspace.path,
     '-configuration', '$configuration',
     '-scheme', 'Runner',
     '-derivedDataPath', flutterBuildDir.absolute.path,

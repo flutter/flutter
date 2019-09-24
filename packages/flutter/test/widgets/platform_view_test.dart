@@ -888,7 +888,7 @@ void main() {
       tester.widget(
           find.descendant(
               of: find.byType(AndroidView),
-              matching: find.byType(Focus)
+              matching: find.byType(Focus),
           )
       );
       final Element containerElement = tester.element(find.byKey(containerKey));
@@ -2161,7 +2161,7 @@ void main() {
       tester.widget(
           find.descendant(
               of: find.byType(PlatformViewLink),
-              matching: find.byType(Focus)
+              matching: find.byType(Focus),
           )
       );
       final FocusNode platformViewFocusNode = platformViewFocusWidget.focusNode;

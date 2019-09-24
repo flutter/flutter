@@ -501,7 +501,7 @@ class _AndroidViewState extends State<AndroidView> {
       creationParamsCodec: widget.creationParamsCodec,
       onFocus: () {
         _focusNode.requestFocus();
-      }
+      },
     );
     if (widget.onPlatformViewCreated != null) {
       _controller.addOnPlatformViewCreatedListener(widget.onPlatformViewCreated);

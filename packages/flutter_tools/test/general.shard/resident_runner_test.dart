@@ -35,6 +35,9 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
+      fs.file(fs.path.join('build', 'app.dill'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('ABC');
       residentRunner = HotRunner(
         <FlutterDevice>[
           mockFlutterDevice,
@@ -90,7 +93,7 @@ void main() {
     when(mockFlutterDevice.connect(
       reloadSources: anyNamed('reloadSources'),
       restart: anyNamed('restart'),
-      compileExpression: anyNamed('compileExpression')
+      compileExpression: anyNamed('compileExpression'),
     )).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.setupDevFS(any, any, packagesFilePath: anyNamed('packagesFilePath')))
       .thenAnswer((Invocation invocation) async {
@@ -193,6 +196,10 @@ void main() {
     Usage: () => MockUsage(),
   }));
 
+  test('ResidentRunner copies dill file from build output into temp directory', () => testbed.run(() async {
+    expect(residentRunner.artifactDirectory.childFile('app.dill').readAsStringSync(), 'ABC');
+  }));
+
   test('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
@@ -216,7 +223,7 @@ void main() {
     expect(verify(flutterUsage.sendEvent('hot', 'reload',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
-                   getNameForTargetPlatform(TargetPlatform.android_arm))
+                   getNameForTargetPlatform(TargetPlatform.android_arm)),
     );
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
@@ -246,7 +253,7 @@ void main() {
     expect(verify(flutterUsage.sendEvent('hot', 'restart',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
-                   getNameForTargetPlatform(TargetPlatform.android_arm))
+                   getNameForTargetPlatform(TargetPlatform.android_arm)),
     );
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
@@ -296,6 +303,20 @@ void main() {
     })).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
+  }));
+
+  test('ResidentRunner uses temp directory when there is no output dill path', () => testbed.run(() {
+    expect(residentRunner.artifactDirectory.path, contains('_fluttter_tool'));
+
+    final ResidentRunner otherRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      dillOutputPath: fs.path.join('foobar', 'app.dill'),
+    );
+    expect(otherRunner.artifactDirectory.path, contains('foobar'));
   }));
 
   test('ResidentRunner printHelpDetails', () => testbed.run(() {

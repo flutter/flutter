@@ -13,6 +13,7 @@ import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/os.dart' show os;
 import 'base/process.dart';
 import 'base/user_messages.dart';
@@ -115,14 +116,17 @@ class AndroidApk extends ApplicationPackage {
 
     String apptStdout;
     try {
-      apptStdout = runCheckedSync(<String>[
-        aaptPath,
-        'dump',
-        'xmltree',
-        apk.path,
-        'AndroidManifest.xml',
-      ]);
-    } catch (error) {
+      apptStdout = processUtils.runSync(
+        <String>[
+          aaptPath,
+          'dump',
+          'xmltree',
+          apk.path,
+          'AndroidManifest.xml',
+        ],
+        throwOnError: true,
+      ).stdout.trim();
+    } on ProcessException catch (error) {
       printError('Failed to extract manifest from APK: $error.');
       return null;
     }
@@ -324,7 +328,7 @@ abstract class IOSApp extends ApplicationPackage {
     );
   }
 
-  factory IOSApp.fromIosProject(IosProject project) {
+  static Future<IOSApp> fromIosProject(IosProject project) {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       return null;
     }
@@ -341,7 +345,7 @@ abstract class IOSApp extends ApplicationPackage {
       printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
       return null;
     }
-    return BuildableIOSApp(project);
+    return BuildableIOSApp.fromProject(project);
   }
 
   @override
@@ -353,7 +357,13 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  BuildableIOSApp(this.project) : super(projectBundleId: project.productBundleIdentifier);
+  BuildableIOSApp(this.project, String projectBundleId)
+    : super(projectBundleId: projectBundleId);
+
+  static Future<BuildableIOSApp> fromProject(IosProject project) async {
+    final String projectBundleId = await project.productBundleIdentifier;
+    return BuildableIOSApp(project, projectBundleId);
+  }
 
   final IosProject project;
 
@@ -412,7 +422,7 @@ class ApplicationPackageStore {
         android ??= await AndroidApk.fromAndroidProject(FlutterProject.current().android);
         return android;
       case TargetPlatform.ios:
-        iOS ??= IOSApp.fromIosProject(FlutterProject.current().ios);
+        iOS ??= await IOSApp.fromIosProject(FlutterProject.current().ios);
         return iOS;
       case TargetPlatform.fuchsia:
         fuchsia ??= FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia);
@@ -497,8 +507,9 @@ class ApkManifestData {
   ApkManifestData._(this._data);
 
   static ApkManifestData parseFromXmlDump(String data) {
-    if (data == null || data.trim().isEmpty)
+    if (data == null || data.trim().isEmpty) {
       return null;
+    }
 
     final List<String> lines = data.split('\n');
     assert(lines.length > 3);

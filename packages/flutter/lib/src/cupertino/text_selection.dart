@@ -335,7 +335,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     void addToolbarButtonIfNeeded(
       String text,
       bool Function(TextSelectionDelegate) predicate,
-      void Function(TextSelectionDelegate) onPressed
+      void Function(TextSelectionDelegate) onPressed,
     ) {
       if (!predicate(delegate)) {
         return;

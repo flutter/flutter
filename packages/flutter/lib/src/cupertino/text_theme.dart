@@ -216,7 +216,7 @@ class CupertinoTextThemeData extends Diagnosticable {
   /// Returns a copy of the current [CupertinoTextThemeData] with all the colors
   /// resolved against the given [BuildContext].
   CupertinoTextThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
-    Color convertColor(Color color) => color == null ? null : CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+    Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
     TextStyle resolveTextStyle(TextStyle textStyle) {
       return textStyle?.copyWith(

@@ -83,7 +83,7 @@ void main() {
       MaterialApp(
         home: provider.buildGestureDetector(
           behavior: HitTestBehavior.translucent,
-          child: FakeEditableText(key: editableTextKey)
+          child: FakeEditableText(key: editableTextKey),
         )
       )
     );

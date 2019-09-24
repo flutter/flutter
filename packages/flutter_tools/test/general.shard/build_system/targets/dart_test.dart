@@ -44,7 +44,7 @@ void main() {
         defines: <String, String>{
           kBuildMode: getNameForBuildMode(BuildMode.profile),
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
-        }
+        },
       );
       iosEnvironment = Environment(
         outputDir: fs.currentDirectory,
@@ -52,7 +52,7 @@ void main() {
         defines: <String, String>{
           kBuildMode: getNameForBuildMode(BuildMode.profile),
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
-        }
+        },
       );
       HostPlatform hostPlatform;
       if (platform.isWindows) {
@@ -130,12 +130,12 @@ flutter_tools:lib/''');
       outputFilePath: anyNamed('outputFilePath'),
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
-      mainPath: anyNamed('mainPath')
+      mainPath: anyNamed('mainPath'),
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
 
-    await const KernelSnapshot().build(<File>[], androidEnvironment);
+    await const KernelSnapshot().build(androidEnvironment);
   }, overrides: <Type, Generator>{
     KernelCompilerFactory: () => MockKernelCompilerFactory(),
   }));
@@ -154,12 +154,12 @@ flutter_tools:lib/''');
       outputFilePath: anyNamed('outputFilePath'),
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
-      mainPath: anyNamed('mainPath')
+      mainPath: anyNamed('mainPath'),
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
 
-    await const KernelSnapshot().build(<File>[], Environment(
+    await const KernelSnapshot().build(Environment(
         outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
         defines: <String, String>{

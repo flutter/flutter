@@ -39,7 +39,7 @@ Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) 
                   key: ValueKey<String>(items[index]),
                   child: KeepAlive(
                     items[index],
-                  )
+                  ),
                 );
               },
               childCount : items.length,
@@ -47,7 +47,7 @@ Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) 
                 final ValueKey<String> valueKey = key;
                 final String data = valueKey.value;
                 return items.indexOf(data);
-              }
+              },
             ),
           ),
         ],
@@ -441,7 +441,7 @@ class TestSliverGrid extends StatelessWidget {
             ),
           ),
         ],
-      )
+      ),
     );
   }
 }
@@ -464,7 +464,7 @@ class TestSliverFixedExtentList extends StatelessWidget {
               ),
             ),
           ],
-        )
+        ),
     );
   }
 }

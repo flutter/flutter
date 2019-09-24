@@ -1098,7 +1098,7 @@ class TextSelectionGestureDetectorBuilder {
   Widget buildGestureDetector({
     Key key,
     HitTestBehavior behavior,
-    Widget child
+    Widget child,
   }) {
     return TextSelectionGestureDetector(
       key: key,
