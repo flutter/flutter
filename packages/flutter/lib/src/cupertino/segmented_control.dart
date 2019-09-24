@@ -46,7 +46,7 @@ const double _kSeparatorWidth = 1;
 
 const SpringDescription _kSegmentedControlSpringDescription = SpringDescription(mass: 1, stiffness: 503.551, damping: 44.8799);
 
-const Duration _kSpringAnimationDuration = Duration(milliseconds: 410);
+const Duration _kSpringAnimationDuration = Duration(milliseconds: 412);
 
 /// An iOS-style segmented control.
 ///
@@ -551,8 +551,6 @@ class _RenderSegmentedControl<T> extends RenderBox
        thumbScaleController = AnimationController(
          duration: _kSpringAnimationDuration,
          value: 1,
-         lowerBound: 0.95,
-         upperBound: 1,
          vsync: vsync,
        ) {
          addAll(children);
@@ -576,7 +574,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   // Unscaled Thumb Rect;
   Tween<Rect> _currentThumbTween;
   final AnimationController thumbController;
-  final Tween<double> thumbScaleTween = Tween<double>(begin: 1, end: 0.6);
+  final Tween<double> thumbScaleTween = Tween<double>(begin: 0.95, end: 1);
   final AnimationController thumbScaleController;
 
   int get selectedIndex => _selectedIndex;
@@ -823,7 +821,7 @@ class _RenderSegmentedControl<T> extends RenderBox
       _currentThumbRect = _currentThumbTween?.evaluate(thumbController)
                         ?? unscaledThumbTargetRect;
 
-      final double thumbScale = thumbScaleController.value;
+      final double thumbScale = thumbScaleTween.evaluate(thumbScaleController);
 
       final Rect thumbRect = Rect.fromCenter(
         center: _currentThumbRect.center,
