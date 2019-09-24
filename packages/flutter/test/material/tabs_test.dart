@@ -96,7 +96,7 @@ class _NestedTabBarContainer extends StatelessWidget {
                 Container(color: Colors.grey),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

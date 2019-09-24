@@ -981,7 +981,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.widgetWithText(CupertinoButton, 'An iPod'), findsOneWidget);
-    }
+    },
   );
 
   testWidgets(
@@ -1036,7 +1036,7 @@ void main() {
       expect(find.text('A Phone'), findsOneWidget);
       // Custom onPressed called.
       expect(backPressed, true);
-    }
+    },
   );
 
   testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {

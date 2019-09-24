@@ -368,7 +368,7 @@ void main() {
       'constraints: MISSING',
       'size: MISSING',
       'behavior: deferToChild',
-      'listeners: <none>'
+      'listeners: <none>',
     ]);
   });
 
@@ -394,7 +394,7 @@ void main() {
       'constraints: MISSING',
       'size: MISSING',
       'behavior: opaque',
-      'listeners: down, move, up, cancel, signal'
+      'listeners: down, move, up, cancel, signal',
     ]);
   });
 }

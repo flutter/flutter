@@ -1042,7 +1042,7 @@ class _RRectPaintPredicate extends _DrawCommandPaintPredicate {
     color: color,
     strokeWidth: strokeWidth,
     hasMaskFilter: hasMaskFilter,
-    style: style
+    style: style,
   );
 
   final RRect rrect;
@@ -1093,7 +1093,7 @@ class _DRRectPaintPredicate extends _TwoParameterPaintPredicate<RRect, RRect> {
 
 class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
   _CirclePaintPredicate({ this.x, this.y, this.radius, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
-    #drawCircle, 'a circle', 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
+    #drawCircle, 'a circle', 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style,
   );
 
   final double x;
@@ -1137,7 +1137,7 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
 
 class _PathPaintPredicate extends _DrawCommandPaintPredicate {
   _PathPaintPredicate({ this.includes, this.excludes, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
-    #drawPath, 'a path', 2, 1, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
+    #drawPath, 'a path', 2, 1, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style,
   );
 
   final Iterable<Offset> includes;
@@ -1177,7 +1177,7 @@ class _PathPaintPredicate extends _DrawCommandPaintPredicate {
 // TODO(ianh): add arguments to test the length, angle, that kind of thing
 class _LinePaintPredicate extends _DrawCommandPaintPredicate {
   _LinePaintPredicate({ this.p1, this.p2, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
-    #drawLine, 'a line', 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
+    #drawLine, 'a line', 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style,
   );
 
   final Offset p1;
@@ -1210,7 +1210,7 @@ class _LinePaintPredicate extends _DrawCommandPaintPredicate {
 
 class _ArcPaintPredicate extends _DrawCommandPaintPredicate {
   _ArcPaintPredicate({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
-    #drawArc, 'an arc', 5, 4, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
+    #drawArc, 'an arc', 5, 4, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style,
   );
 }
 
@@ -1291,7 +1291,7 @@ class _ShadowPredicate extends _PaintPredicate {
 
 class _DrawImagePaintPredicate extends _DrawCommandPaintPredicate {
   _DrawImagePaintPredicate({ this.image, this.x, this.y, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
-    #drawImage, 'an image', 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
+    #drawImage, 'an image', 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style,
   );
 
   final ui.Image image;
@@ -1335,7 +1335,7 @@ class _DrawImagePaintPredicate extends _DrawCommandPaintPredicate {
 
 class _DrawImageRectPaintPredicate extends _DrawCommandPaintPredicate {
   _DrawImageRectPaintPredicate({ this.image, this.source, this.destination, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
-    #drawImageRect, 'an image', 4, 3, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
+    #drawImageRect, 'an image', 4, 3, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style,
   );
 
   final ui.Image image;

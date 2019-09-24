@@ -227,7 +227,7 @@ class CupertinoDatePicker extends StatefulWidget {
     this.maximumYear,
     this.minuteInterval = 1,
     this.use24hFormat = false,
-    this.backgroundColor = _kBackgroundColor
+    this.backgroundColor = _kBackgroundColor,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(mode != null),
        assert(onDateTimeChanged != null),
@@ -1206,7 +1206,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     for (String input in numbers) {
       textPainter.text = TextSpan(
         text: input,
-        style: textStyle
+        style: textStyle,
       );
       textPainter.layout();
 
@@ -1218,7 +1218,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
     textPainter.text = TextSpan(
       text: '$widestNumber$widestNumber',
-      style: textStyle
+      style: textStyle,
     );
 
     textPainter.layout();
@@ -1251,7 +1251,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
               text,
               style: const TextStyle(
                 fontSize: _kTimerPickerLabelFontSize,
-                fontWeight: FontWeight.w600
+                fontWeight: FontWeight.w600,
               ),
               maxLines: 1,
               softWrap: false,
@@ -1320,7 +1320,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         ),
         _buildLabel(
           localizations.timerPickerHourLabel(lastSelectedHour ?? selectedHour),
-          additionalPadding
+          additionalPadding,
         ),
       ],
     );
@@ -1474,14 +1474,14 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         // Pad the widget to make it as wide as `_kPickerWidth`.
         columns = <Widget>[
           _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
-          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2))
+          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2)),
         ];
         break;
       case CupertinoTimerPickerMode.ms:
         // Pad the widget to make it as wide as `_kPickerWidth`.
         columns = <Widget>[
           _buildMinuteColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
-          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2))
+          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2)),
         ];
         break;
       case CupertinoTimerPickerMode.hms:
@@ -1490,7 +1490,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         columns = <Widget>[
           _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
           _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: _kTimerPickerHalfColumnPadding)),
-          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2))
+          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2)),
         ];
         break;
     }

@@ -25,7 +25,7 @@ void main() {
                   width: 100,
                   height: 150,
                   color: Colors.red,
-                )
+                ),
             ),
           ),
         )
@@ -69,7 +69,7 @@ void main() {
                   width: 500,
                   height: 500,
                   color: Colors.red,
-                )
+                ),
             ),
           ),
         )

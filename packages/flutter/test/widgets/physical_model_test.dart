@@ -169,7 +169,7 @@ void main() {
             child: Material(
               elevation: 2.0,
               color: Colors.red,
-            )
+            ),
           ),
         ),
       ];
@@ -272,7 +272,7 @@ void main() {
             child: const Material(
               elevation: 2.0,
               color: Colors.red,
-              shape: CircleBorder()
+              shape: CircleBorder(),
             ),
           ),
         ),
@@ -310,7 +310,7 @@ void main() {
             child: const Material(
               elevation: 2.0,
               color: Colors.red,
-              shape: CircleBorder()
+              shape: CircleBorder(),
             ),
           ),
         ),
@@ -348,7 +348,7 @@ void main() {
             child: const Material(
               elevation: 2.0,
               color: Colors.red,
-              shape: CircleBorder()
+              shape: CircleBorder(),
             ),
           ),
         ),
@@ -433,7 +433,7 @@ void main() {
             child: const Material(
               elevation: 2.0,
               color: Colors.red,
-              shape: CircleBorder()
+              shape: CircleBorder(),
             ),
           ),
         ),

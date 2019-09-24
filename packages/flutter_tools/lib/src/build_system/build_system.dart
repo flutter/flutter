@@ -126,7 +126,7 @@ abstract class Target {
       <Node>[
         for (Target target in dependencies) target._toNode(environment)
       ],
-      environment
+      environment,
     );
   }
 
@@ -390,9 +390,9 @@ class BuildSystem {
   /// Build `target` and all of its dependencies.
   Future<BuildResult> build(
     Target target,
-    Environment environment,
-    { BuildSystemConfig buildSystemConfig = const BuildSystemConfig() }
-  ) async {
+    Environment environment, {
+    BuildSystemConfig buildSystemConfig = const BuildSystemConfig(),
+  }) async {
     environment.buildDir.createSync(recursive: true);
     environment.outputDir.createSync(recursive: true);
 

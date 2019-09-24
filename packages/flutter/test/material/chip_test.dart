@@ -170,7 +170,7 @@ Future<void> _pumpCheckmarkChip(
             child: chip,
           );
         },
-      )
+      ),
     )
   );
 }

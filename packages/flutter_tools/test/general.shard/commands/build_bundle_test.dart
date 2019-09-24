@@ -103,7 +103,7 @@ void main() {
     expect(() => runner.run(<String>[
       'bundle',
       '--no-pub',
-      '--target-platform=windows-x64'
+      '--target-platform=windows-x64',
     ]), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
@@ -120,7 +120,7 @@ void main() {
     expect(() => runner.run(<String>[
       'bundle',
       '--no-pub',
-      '--target-platform=linux-x64'
+      '--target-platform=linux-x64',
     ]), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
@@ -137,7 +137,7 @@ void main() {
     expect(() => runner.run(<String>[
       'bundle',
       '--no-pub',
-      '--target-platform=darwin-x64'
+      '--target-platform=darwin-x64',
     ]), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
@@ -154,7 +154,7 @@ void main() {
     await runner.run(<String>[
       'bundle',
       '--no-pub',
-      '--target-platform=windows-x64'
+      '--target-platform=windows-x64',
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
@@ -171,7 +171,7 @@ void main() {
     await runner.run(<String>[
       'bundle',
       '--no-pub',
-      '--target-platform=linux-x64'
+      '--target-platform=linux-x64',
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
@@ -188,7 +188,7 @@ void main() {
     await runner.run(<String>[
       'bundle',
       '--no-pub',
-      '--target-platform=darwin-x64'
+      '--target-platform=darwin-x64',
     ]);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),

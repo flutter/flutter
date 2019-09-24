@@ -81,7 +81,7 @@ void main() {
           bool enableDebugExtension}) async {
             return mockDwds;
         },
-      }
+      },
     );
   });
 

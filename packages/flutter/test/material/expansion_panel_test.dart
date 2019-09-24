@@ -10,7 +10,7 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
     Key key,
     this.firstPanelKey,
     this.secondPanelKey,
-    this.canTapOnHeader = false
+    this.canTapOnHeader = false,
   }) : super(key: key);
 
   final Key firstPanelKey;

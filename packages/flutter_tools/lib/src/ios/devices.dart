@@ -133,7 +133,7 @@ class IOSDevice extends Device {
     );
     _iproxyPath = artifacts.getArtifactPath(
       Artifact.iproxy,
-      platform: TargetPlatform.ios
+      platform: TargetPlatform.ios,
     );
   }
 
