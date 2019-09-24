@@ -46,20 +46,25 @@ class GradleUtils {
     return _cachedExecutable;
   }
 
-  final Map<FlutterProject, GradleProject> _cachedAppProject =
-    <FlutterProject, GradleProject>{};
+  /// Cached app projects. The key is the [FluterProject]'s path, the value is [GradleProject].
+  final Map<String, GradleProject> _cachedAppProject = <String, GradleProject>{};
+
   /// Gets the [GradleProject] for the [project] if built as an app.
   Future<GradleProject> getAppProject(FlutterProject project) async {
-    _cachedAppProject[project] ??= await _readGradleProject(project, isLibrary: false);
-    return _cachedAppProject[project];
+    final String projectPath = project.directory.path;
+    _cachedAppProject[projectPath] ??= await _readGradleProject(project, isLibrary: false);
+    return _cachedAppProject[projectPath];
   }
 
-  final Map<FlutterProject, GradleProject> _cachedLibraryProject =
-    <FlutterProject, GradleProject>{};
+  /// Cached library projects such as plugins or modules.
+  /// The key is the [FluterProject]'s path, the value is [GradleProject].
+  final Map<String, GradleProject> _cachedLibraryProject = <String, GradleProject>{};
+
   /// Gets the [GradleProject] for the [project] if built as a library.
   Future<GradleProject> getLibraryProject(FlutterProject project) async {
-    _cachedLibraryProject[project] ??= await _readGradleProject(project, isLibrary: true);
-    return _cachedLibraryProject[project];
+    final String projectPath = project.directory.path;
+    _cachedLibraryProject[projectPath] ??= await _readGradleProject(project, isLibrary: true);
+    return _cachedLibraryProject[projectPath];
   }
 }
 
