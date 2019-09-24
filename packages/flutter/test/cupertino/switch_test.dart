@@ -532,8 +532,8 @@ void main() {
                       value = newValue;
                     });
                   },
-                )
-              )
+                ),
+              ),
             );
           },
         ),
@@ -544,7 +544,7 @@ void main() {
       find.byKey(switchKey),
       matchesGoldenFile(
         'switch.tap.off.png',
-        version: 0,
+        version: 1,
       ),
     );
 
@@ -558,7 +558,7 @@ void main() {
       find.byKey(switchKey),
       matchesGoldenFile(
         'switch.tap.turningOn.png',
-        version: 0,
+        version: 1,
       ),
     );
 
@@ -567,9 +567,59 @@ void main() {
       find.byKey(switchKey),
       matchesGoldenFile(
         'switch.tap.on.png',
-        version: 0,
+        version: 1,
       ),
     );
   });
 
+  testWidgets('Switch renders correctly in dark mode', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(platformBrightness: Brightness.dark),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    dragStartBehavior: DragStartBehavior.down,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile(
+        'switch.tap.off.dark.png',
+        version: 0,
+      ),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile(
+        'switch.tap.on.dark.png',
+        version: 0,
+      ),
+    );
+  });
 }
