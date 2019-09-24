@@ -655,12 +655,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  flutter_gold_triage:
-    description: >
-      Checks the number of un-triaged image digests from Flutter Gold.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
   # run_without_leak_linux:
   #   description: >
   #     Checks that `flutter run` does not leak dart on Linux.
