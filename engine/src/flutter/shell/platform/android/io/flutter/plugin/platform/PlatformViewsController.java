@@ -240,10 +240,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
         private void ensureValidAndroidVersion() {
             if (Build.VERSION.SDK_INT < MINIMAL_SDK) {
-                Log.e(TAG, "Trying to use platform views with API " + Build.VERSION.SDK_INT
-                    + ", required API level is: " + MINIMAL_SDK);
-                throw new IllegalStateException("An attempt was made to use platform views on a"
-                    + " version of Android that platform views does not support.");
+                throw new IllegalStateException("Trying to use platform views with API "
+                    + Build.VERSION.SDK_INT + ", required API level is: " + MINIMAL_SDK);
             }
         }
     };
