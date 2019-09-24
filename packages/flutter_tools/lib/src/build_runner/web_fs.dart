@@ -4,10 +4,9 @@
 
 import 'dart:async';
 
+import 'package:archive/archive.dart';
 import 'package:build_daemon/client.dart';
-import 'package:build_daemon/constants.dart';
-import 'package:build_daemon/constants.dart' hide BuildMode;
-import 'package:build_daemon/constants.dart' as daemon show BuildMode;
+import 'package:build_daemon/constants.dart' as daemon;
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
@@ -168,21 +167,23 @@ class WebFs {
     await assetBundle.build();
     await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
+    final String targetBaseName = fs.path
+        .withoutExtension(target).replaceFirst('lib${fs.path.separator}', '');
+    final Map<String, String> mappedUrls = <String, String>{
+      'main.dart.js': 'packages/${flutterProject.manifest.appName}/'
+          '${targetBaseName}_web_entrypoint.dart.js',
+      '${targetBaseName}_web_entrypoint.dart.js.map': 'packages/${flutterProject.manifest.appName}/'
+          '${targetBaseName}_web_entrypoint.dart.js.map',
+      '${targetBaseName}_web_entrypoint.dart.bootstrap.js': 'packages/${flutterProject.manifest.appName}/'
+          '${targetBaseName}_web_entrypoint.dart.bootstrap.js',
+      '${targetBaseName}_web_entrypoint.digests': 'packages/${flutterProject.manifest.appName}/'
+          '${targetBaseName}_web_entrypoint.digests',
+    };
+
     // Initialize the dwds server.
     final int hostPort = port == null ? await os.findFreePort() : int.tryParse(port);
     // Map the bootstrap files to the correct package directory.
-    final String targetBaseName = fs.path
-      .withoutExtension(target).replaceFirst('lib${fs.path.separator}', '');
-    final Map<String, String> mappedUrls = <String, String>{
-      'main.dart.js': 'packages/${flutterProject.manifest.appName}/'
-        '${targetBaseName}_web_entrypoint.dart.js',
-      '${targetBaseName}_web_entrypoint.dart.js.map': 'packages/${flutterProject.manifest.appName}/'
-        '${targetBaseName}_web_entrypoint.dart.js.map',
-      '${targetBaseName}_web_entrypoint.dart.bootstrap.js': 'packages/${flutterProject.manifest.appName}/'
-        '${targetBaseName}_web_entrypoint.dart.bootstrap.js',
-      '${targetBaseName}_web_entrypoint.digests': 'packages/${flutterProject.manifest.appName}/'
-        '${targetBaseName}_web_entrypoint.digests',
-    };
+
     final Pipeline pipeline = const Pipeline().addMiddleware((Handler innerHandler) {
       return (Request request) async {
         // Redirect the main.dart.js to the target file we decided to serve.
@@ -227,7 +228,7 @@ class WebFs {
     }
     Cascade cascade = Cascade();
     cascade = cascade.add(handler);
-    cascade = cascade.add(_assetHandler(flutterProject));
+    cascade = cascade.add(_assetHandler(flutterProject, targetBaseName));
     final HttpServer server = await httpMultiServerFactory(hostname ?? _kHostName, hostPort);
     shelf_io.serveRequests(server, cascade.handler);
     return WebFs(
@@ -238,8 +239,9 @@ class WebFs {
     );
   }
 
-  static Future<Response> Function(Request request) _assetHandler(FlutterProject flutterProject) {
+  static Future<Response> Function(Request request) _assetHandler(FlutterProject flutterProject, String targetBaseName) {
     final PackageMap packageMap = PackageMap(PackageMap.globalPackagesPath);
+    Directory partFiles;
     return (Request request) async {
       if (request.url.path.contains('stack_trace_mapper')) {
         final File file = fs.file(fs.path.join(
@@ -250,6 +252,32 @@ class WebFs {
           'dart_stack_trace_mapper.js'
         ));
         return Response.ok(file.readAsBytesSync(), headers: <String, String>{
+          'Content-Type': 'text/javascript',
+        });
+      } else if (request.url.path.endsWith('part.js')) {
+        // Lazily unpack any deferred imports in release/profile mode. These are
+        // placed into an archive by build_runner, and are named based on the main
+        // entrypoint + a "part" suffix (Though the actual names are arbitrary).
+        // To make this easier to deal with they are copied into a temp directory.
+        if (partFiles == null) {
+          final File dart2jsArchive = fs.file(fs.path.join(
+              flutterProject.dartTool.path,
+              'build',
+              'flutter_web',
+              '${flutterProject.manifest.appName}',
+              'lib',
+              '${targetBaseName}_web_entrypoint.dart.js.tar.gz'));
+          if (dart2jsArchive.existsSync()) {
+            final Archive archive = TarDecoder().decodeBytes(dart2jsArchive.readAsBytesSync());
+            partFiles = fs.systemTempDirectory.createTempSync('_flutter_tool')
+              ..createSync();
+            for (ArchiveFile file in archive) {
+              partFiles.childFile(file.name).writeAsBytesSync(file.content);
+            }
+          }
+        }
+        final String fileName = fs.path.basename(request.url.path);
+        return Response.ok(partFiles.childFile(fileName).readAsBytesSync(), headers: <String, String>{
           'Content-Type': 'text/javascript',
         });
       } else if (request.url.path.contains('require.js')) {
@@ -439,7 +467,7 @@ class BuildDaemonCreator {
 
   /// Retrieve the asset server port for the current daemon.
   int assetServerPort(Directory workingDirectory) {
-    final String portFilePath = fs.path.join(daemonWorkspace(workingDirectory.path), '.asset_server_port');
+    final String portFilePath = fs.path.join(daemon.daemonWorkspace(workingDirectory.path), '.asset_server_port');
     return int.tryParse(fs.file(portFilePath).readAsStringSync());
   }
 }
