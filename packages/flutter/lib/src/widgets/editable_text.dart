@@ -1703,18 +1703,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     updateKeepAlive();
   }
 
-  Size _lastSize;
-  Matrix4 _lastTransform;
-
   void _updateSizeAndTransform() {
     if (_hasInputConnection) {
       final Size size = renderEditable.size;
       final Matrix4 transform = renderEditable.getTransformTo(null);
-      if (size != _lastSize || transform != _lastTransform) {
-        _lastSize = size;
-        _lastTransform = transform;
-        _textInputConnection.setEditableSizeAndTransform(size, transform);
-      }
+      _textInputConnection.setEditableSizeAndTransform(size, transform);
       SchedulerBinding.instance
           .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
     }
