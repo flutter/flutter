@@ -513,8 +513,9 @@ class AndroidDevice extends Device {
       await androidBuilder.buildApk(
           project: project,
           target: mainPath,
-          androidBuildInfo: AndroidBuildInfo(debuggingOptions.buildInfo,
-            targetArchs: <AndroidArch>[androidArch]
+          androidBuildInfo: AndroidBuildInfo(
+            debuggingOptions.buildInfo,
+            targetArchs: <AndroidArch>[androidArch],
           ),
       );
       // Package has been built, so we can get the updated application ID and

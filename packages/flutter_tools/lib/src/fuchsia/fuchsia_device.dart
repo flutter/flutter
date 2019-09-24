@@ -459,7 +459,7 @@ class FuchsiaDevice extends Device {
       '-F',
       fuchsiaArtifacts.sshConfig.absolute.path,
       id,
-      command
+      command,
     ]);
   }
 
@@ -652,7 +652,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       '-vvv',
       '-L',
       '${forwardedPort.hostPort}:$_ipv4Loopback:${forwardedPort.devicePort}',
-      device.id
+      device.id,
     ];
     final ProcessResult result = await processManager.run(command);
     if (result.exitCode != 0) {

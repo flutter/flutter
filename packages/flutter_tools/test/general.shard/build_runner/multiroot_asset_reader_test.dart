@@ -36,7 +36,7 @@ void main() {
     test('Can find assets from the generated directory', () => testbed.run(() async {
       final MultirootFileBasedAssetReader reader = MultirootFileBasedAssetReader(
         packageGraph,
-        fs.directory(fs.path.join('.dart_tool', 'build', 'generated'))
+        fs.directory(fs.path.join('.dart_tool', 'build', 'generated')),
       );
 
       // Note: we can't read from the regular directory because the default

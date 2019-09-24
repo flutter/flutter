@@ -140,18 +140,21 @@ void main() {
     await _createAndAnalyzeProject(
       projectDir,
       <String>[
-        '-i', 'objc', '-a', 'java'
-      ], <String>[
-      'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-      'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-      'flutter_project.iml',
-      'ios/Flutter/AppFrameworkInfo.plist',
-      'ios/Runner/AppDelegate.m',
-      'ios/Runner/GeneratedPluginRegistrant.h',
-    ], unexpectedPaths: <String>[
-      '.android/',
-      '.ios/',
-    ]);
+        '-i', 'objc', '-a', 'java',
+      ],
+      <String>[
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'flutter_project.iml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+      ],
+      unexpectedPaths: <String>[
+        '.android/',
+        '.ios/',
+      ],
+    );
   }, timeout: allowForRemotePubInvocation);
 
   testUsingContext('detects and recreates an app project correctly', () async {
@@ -160,18 +163,21 @@ void main() {
     await _createAndAnalyzeProject(
       projectDir,
       <String>[
-        '-i', 'objc', '-a', 'java'
-      ], <String>[
-      'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-      'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-      'flutter_project.iml',
-      'ios/Flutter/AppFrameworkInfo.plist',
-      'ios/Runner/AppDelegate.m',
-      'ios/Runner/GeneratedPluginRegistrant.h',
-    ], unexpectedPaths: <String>[
-      '.android/',
-      '.ios/',
-    ]);
+        '-i', 'objc', '-a', 'java',
+      ],
+      <String>[
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'flutter_project.iml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+      ],
+      unexpectedPaths: <String>[
+        '.android/',
+        '.ios/',
+      ],
+    );
   }, timeout: allowForRemotePubInvocation);
 
   testUsingContext('detects and recreates a plugin project correctly', () async {
@@ -180,8 +186,9 @@ void main() {
     return _createAndAnalyzeProject(
       projectDir,
       <String>[
-        '-i', 'objc', '-a', 'java'
-      ], <String>[
+        '-i', 'objc', '-a', 'java',
+      ],
+      <String>[
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'example/ios/Runner/AppDelegate.h',
@@ -921,7 +928,7 @@ void main() {
         '--template=app',
         '--org', 'com.bar.foo',
         '-i', 'objc',
-        '-a', 'java'
+        '-a', 'java',
       ],
       <String>[],
     );

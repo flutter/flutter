@@ -293,7 +293,7 @@ abstract class FlutterCommand extends Command<void> {
             'which shortens the names of your app’s classes and members, '
             'and optimization, which applies more aggressive strategies to '
             'further reduce the size of your app.'
-            'To learn more, see: https://developer.android.com/studio/build/shrink-code'
+            'To learn more, see: https://developer.android.com/studio/build/shrink-code',
       );
   }
 

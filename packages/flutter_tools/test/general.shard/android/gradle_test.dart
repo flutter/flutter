@@ -328,13 +328,12 @@ someOtherTask
       expect(project.apkFilesFor(
         const AndroidBuildInfo(
           BuildInfo.debug,
-            splitPerAbi: true,
-            targetArchs: <AndroidArch>[
-                AndroidArch.armeabi_v7a,
-                AndroidArch.arm64_v8a,
-              ]
-            )
-          ),
+          splitPerAbi: true,
+          targetArchs: <AndroidArch>[
+            AndroidArch.armeabi_v7a,
+            AndroidArch.arm64_v8a,
+          ],
+        )),
         <String>[
           'app-armeabi-v7a-debug.apk',
           'app-arm64-v8a-debug.apk',
@@ -343,13 +342,12 @@ someOtherTask
       expect(project.apkFilesFor(
         const AndroidBuildInfo(
           BuildInfo.release,
-            splitPerAbi: true,
-            targetArchs: <AndroidArch>[
-                AndroidArch.armeabi_v7a,
-                AndroidArch.arm64_v8a,
-              ]
-            )
-          ),
+          splitPerAbi: true,
+          targetArchs: <AndroidArch>[
+            AndroidArch.armeabi_v7a,
+            AndroidArch.arm64_v8a,
+          ],
+        )),
         <String>[
           'app-armeabi-v7a-release.apk',
           'app-arm64-v8a-release.apk',
@@ -358,26 +356,24 @@ someOtherTask
       expect(project.apkFilesFor(
         const AndroidBuildInfo(
           BuildInfo(BuildMode.release, 'unknown'),
-            splitPerAbi: true,
-            targetArchs: <AndroidArch>[
-                AndroidArch.armeabi_v7a,
-                AndroidArch.arm64_v8a,
-              ]
-            )
-          ).isEmpty, isTrue);
+          splitPerAbi: true,
+          targetArchs: <AndroidArch>[
+            AndroidArch.armeabi_v7a,
+            AndroidArch.arm64_v8a,
+          ],
+        )).isEmpty, isTrue);
     });
     test('should provide apks for each ABI and flavored build types', () {
       final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], '/some/dir');
       expect(project.apkFilesFor(
         const AndroidBuildInfo(
           BuildInfo(BuildMode.debug, 'free'),
-            splitPerAbi: true,
-            targetArchs: <AndroidArch>[
-                AndroidArch.armeabi_v7a,
-                AndroidArch.arm64_v8a,
-              ]
-            )
-          ),
+          splitPerAbi: true,
+          targetArchs: <AndroidArch>[
+            AndroidArch.armeabi_v7a,
+            AndroidArch.arm64_v8a,
+          ],
+        )),
         <String>[
           'app-free-armeabi-v7a-debug.apk',
           'app-free-arm64-v8a-debug.apk',
@@ -386,13 +382,12 @@ someOtherTask
       expect(project.apkFilesFor(
         const AndroidBuildInfo(
           BuildInfo(BuildMode.release, 'paid'),
-            splitPerAbi: true,
-            targetArchs: <AndroidArch>[
-                AndroidArch.armeabi_v7a,
-                AndroidArch.arm64_v8a,
-              ]
-            )
-          ),
+          splitPerAbi: true,
+          targetArchs: <AndroidArch>[
+            AndroidArch.armeabi_v7a,
+            AndroidArch.arm64_v8a,
+          ],
+        )),
         <String>[
           'app-paid-armeabi-v7a-release.apk',
           'app-paid-arm64-v8a-release.apk',
@@ -401,13 +396,12 @@ someOtherTask
       expect(project.apkFilesFor(
         const AndroidBuildInfo(
           BuildInfo(BuildMode.release, 'unknown'),
-            splitPerAbi: true,
-            targetArchs: <AndroidArch>[
-                AndroidArch.armeabi_v7a,
-                AndroidArch.arm64_v8a,
-              ]
-            )
-          ).isEmpty, isTrue);
+          splitPerAbi: true,
+          targetArchs: <AndroidArch>[
+            AndroidArch.armeabi_v7a,
+            AndroidArch.arm64_v8a,
+          ],
+        )).isEmpty, isTrue);
     });
     test('should provide assemble task name for default build types', () {
       final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], '/some/dir');
@@ -1144,11 +1138,12 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       migrateToR8(sampleAppAndroid);
 
       expect(testLogger.traceText, contains('set `android.enableR8=true` in gradle.properties'));
-      expect(sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+      expect(
+        sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
         equals(
           'org.gradle.jvmargs=-Xmx1536M\n'
           'android.enableR8=true\n'
-        )
+        ),
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
@@ -1246,7 +1241,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
         androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
         project: FlutterProject.current(),
         outputDir: 'build/',
-        target: ''
+        target: '',
       );
 
       final List<String> actualGradlewCall = verify(mockProcessManager.start(
