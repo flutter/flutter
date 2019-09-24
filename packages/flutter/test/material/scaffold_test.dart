@@ -568,6 +568,15 @@ void main() {
       );
     }
 
+    PageRoute<void> pageRouteBuilder() {
+      return PageRouteBuilder<void>(
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return Scaffold(appBar: AppBar(), body: const Text('Page 2'));
+        },
+        fullscreenDialog: true,
+      );
+    }
+
     PageRoute<void> customPageRouteBuilder() {
       return _CustomPageRoute<void>(
         builder: (BuildContext context) {
@@ -587,6 +596,18 @@ void main() {
 
     testWidgets('Close button shows correctly on iOS', (WidgetTester tester) async {
       await expectCloseIcon(tester, TargetPlatform.iOS, Icons.close, materialRouteBuilder);
+    });
+
+    testWidgets('Close button shows correctly with PageRouteBuilder on Android', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.android, Icons.close, pageRouteBuilder);
+    });
+
+    testWidgets('Close button shows correctly with PageRouteBuilder on Fuchsia', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.fuchsia, Icons.close, pageRouteBuilder);
+    });
+
+    testWidgets('Close button shows correctly with PageRouteBuilder on iOS', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.iOS, Icons.close, pageRouteBuilder);
     });
 
     testWidgets('Close button shows correctly with custom page route on Android', (WidgetTester tester) async {
