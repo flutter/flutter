@@ -14,6 +14,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../convert.dart';
+import '../globals.dart';
 
 /// The [ChromeLauncher] instance.
 ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
@@ -102,6 +103,7 @@ class ChromeLauncher {
         ...<String>['--headless', '--disable-gpu', '--no-sandbox'],
       url,
     ];
+    printStatus('serving chrome on http://localhost:$port');
 
     final Process process = await processManager.start(args);
 

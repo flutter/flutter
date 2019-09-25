@@ -32,6 +32,8 @@ import '../common/text.dart';
 import '../common/wait.dart';
 import 'wait_conditions.dart';
 
+import 'io_extension.dart' if (dart.library.html) 'web_extension.dart';
+
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 
@@ -55,6 +57,9 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
       name: _extensionMethodName,
       callback: extension.call,
     );
+    if (kIsWeb) {
+      registerWebServiceExtension(extension.call);
+    }
   }
 
   @override

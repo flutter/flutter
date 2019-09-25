@@ -424,8 +424,7 @@ Future<void> bootstrapDart2Js(BuildStep buildStep, String flutterWebSdk, bool pr
   final Module module = Module.fromJson(json.decode(await buildStep.readAsString(moduleId)));
   final List<Module> allDeps = await module.computeTransitiveDependencies(
     buildStep,
-    throwIfUnsupported: true,
-    skipPlatformCheckPackages: skipPlatformCheckPackages,
+    throwIfUnsupported: false,
   )..add(module);
   final ScratchSpace scratchSpace = await buildStep.fetchResource(scratchSpaceResource);
   final Iterable<AssetId> allSrcs = allDeps.expand((Module module) => module.sources);

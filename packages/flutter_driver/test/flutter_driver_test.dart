@@ -9,6 +9,7 @@ import 'package:flutter_driver/src/common/health.dart';
 import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
+import 'package:flutter_driver/src/driver/vmservice_driver.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
 import 'package:vm_service_client/vm_service_client.dart';
@@ -123,7 +124,7 @@ void main() {
       mockClient = MockVMServiceClient();
       mockPeer = MockPeer();
       mockIsolate = MockIsolate();
-      driver = FlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
+      driver = VMServiceFlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
     });
 
     test('checks the health of the driver extension', () async {
@@ -607,7 +608,7 @@ void main() {
       mockClient = MockVMServiceClient();
       mockPeer = MockPeer();
       mockIsolate = MockIsolate();
-      driver = FlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
+      driver = VMServiceFlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
     });
 
     test('GetHealth has no default timeout', () async {

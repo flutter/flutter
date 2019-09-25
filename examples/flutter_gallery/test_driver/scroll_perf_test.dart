@@ -12,7 +12,7 @@ void main() {
     FlutterDriver driver;
 
     setUpAll(() async {
-      driver = await FlutterDriver.connect();
+      driver = await FlutterDriver.connect(browser: true);
 
       await driver.waitUntilFirstFrameRasterized();
     });
@@ -23,7 +23,7 @@ void main() {
     });
 
     test('measure', () async {
-      final Timeline timeline = await driver.traceAction(() async {
+      // final Timeline timeline = await driver.traceAction(() async {
         await driver.tap(find.text('Material'));
 
         final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
@@ -41,11 +41,11 @@ void main() {
           await driver.scroll(demoList, 0.0, 300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
-      });
+      // });
 
-      TimelineSummary.summarize(timeline)
-        ..writeSummaryToFile('home_scroll_perf', pretty: true)
-        ..writeTimelineToFile('home_scroll_perf', pretty: true);
+      // TimelineSummary.summarize(timeline)
+      //   ..writeSummaryToFile('home_scroll_perf', pretty: true)
+      //   ..writeTimelineToFile('home_scroll_perf', pretty: true);
     });
   });
 }
