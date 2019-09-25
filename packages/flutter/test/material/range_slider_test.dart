@@ -1556,14 +1556,14 @@ void main() {
       .map((DiagnosticsNode node) => node.toString()).toList();
 
     expect(description, <String>[
-      'value1: 25.0',
-      'value2: 75.0',
+      'valueStart: 25.0',
+      'valueEnd: 75.0',
       'disabled',
       'min: 0.0',
       'max: 100.0',
       'divisions: 4',
-      'label1: "lowerValue"',
-      'label2: "upperValue"',
+      'labelStart: "lowerValue"',
+      'labelEnd: "upperValue"',
       'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
       'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))'
     ]);
