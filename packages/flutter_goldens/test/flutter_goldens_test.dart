@@ -85,88 +85,81 @@ void main() {
     group('Request Handling', () {
       String testName;
       String pullRequestNumber;
+      String expectation;
       Uri url;
       MockHttpClientRequest mockHttpRequest;
 
       setUp(() {
         testName = 'flutter.golden_test.1.png';
         pullRequestNumber = '1234';
-        url = Uri.parse(
-          'https://flutter-gold.skia.org/json/search?source_type%3Dflutter'
-            '&head=true&include=true&pos=true&neg=false&unt=false'
-            '&query=Platform%3Dmacos%26name%3Dflutter.golden_test.1%26'
-        );
+        expectation = '55109a4bed52acc780530f7a9aeff6c0';
         mockHttpRequest = MockHttpClientRequest();
-        when(mockHttpClient.getUrl(url))
-          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
-      });
-
-      test('throws for triage breakdown when digests > 1', () async {
-        final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
-          utf8.encode(digestResponseTemplate(includeExtraDigests: true))
-        );
-        when(mockHttpRequest.close())
-          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
-
-        try {
-          await skiaClient.getMasterBytes(testName);
-          fail('TestFailure expected but not thrown.');
-        } catch (error) {
-          expect(error.stderr, contains('There is more than one digest available'));
-        }
-      });
-
-      test('returns empty bytes for new tests without a baseline', () async {
-        final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
-          utf8.encode(digestResponseTemplate(returnEmptyDigest: true))
-        );
-        when(mockHttpRequest.close())
-          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
-
-        final List<int> imageBytes = await skiaClient.getMasterBytes(testName);
-        expect(imageBytes, <int>[]);
       });
 
       test('validates SkiaDigest', () {
         final Map<String, dynamic> skiaJson = json.decode(digestResponseTemplate());
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
-        expect(digest.isValid(platform, 'flutter.golden_test.1'), isTrue);
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+        expect(digest.isValid(platform, 'flutter.golden_test.1', expectation), isTrue);
+      });
+
+      test('invalidates bad SkiaDigest - platform', () {
+        final Map<String, dynamic> skiaJson = json.decode(
+          digestResponseTemplate(platform: 'linux')
+        );
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+        expect(digest.isValid(platform, 'flutter.golden_test.1', expectation), isFalse);
+      });
+
+      test('invalidates bad SkiaDigest - test name', () {
+        final Map<String, dynamic> skiaJson = json.decode(
+          digestResponseTemplate(testName: 'flutter.golden_test.2')
+        );
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+        expect(digest.isValid(platform, 'flutter.golden_test.1', expectation), isFalse);
+      });
+
+      test('invalidates bad SkiaDigest - expectation', () {
+        final Map<String, dynamic> skiaJson = json.decode(
+          digestResponseTemplate(expectation: '1deg543sf645erg44awqcc78')
+        );
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+        expect(digest.isValid(platform, 'flutter.golden_test.1', expectation), isFalse);
+      });
+
+      test('invalidates bad SkiaDigest - status', () {
+        final Map<String, dynamic> skiaJson = json.decode(
+          digestResponseTemplate(status: 'negative')
+        );
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+        expect(digest.isValid(platform, 'flutter.golden_test.1', expectation), isFalse);
+      });
+
+      test('sets up expectations', () async {
+        url = Uri.parse('https://flutter-gold.skia.org/json/expectations/commit/HEAD');
+        final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
+          utf8.encode(expectationsTemplate())
+        );
+        when(mockHttpClient.getUrl(url))
+          .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
+        when(mockHttpRequest.close())
+          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+
+        await skiaClient.getExpectations();
+        expect(skiaClient.expectations, isNotNull);
+        expect(skiaClient.expectations['flutter.golden_test.1'], containsPair(expectation, 1));
       });
 
       test('detects invalid digests SkiaDigest', () {
         const String testName = 'flutter.golden_test.2';
-        final Map<String, dynamic> skiaJson = json.decode(
-          digestResponseTemplate());
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(
-          skiaJson['digests'][0]);
-        expect(digest.isValid(platform, testName), isFalse);
-      });
-
-      test('throws for invalid SkiaDigest', () async {
-        final MockHttpClientResponse mockHttpResponse = MockHttpClientResponse(
-          utf8.encode(digestResponseTemplate(testName: 'flutter.golden_test.2'))
-        );
-        when(mockHttpRequest.close())
-          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
-
-        try {
-          await skiaClient.getMasterBytes(testName);
-          fail('TestFailure expected but not thrown.');
-        } catch (error) {
-          expect(error.stderr, contains('Invalid digest'));
-        }
+        final Map<String, dynamic> skiaJson = json.decode(digestResponseTemplate());
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+        expect(digest.isValid(platform, testName, expectation), isFalse);
       });
 
       test('image bytes are processed properly', () async {
         final Uri imageUrl = Uri.parse(
-          'https://flutter-gold.skia.org/img/images/88e2cc3398bd55b55df35cfe14d557c1.png'
+          'https://flutter-gold.skia.org/img/images/$expectation.png'
         );
-        final MockHttpClientResponse mockDigestResponse = MockHttpClientResponse(
-          utf8.encode(digestResponseTemplate())
-        );
-        when(mockHttpRequest.close())
-          .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockDigestResponse));
-
         final MockHttpClientRequest mockImageRequest = MockHttpClientRequest();
         final MockHttpImageResponse mockImageResponse = MockHttpImageResponse(
           imageResponseTemplate()
@@ -176,10 +169,11 @@ void main() {
         when(mockImageRequest.close())
           .thenAnswer((_) => Future<MockHttpImageResponse>.value(mockImageResponse));
 
-        final List<int> masterBytes = await skiaClient.getMasterBytes(testName);
+        final List<int> masterBytes = await skiaClient.getImageBytes(expectation);
 
         expect(masterBytes, equals(_kTestPngBytes));
       });
+
       group('ignores', () {
         Uri url;
         MockHttpClientRequest mockHttpRequest;
@@ -222,6 +216,49 @@ void main() {
             await skiaClient.testIsIgnoredForPullRequest(
               pullRequestNumber,
               'failure.png',
+            ),
+            isFalse,
+          );
+        });
+      });
+
+      group('digest parsing', () {
+        Uri url;
+        MockHttpClientRequest mockHttpRequest;
+        MockHttpClientResponse mockHttpResponse;
+
+        setUp(() {
+          url = Uri.parse(
+            'https://flutter-gold.skia.org/json/details?test=flutter.golden_test.1&digest=$expectation'
+          );
+          mockHttpRequest = MockHttpClientRequest();
+          when(mockHttpClient.getUrl(url))
+            .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
+        });
+
+        test('succeeds when valid', () async {
+          mockHttpResponse = MockHttpClientResponse(utf8.encode(digestResponseTemplate()));
+          when(mockHttpRequest.close())
+            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+          expect(
+            await skiaClient.isValidDigestForExpectation(
+              expectation,
+              testName,
+            ),
+            isTrue,
+          );
+        });
+
+        test('fails when invalid', () async {
+          mockHttpResponse = MockHttpClientResponse(utf8.encode(
+            digestResponseTemplate(platform: 'linux')
+          ));
+          when(mockHttpRequest.close())
+            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
+          expect(
+            await skiaClient.isValidDigestForExpectation(
+              expectation,
+              testName,
             ),
             isFalse,
           );
@@ -302,6 +339,7 @@ void main() {
       setUp(() {
         final Directory basedir = fs.directory('flutter/test/library/')
           ..createSync(recursive: true);
+        mockSkiaClient.expectations = json.decode(expectationsTemplate());
         comparator = FlutterPreSubmitFileComparator(
           basedir.uri,
           mockSkiaClient,
@@ -315,6 +353,18 @@ void main() {
             operatingSystem: 'macos'
           ),
         );
+
+        when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
+          .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
+        when(mockSkiaClient.expectations)
+          .thenReturn(json.decode(expectationsTemplate())['master']);
+        when(mockSkiaClient.cleanTestName('library.flutter.golden_test.1.png'))
+          .thenReturn('flutter.golden_test.1');
+        when(mockSkiaClient.isValidDigestForExpectation(
+          '55109a4bed52acc780530f7a9aeff6c0',
+          'library.flutter.golden_test.1.png',
+        ))
+          .thenAnswer((_) => Future<bool>.value(false));
       });
 
       test('correctly determines testing environment', () {
@@ -333,42 +383,44 @@ void main() {
       });
 
       test('comparison passes test that is ignored for this PR', () async {
-        when(mockSkiaClient.getMasterBytes('library.test.png'))
+        when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
           .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
-        when(mockSkiaClient.testIsIgnoredForPullRequest('1234', 'library.test.png'))
+        when(mockSkiaClient.testIsIgnoredForPullRequest(
+          '1234',
+          'library.flutter.golden_test.1.png',
+        ))
           .thenAnswer((_) => Future<bool>.value(true));
         expect(
           await comparator.compare(
             Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('test.png'),
+            Uri.parse('flutter.golden_test.1.png'),
           ),
           isTrue,
         );
       });
 
       test('fails test that is not ignored for this PR', () async {
-        when(mockSkiaClient.getMasterBytes('library.test.png'))
+        when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
           .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
-        when(mockSkiaClient.testIsIgnoredForPullRequest('1234', 'library.test.png'))
+        when(mockSkiaClient.testIsIgnoredForPullRequest(
+          '1234',
+          'library.flutter.golden_test.1.png',
+        ))
           .thenAnswer((_) => Future<bool>.value(false));
         expect(
           await comparator.compare(
             Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('test.png'),
+            Uri.parse('flutter.golden_test.1.png'),
           ),
           isFalse,
         );
       });
 
       test('passes non-existent baseline for new test', () async {
-        when(mockSkiaClient.getMasterBytes('library.test.png'))
-          .thenAnswer((_) => Future<List<int>>.value(<int>[]));
-        when(mockSkiaClient.testIsIgnoredForPullRequest('1234', 'library.test.png'))
-          .thenAnswer((_) => Future<bool>.value(true));
         expect(
           await comparator.compare(
             Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('test.png'),
+            Uri.parse('flutter.new_golden_test.1.png'),
           ),
           isTrue,
         );
@@ -379,7 +431,7 @@ void main() {
       FlutterLocalFileComparator comparator;
       final MockSkiaGoldClient mockSkiaClient = MockSkiaGoldClient();
 
-      setUp(() {
+      setUp(() async {
         final Directory basedir = fs.directory('flutter/test/library/')
           ..createSync(recursive: true);
         comparator = FlutterLocalFileComparator(
@@ -391,40 +443,35 @@ void main() {
             operatingSystem: 'macos'
           ),
         );
+
+        when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
+          .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
+        when(mockSkiaClient.expectations)
+          .thenReturn(json.decode(expectationsTemplate())['master']);
+        when(mockSkiaClient.cleanTestName('library.flutter.golden_test.1.png'))
+          .thenReturn('flutter.golden_test.1');
+        when(mockSkiaClient.isValidDigestForExpectation(
+          '55109a4bed52acc780530f7a9aeff6c0',
+          'library.flutter.golden_test.1.png',
+        ))
+          .thenAnswer((_) => Future<bool>.value(false));
       });
 
       test('passes when bytes match', () async {
-        when(mockSkiaClient.getMasterBytes('library.test.png'))
-          .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
         expect(
           await comparator.compare(
             Uint8List.fromList(_kTestPngBytes),
-            Uri.parse('test.png'),
+            Uri.parse('flutter.golden_test.1.png'),
           ),
           isTrue,
         );
       });
 
-      test('fails when bytes do not match', () async {
-        when(mockSkiaClient.getMasterBytes('library.test.png'))
-          .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
-        try {
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('test.png'),
-          );
-        } catch(error) {
-          expect(error.message, contains('Pixel test failed'));
-        }
-      });
-
       test('passes non-existent baseline for new test', () async {
-        when(mockSkiaClient.getMasterBytes('library.test.png'))
-          .thenAnswer((_) => Future<List<int>>.value(<int>[]));
         expect(
           await comparator.compare(
             Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('test.png'),
+            Uri.parse('flutter.new_golden_test.1'),
           ),
           isTrue,
         );

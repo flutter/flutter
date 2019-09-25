@@ -19,7 +19,6 @@ import 'package:process/process.dart';
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
-const String _kFlutterGoldDashboard = 'https://flutter-gold.skia.org';
 
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
@@ -62,7 +61,12 @@ class SkiaGoldClient {
   /// be null.
   final Directory workDirectory;
 
-  /// TODO(Piinks): Doc
+  /// A map of known golden file tests and their associated positive image
+  /// hashes.
+  ///
+  /// This is set and used by the [FlutterLocalFileComparator] and
+  /// [FlutterPreSubmitFileComparator] to test against golden masters maintained
+  /// in the Flutter Gold dashboard.
   Map<String, dynamic> expectations;
 
   /// The local [Directory] where the Flutter repository is hosted.
@@ -184,7 +188,7 @@ class SkiaGoldClient {
     return true;
   }
 
-  /// TODO(Piinks): Doc
+  /// Requests and sets the [expectations] known to Flutter Gold at head.
   Future<void> getExpectations() async {
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForExpectations = Uri.parse(
@@ -197,9 +201,8 @@ class SkiaGoldClient {
         rawResponse = await utf8.decodeStream(response);
         final Map<String, dynamic> skiaJson = json.decode(rawResponse);
         expectations = skiaJson['master'];
-        print(expectations);
       } on FormatException catch(_) {
-        print('Formatting error detected in response from Flutter Gold.'
+        print('Formatting error detected requesting expectations from Flutter Gold.\n'
           'rawResponse: $rawResponse');
         rethrow;
       }
@@ -264,7 +267,7 @@ class SkiaGoldClient {
           }
         }
       } on FormatException catch(_) {
-        print('Formatting error detected in response from Flutter Gold.'
+        print('Formatting error detected requesting ignores from Flutter Gold.\n'
           'rawResponse: $rawResponse');
         rethrow;
       }
@@ -274,7 +277,8 @@ class SkiaGoldClient {
     return ignoreIsActive;
   }
 
-  /// TODO(Piinks): Doc
+  /// Queries the Flutter Gold details api to determine if the given expectation
+  /// for a test matches the configuration of the executing machine.
   Future<bool> isValidDigestForExpectation(String expectation, String testName) async {
     bool isValid = false;
     testName = cleanTestName(testName);
@@ -289,11 +293,11 @@ class SkiaGoldClient {
         final io.HttpClientResponse response = await request.close();
         rawResponse = await utf8.decodeStream(response);
         final Map<String, dynamic> skiaJson = json.decode(rawResponse);
-        SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
         isValid = digest.isValid(platform, testName, expectation);
 
       } on FormatException catch(_) {
-        print('Formatting error detected in response from Flutter Gold.'
+        print('Formatting error detected requesting digest from Flutter Gold.\n'
           'rawResponse: $rawResponse');
         rethrow;
       }
@@ -367,7 +371,8 @@ class SkiaGoldDigest {
 
     return SkiaGoldDigest(
       imageHash: json['digest'],
-      paramSet: Map<String, dynamic>.from(json['paramset']),
+      paramSet: Map<String, dynamic>.from(json['paramset'] ??
+        <String, String>{'Platform': 'none'}),
       testName: json['test'],
       status: json['status'],
     );
@@ -412,52 +417,3 @@ class NonZeroExitCode implements Exception {
   @override
   String toString() => 'Exit code $exitCode: $stderr';
 }
-
-
-//      testName = _cleanTestName(testName);
-//      final Uri requestForDigest = Uri.parse(
-//        'https://flutter-gold.skia.org/json/search?'
-//          'source_type%3Dflutter'
-//          '&head=true'     // Goldens @ head
-//          '&include=true'  // Include ignored tests
-//          '&pos=true'      // Get positive digests
-//          '&neg=false'     // No negative digests
-//          '&unt=false'     // No untriaged digests
-//          '&query=Platform%3D${platform.operatingSystem}%26name%3D$testName%26'
-//      );
-//
-//      SkiaGoldDigest masterDigest;
-//      String rawResponse;
-//      try {
-//        final io.HttpClientRequest request = await httpClient.getUrl(requestForDigest);
-//        final io.HttpClientResponse response = await request.close();
-//        rawResponse = await utf8.decodeStream(response);
-//        final Map<String, dynamic> skiaJson = json.decode(rawResponse);
-//
-//        if (skiaJson['digests'].length > 1) {
-//          final StringBuffer buf = StringBuffer()
-//            ..writeln('There is more than one digest available for golden')
-//            ..writeln('test: $testName. Triage may have broken down.')
-//            ..writeln('Check $_kFlutterGoldDashboard to validate the')
-//            ..writeln('current status of this test.');
-//          throw NonZeroExitCode(1, buf.toString());
-//        } else if (skiaJson['digests'].length == 0) {
-//          masterDigest = const SkiaGoldDigest(testName: 'New');
-//        } else {
-//          masterDigest = SkiaGoldDigest.fromJson(skiaJson['digests'][0]);
-//        }
-//      } on FormatException catch(_) {
-//        print('Formatting error detected in response from Flutter Gold.'
-//          'rawResponse: $rawResponse');
-//        rethrow;
-//      }
-//
-//      if (masterDigest.testName == 'New') {
-//        return;
-//      } else if (!masterDigest.isValid(platform, testName)) {
-//        final StringBuffer buf = StringBuffer()
-//          ..writeln('Invalid digest returned for golden test: $testName.')
-//          ..writeln('Check $_kFlutterGoldDashboard to validate the')
-//          ..writeln('current status of this test.');
-//        throw NonZeroExitCode(1, buf.toString());
-//      }

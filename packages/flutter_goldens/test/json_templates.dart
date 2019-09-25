@@ -2,221 +2,156 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Json respones template for Skia Gold digest request
-String digestResponseTemplate({
-  bool includeExtraDigests = false,
-  bool returnEmptyDigest = false,
-  String testName = 'flutter.golden_test.1',
-}) {
-  return '''{
-    "digests": [${returnEmptyDigest ? '' : '''
-      {
-        "test": "$testName",
-        "digest": "88e2cc3398bd55b55df35cfe14d557c1",
-        "status": "positive",
-        "paramset": {
-          "Platform": [
-            "macos"
-          ],
-          "ext": [
-            "png"
-          ],
-          "name": [
-            "$testName"
-          ],
-          "source_type": [
-            "flutter"
-          ]
+/// Json response template for Skia Gold expectations request:
+/// https://flutter-gold.skia.org/json/expectations/commit/HEAD
+String expectationsTemplate() {
+  return '''
+    {
+      "md5": "a7489b00e03a1846e43500b7c14dd7b0",
+      "master": {
+        "flutter.golden_test.1": {
+          "55109a4bed52acc780530f7a9aeff6c0": 1
         },
-        "traces": {
-          "tileSize": 200,
-          "traces": [
-            {
-              "data": [
-                {
-                  "x": 0,
-                  "y": 0,
-                  "s": 0
-                },
-                {
-                  "x": 1,
-                  "y": 0,
-                  "s": 0
-                },
-                {
-                  "x": 2,
-                  "y": 0,
-                  "s": 0
-                },
-                {
-                  "x": 3,
-                  "y": 0,
-                  "s": 0
-                }
-              ],
-              "label": ",Platform=macos,name=$testName,source_type=flutter,",
-              "params": {
-                "Platform": "macos",
-                "ext": "png",
-                "name": "$testName",
-                "source_type": "flutter"
-              }
-            }
-          ],
-          "digests": [
-            {
-              "digest": "88e2cc3398bd55b55df35cfe14d557c1",
-              "status": "positive"
-            }
-          ]
+        "flutter.golden_test.3": {
+          "87cb35131e6ad4b57d4d09d59ae743c3": 1,
+          "dc94eb2c39c0c8ae11a4efd090b72f94": 1,
+          "f2583c9003978a06b7888878bdc089e2": 1
         },
-        "closestRef": "pos",
-        "refDiffs": {
-          "neg": null,
-          "pos": {
-            "numDiffPixels": 541,
-            "pixelDiffPercent": 4.663793,
-            "maxRGBADiffs": [
-              0,
-              128,
-              255,
-              112
-            ],
-            "dimDiffer": false,
-            "diffs": {
-              "combined": 1.6742188,
-              "percent": 4.663793,
-              "pixel": 541
-            },
-            "digest": "e4ac039c7b3112d7dada8e7c0a4e0501",
-            "status": "positive",
-            "paramset": {
-              "Platform": [
-                "windows"
-              ],
-              "ext": [
-                "png"
-              ],
-              "name": [
-                "$testName"
-              ],
-              "source_type": [
-                "flutter"
-              ]
-            },
-            "n": 191
-          }
-        }
-      }${includeExtraDigests ? ''',
-      {
-        "test": "$testName",
-        "digest": "88e2cc3398bd55b55df35cfe14d557c1",
-        "status": "positive",
-        "paramset": {
-          "Platform": [
-            "macos"
-          ],
-          "ext": [
-            "png"
-          ],
-          "name": [
-            "$testName"
-          ],
-          "source_type": [
-            "flutter"
-          ]
-        },
-        "traces": {
-          "tileSize": 200,
-          "traces": [
-            {
-              "data": [
-                {
-                  "x": 0,
-                  "y": 0,
-                  "s": 0
-                }
-              ],
-              "label": ",Platform=macos,name=$testName,source_type=flutter,",
-              "params": {
-                "Platform": "macos",
-                "ext": "png",
-                "name": "$testName",
-                "source_type": "flutter"
-              }
-            }
-          ],
-          "digests": [
-            {
-              "digest": "88e2cc3398bd55b55df35cfe14d557c1",
-              "status": "positive"
-            }
-          ]
-        },
-        "closestRef": "pos",
-        "refDiffs": {
-          "neg": null,
-          "pos": {
-            "numDiffPixels": 541,
-            "pixelDiffPercent": 4.663793,
-            "maxRGBADiffs": [
-              0,
-              128,
-              255,
-              112
-            ],
-            "dimDiffer": false,
-            "diffs": {
-              "combined": 1.6742188,
-              "percent": 4.663793,
-              "pixel": 541
-            },
-            "digest": "e4ac039c7b3112d7dada8e7c0a4e0501",
-            "status": "positive",
-            "paramset": {
-              "Platform": [
-                "windows"
-              ],
-              "ext": [
-                "png"
-              ],
-              "name": [
-                "$testName"
-              ],
-              "source_type": [
-                "flutter"
-              ]
-            },
-            "n": 191
-          }
+        "flutter.golden_test.2": {
+          "eb03a5e3114c9ecad5e4f1178f285a49": 1,
+          "f14631979de24fca6e14ad247d5f2bd6": 1
         }
       }
-      ''' : ''} '''}
-    ],
-    "offset": 0,
-    "size": 1,
-    "commits": [
-      {
-        "commit_time": 1567412442,
-        "hash": "2b7e59b9c0267d3f90ddd8b2cb10c1431c79137d",
-        "author": "engine-flutter-autoroll (engine-flutter-autoroll@skia.org)"
-      },
-      {
-        "commit_time": 1567418861,
-        "hash": "ec1ea2b38ab1773f2c412e303a8cda0792a980ca",
-        "author": "engine-flutter-autoroll (engine-flutter-autoroll@skia.org)"
-      },
-      {
-        "commit_time": 1567434521,
-        "hash": "d30e4228afd633e4f6d2ed217a926e8983161379",
-        "author": "engine-flutter-autoroll (engine-flutter-autoroll@skia.org)"
-      }
-    ],
-    "issue": null
-  }''';
+    }
+  ''';
 }
 
-/// Json response template for Skia Gold ignore request
+/// Json response template for Skia Gold digest request:
+/// https://flutter-gold.skia.org/json/details?test=[testName]&digest=[expectation]
+String digestResponseTemplate({
+  String testName = 'flutter.golden_test.1',
+  String expectation = '55109a4bed52acc780530f7a9aeff6c0',
+  String platform = 'macos',
+  String status = 'positive',
+}) {
+  return '''
+    {
+  "digest": {
+    "test": "$testName",
+    "digest": "$expectation",
+    "status": "$status",
+    "paramset": {
+      "Platform": [
+        "$platform"
+      ],
+      "ext": [
+        "png"
+      ],
+      "name": [
+        "$testName"
+      ],
+      "source_type": [
+        "flutter"
+      ]
+    },
+    "traces": {
+      "tileSize": 200,
+      "traces": [
+        {
+          "data": [
+            {
+              "x": 0,
+              "y": 0,
+              "s": 0
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "s": 0
+            },
+            {
+              "x": 199,
+              "y": 0,
+              "s": 0
+            }
+          ],
+          "label": ",Platform=$platform,name=$testName,source_type=flutter,",
+          "params": {
+            "Platform": "$platform",
+            "ext": "png",
+            "name": "$testName",
+            "source_type": "flutter"
+          }
+        }
+      ],
+      "digests": [
+        {
+          "digest": "$expectation",
+          "status": "$status"
+        }
+      ]
+    },
+    "closestRef": "pos",
+    "refDiffs": {
+      "neg": null,
+      "pos": {
+        "numDiffPixels": 999,
+        "pixelDiffPercent": 0.4995,
+        "maxRGBADiffs": [
+          86,
+          86,
+          86,
+          0
+        ],
+        "dimDiffer": false,
+        "diffs": {
+          "combined": 0.381955,
+          "percent": 0.4995,
+          "pixel": 999
+        },
+        "digest": "aa748136c70cefdda646df5be0ae189d",
+        "status": "positive",
+        "paramset": {
+          "Platform": [
+            "macos"
+          ],
+          "ext": [
+            "png"
+          ],
+          "name": [
+            "$testName"
+          ],
+          "source_type": [
+            "flutter"
+          ]
+        },
+        "n": 197
+      }
+    }
+  },
+  "commits": [
+    {
+      "commit_time": 1568069344,
+      "hash": "399bb04e2de41665320d3c888f40af6d8bc734a2",
+      "author": "Contributor A (contributorA@getMail.com)"
+    },
+    {
+      "commit_time": 1568078053,
+      "hash": "0f365d3add253a65e5e5af1024f56c6169bf9739",
+      "author": "Contributor B (contributorB@getMail.com)"
+    },
+    {
+      "commit_time": 1569353925,
+      "hash": "81e693a7fe3b808cc9ae2bb3a2cbe404e67ec773",
+      "author": "Contributor C (contributorC@getMail.com)"
+    }
+  ]
+}
+  ''';
+}
+
+/// Json response template for Skia Gold ignore request:
+/// https://flutter-gold.skia.org/json/ignores
 String ignoreResponseTemplate({
   String pullRequestNumber = '0000',
   String testName = 'flutter.golden_test.1',
@@ -235,7 +170,8 @@ String ignoreResponseTemplate({
   ''';
 }
 
-/// Json response template for Skia Gold image request
+/// Json response template for Skia Gold image request:
+/// https://flutter-gold.skia.org/img/images/[imageHash].png
 List<List<int>> imageResponseTemplate() {
   return <List<int>>[
     <int>[137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73,
