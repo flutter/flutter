@@ -873,7 +873,7 @@ void main() {
     expect(
       inkFeatures,
       paints
-        ..circle(color: splashColor)
+        ..circle(color: splashColor),
     );
 
     await touchGesture.up();

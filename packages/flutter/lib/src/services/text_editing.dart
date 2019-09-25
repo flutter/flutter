@@ -106,7 +106,7 @@ class TextSelection extends TextRange {
     this.isDirectional = false,
   }) : super(
          start: baseOffset < extentOffset ? baseOffset : extentOffset,
-         end: baseOffset < extentOffset ? extentOffset : baseOffset
+         end: baseOffset < extentOffset ? extentOffset : baseOffset,
        );
 
   /// Creates a collapsed selection at the given offset.

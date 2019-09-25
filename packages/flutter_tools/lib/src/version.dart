@@ -66,7 +66,7 @@ class FlutterVersion {
         final String remote = channel.substring(0, slash);
         _repositoryUrl = _runGit('git ls-remote --get-url $remote');
         _channel = channel.substring(slash + 1);
-       } else if (channel.isEmpty) {
+      } else if (channel.isEmpty) {
         _channel = 'unknown';
       } else {
         _channel = channel;

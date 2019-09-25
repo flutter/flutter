@@ -50,7 +50,7 @@ class TestCommand extends FastFlutterCommand {
         defaultsTo: false,
         negatable: false,
         help: 'No longer require an authentication code to connect to the VM '
-              'service (not recommended).'
+              'service (not recommended).',
       )
       ..addFlag('coverage',
         defaultsTo: false,
@@ -87,7 +87,7 @@ class TestCommand extends FastFlutterCommand {
         abbr: 'j',
         defaultsTo: math.max<int>(1, platform.numberOfProcessors - 2).toString(),
         help: 'The number of concurrent test processes to run.',
-        valueHelp: 'jobs'
+        valueHelp: 'jobs',
       )
       ..addFlag('test-assets',
         defaultsTo: true,
@@ -98,7 +98,7 @@ class TestCommand extends FastFlutterCommand {
       ..addOption('platform',
         allowed: const <String>['tester', 'chrome'],
         defaultsTo: 'tester',
-        help: 'The platform to run the unit tests on. Defaults to "tester".'
+        help: 'The platform to run the unit tests on. Defaults to "tester".',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }

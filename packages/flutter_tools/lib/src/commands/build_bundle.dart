@@ -82,7 +82,7 @@ class BuildBundleCommand extends BuildSubCommand {
     }
     return <CustomDimensions, String>{
       CustomDimensions.commandBuildBundleTargetPlatform: argResults['target-platform'],
-      CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}'
+      CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}',
     };
   }
 
@@ -131,6 +131,7 @@ class BuildBundleCommand extends BuildSubCommand {
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],
       fileSystemRoots: argResults['filesystem-root'],
+      shouldBuildWithAssemble: true,
     );
     return null;
   }

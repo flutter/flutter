@@ -257,7 +257,7 @@ class WebFs {
           'lib',
           'dev_compiler',
           'web',
-          'dart_stack_trace_mapper.js'
+          'dart_stack_trace_mapper.js',
         ));
         return Response.ok(file.readAsBytesSync(), headers: <String, String>{
           'Content-Type': 'text/javascript',
@@ -269,7 +269,7 @@ class WebFs {
           'dev_compiler',
           'kernel',
           'amd',
-          'require.js'
+          'require.js',
         ));
         return Response.ok(file.readAsBytesSync(), headers: <String, String>{
           'Content-Type': 'text/javascript',
@@ -397,9 +397,12 @@ class BuildDaemonCreator {
   }
 
   Future<BuildDaemonClient> _connectClient(
-    String workingDirectory,
-    { bool release, bool profile, bool hasPlugins, bool initializePlatform }
-  ) {
+    String workingDirectory, {
+    bool release,
+    bool profile,
+    bool hasPlugins,
+    bool initializePlatform,
+  }) {
     final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
     final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
     final String flutterWebSdk = artifacts.getArtifactPath(Artifact.flutterWebSdk);
@@ -420,7 +423,7 @@ class BuildDaemonCreator {
         '--define', 'flutter_tools:entrypoint=profile=$profile',
         '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
         '--define', 'flutter_tools:shell=hasPlugins=$hasPlugins',
-        '--define', 'flutter_tools:shell=initializePlatform=$initializePlatform'
+        '--define', 'flutter_tools:shell=initializePlatform=$initializePlatform',
       ],
       logHandler: (ServerLog serverLog) {
         switch (serverLog.level) {

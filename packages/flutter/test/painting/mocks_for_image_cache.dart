@@ -113,7 +113,7 @@ class LoadErrorImageProvider extends ImageProvider<LoadErrorImageProvider> {
     throw Error();
   }
 
-   @override
+  @override
   Future<LoadErrorImageProvider> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<LoadErrorImageProvider>(this);
   }
@@ -127,7 +127,7 @@ class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterIm
     return OneFrameImageStreamCompleter(completer.future);
   }
 
-   @override
+  @override
   Future<LoadErrorCompleterImageProvider> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<LoadErrorCompleterImageProvider>(this);
   }

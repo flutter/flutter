@@ -795,16 +795,26 @@ class LinuxProject {
 
   final FlutterProject project;
 
-  Directory get editableHostAppDirectory => project.directory.childDirectory('linux');
+  Directory get _editableDirectory => project.directory.childDirectory('linux');
 
-  // TODO(stuartmorgan): Move to using an ephemeralDirectory to match the other
-  // desktop projects.
-  Directory get cacheDirectory => editableHostAppDirectory.childDirectory('flutter');
+  /// The directory in the project that is managed by Flutter. As much as
+  /// possible, files that are edited by Flutter tooling after initial project
+  /// creation should live here.
+  Directory get managedDirectory => _editableDirectory.childDirectory('flutter');
 
-  bool existsSync() => editableHostAppDirectory.existsSync();
+  /// The subdirectory of [managedDirectory] that contains files that are
+  /// generated on the fly. All generated files that are not intended to be
+  /// checked in should live here.
+  Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
+
+  bool existsSync() => _editableDirectory.existsSync();
 
   /// The Linux project makefile.
-  File get makeFile => editableHostAppDirectory.childFile('Makefile');
+  File get makeFile => _editableDirectory.childFile('Makefile');
+
+  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
+  /// the build.
+  File get generatedMakeConfigFile => ephemeralDirectory.childFile('generated_config.mk');
 }
 
 /// The Fuchisa sub project
