@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
 import 'colors.dart';
@@ -479,11 +479,11 @@ class _DropdownRoutePage<T> extends StatelessWidget {
   }
 }
 
-// This widget only exists to enable _DropdownRoute to lookup the sizes of
-// each menu item. The sizes are used to compute offset of the selected item,
-// so that _DropdownRoutePage can position the top of the overall menu so that
-// the vertical center of the selected item lines up with the vertical center
-// of the dropdown button.
+// This widget enables _DropdownRoute to look up the sizes of
+// each menu item. These sizes are used to compute the offset of the selected
+// item so that _DropdownRoutePage can align the vertical center of the
+// selected item lines up with the vertical center of the dropdown button,
+// as closely as posible.
 class _MenuItem<T> extends SingleChildRenderObjectWidget {
  const _MenuItem({
     Key key,
@@ -970,12 +970,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       items = widget.selectedItemBuilder == null
         ? List<Widget>.from(widget.items)
         : widget.selectedItemBuilder(context).map((Widget item) {
-          return Container(
-            constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
-            alignment: AlignmentDirectional.centerStart,
-            child: item,
-          );
-        }).toList();
+            return Container(
+              constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
+              alignment: AlignmentDirectional.centerStart,
+              child: item,
+            );
+          }).toList();
     } else {
       items = <Widget>[];
     }
