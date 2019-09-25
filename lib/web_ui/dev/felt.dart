@@ -25,6 +25,8 @@ void main(List<String> args) async {
     io.exit(64); // Exit code 64 indicates a usage error.
   }
 
+  _listenToShutdownSignals();
+
   try {
     final bool result = await runner.run(args);
     if (result == false) {
@@ -40,4 +42,15 @@ void main(List<String> args) async {
 
   // Sometimes the Dart VM refuses to quit.
   io.exit(io.exitCode);
+}
+
+void _listenToShutdownSignals() {
+  io.ProcessSignal.sigint.watch().listen((_) {
+    print('Received SIGINT. Shutting down.');
+    io.exit(1);
+  });
+  io.ProcessSignal.sigterm.watch().listen((_) {
+    print('Received SIGTERM. Shutting down.');
+    io.exit(1);
+  });
 }
