@@ -638,9 +638,6 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final bool ignoreEvents = widget.route.animation?.status == AnimationStatus.reverse ||
-        widget.route.navigator.userGestureInProgress;
-    focusScopeNode.canRequestFocus = !ignoreEvents;
     return _ModalScopeStatus(
       route: widget.route,
       isCurrent: widget.route.isCurrent, // _routeSetState is called if this updates
@@ -661,13 +658,16 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     widget.route.secondaryAnimation,
                     // This additional AnimatedBuilder is include because if the
                     // value of the userGestureInProgressNotifier changes, it's
-                    // only necessary to rebuild the IgnorePointer widget.
+                    // only necessary to rebuild the IgnorePointer widget and set
+                    // the focus node's ability to focus.
                     AnimatedBuilder(
                       animation: widget.route.navigator.userGestureInProgressNotifier,
                       builder: (BuildContext context, Widget child) {
+                        final bool ignoreEvents = widget.route.animation?.status == AnimationStatus.reverse ||
+                            widget.route.navigator.userGestureInProgress;
+                        focusScopeNode.canRequestFocus = !ignoreEvents;
                         return IgnorePointer(
-                          ignoring: widget.route.navigator.userGestureInProgress
-                            || widget.route.animation?.status == AnimationStatus.reverse,
+                          ignoring: ignoreEvents,
                           child: child,
                         );
                       },
