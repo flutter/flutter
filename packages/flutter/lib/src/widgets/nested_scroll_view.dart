@@ -257,7 +257,7 @@ class NestedScrollView extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
-  
+
   /// This contains the [ScrollController]s for the outer and inner parts
   /// of the [NestedScrollView] and will be populated once the state has
   /// been created.
@@ -489,7 +489,7 @@ class NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldContr
 
   /// Controls the scroll of the [Scrollable] passed to [NestedScrollView.body].
   _NestedScrollController innerController;
-  
+
   void _assign(_NestedScrollViewState state, ScrollController parent, VoidCallback onHasScrolledBodyChanged) {
     _state = state;
     _parent = parent;
