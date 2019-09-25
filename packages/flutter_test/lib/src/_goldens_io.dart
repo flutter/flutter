@@ -15,8 +15,8 @@ import 'goldens.dart';
 
 /// The default [GoldenFileComparator] implementation for `flutter test`.
 ///
-/// The term __golden file__ refers to a master image that is considered the true
-/// rendering of a given widget, state, application, or other visual
+/// The term __golden file__ refers to a master image that is considered the
+/// true rendering of a given widget, state, application, or other visual
 /// representation you have chosen to capture. This comparator loads golden
 /// files from the local file system, treating the golden key as a relative
 /// path from the test file's directory.
@@ -91,7 +91,8 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
     final File goldenFile = _getGoldenFile(golden);
     if (!goldenFile.existsSync()) {
       throw test_package.TestFailure(
-        'Could not be compared against non-existent file: "$golden"');
+        'Could not be compared against non-existent file: "$golden"'
+      );
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
     final ComparisonResult result = GoldenFileComparator.compareLists(
@@ -126,7 +127,8 @@ class LocalComparisonOutput {
   void generateFailureOutput(ComparisonResult result, Uri golden, Uri basedir) {
     String additionalFeedback = '';
     if (result.diffs != null) {
-      additionalFeedback = '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
+      additionalFeedback = '\nFailure feedback can be found at '
+        '${path.join(basedir.path, 'failures')}';
       final Map<String, Image> diffs = result.diffs;
       diffs.forEach((String name, Image image) {
         final File output = getFailureFile(name, golden, basedir);
@@ -134,7 +136,9 @@ class LocalComparisonOutput {
         output.writeAsBytesSync(encodePng(image));
       });
     }
-    throw test_package.TestFailure('Golden "$golden": ${result.error}$additionalFeedback');
+    throw test_package.TestFailure(
+      'Golden "$golden": ${result.error}$additionalFeedback'
+    );
   }
 
   /// Returns the appropriate file for a given diff from a [ComparisonResult].
@@ -218,7 +222,9 @@ ComparisonResult compareLists(List<int> test, List<int> master) {
   if (pixelDiffCount > 0) {
     return ComparisonResult(
       passed: false,
-      error: 'Pixel test failed, ${((pixelDiffCount/totalPixels) * 100).toStringAsFixed(2)}% diff detected.',
+      error: 'Pixel test failed, '
+        '${((pixelDiffCount/totalPixels) * 100).toStringAsFixed(2)}% '
+        'diff detected.',
       diffs: diffs,
     );
   }

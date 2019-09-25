@@ -311,7 +311,6 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       );
 
       if (result.passed) {
-        print('I matched');
         return true;
       }
     }

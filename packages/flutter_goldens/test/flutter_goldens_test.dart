@@ -99,7 +99,14 @@ void main() {
       test('validates SkiaDigest', () {
         final Map<String, dynamic> skiaJson = json.decode(digestResponseTemplate());
         final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
-        expect(digest.isValid(platform, 'flutter.golden_test.1', expectation), isTrue);
+        expect(
+          digest.isValid(
+            platform,
+            'flutter.golden_test.1',
+            expectation,
+          ),
+          isTrue,
+        );
       });
 
       test('invalidates bad SkiaDigest - platform', () {
@@ -107,7 +114,14 @@ void main() {
           digestResponseTemplate(platform: 'linux')
         );
         final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
-        expect(digest.isValid(platform, 'flutter.golden_test.1', expectation), isFalse);
+        expect(
+          digest.isValid(
+            platform,
+            'flutter.golden_test.1',
+            expectation,
+          ),
+          isFalse,
+        );
       });
 
       test('invalidates bad SkiaDigest - test name', () {
@@ -115,7 +129,14 @@ void main() {
           digestResponseTemplate(testName: 'flutter.golden_test.2')
         );
         final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
-        expect(digest.isValid(platform, 'flutter.golden_test.1', expectation), isFalse);
+        expect(
+          digest.isValid(
+            platform,
+            'flutter.golden_test.1',
+            expectation,
+          ),
+          isFalse,
+        );
       });
 
       test('invalidates bad SkiaDigest - expectation', () {
@@ -123,7 +144,14 @@ void main() {
           digestResponseTemplate(expectation: '1deg543sf645erg44awqcc78')
         );
         final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
-        expect(digest.isValid(platform, 'flutter.golden_test.1', expectation), isFalse);
+        expect(
+          digest.isValid(
+            platform,
+            'flutter.golden_test.1',
+            expectation,
+          ),
+          isFalse,
+        );
       });
 
       test('invalidates bad SkiaDigest - status', () {
@@ -131,7 +159,14 @@ void main() {
           digestResponseTemplate(status: 'negative')
         );
         final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
-        expect(digest.isValid(platform, 'flutter.golden_test.1', expectation), isFalse);
+        expect(
+          digest.isValid(
+            platform,
+            'flutter.golden_test.1',
+            expectation,
+          ),
+          isFalse,
+        );
       });
 
       test('sets up expectations', () async {
@@ -146,7 +181,10 @@ void main() {
 
         await skiaClient.getExpectations();
         expect(skiaClient.expectations, isNotNull);
-        expect(skiaClient.expectations['flutter.golden_test.1'], containsPair(expectation, 1));
+        expect(
+          skiaClient.expectations['flutter.golden_test.1'],
+          containsPair(expectation, 1),
+        );
       });
 
       test('detects invalid digests SkiaDigest', () {
@@ -229,7 +267,8 @@ void main() {
 
         setUp(() {
           url = Uri.parse(
-            'https://flutter-gold.skia.org/json/details?test=flutter.golden_test.1&digest=$expectation'
+            'https://flutter-gold.skia.org/json/details?'
+              'test=flutter.golden_test.1&digest=$expectation'
           );
           mockHttpRequest = MockHttpClientRequest();
           when(mockHttpClient.getUrl(url))
@@ -286,8 +325,15 @@ void main() {
       final Directory flutterRoot = fs.directory(platform.environment['FLUTTER_ROOT'])
         ..createSync(recursive: true);
       when(defaultComparator.basedir).thenReturn(flutterRoot.childDirectory('baz').uri);
-      final Directory basedir = FlutterGoldenFileComparator.getBaseDirectory(defaultComparator, platform);
-      expect(basedir.uri, fs.directory('/flutter/bin/cache/pkg/skia_goldens/baz').uri);
+
+      final Directory basedir = FlutterGoldenFileComparator.getBaseDirectory(
+        defaultComparator,
+        platform,
+      );
+      expect(
+        basedir.uri,
+        fs.directory('/flutter/bin/cache/pkg/skia_goldens/baz').uri,
+      );
     });
 
     test('ignores version number', () {
