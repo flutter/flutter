@@ -1285,12 +1285,14 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] must not be null or [Clip.none].
   RenderClipRect({
     RenderBox child,
     CustomClipper<Rect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
+       super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   Rect get _defaultClip => Offset.zero & size;
@@ -1342,13 +1344,14 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   ///
   /// If [clipper] is non-null, then [borderRadius] is ignored.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipRRect({
     RenderBox child,
     BorderRadius borderRadius = BorderRadius.zero,
     CustomClipper<RRect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        _borderRadius = borderRadius,
        super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
     assert(_borderRadius != null || clipper != null);
@@ -1418,12 +1421,13 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipOval({
     RenderBox child,
     CustomClipper<Rect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect _cachedRect;
@@ -1496,12 +1500,13 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// consider using a [RenderClipRect], which can achieve the same effect more
   /// efficiently.
   ///
-  /// The [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] argument must not be null or [Clip.none].
   RenderClipPath({
     RenderBox child,
     CustomClipper<Path> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : assert(clipBehavior != Clip.none),
+  }) : assert(clipBehavior != null),
+       assert(clipBehavior != Clip.none),
        super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
@@ -1632,8 +1637,9 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   ///
   /// The [color] is required.
   ///
-  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
-  /// Additionally, the [elevation] must be non-negative.
+  /// The [shape], [elevation], [color], [clipBehavior], and [shadowColor]
+  /// arguments must not be null. Additionally, the [elevation] must be
+  /// non-negative.
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,
@@ -1654,7 +1660,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
          child: child,
          elevation: elevation,
          color: color,
-         shadowColor: shadowColor
+         shadowColor: shadowColor,
        );
 
   @override
@@ -1796,7 +1802,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
          color: color,
          shadowColor: shadowColor,
          clipper: clipper,
-         clipBehavior: clipBehavior
+         clipBehavior: clipBehavior,
        );
 
   @override
@@ -2569,21 +2575,17 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> listeners = <String>[];
-    if (onPointerDown != null)
-      listeners.add('down');
-    if (onPointerMove != null)
-      listeners.add('move');
-    if (onPointerUp != null)
-      listeners.add('up');
-    if (onPointerCancel != null)
-      listeners.add('cancel');
-    if (onPointerSignal != null)
-      listeners.add('signal');
-    if (listeners.isEmpty)
-      listeners.add('<none>');
-    properties.add(IterableProperty<String>('listeners', listeners));
-    // TODO(jacobr): add raw listeners to the diagnostics data.
+    properties.add(FlagsSummary<Function>(
+      'listeners',
+      <String, Function>{
+        'down': onPointerDown,
+        'move': onPointerMove,
+        'up': onPointerUp,
+        'cancel': onPointerCancel,
+        'signal': onPointerSignal,
+      },
+      ifEmpty: '<none>',
+    ));
   }
 }
 
@@ -2767,17 +2769,15 @@ class RenderMouseRegion extends RenderProxyBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> listeners = <String>[];
-    if (onEnter != null)
-      listeners.add('enter');
-    if (onHover != null)
-      listeners.add('hover');
-    if (onExit != null)
-      listeners.add('exit');
-    if (listeners.isEmpty)
-      listeners.add('<none>');
-    properties.add(IterableProperty<String>('listeners', listeners));
-    // TODO(jacobr): add raw listeners to the diagnostics data.
+    properties.add(FlagsSummary<Function>(
+      'listeners',
+      <String, Function>{
+        'enter': onEnter,
+        'hover': onHover,
+        'exit': onExit,
+      },
+      ifEmpty: '<none>',
+    ));
   }
 }
 
@@ -3456,15 +3456,12 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> gestures = <String>[];
-    if (onTap != null)
-      gestures.add('tap');
-    if (onLongPress != null)
-      gestures.add('long press');
-    if (onHorizontalDragUpdate != null)
-      gestures.add('horizontal scroll');
-    if (onVerticalDragUpdate != null)
-      gestures.add('vertical scroll');
+    final List<String> gestures = <String>[
+      if (onTap != null) 'tap',
+      if (onLongPress != null) 'long press',
+      if (onHorizontalDragUpdate != null) 'horizontal scroll',
+      if (onVerticalDragUpdate != null) 'vertical scroll',
+    ];
     if (gestures.isEmpty)
       gestures.add('<none>');
     properties.add(IterableProperty<String>('gestures', gestures));
@@ -3500,6 +3497,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool hidden,
     bool image,
     bool liveRegion,
+    int maxValueLength,
+    int currentValueLength,
     String label,
     String value,
     String increasedValue,
@@ -3547,6 +3546,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _scopesRoute = scopesRoute,
        _namesRoute = namesRoute,
        _liveRegion = liveRegion,
+       _maxValueLength = maxValueLength,
+       _currentValueLength = currentValueLength,
        _hidden = hidden,
        _image = image,
        _onDismiss = onDismiss,
@@ -3799,6 +3800,28 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_liveRegion == value)
       return;
     _liveRegion = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.maxValueLength] semantic to the given
+  /// value.
+  int get maxValueLength => _maxValueLength;
+  int _maxValueLength;
+  set maxValueLength(int value) {
+    if (_maxValueLength == value)
+      return;
+    _maxValueLength = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.currentValueLength] semantic to the
+  /// given value.
+  int get currentValueLength => _currentValueLength;
+  int _currentValueLength;
+  set currentValueLength(int value) {
+    if (_currentValueLength == value)
+      return;
+    _currentValueLength = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4373,6 +4396,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.namesRoute = namesRoute;
     if (liveRegion != null)
       config.liveRegion = liveRegion;
+    if (maxValueLength != null) {
+      config.maxValueLength = maxValueLength;
+    }
+    if (currentValueLength != null) {
+      config.currentValueLength = currentValueLength;
+    }
     if (textDirection != null)
       config.textDirection = textDirection;
     if (sortKey != null)

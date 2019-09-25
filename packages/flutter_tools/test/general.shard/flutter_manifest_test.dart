@@ -374,7 +374,7 @@ flutter:
       expect(flutterManifest.androidPackage, 'com.example');
     });
 
-    test('allows a plugin declaration', () async {
+    test('allows a legacy plugin declaration', () async {
       const String manifest = '''
 name: test
 flutter:
@@ -385,6 +385,21 @@ flutter:
       expect(flutterManifest.isPlugin, true);
       expect(flutterManifest.androidPackage, 'com.example');
     });
+    test('allows a multi-plat plugin declaration', () async {
+      const String manifest = '''
+name: test
+flutter:
+    plugin:
+      platforms:
+        android:
+          package: com.example
+          pluginClass: TestPlugin
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      expect(flutterManifest.isPlugin, true);
+      expect(flutterManifest.androidPackage, 'com.example');
+    });
+
 
     Future<void> checkManifestVersion({
       String manifest,

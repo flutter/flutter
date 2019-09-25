@@ -89,7 +89,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This sample shows an [AppBar] with two simple actions. The first action
 /// opens a [SnackBar], while the second action navigates to a new page.
@@ -480,8 +480,8 @@ class _AppBarState extends State<AppBar> {
       switch (theme.platform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
-           namesRoute = true;
-           break;
+          namesRoute = true;
+          break;
         case TargetPlatform.iOS:
           break;
       }
@@ -552,10 +552,13 @@ class _AppBarState extends State<AppBar> {
               child: appBar,
             ),
           ),
-          widget.bottomOpacity == 1.0 ? widget.bottom : Opacity(
-            opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.bottomOpacity),
-            child: widget.bottom,
-          ),
+          if (widget.bottomOpacity == 1.0)
+            widget.bottom
+          else
+            Opacity(
+              opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.bottomOpacity),
+              child: widget.bottom,
+            ),
         ],
       );
     }

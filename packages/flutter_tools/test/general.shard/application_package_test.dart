@@ -39,17 +39,20 @@ void main() {
     AndroidSdk sdk;
     ProcessManager mockProcessManager;
     MemoryFileSystem fs;
+    Cache mockCache;
     File gradle;
     final Map<Type, Generator> overrides = <Type, Generator>{
       AndroidSdk: () => sdk,
       ProcessManager: () => mockProcessManager,
       FileSystem: () => fs,
+      Cache: () => mockCache,
     };
 
     setUp(() async {
       sdk = MockitoAndroidSdk();
       mockProcessManager = MockitoProcessManager();
       fs = MemoryFileSystem();
+      mockCache = MockCache();
       Cache.flutterRoot = '../..';
       when(sdk.licensesAvailable).thenReturn(true);
       when(mockProcessManager.canRun(any)).thenReturn(true);
@@ -84,7 +87,7 @@ void main() {
           workingDirectory: anyNamed('workingDirectory'),
           environment: anyNamed('environment'),
         ),
-      ).thenReturn(ProcessResult(0, 0, _aaptDataWithDefaultEnabledAndMainLauncherActivity, null));
+      ).thenReturn(ProcessResult(0, 0, _aaptDataWithDefaultEnabledAndMainLauncherActivity, ''));
 
       final ApplicationPackage applicationPackage = await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
@@ -99,6 +102,18 @@ void main() {
       final File gradle = project.android.hostAppGradleRoot.childFile(
         platform.isWindows ? 'gradlew.bat' : 'gradlew',
       )..createSync(recursive: true);
+
+      project.android.hostAppGradleRoot
+        .childFile('gradle.properties')
+        .writeAsStringSync('irrelevant');
+
+      final Directory gradleWrapperDir = fs.systemTempDirectory.createTempSync('gradle_wrapper.');
+      when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
+
+      fs.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))
+          .createSync(recursive: true);
+      fs.file(fs.path.join(gradleWrapperDir.path, 'gradlew')).writeAsStringSync('irrelevant');
+      fs.file(fs.path.join(gradleWrapperDir.path, 'gradlew.bat')).writeAsStringSync('irrelevant');
 
       await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
@@ -310,7 +325,8 @@ void main() {
     testUsingContext('returns null when there is no ios or .ios directory', () async {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
-      final BuildableIOSApp iosApp = IOSApp.fromIosProject(FlutterProject.fromDirectory(fs.currentDirectory).ios);
+      final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
+        FlutterProject.fromDirectory(fs.currentDirectory).ios);
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -319,7 +335,8 @@ void main() {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       fs.file('ios/FooBar.xcodeproj').createSync(recursive: true);
-      final BuildableIOSApp iosApp = IOSApp.fromIosProject(FlutterProject.fromDirectory(fs.currentDirectory).ios);
+      final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
+        FlutterProject.fromDirectory(fs.currentDirectory).ios);
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -328,7 +345,8 @@ void main() {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
-      final BuildableIOSApp iosApp = IOSApp.fromIosProject(FlutterProject.fromDirectory(fs.currentDirectory).ios);
+      final BuildableIOSApp iosApp = await IOSApp.fromIosProject(
+        FlutterProject.fromDirectory(fs.currentDirectory).ios);
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -606,4 +624,5 @@ const String plistData = '''
 {"CFBundleIdentifier": "fooBundleId"}
 ''';
 
+class MockCache extends Mock implements Cache {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils { }

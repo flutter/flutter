@@ -48,6 +48,12 @@ enum CustomDimensions {
   commandBuildAarProjectType,  // cd35
   buildEventCommand,  // cd36
   buildEventSettings,  // cd37
+  commandBuildApkTargetPlatform, // cd38
+  commandBuildApkBuildMode, // cd39
+  commandBuildApkSplitPerAbi, // cd40
+  commandBuildAppBundleTargetPlatform, // cd41
+  commandBuildAppBundleBuildMode, // cd42
+  buildEventError,  // cd43
 }
 
 String cdKey(CustomDimensions cd) => 'cd${cd.index + 1}';
@@ -103,8 +109,9 @@ abstract class Usage {
   ///
   /// Note that using [command] above is preferred to ensure that the parameter
   /// keys are well-defined in [CustomDimensions] above.
-  void sendCommand(String command, {
-    Map<String, String> parameters
+  void sendCommand(
+    String command, {
+    Map<String, String> parameters,
   });
 
   /// Sends an 'event' to the underlying analytics implementation.
@@ -113,13 +120,18 @@ abstract class Usage {
   /// event types defined in this directory in events.dart.
   @visibleForOverriding
   @visibleForTesting
-  void sendEvent(String category, String parameter, {
-    Map<String, String> parameters
+  void sendEvent(
+    String category,
+    String parameter, {
+    Map<String, String> parameters,
   });
 
   /// Sends timing information to the underlying analytics implementation.
-  void sendTiming(String category, String variableName, Duration duration, {
-    String label
+  void sendTiming(
+    String category,
+    String variableName,
+    Duration duration, {
+    String label,
   });
 
   /// Sends an exception to the underlying analytics implementation.

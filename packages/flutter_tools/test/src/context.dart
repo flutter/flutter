@@ -129,8 +129,9 @@ void testUsingContext(
 void _printBufferedErrors(AppContext testContext) {
   if (testContext.get<Logger>() is BufferLogger) {
     final BufferLogger bufferLogger = testContext.get<Logger>();
-    if (bufferLogger.errorText.isNotEmpty)
+    if (bufferLogger.errorText.isNotEmpty) {
       print(bufferLogger.errorText);
+    }
     bufferLogger.clear();
   }
 }
@@ -142,8 +143,9 @@ class FakeDeviceManager implements DeviceManager {
 
   @override
   String get specifiedDeviceId {
-    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all')
+    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all') {
       return null;
+    }
     return _specifiedDeviceId;
   }
 
@@ -331,7 +333,11 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   int get minorVersion => 2;
 
   @override
-  Map<String, String> getBuildSettings(String projectPath, String target) {
+  Future<Map<String, String>> getBuildSettings(
+    String projectPath,
+    String target, {
+    Duration timeout = const Duration(minutes: 1),
+  }) async {
     return <String, String>{};
   }
 
@@ -340,7 +346,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],

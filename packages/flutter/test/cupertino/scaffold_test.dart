@@ -126,7 +126,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data:  MediaQueryData(viewInsets: EdgeInsets.only(bottom: 20.0)),
-          child: child
+          child: child,
         ),
       )
     );

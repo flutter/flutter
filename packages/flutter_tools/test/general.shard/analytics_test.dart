@@ -67,7 +67,7 @@ void main() {
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       Usage: () => Usage(
         configDirOverride: tempDir.path,
-        logFile: tempDir.childFile('analytics.log').path
+        logFile: tempDir.childFile('analytics.log').path,
       ),
     });
 
@@ -89,7 +89,7 @@ void main() {
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       Usage: () => Usage(
         configDirOverride: tempDir.path,
-        logFile: tempDir.childFile('analytics.log').path
+        logFile: tempDir.childFile('analytics.log').path,
       ),
     });
 

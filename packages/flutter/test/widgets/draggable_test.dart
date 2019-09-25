@@ -982,8 +982,7 @@ void main() {
             feedback: Text('Dragging'),
           ),
           DragTarget<int>(
-            builder:
-                (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
               return Container(
                 height: 100.0,
                 child: rejects.isNotEmpty
@@ -1041,8 +1040,7 @@ void main() {
           },
           ),
           DragTarget<int>(
-            builder:
-                (BuildContext context, List<int> data, List<dynamic> rejects) {
+            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
               return Container(
                 height: 100.0,
                 child: rejects.isNotEmpty

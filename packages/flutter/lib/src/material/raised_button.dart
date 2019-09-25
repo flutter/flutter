@@ -126,7 +126,7 @@ class RaisedButton extends MaterialButton {
     double disabledElevation,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
-    Clip clipBehavior,
+    Clip clipBehavior = Clip.none,
     FocusNode focusNode,
     bool autofocus = false,
     MaterialTapTargetSize materialTapTargetSize,
@@ -138,6 +138,7 @@ class RaisedButton extends MaterialButton {
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(clipBehavior != null),
        super(
          key: key,
          onPressed: onPressed,
@@ -209,7 +210,7 @@ class RaisedButton extends MaterialButton {
     return RawMaterialButton(
       onPressed: onPressed,
       onHighlightChanged: onHighlightChanged,
-      clipBehavior: clipBehavior ?? Clip.none,
+      clipBehavior: clipBehavior,
       fillColor: buttonTheme.getFillColor(this),
       textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
       focusColor: buttonTheme.getFocusColor(this),
@@ -276,6 +277,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
   }) : assert(elevation == null || elevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(clipBehavior != null),
        assert(icon != null),
        assert(label != null),
        assert(autofocus != null),

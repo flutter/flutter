@@ -9,6 +9,7 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -528,9 +529,14 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   // Returns the offset that should result from applying [event] to the current
   // position, taking min/max scroll extent into account.
   double _targetScrollOffsetForPointerScroll(PointerScrollEvent event) {
-    final double delta = widget.axis == Axis.horizontal
+    double delta = widget.axis == Axis.horizontal
         ? event.scrollDelta.dx
         : event.scrollDelta.dy;
+
+    if (axisDirectionIsReversed(widget.axisDirection)) {
+      delta *= -1;
+    }
+
     return math.min(math.max(position.pixels + delta, position.minScrollExtent),
         position.maxScrollExtent);
   }

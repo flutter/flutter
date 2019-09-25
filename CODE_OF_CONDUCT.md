@@ -10,8 +10,9 @@ Specifically:
 * Listen. Consider and acknowledge people's points before responding.
 
 Should you experience anything that makes you feel unwelcome in Flutter's
-community, please contact someone on the team, for instance
-[Ian](mailto:ian@hixie.ch) or [Tim](mailto:timsneath@google.com). We will
+community, please contact [conduct@flutter.dev](mailto:conduct@flutter.dev)
+or, if you prefer, directly contact someone on the team, for instance
+[Hixie](mailto:ian@hixie.ch) or [Tim](mailto:timsneath@google.com). We will
 not tolerate harassment from anyone in Flutter's community, even outside
 of Flutter's public communication channels.
 

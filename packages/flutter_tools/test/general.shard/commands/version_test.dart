@@ -62,6 +62,16 @@ void main() {
       ProcessManager: () => MockProcessManager(),
     });
 
+    testUsingContext('tool exit on confusing version', () async {
+      const String version = 'master';
+      final VersionCommand command = VersionCommand();
+      final Future<void> runCommand = createTestCommandRunner(command).run(<String>['version', version]);
+      expect(() async => await Future.wait<void>(<Future<void>>[runCommand]),
+             throwsA(isInstanceOf<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => MockProcessManager(),
+    });
+
     testUsingContext('exit tool if can\'t get the tags', () async {
       final VersionCommand command = VersionCommand();
 

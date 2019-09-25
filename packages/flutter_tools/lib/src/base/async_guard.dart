@@ -11,14 +11,19 @@ import 'dart:async';
 /// returned by [asyncGuard] is completed with that value if it has not already
 /// been completed with an error.
 ///
-/// If the execution of [fn] throws a synchronous exception, then the [Future]
-/// returned by [asyncGuard] is completed with an error whose object and
-/// stack trace are given by the synchronous exception.
+/// If the execution of [fn] throws a synchronous exception, and no [onError]
+/// callback is provided, then the [Future] returned by [asyncGuard] is
+/// completed with an error whose object and stack trace are given by the
+/// synchronous exception. If an [onError] callback is provided, then the
+/// [Future] returned by [asyncGuard] is completed with its result when passed
+/// the error object and stack trace.
 ///
 /// If the execution of [fn] results in an asynchronous exception that would
-/// otherwise be unhandled, then the [Future] returned by [asyncGuard] is
-/// completed with an error whose object and stack trace are given by the
-/// asynchronous exception.
+/// otherwise be unhandled, and no [onError] callback is provided, then the
+/// [Future] returned by [asyncGuard] is completed with an error whose object
+/// and stack trace are given by the asynchronous exception. If an [onError]
+/// callback is provided, then the [Future] returned by [asyncGuard] is
+/// completed with its result when passed the error object and stack trace.
 ///
 /// After the returned [Future] is completed, whether it be with a value or an
 /// error, all further errors resulting from the execution of [fn] both
@@ -64,8 +69,42 @@ import 'dart:async';
 /// Without the [asyncGuard] the error 'Error' would be propagated to the
 /// error handler of the containing [Zone]. With the [asyncGuard], the error
 /// 'Error' is instead caught by the `catch`.
-Future<T> asyncGuard<T>(Future<T> Function() fn) {
+///
+/// [asyncGuard] also accepts an [onError] callback for situations in which
+/// completing the returned [Future] with an error is not appropriate.
+/// For example, it is not always possible to immediately await the returned
+/// [Future]. In these cases, an [onError] callback is needed to prevent an
+/// error from propagating to the containing [Zone].
+///
+/// [onError] must have type `FutureOr<T> Function(Object error)` or
+/// `FutureOr<T> Function(Object error, StackTrace stackTrace)` otherwise an
+/// [ArgumentError] will be thrown synchronously.
+Future<T> asyncGuard<T>(Future<T> Function() fn, {
+    Function onError,
+  }) {
+  if (onError != null &&
+      onError is! _UnaryOnError<T> &&
+      onError is! _BinaryOnError<T>) {
+    throw ArgumentError('onError must be a unary function accepting an Object, '
+                        'or a binary function accepting an Object and '
+                        'StackTrace. onError must return a T');
+  }
   final Completer<T> completer = Completer<T>();
+
+  void handleError(Object e, StackTrace s) {
+    if (completer.isCompleted) {
+      return;
+    }
+    if (onError == null) {
+      completer.completeError(e, s);
+      return;
+    }
+    if (onError is _UnaryOnError) {
+      completer.complete(onError(e));
+    } else if (onError is _BinaryOnError) {
+      completer.complete(onError(e, s));
+    }
+  }
 
   runZoned<void>(() async {
     try {
@@ -74,15 +113,14 @@ Future<T> asyncGuard<T>(Future<T> Function() fn) {
         completer.complete(result);
       }
     } catch (e, s) {
-      if (!completer.isCompleted) {
-        completer.completeError(e, s);
-      }
+      handleError(e, s);
     }
-  }, onError: (dynamic e, StackTrace s) {
-    if (!completer.isCompleted) {
-      completer.completeError(e, s);
-    }
+  }, onError: (Object e, StackTrace s) {
+    handleError(e, s);
   });
 
   return completer.future;
 }
+
+typedef _UnaryOnError<T> = FutureOr<T> Function(Object error);
+typedef _BinaryOnError<T> = FutureOr<T> Function(Object error, StackTrace stackTrace);

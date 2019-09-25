@@ -58,11 +58,7 @@ class BuildableLinuxApp extends LinuxApp {
   @override
   String executable(BuildMode buildMode) {
     final String binaryName = makefileExecutableName(project);
-    if (buildMode == BuildMode.debug) {
-      return fs.path.join(getLinuxBuildDirectory(), 'debug', binaryName);
-    } else {
-      return fs.path.join(getLinuxBuildDirectory(), 'release', binaryName);
-    }
+    return fs.path.join(getLinuxBuildDirectory(), getNameForBuildMode(buildMode), binaryName);
   }
 
   @override

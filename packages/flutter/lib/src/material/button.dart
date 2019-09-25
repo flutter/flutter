@@ -241,6 +241,8 @@ class RawMaterialButton extends StatefulWidget {
   final bool autofocus;
 
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
   @override
@@ -330,6 +332,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
     final Widget result = Focus(
       focusNode: widget.focusNode,
+      canRequestFocus: widget.enabled,
       onFocusChange: _handleFocusedChanged,
       autofocus: widget.autofocus,
       child: ConstrainedBox(
