@@ -146,9 +146,8 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addFlag('web-skip-launch',
       defaultsTo: false,
-      help: 'Whether to skip automatically launching browsers on web devices that do so. '
-      'Setting this to true allows using the debug chrome extension in environments that don\'t'
-      ' support the usual websocket connection.',
+      help: 'Whether to skip automatically launching browsers on web devices '
+        'that do so. Setting this to true allows using the Dart debug extension',
       hide: hide,
     );
   }
