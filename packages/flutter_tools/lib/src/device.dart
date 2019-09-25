@@ -492,7 +492,7 @@ class DebuggingOptions {
     this.initializePlatform = true,
     this.hostname,
     this.port,
-    this.skipWebLaunch = false,
+    this.browserLaunch = true,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname })
@@ -508,7 +508,7 @@ class DebuggingOptions {
       dumpSkpOnShaderCompilation = false,
       verboseSystemLogs = false,
       observatoryPort = null,
-      skipWebLaunch = null;
+      browserLaunch = true;
 
   final bool debuggingEnabled;
 
@@ -528,7 +528,7 @@ class DebuggingOptions {
   final int observatoryPort;
   final String port;
   final String hostname;
-  final bool skipWebLaunch;
+  final bool browserLaunch;
 
   bool get hasObservatoryPort => observatoryPort != null;
 }

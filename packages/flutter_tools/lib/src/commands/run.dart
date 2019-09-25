@@ -306,7 +306,7 @@ class RunCommand extends RunCommandBase {
         initializePlatform: argResults['web-initialize-platform'],
         hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] : '',
         port: featureFlags.isWebEnabled ? argResults['web-port'] : '',
-        skipWebLaunch: featureFlags.isWebEnabled ? argResults['web-skip-launch'] : null,
+        browserLaunch: featureFlags.isWebEnabled ? argResults['web-browser-launch'] : null,
       );
     }
   }

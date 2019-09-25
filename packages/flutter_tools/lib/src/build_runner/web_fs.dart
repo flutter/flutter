@@ -108,13 +108,15 @@ class WebFs {
     await _connectedApps?.cancel();
   }
 
+  Future<DebugConnection> _cachedExtensionFuture;
+
   /// Retrieve the [DebugConnection] for the current application
   Future<DebugConnection> runAndDebug(DebuggingOptions debuggingOptions) {
     final Completer<DebugConnection> firstConnection = Completer<DebugConnection>();
     _connectedApps = _dwds.connectedApps.listen((AppConnection appConnection) async {
-      final DebugConnection debugConnection = debuggingOptions.skipWebLaunch
-        ? await _dwds.extensionDebugConnections.stream.first
-        : await _dwds.debugConnection(appConnection);
+      final DebugConnection debugConnection = debuggingOptions.browserLaunch
+        ? await _dwds.debugConnection(appConnection)
+        : await (_cachedExtensionFuture ??= _dwds.extensionDebugConnections.stream.first);
       if (!firstConnection.isCompleted) {
         firstConnection.complete(debugConnection);
       }
