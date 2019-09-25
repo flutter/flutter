@@ -1861,7 +1861,7 @@ void main() {
         '#0      someMethod()  file:///diagnostics_test.dart:42:19\n'
         '#1      someMethod2()  file:///diagnostics_test.dart:12:3\n'
         '#2      someMethod3()  file:///foo.dart:4:1\n'
-      )
+      ),
     );
 
     expect(
@@ -1871,7 +1871,7 @@ void main() {
         '#0      someMethod()  file:///diagnostics_test.dart:42:19\n'
         '#1      someMethod2()  file:///diagnostics_test.dart:12:3\n'
         '#2      someMethod3()  file:///foo.dart:4:1\n'
-      )
+      ),
     );
   });
 
@@ -2059,7 +2059,7 @@ void main() {
         'diagnosis: insufficient data to draw\n'
         '  conclusion (less than five repaints)\n'
         '════════════════════════════════════════\n',
-      )
+      ),
     );
 
     // This output looks ugly but verifies that no indentation on word wrap
@@ -2132,7 +2132,7 @@ void main() {
         '   --- example property at max length --\n'
         '   diagnosis: insufficient data to draw\n'
         '   conclusion (less than five repaints)\n'
-      )
+      ),
     );
 
     // This case matches the styles that should generally be used for error
@@ -2207,7 +2207,7 @@ void main() {
           '  insufficient data to draw conclusion\n'
           '  (less than five repaints)\n'
           '════════════════════════════════════════\n'
-        )
+        ),
     );
   });
 

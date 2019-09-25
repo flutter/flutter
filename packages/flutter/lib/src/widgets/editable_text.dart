@@ -395,8 +395,8 @@ class EditableText extends StatefulWidget {
       copy: true,
       cut: true,
       paste: true,
-      selectAll: true
-    )
+      selectAll: true,
+    ),
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -1274,12 +1274,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
         break;
       case FloatingCursorDragState.End:
-      // We skip animation if no update has happened.
+        // We skip animation if no update has happened.
         if (_lastTextPosition != null && _lastBoundedOffset != null) {
           _floatingCursorResetController.value = 0.0;
           _floatingCursorResetController.animateTo(1.0, duration: _floatingCursorResetTime, curve: Curves.decelerate);
         }
-      break;
+        break;
     }
   }
 
@@ -1703,18 +1703,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     updateKeepAlive();
   }
 
-  Size _lastSize;
-  Matrix4 _lastTransform;
-
   void _updateSizeAndTransform() {
     if (_hasInputConnection) {
       final Size size = renderEditable.size;
       final Matrix4 transform = renderEditable.getTransformTo(null);
-      if (size != _lastSize || transform != _lastTransform) {
-        _lastSize = size;
-        _lastTransform = transform;
-        _textInputConnection.setEditableSizeAndTransform(size, transform);
-      }
+      _textInputConnection.setEditableSizeAndTransform(size, transform);
       SchedulerBinding.instance
           .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
     }

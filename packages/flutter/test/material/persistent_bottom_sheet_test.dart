@@ -103,7 +103,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: Text('body'))
+        body: const Center(child: Text('body')),
       )
     ));
 
@@ -466,7 +466,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: Text('body'))
+        body: const Center(child: Text('body')),
       )
     ));
 

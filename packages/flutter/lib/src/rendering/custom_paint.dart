@@ -522,7 +522,10 @@ class RenderCustomPaint extends RenderProxyBox {
   void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
     int debugPreviousCanvasSaveCount;
     canvas.save();
-    assert(() { debugPreviousCanvasSaveCount = canvas.getSaveCount(); return true; }());
+    assert(() {
+      debugPreviousCanvasSaveCount = canvas.getSaveCount();
+      return true;
+    }());
     if (offset != Offset.zero)
       canvas.translate(offset.dx, offset.dy);
     painter.paint(canvas, size);

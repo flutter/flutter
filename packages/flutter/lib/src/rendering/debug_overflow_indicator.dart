@@ -254,7 +254,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
           // handle a little more generically in GUI debugging clients in the
           // future.
           yield DiagnosticsNode.message('◢◤' * (FlutterError.wrapWidth ~/ 2), allowWrap: false);
-        }
+        },
       ),
     );
   }

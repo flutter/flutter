@@ -111,7 +111,7 @@ class IMobileDevice {
     _isInstalled ??= processUtils.exitsHappySync(
       <String>[
         _ideviceIdPath,
-        '-h'
+        '-h',
       ],
       environment: Map<String, String>.fromEntries(
         <MapEntry<String, String>>[cache.dyLdLibEntry]
@@ -141,7 +141,7 @@ class IMobileDevice {
       <String>[
         _ideviceinfoPath,
         '-u',
-        fakeIphoneId
+        fakeIphoneId,
       ],
       environment: executionEnv,
     )).processResult;
@@ -176,7 +176,7 @@ class IMobileDevice {
       final ProcessResult result = await processManager.run(
         <String>[
           _ideviceIdPath,
-          '-l'
+          '-l',
         ],
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry]
@@ -199,7 +199,7 @@ class IMobileDevice {
           '-u',
           deviceID,
           '-k',
-          key
+          key,
         ],
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry]
@@ -250,7 +250,7 @@ class IMobileDevice {
     return processUtils.run(
       <String>[
         _idevicescreenshotPath,
-        outputFile.path
+        outputFile.path,
       ],
       throwOnError: true,
       environment: Map<String, String>.fromEntries(

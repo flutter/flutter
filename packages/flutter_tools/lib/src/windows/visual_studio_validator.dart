@@ -51,7 +51,7 @@ class VisualStudioValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(
             userMessages.visualStudioMissingComponents(
                 visualStudio.workloadDescription,
-                visualStudio.necessaryComponentDescriptions(majorVersion)
+                visualStudio.necessaryComponentDescriptions(majorVersion),
             )
         ));
       }
@@ -61,7 +61,7 @@ class VisualStudioValidator extends DoctorValidator {
       messages.add(ValidationMessage.error(
         userMessages.visualStudioMissing(
           visualStudio.workloadDescription,
-          visualStudio.necessaryComponentDescriptions(majorVersion)
+          visualStudio.necessaryComponentDescriptions(majorVersion),
         )
       ));
     }

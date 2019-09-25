@@ -140,18 +140,21 @@ void main() {
     await _createAndAnalyzeProject(
       projectDir,
       <String>[
-        '-i', 'objc', '-a', 'java'
-      ], <String>[
-      'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-      'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-      'flutter_project.iml',
-      'ios/Flutter/AppFrameworkInfo.plist',
-      'ios/Runner/AppDelegate.m',
-      'ios/Runner/GeneratedPluginRegistrant.h',
-    ], unexpectedPaths: <String>[
-      '.android/',
-      '.ios/',
-    ]);
+        '-i', 'objc', '-a', 'java',
+      ],
+      <String>[
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'flutter_project.iml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+      ],
+      unexpectedPaths: <String>[
+        '.android/',
+        '.ios/',
+      ],
+    );
   }, timeout: allowForRemotePubInvocation);
 
   testUsingContext('detects and recreates an app project correctly', () async {
@@ -160,18 +163,21 @@ void main() {
     await _createAndAnalyzeProject(
       projectDir,
       <String>[
-        '-i', 'objc', '-a', 'java'
-      ], <String>[
-      'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
-      'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-      'flutter_project.iml',
-      'ios/Flutter/AppFrameworkInfo.plist',
-      'ios/Runner/AppDelegate.m',
-      'ios/Runner/GeneratedPluginRegistrant.h',
-    ], unexpectedPaths: <String>[
-      '.android/',
-      '.ios/',
-    ]);
+        '-i', 'objc', '-a', 'java',
+      ],
+      <String>[
+        'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        'flutter_project.iml',
+        'ios/Flutter/AppFrameworkInfo.plist',
+        'ios/Runner/AppDelegate.m',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+      ],
+      unexpectedPaths: <String>[
+        '.android/',
+        '.ios/',
+      ],
+    );
   }, timeout: allowForRemotePubInvocation);
 
   testUsingContext('detects and recreates a plugin project correctly', () async {
@@ -180,8 +186,9 @@ void main() {
     return _createAndAnalyzeProject(
       projectDir,
       <String>[
-        '-i', 'objc', '-a', 'java'
-      ], <String>[
+        '-i', 'objc', '-a', 'java',
+      ],
+      <String>[
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'example/ios/Runner/AppDelegate.h',
@@ -410,7 +417,7 @@ void main() {
   }, timeout: allowForRemotePubInvocation);
 
 
-  testUsingContext('androidx app project', () async {
+  testUsingContext('androidx is used by default in an app project', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -418,7 +425,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--androidx', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     void expectExists(String relPath) {
       expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
@@ -452,7 +459,7 @@ void main() {
     expect(actualContents.contains('useAndroidX'), false);
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext('androidx app module', () async {
+  testUsingContext('androidx is used by default in a module project', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -460,7 +467,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--template=module', '--no-pub', '--androidx', projectDir.path]);
+    await runner.run(<String>['create', '--template=module', '--no-pub', projectDir.path]);
 
     final FlutterProject project = FlutterProject.fromDirectory(projectDir);
     expect(
@@ -469,7 +476,7 @@ void main() {
     );
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext('non androidx app module', () async {
+  testUsingContext('non androidx module', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -486,7 +493,7 @@ void main() {
     );
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext('androidx plugin project', () async {
+  testUsingContext('androidx is used by default in a plugin project', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -494,7 +501,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--androidx', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
     void expectExists(String relPath) {
       expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
@@ -526,6 +533,58 @@ void main() {
     final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
 
     expect(actualContents.contains('useAndroidX'), false);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('app supports macOS if requested', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--macos', projectDir.path]);
+
+    expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), true);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('app does not include macOS by default', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), false);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('plugin supports macOS if requested', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--macos', projectDir.path]);
+
+    expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), true);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('plugin does not include macOS by default', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), false);
   }, timeout: allowForCreateFlutterProject);
 
   testUsingContext('has correct content and formatting with module template', () async {
@@ -869,7 +928,7 @@ void main() {
         '--template=app',
         '--org', 'com.bar.foo',
         '-i', 'objc',
-        '-a', 'java'
+        '-a', 'java',
       ],
       <String>[],
     );

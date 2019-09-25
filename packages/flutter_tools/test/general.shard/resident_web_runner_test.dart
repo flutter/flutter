@@ -61,7 +61,7 @@ void main() {
     });
   });
 
-   void _setupMocks() {
+  void _setupMocks() {
     fs.file('pubspec.yaml').createSync();
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
@@ -138,9 +138,9 @@ void main() {
   }));
 
   test('Can hot reload after attaching', () => testbed.run(() async {
-  _setupMocks();
+    _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -155,7 +155,10 @@ void main() {
     expect(result.code, 0);
 	  // ensure that analytics are sent.
     verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
-      'cd27': 'web-javascript', 'cd28': null, 'cd29': 'false', 'cd30': 'true'
+      'cd27': 'web-javascript',
+      'cd28': null,
+      'cd29': 'false',
+      'cd30': 'true',
     })).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
@@ -164,7 +167,7 @@ void main() {
   test('Can hot restart after attaching', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -179,7 +182,10 @@ void main() {
     expect(result.code, 0);
 	  // ensure that analytics are sent.
     verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
-      'cd27': 'web-javascript', 'cd28': null, 'cd29': 'false', 'cd30': 'true'
+      'cd27': 'web-javascript',
+      'cd28': null,
+      'cd29': 'false',
+      'cd30': 'true',
     })).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
@@ -188,7 +194,7 @@ void main() {
   test('Fails on compilation errors in hot restart', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -204,7 +210,7 @@ void main() {
   test('Fails on vmservice response error', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -247,7 +253,7 @@ void main() {
   test('debugDumpApp', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -259,7 +265,7 @@ void main() {
   test('debugDumpLayerTree', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -271,7 +277,7 @@ void main() {
   test('debugDumpRenderTree', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -283,7 +289,7 @@ void main() {
   test('debugDumpSemanticsTreeInTraversalOrder', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -295,7 +301,7 @@ void main() {
   test('debugDumpSemanticsTreeInInverseHitTestOrder', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -307,7 +313,7 @@ void main() {
   test('debugToggleDebugPaintSizeEnabled', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -325,7 +331,7 @@ void main() {
   test('debugTogglePerformanceOverlayOverride', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -343,7 +349,7 @@ void main() {
   test('debugToggleWidgetInspector', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -361,7 +367,7 @@ void main() {
   test('debugToggleProfileWidgetBuilds', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -386,7 +392,7 @@ void main() {
       debugClosed = true;
     });
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -399,7 +405,7 @@ void main() {
     _setupMocks();
     when(mockWebDevice.name).thenReturn('Chromez');
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;

@@ -1063,8 +1063,9 @@ class _RenderCupertinoAlertActions extends RenderBox
           ..color = pressedColor,
        _dividerPaint = Paint()
           ..color = dividerColor
-          ..style = PaintingStyle.fill
-       { addAll(children); }
+          ..style = PaintingStyle.fill {
+    addAll(children);
+  }
 
   // The thickness of the divider between buttons.
   double get dividerThickness => _dividerThickness;

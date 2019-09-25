@@ -59,7 +59,7 @@ Future<void> updateGeneratedXcodeProperties({
     targetOverride: targetOverride,
     useMacOSConfig: useMacOSConfig,
     setSymroot: setSymroot,
-    buildDirOverride: buildDirOverride
+    buildDirOverride: buildDirOverride,
   );
 
   _updateGeneratedXcodePropertiesFile(
@@ -327,7 +327,7 @@ class XcodeProjectInterpreter {
       '-scheme',
       scheme,
       '-quiet',
-      'clean'
+      'clean',
     ], workingDirectory: fs.currentDirectory.path);
   }
 

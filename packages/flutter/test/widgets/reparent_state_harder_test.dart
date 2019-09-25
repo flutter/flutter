@@ -38,7 +38,7 @@ class OrderSwitcherState extends State<OrderSwitcher> {
           ]
         : <Widget>[
             KeyedSubtree(child: widget.b),
-            widget.a
+            widget.a,
           ],
     );
   }
