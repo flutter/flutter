@@ -27,14 +27,18 @@ class HoverClient extends StatefulWidget {
 
 class HoverClientState extends State<HoverClient> {
   void _onExit(PointerExitEvent details) {
-    if (widget.onExit != null) widget.onExit();
+    if (widget.onExit != null) {
+      widget.onExit();
+    }
     if (widget.onHover != null) {
       widget.onHover(false);
     }
   }
 
   void _onEnter(PointerEnterEvent details) {
-    if (widget.onEnter != null) widget.onEnter();
+    if (widget.onEnter != null) {
+      widget.onEnter();
+    }
     if (widget.onHover != null) {
       widget.onHover(true);
     }
@@ -853,7 +857,9 @@ class _PaintCallbackObject extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (onPaint != null) onPaint();
+    if (onPaint != null) {
+      onPaint();
+    }
     super.paint(context, offset);
   }
 }

@@ -110,7 +110,6 @@ void main() {
     TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(() => gesture?.removePointer());
-    await tester.pumpAndSettle();
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
     await tester.pumpAndSettle();
 
@@ -118,8 +117,8 @@ void main() {
 
     await gesture.moveTo(Offset.zero);
     await gesture.removePointer();
-    await tester.pumpAndSettle();
     gesture = null;
+    await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsNothing);
 
