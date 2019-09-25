@@ -68,4 +68,17 @@ void main() {
     expect(fileStorage.files.single.hash, currentHash);
     expect(fileStorage.files.single.path, file.resolveSymbolicLinksSync());
   }));
+
+  test('handles persisting with a missing build directory', () => testbed.run(() {
+    final File file = fs.file('foo.dart')
+      ..createSync()
+      ..writeAsStringSync('hello');
+    final FileHashStore fileCache = FileHashStore(environment);
+    fileCache.initialize();
+    environment.buildDir.deleteSync(recursive: true);
+
+    fileCache.hashFiles(<File>[file]);
+    // Does not throw.
+    fileCache.persist();
+  }));
 }

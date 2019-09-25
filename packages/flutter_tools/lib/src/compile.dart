@@ -274,6 +274,11 @@ class KernelCompiler {
     if (packagesPath != null) {
       mainUri = PackageUriMapper.findUri(mainPath, packagesPath, fileSystemScheme, fileSystemRoots);
     }
+    // TODO(jonahwilliams): The output file must already exist, but this seems
+    // unnecessary.
+    if (outputFilePath != null && !fs.isFileSync(outputFilePath)) {
+      fs.file(outputFilePath).createSync(recursive: true);
+    }
     final List<String> command = <String>[
       engineDartPath,
       frontendServer,
