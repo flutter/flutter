@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
+import '../rendering/mock_canvas.dart';
 
 /// Integration tests testing both [CupertinoPageScaffold] and [CupertinoTabScaffold].
 void main() {
@@ -51,6 +52,53 @@ void main() {
     // it's pushed down by the opaque navigation bar whose height is 44 px,
     // and the 20 px [MediaQuery] top padding is fully absorbed by the navigation bar.
     expect(tester.getRect(find.byType(Container)), const Rect.fromLTRB(0, 44, 800, 600));
+  });
+
+  testWidgets('dark mode and obstruction work', (WidgetTester tester) async {
+    const Color dynamicColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFFF8F8F8),
+      darkColor: Color(0xEE333333),
+    );
+
+    const CupertinoDynamicColor backgroundColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFFFFFFFF),
+      darkColor: Color(0xFF000000),
+    );
+
+    BuildContext childContext;
+    Widget scaffoldWithBrightness(Brightness brightness) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(
+            platformBrightness: brightness,
+            viewInsets: const EdgeInsets.only(top: 20),
+          ),
+          child: CupertinoPageScaffold(
+            backgroundColor: backgroundColor,
+            navigationBar: const CupertinoNavigationBar(
+              middle: Text('Title'),
+              backgroundColor: dynamicColor,
+            ),
+            child: Builder(
+              builder: (BuildContext context) {
+                childContext = context;
+                return Container();
+              },
+            ),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(scaffoldWithBrightness(Brightness.light));
+
+    expect(MediaQuery.of(childContext).padding.top, 0);
+    expect(find.byType(CupertinoPageScaffold), paints..rect(color: backgroundColor.color));
+
+    await tester.pumpWidget(scaffoldWithBrightness(Brightness.dark));
+
+    expect(MediaQuery.of(childContext).padding.top, greaterThan(0));
+    expect(find.byType(CupertinoPageScaffold), paints..rect(color: backgroundColor.darkColor));
   });
 
   testWidgets('Contents padding from viewInsets', (WidgetTester tester) async {
