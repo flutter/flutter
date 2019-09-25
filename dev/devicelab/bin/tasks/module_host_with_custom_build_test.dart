@@ -100,6 +100,7 @@ Future<void> main() async {
 
       final Iterable<String> demoDebugFiles = await getFilesInApk(demoDebugApk);
       checkItContains<String>(<String>[
+        ...flutterAssets,
         'assets/flutter_assets/isolate_snapshot_data',
         'assets/flutter_assets/kernel_blob.bin',
         'assets/flutter_assets/vm_snapshot_data',
@@ -149,6 +150,7 @@ Future<void> main() async {
 
       final Iterable<String> demoStagingFiles = await getFilesInApk(demoStagingApk);
       checkItContains<String>(<String>[
+        ...flutterAssets,
         'assets/flutter_assets/isolate_snapshot_data',
         'assets/flutter_assets/kernel_blob.bin',
         'assets/flutter_assets/vm_snapshot_data',
@@ -200,6 +202,7 @@ Future<void> main() async {
 
       final Iterable<String> demoReleaseFiles = await getFilesInApk(demoReleaseApk);
       checkItContains<String>(<String>[
+        ...flutterAssets,
         'lib/arm64-v8a/libapp.so',
         'lib/arm64-v8a/libflutter.so',
         'lib/armeabi-v7a/libapp.so',
@@ -250,6 +253,7 @@ Future<void> main() async {
 
       final Iterable<String> demoProdFiles = await getFilesInApk(demoProdApk);
       checkItContains<String>(<String>[
+          ...flutterAssets,
           'lib/arm64-v8a/libapp.so',
           'lib/arm64-v8a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
