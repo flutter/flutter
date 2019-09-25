@@ -180,10 +180,15 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               currentLineIndent += 8;
               state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
               break;
+            case '\r':
             case '\n':
             case '\f':
               if (lines.isNotEmpty) {
                 yield getParagraph();
+              }
+              if (text[currentPosition] == '\r' && currentPosition < text.length - 1
+                  && text[currentPosition + 1] == '\n') {
+                currentPosition += 1;
               }
               lastLineIndent = 0;
               currentLineIndent = 0;

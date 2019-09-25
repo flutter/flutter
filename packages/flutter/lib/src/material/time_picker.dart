@@ -259,7 +259,7 @@ class _DayPeriodControl extends StatelessWidget {
               heightFactor: 1,
               child: Semantics(
                 selected: amSelected,
-                child: Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle)
+                child: Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle),
               ),
             ),
           ),
@@ -467,9 +467,8 @@ class _MinuteControl extends StatelessWidget {
 _TimePickerHeaderFormat _buildHeaderFormat(
   TimeOfDayFormat timeOfDayFormat,
   _TimePickerFragmentContext context,
-  Orientation orientation
+  Orientation orientation,
 ) {
-
   // Creates an hour fragment.
   _TimePickerHeaderFragment hour() {
     return _TimePickerHeaderFragment(
@@ -872,7 +871,7 @@ class _TappableLabel {
 }
 
 class _DialPainter extends CustomPainter {
-  const _DialPainter({
+  _DialPainter({
     @required this.primaryOuterLabels,
     @required this.primaryInnerLabels,
     @required this.secondaryOuterLabels,
@@ -883,7 +882,7 @@ class _DialPainter extends CustomPainter {
     @required this.activeRing,
     @required this.textDirection,
     @required this.selectedValue,
-  });
+  }) : super(repaint: PaintingBinding.instance.systemFonts);
 
   final List<_TappableLabel> primaryOuterLabels;
   final List<_TappableLabel> primaryInnerLabels;

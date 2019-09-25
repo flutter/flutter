@@ -64,6 +64,7 @@ Future<void> main() async {
           options: <String>[
             'apk',
             '--target-platform', 'android-arm',
+            '--no-shrink',
             '--verbose',
           ],
         );
@@ -100,7 +101,9 @@ Future<void> main() async {
           options: <String>[
             'apk',
             '--target-platform', 'android-arm',
-            '--debug', '--verbose',
+            '--debug',
+            '--no-shrink',
+            '--verbose',
           ],
         );
       });

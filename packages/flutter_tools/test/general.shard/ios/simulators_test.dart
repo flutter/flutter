@@ -454,23 +454,21 @@ void main() {
     });
 
     testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
-        final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
-        when(PlistParser.instance.getValueFromFile(any, any)).thenReturn('correct');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
+      when(PlistParser.instance.getValueFromFile(any, any)).thenReturn('correct');
 
-        final Directory mockDir = fs.currentDirectory;
-        final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
+      final Directory mockDir = fs.currentDirectory;
+      final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
 
-        const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
-        final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
-        await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
+      final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
+      await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
-        verify(simControl.launch(any, 'correct', any));
-      },
-      overrides: <Type, Generator>{
-        SimControl: () => simControl,
-        PlistParser: () => MockPlistUtils(),
-      },
-    );
+      verify(simControl.launch(any, 'correct', any));
+    }, overrides: <Type, Generator>{
+      SimControl: () => simControl,
+      PlistParser: () => MockPlistUtils(),
+    });
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {

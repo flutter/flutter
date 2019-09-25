@@ -1366,7 +1366,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
             ErrorSummary('Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.'),
             ErrorHint('Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.'),
             ErrorDescription('Error details:'),
-            ...mutationErrors
+            ...mutationErrors,
           ]);
         }
       }

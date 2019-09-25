@@ -284,7 +284,8 @@ String _filterOverrideWarnings(String message) {
   //   ! front_end 0.1.0-alpha.0 from path ../../bin/cache/dart-sdk/lib/front_end
   if (message == 'Warning: You are using these overridden dependencies:') {
     return null;
-  } if (message.contains(_analyzerWarning)) {
+  }
+  if (message.contains(_analyzerWarning)) {
     return null;
   }
   return message;

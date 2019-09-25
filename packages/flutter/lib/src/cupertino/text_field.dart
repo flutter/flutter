@@ -201,7 +201,7 @@ class CupertinoTextField extends StatefulWidget {
     this.placeholder,
     this.placeholderStyle = const TextStyle(
       fontWeight: FontWeight.w300,
-      color: _kInactiveTextColor
+      color: _kInactiveTextColor,
     ),
     this.prefix,
     this.prefixMode = OverlayVisibilityMode.always,

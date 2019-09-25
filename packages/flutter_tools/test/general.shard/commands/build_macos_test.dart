@@ -52,7 +52,7 @@ void main() {
     macosPlatform = MockPlatform();
     notMacosPlatform = MockPlatform();
     when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
-    return 0;
+      return 0;
     });
     when(mockProcess.stderr).thenAnswer((Invocation invocation) {
       return const Stream<List<int>>.empty();

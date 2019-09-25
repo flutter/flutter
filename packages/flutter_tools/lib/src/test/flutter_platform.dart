@@ -94,7 +94,7 @@ FlutterPlatform installHook({
   Uri projectRootDirectory,
   FlutterProject flutterProject,
   String icudtlPath,
-  PlatformPluginRegistration platformPluginRegistration
+  PlatformPluginRegistration platformPluginRegistration,
 }) {
   assert(enableObservatory || (!startPaused && observatoryPort == null));
 
@@ -102,9 +102,9 @@ FlutterPlatform installHook({
   platformPluginRegistration ??= (FlutterPlatform platform) {
     hack.registerPlatformPlugin(
       <Runtime>[Runtime.vm],
-        () {
+      () {
         return platform;
-      }
+      },
     );
   };
   final FlutterPlatform platform = FlutterPlatform(
@@ -417,7 +417,8 @@ class FlutterPlatform extends PlatformPlugin {
         await server.close(force: true);
       });
       final Completer<WebSocket> webSocket = Completer<WebSocket>();
-      server.listen((HttpRequest request) {
+      server.listen(
+        (HttpRequest request) {
           if (!webSocket.isCompleted) {
             webSocket.complete(WebSocketTransformer.upgrade(request));
           }

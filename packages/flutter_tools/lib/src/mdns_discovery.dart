@@ -85,7 +85,7 @@ class MDnsObservatoryDiscovery {
         buffer.writeln('There are multiple observatory ports available.');
         buffer.writeln('Rerun this command with one of the following passed in as the appId:');
         buffer.writeln('');
-         for (final String uniqueDomainName in uniqueDomainNames) {
+        for (final String uniqueDomainName in uniqueDomainNames) {
           buffer.writeln('  flutter attach --app-id ${uniqueDomainName.replaceAll('.$dartObservatoryName', '')}');
         }
         throwToolExit(buffer.toString());
