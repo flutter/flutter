@@ -45,12 +45,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   final _TextFieldState _state;
 
   @override
-  void onTapDown(TapDownDetails details) {
-    super.onTapDown(details);
-    _state._startSplash(details.globalPosition);
-  }
-
-  @override
   void onForcePressStart(ForcePressDetails details) {
     super.onForcePressStart(details);
     if (delegate.selectionEnabled && shouldShowSelectionToolbar) {
@@ -100,14 +94,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
       }
     }
     _state._requestKeyboard();
-    _state._confirmCurrentSplash();
     if (_state.widget.onTap != null)
       _state.widget.onTap();
-  }
-
-  @override
-  void onSingleTapCancel() {
-    _state._cancelCurrentSplash();
   }
 
   @override
@@ -127,13 +115,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
           break;
       }
     }
-    _state._confirmCurrentSplash();
-  }
-
-  @override
-  void onDragSelectionStart(DragStartDetails details) {
-    super.onDragSelectionStart(details);
-    _state._startSplash(details.globalPosition);
   }
 }
 
@@ -720,10 +701,7 @@ class TextField extends StatefulWidget {
   }
 }
 
-class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixin implements TextSelectionGestureDetectorBuilderDelegate {
-  Set<InteractiveInkFeature> _splashes;
-  InteractiveInkFeature _currentSplash;
-
+class _TextFieldState extends State<TextField> implements TextSelectionGestureDetectorBuilderDelegate {
   TextEditingController _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller;
 
@@ -905,75 +883,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     }
   }
 
-  InteractiveInkFeature _createInkFeature(Offset globalPosition) {
-    final MaterialInkController inkController = Material.of(context);
-    final ThemeData themeData = Theme.of(context);
-    final BuildContext editableContext = editableTextKey.currentContext;
-    final RenderBox referenceBox = InputDecorator.containerOf(editableContext) ?? editableContext.findRenderObject();
-    final Offset position = referenceBox.globalToLocal(globalPosition);
-    final Color color = themeData.splashColor;
-
-    InteractiveInkFeature splash;
-    void handleRemoved() {
-      if (_splashes != null) {
-        assert(_splashes.contains(splash));
-        _splashes.remove(splash);
-        if (_currentSplash == splash)
-          _currentSplash = null;
-        updateKeepAlive();
-      } // else we're probably in deactivate()
-    }
-
-    splash = themeData.splashFactory.create(
-      controller: inkController,
-      referenceBox: referenceBox,
-      position: position,
-      color: color,
-      containedInkWell: true,
-      // TODO(hansmuller): splash clip borderRadius should match the input decorator's border.
-      borderRadius: BorderRadius.zero,
-      onRemoved: handleRemoved,
-      textDirection: Directionality.of(context),
-    );
-
-    return splash;
-  }
-
-  void _startSplash(Offset globalPosition) {
-    if (_effectiveFocusNode.hasFocus)
-      return;
-    final InteractiveInkFeature splash = _createInkFeature(globalPosition);
-    _splashes ??= HashSet<InteractiveInkFeature>();
-    _splashes.add(splash);
-    _currentSplash = splash;
-    updateKeepAlive();
-  }
-
-  void _confirmCurrentSplash() {
-    _currentSplash?.confirm();
-    _currentSplash = null;
-  }
-
-  void _cancelCurrentSplash() {
-    _currentSplash?.cancel();
-  }
-
-  @override
-  bool get wantKeepAlive => _splashes != null && _splashes.isNotEmpty;
-
-  @override
-  void deactivate() {
-    if (_splashes != null) {
-      final Set<InteractiveInkFeature> splashes = _splashes;
-      _splashes = null;
-      for (InteractiveInkFeature splash in splashes)
-        splash.dispose();
-      _currentSplash = null;
-    }
-    assert(_currentSplash == null);
-    super.deactivate();
-  }
-
   void _handleMouseEnter(PointerEnterEvent event) => _handleHover(true);
   void _handleMouseExit(PointerExitEvent event) => _handleHover(false);
 
@@ -987,23 +896,24 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasMaterial(context));
     // TODO(jonahwilliams): uncomment out this check once we have migrated tests.
     // assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     assert(
-      !(widget.style != null && widget.style.inherit == false &&
+    !(widget.style != null && widget.style.inherit == false &&
         (widget.style.fontSize == null || widget.style.textBaseline == null)),
-      'inherit false style must supply fontSize and textBaseline',
+    'inherit false style must supply fontSize and textBaseline',
     );
 
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = themeData.textTheme.subhead.merge(widget.style);
-    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.primaryColorBrightness;
+    final Brightness keyboardAppearance = widget.keyboardAppearance ??
+        themeData.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
-    final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
+    final List<TextInputFormatter> formatters = widget.inputFormatters ??
+        <TextInputFormatter>[];
     if (widget.maxLength != null && widget.maxLengthEnforced)
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
 
@@ -1020,9 +930,13 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         textSelectionControls = cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
-        cursorColor ??= CupertinoTheme.of(context).primaryColor;
+        cursorColor ??= CupertinoTheme
+            .of(context)
+            .primaryColor;
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery
+            .of(context)
+            .devicePixelRatio, 0);
         break;
 
       case TargetPlatform.android:
@@ -1058,7 +972,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         minLines: widget.minLines,
         expands: widget.expands,
         selectionColor: themeData.textSelectionColor,
-        selectionControls: widget.selectionEnabled ? textSelectionControls : null,
+        selectionControls: widget.selectionEnabled
+            ? textSelectionControls
+            : null,
         onChanged: widget.onChanged,
         onSelectionChanged: _handleSelectionChanged,
         onEditingComplete: widget.onEditingComplete,
@@ -1084,7 +1000,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
     if (widget.decoration != null) {
       child = AnimatedBuilder(
-        animation: Listenable.merge(<Listenable>[ focusNode, controller ]),
+        animation: Listenable.merge(<Listenable>[ focusNode, controller]),
         builder: (BuildContext context, Widget child) {
           return InputDecorator(
             decoration: _getEffectiveDecoration(),
@@ -1110,13 +1026,15 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           animation: controller, // changes the _currentLength
           builder: (BuildContext context, Widget child) {
             return Semantics(
-              maxValueLength: widget.maxLengthEnforced && widget.maxLength != null && widget.maxLength > 0
+              maxValueLength: widget.maxLengthEnforced &&
+                  widget.maxLength != null && widget.maxLength > 0
                   ? widget.maxLength
                   : null,
               currentValueLength: _currentLength,
               onTap: () {
                 if (!_effectiveController.selection.isValid)
-                  _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+                  _effectiveController.selection = TextSelection.collapsed(
+                      offset: _effectiveController.text.length);
                 _requestKeyboard();
               },
               child: child,
