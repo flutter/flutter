@@ -573,6 +573,7 @@ void main() {
 
     expect(config.isSemanticBoundary, isFalse);
     expect(config.isButton, isFalse);
+    expect(config.isLink, isFalse);
     expect(config.isMergingSemanticsOfDescendants, isFalse);
     expect(config.isEnabled, null);
     expect(config.isChecked, null);
@@ -596,6 +597,7 @@ void main() {
 
     config.isSemanticBoundary = true;
     config.isButton = true;
+    config.isLink = true;
     config.isMergingSemanticsOfDescendants = true;
     config.isEnabled = true;
     config.isChecked = true;
@@ -632,6 +634,7 @@ void main() {
 
     expect(config.isSemanticBoundary, isTrue);
     expect(config.isButton, isTrue);
+    expect(config.isLink, isTrue);
     expect(config.isMergingSemanticsOfDescendants, isTrue);
     expect(config.isEnabled, isTrue);
     expect(config.isChecked, isTrue);
