@@ -263,7 +263,6 @@ class Image extends StatefulWidget {
   const Image({
     Key key,
     @required this.image,
-    this.certificate,
     this.frameBuilder,
     this.loadingBuilder,
     this.semanticLabel,
@@ -308,7 +307,6 @@ class Image extends StatefulWidget {
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.network(
     String src, {
-    this.certificate,
     Key key,
     double scale = 1.0,
     this.frameBuilder,
@@ -327,7 +325,7 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
     Map<String, String> headers,
-  }) : image = NetworkImage(src, scale: scale, headers: headers, certificate: certificate),
+  }) : image = NetworkImage(src, scale: scale, headers: headers),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -371,7 +369,6 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
   }) : image = FileImage(file, scale: scale),
        loadingBuilder = null,
-       certificate = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(filterQuality != null),
@@ -527,7 +524,6 @@ class Image extends StatefulWidget {
          ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
          : AssetImage(name, bundle: bundle, package: package),
        loadingBuilder = null,
-       certificate = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -572,7 +568,6 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
   }) : image = MemoryImage(bytes, scale: scale),
        loadingBuilder = null,
-       certificate = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -859,11 +854,6 @@ class Image extends StatefulWidget {
   /// Useful for images which do not contribute meaningful information to an
   /// application.
   final bool excludeFromSemantics;
-
-  /// For https-originated images, this optionally provides a certificate.
-  ///
-  /// This allows to override default certificates used for https operations.
-  final String certificate;
 
   @override
   _ImageState createState() => _ImageState();

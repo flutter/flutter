@@ -19,7 +19,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments [url] and [scale] must not be null.
-  const NetworkImage(this.url, { this.scale = 1.0, this.headers, this.certificate })
+  const NetworkImage(this.url, { this.scale = 1.0, this.headers })
     : assert(url != null),
       assert(scale != null);
 
@@ -31,9 +31,6 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
   @override
   final Map<String, String> headers;
-
-  @override
-  final String certificate;
 
   @override
   Future<NetworkImage> obtainKey(image_provider.ImageConfiguration configuration) {
@@ -64,8 +61,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   // We set `autoUncompress` to false to ensure that we can trust the value of
   // the `Content-Length` HTTP header. We automatically uncompress the content
   // in our call to [consolidateHttpClientResponseBytes].
-  static HttpClient _sharedHttpClient;
-  static String _sharedClientCertificate;
+  static final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
 
   static HttpClient get _httpClient {
     HttpClient client = _sharedHttpClient;
@@ -85,15 +81,6 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       assert(key == this);
 
       final Uri resolved = Uri.base.resolve(key.url);
-      if (_sharedHttpClient == null || _sharedClientCertificate != certificate) {
-        // Initialize sharedHttpClient on first request.
-        // Reset shared http client instance if certificate changes.
-        _sharedClientCertificate = certificate;
-        _sharedHttpClient = _sharedClientCertificate == null ?
-            HttpClient() :
-            HttpClient(context: SecurityContext()..setTrustedCertificatesBytes(certificate.codeUnits));
-        _sharedHttpClient.autoUncompress = false;
-      }
       final HttpClientRequest request = await _httpClient.getUrl(resolved);
       headers?.forEach((String name, String value) {
         request.headers.add(name, value);
