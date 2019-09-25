@@ -98,6 +98,146 @@ typedef GestureTapCallback = void Function();
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
 typedef GestureTapCancelCallback = void Function();
 
+abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
+  /// Creates a tap gesture recognizer.
+  BaseTapGestureRecognizer({ Object debugOwner, Duration deadline = kPressTimeout })
+    : super(deadline: deadline, debugOwner: debugOwner);
+
+  bool _sentTapDown = false;
+  bool _wonArenaForPrimaryPointer = false;
+
+  PointerDownEvent _down;
+  PointerUpEvent _up;
+
+  @protected
+  bool handleIsPointerAllowed(PointerDownEvent event);
+
+  @protected
+  void handleTapDown({ PointerDownEvent down });
+
+  @protected
+  void handleTapUp({ PointerDownEvent down, PointerUpEvent up });
+
+  @protected
+  void handleTapCancel({ PointerDownEvent down, PointerCancelEvent cancel, String reason });
+
+  @override
+  bool isPointerAllowed(PointerDownEvent event) {
+    final bool allowedByDelegate = handleIsPointerAllowed(event);
+    if (allowedByDelegate != null)
+      return allowedByDelegate;
+    return super.isPointerAllowed(event);
+  }
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    if (state == GestureRecognizerState.ready) {
+      // `_down` must be assigned in this method instead of `handlePrimaryPointer`,
+      // because `acceptGesture` might be called before `handlePrimaryPointer`,
+      // which relies on `_down` to call `_delegate.onDown`.
+      _down = event;
+    }
+    super.addAllowedPointer(event);
+  }
+
+  @override
+  void handlePrimaryPointer(PointerEvent event) {
+    if (event is PointerUpEvent) {
+      _up = event;
+      _checkUp();
+    } else if (event is PointerCancelEvent) {
+      resolve(GestureDisposition.rejected);
+      if (_sentTapDown) {
+        _checkCancel(event, '');
+      }
+      _reset();
+    } else if (event.buttons != _down.buttons) {
+      resolve(GestureDisposition.rejected);
+      stopTrackingPointer(primaryPointer);
+    }
+  }
+
+  @override
+  void resolve(GestureDisposition disposition) {
+    if (_wonArenaForPrimaryPointer && disposition == GestureDisposition.rejected) {
+      // This can happen if the gesture has been canceled. For example, when
+      // the pointer has exceeded the touch slop, the buttons have been changed,
+      // or if the recognizer is disposed.
+      assert(_sentTapDown);
+      _checkCancel(null, 'spontaneous');
+      _reset();
+    }
+    super.resolve(disposition);
+  }
+
+  @override
+  void didExceedDeadlineWithEvent(PointerDownEvent event) {
+    _checkDown();
+  }
+
+  @override
+  void acceptGesture(int pointer) {
+    super.acceptGesture(pointer);
+    if (pointer == primaryPointer) {
+      _checkDown();
+      _wonArenaForPrimaryPointer = true;
+      _checkUp();
+    }
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    super.rejectGesture(pointer);
+    if (pointer == primaryPointer) {
+      // Another gesture won the arena.
+      assert(state != GestureRecognizerState.possible);
+      if (_sentTapDown)
+        _checkCancel(null, 'forced');
+      _reset();
+    }
+  }
+
+  void _checkDown() {
+    if (_sentTapDown) {
+      return;
+    }
+    handleTapDown(down: _down);
+    _sentTapDown = true;
+  }
+
+  void _checkUp() {
+    if (!_wonArenaForPrimaryPointer || _up == null) {
+      return;
+    }
+    handleTapUp(down: _down, up: _up);
+    _reset();
+  }
+
+  void _checkCancel(PointerCancelEvent event, String note) {
+    handleTapCancel(down: _down, cancel: event, reason: note);
+  }
+
+  void _reset() {
+    _sentTapDown = false;
+    _wonArenaForPrimaryPointer = false;
+    _up = null;
+    _down = null;
+  }
+
+  @override
+  String get debugDescription => 'base tap';
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(FlagProperty('wonArenaForPrimaryPointer', value: _wonArenaForPrimaryPointer, ifTrue: 'won arena'));
+    properties.add(DiagnosticsProperty<Offset>('finalPosition', _up?.position, defaultValue: null));
+    properties.add(DiagnosticsProperty<Offset>('finalLocalPosition', _up?.localPosition, defaultValue: _up?.position));
+    properties.add(FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
+    // TODO(tongmu): Add property _initialButtons and update related tests
+  }
+}
+
 /// Recognizes taps.
 ///
 /// Gesture recognizers take part in gesture arenas to enable potential gestures
@@ -118,7 +258,7 @@ typedef GestureTapCancelCallback = void Function();
 ///
 ///  * [GestureDetector.onTap], which uses this recognizer.
 ///  * [MultiTapGestureRecognizer]
-class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
+class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// Creates a tap gesture recognizer.
   TapGestureRecognizer({ Object debugOwner }) : super(deadline: kPressTimeout, debugOwner: debugOwner);
 
@@ -230,15 +370,9 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///  * [GestureDetector.onTapCancel], which exposes this callback.
   GestureTapCancelCallback onSecondaryTapCancel;
 
-  bool _sentTapDown = false;
-  bool _wonArenaForPrimaryPointer = false;
-  OffsetPair _finalPosition;
-  // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
-  // different set of buttons, the gesture is canceled.
-  int _initialButtons;
-
+  @protected
   @override
-  bool isPointerAllowed(PointerDownEvent event) {
+  bool handleIsPointerAllowed(PointerDownEvent event) {
     switch (event.buttons) {
       case kPrimaryButton:
         if (onTapDown == null &&
@@ -256,85 +390,18 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       default:
         return false;
     }
-    return super.isPointerAllowed(event);
+    return null;
   }
 
+  @protected
   @override
-  void addAllowedPointer(PointerDownEvent event) {
-    super.addAllowedPointer(event);
-    // `_initialButtons` must be assigned here instead of `handlePrimaryPointer`,
-    // because `acceptGesture` might be called before `handlePrimaryPointer`,
-    // which relies on `_initialButtons` to create `TapDownDetails`.
-    _initialButtons = event.buttons;
-  }
-
-  @override
-  void handlePrimaryPointer(PointerEvent event) {
-    if (event is PointerUpEvent) {
-      _finalPosition = OffsetPair(global: event.position, local: event.localPosition);
-      _checkUp();
-    } else if (event is PointerCancelEvent) {
-      resolve(GestureDisposition.rejected);
-      if (_sentTapDown) {
-        _checkCancel('');
-      }
-      _reset();
-    } else if (event.buttons != _initialButtons) {
-      resolve(GestureDisposition.rejected);
-      stopTrackingPointer(primaryPointer);
-    }
-  }
-
-  @override
-  void resolve(GestureDisposition disposition) {
-    if (_wonArenaForPrimaryPointer && disposition == GestureDisposition.rejected) {
-      // This can happen if the gesture has been canceled. For example, when
-      // the pointer has exceeded the touch slop, the buttons have been changed,
-      // or if the recognizer is disposed.
-      assert(_sentTapDown);
-      _checkCancel('spontaneous ');
-      _reset();
-    }
-    super.resolve(disposition);
-  }
-
-  @override
-  void didExceedDeadlineWithEvent(PointerDownEvent event) {
-    _checkDown(event.pointer);
-  }
-
-  @override
-  void acceptGesture(int pointer) {
-    super.acceptGesture(pointer);
-    if (pointer == primaryPointer) {
-      _checkDown(pointer);
-      _wonArenaForPrimaryPointer = true;
-      _checkUp();
-    }
-  }
-
-  @override
-  void rejectGesture(int pointer) {
-    super.rejectGesture(pointer);
-    if (pointer == primaryPointer) {
-      // Another gesture won the arena.
-      assert(state != GestureRecognizerState.possible);
-      if (_sentTapDown)
-        _checkCancel('forced ');
-      _reset();
-    }
-  }
-
-  void _checkDown(int pointer) {
-    if (_sentTapDown) {
-      return;
-    }
+  void handleTapDown({PointerDownEvent down}) {
     final TapDownDetails details = TapDownDetails(
-      globalPosition: initialPosition.global,
-      localPosition: initialPosition.local,
-      kind: getKindForPointer(pointer),
+      globalPosition: down.position,
+      localPosition: down.localPosition,
+      kind: getKindForPointer(down.pointer),
     );
-    switch (_initialButtons) {
+    switch (down.buttons) {
       case kPrimaryButton:
         if (onTapDown != null)
           invokeCallback<void>('onTapDown', () => onTapDown(details));
@@ -346,18 +413,16 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
         break;
       default:
     }
-    _sentTapDown = true;
   }
 
-  void _checkUp() {
-    if (!_wonArenaForPrimaryPointer || _finalPosition == null) {
-      return;
-    }
+  @protected
+  @override
+  void handleTapUp({PointerDownEvent down, PointerUpEvent up}) {
     final TapUpDetails details = TapUpDetails(
-      globalPosition: _finalPosition.global,
-      localPosition: _finalPosition.local,
+      globalPosition: up.position,
+      localPosition: up.localPosition,
     );
-    switch (_initialButtons) {
+    switch (down.buttons) {
       case kPrimaryButton:
         if (onTapUp != null)
           invokeCallback<void>('onTapUp', () => onTapUp(details));
@@ -371,11 +436,13 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
         break;
       default:
     }
-    _reset();
   }
 
-  void _checkCancel(String note) {
-    switch (_initialButtons) {
+  @protected
+  @override
+  void handleTapCancel({PointerDownEvent down, PointerCancelEvent cancel, String reason}) {
+    final String note = reason == '' ? reason : ' $reason';
+    switch (down.buttons) {
       case kPrimaryButton:
         if (onTapCancel != null)
           invokeCallback<void>('${note}onTapCancel', onTapCancel);
@@ -389,23 +456,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
   }
 
-  void _reset() {
-    _sentTapDown = false;
-    _wonArenaForPrimaryPointer = false;
-    _finalPosition = null;
-    _initialButtons = null;
-  }
-
   @override
   String get debugDescription => 'tap';
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(FlagProperty('wonArenaForPrimaryPointer', value: _wonArenaForPrimaryPointer, ifTrue: 'won arena'));
-    properties.add(DiagnosticsProperty<Offset>('finalPosition', _finalPosition?.global, defaultValue: null));
-    properties.add(DiagnosticsProperty<Offset>('finalLocalPosition', _finalPosition?.local, defaultValue: _finalPosition?.global));
-    properties.add(FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
-    // TODO(tongmu): Add property _initialButtons and update related tests
-  }
 }
