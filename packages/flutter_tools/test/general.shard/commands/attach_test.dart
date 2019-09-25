@@ -539,6 +539,9 @@ class StreamLogger extends Logger {
   }
 
   Stream<String> get stream => _controller.stream;
+
+  @override
+  void sendNotification(String message, {String progressId}) { }
 }
 
 class LoggerInterrupted implements Exception {
