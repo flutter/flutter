@@ -153,4 +153,20 @@ class BuildEvent extends UsageEvent {
 class CommandResultEvent extends UsageEvent {
   CommandResultEvent(String commandPath, FlutterCommandResult result)
       : super(commandPath, result?.toString() ?? 'unspecified');
+
+  @override
+  void send() {
+    int maxRss;
+    try {
+      maxRss = processInfo.maxRss;
+    } catch (e) {
+      // If grabbing the maxRss fails for some reason, just leave it off the
+      // event.
+    }
+    final Map<String, String> parameters = _useCdKeys(<CustomDimensions, String>{
+      if (maxRss != null)
+        CustomDimensions.commandResultEventMaxRss: maxRss.toString(),
+    });
+    flutterUsage.sendEvent(category, parameter, parameters: parameters);
+  }
 }
