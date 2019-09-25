@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # The tests to run on Firebase Test Lab.
-# Currently, the test consist on building an Android App Bundle and ensuring
+# Currently, the test consists on building an Android App Bundle and ensuring
 # that the app doesn't crash upon startup.
 tests=(
   "dev/integration_tests/release_smoke_test"
