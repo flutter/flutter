@@ -2239,10 +2239,25 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     route.dispose();
   }
 
+  int get _userGesturesInProgress => _userGesturesInProgressCount;
+  int _userGesturesInProgressCount = 0;
+  set _userGesturesInProgress(int value) {
+    _userGesturesInProgressCount = value;
+    userGestureInProgressNotifier.value = _userGesturesInProgress > 0;
+  }
+
   /// Whether a route is currently being manipulated by the user, e.g.
   /// as during an iOS back gesture.
-  bool get userGestureInProgress => _userGesturesInProgress > 0;
-  int _userGesturesInProgress = 0;
+  ///
+  /// See also:
+  ///
+  ///  * [userGestureInProgressNotifier], which notifies its listeners if
+  ///    the value of [userGestureInProgress] changes.
+  bool get userGestureInProgress => userGestureInProgressNotifier.value;
+
+  /// Notifies its listeners if the value of [userGestureInProgress] changes.
+  final ValueNotifier<bool> userGestureInProgressNotifier = ValueNotifier<bool>(false);
+
 
   /// The navigator is being controlled by a user gesture.
   ///

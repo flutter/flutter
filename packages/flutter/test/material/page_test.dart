@@ -707,4 +707,76 @@ void main() {
     expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(400, 0));
     expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
   });
+
+  testWidgets('After a pop caused by a back-swipe, input reaches the exposed route', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/41024
+
+    final GlobalKey homeScaffoldKey = GlobalKey();
+    final GlobalKey pageScaffoldKey = GlobalKey();
+    int homeTapCount = 0;
+    int pageTapCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          key: homeScaffoldKey,
+          body: GestureDetector(
+            onTap: () {
+              homeTapCount += 1;
+            }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(homeScaffoldKey));
+    expect(homeTapCount, 1);
+    expect(pageTapCount, 0);
+
+    final ValueNotifier<bool> notifier = Navigator.of(homeScaffoldKey.currentContext).userGestureInProgressNotifier;
+    expect(notifier.value, false);
+
+    Navigator.push<void>(homeScaffoldKey.currentContext, MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return Scaffold(
+          key: pageScaffoldKey,
+          appBar: AppBar(title: const Text('Page')),
+          body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: GestureDetector(
+              onTap: () {
+                pageTapCount += 1;
+              }
+            ),
+          ),
+        );
+      },
+    ));
+
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(pageScaffoldKey));
+    expect(homeTapCount, 1);
+    expect(pageTapCount, 1);
+
+    // Trigger the basic iOS back-swipe dismiss transition. Drag the pushed
+    // "page" route more than halfway across the screen and then release it.
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5, 300));
+    await gesture.moveBy(const Offset(500, 0));
+    await tester.pump();
+    expect(tester.getTopLeft(find.byKey(pageScaffoldKey)), const Offset(500, 0));
+    expect(tester.getTopLeft(find.byKey(homeScaffoldKey)).dx, lessThan(0));
+    expect(notifier.value, true);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(notifier.value, false);
+    expect(find.byKey(pageScaffoldKey), findsNothing);
+
+    // The back-swipe dismiss pop transition has finished and input on the
+    // home page still works.
+    await tester.tap(find.byKey(homeScaffoldKey));
+    expect(homeTapCount, 2);
+    expect(pageTapCount, 1);
+  });
 }
