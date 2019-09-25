@@ -44,7 +44,7 @@ void main() async {
     try {
       sceneElement.append(engineCanvas.rootElement);
       html.document.body.append(sceneElement);
-      await matchGoldenFile('engine/paint_bounds_for_$fileName.png', region: region);
+      await matchGoldenFile('paint_bounds_for_$fileName.png', region: region);
     } finally {
       // The page is reused across tests, so remove the element after taking the
       // Scuba screenshot.

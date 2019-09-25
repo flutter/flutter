@@ -147,10 +147,28 @@ class BrowserPlatform extends PlatformPlugin {
   }
 
   Future<String> _diffScreenshot(String filename, bool write, [ Map<String, dynamic> region ]) async {
-    const String _kGoldensDirectory = 'test/golden_files';
+    String goldensDirectory;
+    if (filename.startsWith('__local__')) {
+      filename = filename.substring('__local__/'.length);
+      goldensDirectory = p.join(
+        env.environment.webUiRootDir.path,
+        'test',
+        'golden_files',
+      );
+    } else {
+      await fetchGoldens();
+      goldensDirectory = p.join(
+        env.environment.webUiGoldensRepositoryDirectory.path,
+        'engine',
+        'web',
+      );
+    }
 
     // Bail out fast if golden doesn't exist, and user doesn't want to create it.
-    final File file = File(p.join(_kGoldensDirectory, filename));
+    final File file = File(p.join(
+      goldensDirectory,
+      filename,
+    ));
     if (!file.existsSync() && !write) {
       return '''
 Golden file $filename does not exist.

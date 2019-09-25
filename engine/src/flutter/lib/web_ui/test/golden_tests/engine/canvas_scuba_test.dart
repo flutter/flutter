@@ -68,7 +68,7 @@ void main() async {
 
     html.document.body.append(canvas.rootElement);
 
-    await matchGoldenFile('engine/misaligned_pixels_in_canvas_test.png', region: region);
+    await matchGoldenFile('misaligned_pixels_in_canvas_test.png', region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('compensates for misalignment of the canvas', () async {
@@ -83,7 +83,7 @@ void main() async {
 
     html.document.body.append(canvas.rootElement);
 
-    await matchGoldenFile('engine/misaligned_canvas_test.png', region: region);
+    await matchGoldenFile('misaligned_canvas_test.png', region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('fill the whole canvas with color even when transformed', () async {
@@ -94,7 +94,7 @@ void main() async {
 
     html.document.body.append(canvas.rootElement);
 
-    await matchGoldenFile('engine/bitmap_canvas_fills_color_when_transformed.png', region: region);
+    await matchGoldenFile('bitmap_canvas_fills_color_when_transformed.png', region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('fill the whole canvas with paint even when transformed', () async {
@@ -107,6 +107,6 @@ void main() async {
 
     html.document.body.append(canvas.rootElement);
 
-    await matchGoldenFile('engine/bitmap_canvas_fills_paint_when_transformed.png', region: region);
+    await matchGoldenFile('bitmap_canvas_fills_paint_when_transformed.png', region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 }

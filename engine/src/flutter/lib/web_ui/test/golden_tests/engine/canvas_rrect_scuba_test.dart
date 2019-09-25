@@ -42,7 +42,7 @@ void main() async {
     }
 
     html.document.body.append(canvas.rootElement);
-    await matchGoldenFile('engine/canvas_rrect_round_square.png', region: region);
+    await matchGoldenFile('canvas_rrect_round_square.png', region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('round rect with big radius scale down smaller radius', () async {
@@ -58,7 +58,7 @@ void main() async {
     }
 
     html.document.body.append(canvas.rootElement);
-    await matchGoldenFile('engine/canvas_rrect_overlapping_radius.png', region: region);
+    await matchGoldenFile('canvas_rrect_overlapping_radius.png', region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('diff round rect with big radius scale down smaller radius', () async {
@@ -81,6 +81,6 @@ void main() async {
     }
 
     html.document.body.append(canvas.rootElement);
-    await matchGoldenFile('engine/canvas_drrect_overlapping_radius.png', region: region);
+    await matchGoldenFile('canvas_drrect_overlapping_radius.png', region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 }

@@ -38,7 +38,7 @@ void main() async {
 
     canvas.apply(bitmapCanvas);
 
-    await matchGoldenFile('engine/$scubaFileName.png', region: region);
+    await matchGoldenFile('$scubaFileName.png', region: region);
 
     bitmapCanvas.rootElement.remove();
     svgElement.remove();

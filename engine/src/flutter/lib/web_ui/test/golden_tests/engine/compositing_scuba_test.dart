@@ -34,7 +34,7 @@ void main() async {
 
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('engine/compositing_shifted_clip_rect.png', region: region);
+    await matchGoldenFile('compositing_shifted_clip_rect.png', region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('pushClipRect with offset and transform', () async {
@@ -54,7 +54,7 @@ void main() async {
 
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('engine/compositing_clip_rect_with_offset_and_transform.png', region: region);
+    await matchGoldenFile('compositing_clip_rect_with_offset_and_transform.png', region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('pushClipRRect', () async {
@@ -67,7 +67,7 @@ void main() async {
 
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('engine/compositing_shifted_clip_rrect.png', region: region);
+    await matchGoldenFile('compositing_shifted_clip_rrect.png', region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   test('pushPhysicalShape', () async {
@@ -95,7 +95,7 @@ void main() async {
 
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('engine/compositing_shifted_physical_shape_clip.png', region: region);
+    await matchGoldenFile('compositing_shifted_physical_shape_clip.png', region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   group('Cull rect computation', () {
@@ -222,7 +222,7 @@ void _testCullRectComputation() {
     builder.pop(); // pushClipRect
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('engine/compositing_cull_rect_fills_layer_clip.png', region: region);
+    await matchGoldenFile('compositing_cull_rect_fills_layer_clip.png', region: region);
 
     final PersistedStandardPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect, const Rect.fromLTRB(40, 40, 70, 70));
@@ -250,7 +250,7 @@ void _testCullRectComputation() {
     builder.pop(); // pushClipRect
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('engine/compositing_cull_rect_intersects_clip_and_paint_bounds.png', region: region);
+    await matchGoldenFile('compositing_cull_rect_intersects_clip_and_paint_bounds.png', region: region);
 
     final PersistedStandardPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect, const Rect.fromLTRB(50, 40, 70, 70));
@@ -280,7 +280,7 @@ void _testCullRectComputation() {
     builder.pop(); // pushClipRect
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('engine/compositing_cull_rect_offset_inside_layer_clip.png', region: region);
+    await matchGoldenFile('compositing_cull_rect_offset_inside_layer_clip.png', region: region);
 
     final PersistedStandardPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect,
@@ -353,7 +353,7 @@ void _testCullRectComputation() {
     builder.pop(); // pushOffset
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('engine/compositing_cull_rect_rotated.png', region: region);
+    await matchGoldenFile('compositing_cull_rect_rotated.png', region: region);
 
     final PersistedStandardPicture picture = enumeratePictures().single;
     expect(
@@ -375,7 +375,7 @@ void _testCullRectComputation() {
 
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('engine/compositing_clip_path.png', region: region);
+    await matchGoldenFile('compositing_clip_path.png', region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 
   // Draw a picture inside a rotated clip. Verify that the cull rect is big
@@ -477,7 +477,7 @@ void _testCullRectComputation() {
     builder.pop(); // pushTransform scale
     html.document.body.append(builder.build().webOnlyRootElement);
 
-    await matchGoldenFile('engine/compositing_3d_rotate1.png', region: region);
+    await matchGoldenFile('compositing_3d_rotate1.png', region: region);
 
     final PersistedStandardPicture picture = enumeratePictures().single;
     // TODO(https://github.com/flutter/flutter/issues/40395):
