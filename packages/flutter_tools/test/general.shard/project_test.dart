@@ -272,7 +272,7 @@ void main() {
         });
         addAndroidGradleFile(project.directory,
           gradleFileContent: () {
-      return '''
+            return '''
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 ''';

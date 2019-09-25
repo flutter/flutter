@@ -168,7 +168,7 @@ void main() {
                   ),
                   Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
                     key: key2,
-                    style: const TextStyle(fontSize: fontSize2)
+                    style: const TextStyle(fontSize: fontSize2),
                   ),
                 ],
               ),

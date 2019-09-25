@@ -47,8 +47,7 @@ void main() {
   });
 
   group('Fuchsia build fails gracefully when', () {
-    testUsingContext('there is no Fuchsia project',
-        () async {
+    testUsingContext('there is no Fuchsia project', () async {
       final BuildCommand command = BuildCommand();
       applyMocksToCommand(command);
       expect(

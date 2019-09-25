@@ -467,13 +467,13 @@ abstract class ServiceObject {
     switch (type) {
       case 'Event':
         serviceObject = ServiceEvent._empty(owner);
-      break;
+        break;
       case 'FlutterView':
         serviceObject = FlutterView._empty(owner.vm);
-      break;
+        break;
       case 'Isolate':
         serviceObject = Isolate._empty(owner.vm);
-      break;
+        break;
     }
     // If we don't have a model object for this service object type, as a
     // fallback return a ServiceMap object.
@@ -811,7 +811,7 @@ class VM extends ServiceObjectOwner {
     final String mapId = map['id'];
 
     switch (type) {
-      case 'Isolate': {
+      case 'Isolate':
         // Check cache.
         Isolate isolate = _isolateCache[mapId];
         if (isolate == null) {
@@ -829,9 +829,7 @@ class VM extends ServiceObjectOwner {
           isolate.updateFromMap(map);
         }
         return isolate;
-      }
-      break;
-      case 'FlutterView': {
+      case 'FlutterView':
         FlutterView view = _viewCache[mapId];
         if (view == null) {
           // Add new view to the cache.
@@ -841,8 +839,6 @@ class VM extends ServiceObjectOwner {
           view.updateFromMap(map);
         }
         return view;
-      }
-      break;
       default:
         throw VMServiceObjectLoadError(
             'VM.getFromMap called for something other than an isolate', map);

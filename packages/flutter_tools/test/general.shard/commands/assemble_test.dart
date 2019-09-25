@@ -32,9 +32,9 @@ void main() {
 
   test('Can run a build', () => testbed.run(() async {
     when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
-        .thenAnswer((Invocation invocation) async {
-      return BuildResult(success: true);
-    });
+      .thenAnswer((Invocation invocation) async {
+        return BuildResult(success: true);
+      });
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
     final BufferLogger bufferLogger = logger;
@@ -44,9 +44,9 @@ void main() {
 
   test('Throws ToolExit if not provided with output', () => testbed.run(() async {
     when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
-        .thenAnswer((Invocation invocation) async {
-      return BuildResult(success: true);
-    });
+      .thenAnswer((Invocation invocation) async {
+        return BuildResult(success: true);
+      });
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
 
     expect(commandRunner.run(<String>['assemble', 'debug_macos_bundle_flutter_assets']), throwsA(isInstanceOf<ToolExit>()));
@@ -54,9 +54,9 @@ void main() {
 
   test('Throws ToolExit if called with non-existent rule', () => testbed.run(() async {
     when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
-        .thenAnswer((Invocation invocation) async {
-      return BuildResult(success: true);
-    });
+      .thenAnswer((Invocation invocation) async {
+        return BuildResult(success: true);
+      });
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
 
     expect(commandRunner.run(<String>['assemble', '-o Output', 'undefined']), throwsA(isInstanceOf<ToolExit>()));
@@ -64,13 +64,13 @@ void main() {
 
   test('Only writes input and output files when the values change', () => testbed.run(() async {
     when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
-        .thenAnswer((Invocation invocation) async {
-      return BuildResult(
-        success: true,
-        inputFiles: <File>[fs.file('foo')..createSync()],
-        outputFiles: <File>[fs.file('bar')..createSync()],
-      );
-    });
+      .thenAnswer((Invocation invocation) async {
+        return BuildResult(
+          success: true,
+          inputFiles: <File>[fs.file('foo')..createSync()],
+          outputFiles: <File>[fs.file('bar')..createSync()],
+        );
+      });
 
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
     await commandRunner.run(<String>['assemble', '-o Output', '--build-outputs=outputs', '--build-inputs=inputs', 'debug_macos_bundle_flutter_assets']);
@@ -90,12 +90,12 @@ void main() {
 
 
     when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
-        .thenAnswer((Invocation invocation) async {
-      return BuildResult(
-        success: true,
-        inputFiles: <File>[fs.file('foo'), fs.file('fizz')..createSync()],
-        outputFiles: <File>[fs.file('bar'), fs.file(fs.path.join('.dart_tool', 'fizz2'))..createSync(recursive: true)]);
-    });
+      .thenAnswer((Invocation invocation) async {
+        return BuildResult(
+          success: true,
+          inputFiles: <File>[fs.file('foo'), fs.file('fizz')..createSync()],
+          outputFiles: <File>[fs.file('bar'), fs.file(fs.path.join('.dart_tool', 'fizz2'))..createSync(recursive: true)]);
+      });
     await commandRunner.run(<String>['assemble', '-o Output', '--build-outputs=outputs', '--build-inputs=inputs', 'debug_macos_bundle_flutter_assets']);
 
     expect(inputs.readAsStringSync(), contains('foo'));
