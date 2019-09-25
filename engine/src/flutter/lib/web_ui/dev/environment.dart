@@ -85,7 +85,7 @@ class Environment {
   ));
 
   /// Path to the "web_engine_tester" package.
-  io.Directory get goldenTesterRootDir => io.Directory(pathlib.join(
+  io.Directory get webEngineTesterRootDir => io.Directory(pathlib.join(
     webSdkRootDir.path,
     'web_engine_tester',
   ));
