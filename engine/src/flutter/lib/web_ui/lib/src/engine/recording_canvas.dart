@@ -7,8 +7,16 @@ part of engine;
 /// Enable this to print every command applied by a canvas.
 const bool _debugDumpPaintCommands = false;
 
-// Similar to [Offset.distance]
-double _getDistance(double x, double y) => math.sqrt(x * x + y * y);
+// Returns the squared length of the x, y (of a border radius)
+// It normalizes x, y values before working with them, by
+// assuming anything < 0 to be 0, because flutter may pass
+// negative radii (which Skia assumes to be 0), see:
+// https://skia.org/user/api/SkRRect_Reference#SkRRect_inset
+double _measureBorderRadius(double x, double y) {
+  double clampedX = x < 0 ? 0 : x;
+  double clampedY = y < 0 ? 0 : y;
+  return clampedX * clampedX + clampedY * clampedY;
+}
 
 /// Records canvas commands to be applied to a [EngineCanvas].
 ///
@@ -231,8 +239,8 @@ class RecordingCanvas {
   }
 
   void drawDRRect(ui.RRect outer, ui.RRect inner, ui.Paint paint) {
-    // Ensure inner is fully contained within outer, by comparing its
-    // defining points (including its border radius)
+    // Check the inner bounds are contained within the outer bounds
+    // see: https://cs.chromium.org/chromium/src/third_party/skia/src/core/SkCanvas.cpp?l=1787-1789
     ui.Rect innerRect = inner.outerRect;
     ui.Rect outerRect = outer.outerRect;
     if (outerRect == innerRect || outerRect.intersect(innerRect) != innerRect) {
@@ -243,15 +251,15 @@ class RecordingCanvas {
     final ui.RRect scaledOuter = outer.scaleRadii();
     final ui.RRect scaledInner = inner.scaleRadii();
 
-    final double outerTl = _getDistance(scaledOuter.tlRadiusX, scaledOuter.tlRadiusY);
-    final double outerTr = _getDistance(scaledOuter.trRadiusX, scaledOuter.trRadiusY);
-    final double outerBl = _getDistance(scaledOuter.blRadiusX, scaledOuter.blRadiusY);
-    final double outerBr = _getDistance(scaledOuter.brRadiusX, scaledOuter.brRadiusY);
+    final double outerTl = _measureBorderRadius(scaledOuter.tlRadiusX, scaledOuter.tlRadiusY);
+    final double outerTr = _measureBorderRadius(scaledOuter.trRadiusX, scaledOuter.trRadiusY);
+    final double outerBl = _measureBorderRadius(scaledOuter.blRadiusX, scaledOuter.blRadiusY);
+    final double outerBr = _measureBorderRadius(scaledOuter.brRadiusX, scaledOuter.brRadiusY);
 
-    final double innerTl = _getDistance(scaledInner.tlRadiusX, scaledInner.tlRadiusY);
-    final double innerTr = _getDistance(scaledInner.trRadiusX, scaledInner.trRadiusY);
-    final double innerBl = _getDistance(scaledInner.blRadiusX, scaledInner.blRadiusY);
-    final double innerBr = _getDistance(scaledInner.brRadiusX, scaledInner.brRadiusY);
+    final double innerTl = _measureBorderRadius(scaledInner.tlRadiusX, scaledInner.tlRadiusY);
+    final double innerTr = _measureBorderRadius(scaledInner.trRadiusX, scaledInner.trRadiusY);
+    final double innerBl = _measureBorderRadius(scaledInner.blRadiusX, scaledInner.blRadiusY);
+    final double innerBr = _measureBorderRadius(scaledInner.brRadiusX, scaledInner.brRadiusY);
 
     if (innerTl > outerTl || innerTr > outerTr || innerBl > outerBl || innerBr > outerBr) {
       return; // Some inner radius is overlapping some outer radius
