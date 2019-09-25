@@ -273,7 +273,10 @@ const std::shared_ptr<minikin::FontFamily>& FontCollection::DoMatchFallbackFont(
     typeface->getFamilyName(&sk_family_name);
     std::string family_name(sk_family_name.c_str());
 
-    fallback_fonts_for_locale_[locale].insert(family_name);
+    if (std::find(fallback_fonts_for_locale_[locale].begin(),
+                  fallback_fonts_for_locale_[locale].end(),
+                  family_name) == fallback_fonts_for_locale_[locale].end())
+      fallback_fonts_for_locale_[locale].push_back(family_name);
 
     return GetFallbackFontFamily(manager, family_name);
   }

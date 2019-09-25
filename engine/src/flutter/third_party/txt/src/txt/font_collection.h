@@ -103,7 +103,7 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
       fallback_match_cache_;
   std::unordered_map<std::string, std::shared_ptr<minikin::FontFamily>>
       fallback_fonts_;
-  std::unordered_map<std::string, std::set<std::string>>
+  std::unordered_map<std::string, std::vector<std::string>>
       fallback_fonts_for_locale_;
   bool enable_font_fallback_;
 
