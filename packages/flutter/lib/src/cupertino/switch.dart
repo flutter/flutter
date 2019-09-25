@@ -96,7 +96,7 @@ class CupertinoSwitch extends StatefulWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to [CupertinoSystemColorsData.systemGreen] when null and ignores
+  /// Defaults to [CupertinoColors.systemGreen] when null and ignores
   /// the [CupertinoTheme] in accordance to native iOS behavior.
   final Color activeColor;
 
@@ -141,7 +141,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       child: _CupertinoSwitchRenderObjectWidget(
         value: widget.value,
         activeColor: CupertinoDynamicColor.resolve(
-          widget.activeColor ?? CupertinoSystemColors.of(context).systemGreen,
+          widget.activeColor ?? CupertinoColors.systemGreen,
           context,
         ),
         onChanged: widget.onChanged,
@@ -173,7 +173,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     return _RenderCupertinoSwitch(
       value: value,
       activeColor: activeColor,
-      trackColor: CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).secondarySystemFill, context),
+      trackColor: CupertinoDynamicColor.resolve(CupertinoColors.secondarySystemFill, context),
       onChanged: onChanged,
       textDirection: Directionality.of(context),
       vsync: vsync,
@@ -186,7 +186,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     renderObject
       ..value = value
       ..activeColor = activeColor
-      ..trackColor = CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).secondarySystemFill, context)
+      ..trackColor = CupertinoDynamicColor.resolve(CupertinoColors.secondarySystemFill, context)
       ..onChanged = onChanged
       ..textDirection = Directionality.of(context)
       ..vsync = vsync

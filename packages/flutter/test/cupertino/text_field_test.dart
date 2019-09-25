@@ -2807,7 +2807,7 @@ void main() {
     tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    expect(renderEditable.cursorColor, CupertinoColors.activeBlue);
+    expect(renderEditable.cursorColor, CupertinoColors.activeBlue.color);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -2819,7 +2819,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(renderEditable.cursorColor, CupertinoColors.activeOrange);
+    expect(renderEditable.cursorColor, CupertinoColors.activeOrange.darkColor);
 
     await tester.pumpWidget(
       const CupertinoApp(
