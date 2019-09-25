@@ -133,9 +133,8 @@ void main() {
         ),
       );
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer(location: Offset.zero);
+      await gesture.addPointer(location: const Offset(400.0, 300.0));
       addTearDown(gesture.removePointer);
-      await gesture.moveTo(const Offset(400.0, 300.0));
       await tester.pump();
       move = null;
       enter = null;
@@ -165,12 +164,10 @@ void main() {
       );
       final RenderMouseRegion renderListener = tester.renderObject(find.byType(MouseRegion));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer(location: Offset.zero);
+      await gesture.addPointer(location: const Offset(400.0, 300.0));
       addTearDown(gesture.removePointer);
-      await gesture.moveTo(const Offset(400.0, 300.0));
       await tester.pump();
-      expect(move, isNotNull);
-      expect(move.position, equals(const Offset(400.0, 300.0)));
+      expect(move, isNull);
       expect(enter, isNotNull);
       expect(enter.position, equals(const Offset(400.0, 300.0)));
       expect(exit, isNull);
@@ -205,7 +202,7 @@ void main() {
       await tester.pumpWidget(Container());
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
-      await gesture.moveTo(const Offset(400.0, 0.0));
+      await gesture.addPointer(location: const Offset(400.0, 0.0));
       await tester.pump();
       await tester.pumpWidget(
         Column(
@@ -438,9 +435,8 @@ void main() {
       expect(bottomLeft.dy - topLeft.dy, scaleFactor * localHeight);
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer(location: Offset.zero);
+      await gesture.addPointer(location: topLeft - const Offset(1, 1));
       addTearDown(gesture.removePointer);
-      await gesture.moveTo(topLeft - const Offset(1, 1));
       await tester.pump();
       expect(events, isEmpty);
 
@@ -546,7 +542,7 @@ void main() {
     testWidgets("Listener activate/deactivate don't duplicate annotations", (WidgetTester tester) async {
       final GlobalKey feedbackKey = GlobalKey();
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer();
+      await gesture.addPointer(location: Offset.zero);
       addTearDown(gesture.removePointer);
 
       await tester.pumpWidget(
@@ -594,7 +590,7 @@ void main() {
 
       // Plug-in a mouse and move it to the center of the container.
       TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await gesture.addPointer();
+      await gesture.addPointer(location: Offset.zero);
       addTearDown(() => gesture?.removePointer());
       await gesture.moveTo(tester.getCenter(find.byType(Container)));
       await tester.pumpAndSettle();
