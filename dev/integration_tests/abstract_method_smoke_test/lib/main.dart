@@ -37,7 +37,7 @@ class _HomePage extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold();
-  } 
+  }
 }
 
 class SecondPage extends StatelessWidget {
