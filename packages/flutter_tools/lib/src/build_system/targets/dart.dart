@@ -214,7 +214,7 @@ class KernelSnapshot extends Target {
       linkPlatformKernelIn: buildMode == BuildMode.release,
       mainPath: targetFileAbsolute,
     );
-    if (output.errorCount != 0) {
+    if (output == null || output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');
     }
   }
