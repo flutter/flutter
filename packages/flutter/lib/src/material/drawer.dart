@@ -425,12 +425,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           break;
       }
       switch (Directionality.of(context)) {
-      case TextDirection.rtl:
-        _controller.fling(velocity: -visualVelocity);
-        break;
-      case TextDirection.ltr:
-        _controller.fling(velocity: visualVelocity);
-        break;
+        case TextDirection.rtl:
+          _controller.fling(velocity: -visualVelocity);
+          break;
+        case TextDirection.ltr:
+          _controller.fling(velocity: visualVelocity);
+          break;
       }
     } else if (_controller.value < 0.5) {
       close();
@@ -492,16 +492,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     double dragAreaWidth = widget.edgeDragWidth;
     if (widget.edgeDragWidth == null) {
       switch (textDirection) {
-        case TextDirection.ltr: {
+        case TextDirection.ltr:
           dragAreaWidth = _kEdgeDragWidth +
             (drawerIsStart ? padding.left : padding.right);
-        }
-        break;
-        case TextDirection.rtl: {
+          break;
+        case TextDirection.rtl:
           dragAreaWidth = _kEdgeDragWidth +
             (drawerIsStart ? padding.right : padding.left);
-        }
-        break;
+          break;
       }
     }
 

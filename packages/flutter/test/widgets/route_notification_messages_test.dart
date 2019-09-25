@@ -35,8 +35,7 @@ class OnTapPage extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Push and Pop should send platform messages',
-      (WidgetTester tester) async {
+  testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(
           id: '/',
@@ -52,8 +51,7 @@ void main() {
 
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.navigation
-        .setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -103,8 +101,7 @@ void main() {
         ));
   });
 
-  testWidgets('Replace should send platform messages',
-      (WidgetTester tester) async {
+  testWidgets('Replace should send platform messages', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => OnTapPage(
           id: '/',
@@ -121,8 +118,7 @@ void main() {
 
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.navigation
-        .setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 

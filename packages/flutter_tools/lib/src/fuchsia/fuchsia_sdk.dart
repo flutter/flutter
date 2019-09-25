@@ -61,8 +61,7 @@ class FuchsiaSdk {
   Stream<String> syslogs(String id) {
     Process process;
     try {
-      final StreamController<String> controller =
-          StreamController<String>(onCancel: () {
+      final StreamController<String> controller = StreamController<String>(onCancel: () {
         process.kill();
       });
       if (fuchsiaArtifacts.sshConfig == null ||

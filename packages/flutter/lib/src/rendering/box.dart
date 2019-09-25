@@ -275,7 +275,10 @@ class BoxConstraints extends Constraints {
   /// separately provided widths and heights.
   Size constrain(Size size) {
     Size result = Size(constrainWidth(size.width), constrainHeight(size.height));
-    assert(() { result = _debugPropagateDebugSize(size, result); return true; }());
+    assert(() {
+      result = _debugPropagateDebugSize(size, result);
+      return true;
+    }());
     return result;
   }
 
@@ -298,7 +301,10 @@ class BoxConstraints extends Constraints {
   Size constrainSizeAndAttemptToPreserveAspectRatio(Size size) {
     if (isTight) {
       Size result = smallest;
-      assert(() { result = _debugPropagateDebugSize(size, result); return true; }());
+      assert(() {
+        result = _debugPropagateDebugSize(size, result);
+        return true;
+      }());
       return result;
     }
 
@@ -329,7 +335,10 @@ class BoxConstraints extends Constraints {
     }
 
     Size result = Size(constrainWidth(width), constrainHeight(height));
-    assert(() { result = _debugPropagateDebugSize(size, result); return true; }());
+    assert(() {
+      result = _debugPropagateDebugSize(size, result);
+      return true;
+    }());
     return result;
   }
 
