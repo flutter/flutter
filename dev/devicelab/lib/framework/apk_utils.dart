@@ -10,6 +10,13 @@ import 'package:path/path.dart' as path;
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
+final List<String> flutterAssets = <String>[
+  'assets/flutter_assets/AssetManifest.json',
+  'assets/flutter_assets/LICENSE',
+  'assets/flutter_assets/fonts/MaterialIcons-Regular.ttf',
+  'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',
+];
+
 /// Runs the given [testFunction] on a freshly generated Flutter project.
 Future<void> runProjectTest(Future<void> testFunction(FlutterProject project)) async {
   final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_plugin_test.');
