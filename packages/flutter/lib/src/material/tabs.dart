@@ -744,7 +744,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     for (Widget item in tabs) {
       if (item is Tab) {
         final Tab tab = item;
-        if (tab.text != null && tab.icon != null)
+        if ((tab.text != null || tab.child != null) && tab.icon != null)
           return Size.fromHeight(_kTextAndIconTabHeight + indicatorWeight);
       }
     }
