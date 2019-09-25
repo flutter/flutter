@@ -378,7 +378,7 @@ void main() {
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
     ));
-    expect(tab2.text.style.color, CupertinoColors.destructiveRed);
+    expect(tab2.text.style.color.value, CupertinoColors.systemRed.darkColor.value);
   });
 
   testWidgets('Tab contents are padded when there are view insets', (WidgetTester tester) async {
