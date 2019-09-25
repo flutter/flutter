@@ -525,11 +525,11 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     canvas.drawRRect(trackRRect, paint);
 
-    if (_enableOnOffLabels || true) {
+    if (_enableOnOffLabels) {
       final Paint activePaint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.25
-        ..color = Color.lerp(_kTrackColor, _kSwitchLabelActiveColor, currentValue);
+        ..color = Color.lerp(trackColor, _kSwitchLabelActiveColor, currentValue);
       final Paint inactivePaint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.25
