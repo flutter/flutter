@@ -53,7 +53,7 @@ import 'src/web/web_runner.dart';
 ///
 /// This function is intended to be used from the `flutter` command line tool.
 Future<void> main(List<String> args) async {
-  final bool verbose = args.contains('-v') || args.contains('--verbose');
+  const bool verbose = true; // args.contains('-v') || args.contains('--verbose');
 
   final bool doctor = (args.isNotEmpty && args.first == 'doctor') ||
       (args.length == 2 && verbose && args.last == 'doctor');
