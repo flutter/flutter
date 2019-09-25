@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -474,6 +476,11 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
 }
 
 void main() {
+  if (Platform.isMacOS) {
+    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
+
   runApp(const MaterialApp(
     home: AnimationDemo(),
   ));

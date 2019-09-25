@@ -2,10 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
+  if (Platform.isMacOS) {
+    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
+
   runApp(MaterialApp(
     title: 'Hardware Key Demo',
     home: Scaffold(
