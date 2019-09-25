@@ -14,7 +14,10 @@ import 'package:platform/platform.dart';
 import 'package:flutter_goldens_client/skia_client.dart';
 export 'package:flutter_goldens_client/skia_client.dart';
 
-const String _kFlutterGoldDashboard = 'https://flutter-gold.skia.org';
+// If you are here trying to figure out how to use golden files in the Flutter
+// repo itself, consider reading this wiki page:
+// https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
+
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
@@ -35,6 +38,36 @@ Future<void> main(FutureOr<void> testMain()) async {
 
 /// Abstract base class golden file comparator specific to the `flutter/flutter`
 /// repository.
+///
+/// Golden file testing for the `flutter/flutter` repository is handled by three
+/// different [FlutterGoldenFileComparator]s, depending on the current testing
+/// environment.
+///
+///   * The [FlutterSkiaGoldFileComparator] is utilized during pre-submit
+///     testing, after a pull request has landed on the master branch. This
+///     comparator uses the [SkiaGoldClient] and the `goldctl` tool to upload
+///     tests to the [Flutter Gold dashboard](https://flutter-gold.skia.org).
+///     Flutter Gold manages the master golden files for the `flutter/flutter`
+///     repository.
+///
+///   * The [FlutterPreSubmitFileComparator] is utilized in pre-submit testing,
+///     before a pull request can land on the master branch. This comparator
+///     uses the [SkiaGoldClient] to request the baseline images kept by the
+///     [Flutter Gold dashboard](https://flutter-gold.skia.org). It then
+///     compares the current test image to the baseline images using the
+///     standard [GoldenFileComparator.compareLists] to detect any pixel
+///     difference. The [SkiaGoldClient] is also used here to check the active
+///     ignores from the dashboard, in order to allow changes to pass tests.
+///
+///   * The [FlutterLocalFileComparator] is used for any other tests run outside
+///     of the above conditions. Similar to the
+///     [FlutterPreSubmitFileComparator], this comparator will use the
+///     [SkiaGoldClient] to request baseline images from
+///     [Flutter Gold](https://flutter-gold.skia.org) and compares for the
+///     current test image. If a difference is detected, this comparator will
+///     generate failure output illustrating the found difference. If a baseline
+///     is not found for a given test image, it will consider it a new test and
+///     output the new image for verification.
 abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// Creates a [FlutterGoldenFileComparator] that will resolve golden file
   /// URIs relative to the specified [basedir].
@@ -215,7 +248,7 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
 ///    [FlutterGoldenFileComparator] that tests golden images locally on your
 ///    current machine.
 class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
-  /// Creates a [FlutterPresubmitFileComparator] that will test golden file
+  /// Creates a [FlutterPreSubmitFileComparator] that will test golden file
   /// images against baselines requested from Flutter Gold.
   ///
   /// The [fs] and [platform] parameters useful in tests, where the default file
@@ -315,7 +348,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 ///  * [FlutterSkiaGoldFileComparator], another
 ///    [FlutterGoldenFileComparator] that uploads tests to the Skia Gold
 ///    dashboard.
-///  * [FlutterPresubmitFileComparator], another
+///  * [FlutterPreSubmitFileComparator], another
 ///    [FlutterGoldenFileComparator] that tests golden images before changes are
 ///    merged into the master branch.
 class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalComparisonOutput {
@@ -371,7 +404,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       // There is no baseline for this test
       print('No expectations provided by Skia Gold for test: $golden. '
         'This may be a new test. If this is an unexpected result, check'
-        ' $_kFlutterGoldDashboard.\n'
+        ' https://flutter-gold.skia.org.\n'
         'Image output found at $basedir'
       );
       update(golden, imageBytes);
@@ -394,6 +427,6 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       }
     }
     generateFailureOutput(result, golden, basedir);
+    return false;
   }
 }
-

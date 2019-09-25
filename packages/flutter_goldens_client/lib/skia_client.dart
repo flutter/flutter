@@ -43,7 +43,7 @@ class SkiaGoldClient {
   /// be replaced by a mock platform instance.
   final Platform platform;
 
-  /// A controller for launching subprocesses.
+  /// A controller for launching sub-processes.
   ///
   /// This is useful in tests, where the real process manager (the default)
   /// can be replaced by a mock process manager that doesn't really create
