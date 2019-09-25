@@ -155,7 +155,7 @@ class MouseTracker extends ChangeNotifier {
     if (_trackedAnnotations.isNotEmpty && !_scheduledPostFramePositionCheck) {
       _scheduledPostFramePositionCheck = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        sendMouseNotifications(_lastMouseEvent.keys.toSet());
+        sendMouseNotifications(_lastMouseEvent.keys);
         _scheduledPostFramePositionCheck = false;
       });
     }

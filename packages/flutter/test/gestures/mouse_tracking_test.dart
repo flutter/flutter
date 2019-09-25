@@ -176,13 +176,10 @@ void main() {
       expect(enter.first.device, equals(1));
       expect(enter.first.runtimeType, equals(PointerEnterEvent));
       expect(exit.length, equals(0), reason: 'exit contains $exit');
-      expect(move.length, equals(3), reason: 'move contains $move');
+      expect(move.length, equals(2), reason: 'move contains $move');
       expect(move.first.position, equals(const Offset(1.0, 401.0)));
       expect(move.first.device, equals(1));
       expect(move.first.runtimeType, equals(PointerHoverEvent));
-      expect(move[1].position, equals(const Offset(1.0, 301.0)));
-      expect(move[1].device, equals(0));
-      expect(move[1].runtimeType, equals(PointerHoverEvent));
       expect(move.last.position, equals(const Offset(1.0, 401.0)));
       expect(move.last.device, equals(1));
       expect(move.last.runtimeType, equals(PointerHoverEvent));
@@ -215,9 +212,7 @@ void main() {
       RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{0});
 
       ui.window.onPointerDataPacket(packet1);
-      RendererBinding.instance.mouseTracker.collectMousePositions(<int>{0});
 
-      ui.window.onPointerDataPacket(packet1);
       expect(enter.length, equals(1), reason: 'enter contains $enter');
       expect(enter.first.position, equals(const Offset(0.0, 0.0)));
       expect(enter.first.device, equals(0));
@@ -297,8 +292,6 @@ void main() {
       isInHitRegionOne = true;
       RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
       RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{0});
-      ui.window.onPointerDataPacket(packet1);
-      RendererBinding.instance.mouseTracker.collectMousePositions(<int>{0});
       ui.window.onPointerDataPacket(packet1);
       ui.window.onPointerDataPacket(packet2);
       expect(enter.length, equals(1), reason: 'enter contains $enter');

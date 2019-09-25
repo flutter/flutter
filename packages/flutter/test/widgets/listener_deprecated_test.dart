@@ -438,8 +438,8 @@ void main() {
       expect(bottomLeft.dy - topLeft.dy, scaleFactor * localHeight);
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
       await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
       await gesture.moveTo(topLeft - const Offset(1, 1));
       await tester.pump();
       expect(events, isEmpty);
@@ -466,8 +466,8 @@ void main() {
     testWidgets('needsCompositing updates correctly and is respected', (WidgetTester tester) async {
       // Pretend that we have a mouse connected.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
       await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
 
       await tester.pumpWidget(
         Transform.scale(
@@ -515,8 +515,8 @@ void main() {
 
     testWidgets("Callbacks aren't called during build", (WidgetTester tester) async {
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
       await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
 
       await tester.pumpWidget(
         const Center(child: HoverFeedback()),

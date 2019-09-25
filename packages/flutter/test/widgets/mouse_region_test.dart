@@ -728,6 +728,63 @@ void main() {
       'listeners: enter, hover, exit',
     ]);
   });
+
+  testWidgets('MouseRegion uses updated callbacks', (WidgetTester tester) async {
+    final List<String> logs = <String>[];
+    Widget hoverableContainer({
+      PointerEnterEventListener onEnter,
+      PointerHoverEventListener onHover,
+      PointerExitEventListener onExit,
+    }) {
+      return Container(
+        alignment: Alignment.topLeft,
+        child: MouseRegion(
+          child: Container(
+            color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
+            width: 100.0,
+            height: 100.0,
+          ),
+          onEnter: onEnter,
+          onHover: onHover,
+          onExit: onExit,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(hoverableContainer(
+      onEnter: (PointerEnterEvent details) => logs.add('enter1'),
+      onHover: (PointerHoverEvent details) => logs.add('hover1'),
+      onExit: (PointerExitEvent details) => logs.add('exit1'),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+
+    // Start outside, move inside, then move outside
+    await gesture.moveTo(const Offset(150.0, 150.0));
+    await tester.pump();
+    await gesture.moveTo(const Offset(50.0, 50.0));
+    await tester.pump();
+    await gesture.moveTo(const Offset(150.0, 150.0));
+    await tester.pump();
+    expect(logs, <String>['enter1', 'hover1', 'exit1']);
+    logs.clear();
+
+    // Same tests but with updated callbacks
+    await tester.pumpWidget(hoverableContainer(
+      onEnter: (PointerEnterEvent details) => logs.add('enter2'),
+      onHover: (PointerHoverEvent details) => logs.add('hover2'),
+      onExit: (PointerExitEvent details) => logs.add('exit2'),
+    ));
+    await gesture.moveTo(const Offset(150.0, 150.0));
+    await tester.pump();
+    await gesture.moveTo(const Offset(50.0, 50.0));
+    await tester.pump();
+    await gesture.moveTo(const Offset(150.0, 150.0));
+    await tester.pump();
+    expect(logs, <String>['enter2', 'hover2', 'exit2']);
+  });
 }
 
 // This widget allows you to send a callback that is called during `onPaint.

@@ -2614,9 +2614,9 @@ class RenderMouseRegion extends RenderProxyBox {
        _annotationIsActive = false,
        super(child) {
     _hoverAnnotation = MouseTrackerAnnotation(
-      onEnter: _onEnter,
-      onHover: _onHover,
-      onExit: _onExit,
+      onEnter: _handleEnter,
+      onHover: _handleHover,
+      onExit: _handleExit,
     );
   }
 
@@ -2632,6 +2632,10 @@ class RenderMouseRegion extends RenderProxyBox {
     }
   }
   PointerEnterEventListener _onEnter;
+  void _handleEnter(PointerEnterEvent event) {
+    if (_onEnter != null)
+      _onEnter(event);
+  }
 
   /// Called when a pointer that has not triggered an [onPointerDown] changes
   /// position.
@@ -2645,6 +2649,10 @@ class RenderMouseRegion extends RenderProxyBox {
     }
   }
   PointerHoverEventListener _onHover;
+  void _handleHover(PointerHoverEvent event) {
+    if (_onHover != null)
+      _onHover(event);
+  }
 
   /// Called when a hovering pointer leaves the region for this widget.
   ///
@@ -2658,6 +2666,10 @@ class RenderMouseRegion extends RenderProxyBox {
     }
   }
   PointerExitEventListener _onExit;
+  void _handleExit(PointerExitEvent event) {
+    if (_onExit != null)
+      _onExit(event);
+  }
 
   // Object used for annotation of the layer used for hover hit detection.
   MouseTrackerAnnotation _hoverAnnotation;
