@@ -245,6 +245,7 @@ class WebServerDevice extends Device {
   }) async {
     final String url = platformArgs['uri'];
     printStatus('$mainPath is being served at $url', emphasis: true);
+    logger.sendNotification(url, progressId: 'debugExtension');
     return LaunchResult.succeeded(observatoryUri: null);
   }
 
