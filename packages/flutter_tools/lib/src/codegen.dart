@@ -84,6 +84,8 @@ abstract class CodegenDaemon {
 /// Only a subset of the arguments provided to the [KernelCompiler] are
 /// supported here. Using the build pipeline implies a fixed multiroot
 /// filesystem and requires a pubspec.
+///
+/// This is only safe to use if [experimentalBuildEnabled] is true.
 class CodeGeneratingKernelCompiler implements KernelCompiler {
   const CodeGeneratingKernelCompiler();
 
