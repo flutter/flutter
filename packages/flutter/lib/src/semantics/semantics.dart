@@ -591,6 +591,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.selected,
     this.toggled,
     this.button,
+    this.link,
     this.header,
     this.textField,
     this.readOnly,
@@ -669,6 +670,11 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack/VoiceOver provides users with the hint "button" when a button
   /// is focused.
   final bool button;
+
+  /// If non-null, indicates that this subtree represents a link.
+  ///
+  /// TalkBack/VoiceOver provides users with a hint when a link is focused.
+  final bool link;
 
   /// If non-null, indicates that this subtree represents a header.
   ///
@@ -3613,6 +3619,12 @@ class SemanticsConfiguration {
   bool get isButton => _hasFlag(SemanticsFlag.isButton);
   set isButton(bool value) {
     _setFlag(SemanticsFlag.isButton, value);
+  }
+
+  /// Whether the owning [RenderObject] is a link (true) or not (false).
+  bool get isLink => _hasFlag(SemanticsFlag.isLink);
+  set isLink(bool value) {
+    _setFlag(SemanticsFlag.isLink, value);
   }
 
   /// Whether the owning [RenderObject] is a header (true) or not (false).
