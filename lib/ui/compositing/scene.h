@@ -45,7 +45,7 @@ class Scene : public RefCountedDartWrappable<Scene> {
                  bool checkerboardRasterCacheImages,
                  bool checkerboardOffscreenLayers);
 
-  std::unique_ptr<flutter::LayerTree> m_layerTree;
+  std::unique_ptr<flutter::LayerTree> layer_tree_;
 };
 
 }  // namespace flutter

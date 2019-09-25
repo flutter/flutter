@@ -16,36 +16,37 @@
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSize.h"
 
+namespace scenic {
+class ContainerNode;
+}  // namespace scenic
+
 namespace flutter {
+
+class SceneUpdateContext;
 
 class LayerTree {
  public:
-  LayerTree();
-
+  LayerTree(const SkISize& frame_size,
+            float frame_physical_depth,
+            float frame_device_pixel_ratio);
   ~LayerTree();
 
   void Preroll(CompositorContext::ScopedFrame& frame,
                bool ignore_raster_cache = false);
-
-#if defined(OS_FUCHSIA)
-  void UpdateScene(SceneUpdateContext& context,
-                   scenic::ContainerNode& container);
-#endif
-
   void Paint(CompositorContext::ScopedFrame& frame,
              bool ignore_raster_cache = false) const;
-
   sk_sp<SkPicture> Flatten(const SkRect& bounds);
+  void UpdateScene(SceneUpdateContext& context,
+                   scenic::ContainerNode& container);
 
   Layer* root_layer() const { return root_layer_.get(); }
-
   void set_root_layer(std::shared_ptr<Layer> root_layer) {
     root_layer_ = std::move(root_layer);
   }
 
   const SkISize& frame_size() const { return frame_size_; }
-
-  void set_frame_size(const SkISize& frame_size) { frame_size_ = frame_size; }
+  float frame_physical_depth() const { return frame_physical_depth_; }
+  float frame_device_pixel_ratio() const { return frame_device_pixel_ratio_; }
 
   void RecordBuildTime(fml::TimePoint begin_start);
   fml::TimePoint build_start() const { return build_start_; }
@@ -72,10 +73,13 @@ class LayerTree {
   }
 
  private:
-  SkISize frame_size_;  // Physical pixels.
   std::shared_ptr<Layer> root_layer_;
   fml::TimePoint build_start_;
   fml::TimePoint build_finish_;
+  SkISize frame_size_;  // Physical pixels.
+  float frame_physical_depth_;
+  float
+      frame_device_pixel_ratio_;  // Ratio between logical and physical pixels.
   uint32_t rasterizer_tracing_threshold_;
   bool checkerboard_raster_cache_images_;
   bool checkerboard_offscreen_layers_;
