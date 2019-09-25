@@ -276,7 +276,7 @@ class KernelCompiler {
     }
     // TODO(jonahwilliams): The output file must already exist, but this seems
     // unnecessary.
-    if (!fs.isFileSync(outputFilePath)) {
+    if (outputFilePath != null && !fs.isFileSync(outputFilePath)) {
       fs.file(outputFilePath).createSync(recursive: true);
     }
     final List<String> command = <String>[
