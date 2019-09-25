@@ -13,7 +13,7 @@ void main() {
     final List<RenderBox> children = <RenderBox>[
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
-      RenderSizedBox(const Size(400.0, 100.0))
+      RenderSizedBox(const Size(400.0, 100.0)),
     ];
     final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,

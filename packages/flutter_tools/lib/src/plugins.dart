@@ -534,17 +534,17 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
     await _writeMacOSPluginRegistrant(project, plugins);
   }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
-  if (!project.isModule && (!checkProjects || subproject.existsSync())) {
-    final CocoaPods cocoaPods = CocoaPods();
-    if (plugins.isNotEmpty) {
-      await cocoaPods.setupPodfile(subproject);
+    if (!project.isModule && (!checkProjects || subproject.existsSync())) {
+      final CocoaPods cocoaPods = CocoaPods();
+      if (plugins.isNotEmpty) {
+        await cocoaPods.setupPodfile(subproject);
+      }
+      /// The user may have a custom maintained Podfile that they're running `pod install`
+      /// on themselves.
+      else if (subproject.podfile.existsSync() && subproject.podfileLock.existsSync()) {
+        cocoaPods.addPodsDependencyToFlutterXcconfig(subproject);
+      }
     }
-    /// The user may have a custom maintained Podfile that they're running `pod install`
-    /// on themselves.
-    else if (subproject.podfile.existsSync() && subproject.podfileLock.existsSync()) {
-      cocoaPods.addPodsDependencyToFlutterXcconfig(subproject);
-    }
-  }
   }
   if (featureFlags.isWebEnabled && project.web.existsSync()) {
     await _writeWebPluginRegistrant(project, plugins);

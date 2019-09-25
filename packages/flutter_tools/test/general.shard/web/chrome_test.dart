@@ -55,7 +55,7 @@ void main() {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
-      'example_url'
+      'example_url',
     ])).thenAnswer((Invocation invocation) async {
       return FakeProcess(
         exitCode: Completer<int>().future,

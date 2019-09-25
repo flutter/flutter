@@ -985,7 +985,7 @@ void main() {
           overlayColor: Color(0xff000010),
           thumbColor: Color(0xff000011),
           valueIndicatorColor: Color(0xff000012),
-        )
+        ),
     );
   }
 
@@ -1293,7 +1293,7 @@ void main() {
       sliderBox,
       paints
         ..path(color: sliderTheme.valueIndicatorColor)
-        ..path(color: sliderTheme.valueIndicatorColor)
+        ..path(color: sliderTheme.valueIndicatorColor),
     );
     await gesture.up();
     // Wait for value indicator animation to finish.
@@ -1313,7 +1313,7 @@ void main() {
       sliderBox,
       paints
         ..path(color: customColor1)
-        ..path(color: customColor1)
+        ..path(color: customColor1),
     );
     await gesture.up();
   });
@@ -1326,8 +1326,8 @@ void main() {
         primarySwatch: Colors.blue,
         sliderTheme: const SliderThemeData(
           thumbColor: Color(0xff000001),
-          overlappingShapeStrokeColor: Color(0xff000002)
-        )
+          overlappingShapeStrokeColor: Color(0xff000002),
+        ),
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1382,7 +1382,7 @@ void main() {
       paints
         ..circle(color: sliderTheme.thumbColor)
         ..circle(color: sliderTheme.overlappingShapeStrokeColor)
-        ..circle(color: sliderTheme.thumbColor)
+        ..circle(color: sliderTheme.thumbColor),
     );
   });
 
@@ -1396,7 +1396,7 @@ void main() {
           valueIndicatorColor: Color(0xff000001),
           overlappingShapeStrokeColor: Color(0xff000002),
           showValueIndicator: ShowValueIndicator.always,
-        )
+        ),
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1454,7 +1454,7 @@ void main() {
         paints
           ..path(color: sliderTheme.valueIndicatorColor)
           ..path(color: sliderTheme.overlappingShapeStrokeColor)
-          ..path(color: sliderTheme.valueIndicatorColor)
+          ..path(color: sliderTheme.valueIndicatorColor),
     );
 
     await gesture.up();
@@ -1470,7 +1470,7 @@ void main() {
           valueIndicatorColor: Color(0xff000001),
           overlappingShapeStrokeColor: Color(0xff000002),
           showValueIndicator: ShowValueIndicator.always,
-        )
+        ),
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
 

@@ -2776,23 +2776,22 @@ class _RenderChip extends RenderBox {
 
   @override
   void debugPaint(PaintingContext context, Offset offset) {
-    assert(!_debugShowTapTargetOutlines ||
-        () {
-          // Draws a rect around the tap targets to help with visualizing where
-          // they really are.
-          final Paint outlinePaint = Paint()
-            ..color = const Color(0xff800000)
-            ..strokeWidth = 1.0
-            ..style = PaintingStyle.stroke;
-          if (deleteIconShowing) {
-            context.canvas.drawRect(deleteButtonRect.shift(offset), outlinePaint);
-          }
-          context.canvas.drawRect(
-            pressRect.shift(offset),
-            outlinePaint..color = const Color(0xff008000),
-          );
-          return true;
-        }());
+    assert(!_debugShowTapTargetOutlines || () {
+      // Draws a rect around the tap targets to help with visualizing where
+      // they really are.
+      final Paint outlinePaint = Paint()
+        ..color = const Color(0xff800000)
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
+      if (deleteIconShowing) {
+        context.canvas.drawRect(deleteButtonRect.shift(offset), outlinePaint);
+      }
+      context.canvas.drawRect(
+        pressRect.shift(offset),
+        outlinePaint..color = const Color(0xff008000),
+      );
+      return true;
+    }());
   }
 
   @override

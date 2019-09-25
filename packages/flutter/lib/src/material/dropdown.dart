@@ -898,12 +898,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       items = widget.selectedItemBuilder == null
         ? List<Widget>.from(widget.items)
         : widget.selectedItemBuilder(context).map((Widget item) {
-          return Container(
-            height: _kMenuItemHeight,
-            alignment: AlignmentDirectional.centerStart,
-            child: item,
-          );
-        }).toList();
+            return Container(
+              height: _kMenuItemHeight,
+              alignment: AlignmentDirectional.centerStart,
+              child: item,
+            );
+          }).toList();
     } else {
       items = <Widget>[];
     }
@@ -1066,7 +1066,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                ),
              ),
            );
-         }
+         },
        );
 
   /// {@macro flutter.material.dropdownButton.onChanged}

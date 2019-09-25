@@ -373,7 +373,7 @@ class IOSSimulator extends Device {
         if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
         if (debuggingOptions.useTestFonts) '--use-test-fonts',
         '--observatory-port=${debuggingOptions.observatoryPort ?? 0}',
-      ]
+      ],
     ];
 
     ProtocolDiscovery observatoryDiscovery;

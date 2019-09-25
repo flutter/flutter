@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'theme.dart';
 
 /// Implements a single iOS application page's layout.
@@ -110,8 +111,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
           ? existingMediaQuery.viewInsets.copyWith(bottom: 0.0)
           : existingMediaQuery.viewInsets;
 
-      final bool fullObstruction =
-        widget.navigationBar.fullObstruction ?? CupertinoTheme.of(context).barBackgroundColor.alpha == 0xFF;
+      final bool fullObstruction = widget.navigationBar.shouldFullyObstruct(context);
 
       // If navigation bar is opaquely obstructing, directly shift the main content
       // down. If translucent, let main content draw behind navigation bar but hint the
@@ -157,7 +157,8 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: widget.backgroundColor ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
+        color: CupertinoDynamicColor.resolve(widget.backgroundColor, context)
+            ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
       ),
       child: Stack(
         children: <Widget>[
@@ -204,5 +205,5 @@ abstract class ObstructingPreferredSizeWidget extends PreferredSizeWidget {
   /// size.
   ///
   /// If false, this widget partially obstructs.
-  bool get fullObstruction;
+  bool shouldFullyObstruct(BuildContext context);
 }
