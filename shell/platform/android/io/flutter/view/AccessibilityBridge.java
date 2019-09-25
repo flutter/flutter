@@ -519,6 +519,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         result.setClassName("android.view.View");
         result.setSource(rootAccessibilityView, virtualViewId);
         result.setFocusable(semanticsNode.isFocusable());
+        if (semanticsNode.isFocusable()) {
+           result.addAction(AccessibilityNodeInfo.ACTION_FOCUS);
+        }
+
         if (inputFocusedSemanticsNode != null) {
             result.setFocused(inputFocusedSemanticsNode.id == virtualViewId);
         }
@@ -1228,6 +1232,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             }
             if (semanticsNode.hasFlag(Flag.IS_FOCUSED)) {
                 inputFocusedSemanticsNode = semanticsNode;
+                AccessibilityEvent event = obtainAccessibilityEvent(
+                    inputFocusedSemanticsNode.id,
+                    AccessibilityEvent.TYPE_VIEW_FOCUSED
+                );
+                sendAccessibilityEvent(event);
             }
             if (semanticsNode.hadPreviousConfig) {
                 updated.add(semanticsNode);
@@ -1271,7 +1280,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
         if (lastAdded != null && lastAdded.id != previousRouteId) {
             previousRouteId = lastAdded.id;
-            createAndSendWindowChangeEvent(lastAdded);
+            sendWindowChangeEvent(lastAdded);
         }
         flutterNavigationStack.clear();
         for (SemanticsNode semanticsNode : newRoutes) {
@@ -1290,7 +1299,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
         // TODO(goderbauer): Send this event only once (!) for changed subtrees,
         //     see https://github.com/flutter/flutter/issues/14534
-        sendAccessibilityEvent(0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        sendWindowContentChangeEvent(0);
 
         for (SemanticsNode object : updated) {
             if (object.didScroll()) {
@@ -1362,13 +1371,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 String label = object.label == null ? "" : object.label;
                 String previousLabel = object.previousLabel == null ? "" : object.label;
                 if (!label.equals(previousLabel) || !object.hadFlag(Flag.IS_LIVE_REGION)) {
-                    sendAccessibilityEvent(object.id, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+                    sendWindowContentChangeEvent(object.id);
                 }
             } else if (object.hasFlag(Flag.IS_TEXT_FIELD) && object.didChangeLabel()
                     && inputFocusedSemanticsNode != null && inputFocusedSemanticsNode.id == object.id) {
                 // Text fields should announce when their label changes while focused. We use a live
                 // region tag to do so, and this event triggers that update.
-                sendAccessibilityEvent(object.id, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+                sendWindowContentChangeEvent(object.id);
             }
             if (accessibilityFocusedSemanticsNode != null && accessibilityFocusedSemanticsNode.id == object.id
                     && !object.hadFlag(Flag.IS_SELECTED) && object.hasFlag(Flag.IS_SELECTED)) {
@@ -1472,19 +1481,40 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     /**
-     * Factory method that creates a {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED} and sends
-     * the event to Android's accessibility system.
+     * Creates a {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED} and sends the event to
+     * Android's accessibility system.
      *
      * The given {@code route} should be a {@link SemanticsNode} that represents a navigation route
      * in the Flutter app.
      */
-    private void createAndSendWindowChangeEvent(@NonNull SemanticsNode route) {
+    private void sendWindowChangeEvent(@NonNull SemanticsNode route) {
         AccessibilityEvent event = obtainAccessibilityEvent(
             route.id,
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
         );
         String routeName = route.getRouteName();
         event.getText().add(routeName);
+        sendAccessibilityEvent(event);
+    }
+
+    /**
+     * Creates a {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} and sends the event to
+     * Android's accessibility system.
+     *
+     * It sets the content change types to {@link AccessibilityEvent#CONTENT_CHANGE_TYPE_SUBTREE}
+     * when supported by the API level.
+     *
+     * The given {@code virtualViewId} should be a {@link SemanticsNode} below which the content has
+     * changed.
+     */
+    private void sendWindowContentChangeEvent(int virtualViewId) {
+        AccessibilityEvent event = obtainAccessibilityEvent(
+            virtualViewId,
+            AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+        );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            event.setContentChangeTypes(AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
+        }
         sendAccessibilityEvent(event);
     }
 
@@ -1559,7 +1589,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
         accessibilityFocusedSemanticsNode = null;
         hoveredObject = null;
-        sendAccessibilityEvent(0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        sendWindowContentChangeEvent(0);
     }
 
     /**
