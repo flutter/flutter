@@ -16,6 +16,7 @@ import io.flutter.embedding.engine.RenderingComponentTest;
 import io.flutter.embedding.engine.renderer.FlutterRendererTest;
 import io.flutter.embedding.engine.systemchannels.PlatformChannelTest;
 import io.flutter.plugin.common.StandardMessageCodecTest;
+import io.flutter.plugin.editing.TextInputPluginTest;
 import io.flutter.plugin.platform.SingleViewPresentationTest;
 import io.flutter.util.PreconditionsTest;
 
@@ -33,6 +34,7 @@ import io.flutter.util.PreconditionsTest;
     StandardMessageCodecTest.class,
     SingleViewPresentationTest.class,
     SmokeTest.class,
+    TextInputPluginTest.class,
 })
 /** Runs all of the unit tests listed in the {@code @SuiteClasses} annotation. */
 public class FlutterTestSuite { }

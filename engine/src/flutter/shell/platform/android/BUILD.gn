@@ -419,6 +419,7 @@ action("robolectric_tests") {
     "test/io/flutter/embedding/engine/renderer/FlutterRendererTest.java",
     "test/io/flutter/embedding/engine/systemchannels/PlatformChannelTest.java",
     "test/io/flutter/plugin/common/StandardMessageCodecTest.java",
+    "test/io/flutter/plugin/editing/TextInputPluginTest.java",
     "test/io/flutter/plugin/platform/SingleViewPresentationTest.java",
     "test/io/flutter/util/PreconditionsTest.java",
   ]
@@ -437,6 +438,7 @@ action("robolectric_tests") {
     "//third_party/robolectric/lib/robolectric-3.8.jar",
     "//third_party/robolectric/lib/shadows-framework-3.8.jar",
     "//third_party/robolectric/lib/annotations-3.8.jar",
+    "//third_party/robolectric/lib/shadowapi-3.8.jar",
     "//third_party/robolectric/lib/runtime-1.1.1.jar",
     "//third_party/robolectric/lib/common-1.1.1.jar",
     "//third_party/robolectric/lib/common-java8-1.1.1.jar",
