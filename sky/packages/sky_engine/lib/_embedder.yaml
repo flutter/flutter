@@ -5,20 +5,19 @@ embedded_libs:
   "dart:core": "core/core.dart"
   "dart:developer": "developer/developer.dart"
   "dart:ffi": "ffi/ffi.dart"
-  "dart:wasm": "wasm/wasm.dart"
+  "dart:html": "html/html_dart2js.dart"
   "dart:io": "io/io.dart"
   "dart:isolate": "isolate/isolate.dart"
+  "dart:js": "js/js_dart2js.dart"
+  "dart:js_util": "js_util/js_util_dart2js.dart"
   "dart:math": "math/math.dart"
   "dart:typed_data": "typed_data/typed_data.dart"
   "dart:ui": "ui/ui.dart"
-  # The internal library is needed as some implementations bleed into the public
-  # API, e.g. List being Iterable by virtue of implementing
-  # EfficientLengthIterable.
-  # Not including this library yields analysis errors.
-  "dart:_http": "_http/http.dart"
-  "dart:_internal": "internal/internal.dart"
-  "dart:nativewrappers": "_empty.dart"
+  "dart:wasm": "wasm/wasm.dart"
 
-analyzer:
-  language:
-    enableSuperMixins: true
+  # The internal library is needed as some implementations bleed into the
+  # public API, e.g. List being Iterable by virtue of implementing
+  # EfficientLengthIterable. Not including this library yields analysis errors.
+  "dart:_internal": "internal/internal.dart"
+  "dart:_http": "_http/http.dart"
+  "dart:nativewrappers": "_empty.dart"
