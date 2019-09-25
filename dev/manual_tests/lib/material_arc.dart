@@ -477,6 +477,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
 
 void main() {
   if (Platform.isMacOS) {
+    // TODO(flutter/flutter#31366): Update this when TargetPlatform includes macOS.
     // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
