@@ -256,6 +256,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     this.disableAnimations = false,
     this.boldText = false,
     this.reduceMotion = false,
+    this.onOffSwitchLabels = false,
   });
 
   @override
@@ -272,4 +273,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
 
   @override
   final bool reduceMotion;
+
+  @override
+  final bool onOffSwitchLabels;
 }

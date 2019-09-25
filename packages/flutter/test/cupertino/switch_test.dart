@@ -2,13 +2,49 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show AccessibilityFeatures;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 
+class FakeAccessibilityFeatures implements AccessibilityFeatures {
+  const FakeAccessibilityFeatures({
+    this.accessibleNavigation = false,
+    this.invertColors = false,
+    this.disableAnimations = false,
+    this.boldText = false,
+    this.reduceMotion = false,
+    this.onOffSwitchLabels = false,
+  });
+
+  @override
+  final bool accessibleNavigation;
+
+  @override
+  final bool invertColors;
+
+  @override
+  final bool disableAnimations;
+
+  @override
+  final bool boldText;
+
+  @override
+  final bool reduceMotion;
+
+  @override
+  final bool onOffSwitchLabels;
+}
+
 void main() {
+  final TestWidgetsFlutterBinding binding =
+      TestWidgetsFlutterBinding.ensureInitialized();
+
+  tearDown(() => binding.window.clearAccessibilityFeaturesTestValue());
+
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
@@ -618,6 +654,122 @@ void main() {
       find.byKey(switchKey),
       matchesGoldenFile(
         'switch.tap.on.dark.png',
+        version: 0,
+      ),
+    );
+  });
+
+  testWidgets('Switch renders correctly before, during, and after being tapped with accessibility labels', (WidgetTester tester) async {
+    binding.window.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(onOffSwitchLabels: true);
+
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: RepaintBoundary(
+                child: CupertinoSwitch(
+                  key: switchKey,
+                  value: value,
+                  dragStartBehavior: DragStartBehavior.down,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile(
+        'switch.tap.off.labeled.png',
+        version: 0,
+      ),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    // Kick off animation, then advance to intermediate frame.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile(
+        'switch.tap.turningOn.labeled.png',
+        version: 0,
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile(
+        'switch.tap.on.labeled.png',
+        version: 0,
+      ),
+    );
+  });
+
+  testWidgets('Switch renders correctly in dark mode with accessibility labels', (WidgetTester tester) async {
+    binding.window.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(onOffSwitchLabels: true);
+
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(platformBrightness: Brightness.dark),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    dragStartBehavior: DragStartBehavior.down,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile(
+        'switch.tap.off.dark.labeled.png',
+        version: 0,
+      ),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile(
+        'switch.tap.on.dark.labeled.png',
         version: 0,
       ),
     );
