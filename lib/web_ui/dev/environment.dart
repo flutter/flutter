@@ -103,4 +103,17 @@ class Environment {
     webUiRootDir.path,
     '.dart_tool',
   ));
+
+  /// Path to the "dev" directory containing engine developer tools and
+  /// configuration files.
+  io.Directory get webUiDevDir => io.Directory(pathlib.join(
+    webUiRootDir.path,
+    'dev',
+  ));
+
+  /// Path to the clone of the flutter/goldens repository.
+  io.Directory get webUiGoldensRepositoryDirectory => io.Directory(pathlib.join(
+    webUiDartToolDir.path,
+    'goldens',
+  ));
 }

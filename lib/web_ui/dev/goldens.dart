@@ -3,6 +3,11 @@
 // found in the LICENSE file.
 import 'dart:io' as io;
 import 'package:image/image.dart';
+import 'package:path/path.dart' as path;
+import 'package:yaml/yaml.dart';
+
+import 'environment.dart';
+import 'utils.dart';
 
 void main(List<String> args) {
   final io.File fileA = io.File(args[0]);
@@ -10,7 +15,7 @@ void main(List<String> args) {
   final Image imageA = decodeNamedImage(fileA.readAsBytesSync(), 'a.png');
   final Image imageB = decodeNamedImage(fileB.readAsBytesSync(), 'b.png');
   final ImageDiff diff = ImageDiff(golden: imageA, other: imageB);
-  print('Diff: ${(diff.rate * 100).toStringAsFixed(4)}');
+  print('Diff: ${(diff.rate * 100).toStringAsFixed(4)}%');
 }
 
 /// This class encapsulates visually diffing an Image with any other.
@@ -140,3 +145,72 @@ class ImageDiff {
 String getPrintableDiffFilesInfo(double diffRate, double maxRate) =>
   '(${((diffRate) * 100).toStringAsFixed(4)}% of pixels were different. '
   'Maximum allowed rate is: ${(maxRate * 100).toStringAsFixed(4)}%).';
+
+/// Fetches golden files from github.com/flutter/goldens, cloning the repository if necessary.
+///
+/// The repository is cloned into web_ui/.dart_tool.
+Future<void> fetchGoldens() async {
+  await _GoldensRepoFetcher().fetch();
+}
+
+class _GoldensRepoFetcher {
+  String _repository;
+  String _revision;
+
+  Future<void> fetch() async {
+    final io.File lockFile = io.File(
+      path.join(environment.webUiDevDir.path, 'goldens_lock.yaml')
+    );
+    final YamlMap lock = loadYaml(lockFile.readAsStringSync());
+    _repository = lock['repository'];
+    _revision = lock['revision'];
+
+    final String localRevision = await _getLocalRevision();
+    if (localRevision == _revision) {
+      return;
+    }
+
+    print('Fetching $_repository@$_revision');
+
+    if (!environment.webUiGoldensRepositoryDirectory.existsSync()) {
+      environment.webUiGoldensRepositoryDirectory.createSync(recursive: true);
+      await runProcess(
+        'git',
+        <String>['init'],
+        workingDirectory: environment.webUiGoldensRepositoryDirectory.path,
+        mustSucceed: true,
+      );
+      await runProcess(
+        'git',
+        <String>['remote', 'add', 'origin', _repository],
+        workingDirectory: environment.webUiGoldensRepositoryDirectory.path,
+        mustSucceed: true,
+      );
+    }
+
+    await runProcess(
+      'git',
+      <String>['fetch', 'origin', 'master'],
+      workingDirectory: environment.webUiGoldensRepositoryDirectory.path,
+      mustSucceed: true,
+    );
+    await runProcess(
+      'git',
+      <String>['checkout', _revision],
+      workingDirectory: environment.webUiGoldensRepositoryDirectory.path,
+      mustSucceed: true,
+    );
+  }
+
+  Future<String> _getLocalRevision() async {
+    final io.File head = io.File(path.join(
+      environment.webUiGoldensRepositoryDirectory.path, '.git', 'HEAD'
+    ));
+
+    if (!head.existsSync()) {
+      return null;
+    }
+
+    return head.readAsStringSync().trim();
+  }
+}

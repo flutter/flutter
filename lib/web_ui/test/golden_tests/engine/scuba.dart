@@ -40,7 +40,7 @@ class EngineScubaTester {
   }
 
   Future<void> diffScreenshot(String fileName) async {
-    await matchGoldenFile('engine/$fileName.png', region: ui.Rect.fromLTWH(0, 0, viewportSize.width, viewportSize.height));
+    await matchGoldenFile('$fileName.png', region: ui.Rect.fromLTWH(0, 0, viewportSize.width, viewportSize.height));
   }
 
   /// Prepares the DOM and inserts all the necessary nodes, then invokes scuba's
