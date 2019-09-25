@@ -919,7 +919,7 @@ Future<void> _verifyVersion(String filename) async {
     print('$redLine');
     exit(1);
   }
-  final RegExp pattern = RegExp(r'^\d+\.\d+\.\d+(?:|-pre\.\d+|\+hotfix\.\d+)$');
+  final RegExp pattern = RegExp(r'^\d+\.\d+\.\d+(?:|-pre\.\d+|\+hotfix\.\d+)(-pre\.\d+)?$');
   if (!version.contains(pattern)) {
     print('$redLine');
     print('The version logic generated an invalid version string.');
