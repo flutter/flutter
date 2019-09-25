@@ -49,10 +49,10 @@ class TestsCommand extends Command<bool> {
 
     _copyAhemFontIntoWebUi();
     await _buildHostPage();
-    await _buildTests();
 
     final List<FilePath> targets =
         this.targets.map((t) => FilePath.fromCwd(t)).toList();
+    await _buildTests(targets: targets);
     if (targets.isEmpty) {
       await _runAllTests();
     } else {
@@ -143,27 +143,52 @@ class TestsCommand extends Command<bool> {
     }
   }
 
-  // TODO(yjbanov): skip rebuild if host.dart hasn't changed.
   Future<void> _buildHostPage() async {
+    final String hostDartPath = path.join('lib', 'static', 'host.dart');
+    final io.File hostDartFile = io.File(path.join(
+      environment.webEngineTesterRootDir.path,
+      hostDartPath,
+    ));
+    final io.File timestampFile = io.File(path.join(
+      environment.webEngineTesterRootDir.path,
+      '$hostDartPath.js.timestamp',
+    ));
+
+    final String timestamp = hostDartFile.statSync().modified.millisecondsSinceEpoch.toString();
+    if (timestampFile.existsSync()) {
+      final String lastBuildTimestamp = timestampFile.readAsStringSync();
+      if (lastBuildTimestamp == timestamp) {
+        // The file is still fresh. No need to rebuild.
+        return;
+      } else {
+        // Record new timestamp, but don't return. We need to rebuild.
+        print('${hostDartFile.path} timestamp changed. Rebuilding.');
+      }
+    } else {
+      print('Building ${hostDartFile.path}.');
+    }
+
     final int exitCode = await runProcess(
       environment.dart2jsExecutable,
       <String>[
-        'lib/static/host.dart',
+        hostDartPath,
         '-o',
-        'lib/static/host.dart.js',
+        '$hostDartPath.js',
       ],
-      workingDirectory: environment.goldenTesterRootDir.path,
+      workingDirectory: environment.webEngineTesterRootDir.path,
     );
 
     if (exitCode != 0) {
       io.stderr.writeln(
-          'Failed to compile tests. Compiler exited with exit code $exitCode');
+          'Failed to compile ${hostDartFile.path}. Compiler exited with exit code $exitCode');
       io.exit(1);
     }
+
+    // Record the timestamp to avoid rebuilding unless the file changes.
+    timestampFile.writeAsStringSync(timestamp);
   }
 
-  Future<void> _buildTests() async {
-    // TODO(yjbanov): learn to build only requested tests: https://github.com/flutter/flutter/issues/37810
+  Future<void> _buildTests({ List<FilePath> targets }) async {
     final int exitCode = await runProcess(
       environment.pubExecutable,
       <String>[
@@ -173,6 +198,12 @@ class TestsCommand extends Command<bool> {
         'test',
         '-o',
         'build',
+        if (targets != null)
+          for (FilePath path in targets)
+            ...[
+              '--build-filter=${path.relativeToWebUi}.js',
+              '--build-filter=${path.relativeToWebUi}.browser_test.dart.js',
+            ],
       ],
       workingDirectory: environment.webUiRootDir.path,
     );
