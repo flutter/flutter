@@ -51,11 +51,12 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
       );
       // Check for deferred import outputs.
       final File dart2jsArchive = fs.file(fs.path.join(
-          flutterProject.dartTool.path,
-          'build',
-          'flutter_web',
-          '${flutterProject.manifest.appName}',
-          '${fs.path.withoutExtension(target)}_web_entrypoint.dart.js.tar.gz'));
+        flutterProject.dartTool.path,
+        'build',
+        'flutter_web',
+        '${flutterProject.manifest.appName}',
+        '${fs.path.withoutExtension(target)}_web_entrypoint.dart.js.tar.gz'),
+      );
       fs.file(outputPath).copySync(fs.path.join(outputDir.path, 'main.dart.js'));
       fs.file('$outputPath.map').copySync(fs.path.join(outputDir.path, 'main.dart.js.map'));
       flutterProject.web.indexFile.copySync(fs.path.join(outputDir.path, 'index.html'));
