@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show debugDumpRenderTree;
 
@@ -392,12 +390,6 @@ class CardCollectionState extends State<CardCollection> {
 }
 
 void main() {
-  if (Platform.isMacOS) {
-    // TODO(flutter/flutter#31366): Update this when TargetPlatform includes macOS.
-    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
-    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-  }
-
   runApp(MaterialApp(
     title: 'Cards',
     home: CardCollection(),
