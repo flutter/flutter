@@ -2253,6 +2253,8 @@ void main() {
                 style: Typography(platform: TargetPlatform.android).black.subhead,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
+                minLines: 10,
+                maxLines: 20,
               ),
               const SizedBox(height: 100.0),
             ],
@@ -2272,6 +2274,8 @@ void main() {
       }),
     );
 
+    log.clear();
+
     // Move to the next editable text.
     await tester.showKeyboard(find.byKey(ValueKey<String>(controller2.text)));
     final MethodCall methodCall2 = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
@@ -2279,10 +2283,12 @@ void main() {
       methodCall2,
       isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
         'width': 800,
-        'height': 14,
-        'transform': Matrix4.identity().storage.toList(),
+        'height': 140.0,
+        'transform': <double>[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 214.0, 0.0, 1.0],
       }),
     );
+
+    log.clear();
 
     // Move back to the first editable text.
     await tester.showKeyboard(find.byKey(ValueKey<String>(controller1.text)));
