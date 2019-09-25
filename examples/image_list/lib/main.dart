@@ -76,7 +76,7 @@ class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext context) {
     return super.createHttpClient(
-        SecurityContext()..setTrustedCertificatesBytes(certificate.codeUnits)
+        (context ?? SecurityContext())..setTrustedCertificatesBytes(certificate.codeUnits)
     );
   }
 }
