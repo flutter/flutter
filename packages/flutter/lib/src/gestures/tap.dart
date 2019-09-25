@@ -98,6 +98,35 @@ typedef GestureTapCallback = void Function();
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
 typedef GestureTapCancelCallback = void Function();
 
+/// The base class of gesture recognizers that recognize taps.
+///
+/// Gesture recognizers take part in gesture arenas to enable potential gestures
+/// to be disambiguated from each other. This process is managed by a
+/// [GestureArenaManager].
+///
+/// A tap is defined as a sequence of events that starts with a down, followed
+/// by optional moves, then ends with an up. All move events must contain the
+/// same `buttons` with the down event, and must not be too far from the initial
+/// position. The gesture is rejected on any violation, a cancel event, or
+/// if any other gesture wins the arena. It is accepted only when it is the last
+/// member of the arena.
+///
+/// [BaseTapGestureRecognizer] considers all the pointers involved in the pointer
+/// event sequence as contributing to one gesture. For this reason, extra
+/// pointer interactions during a tap sequence are not recognized as additional
+/// taps. For example, down-1, down-2, up-1, up-2 produces only one tap on up-1.
+///
+/// [BaseTapGestureRecognizer] can not be directly used, since it does not
+/// define which buttons to accept, or what to do when a tap happens. If you
+/// want to build a custom tap recognizer, extend this class by overriding
+/// [isPointerAllowed] and the handler methods.
+///
+/// See also:
+///
+///  * [TapGestureRecognizer], a ready-to-use tap recognizer that recognizes
+///    taps of the primary button and taps of the secondary button.
+///  * [ModalBarrier], a widget that uses a custom tap recognizer, which accepts
+///    any buttons.
 abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a tap gesture recognizer.
   BaseTapGestureRecognizer({ Object debugOwner, Duration deadline = kPressTimeout })
@@ -109,25 +138,47 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   PointerDownEvent _down;
   PointerUpEvent _up;
 
-  @protected
-  bool handleIsPointerAllowed(PointerDownEvent event);
-
+  /// A pointer that might cause a tap has contacted the screen.
+  ///
+  /// This triggers after the down event, once a short timeout ([deadline]) has
+  /// elapsed, or once the gestures has won the arena, whichever comes first.
+  ///
+  /// The parameter `down` is the down event of the primary pointer that started
+  /// the tap sequence.
+  ///
+  /// If the gesture doesn't win the arena, [handleTapUp] is called next.
+  /// Otherwise, [handleTapCancel] is called next.
   @protected
   void handleTapDown({ PointerDownEvent down });
 
+  /// A pointer that will trigger a tap has stopped contacting the screen.
+  ///
+  /// This triggers on the up event, if the gesture wins the arena with it
+  /// or has previously won.
+  ///
+  /// The parameter `down` is the down event of the primary pointer that started
+  /// the tap sequence, and `up` is the up event that ended the tap sequence.
+  ///
+  /// If the gesture doesn't win the arena, [handleTapCancel] is called
+  /// instead.
   @protected
   void handleTapUp({ PointerDownEvent down, PointerUpEvent up });
 
+  /// The pointer that previously triggered [handleTapDown] will not end up
+  /// causing a tap.
+  ///
+  /// This triggers once the gesture loses the arena, if [handleTapDown] has
+  /// been previously triggered.
+  ///
+  /// The parameter `down` is the down event of the primary pointer that started
+  /// the tap sequence; `cancel` is the cancel event, which might be null;
+  /// `reason` is a short description of the cause if `cancel` is null, which
+  /// can be `"forced"` if other gestures won the arena, or `"spontaneous"`
+  /// otherwise.
+  ///
+  /// If the gesture wins the arena, [onSecondaryTapUp] is called instead.
   @protected
   void handleTapCancel({ PointerDownEvent down, PointerCancelEvent cancel, String reason });
-
-  @override
-  bool isPointerAllowed(PointerDownEvent event) {
-    final bool allowedByDelegate = handleIsPointerAllowed(event);
-    if (allowedByDelegate != null)
-      return allowedByDelegate;
-    return super.isPointerAllowed(event);
-  }
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
@@ -370,9 +421,8 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///  * [GestureDetector.onTapCancel], which exposes this callback.
   GestureTapCancelCallback onSecondaryTapCancel;
 
-  @protected
   @override
-  bool handleIsPointerAllowed(PointerDownEvent event) {
+  bool isPointerAllowed(PointerDownEvent event) {
     switch (event.buttons) {
       case kPrimaryButton:
         if (onTapDown == null &&
@@ -390,7 +440,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
       default:
         return false;
     }
-    return null;
+    return super.isPointerAllowed(event);
   }
 
   @protected
