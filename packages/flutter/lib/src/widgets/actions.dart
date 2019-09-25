@@ -258,9 +258,7 @@ class Actions extends InheritedWidget {
       }
       return true;
     }());
-    ActionDispatcher dispatcher = inherited?.dispatcher;
-    dispatcher ??= _findDispatcher(inheritedElement);
-    return dispatcher;
+    return inherited?.dispatcher ?? _findDispatcher(inheritedElement);
   }
 
   /// Invokes the action associated with the given [Intent] using the
@@ -359,17 +357,4 @@ class Actions extends InheritedWidget {
     properties.add(DiagnosticsProperty<ActionDispatcher>('dispatcher', dispatcher));
     properties.add(DiagnosticsProperty<Map<LocalKey, ActionFactory>>('actions', actions));
   }
-}
-
-/// An action that invokes the currently focused control.
-///
-/// This is an abstract class that serves as a base class for actions that
-/// activate a control. It is bound to [LogicalKeyboardKey.enter] in the default
-/// keyboard map in [WidgetsApp].
-abstract class ActivateAction extends Action {
-  /// Creates a [ActivateAction] with a fixed [key];
-  const ActivateAction() : super(key);
-
-  /// The [LocalKey] that uniquely identifies this action.
-  static const LocalKey key = ValueKey<Type>(ActivateAction);
 }
