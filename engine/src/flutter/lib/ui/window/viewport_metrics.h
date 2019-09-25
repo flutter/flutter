@@ -7,6 +7,8 @@
 
 #include <stdint.h>
 
+#include "flutter/fml/logging.h"
+
 namespace flutter {
 
 // This is the value of double.maxFinite from dart:core.

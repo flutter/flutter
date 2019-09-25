@@ -15,12 +15,8 @@ class ClipRRectLayer : public ContainerLayer {
   ~ClipRRectLayer() override;
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
-
   void Paint(PaintContext& context) const override;
-
-#if defined(OS_FUCHSIA)
   void UpdateScene(SceneUpdateContext& context) override;
-#endif  // defined(OS_FUCHSIA)
 
  private:
   SkRRect clip_rrect_;

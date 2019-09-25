@@ -173,7 +173,9 @@ void RasterCache::Prepare(PrerollContext* context,
                                   context->ui_time,
                                   context->texture_registry,
                                   context->raster_cache,
-                                  context->checkerboard_offscreen_layers};
+                                  context->checkerboard_offscreen_layers,
+                                  context->frame_physical_depth,
+                                  context->frame_device_pixel_ratio};
                               if (layer->needs_painting()) {
                                 layer->Paint(paintContext);
                               }

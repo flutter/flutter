@@ -11,6 +11,7 @@
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/instrumentation.h"
 #include "flutter/flow/raster_cache.h"
+#include "flutter/flow/scene_update_context.h"
 #include "flutter/flow/texture.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/compiler_specific.h"
@@ -27,14 +28,6 @@
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/utils/SkNWayCanvas.h"
 
-#if defined(OS_FUCHSIA)
-
-#include "flutter/flow/scene_update_context.h"  //nogncheck
-#include "lib/ui/scenic/cpp/resources.h"        //nogncheck
-#include "lib/ui/scenic/cpp/session.h"          //nogncheck
-
-#endif  // defined(OS_FUCHSIA)
-
 namespace flutter {
 
 static constexpr SkRect kGiantRect = SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
@@ -43,6 +36,7 @@ static constexpr SkRect kGiantRect = SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
 enum Clip { none, hardEdge, antiAlias, antiAliasWithSaveLayer };
 
 class ContainerLayer;
+class SceneUpdateContext;
 
 struct PrerollContext {
   RasterCache* raster_cache;
@@ -57,7 +51,15 @@ struct PrerollContext {
   const Stopwatch& ui_time;
   TextureRegistry& texture_registry;
   const bool checkerboard_offscreen_layers;
+
+  // The folllowing allow us to make use of the scene metrics during Preroll.
+  float frame_physical_depth;
+  float frame_device_pixel_ratio;
+
+  // The following allow us to track properties like elevation and opacity
+  // which stack with each other during Preroll.
   float total_elevation = 0.0f;
+  bool is_opaque = true;
 };
 
 // Represents a single composited layer. Created on the UI thread but then
@@ -65,9 +67,7 @@ struct PrerollContext {
 class Layer {
  public:
   Layer();
-  virtual ~Layer();
-
-  virtual void Preroll(PrerollContext* context, const SkMatrix& matrix);
+  virtual ~Layer() = default;
 
   struct PaintContext {
     // When splitting the scene into multiple canvases (e.g when embedding
@@ -89,6 +89,10 @@ class Layer {
     TextureRegistry& texture_registry;
     const RasterCache* raster_cache;
     const bool checkerboard_offscreen_layers;
+
+    // The folllowing allow us to make use of the scene metrics during Paint.
+    float frame_physical_depth;
+    float frame_device_pixel_ratio;
   };
 
   // Calls SkCanvas::saveLayer and restores the layer upon destruction. Also
@@ -118,15 +122,18 @@ class Layer {
     const SkRect bounds_;
   };
 
+  // Performs pre-paint optimizations, including bounds calculation.  Called
+  // before |Paint|.  If the |paint_bounds| calculated in this method is empty,
+  // then |Paint| will not be called.
+  virtual void Preroll(PrerollContext* context, const SkMatrix& matrix) {}
+
+  // Paints this layer onto a canvas.  Not called if |paint_bounds| is empty.
   virtual void Paint(PaintContext& context) const = 0;
 
-#if defined(OS_FUCHSIA)
   // Updates the system composited scene.
-  virtual void UpdateScene(SceneUpdateContext& context);
-#endif
+  virtual void UpdateScene(SceneUpdateContext& context) {}
 
   ContainerLayer* parent() const { return parent_; }
-
   void set_parent(ContainerLayer* parent) { parent_ = parent; }
 
   bool needs_system_composite() const { return needs_system_composite_; }
@@ -135,9 +142,6 @@ class Layer {
   }
 
   const SkRect& paint_bounds() const { return paint_bounds_; }
-
-  // This must be set by the time Preroll() returns otherwise the layer will
-  // be assumed to have empty paint bounds (paints no content).
   void set_paint_bounds(const SkRect& paint_bounds) {
     paint_bounds_ = paint_bounds;
   }
@@ -148,11 +152,9 @@ class Layer {
 
  private:
   ContainerLayer* parent_;
-  bool needs_system_composite_;
   SkRect paint_bounds_;
   uint64_t unique_id_;
-
-  static uint64_t NextUniqueID();
+  bool needs_system_composite_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Layer);
 };
