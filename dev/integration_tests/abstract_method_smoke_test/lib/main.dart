@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 void main() => runApp(MyApp());
 
@@ -48,8 +48,10 @@ class SecondPage extends StatelessWidget {
         children: <Widget>[
           TextFormField(),
           const Expanded(
-            child: InAppWebView(
-              initialUrl: 'https://google.com',
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: LatLng(0, 0)
+              ),
             ),
           ),
         ],
