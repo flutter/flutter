@@ -43,6 +43,13 @@ const CupertinoDynamicColor _kThumbColor = CupertinoDynamicColor.withBrightness(
 // The amount of space by which to inset each separator.
 const EdgeInsets _kSeparatorInset = EdgeInsets.symmetric(vertical: 6);
 const double _kSeparatorWidth = 1;
+const Radius _kSeparatorRadius = Radius.circular(_kSeparatorWidth/2);
+
+// Temp value
+const double _kTouchYDistanceThreshold = 50;
+
+// The minimal horizontal distance between the edges of the separator and the closest child.
+const double _kSegmentMinPadding = 9.25;
 
 const SpringDescription _kSegmentedControlSpringDescription = SpringDescription(mass: 1, stiffness: 503.551, damping: 44.8799);
 
@@ -502,6 +509,21 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   }
 }
 
+class _ChildAnimationManifest {
+  _ChildAnimationManifest({
+    this.opacity = 1,
+    @required this.separatorOpacity,
+  }) : assert(separatorOpacity != null),
+       assert(opacity != null),
+       separatorTween = Tween<double>(begin: separatorOpacity, end: separatorOpacity),
+       opacityTween = Tween<double>(begin: opacity, end: opacity);
+
+  double opacity;
+  Tween<double> opacityTween;
+  double separatorOpacity;
+  Tween<double> separatorTween;
+}
+
 class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<RenderBox> { }
 
 // The behavior of a UISegmentedControl as observed on iOS 13.1:
@@ -529,6 +551,7 @@ class _SegmentedControlContainerBoxParentData extends ContainerBoxParentData<Ren
 //
 // 5. A tap down event on other segments will trigger a CABasciaAnimation that
 //    fades out the content, eventually reduces the alpha of that segment to 20%.
+//    fillMode = both, timingFunction = default, duration = 0.47.
 class _RenderSegmentedControl<T> extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>,
         RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>> {
@@ -552,10 +575,16 @@ class _RenderSegmentedControl<T> extends RenderBox
          duration: _kSpringAnimationDuration,
          value: 1,
          vsync: vsync,
+       ),
+       separatorOpacityController = AnimationController(
+         duration: _kSpringAnimationDuration,
+         value: 0,
+         vsync: vsync,
        ) {
          addAll(children);
          thumbController.addListener(markNeedsPaint);
          thumbScaleController.addListener(markNeedsPaint);
+         separatorOpacityController.addListener(markNeedsPaint);
 
          _drag
           ..onDown = _onDown
@@ -568,12 +597,15 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   final HorizontalDragGestureRecognizer _drag = HorizontalDragGestureRecognizer();
 
+  Map<RenderBox, _ChildAnimationManifest> childAnimations = <RenderBox, _ChildAnimationManifest>{};
+
   // Unscaled Thumb Rect
   Rect _currentThumbRect;
 
   // Unscaled Thumb Rect;
   Tween<Rect> _currentThumbTween;
   final AnimationController thumbController;
+  final AnimationController separatorOpacityController;
   final Tween<double> thumbScaleTween = Tween<double>(begin: 0.95, end: 1);
   final AnimationController thumbScaleController;
 
@@ -587,6 +619,22 @@ class _RenderSegmentedControl<T> extends RenderBox
     0, // Everytime a new spring animation starts the previous animation stops.
   );
 
+
+  @override
+  void insert(RenderBox child, { RenderBox after }) {
+    super.insert(child, after: after);
+    assert(childAnimations[child] == null);
+    childAnimations[child] = _ChildAnimationManifest(separatorOpacity: 1);
+  }
+
+  @override
+  void remove(RenderBox child) {
+    super.remove(child);
+    assert(childAnimations[child] == null);
+    childAnimations[child] = null;
+  }
+
+  // selectedIndex has changed, animations need to be updated.
   bool _needsThumbAnimationUpdate = false;
   set selectedIndex(int value) {
     if (_selectedIndex == value) {
@@ -629,18 +677,6 @@ class _RenderSegmentedControl<T> extends RenderBox
     markNeedsPaint();
   }
 
-  // When the touch event lands directly on top of the thumb, the thumb shrinks
-  // animatedly
-  double _thumbScale = 1;
-  double get thumbScale => _thumbScale;
-  set thumbScale(double value) {
-    if (thumbScale == value) {
-      return;
-    }
-    _thumbScale = value;
-    markNeedsPaint();
-  }
-
   double get totalSeparatorWidth => (_kSeparatorInset.horizontal + _kSeparatorWidth) * (childCount - 1);
 
   @override
@@ -654,7 +690,13 @@ class _RenderSegmentedControl<T> extends RenderBox
   Offset localDragOffset;
   bool startedOnSelectedSegment;
 
-  int indexFromLocation(Offset location) => (localDragOffset.dx / (size.width / childCount)).floor();
+  int indexFromLocation(Offset location) {
+    return childCount == 0
+      ? 0
+      : (localDragOffset.dx / (size.width / childCount))
+        .floor()
+        .clamp(0, childCount - 1);
+  }
 
   void _onDown(DragDownDetails details) {
     assert(size.contains(details.localPosition));
@@ -696,7 +738,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     double minWidth = 0.0;
     while (child != null) {
       final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
-      final double childWidth = child.getMinIntrinsicWidth(height);
+      final double childWidth = child.getMinIntrinsicWidth(height) + 2 * _kSegmentMinPadding;
       minWidth = math.max(minWidth, childWidth);
       child = childParentData.nextSibling;
     }
@@ -709,7 +751,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     double maxWidth = 0.0;
     while (child != null) {
       final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
-      final double childWidth = child.getMaxIntrinsicWidth(height);
+      final double childWidth = child.getMaxIntrinsicWidth(height) + 2 * _kSegmentMinPadding;
       maxWidth = math.max(maxWidth, childWidth);
       child = childParentData.nextSibling;
     }
@@ -760,7 +802,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     double maxHeight = _kMinSegmentedControlHeight;
 
     for (RenderBox child in getChildrenAsList()) {
-      childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity));
+      childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity) + 2 * _kSegmentMinPadding);
     }
 
     childWidth = math.min(
@@ -807,15 +849,52 @@ class _RenderSegmentedControl<T> extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     final List<RenderBox> children = getChildrenAsList();
 
+    // Paint thumb.
     if (selectedIndex != null) {
       final RenderBox selectedChild = children[selectedIndex];
       final Rect unscaledThumbTargetRect = _unscaledThumbRectFrom(selectedChild);
 
+      // Reset all if "momentary" was on.
+      if (childAnimations == null) {
+        childAnimations = <RenderBox, _ChildAnimationManifest> { };
+        for (int i = 0; i < childCount - 1; i++) {
+          // The separator associated with the last child will not be painted (unless
+          // a new trailing segment is added), and its opacity will always be 1.
+          final bool shouldFadeOut = i == selectedIndex || i == selectedIndex - 1;
+          final RenderBox child = children[i];
+          childAnimations[child] = _ChildAnimationManifest(separatorOpacity: shouldFadeOut ? 0 : 1);
+        }
+      }
+
       if (_needsThumbAnimationUpdate) {
-        // Needs to ensure _currentThumbRect makes sense.
+        // Needs to ensure _currentThumbRect is valid.
         _currentThumbTween = RectTween(begin: _currentThumbRect, end: unscaledThumbTargetRect);
+
+        for (int i = 0; i < childCount - 1; i++) {
+          // The separator associated with the last child will not be painted (unless
+          // a new trailing segment is added), and its opacity will always be 1.
+          final bool shouldFadeOut = i == selectedIndex || i == selectedIndex - 1;
+          final RenderBox child = children[i];
+          assert(childAnimations[child] != null);
+          final _ChildAnimationManifest oldManifest = childAnimations[child];
+          childAnimations[child].separatorTween = Tween<double>(
+            begin: oldManifest.separatorOpacity,
+            end: shouldFadeOut ? 0 : 1,
+          );
+        }
+
         thumbController.animateWith(thumbRectSimulation);
-        _needsThumbAnimationUpdate = false;
+
+        separatorOpacityController.removeListener(markNeedsPaint);
+        separatorOpacityController.reset();
+        separatorOpacityController.addListener(markNeedsPaint);
+        separatorOpacityController.animateTo(1, duration: _kSpringAnimationDuration, curve: Curves.ease);
+      }
+
+
+      // Paint separators.
+      for (int index = 0; index < childCount - 1; index++) {
+        _paintSeparator(context, offset, children[index]);
       }
 
       _currentThumbRect = _currentThumbTween?.evaluate(thumbController)
@@ -831,17 +910,52 @@ class _RenderSegmentedControl<T> extends RenderBox
 
       _paintThumb(context, offset, thumbRect);
     } else {
+      // Reset all animations when "momentary" is on.
       _currentThumbRect = null;
+      childAnimations = null;
+
+      // Paint separators.
+      for (int index = 0; index < childCount - 1; index++) {
+        _paintSeparator(context, offset, children[index]);
+      }
     }
 
+    _needsThumbAnimationUpdate = false;
+    // Paint children.
     for (int index = 0; index < children.length; index++) {
       _paintChild(context, offset, children[index], index);
     }
   }
 
+  // Paint the separator to the right of the given child.
+  void _paintSeparator(PaintingContext context, Offset offset, RenderBox child) {
+    assert(child != null);
+    final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
+
+    final Paint paint = Paint();
+
+    if (selectedIndex == null) {
+      paint.color = _kSeparatorColor;
+    } else {
+      final _ChildAnimationManifest manifest = childAnimations[child];
+      assert(manifest != null);
+      manifest.separatorOpacity = manifest.separatorTween.evaluate(separatorOpacityController);
+      paint.color = _kSeparatorColor.withOpacity(_kSeparatorColor.opacity * manifest.separatorOpacity);
+    }
+
+    final Rect childRect = (childParentData.offset + offset) & child.size;
+    final Rect separatorRect = _kSeparatorInset.deflateRect(
+      childRect.topRight & Size(_kSeparatorInset.horizontal + _kSeparatorWidth, child.size.height),
+    );
+
+    context.canvas.drawRRect(
+      RRect.fromRectAndRadius(separatorRect, _kSeparatorRadius),
+      paint,
+    );
+  }
+
   void _paintChild(PaintingContext context, Offset offset, RenderBox child, int childIndex) {
     assert(child != null);
-
     final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
     context.paintChild(child, childParentData.offset + offset);
   }
