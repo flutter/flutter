@@ -1562,7 +1562,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         child: Align(
           alignment: widget.alignment,
           child: Container(
-            color: widget.backgroundColor,
+            color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
             width: totalWidth,
             height: _kPickerHeight,
             child: DefaultTextStyle(

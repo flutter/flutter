@@ -140,7 +140,7 @@ class RenderListWheelViewport
     double offAxisFraction = 0,
     bool useMagnifier = false,
     double magnification = 1,
-    double offCenterOpacity = 1,
+    double overAndUnderCenterOpacity = 1,
     @required double itemExtent,
     double squeeze = 1,
     bool clipToSize = true,
@@ -157,8 +157,8 @@ class RenderListWheelViewport
        assert(useMagnifier != null),
        assert(magnification != null),
        assert(magnification > 0),
-       assert(offCenterOpacity != null),
-       assert(offCenterOpacity >= 0 && offCenterOpacity <= 1),
+       assert(overAndUnderCenterOpacity != null),
+       assert(overAndUnderCenterOpacity >= 0 && overAndUnderCenterOpacity <= 1),
        assert(itemExtent != null),
        assert(squeeze != null),
        assert(squeeze > 0),
@@ -175,7 +175,7 @@ class RenderListWheelViewport
        _offAxisFraction = offAxisFraction,
        _useMagnifier = useMagnifier,
        _magnification = magnification,
-       _offCenterOpacity = offCenterOpacity,
+       _overAndUnderCenterOpacity = overAndUnderCenterOpacity,
        _itemExtent = itemExtent,
        _squeeze = squeeze,
        _clipToSize = clipToSize,
@@ -372,7 +372,7 @@ class RenderListWheelViewport
     markNeedsPaint();
   }
 
-  /// {@template flutter.rendering.wheelList.offCenterOpacity}
+  /// {@template flutter.rendering.wheelList.overAndUnderCenterOpacity}
   /// The opacity value that will be applied to the wheel that appears below and
   /// above the magnifier.
   ///
@@ -380,14 +380,14 @@ class RenderListWheelViewport
   ///
   /// Must be greater than or equal to 0, and less than or equal to 1.
   /// {@endtemplate}
-  double get offCenterOpacity => _offCenterOpacity;
-  double _offCenterOpacity = 1.0;
-  set offCenterOpacity(double value) {
+  double get overAndUnderCenterOpacity => _overAndUnderCenterOpacity;
+  double _overAndUnderCenterOpacity = 1.0;
+  set overAndUnderCenterOpacity(double value) {
     assert(value != null);
     assert(value >= 0 && value <= 1);
-    if (value == _offCenterOpacity)
+    if (value == _overAndUnderCenterOpacity)
       return;
-    _offCenterOpacity = value;
+    _overAndUnderCenterOpacity = value;
     markNeedsPaint();
   }
 
@@ -849,18 +849,12 @@ class RenderListWheelViewport
       -_topScrollMarginExtent
     );
 
-    final bool shouldApplyOffCenterDim = offCenterOpacity < 1;
-    if (useMagnifier || shouldApplyOffCenterDim)
-      _paintChildWithMagnifier(
-        context,
-        offset,
-        child,
-        transform,
-        offsetToCenter,
-        untransformedPaintingCoordinates,
-      );
-    else
+    final bool shouldApplyOffCenterDim = overAndUnderCenterOpacity < 1;
+    if (useMagnifier || shouldApplyOffCenterDim) {
+      _paintChildWithMagnifier(context, offset, child, transform, offsetToCenter, untransformedPaintingCoordinates);
+    } else {
       _paintChildCylindrically(context, offset, child, transform, offsetToCenter);
+    }
   }
 
   /// Paint child with the magnifier active - the child will be rendered
@@ -912,9 +906,7 @@ class RenderListWheelViewport
             offset,
             _magnifyTransform(),
             (PaintingContext context, Offset offset) {
-              context.paintChild(
-                child,
-                offset + untransformedPaintingCoordinates);
+              context.paintChild(child, offset + untransformedPaintingCoordinates);
           });
       });
 
@@ -952,7 +944,8 @@ class RenderListWheelViewport
     Matrix4 cylindricalTransform,
     Offset offsetToCenter,
   ) {
-    final PaintingContextCallback innerPainter = (PaintingContext context, Offset offset) {
+    // Paint child with cylindrically.
+    final PaintingContextCallback painter = (PaintingContext context, Offset offset) {
       context.paintChild(
         child,
         // Paint everything in the center (e.g. angle = 0), then transform.
@@ -960,14 +953,17 @@ class RenderListWheelViewport
       );
     };
 
+    // Paint child with cylindrically, with [overAndUnderCenterOpacity].
+    final PaintingContextCallback opacityPainter = (PaintingContext context, Offset offset) {
+      context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), painter);
+    };
+
     context.pushTransform(
       needsCompositing,
       offset,
       _centerOriginTransform(cylindricalTransform),
       // Pre-transform painting function.
-      offCenterOpacity == 1
-        ? innerPainter
-        : (PaintingContext context, Offset offset) => context.pushOpacity(offset, (offCenterOpacity * 255).round(), innerPainter),
+      overAndUnderCenterOpacity == 1 ? painter : opacityPainter,
     );
   }
 

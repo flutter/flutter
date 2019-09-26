@@ -23,7 +23,7 @@ const double _kSqueeze = 1.45;
 
 // Opacity fraction value that dims the wheel above and below the "magnifier"
 // lens.
-const double _kOffCenterOpacity = 0.447;
+const double _kOverAndUnderCenterOpacity = 0.447;
 
 /// An iOS-styled picker.
 ///
@@ -283,7 +283,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
                 offAxisFraction: widget.offAxisFraction,
                 useMagnifier: widget.useMagnifier,
                 magnification: widget.magnification,
-                offCenterOpacity: _kOffCenterOpacity,
+                overAndUnderCenterOpacity: _kOverAndUnderCenterOpacity,
                 itemExtent: widget.itemExtent,
                 squeeze: widget.squeeze,
                 onSelectedItemChanged: _handleSelectedItemChanged,

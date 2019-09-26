@@ -65,11 +65,11 @@ void main() {
       );
     });
 
-    testWidgets('ListWheelScrollView needs valid offCenterOpacity', (WidgetTester tester) async {
+    testWidgets('ListWheelScrollView needs valid overAndUnderCenterOpacity', (WidgetTester tester) async {
       expect(
         () {
           ListWheelScrollView(
-            offCenterOpacity: null,
+            overAndUnderCenterOpacity: null,
             itemExtent: 20.0,
             children: <Widget>[Container()],
           );
@@ -80,7 +80,7 @@ void main() {
       expect(
         () {
           ListWheelScrollView(
-            offCenterOpacity: -1,
+            overAndUnderCenterOpacity: -1,
             itemExtent: 20.0,
             children: <Widget>[Container()],
           );
@@ -91,7 +91,7 @@ void main() {
       expect(
         () {
           ListWheelScrollView(
-            offCenterOpacity: 2,
+            overAndUnderCenterOpacity: 2,
             itemExtent: 20.0,
             children: <Widget>[Container()],
           );
@@ -102,7 +102,7 @@ void main() {
       expect(
         () {
           ListWheelScrollView(
-            offCenterOpacity: 1,
+            overAndUnderCenterOpacity: 1,
             itemExtent: 20.0,
             children: <Widget>[Container()],
           );
@@ -113,7 +113,7 @@ void main() {
       expect(
         () {
           ListWheelScrollView(
-            offCenterOpacity: 0,
+            overAndUnderCenterOpacity: 0,
             itemExtent: 20.0,
             children: <Widget>[Container()],
           );
