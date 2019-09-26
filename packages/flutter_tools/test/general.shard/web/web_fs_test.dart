@@ -78,8 +78,9 @@ void main() {
           bool serveDevTools,
           LogWriter logWriter,
           bool verbose,
-          bool enableDebugExtension}) async {
-            return mockDwds;
+          bool enableDebugExtension,
+        }) async {
+          return mockDwds;
         },
       },
     );

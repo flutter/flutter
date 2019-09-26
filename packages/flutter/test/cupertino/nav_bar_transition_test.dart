@@ -246,14 +246,14 @@ void main() {
 
     // Move animation further a bit.
     await tester.pump(const Duration(milliseconds: 200));
-    expect(bottomMiddle.text.style.color, const Color(0xffffa01a));
+    expect(bottomMiddle.text.style.color, const Color(0xffffa923));
     expect(bottomMiddle.text.style.fontWeight, FontWeight.w400);
     expect(bottomMiddle.text.style.fontFamily, '.SF Pro Text');
     expect(bottomMiddle.text.style.letterSpacing, -0.41);
 
     checkOpacity(tester, flying(tester, find.text('Page 1')).first, 0.0);
 
-    expect(topBackLabel.text.style.color, const Color(0xffffa01a));
+    expect(topBackLabel.text.style.color, const Color(0xffffa923));
     expect(topBackLabel.text.style.fontWeight, FontWeight.w400);
     expect(topBackLabel.text.style.fontFamily, '.SF Pro Text');
     expect(topBackLabel.text.style.letterSpacing, -0.41);

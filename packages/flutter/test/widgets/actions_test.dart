@@ -226,11 +226,11 @@ void main() {
       const Intent(ValueKey<String>('foo')).debugFillProperties(builder);
 
       final List<String> description = builder.properties
-          .where((DiagnosticsNode node) {
-        return !node.isFiltered(DiagnosticLevel.info);
-      })
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
+        .where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        })
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
       expect(description, equals(<String>['key: [<\'foo\'>]']));
     });
@@ -257,11 +257,11 @@ void main() {
       Actions(actions: const <LocalKey, ActionFactory>{}, child: Container()).debugFillProperties(builder);
 
       final List<String> description = builder.properties
-          .where((DiagnosticsNode node) {
-        return !node.isFiltered(DiagnosticLevel.info);
-      })
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
+        .where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        })
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
       expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
       expect(description[1], equals('actions: {}'));
@@ -278,11 +278,11 @@ void main() {
       ).debugFillProperties(builder);
 
       final List<String> description = builder.properties
-          .where((DiagnosticsNode node) {
-        return !node.isFiltered(DiagnosticLevel.info);
-      })
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
+        .where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        })
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
       expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
       expect(description[1], equals('actions: {[<\'bar\'>]: Closure: () => TestAction}'));

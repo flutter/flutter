@@ -525,14 +525,14 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         double crossSize;
         if (flex == 0) {
           switch (_direction) {
-              case Axis.horizontal:
-                mainSize = child.getMaxIntrinsicWidth(double.infinity);
-                crossSize = childSize(child, mainSize);
-                break;
-              case Axis.vertical:
-                mainSize = child.getMaxIntrinsicHeight(double.infinity);
-                crossSize = childSize(child, mainSize);
-                break;
+            case Axis.horizontal:
+              mainSize = child.getMaxIntrinsicWidth(double.infinity);
+              crossSize = childSize(child, mainSize);
+              break;
+            case Axis.vertical:
+              mainSize = child.getMaxIntrinsicHeight(double.infinity);
+              crossSize = childSize(child, mainSize);
+              break;
           }
           inflexibleSpace += mainSize;
           maxCrossSize = math.max(maxCrossSize, crossSize);

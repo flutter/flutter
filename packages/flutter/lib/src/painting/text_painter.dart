@@ -161,6 +161,17 @@ class TextPainter {
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
 
+  /// Marks this text painter's layout information as dirty and removes cached
+  /// information.
+  ///
+  /// Uses this method to notify text painter to relayout in the case of
+  /// layout changes in engine. In most cases, updating text painter properties
+  /// in framework will automatically invoke this method.
+  void markNeedsLayout() {
+    _paragraph = null;
+    _needsLayout = true;
+  }
+
   /// The (potentially styled) text to paint.
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
@@ -180,8 +191,7 @@ class TextPainter {
     if (_text?.style != value?.style)
       _layoutTemplate = null;
     _text = value;
-    _paragraph = null;
-    _needsLayout = true;
+    markNeedsLayout();
   }
 
   /// How the text should be aligned horizontally.
@@ -196,8 +206,7 @@ class TextPainter {
     if (_textAlign == value)
       return;
     _textAlign = value;
-    _paragraph = null;
-    _needsLayout = true;
+    markNeedsLayout();
   }
 
   /// The default directionality of the text.
@@ -221,9 +230,8 @@ class TextPainter {
     if (_textDirection == value)
       return;
     _textDirection = value;
-    _paragraph = null;
+    markNeedsLayout();
     _layoutTemplate = null; // Shouldn't really matter, but for strict correctness...
-    _needsLayout = true;
   }
 
   /// The number of font pixels for each logical pixel.
@@ -239,9 +247,8 @@ class TextPainter {
     if (_textScaleFactor == value)
       return;
     _textScaleFactor = value;
-    _paragraph = null;
+    markNeedsLayout();
     _layoutTemplate = null;
-    _needsLayout = true;
   }
 
   /// The string used to ellipsize overflowing text. Setting this to a non-empty
@@ -267,8 +274,7 @@ class TextPainter {
     if (_ellipsis == value)
       return;
     _ellipsis = value;
-    _paragraph = null;
-    _needsLayout = true;
+    markNeedsLayout();
   }
 
   /// The locale used to select region-specific glyphs.
@@ -278,8 +284,7 @@ class TextPainter {
     if (_locale == value)
       return;
     _locale = value;
-    _paragraph = null;
-    _needsLayout = true;
+    markNeedsLayout();
   }
 
   /// An optional maximum number of lines for the text to span, wrapping if
@@ -297,8 +302,7 @@ class TextPainter {
     if (_maxLines == value)
       return;
     _maxLines = value;
-    _paragraph = null;
-    _needsLayout = true;
+    markNeedsLayout();
   }
 
   /// {@template flutter.painting.textPainter.strutStyle}
@@ -319,8 +323,7 @@ class TextPainter {
     if (_strutStyle == value)
       return;
     _strutStyle = value;
-    _paragraph = null;
-    _needsLayout = true;
+    markNeedsLayout();
   }
 
   /// {@template flutter.painting.textPainter.textWidthBasis}
@@ -333,8 +336,7 @@ class TextPainter {
     if (_textWidthBasis == value)
       return;
     _textWidthBasis = value;
-    _paragraph = null;
-    _needsLayout = true;
+    markNeedsLayout();
   }
 
 
@@ -382,8 +384,7 @@ class TextPainter {
       return placeholderCount;
     }() == value.length);
     _placeholderDimensions = value;
-    _needsLayout = true;
-    _paragraph = null;
+    markNeedsLayout();
   }
   List<PlaceholderDimensions> _placeholderDimensions;
 

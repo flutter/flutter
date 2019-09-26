@@ -731,6 +731,33 @@ class HeroController extends NavigatorObserver {
     _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, true);
   }
 
+  @override
+  void didStopUserGesture() {
+    if (navigator.userGestureInProgress)
+      return;
+
+    // If the user horizontal drag gesture initiated the flight (i.e. the back swipe)
+    // didn't move towards the pop direction at all, the animation will not play
+    // and thus the status update callback _handleAnimationUpdate will never be
+    // called when the gesture finishes. In this case the initiated flight needs
+    // to be manually invalidated.
+    bool isInvalidFlight(_HeroFlight flight) {
+      return flight.manifest.isUserGestureTransition
+          && flight.manifest.type == HeroFlightDirection.pop
+          && flight._proxyAnimation.isDismissed;
+    }
+
+    final List<_HeroFlight> invalidFlights = _flights.values
+      .where(isInvalidFlight)
+      .toList(growable: false);
+
+    // Treat these invalidated flights as dismissed. Calling _handleAnimationUpdate
+    // will also remove the flight from _flights.
+    for (_HeroFlight flight in invalidFlights) {
+      flight._handleAnimationUpdate(AnimationStatus.dismissed);
+    }
+  }
+
   // If we're transitioning between different page routes, start a hero transition
   // after the toRoute has been laid out with its animation's value at 1.0.
   void _maybeStartHeroTransition(

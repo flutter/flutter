@@ -1379,8 +1379,7 @@ void main() {
     final FocusNode focusNode = FocusNode();
 
     String clipboardContent = '';
-    SystemChannels.platform
-        .setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
         clipboardContent = methodCall.arguments['text'];
       else if (methodCall.method == 'Clipboard.getData')
@@ -2308,7 +2307,7 @@ void main() {
 
   testWidgets(
     'tap moves cursor to the edge of the word it tapped on (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2340,7 +2339,7 @@ void main() {
 
   testWidgets(
     'tap moves cursor to the position tapped (Android)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -2372,7 +2371,7 @@ void main() {
 
   testWidgets(
     'two slow taps do not trigger a word selection (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2407,7 +2406,7 @@ void main() {
 
   testWidgets(
     'double tap selects word and first tap of double tap moves cursor (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2453,7 +2452,7 @@ void main() {
 
   testWidgets(
     'double tap selects word and first tap of double tap moves cursor and shows toolbar (Android)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -2498,7 +2497,7 @@ void main() {
 
   testWidgets(
     'double tap on top of cursor also selects word (Android)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -2547,7 +2546,7 @@ void main() {
 
   testWidgets(
     'double tap hold selects word (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2594,7 +2593,7 @@ void main() {
 
   testWidgets(
     'tap after a double tap select is not affected (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2641,7 +2640,7 @@ void main() {
 
   testWidgets(
     'long press moves cursor to the exact long press position and shows toolbar (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2674,7 +2673,7 @@ void main() {
 
   testWidgets(
     'long press selects word and shows toolbar (Android)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
 
       await tester.pumpWidget(
         const MaterialApp(
@@ -2706,7 +2705,7 @@ void main() {
 
   testWidgets(
     'long press tap cannot initiate a double tap (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2742,7 +2741,7 @@ void main() {
 
   testWidgets(
     'long press drag moves the cursor under the drag and shows toolbar on lift (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2898,7 +2897,7 @@ void main() {
 
   testWidgets(
     'long tap after a double tap select is not affected (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2942,7 +2941,7 @@ void main() {
 //convert
   testWidgets(
     'double tap after a long tap is not affected (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2984,7 +2983,7 @@ void main() {
 
   testWidgets(
     'double tap chains work (iOS)',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -3238,7 +3237,7 @@ void main() {
 
   testWidgets(
     'strut basic single line',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -3261,7 +3260,7 @@ void main() {
 
   testWidgets(
     'strut TextStyle increases height',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -3308,7 +3307,7 @@ void main() {
 
   testWidgets(
     'strut basic multi line',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -3332,7 +3331,7 @@ void main() {
 
   testWidgets(
     'strut no force small strut',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -3364,7 +3363,7 @@ void main() {
 
   testWidgets(
     'strut no force large strut',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -3393,7 +3392,7 @@ void main() {
 
   testWidgets(
     'strut height override',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -3422,7 +3421,7 @@ void main() {
 
   testWidgets(
     'strut forces field taller',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -3636,7 +3635,7 @@ void main() {
 
   testWidgets(
     'Mouse tap does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3665,7 +3664,7 @@ void main() {
 
   testWidgets(
     'Mouse long press does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3694,7 +3693,7 @@ void main() {
 
   testWidgets(
     'Mouse double tap does not show handles nor toolbar',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(

@@ -92,11 +92,20 @@ class MouseTracker extends ChangeNotifier {
   /// Creates a mouse tracker to keep track of mouse locations.
   ///
   /// All of the parameters must not be null.
-  MouseTracker(PointerRouter router, this.annotationFinder)
-      : assert(router != null),
+  MouseTracker(this._router, this.annotationFinder)
+      : assert(_router != null),
         assert(annotationFinder != null) {
-    router.addGlobalRoute(_handleEvent);
+    _router.addGlobalRoute(_handleEvent);
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _router.removeGlobalRoute(_handleEvent);
+  }
+
+  // The pointer router that the mouse tracker listens to for events.
+  final PointerRouter _router;
 
   /// Used to find annotations at a given logical coordinate.
   final MouseDetectorAnnotationFinder annotationFinder;
@@ -111,16 +120,19 @@ class MouseTracker extends ChangeNotifier {
   /// annotation has been added to the layer tree.
   void attachAnnotation(MouseTrackerAnnotation annotation) {
     _trackedAnnotations[annotation] = _TrackedAnnotation(annotation);
-    // Schedule a check so that we test this new annotation to see if the mouse
-    // is currently inside its region.
-    _scheduleMousePositionCheck();
+    // Schedule a check so that we test this new annotation to see if any mouse
+    // is currently inside its region. It has to happen after the frame is
+    // complete so that the annotation layer has been added before the check.
+    if (mouseIsConnected) {
+      _scheduleMousePositionCheck();
+    }
   }
 
   /// Stops tracking an annotation, indicating that it has been removed from the
   /// layer tree.
   ///
   /// If the associated layer is not removed, and receives a hit, then
-  /// [collectMousePositions] will assert the next time it is called.
+  /// [sendMouseNotifications] will assert the next time it is called.
   void detachAnnotation(MouseTrackerAnnotation annotation) {
     final _TrackedAnnotation trackedAnnotation = _findAnnotation(annotation);
     for (int deviceId in trackedAnnotation.activeDevices) {
@@ -133,18 +145,19 @@ class MouseTracker extends ChangeNotifier {
     _trackedAnnotations.remove(annotation);
   }
 
-  bool _postFrameCheckScheduled = false;
+  bool _scheduledPostFramePositionCheck = false;
+  // Schedules a position check at the end of this frame for those annotations
+  // that have been added.
   void _scheduleMousePositionCheck() {
     // If we're not tracking anything, then there is no point in registering a
     // frame callback or scheduling a frame. By definition there are no active
     // annotations that need exiting, either.
-    if (_trackedAnnotations.isNotEmpty && !_postFrameCheckScheduled) {
-      _postFrameCheckScheduled = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-        _postFrameCheckScheduled = false;
-        collectMousePositions();
+    if (_trackedAnnotations.isNotEmpty && !_scheduledPostFramePositionCheck) {
+      _scheduledPostFramePositionCheck = true;
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        sendMouseNotifications(_lastMouseEvent.keys);
+        _scheduledPostFramePositionCheck = false;
       });
-      SchedulerBinding.instance.scheduleFrame();
     }
   }
 
@@ -158,21 +171,24 @@ class MouseTracker extends ChangeNotifier {
       // If we are adding the device again, then we're not removing it anymore.
       _pendingRemovals.remove(deviceId);
       _addMouseEvent(deviceId, event);
+      sendMouseNotifications(<int>{deviceId});
       return;
     }
     if (event is PointerRemovedEvent) {
       _removeMouseEvent(deviceId, event);
       // If the mouse was removed, then we need to schedule one more check to
       // exit any annotations that were active.
-      _scheduleMousePositionCheck();
+      sendMouseNotifications(<int>{deviceId});
     } else {
       if (event is PointerMoveEvent || event is PointerHoverEvent || event is PointerDownEvent) {
-        if (!_lastMouseEvent.containsKey(deviceId) || _lastMouseEvent[deviceId].position != event.position) {
+        final PointerEvent lastEvent = _lastMouseEvent[deviceId];
+        _addMouseEvent(deviceId, event);
+        if (lastEvent == null ||
+            lastEvent is PointerAddedEvent || lastEvent.position != event.position) {
           // Only schedule a frame if we have our first event, or if the
           // location of the mouse has changed, and only if there are tracked annotations.
-          _scheduleMousePositionCheck();
+          sendMouseNotifications(<int>{deviceId});
         }
-        _addMouseEvent(deviceId, event);
       }
     }
   }
@@ -206,14 +222,18 @@ class MouseTracker extends ChangeNotifier {
   /// This function is only public to allow for proper testing of the
   /// MouseTracker. Do not call in other contexts.
   @visibleForTesting
-  void collectMousePositions() {
+  void sendMouseNotifications(Iterable<int> deviceIds) {
+    if (_trackedAnnotations.isEmpty) {
+      return;
+    }
+
     void exitAnnotation(_TrackedAnnotation trackedAnnotation, int deviceId) {
       if (trackedAnnotation.annotation?.onExit != null && trackedAnnotation.activeDevices.contains(deviceId)) {
         final PointerEvent event = _lastMouseEvent[deviceId] ?? _pendingRemovals[deviceId];
         assert(event != null);
         trackedAnnotation.annotation.onExit(PointerExitEvent.fromMouseEvent(event));
-        trackedAnnotation.activeDevices.remove(deviceId);
       }
+      trackedAnnotation.activeDevices.remove(deviceId);
     }
 
     void exitAllDevices(_TrackedAnnotation trackedAnnotation) {
@@ -234,8 +254,9 @@ class MouseTracker extends ChangeNotifier {
         return;
       }
 
-      for (int deviceId in _lastMouseEvent.keys) {
+      for (int deviceId in deviceIds) {
         final PointerEvent lastEvent = _lastMouseEvent[deviceId];
+        assert(lastEvent != null);
         final Iterable<MouseTrackerAnnotation> hits = annotationFinder(lastEvent.position);
 
         // No annotations were found at this position for this deviceId, so send an
@@ -311,7 +332,6 @@ class MouseTracker extends ChangeNotifier {
   /// The most recent mouse event observed for each mouse device ID observed.
   ///
   /// May be null if no mouse is connected, or hasn't produced an event yet.
-  /// Will not be updated unless there is at least one tracked annotation.
   final Map<int, PointerEvent> _lastMouseEvent = <int, PointerEvent>{};
 
   /// Whether or not a mouse is connected and has produced events.

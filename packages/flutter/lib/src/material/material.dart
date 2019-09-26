@@ -615,7 +615,10 @@ abstract class InkFeature {
   @mustCallSuper
   void dispose() {
     assert(!_debugDisposed);
-    assert(() { _debugDisposed = true; return true; }());
+    assert(() {
+      _debugDisposed = true;
+      return true;
+    }());
     _controller._removeFeature(this);
     if (onRemoved != null)
       onRemoved();

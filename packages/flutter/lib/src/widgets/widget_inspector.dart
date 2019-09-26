@@ -947,7 +947,10 @@ mixin WidgetInspectorService {
   void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
     _registerServiceExtensionCallback = registerServiceExtensionCallback;
     assert(!_debugServiceExtensionsRegistered);
-    assert(() { _debugServiceExtensionsRegistered = true; return true; }());
+    assert(() {
+      _debugServiceExtensionsRegistered = true;
+      return true;
+    }());
 
     SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
 

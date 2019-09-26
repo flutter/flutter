@@ -319,7 +319,7 @@ void main() {
     });
 
     testWidgets('background color is not null', (WidgetTester tester) async {
-       expect(
+      expect(
         () {
           CupertinoDatePicker(
             onDateTimeChanged: (_) { },
@@ -345,30 +345,30 @@ void main() {
     });
 
     testWidgets('initial date honors minuteInterval', (WidgetTester tester) async {
-        DateTime newDateTime;
-        await tester.pumpWidget(
-          CupertinoApp(
-            home: Center(
-              child: SizedBox(
-                width: 400,
-                height: 400,
-                child: CupertinoDatePicker(
-                  onDateTimeChanged: (DateTime d) => newDateTime = d,
-                  initialDateTime: DateTime(2018, 10, 10, 10, 3),
-                  minuteInterval: 3,
-                ),
+      DateTime newDateTime;
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              width: 400,
+              height: 400,
+              child: CupertinoDatePicker(
+                onDateTimeChanged: (DateTime d) => newDateTime = d,
+                initialDateTime: DateTime(2018, 10, 10, 10, 3),
+                minuteInterval: 3,
               ),
-            )
+            ),
           )
-        );
+        )
+      );
 
-        // Drag the minute picker to the next slot (03 -> 06).
-        // The `initialDateTime` and the `minuteInterval` values are specifically chosen
-        // so that `find.text` finds exactly one widget.
-        await tester.drag(find.text('03'), _kRowOffset);
-        await tester.pump();
+      // Drag the minute picker to the next slot (03 -> 06).
+      // The `initialDateTime` and the `minuteInterval` values are specifically chosen
+      // so that `find.text` finds exactly one widget.
+      await tester.drag(find.text('03'), _kRowOffset);
+      await tester.pump();
 
-        expect(newDateTime.minute, 6);
+      expect(newDateTime.minute, 6);
     });
 
     testWidgets('changing initialDateTime after first build does not do anything', (WidgetTester tester) async {
