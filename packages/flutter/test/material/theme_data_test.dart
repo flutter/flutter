@@ -205,7 +205,7 @@ void main() {
       backgroundColor: darkTheme.backgroundColor,
       dialogBackgroundColor: darkTheme.dialogBackgroundColor,
       indicatorColor: darkTheme.indicatorColor,
-      hintColor : darkTheme.hintColor ,
+      hintColor: darkTheme.hintColor,
       errorColor : darkTheme.errorColor ,
       toggleableActiveColor : darkTheme.toggleableActiveColor ,
       textTheme : darkTheme.textTheme ,
