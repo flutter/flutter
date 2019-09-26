@@ -34,9 +34,9 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  ImageStreamCompleter load(image_provider.NetworkImage key) {
+  ImageStreamCompleter load(image_provider.NetworkImage key, {int targetWidth, int targetHeight}) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, targetWidth: targetWidth, targetHeight: targetHeight),
       scale: key.scale,
       informationCollector: () {
         return <DiagnosticsNode>[
@@ -47,7 +47,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     );
   }
 
-  Future<ui.Codec> _loadAsync(NetworkImage key) async {
+  // TODO(garyq): Handle targetWidth and targetHeight on web.
+  Future<ui.Codec> _loadAsync(NetworkImage key, {int targetWidth, int targetHeight}) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);

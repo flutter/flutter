@@ -107,7 +107,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key) {
+  ImageStreamCompleter load(TestImageProvider key, {int targetWidth, int targetHeight}) {
     return OneFrameImageStreamCompleter(
       SynchronousFuture<ImageInfo>(ImageInfo(image: TestImage(), scale: 1.0)),
     );
