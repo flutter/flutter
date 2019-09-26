@@ -265,7 +265,16 @@ class AssetServer {
   Directory partFiles;
 
   Future<Response> handle(Request request) async {
-    if (request.url.path.contains('stack_trace_mapper')) {
+    if (request.url.path.endsWith('.html')) {
+      final Uri htmlUri = flutterProject.web.directory.uri.resolveUri(request.url);
+      final File htmlFile = fs.file(htmlUri);
+      if (htmlFile.existsSync()) {
+        return Response.ok(htmlFile.readAsBytesSync(), headers: <String, String>{
+          'Content-Type': 'text/html',
+        });
+      }
+      return Response.notFound('');
+    } else if (request.url.path.contains('stack_trace_mapper')) {
       final File file = fs.file(fs.path.join(
         artifacts.getArtifactPath(Artifact.engineDartSdkPath),
         'lib',
