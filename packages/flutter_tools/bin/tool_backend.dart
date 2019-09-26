@@ -73,7 +73,6 @@ or
       'bundle',
       '--target=$flutterTarget',
       '--target-platform=$targetPlatform',
-      '--debug',
       if (trackWidgetCreation) '--track-widget-creation',
       if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
       if (localEngine != null) '--local-engine=$localEngine',
