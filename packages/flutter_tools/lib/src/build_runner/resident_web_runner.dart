@@ -211,20 +211,20 @@ class ResidentWebRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
   }) async {
-    // Cleanup old subscriptions. These will throw if there isn't anything
-    // listening, which is fine because that is what we want to ensure.
-    try {
-      await _vmService?.streamCancel('Stdout');
-    } on vmservice.RPCError {
-      // Ignore this specific error.
-    }
-    try {
-      await _vmService?.streamListen('Stdout');
-    } on vmservice.RPCError  {
-      // Ignore this specific error.
-    }
     Uri websocketUri;
     if (supportsServiceProtocol) {
+      // Cleanup old subscriptions. These will throw if there isn't anything
+      // listening, which is fine because that is what we want to ensure.
+      try {
+        await _vmService.streamCancel('Stdout');
+      } on vmservice.RPCError {
+        // Ignore this specific error.
+      }
+      try {
+        await _vmService.streamListen('Stdout');
+      } on vmservice.RPCError  {
+        // Ignore this specific error.
+      }
       _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
         final String message = utf8.decode(base64.decode(log.bytes)).trim();
         printStatus(message);
