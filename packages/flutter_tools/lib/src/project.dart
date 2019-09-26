@@ -636,7 +636,7 @@ class WebProject {
   /// The 'lib' directory for the application.
   Directory get libDirectory => parent.directory.childDirectory('lib');
 
-  /// The directory containing additional html files for the application,
+  /// The directory containing additional files for the application.
   Directory get directory => parent.directory.childDirectory('web');
 
   /// The html file used to host the flutter web application.
