@@ -26,6 +26,7 @@ void main() {
     });
 
     tearDownAll(() {
+      Cache.enableLocking();
       tryToDelete(tempDir);
       return server?.dispose();
     });
