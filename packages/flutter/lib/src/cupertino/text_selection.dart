@@ -164,7 +164,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
     child.layout(heightConstraint.enforce(enforcedConstraint), parentUsesSize: true,);
     final _ToolbarParentData childParentData = child.parentData;
 
-    final Offset localTopCenter = globalToLocal(Offset(_arrowTipX, _barTopY));
+    final Offset localTopCenter = (Offset(_arrowTipX, _barTopY));
 
     // The local x-coordinate of the center of the toolbar.
     final double lowerBound = child.size.width/2 + _kToolbarScreenPadding;
