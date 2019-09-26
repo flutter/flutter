@@ -74,7 +74,7 @@ class ResidentWebRunner extends ResidentRunner {
   StreamSubscription<vmservice.Event> _stdOutSub;
   bool _exited = false;
 
-  vmservice.VmService get _vmService => _connectionResult.debugConnection.vmService;
+  vmservice.VmService get _vmService => _connectionResult?.debugConnection?.vmService;
 
   @override
   bool get canHotRestart {
@@ -231,12 +231,12 @@ class ResidentWebRunner extends ResidentRunner {
       });
       unawaited(_vmService.registerService('reloadSources', 'FlutterTools'));
       websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
+      // Always run main after connecting because start paused doesn't work yet.
+      _connectionResult.appConnection.runMain();
     }
     if (websocketUri != null) {
       printStatus('Debug service listening on $websocketUri');
     }
-    // Always run main after connecting because start paused doesn't work yet.
-    _connectionResult.appConnection.runMain();
     connectionInfoCompleter?.complete(
       DebugConnectionInfo(wsUri: websocketUri)
     );
