@@ -1251,6 +1251,7 @@ class FocusManager with DiagnosticableTreeMixin {
     // Walk the current focus from the leaf to the root, calling each one's
     // onKey on the way up, and if one responds that they handled it, stop.
     if (_primaryFocus == null) {
+      assert(_focusDebug('No primary focus for key event, ignored: $event'));
       return;
     }
     Iterable<FocusNode> allNodes(FocusNode node) sync* {
@@ -1260,10 +1261,16 @@ class FocusManager with DiagnosticableTreeMixin {
       }
     }
 
+    bool handled = false;
     for (FocusNode node in allNodes(_primaryFocus)) {
       if (node.onKey != null && node.onKey(node, event)) {
+        assert(_focusDebug('Node $node handled key event $event.'));
+        handled = true;
         break;
       }
+    }
+    if (!handled) {
+      assert(_focusDebug('Key event not handled by anyone: $event.'));
     }
   }
 

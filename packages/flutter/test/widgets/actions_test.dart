@@ -159,7 +159,7 @@ void main() {
       expect(invoked, isTrue);
       expect(invokedIntent, equals(intent));
     });
-    testWidgets('$Actions widget can invoke actions in ancestor dispatcher', (WidgetTester tester) async {
+    testWidgets('$Actions can invoke actions in ancestor dispatcher', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       const Intent intent = Intent(TestAction.key);
@@ -200,6 +200,46 @@ void main() {
       expect(invokedAction, equals(testAction));
       expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
     });
+    testWidgets("$Actions can invoke actions in ancestor dispatcher if a lower one isn't specified", (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      bool invoked = false;
+      const Intent intent = Intent(TestAction.key);
+      FocusNode passedNode;
+      final FocusNode testNode = FocusNode(debugLabel: 'Test Node');
+      final Action testAction = TestAction(
+        onInvoke: (FocusNode node, Intent invocation) {
+          invoked = true;
+          passedNode = node;
+        },
+      );
+
+      await tester.pumpWidget(
+        Actions(
+          dispatcher: TestDispatcher1(postInvoke: collect),
+          actions: <LocalKey, ActionFactory>{
+            TestAction.key: () => testAction,
+          },
+          child: Actions(
+            actions: const <LocalKey, ActionFactory>{},
+            child: Container(key: containerKey),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      final bool result = Actions.invoke(
+        containerKey.currentContext,
+        intent,
+        focusNode: testNode,
+      );
+      expect(passedNode, equals(testNode));
+      expect(invokedNode, equals(testNode));
+      expect(result, isTrue);
+      expect(invoked, isTrue);
+      expect(invokedIntent, equals(intent));
+      expect(invokedAction, equals(testAction));
+      expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
+    });
     testWidgets('$Actions widget can be found with of', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final ActionDispatcher testDispatcher = TestDispatcher1(postInvoke: collect);
@@ -214,7 +254,8 @@ void main() {
 
       await tester.pump();
       final ActionDispatcher dispatcher = Actions.of(
-        containerKey.currentContext, nullOk: true,
+        containerKey.currentContext,
+        nullOk: true,
       );
       expect(dispatcher, equals(testDispatcher));
     });
@@ -254,14 +295,18 @@ void main() {
     testWidgets('default $Actions debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-      Actions(actions: const <LocalKey, ActionFactory>{}, child: Container()).debugFillProperties(builder);
+      Actions(
+        actions: const <LocalKey, ActionFactory>{},
+        dispatcher: const ActionDispatcher(),
+        child: Container(),
+      ).debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) {
-          return !node.isFiltered(DiagnosticLevel.info);
-        })
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
       expect(description[1], equals('actions: {}'));
@@ -271,6 +316,7 @@ void main() {
 
       Actions(
         key: const ValueKey<String>('foo'),
+        dispatcher: const ActionDispatcher(),
         actions: <LocalKey, ActionFactory>{
           const ValueKey<String>('bar'): () => TestAction(onInvoke: (FocusNode node, Intent intent) {}),
         },
@@ -278,11 +324,11 @@ void main() {
       ).debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) {
-          return !node.isFiltered(DiagnosticLevel.info);
-        })
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+          .where((DiagnosticsNode node) {
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
 
       expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
       expect(description[1], equals('actions: {[<\'bar\'>]: Closure: () => TestAction}'));
