@@ -112,17 +112,20 @@ class WebFs {
 
   Future<DebugConnection> _cachedExtensionFuture;
 
-  /// Retrieve the [DebugConnection] for the current application
-  Future<DebugConnection> runAndDebug(DebuggingOptions debuggingOptions) {
-    final Completer<DebugConnection> firstConnection = Completer<DebugConnection>();
+  /// Connect and retrieve the [DebugConnection] for the current application.
+  ///
+  /// Only calls [AppConnection.runMain] on the subsequent connections.
+  Future<ConnectionResult> connect(DebuggingOptions debuggingOptions) {
+    final Completer<ConnectionResult> firstConnection = Completer<ConnectionResult>();
     _connectedApps = _dwds.connectedApps.listen((AppConnection appConnection) async {
       final DebugConnection debugConnection = debuggingOptions.browserLaunch
         ? await _dwds.debugConnection(appConnection)
         : await (_cachedExtensionFuture ??= _dwds.extensionDebugConnections.stream.first);
       if (!firstConnection.isCompleted) {
-        firstConnection.complete(debugConnection);
+        firstConnection.complete(ConnectionResult(appConnection, debugConnection));
+      } else {
+        appConnection.runMain();
       }
-      appConnection.runMain();
     });
     return firstConnection.future;
   }
@@ -391,6 +394,13 @@ class AssetServer {
   void dispose() {
     partFiles?.deleteSync(recursive: true);
   }
+}
+
+class ConnectionResult {
+  ConnectionResult(this.appConnection, this.debugConnection);
+
+  final AppConnection appConnection;
+  final DebugConnection debugConnection;
 }
 
 /// A testable interface for starting a build daemon.
