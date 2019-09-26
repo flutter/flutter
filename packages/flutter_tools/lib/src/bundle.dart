@@ -89,6 +89,7 @@ class BundleBuilder {
         flutterProject: flutterProject,
         outputDir: assetDirPath,
         depfilePath: depfilePath,
+        precompiled: precompiledSnapshot,
       );
       return;
     }
@@ -150,7 +151,10 @@ Future<void> buildWithAssemble({
   @required String mainPath,
   @required String outputDir,
   @required String depfilePath,
+  @required bool precompiled,
 }) async {
+  // If the precompiled flag was not passed, force us into debug mode.
+  buildMode = precompiled ? buildMode : BuildMode.debug;
   final Environment environment = Environment(
     projectDir: flutterProject.directory,
     outputDir: fs.directory(outputDir),
