@@ -284,8 +284,8 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
     properties.add(FlagProperty('wonArenaForPrimaryPointer', value: _wonArenaForPrimaryPointer, ifTrue: 'won arena'));
     properties.add(DiagnosticsProperty<Offset>('finalPosition', _up?.position, defaultValue: null));
     properties.add(DiagnosticsProperty<Offset>('finalLocalPosition', _up?.localPosition, defaultValue: _up?.position));
+    properties.add(DiagnosticsProperty<int>('button', _down?.buttons, defaultValue: null));
     properties.add(FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
-    // TODO(tongmu): Add property _initialButtons and update related tests
   }
 }
 
