@@ -226,6 +226,8 @@ class TextEditingElement {
   EditingState _lastEditingState;
   _OnChangeCallback _onChange;
 
+  SelectionChangeDetection _selectionDetection;
+
   final List<StreamSubscription<html.Event>> _subscriptions =
       <StreamSubscription<html.Event>>[];
 
@@ -273,6 +275,7 @@ class TextEditingElement {
 
     _initDomElement(inputConfig);
     _enabled = true;
+    _selectionDetection = SelectionChangeDetection(domElement);
     _onChange = onChange;
 
     // Chrome on Android will hide the onscreen keyboard when you tap outside
@@ -305,6 +308,18 @@ class TextEditingElement {
     _subscriptions
       ..add(html.document.onSelectionChange.listen(_handleChange))
       ..add(domElement.onInput.listen(_handleChange));
+
+    // In Firefox, when cursor moves, nor selectionChange neither onInput
+    // events are triggered. We are listening to keyup event to decide
+    // if the user shifted the cursor.
+    // See [SelectionChangeDetection].
+    if (browserEngine == BrowserEngine.firefox) {
+      _subscriptions.add(domElement.onKeyUp.listen((event) {
+        if (_selectionDetection.detectChange()) {
+          _handleChange(event);
+        }
+      }));
+    }
   }
 
   /// Disables the element so it's no longer used for text editing.
@@ -324,6 +339,7 @@ class TextEditingElement {
     _positionInputElementTimer = null;
     owner.inputPositioned = false;
     _removeDomElement();
+    _selectionDetection = null;
   }
 
   void _initDomElement(InputConfiguration inputConfig) {
@@ -412,8 +428,7 @@ class TextEditingElement {
         break;
     }
 
-
-    if(owner.inputElementNeedsToBePositioned) {
+    if (owner.inputElementNeedsToBePositioned) {
       _preventShiftDuringFocus();
     }
 
@@ -641,9 +656,7 @@ class HybridTextEditing {
   ///
   /// See [TextEditingElement._delayBeforePositioning].
   bool get inputElementNeedsToBePositioned =>
-      !inputPositioned &&
-      _isEditing &&
-      doesKeyboardShiftInput;
+      !inputPositioned && _isEditing && doesKeyboardShiftInput;
 
   /// Flag indicating whether the input element's position is set.
   ///
@@ -788,8 +801,8 @@ class HybridTextEditing {
   /// In iOS, the virtual keyboard might shifts the screen up to make input
   /// visible depending on the location of the focused input element.
   bool get doesKeyboardShiftInput =>
-    browserEngine == BrowserEngine.webkit &&
-    operatingSystem == OperatingSystem.iOs;
+      browserEngine == BrowserEngine.webkit &&
+      operatingSystem == OperatingSystem.iOs;
 
   /// These style attributes are dynamic throughout the life time of an input
   /// element.
@@ -887,4 +900,63 @@ class _EditableSizeAndTransform {
   final double width;
   final double height;
   final Float64List transform;
+}
+
+/// Detects changes in text selection.
+///
+/// Currently only used in Firefox.
+///
+/// In Firefox, when cursor moves, neither selectionChange nor onInput
+/// events are triggered. We are listening to keyup event. Selection start,
+/// end values are used to decide if the text cursor moved.
+///
+/// Specific keycodes are not checked since users/applicatins can bind their own
+/// keys to move the text cursor.
+class SelectionChangeDetection {
+  final html.HtmlElement _domElement;
+  int _start = -1;
+  int _end = -1;
+
+  SelectionChangeDetection(this._domElement) {
+    if (_domElement is html.InputElement) {
+      html.InputElement element = _domElement;
+      _saveSelection(element.selectionStart, element.selectionEnd);
+    } else if (_domElement is html.TextAreaElement) {
+      html.TextAreaElement element = _domElement;
+      _saveSelection(element.selectionStart, element.selectionEnd);
+    } else {
+      throw UnsupportedError('Initialized with unsupported input type');
+    }
+  }
+
+  /// Decides if the selection has changed (cursor moved) compared to the
+  /// previous values.
+  ///
+  /// After each keyup, the start/end values of the selection is compared to the
+  /// previously saved start/end values.
+  bool detectChange() {
+    if (_domElement is html.InputElement) {
+      html.InputElement element = _domElement;
+      return _compareSelection(element.selectionStart, element.selectionEnd);
+    }
+    if (_domElement is html.TextAreaElement) {
+      html.TextAreaElement element = _domElement;
+      return _compareSelection(element.selectionStart, element.selectionEnd);
+    }
+    throw UnsupportedError('Unsupported input type');
+  }
+
+  void _saveSelection(int selectionStart, int selectionEnd) {
+    _start = selectionStart;
+    _end = selectionEnd;
+  }
+
+  bool _compareSelection(int selectionStart, int selectionEnd) {
+    if (selectionStart != _start || selectionEnd != _end) {
+      _saveSelection(selectionStart, selectionEnd);
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
