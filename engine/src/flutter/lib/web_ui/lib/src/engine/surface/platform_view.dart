@@ -12,14 +12,13 @@ class PersistedPlatformView extends PersistedLeafSurface {
   final double width;
   final double height;
 
-  html.HtmlElement _hostElement;
   html.ShadowRoot _shadowRoot;
 
   PersistedPlatformView(this.viewId, this.dx, this.dy, this.width, this.height);
 
   @override
   html.Element createElement() {
-    _hostElement = defaultCreateElement('flt-platform-view');
+    html.Element element = defaultCreateElement('flt-platform-view');
 
     // Allow the platform view host element to receive pointer events.
     //
@@ -34,9 +33,12 @@ class PersistedPlatformView extends PersistedLeafSurface {
     // to enable accessibility, you must double tap the app *outside of a
     // platform view*. As a consequence, a full-screen platform view will make
     // it impossible to enable accessibility.
-    _hostElement.style.pointerEvents = 'auto';
+    element.style.pointerEvents = 'auto';
 
-    _shadowRoot = _hostElement.attachShadow(<String, String>{'mode': 'open'});
+    // Enforce the effective size of the PlatformView.
+    element.style.overflow = 'hidden';
+
+    _shadowRoot = element.attachShadow(<String, String>{'mode': 'open'});
     final html.StyleElement _styleReset = html.StyleElement();
     _styleReset.innerHtml = '''
       :host {
@@ -50,7 +52,7 @@ class PersistedPlatformView extends PersistedLeafSurface {
     } else {
       html.window.console.warn('No platform view created for id $viewId');
     }
-    return _hostElement;
+    return element;
   }
 
   @override
@@ -58,14 +60,37 @@ class PersistedPlatformView extends PersistedLeafSurface {
 
   @override
   void apply() {
-    _hostElement.style
+    rootElement.style
       ..transform = 'translate(${dx}px, ${dy}px)'
       ..width = '${width}px'
       ..height = '${height}px';
+    // Set size of the root element created by the PlatformView.
+    final html.Element platformView =
+        platformViewRegistry.getCreatedView(viewId);
+    if (platformView != null) {
+      platformView.style
+        ..width = '${width}px'
+        ..height = '${height}px';
+    }
   }
 
   @override
   double matchForUpdate(PersistedPlatformView existingSurface) {
     return existingSurface.viewId == viewId ? 0.0 : 1.0;
+  }
+
+  @override
+  void update(PersistedPlatformView oldSurface) {
+    super.update(oldSurface);
+    if (viewId != oldSurface.viewId) {
+      // The content of the surface has to be rebuild if the viewId is changed.
+      build();
+    } else if (dx != oldSurface.dx ||
+        dy != oldSurface.dy ||
+        width != oldSurface.width ||
+        height != oldSurface.height) {
+      // A change in any of the dimensions is performed by calling apply.
+      apply();
+    }
   }
 }
