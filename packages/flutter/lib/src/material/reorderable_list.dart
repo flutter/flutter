@@ -584,7 +584,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 /// using [operator ==]. This allows a locally scoped value to be turned
 /// into a globally unique key.
 class _ScopedValueKey extends GlobalKey {
-  _ScopedValueKey({this.scope, this.value}) : super.constructor();
+  const _ScopedValueKey({this.scope, this.value}) : super.constructor();
 
   final Object scope;
   final Object value;
@@ -593,11 +593,11 @@ class _ScopedValueKey extends GlobalKey {
   int get hashCode => hashValues(identityHashCode(scope), value.hashCode);
 
   @override
-  operator ==(other) {
+  bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    _ScopedValueKey typedOther = other;
+    final _ScopedValueKey typedOther = other;
     return identical(scope, typedOther.scope) && value == typedOther.value;
   }
 }
