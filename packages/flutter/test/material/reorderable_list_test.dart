@@ -684,6 +684,8 @@ void main() {
         await tester.pumpWidget(MaterialApp(
           home: ReorderableListView(
             children: <Widget>[
+              // Deliberately avoid the const constructor below to ensure keys are
+              // distinct objects.
               _Stateful(key: ObjectKey('B')), // ignore:prefer_const_constructors
               _Stateful(key: ObjectKey('C')), // ignore:prefer_const_constructors
               _Stateful(key: ObjectKey('A')), // ignore:prefer_const_constructors
