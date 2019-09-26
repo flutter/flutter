@@ -43,7 +43,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     _handleSemanticsEnabledChanged();
     assert(renderView != null);
     addPersistentFrameCallback(_handlePersistentFrameCallback);
-    _mouseTracker = _createMouseTracker();
+    initMouseTracker();
   }
 
   /// The current [RendererBinding], if one has been created.
@@ -238,10 +238,14 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   SemanticsHandle _semanticsHandle;
 
-  // Creates a [MouseTracker] which manages state about currently connected
-  // mice, for hover notification.
-  MouseTracker _createMouseTracker() {
-    return MouseTracker(pointerRouter, renderView.hitTestMouseTrackers);
+  /// Creates a [MouseTracker] which manages state about currently connected
+  /// mice, for hover notification.
+  ///
+  /// Used by testing framework to reinitialize the mouse tracker between tests.
+  @visibleForTesting
+  void initMouseTracker([MouseTracker tracker]) {
+    _mouseTracker?.dispose();
+    _mouseTracker = tracker ?? MouseTracker(pointerRouter, renderView.hitTestMouseTrackers);
   }
 
   void _handleSemanticsEnabledChanged() {

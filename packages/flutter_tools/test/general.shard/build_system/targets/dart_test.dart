@@ -81,6 +81,7 @@ flutter_tools:lib/''');
         fs.path.join('bin', 'cache', 'pkg', 'sky_engine', 'sdk_ext',
             'vmservice_io.dart'),
         fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+        fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart.exe'),
         fs.path.join(engineArtifacts, getNameForHostPlatform(hostPlatform),
             'frontend_server.dart.snapshot'),
         fs.path.join(engineArtifacts, 'android-arm-profile',
@@ -114,6 +115,33 @@ flutter_tools:lib/''');
         androidEnvironment..defines.remove(kBuildMode));
 
     expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
+  }));
+
+  test('kernel_snapshot handles null result from kernel compilation', () => testbed.run(() async {
+    final FakeKernelCompilerFactory fakeKernelCompilerFactory = kernelCompilerFactory;
+    fakeKernelCompilerFactory.kernelCompiler = MockKernelCompiler();
+    when(fakeKernelCompilerFactory.kernelCompiler.compile(
+      sdkRoot: anyNamed('sdkRoot'),
+      mainPath: anyNamed('mainPath'),
+      outputFilePath: anyNamed('outputFilePath'),
+      depFilePath: anyNamed('depFilePath'),
+      targetModel: anyNamed('targetModel'),
+      linkPlatformKernelIn: anyNamed('linkPlatformKernelIn'),
+      aot: anyNamed('aot'),
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
+      extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
+      packagesPath: anyNamed('packagesPath'),
+      fileSystemRoots: anyNamed('fileSystemRoots'),
+      fileSystemScheme: anyNamed('fileSystemScheme'),
+      targetProductVm: anyNamed('targetProductVm'),
+      platformDill: anyNamed('platformDill'),
+      initializeFromDill: anyNamed('initializeFromDill'),
+    )).thenAnswer((Invocation invocation) async {
+      return null;
+    });
+    final BuildResult result = await buildSystem.build(const KernelSnapshot(), androidEnvironment);
+
+    expect(result.exceptions.values.single.exception, isInstanceOf<Exception>());
   }));
 
   test('kernel_snapshot does not use track widget creation on profile builds', () => testbed.run(() async {
@@ -342,7 +370,7 @@ class FakeGenSnapshot implements GenSnapshot {
 }
 
 class FakeKernelCompilerFactory implements KernelCompilerFactory {
-  FakeKernelCompiler kernelCompiler = FakeKernelCompiler();
+  KernelCompiler kernelCompiler = FakeKernelCompiler();
 
   @override
   Future<KernelCompiler> create(FlutterProject flutterProject) async {
@@ -362,7 +390,6 @@ class FakeKernelCompiler implements KernelCompiler {
     bool aot = false,
     bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
-    String incrementalCompilerByteStorePath,
     String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,

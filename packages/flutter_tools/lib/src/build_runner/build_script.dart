@@ -11,6 +11,7 @@ import 'dart:isolate';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:archive/archive.dart';
 import 'package:build/build.dart';
 import 'package:build_config/build_config.dart';
 import 'package:build_modules/build_modules.dart';
@@ -26,6 +27,7 @@ import 'package:build_web_compilers/build_web_compilers.dart';
 import 'package:build_web_compilers/builders.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
 import 'package:crypto/crypto.dart';
+import 'package:glob/glob.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
 import 'package:scratch_space/scratch_space.dart';
 import 'package:test_core/backend.dart';
@@ -461,8 +463,32 @@ Future<void> bootstrapDart2Js(BuildStep buildStep, String flutterWebSdk, bool pr
   final AssetId jsOutputId = dartEntrypointId.changeExtension(jsEntrypointExtension);
   final File jsOutputFile = scratchSpace.fileFor(jsOutputId);
   if (result.succeeded && jsOutputFile.existsSync()) {
-    log.info(result.output);
-    // Explicitly write out the original js file and sourcemap.
+    final String rootDir = path.dirname(jsOutputFile.path);
+    final String dartFile = path.basename(dartEntrypointId.path);
+    final Glob fileGlob = Glob('$dartFile.js*');
+    final Archive archive = Archive();
+    await for (FileSystemEntity jsFile in fileGlob.list(root: rootDir)) {
+      if (jsFile.path.endsWith(jsEntrypointExtension) ||
+          jsFile.path.endsWith(jsEntrypointSourceMapExtension)) {
+        // These are explicitly output, and are not part of the archive.
+        continue;
+      }
+      if (jsFile is File) {
+        final String fileName = path.relative(jsFile.path, from: rootDir);
+        final FileStat fileStats = jsFile.statSync();
+        archive.addFile(
+            ArchiveFile(fileName, fileStats.size, await jsFile.readAsBytes())
+              ..mode = fileStats.mode
+              ..lastModTime = fileStats.modified.millisecondsSinceEpoch);
+      }
+    }
+    if (archive.isNotEmpty) {
+      final AssetId archiveId = dartEntrypointId.changeExtension(jsEntrypointArchiveExtension);
+      await buildStep.writeAsBytes(archiveId, TarEncoder().encode(archive));
+    }
+
+    // Explicitly write out the original js file and sourcemap - we can't output
+    // these as part of the archive because they already have asset nodes.
     await scratchSpace.copyOutput(jsOutputId, buildStep);
     final AssetId jsSourceMapId =
         dartEntrypointId.changeExtension(jsEntrypointSourceMapExtension);
