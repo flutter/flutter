@@ -170,7 +170,7 @@ void main() {
     expect(theme.applyElevationOverlayColor, isTrue);
   });
 
-  testWidgets('ThemeData.copyWith return appropriate value', (WidgetTester tester) async {
+  testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
     final ThemeData theme = ThemeData.light();
     final ThemeData darkTheme = ThemeData.dark();
 
