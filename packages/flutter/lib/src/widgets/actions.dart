@@ -29,11 +29,10 @@ class Intent extends Diagnosticable {
 
   /// An intent that can't be mapped to an action.
   ///
-  /// This Intent is prevented from being mapped to an action in the
-  /// [ActionDispatcher], and as such can be used to indicate that a shortcut
-  /// should not do anything, allowing a shortcut defined at a higher level to
-  /// be disabled at a deeper level in the widget hierarchy.
-  static const Intent doNothing = Intent(ValueKey<Type>(Intent));
+  /// This Intent is mapped to an action in the [WidgetsApp] that does nothing,
+  /// so that it can be bound to a key in a [Shortcuts] widget in order to
+  /// disable a key binding made above it in the hierarchy.
+  static const Intent doNothing = DoNothingIntent();
 
   /// The key for the action this intent is associated with.
   final LocalKey key;
@@ -151,17 +150,9 @@ class ActionDispatcher extends Diagnosticable {
   /// The `action` and `intent` arguments must not be null.
   ///
   /// Returns true if the action was successfully invoked.
-  ///
-  /// If the `intent` argument is [Intent.doNothing], then this function will
-  /// return true, without invoking the action.
   bool invokeAction(Action action, Intent intent, {FocusNode focusNode}) {
     assert(action != null);
     assert(intent != null);
-
-    if (identical(intent, Intent.doNothing)) {
-      return true;
-    }
-
     focusNode ??= WidgetsBinding.instance.focusManager.primaryFocus;
     if (action != null && intent.isEnabled(focusNode.context)) {
       action.invoke(focusNode, intent);
@@ -232,6 +223,7 @@ class Actions extends InheritedWidget {
         // Stop visiting.
         return false;
       }
+
       element.visitAncestorElements(visitAncestorElement);
     }
     return dispatcher ?? const ActionDispatcher();
@@ -286,9 +278,6 @@ class Actions extends InheritedWidget {
   ///
   /// Setting `nullOk` to true means that if no ambient [Actions] widget is
   /// found, then this method will return false instead of throwing.
-  ///
-  /// If the `intent` argument is [Intent.doNothing], then this function will
-  /// return true, without looking for a matching action.
   static bool invoke(
     BuildContext context,
     Intent intent, {
@@ -299,10 +288,6 @@ class Actions extends InheritedWidget {
     assert(intent != null);
     Element actionsElement;
     Action action;
-
-    if (identical(intent, Intent.doNothing)) {
-      return true;
-    }
 
     bool visitAncestorElement(Element element) {
       if (element.widget is! Actions) {
@@ -365,4 +350,30 @@ class Actions extends InheritedWidget {
     properties.add(DiagnosticsProperty<ActionDispatcher>('dispatcher', dispatcher));
     properties.add(DiagnosticsProperty<Map<LocalKey, ActionFactory>>('actions', actions));
   }
+}
+
+/// An [Action], that, as the name implies, does nothing.
+///
+/// This action is bound to the [Intent.doNothing] intent inside of
+/// [WidgetsApp.build] so that a [Shortcuts] widget can bind a key to it to
+/// override another shortcut binding defined above it in the hierarchy.
+class DoNothingAction extends Action {
+  /// Const constructor for [DoNothingAction].
+  const DoNothingAction() : super(key);
+
+  /// The Key used for the [DoNothingIntent] intent, and registered at the top
+  /// level actions in [WidgetsApp.build].
+  static const LocalKey key = ValueKey<Type>(DoNothingAction);
+
+  @override
+  void invoke(FocusNode node, Intent invocation) { }
+}
+
+/// An [Intent] that can be used to disable [Shortcuts] key bindings defined
+/// above a widget in the hierarchy.
+///
+/// The [Intent.doNothing] intent is of this type.
+class DoNothingIntent extends Intent {
+  /// Const constructor for [DoNothingIntent].
+  const DoNothingIntent() : super(DoNothingAction.key);
 }

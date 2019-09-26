@@ -245,27 +245,29 @@ void main() {
       final TestShortcutManager testManager = TestShortcutManager(pressedKeys);
       bool invoked = false;
       await tester.pumpWidget(
-        Shortcuts(
-          manager: testManager,
-          shortcuts: <LogicalKeySet, Intent>{
-            LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
-          },
-          child: Actions(
-            actions: <LocalKey, ActionFactory>{
-              TestAction.key: () => TestAction(
-                onInvoke: (FocusNode node, Intent intent) {
-                  invoked = true;
-                  return true;
-                },
-              ),
+        MaterialApp(
+          home: Shortcuts(
+            manager: testManager,
+            shortcuts: <LogicalKeySet, Intent>{
+              LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
             },
-            child: Shortcuts(
-              shortcuts: <LogicalKeySet, Intent>{
-                LogicalKeySet(LogicalKeyboardKey.shift): Intent.doNothing,
+            child: Actions(
+              actions: <LocalKey, ActionFactory>{
+                TestAction.key: () => TestAction(
+                  onInvoke: (FocusNode node, Intent intent) {
+                    invoked = true;
+                    return true;
+                  },
+                ),
               },
-              child: Focus(
-                autofocus: true,
-                child: Container(key: containerKey, width: 100, height: 100),
+              child: Shortcuts(
+                shortcuts: <LogicalKeySet, Intent>{
+                  LogicalKeySet(LogicalKeyboardKey.shift): Intent.doNothing,
+                },
+                child: Focus(
+                  autofocus: true,
+                  child: Container(key: containerKey, width: 100, height: 100),
+                ),
               ),
             ),
           ),

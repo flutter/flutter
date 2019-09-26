@@ -71,22 +71,6 @@ void main() {
       expect(result, isTrue);
       expect(invoked, isTrue);
     });
-    test('$ActionDispatcher does nothing if Intent.doNothing is the intent.', () {
-      bool invoked = false;
-      const ActionDispatcher dispatcher = ActionDispatcher();
-      final FocusNode testNode = FocusNode(debugLabel: 'Test Node');
-      final bool result = dispatcher.invokeAction(
-        TestAction(
-          onInvoke: (FocusNode node, Intent invocation) {
-            invoked = true;
-          },
-        ),
-        Intent.doNothing,
-        focusNode: testNode,
-      );
-      expect(result, isTrue);
-      expect(invoked, isFalse);
-    });
   });
   group(Actions, () {
     Intent invokedIntent;
