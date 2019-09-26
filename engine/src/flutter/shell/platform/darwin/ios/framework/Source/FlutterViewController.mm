@@ -235,16 +235,6 @@ typedef enum UIAccessibilityContrast : NSInteger {
                object:nil];
 
   [center addObserver:self
-             selector:@selector(onAccessibilityStatusChanged:)
-                 name:UIAccessibilityOnOffSwitchLabelsDidChangeNotification
-               object:nil];
-
-  [center addObserver:self
-             selector:@selector(onAccessibilityStatusChanged:)
-                 name:UIAccessibilityOnOffSwitchLabelsDidChangeNotification
-               object:nil];
-
-  [center addObserver:self
              selector:@selector(onUserSettingsChanged:)
                  name:UIContentSizeCategoryDidChangeNotification
                object:nil];
@@ -867,8 +857,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kReduceMotion);
   if (UIAccessibilityIsBoldTextEnabled())
     flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kBoldText);
-  if (UIAccessibilityIsOnOffSwitchLabelsEnabled())
-    flags |= static_cast<int32_t>(flutter::AccessibilityFeatureFlag::kOnOffSwitchLabels);
 #if TARGET_OS_SIMULATOR
   // There doesn't appear to be any way to determine whether the accessibility
   // inspector is enabled on the simulator. We conservatively always turn on the
