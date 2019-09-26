@@ -332,9 +332,11 @@ class FlutterPlugin implements Plugin<Project> {
         }
         Closure addEmbeddingCompileOnlyDependency = { buildType ->
             String flutterBuildMode = buildModeFor(buildType)
-            // Add the embedding as a compile only dependency to the plugin.
+            // In AGP 3.5, the embedding must be added as an API implementation,
+            // so java8 features are desugared against the runtime classpath.
+            // For more, see https://github.com/flutter/flutter/issues/40126
             if (flutterJar) {
-                addCompileOnlyDependency(
+                addApiDependencies(
                     pluginProject,
                     buildType.name,
                     project.files {
@@ -343,7 +345,7 @@ class FlutterPlugin implements Plugin<Project> {
                 )
                 return
             }
-            addCompileOnlyDependency(
+            addApiDependencies(
                 pluginProject,
                 buildType.name,
                 "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion",
