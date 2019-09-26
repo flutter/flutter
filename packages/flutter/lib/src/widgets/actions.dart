@@ -154,6 +154,11 @@ class ActionDispatcher extends Diagnosticable {
   bool invokeAction(Action action, Intent intent, {FocusNode focusNode}) {
     assert(action != null);
     assert(intent != null);
+
+    if (identical(intent, Intent.doNothing)) {
+      return true;
+    }
+
     focusNode ??= WidgetsBinding.instance.focusManager.primaryFocus;
     if (action != null && intent.isEnabled(focusNode.context)) {
       action.invoke(focusNode, intent);
@@ -280,7 +285,7 @@ class Actions extends InheritedWidget {
   /// found, then this method will return false instead of throwing.
   ///
   /// If the `intent` argument is [Intent.doNothing], then this function will
-  /// return false, without looking for a matching action.
+  /// return true, without looking for a matching action.
   static bool invoke(
     BuildContext context,
     Intent intent, {
@@ -293,7 +298,7 @@ class Actions extends InheritedWidget {
     Action action;
 
     if (identical(intent, Intent.doNothing)) {
-      return false;
+      return true;
     }
 
     bool visitAncestorElement(Element element) {

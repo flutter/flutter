@@ -71,6 +71,22 @@ void main() {
       expect(result, isTrue);
       expect(invoked, isTrue);
     });
+    test('$ActionDispatcher does nothing if Intent.doNothing is the intent.', () {
+      bool invoked = false;
+      const ActionDispatcher dispatcher = ActionDispatcher();
+      final FocusNode testNode = FocusNode(debugLabel: 'Test Node');
+      final bool result = dispatcher.invokeAction(
+        TestAction(
+          onInvoke: (FocusNode node, Intent invocation) {
+            invoked = true;
+          },
+        ),
+        Intent.doNothing,
+        focusNode: testNode,
+      );
+      expect(result, isTrue);
+      expect(invoked, isFalse);
+    });
   });
   group(Actions, () {
     Intent invokedIntent;
@@ -302,11 +318,11 @@ void main() {
       ).debugFillProperties(builder);
 
       final List<String> description = builder.properties
-          .where((DiagnosticsNode node) {
-            return !node.isFiltered(DiagnosticLevel.info);
-          })
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
+        .where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        })
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
       expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
       expect(description[1], equals('actions: {}'));
