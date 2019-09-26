@@ -37,18 +37,6 @@ class TestIntent extends Intent {
   const TestIntent() : super(TestAction.key);
 }
 
-class DoNothingAction extends Action {
-  const DoNothingAction({
-    @required OnInvokeCallback onInvoke,
-  })  : assert(onInvoke != null),
-        super(key);
-
-  static const LocalKey key = ValueKey<Type>(DoNothingAction);
-
-  @override
-  void invoke(FocusNode node, Intent invocation) {}
-}
-
 class TestShortcutManager extends ShortcutManager {
   TestShortcutManager(this.keys);
 

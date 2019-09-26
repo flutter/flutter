@@ -151,6 +151,9 @@ class ActionDispatcher extends Diagnosticable {
   /// The `action` and `intent` arguments must not be null.
   ///
   /// Returns true if the action was successfully invoked.
+  ///
+  /// If the `intent` argument is [Intent.doNothing], then this function will
+  /// return true, without invoking the action.
   bool invokeAction(Action action, Intent intent, {FocusNode focusNode}) {
     assert(action != null);
     assert(intent != null);
