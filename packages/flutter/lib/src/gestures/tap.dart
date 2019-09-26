@@ -125,7 +125,7 @@ typedef GestureTapCancelCallback = void Function();
 ///
 ///  * [TapGestureRecognizer], a ready-to-use tap recognizer that recognizes
 ///    taps of the primary button and taps of the secondary button.
-///  * [ModalBarrier], a widget that uses a custom tap recognizer, which accepts
+///  * [ModalBarrier], a widget that uses a custom tap recognizer that accepts
 ///    any buttons.
 abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a tap gesture recognizer.
@@ -333,8 +333,8 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// A pointer that will trigger a tap of a primary button has stopped
   /// contacting the screen at a particular location.
   ///
-  /// This triggers once the gesture has won the arena, immediately before
-  /// [onTap].
+  /// This triggers once the pointer has stopped contacting the screen, if the
+  /// gesture has won the arena, immediately before [onTap].
   ///
   /// If the gesture doesn't win the arena, [onTapCancel] is called instead.
   ///
@@ -348,8 +348,8 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
 
   /// A tap of a primary button has occurred.
   ///
-  /// This triggers once the gesture has won the arena, immediately after
-  /// [onTapUp].
+  /// This triggers once the pointer has stopped contacting the screen, if the
+  /// gesture has won the arena, immediately after [onTapUp].
   ///
   /// If the gesture doesn't win the arena, [onTapCancel] is called instead.
   ///
@@ -363,7 +363,8 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// The pointer that previously triggered [onTapDown] will not end up causing
   /// a tap.
   ///
-  /// This triggers if the gesture loses the arena.
+  /// This triggers once the gesture loses the arena, if [onTapDown] has
+  /// previously been triggered.
   ///
   /// If the gesture wins the arena, [onTapUp] and [onTap] are called instead.
   ///
