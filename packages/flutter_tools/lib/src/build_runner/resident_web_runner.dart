@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 
@@ -71,11 +70,11 @@ class ResidentWebRunner extends ResidentRunner {
   bool get debuggingEnabled => isRunningDebug && device is! WebServerDevice;
 
   WebFs _webFs;
-  DebugConnection _debugConnection;
+  ConnectionResult _connectionResult;
   StreamSubscription<vmservice.Event> _stdOutSub;
   bool _exited = false;
 
-  vmservice.VmService get _vmService => _debugConnection.vmService;
+  vmservice.VmService get _vmService => _connectionResult?.debugConnection?.vmService;
 
   @override
   bool get canHotRestart {
@@ -105,7 +104,7 @@ class ResidentWebRunner extends ResidentRunner {
     if (_exited) {
       return;
     }
-    await _debugConnection?.close();
+    await _connectionResult?.debugConnection?.close();
     await _stdOutSub?.cancel();
     await _webFs?.stop();
     await device.stopApp(null);
@@ -173,12 +172,25 @@ class ResidentWebRunner extends ResidentRunner {
         port: debuggingOptions.port,
         skipDwds: device is WebServerDevice,
       );
-      await device.startApp(package, mainPath: target, debuggingOptions: debuggingOptions, platformArgs: <String, Object>{
-        'uri': _webFs.uri
-      });
+      // When connecting to a browser, update the message with a seemsSlow notification
+      // to handle the case where we fail to connect.
+      if (debuggingOptions.browserLaunch) {
+        buildStatus.stop();
+        buildStatus = logger.startProgress(
+          'Attempting to connect to browser instance..',
+          timeout: const Duration(seconds: 30),
+        );
+      }
+      await device.startApp(package,
+        mainPath: target,
+        debuggingOptions: debuggingOptions,
+        platformArgs: <String, Object>{
+          'uri': _webFs.uri
+        },
+      );
       if (supportsServiceProtocol) {
-        _debugConnection = await _webFs.runAndDebug(debuggingOptions);
-        unawaited(_debugConnection.onDone.whenComplete(exit));
+        _connectionResult = await _webFs.connect(debuggingOptions);
+        unawaited(_connectionResult.debugConnection.onDone.whenComplete(exit));
       }
     } catch (err, stackTrace) {
       printError(err.toString());
@@ -199,26 +211,28 @@ class ResidentWebRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
   }) async {
-    // Cleanup old subscriptions. These will throw if there isn't anything
-    // listening, which is fine because that is what we want to ensure.
-    try {
-      await _debugConnection?.vmService?.streamCancel('Stdout');
-    } on vmservice.RPCError {
-      // Ignore this specific error.
-    }
-    try {
-      await _debugConnection?.vmService?.streamListen('Stdout');
-    } on vmservice.RPCError  {
-      // Ignore this specific error.
-    }
     Uri websocketUri;
     if (supportsServiceProtocol) {
-      _stdOutSub = _debugConnection.vmService.onStdoutEvent.listen((vmservice.Event log) {
+      // Cleanup old subscriptions. These will throw if there isn't anything
+      // listening, which is fine because that is what we want to ensure.
+      try {
+        await _vmService.streamCancel('Stdout');
+      } on vmservice.RPCError {
+        // Ignore this specific error.
+      }
+      try {
+        await _vmService.streamListen('Stdout');
+      } on vmservice.RPCError  {
+        // Ignore this specific error.
+      }
+      _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
         final String message = utf8.decode(base64.decode(log.bytes)).trim();
         printStatus(message);
       });
-      unawaited(_debugConnection.vmService.registerService('reloadSources', 'FlutterTools'));
-      websocketUri = Uri.parse(_debugConnection.uri);
+      unawaited(_vmService.registerService('reloadSources', 'FlutterTools'));
+      websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
+      // Always run main after connecting because start paused doesn't work yet.
+      _connectionResult.appConnection.runMain();
     }
     if (websocketUri != null) {
       printStatus('Debug service listening on $websocketUri');

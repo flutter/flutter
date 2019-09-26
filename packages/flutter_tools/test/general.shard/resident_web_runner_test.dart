@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -31,12 +32,14 @@ void main() {
   MockDebugConnection mockDebugConnection;
   MockVmService mockVmService;
   MockWebDevice mockWebDevice;
+  MockAppConnection mockAppConnection;
 
   setUp(() {
     mockWebFs = MockFlutterWebFs();
     mockDebugConnection = MockDebugConnection();
     mockVmService = MockVmService();
     mockWebDevice = MockWebDevice();
+    mockAppConnection = MockAppConnection();
     testbed = Testbed(
       setup: () {
         residentWebRunner = ResidentWebRunner(
@@ -65,8 +68,8 @@ void main() {
     fs.file('pubspec.yaml').createSync();
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
-    when(mockWebFs.runAndDebug(any)).thenAnswer((Invocation _) async {
-      return mockDebugConnection;
+    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
     });
     when(mockWebFs.recompile()).thenAnswer((Invocation _) {
       return Future<bool>.value(false);
@@ -132,9 +135,34 @@ void main() {
     ));
     final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
 
+    verify(mockAppConnection.runMain()).called(1);
     verify(mockVmService.registerService('reloadSources', 'FlutterTools')).called(1);
     expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
+  }));
+
+  test('Listens to stdout streams before running main', () => testbed.run(() async {
+    _setupMocks();
+    final BufferLogger bufferLogger = logger;
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    final StreamController<Event> controller = StreamController<Event>.broadcast();
+    when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
+      return controller.stream;
+    });
+    when(mockAppConnection.runMain()).thenAnswer((Invocation invocation) {
+      controller.add(Event.parse(<String, Object>{
+        'type': 'Event',
+        'kind': 'WriteEvent',
+        'timestamp': 1569473488296,
+        'bytes': base64.encode('THIS MESSAGE IS IMPORTANT'.codeUnits)
+      }));
+    });
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    expect(bufferLogger.statusText, contains('THIS MESSAGE IS IMPORTANT'));
   }));
 
   test('Can hot reload after attaching', () => testbed.run(() async {
@@ -421,4 +449,5 @@ class MockWebDevice extends Mock implements ChromeDevice {}
 class MockBuildDaemonCreator extends Mock implements BuildDaemonCreator {}
 class MockFlutterWebFs extends Mock implements WebFs {}
 class MockDebugConnection extends Mock implements DebugConnection {}
+class MockAppConnection extends Mock implements AppConnection {}
 class MockVmService extends Mock implements VmService {}
