@@ -48,10 +48,10 @@ class Win32FlutterWindow : public Win32Window {
   void OnPointerMove(double x, double y) override;
 
   // |Win32Window|
-  void OnPointerDown(double x, double y) override;
+  void OnPointerDown(double x, double y, UINT button) override;
 
   // |Win32Window|
-  void OnPointerUp(double x, double y) override;
+  void OnPointerUp(double x, double y, UINT button) override;
 
   // |Win32Window|
   void OnPointerLeave() override;
