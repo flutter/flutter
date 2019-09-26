@@ -5,6 +5,7 @@
 package io.flutter.plugin.platform;
 
 import android.annotation.SuppressLint;
+import android.support.annotation.NonNull;
 import android.view.View;
 
 /**
@@ -17,12 +18,49 @@ public interface PlatformView {
     View getView();
 
     /**
+     * Called by the {@link FlutterEngine} that owns this {@code PlatformView} when
+     * the Android {@link View} responsible for rendering a Flutter UI is associated
+     * with the {@link FlutterEngine}.
+     *
+     * <p>This means that our associated {@link FlutterEngine} can now render a UI and
+     * interact with the user.
+     *
+     * <p>Some platform views may have unusual dependencies on the {@link View} that
+     * renders Flutter UIs, such as unique keyboard interactions. That {@link View}
+     * is provided here for those purposes. Use of this {@link View} should be avoided
+     * if it is not absolutely necessary, because depending on this {@link View} will
+     * tend to make platform view code more brittle to future changes.
+     */
+    // Default interface methods are supported on all min SDK versions of Android.
+    @SuppressLint("NewApi")
+    default void onFlutterViewAttached(@NonNull View flutterView) {}
+
+    /**
+     * Called by the {@link FlutterEngine} that owns this {@code PlatformView} when
+     * the Android {@link View} responsible for rendering a Flutter UI is detached
+     * and disassociated from the {@link FlutterEngine}.
+     *
+     * <p>This means that our associated {@link FlutterEngine} no longer has a rendering
+     * surface, or a user interaction surface of any kind.
+     *
+     * <p>This platform view must release any references related to the Android {@link View}
+     * that was provided in {@link #onFlutterViewAttached(View)}.
+     */
+    // Default interface methods are supported on all min SDK versions of Android.
+    @SuppressLint("NewApi")
+    default void onFlutterViewDetached() {}
+
+    /**
      * Dispose this platform view.
      *
      * <p>The {@link PlatformView} object is unusable after this method is called.
      *
      * <p>Plugins implementing {@link PlatformView} must clear all references to the View object and the PlatformView
      * after this method is called. Failing to do so will result in a memory leak.
+     *
+     * <p>References related to the Android {@link View} attached in
+     * {@link #onFlutterViewAttached(View)} must be released in {@code dispose()} to avoid memory
+     * leaks.
      */
     void dispose();
 

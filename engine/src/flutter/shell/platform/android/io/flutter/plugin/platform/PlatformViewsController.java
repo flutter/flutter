@@ -11,6 +11,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.UiThread;
+import android.support.annotation.VisibleForTesting;
 import android.util.DisplayMetrics;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -44,6 +45,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     // The context of the Activity or Fragment hosting the render target for the Flutter engine.
     private Context context;
 
+    // The View currently rendering the Flutter UI associated with these platform views.
+    private View flutterView;
+
     // The texture registry maintaining the textures into which the embedded views will be rendered.
     private TextureRegistry textureRegistry;
 
@@ -55,7 +59,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     // The accessibility bridge to which accessibility events form the platform views will be dispatched.
     private final AccessibilityEventsDelegate accessibilityEventsDelegate;
 
-    private final HashMap<Integer, VirtualDisplayController> vdControllers;
+    // TODO(mattcarroll): Refactor overall platform views to facilitate testing and then make
+    // this private. This is visible as a hack to facilitate testing. This was deemed the least
+    // bad option at the time of writing.
+    @VisibleForTesting
+    /* package */ final HashMap<Integer, VirtualDisplayController> vdControllers;
 
     // Maps a virtual display's context to the platform view hosted in this virtual display.
     // Since each virtual display has it's unique context this allows associating any view with the platform view that
@@ -113,6 +121,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             if (vdController == null) {
                 throw new IllegalStateException("Failed creating virtual display for a "
                     + request.viewType + " with id: " + request.viewId);
+            }
+
+            // If our FlutterEngine is already attached to a Flutter UI, provide that Android
+            // View to this new platform view.
+            if (flutterView != null) {
+                vdController.onFlutterViewAttached(flutterView);
             }
 
             vdControllers.put(request.viewId, vdController);
@@ -288,6 +302,37 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         platformViewsChannel = null;
         context = null;
         textureRegistry = null;
+    }
+
+    /**
+     * This {@code PlatformViewsController} and its {@code FlutterEngine} is now attached to
+     * an Android {@code View} that renders a Flutter UI.
+     */
+    public void attachToView(@NonNull View flutterView) {
+        this.flutterView = flutterView;
+
+        // Inform all existing platform views that they are now associated with
+        // a Flutter View.
+        for (VirtualDisplayController controller : vdControllers.values()) {
+            controller.onFlutterViewAttached(flutterView);
+        }
+    }
+
+    /**
+     * This {@code PlatformViewController} and its {@code FlutterEngine} are no longer attached
+     * to an Android {@code View} that renders a Flutter UI.
+     * <p>
+     * All platform views controlled by this {@code PlatformViewController} will be detached
+     * from the previously attached {@code View}.
+     */
+    public void detachFromView() {
+        this.flutterView = null;
+
+        // Inform all existing platform views that they are no longer associated with
+        // a Flutter View.
+        for (VirtualDisplayController controller : vdControllers.values()) {
+            controller.onFlutterViewDetached();
+        }
     }
 
     @Override
