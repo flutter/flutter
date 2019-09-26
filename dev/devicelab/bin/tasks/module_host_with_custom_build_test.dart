@@ -198,7 +198,7 @@ Future<void> main() async {
         return TaskResult.failure('Failed to build app-demo-release-unsigned.apk');
       }
 
-      section('Verify AOT blobs in app-demo-release-unsigned.apk');
+      section('Verify AOT ELF in app-demo-release-unsigned.apk');
 
       final Iterable<String> demoReleaseFiles = await getFilesInApk(demoReleaseApk);
       checkItContains<String>(<String>[
@@ -249,7 +249,7 @@ Future<void> main() async {
         return TaskResult.failure('Failed to build app-demo-prod-unsigned.apk');
       }
 
-      section('Verify AOT blobs in app-demo-prod-unsigned.apk');
+      section('Verify AOT ELF in app-demo-prod-unsigned.apk');
 
       final Iterable<String> demoProdFiles = await getFilesInApk(demoProdApk);
       checkItContains<String>(<String>[

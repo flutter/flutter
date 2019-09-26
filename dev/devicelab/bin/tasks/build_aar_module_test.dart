@@ -153,7 +153,7 @@ Future<void> main() async {
         'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',
       ], releaseAar);
 
-      section('Check AOT blobs in release AAR');
+      section('Check AOT ELF in release AAR');
 
       checkItContains<String>(<String>[
         'jni/arm64-v8a/libapp.so',
@@ -260,7 +260,7 @@ Future<void> main() async {
         'assets/flutter_assets/vm_snapshot_data',
       ], debugAar);
 
-      section('Check AOT blobs in debug AAR');
+      section('Check AOT ELF in debug AAR');
 
       checkItContains<String>(<String>[
         'jni/arm64-v8a/libflutter.so',
