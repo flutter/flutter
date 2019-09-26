@@ -50,6 +50,9 @@ void handlePlatformViewCall(
     case 'create':
       _createPlatformView(decoded, callback);
       return;
+    case 'dispose':
+      _disposePlatformView(decoded, callback);
+      return;
   }
   callback(null);
 }
@@ -74,5 +77,17 @@ void _createPlatformView(
       platformViewRegistry._registeredFactories[viewType](id);
 
   platformViewRegistry._createdViews[id] = element;
+  callback(codec.encodeSuccessEnvelope(null));
+}
+
+void _disposePlatformView(
+    MethodCall methodCall, ui.PlatformMessageResponseCallback callback) {
+  final int id = methodCall.arguments;
+  const MethodCodec codec = StandardMethodCodec();
+
+  // Remove the root element of the view from the DOM.
+  platformViewRegistry._createdViews[id]?.remove();
+  platformViewRegistry._createdViews.remove(id);
+
   callback(codec.encodeSuccessEnvelope(null));
 }
