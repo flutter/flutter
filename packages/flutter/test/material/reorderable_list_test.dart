@@ -655,6 +655,48 @@ void main() {
         expect(findState(const Key('A')).checked, true);
       });
 
+      testWidgets('Preserves children states across reorder when keys are not identical', (WidgetTester tester) async {
+        _StatefulState findState(Key key) {
+          return find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
+              .evaluate()
+              .first
+              .ancestorStateOfType(const TypeMatcher<_StatefulState>());
+        }
+        await tester.pumpWidget(MaterialApp(
+          home: ReorderableListView(
+            children: <Widget>[
+              _Stateful(key: ObjectKey('A')),
+              _Stateful(key: ObjectKey('B')),
+              _Stateful(key: ObjectKey('C')),
+            ],
+            onReorder: (int oldIndex, int newIndex) { },
+            scrollDirection: Axis.horizontal,
+          ),
+        ));
+        await tester.tap(find.byKey(ObjectKey('A')));
+        await tester.pumpAndSettle();
+        // Only the 'A' widget should be checked.
+        expect(findState(ObjectKey('A')).checked, true);
+        expect(findState(ObjectKey('B')).checked, false);
+        expect(findState(ObjectKey('C')).checked, false);
+
+        await tester.pumpWidget(MaterialApp(
+          home: ReorderableListView(
+            children: <Widget>[
+              _Stateful(key: ObjectKey('B')),
+              _Stateful(key: ObjectKey('C')),
+              _Stateful(key: ObjectKey('A')),
+            ],
+            onReorder: (int oldIndex, int newIndex) { },
+            scrollDirection: Axis.horizontal,
+          ),
+        ));
+        // Only the 'A' widget should be checked.
+        expect(findState(ObjectKey('B')).checked, false);
+        expect(findState(ObjectKey('C')).checked, false);
+        expect(findState(ObjectKey('A')).checked, true);
+      });
+
       group('Accessibility (a11y/Semantics)', () {
         Map<CustomSemanticsAction, VoidCallback> getSemanticsActions(int index) {
           final Semantics semantics = find.ancestor(
