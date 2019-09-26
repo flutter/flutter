@@ -20,7 +20,7 @@ const BorderSide _kDefaultRoundedBorderSide = BorderSide(
     darkColor: Color(0x33FFFFFF),
   ),
   style: BorderStyle.solid,
-  width: 0.5,
+  width: 0.0,
 );
 const Border _kDefaultRoundedBorder = Border(
   top: _kDefaultRoundedBorderSide,
@@ -832,7 +832,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
     final Color decorationColor = CupertinoDynamicColor.resolve(widget.decoration?.color, context);
 
-    final BoxBorder border = widget.decoration.border;
+    final BoxBorder border = widget.decoration?.border;
     Border resolvedBorder = border;
     if (border is Border) {
       BorderSide resolveBorderSide(BorderSide side) {
