@@ -3280,6 +3280,10 @@ void main() {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/37046.
     testWidgets('No exceptions when showing selection menu inside of nested Navigators', (WidgetTester tester) async {
+      const String testValue = '123456';
+      final TextEditingController controller = TextEditingController(
+        text: testValue,
+      );
       await tester.pumpWidget(
         CupertinoApp(
           home: CupertinoPageScaffold(
@@ -3293,8 +3297,10 @@ void main() {
                   Expanded(
                     child: Navigator(
                       onGenerateRoute: (_) =>
-                        CupertinoPageRoute(builder: (_) => Container(
-                          child: const CupertinoTextField(),
+                        CupertinoPageRoute<void>(builder: (_) => Container(
+                          child: CupertinoTextField(
+                            controller: controller,
+                          ),
                         )),
                     ),
                   ),
@@ -3308,12 +3314,10 @@ void main() {
       // No text selection toolbar.
       expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
 
-      // Type a string and double tap on it.
-      const String testValue = '123456';
-      await tester.enterText(find.byType(CupertinoTextField), testValue);
+      // Double tap on the text in the input.
       await tester.pumpAndSettle();
       await tester.tapAt(textOffsetToPosition(tester, testValue.length ~/ 2));
-      await tester.pump(Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 100));
       await tester.tapAt(textOffsetToPosition(tester, testValue.length ~/ 2));
       await tester.pumpAndSettle();
 
