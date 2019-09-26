@@ -1,4 +1,4 @@
-Signature: adb6f9c0d3af94ec21b2ca06e48d0edf
+Signature: e26c0f7e6a37e4446457835268bb82b7
 
 UNUSED LICENSES:
 
@@ -1309,6 +1309,7 @@ FILE: ../../../third_party/skia/experimental/docs/svgBackend.js
 FILE: ../../../third_party/skia/experimental/docs/svgbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/utilities.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/cpu.js
+FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger/anim.mskp
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger/index.html
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger/sample.skp
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/externs.js
@@ -3321,7 +3322,8 @@ FILE: ../../../third_party/skia/src/core/SkDescriptor.cpp
 FILE: ../../../third_party/skia/src/core/SkDraw_atlas.cpp
 FILE: ../../../third_party/skia/src/core/SkEffectPriv.h
 FILE: ../../../third_party/skia/src/core/SkPathMakers.h
-FILE: ../../../third_party/skia/src/core/SkStrikeInterface.h
+FILE: ../../../third_party/skia/src/core/SkStrikeForGPU.cpp
+FILE: ../../../third_party/skia/src/core/SkStrikeForGPU.h
 FILE: ../../../third_party/skia/src/core/SkStrikeSpec.h
 FILE: ../../../third_party/skia/src/core/SkVMBlitter.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVMath.cpp
