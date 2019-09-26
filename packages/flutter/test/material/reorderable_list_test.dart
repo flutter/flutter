@@ -665,36 +665,37 @@ void main() {
         await tester.pumpWidget(MaterialApp(
           home: ReorderableListView(
             children: <Widget>[
-              _Stateful(key: ObjectKey('A')),
-              _Stateful(key: ObjectKey('B')),
-              _Stateful(key: ObjectKey('C')),
+              _Stateful(key: const ObjectKey('A')),
+              _Stateful(key: const ObjectKey('B')),
+              _Stateful(key: const ObjectKey('C')),
             ],
             onReorder: (int oldIndex, int newIndex) { },
             scrollDirection: Axis.horizontal,
           ),
         ));
-        await tester.tap(find.byKey(ObjectKey('A')));
+        await tester.tap(find.byKey(const ObjectKey('A')));
         await tester.pumpAndSettle();
         // Only the 'A' widget should be checked.
-        expect(findState(ObjectKey('A')).checked, true);
-        expect(findState(ObjectKey('B')).checked, false);
-        expect(findState(ObjectKey('C')).checked, false);
+        expect(findState(const ObjectKey('A')).checked, true);
+        expect(findState(const ObjectKey('B')).checked, false);
+        expect(findState(const ObjectKey('C')).checked, false);
 
+        // Rebuild with distinct key objects.
         await tester.pumpWidget(MaterialApp(
           home: ReorderableListView(
             children: <Widget>[
-              _Stateful(key: ObjectKey('B')),
-              _Stateful(key: ObjectKey('C')),
-              _Stateful(key: ObjectKey('A')),
+              _Stateful(key: ObjectKey('B')), // ignore:prefer_const_constructors
+              _Stateful(key: ObjectKey('C')), // ignore:prefer_const_constructors
+              _Stateful(key: ObjectKey('A')), // ignore:prefer_const_constructors
             ],
             onReorder: (int oldIndex, int newIndex) { },
             scrollDirection: Axis.horizontal,
           ),
         ));
         // Only the 'A' widget should be checked.
-        expect(findState(ObjectKey('B')).checked, false);
-        expect(findState(ObjectKey('C')).checked, false);
-        expect(findState(ObjectKey('A')).checked, true);
+        expect(findState(const ObjectKey('B')).checked, false);
+        expect(findState(const ObjectKey('C')).checked, false);
+        expect(findState(const ObjectKey('A')).checked, true);
       });
 
       group('Accessibility (a11y/Semantics)', () {
