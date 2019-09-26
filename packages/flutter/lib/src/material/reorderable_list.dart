@@ -344,7 +344,10 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // Handles up the logic for dragging and reordering items in the list.
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
-    final GlobalObjectKey keyIndexGlobalKey = GlobalObjectKey(toWrap.key);
+    final _ScopedValueKey keyIndexGlobalKey = _ScopedValueKey(
+      scope: this,
+      value: toWrap.key,
+    );
     // We pass the toWrapWithGlobalKey into the Draggable so that when a list
     // item gets dragged, the accessibility framework can preserve the selected
     // state of the dragging item.
@@ -572,5 +575,29 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         ),
       );
     });
+  }
+}
+
+/// A [GlobalKey] that uses a scope and a value to determine equality.
+///
+/// The scope is compared using [identical], while the value is compared
+/// using [operator ==]. This allows a locally scoped value to be turned
+/// into a globally unique key.
+class _ScopedValueKey extends GlobalKey {
+  _ScopedValueKey({this.scope, this.value}) : super.constructor();
+
+  final Object scope;
+  final Object value;
+
+  @override
+  int get hashCode => hashValues(identityHashCode(scope), value.hashCode);
+
+  @override
+  operator ==(other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    _ScopedValueKey typedOther = other;
+    return identical(scope, typedOther.scope) && value == typedOther.value;
   }
 }
