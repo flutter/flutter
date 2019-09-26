@@ -40,6 +40,7 @@ const CupertinoDynamicColor _kThumbColor = CupertinoDynamicColor.withBrightness(
 const EdgeInsets _kSeparatorInset = EdgeInsets.symmetric(vertical: 6);
 const double _kSeparatorWidth = 1;
 const Radius _kSeparatorRadius = Radius.circular(_kSeparatorWidth/2);
+const double _kMinThumbScale = 0.95;
 
 // Temp value
 const double _kTouchYDistanceThreshold = 50.0 * 50.0;
@@ -558,17 +559,18 @@ class _RenderSegmentedControl<T> extends RenderBox
   Map<RenderBox, _ChildAnimationManifest> childAnimations = <RenderBox, _ChildAnimationManifest>{};
 
   // Unscaled Thumb Rect
-  Rect _currentThumbRect;
-  Tween<Rect> _currentThumbTween;
+  Rect currentThumbRect;
+  Tween<Rect> currentThumbTween;
   final AnimationController thumbController;
 
   final AnimationController separatorOpacityController;
 
-  final Tween<double> thumbScaleTween = Tween<double>(begin: 0.95, end: 1);
+  Tween<double> thumbScaleTween = Tween<double>(begin: _kMinThumbScale, end: 1);
   final AnimationController thumbScaleController;
+  double currentThumbScale = 1;
 
 
-  final SpringSimulation thumbRectSimulation = SpringSimulation(
+  final SpringSimulation thumbSpringAnimationSimulation = SpringSimulation(
     _kSegmentedControlSpringDescription,
     0,
     1,
@@ -605,7 +607,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     _needsThumbAnimationUpdate = true;
     _selectedIndex = value;
 
-    thumbController.animateWith(thumbRectSimulation);
+    thumbController.animateWith(thumbSpringAnimationSimulation);
 
     separatorOpacityController.reset();
     separatorOpacityController.animateTo(
@@ -671,7 +673,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     pressedIndex = index;
 
     if (startedOnSelectedSegment) {
-      thumbScaleController.reverse();
+      playThumbScaleAnimation(isExpanding: false);
     }
   }
 
@@ -689,7 +691,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   void _onEnd(DragEndDetails details) {
     if (startedOnSelectedSegment) {
-      thumbScaleController.forward();
+      playThumbScaleAnimation(isExpanding: true);
     }
     print('$localDragOffset - $size');
     if (localDragOffset != null && size.contains(localDragOffset)) {
@@ -701,11 +703,18 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   void _onCancel() {
     if (startedOnSelectedSegment) {
-      thumbScaleController.forward();
+      playThumbScaleAnimation(isExpanding: true);
     }
 
     pressedIndex = null;
     localDragOffset = null;
+  }
+
+  void playThumbScaleAnimation({ bool isExpanding }) {
+    assert(isExpanding != null);
+
+    thumbScaleTween = Tween<double>(begin: currentThumbScale, end: isExpanding ? 1 : _kMinThumbScale);
+    thumbScaleController.animateWith(thumbSpringAnimationSimulation);
   }
 
   bool hasDraggedTooFar(DragUpdateDetails details) {
@@ -849,7 +858,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
       if (_needsThumbAnimationUpdate) {
         // Needs to ensure _currentThumbRect is valid.
-        _currentThumbTween = RectTween(begin: _currentThumbRect, end: unscaledThumbTargetRect);
+        currentThumbTween = RectTween(begin: currentThumbRect, end: unscaledThumbTargetRect);
 
         for (int i = 0; i < childCount - 1; i++) {
           // The separator associated with the last child will not be painted (unless
@@ -870,21 +879,21 @@ class _RenderSegmentedControl<T> extends RenderBox
         _paintSeparator(context, offset, children[index]);
       }
 
-      _currentThumbRect = _currentThumbTween?.evaluate(thumbController)
+      currentThumbRect = currentThumbTween?.evaluate(thumbController)
                         ?? unscaledThumbTargetRect;
 
-      final double thumbScale = thumbScaleTween.evaluate(thumbScaleController);
+      currentThumbScale = thumbScaleTween.evaluate(thumbScaleController);
 
       final Rect thumbRect = Rect.fromCenter(
-        center: _currentThumbRect.center,
-        width: _currentThumbRect.width * thumbScale,
-        height: _currentThumbRect.height * thumbScale,
+        center: currentThumbRect.center,
+        width: currentThumbRect.width * currentThumbScale,
+        height: currentThumbRect.height * currentThumbScale,
       );
 
       _paintThumb(context, offset, thumbRect);
     } else {
       // Reset all animations when "momentary" is on.
-      _currentThumbRect = null;
+      currentThumbRect = null;
       childAnimations = null;
 
       // Paint separators.
