@@ -3,17 +3,21 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
-import 'package:flutter_driver/flutter_driver.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_driver/flutter_self_driver.dart';
+import 'package:flutter_test/flutter_test.dart' show Finder, find;
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:macrobenchmarks/main.dart' as app;
 
-void macroPerfTest(
+Future<void> macroPerfTest(
     String testName,
     String routeName,
-    {Duration pageDelay, Duration duration = const Duration(seconds: 3)}) {
+    {Duration pageDelay, Duration duration = const Duration(seconds: 3)}) async {
+  final FlutterSelfDriver driver = await FlutterSelfDriver.connect();
+  app.main();
   test(testName, () async {
-    final FlutterDriver driver = await FlutterDriver.connect();
-
     // The slight initial delay avoids starting the timing during a
     // period of increased load on the device. Without this delay, the
     // benchmark has greater noise.
@@ -22,7 +26,7 @@ void macroPerfTest(
 
     await driver.forceGC();
 
-    final SerializableFinder button = find.byValueKey(routeName);
+    final Finder button = find.byKey(ValueKey<String>(routeName));
     expect(button, isNotNull);
     await driver.tap(button);
 
@@ -36,9 +40,10 @@ void macroPerfTest(
     });
 
     final TimelineSummary summary = TimelineSummary.summarize(timeline);
-    summary.writeSummaryToFile(testName, pretty: true);
-    summary.writeTimelineToFile(testName, pretty: true);
-
-    driver.close();
+    final Map<String, dynamic> results = Map<String, dynamic>.from(summary.summaryJson);
+    results.remove('frame_build_times');
+    results.remove('frame_rasterizer_times');
+    print('================ RESULTS ================');
+    print(json.encode(results));
   });
 }

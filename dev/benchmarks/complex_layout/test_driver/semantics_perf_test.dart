@@ -2,25 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:flutter_driver/flutter_driver.dart';
-import 'package:path/path.dart' as p;
+import 'package:flutter_driver/flutter_self_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:complex_layout/main.dart' as app;
 
-void main() {
+Future<void> main() async {
+  final FlutterSelfDriver driver = await FlutterSelfDriver.connect();
+  app.main();
   group('semantics performance test', () {
-    FlutterDriver driver;
-
     setUpAll(() async {
-      driver = await FlutterDriver.connect(printCommunication: true);
     });
 
     tearDownAll(() async {
-      if (driver != null)
-        driver.close();
     });
 
     test('inital tree creation', () async {
@@ -39,7 +34,7 @@ void main() {
       final Duration semanticsTreeCreation = semanticsEvents.first.duration;
 
       final String jsonEncoded = json.encode(<String, dynamic>{'initialSemanticsTreeCreation': semanticsTreeCreation.inMilliseconds});
-      File(p.join(testOutputsDirectory, 'complex_layout_semantics_perf.json')).writeAsStringSync(jsonEncoded);
+      print(jsonEncoded);
     });
   });
 }

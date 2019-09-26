@@ -3,15 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JsonEncoder, JsonDecoder;
+import 'dart:convert';
 
-import 'package:file/file.dart';
-import 'package:file/local.dart';
-import 'package:flutter_driver/flutter_driver.dart';
-import 'package:path/path.dart' as path;
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-
-const FileSystem _fs = LocalFileSystem();
+import 'package:flutter_driver/flutter_self_driver.dart';
+import 'package:flutter_gallery/gallery/demos.dart';
+import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 // Demos for which timeline data will be collected using
 // FlutterDriver.traceAction().
@@ -59,78 +57,12 @@ const List<String> kSkippedDemos = <String>[];
 //
 // These names are reported by the test app, see _handleMessages()
 // in transitions_perf.dart.
-List<String> _allDemos = <String>[];
-
-/// Extracts event data from [events] recorded by timeline, validates it, turns
-/// it into a histogram, and saves to a JSON file.
-Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
-  final Map<String, List<int>> durations = <String, List<int>>{};
-  Map<String, dynamic> startEvent;
-
-  // Save the duration of the first frame after each 'Start Transition' event.
-  for (Map<String, dynamic> event in events) {
-    final String eventName = event['name'];
-    if (eventName == 'Start Transition') {
-      assert(startEvent == null);
-      startEvent = event;
-    } else if (startEvent != null && eventName == 'Frame') {
-      final String routeName = startEvent['args']['to'];
-      durations[routeName] ??= <int>[];
-      durations[routeName].add(event['dur']);
-      startEvent = null;
-    }
-  }
-
-  // Verify that the durations data is valid.
-  if (durations.keys.isEmpty)
-    throw 'no "Start Transition" timeline events found';
-  final Map<String, int> unexpectedValueCounts = <String, int>{};
-  durations.forEach((String routeName, List<int> values) {
-    if (values.length != 2) {
-      unexpectedValueCounts[routeName] = values.length;
-    }
-  });
-
-  if (unexpectedValueCounts.isNotEmpty) {
-    final StringBuffer error = StringBuffer('Some routes recorded wrong number of values (expected 2 values/route):\n\n');
-    unexpectedValueCounts.forEach((String routeName, int count) {
-      error.writeln(' - $routeName recorded $count values.');
-    });
-    error.writeln('\nFull event sequence:');
-    final Iterator<Map<String, dynamic>> eventIter = events.iterator;
-    String lastEventName = '';
-    String lastRouteName = '';
-    while (eventIter.moveNext()) {
-      final String eventName = eventIter.current['name'];
-
-      if (!<String>['Start Transition', 'Frame'].contains(eventName))
-        continue;
-
-      final String routeName = eventName == 'Start Transition'
-        ? eventIter.current['args']['to']
-        : '';
-
-      if (eventName == lastEventName && routeName == lastRouteName) {
-        error.write('.');
-      } else {
-        error.write('\n - $eventName $routeName .');
-      }
-
-      lastEventName = eventName;
-      lastRouteName = routeName;
-    }
-    throw error;
-  }
-
-  // Save the durations Map to a file.
-  final File file = await _fs.file(outputPath).create(recursive: true);
-  await file.writeAsString(const JsonEncoder.withIndent('  ').convert(durations));
-}
+List<String> _allDemos = kAllGalleryDemos.map((GalleryDemo demo) => '${demo.title}@${demo.category.name}').toList();
 
 /// Scrolls each demo menu item into view, launches it, then returns to the
 /// home screen twice.
-Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
-  final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
+Future<void> runDemos(List<String> demos, FlutterSelfDriver driver) async {
+  final Finder demoList = find.byKey(const Key('GalleryDemoList'));
   String currentDemoCategory;
 
   for (String demo in demos) {
@@ -151,7 +83,7 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
     }
     currentDemoCategory = demoCategory;
 
-    final SerializableFinder demoItem = find.text(demoName);
+    final Finder demoItem = find.text(demoName);
     await driver.scrollUntilVisible(demoList, demoItem,
       dyScroll: -48.0,
       alignment: 0.5,
@@ -163,10 +95,15 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
 
       if (kUnsynchronizedDemos.contains(demo)) {
         await driver.runUnsynchronized<void>(() async {
-          await driver.tap(find.pageBack());
+          // TODO(sortie): The page back can be delivered too early and not get
+          // properly acted on, causing this to deadlock. We should probably
+          // wait for the title of the demo to appear before sending the page
+          // back. Simply waiting a moment works around the issue.
+          await Future<void>.delayed(const Duration(microseconds: 1000000));
+          await driver.tap(driver.createPageBackFinder());
         });
       } else {
-        await driver.tap(find.pageBack());
+        await driver.tap(driver.createPageBackFinder());
       }
     }
 
@@ -177,12 +114,13 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   await driver.tap(find.byTooltip('Back'));
 }
 
-void main([List<String> args = const <String>[]]) {
+Future<void> main([List<String> args = const <String>[]]) async {
+  final FlutterSelfDriver driver = await FlutterSelfDriver.connect();
+  // As in lib/main.dart: overriding https://github.com/flutter/flutter/issues/13736
+  // for better visual effect at the cost of performance.
+  runApp(const GalleryApp(testMode: true));
   group('flutter gallery transitions', () {
-    FlutterDriver driver;
     setUpAll(() async {
-      driver = await FlutterDriver.connect();
-
       // Wait for the first frame to be rasterized.
       await driver.waitUntilFirstFrameRasterized();
 
@@ -190,16 +128,9 @@ void main([List<String> args = const <String>[]]) {
         print('Enabeling semantics...');
         await driver.setSemantics(true);
       }
-
-      // See _handleMessages() in transitions_perf.dart.
-      _allDemos = List<String>.from(const JsonDecoder().convert(await driver.requestData('demoNames')));
-      if (_allDemos.isEmpty)
-        throw 'no demo names found';
     });
 
     tearDownAll(() async {
-      if (driver != null)
-        await driver.close();
     });
 
     test('all demos', () async {
@@ -218,11 +149,11 @@ void main([List<String> args = const <String>[]]) {
       // that follows a 'Start Transition' event. The Gallery app adds a
       // 'Start Transition' event when a demo is launched (see GalleryItem).
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeSummaryToFile('transitions', pretty: true);
-      final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
-      await saveDurationsHistogram(
-          List<Map<String, dynamic>>.from(timeline.json['traceEvents']),
-          histogramPath);
+      final Map<String, dynamic> results = Map<String, dynamic>.from(summary.summaryJson);
+      results.remove('frame_build_times');
+      results.remove('frame_rasterizer_times');
+      print('================ RESULTS ================');
+      print(json.encode(results));
 
       // Execute the remaining tests.
       final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);

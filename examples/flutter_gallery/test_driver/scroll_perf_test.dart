@@ -2,31 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+import 'dart:convert';
 
-import 'package:flutter_driver/flutter_driver.dart';
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:flutter_driver/flutter_self_driver.dart';
+import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-void main() {
+Future<void> main() async {
+  final FlutterSelfDriver driver = await FlutterSelfDriver.connect();
+  // As in lib/main.dart: overriding https://github.com/flutter/flutter/issues/13736
+  // for better visual effect at the cost of performance.
+  runApp(const GalleryApp(testMode: true));
   group('scrolling performance test', () {
-    FlutterDriver driver;
 
     setUpAll(() async {
-      driver = await FlutterDriver.connect();
-
       await driver.waitUntilFirstFrameRasterized();
     });
 
     tearDownAll(() async {
-      if (driver != null)
-        driver.close();
     });
 
     test('measure', () async {
       final Timeline timeline = await driver.traceAction(() async {
         await driver.tap(find.text('Material'));
 
-        final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
+        final Finder demoList = find.byKey(const Key('GalleryDemoList'));
 
         // TODO(eseidel): These are very artificial scrolls, we should use better
         // https://github.com/flutter/flutter/issues/3316
@@ -43,9 +44,12 @@ void main() {
         }
       });
 
-      TimelineSummary.summarize(timeline)
-        ..writeSummaryToFile('home_scroll_perf', pretty: true)
-        ..writeTimelineToFile('home_scroll_perf', pretty: true);
+      final TimelineSummary summary = TimelineSummary.summarize(timeline);
+      final Map<String, dynamic> results = Map<String, dynamic>.from(summary.summaryJson);
+      results.remove('frame_build_times');
+      results.remove('frame_rasterizer_times');
+      print('================ RESULTS ================');
+      print(json.encode(results));
     });
   });
 }

@@ -2,24 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+import 'dart:convert';
 
-import 'package:flutter_driver/flutter_driver.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_driver/flutter_self_driver.dart';
+import 'package:flutter_test/flutter_test.dart' show Finder, find;
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:complex_layout/main.dart' as app;
 
-void main() {
+Future<void> main() async {
+  final FlutterSelfDriver driver = await FlutterSelfDriver.connect();
+  app.main();
   group('scrolling performance test', () {
-    FlutterDriver driver;
 
     setUpAll(() async {
-      driver = await FlutterDriver.connect();
-
       await driver.waitUntilFirstFrameRasterized();
     });
 
     tearDownAll(() async {
-      if (driver != null)
-        driver.close();
     });
 
     Future<void> testScrollPerf(String listKey, String summaryName) async {
@@ -33,7 +33,7 @@ void main() {
 
       final Timeline timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
-        final SerializableFinder list = find.byValueKey(listKey);
+        final Finder list = find.byKey(ValueKey<String>(listKey));
         expect(list, isNotNull);
 
         // Scroll down
@@ -50,8 +50,11 @@ void main() {
       });
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      summary.writeSummaryToFile(summaryName, pretty: true);
-      summary.writeTimelineToFile(summaryName, pretty: true);
+      final Map<String, dynamic> results = Map<String, dynamic>.from(summary.summaryJson);
+      results.remove('frame_build_times');
+      results.remove('frame_rasterizer_times');
+      print('================ RESULTS ================');
+      print(json.encode(results));
     }
 
     test('complex_layout_scroll_perf', () async {
@@ -60,7 +63,7 @@ void main() {
 
     test('tiles_scroll_perf', () async {
       await driver.tap(find.byTooltip('Open navigation menu'));
-      await driver.tap(find.byValueKey('scroll-switcher'));
+      await driver.tap(find.byKey(const ValueKey<String>('scroll-switcher')));
       await testScrollPerf('tiles-scroll', 'tiles_scroll_perf');
     });
   });

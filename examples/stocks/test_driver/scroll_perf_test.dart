@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+import 'dart:convert';
 
-import 'package:flutter_driver/flutter_driver.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_driver/flutter_self_driver.dart';
+import 'package:flutter_test/flutter_test.dart' show Finder, find;
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:stocks/main.dart' as app;
 
-void main() {
+Future<void> main() async {
+  final FlutterSelfDriver driver = await FlutterSelfDriver.connect();
+  app.main();
   group('scrolling performance test', () {
-    FlutterDriver driver;
 
     setUpAll(() async {
-      driver = await FlutterDriver.connect();
     });
 
     tearDownAll(() async {
-      if (driver != null)
-        driver.close();
     });
 
     test('measure', () async {
       final Timeline timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
-        final SerializableFinder stockList = find.byValueKey('stock-list');
+        final Finder stockList = find.byKey(const ValueKey<String>('stock-list'));
         expect(stockList, isNotNull);
 
         // Scroll down
@@ -40,8 +41,11 @@ void main() {
       });
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      summary.writeSummaryToFile('stocks_scroll_perf', pretty: true);
-      summary.writeTimelineToFile('stocks_scroll_perf', pretty: true);
+      final Map<String, dynamic> results = Map<String, dynamic>.from(summary.summaryJson);
+      results.remove('frame_build_times');
+      results.remove('frame_rasterizer_times');
+      print('================ RESULTS ================');
+      print(json.encode(results));
     });
   });
 }
