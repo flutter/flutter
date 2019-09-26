@@ -152,6 +152,9 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
+    if (tmpBuildNumber.isEmpty) {
+      return null;
+    }
     final List<String> segments = tmpBuildNumber
         .split('.')
         .where((String segment) => segment.isNotEmpty)
@@ -196,6 +199,9 @@ String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String build
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
+    if (tmpBuildName.isEmpty) {
+      return null;
+    }
     final List<String> segments = tmpBuildName
         .split('.')
         .where((String segment) => segment.isNotEmpty)

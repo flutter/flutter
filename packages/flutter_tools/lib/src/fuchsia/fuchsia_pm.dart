@@ -151,7 +151,7 @@ class FuchsiaPM {
     if (fuchsiaArtifacts.pm == null) {
       throwToolExit('Fuchsia pm tool not found');
     }
-    final List<String> command = <String>[fuchsiaArtifacts.pm.path] + args;
+    final List<String> command = <String>[fuchsiaArtifacts.pm.path, ...args];
     final RunResult result = await processUtils.run(command);
     return result.exitCode == 0;
   }

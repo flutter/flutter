@@ -196,9 +196,11 @@ void main() {
 
     testUsingOsxContext('getInfo returns something when xcodebuild -list succeeds', () async {
       const String workingDirectory = '/';
-      when(mockProcessManager.run(<String>[xcodebuild, '-list'],
-          environment: anyNamed('environment'),
-          workingDirectory: workingDirectory)).thenAnswer((_) {
+      when(mockProcessManager.run(
+        <String>[xcodebuild, '-list'],
+        environment: anyNamed('environment'),
+        workingDirectory: workingDirectory),
+      ).thenAnswer((_) {
         return Future<ProcessResult>.value(ProcessResult(1, 0, '', ''));
       });
       final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter();
@@ -208,9 +210,11 @@ void main() {
     testUsingOsxContext('getInfo throws a tool exit when it is unable to find a project', () async {
       const String workingDirectory = '/';
       const String stderr = 'Useful Xcode failure message about missing project.';
-      when(mockProcessManager.run(<String>[xcodebuild, '-list'],
-          environment: anyNamed('environment'),
-          workingDirectory: workingDirectory)).thenAnswer((_) {
+      when(mockProcessManager.run(
+        <String>[xcodebuild, '-list'],
+        environment: anyNamed('environment'),
+        workingDirectory: workingDirectory),
+      ).thenAnswer((_) {
         return Future<ProcessResult>.value(ProcessResult(1, 66, '', stderr));
       });
       final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter();
@@ -627,6 +631,23 @@ flutter:
         buildInfo: buildInfo,
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '3',
+      );
+    });
+
+    testUsingOsxContext('default build name and number when version is missing', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null);
+      await checkBuildVersion(
+        manifestString: manifest,
+        buildInfo: buildInfo,
+        expectedBuildName: '1.0.0',
+        expectedBuildNumber: '1',
       );
     });
   });

@@ -263,7 +263,7 @@ Future<void> main() async {
           ],
           environment: <String, String> {
             'FLUTTER_ANALYTICS_LOG_FILE': objectiveCAnalyticsOutputFile.path,
-          }
+          },
         );
       });
 
@@ -306,7 +306,7 @@ Future<void> main() async {
             'CONFIGURATION_BUILD_DIR=${objectiveCBuildDirectory.path}',
             'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
-          canFail: true
+          canFail: true,
         );
       });
 
@@ -346,7 +346,7 @@ Future<void> main() async {
           ],
           environment: <String, String> {
             'FLUTTER_ANALYTICS_LOG_FILE': swiftAnalyticsOutputFile.path,
-          }
+          },
         );
       });
 
@@ -383,7 +383,7 @@ Future<bool> _isAppAotBuild(Directory app) async {
     app.path,
     'Frameworks',
     'App.framework',
-    'App'
+    'App',
   );
 
   final String symbolTable = await eval(
@@ -402,7 +402,7 @@ Future<bool> _hasDebugSymbols(Directory app) async {
     app.path,
     'Frameworks',
     'App.framework',
-    'App'
+    'App',
   );
 
   final String symbolTable = await eval(

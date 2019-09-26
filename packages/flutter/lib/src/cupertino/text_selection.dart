@@ -231,9 +231,9 @@ class _ToolbarRenderBox extends RenderShiftedBox {
   @override
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
-        if (child == null) {
-          return true;
-        }
+      if (child == null) {
+        return true;
+      }
 
       _debugPaint ??= Paint()
       ..shader = ui.Gradient.linear(
@@ -343,7 +343,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     void addToolbarButtonIfNeeded(
       String text,
       bool Function(TextSelectionDelegate) predicate,
-      void Function(TextSelectionDelegate) onPressed
+      void Function(TextSelectionDelegate) onPressed,
     ) {
       if (!predicate(delegate)) {
         return;

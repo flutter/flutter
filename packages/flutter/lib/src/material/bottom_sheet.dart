@@ -391,7 +391,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
         elevation: elevation,
         shape: shape,
         clipBehavior: clipBehavior,
-        isScrollControlled: isScrollControlled
+        isScrollControlled: isScrollControlled,
       ),
     );
     if (theme != null)

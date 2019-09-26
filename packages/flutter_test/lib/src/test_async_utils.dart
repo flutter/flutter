@@ -185,9 +185,10 @@ class TestAsyncUtils {
       assert(candidateScope.zone != null);
     } while (candidateScope.zone != zone);
     assert(scope != null);
-    final List<DiagnosticsNode> information = <DiagnosticsNode>[];
-    information.add(ErrorSummary('Guarded function conflict.'));
-    information.add(ErrorHint('You must use "await" with all Future-returning test APIs.'));
+    final List<DiagnosticsNode> information = <DiagnosticsNode>[
+      ErrorSummary('Guarded function conflict.'),
+      ErrorHint('You must use "await" with all Future-returning test APIs.'),
+    ];
     final _StackEntry originalGuarder = _findResponsibleMethod(scope.creationStack, 'guard', information);
     final _StackEntry collidingGuarder = _findResponsibleMethod(StackTrace.current, 'guardSync', information);
     if (originalGuarder != null && collidingGuarder != null) {

@@ -20,6 +20,7 @@ import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
@@ -110,7 +111,7 @@ class IMobileDevice {
     _isInstalled ??= processUtils.exitsHappySync(
       <String>[
         _ideviceIdPath,
-        '-h'
+        '-h',
       ],
       environment: Map<String, String>.fromEntries(
         <MapEntry<String, String>>[cache.dyLdLibEntry]
@@ -140,7 +141,7 @@ class IMobileDevice {
       <String>[
         _ideviceinfoPath,
         '-u',
-        fakeIphoneId
+        fakeIphoneId,
       ],
       environment: executionEnv,
     )).processResult;
@@ -175,7 +176,7 @@ class IMobileDevice {
       final ProcessResult result = await processManager.run(
         <String>[
           _ideviceIdPath,
-          '-l'
+          '-l',
         ],
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry]
@@ -198,7 +199,7 @@ class IMobileDevice {
           '-u',
           deviceID,
           '-k',
-          key
+          key,
         ],
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry]
@@ -249,7 +250,7 @@ class IMobileDevice {
     return processUtils.run(
       <String>[
         _idevicescreenshotPath,
-        outputFile.path
+        outputFile.path,
       ],
       throwOnError: true,
       environment: Map<String, String>.fromEntries(
@@ -321,6 +322,25 @@ Future<XcodeBuildResult> buildXcodeProject({
     printError('');
     printError('4. If you are not using completely custom build configurations, name the newly created configuration ${buildInfo.modeName}.');
     return XcodeBuildResult(success: false);
+  }
+
+  final FlutterManifest manifest = app.project.parent.manifest;
+  final String buildName = parsedBuildName(manifest: manifest, buildInfo: buildInfo);
+  final bool buildNameIsMissing = buildName == null || buildName.isEmpty;
+
+  if (buildNameIsMissing) {
+    printStatus('Warning: Missing build name (CFBundleShortVersionString).');
+  }
+
+  final String buildNumber = parsedBuildNumber(manifest: manifest, buildInfo: buildInfo);
+  final bool buildNumberIsMissing = buildNumber == null || buildNumber.isEmpty;
+
+  if (buildNumberIsMissing) {
+    printStatus('Warning: Missing build number (CFBundleVersion).');
+  }
+  if (buildNameIsMissing || buildNumberIsMissing) {
+    printError('Action Required: You must set a build name and number in the pubspec.yaml '
+      'file version field before submitting to the App Store.');
   }
 
   Map<String, String> autoSigningConfigs;

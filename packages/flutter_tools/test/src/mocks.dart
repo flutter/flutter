@@ -40,7 +40,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
       versionCode: 1,
       launchActivity: 'io.flutter.android.mock.MockActivity',
     ),
-    iOS: BuildableIOSApp(MockIosProject(), MockIosProject.bundleId)
+    iOS: BuildableIOSApp(MockIosProject(), MockIosProject.bundleId),
   );
 }
 

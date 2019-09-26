@@ -90,7 +90,7 @@ void main() {
       'rangeTrackShape: Instance of \'RoundedRectRangeSliderTrackShape\'',
       'rangeValueIndicatorShape: Instance of \'PaddleRangeSliderValueIndicatorShape\'',
       'showValueIndicator: always',
-      'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))'
+      'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
     ]);
   });
 
@@ -528,8 +528,7 @@ void main() {
         ),
     );
     await gesture.up();
-  }, skip: isBrowser
-  );
+  }, skip: isBrowser);
 
   testWidgets('The slider track height can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);
