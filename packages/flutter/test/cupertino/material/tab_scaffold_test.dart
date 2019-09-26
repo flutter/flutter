@@ -194,7 +194,12 @@ void main() {
 
     // The DecoratedBox with the smallest depth is the DecoratedBox of the
     // CupertinoTabScaffold.
-    BoxDecoration tabDecoration = tester.firstWidget<DecoratedBox>(find.byType(DecoratedBox)).decoration;
+    BoxDecoration tabDecoration = tester.firstWidget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(CupertinoTabScaffold),
+        matching: find.byType(DecoratedBox),
+      )
+    ).decoration;
 
     expect(tabDecoration.color.value, backgroundColor.color.value);
 
@@ -212,7 +217,12 @@ void main() {
       ),
     );
 
-    tabDecoration = tester.firstWidget<DecoratedBox>(find.byType(DecoratedBox)).decoration;
+    tabDecoration = tester.firstWidget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(CupertinoTabScaffold),
+        matching: find.byType(DecoratedBox),
+      )
+    ).decoration;
 
     expect(tabDecoration.color.value, backgroundColor.darkColor.value);
   });

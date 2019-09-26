@@ -13,11 +13,14 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
 
-// Value extracted via color reader from iOS simulator.
+// Value inspected from Xcode 11 & iOS 13.0 Simulator.
 const BorderSide _kDefaultRoundedBorderSide = BorderSide(
-  color: CupertinoColors.lightBackgroundGray,
+  color: CupertinoDynamicColor.withBrightness(
+    color: Color(0x33000000),
+    darkColor: Color(0x33FFFFFF),
+  ),
   style: BorderStyle.solid,
-  width: 0.0,
+  width: 0.5,
 );
 const Border _kDefaultRoundedBorder = Border(
   top: _kDefaultRoundedBorderSide,
@@ -25,21 +28,25 @@ const Border _kDefaultRoundedBorder = Border(
   left: _kDefaultRoundedBorderSide,
   right: _kDefaultRoundedBorderSide,
 );
-// Counted manually on magnified simulator.
+
 const BoxDecoration _kDefaultRoundedBorderDecoration = BoxDecoration(
+  color: CupertinoDynamicColor.withBrightness(
+    color: CupertinoColors.white,
+    darkColor: CupertinoColors.black,
+  ),
   border: _kDefaultRoundedBorder,
-  borderRadius: BorderRadius.all(Radius.circular(4.0)),
+  borderRadius: BorderRadius.all(Radius.circular(5.0)),
 );
 
-// Value extracted via color reader from iOS simulator.
-const Color _kSelectionHighlightColor = Color(0x667FAACF);
-const CupertinoDynamicColor _kInactiveTextColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0x4D3C3C43),
-  darkColor: Color(0x4DEBEBF5),
-);
 const Color _kDisabledBackground = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFFAFAFA),
   darkColor: Color(0xFF050505),
+);
+
+// Value extracted from https://developer.apple.com/design/resources/.
+const CupertinoDynamicColor _kClearButtonColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x993C3C43),
+  darkColor: Color(0x99EBEBF5),
 );
 
 // An eyeballed value that moves the cursor slightly left of where it is
@@ -206,8 +213,8 @@ class CupertinoTextField extends StatefulWidget {
     this.padding = const EdgeInsets.all(6.0),
     this.placeholder,
     this.placeholderStyle = const TextStyle(
-      fontWeight: FontWeight.w300,
-      color: _kInactiveTextColor,
+      fontWeight: FontWeight.w400,
+      color: CupertinoColors.placeholderText,
     ),
     this.prefix,
     this.prefixMode = OverlayVisibilityMode.always,
@@ -783,7 +790,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                 child: Icon(
                   CupertinoIcons.clear_thick_circled,
                   size: 18.0,
-                  color: CupertinoDynamicColor.resolve(_kInactiveTextColor, context)?.withAlpha(60),
+                  color: CupertinoDynamicColor.resolve(_kClearButtonColor, context)?.withAlpha(60),
                 ),
               ),
             ),
@@ -824,7 +831,27 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final Color disabledColor = CupertinoDynamicColor.resolve(_kDisabledBackground, context);
 
     final Color decorationColor = CupertinoDynamicColor.resolve(widget.decoration?.color, context);
+
+    final BoxBorder border = widget.decoration.border;
+    Border resolvedBorder = border;
+    if (border is Border) {
+      BorderSide resolveBorderSide(BorderSide side) {
+        return side == BorderSide.none
+          ? side
+          : side.copyWith(color: CupertinoDynamicColor.resolve(side.color, context));
+      }
+      resolvedBorder = border == null || border.runtimeType != Border
+        ? border
+        : Border(
+          top: resolveBorderSide(border.top),
+          left: resolveBorderSide(border.left),
+          bottom: resolveBorderSide(border.bottom),
+          right: resolveBorderSide(border.right),
+        );
+    }
+
     final BoxDecoration effectiveDecoration = widget.decoration?.copyWith(
+      border: resolvedBorder,
       color: enabled ? decorationColor : (decorationColor ?? disabledColor),
     );
 
@@ -851,7 +878,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           maxLines: widget.maxLines,
           minLines: widget.minLines,
           expands: widget.expands,
-          selectionColor: _kSelectionHighlightColor,
+          selectionColor: CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context),
           selectionControls: widget.selectionEnabled
             ? cupertinoTextSelectionControls : null,
           onChanged: widget.onChanged,
