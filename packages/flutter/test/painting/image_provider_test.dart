@@ -293,6 +293,45 @@ void main() {
       }, skip: isBrowser);
     });
   });
+
+  test('ResizedImage resizes to the correct dimensions', () async {
+    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+    final MemoryImage imageProvider = MemoryImage(bytes);
+    final Size rawImageSize = await _resolveAndGetSize(imageProvider);
+    expect(rawImageSize, const Size(1, 1));
+
+    final ResizedImage resizedImage = ResizedImage(MemoryImage(bytes));
+    const Size resizeDims = Size(14, 7);
+    final ImageConfiguration resizeConfig = ImageConfiguration.empty.copyWith(size: resizeDims);
+    final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
+    expect(resizedImageSize, resizeDims);
+  });
+
+  test('ResizedImage does not resize when no size is passed', () async {
+    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+    final MemoryImage imageProvider = MemoryImage(bytes);
+    final Size rawImageSize = await _resolveAndGetSize(imageProvider);
+    expect(rawImageSize, const Size(1, 1));
+
+    final ResizedImage resizedImage = ResizedImage(MemoryImage(bytes));
+    final Size resizedImageSize = await _resolveAndGetSize(resizedImage);
+    expect(resizedImageSize, const Size(1, 1));
+  });
+}
+
+Future<Size> _resolveAndGetSize(ImageProvider imageProvider,
+    {ImageConfiguration configuration = ImageConfiguration.empty}) async {
+  final ImageStream stream = imageProvider.resolve(configuration);
+  final Completer<Size> completer = Completer<Size>();
+  final ImageStreamListener listener =
+    ImageStreamListener((ImageInfo image, bool synchronousCall) {
+      final int height = image.image.height;
+      final int width = image.image.width;
+      completer.complete(Size(width.toDouble(), height.toDouble()));
+    }
+  );
+  stream.addListener(listener);
+  return await completer.future;
 }
 
 class MockHttpClient extends Mock implements HttpClient {}

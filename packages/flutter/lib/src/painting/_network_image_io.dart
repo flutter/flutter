@@ -38,14 +38,14 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  ImageStreamCompleter load(image_provider.NetworkImage key) {
+  ImageStreamCompleter load(image_provider.NetworkImage key, {int targetWidth, int targetHeight}) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, chunkEvents),
+      codec: _loadAsync(key, chunkEvents, targetWidth: targetWidth, targetHeight: targetHeight),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       informationCollector: () {
@@ -75,8 +75,10 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
-    StreamController<ImageChunkEvent> chunkEvents,
-  ) async {
+    StreamController<ImageChunkEvent> chunkEvents, {
+    int targetWidth,
+    int targetHeight
+  }) async {
     try {
       assert(key == this);
 
@@ -101,7 +103,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       if (bytes.lengthInBytes == 0)
         throw Exception('NetworkImage is an empty file: $resolved');
 
-      return PaintingBinding.instance.instantiateImageCodec(bytes);
+      return PaintingBinding.instance.instantiateImageCodec(bytes, targetWidth: targetWidth, targetHeight: targetHeight);
     } finally {
       chunkEvents.close();
     }
