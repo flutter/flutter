@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -30,12 +31,15 @@ const EdgeInsetsGeometry _kUnalignedMenuMargin = EdgeInsetsDirectional.only(star
 
 typedef DropdownButtonBuilder = List<Widget> Function(BuildContext context);
 
+typedef _GetSelectedItemOffsetCallback = double Function(int selectedIndex);
+
 class _DropdownMenuPainter extends CustomPainter {
   _DropdownMenuPainter({
     this.color,
     this.elevation,
     this.selectedIndex,
     this.resize,
+    this.getSelectedItemOffset,
   }) : _painter = BoxDecoration(
          // If you add an image here, you must provide a real
          // configuration in the paint() function and you must provide some sort
@@ -50,12 +54,12 @@ class _DropdownMenuPainter extends CustomPainter {
   final int elevation;
   final int selectedIndex;
   final Animation<double> resize;
-
+  final _GetSelectedItemOffsetCallback getSelectedItemOffset;
   final BoxPainter _painter;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
+    final double selectedItemOffset = getSelectedItemOffset(selectedIndex);
     final Tween<double> top = Tween<double>(
       begin: selectedItemOffset.clamp(0.0, size.height - _kMenuItemHeight),
       end: 0.0,
@@ -165,7 +169,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           ),
           onTap: () => Navigator.pop(
             context,
-            _DropdownRouteResult<T>(route.items[itemIndex].value),
+            _DropdownRouteResult<T>(route.items[itemIndex].item.value),
           ),
         ),
       ));
@@ -179,6 +183,9 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           elevation: route.elevation,
           selectedIndex: route.selectedIndex,
           resize: _resize,
+          // This offset is passed as a callback, not a value, because it must
+          // be retrieved at paint time (after layout), not at build time.
+          getSelectedItemOffset: (int index) => route.getSelectedItemOffset(index),
         ),
         child: Semantics(
           scopesRoute: true,
@@ -194,7 +201,6 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
                 child: ListView(
                   controller: widget.route.scrollController,
                   padding: kMaterialListPadding,
-                  itemExtent: _kMenuItemHeight,
                   shrinkWrap: true,
                   children: children,
                 ),
@@ -303,9 +309,10 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.theme,
     @required this.style,
     this.barrierLabel,
-  }) : assert(style != null);
+  }) : assert(style != null),
+       itemHeights = List<double>.filled(items.length, kMinInteractiveDimension);
 
-  final List<DropdownMenuItem<T>> items;
+  final List<_MenuItem<T>> items;
   final EdgeInsetsGeometry padding;
   final Rect buttonRect;
   final int selectedIndex;
@@ -313,6 +320,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final ThemeData theme;
   final TextStyle style;
 
+  final List<double> itemHeights;
   ScrollController scrollController;
 
   @override
@@ -349,6 +357,17 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   void _dismiss() {
     navigator?.removeRoute(this);
   }
+
+  double getSelectedItemOffset(int selectedIndex) {
+    double offset = kMaterialListPadding.top;
+    if (items.isNotEmpty && selectedIndex > 0) {
+      assert(items.length == itemHeights?.length);
+      offset += itemHeights
+        .sublist(0, selectedIndex)
+        .reduce((double total, double height) => total + height);
+    }
+    return offset;
+  }
 }
 
 class _DropdownRoutePage<T> extends StatelessWidget {
@@ -367,7 +386,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
 
   final _DropdownRoute<T> route;
   final BoxConstraints constraints;
-  final List<DropdownMenuItem<T>> items;
+  final List<_MenuItem<T>> items;
   final EdgeInsetsGeometry padding;
   final Rect buttonRect;
   final int selectedIndex;
@@ -391,10 +410,13 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     final double topLimit = math.min(_kMenuItemHeight, buttonTop);
     final double bottomLimit = math.max(availableHeight - _kMenuItemHeight, buttonBottom);
 
-    final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
+    final List<double> itemHeights = route.itemHeights;
+    final double selectedItemOffset = route.getSelectedItemOffset(selectedIndex);
 
     double menuTop = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
-    final double preferredMenuHeight = (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
+    double preferredMenuHeight = kMaterialListPadding.vertical;
+    if (items.isNotEmpty)
+      preferredMenuHeight += itemHeights.reduce((double total, double height) => total + height);
 
     // If there are too many elements in the menu, we need to shrink it down
     // so it is at most the maxMenuHeight.
@@ -457,6 +479,44 @@ class _DropdownRoutePage<T> extends StatelessWidget {
   }
 }
 
+// This widget enables _DropdownRoute to look up the sizes of
+// each menu item. These sizes are used to compute the offset of the selected
+// item so that _DropdownRoutePage can align the vertical center of the
+// selected item lines up with the vertical center of the dropdown button,
+// as closely as posible.
+class _MenuItem<T> extends SingleChildRenderObjectWidget {
+ const _MenuItem({
+    Key key,
+    @required this.onLayout,
+    @required this.item,
+  }) : assert(onLayout != null), assert(item != null), super(key: key, child: item);
+
+  final ValueChanged<Size> onLayout;
+  final DropdownMenuItem<T> item;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderMenuItem(onLayout);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderMenuItem renderObject) {
+    renderObject.onLayout = onLayout;
+  }
+}
+
+class _RenderMenuItem extends RenderProxyBox {
+  _RenderMenuItem(this.onLayout, [RenderBox child]) : assert(onLayout != null), super(child);
+
+  ValueChanged<Size> onLayout;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    onLayout(size);
+  }
+}
+
 /// An item in a menu created by a [DropdownButton].
 ///
 /// The type `T` is the type of the value the entry represents. All the entries
@@ -484,10 +544,12 @@ class DropdownMenuItem<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: _kMenuItemHeight,
-      alignment: AlignmentDirectional.centerStart,
-      child: child,
+    return IntrinsicHeight(
+      child: Container(
+        alignment: AlignmentDirectional.centerStart,
+        constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
+        child: child,
+      ),
     );
   }
 }
@@ -826,9 +888,19 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       ? _kAlignedMenuMargin
       : _kUnalignedMenuMargin;
 
+    final List<_MenuItem<T>> menuItems = List<_MenuItem<T>>(widget.items.length);
+    for (int index = 0; index < widget.items.length; index += 1) {
+      menuItems[index] = _MenuItem<T>(
+        item: widget.items[index],
+        onLayout: (Size size) {
+          _dropdownRoute.itemHeights[index] = size.height;
+        },
+      );
+    }
+
     assert(_dropdownRoute == null);
     _dropdownRoute = _DropdownRoute<T>(
-      items: widget.items,
+      items: menuItems,
       buttonRect: menuMargin.resolve(textDirection).inflateRect(itemRect),
       padding: _kMenuItemPadding.resolve(textDirection),
       selectedIndex: _selectedIndex ?? 0,
@@ -899,7 +971,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         ? List<Widget>.from(widget.items)
         : widget.selectedItemBuilder(context).map((Widget item) {
             return Container(
-              height: _kMenuItemHeight,
+              constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
               alignment: AlignmentDirectional.centerStart,
               child: item,
             );
