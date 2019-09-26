@@ -63,9 +63,8 @@ class Plugin {
     }
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
       return Plugin._fromMultiPlatformYaml(name, path, pluginYaml);
-    } else {
-      return Plugin._fromLegacyYaml(name, path, pluginYaml); // ignore: deprecated_member_use_from_same_package
     }
+    return Plugin._fromLegacyYaml(name, path, pluginYaml); // ignore: deprecated_member_use_from_same_package
   }
 
   factory Plugin._fromMultiPlatformYaml(String name, String path, dynamic pluginYaml) {
@@ -79,8 +78,11 @@ class Plugin {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
 
     if (platformsYaml[AndroidPlugin.kConfigKey] != null) {
-      platforms[AndroidPlugin.kConfigKey] =
-          AndroidPlugin.fromYaml(name, platformsYaml[AndroidPlugin.kConfigKey]);
+      platforms[AndroidPlugin.kConfigKey] = AndroidPlugin.fromYaml(
+        name,
+        platformsYaml[AndroidPlugin.kConfigKey],
+        path,
+      );
     }
 
     if (platformsYaml[IOSPlugin.kConfigKey] != null) {
@@ -122,12 +124,12 @@ class Plugin {
     if (pluginYaml != null && pluginClass != null) {
       final String androidPackage = pluginYaml['androidPackage'];
       if (androidPackage != null) {
-        platforms[AndroidPlugin.kConfigKey] =
-            AndroidPlugin(
-              name: name,
-              package: pluginYaml['androidPackage'],
-              pluginClass: pluginClass,
-            );
+        platforms[AndroidPlugin.kConfigKey] = AndroidPlugin(
+          name: name,
+          package: pluginYaml['androidPackage'],
+          pluginClass: pluginClass,
+          pluginPath: path,
+        );
       }
 
       final String iosPrefix = pluginYaml['iosPrefix'] ?? '';
@@ -206,7 +208,11 @@ class Plugin {
   final Map<String, PluginPlatform> platforms;
 }
 
-Plugin _pluginFromPubspec(String name, Uri packageRoot) {
+Plugin _pluginFromPubspec(
+  String name,
+  Uri packageRoot,
+  AndroidProject androidProject,
+) {
   final String pubspecPath = fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
   if (!fs.isFileSync(pubspecPath)) {
     return null;
@@ -221,14 +227,21 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
   }
   final String packageRootPath = fs.path.fromUri(packageRoot);
   printTrace('Found plugin $name at $packageRootPath');
-  return Plugin.fromYaml(name, packageRootPath, flutterConfig['plugin']);
+  return Plugin.fromYaml(
+    name,
+    packageRootPath,
+    flutterConfig['plugin'],
+  );
 }
 
 List<Plugin> findPlugins(FlutterProject project) {
   final List<Plugin> plugins = <Plugin>[];
   Map<String, Uri> packages;
   try {
-    final String packagesFile = fs.path.join(project.directory.path, PackageMap.globalPackagesPath);
+    final String packagesFile = fs.path.join(
+      project.directory.path,
+      PackageMap.globalPackagesPath,
+    );
     packages = PackageMap(packagesFile).map;
   } on FormatException catch (e) {
     printTrace('Invalid .packages file: $e');
@@ -236,7 +249,7 @@ List<Plugin> findPlugins(FlutterProject project) {
   }
   packages.forEach((String name, Uri uri) {
     final Uri packageRoot = uri.resolve('..');
-    final Plugin plugin = _pluginFromPubspec(name, packageRoot);
+    final Plugin plugin = _pluginFromPubspec(name, packageRoot, project.android);
     if (plugin != null) {
       plugins.add(plugin);
     }
@@ -269,7 +282,7 @@ String _readFlutterPluginsList(FlutterProject project) {
       : null;
 }
 
-const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
+const String _androidPluginRegistryTemplateOldEmbedding = '''package io.flutter.plugins;
 
 import io.flutter.plugin.common.PluginRegistry;
 {{#plugins}}
@@ -300,6 +313,29 @@ public final class GeneratedPluginRegistrant {
 }
 ''';
 
+const String _androidPluginRegistryTemplateNewEmbedding = '''package dev.flutter.plugins;
+
+import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
+
+/**
+ * Generated file. Do not edit.
+ */
+public final class GeneratedPluginRegistrant {
+  public static void registerWith(FlutterEngine flutterEngine) {
+    ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
+{{#plugins}}
+  {{#usesNewEmbedding}}
+    flutterEngine.getPlugins().add(new {{package}}.{{class}}());
+  {{/usesNewEmbedding}}
+  {{^usesNewEmbedding}}
+    {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
+  {{/usesNewEmbedding}}
+{{/plugins}}
+  }
+}
+''';
+
 List<Map<String, dynamic>> _extractPlatformMaps(List<Plugin> plugins, String type) {
   final List<Map<String, dynamic>> pluginConfigs = <Map<String, dynamic>>[];
   for (Plugin p in plugins) {
@@ -316,21 +352,41 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': androidPlugins,
   };
-
   final String javaSourcePath = fs.path.join(
     project.android.pluginRegistrantHost.path,
     'src',
     'main',
     'java',
   );
+
+  bool canUseNewEmbedding = false;
+  if (featureFlags.isNewAndroidEmbeddingEnabled) {
+    assert(project.android != null);
+    final File androidManifest = project.android.appManifestFile;
+    assert(androidManifest.existsSync());
+    final String manifestContent = androidManifest.readAsStringSync();
+    if (!manifestContent.contains('usesNewEmbedding:true')) {
+      canUseNewEmbedding = false;
+      printTrace('AndroidManifest.xml doesn\'t contain usesNewEmbedding:true');
+    } else {
+      canUseNewEmbedding = true;
+    }
+  }
   final String registryPath = fs.path.join(
     javaSourcePath,
-    'io',
+    canUseNewEmbedding ? 'dev' : 'io',
     'flutter',
     'plugins',
     'GeneratedPluginRegistrant.java',
   );
-  _renderTemplateToFile(_androidPluginRegistryTemplate, context, registryPath);
+  printTrace('Generating $registryPath');
+  _renderTemplateToFile(
+    canUseNewEmbedding ?
+      _androidPluginRegistryTemplateNewEmbedding :
+      _androidPluginRegistryTemplateOldEmbedding,
+    context,
+    registryPath,
+  );
 }
 
 const String _objcPluginRegistryHeaderTemplate = '''//

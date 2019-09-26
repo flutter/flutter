@@ -695,6 +695,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
+    this.isNewAndroidEmbeddingEnabled = false,
 });
 
   @override
@@ -708,4 +709,7 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isWindowsEnabled;
+
+  @override
+  final bool isNewAndroidEmbeddingEnabled;
 }

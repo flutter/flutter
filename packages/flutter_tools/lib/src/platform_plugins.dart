@@ -5,6 +5,10 @@
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
+import 'base/common.dart';
+import 'base/file_system.dart';
+import 'globals.dart';
+
 /// Marker interface for all platform specific plugin config impls.
 abstract class PluginPlatform {
   const PluginPlatform();
@@ -21,14 +25,16 @@ class AndroidPlugin extends PluginPlatform {
     @required this.name,
     @required this.package,
     @required this.pluginClass,
+    @required this.pluginPath,
   });
 
-  factory AndroidPlugin.fromYaml(String name, YamlMap yaml) {
+  factory AndroidPlugin.fromYaml(String name, YamlMap yaml, String pluginPath) {
     assert(validate(yaml));
     return AndroidPlugin(
       name: name,
       package: yaml['package'],
       pluginClass: yaml['pluginClass'],
+      pluginPath: pluginPath,
     );
   }
 
@@ -44,6 +50,7 @@ class AndroidPlugin extends PluginPlatform {
   final String name;
   final String package;
   final String pluginClass;
+  final String pluginPath;
 
   @override
   Map<String, dynamic> toMap() {
@@ -51,7 +58,56 @@ class AndroidPlugin extends PluginPlatform {
       'name': name,
       'package': package,
       'class': pluginClass,
+      'usesNewEmbedding': _usesNewEmbedding,
     };
+  }
+
+  /// Returns [true] if the plugin is using the new Android embedding.
+  bool get _usesNewEmbedding {
+    if (pluginPath == null) {
+      return false;
+    }
+    final String baseMainPath = fs.path.join(
+      pluginPath,
+      'android',
+      'src',
+      'main',
+    );
+    File mainPluginClass = fs.file(
+      fs.path.join(
+        baseMainPath,
+        'java',
+        package.replaceAll('.', fs.path.separator),
+        '$pluginClass.java',
+      )
+    );
+    if (!mainPluginClass.existsSync()) {
+      mainPluginClass = fs.file(
+        fs.path.join(
+          baseMainPath,
+          'kotlin',
+          package.replaceAll('.', fs.path.separator),
+          '$pluginClass.kt',
+        )
+      );
+    }
+    if (!mainPluginClass.existsSync()) {
+      printTrace('File $mainPluginClass doesn\'t exist');
+      return false;
+    }
+    String mainClassContent;
+    try {
+      mainClassContent = mainPluginClass.readAsStringSync();
+    } on FileSystemException {
+      throwToolExit(
+        'Couldn\'t read file $mainPluginClass even though it exists. '
+        'Please verify that this file has read permission and try again.'
+      );
+    }
+    final bool usesNewEmbedding = mainClassContent
+        .contains('io.flutter.embedding.engine.plugins.FlutterPlugin');
+    printTrace('$mainPluginClass uses new embedding: $usesNewEmbedding');
+    return usesNewEmbedding;
   }
 }
 
