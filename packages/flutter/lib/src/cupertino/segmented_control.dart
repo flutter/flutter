@@ -57,6 +57,13 @@ const Duration _kHighlightAnimationDuration = Duration(milliseconds: 200);
 
 typedef _IntCallback = void Function(int);
 
+class _FontWeightTween extends Tween<FontWeight> {
+  _FontWeightTween({ FontWeight begin, FontWeight end}) : super(begin: begin, end: end);
+
+  @override
+  FontWeight lerp(double t) => FontWeight.lerp(begin, end, t);
+}
+
 /// An iOS-style segmented control.
 ///
 /// Displays the widgets provided in the [Map] of [children] in a
@@ -234,7 +241,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
     with TickerProviderStateMixin<CupertinoSegmentedControl<T>> {
 
   final Map<T, AnimationController> _highlightControllers = <T, AnimationController>{};
-  final Tween<FontWeight> highlightTween = Tween<FontWeight>(begin: FontWeight.normal, end: FontWeight.w600);
+  final Tween<FontWeight> highlightTween = _FontWeightTween(begin: FontWeight.normal, end: FontWeight.w600);
 
   final Map<T, AnimationController> _pressControllers = <T, AnimationController>{};
   final Tween<double> pressTween = Tween<double>(begin: 1, end: 0.2);
@@ -304,9 +311,6 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
         _pressControllers[newKey] = createFadeoutAnimationController();
       }
     }
-
-    onHighlightedChange(widget.groupValue);
-    selected = widget.groupValue;
   }
 
   @override
@@ -327,19 +331,34 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   void onHighlightedChange(T newValue) {
     if (highlighted == newValue)
       return;
+    if (newValue != null) {
+      _highlightControllers[newValue].animateTo(1, duration: _kHighlightAnimationDuration, curve: Curves.ease);
+    }
+    if (highlighted != null) {
+      _highlightControllers[highlighted]?.animateTo(0, duration: _kHighlightAnimationDuration, curve: Curves.ease);
+    }
     highlighted = newValue;
+    print('highlighted: $newValue');
   }
 
   T pressed;
   void onPressedChange(T newValue) {
     if (pressed == newValue)
       return;
+
+    print('pressed: $newValue');
+    if (pressed != null) {
+      _pressControllers[pressed]?.animateTo(0, duration: _kOpacityAnimationDuration, curve: Curves.ease);
+    }
+    if (newValue != highlighted && newValue != null) {
+      _pressControllers[newValue].animateTo(1, duration: _kOpacityAnimationDuration, curve: Curves.ease);
+    }
     pressed = newValue;
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _gestureChildren = <Widget>[];
+    final List<Widget> children = <Widget>[];
 
     List<T> keys;
 
@@ -362,22 +381,23 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
         child: Semantics(
           button: true,
           inMutuallyExclusiveGroup: true,
-          selected: widget.groupValue == currentKey,
-          child: Opacity(
-            alwaysIncludeSemantics: true,
-            opacity: pressTween.evaluate(_pressControllers[currentKey]),
-            child: widget.children[currentKey],
+          selected: selected == currentKey,
+          child: Center(
+            child: Opacity(
+              alwaysIncludeSemantics: true,
+              opacity: pressTween.evaluate(_pressControllers[currentKey]),
+              child: widget.children[currentKey],
+            ),
           ),
         ),
       );
 
-      _gestureChildren.add(child);
+      children.add(child);
     }
 
     final Widget box = _SegmentedControlRenderWidget<T>(
-      children: _gestureChildren,
-      //selectedIndex: selected,
-      //pressedIndex: pressedIndex,
+      children: children,
+      selectedIndex: keys.indexOf(selected),
       onPressedIndexChange: (int index) { onPressedChange(index == null ? null : keys[index]); },
       onSelectedIndexChange: (int index) { onHighlightedChange(keys[index]); },
       vsync: this,
@@ -437,8 +457,8 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderSegmentedControl<T> renderObject) {
     renderObject
-      ..selectedIndex = selectedIndex
-      ..pressedIndex = pressedIndex
+      //..selectedIndex = selectedIndex
+      //..pressedIndex = pressedIndex
       ..thumbColor = CupertinoDynamicColor.resolve(_kThumbColor, context);
   }
 }
@@ -671,6 +691,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     if (startedOnSelectedSegment) {
       thumbScaleController.forward();
     }
+    print('$localDragOffset - $size');
     if (localDragOffset != null && size.contains(localDragOffset)) {
       selectedIndex = indexFromLocation(localDragOffset);
     }
@@ -689,7 +710,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   bool hasDraggedTooFar(DragUpdateDetails details) {
     final Offset offCenter = details.localPosition - Offset(size.width/2, size.height/2);
-    return math.pow(offCenter.dx.abs() - size.width/2, 2) + math.pow(offCenter.dy.abs() - size.height/2, 2) > _kTouchYDistanceThreshold;
+    return math.pow(math.max(0, offCenter.dx.abs() - size.width/2), 2) + math.pow(math.max(0, offCenter.dy.abs() - size.height/2), 2) > _kTouchYDistanceThreshold;
   }
 
   @override
