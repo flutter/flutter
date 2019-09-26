@@ -121,23 +121,20 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// If no [groupValue] is provided, or the [groupValue] is null, no widget will
   /// appear as selected. The [groupValue] must be either null or one of the keys
   /// in the [children] map.
-  CupertinoSegmentedControl({
+  CupertinoSlidingSegmentedControl({
     Key key,
     @required this.children,
     @required this.onValueChanged,
-    this.groupValue,
-    this.unselectedColor,
-    this.selectedColor,
-    this.borderColor,
-    this.pressedColor,
+    this.controller,
+    this.thumbColor = _kThumbColor,
     this.padding,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
   }) : assert(children != null),
        assert(children.length >= 2),
        assert(onValueChanged != null),
        assert(
-         groupValue == null || children.keys.any((T child) => child == groupValue),
-         'The groupValue must be either null or one of the keys in the children map.',
+         controller.value == null || children.keys.any((T child) => child == controller.value),
+         "The controller's value must be either null or one of the keys in the children map.",
        ),
        super(key: key);
 
@@ -152,7 +149,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   ///
   /// This must be one of the keys in the [Map] of [children].
   /// If this attribute is null, no widget will be initially selected.
-  final T groupValue;
+  final ValueNotifier<T> controller;
 
   /// The callback that is called when a new option is tapped.
   ///
@@ -202,32 +199,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   final ValueChanged<T> onValueChanged;
 
   final Color backgroundColor;
-  /// The color used to fill the backgrounds of unselected widgets and as the
-  /// text color of the selected widget.
-  ///
-  /// Defaults to [CupertinoTheme]'s `primaryContrastingColor` if null.
-  @deprecated
-  final Color unselectedColor;
-
-  /// The color used to fill the background of the selected widget and as the text
-  /// color of unselected widgets.
-  ///
-  /// Defaults to [CupertinoTheme]'s `primaryColor` if null.
-  @deprecated
-  final Color selectedColor;
-
-  /// The color used as the border around each widget.
-  ///
-  /// Defaults to [CupertinoTheme]'s `primaryColor` if null.
-  @deprecated
-  final Color borderColor;
-
-  /// The color used to fill the background of the widget the user is
-  /// temporarily interacting with through a long press or drag.
-  ///
-  /// Defaults to the selectedColor at 20% opacity if null.
-  @deprecated
-  final Color pressedColor;
+  final Color thumbColor;
 
   /// The CupertinoSegmentedControl will be placed inside this padding
   ///
@@ -238,8 +210,8 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   _SegmentedControlState<T> createState() => _SegmentedControlState<T>();
 }
 
-class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
-    with TickerProviderStateMixin<CupertinoSegmentedControl<T>> {
+class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T>>
+    with TickerProviderStateMixin<CupertinoSlidingSegmentedControl<T>> {
 
   final Map<T, AnimationController> _highlightControllers = <T, AnimationController>{};
   final Tween<FontWeight> highlightTween = _FontWeightTween(begin: FontWeight.normal, end: FontWeight.w600);
@@ -248,6 +220,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   final Tween<double> pressTween = Tween<double>(begin: 1, end: 0.2);
 
   TextDirection textDirection;
+  ValueNotifier<T> controller;
 
   AnimationController createHighlightAnimationController({ bool isCompleted = false }) {
     return AnimationController(
@@ -276,11 +249,13 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   void initState() {
     super.initState();
 
-    highlighted = widget.groupValue;
-    selected = widget.groupValue;
+    controller = widget.controller;
+    _highlighted = controller.value;
 
     for (T currentKey in widget.children.keys) {
-      _highlightControllers[currentKey] = createHighlightAnimationController(isCompleted: currentKey == widget.groupValue);
+      _highlightControllers[currentKey] = createHighlightAnimationController(
+        isCompleted: currentKey == controller.value,  // Highlight the current selection.
+      );
       _pressControllers[currentKey] = createFadeoutAnimationController();
     }
   }
@@ -293,9 +268,10 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   }
 
   @override
-  void didUpdateWidget(CupertinoSegmentedControl<T> oldWidget) {
+  void didUpdateWidget(CupertinoSlidingSegmentedControl<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    // Update animation controllers.
     for (T oldKey in oldWidget.children.keys) {
       if (!widget.children.containsKey(oldKey)) {
         _highlightControllers[oldKey].dispose();
@@ -312,6 +288,12 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
         _pressControllers[newKey] = createFadeoutAnimationController();
       }
     }
+
+    if (controller.value != oldWidget.controller.value) {
+      highlighted = widget.controller.value;
+    }
+
+    controller = widget.controller;
   }
 
   @override
@@ -326,35 +308,41 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
     super.dispose();
   }
 
-  T selected;
-
-  T highlighted;
-  void onHighlightedChange(T newValue) {
-    if (highlighted == newValue)
+  void animateHighlightController({ T at, bool forward }) {
+    if (at == null)
       return;
-    if (newValue != null) {
-      _highlightControllers[newValue].animateTo(1, duration: _kHighlightAnimationDuration, curve: Curves.ease);
-    }
-    if (highlighted != null) {
-      _highlightControllers[highlighted]?.animateTo(0, duration: _kHighlightAnimationDuration, curve: Curves.ease);
-    }
-    highlighted = newValue;
+    final AnimationController controller = _highlightControllers[at];
+    assert(!forward || controller != null);
+    controller?.animateTo(forward ? 1 : 0, duration: _kHighlightAnimationDuration, curve: Curves.ease);
+  }
+
+  T _highlighted;
+  set highlighted(T newValue) {
+    if (_highlighted == newValue)
+      return;
+    animateHighlightController(at: newValue, forward: true);
+    animateHighlightController(at: _highlighted, forward: false);
+    _highlighted = newValue;
     print('highlighted: $newValue');
   }
 
-  T pressed;
-  void onPressedChange(T newValue) {
-    if (pressed == newValue)
+  T _pressed;
+  set pressed(T newValue) {
+    if (_pressed == newValue)
       return;
 
     print('pressed: $newValue');
-    if (pressed != null) {
-      _pressControllers[pressed]?.animateTo(0, duration: _kOpacityAnimationDuration, curve: Curves.ease);
+    if (_pressed != null) {
+      _pressControllers[_pressed]?.animateTo(0, duration: _kOpacityAnimationDuration, curve: Curves.ease);
     }
-    if (newValue != highlighted && newValue != null) {
+    if (newValue != _highlighted && newValue != null) {
       _pressControllers[newValue].animateTo(1, duration: _kOpacityAnimationDuration, curve: Curves.ease);
     }
-    pressed = newValue;
+    _pressed = newValue;
+  }
+
+  void _didChangeSelectedByGesture() {
+    controller.value = _highlighted;
   }
 
   @override
@@ -382,7 +370,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
         child: Semantics(
           button: true,
           inMutuallyExclusiveGroup: true,
-          selected: selected == currentKey,
+          selected: controller.value == currentKey,
           child: Center(
             child: Opacity(
               alwaysIncludeSemantics: true,
@@ -396,11 +384,14 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
       children.add(child);
     }
 
+    final int selectedIndex = controller.value == null ? null : keys.indexOf(controller.value);
+
     final Widget box = _SegmentedControlRenderWidget<T>(
       children: children,
-      selectedIndex: keys.indexOf(selected),
-      onPressedIndexChange: (int index) { onPressedChange(index == null ? null : keys[index]); },
-      onSelectedIndexChange: (int index) { onHighlightedChange(keys[index]); },
+      selectedIndex: selectedIndex,
+      onPressedIndexChange: (int index) { pressed = index == null ? null : keys[index]; },
+      onSelectedIndexChange: (int index) { highlighted = keys[index]; },
+      didChangeSelectedByGesture: _didChangeSelectedByGesture,
       vsync: this,
     );
 
@@ -423,11 +414,11 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
     Key key,
     List<Widget> children = const <Widget>[],
     @required this.selectedIndex,
-    @required this.pressedIndex,
     @required this.backgroundColors,
     @required this.borderColor,
     @required this.onSelectedIndexChange,
     @required this.onPressedIndexChange,
+    @required this.didChangeSelectedByGesture,
     @required this.vsync,
   }) : super(
           key: key,
@@ -435,31 +426,30 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
         );
 
   final int selectedIndex;
-  final int pressedIndex;
   final List<Color> backgroundColors;
   final Color borderColor;
   final TickerProvider vsync;
 
   final _IntCallback onSelectedIndexChange;
   final _IntCallback onPressedIndexChange;
+  final VoidCallback didChangeSelectedByGesture;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderSegmentedControl<T>(
       selectedIndex: selectedIndex,
-      pressedIndex: pressedIndex,
       thumbColor: CupertinoDynamicColor.resolve(_kThumbColor, context),
       onPressedIndexChange: onPressedIndexChange,
       onSelectedIndexChange: onSelectedIndexChange,
       vsync: vsync,
-    );
+    )..didChangeSelectedByGesture = didChangeSelectedByGesture;
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderSegmentedControl<T> renderObject) {
     renderObject
-      //..selectedIndex = selectedIndex
-      //..pressedIndex = pressedIndex
+      ..guardedSetSelectedIndex(selectedIndex)
+      ..didChangeSelectedByGesture = didChangeSelectedByGesture
       ..thumbColor = CupertinoDynamicColor.resolve(_kThumbColor, context);
   }
 }
@@ -579,6 +569,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   final _IntCallback onSelectedIndexChange;
   final _IntCallback onPressedIndexChange;
+  VoidCallback didChangeSelectedByGesture;
 
   @override
   void insert(RenderBox child, { RenderBox after }) {
@@ -619,6 +610,13 @@ class _RenderSegmentedControl<T> extends RenderBox
     onSelectedIndexChange(value);
     markNeedsPaint();
     markNeedsSemanticsUpdate();
+  }
+
+  // Ignore set selectedIndex when a valid user gesture is in progress.
+  void guardedSetSelectedIndex(int value) {
+    if (startedOnSelectedSegment == true)
+      return;
+    selectedIndex = value;
   }
 
   int get pressedIndex => _pressedIndex;
@@ -692,13 +690,16 @@ class _RenderSegmentedControl<T> extends RenderBox
   void _onEnd(DragEndDetails details) {
     if (startedOnSelectedSegment) {
       playThumbScaleAnimation(isExpanding: true);
+      didChangeSelectedByGesture();
     }
     print('$localDragOffset - $size');
     if (localDragOffset != null && size.contains(localDragOffset)) {
       selectedIndex = indexFromLocation(localDragOffset);
+      didChangeSelectedByGesture();
     }
     pressedIndex = null;
     localDragOffset = null;
+    startedOnSelectedSegment = null;
   }
 
   void _onCancel() {
@@ -708,9 +709,10 @@ class _RenderSegmentedControl<T> extends RenderBox
 
     pressedIndex = null;
     localDragOffset = null;
+    startedOnSelectedSegment = null;
   }
 
-  void playThumbScaleAnimation({ bool isExpanding }) {
+  void playThumbScaleAnimation({ @required bool isExpanding }) {
     assert(isExpanding != null);
 
     thumbScaleTween = Tween<double>(begin: currentThumbScale, end: isExpanding ? 1 : _kMinThumbScale);
