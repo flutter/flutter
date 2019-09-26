@@ -1401,14 +1401,14 @@ plugin2=${plugin2.path}
       expect(actualGradlewCall, contains('/path/to/project/.android/gradlew'));
       expect(actualGradlewCall, contains('-PlocalEngineOut=out/android_arm'));
     }, overrides: <Type, Generator>{
-        AndroidSdk: () => mockAndroidSdk,
-        AndroidStudio: () => mockAndroidStudio,
-        Artifacts: () => mockArtifacts,
-        Cache: () => cache,
-        ProcessManager: () => mockProcessManager,
-        Platform: () => android,
-        FileSystem: () => fs,
-      });
+      AndroidSdk: () => mockAndroidSdk,
+      AndroidStudio: () => mockAndroidStudio,
+      Artifacts: () => mockArtifacts,
+      Cache: () => cache,
+      ProcessManager: () => mockProcessManager,
+      Platform: () => android,
+      FileSystem: () => fs,
+    });
   });
 }
 
