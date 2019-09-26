@@ -676,6 +676,56 @@ void main() {
       expect(spy.messages, isEmpty);
     });
   });
+
+  group('SelectionChangeDetection', () {
+    SelectionChangeDetection _selectionChangeDetection;
+
+    test('Change detected on an input field', () {
+      final InputElement input = document.getElementsByTagName('input')[0];
+      _selectionChangeDetection = SelectionChangeDetection(input);
+
+      input.value = 'foo\nbar';
+      input.setSelectionRange(1, 3);
+
+      expect(_selectionChangeDetection.detectChange(), true);
+      expect(_selectionChangeDetection.detectChange(), false);
+
+      input.setSelectionRange(1, 5);
+
+      expect(_selectionChangeDetection.detectChange(), true);
+    });
+
+    test('Change detected on an text area', () {
+      final TextAreaElement textarea =
+          document.getElementsByTagName('textarea')[0];
+      _selectionChangeDetection = SelectionChangeDetection(textarea);
+
+      textarea.value = 'foo\nbar';
+      textarea.setSelectionRange(4, 6);
+
+      expect(_selectionChangeDetection.detectChange(), true);
+      expect(_selectionChangeDetection.detectChange(), false);
+
+      textarea.setSelectionRange(4, 5);
+
+      expect(_selectionChangeDetection.detectChange(), true);
+    });
+
+    test('No change if selection stayed the same', () {
+      final InputElement input = document.getElementsByTagName('input')[0];
+      _selectionChangeDetection = SelectionChangeDetection(input);
+
+      input.value = 'foo\nbar';
+      input.setSelectionRange(1, 3);
+
+      expect(_selectionChangeDetection.detectChange(), true);
+      expect(_selectionChangeDetection.detectChange(), false);
+
+      input.setSelectionRange(1, 3);
+
+      expect(_selectionChangeDetection.detectChange(), false);
+    });
+  });
 }
 
 MethodCall configureSetStyleMethodCall(int fontSize, String fontFamily,
