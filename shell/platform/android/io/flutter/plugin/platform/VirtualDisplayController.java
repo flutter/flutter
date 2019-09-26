@@ -9,6 +9,7 @@ import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Surface;
 import android.view.View;
@@ -157,6 +158,26 @@ class VirtualDisplayController {
         view.dispose();
         virtualDisplay.release();
         textureEntry.release();
+    }
+
+    /**
+     * See {@link PlatformView#onFlutterViewAttached(View)}
+     */
+    /*package*/ void onFlutterViewAttached(@NonNull View flutterView) {
+        if (presentation == null || presentation.getView() == null) {
+            return;
+        }
+        presentation.getView().onFlutterViewAttached(flutterView);
+    }
+
+    /**
+     * See {@link PlatformView#onFlutterViewDetached()}
+     */
+    /*package*/ void onFlutterViewDetached() {
+        if (presentation == null || presentation.getView() == null) {
+            return;
+        }
+        presentation.getView().onFlutterViewDetached();
     }
 
     /*package*/ void onInputConnectionLocked() {
