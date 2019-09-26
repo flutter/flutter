@@ -81,9 +81,12 @@ class FocusAttachment {
     assert(_node != null);
     assert(_focusDebug('Detaching node:', <String>[_node.toString(), 'With enclosing scope ${_node.enclosingScope}']));
     if (isAttached) {
-      if (_node.hasPrimaryFocus) {
-        _node.unfocus();
+      if (_node.hasPrimaryFocus || (_node._manager != null && _node._manager._nextFocus == _node)) {
+        _node.unfocus(focusPrevious: true);
       }
+      assert(_node._manager?._nextFocus != _node);
+      assert(!_node.hasPrimaryFocus);
+      _node._manager?._dirtyNodes?.remove(_node);
       _node._parent?._removeChild(_node);
       _node._attachment = null;
     }
@@ -418,14 +421,15 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///     its descendants.
   ///   - [FocusTraversalPolicy], a class that can be extended to describe a
   ///     traversal policy.
-  bool get canRequestFocus => _canRequestFocus;
+  bool get canRequestFocus => _canRequestFocus && (enclosingScope == null || enclosingScope.canRequestFocus);
   bool _canRequestFocus;
+  @mustCallSuper
   set canRequestFocus(bool value) {
     if (value != _canRequestFocus) {
-      _canRequestFocus = value;
-      if (!_canRequestFocus) {
-        unfocus();
+      if (!value) {
+        unfocus(focusPrevious: true);
       }
+      _canRequestFocus = value;
       _manager?._dirtyNodes?.add(this);
       _manager?._markNeedsUpdate();
     }
@@ -463,8 +467,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// An iterator over the children that are allowed to be traversed by the
   /// [FocusTraversalPolicy].
   Iterable<FocusNode> get traversalChildren {
+    if (!canRequestFocus) {
+      return const <FocusNode>[];
+    }
     return children.where(
-      (FocusNode node) => !node.skipTraversal && node.canRequestFocus,
+      (FocusNode node) => !node.skipTraversal && node._canRequestFocus,
     );
   }
 
@@ -625,18 +632,28 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// Has no effect on nodes that return true from [hasFocus], but false from
   /// [hasPrimaryFocus].
-  void unfocus() {
-    if (hasPrimaryFocus) {
-      final FocusScopeNode scope = enclosingScope;
-      assert(scope != null, 'Node has primary focus, but no enclosingScope.');
-      scope._focusedChildren.remove(this);
-      _manager?._willUnfocusNode(this);
+  ///
+  /// if [focusPrevious] is true, then rather than losing all focus, the focus
+  /// will be moved to the node that the [enclosingScope] thinks should have it,
+  /// based on its history of nodes that were set as first focus on it using
+  /// [FocusScopeNode.setFirstFocus].
+  void unfocus({ bool focusPrevious = false }) {
+    assert(focusPrevious != null);
+    if (!hasFocus && (_manager != null && _manager._nextFocus != this)) {
       return;
     }
-    if (hasFocus) {
+    if (!hasPrimaryFocus) {
       // If we are in the focus chain, but not the primary focus, then unfocus
       // the primary instead.
-      _manager.primaryFocus.unfocus();
+      _manager?.primaryFocus?.unfocus(focusPrevious: focusPrevious);
+    }
+    _manager?._willUnfocusNode(this);
+    final FocusScopeNode scope = enclosingScope;
+    if (scope != null) {
+      scope._focusedChildren.remove(this);
+      if (focusPrevious) {
+        scope._doRequestFocus();
+      }
     }
   }
 
@@ -667,8 +684,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   void _markAsDirty({FocusNode newFocus}) {
     if (_manager != null) {
       // If we have a manager, then let it handle the focus change.
-      _manager._dirtyNodes?.add(this);
       _manager._markNeedsUpdate(newFocus: newFocus);
+      _manager._dirtyNodes?.add(this);
     } else {
       // If we don't have a manager, then change the focus locally.
       newFocus?._setAsFocusedChild();
@@ -748,7 +765,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   @override
   void dispose() {
-    _manager?._willDisposeFocusNode(this);
+    // Detaching will also unfocus and clean up the manager's data structures.
     _attachment?.detach();
     super.dispose();
   }
@@ -966,10 +983,6 @@ class FocusScopeNode extends FocusNode {
 
   @override
   void _doRequestFocus() {
-    if (!canRequestFocus) {
-      return;
-    }
-
     // Start with the primary focus as the focused child of this scope, if there
     // is one. Otherwise start with this node itself.
     FocusNode primaryFocus = focusedChild ?? this;
@@ -980,22 +993,31 @@ class FocusScopeNode extends FocusNode {
       final FocusScopeNode scope = primaryFocus;
       primaryFocus = scope.focusedChild;
     }
-    if (primaryFocus is FocusScopeNode) {
-      // We didn't find a FocusNode at the leaf, so we're focusing the scope.
-      _setAsFocusedChild();
-      _markAsDirty(newFocus: primaryFocus);
+    if (identical(primaryFocus, this)) {
+      // We didn't find a FocusNode at the leaf, so we're focusing the scope, if
+      // allowed.
+      if (primaryFocus.canRequestFocus) {
+        _setAsFocusedChild();
+        _markAsDirty(newFocus: this);
+      }
     } else {
       // We found a FocusScope at the leaf, so ask it to focus itself instead of
       // this scope. That will cause this scope to return true from hasFocus,
       // but false from hasPrimaryFocus.
-      primaryFocus.requestFocus();
+      primaryFocus._doRequestFocus();
     }
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<FocusNode>('focusedChild', focusedChild, defaultValue: null));
+    if (_focusedChildren.isEmpty) {
+      return;
+    }
+    final List<String> childList = _focusedChildren.reversed.map<String>((FocusNode child) {
+      return '${describeIdentity(child)}${child.debugLabel != null && child.debugLabel.isNotEmpty ? '(${child.debugLabel})' : ''}';
+    }).toList();
+    properties.add(IterableProperty<String>('focusedChildren', childList, defaultValue: <String>[]));
   }
 }
 
@@ -1225,6 +1247,7 @@ class FocusManager with DiagnosticableTreeMixin {
       _updateHighlightMode();
     }
 
+    assert(_focusDebug('Received key event ${event.logicalKey}'));
     // Walk the current focus from the leaf to the root, calling each one's
     // onKey on the way up, and if one responds that they handled it, stop.
     if (_primaryFocus == null) {
@@ -1255,26 +1278,18 @@ class FocusManager with DiagnosticableTreeMixin {
   // update.
   final Set<FocusNode> _dirtyNodes = <FocusNode>{};
 
-  // Called to indicate that the given node is being disposed.
-  void _willDisposeFocusNode(FocusNode node) {
-    assert(node != null);
-    assert(_focusDebug('Disposing of node:', <String>[node.toString(), 'with enclosing scope ${node.enclosingScope}']));
-    _willUnfocusNode(node);
-    _dirtyNodes.remove(node);
-  }
-
   // Called to indicate that the given node is being unfocused, and that any
   // pending request to be focused should be canceled.
   void _willUnfocusNode(FocusNode node) {
     assert(node != null);
     assert(_focusDebug('Unfocusing node $node'));
-    if (_primaryFocus == node) {
-      _primaryFocus = null;
-      _dirtyNodes.add(node);
-      _markNeedsUpdate();
-    }
-    if (_nextFocus == node) {
-      _nextFocus = null;
+    if (_primaryFocus == node || _nextFocus == node) {
+      if (_primaryFocus == node) {
+        _primaryFocus = null;
+      }
+      if (_nextFocus == node) {
+        _nextFocus = null;
+      }
       _dirtyNodes.add(node);
       _markNeedsUpdate();
     }
@@ -1350,6 +1365,7 @@ class FocusManager with DiagnosticableTreeMixin {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties.add(FlagProperty('haveScheduledUpdate', value: _haveScheduledUpdate, ifTrue: 'UPDATE SCHEDULED'));
     properties.add(DiagnosticsProperty<FocusNode>('primaryFocus', primaryFocus, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('nextFocus', _nextFocus, defaultValue: null));
     final Element element = primaryFocus?.context;
     if (element != null) {
       properties.add(DiagnosticsProperty<String>('primaryFocusCreator', element.debugGetCreatorChain(20)));
