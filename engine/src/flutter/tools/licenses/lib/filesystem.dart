@@ -202,6 +202,7 @@ FileType identifyFile(String name, Reader reader) {
     case '.pdf': return FileType.binary; // PDF
     case '.emf': return FileType.binary; // Windows enhanced metafile format
     case '.skp': return FileType.binary; // Skia picture format
+    case '.mskp': return FileType.binary; // Skia picture format
     // Videos
     case '.ogg': return FileType.binary; // Ogg media
     case '.mp4': return FileType.binary; // MPEG media
