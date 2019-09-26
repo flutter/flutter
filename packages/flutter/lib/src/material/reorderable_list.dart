@@ -4,8 +4,9 @@
 
 import 'dart:math';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
 import 'material.dart';
@@ -344,7 +345,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // Handles up the logic for dragging and reordering items in the list.
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
-    final _ScopedValueGlobalKey keyIndexGlobalKey = _ScopedValueGlobalKey(
+    final _ScopedValueGlobalKey<_ReorderableListContentState> keyIndexGlobalKey =
+        _ScopedValueGlobalKey<_ReorderableListContentState>(
       scope: this,
       value: toWrap.key,
     );
@@ -583,7 +585,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 /// The scope is compared using [identical], while the value is compared
 /// using [operator ==]. This allows a locally scoped value to be turned
 /// into a globally unique key.
-class _ScopedValueGlobalKey extends GlobalKey {
+class _ScopedValueGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   const _ScopedValueGlobalKey({this.scope, this.value}) : super.constructor();
 
   final Object scope;
@@ -597,7 +599,12 @@ class _ScopedValueGlobalKey extends GlobalKey {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final _ScopedValueGlobalKey typedOther = other;
+    final _ScopedValueGlobalKey<T> typedOther = other;
     return identical(scope, typedOther.scope) && value == typedOther.value;
+  }
+
+  @override
+  String toString() {
+    return '[$runtimeType ${describeIdentity(scope)} ${describeIdentity(value)}]';
   }
 }
