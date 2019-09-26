@@ -1019,13 +1019,11 @@ enum Clip {
   antiAliasWithSaveLayer,
 }
 
-// Indicates that the image should not be resized in this dimension.
-//
-// Used by [instantiateImageCodec] as a magical value to disable resizing
-// in the given dimension.
-//
-// This needs to be kept in sync with "kDoNotResizeDimension" in codec.cc
-const int _kDoNotResizeDimension = -1;
+/// Indicates that the image should not be resized in this dimension.
+///
+/// Used by [instantiateImageCodec] as a magical value to disable resizing
+/// in the given dimension.
+const int kDoNotResizeDimension = -1;
 
 /// A description of the style to use when drawing on a [Canvas].
 ///
@@ -1667,7 +1665,7 @@ Future<Codec> instantiateImageCodec(Uint8List list, {
   int targetHeight,
 }) {
   return _futurize(
-    (_Callback<Codec> callback) => _instantiateImageCodec(list, callback, null, targetWidth ?? _kDoNotResizeDimension, targetHeight ?? _kDoNotResizeDimension)
+    (_Callback<Codec> callback) => _instantiateImageCodec(list, callback, null, targetWidth ?? kDoNotResizeDimension, targetHeight ?? kDoNotResizeDimension)
   );
 }
 
@@ -1677,9 +1675,9 @@ Future<Codec> instantiateImageCodec(Uint8List list, {
 /// image, in image pixels. Image in this context refers to image in every frame of the [Codec].
 /// If [targetWidth] and [targetHeight] are not equal to the intrinsic dimensions of the
 /// image, then the image will be scaled after being decoded. If exactly one of
-/// these two arguments is not equal to [_kDoNotResizeDimension], then the aspect
+/// these two arguments is not equal to [kDoNotResizeDimension], then the aspect
 /// ratio will be maintained while forcing the image to match the given dimension.
-/// If both are equal to [_kDoNotResizeDimension], then the image maintains its real size.
+/// If both are equal to [kDoNotResizeDimension], then the image maintains its real size.
 ///
 /// Returns an error message if the instantiation has failed, null otherwise.
 String _instantiateImageCodec(Uint8List list, _Callback<Codec> callback, _ImageInfo imageInfo, int targetWidth, int targetHeight)
@@ -1724,7 +1722,7 @@ void decodeImageFromPixels(
 ) {
   final _ImageInfo imageInfo = _ImageInfo(width, height, format.index, rowBytes);
   final Future<Codec> codecFuture = _futurize(
-    (_Callback<Codec> callback) => _instantiateImageCodec(pixels, callback, imageInfo, targetWidth ?? _kDoNotResizeDimension, targetHeight ?? _kDoNotResizeDimension)
+    (_Callback<Codec> callback) => _instantiateImageCodec(pixels, callback, imageInfo, targetWidth ?? kDoNotResizeDimension, targetHeight ?? kDoNotResizeDimension)
   );
   codecFuture.then((Codec codec) => codec.getNextFrame())
       .then((FrameInfo frameInfo) => callback(frameInfo.image));

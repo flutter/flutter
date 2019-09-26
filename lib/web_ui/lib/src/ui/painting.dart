@@ -1628,6 +1628,12 @@ enum PixelFormat {
   bgra8888,
 }
 
+/// Indicates that the image should not be resized in this dimension.
+///
+/// Used by [instantiateImageCodec] as a magical value to disable resizing
+/// in the given dimension.
+const int kDoNotResizeDimension = -1;
+
 class _ImageInfo {
   _ImageInfo(this.width, this.height, this.format, this.rowBytes) {
     rowBytes ??= width * 4;
@@ -1705,9 +1711,12 @@ class Codec {
 ///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
-Future<Codec> instantiateImageCodec(Uint8List list,
-    {double decodedCacheRatioCap = double.infinity}) {
+Future<Codec> instantiateImageCodec(Uint8List list, {
+  int targetWidth,
+  int targetHeight,
+}) {
   return engine.futurize((engine.Callback<Codec> callback) =>
+      // TODO: Implement targetWidth and targetHeight support.
       _instantiateImageCodec(list, callback, null));
 }
 
