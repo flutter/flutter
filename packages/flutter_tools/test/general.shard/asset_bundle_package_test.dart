@@ -483,8 +483,7 @@ $assetsSection
   });
 
   group('AssetBundle assets from scanned paths', () {
-    testUsingContext(
-        'Two assets are bundled when scanning their directory', () async {
+    testUsingContext('Two assets are bundled when scanning their directory', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 
@@ -514,8 +513,7 @@ $assetsSection
       FileSystem: () => testFileSystem,
     });
 
-    testUsingContext(
-        'Two assets are bundled when listing one and scanning second directory', () async {
+    testUsingContext('Two assets are bundled when listing one and scanning second directory', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 
@@ -545,8 +543,7 @@ $assetsSection
       FileSystem: () => testFileSystem,
     });
 
-    testUsingContext(
-        'One asset is bundled with variant, scanning wrong directory', () async {
+    testUsingContext('One asset is bundled with variant, scanning wrong directory', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 
@@ -573,8 +570,7 @@ $assetsSection
   });
 
   group('AssetBundle assets from scanned paths with MemoryFileSystem', () {
-    testUsingContext(
-        'One asset is bundled with variant, scanning directory', () async {
+    testUsingContext('One asset is bundled with variant, scanning directory', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 
@@ -603,8 +599,7 @@ $assetsSection
       FileSystem: () => testFileSystem,
     });
 
-    testUsingContext(
-        'No asset is bundled with variant, no assets or directories are listed', () async {
+    testUsingContext('No asset is bundled with variant, no assets or directories are listed', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 
@@ -632,8 +627,7 @@ $assetsSection
       FileSystem: () => testFileSystem,
     });
 
-    testUsingContext(
-        'Expect error generating manifest, wrong non-existing directory is listed', () async {
+    testUsingContext('Expect error generating manifest, wrong non-existing directory is listed', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 

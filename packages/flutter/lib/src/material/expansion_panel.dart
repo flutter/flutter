@@ -464,7 +464,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         expandIconContainer = Semantics(
           label: _isChildExpanded(index)? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
           container: true,
-          child: expandIconContainer
+          child: expandIconContainer,
         );
       }
       Widget header = Row(

@@ -5,7 +5,6 @@
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/file_hash_store.dart';
-import 'package:flutter_tools/src/build_system/filecache.pb.dart' as pb;
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -34,10 +33,10 @@ void main() {
 
     final List<int> buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
         .readAsBytesSync();
-    final pb.FileStorage fileStorage = pb.FileStorage.fromBuffer(buffer);
+    final FileStorage fileStorage = FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files, isEmpty);
-    expect(fileStorage.version, 1);
+    expect(fileStorage.version, 2);
   }));
 
   test('saves and restores to file cache', () => testbed.run(() {
@@ -51,7 +50,7 @@ void main() {
     final String currentHash =  fileCache.currentHashes[file.resolveSymbolicLinksSync()];
     final List<int> buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
         .readAsBytesSync();
-    pb.FileStorage fileStorage = pb.FileStorage.fromBuffer(buffer);
+    FileStorage fileStorage = FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files.single.hash, currentHash);
     expect(fileStorage.files.single.path, file.resolveSymbolicLinksSync());
@@ -64,7 +63,7 @@ void main() {
     newFileCache.persist();
 
     // Still persisted correctly.
-    fileStorage = pb.FileStorage.fromBuffer(buffer);
+    fileStorage = FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files.single.hash, currentHash);
     expect(fileStorage.files.single.path, file.resolveSymbolicLinksSync());

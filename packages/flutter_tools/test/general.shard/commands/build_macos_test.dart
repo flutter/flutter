@@ -25,7 +25,7 @@ import '../../src/testbed.dart';
 
 class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Profile', 'Release'],
@@ -52,7 +52,7 @@ void main() {
     macosPlatform = MockPlatform();
     notMacosPlatform = MockPlatform();
     when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
-    return 0;
+      return 0;
     });
     when(mockProcess.stderr).thenAnswer((Invocation invocation) {
       return const Stream<List<int>>.empty();

@@ -44,7 +44,7 @@ class AssembleCommand extends FlutterCommand {
     argParser.addMultiOption(
       'define',
       abbr: 'd',
-      help: 'Allows passing configuration to a target with --define=target=key=value.'
+      help: 'Allows passing configuration to a target with --define=target=key=value.',
     );
     argParser.addOption('build-inputs', help: 'A file path where a newline '
         'separated file containing all inputs used will be written after a build.'
@@ -60,7 +60,7 @@ class AssembleCommand extends FlutterCommand {
     );
     argParser.addOption(
       'resource-pool-size',
-      help: 'The maximum number of concurrent tasks the build system will run.'
+      help: 'The maximum number of concurrent tasks the build system will run.',
     );
   }
 
@@ -149,7 +149,7 @@ void writeListIfChanged(List<File> files, String path) {
   final StringBuffer buffer = StringBuffer();
   // These files are already sorted.
   for (File file in files) {
-    buffer.writeln(file.resolveSymbolicLinksSync());
+    buffer.writeln(file.path);
   }
   final String newContents = buffer.toString();
   if (!file.existsSync()) {

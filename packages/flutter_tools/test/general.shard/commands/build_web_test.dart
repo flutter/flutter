@@ -41,8 +41,10 @@ void main() {
       fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       when(mockWebCompilationProxy.initialize(
+        projectName: anyNamed('projectName'),
         projectDirectory: anyNamed('projectDirectory'),
-        mode: anyNamed('mode')
+        mode: anyNamed('mode'),
+        initializePlatform: anyNamed('initializePlatform'),
       )).thenAnswer((Invocation invocation) {
         final String path = fs.path.join('.dart_tool', 'build', 'flutter_web', 'foo', 'lib', 'main_web_entrypoint.dart.js');
         fs.file(path).createSync(recursive: true);
@@ -64,6 +66,7 @@ void main() {
       FlutterProject.current(),
       fs.path.join('lib', 'main.dart'),
       BuildInfo.debug,
+      false,
     ), throwsA(isInstanceOf<ToolExit>()));
   }));
 
@@ -85,7 +88,17 @@ void main() {
       FlutterProject.current(),
       fs.path.join('lib', 'main.dart'),
       BuildInfo.debug,
+      false,
     );
+  }));
+
+  test('Refuses to build a debug build for web', () => testbed.run(() async {
+    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
+
+    expect(() => runner.run(<String>['build', 'web', '--debug']),
+        throwsA(isInstanceOf<UsageException>()));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
   }));
 
   test('Refuses to build for web when feature is disabled', () => testbed.run(() async {
