@@ -62,7 +62,7 @@ Future<void> main() async {
   }, skip: isBrowser);
 
   test('ShapeDecoration with BorderDirectional', () {
-    var decoration = ShapeDecoration(
+    final ShapeDecoration decoration = ShapeDecoration(
       shape: BorderDirectional(start: BorderSide(color: Colors.red, width: 3)),
     );
 
