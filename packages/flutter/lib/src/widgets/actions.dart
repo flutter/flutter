@@ -32,7 +32,7 @@ class Intent extends Diagnosticable {
   /// This Intent is mapped to an action in the [WidgetsApp] that does nothing,
   /// so that it can be bound to a key in a [Shortcuts] widget in order to
   /// disable a key binding made above it in the hierarchy.
-  static const Intent doNothing = DoNothingIntent();
+  static const Intent doNothing = Intent(DoNothingAction.key);
 
   /// The key for the action this intent is associated with.
   final LocalKey key;
@@ -367,13 +367,4 @@ class DoNothingAction extends Action {
 
   @override
   void invoke(FocusNode node, Intent intent) { }
-}
-
-/// An [Intent] that can be used to disable [Shortcuts] key bindings defined
-/// above a widget in the hierarchy.
-///
-/// The [Intent.doNothing] intent is of this type.
-class DoNothingIntent extends Intent {
-  /// Const constructor for [DoNothingIntent].
-  const DoNothingIntent() : super(DoNothingAction.key);
 }
