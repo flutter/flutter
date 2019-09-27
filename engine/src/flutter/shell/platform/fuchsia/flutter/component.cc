@@ -38,8 +38,7 @@ constexpr char kDataKey[] = "data";
 constexpr char kTmpPath[] = "/tmp";
 constexpr char kServiceRootPath[] = "/svc";
 
-std::pair<std::unique_ptr<Thread>, std::unique_ptr<Application>>
-Application::Create(
+ActiveApplication Application::Create(
     TerminationCallback termination_callback,
     fuchsia::sys::Package package,
     fuchsia::sys::StartupInfo startup_info,
@@ -58,7 +57,7 @@ Application::Create(
   });
 
   latch.Wait();
-  return {std::move(thread), std::move(application)};
+  return {.thread = std::move(thread), .application = std::move(application)};
 }
 
 static std::string DebugLabelForURL(const std::string& url) {
