@@ -433,7 +433,11 @@ class _FocusState extends State<Focus> {
     _focusAttachment.reparent();
     return _FocusMarker(
       node: focusNode,
-      child: widget.child,
+      child: Semantics(
+
+        focused: _hasFocus,
+        child: widget.child
+      ),
     );
   }
 }

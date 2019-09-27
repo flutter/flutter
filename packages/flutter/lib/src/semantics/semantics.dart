@@ -594,6 +594,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.header,
     this.textField,
     this.readOnly,
+    this.focusable,
     this.focused,
     this.inMutuallyExclusiveGroup,
     this.hidden,
@@ -690,14 +691,25 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack/VoiceOver will treat it as non-editable text field.
   final bool readOnly;
 
-  /// If non-null, whether the node currently holds input focus.
+  /// If non-null, whether the node currently is able to hold input focus.
   ///
-  /// At most one node in the tree should hold input focus at any point in time.
+  /// If [focusable] is set to false, then [focused] must not be true.
   ///
   /// Input focus (indicates that the node will receive keyboard events) is not
   /// to be confused with accessibility focus. Accessibility focus is the
-  /// green/black rectangular that TalkBack/VoiceOver on the screen and is
-  /// separate from input focus.
+  /// green/black rectangular highlight that TalkBack/VoiceOver draws around the
+  /// element it is reading, and is separate from input focus.
+  final bool focusable;
+
+  /// If non-null, whether the node currently holds input focus.
+  ///
+  /// At most one node in the tree should hold input focus at any point in time,
+  /// and it should not be set to true if [focusable] is false.
+  ///
+  /// Input focus (indicates that the node will receive keyboard events) is not
+  /// to be confused with accessibility focus. Accessibility focus is the
+  /// green/black rectangular highlight that TalkBack/VoiceOver draws around the
+  /// element it is reading, and is separate from input focus.
   final bool focused;
 
   /// If non-null, whether a semantic node is in a mutually exclusive group.
@@ -3601,6 +3613,12 @@ class SemanticsConfiguration {
   bool get isInMutuallyExclusiveGroup => _hasFlag(SemanticsFlag.isInMutuallyExclusiveGroup);
   set isInMutuallyExclusiveGroup(bool value) {
     _setFlag(SemanticsFlag.isInMutuallyExclusiveGroup, value);
+  }
+
+  /// Whether the owning [RenderObject] currently holds the user's focus.
+  bool get isFocusable => _hasFlag(SemanticsFlag.isFocusable);
+  set isFocusable(bool value) {
+    _setFlag(SemanticsFlag.isFocusable, value);
   }
 
   /// Whether the owning [RenderObject] currently holds the user's focus.
