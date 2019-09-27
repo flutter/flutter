@@ -320,38 +320,41 @@ Application::Application(
   auto platform_task_runner =
       CreateFMLTaskRunner(async_get_default_dispatcher());
   const std::string component_url = package.resolved_url;
-  settings_.unhandled_exception_callback =
-      [weak_application, platform_task_runner, runner_incoming_services,
-       component_url](const std::string& error,
-                      const std::string& stack_trace) {
+  settings_.unhandled_exception_callback = [weak_application,
+                                            platform_task_runner,
+                                            runner_incoming_services,
+                                            component_url](
+                                               const std::string& error,
+                                               const std::string& stack_trace) {
+    if (weak_application) {
+      // TODO(cbracken): unsafe. The above check and the PostTask below are
+      // happening on the UI thread. If the Application dtor and thread
+      // termination happen (on the platform thread) between the previous
+      // line and the next line, a crash will occur since we'll be posting
+      // to a dead thread. See Runner::OnApplicationTerminate() in
+      // runner.cc.
+      platform_task_runner->PostTask([weak_application,
+                                      runner_incoming_services, component_url,
+                                      error, stack_trace]() {
         if (weak_application) {
-          // TODO(cbracken): unsafe. The above check and the PostTask below are
-          // happening on the UI thread. If the Application dtor and thread
-          // termination happen (on the platform thread) between the previous
-          // line and the next line, a crash will occur since we'll be posting
-          // to a dead thread. See Runner::OnApplicationTerminate() in
-          // runner.cc.
-          platform_task_runner->PostTask([weak_application,
-                                          runner_incoming_services,
-                                          component_url, error, stack_trace]() {
-            if (weak_application) {
-              dart_utils::HandleException(runner_incoming_services,
-                                          component_url, error, stack_trace);
-            } else {
-              FML_LOG(ERROR)
-                  << "Unhandled exception after application shutdown: "
-                  << error;
-            }
-          });
+          dart_utils::HandleException(runner_incoming_services, component_url,
+                                      error, stack_trace);
         } else {
-          FML_LOG(ERROR) << "Unhandled exception after application shutdown: "
-                         << error;
+          FML_LOG(WARNING)
+              << "Exception was thrown which was not caught in Flutter app: "
+              << error;
         }
-        // Ideally we would return whether HandleException returned ZX_OK, but
-        // short of knowing if the exception was correctly handled, we return
-        // false to have the error and stack trace printed in the logs.
-        return false;
-      };
+      });
+    } else {
+      FML_LOG(WARNING)
+          << "Exception was thrown which was not caught in Flutter app: "
+          << error;
+    }
+    // Ideally we would return whether HandleException returned ZX_OK, but
+    // short of knowing if the exception was correctly handled, we return
+    // false to have the error and stack trace printed in the logs.
+    return false;
+  };
 
   AttemptVMLaunchWithCurrentSettings(settings_);
 }
