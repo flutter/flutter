@@ -113,6 +113,20 @@ void main() {
         FileSystem: () => memoryFileSystem,
         Platform: () => FakePlatform(operatingSystem: 'linux'),
       });
+
+      testUsingContext('Looks up dart.exe on windows platforms', () async {
+        expect(artifacts.getArtifactPath(Artifact.engineDartBinary), contains('.exe'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => memoryFileSystem,
+        Platform: () => FakePlatform(operatingSystem: 'windows'),
+      });
+
+      testUsingContext('Looks up dart on linux platforms', () async {
+        expect(artifacts.getArtifactPath(Artifact.engineDartBinary), isNot(contains('.exe')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => memoryFileSystem,
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
+      });
     });
   });
 }
