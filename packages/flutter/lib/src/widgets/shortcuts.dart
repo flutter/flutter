@@ -345,6 +345,7 @@ class _ShortcutsState extends State<Shortcuts> {
   @override
   Widget build(BuildContext context) {
     return Focus(
+      debugLabel: describeIdentity(widget),
       canRequestFocus: false,
       onKey: _handleOnKey,
       child: _ShortcutsMarker(

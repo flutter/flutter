@@ -21,7 +21,10 @@ class BuildBundleCommand extends BuildSubCommand {
     usesBuildNumberOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     argParser
-      ..addFlag('precompiled', negatable: false)
+      ..addFlag('precompiled', negatable: false, help: 'If not provided, then '
+        'a debug build is always provided, regardless of build mode. If provided '
+        'then release is the default mode.'
+      )
       // This option is still referenced by the iOS build scripts. We should
       // remove it once we've updated those build scripts.
       ..addOption('asset-base', help: 'Ignored. Will be removed.', hide: !verboseHelp)
@@ -131,6 +134,7 @@ class BuildBundleCommand extends BuildSubCommand {
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],
       fileSystemRoots: argResults['filesystem-root'],
+      shouldBuildWithAssemble: true,
     );
     return null;
   }

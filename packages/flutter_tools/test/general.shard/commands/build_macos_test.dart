@@ -187,7 +187,7 @@ void main() {
     expect(BuildMacosCommand().hidden, true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
-     Platform: () => MockPlatform(),
+    Platform: () => MockPlatform(),
   });
 
   testUsingContext('Not hidden when enabled and on macOS host', () {

@@ -43,7 +43,7 @@ void main() {
     'isPrerelease': false,
     'catalog': <String, dynamic>{
       'productDisplayVersion': '16.2.5',
-    }
+    },
   };
 
   // A version of a response that doesn't include certain installation status
@@ -87,12 +87,12 @@ void main() {
     when(mockProcessManager.runSync(
       <String>[
         vswherePath,
-          '-format',
-          'json',
-          '-utf8',
-          '-latest',
-          ...?additionalArguments,
-          ...?requirementArguments,
+        '-format',
+        'json',
+        '-utf8',
+        '-latest',
+        ...?additionalArguments,
+        ...?requirementArguments,
       ],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
@@ -415,7 +415,7 @@ void main() {
         'installationVersion': '15.9.28307.665',
         'catalog': <String, dynamic>{
           'productDisplayVersion': '15.9.12',
-        }
+        },
       };
 
       setMockCompatibleVisualStudioInstallation(olderButCompleteVersionResponse);

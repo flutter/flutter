@@ -181,7 +181,7 @@ void main() {
     expect(BuildWindowsCommand().hidden, true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
-     Platform: () => MockPlatform(),
+    Platform: () => MockPlatform(),
   });
 
   testUsingContext('Not hidden when enabled and on Windows host', () {

@@ -118,14 +118,15 @@ void main() {
               SnapshotType(TargetPlatform.android_x64, BuildMode.release),
           darwinArch: null,
           additionalArgs: <String>['--additional_arg']);
-      verify(mockProcessManager.start(<String>[
-        'gen_snapshot',
-        '--causal_async_stacks',
-        '--additional_arg'
-      ],
-              workingDirectory: anyNamed('workingDirectory'),
-              environment: anyNamed('environment')))
-          .called(1);
+      verify(mockProcessManager.start(
+        <String>[
+          'gen_snapshot',
+          '--causal_async_stacks',
+          '--additional_arg',
+        ],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).called(1);
     }, overrides: contextOverrides);
 
     testUsingContext('iOS armv7', () async {
@@ -142,14 +143,15 @@ void main() {
           snapshotType: SnapshotType(TargetPlatform.ios, BuildMode.release),
           darwinArch: DarwinArch.armv7,
           additionalArgs: <String>['--additional_arg']);
-      verify(mockProcessManager.start(<String>[
-        'gen_snapshot_armv7',
-        '--causal_async_stacks',
-        '--additional_arg'
-      ],
-              workingDirectory: anyNamed('workingDirectory'),
-              environment: anyNamed('environment')))
-          .called(1);
+      verify(mockProcessManager.start(
+        <String>[
+          'gen_snapshot_armv7',
+          '--causal_async_stacks',
+          '--additional_arg',
+        ],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment')),
+      ).called(1);
     }, overrides: contextOverrides);
 
     testUsingContext('iOS arm64', () async {
@@ -166,14 +168,15 @@ void main() {
           snapshotType: SnapshotType(TargetPlatform.ios, BuildMode.release),
           darwinArch: DarwinArch.arm64,
           additionalArgs: <String>['--additional_arg']);
-      verify(mockProcessManager.start(<String>[
-        'gen_snapshot_arm64',
-        '--causal_async_stacks',
-        '--additional_arg'
-      ],
-              workingDirectory: anyNamed('workingDirectory'),
-              environment: anyNamed('environment')))
-          .called(1);
+      verify(mockProcessManager.start(
+        <String>[
+          'gen_snapshot_arm64',
+          '--causal_async_stacks',
+          '--additional_arg',
+        ],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).called(1);
     }, overrides: contextOverrides);
 
     testUsingContext('--strip filters outputs', () async {
@@ -187,11 +190,12 @@ void main() {
           .thenAnswer((_) => Future<Process>.value(mockProc));
       when(mockProc.stdout).thenAnswer((_) => const Stream<List<int>>.empty());
       when(mockProc.stderr)
-          .thenAnswer((_) => Stream<String>.fromIterable(<String>[
-                '--ABC\n',
-                'Warning: Generating ELF library without DWARF debugging information.\n',
-                '--XYZ\n'
-              ]).transform<List<int>>(utf8.encoder));
+        .thenAnswer((_) => Stream<String>.fromIterable(<String>[
+          '--ABC\n',
+          'Warning: Generating ELF library without DWARF debugging information.\n',
+          '--XYZ\n',
+        ])
+        .transform<List<int>>(utf8.encoder));
       await genSnapshot.run(
           snapshotType:
               SnapshotType(TargetPlatform.android_x64, BuildMode.release),
