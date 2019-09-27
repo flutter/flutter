@@ -115,19 +115,20 @@ void main() {
       );
 
       final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
-      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.white), false);
+      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != null), false);
     });
 
-    testWidgets('background color is not null', (WidgetTester tester) async {
-      expect(
-        () {
-          CupertinoTimerPicker(
+    testWidgets('background color can be null', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTimerPicker(
             onTimerDurationChanged: (_) { },
             backgroundColor: null,
-          );
-        },
-        throwsAssertionError,
+          ),
+        ),
       );
+
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('specified background color is applied', (WidgetTester tester) async {
@@ -315,19 +316,20 @@ void main() {
       );
 
       final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
-      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.white), false);
+      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != null), false);
     });
 
-    testWidgets('background color is not null', (WidgetTester tester) async {
-      expect(
-        () {
-          CupertinoDatePicker(
+    testWidgets('background color can be null', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoDatePicker(
             onDateTimeChanged: (_) { },
             backgroundColor: null,
-          );
-        },
-        throwsAssertionError,
+          ),
+        ),
       );
+
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('specified background color is applied', (WidgetTester tester) async {
@@ -924,7 +926,7 @@ void main() {
         find.byType(CupertinoDatePicker),
         matchesGoldenFile(
           'date_picker_test.datetime.initial.png',
-          version: 2,
+          version: 3,
         ),
       );
 
@@ -936,7 +938,7 @@ void main() {
         find.byType(CupertinoDatePicker),
         matchesGoldenFile(
           'date_picker_test.datetime.drag.png',
-          version: 2,
+          version: 3,
         ),
       );
     });
@@ -973,7 +975,7 @@ void main() {
       find.byType(CupertinoTimerPicker),
       matchesGoldenFile(
         'timer_picker_test.datetime.initial.png',
-        version: 1,
+        version: 2,
       ),
     );
 
@@ -985,7 +987,7 @@ void main() {
       find.byType(CupertinoTimerPicker),
       matchesGoldenFile(
         'timer_picker_test.datetime.drag.png',
-        version: 1,
+        version: 2,
       ),
     );
   });
