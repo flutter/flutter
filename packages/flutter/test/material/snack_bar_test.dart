@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -1065,4 +1067,79 @@ void main() {
     await tester.tap(find.byKey(tapTarget));
     expect(tester.takeException(), isNotNull);
   });
+
+  testWidgets('Snackbar makes semantic announcement of contents on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    dynamic capturedMessage;
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+      capturedMessage = message;
+    });
+    const Key tapTarget = Key('tap-target');
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                Scaffold.of(context).showSnackBar(const SnackBar(
+                  content: Text('hello, world'),
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+                key: tapTarget,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(capturedMessage, <String, Object>{
+      'type': 'announce',
+      'data': <String, Object>{'message': 'hello, world', 'textDirection': 1},
+    });
+    debugDefaultTargetPlatformOverride = null;
+  }, semanticsEnabled: true);
+
+  testWidgets('Snackbar makes no semantic announcement of contents on android', (WidgetTester tester) async {
+    dynamic capturedMessage;
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+      capturedMessage = message;
+    });
+    const Key tapTarget = Key('tap-target');
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                Scaffold.of(context).showSnackBar(const SnackBar(
+                  content: Text('hello, world'),
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+                key: tapTarget,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byKey(tapTarget));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(capturedMessage, null);
+  }, semanticsEnabled: true);
 }

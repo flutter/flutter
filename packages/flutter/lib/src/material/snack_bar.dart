@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -353,9 +354,7 @@ class SnackBar extends StatelessWidget {
       );
     }
 
-    snackBar = Semantics(
-      container: true,
-      liveRegion: true,
+    snackBar = _SnackbarSemantics(
       onDismiss: () {
         Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
       },
@@ -422,5 +421,60 @@ class SnackBar extends StatelessWidget {
       duration: duration,
       animation: newAnimation,
     );
+  }
+}
+
+class _SnackbarSemantics extends SingleChildRenderObjectWidget {
+  const _SnackbarSemantics({
+    @required Widget child,
+    @required this.onDismiss,
+  }) : assert(onDismiss != null),
+       super(child: child);
+
+  final VoidCallback onDismiss;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderSnackbarSemantics()
+      ..textDirection = Directionality.of(context)
+      ..onDismiss = onDismiss;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderSnackbarSemantics renderObject) {
+    renderObject
+      ..textDirection = Directionality.of(context)
+      ..onDismiss = onDismiss;
+  }
+}
+
+class _RenderSnackbarSemantics extends RenderProxyBox {
+  String _lastAnnouncedLabel;
+
+  TextDirection textDirection;
+
+  VoidCallback onDismiss;
+
+  void _onDismiss() {
+    if (onDismiss != null) {
+      onDismiss();
+    }
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.liveRegion = true;
+    config.isSemanticBoundary = true;
+    config.onDismiss = _onDismiss;
+  }
+
+  @override
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+    super.assembleSemanticsNode(node, config, children);
+    if (defaultTargetPlatform == TargetPlatform.iOS && node.label != null && node.label != _lastAnnouncedLabel) {
+      _lastAnnouncedLabel = node.label;
+      SemanticsService.announce(_lastAnnouncedLabel, textDirection);
+    }
   }
 }
