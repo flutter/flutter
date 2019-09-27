@@ -402,5 +402,5 @@ class FakeSignals implements Signals {
   }
 
   @override
-  Stream<Object> get errors => Stream<Object>.empty();
+  Stream<Object> get errors => const Stream<Object>.empty();
 }
