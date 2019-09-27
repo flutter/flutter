@@ -454,13 +454,14 @@ final Animatable<int> _kStepTween = StepTween(begin: 0, end: 5);
 final Animatable<double> _kRotationTween = CurveTween(curve: const SawTooth(5));
 
 class _CircularProgressIndicatorState extends State<CircularProgressIndicator> with SingleTickerProviderStateMixin {
+  static const int _perCycleAnimationDurationMs = 1333;
   AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 5),
+      duration: const Duration(milliseconds: 5 * _perCycleAnimationDurationMs),
       vsync: this,
     );
     if (widget.value == null)
