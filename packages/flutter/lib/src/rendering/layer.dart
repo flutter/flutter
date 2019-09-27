@@ -2063,8 +2063,9 @@ class FollowerLayer extends ContainerLayer {
   @protected
   bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
     if (link.leader == null) {
-      if (showWhenUnlinked)
+      if (showWhenUnlinked) {
         return super.findAnnotations(result, localPosition - unlinkedOffset, onlyFirst: onlyFirst);
+      }
       return false;
     }
     final Offset transformedOffset = _transformOffset<S>(localPosition);
