@@ -326,14 +326,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
   }
 
-  void _handleEnter(PointerEnterEvent event) {
-    _showTooltip();
-  }
-
-  void _handleExit(PointerExitEvent event) {
-    _hideTooltip();
-  }
-
   @override
   void deactivate() {
     if (_entry != null) {
@@ -408,8 +400,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // Only check for hovering if there is a mouse connected.
     if (_mouseIsConnected) {
       result = MouseRegion(
-        onEnter: _handleEnter,
-        onExit: _handleExit,
+        onEnter: (PointerEnterEvent event) => _showTooltip(),
+        onExit: (PointerExitEvent event) => _hideTooltip(),
         child: result,
       );
     }

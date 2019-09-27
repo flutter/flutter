@@ -974,9 +974,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     super.deactivate();
   }
 
-  void _handleMouseEnter(PointerEnterEvent event) => _handleHover(true);
-  void _handleMouseExit(PointerExitEvent event) => _handleHover(false);
-
   void _handleHover(bool hovering) {
     if (hovering != _isHovering) {
       setState(() {
@@ -1104,8 +1101,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     return IgnorePointer(
       ignoring: !_isEnabled,
       child: MouseRegion(
-        onEnter: _handleMouseEnter,
-        onExit: _handleMouseExit,
+        onEnter: (PointerEnterEvent event) => _handleHover(true),
+        onExit: (PointerExitEvent event) => _handleHover(false),
         child: AnimatedBuilder(
           animation: controller, // changes the _currentLength
           builder: (BuildContext context, Widget child) {
