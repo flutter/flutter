@@ -187,7 +187,7 @@ void main() {
 
     const PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
       builders: <TargetPlatform, PageTransitionsBuilder>{
-        TargetPlatform.iOS : CupertinoPageTransitionsBuilder()
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
       }
     );
     
