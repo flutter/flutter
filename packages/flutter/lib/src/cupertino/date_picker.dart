@@ -1561,7 +1561,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         data: themeData.copyWith(
           textTheme: themeData.textTheme.copyWith(
             pickerTextStyle: _textStyleFrom(context),
-          )
+          ),
         ),
         child: Align(
           alignment: widget.alignment,

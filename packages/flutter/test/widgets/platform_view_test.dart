@@ -1914,7 +1914,8 @@ void main() {
             Factory<OneSequenceGestureRecognizer>(
                   constructRecognizer,
             ),
-          })
+          },
+        ),
       );
 
       await tester.pumpWidget(
@@ -1925,7 +1926,8 @@ void main() {
             Factory<OneSequenceGestureRecognizer>(
                   constructRecognizer,
             ),
-          })
+          },
+        ),
       );
       expect(factoryInvocationCount, 1);
     });

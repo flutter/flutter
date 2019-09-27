@@ -792,7 +792,7 @@ void main() {
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[SemanticsFlag.isImage],
         ),
-      ]
+      ],
     ), ignoreTransform: true));
     semantics.dispose();
   });

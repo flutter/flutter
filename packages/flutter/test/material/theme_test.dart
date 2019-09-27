@@ -338,7 +338,7 @@ void main() {
       primaryTextTheme: fallback.primaryTextTheme.copyWith(
         body1: fallback.primaryTextTheme.body1.copyWith(
           fontSize: _kMagicFontSize,
-        )
+        ),
       ),
     );
     expect(customTheme.primaryTextTheme.body1.fontSize, _kMagicFontSize);

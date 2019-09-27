@@ -315,7 +315,7 @@ Future<void> main() async {
       find.ancestor(
         of: find.byKey(firstKey, skipOffstage: false),
         matching: find.byType(Offstage, skipOffstage: false),
-      ).first
+      ).first,
     );
     // Original hero should stay hidden.
     expect(first.offstage, isTrue);
@@ -2234,7 +2234,7 @@ Future<void> main() async {
                 child: Image(
                   image: imageProvider,
                   key: imageKey2,
-                )
+                ),
               ),
             ),
           );

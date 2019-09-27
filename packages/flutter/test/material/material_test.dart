@@ -225,8 +225,8 @@ void main() {
             applyElevationOverlayColor: false,
             colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
           ),
-          child: buildMaterial(color: surfaceColor, elevation: 8.0))
-      );
+          child: buildMaterial(color: surfaceColor, elevation: 8.0),
+      ));
       final RenderPhysicalShape model = getModel(tester);
       expect(model.color, equals(surfaceColor));
     });

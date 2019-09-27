@@ -94,7 +94,7 @@ void main() {
               ),
             ],
           ),
-        ]
+        ],
       ),
       ignoreId: true,
       ignoreRect: true,
@@ -136,7 +136,7 @@ void main() {
               ),
             ],
           ),
-        ]
+        ],
       ),
       ignoreId: true,
       ignoreRect: true,
@@ -189,7 +189,7 @@ void main() {
           label: 'test1',
           textDirection: TextDirection.ltr,
         ),
-      ]
+      ],
     );
 
     await tester.pumpWidget(
@@ -216,7 +216,7 @@ void main() {
           label: 'test1',
           textDirection: TextDirection.rtl,
         ),
-      ]
+      ],
     );
 
     await tester.pumpWidget(
@@ -257,7 +257,7 @@ void main() {
           value: 'value',
           textDirection: TextDirection.ltr,
         ),
-      ]
+      ],
     );
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
@@ -293,7 +293,7 @@ void main() {
           hint: 'hint one\nhint two',
           textDirection: TextDirection.ltr,
         ),
-      ]
+      ],
     );
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
@@ -342,7 +342,7 @@ void main() {
               value: 'value two',
               textDirection: TextDirection.ltr,
             ),
-          ]
+          ],
         ),
       ],
     );
@@ -380,7 +380,7 @@ void main() {
           value: 'value',
           textDirection: TextDirection.ltr,
         ),
-      ]
+      ],
     );
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));

@@ -44,8 +44,8 @@ void main() {
             label: 'label',
             rect: TestSemantics.fullScreen,
           ),
-        ]
-      )
+        ],
+      ),
     ));
 
     semantics.dispose();

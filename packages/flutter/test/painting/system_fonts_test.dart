@@ -73,8 +73,8 @@ void main() {
       CupertinoApp(
         home: CupertinoDatePicker(
           onDateTimeChanged: (DateTime dateTime) { },
-        )
-      )
+        ),
+      ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
     final Map<int, double> cache = state.estimatedColumnWidths;
@@ -99,8 +99,8 @@ void main() {
         home: CupertinoDatePicker(
           mode: CupertinoDatePickerMode.date,
           onDateTimeChanged: (DateTime dateTime) { },
-        )
-      )
+        ),
+      ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
     final Map<int, double> cache = state.estimatedColumnWidths;
@@ -125,8 +125,8 @@ void main() {
       CupertinoApp(
         home: CupertinoTimerPicker(
           onTimerDurationChanged: (Duration d) { },
-        )
-      )
+        ),
+      ),
     );
     final dynamic state = tester.state(find.byType(CupertinoTimerPicker));
     // Simulates wrong metrics due to font missing.
@@ -238,7 +238,7 @@ void main() {
       find.descendant(
         of: find.byKey(const Key('parent')),
         matching: find.byType(CustomPaint),
-      ).first
+      ).first,
     );
     expect(renderObject.debugNeedsPaint, isTrue);
   });

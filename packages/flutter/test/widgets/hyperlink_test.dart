@@ -38,7 +38,7 @@ void main() {
                 text: 'zzzzzzzzz',
                 recognizer: tapRight,
               ),
-            ]
+            ],
           ),
         ),
       ),

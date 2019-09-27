@@ -21,7 +21,7 @@ void main() {
       boilerplate(child: const CupertinoButton(
         child: Text('X', style: testStyle),
         onPressed: null,
-      ))
+      )),
     );
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
@@ -38,7 +38,7 @@ void main() {
         child: Text('X', style: testStyle),
         onPressed: null,
         minSize: minSize,
-      ))
+      )),
     );
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
@@ -53,7 +53,7 @@ void main() {
       boilerplate(child: const CupertinoButton(
         child: Text('XXXX', style: testStyle),
         onPressed: null,
-      ))
+      )),
     );
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(

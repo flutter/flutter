@@ -619,7 +619,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           child: Checkbox(value: false, onChanged: null),
@@ -631,7 +631,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           child: Text('embedded'),

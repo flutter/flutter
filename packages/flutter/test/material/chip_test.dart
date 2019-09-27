@@ -333,7 +333,7 @@ void main() {
                     label: Text(text),
                     onDeleted: onDeleted,
                   ),
-                ]
+                ],
               ),
             ),
           ),

@@ -869,10 +869,10 @@ void main() {
                     );
                   },
                 ),
-              ]
-            )
-          )
-        )
+              ],
+            ),
+          ),
+        ),
       );
       expect(tabsPainted0, const <int>[2, 0, 1, 2]);
       expect(tabsPainted1, const <int>[2, 0]);

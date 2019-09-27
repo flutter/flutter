@@ -277,7 +277,7 @@ void main() {
                                 child: Text('Hello World!')
                             )
                         ),
-                      )
+                      ),
                   ),
                   TextSpan(
                     text: 'Third line!\n',
@@ -1240,7 +1240,7 @@ void main() {
           SemanticsFlag.isTextField,
           SemanticsFlag.isReadOnly,
           SemanticsFlag.isMultiline,
-        ]
+        ],
       ),
     );
 
@@ -2242,7 +2242,7 @@ void main() {
                 style: style,
               ),
             ),
-          )
+          ),
         ),
       );
     }

@@ -57,7 +57,7 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
+            ],
           ),
         ),
       ),
@@ -691,7 +691,7 @@ void main() {
                   icon: Icon(Icons.access_alarm),
                   title: Text('Alarm'),
                 ),
-              ]
+              ],
             ),
           ),
         ),
@@ -1658,7 +1658,7 @@ double _getOpacity(WidgetTester tester, String textValue) {
       find.ancestor(
         of: find.text(textValue),
         matching: find.byType(FadeTransition),
-      ).first
+      ).first,
   );
   return opacityWidget.opacity.value;
 }

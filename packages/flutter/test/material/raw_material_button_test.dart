@@ -67,7 +67,7 @@ void main() {
             rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
             children: <TestSemantics>[],
           ),
-        ]
+        ],
       ),
       ignoreTransform: true,
     ));

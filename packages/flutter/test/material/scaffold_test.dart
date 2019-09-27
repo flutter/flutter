@@ -103,8 +103,8 @@ void main() {
       ),
       child: Scaffold(
         body: Container(key: bodyKey),
-      ))
-    ));
+      ),
+    )));
 
     final RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 0.0)));
@@ -1155,7 +1155,7 @@ void main() {
                 icon: Icon(Icons.add),
                 title: Text('test'),
               ),
-            ]
+            ],
           ),
         ),
       );

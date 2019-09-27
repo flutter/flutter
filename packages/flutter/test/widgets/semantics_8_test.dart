@@ -45,8 +45,8 @@ void main() {
             textDirection: TextDirection.ltr,
             rect: TestSemantics.fullScreen,
           ),
-        ]
-      )
+        ],
+      ),
     ));
 
     // switch the order of the inner Semantics node to trigger a reset
