@@ -50,7 +50,9 @@ class AssetBehavior extends SourceBehavior {
 
 /// A specific asset behavior for building bundles.
 class AssetOutputBehavior extends SourceBehavior {
-  const AssetOutputBehavior();
+  const AssetOutputBehavior([this._pathSuffix = '']);
+
+  final String _pathSuffix;
 
   @override
   List<File> inputs(Environment environment) {
@@ -64,7 +66,7 @@ class AssetOutputBehavior extends SourceBehavior {
     final List<File> results = <File>[];
     final Iterable<DevFSFileContent> files = assetBundle.entries.values.whereType<DevFSFileContent>();
     for (DevFSFileContent devFsContent in files) {
-      results.add(fs.file(devFsContent.file.path));
+      results.add(fs.file(fs.path.join(_pathSuffix, devFsContent.file.path)));
     }
     return results;
   }
@@ -78,7 +80,7 @@ class AssetOutputBehavior extends SourceBehavior {
     );
     final List<File> results = <File>[];
     for (String key in assetBundle.entries.keys) {
-      final File file = fs.file(fs.path.join(environment.outputDir.path, key));
+      final File file = fs.file(fs.path.join(environment.outputDir.path, _pathSuffix, key));
       results.add(file);
     }
     return results;
