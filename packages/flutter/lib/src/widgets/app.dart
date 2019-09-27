@@ -8,7 +8,6 @@ import 'dart:collection' show HashMap;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-import 'actions.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
@@ -1195,19 +1194,14 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
     assert(_debugCheckLocalizations(appLocale));
 
-    return Actions(
-      actions: <LocalKey, ActionFactory>{
-        DoNothingAction.key: () => const DoNothingAction(),
-      },
-      child: DefaultFocusTraversal(
-        policy: ReadingOrderTraversalPolicy(),
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
-          child: Localizations(
-            locale: appLocale,
-            delegates: _localizationsDelegates.toList(),
-            child: title,
-          ),
+    return DefaultFocusTraversal(
+      policy: ReadingOrderTraversalPolicy(),
+      child: MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: Localizations(
+          locale: appLocale,
+          delegates: _localizationsDelegates.toList(),
+          child: title,
         ),
       ),
     );
