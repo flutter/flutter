@@ -24,6 +24,8 @@ const double _kDatePickerPadSize = 12.0;
 // The density of a date picker is different from a generic picker.
 // Eyeballed from iOS.
 const double _kSqueeze = 1.25;
+// Considers setting the default background color from the theme, in the future.
+const Color _kBackgroundColor = CupertinoColors.white;
 
 const TextStyle _kDefaultPickerTextStyle = TextStyle(
   letterSpacing: -0.83,
@@ -225,11 +227,12 @@ class CupertinoDatePicker extends StatefulWidget {
     this.maximumYear,
     this.minuteInterval = 1,
     this.use24hFormat = false,
-    this.backgroundColor,
+    this.backgroundColor = _kBackgroundColor,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(mode != null),
        assert(onDateTimeChanged != null),
        assert(minimumYear != null),
+       assert(backgroundColor != null),
        assert(
          minuteInterval > 0 && 60 % minuteInterval == 0,
          'minute interval is not a positive integer factor of 60',
@@ -299,7 +302,7 @@ class CupertinoDatePicker extends StatefulWidget {
 
   /// Background color of date picker.
   ///
-  /// Defaults to null, which disables background painting entirely.
+  /// Defaults to [CupertinoColors.white] when null.
   final Color backgroundColor;
 
   @override
@@ -1118,7 +1121,7 @@ class CupertinoTimerPicker extends StatefulWidget {
     this.minuteInterval = 1,
     this.secondInterval = 1,
     this.alignment = Alignment.center,
-    this.backgroundColor,
+    this.backgroundColor = _kBackgroundColor,
     @required this.onTimerDurationChanged,
   }) : assert(mode != null),
        assert(onTimerDurationChanged != null),
@@ -1128,6 +1131,7 @@ class CupertinoTimerPicker extends StatefulWidget {
        assert(secondInterval > 0 && 60 % secondInterval == 0),
        assert(initialTimerDuration.inMinutes % minuteInterval == 0),
        assert(initialTimerDuration.inSeconds % secondInterval == 0),
+       assert(backgroundColor != null),
        assert(alignment != null),
        super(key: key);
 
@@ -1155,7 +1159,7 @@ class CupertinoTimerPicker extends StatefulWidget {
 
   /// Background color of timer picker.
   ///
-  /// Defaults to null, which disables background painting entirely.
+  /// Defaults to [CupertinoColors.white] when null.
   final Color backgroundColor;
 
   @override
@@ -1562,7 +1566,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         child: Align(
           alignment: widget.alignment,
           child: Container(
-            color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
+            color: _kBackgroundColor,
             width: totalWidth,
             height: _kPickerHeight,
             child: DefaultTextStyle(
