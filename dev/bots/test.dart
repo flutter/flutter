@@ -927,22 +927,24 @@ Future<void> _runFlutterTest(String workingDirectory, {
   }
 }
 
+// the optional `file` argument is an override for testing
 @visibleForTesting
-Future<bool> verifyVersion(String filename) async {
-  if (!File(filename).existsSync()) {
+Future<bool> verifyVersion(String filename, [File file]) async {
+  final RegExp pattern = RegExp(r'^\d+\.\d+\.\d+(\+hotfix\.\d+)?(-pre\.\d+)?$');
+  file ??= File(filename);
+  final String version = await file.readAsString();
+  if (!file.existsSync()) {
     print('$redLine');
     print('The version logic failed to create the Flutter version file.');
     print('$redLine');
     return false;
   }
-  final String version = await File(filename).readAsString();
   if (version == '0.0.0-unknown') {
     print('$redLine');
     print('The version logic failed to determine the Flutter version.');
     print('$redLine');
     return false;
   }
-  final RegExp pattern = RegExp(r'^\d+\.\d+\.\d+(\+hotfix\.\d+)?(-pre\.\d+)?$');
   if (!version.contains(pattern)) {
     print('$redLine');
     print('The version logic generated an invalid version string: "$version".');

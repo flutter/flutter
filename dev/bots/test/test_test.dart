@@ -17,7 +17,7 @@ import 'fake_process_manager.dart';
 
 void main() {
   group('verifyVersion()', () {
-    testUsingContext('passes for valid version strings', () async {
+    test('passes for valid version strings', () async {
       const List<String> valid_versions = <String>[
         '1.2.3',
         '12.34.56',
