@@ -26,15 +26,28 @@ class OpacityLayer : public ContainerLayer {
   // to many leaf layers. Therefore we try to capture that offset here to stop
   // the propagation as repainting the OpacityLayer is expensive.
   OpacityLayer(int alpha, const SkPoint& offset);
-  ~OpacityLayer() override = default;
+  ~OpacityLayer() override;
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
+
   void Paint(PaintContext& context) const override;
-  void UpdateScene(SceneUpdateContext& context) override;
+
+  // TODO(chinmaygarde): Once SCN-139 is addressed, introduce a new node in the
+  // session scene hierarchy.
 
  private:
   int alpha_;
   SkPoint offset_;
+
+  // Restructure (if necessary) OpacityLayer to have only one child.
+  //
+  // This is needed to ensure that retained rendering can always be applied to
+  // save the costly saveLayer.
+  //
+  // If there are multiple children, this creates a new identity TransformLayer,
+  // sets all children to be the TransformLayer's children, and sets that
+  // TransformLayer as the single child of this OpacityLayer.
+  void EnsureSingleChild();
 
   FML_DISALLOW_COPY_AND_ASSIGN(OpacityLayer);
 };

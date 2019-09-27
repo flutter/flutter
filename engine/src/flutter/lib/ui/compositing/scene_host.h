@@ -49,6 +49,7 @@ class SceneHost : public RefCountedDartWrappable<SceneHost> {
                      double insetBottom,
                      double insetLeft,
                      bool focusable);
+  void setOpacity(double opacity);
 
  private:
   fml::RefPtr<fml::TaskRunner> gpu_task_runner_;

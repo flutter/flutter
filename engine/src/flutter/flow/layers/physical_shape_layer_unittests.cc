@@ -16,6 +16,8 @@ TEST(PhysicalShapeLayer, TotalElevation) {
   for (int i = 0; i < 4; i += 1) {
     layers[i] =
         std::make_shared<PhysicalShapeLayer>(dummy_color, dummy_color,
+                                             1.0f,            // pixel ratio,
+                                             1.0f,            // depth
                                              (float)(i + 1),  // elevation
                                              dummy_path, Clip::none);
   }
@@ -38,8 +40,6 @@ TEST(PhysicalShapeLayer, TotalElevation) {
       unused_stopwatch,         // engine time (dont care)
       unused_texture_registry,  // texture registry (not supported)
       false,                    // checkerboard_offscreen_layers
-      6.0f,                     // depth
-      1.0f,                     // pixel ratio
       0.0f,                     // total elevation
   };
 
@@ -55,14 +55,14 @@ TEST(PhysicalShapeLayer, TotalElevation) {
   // |         \
   // |       layers[2] +3.0f
   // |          |
-  // |       layers[3] +4.0f (clamped to 6.0f)
+  // |       layers[3] +4.0f
   // |
   // |
   // layers[1] + 2.0f
-  EXPECT_EQ(layers[0]->total_elevation(), 1.0f);
-  EXPECT_EQ(layers[1]->total_elevation(), 3.0f);
-  EXPECT_EQ(layers[2]->total_elevation(), 4.0f);
-  EXPECT_EQ(layers[3]->total_elevation(), 6.0f);
+  EXPECT_EQ(layers[0]->total_elevation_, 1.0f);
+  EXPECT_EQ(layers[1]->total_elevation_, 3.0f);
+  EXPECT_EQ(layers[2]->total_elevation_, 4.0f);
+  EXPECT_EQ(layers[3]->total_elevation_, 8.0f);
 }
 
 }  // namespace flutter

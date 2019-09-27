@@ -7,9 +7,17 @@
 #include "flutter/flow/paint_utils.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 
-namespace {
+namespace flutter {
 
-uint64_t NextUniqueID() {
+Layer::Layer()
+    : parent_(nullptr),
+      needs_system_composite_(false),
+      paint_bounds_(SkRect::MakeEmpty()),
+      unique_id_(NextUniqueID()) {}
+
+Layer::~Layer() = default;
+
+uint64_t Layer::NextUniqueID() {
   static std::atomic<uint64_t> nextID(1);
   uint64_t id;
   do {
@@ -18,15 +26,11 @@ uint64_t NextUniqueID() {
   return id;
 }
 
-}  // anonymous namespace
+void Layer::Preroll(PrerollContext* context, const SkMatrix& matrix) {}
 
-namespace flutter {
-
-Layer::Layer()
-    : parent_(nullptr),
-      paint_bounds_(SkRect::MakeEmpty()),
-      unique_id_(NextUniqueID()),
-      needs_system_composite_(false) {}
+#if defined(OS_FUCHSIA)
+void Layer::UpdateScene(SceneUpdateContext& context) {}
+#endif  // defined(OS_FUCHSIA)
 
 Layer::AutoSaveLayer::AutoSaveLayer(const PaintContext& paint_context,
                                     const SkRect& bounds,
