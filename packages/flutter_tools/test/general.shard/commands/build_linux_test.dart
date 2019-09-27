@@ -170,7 +170,7 @@ BINARY_NAME=fizz_bar
     expect(BuildLinuxCommand().hidden, true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
-     Platform: () => MockPlatform(),
+    Platform: () => MockPlatform(),
   });
 
   testUsingContext('Not hidden when enabled and on Linux host', () {

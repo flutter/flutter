@@ -163,7 +163,7 @@ Future<void> buildWithAssemble({
       kTargetFile: mainPath,
       kBuildMode: getNameForBuildMode(buildMode),
       kTargetPlatform: getNameForTargetPlatform(targetPlatform),
-    }
+    },
   );
   final Target target = buildMode == BuildMode.debug
     ? const CopyFlutterBundle()

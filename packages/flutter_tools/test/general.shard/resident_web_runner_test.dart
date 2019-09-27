@@ -50,18 +50,19 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-      WebFsFactory: () => ({
-        @required String target,
-        @required FlutterProject flutterProject,
-        @required BuildInfo buildInfo,
-        @required bool skipDwds,
-        @required bool initializePlatform,
-        @required String hostname,
-        @required String port,
-      }) async {
-        return mockWebFs;
+        WebFsFactory: () => ({
+          @required String target,
+          @required FlutterProject flutterProject,
+          @required BuildInfo buildInfo,
+          @required bool skipDwds,
+          @required bool initializePlatform,
+          @required String hostname,
+          @required String port,
+        }) async {
+          return mockWebFs;
+        },
       },
-    });
+    );
   });
 
   void _setupMocks() {
