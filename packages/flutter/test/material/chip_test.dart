@@ -1808,6 +1808,28 @@ void main() {
     expect(find.byType(InkWell), findsOneWidget);
   });
 
+  testWidgets('Chips should use Ink instead of Container for delete icon ripple', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/41461
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Chip(
+            onDeleted: () { },
+            backgroundColor: Colors.pink,
+            label: const Text('Chip with delete icon'),
+          ),
+        ),
+      ),
+    );
+    expect(
+      find.descendant(
+        of: find.byType(InkWell),
+        matching: find.byType(Container),
+      ),
+      findsNothing,
+    );
+  });
+
   testWidgets('RawChip.selected can not be null', (WidgetTester tester) async {
     expect(() async {
       MaterialApp(
