@@ -163,8 +163,8 @@ class BuildRunner extends CodeGenerator {
         '--packages=$scriptPackagesPath',
         buildSnapshot.path,
         'daemon',
-         '--skip-build-script-check',
-         '--delete-conflicting-outputs',
+        '--skip-build-script-check',
+        '--delete-conflicting-outputs',
       ];
       buildDaemonClient = await BuildDaemonClient.connect(
         flutterProject.directory.path,

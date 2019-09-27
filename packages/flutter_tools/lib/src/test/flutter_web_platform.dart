@@ -245,11 +245,11 @@ class FlutterWebPlatform extends PlatformPlugin {
         _webSocketHandler.create(webSocketHandler(completer.complete));
     final Uri webSocketUrl = url.replace(scheme: 'ws').resolve(path);
     final Uri hostUrl = url
-        .resolve('static/index.html')
-        .replace(queryParameters: <String, String>{
-      'managerUrl': webSocketUrl.toString(),
-      'debug': _config.pauseAfterLoad.toString(),
-    });
+      .resolve('static/index.html')
+      .replace(queryParameters: <String, String>{
+        'managerUrl': webSocketUrl.toString(),
+        'debug': _config.pauseAfterLoad.toString(),
+      });
 
     printTrace('Serving tests at $hostUrl');
 
@@ -559,8 +559,7 @@ class BrowserManager {
     Object message, {
     StackTraceMapper mapper,
   }) async {
-    url = url.replace(
-        fragment: Uri.encodeFull(jsonEncode(<String, Object>{
+    url = url.replace(fragment: Uri.encodeFull(jsonEncode(<String, Object>{
       'metadata': suiteConfig.metadata.serialize(),
       'browser': _runtime.identifier,
     })));

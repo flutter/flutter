@@ -188,12 +188,12 @@ flutter_tools:lib/''');
     });
 
     await const KernelSnapshot().build(Environment(
-        outputDir: fs.currentDirectory,
-        projectDir: fs.currentDirectory,
-        defines: <String, String>{
-      kBuildMode: 'debug',
-      kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
-    }));
+      outputDir: fs.currentDirectory,
+      projectDir: fs.currentDirectory,
+      defines: <String, String>{
+        kBuildMode: 'debug',
+        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+      }));
   }, overrides: <Type, Generator>{
     KernelCompilerFactory: () => MockKernelCompilerFactory(),
   }));
