@@ -650,7 +650,7 @@ Future<Map<String, dynamic>> measureIosCpuGpu({
     'global',
     'activate',
     'gauge',
-    '0.1.2',
+    '0.1.4',
   ]);
 
   await _execAndCheck('pub', <String>[
