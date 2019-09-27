@@ -105,7 +105,6 @@ abstract class DesktopDevice extends Device {
     ]);
     _runningProcesses.add(process);
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
-    onLaunched(package, buildMode, process);
 
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
@@ -114,6 +113,7 @@ abstract class DesktopDevice extends Device {
     final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader);
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
+      onAttached(package, buildMode, process);
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
       printError('Error waiting for a debug connection: $error');
@@ -145,9 +145,9 @@ abstract class DesktopDevice extends Device {
   /// the given [buildMode].
   String executablePathForDevice(ApplicationPackage package, BuildMode buildMode);
 
-  /// Called after a process is started, allowing any device-specific extra
+  /// Called after a process is attached, allowing any device-specific extra
   /// steps to be run.
-  void onLaunched(ApplicationPackage package, BuildMode buildMode, Process process) {}
+  void onAttached(ApplicationPackage package, BuildMode buildMode, Process process) {}
 }
 
 class DesktopLogReader extends DeviceLogReader {

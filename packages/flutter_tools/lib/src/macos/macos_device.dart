@@ -54,8 +54,11 @@ class MacOSDevice extends DesktopDevice {
   }
 
   @override
-  void onLaunched(covariant MacOSApp package, BuildMode buildMode, Process process) {
-    // Bring app to foreground.
+  void onAttached(covariant MacOSApp package, BuildMode buildMode, Process process) {
+    // Bring app to foreground. Ideally this would be done post-launch rather
+    // than post-attach, since this won't run for release builds, but there's
+    // no general-purpose way of knowing when a process is far enoug along in
+    // the launch process for 'open' to foreground it.
     processManager.run(<String>[
       'open', package.applicationBundle(buildMode),
     ]);
