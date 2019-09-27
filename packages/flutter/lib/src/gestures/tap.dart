@@ -147,7 +147,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   /// The parameter `down` is the down event of the primary pointer that started
   /// the tap sequence.
   ///
-  /// If the gesture doesn't win the arena, [handleTapCancel] is called next.
+  /// If this recognizer doesn't win the arena, [handleTapCancel] is called next.
   /// Otherwise, [handleTapUp] is called next.
   @protected
   void handleTapDown({ PointerDownEvent down });
@@ -160,7 +160,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   /// The parameter `down` is the down event of the primary pointer that started
   /// the tap sequence, and `up` is the up event that ended the tap sequence.
   ///
-  /// If the gesture doesn't win the arena, [handleTapCancel] is called
+  /// If this recognizer doesn't win the arena, [handleTapCancel] is called
   /// instead.
   @protected
   void handleTapUp({ PointerDownEvent down, PointerUpEvent up });
@@ -177,7 +177,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   /// can be "forced" if other gestures won the arena, or "spontaneous"
   /// otherwise.
   ///
-  /// If the gesture wins the arena, [handleTapUp] is called instead.
+  /// If this recognizer wins the arena, [handleTapUp] is called instead.
   @protected
   void handleTapCancel({ PointerDownEvent down, PointerCancelEvent cancel, String reason });
 
@@ -320,7 +320,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// This triggers once a short timeout ([deadline]) has elapsed, or once
   /// the gestures has won the arena, whichever comes first.
   ///
-  /// If the gesture doesn't win the arena, [onTapCancel] is called next.
+  /// If this recognizer doesn't win the arena, [onTapCancel] is called next.
   /// Otherwise, [onTapUp] is called next.
   ///
   /// See also:
@@ -337,7 +337,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// This triggers once the pointer has stopped contacting the screen, if the
   /// gesture has won the arena, immediately before [onTap].
   ///
-  /// If the gesture doesn't win the arena, [onTapCancel] is called instead.
+  /// If this recognizer doesn't win the arena, [onTapCancel] is called instead.
   ///
   /// See also:
   ///
@@ -352,7 +352,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// This triggers once the pointer has stopped contacting the screen, if the
   /// gesture has won the arena, immediately after [onTapUp].
   ///
-  /// If the gesture doesn't win the arena, [onTapCancel] is called instead.
+  /// If this recognizer doesn't win the arena, [onTapCancel] is called instead.
   ///
   /// See also:
   ///
@@ -367,7 +367,8 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// This triggers once the gesture loses the arena, if [onTapDown] has
   /// previously been triggered.
   ///
-  /// If the gesture wins the arena, [onTapUp] and [onTap] are called instead.
+  /// If this recognizer wins the arena, [onTapUp] and [onTap] are called
+  /// instead.
   ///
   /// See also:
   ///
@@ -382,8 +383,8 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// This triggers once a short timeout ([deadline]) has elapsed, or once
   /// the gestures has won the arena, whichever comes first.
   ///
-  /// If the gesture doesn't win the arena, [onSecondaryTapCancel] is called next.
-  /// Otherwise, [onSecondaryTapUp] is called next.
+  /// If this recognizer doesn't win the arena, [onSecondaryTapCancel] is called
+  /// next. Otherwise, [onSecondaryTapUp] is called next.
   ///
   /// See also:
   ///
@@ -398,7 +399,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///
   /// This triggers once the gesture has won the arena.
   ///
-  /// If the gesture doesn't win the arena, [onSecondaryTapCancel] is called
+  /// If this recognizer doesn't win the arena, [onSecondaryTapCancel] is called
   /// instead.
   ///
   /// See also:
@@ -414,7 +415,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///
   /// This triggers if the gesture loses the arena.
   ///
-  /// If the gesture wins the arena, [onSecondaryTapUp] is called instead.
+  /// If this recognizer wins the arena, [onSecondaryTapUp] is called instead.
   ///
   /// See also:
   ///
