@@ -55,9 +55,9 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
   );
 }
 
-ImageProvider<dynamic> _resizeIfNeeded(bool resizeToFit, ImageProvider<dynamic> provider) {
-  if (resizeToFit) {
-    return ResizedImage(provider);
+ImageProvider<dynamic> _resizeIfNeeded(int targetWidth, int targetHeight, ImageProvider<dynamic> provider) {
+  if (targetWidth != null || targetHeight != null) {
+    return ResizedImage(provider, targetWidth, targetHeight);
   } else {
     return provider;
   }
@@ -339,8 +339,9 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
     Map<String, String> headers,
-    bool resizeToFit = false,
-  }) : image = _resizeIfNeeded(resizeToFit, NetworkImage(src, scale: scale, headers: headers)),
+    int resizeWidth,
+    int resizeHeight,
+  }) : image = _resizeIfNeeded(resizeWidth, resizeHeight, NetworkImage(src, scale: scale, headers: headers)),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -388,8 +389,9 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-    bool resizeToFit = false,
-  }) : image = _resizeIfNeeded(resizeToFit, FileImage(file, scale: scale)),
+    int resizeWidth,
+    int resizeHeight,
+  }) : image = _resizeIfNeeded(resizeWidth, resizeHeight, FileImage(file, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
@@ -594,8 +596,9 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-    bool resizeToFit = false,
-  }) : image = _resizeIfNeeded(resizeToFit, MemoryImage(bytes, scale: scale)),
+    int resizeWidth,
+    int resizeHeight,
+  }) : image = _resizeIfNeeded(resizeWidth, resizeHeight, MemoryImage(bytes, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
