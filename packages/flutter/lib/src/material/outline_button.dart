@@ -28,7 +28,7 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 /// wide grey rounded rectangle that does not change when the button is
 /// pressed or disabled. By default the button's background is transparent.
 ///
-/// If [onPressed] or [onLongPress] callbacks are null, then the button will be disabled and by
+/// If the [onPressed] or [onLongPress] callbacks are null, then the button will be disabled and by
 /// default will resemble a flat button in the [disabledColor].
 ///
 /// The button's [highlightElevation], which defines the size of the

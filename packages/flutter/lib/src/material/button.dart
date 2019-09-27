@@ -76,12 +76,20 @@ class RawMaterialButton extends StatefulWidget {
 
   /// Called when the button is tapped or otherwise activated.
   ///
-  /// If this and [onLongPress] are set to null, the button will be disabled, see [enabled].
+  /// If this callback and [onLongPress] are null, then the button will be disabled.
+  /// 
+  /// See also:
+  ///
+  ///  * [enabled], which is true if the button is enabled.
   final VoidCallback onPressed;
 
   /// Called when the button is long-pressed.
   /// 
-  /// If this and [onPressed] are set to null, the button will be disabled, see [enabled].
+  /// If this callback and [onPressed] are null, then the button will be disabled.
+  /// 
+  /// See also:
+  ///
+  ///  * [enabled], which is true if the button is enabled.
   final VoidCallback onLongPress;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]

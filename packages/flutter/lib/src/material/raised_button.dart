@@ -23,7 +23,7 @@ import 'theme_data.dart';
 /// If [onPressed] and [onLongPress] callbacks are null, then the button will be disabled and by
 /// default will resemble a flat button in the [disabledColor]. If you are
 /// trying to change the button's [color] and it is not having any effect, check
-/// that you are passing a non-null [onPressed] or [onLongPress] handler.
+/// that you are passing a non-null [onPressed] or [onLongPress] callbacks.
 ///
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
