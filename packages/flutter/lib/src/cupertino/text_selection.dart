@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'localizations.dart';
+import 'theme.dart';
 
 // Read off from the output on iOS 12. This color does not vary with the
 // application's theme color.
@@ -37,7 +38,7 @@ const double _kToolbarHeight = 43.0;
 const Size _kToolbarArrowSize = Size(14.0, 7.0);
 const Radius _kToolbarBorderRadius = Radius.circular(8);
 // Colors extracted from https://developer.apple.com/design/resources/.
-// These colors don't seem to react to trait collection changes.
+// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
 const Color _kToolbarBackgroundColor = Color(0xEB202020);
 const Color _kToolbarDividerColor = Color(0xFF808080);
 
@@ -390,7 +391,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     final Widget handle = SizedBox.fromSize(
       size: desiredSize,
       child: CustomPaint(
-        painter: _TextSelectionHandlePainter(CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context)),
+        painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
       ),
     );
 
