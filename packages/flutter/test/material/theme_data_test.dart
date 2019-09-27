@@ -190,7 +190,7 @@ void main() {
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
       },
     );
-    
+
     final ThemeData theme = ThemeData.raw(
       brightness: Brightness.dark,
       primaryColor: Colors.black,
