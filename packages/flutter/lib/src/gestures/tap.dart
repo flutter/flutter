@@ -98,7 +98,7 @@ typedef GestureTapCallback = void Function();
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
 typedef GestureTapCancelCallback = void Function();
 
-/// The base class of gesture recognizers that recognize taps.
+/// A base class for gesture recognizers that recognize taps.
 ///
 /// Gesture recognizers take part in gesture arenas to enable potential gestures
 /// to be disambiguated from each other. This process is managed by a
@@ -106,17 +106,18 @@ typedef GestureTapCancelCallback = void Function();
 ///
 /// A tap is defined as a sequence of events that starts with a down, followed
 /// by optional moves, then ends with an up. All move events must contain the
-/// same `buttons` with the down event, and must not be too far from the initial
+/// same `buttons` as the down event, and must not be too far from the initial
 /// position. The gesture is rejected on any violation, a cancel event, or
 /// if any other gesture wins the arena. It is accepted only when it is the last
 /// member of the arena.
 ///
-/// [BaseTapGestureRecognizer] considers all the pointers involved in the pointer
-/// event sequence as contributing to one gesture. For this reason, extra
-/// pointer interactions during a tap sequence are not recognized as additional
-/// taps. For example, down-1, down-2, up-1, up-2 produces only one tap on up-1.
+/// The [BaseTapGestureRecognizer] considers all the pointers involved in the
+/// pointer event sequence as contributing to one gesture. For this reason,
+/// extra pointer interactions during a tap sequence are not recognized as
+/// additional taps. For example, down-1, down-2, up-1, up-2 produces only one
+/// tap on up-1.
 ///
-/// [BaseTapGestureRecognizer] can not be directly used, since it does not
+/// The [BaseTapGestureRecognizer] can not be directly used, since it does not
 /// define which buttons to accept, or what to do when a tap happens. If you
 /// want to build a custom tap recognizer, extend this class by overriding
 /// [isPointerAllowed] and the handler methods.
@@ -146,8 +147,8 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   /// The parameter `down` is the down event of the primary pointer that started
   /// the tap sequence.
   ///
-  /// If the gesture doesn't win the arena, [handleTapUp] is called next.
-  /// Otherwise, [handleTapCancel] is called next.
+  /// If the gesture doesn't win the arena, [handleTapCancel] is called next.
+  /// Otherwise, [handleTapUp] is called next.
   @protected
   void handleTapDown({ PointerDownEvent down });
 
@@ -173,10 +174,10 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   /// The parameter `down` is the down event of the primary pointer that started
   /// the tap sequence; `cancel` is the cancel event, which might be null;
   /// `reason` is a short description of the cause if `cancel` is null, which
-  /// can be `"forced"` if other gestures won the arena, or `"spontaneous"`
+  /// can be "forced" if other gestures won the arena, or "spontaneous"
   /// otherwise.
   ///
-  /// If the gesture wins the arena, [onSecondaryTapUp] is called instead.
+  /// If the gesture wins the arena, [handleTapUp] is called instead.
   @protected
   void handleTapCancel({ PointerDownEvent down, PointerCancelEvent cancel, String reason });
 
@@ -185,7 +186,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
     if (state == GestureRecognizerState.ready) {
       // `_down` must be assigned in this method instead of `handlePrimaryPointer`,
       // because `acceptGesture` might be called before `handlePrimaryPointer`,
-      // which relies on `_down` to call `_delegate.onDown`.
+      // which relies on `_down` to call `handleTapDown`.
       _down = event;
     }
     super.addAllowedPointer(event);
@@ -222,7 +223,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   }
 
   @override
-  void didExceedDeadlineWithEvent(PointerDownEvent event) {
+  void didExceedDeadline() {
     _checkDown();
   }
 
