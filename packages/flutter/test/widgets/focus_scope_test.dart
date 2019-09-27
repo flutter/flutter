@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/semantics.dart';
 
 class TestFocus extends StatefulWidget {
   const TestFocus({
@@ -1289,5 +1292,23 @@ void main() {
     await tester.pumpWidget(Container());
 
     expect(WidgetsBinding.instance.focusManager.rootScope.descendants, isEmpty);
+  });
+  testWidgets('Focus widgets set Semantics information about focus', (WidgetTester tester) async {
+    final GlobalKey<TestFocusState> key = GlobalKey();
+
+    await tester.pumpWidget(
+      TestFocus(key: key, name: 'a'),
+    );
+
+    final SemanticsNode semantics = tester.getSemantics(find.byKey(key));
+
+    expect(key.currentState.focusNode.hasFocus, isFalse);
+    expect(semantics.hasFlag(SemanticsFlag.isFocused), isFalse);
+
+    FocusScope.of(key.currentContext).requestFocus(key.currentState.focusNode);
+    await tester.pumpAndSettle();
+
+    expect(key.currentState.focusNode.hasFocus, isTrue);
+    expect(semantics.hasFlag(SemanticsFlag.isFocused), isTrue);
   });
 }
