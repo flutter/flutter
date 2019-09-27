@@ -36,7 +36,7 @@ void main() {
   Finder _findDecoyChild(Widget child) {
     return find.descendant(
       of: find.byType(ShaderMask),
-      matching: find.byWidgetPredicate((Widget w) => w == child),
+      matching: find.byWidget(child),
     );
   }
 

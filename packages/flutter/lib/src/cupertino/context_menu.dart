@@ -21,7 +21,7 @@ typedef _DismissCallback = void Function(
 );
 
 // Given a GlobalKey, return the Rect of the corresponding RenderBox's
-// paintBounds.
+// paintBounds in global coordinates.
 Rect _getRect(GlobalKey globalKey) {
   assert(globalKey.currentContext != null);
   final RenderBox renderBoxContainer = globalKey.currentContext.findRenderObject();
@@ -30,17 +30,19 @@ Rect _getRect(GlobalKey globalKey) {
 }
 
 // The context menu arranges itself slightly differently based on the location
-// on the screen of the original child.
+// on the screen of [ContextMenu.child] before the [ContextMenu] opens.
 enum _ContextMenuOrientation {
   center,
   left,
   right,
 }
 
-/// A full-screen menu that can be activated for the given child.
+// TODO(justinmc): Dartpad example here.
+/// A full-screen overlay menu that opens when the child is long-pressed or 3d
+/// touched.
 ///
-/// Long pressing or 3d touching on the child will open in up in a full-screen
-/// overlay menu.
+/// The open menu shows the child or the given [preview] with a list of buttons
+/// specified by [actions].
 class ContextMenu extends StatefulWidget {
   /// Create a context menu.
   ContextMenu({
@@ -53,13 +55,23 @@ class ContextMenu extends StatefulWidget {
        assert(child != null),
        super(key: key);
 
-  /// The widget that can be opened in a ContextMenu.
+
+  /// The widget that can be "opened" with the ContextMenu.
   ///
-  /// This widget will be displayed at its normal position in the widget tree,
-  /// but long pressing or 3d touching on it will cause the ContextMenu to open.
+  /// When the context menu is long-pressed or 3d touched the menu will open and
+  /// this widget (or [preview], if provided) will be moved to the overlay and
+  /// sized to be as wide or tall as possible.
+  ///
+  /// When the context menu is "closed", this widget acts like a [Container],
+  /// i.e. it does not constrain its child.
+  ///
+  /// This parameter cannot be null.
   final Widget child;
 
   /// The actions that are shown in the menu.
+  ///
+  /// This parameter cannot be null, and items in the List must be
+  /// [ContextMenuSheetAction]s.
   final List<ContextMenuSheetAction> actions;
 
   /// The callback to call when tapping on the child when the ContextMenu is
