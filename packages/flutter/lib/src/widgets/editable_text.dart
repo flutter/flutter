@@ -1815,6 +1815,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             onCopy: _semanticsOnCopy(controls),
             onCut: _semanticsOnCut(controls),
             onPaste: _semanticsOnPaste(controls),
+            focused: _hasFocus,
             child: _Editable(
               key: _editableKey,
               startHandleLayerLink: _startHandleLayerLink,
