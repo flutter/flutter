@@ -140,6 +140,86 @@ class MacOSPlugin extends PluginPlatform {
   }
 }
 
+/// Contains the parameters to template a Windows plugin.
+///
+/// The required fields include: [name] of the plugin, and [pluginClass] that will
+/// be the entry point to the plugin's native code.
+class WindowsPlugin extends PluginPlatform {
+  const WindowsPlugin({
+    @required this.name,
+    @required this.pluginClass,
+  });
+
+  factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
+    assert(validate(yaml));
+    return WindowsPlugin(
+      name: name,
+      pluginClass: yaml['pluginClass'],
+    );
+  }
+
+  static bool validate(YamlMap yaml) {
+    if (yaml == null) {
+      return false;
+    }
+    return yaml['pluginClass'] is String;
+  }
+
+  static const String kConfigKey = 'windows';
+
+  final String name;
+  final String pluginClass;
+
+  @override
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'name': name,
+      'class': pluginClass,
+      'filename': _filenameForCppClass(pluginClass),
+    };
+  }
+}
+
+/// Contains the parameters to template a Linux plugin.
+///
+/// The required fields include: [name] of the plugin, and [pluginClass] that will
+/// be the entry point to the plugin's native code.
+class LinuxPlugin extends PluginPlatform {
+  const LinuxPlugin({
+    @required this.name,
+    @required this.pluginClass,
+  });
+
+  factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
+    assert(validate(yaml));
+    return LinuxPlugin(
+      name: name,
+      pluginClass: yaml['pluginClass'],
+    );
+  }
+
+  static bool validate(YamlMap yaml) {
+    if (yaml == null) {
+      return false;
+    }
+    return yaml['pluginClass'] is String;
+  }
+
+  static const String kConfigKey = 'linux';
+
+  final String name;
+  final String pluginClass;
+
+  @override
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'name': name,
+      'class': pluginClass,
+      'filename': _filenameForCppClass(pluginClass),
+    };
+  }
+}
+
 /// Contains the parameters to template a web plugin.
 ///
 /// The required fields include: [name] of the plugin, the [pluginClass] that will
@@ -189,4 +269,12 @@ class WebPlugin extends PluginPlatform {
       'file': fileName,
     };
   }
+}
+
+final RegExp _internalCapitalLetterRegex = RegExp(r'(?=(?!^)[A-Z])');
+String _filenameForCppClass(String className) {
+  return className.splitMapJoin(
+    _internalCapitalLetterRegex,
+    onMatch: (_) => '_',
+    onNonMatch: (String n) => n.toLowerCase());
 }

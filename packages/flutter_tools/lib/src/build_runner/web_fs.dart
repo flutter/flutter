@@ -112,17 +112,20 @@ class WebFs {
 
   Future<DebugConnection> _cachedExtensionFuture;
 
-  /// Retrieve the [DebugConnection] for the current application
-  Future<DebugConnection> runAndDebug(DebuggingOptions debuggingOptions) {
-    final Completer<DebugConnection> firstConnection = Completer<DebugConnection>();
+  /// Connect and retrieve the [DebugConnection] for the current application.
+  ///
+  /// Only calls [AppConnection.runMain] on the subsequent connections.
+  Future<ConnectionResult> connect(DebuggingOptions debuggingOptions) {
+    final Completer<ConnectionResult> firstConnection = Completer<ConnectionResult>();
     _connectedApps = _dwds.connectedApps.listen((AppConnection appConnection) async {
       final DebugConnection debugConnection = debuggingOptions.browserLaunch
         ? await _dwds.debugConnection(appConnection)
         : await (_cachedExtensionFuture ??= _dwds.extensionDebugConnections.stream.first);
       if (!firstConnection.isCompleted) {
-        firstConnection.complete(debugConnection);
+        firstConnection.complete(ConnectionResult(appConnection, debugConnection));
+      } else {
+        appConnection.runMain();
       }
-      appConnection.runMain();
     });
     return firstConnection.future;
   }
@@ -132,7 +135,7 @@ class WebFs {
     _client.startBuild();
     await for (BuildResults results in _client.buildResults) {
       final BuildResult result = results.results.firstWhere((BuildResult result) {
-        return result.target == 'web';
+        return result.target == kBuildTargetName;
       });
       if (result.status == BuildStatus.failed) {
         return false;
@@ -161,6 +164,7 @@ class WebFs {
     final bool hasWebPlugins = findPlugins(flutterProject)
         .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     // Start the build daemon and run an initial build.
+    final Completer<bool> inititalBuild = Completer<bool>();
     final BuildDaemonClient client = await buildDaemonCreator
       .startBuildDaemon(fs.currentDirectory.path,
           release: buildInfo.isRelease,
@@ -175,6 +179,17 @@ class WebFs {
           return results.results
             .firstWhere((BuildResult result) => result.target == kBuildTargetName);
         });
+    client.buildResults.listen((BuildResults buildResults) {
+      final BuildResult result = buildResults.results.firstWhere((BuildResult result) {
+        return result.target == kBuildTargetName;
+      });
+      if (result.status == BuildStatus.failed) {
+        inititalBuild.complete(false);
+      }
+      if (result.status == BuildStatus.succeeded) {
+        inititalBuild.complete(true);
+      }
+    });
     final int daemonAssetPort = buildDaemonCreator.assetServerPort(fs.currentDirectory);
 
     // Initialize the asset bundle.
@@ -246,13 +261,17 @@ class WebFs {
     cascade = cascade.add(assetServer.handle);
     final HttpServer server = await httpMultiServerFactory(hostname ?? _kHostName, hostPort);
     shelf_io.serveRequests(server, cascade.handler);
-    return WebFs(
+    final WebFs webFS = WebFs(
       client,
       server,
       dwds,
       'http://$_kHostName:$hostPort/',
       assetServer,
     );
+    if (!await inititalBuild.future) {
+      throw Exception('Failed to compile for the web.');
+    }
+    return webFS;
   }
 }
 
@@ -391,6 +410,13 @@ class AssetServer {
   void dispose() {
     partFiles?.deleteSync(recursive: true);
   }
+}
+
+class ConnectionResult {
+  ConnectionResult(this.appConnection, this.debugConnection);
+
+  final AppConnection appConnection;
+  final DebugConnection debugConnection;
 }
 
 /// A testable interface for starting a build daemon.

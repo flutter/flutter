@@ -50,7 +50,11 @@ class Plugin {
   ///        pluginClass: SamplePlugin
   ///      ios:
   ///        pluginClass: SamplePlugin
+  ///      linux:
+  ///        pluginClass: SamplePlugin
   ///      macos:
+  ///        pluginClass: SamplePlugin
+  ///      windows:
   ///        pluginClass: SamplePlugin
   factory Plugin.fromYaml(String name, String path, dynamic pluginYaml) {
     final List<String> errors = validatePluginYaml(pluginYaml);
@@ -84,6 +88,11 @@ class Plugin {
           IOSPlugin.fromYaml(name, platformsYaml[IOSPlugin.kConfigKey]);
     }
 
+    if (platformsYaml[LinuxPlugin.kConfigKey] != null) {
+      platforms[LinuxPlugin.kConfigKey] =
+          LinuxPlugin.fromYaml(name, platformsYaml[LinuxPlugin.kConfigKey]);
+    }
+
     if (platformsYaml[MacOSPlugin.kConfigKey] != null) {
       platforms[MacOSPlugin.kConfigKey] =
           MacOSPlugin.fromYaml(name, platformsYaml[MacOSPlugin.kConfigKey]);
@@ -92,6 +101,11 @@ class Plugin {
     if (platformsYaml[WebPlugin.kConfigKey] != null) {
       platforms[WebPlugin.kConfigKey] =
           WebPlugin.fromYaml(name, platformsYaml[WebPlugin.kConfigKey]);
+    }
+
+    if (platformsYaml[WindowsPlugin.kConfigKey] != null) {
+      platforms[WindowsPlugin.kConfigKey] =
+          WindowsPlugin.fromYaml(name, platformsYaml[WindowsPlugin.kConfigKey]);
     }
 
     return Plugin(
@@ -156,9 +170,17 @@ class Plugin {
         !IOSPlugin.validate(yaml[IOSPlugin.kConfigKey])) {
       errors.add('Invalid "ios" plugin specification.');
     }
+    if (yaml.containsKey(LinuxPlugin.kConfigKey) &&
+        !LinuxPlugin.validate(yaml[LinuxPlugin.kConfigKey])) {
+      errors.add('Invalid "linux" plugin specification.');
+    }
     if (yaml.containsKey(MacOSPlugin.kConfigKey) &&
         !MacOSPlugin.validate(yaml[MacOSPlugin.kConfigKey])) {
       errors.add('Invalid "macos" plugin specification.');
+    }
+    if (yaml.containsKey(WindowsPlugin.kConfigKey) &&
+        !WindowsPlugin.validate(yaml[WindowsPlugin.kConfigKey])) {
+      errors.add('Invalid "windows" plugin specification.');
     }
     return errors;
   }
@@ -170,9 +192,6 @@ class Plugin {
     }
     if (yaml['iosPrefix'] != null && yaml['iosPrefix'] is! String) {
       errors.add('The "iosPrefix" must either be null or a string.');
-    }
-    if (yaml['macosPrefix'] != null && yaml['macosPrefix'] is! String) {
-      errors.add('The "macosPrefix" must either be null or a string.');
     }
     if (yaml['pluginClass'] != null && yaml['pluginClass'] is! String) {
       errors.add('The "pluginClass" must either be null or a string..');
@@ -415,6 +434,39 @@ void registerPlugins(PluginRegistry registry) {
 }
 ''';
 
+const String _cppPluginRegistryHeaderTemplate = '''//
+//  Generated file. Do not edit.
+//
+
+#ifndef GENERATED_PLUGIN_REGISTRANT_
+#define GENERATED_PLUGIN_REGISTRANT_
+
+#include <flutter/plugin_registry.h>
+
+// Registers Flutter plugins.
+void RegisterPlugins(flutter::PluginRegistry* registry);
+
+#endif  // GENERATED_PLUGIN_REGISTRANT_
+''';
+
+const String _cppPluginRegistryImplementationTemplate = '''//
+//  Generated file. Do not edit.
+//
+
+#include "generated_plugin_registrant.h"
+
+{{#plugins}}
+#include <{{filename}}.h>
+{{/plugins}}
+
+void RegisterPlugins(flutter::PluginRegistry* registry) {
+{{#plugins}}
+  {{class}}RegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("{{class}}"));
+{{/plugins}}
+}
+''';
+
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> iosPlugins = _extractPlatformMaps(plugins, IOSPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
@@ -455,6 +507,14 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   }
 }
 
+Future<void> _writeLinuxPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+  final List<Map<String, dynamic>> linuxPlugins = _extractPlatformMaps(plugins, LinuxPlugin.kConfigKey);
+  final Map<String, dynamic> context = <String, dynamic>{
+    'plugins': linuxPlugins,
+  };
+  await _writeCppPluginRegistrant(project.linux.managedDirectory, context);
+}
+
 Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> macosPlugins = _extractPlatformMaps(plugins, MacOSPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
@@ -467,6 +527,28 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
     _swiftPluginRegistryTemplate,
     context,
     fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.swift'),
+  );
+}
+
+Future<void> _writeWindowsPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+  final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(plugins, WindowsPlugin.kConfigKey);
+  final Map<String, dynamic> context = <String, dynamic>{
+    'plugins': windowsPlugins,
+  };
+  await _writeCppPluginRegistrant(project.windows.managedDirectory, context);
+}
+
+Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynamic> templateContext) async {
+  final String registryDirectory = destination.path;
+  _renderTemplateToFile(
+    _cppPluginRegistryHeaderTemplate,
+    templateContext,
+    fs.path.join(registryDirectory, 'generated_plugin_registrant.h'),
+  );
+  _renderTemplateToFile(
+    _cppPluginRegistryImplementationTemplate,
+    templateContext,
+    fs.path.join(registryDirectory, 'generated_plugin_registrant.cc'),
   );
 }
 
@@ -527,11 +609,17 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
   if ((checkProjects && project.ios.existsSync()) || !checkProjects) {
     await _writeIOSPluginRegistrant(project, plugins);
   }
-  // TODO(stuartmorgan): Revisit the condition here once the plans for handling
+  // TODO(stuartmorgan): Revisit the conditions here once the plans for handling
   // desktop in existing projects are in place. For now, ignore checkProjects
   // on desktop and always treat it as true.
+  if (featureFlags.isLinuxEnabled && project.linux.existsSync()) {
+    await _writeLinuxPluginRegistrant(project, plugins);
+  }
   if (featureFlags.isMacOSEnabled && project.macos.existsSync()) {
     await _writeMacOSPluginRegistrant(project, plugins);
+  }
+  if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
+    await _writeWindowsPluginRegistrant(project, plugins);
   }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
     if (!project.isModule && (!checkProjects || subproject.existsSync())) {

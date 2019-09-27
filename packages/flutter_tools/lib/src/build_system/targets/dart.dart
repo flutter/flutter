@@ -73,7 +73,7 @@ class CopyFlutterBundle extends Target {
     Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.behavior(AssetOutputBehavior())
+    Source.behavior(AssetOutputBehavior()),
   ];
 
   @override
@@ -84,7 +84,7 @@ class CopyFlutterBundle extends Target {
     Source.pattern('{OUTPUT_DIR}/AssetManifest.json'),
     Source.pattern('{OUTPUT_DIR}/FontManifest.json'),
     Source.pattern('{OUTPUT_DIR}/LICENSE'),
-    Source.behavior(AssetOutputBehavior())
+    Source.behavior(AssetOutputBehavior()),
   ];
 
   @override
@@ -157,7 +157,7 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
     Source.pattern('{OUTPUT_DIR}/AssetManifest.json'),
     Source.pattern('{OUTPUT_DIR}/FontManifest.json'),
     Source.pattern('{OUTPUT_DIR}/LICENSE'),
-    Source.behavior(AssetOutputBehavior())
+    Source.behavior(AssetOutputBehavior()),
   ];
 
   @override

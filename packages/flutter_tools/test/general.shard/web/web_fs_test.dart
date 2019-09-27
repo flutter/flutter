@@ -4,6 +4,7 @@
 
 import 'package:build_daemon/client.dart';
 import 'package:build_daemon/data/build_status.dart';
+import 'package:built_collection/built_collection.dart';
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -49,7 +50,18 @@ void main() {
       return 1234;
     });
     when(mockBuildDaemonClient.buildResults).thenAnswer((Invocation _) {
-      return const Stream<BuildResults>.empty();
+      return Stream<BuildResults>.fromFuture(Future<BuildResults>.value(
+        BuildResults((BuildResultsBuilder builder) {
+          builder.results = ListBuilder<BuildResult>(
+            <BuildResult>[
+              DefaultBuildResult((DefaultBuildResultBuilder builder) {
+                builder.target = 'web';
+                builder.status = BuildStatus.succeeded;
+              })
+            ]
+          );
+        })
+      ));
     });
     when(mockBuildDaemonCreator.assetServerPort(any)).thenReturn(4321);
     testbed = Testbed(
@@ -140,6 +152,34 @@ void main() {
 
     expect(lastPort, 1234);
     expect(lastAddress, contains('foo'));
+  }));
+
+  test('Throws exception if build fails', () => testbed.run(() async {
+    when(mockBuildDaemonClient.buildResults).thenAnswer((Invocation _) {
+      return Stream<BuildResults>.fromFuture(Future<BuildResults>.value(
+        BuildResults((BuildResultsBuilder builder) {
+          builder.results = ListBuilder<BuildResult>(
+            <BuildResult>[
+              DefaultBuildResult((DefaultBuildResultBuilder builder) {
+                builder.target = 'web';
+                builder.status = BuildStatus.failed;
+              })
+            ]
+          );
+        })
+      ));
+    });
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(WebFs.start(
+      skipDwds: false,
+      target: fs.path.join('lib', 'main.dart'),
+      buildInfo: BuildInfo.debug,
+      flutterProject: flutterProject,
+      initializePlatform: false,
+      hostname: 'foo',
+      port: '1234',
+    ), throwsA(isInstanceOf<Exception>()));
   }));
 }
 

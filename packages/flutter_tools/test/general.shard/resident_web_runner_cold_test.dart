@@ -38,25 +38,26 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-      WebFsFactory: () => ({
-        @required String target,
-        @required FlutterProject flutterProject,
-        @required BuildInfo buildInfo,
-        @required bool skipDwds,
-        @required bool initializePlatform,
-        @required String hostname,
-        @required String port,
-      }) async {
-        return mockWebFs;
+        WebFsFactory: () => ({
+          @required String target,
+          @required FlutterProject flutterProject,
+          @required BuildInfo buildInfo,
+          @required bool skipDwds,
+          @required bool initializePlatform,
+          @required String hostname,
+          @required String port,
+        }) async {
+          return mockWebFs;
+        },
       },
-    });
+    );
   });
 
   void _setupMocks() {
     fs.file('pubspec.yaml').createSync();
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
-    when(mockWebFs.runAndDebug(any)).thenThrow(StateError('debugging not supported'));
+    when(mockWebFs.connect(any)).thenThrow(StateError('debugging not supported'));
   }
 
   test('Can successfully run and connect without vmservice', () => testbed.run(() async {
