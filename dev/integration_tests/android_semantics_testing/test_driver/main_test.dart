@@ -76,8 +76,9 @@ void main() {
           isFocused: false,
           isPassword: false,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.focus,
           ],
         ));
 
@@ -90,10 +91,11 @@ void main() {
           isEditable: true,
           isPassword: false,
           actions: <AndroidSemanticsAction>[
+            AndroidSemanticsAction.clearAccessibilityFocus,
             AndroidSemanticsAction.click,
-            AndroidSemanticsAction.accessibilityFocus,
-            AndroidSemanticsAction.setSelection,
             AndroidSemanticsAction.copy,
+            AndroidSemanticsAction.focus,
+            AndroidSemanticsAction.setSelection,
           ],
         ));
 
@@ -107,10 +109,11 @@ void main() {
           isEditable: true,
           isPassword: false,
           actions: <AndroidSemanticsAction>[
+            AndroidSemanticsAction.clearAccessibilityFocus,
             AndroidSemanticsAction.click,
-            AndroidSemanticsAction.accessibilityFocus,
-            AndroidSemanticsAction.setSelection,
             AndroidSemanticsAction.copy,
+            AndroidSemanticsAction.focus,
+            AndroidSemanticsAction.setSelection,
           ],
         ));
       });
@@ -128,8 +131,9 @@ void main() {
           isFocused: false,
           isPassword: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.focus,
           ],
         ));
 
@@ -142,10 +146,11 @@ void main() {
           isEditable: true,
           isPassword: true,
           actions: <AndroidSemanticsAction>[
+            AndroidSemanticsAction.clearAccessibilityFocus,
             AndroidSemanticsAction.click,
-            AndroidSemanticsAction.accessibilityFocus,
-            AndroidSemanticsAction.setSelection,
             AndroidSemanticsAction.copy,
+            AndroidSemanticsAction.focus,
+            AndroidSemanticsAction.setSelection,
           ],
         ));
 
@@ -159,10 +164,11 @@ void main() {
           isEditable: true,
           isPassword: true,
           actions: <AndroidSemanticsAction>[
+            AndroidSemanticsAction.clearAccessibilityFocus,
             AndroidSemanticsAction.click,
-            AndroidSemanticsAction.accessibilityFocus,
-            AndroidSemanticsAction.setSelection,
             AndroidSemanticsAction.copy,
+            AndroidSemanticsAction.focus,
+            AndroidSemanticsAction.setSelection,
           ],
         ));
       });
@@ -185,8 +191,9 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.focus,
           ],
         ));
 
@@ -199,8 +206,9 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.focus,
           ],
         ));
         expect(await getSemantics(find.byValueKey(disabledCheckboxKeyValue)), hasAndroidSemantics(
@@ -209,6 +217,7 @@ void main() {
           isEnabled: false,
           actions: const <AndroidSemanticsAction>[
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.focus,
           ],
         ));
       });
@@ -220,8 +229,9 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.focus,
           ],
         ));
 
@@ -234,8 +244,9 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.focus,
           ],
         ));
       });
@@ -247,8 +258,9 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.focus,
           ],
         ));
 
@@ -261,8 +273,9 @@ void main() {
           isEnabled: true,
           isFocusable: true,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.focus,
           ],
         ));
       });
@@ -277,8 +290,9 @@ void main() {
           isFocusable: true,
           contentDescription: switchLabel,
           actions: <AndroidSemanticsAction>[
-            AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.focus,
           ],
         ));
       });
