@@ -25,7 +25,7 @@ void main() {
               SizedBox(width: 10.0, height: 10.0),
             ],
           ),
-        )
+        ),
       );
 
       final Finder child = find.byType(SizedBox);
@@ -47,7 +47,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
       );
 
       final Finder child = find.byType(SizedBox);
@@ -70,7 +70,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
       );
 
       final Finder child = find.byType(SizedBox);
@@ -91,7 +91,7 @@ void main() {
               Container(),
             ],
           ),
-        )
+        ),
       );
 
       // ButtonBar uses a Row internally to implement this
@@ -112,7 +112,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
       );
 
       // ButtonBar uses a Row internally to implement this
@@ -134,7 +134,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
       );
 
       // ButtonBar uses a Row internally to implement this
@@ -158,7 +158,7 @@ void main() {
               }),
             ],
           ),
-        )
+        ),
       );
       final ButtonThemeData buttonTheme = ButtonTheme.of(capturedContext);
       expect(buttonTheme.textTheme, equals(ButtonTextTheme.primary));
@@ -191,7 +191,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
       );
       final ButtonThemeData buttonTheme = ButtonTheme.of(capturedContext);
       expect(buttonTheme.textTheme, equals(ButtonTextTheme.primary));
@@ -230,7 +230,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
       );
       final ButtonThemeData buttonTheme = ButtonTheme.of(capturedContext);
       expect(buttonTheme.textTheme, equals(ButtonTextTheme.primary));

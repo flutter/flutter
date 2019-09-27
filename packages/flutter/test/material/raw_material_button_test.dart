@@ -25,7 +25,7 @@ void main() {
           materialTapTargetSize: MaterialTapTargetSize.padded,
           child: const Text('+'),
         ),
-      )
+      ),
     );
 
     await tester.tapAt(const Offset(40.0, 400.0));

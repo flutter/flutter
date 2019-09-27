@@ -41,7 +41,7 @@ void main() {
             ]
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox box = tester.renderObject(find.byKey(textKey));

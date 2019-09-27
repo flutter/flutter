@@ -37,7 +37,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Container(),
         ),
-      )
+      ),
     );
 
     expect(semantics, hasSemantics(
@@ -412,7 +412,7 @@ void main() {
         onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
         onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
         onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
-      )
+      ),
     );
 
     final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
@@ -484,7 +484,7 @@ void main() {
           namesRoute: true,
           image: true,
           liveRegion: true,
-        )
+        ),
     );
     final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
     flags

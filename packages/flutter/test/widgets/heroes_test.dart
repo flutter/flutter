@@ -736,7 +736,7 @@ Future<void> main() async {
             },
           ),
         ),
-      )
+      ),
     );
 
     // Pushes route
@@ -838,7 +838,7 @@ Future<void> main() async {
             },
           ),
         ),
-      )
+      ),
     );
 
     // Pushes route
@@ -916,7 +916,7 @@ Future<void> main() async {
             },
           ),
         ),
-      )
+      ),
     );
 
     // Pushes route
@@ -1044,7 +1044,7 @@ Future<void> main() async {
             },
           ),
         ),
-      )
+      ),
     );
 
     // Pushes routeB
@@ -1143,7 +1143,7 @@ Future<void> main() async {
             },
           ),
         ),
-      )
+      ),
     );
 
     expect(find.text('456'), findsOneWidget);
@@ -1758,7 +1758,7 @@ Future<void> main() async {
             );
           },
         ),
-      )
+      ),
     );
 
     nestedNavigator.currentState.push(MaterialPageRoute<void>(

@@ -698,7 +698,7 @@ void main() {
         find.descendant(
           of: find.widgetWithText(RawMaterialButton, text),
           matching: find.byType(Material),
-        )
+        ),
       ).color;
     }
 

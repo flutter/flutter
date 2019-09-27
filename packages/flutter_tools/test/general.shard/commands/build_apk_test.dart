@@ -223,7 +223,7 @@ void main() {
           createMockProcess(
             exitCode: 1,
             stdout: r8StdoutWarning,
-          )
+          ),
         );
       });
 

@@ -229,7 +229,7 @@ void main() {
               ),
             ),
           ),
-        )
+        ),
     );
 
     await expectLater(
@@ -482,7 +482,7 @@ void main() {
         TextDecoration.underline,
         TextDecoration.overline,
         TextDecoration.lineThrough,
-      ]
+      ],
     );
 
     await tester.pumpWidget(
@@ -523,7 +523,7 @@ void main() {
         TextDecoration.underline,
         TextDecoration.overline,
         TextDecoration.lineThrough,
-      ]
+      ],
     );
 
     await tester.pumpWidget(

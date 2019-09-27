@@ -219,7 +219,7 @@ void main() {
           padding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
-      )
+      ),
     );
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
     // Consume bottom padding - as if by the keyboard opening
@@ -275,7 +275,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
@@ -398,7 +398,7 @@ void main() {
           padding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
-      )
+      ),
     );
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
     // Consume bottom padding - as if by the keyboard opening
@@ -487,7 +487,7 @@ void main() {
           padding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
-      )
+      ),
     );
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
     // Consume bottom padding - as if by the keyboard opening
@@ -546,7 +546,7 @@ void main() {
         MaterialApp(
           theme: ThemeData(platform: platform),
           home: Scaffold(appBar: AppBar(), body: const Text('Page 1')),
-        )
+        ),
       );
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(routeBuilder());

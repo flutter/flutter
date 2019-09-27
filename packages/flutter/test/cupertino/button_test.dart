@@ -311,7 +311,7 @@ void main() {
       find.descendant(
         of: find.byType(CupertinoButton),
         matching: find.byType(DecoratedBox),
-      )
+      ),
     ).decoration;
     expect(decoration.color, CupertinoColors.activeBlue);
 
@@ -346,7 +346,7 @@ void main() {
       find.descendant(
         of: find.byType(CupertinoButton),
         matching: find.byType(DecoratedBox),
-      )
+      ),
     ).decoration;
     expect(decoration.color.value, CupertinoColors.activeOrange.darkColor.value);
   });

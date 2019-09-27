@@ -700,7 +700,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final Finder tooltip = find.byType(Tooltip);
@@ -758,7 +758,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final Finder tooltip = find.byType(Tooltip);

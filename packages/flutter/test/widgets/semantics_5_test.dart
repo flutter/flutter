@@ -29,7 +29,7 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      )
+      ),
     );
 
     expect(semantics, hasSemantics(

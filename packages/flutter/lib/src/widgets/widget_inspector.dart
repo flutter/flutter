@@ -2808,7 +2808,7 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
           children: <DiagnosticsNode>[
             ErrorDescription('${ancestor.widget.toStringShort()} ${_describeCreationLocation(ancestor)}'),
           ],
-        )
+        ),
       );
       nodes.add(ErrorSpacer());
       return false;

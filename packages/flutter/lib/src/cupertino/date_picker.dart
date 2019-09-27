@@ -1509,7 +1509,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       .pickerTextStyle.merge(
         const TextStyle(
           fontSize: _kTimerPickerNumberLabelFontSize,
-        )
+        ),
       );
   }
 

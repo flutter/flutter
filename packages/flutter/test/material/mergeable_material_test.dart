@@ -408,7 +408,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
@@ -443,7 +443,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -482,7 +482,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -524,7 +524,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -565,7 +565,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
@@ -604,7 +604,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     expect(box.size.height, equals(300));
@@ -644,7 +644,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
@@ -676,7 +676,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.pump();
@@ -710,7 +710,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
@@ -755,7 +755,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -811,7 +811,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
@@ -845,7 +845,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -889,7 +889,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
@@ -935,7 +935,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -991,7 +991,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
@@ -1028,7 +1028,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -1096,7 +1096,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     List<Widget> boxes = tester.widgetList(find.byType(DecoratedBox)).toList();
@@ -1149,7 +1149,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     // Wait for dividers to shrink.

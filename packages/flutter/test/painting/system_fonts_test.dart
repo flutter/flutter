@@ -15,7 +15,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Text('text widget'),
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -33,7 +33,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: SelectableText('text widget'),
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -54,8 +54,7 @@ void main() {
         location: BannerLocation.topStart,
         textDirection: TextDirection.ltr,
         layoutDirection: TextDirection.ltr,
-
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -159,7 +158,7 @@ void main() {
             onChanged: (RangeValues values) { },
           ),
         ),
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -182,7 +181,7 @@ void main() {
             onChanged: (double value) { },
           ),
         ),
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -223,7 +222,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();

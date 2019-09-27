@@ -73,7 +73,7 @@ void main() {
             ],
           ),
         ],
-      )
+      ),
     ));
 
     //    O        O=root
@@ -122,7 +122,7 @@ void main() {
             rect: TestSemantics.fullScreen,
           ),
         ],
-      )
+      ),
     ));
 
     //             O=root
@@ -162,7 +162,7 @@ void main() {
             rect: TestSemantics.fullScreen,
           ),
         ],
-      )
+      ),
     ));
 
     semantics.dispose();

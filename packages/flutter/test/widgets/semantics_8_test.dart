@@ -32,7 +32,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     expect(semantics, hasSemantics(
@@ -70,7 +70,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     expect(semantics, hasSemantics(
