@@ -102,7 +102,7 @@ class CocoaPods {
 
   /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are
   /// cloned.
-  /// 
+  ///
   /// Versions >= 1.8.0 do not require 'pod setup' and default to a CDN instead
   /// of a locally cloned repository.
   /// See http://blog.cocoapods.org/CocoaPods-1.8.0-beta/
