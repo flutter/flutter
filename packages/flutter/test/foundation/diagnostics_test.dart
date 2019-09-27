@@ -22,16 +22,13 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   final DiagnosticsTreeStyle style;
 
   @override
-  List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    for (TestTree child in this.children) {
-      children.add(child.toDiagnosticsNode(
+  List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
+    for (TestTree child in children)
+      child.toDiagnosticsNode(
         name: 'child ${child.name}',
         style: child.style,
-      ));
-    }
-    return children;
-  }
+      ),
+  ];
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -118,6 +115,21 @@ void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> prop
     expect(json['ifPresent'], equals(property.ifPresent));
   } else {
     expect(json.containsKey('ifPresent'), isFalse);
+  }
+
+  validatePropertyJsonSerializationHelper(json, property);
+}
+
+void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object> property) {
+  final Map<String, Object> json = simulateJsonSerialization(property);
+  if (property.value.isNotEmpty) {
+    expect(json['values'], equals(
+      property.value.entries
+        .where((MapEntry<String, Object> entry) => entry.value != null)
+        .map((MapEntry<String, Object> entry) => entry.key).toList(),
+    ));
+  } else {
+    expect(json.containsKey('values'), isFalse);
   }
 
   validatePropertyJsonSerializationHelper(json, property);
@@ -1035,6 +1047,15 @@ void main() {
     validateDoublePropertyJsonSerialization(doubleWithUnit);
   });
 
+  test('double.infinity serialization test', () {
+    final DoubleProperty infProperty1 = DoubleProperty('double1', double.infinity);
+    validateDoublePropertyJsonSerialization(infProperty1);
+    expect(infProperty1.toString(), equals('double1: Infinity'));
+
+    final DoubleProperty infProperty2 = DoubleProperty('double2', double.negativeInfinity);
+    validateDoublePropertyJsonSerialization(infProperty2);
+    expect(infProperty2.toString(), equals('double2: -Infinity'));
+  });
 
   test('unsafe double property test', () {
     final DoubleProperty safe = DoubleProperty.lazy(
@@ -1601,6 +1622,88 @@ void main() {
     validateObjectFlagPropertyJsonSerialization(missing);
   });
 
+  test('iterable flags property test', () {
+    // Normal property
+    {
+      final Function onClick = () { };
+      final Function onMove = () { };
+      final Map<String, Function> value = <String, Function>{
+        'click': onClick,
+        'move': onMove,
+      };
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
+        'listeners',
+        value,
+      );
+      expect(flags.name, equals('listeners'));
+      expect(flags.value, equals(value));
+      expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
+      expect(flags.toString(), equals('listeners: click, move'));
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
+
+    // Reversed-order property
+    {
+      final Function onClick = () { };
+      final Function onMove = () { };
+      final Map<String, Function> value = <String, Function>{
+        'move': onMove,
+        'click': onClick,
+      };
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
+        'listeners',
+        value,
+      );
+      expect(flags.toString(), equals('listeners: move, click'));
+      expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
+
+    // Partially empty property
+    {
+      final Function onClick = () { };
+      final Map<String, Function> value = <String, Function>{
+        'move': null,
+        'click': onClick,
+      };
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
+        'listeners',
+        value,
+      );
+      expect(flags.toString(), equals('listeners: click'));
+      expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
+
+    // Empty property (without ifEmpty)
+    {
+      final Map<String, Function> value = <String, Function>{
+        'enter': null,
+      };
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
+        'listeners',
+        value,
+      );
+      expect(flags.isFiltered(DiagnosticLevel.info), isTrue);
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
+
+    // Empty property (without ifEmpty)
+    {
+      final Map<String, Function> value = <String, Function>{
+        'enter': null,
+      };
+      final FlagsSummary<Function> flags = FlagsSummary<Function>(
+        'listeners',
+        value,
+        ifEmpty: '<none>',
+      );
+      expect(flags.toString(), equals('listeners: <none>'));
+      expect(flags.isFiltered(DiagnosticLevel.info), isFalse);
+      validateIterableFlagsPropertyJsonSerialization(flags);
+    }
+  });
+
   test('iterable property test', () {
     final List<int> ints = <int>[1,2,3];
     final IterableProperty<int> intsProperty = IterableProperty<int>(
@@ -1758,7 +1861,7 @@ void main() {
         '#0      someMethod()  file:///diagnostics_test.dart:42:19\n'
         '#1      someMethod2()  file:///diagnostics_test.dart:12:3\n'
         '#2      someMethod3()  file:///foo.dart:4:1\n'
-      )
+      ),
     );
 
     expect(
@@ -1768,7 +1871,7 @@ void main() {
         '#0      someMethod()  file:///diagnostics_test.dart:42:19\n'
         '#1      someMethod2()  file:///diagnostics_test.dart:12:3\n'
         '#2      someMethod3()  file:///foo.dart:4:1\n'
-      )
+      ),
     );
   });
 
@@ -1956,7 +2059,7 @@ void main() {
         'diagnosis: insufficient data to draw\n'
         '  conclusion (less than five repaints)\n'
         '════════════════════════════════════════\n',
-      )
+      ),
     );
 
     // This output looks ugly but verifies that no indentation on word wrap
@@ -2029,7 +2132,7 @@ void main() {
         '   --- example property at max length --\n'
         '   diagnosis: insufficient data to draw\n'
         '   conclusion (less than five repaints)\n'
-      )
+      ),
     );
 
     // This case matches the styles that should generally be used for error
@@ -2104,7 +2207,7 @@ void main() {
           '  insufficient data to draw conclusion\n'
           '  (less than five repaints)\n'
           '════════════════════════════════════════\n'
-        )
+        ),
     );
   });
 

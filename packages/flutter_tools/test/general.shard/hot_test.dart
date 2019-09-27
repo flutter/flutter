@@ -290,7 +290,7 @@ void main() {
           device: mockDevice,
           generator: residentCompiler,
           exception: const HttpException('Connection closed before full header was received, '
-              'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws')
+              'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
         ),
       ];
 
@@ -319,7 +319,7 @@ void main() {
         TestFlutterDevice(
           device: mockDevice,
           generator: residentCompiler,
-          exception: const HttpException(', uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws')
+          exception: const HttpException(', uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws'),
         ),
       ];
 
@@ -353,7 +353,7 @@ class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice({
     @required Device device,
     @required this.exception,
-    @required ResidentCompiler generator
+    @required ResidentCompiler generator,
   })  : assert(exception != null),
         super(device, buildMode: BuildMode.debug, generator: generator, trackWidgetCreation: false);
 

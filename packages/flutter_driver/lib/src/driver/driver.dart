@@ -28,6 +28,7 @@ import '../common/render_tree.dart';
 import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
+import '../common/wait.dart';
 import 'common.dart';
 import 'timeline.dart';
 
@@ -491,12 +492,17 @@ class FlutterDriver {
     await _sendCommand(WaitForAbsent(finder, timeout: timeout));
   }
 
+  /// Waits until the given [waitCondition] is satisfied.
+  Future<void> waitForCondition(SerializableWaitCondition waitCondition, {Duration timeout}) async {
+    await _sendCommand(WaitForCondition(waitCondition, timeout: timeout));
+  }
+
   /// Waits until there are no more transient callbacks in the queue.
   ///
   /// Use this method when you need to wait for the moment when the application
   /// becomes "stable", for example, prior to taking a [screenshot].
   Future<void> waitUntilNoTransientCallbacks({ Duration timeout }) async {
-    await _sendCommand(WaitUntilNoTransientCallbacks(timeout: timeout));
+    await _sendCommand(WaitForCondition(const NoTransientCallbacks(), timeout: timeout));
   }
 
   /// Waits until the next [Window.onReportTimings] is called.
@@ -504,7 +510,7 @@ class FlutterDriver {
   /// Use this method to wait for the first frame to be rasterized during the
   /// app launch.
   Future<void> waitUntilFirstFrameRasterized() async {
-    await _sendCommand(const WaitUntilFirstFrameRasterized());
+    await _sendCommand(const WaitForCondition(FirstFrameRasterized()));
   }
 
   Future<DriverOffset> _getOffset(SerializableFinder finder, OffsetType type, { Duration timeout }) async {
@@ -1117,12 +1123,11 @@ void _unhandledJsonRpcError(dynamic error, dynamic stack) {
 
 String _getWebSocketUrl(String url) {
   Uri uri = Uri.parse(url);
-  final List<String> pathSegments = <String>[];
-  // If there's an authentication code (default), we need to add it to our path.
-  if (uri.pathSegments.isNotEmpty) {
-    pathSegments.add(uri.pathSegments.first);
-  }
-  pathSegments.add('ws');
+  final List<String> pathSegments = <String>[
+    // If there's an authentication code (default), we need to add it to our path.
+    if (uri.pathSegments.isNotEmpty) uri.pathSegments.first,
+    'ws',
+  ];
   if (uri.scheme == 'http')
     uri = uri.replace(scheme: 'ws', pathSegments: pathSegments);
   return uri.toString();
@@ -1194,22 +1199,30 @@ class CommonFinders {
   ///
   /// If the `matchRoot` argument is true then the widget specified by `of` will
   /// be considered for a match. The argument defaults to false.
+  ///
+  /// If `firstMatchOnly` is true then only the first ancestor matching
+  /// `matching` will be returned. Defaults to false.
   SerializableFinder ancestor({
     @required SerializableFinder of,
     @required SerializableFinder matching,
     bool matchRoot = false,
-  }) => Ancestor(of: of, matching: matching, matchRoot: matchRoot);
+    bool firstMatchOnly = false,
+  }) => Ancestor(of: of, matching: matching, matchRoot: matchRoot, firstMatchOnly: firstMatchOnly);
 
   /// Finds the widget that is an descendant of the `of` parameter and that
   /// matches the `matching` parameter.
   ///
   /// If the `matchRoot` argument is true then the widget specified by `of` will
   /// be considered for a match. The argument defaults to false.
+  ///
+  /// If `firstMatchOnly` is true then only the first descendant matching
+  /// `matching` will be returned. Defaults to false.
   SerializableFinder descendant({
     @required SerializableFinder of,
     @required SerializableFinder matching,
     bool matchRoot = false,
-  }) => Descendant(of: of, matching: matching, matchRoot: matchRoot);
+    bool firstMatchOnly = false,
+  }) => Descendant(of: of, matching: matching, matchRoot: matchRoot, firstMatchOnly: firstMatchOnly);
 }
 
 /// An immutable 2D floating-point offset used by Flutter Driver.

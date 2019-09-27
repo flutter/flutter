@@ -394,8 +394,8 @@ void main() {
             return Container(
               height: 200.0,
               color: index % 2 == 0
-                  ? const Color(0xFF0000FF)
-                  : const Color(0xFF00FF00),
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
               child: Text(kStates[index]),
             );
           },
@@ -500,8 +500,8 @@ void main() {
             return Container(
               height: 200.0,
               color: index % 2 == 0
-                  ? const Color(0xFF0000FF)
-                  : const Color(0xFF00FF00),
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
               child: Text(kStates[index]),
             );
           },
@@ -545,8 +545,8 @@ void main() {
             return Container(
               height: 200.0,
               color: index % 2 == 0
-                  ? const Color(0xFF0000FF)
-                  : const Color(0xFF00FF00),
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
               child: Text(kStates[index]),
             );
           },
@@ -563,6 +563,88 @@ void main() {
     await tester.pump();
 
     expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-100.0, 0.0));
+  });
+
+  testWidgets(
+    'Updating PageView large viewportFraction',
+    (WidgetTester tester) async {
+      Widget build(PageController controller) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: PageView.builder(
+            controller: controller,
+            itemCount: kStates.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 200.0,
+                color: index % 2 == 0
+                  ? const Color(0xFF0000FF)
+                  : const Color(0xFF00FF00),
+                child: Text(kStates[index]),
+              );
+            },
+          ),
+        );
+      }
+
+      final PageController oldController = PageController(viewportFraction: 5/4);
+      await tester.pumpWidget(build(oldController));
+
+      expect(tester.getTopLeft(find.text('Alabama')), const Offset(-100, 0));
+      expect(tester.getBottomRight(find.text('Alabama')), const Offset(900.0, 600.0));
+
+      final PageController newController = PageController(viewportFraction: 4);
+      await tester.pumpWidget(build(newController));
+      newController.jumpToPage(10);
+      await tester.pump();
+
+      expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-(4 - 1) * 800 / 2, 0));
+  });
+
+  testWidgets(
+    'All visible pages are able to receive touch events',
+    (WidgetTester tester) async {
+      final PageController controller = PageController(viewportFraction: 1/4, initialPage: 0);
+      int tappedIndex;
+
+      Widget build() {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: PageView.builder(
+            controller: controller,
+            itemCount: 20,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                onTap: () => tappedIndex = index,
+                child: SizedBox.expand(child: Text('$index')),
+              );
+            },
+          ),
+        );
+      }
+
+      Iterable<int> visiblePages = const <int> [0, 1, 2];
+      await tester.pumpWidget(build());
+
+      // The first 3 items should be visible and tappable.
+      for (int index in visiblePages) {
+        expect(find.text(index.toString()), findsOneWidget);
+        // The center of page 2's x-coordinate is 800, so we have to manually
+        // offset it a bit to make sure the tap lands within the screen.
+        final Offset center = tester.getCenter(find.text('$index')) - const Offset(3, 0);
+        await tester.tapAt(center);
+        expect(tappedIndex, index);
+      }
+
+      controller.jumpToPage(19);
+      await tester.pump();
+      // The last 3 items should be visible and tappable.
+      visiblePages = const <int> [17, 18, 19];
+      for (int index in visiblePages) {
+        expect(find.text('$index'), findsOneWidget);
+        await tester.tap(find.text('$index'));
+        expect(tappedIndex, index);
+      }
   });
 
   testWidgets('PageView does not report page changed on overscroll', (WidgetTester tester) async {

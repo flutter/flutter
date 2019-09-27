@@ -110,10 +110,16 @@ class AnsiTerminal {
   bool get supportsColor => platform.stdoutSupportsAnsi ?? false;
   final RegExp _boldControls = RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
 
+  /// Whether we are interacting with the flutter tool via the terminal.
+  ///
+  /// If not set, defaults to false.
+  bool usesTerminalUi = false;
+
   String bolden(String message) {
     assert(message != null);
-    if (!supportsColor || message.isEmpty)
+    if (!supportsColor || message.isEmpty) {
       return message;
+    }
     final StringBuffer buffer = StringBuffer();
     for (String line in message.split('\n')) {
       // If there were bolds or resetBolds in the string before, then nuke them:
@@ -131,8 +137,9 @@ class AnsiTerminal {
 
   String color(String message, TerminalColor color) {
     assert(message != null);
-    if (!supportsColor || color == null || message.isEmpty)
+    if (!supportsColor || color == null || message.isEmpty) {
       return message;
+    }
     final StringBuffer buffer = StringBuffer();
     final String colorCodes = _colorMap[color];
     for (String line in message.split('\n')) {
@@ -186,6 +193,8 @@ class AnsiTerminal {
   /// null, and the user presses enter without any other input, the return value
   /// will be the character in `acceptedCharacters` at the index given by
   /// `defaultChoiceIndex`.
+  ///
+  /// If [usesTerminalUi] is false, throws a [StateError].
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
     String prompt,
@@ -196,6 +205,9 @@ class AnsiTerminal {
     assert(acceptedCharacters.isNotEmpty);
     assert(prompt == null || prompt.isNotEmpty);
     assert(displayAcceptedCharacters != null);
+    if (!usesTerminalUi) {
+      throw StateError('cannot prompt without a terminal ui');
+    }
     List<String> charactersToDisplay = acceptedCharacters;
     if (defaultChoiceIndex != null) {
       assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
@@ -208,16 +220,18 @@ class AnsiTerminal {
     while (choice == null || choice.length > 1 || !acceptedCharacters.contains(choice)) {
       if (prompt != null) {
         printStatus(prompt, emphasis: true, newline: false);
-        if (displayAcceptedCharacters)
+        if (displayAcceptedCharacters) {
           printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
+        }
         printStatus(': ', emphasis: true, newline: false);
       }
       choice = await keystrokes.first;
       printStatus(choice);
     }
     singleCharMode = false;
-    if (defaultChoiceIndex != null && choice == '\n')
+    if (defaultChoiceIndex != null && choice == '\n') {
       choice = acceptedCharacters[defaultChoiceIndex];
+    }
     return choice;
   }
 }

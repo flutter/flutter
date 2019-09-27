@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/rendering/layer.dart';
 
 /// An [Invocation] and the [stack] trace that led to it.
 ///
@@ -103,38 +104,49 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   }
 
   @override
-  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge }) {
+  ClipRectLayer pushClipRect(bool needsCompositing, Offset offset, Rect clipRect,
+      PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge, ClipRectLayer oldLayer }) {
     clipRectAndPaint(clipRect.shift(offset), clipBehavior, clipRect.shift(offset), () => painter(this, offset));
+    return null;
   }
 
   @override
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias }) {
+  ClipRRectLayer pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect,
+      PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipRRectLayer oldLayer }) {
     assert(clipBehavior != null);
     clipRRectAndPaint(clipRRect.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
+    return null;
   }
 
   @override
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias }) {
+  ClipPathLayer pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath,
+      PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipPathLayer oldLayer }) {
     clipPathAndPaint(clipPath.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
+    return null;
   }
 
   @override
-  void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
+  TransformLayer pushTransform(bool needsCompositing, Offset offset, Matrix4 transform,
+      PaintingContextCallback painter, { TransformLayer oldLayer }) {
     canvas.save();
     canvas.transform(transform.storage);
     painter(this, offset);
     canvas.restore();
+    return null;
   }
 
   @override
-  void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
+  OpacityLayer pushOpacity(Offset offset, int alpha, PaintingContextCallback painter,
+      { OpacityLayer oldLayer }) {
     canvas.saveLayer(null, null); // TODO(ianh): Expose the alpha somewhere.
     painter(this, offset);
     canvas.restore();
+    return null;
   }
 
   @override
-  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
+  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset,
+      { Rect childPaintBounds }) {
     painter(this, offset);
   }
 

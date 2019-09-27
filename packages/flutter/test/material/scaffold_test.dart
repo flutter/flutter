@@ -568,6 +568,15 @@ void main() {
       );
     }
 
+    PageRoute<void> pageRouteBuilder() {
+      return PageRouteBuilder<void>(
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return Scaffold(appBar: AppBar(), body: const Text('Page 2'));
+        },
+        fullscreenDialog: true,
+      );
+    }
+
     PageRoute<void> customPageRouteBuilder() {
       return _CustomPageRoute<void>(
         builder: (BuildContext context) {
@@ -587,6 +596,18 @@ void main() {
 
     testWidgets('Close button shows correctly on iOS', (WidgetTester tester) async {
       await expectCloseIcon(tester, TargetPlatform.iOS, Icons.close, materialRouteBuilder);
+    });
+
+    testWidgets('Close button shows correctly with PageRouteBuilder on Android', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.android, Icons.close, pageRouteBuilder);
+    });
+
+    testWidgets('Close button shows correctly with PageRouteBuilder on Fuchsia', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.fuchsia, Icons.close, pageRouteBuilder);
+    });
+
+    testWidgets('Close button shows correctly with PageRouteBuilder on iOS', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.iOS, Icons.close, pageRouteBuilder);
     });
 
     testWidgets('Close button shows correctly with custom page route on Android', (WidgetTester tester) async {
@@ -731,6 +752,102 @@ void main() {
       await tester.pumpWidget(buildFrame(extendBody: false, resizeToAvoidBottomInset: true, viewInsetBottom: 100.0));
       expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
       expect(mediaQueryBottom, 0.0);
+    });
+
+    testWidgets('body size with extendBodyBehindAppBar', (WidgetTester tester) async {
+      final Key appBarKey = UniqueKey();
+      final Key bodyKey = UniqueKey();
+
+      const double appBarHeight = 100;
+      const double windowPaddingTop = 24;
+      bool fixedHeightAppBar;
+      double mediaQueryTop;
+
+      Widget buildFrame({ bool extendBodyBehindAppBar, bool hasAppBar }) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(top: windowPaddingTop),
+            ),
+            child: Builder(
+              builder: (BuildContext context) {
+                return Scaffold(
+                  extendBodyBehindAppBar: extendBodyBehindAppBar,
+                  appBar: !hasAppBar ? null : PreferredSize(
+                    key: appBarKey,
+                    preferredSize: const Size.fromHeight(appBarHeight),
+                    child: Container(
+                      constraints: BoxConstraints(
+                        minHeight: appBarHeight,
+                        maxHeight: fixedHeightAppBar ? appBarHeight : double.infinity,
+                      ),
+                    ),
+                  ),
+                  body: Builder(
+                    builder: (BuildContext context) {
+                      mediaQueryTop = MediaQuery.of(context).padding.top;
+                      return Container(key: bodyKey);
+                    }
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      }
+
+      fixedHeightAppBar = false;
+
+      // When an appbar is provided, the Scaffold's body is built within a
+      // MediaQuery with padding.top = 0, and the appBar's maxHeight is
+      // constrained to its preferredSize.height + the original MediaQuery
+      // padding.top. When extendBodyBehindAppBar is true, an additional
+      // inner MediaQuery is added around the Scaffold's body with padding.top
+      // equal to the overall height of the appBar. See _BodyBuilder in
+      // material/scaffold.dart.
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: true, hasAppBar: true));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+      expect(tester.getSize(find.byKey(appBarKey)), const Size(800.0, appBarHeight + windowPaddingTop));
+      expect(mediaQueryTop, appBarHeight + windowPaddingTop);
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: true, hasAppBar: false));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+      expect(find.byKey(appBarKey), findsNothing);
+      expect(mediaQueryTop, windowPaddingTop);
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: false, hasAppBar: true));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0 - appBarHeight - windowPaddingTop));
+      expect(tester.getSize(find.byKey(appBarKey)), const Size(800.0, appBarHeight + windowPaddingTop));
+      expect(mediaQueryTop, 0.0);
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: false, hasAppBar: false));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+      expect(find.byKey(appBarKey), findsNothing);
+      expect(mediaQueryTop, windowPaddingTop);
+
+      fixedHeightAppBar = true;
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: true, hasAppBar: true));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+      expect(tester.getSize(find.byKey(appBarKey)), const Size(800.0, appBarHeight));
+      expect(mediaQueryTop, appBarHeight);
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: true, hasAppBar: false));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+      expect(find.byKey(appBarKey), findsNothing);
+      expect(mediaQueryTop, windowPaddingTop);
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: false, hasAppBar: true));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0 - appBarHeight));
+      expect(tester.getSize(find.byKey(appBarKey)), const Size(800.0, appBarHeight));
+      expect(mediaQueryTop, 0.0);
+
+      await tester.pumpWidget(buildFrame(extendBodyBehindAppBar: false, hasAppBar: false));
+      expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 600.0));
+      expect(find.byKey(appBarKey), findsNothing);
+      expect(mediaQueryTop, windowPaddingTop);
     });
   });
 
@@ -1037,7 +1154,7 @@ void main() {
               BottomNavigationBarItem(
                 icon: Icon(Icons.add),
                 title: Text('test'),
-              )
+              ),
             ]
           ),
         ),
@@ -1463,51 +1580,51 @@ void main() {
     });
   });
 
-    testWidgets('Drawer opens correctly with custom edgeDragWidth', (WidgetTester tester) async {
-      // The default edge drag width is 20.0.
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            drawer: const Drawer(
-              child: Text('Drawer'),
-            ),
-            body: const Text('Scaffold body'),
-            appBar: AppBar(
-              centerTitle: true,
-              title: const Text('Title'),
-            ),
+  testWidgets('Drawer opens correctly with custom edgeDragWidth', (WidgetTester tester) async {
+    // The default edge drag width is 20.0.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: const Drawer(
+            child: Text('Drawer'),
+          ),
+          body: const Text('Scaffold body'),
+          appBar: AppBar(
+            centerTitle: true,
+            title: const Text('Title'),
           ),
         ),
-      );
-      ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
-      expect(scaffoldState.isDrawerOpen, false);
+      ),
+    );
+    ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isDrawerOpen, false);
 
-      await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
-      await tester.pumpAndSettle();
-      expect(scaffoldState.isDrawerOpen, false);
+    await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            drawer: const Drawer(
-              child: Text('Drawer'),
-            ),
-            drawerEdgeDragWidth: 40.0,
-            body: const Text('Scaffold Body'),
-            appBar: AppBar(
-              centerTitle: true,
-              title: const Text('Title'),
-            ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: const Drawer(
+            child: Text('Drawer'),
+          ),
+          drawerEdgeDragWidth: 40.0,
+          body: const Text('Scaffold Body'),
+          appBar: AppBar(
+            centerTitle: true,
+            title: const Text('Title'),
           ),
         ),
-      );
-      scaffoldState = tester.state(find.byType(Scaffold));
-      expect(scaffoldState.isDrawerOpen, false);
+      ),
+    );
+    scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isDrawerOpen, false);
 
-      await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
-      await tester.pumpAndSettle();
-      expect(scaffoldState.isDrawerOpen, true);
-    });
+    await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, true);
+  });
 
   testWidgets('Nested scaffold body insets', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/20295

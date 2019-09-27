@@ -8,12 +8,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-Future<void> pumpTest(WidgetTester tester, TargetPlatform platform, {bool scrollable = true}) async {
+Future<void> pumpTest(
+  WidgetTester tester,
+  TargetPlatform platform, {
+  bool scrollable = true,
+  bool reverse = false,
+}) async {
   await tester.pumpWidget(MaterialApp(
     theme: ThemeData(
       platform: platform,
     ),
     home: CustomScrollView(
+      reverse: reverse,
       physics: scrollable ? null : const NeverScrollableScrollPhysics(),
       slivers: const <Widget>[
         SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
@@ -247,5 +253,18 @@ void main() {
     final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
     expect(getScrollOffset(tester), 0.0);
+  });
+
+  testWidgets('Scrolls in correct direction when scroll axis is reversed', (WidgetTester tester) async {
+    await pumpTest(tester, TargetPlatform.fuchsia, reverse: true);
+
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -20.0)), result);
+
+    expect(getScrollOffset(tester), 20.0);
   });
 }

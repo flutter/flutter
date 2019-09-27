@@ -178,6 +178,7 @@ void main() {
     testUsingContext('reports unsuccessful compile when errors are returned', () async {
       devFS = DevFS(vmService, 'test', tempDir);
       await devFS.create();
+      final DateTime previousCompile = devFS.lastCompiled;
 
       final RealMockResidentCompiler residentCompiler = RealMockResidentCompiler();
       when(residentCompiler.recompile(
@@ -197,6 +198,7 @@ void main() {
       );
 
       expect(report.success, false);
+      expect(devFS.lastCompiled, previousCompile);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -302,8 +304,9 @@ Directory _newTempDir(FileSystem fs) {
 }
 
 void _cleanupTempDirs() {
-  while (_tempDirs.isNotEmpty)
+  while (_tempDirs.isNotEmpty) {
     tryToDelete(_tempDirs.removeLast());
+  }
 }
 
 Future<void> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash = false }) async {

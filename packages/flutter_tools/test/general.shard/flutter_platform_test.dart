@@ -88,14 +88,14 @@ void main() {
       expect(() => installHook(
         shellPath: 'abc',
         enableObservatory: false,
-        startPaused: true
+        startPaused: true,
       ), throwsA(isA<AssertionError>()));
 
       expect(() => installHook(
         shellPath: 'abc',
         enableObservatory: false,
         startPaused: false,
-        observatoryPort: 123
+        observatoryPort: 123,
       ), throwsA(isA<AssertionError>()));
 
       FlutterPlatform capturedPlatform;

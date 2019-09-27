@@ -32,6 +32,7 @@ export 'src/material/bottom_sheet.dart';
 export 'src/material/bottom_sheet_theme.dart';
 export 'src/material/button.dart';
 export 'src/material/button_bar.dart';
+export 'src/material/button_bar_theme.dart';
 export 'src/material/button_theme.dart';
 export 'src/material/card.dart';
 export 'src/material/card_theme.dart';

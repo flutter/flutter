@@ -171,7 +171,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
               '- $older\n'
               '- $newer\n'
               'A GlobalKey can only be specified on one widget at a time in the widget tree.'
-            )
+            ),
           ]);
         }
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -1133,7 +1133,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
             'hasn\'t been inserted into the widget tree yet. It is not necessary to call '
             'setState() in the constructor, since the state is already assumed to be dirty '
             'when it is initially created.'
-          )
+          ),
         ]);
       }
       return true;
@@ -1151,7 +1151,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
             'Instead of performing asynchronous work inside a call to setState(), first '
             'execute the work (without updating the widget state), and then synchronously '
            'update the state inside a call to setState().'
-          )
+          ),
         ]);
       }
       // We ignore other types of return values so that you can do things like:
@@ -1208,7 +1208,10 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   @mustCallSuper
   void dispose() {
     assert(_debugLifecycleState == _StateLifecycle.ready);
-    assert(() { _debugLifecycleState = _StateLifecycle.defunct; return true; }());
+    assert(() {
+      _debugLifecycleState = _StateLifecycle.defunct;
+      return true;
+    }());
   }
 
   /// Describes the part of the user interface represented by this widget.
@@ -1756,7 +1759,10 @@ class _InactiveElements {
     element.deactivate();
     assert(element._debugLifecycleState == _ElementLifecycle.inactive);
     element.visitChildren(_deactivateRecursively);
-    assert(() { element.debugDeactivated(); return true; }());
+    assert(() {
+      element.debugDeactivated();
+      return true;
+    }());
   }
 
   void add(Element element) {
@@ -2176,14 +2182,7 @@ class BuildOwner {
   /// the [FocusScopeNode] for a given [BuildContext].
   ///
   /// See [FocusManager] for more details.
-  FocusManager get focusManager {
-    _focusManager ??= FocusManager();
-    return _focusManager;
-  }
-  FocusManager _focusManager;
-  set focusManager(FocusManager focusManager) {
-    _focusManager = focusManager;
-  }
+  FocusManager focusManager = FocusManager();
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.drawFrame] calls [buildScope].
@@ -2204,7 +2203,7 @@ class BuildOwner {
             'If you did not attempt to call scheduleBuildFor() yourself, then this probably '
             'indicates a bug in the widgets framework. Please report it:\n'
             '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
-          )
+          ),
         ]);
       }
       return true;
@@ -2219,7 +2218,7 @@ class BuildOwner {
             ErrorHint(
               'The BuildOwner.scheduleBuildFor() method should only be called while the '
               'buildScope() method is actively rebuilding the widget tree.'
-            )
+            ),
           ]);
         }
         return true;
@@ -2379,7 +2378,7 @@ class BuildOwner {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('buildScope missed some dirty elements.'),
             ErrorHint('This probably indicates that the dirty list should have been resorted but was not.'),
-            Element.describeElements('The list of dirty elements at the end of the buildScope call was', _dirtyElements)
+            Element.describeElements('The list of dirty elements at the end of the buildScope call was', _dirtyElements),
           ]);
         }
         return true;
@@ -2508,7 +2507,7 @@ class BuildOwner {
                   'due to GlobalKey reparenting $are:\n'
                   '- ${elementLabels.join("\n  ")}'
                   '\nA GlobalKey can only be specified on one widget at a time in the widget tree.'
-                )
+                ),
               ]);
             }
           }
@@ -2831,7 +2830,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           'build because the child list is still being updated at that point, '
           'so the children might not be constructed yet, or might be old children '
           'that are going to be replaced.'
-        )
+        ),
       ]);
     }());
     visitChildren(visitor);
@@ -2933,7 +2932,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       key._register(this);
     }
     _updateInheritance();
-    assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; }());
+    assert(() {
+      _debugLifecycleState = _ElementLifecycle.active;
+      return true;
+    }());
   }
 
   /// Change the widget used to configure this element.
@@ -3050,7 +3052,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             parent.describeElement('The parent of the widgets with that key was'),
             element.describeElement('The first child to get instantiated with that key became'),
             DiagnosticsProperty<Widget>('The second child that was to be instantiated with that key was', widget, style: DiagnosticsTreeStyle.errorProperty),
-            ErrorDescription('A GlobalKey can only be specified on one widget at a time in the widget tree.')
+            ErrorDescription('A GlobalKey can only be specified on one widget at a time in the widget tree.'),
           ]);
         }
         parent.owner._debugTrackElementThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans(
@@ -3089,7 +3091,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       final Element newChild = _retakeInactiveElement(key, newWidget);
       if (newChild != null) {
         assert(newChild._parent == null);
-        assert(() { _debugCheckForCycles(newChild); return true; }());
+        assert(() {
+          _debugCheckForCycles(newChild);
+          return true;
+        }());
         newChild._activateWithParent(this, newSlot);
         final Element updatedChild = updateChild(newChild, newWidget, newSlot);
         assert(newChild == updatedChild);
@@ -3097,7 +3102,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       }
     }
     final Element newChild = newWidget.createElement();
-    assert(() { _debugCheckForCycles(newChild); return true; }());
+    assert(() {
+      _debugCheckForCycles(newChild);
+      return true;
+    }());
     newChild.mount(this, newSlot);
     assert(newChild._debugLifecycleState == _ElementLifecycle.active);
     return newChild;
@@ -3198,7 +3206,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     _dependencies?.clear();
     _hadUnsatisfiedDependencies = false;
     _updateInheritance();
-    assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; }());
+    assert(() {
+      _debugLifecycleState = _ElementLifecycle.active;
+      return true;
+    }());
     if (_dirty)
       owner.scheduleBuildFor(this);
     if (hadDependencies)
@@ -3235,7 +3246,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }
     _inheritedWidgets = null;
     _active = false;
-    assert(() { _debugLifecycleState = _ElementLifecycle.inactive; return true; }());
+    assert(() {
+      _debugLifecycleState = _ElementLifecycle.inactive;
+      return true;
+    }());
   }
 
   /// Called, in debug mode, after children have been deactivated (see [deactivate]).
@@ -3267,7 +3281,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       final GlobalKey key = widget.key;
       key._unregister(this);
     }
-    assert(() { _debugLifecycleState = _ElementLifecycle.defunct; return true; }());
+    assert(() {
+      _debugLifecycleState = _ElementLifecycle.defunct;
+      return true;
+    }());
   }
 
   @override
@@ -3286,7 +3303,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             'active, which means it is part of the tree.\n'
             'Instead, this element is in the $_debugLifecycleState state.'
           ),
-          describeElement('The size getter was called for the following element')
+          describeElement('The size getter was called for the following element'),
         ]);
       }
       if (owner._debugBuilding) {
@@ -3308,7 +3325,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             'for more details.'
           ),
           ErrorSpacer(),
-          describeElement('The size getter was called for the following element')
+          describeElement('The size getter was called for the following element'),
         ]);
       }
       return true;
@@ -3325,7 +3342,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             'too early in the pipeline (e.g., during the build phase) before the '
             'framework has created the render tree.'
           ),
-          describeElement('The size getter was called for the following element')
+          describeElement('The size getter was called for the following element'),
         ]);
       }
       if (renderObject is RenderSliver) {
@@ -3353,7 +3370,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             'and extracting its size manually.'
           ),
           describeElement('The size getter was called for the following element'),
-          renderObject.describeForError('The associated render object was')
+          renderObject.describeForError('The associated render object was'),
         ]);
       }
       final RenderBox box = renderObject;
@@ -3368,7 +3385,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
            'the size and position of the render objects during layout.'
           ),
           describeElement('The size getter was called for the following element'),
-          box.describeForError('The render object from which the size was to be obtained was')
+          box.describeForError('The render object from which the size was to be obtained was'),
         ]);
       }
       if (box.debugNeedsLayout) {
@@ -3413,7 +3430,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             'To safely refer to a widget\'s ancestor in its dispose() method, '
             'save a reference to the ancestor by calling inheritFromWidgetOfExactType() '
             'in the widget\'s didChangeDependencies() method.'
-          )
+          ),
         ]);
       }
       return true;
@@ -3541,7 +3558,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             ' * file I/O event\n'
             ' * timer\n'
             ' * microtask (caused by Future.then, async/await, scheduleMicrotask)'
-          )
+          ),
         ]);
       }
       return true;
@@ -3680,7 +3697,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             ),
             describeElement(
               'The widget on which setState() or markNeedsBuild() was called was',
-            )
+            ),
           ];
           if (owner._debugCurrentBuildTarget != null)
             information.add(owner._debugCurrentBuildTarget.describeWidget('The widget which was currently being built when the offending call was made was'));
@@ -3695,7 +3712,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             'This ${widget.runtimeType} widget cannot be marked as needing to build '
             'because the framework is locked.'
           ),
-          describeElement('The widget on which setState() or markNeedsBuild() was called was')
+          describeElement('The widget on which setState() or markNeedsBuild() was called was'),
         ]);
       }
       return true;
@@ -4031,7 +4048,7 @@ class StatefulElement extends ComponentElement {
             'The createState function for ${widget.runtimeType} returned a state '
             'of type ${_state.runtimeType}, which is not a subtype of '
             'State<${widget.runtimeType}>, violating the contract for createState.'
-          )
+          ),
         ]);
       }
       return true;
@@ -4074,7 +4091,7 @@ class StatefulElement extends ComponentElement {
             ErrorHint(
               'Rather than awaiting on asynchronous work directly inside of initState, '
               'call a separate method to do this work without awaiting it.'
-            )
+            ),
           ]);
         }
         return true;
@@ -4082,9 +4099,15 @@ class StatefulElement extends ComponentElement {
     } finally {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }
-    assert(() { _state._debugLifecycleState = _StateLifecycle.initialized; return true; }());
+    assert(() {
+      _state._debugLifecycleState = _StateLifecycle.initialized;
+      return true;
+    }());
     _state.didChangeDependencies();
-    assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; }());
+    assert(() {
+      _state._debugLifecycleState = _StateLifecycle.ready;
+      return true;
+    }());
     super._firstBuild();
   }
 
@@ -4109,7 +4132,7 @@ class StatefulElement extends ComponentElement {
             ErrorHint(
               'Rather than awaiting on asynchronous work directly inside of didUpdateWidget, '
               'call a separate method to do this work without awaiting it.'
-            )
+            ),
           ]);
         }
         return true;
@@ -4148,7 +4171,7 @@ class StatefulElement extends ComponentElement {
         ErrorDescription(
           'dispose() implementations must always call their superclass dispose() method, to ensure '
          'that all the resources used by the widget are fully released.'
-        )
+        ),
       ]);
     }());
     _state._element = null;
@@ -4174,7 +4197,7 @@ class StatefulElement extends ComponentElement {
             'Typically references to inherited widgets should occur in widget build() methods. Alternatively, '
             'initialization based on inherited widgets can be placed in the didChangeDependencies method, which '
             'is called after initState and whenever the dependencies change thereafter.'
-          )
+          ),
         ]);
       }
       if (state._debugLifecycleState == _StateLifecycle.defunct) {
@@ -4747,7 +4770,10 @@ abstract class RenderObjectElement extends Element {
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     _renderObject = widget.createRenderObject(this);
-    assert(() { _debugUpdateRenderObjectOwner(); return true; }());
+    assert(() {
+      _debugUpdateRenderObjectOwner();
+      return true;
+    }());
     assert(_slot == newSlot);
     attachRenderObject(newSlot);
     _dirty = false;
@@ -4757,7 +4783,10 @@ abstract class RenderObjectElement extends Element {
   void update(covariant RenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    assert(() { _debugUpdateRenderObjectOwner(); return true; }());
+    assert(() {
+      _debugUpdateRenderObjectOwner();
+      return true;
+    }());
     widget.updateRenderObject(this, renderObject);
     _dirty = false;
   }
@@ -5015,6 +5044,15 @@ abstract class RenderObjectElement extends Element {
   /// this element has a single child, the slot should always be null. If this
   /// element has a list of children, the previous sibling is a convenient value
   /// for the slot.
+  ///
+  /// This method is only ever called if [updateChild] can end up being called
+  /// with an existing [Element] child and a `slot` that differs from the slot
+  /// that element was previously given. [MultiChildRenderObjectElement] does this,
+  /// for example. [SingleChildRenderObjectElement] does not (since the `slot` is
+  /// always null). An [Element] that has a specific set of slots with each child
+  /// always having the same slot (and where children in different slots are never
+  /// compared against each other for the purposes of updating one slot with the
+  /// element from another slot) would never call this.
   @protected
   void moveChildRenderObject(covariant RenderObject child, covariant dynamic slot);
 

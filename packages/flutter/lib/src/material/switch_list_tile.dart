@@ -46,7 +46,7 @@ enum _SwitchListTileType { material, adaptive }
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
 /// ![SwitchListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile.png)
 ///
@@ -58,13 +58,11 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: SwitchListTile(
-///       title: const Text('Lights'),
-///       value: _lights,
-///       onChanged: (bool value) { setState(() { _lights = value; }); },
-///       secondary: const Icon(Icons.lightbulb_outline),
-///     ),
+///   return SwitchListTile(
+///     title: const Text('Lights'),
+///     value: _lights,
+///     onChanged: (bool value) { setState(() { _lights = value; }); },
+///     secondary: const Icon(Icons.lightbulb_outline),
 ///   );
 /// }
 /// ```
@@ -87,7 +85,7 @@ enum _SwitchListTileType { material, adaptive }
 /// into one. Therefore, it may be necessary to create a custom radio tile
 /// widget to accommodate similar use cases.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
 /// ![Switch list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_semantics.png)
 ///
@@ -150,19 +148,15 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: LinkedLabelSwitch(
-///         label: 'Linked, tappable label text',
-///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-///         value: _isSelected,
-///         onChanged: (bool newValue) {
-///           setState(() {
-///             _isSelected = newValue;
-///           });
-///         },
-///       ),
-///     ),
+///   return LinkedLabelSwitch(
+///     label: 'Linked, tappable label text',
+///     padding: const EdgeInsets.symmetric(horizontal: 20.0),
+///     value: _isSelected,
+///     onChanged: (bool newValue) {
+///       setState(() {
+///         _isSelected = newValue;
+///       });
+///     },
 ///   );
 /// }
 /// ```
@@ -175,7 +169,7 @@ enum _SwitchListTileType { material, adaptive }
 /// combining [Switch] with other widgets, such as [Text], [Padding] and
 /// [InkWell].
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
 /// ![Custom switch list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_custom.png)
 ///
@@ -227,19 +221,15 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: LabeledSwitch(
-///         label: 'This is the label text',
-///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-///         value: _isSelected,
-///         onChanged: (bool newValue) {
-///           setState(() {
-///             _isSelected = newValue;
-///           });
-///         },
-///       ),
-///     ),
+///   return LabeledSwitch(
+///     label: 'This is the label text',
+///     padding: const EdgeInsets.symmetric(horizontal: 20.0),
+///     value: _isSelected,
+///     onChanged: (bool newValue) {
+///       setState(() {
+///         _isSelected = newValue;
+///       });
+///     },
 ///   );
 /// }
 /// ```
@@ -279,6 +269,7 @@ class SwitchListTile extends StatelessWidget {
     this.subtitle,
     this.isThreeLine = false,
     this.dense,
+    this.contentPadding,
     this.secondary,
     this.selected = false,
   }) : _switchListTileType = _SwitchListTileType.material,
@@ -310,6 +301,7 @@ class SwitchListTile extends StatelessWidget {
     this.subtitle,
     this.isThreeLine = false,
     this.dense,
+    this.contentPadding,
     this.secondary,
     this.selected = false,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
@@ -409,6 +401,15 @@ class SwitchListTile extends StatelessWidget {
   /// If this property is null then its value is based on [ListTileTheme.dense].
   final bool dense;
 
+  /// The tile's internal padding.
+  ///
+  /// Insets a [SwitchListTile]'s contents: its [title], [subtitle],
+  /// [secondary], and [Switch] widgets.
+  ///
+  /// If null, [ListTile]'s default of `EdgeInsets.symmetric(horizontal: 16.0)`
+  /// is used.
+  final EdgeInsetsGeometry contentPadding;
+
   /// Whether to render icons and text in the [activeColor].
   ///
   /// No effort is made to automatically coordinate the [selected] state and the
@@ -462,6 +463,7 @@ class SwitchListTile extends StatelessWidget {
           trailing: control,
           isThreeLine: isThreeLine,
           dense: dense,
+          contentPadding: contentPadding,
           enabled: onChanged != null,
           onTap: onChanged != null ? () { onChanged(!value); } : null,
           selected: selected,

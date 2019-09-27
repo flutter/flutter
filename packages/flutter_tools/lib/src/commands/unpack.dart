@@ -5,16 +5,14 @@
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/process_manager.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 /// The directory in the Flutter cache for each platform's artifacts.
-const Map<TargetPlatform, String> flutterArtifactPlatformDirectory =
-    <TargetPlatform, String>{
+const Map<TargetPlatform, String> flutterArtifactPlatformDirectory = <TargetPlatform, String>{
   TargetPlatform.linux_x64: 'linux-x64',
   TargetPlatform.darwin_x64: 'darwin-x64',
   TargetPlatform.windows_x64: 'windows-x64',
@@ -24,13 +22,13 @@ const Map<TargetPlatform, String> flutterArtifactPlatformDirectory =
 // directory.
 const Map<TargetPlatform, List<String>> artifactFilesByPlatform = <TargetPlatform, List<String>>{
   TargetPlatform.linux_x64: <String>[
-    'libflutter_linux.so',
+    'libflutter_linux_glfw.so',
     'flutter_export.h',
     'flutter_messenger.h',
     'flutter_plugin_registrar.h',
     'flutter_glfw.h',
     'icudtl.dat',
-    'cpp_client_wrapper/',
+    'cpp_client_wrapper_glfw/',
   ],
   TargetPlatform.darwin_x64: <String>[
     'FlutterMacOS.framework',
@@ -43,7 +41,7 @@ const Map<TargetPlatform, List<String>> artifactFilesByPlatform = <TargetPlatfor
     'flutter_export.h',
     'flutter_messenger.h',
     'flutter_plugin_registrar.h',
-    'flutter_glfw.h',
+    'flutter_windows.h',
     'icudtl.dat',
     'cpp_client_wrapper/',
   ],
@@ -284,7 +282,7 @@ class ArtifactUnpacker {
     _deleteFrameworkIfPresent(
         fs.path.join(targetDirectory, fs.path.basename(frameworkPath)));
 
-    final ProcessResult result = processManager
+    final RunResult result = processUtils
         .runSync(<String>['cp', '-R', frameworkPath, targetDirectory]);
     if (result.exitCode != 0) {
       throw Exception(

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/compile.dart';
 
 import '../src/common.dart';
@@ -17,6 +18,14 @@ void main() {
     final CompilerOutput output = await stdoutHandler.compilerOutput.future;
     expect(output.errorCount, 0);
     expect(output.outputFilename, 'message');
+  });
+
+  testUsingContext('StdOutHandler crash test', () async {
+    final StdoutHandler stdoutHandler = StdoutHandler();
+    final Future<CompilerOutput> output = stdoutHandler.compilerOutput.future;
+    stdoutHandler.handler('message with no result');
+
+    expect(output, throwsA(isInstanceOf<ToolExit>()));
   });
 
   test('TargetModel values', () {

@@ -270,6 +270,7 @@ void main() {
     const Color color = Colors.pink;
     const double elevation = 9.0;
     final ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.circular(12));
+    const Clip clipBehavior = Clip.antiAlias;
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -283,6 +284,7 @@ void main() {
       backgroundColor: color,
       elevation: elevation,
       shape: shape,
+      clipBehavior: clipBehavior,
       builder: (BuildContext context) {
         return Container(
           child: const Text('BottomSheet'),
@@ -297,6 +299,7 @@ void main() {
     expect(bottomSheet.backgroundColor, color);
     expect(bottomSheet.elevation, elevation);
     expect(bottomSheet.shape, shape);
+    expect(bottomSheet.clipBehavior, clipBehavior);
   });
 
   testWidgets('modal BottomSheet with scrollController has semantics', (WidgetTester tester) async {
@@ -306,7 +309,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: Text('body'))
+        body: const Center(child: Text('body')),
       )
     ));
 
@@ -377,7 +380,7 @@ void main() {
             BottomNavigationBarItem(
               icon: Icon(Icons.style),
               title: Text('Item 2'),
-            )
+            ),
           ],
         ),
       ),
@@ -406,7 +409,7 @@ void main() {
             BottomNavigationBarItem(
               icon: Icon(Icons.style),
               title: Text('Item 2'),
-            )
+            ),
           ],
         ),
       ),
@@ -444,7 +447,7 @@ class _TestPage extends StatelessWidget {
               builder: (_) => const Text('Modal bottom sheet'),
             );
           }
-        }
+        },
       ),
     );
   }

@@ -660,10 +660,9 @@ class _RenderTheatre extends RenderBox
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-
-    if (child != null)
-      children.add(child.toDiagnosticsNode(name: 'onstage'));
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[
+      if (child != null) child.toDiagnosticsNode(name: 'onstage'),
+    ];
 
     if (firstChild != null) {
       RenderBox child = firstChild;

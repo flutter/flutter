@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/version.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -57,6 +58,16 @@ void main() {
       final Future<void> runCommand = createTestCommandRunner(command).run(<String>['version', '--force', version]);
       await Future.wait<void>(<Future<void>>[runCommand]);
       expect(testLogger.statusText, contains('Switching Flutter to version $version with force'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => MockProcessManager(),
+    });
+
+    testUsingContext('tool exit on confusing version', () async {
+      const String version = 'master';
+      final VersionCommand command = VersionCommand();
+      final Future<void> runCommand = createTestCommandRunner(command).run(<String>['version', version]);
+      expect(() async => await Future.wait<void>(<Future<void>>[runCommand]),
+             throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
     });
@@ -116,7 +127,7 @@ class MockProcessManager extends Mock implements ProcessManager {
     Encoding stderrEncoding = systemEncoding,
   }) {
     final String commandStr = command.join(' ');
-    if (commandStr == 'git log -n 1 --pretty=format:%H') {
+    if (commandStr == FlutterVersion.gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' ')) {
       return ProcessResult(0, 0, '000000000000000000000', '');
     }
     if (commandStr ==

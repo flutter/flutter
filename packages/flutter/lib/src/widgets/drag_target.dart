@@ -524,9 +524,12 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
         _candidateAvatars.add(avatar);
       });
       return true;
+    } else {
+      setState(() {
+        _rejectedAvatars.add(avatar);
+      });
+      return false;
     }
-    _rejectedAvatars.add(avatar);
-    return false;
   }
 
   void didLeave(_DragAvatar<dynamic> avatar) {

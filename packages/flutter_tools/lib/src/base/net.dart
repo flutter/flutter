@@ -21,8 +21,9 @@ Future<List<int>> fetchUrl(Uri url, {int maxAttempts}) async {
   while (true) {
     attempts += 1;
     final List<int> result = await _attempt(url);
-    if (result != null)
+    if (result != null) {
       return result;
+    }
     if (maxAttempts != null && attempts >= maxAttempts) {
       printStatus('Download failed -- retry $attempts');
       return null;
@@ -30,8 +31,9 @@ Future<List<int>> fetchUrl(Uri url, {int maxAttempts}) async {
     printStatus('Download failed -- attempting retry $attempts in '
         '$durationSeconds second${ durationSeconds == 1 ? "" : "s"}...');
     await Future<void>.delayed(Duration(seconds: durationSeconds));
-    if (durationSeconds < 64)
+    if (durationSeconds < 64) {
       durationSeconds *= 2;
+    }
   }
 }
 
@@ -48,12 +50,14 @@ Future<List<int>> _attempt(Uri url, { bool onlyHeaders = false }) async {
     httpClient = HttpClient();
   }
   HttpClientRequest request;
+  HttpClientResponse response;
   try {
     if (onlyHeaders) {
       request = await httpClient.headUrl(url);
     } else {
       request = await httpClient.getUrl(url);
     }
+    response = await request.close();
   } on ArgumentError catch (error) {
     final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
     if (overrideUrl != null && url.toString().contains(overrideUrl)) {
@@ -82,7 +86,8 @@ Future<List<int>> _attempt(Uri url, { bool onlyHeaders = false }) async {
     printTrace('Download error: $error');
     return null;
   }
-  final HttpClientResponse response = await request.close();
+  assert(response != null);
+
   // If we're making a HEAD request, we're only checking to see if the URL is
   // valid.
   if (onlyHeaders) {

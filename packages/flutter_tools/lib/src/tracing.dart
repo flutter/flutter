@@ -57,8 +57,9 @@ class Tracing {
             break;
           }
         }
-        if (!done)
+        if (!done) {
           await whenFirstFrameRendered.future;
+        }
       } catch (exception) {
         status.cancel();
         rethrow;
@@ -78,12 +79,14 @@ Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame 
   final File traceInfoFile = fs.file(traceInfoFilePath);
 
   // Delete old startup data, if any.
-  if (await traceInfoFile.exists())
-    await traceInfoFile.delete();
+  if (traceInfoFile.existsSync()) {
+    traceInfoFile.deleteSync();
+  }
 
   // Create "build" directory, if missing.
-  if (!(await traceInfoFile.parent.exists()))
-    await traceInfoFile.parent.create();
+  if (!traceInfoFile.parent.existsSync()) {
+    traceInfoFile.parent.createSync();
+  }
 
   final Tracing tracing = Tracing(observatory);
 
@@ -136,8 +139,9 @@ Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame 
     final int timeToFirstFrameMicros = firstFrameBuiltTimestampMicros - engineEnterTimestampMicros;
     traceInfo['timeToFirstFrameMicros'] = timeToFirstFrameMicros;
     message = 'Time to first frame: ${timeToFirstFrameMicros ~/ 1000}ms.';
-    if (frameworkInitTimestampMicros != null)
+    if (frameworkInitTimestampMicros != null) {
       traceInfo['timeAfterFrameworkInitMicros'] = firstFrameBuiltTimestampMicros - frameworkInitTimestampMicros;
+    }
   }
 
   traceInfoFile.writeAsStringSync(toPrettyJson(traceInfo));
