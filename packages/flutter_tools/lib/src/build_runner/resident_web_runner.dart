@@ -192,9 +192,7 @@ class ResidentWebRunner extends ResidentRunner {
         _connectionResult = await _webFs.connect(debuggingOptions);
         unawaited(_connectionResult.debugConnection.onDone.whenComplete(exit));
       }
-    } catch (err, stackTrace) {
-      printError(err.toString());
-      printError(stackTrace.toString());
+    } catch (err) {
       throwToolExit('Failed to build application for the web.');
     } finally {
       buildStatus.stop();
