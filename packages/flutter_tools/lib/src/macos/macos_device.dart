@@ -2,19 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../application_package.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
-import '../cache.dart';
-import '../desktop.dart';
 import '../desktop_device.dart';
 import '../device.dart';
-import '../globals.dart';
 import '../macos/application_package.dart';
 import '../project.dart';
-import '../protocol_discovery.dart';
 import 'build_macos.dart';
 import 'macos_workflow.dart';
 
@@ -27,74 +22,10 @@ class MacOSDevice extends DesktopDevice {
   );
 
   @override
-  void clearLogs() { }
-
-  @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) {
-    return _deviceLogReader;
-  }
-  final DesktopLogReader _deviceLogReader = DesktopLogReader();
-
-  @override
   bool isSupported() => true;
 
   @override
   String get name => 'macOS';
-
-  @override
-  Future<LaunchResult> startApp(
-    covariant MacOSApp package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs,
-    bool prebuiltApplication = false,
-    bool ipv6 = false,
-  }) async {
-    if (!prebuiltApplication) {
-      Cache.releaseLockEarly();
-      await buildMacOS(
-        flutterProject: FlutterProject.current(),
-        buildInfo: debuggingOptions?.buildInfo,
-        targetOverride: mainPath,
-      );
-    }
-
-    // Ensure that the executable is locatable.
-    final String executable = package.executable(debuggingOptions?.buildInfo?.mode);
-    if (executable == null) {
-      printError('Unable to find executable to run');
-      return LaunchResult.failed();
-    }
-
-    _lastBuiltMode = debuggingOptions?.buildInfo?.mode;
-    final Process process = await processManager.start(<String>[
-      executable
-    ]);
-    if (debuggingOptions?.buildInfo?.isRelease == true) {
-      return LaunchResult.succeeded();
-    }
-    _deviceLogReader.initializeProcess(process);
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader);
-    try {
-      final Uri observatoryUri = await observatoryDiscovery.uri;
-      // Bring app to foreground.
-      await processManager.run(<String>[
-        'open', package.applicationBundle(debuggingOptions?.buildInfo?.mode),
-      ]);
-      return LaunchResult.succeeded(observatoryUri: observatoryUri);
-    } catch (error) {
-      printError('Error waiting for a debug connection: $error');
-      return LaunchResult.failed();
-    } finally {
-      await observatoryDiscovery.cancel();
-    }
-  }
-
-  @override
-  Future<bool> stopApp(covariant MacOSApp app) async {
-    return killProcess(app.executable(_lastBuiltMode));
-  }
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin_x64;
@@ -104,8 +35,31 @@ class MacOSDevice extends DesktopDevice {
     return flutterProject.macos.existsSync();
   }
 
-  // Track the last built mode from startApp.
-  BuildMode _lastBuiltMode;
+  @override
+  Future<void> buildForDevice(
+    covariant MacOSApp package, {
+    String mainPath,
+    BuildInfo buildInfo,
+  }) async {
+    await buildMacOS(
+      flutterProject: FlutterProject.current(),
+      buildInfo: buildInfo,
+      targetOverride: mainPath,
+    );
+  }
+
+  @override
+  String executablePathForDevice(covariant MacOSApp package, BuildMode buildMode) {
+    return package.executable(buildMode);
+  }
+
+  @override
+  void onLaunched(covariant MacOSApp package, BuildMode buildMode, Process process) {
+    // Bring app to foreground.
+    processManager.run(<String>[
+      'open', package.applicationBundle(buildMode),
+    ]);
+  }
 }
 
 class MacOSDevices extends PollingDeviceDiscovery {
