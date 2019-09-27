@@ -878,7 +878,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           maxLines: widget.maxLines,
           minLines: widget.minLines,
           expands: widget.expands,
-          selectionColor: CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context),
+          selectionColor: CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context).withOpacity(0.2),
           selectionControls: widget.selectionEnabled
             ? cupertinoTextSelectionControls : null,
           onChanged: widget.onChanged,
