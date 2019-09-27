@@ -637,8 +637,8 @@ void main() {
         final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
           'type': 'keydown',
           'keymap': 'web',
-          'keyCode': 0x04,
-          'keyLabel': null,
+          'code': 'RandomCode',
+          'key': null,
           'metaState': modifier,
         });
         final RawKeyEventDataWeb data = event.data;
@@ -668,8 +668,8 @@ void main() {
         final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
           'type': 'keydown',
           'keymap': 'web',
-          'keyCode': 0x04,
-          'keyLabel': null,
+          'code': 'RandomCode',
+          'key': null,
           'metaState': modifier | RawKeyEventDataWeb.modifierMeta,
         });
         final RawKeyEventDataWeb data = event.data;
@@ -696,8 +696,8 @@ void main() {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'web',
-        'keyCode': 65,
-        'keyLabel': 'a',
+        'code': 'KeyA',
+        'key': 'a',
         'metaState': 0x0,
       });
       final RawKeyEventDataWeb data = keyAEvent.data;
@@ -709,8 +709,8 @@ void main() {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'web',
-        'keyCode': 27,
-        'keyLabel': null,
+        'code': 'Escape',
+        'key': null,
         'metaState': 0x0,
       });
       final RawKeyEventDataWeb data = escapeKeyEvent.data;
@@ -722,21 +722,21 @@ void main() {
       final RawKeyEvent shiftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'web',
-        'keyCode': 16,
+        'code': 'ShiftLeft',
         'keyLabel': null,
         'metaState': RawKeyEventDataWeb.modifierShift,
       });
       final RawKeyEventDataWeb data = shiftKeyEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
-      expect(data.logicalKey, equals(LogicalKeyboardKey.shift));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
     });
     test('Arrow keys from a keyboard give correct physical key mappings', () {
       final RawKeyEvent arrowKeyDown = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'web',
-        'keyCode': 40,
-        'keyLabel': null,
+        'code': 'ArrowDown',
+        'key': null,
         'metaState': 0x0,
       });
       final RawKeyEventDataWeb data = arrowKeyDown.data;

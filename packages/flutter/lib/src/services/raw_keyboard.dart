@@ -287,8 +287,8 @@ abstract class RawKeyEvent extends Diagnosticable {
         break;
       case 'web':
         data = RawKeyEventDataWeb(
-          keyCode: message['keyCode'],
-          keyLabel: message['keyLabel'],
+          code: message['code'],
+          key: message['key'],
           metaState: message['metaState'],
         );
         break;
