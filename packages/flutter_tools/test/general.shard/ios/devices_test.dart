@@ -219,6 +219,7 @@ void main() {
           platformArgs: <String, dynamic>{},
         );
         verify(mockUsage.sendEvent('ios-mdns', 'failure')).called(1);
+        verify(mockUsage.sendEvent('ios-mdns', 'fallback-success')).called(1);
         expect(launchResult.started, isTrue);
         expect(launchResult.hasObservatory, isTrue);
         expect(await device.stopApp(mockApp), isFalse);
@@ -250,6 +251,8 @@ void main() {
             debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
             platformArgs: <String, dynamic>{},
         );
+        verify(mockUsage.sendEvent('ios-mdns', 'failure')).called(1);
+        verify(mockUsage.sendEvent('ios-mdns', 'fallback-failure')).called(1);
         expect(launchResult.started, isFalse);
         expect(launchResult.hasObservatory, isFalse);
       }, overrides: <Type, Generator>{
@@ -259,6 +262,7 @@ void main() {
         MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
         Platform: () => macPlatform,
         ProcessManager: () => mockProcessManager,
+        Usage: () => mockUsage,
       });
 
       testUsingContext(' succeeds in release mode', () async {
