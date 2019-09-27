@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TOPAZ_RUNTIME_DART_RUNNER_DART_RUNNER_H_
-#define TOPAZ_RUNTIME_DART_RUNNER_DART_RUNNER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_DART_RUNNER_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_DART_RUNNER_H_
 
 #include <fuchsia/sys/cpp/fidl.h>
 #include <lib/fidl/cpp/binding_set.h>
@@ -41,4 +41,4 @@ class DartRunner : public fuchsia::sys::Runner {
 
 }  // namespace dart_runner
 
-#endif  // TOPAZ_RUNTIME_DART_RUNNER_DART_RUNNER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_DART_RUNNER_H_
