@@ -130,8 +130,8 @@ typedef GestureTapCancelCallback = void Function();
 ///    any buttons.
 abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a tap gesture recognizer.
-  BaseTapGestureRecognizer({ Object debugOwner, Duration deadline = kPressTimeout })
-    : super(deadline: deadline, debugOwner: debugOwner);
+  BaseTapGestureRecognizer({ Object debugOwner })
+    : super(deadline: kPressTimeout , debugOwner: debugOwner);
 
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
