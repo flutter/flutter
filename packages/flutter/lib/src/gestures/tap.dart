@@ -108,8 +108,8 @@ typedef GestureTapCancelCallback = void Function();
 /// by optional moves, then ends with an up. All move events must contain the
 /// same `buttons` as the down event, and must not be too far from the initial
 /// position. The gesture is rejected on any violation, a cancel event, or
-/// if any other gesture wins the arena. It is accepted only when it is the last
-/// member of the arena.
+/// if any other recognizers wins the arena. It is accepted only when it is the
+/// last member of the arena.
 ///
 /// The [BaseTapGestureRecognizer] considers all the pointers involved in the
 /// pointer event sequence as contributing to one gesture. For this reason,
@@ -139,10 +139,10 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   PointerDownEvent _down;
   PointerUpEvent _up;
 
-  /// A pointer that might cause a tap has contacted the screen.
+  /// A pointer has contacted the screen, which might be the start of a tap.
   ///
   /// This triggers after the down event, once a short timeout ([deadline]) has
-  /// elapsed, or once the gestures has won the arena, whichever comes first.
+  /// elapsed, or once the gesture has won the arena, whichever comes first.
   ///
   /// The parameter `down` is the down event of the primary pointer that started
   /// the tap sequence.
@@ -152,9 +152,9 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   @protected
   void handleTapDown({ PointerDownEvent down });
 
-  /// A pointer that will trigger a tap has stopped contacting the screen.
+  /// A pointer has stopped contacting the screen, which is recognized as a tap.
   ///
-  /// This triggers on the up event, if the gesture wins the arena with it
+  /// This triggers on the up event, if the recognizer wins the arena with it
   /// or has previously won.
   ///
   /// The parameter `down` is the down event of the primary pointer that started
@@ -165,7 +165,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   @protected
   void handleTapUp({ PointerDownEvent down, PointerUpEvent up });
 
-  /// The pointer that previously triggered [handleTapDown] will not end up
+  /// A pointer that previously triggered [handleTapDown] will not end up
   /// causing a tap.
   ///
   /// This triggers once the gesture loses the arena, if [handleTapDown] has
@@ -314,11 +314,11 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// Creates a tap gesture recognizer.
   TapGestureRecognizer({ Object debugOwner }) : super(deadline: kPressTimeout, debugOwner: debugOwner);
 
-  /// A pointer that might cause a tap of a primary button has contacted the
-  /// screen at a particular location.
+  /// A pointer has contacted the screen at a particular location with a primary
+  /// button, which might be the start of a tap.
   ///
-  /// This triggers once a short timeout ([deadline]) has elapsed, or once
-  /// the gestures has won the arena, whichever comes first.
+  /// This triggers after the down event, once a short timeout ([deadline]) has
+  /// elapsed, or once the gestures has won the arena, whichever comes first.
   ///
   /// If this recognizer doesn't win the arena, [onTapCancel] is called next.
   /// Otherwise, [onTapUp] is called next.
@@ -331,11 +331,11 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///  * [GestureDetector.onTapDown], which exposes this callback.
   GestureTapDownCallback onTapDown;
 
-  /// A pointer that will trigger a tap of a primary button has stopped
-  /// contacting the screen at a particular location.
+  /// A pointer has stopped contacting the screen at a particular location,
+  /// which is recognized as a tap of a primary button.
   ///
-  /// This triggers once the pointer has stopped contacting the screen, if the
-  /// gesture has won the arena, immediately before [onTap].
+  /// This triggers on the up event, if the recognizer wins the arena with it
+  /// or has previously won, immediately followed by [onTap].
   ///
   /// If this recognizer doesn't win the arena, [onTapCancel] is called instead.
   ///
@@ -347,10 +347,11 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///  * [GestureDetector.onTapUp], which exposes this callback.
   GestureTapUpCallback onTapUp;
 
-  /// A tap of a primary button has occurred.
+  /// A pointer has stopped contacting the screen, which is recognized as a tap
+  /// of a primary button.
   ///
-  /// This triggers once the pointer has stopped contacting the screen, if the
-  /// gesture has won the arena, immediately after [onTapUp].
+  /// This triggers on the up event, if the recognizer wins the arena with it
+  /// or has previously won, immediately following [onTap].
   ///
   /// If this recognizer doesn't win the arena, [onTapCancel] is called instead.
   ///
@@ -361,7 +362,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///  * [GestureDetector.onTap], which exposes this callback.
   GestureTapCallback onTap;
 
-  /// The pointer that previously triggered [onTapDown] will not end up causing
+  /// A pointer that previously triggered [onTapDown] will not end up causing
   /// a tap.
   ///
   /// This triggers once the gesture loses the arena, if [onTapDown] has
@@ -377,11 +378,11 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///  * [GestureDetector.onTapCancel], which exposes this callback.
   GestureTapCancelCallback onTapCancel;
 
-  /// A pointer that might cause a tap of a secondary button has contacted the
-  /// screen at a particular location.
+  /// A pointer has contacted the screen at a particular location with a
+  /// secondary button, which might be the start of a secondary tap.
   ///
-  /// This triggers once a short timeout ([deadline]) has elapsed, or once
-  /// the gestures has won the arena, whichever comes first.
+  /// This triggers after the down event, once a short timeout ([deadline]) has
+  /// elapsed, or once the gestures has won the arena, whichever comes first.
   ///
   /// If this recognizer doesn't win the arena, [onSecondaryTapCancel] is called
   /// next. Otherwise, [onSecondaryTapUp] is called next.
@@ -394,10 +395,11 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///  * [GestureDetector.onSecondaryTapDown], which exposes this callback.
   GestureTapDownCallback onSecondaryTapDown;
 
-  /// A pointer that will trigger a tap of a secondary button has stopped
-  /// contacting the screen at a particular location.
+  /// A pointer has stopped contacting the screen at a particular location,
+  /// which is recognized as a tap of a secondary button.
   ///
-  /// This triggers once the gesture has won the arena.
+  /// This triggers on the up event, if the recognizer wins the arena with it
+  /// or has previously won.
   ///
   /// If this recognizer doesn't win the arena, [onSecondaryTapCancel] is called
   /// instead.
@@ -410,10 +412,11 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   ///  * [GestureDetector.onSecondaryTapUp], which exposes this callback.
   GestureTapUpCallback onSecondaryTapUp;
 
-  /// The pointer that previously triggered [onSecondaryTapDown] will not end up
+  /// A pointer that previously triggered [onSecondaryTapDown] will not end up
   /// causing a tap.
   ///
-  /// This triggers if the gesture loses the arena.
+  /// This triggers once the gesture loses the arena, if [onSecondaryTapDown]
+  /// has previously been triggered.
   ///
   /// If this recognizer wins the arena, [onSecondaryTapUp] is called instead.
   ///
