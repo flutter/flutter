@@ -472,9 +472,18 @@ class _RenderSnackbarSemantics extends RenderProxyBox {
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
     super.assembleSemanticsNode(node, config, children);
-    if (defaultTargetPlatform == TargetPlatform.iOS && node.label != null && node.label != _lastAnnouncedLabel) {
-      _lastAnnouncedLabel = node.label;
-      SemanticsService.announce(_lastAnnouncedLabel, textDirection);
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        // Do nothing on Android and Fuchsia.
+        break;
+      case TargetPlatform.iOS:
+        // On iOS announce the value if it is different from the last announced
+        // value.
+        if (node.label != null && node.label != _lastAnnouncedLabel) {
+          _lastAnnouncedLabel = node.label;
+          SemanticsService.announce(_lastAnnouncedLabel, textDirection);
+        }
     }
   }
 }
