@@ -186,7 +186,7 @@ public class FlutterMain {
             }
 
             String kernelPath = null;
-            if (BuildConfig.DEBUG) {
+            if (BuildConfig.DEBUG || BuildConfig.JIT_RELEASE) {
                 String snapshotAssetPath = PathUtils.getDataDirectory(applicationContext) + File.separator + sFlutterAssetsDir;
                 kernelPath = snapshotAssetPath + File.separator + DEFAULT_KERNEL_BLOB;
                 shellArgs.add("--" + SNAPSHOT_ASSET_PATH_KEY + "=" + snapshotAssetPath);
@@ -297,7 +297,7 @@ public class FlutterMain {
     private static void initResources(@NonNull Context applicationContext) {
         new ResourceCleaner(applicationContext).start();
 
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG || BuildConfig.JIT_RELEASE) {
             final String dataDirPath = PathUtils.getDataDirectory(applicationContext);
             final String packageName = applicationContext.getPackageName();
             final PackageManager packageManager = applicationContext.getPackageManager();

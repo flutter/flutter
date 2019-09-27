@@ -87,7 +87,8 @@ template("dart_snapshot_kernel") {
       rebase_path(snapshot_depfile),
     ]
 
-    if (flutter_runtime_mode == "release") {
+    if (flutter_runtime_mode == "release" ||
+        flutter_runtime_mode == "jit_release") {
       args += [ "-Ddart.vm.product=true" ]
     }
 

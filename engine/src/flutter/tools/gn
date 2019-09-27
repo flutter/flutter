@@ -17,8 +17,6 @@ def get_out_dir(args):
         target_dir = ['host']
 
     runtime_mode = args.runtime_mode
-    if args.dynamic and runtime_mode in ['profile', 'release']:
-        target_dir.append('dynamic')
 
     target_dir.append(args.runtime_mode)
 
@@ -81,8 +79,6 @@ def to_gn_args(args):
       raise Exception('--enable-metal is only supported on iOS')
 
     runtime_mode = args.runtime_mode
-    if args.dynamic and runtime_mode in ['profile', 'release']:
-      runtime_mode = 'dynamic_' + runtime_mode
 
     gn_args = {}
 
@@ -148,10 +144,8 @@ def to_gn_args(args):
 
     if runtime_mode == 'debug':
         gn_args['dart_runtime_mode'] = 'develop'
-    elif runtime_mode == 'dynamic_profile':
-        gn_args['dart_runtime_mode'] = 'profile'
-    elif runtime_mode == 'dynamic_release':
-        gn_args['dart_runtime_mode'] = 'release'
+    elif runtime_mode == 'jit_release':
+        gn_args['dart_runtime_mode'] = 'release';
     else:
         gn_args['dart_runtime_mode'] = runtime_mode
 
@@ -271,8 +265,7 @@ def parse_args(args):
 
   parser.add_argument('--unoptimized', default=False, action='store_true')
 
-  parser.add_argument('--runtime-mode', type=str, choices=['debug', 'profile', 'release'], default='debug')
-  parser.add_argument('--dynamic', default=False, action='store_true')
+  parser.add_argument('--runtime-mode', type=str, choices=['debug', 'profile', 'release', 'jit_release'], default='debug')
   parser.add_argument('--interpreter', default=False, action='store_true')
   parser.add_argument('--dart-debug', default=False, action='store_true', help='Enables assertsion in the Dart VM. ' +
       'Does not affect optimization levels. If you need to disable optimizations in Dart, use --full-dart-debug')

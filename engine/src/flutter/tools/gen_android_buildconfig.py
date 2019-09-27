@@ -23,6 +23,7 @@ public final class BuildConfig {{
   public final static boolean DEBUG = {0};
   public final static boolean PROFILE = {1};
   public final static boolean RELEASE = {2};
+  public final static boolean JIT_RELEASE = {3};
 }}
 """
 
@@ -33,13 +34,14 @@ def main():
 
   args = parser.parse_args()
 
-  release ='release' in args.runtime_mode.lower()
-  profile = not release and 'profile' in args.runtime_mode.lower()
-  debug = not release and not profile and 'debug' in args.runtime_mode.lower()
-  assert debug or profile or release
+  jit_release = 'jit_release' in args.runtime_mode.lower()
+  release = not jit_release and 'release' in args.runtime_mode.lower()
+  profile = 'profile' in args.runtime_mode.lower()
+  debug = 'debug' in args.runtime_mode.lower()
+  assert debug or profile or release or jit_release
 
   with open(os.path.abspath(args.out), 'w+') as output_file:
-    output_file.write(BUILD_CONFIG_TEMPLATE.format(str(debug).lower(), str(profile).lower(), str(release).lower()))
+    output_file.write(BUILD_CONFIG_TEMPLATE.format(str(debug).lower(), str(profile).lower(), str(release).lower(), str(jit_release).lower()))
 
 if __name__ == '__main__':
   sys.exit(main())

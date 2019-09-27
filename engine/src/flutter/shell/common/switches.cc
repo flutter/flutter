@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 
+#include "flutter/common/runtime.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/size.h"
@@ -36,7 +37,7 @@ struct SwitchDesc {
 #define DEF_SWITCHES_END };
 // clang-format on
 
-#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
+#if !FLUTTER_RELEASE
 
 // List of common and safe VM flags to allow to be passed directly to the VM.
 // clang-format off
@@ -134,7 +135,7 @@ const std::string_view FlagForSwitch(Switch swtch) {
   return std::string_view();
 }
 
-#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
+#if !FLUTTER_RELEASE
 
 static bool IsWhitelistedDartVMFlag(const std::string& flag) {
   for (uint32_t i = 0; i < fml::size(gDartFlagsWhitelist); ++i) {
@@ -328,7 +329,7 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.use_test_fonts =
       command_line.HasOption(FlagForSwitch(Switch::UseTestFonts));
 
-#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
+#if !FLUTTER_RELEASE
   command_line.GetOptionValue(FlagForSwitch(Switch::LogTag), &settings.log_tag);
   std::string all_dart_flags;
   if (command_line.GetOptionValue(FlagForSwitch(Switch::DartFlags),
