@@ -1,4 +1,4 @@
-Signature: e26c0f7e6a37e4446457835268bb82b7
+Signature: bbd2af5f726419e37ee57206f05911f6
 
 UNUSED LICENSES:
 
@@ -3794,6 +3794,7 @@ FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleHelpers.h
 FILE: ../../../third_party/skia/include/private/GrGLTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkThreadAnnotations.h
 FILE: ../../../third_party/skia/modules/canvaskit/WasmAliases.h
+FILE: ../../../third_party/skia/modules/canvaskit/fonts/nofonts.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/particles_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/skottie_bindings.cpp
 FILE: ../../../third_party/skia/modules/particles/include/SkCurve.h
