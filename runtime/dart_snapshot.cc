@@ -6,6 +6,7 @@
 
 #include <sstream>
 
+#include "flutter/common/runtime.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"
@@ -24,7 +25,7 @@ const char* DartSnapshot::kIsolateInstructionsSymbol =
 // data through symbols that are statically linked into the executable.
 // On other platforms this data is obtained by a dynamic symbol lookup.
 #define DART_SNAPSHOT_STATIC_LINK \
-  (OS_WIN || (OS_ANDROID && FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG))
+  (OS_WIN || (OS_ANDROID && FLUTTER_JIT_RUNTIME))
 
 #if !DART_SNAPSHOT_STATIC_LINK
 

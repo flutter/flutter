@@ -59,7 +59,8 @@ compiled_action("generate_snapshot_bin") {
   ]
 
   if (is_debug && flutter_runtime_mode != "profile" &&
-      flutter_runtime_mode != "release") {
+      flutter_runtime_mode != "release" &&
+      flutter_runtime_mode != "jit_release") {
     args += [ "--enable_asserts" ]
   }
 
@@ -261,7 +262,8 @@ compile_platform("strong_platform") {
     "$root_out_dir/flutter_patched_sdk/vm_outline_strong.dill",
   ]
 
-  is_runtime_mode_release = flutter_runtime_mode == "release"
+  is_runtime_mode_release =
+      flutter_runtime_mode == "release" || flutter_runtime_mode == "jit_release"
   allow_causal_async_stacks = !is_runtime_mode_release
   args = [
     "--target=flutter",

@@ -6,6 +6,7 @@
 
 #include <vector>
 
+#include "flutter/common/runtime.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/paint_utils.h"
 #include "flutter/fml/logging.h"
@@ -265,7 +266,7 @@ void RasterCache::SetCheckboardCacheImages(bool checkerboard) {
 }
 
 void RasterCache::TraceStatsToTimeline() const {
-#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
+#if !FLUTTER_RELEASE
 
   size_t layer_cache_count = 0;
   size_t layer_cache_bytes = 0;
@@ -292,7 +293,7 @@ void RasterCache::TraceStatsToTimeline() const {
                     "PictureMBytes", picture_cache_bytes * 1e-6  //
   );
 
-#endif  // FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
+#endif  // !FLUTTER_RELEASE
 }
 
 }  // namespace flutter

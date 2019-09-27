@@ -9,6 +9,7 @@
 #include <mutex>
 #include <vector>
 
+#include "flutter/common/runtime.h"
 #include "flutter/common/settings.h"
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/file.h"
@@ -39,7 +40,7 @@
 namespace dart {
 namespace observatory {
 
-#if !OS_FUCHSIA && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE)
+#if !OS_FUCHSIA && !FLUTTER_RELEASE
 
 // These two symbols are defined in |observatory_archive.cc| which is generated
 // by the |//third_party/dart/runtime/observatory:archive_observatory| rule.
@@ -48,8 +49,7 @@ namespace observatory {
 extern unsigned int observatory_assets_archive_len;
 extern const uint8_t* observatory_assets_archive;
 
-#endif  // !OS_FUCHSIA && (FLUTTER_RUNTIME_MODE !=
-        // FLUTTER_RUNTIME_MODE_RELEASE)
+#endif  // !OS_FUCHSIA && !FLUTTER_RELEASE
 
 }  // namespace observatory
 }  // namespace dart
@@ -148,7 +148,7 @@ bool DartFileModifiedCallback(const char* source_url, int64_t since_ms) {
 void ThreadExitCallback() {}
 
 Dart_Handle GetVMServiceAssetsArchiveCallback() {
-#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE)
+#if FLUTTER_RELEASE
   return nullptr;
 #elif OS_FUCHSIA
   fml::UniqueFD fd = fml::OpenFile("pkg/data/observatory.tar", false,

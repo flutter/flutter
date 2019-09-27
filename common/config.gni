@@ -21,7 +21,7 @@ if (is_ios || is_mac) {
 }
 
 declare_args() {
-  # The runtime mode ("debug", "profile", or "release")
+  # The runtime mode ("debug", "profile", "release", or "jit_release")
   flutter_runtime_mode = "debug"
 
   # Whether to use the Skia text shaper module
@@ -39,6 +39,7 @@ feature_defines_list = [
   "FLUTTER_RUNTIME_MODE_DEBUG=1",
   "FLUTTER_RUNTIME_MODE_PROFILE=2",
   "FLUTTER_RUNTIME_MODE_RELEASE=3",
+  "FLUTTER_RUNTIME_MODE_JIT_RELEASE=4",
 ]
 
 if (flutter_runtime_mode == "debug") {
@@ -47,6 +48,8 @@ if (flutter_runtime_mode == "debug") {
   feature_defines_list += [ "FLUTTER_RUNTIME_MODE=2" ]
 } else if (flutter_runtime_mode == "release") {
   feature_defines_list += [ "FLUTTER_RUNTIME_MODE=3" ]
+} else if (flutter_runtime_mode == "jit_release") {
+  feature_defines_list += [ "FLUTTER_RUNTIME_MODE=4" ]
 } else {
   feature_defines_list += [ "FLUTTER_RUNTIME_MODE=0" ]
 }
