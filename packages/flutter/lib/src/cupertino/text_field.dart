@@ -43,10 +43,11 @@ const Color _kDisabledBackground = CupertinoDynamicColor.withBrightness(
   darkColor: Color(0xFF050505),
 );
 
-// Value extracted from https://developer.apple.com/design/resources/.
+// Value inspected from Xcode 11 & iOS 13.0 Simulator.
+// Note it may not be consistent with https://developer.apple.com/design/resources/.
 const CupertinoDynamicColor _kClearButtonColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0x993C3C43),
-  darkColor: Color(0x99EBEBF5),
+  color: Color(0xFF636366),
+  darkColor: Color(0xFFAEAEB2),
 );
 
 // An eyeballed value that moves the cursor slightly left of where it is
@@ -790,7 +791,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                 child: Icon(
                   CupertinoIcons.clear_thick_circled,
                   size: 18.0,
-                  color: CupertinoDynamicColor.resolve(_kClearButtonColor, context)?.withAlpha(60),
+                  color: CupertinoDynamicColor.resolve(_kClearButtonColor, context),
                 ),
               ),
             ),
@@ -878,7 +879,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           maxLines: widget.maxLines,
           minLines: widget.minLines,
           expands: widget.expands,
-          selectionColor: CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context).withOpacity(0.2),
+          selectionColor: CupertinoTheme.of(context).primaryColor.withOpacity(0.2),
           selectionControls: widget.selectionEnabled
             ? cupertinoTextSelectionControls : null,
           onChanged: widget.onChanged,
