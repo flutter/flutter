@@ -323,9 +323,9 @@ apply plugin: 'kotlin-android'
         expect(await project.ios.isSwift, isTrue);
         expect(project.android.isKotlin, isTrue);
       }, overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-          FlutterProjectFactory: () => flutterProjectFactory,
+        FileSystem: () => fs,
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
       });
     });
 
