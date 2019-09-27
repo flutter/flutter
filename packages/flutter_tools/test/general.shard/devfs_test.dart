@@ -178,7 +178,6 @@ void main() {
     testUsingContext('reports unsuccessful compile when errors are returned', () async {
       devFS = DevFS(vmService, 'test', tempDir);
       await devFS.create();
-      final DateTime previousCompile = devFS.lastCompiled;
 
       final RealMockResidentCompiler residentCompiler = RealMockResidentCompiler();
       when(residentCompiler.recompile(
@@ -198,7 +197,6 @@ void main() {
       );
 
       expect(report.success, false);
-      expect(devFS.lastCompiled, previousCompile);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
