@@ -360,7 +360,7 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
     return _RenderCupertinoDialog(
       dividerThickness: _kDividerThickness / MediaQuery.of(context).devicePixelRatio,
       isInAccessibilityMode: _isInAccessibilityMode(context),
-      dividerColor: CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).separator, context),
+      dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
     );
   }
 
@@ -368,7 +368,7 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderCupertinoDialog renderObject) {
     renderObject
       ..isInAccessibilityMode = _isInAccessibilityMode(context)
-      ..dividerColor = CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).separator, context);
+      ..dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context);
   }
 
   @override
@@ -858,7 +858,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
           ),
           child: DefaultTextStyle(
             style: _kCupertinoDialogTitleStyle.copyWith(
-              color: CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).label, context),
+              color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
             ),
             textAlign: TextAlign.center,
             child: title,
@@ -874,7 +874,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
           ),
           child: DefaultTextStyle(
             style: _kCupertinoDialogContentStyle.copyWith(
-              color: CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).label, context),
+              color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
             ),
             textAlign: TextAlign.center,
             child: content,
@@ -1158,7 +1158,7 @@ class CupertinoDialogAction extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle style = _kCupertinoDialogActionStyle.copyWith(
       color: CupertinoDynamicColor.resolve(
-        isDestructiveAction ?  CupertinoSystemColors.of(context).systemRed : CupertinoSystemColors.of(context).systemBlue,
+        isDestructiveAction ?  CupertinoColors.systemRed : CupertinoColors.systemBlue,
         context,
       ),
     );
@@ -1233,7 +1233,7 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
       dividerThickness: _dividerThickness,
       dialogColor: CupertinoDynamicColor.resolve(_kDialogColor, context),
       dialogPressedColor: CupertinoDynamicColor.resolve(_kDialogPressedColor, context),
-      dividerColor: CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).separator, context),
+      dividerColor: CupertinoDynamicColor.resolve(CupertinoColors.separator, context),
     );
   }
 
@@ -1246,7 +1246,7 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
       ..dividerThickness = _dividerThickness
       ..dialogColor = CupertinoDynamicColor.resolve(_kDialogColor, context)
       ..dialogPressedColor = CupertinoDynamicColor.resolve(_kDialogPressedColor, context)
-      ..dividerColor = CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).separator, context);
+      ..dividerColor = CupertinoDynamicColor.resolve(CupertinoColors.separator, context);
   }
 }
 
@@ -1339,7 +1339,7 @@ class _RenderCupertinoDialogActions extends RenderBox
   final Paint _pressedButtonBackgroundPaint;
   set dialogPressedColor(Color value) {
     if (value == _pressedButtonBackgroundPaint.color)
-    return;
+      return;
 
     _pressedButtonBackgroundPaint.color = value;
     markNeedsPaint();
@@ -1348,7 +1348,7 @@ class _RenderCupertinoDialogActions extends RenderBox
   final Paint _dividerPaint;
   set dividerColor(Color value) {
     if (value == _dividerPaint.color)
-    return;
+      return;
 
     _dividerPaint.color = value;
     markNeedsPaint();

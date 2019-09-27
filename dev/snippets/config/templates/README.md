@@ -101,6 +101,11 @@ follows:
   `stateful_widget_scaffold`, except that it wraps the stateful widget with a
   `Scaffold` _and_ a `Center`.
 
+- [`stateful_widget_scaffold_center_freeform_state`](stateful_widget_scaffold_center_freeform_state.tmpl) :
+  Similar to `stateful_widget_scaffold_center` except that the code block has
+  to contain the entire state class defined as:
+  `class _MyStatefulWidgetState extends State<MyStatefulWidget>`
+
 - [`stateless_widget_scaffold`](stateless_widget_scaffold.tmpl) : Similar to
   `stateless_widget_material`, except that it wraps the stateless widget with a
   `Scaffold`.

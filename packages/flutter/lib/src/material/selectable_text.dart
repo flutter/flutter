@@ -440,7 +440,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       );
     }
     if (_effectiveFocusNode.hasFocus && _controller.selection.isCollapsed) {
-        _showSelectionHandles = false;
+      _showSelectionHandles = false;
     }
   }
 

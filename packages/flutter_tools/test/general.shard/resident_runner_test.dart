@@ -348,10 +348,10 @@ void main() {
   test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockDevice.takeScreenshot(any))
-        .thenAnswer((Invocation invocation) async {
-      final File file = invocation.positionalArguments.first;
-      file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
-    });
+      .thenAnswer((Invocation invocation) async {
+        final File file = invocation.positionalArguments.first;
+        file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
+      });
     final BufferLogger bufferLogger = context.get<Logger>();
 
     await residentRunner.screenshot(mockFlutterDevice);
@@ -410,10 +410,10 @@ void main() {
     );
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockDevice.takeScreenshot(any))
-        .thenAnswer((Invocation invocation) async {
-      final File file = invocation.positionalArguments.first;
-      file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
-    });
+      .thenAnswer((Invocation invocation) async {
+        final File file = invocation.positionalArguments.first;
+        file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
+      });
     final BufferLogger bufferLogger = context.get<Logger>();
 
     await residentRunner.screenshot(mockFlutterDevice);

@@ -871,7 +871,7 @@ class _TappableLabel {
 }
 
 class _DialPainter extends CustomPainter {
-  const _DialPainter({
+  _DialPainter({
     @required this.primaryOuterLabels,
     @required this.primaryInnerLabels,
     @required this.secondaryOuterLabels,
@@ -882,7 +882,7 @@ class _DialPainter extends CustomPainter {
     @required this.activeRing,
     @required this.textDirection,
     @required this.selectedValue,
-  });
+  }) : super(repaint: PaintingBinding.instance.systemFonts);
 
   final List<_TappableLabel> primaryOuterLabels;
   final List<_TappableLabel> primaryInnerLabels;

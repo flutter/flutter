@@ -230,7 +230,7 @@ Future<ProcessResult> _runFlutterTest(
     }
   } else {
     // Test just a specific test file.
-     testPath = fs.path.join(testDirectory, '${testName}_test.dart');
+    testPath = fs.path.join(testDirectory, '${testName}_test.dart');
     final File testFile = fs.file(testPath);
     if (!testFile.existsSync()) {
       fail('missing test file: $testFile');

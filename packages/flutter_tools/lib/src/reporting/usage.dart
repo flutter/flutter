@@ -53,6 +53,8 @@ enum CustomDimensions {
   commandBuildApkSplitPerAbi, // cd40
   commandBuildAppBundleTargetPlatform, // cd41
   commandBuildAppBundleBuildMode, // cd42
+  buildEventError,  // cd43
+  commandResultEventMaxRss,  // cd44
 }
 
 String cdKey(CustomDimensions cd) => 'cd${cd.index + 1}';

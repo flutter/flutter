@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:archive/archive.dart';
 import 'package:meta/meta.dart';
 
 import '../asset.dart';
@@ -48,9 +49,23 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
         flutterProject.manifest.appName,
         '${fs.path.withoutExtension(target)}_web_entrypoint.dart.js',
       );
+      // Check for deferred import outputs.
+      final File dart2jsArchive = fs.file(fs.path.join(
+        flutterProject.dartTool.path,
+        'build',
+        'flutter_web',
+        '${flutterProject.manifest.appName}',
+        '${fs.path.withoutExtension(target)}_web_entrypoint.dart.js.tar.gz'),
+      );
       fs.file(outputPath).copySync(fs.path.join(outputDir.path, 'main.dart.js'));
       fs.file('$outputPath.map').copySync(fs.path.join(outputDir.path, 'main.dart.js.map'));
       flutterProject.web.indexFile.copySync(fs.path.join(outputDir.path, 'index.html'));
+      if (dart2jsArchive.existsSync()) {
+        final Archive archive = TarDecoder().decodeBytes(dart2jsArchive.readAsBytesSync());
+        for (ArchiveFile file in archive.files) {
+          outputDir.childFile(file.name).writeAsBytesSync(file.content);
+        }
+      }
     }
   } catch (err) {
     printError(err.toString());

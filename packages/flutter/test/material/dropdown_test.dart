@@ -1685,4 +1685,102 @@ void main() {
     verifyPaintedShadow(customPaintTwo, 24);
     debugDisableShadows = true;
   });
+
+  testWidgets('Variable size and oversized menu items', (WidgetTester tester) async {
+    final List<double> itemHeights = <double>[30, 40, 50, 60];
+    double dropdownValue = itemHeights[0];
+
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownButton<double>(
+                  onChanged: (double value) {
+                    setState(() { dropdownValue = value; });
+                  },
+                  value: dropdownValue,
+                  items: itemHeights.map<DropdownMenuItem<double>>((double value) {
+                    return DropdownMenuItem<double>(
+                      key: ValueKey<double>(value),
+                      value: value,
+                      child: Center(
+                        child: Container(
+                          width: 100,
+                          height: value,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    final Finder dropdownIcon = find.byType(Icon);
+    final Finder item30 = find.byKey(const ValueKey<double>(30));
+    final Finder item40 = find.byKey(const ValueKey<double>(40));
+    final Finder item50 = find.byKey(const ValueKey<double>(50));
+    final Finder item60 = find.byKey(const ValueKey<double>(60));
+
+    // Only the DropdownButton is visible. It contains the selected item
+    // and a dropdown arrow icon.
+    await tester.pumpWidget(buildFrame());
+    expect(dropdownIcon, findsOneWidget);
+    expect(item30, findsOneWidget);
+
+    // All menu items have a minimum height of 48. The centers of the
+    // dropdown icon and the selected menu item are vertically aligned
+    // and horizontally adjacent.
+    expect(tester.getSize(item30), const Size(100, 48));
+    expect(tester.getCenter(item30).dy, tester.getCenter(dropdownIcon).dy);
+    expect(tester.getTopRight(item30).dx, tester.getTopLeft(dropdownIcon).dx);
+
+    // Show the popup menu.
+    await tester.tap(item30);
+    await tester.pumpAndSettle();
+
+    // The Each item appears twice, once in the menu and once
+    // in the dropdown button's IndexedStack.
+    expect(item30.evaluate().length, 2);
+    expect(item40.evaluate().length, 2);
+    expect(item50.evaluate().length, 2);
+    expect(item60.evaluate().length, 2);
+
+    // Verify that the items have the expected sizes. The width of the items
+    // that appear in the menu is padded by 16 on the left and right.
+    expect(tester.getSize(item30.first), const Size(100, 48));
+    expect(tester.getSize(item40.first), const Size(100, 48));
+    expect(tester.getSize(item50.first), const Size(100, 50));
+    expect(tester.getSize(item60.first), const Size(100, 60));
+    expect(tester.getSize(item30.last), const Size(132, 48));
+    expect(tester.getSize(item40.last), const Size(132, 48));
+    expect(tester.getSize(item50.last), const Size(132, 50));
+    expect(tester.getSize(item60.last), const Size(132, 60));
+
+    // The vertical center of the selectedItem (item30) should
+    // line up with its button counterpart.
+    expect(tester.getCenter(item30.first).dy, tester.getCenter(item30.last).dy);
+
+    // The menu items should be arranged in a column.
+    expect(tester.getBottomLeft(item30.last), tester.getTopLeft(item40.last));
+    expect(tester.getBottomLeft(item40.last), tester.getTopLeft(item50.last));
+    expect(tester.getBottomLeft(item50.last), tester.getTopLeft(item60.last));
+
+    // Dismiss the menu by selecting item40 and then show the menu again.
+    await tester.tap(item40.last);
+    await tester.pumpAndSettle();
+    expect(dropdownValue, 40);
+    await tester.tap(item40.first);
+    await tester.pumpAndSettle();
+
+    // The vertical center of the selectedItem (item40) should
+    // line up with its button counterpart.
+    expect(tester.getCenter(item40.first).dy, tester.getCenter(item40.last).dy);
+  });
 }

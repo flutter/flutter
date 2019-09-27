@@ -5852,7 +5852,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   final bool opaque;
 
   @override
-  _ListenerElement createElement() => _ListenerElement(this);
+  _MouseRegionElement createElement() => _MouseRegionElement(this);
 
   @override
   RenderMouseRegion createRenderObject(BuildContext context) {
@@ -5888,20 +5888,20 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   }
 }
 
-class _ListenerElement extends SingleChildRenderObjectElement {
-  _ListenerElement(SingleChildRenderObjectWidget widget) : super(widget);
+class _MouseRegionElement extends SingleChildRenderObjectElement {
+  _MouseRegionElement(SingleChildRenderObjectWidget widget) : super(widget);
 
   @override
   void activate() {
     super.activate();
-    final RenderMouseRegion renderMouseListener = renderObject;
-    renderMouseListener.postActivate();
+    final RenderMouseRegion renderMouseRegion = renderObject;
+    renderMouseRegion.postActivate();
   }
 
   @override
   void deactivate() {
-    final RenderMouseRegion renderMouseListener = renderObject;
-    renderMouseListener.preDeactivate();
+    final RenderMouseRegion renderMouseRegion = renderObject;
+    renderMouseRegion.preDeactivate();
     super.deactivate();
   }
 }

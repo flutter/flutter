@@ -58,7 +58,7 @@ void main() {
               events.add(event);
             },
             onPointerUp: (PointerUpEvent event) {
-            events.add(event);
+              events.add(event);
             },
             onPointerMove: (PointerMoveEvent event) {
               events.add(event);
