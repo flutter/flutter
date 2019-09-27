@@ -6,12 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:args/args.dart' as argslib;
 import 'package:path/path.dart' as path;
-import 'package:meta/meta.dart';
-
-import 'localizations_utils.dart';
-
 
 const String defaultFileTemplate = '''
 import 'dart:async';
@@ -167,7 +162,7 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
   ];
 
   for(String pluralKey in pluralIds.keys) {
-    final RegExp expRE = RegExp('(${pluralKey}){([^}]+)}');
+    final RegExp expRE = RegExp('($pluralKey){([^}]+)}');
     final RegExpMatch match = expRE.firstMatch(message);
     if (match.groupCount == 2) {
       String argValue = match.group(2);
@@ -188,7 +183,7 @@ Future<void> main(List<String> args) async {
   final Directory l10nDirectory = Directory(path.join('lib', 'l10n'));
   final File inputArbFile = File(path.join(l10nDirectory.path, 'demo_en.arb'));
   final File outputFile = File(path.join(l10nDirectory.path, 'demo_localizations.dart'));
-  final String stringsClassName = 'DemoLocalizations';
+  const String stringsClassName = 'DemoLocalizations';
 
   final RegExp arbFilenameRE = RegExp(r'\w+_(\w+)\.arb$');
   final List<String> arbFilenames = <String>[];
