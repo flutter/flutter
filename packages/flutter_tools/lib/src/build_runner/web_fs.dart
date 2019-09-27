@@ -135,7 +135,7 @@ class WebFs {
     _client.startBuild();
     await for (BuildResults results in _client.buildResults) {
       final BuildResult result = results.results.firstWhere((BuildResult result) {
-        return result.target == kBuildTargetName;
+        return result.target == 'web';
       });
       if (result.status == BuildStatus.failed) {
         return false;
@@ -164,7 +164,6 @@ class WebFs {
     final bool hasWebPlugins = findPlugins(flutterProject)
         .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     // Start the build daemon and run an initial build.
-    final Completer<bool> inititalBuild = Completer<bool>();
     final BuildDaemonClient client = await buildDaemonCreator
       .startBuildDaemon(fs.currentDirectory.path,
           release: buildInfo.isRelease,
@@ -179,17 +178,6 @@ class WebFs {
           return results.results
             .firstWhere((BuildResult result) => result.target == kBuildTargetName);
         });
-    client.buildResults.listen((BuildResults buildResults) {
-      final BuildResult result = buildResults.results.firstWhere((BuildResult result) {
-        return result.target == kBuildTargetName;
-      });
-      if (result.status == BuildStatus.failed) {
-        inititalBuild.complete(false);
-      }
-      if (result.status == BuildStatus.succeeded) {
-        inititalBuild.complete(true);
-      }
-    });
     final int daemonAssetPort = buildDaemonCreator.assetServerPort(fs.currentDirectory);
 
     // Initialize the asset bundle.
@@ -261,17 +249,13 @@ class WebFs {
     cascade = cascade.add(assetServer.handle);
     final HttpServer server = await httpMultiServerFactory(hostname ?? _kHostName, hostPort);
     shelf_io.serveRequests(server, cascade.handler);
-    final WebFs webFS = WebFs(
+    return WebFs(
       client,
       server,
       dwds,
       'http://$_kHostName:$hostPort/',
       assetServer,
     );
-    if (!await inititalBuild.future) {
-      throw Exception('Failed to compile for the web.');
-    }
-    return webFS;
   }
 }
 
