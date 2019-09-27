@@ -18,6 +18,11 @@ import 'image_data.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
+
+  DecoderCallback basicDecoder = (Uint8List bytes, {int targetWidth, int targetHeight}) {
+    return PaintingBinding.instance.instantiateImageCodec(bytes, targetWidth: targetWidth, targetHeight: targetHeight);
+  };
+
   group(ImageProvider, () {
     setUpAll(() {
       TestRenderingFlutterBinding(); // initializes the imageCache
@@ -46,7 +51,7 @@ void main() {
         final Uint8List bytes = Uint8List.fromList(kTransparentImage);
         final MemoryImage imageProvider = MemoryImage(bytes);
         final ImageStreamCompleter cacheStream = otherCache.putIfAbsent(
-          imageProvider, () => imageProvider.load(imageProvider),
+          imageProvider, () => imageProvider.load(imageProvider, basicDecoder),
         );
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
         final Completer<void> completer = Completer<void>();
@@ -195,7 +200,7 @@ void main() {
 
         Future<void> loadNetworkImage() async {
           final NetworkImage networkImage = NetworkImage(nonconst('foo'));
-          final ImageStreamCompleter completer = networkImage.load(networkImage);
+          final ImageStreamCompleter completer = networkImage.load(networkImage, basicDecoder);
           completer.addListener(ImageStreamListener(
             (ImageInfo image, bool synchronousCall) { },
             onError: (dynamic error, StackTrace stackTrace) {
@@ -300,8 +305,8 @@ void main() {
     final Size rawImageSize = await _resolveAndGetSize(imageProvider);
     expect(rawImageSize, const Size(1, 1));
 
-    final ResizedImage resizedImage = ResizedImage(MemoryImage(bytes));
     const Size resizeDims = Size(14, 7);
+    final ResizedImage resizedImage = ResizedImage(MemoryImage(bytes), 14, 7);
     final ImageConfiguration resizeConfig = ImageConfiguration.empty.copyWith(size: resizeDims);
     final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
     expect(resizedImageSize, resizeDims);
@@ -313,7 +318,7 @@ void main() {
     final Size rawImageSize = await _resolveAndGetSize(imageProvider);
     expect(rawImageSize, const Size(1, 1));
 
-    final ResizedImage resizedImage = ResizedImage(MemoryImage(bytes));
+    final ResizedImage resizedImage = ResizedImage(MemoryImage(bytes), null, null);
     final Size resizedImageSize = await _resolveAndGetSize(resizedImage);
     expect(resizedImageSize, const Size(1, 1));
   });

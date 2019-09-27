@@ -76,11 +76,8 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   }) {
     return ui.instantiateImageCodec(
       list,
-      // decodedCacheRatioCap: decodedCacheRatioCap, // ignore: deprecated_member_use_from_same_package
       targetWidth: targetWidth ?? ui.kDoNotResizeDimension,
-      // targetWidth: targetWidth ?? -1,
       targetHeight: targetHeight ?? ui.kDoNotResizeDimension,
-      // targetHeight: targetHeight ?? -1,
     );
   }
 
