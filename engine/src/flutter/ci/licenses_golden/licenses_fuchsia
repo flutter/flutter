@@ -1,4 +1,4 @@
-Signature: d451f00ba36583b1d8fcde0571d6fb5a
+Signature: 847076da7bd70f2090c34f0362f8640a
 
 UNUSED LICENSES:
 
@@ -464,6 +464,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2.hal/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castauth/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castconfig/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/meta.json
@@ -1244,6 +1245,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/stream.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castauth/cast_auth.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castauth/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castconfig/cast_config.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castconfig/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/cast_setup.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/cast_system_info.fidl
@@ -1342,6 +1345,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/heap.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/secure_mem.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/view.fidl
@@ -2005,6 +2009,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2.hal/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castauth/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castconfig/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/meta.json
