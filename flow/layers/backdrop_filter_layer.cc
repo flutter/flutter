@@ -18,7 +18,7 @@ void BackdropFilterLayer::Paint(PaintContext& context) const {
   Layer::AutoSaveLayer save = Layer::AutoSaveLayer::Create(
       context,
       SkCanvas::SaveLayerRec{&paint_bounds(), nullptr, filter_.get(), 0});
-  ContainerLayer::Paint(context);
+  PaintChildren(context);
 }
 
 }  // namespace flutter

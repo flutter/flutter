@@ -15,20 +15,30 @@ ClipRectLayer::~ClipRectLayer() = default;
 
 void ClipRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   SkRect previous_cull_rect = context->cull_rect;
-  SkRect clip_rect_bounds = clip_rect_;
-  if (context->cull_rect.intersect(clip_rect_bounds)) {
-    context->mutators_stack.PushClipRect(clip_rect_bounds);
-    ContainerLayer::Preroll(context, matrix);
+  if (context->cull_rect.intersect(clip_rect_)) {
+    context->mutators_stack.PushClipRect(clip_rect_);
+    SkRect child_paint_bounds = SkRect::MakeEmpty();
+    PrerollChildren(context, matrix, &child_paint_bounds);
 
-    if (clip_rect_bounds.intersect(paint_bounds())) {
-      set_paint_bounds(clip_rect_bounds);
-    } else {
-      set_paint_bounds(SkRect::MakeEmpty());
+    if (child_paint_bounds.intersect(clip_rect_)) {
+      set_paint_bounds(child_paint_bounds);
     }
     context->mutators_stack.Pop();
   }
   context->cull_rect = previous_cull_rect;
 }
+
+#if defined(OS_FUCHSIA)
+
+void ClipRectLayer::UpdateScene(SceneUpdateContext& context) {
+  FML_DCHECK(needs_system_composite());
+
+  // TODO(liyuqian): respect clip_behavior_
+  SceneUpdateContext::Clip clip(context, clip_rect_);
+  UpdateSceneChildren(context);
+}
+
+#endif  // defined(OS_FUCHSIA)
 
 void ClipRectLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ClipRectLayer::Paint");
@@ -41,21 +51,10 @@ void ClipRectLayer::Paint(PaintContext& context) const {
   if (clip_behavior_ == Clip::antiAliasWithSaveLayer) {
     context.internal_nodes_canvas->saveLayer(clip_rect_, nullptr);
   }
-  ContainerLayer::Paint(context);
+  PaintChildren(context);
   if (clip_behavior_ == Clip::antiAliasWithSaveLayer) {
     context.internal_nodes_canvas->restore();
   }
-}
-
-void ClipRectLayer::UpdateScene(SceneUpdateContext& context) {
-#if defined(OS_FUCHSIA)
-  FML_DCHECK(needs_system_composite());
-
-  // TODO(liyuqian): respect clip_behavior_
-  SceneUpdateContext::Clip clip(context, clip_rect_);
-
-  ContainerLayer::UpdateScene(context);
-#endif  // defined(OS_FUCHSIA)
 }
 
 }  // namespace flutter

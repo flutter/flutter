@@ -4,91 +4,62 @@
 
 #include "flutter/flow/layers/opacity_layer.h"
 
+#include "flutter/flow/layers/transform_layer.h"
+
 namespace flutter {
 
-#if defined(OS_FUCHSIA)
-constexpr bool kRenderOpacityUsingSystemCompositor = true;
-#else
-constexpr bool kRenderOpacityUsingSystemCompositor = false;
-#endif
-constexpr float kOpacityElevationWhenUsingSystemCompositor = 0.01f;
-
 OpacityLayer::OpacityLayer(int alpha, const SkPoint& offset)
-    : ContainerLayer(true), alpha_(alpha), offset_(offset) {
-#if !defined(OS_FUCHSIA)
-  static_assert(!kRenderOpacityUsingSystemCompositor,
-                "Delegation of OpacityLayer to the system compositor is only "
-                "allowed on Fuchsia");
-#endif
+    : alpha_(alpha), offset_(offset) {}
 
-  if (kRenderOpacityUsingSystemCompositor) {
-    set_elevation(kOpacityElevationWhenUsingSystemCompositor);
+OpacityLayer::~OpacityLayer() = default;
+
+void OpacityLayer::EnsureSingleChild() {
+  FML_DCHECK(layers().size() > 0);  // OpacityLayer should never be a leaf
+
+  if (layers().size() == 1) {
+    return;
   }
+
+  // Be careful: SkMatrix's default constructor doesn't initialize the matrix to
+  // identity. Hence we have to explicitly call SkMatrix::setIdentity.
+  SkMatrix identity;
+  identity.setIdentity();
+  auto new_child = std::make_shared<flutter::TransformLayer>(identity);
+
+  for (auto& child : layers()) {
+    new_child->Add(child);
+  }
+  ClearChildren();
+  Add(new_child);
 }
 
 void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+  EnsureSingleChild();
   SkMatrix child_matrix = matrix;
-  float parent_is_opaque = context->is_opaque;
   child_matrix.postTranslate(offset_.fX, offset_.fY);
   context->mutators_stack.PushTransform(
       SkMatrix::MakeTrans(offset_.fX, offset_.fY));
   context->mutators_stack.PushOpacity(alpha_);
-  context->is_opaque = parent_is_opaque && (alpha_ == 255);
   ContainerLayer::Preroll(context, child_matrix);
-  context->is_opaque = parent_is_opaque;
   context->mutators_stack.Pop();
   context->mutators_stack.Pop();
-
-  // When using the system compositor, do not include the offset or use the
-  // raster cache, since we are rendering as a separate piece of geometry.
-  if (kRenderOpacityUsingSystemCompositor) {
-    set_needs_system_composite(true);
-    set_frame_properties(SkRRect::MakeRect(paint_bounds()), SK_ColorTRANSPARENT,
-                         alpha_ / 255.0f);
-
-    // If the frame behind us is opaque, don't punch a hole in it for group
-    // opacity.
-    if (context->is_opaque) {
-      set_paint_bounds(SkRect());
-    }
-  } else {
-    set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
-    if (context->raster_cache &&
-        SkRect::Intersects(context->cull_rect, paint_bounds())) {
-      Layer* child = layers()[0].get();
-      SkMatrix ctm = child_matrix;
+  set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
+  // See |EnsureSingleChild|.
+  FML_DCHECK(layers().size() == 1);
+  if (context->view_embedder == nullptr && context->raster_cache &&
+      SkRect::Intersects(context->cull_rect, paint_bounds())) {
+    Layer* child = layers()[0].get();
+    SkMatrix ctm = child_matrix;
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
-      ctm = RasterCache::GetIntegralTransCTM(ctm);
+    ctm = RasterCache::GetIntegralTransCTM(ctm);
 #endif
-      context->raster_cache->Prepare(context, child, ctm);
-    }
+    context->raster_cache->Prepare(context, child, ctm);
   }
 }
 
 void OpacityLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "OpacityLayer::Paint");
   FML_DCHECK(needs_painting());
-
-  // The compositor will paint this layer (which is |Sk_ColorWHITE| scaled by
-  // opacity) via the model color on |SceneUpdateContext::Frame|.
-  //
-  // The child layers will be painted into the texture used by the Frame, so
-  // painting them here would actually cause them to be painted on the display
-  // twice -- once into the current canvas (which may be inside of another
-  // Frame) and once into the Frame's texture (which is then drawn on top of the
-  // current canvas).
-  if (kRenderOpacityUsingSystemCompositor) {
-#if defined(OS_FUCHSIA)
-    // On Fuchsia, If we are being rendered into our own frame using the system
-    // compositor, then it is neccesary to "punch a hole" in the canvas/frame
-    // behind us so that single-pass group opacity looks correct.
-    SkPaint paint;
-    paint.setColor(SK_ColorTRANSPARENT);
-    paint.setBlendMode(SkBlendMode::kSrc);
-    context.leaf_nodes_canvas->drawRect(paint_bounds(), paint);
-#endif
-    return;
-  }
 
   SkPaint paint;
   paint.setAlpha(alpha_);
@@ -100,6 +71,9 @@ void OpacityLayer::Paint(PaintContext& context) const {
   context.internal_nodes_canvas->setMatrix(RasterCache::GetIntegralTransCTM(
       context.leaf_nodes_canvas->getTotalMatrix()));
 #endif
+
+  // See |EnsureSingleChild|.
+  FML_DCHECK(layers().size() == 1);
 
   // Embedded platform views are changing the canvas in the middle of the paint
   // traversal. To make sure we paint on the right canvas, when the embedded
@@ -131,16 +105,7 @@ void OpacityLayer::Paint(PaintContext& context) const {
 
   Layer::AutoSaveLayer save_layer =
       Layer::AutoSaveLayer::Create(context, saveLayerBounds, &paint);
-  ContainerLayer::Paint(context);
-}
-
-void OpacityLayer::UpdateScene(SceneUpdateContext& context) {
-#if defined(OS_FUCHSIA)
-  SceneUpdateContext::Transform transform(
-      context, SkMatrix::MakeTrans(offset_.fX, offset_.fY));
-
-  ContainerLayer::UpdateScene(context);
-#endif
+  PaintChildren(context);
 }
 
 }  // namespace flutter

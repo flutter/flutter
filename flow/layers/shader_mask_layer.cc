@@ -19,7 +19,7 @@ void ShaderMaskLayer::Paint(PaintContext& context) const {
 
   Layer::AutoSaveLayer save =
       Layer::AutoSaveLayer::Create(context, paint_bounds(), nullptr);
-  ContainerLayer::Paint(context);
+  PaintChildren(context);
 
   SkPaint paint;
   paint.setBlendMode(blend_mode_);

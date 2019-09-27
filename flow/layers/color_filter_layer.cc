@@ -20,7 +20,7 @@ void ColorFilterLayer::Paint(PaintContext& context) const {
 
   Layer::AutoSaveLayer save =
       Layer::AutoSaveLayer::Create(context, paint_bounds(), &paint);
-  ContainerLayer::Paint(context);
+  PaintChildren(context);
 }
 
 }  // namespace flutter

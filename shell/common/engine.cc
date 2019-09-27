@@ -427,12 +427,12 @@ void Engine::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
   if (!layer_tree)
     return;
 
-  // Ensure frame dimensions are sane.
-  if (layer_tree->frame_size().isEmpty() ||
-      layer_tree->frame_physical_depth() <= 0.0f ||
-      layer_tree->frame_device_pixel_ratio() <= 0.0f)
+  SkISize frame_size = SkISize::Make(viewport_metrics_.physical_width,
+                                     viewport_metrics_.physical_height);
+  if (frame_size.isEmpty())
     return;
 
+  layer_tree->set_frame_size(frame_size);
   animator_->Render(std::move(layer_tree));
 }
 

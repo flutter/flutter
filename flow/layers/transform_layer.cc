@@ -40,13 +40,26 @@ void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
     context->cull_rect = kGiantRect;
   }
 
-  ContainerLayer::Preroll(context, child_matrix);
+  SkRect child_paint_bounds = SkRect::MakeEmpty();
+  PrerollChildren(context, child_matrix, &child_paint_bounds);
 
-  transform_.mapRect(paint_bounds());
+  transform_.mapRect(&child_paint_bounds);
+  set_paint_bounds(child_paint_bounds);
 
   context->cull_rect = previous_cull_rect;
   context->mutators_stack.Pop();
 }
+
+#if defined(OS_FUCHSIA)
+
+void TransformLayer::UpdateScene(SceneUpdateContext& context) {
+  FML_DCHECK(needs_system_composite());
+
+  SceneUpdateContext::Transform transform(context, transform_);
+  UpdateSceneChildren(context);
+}
+
+#endif  // defined(OS_FUCHSIA)
 
 void TransformLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "TransformLayer::Paint");
@@ -55,17 +68,7 @@ void TransformLayer::Paint(PaintContext& context) const {
   SkAutoCanvasRestore save(context.internal_nodes_canvas, true);
   context.internal_nodes_canvas->concat(transform_);
 
-  ContainerLayer::Paint(context);
-}
-
-void TransformLayer::UpdateScene(SceneUpdateContext& context) {
-#if defined(OS_FUCHSIA)
-  FML_DCHECK(needs_system_composite());
-
-  SceneUpdateContext::Transform transform(context, transform_);
-
-  ContainerLayer::UpdateScene(context);
-#endif  // defined(OS_FUCHSIA)
+  PaintChildren(context);
 }
 
 }  // namespace flutter
