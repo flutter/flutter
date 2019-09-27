@@ -5,6 +5,7 @@
 .DS_Store
 .ccls-cache
 .classpath
+.clangd/
 .cproject
 .dart_tool
 .gdb_history
