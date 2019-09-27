@@ -19,6 +19,12 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
+ * The dart entrypoint that is associated with `main()`.  This is to be used as an argument to the
+ * `runWithEntrypoint*` methods.
+ */
+extern NSString* const FlutterDefaultDartEntrypoint;
+
+/**
  * The FlutterEngine class coordinates a single instance of execution for a
  * `FlutterDartProject`.  It may have zero or one `FlutterViewController` at a
  * time, which can be specified via `-setViewController:`.
@@ -41,6 +47,26 @@ NS_ASSUME_NONNULL_BEGIN
  */
 FLUTTER_EXPORT
 @interface FlutterEngine : NSObject <FlutterTextureRegistry, FlutterPluginRegistry>
+
+/**
+ * Initialize this FlutterEngine.
+ *
+ * The engine will execute the project located in the bundle with the identifier
+ * "io.flutter.flutter.app" (the default for Flutter projects).
+ *
+ * A newly initialized engine will not run until either `-runWithEntrypoint:` or
+ * `-runWithEntrypoint:libraryURI:` is called.
+ *
+ * FlutterEngine created with this method will have allowHeadlessExecution set to `YES`.
+ * This means that the engine will continue to run regardless of whether a `FlutterViewController`
+ * is attached to it or not, until `-destroyContext:` is called or the process finishes.
+ *
+ * @param labelPrefix The label prefix used to identify threads for this instance. Should
+ *   be unique across FlutterEngine instances, and is used in instrumentation to label
+ *   the threads used by this FlutterEngine.
+ */
+- (instancetype)initWithName:(NSString*)labelPrefix;
+
 /**
  * Initialize this FlutterEngine with a `FlutterDartProject`.
  *
@@ -93,16 +119,27 @@ FLUTTER_EXPORT
 
 /**
  * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that
+ * contains `main()`), using `main()` as the entrypoint (the default for Flutter projects).
+ *
+ * The first call to this method will create a new Isolate. Subsequent calls will return
+ * immediately.
+ *
+ * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
+ */
+- (BOOL)run;
+
+/**
+ * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that
  * contains `main()`).
  *
  * The first call to this method will create a new Isolate. Subsequent calls will return
  * immediately.
  *
  * @param entrypoint The name of a top-level function from the same Dart
- *   library that contains the app's main() function.  If this is nil, it will
- *   default to `main()`.  If it is not the app's main() function, that function
- *   must be decorated with `@pragma(vm:entry-point)` to ensure the method is not
- *   tree-shaken by the Dart compiler.
+ *   library that contains the app's main() function.  If this is FlutterDefaultDartEntrypoint (or
+ *   nil) it will default to `main()`.  If it is not the app's main() function, that function must
+ *   be decorated with `@pragma(vm:entry-point)` to ensure the method is not tree-shaken by the Dart
+ *   compiler.
  * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
  */
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint;
@@ -114,10 +151,10 @@ FLUTTER_EXPORT
  * The first call to this method will create a new Isolate. Subsequent calls will return
  * immediately.
  *
- * @param entrypoint The name of a top-level function from a Dart library.  If nil, this will
- *   default to `main()`.  If it is not the app's main() function, that function
- *   must be decorated with `@pragma(vm:entry-point)` to ensure the method is not
- *   tree-shaken by the Dart compiler.
+ * @param entrypoint The name of a top-level function from a Dart library.  If this is
+ *   FlutterDefaultDartEntrypoint (or nil); this will default to `main()`.  If it is not the app's
+ *   main() function, that function must be decorated with `@pragma(vm:entry-point)` to ensure the
+ *   method is not tree-shaken by the Dart compiler.
  * @param uri The URI of the Dart library which contains the entrypoint method.  IF nil,
  *   this will default to the same library as the `main()` function in the Dart program.
  * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
