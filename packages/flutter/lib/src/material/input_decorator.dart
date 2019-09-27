@@ -2449,7 +2449,7 @@ class InputDecoration {
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the helper.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [errorMaxLines], the equivalent but for the [errorText].
@@ -2504,7 +2504,7 @@ class InputDecoration {
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [helperMaxLines], the equivalent but for the [helperText].
@@ -3282,7 +3282,7 @@ class InputDecorationTheme extends Diagnosticable {
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the helper.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [errorMaxLines], the equivalent but for the [errorText].
@@ -3311,7 +3311,7 @@ class InputDecorationTheme extends Diagnosticable {
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [helperMaxLines], the equivalent but for the [helperText].
