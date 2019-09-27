@@ -20,7 +20,7 @@ Future<void> main() async {
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
+          ...flutterAssets,
           'classes.dex',
           'assets/flutter_assets/isolate_snapshot_data',
           'assets/flutter_assets/kernel_blob.bin',
@@ -47,7 +47,7 @@ Future<void> main() async {
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
+          ...flutterAssets,
           'classes.dex',
           'assets/flutter_assets/isolate_snapshot_data',
           'assets/flutter_assets/kernel_blob.bin',
@@ -73,7 +73,7 @@ Future<void> main() async {
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
+          ...flutterAssets,
           'classes.dex',
           'assets/flutter_assets/isolate_snapshot_data',
           'assets/flutter_assets/kernel_blob.bin',
@@ -98,7 +98,7 @@ Future<void> main() async {
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
+          ...flutterAssets,
           'classes.dex',
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
@@ -121,7 +121,7 @@ Future<void> main() async {
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
+          ...flutterAssets,
           'classes.dex',
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
