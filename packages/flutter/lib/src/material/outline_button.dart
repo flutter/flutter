@@ -28,7 +28,7 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 /// wide grey rounded rectangle that does not change when the button is
 /// pressed or disabled. By default the button's background is transparent.
 ///
-/// If the [onPressed] callback is null, then the button will be disabled and by
+/// If [onPressed] or [onLongPress] callbacks are null, then the button will be disabled and by
 /// default will resemble a flat button in the [disabledColor].
 ///
 /// The button's [highlightElevation], which defines the size of the
@@ -320,7 +320,7 @@ class _OutlineButton extends StatefulWidget {
   final bool autofocus;
   final Widget child;
 
-  bool get enabled => onPressed != null;
+  bool get enabled => onPressed != null || onLongPress != null;
 
   @override
   _OutlineButtonState createState() => _OutlineButtonState();

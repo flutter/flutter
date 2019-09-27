@@ -21,8 +21,8 @@ import 'theme_data.dart';
 ///
 /// The button's size will expand to fit the child widget, if necessary.
 ///
-/// MaterialButtons whose [onPressed] handler is null will be disabled. To have
-/// an enabled button, make sure to pass a non-null value for onPressed.
+/// MaterialButtons whose [onPressed] and [onLongPress] handlers are null will be disabled. To have
+/// an enabled button, make sure to pass a non-null value for [onPressed] or [onLongPress].
 ///
 /// Rather than using this class directly, consider using [FlatButton],
 /// [OutlineButton], or [RaisedButton], which configure this class with
@@ -89,10 +89,12 @@ class MaterialButton extends StatelessWidget {
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
-  /// If this is set to null, the button will be disabled.
+  /// If this and [onLongPress] are set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// Called when the button is long-pressed.
+  /// The callback that is called when the button is long-pressed.
+  ///
+  /// If this and [onPressed] are set to null, the button will be disabled.
   final VoidCallback onLongPress;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
@@ -291,8 +293,8 @@ class MaterialButton extends StatelessWidget {
   /// Whether the button is enabled or disabled.
   ///
   /// Buttons are disabled by default. To enable a button, set its [onPressed]
-  /// property to a non-null value.
-  bool get enabled => onPressed != null;
+  /// or [onLongPress] properties to a non-null value.
+  bool get enabled => onPressed != null || onLongPress != null;
 
   /// The internal padding for the button's [child].
   ///

@@ -20,10 +20,10 @@ import 'theme_data.dart';
 /// in long busy lists of content, or in wide spaces. Avoid using raised buttons
 /// on already-raised content such as dialogs or cards.
 ///
-/// If the [onPressed] callback is null, then the button will be disabled and by
+/// If [onPressed] and [onLongPress] callbacks are null, then the button will be disabled and by
 /// default will resemble a flat button in the [disabledColor]. If you are
 /// trying to change the button's [color] and it is not having any effect, check
-/// that you are passing a non-null [onPressed] handler.
+/// that you are passing a non-null [onPressed] or [onLongPress] handler.
 ///
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.

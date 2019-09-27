@@ -29,7 +29,7 @@ import 'theme_data.dart';
 /// interactive, with ink splashes, without also committing to these stylistic
 /// choices, consider using [InkWell] instead.
 ///
-/// If the [onPressed] callback is null, then the button will be disabled,
+/// If [onPressed] or [onLongPress] callbacks are null, then the button will be disabled,
 /// will not react to touch, and will be colored as specified by
 /// the [disabledColor] property instead of the [color] property. If you are
 /// trying to change the button's [color] and it is not having any effect, check
