@@ -178,7 +178,7 @@ void Runner::StartComponent(
         });
       };
 
-  auto thread_application_pair = Application::Create(
+  auto active_application = Application::Create(
       std::move(termination_callback),  // termination callback
       std::move(package),               // application package
       std::move(startup_info),          // startup info
@@ -186,9 +186,8 @@ void Runner::StartComponent(
       std::move(controller)             // controller request
   );
 
-  auto key = thread_application_pair.second.get();
-
-  active_applications_[key] = std::move(thread_application_pair);
+  auto key = active_application.application.get();
+  active_applications_[key] = std::move(active_application);
 }
 
 void Runner::OnApplicationTerminate(const Application* application) {

@@ -18,7 +18,6 @@
 #include "flutter/fml/macros.h"
 #include "lib/fidl/cpp/binding_set.h"
 #include "runtime/dart/utils/vmservice_object.h"
-#include "thread.h"
 
 namespace flutter_runner {
 
@@ -32,17 +31,6 @@ class Runner final : public fuchsia::sys::Runner {
 
  private:
   async::Loop* loop_;
-
-  struct ActiveApplication {
-    std::unique_ptr<Thread> thread;
-    std::unique_ptr<Application> application;
-
-    ActiveApplication(
-        std::pair<std::unique_ptr<Thread>, std::unique_ptr<Application>> pair)
-        : thread(std::move(pair.first)), application(std::move(pair.second)) {}
-
-    ActiveApplication() = default;
-  };
 
   std::unique_ptr<sys::ComponentContext> context_;
   fidl::BindingSet<fuchsia::sys::Runner> active_applications_bindings_;
