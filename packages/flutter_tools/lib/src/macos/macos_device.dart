@@ -4,12 +4,12 @@
 
 import '../application_package.dart';
 import '../base/io.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../desktop.dart';
+import '../desktop_device.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../macos/application_package.dart';
@@ -19,10 +19,9 @@ import 'build_macos.dart';
 import 'macos_workflow.dart';
 
 /// A device that represents a desktop MacOS target.
-class MacOSDevice extends Device {
+class MacOSDevice extends DesktopDevice {
   MacOSDevice() : super(
       'macOS',
-      category: Category.desktop,
       platformType: PlatformType.macos,
       ephemeral: false,
   );
@@ -36,38 +35,11 @@ class MacOSDevice extends Device {
   }
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
-  // Since the host and target devices are the same, no work needs to be done
-  // to install the application.
-  @override
-  Future<bool> installApp(ApplicationPackage app) async => true;
-
-  // Since the host and target devices are the same, no work needs to be done
-  // to install the application.
-  @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async => true;
-
-  // Since the host and target devices are the same, no work needs to be done
-  // to install the application.
-  @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => true;
-
-  @override
-  Future<bool> get isLocalEmulator async => false;
-
-  @override
-  Future<String> get emulatorId async => null;
-
   @override
   bool isSupported() => true;
 
   @override
   String get name => 'macOS';
-
-  @override
-  DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
-
-  @override
-  Future<String> get sdkNameAndVersion async => os.name;
 
   @override
   Future<LaunchResult> startApp(
@@ -119,8 +91,6 @@ class MacOSDevice extends Device {
     }
   }
 
-  // TODO(jonahwilliams): implement using process manager.
-  // currently we rely on killing the isolate taking down the application.
   @override
   Future<bool> stopApp(covariant MacOSApp app) async {
     return killProcess(app.executable(_lastBuiltMode));
@@ -128,11 +98,6 @@ class MacOSDevice extends Device {
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin_x64;
-
-  // Since the host and target devices are the same, no work needs to be done
-  // to uninstall the application.
-  @override
-  Future<bool> uninstallApp(ApplicationPackage app) async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {

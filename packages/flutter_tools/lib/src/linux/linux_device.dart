@@ -4,11 +4,11 @@
 
 import '../application_package.dart';
 import '../base/io.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../desktop.dart';
+import '../desktop_device.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
@@ -18,10 +18,9 @@ import 'build_linux.dart';
 import 'linux_workflow.dart';
 
 /// A device that represents a desktop Linux target.
-class LinuxDevice extends Device {
+class LinuxDevice extends DesktopDevice {
   LinuxDevice() : super(
       'Linux',
-      category: Category.desktop,
       platformType: PlatformType.linux,
       ephemeral: false,
   );
@@ -35,38 +34,11 @@ class LinuxDevice extends Device {
   }
   final DesktopLogReader _logReader = DesktopLogReader();
 
-  // Since the host and target devices are the same, no work needs to be done
-  // to install the application.
-  @override
-  Future<bool> installApp(ApplicationPackage app) async => true;
-
-  // Since the host and target devices are the same, no work needs to be done
-  // to install the application.
-  @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async => true;
-
-  // Since the host and target devices are the same, no work needs to be done
-  // to install the application.
-  @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => true;
-
-  @override
-  Future<bool> get isLocalEmulator async => false;
-
-  @override
-  Future<String> get emulatorId async => null;
-
   @override
   bool isSupported() => true;
 
   @override
   String get name => 'Linux';
-
-  @override
-  DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
-
-  @override
-  Future<String> get sdkNameAndVersion async => os.name;
 
   @override
   Future<LaunchResult> startApp(
@@ -112,11 +84,6 @@ class LinuxDevice extends Device {
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.linux_x64;
-
-  // Since the host and target devices are the same, no work needs to be done
-  // to uninstall the application.
-  @override
-  Future<bool> uninstallApp(ApplicationPackage app) async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
