@@ -37,22 +37,6 @@ class TestIntent extends Intent {
   const TestIntent() : super(TestAction.key);
 }
 
-class DoNothingAction extends Action {
-  const DoNothingAction({
-    @required OnInvokeCallback onInvoke,
-  })  : assert(onInvoke != null),
-        super(key);
-
-  static const LocalKey key = ValueKey<Type>(DoNothingAction);
-
-  @override
-  void invoke(FocusNode node, Intent invocation) {}
-}
-
-class DoNothingIntent extends Intent {
-  const DoNothingIntent() : super(DoNothingAction.key);
-}
-
 class TestShortcutManager extends ShortcutManager {
   TestShortcutManager(this.keys);
 
@@ -143,8 +127,8 @@ void main() {
         LogicalKeyboardKey.keyD,
         LogicalKeyboardKey.keyC,
         LogicalKeyboardKey.keyB,
-        LogicalKeyboardKey.keyA,}
-      );
+        LogicalKeyboardKey.keyA,
+      });
       final Map<LogicalKeySet, String> map = <LogicalKeySet, String>{set1: 'one'};
       expect(set2 == set3, isTrue);
       expect(set2 == set4, isTrue);
@@ -192,10 +176,12 @@ void main() {
       await tester.pumpWidget(
         Actions(
           actions: <LocalKey, ActionFactory>{
-            TestAction.key: () => TestAction(onInvoke: (FocusNode node, Intent intent) {
-              invoked = true;
-              return true;
-            }),
+            TestAction.key: () => TestAction(
+              onInvoke: (FocusNode node, Intent intent) {
+                invoked = true;
+                return true;
+              },
+            ),
           },
           child: Shortcuts(
             manager: testManager,
@@ -228,14 +214,16 @@ void main() {
           },
           child: Actions(
             actions: <LocalKey, ActionFactory>{
-              TestAction.key: () => TestAction(onInvoke: (FocusNode node, Intent intent) {
-                invoked = true;
-                return true;
-              }),
+              TestAction.key: () => TestAction(
+                onInvoke: (FocusNode node, Intent intent) {
+                  invoked = true;
+                  return true;
+                },
+              ),
             },
             child: Shortcuts(
               shortcuts: <LogicalKeySet, Intent>{
-                LogicalKeySet(LogicalKeyboardKey.keyA): const DoNothingIntent(),
+                LogicalKeySet(LogicalKeyboardKey.keyA): Intent.doNothing,
               },
               child: Focus(
                 autofocus: true,
@@ -250,6 +238,46 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
+    });
+    testWidgets('$Shortcuts can disable a shortcut with Intent.doNothing', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
+      final TestShortcutManager testManager = TestShortcutManager(pressedKeys);
+      bool invoked = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Shortcuts(
+            manager: testManager,
+            shortcuts: <LogicalKeySet, Intent>{
+              LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
+            },
+            child: Actions(
+              actions: <LocalKey, ActionFactory>{
+                TestAction.key: () => TestAction(
+                  onInvoke: (FocusNode node, Intent intent) {
+                    invoked = true;
+                    return true;
+                  },
+                ),
+              },
+              child: Shortcuts(
+                shortcuts: <LogicalKeySet, Intent>{
+                  LogicalKeySet(LogicalKeyboardKey.shift): Intent.doNothing,
+                },
+                child: Focus(
+                  autofocus: true,
+                  child: Container(key: containerKey, width: 100, height: 100),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(Shortcuts.of(containerKey.currentContext), isNotNull);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      expect(invoked, isFalse);
+      expect(pressedKeys, isEmpty);
     });
   });
 }
