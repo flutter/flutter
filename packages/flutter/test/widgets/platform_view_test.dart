@@ -836,7 +836,15 @@ void main() {
         ),
       );
 
-      final SemanticsNode semantics =  tester.getSemantics(find.byType(AndroidView));
+      // Find the first _AndroidPlatformView widget inside of the AndroidView so
+      // that it finds the right RenderObject when looking for semantics.
+      final Finder semanticsFinder = find.byWidgetPredicate(
+        (Widget widget) {
+          return widget.runtimeType.toString() == '_AndroidPlatformView';
+        },
+        description: '_AndroidPlatformView widget inside AndroidView',
+      );
+      final SemanticsNode semantics = tester.getSemantics(semanticsFinder.first);
 
       // Platform view has not been created yet, no platformViewId.
       expect(semantics.platformViewId, null);
