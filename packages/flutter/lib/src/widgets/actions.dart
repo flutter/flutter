@@ -94,7 +94,7 @@ abstract class Action extends Diagnosticable {
   /// needed in the action, use [ActionDispatcher.invokeFocusedAction] instead.
   @protected
   @mustCallSuper
-  void invoke(FocusNode node, covariant Intent tag);
+  void invoke(FocusNode node, covariant Intent intent);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -133,7 +133,7 @@ class CallbackAction extends Action {
   final OnInvokeCallback onInvoke;
 
   @override
-  void invoke(FocusNode node, Intent tag) => onInvoke.call(node, tag);
+  void invoke(FocusNode node, Intent intent) => onInvoke.call(node, intent);
 }
 
 /// An action manager that simply invokes the actions given to it.
@@ -366,7 +366,7 @@ class DoNothingAction extends Action {
   static const LocalKey key = ValueKey<Type>(DoNothingAction);
 
   @override
-  void invoke(FocusNode node, Intent invocation) { }
+  void invoke(FocusNode node, Intent intent) { }
 }
 
 /// An [Intent] that can be used to disable [Shortcuts] key bindings defined
