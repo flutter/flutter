@@ -61,7 +61,9 @@ void main() {
       return const Stream<List<int>>.empty();
     });
     when(macosPlatform.isMacOS).thenReturn(true);
+    when(macosPlatform.isWindows).thenReturn(false);
     when(notMacosPlatform.isMacOS).thenReturn(false);
+    when(notMacosPlatform.isWindows).thenReturn(false);
   });
 
   // Sets up the minimal mock project files necessary for macOS builds to succeed.
