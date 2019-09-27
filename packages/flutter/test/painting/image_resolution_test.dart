@@ -115,8 +115,7 @@ void main() {
       }));
     });
 
-    test(
-        'When high-res device and high-res asset not present in bundle then  return main variant', () {
+    test('When high-res device and high-res asset not present in bundle then  return main variant', () {
       const String mainAssetPath = 'assets/normalFolder/normalFile.png';
 
       final Map<String, List<String>> assetBundleMap =

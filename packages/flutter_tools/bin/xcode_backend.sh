@@ -135,7 +135,6 @@ BuildApp() {
   local bitcode_flag=""
   if [[ $ENABLE_BITCODE == "YES" ]]; then
     bitcode_flag="--bitcode"
-    echo "Set Bitcode!"
   fi
 
   if [[ -e "${project_path}/.ios" ]]; then
@@ -143,11 +142,13 @@ BuildApp() {
     mkdir "${derived_dir}/engine"
     RunCommand cp -r -- "${flutter_podspec}" "${derived_dir}/engine"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}/engine"
-    RunCommand find "${derived_dir}/engine/Flutter.framework" -type f -exec chmod a-w "{}" \;
+    # Make headers, plists, and modulemap files read-only to discourage editing.
+    RunCommand find "${derived_dir}/engine/Flutter.framework" -type f \( -name '*.h' -o -name '*.modulemap' -o -name '*.plist' \) -exec chmod a-w "{}" \;
   else
     RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}"
-    RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
+    # Make headers, plists, and modulemap files read-only to discourage editing.
+    RunCommand find "${derived_dir}/Flutter.framework" -type f \( -name '*.h' -o -name '*.modulemap' -o -name '*.plist' \) -exec chmod a-w "{}" \;
   fi
 
   RunCommand pushd "${project_path}" > /dev/null
@@ -239,6 +240,7 @@ BuildApp() {
 
     RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
         ${arch_flags} \
+        -fembed-bitcode-marker \
         -dynamiclib \
         -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
         -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \

@@ -52,7 +52,6 @@ Future<void> main() async {
           'assets/flutter_assets/isolate_snapshot_data',
           'assets/flutter_assets/kernel_blob.bin',
           'assets/flutter_assets/vm_snapshot_data',
-          'lib/armeabi-v7a/libflutter.so',
           // Debug mode intentionally includes `x86` and `x86_64`.
           'lib/x86/libflutter.so',
           'lib/x86_64/libflutter.so',
@@ -79,7 +78,6 @@ Future<void> main() async {
           'assets/flutter_assets/isolate_snapshot_data',
           'assets/flutter_assets/kernel_blob.bin',
           'assets/flutter_assets/vm_snapshot_data',
-          'lib/armeabi-v7a/libflutter.so',
           // Debug mode intentionally includes `x86` and `x86_64`.
           'lib/x86/libflutter.so',
           'lib/x86_64/libflutter.so',
@@ -141,7 +139,7 @@ Future<void> main() async {
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleDebug');
         await project.runGradleTask('assembleDebug');
-        final String errorMessage = validateSnapshotDependency(project, 'build/app.dill');
+        final String errorMessage = validateSnapshotDependency(project, 'kernel_blob.bin');
         if (errorMessage != null) {
           throw TaskResult.failure(errorMessage);
         }

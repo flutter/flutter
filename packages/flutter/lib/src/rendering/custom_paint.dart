@@ -522,7 +522,10 @@ class RenderCustomPaint extends RenderProxyBox {
   void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
     int debugPreviousCanvasSaveCount;
     canvas.save();
-    assert(() { debugPreviousCanvasSaveCount = canvas.getSaveCount(); return true; }());
+    assert(() {
+      debugPreviousCanvasSaveCount = canvas.getSaveCount();
+      return true;
+    }());
     if (offset != Offset.zero)
       canvas.translate(offset.dx, offset.dy);
     painter.paint(canvas, size);
@@ -863,6 +866,12 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.liveRegion != null) {
       config.liveRegion = properties.liveRegion;
+    }
+    if (properties.maxValueLength != null) {
+      config.maxValueLength = properties.maxValueLength;
+    }
+    if (properties.currentValueLength != null) {
+      config.currentValueLength = properties.currentValueLength;
     }
     if (properties.toggled != null) {
       config.isToggled = properties.toggled;

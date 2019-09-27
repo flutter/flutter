@@ -231,7 +231,7 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
       divisions: widget.divisions,
       activeColor: CupertinoDynamicColor.resolve(
         widget.activeColor ?? CupertinoTheme.of(context).primaryColor,
-        context
+        context,
       ),
       onChanged: widget.onChanged != null ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
@@ -268,7 +268,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       value: value,
       divisions: divisions,
       activeColor: activeColor,
-      trackColor: CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).systemFill, context),
+      trackColor: CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context),
       onChanged: onChanged,
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
@@ -283,7 +283,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = value
       ..divisions = divisions
       ..activeColor = activeColor
-      ..trackColor = CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).systemFill, context)
+      ..trackColor = CupertinoDynamicColor.resolve(CupertinoColors.systemFill, context)
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
@@ -474,8 +474,6 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
       _drag.addPointer(event);
   }
 
-  final CupertinoThumbPainter _thumbPainter = CupertinoThumbPainter();
-
   @override
   void paint(PaintingContext context, Offset offset) {
     double visualPosition;
@@ -514,7 +512,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     }
 
     final Offset thumbCenter = Offset(trackActive, trackCenter);
-    _thumbPainter.paint(canvas, Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));
+    const CupertinoThumbPainter().paint(canvas, Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));
   }
 
   @override

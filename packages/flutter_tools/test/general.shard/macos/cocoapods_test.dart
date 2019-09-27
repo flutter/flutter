@@ -173,10 +173,10 @@ void main() {
 
     testUsingContext('creates swift Podfile if swift', () async {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.getBuildSettingsAsync(any, any))
-          .thenAnswer((_) async => <String, String>{
-        'SWIFT_VERSION': '4.0',
-      });
+      when(mockXcodeProjectInterpreter.getBuildSettings(any, any))
+        .thenAnswer((_) async => <String, String>{
+          'SWIFT_VERSION': '4.0',
+        });
 
       final FlutterProject project = FlutterProject.fromPath('project');
       await cocoaPodsUnderTest.setupPodfile(project.ios);

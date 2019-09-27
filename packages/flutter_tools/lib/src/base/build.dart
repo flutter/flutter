@@ -69,7 +69,10 @@ class GenSnapshot {
       outputFilter = (String line) => line != kStripWarning ? line : null;
     }
 
-    return runCommandAndStreamOutput(<String>[snapshotterPath, ...args], mapFunction: outputFilter);
+    return processUtils.stream(
+      <String>[snapshotterPath, ...args],
+      mapFunction: outputFilter,
+    );
   }
 }
 
@@ -178,7 +181,8 @@ class AOTSnapshotter {
     // is resolved.
     // The DWARF section confuses Xcode tooling, so this strips it. Ideally,
     // gen_snapshot would provide an argument to do this automatically.
-    if (platform == TargetPlatform.ios && bitcode) {
+    final bool stripSymbols = platform == TargetPlatform.ios && buildMode == BuildMode.release && bitcode;
+    if (stripSymbols) {
       final IOSink sink = fs.file('$assembly.stripped.S').openWrite();
       for (String line in fs.file(assembly).readAsLinesSync()) {
         if (line.startsWith('.section __DWARF')) {
@@ -201,12 +205,13 @@ class AOTSnapshotter {
       final RunResult result = await _buildFramework(
         appleArch: darwinArch,
         isIOS: platform == TargetPlatform.ios,
-        assemblyPath: bitcode ? '$assembly.stripped.S' : assembly,
+        assemblyPath: stripSymbols ? '$assembly.stripped.S' : assembly,
         outputPath: outputDir.path,
         bitcode: bitcode,
       );
-      if (result.exitCode != 0)
+      if (result.exitCode != 0) {
         return result.exitCode;
+      }
     }
     return 0;
   }
@@ -283,8 +288,9 @@ class AOTSnapshotter {
 
     printTrace('Compiling Dart to kernel: $mainPath');
 
-    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
+    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty) {
       printTrace('Extra front-end options: $extraFrontEndOptions');
+    }
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
@@ -314,8 +320,9 @@ class AOTSnapshotter {
   }
 
   bool _isValidAotPlatform(TargetPlatform platform, BuildMode buildMode) {
-    if (buildMode == BuildMode.debug)
+    if (buildMode == BuildMode.debug) {
       return false;
+    }
     return const <TargetPlatform>[
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,

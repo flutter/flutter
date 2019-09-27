@@ -9,11 +9,11 @@
     ],
     "headers": [
       {
-        "source": "snippets/**",
+        "source": "snippets/**.dart",
         "headers": [
           {
             "key": "Access-Control-Allow-Origin",
-            "value": "https://dartpad.dev"
+            "value": "*"
           }
         ]
       }

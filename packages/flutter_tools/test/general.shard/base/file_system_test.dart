@@ -58,6 +58,29 @@ void main() {
       // There's still 3 things in the original directory as there were initially.
       expect(sourceMemoryFs.directory(sourcePath).listSync().length, 3);
     });
+
+    testUsingContext('Skip files if shouldCopyFile returns false', () {
+      final Directory origin = fs.directory('/origin');
+      origin.createSync();
+      fs.file(fs.path.join('origin', 'a.txt')).writeAsStringSync('irrelevant');
+      fs.directory('/origin/nested').createSync();
+      fs.file(fs.path.join('origin', 'nested', 'a.txt')).writeAsStringSync('irrelevant');
+      fs.file(fs.path.join('origin', 'nested', 'b.txt')).writeAsStringSync('irrelevant');
+
+      final Directory destination = fs.directory('/destination');
+      copyDirectorySync(origin, destination, shouldCopyFile: (File origin, File dest) {
+        return origin.basename == 'b.txt';
+      });
+
+      expect(destination.existsSync(), isTrue);
+      expect(destination.childDirectory('nested').existsSync(), isTrue);
+      expect(destination.childDirectory('nested').childFile('b.txt').existsSync(), isTrue);
+
+      expect(destination.childFile('a.txt').existsSync(), isFalse);
+      expect(destination.childDirectory('nested').childFile('a.txt').existsSync(), isFalse);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
   });
 
   group('canonicalizePath', () {
