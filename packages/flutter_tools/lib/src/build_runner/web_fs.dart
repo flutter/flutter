@@ -179,7 +179,10 @@ class WebFs {
           return results.results
             .firstWhere((BuildResult result) => result.target == kBuildTargetName);
         });
-    client.buildResults.listen((BuildResults buildResults) {
+    final StreamSubscription<void> firstBuild = client.buildResults.listen((BuildResults buildResults) {
+      if (inititalBuild.isCompleted) {
+        return;
+      }
       final BuildResult result = buildResults.results.firstWhere((BuildResult result) {
         return result.target == kBuildTargetName;
       });
@@ -271,6 +274,7 @@ class WebFs {
     if (!await inititalBuild.future) {
       throw Exception('Failed to compile for the web.');
     }
+    await firstBuild.cancel();
     return webFS;
   }
 }
