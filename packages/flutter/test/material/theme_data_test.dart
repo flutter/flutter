@@ -188,7 +188,7 @@ void main() {
     const PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
       builders: <TargetPlatform, PageTransitionsBuilder>{
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-      }
+      },
     );
     
     final ThemeData theme = ThemeData.raw(
