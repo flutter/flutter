@@ -192,9 +192,8 @@ class AnimatedModalBarrier extends AnimatedWidget {
 // It is similar to [TapGestureRecognizer.onTapDown], but accepts any single
 // button, which means the gesture also takes parts in gesture arenas.
 class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
-  _AnyTapGestureRecognizer({
-    Object debugOwner,
-  }) : super(debugOwner: debugOwner);
+  _AnyTapGestureRecognizer({ Object debugOwner })
+    : super(debugOwner: debugOwner);
 
   VoidCallback onAnyTapDown;
 
