@@ -125,7 +125,7 @@ void main() {
             instance
               ..onTap = () { logs.add('tap'); };
           },
-        )
+        ),
       });
     };
 
@@ -149,7 +149,7 @@ void main() {
                     instance
                       ..onStart = (_) { logs.add('horizontal'); };
                   },
-                )
+                ),
               },
               child: hasLayoutPerformer ? _TestLayoutPerformer(performLayout: performLayout) : null,
             ),

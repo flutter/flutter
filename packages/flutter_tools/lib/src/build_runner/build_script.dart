@@ -107,7 +107,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
           hasPlugins: hasPlugins,
           initializePlatform: initializePlatform,
         );
-      }
+      },
     ],
     core.toRoot(),
     hideOutput: true,
@@ -263,7 +263,7 @@ class FlutterWebTestBootstrapBuilder implements Builder {
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
     '_test.dart': <String>[
       '_test.dart.browser_test.dart',
-    ]
+    ],
   };
 
   @override

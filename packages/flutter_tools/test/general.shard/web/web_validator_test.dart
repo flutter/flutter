@@ -50,7 +50,7 @@ void main() {
       when(mockProcessManager.canRun(kMacOSExecutable)).thenReturn(false);
       final ValidationResult result = await webValidator.validate();
       expect(result.messages, <ValidationMessage>[
-        ValidationMessage.hint('CHROME_EXECUTABLE not set')
+        ValidationMessage.hint('CHROME_EXECUTABLE not set'),
       ]);
       expect(result.type, ValidationType.missing);
     }));

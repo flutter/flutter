@@ -2504,7 +2504,7 @@ class _InspectorOverlayLayer extends Layer {
         ErrorSummary(
           'The inspector should never be used in production mode due to the '
           'negative performance impact.'
-        )
+        ),
       ]);
     }
   }

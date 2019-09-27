@@ -155,7 +155,7 @@ void main() {
         'type': 'Event',
         'kind': 'WriteEvent',
         'timestamp': 1569473488296,
-        'bytes': base64.encode('THIS MESSAGE IS IMPORTANT'.codeUnits)
+        'bytes': base64.encode('THIS MESSAGE IS IMPORTANT'.codeUnits),
       }));
     });
     unawaited(residentWebRunner.run(

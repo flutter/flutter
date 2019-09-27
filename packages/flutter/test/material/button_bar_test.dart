@@ -155,7 +155,7 @@ void main() {
               Builder(builder: (BuildContext context) {
                 capturedContext = context;
                 return Container();
-              })
+              }),
             ],
           ),
         )
@@ -187,7 +187,7 @@ void main() {
                 Builder(builder: (BuildContext context) {
                   capturedContext = context;
                   return Container();
-                })
+                }),
               ],
             ),
           ),
@@ -226,7 +226,7 @@ void main() {
                 Builder(builder: (BuildContext context) {
                   capturedContext = context;
                   return Container();
-                })
+                }),
               ],
             ),
           ),

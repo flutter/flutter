@@ -121,7 +121,7 @@ void main() {
         Source.pattern('{PROJECT_DIR}/foo.dart'),
       ]
       ..outputs = const <Source>[
-        Source.pattern('{BUILD_DIR}/out')
+        Source.pattern('{BUILD_DIR}/out'),
       ];
     final BuildResult result = await buildSystem.build(badTarget, environment);
 
@@ -293,7 +293,7 @@ void main() {
     environment.buildDir.createSync(recursive: true);
     expect(fooTarget.toJson(environment), <String, dynamic>{
       'inputs':  <Object>[
-        '/foo.dart'
+        '/foo.dart',
       ],
       'outputs': <Object>[
         fs.path.join(environment.buildDir.path, 'out'),
