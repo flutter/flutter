@@ -155,6 +155,30 @@ void main() {
     missingSource.accept(visitor);
     expect(visitor.sources, isEmpty);
   }));
+
+  test('can resolve a missing depfile', () => testbed.run(() {
+    const Source depfile = Source.depfile('foo.d');
+
+    depfile.accept(visitor);
+    expect(visitor.sources, isEmpty);
+    expect(visitor.containsNewDepfile, true);
+  }));
+
+  test('can resolve a populated depfile', () => testbed.run(() {
+    const Source depfile = Source.depfile('foo.d');
+    environment.buildDir.childFile('foo.d')
+      .writeAsStringSync('a.dart : c.dart');
+
+    depfile.accept(visitor);
+    expect(visitor.sources.single.path, 'c.dart');
+    expect(visitor.containsNewDepfile, false);
+
+    final SourceVisitor outputVisitor = SourceVisitor(environment, false);
+    depfile.accept(outputVisitor);
+
+    expect(outputVisitor.sources.single.path, 'a.dart');
+    expect(outputVisitor.containsNewDepfile, false);
+  }));
 }
 
 class TestBehavior extends SourceBehavior {
