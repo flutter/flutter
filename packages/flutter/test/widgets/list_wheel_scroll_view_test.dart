@@ -64,63 +64,6 @@ void main() {
         throwsAssertionError,
       );
     });
-
-    testWidgets('ListWheelScrollView needs valid overAndUnderCenterOpacity', (WidgetTester tester) async {
-      expect(
-        () {
-          ListWheelScrollView(
-            overAndUnderCenterOpacity: null,
-            itemExtent: 20.0,
-            children: <Widget>[Container()],
-          );
-        },
-        throwsAssertionError,
-      );
-
-      expect(
-        () {
-          ListWheelScrollView(
-            overAndUnderCenterOpacity: -1,
-            itemExtent: 20.0,
-            children: <Widget>[Container()],
-          );
-        },
-        throwsAssertionError,
-      );
-
-      expect(
-        () {
-          ListWheelScrollView(
-            overAndUnderCenterOpacity: 2,
-            itemExtent: 20.0,
-            children: <Widget>[Container()],
-          );
-        },
-        throwsAssertionError,
-      );
-
-      expect(
-        () {
-          ListWheelScrollView(
-            overAndUnderCenterOpacity: 1,
-            itemExtent: 20.0,
-            children: <Widget>[Container()],
-          );
-        },
-        isNot(throwsAssertionError),
-      );
-
-      expect(
-        () {
-          ListWheelScrollView(
-            overAndUnderCenterOpacity: 0,
-            itemExtent: 20.0,
-            children: <Widget>[Container()],
-          );
-        },
-        isNot(throwsAssertionError),
-      );
-    });
   });
 
   group('infinite scrolling', () {
@@ -594,7 +537,7 @@ void main() {
         find.byKey(const Key('list_wheel_scroll_view')),
         matchesGoldenFile(
           'list_wheel_scroll_view.center_child.magnified.png',
-          version: 1,
+          version: null,
         ),
       );
     }, skip: isBrowser);
@@ -651,7 +594,7 @@ void main() {
         find.byKey(const Key('list_wheel_scroll_view')),
         matchesGoldenFile(
           'list_wheel_scroll_view.curved_wheel.left.png',
-          version: 1,
+          version: null,
         ),
       );
     }, skip: isBrowser);
