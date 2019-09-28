@@ -39,13 +39,13 @@ void main() {
     expect(fileStorage.version, 2);
   }));
 
-  test('saves and restores to file cache', () => testbed.run(() {
+  test('saves and restores to file cache', () => testbed.run(() async {
     final File file = fs.file('foo.dart')
       ..createSync()
       ..writeAsStringSync('hello');
     final FileHashStore fileCache = FileHashStore(environment);
     fileCache.initialize();
-    fileCache.hashFiles(<File>[file]);
+    await fileCache.hashFiles(<File>[file]);
     fileCache.persist();
     final String currentHash =  fileCache.currentHashes[file.resolveSymbolicLinksSync()];
     final List<int> buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
@@ -69,7 +69,7 @@ void main() {
     expect(fileStorage.files.single.path, file.resolveSymbolicLinksSync());
   }));
 
-  test('handles persisting with a missing build directory', () => testbed.run(() {
+  test('handles persisting with a missing build directory', () => testbed.run(() async {
     final File file = fs.file('foo.dart')
       ..createSync()
       ..writeAsStringSync('hello');
@@ -77,7 +77,7 @@ void main() {
     fileCache.initialize();
     environment.buildDir.deleteSync(recursive: true);
 
-    fileCache.hashFiles(<File>[file]);
+    await fileCache.hashFiles(<File>[file]);
     // Does not throw.
     fileCache.persist();
   }));
