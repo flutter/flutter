@@ -235,9 +235,9 @@ abstract class UndoableAction extends Action {
 
   @override
   @mustCallSuper
-  void invoke(FocusNode node, Intent tag) {
+  void invoke(FocusNode node, Intent intent) {
     invocationNode = node;
-    invocationIntent = tag;
+    invocationIntent = intent;
   }
 
   @override
@@ -253,8 +253,8 @@ class SetFocusActionBase extends UndoableAction {
   FocusNode _previousFocus;
 
   @override
-  void invoke(FocusNode node, Intent tag) {
-    super.invoke(node, tag);
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
     _previousFocus = WidgetsBinding.instance.focusManager.primaryFocus;
     node.requestFocus();
   }
@@ -292,8 +292,8 @@ class SetFocusAction extends SetFocusActionBase {
   static const LocalKey key = ValueKey<Type>(SetFocusAction);
 
   @override
-  void invoke(FocusNode node, Intent tag) {
-    super.invoke(node, tag);
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
     node.requestFocus();
   }
 }
@@ -305,8 +305,8 @@ class NextFocusAction extends SetFocusActionBase {
   static const LocalKey key = ValueKey<Type>(NextFocusAction);
 
   @override
-  void invoke(FocusNode node, Intent tag) {
-    super.invoke(node, tag);
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
     node.nextFocus();
   }
 }
@@ -317,8 +317,8 @@ class PreviousFocusAction extends SetFocusActionBase {
   static const LocalKey key = ValueKey<Type>(PreviousFocusAction);
 
   @override
-  void invoke(FocusNode node, Intent tag) {
-    super.invoke(node, tag);
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
     node.previousFocus();
   }
 }
@@ -337,9 +337,9 @@ class DirectionalFocusAction extends SetFocusActionBase {
   TraversalDirection direction;
 
   @override
-  void invoke(FocusNode node, DirectionalFocusIntent tag) {
-    super.invoke(node, tag);
-    final DirectionalFocusIntent args = tag;
+  void invoke(FocusNode node, DirectionalFocusIntent intent) {
+    super.invoke(node, intent);
+    final DirectionalFocusIntent args = intent;
     node.focusInDirection(args.direction);
   }
 }
