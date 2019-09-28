@@ -306,7 +306,7 @@ void main() {
     expect(rawImageSize, const Size(1, 1));
 
     const Size resizeDims = Size(14, 7);
-    final ResizedImage resizedImage = ResizedImage(MemoryImage(bytes), 14, 7);
+    final ResizedImage resizedImage = ResizedImage(MemoryImage(bytes), resizeDims.width.round(), resizeDims.height.round());
     final ImageConfiguration resizeConfig = ImageConfiguration.empty.copyWith(size: resizeDims);
     final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
     expect(resizedImageSize, resizeDims);

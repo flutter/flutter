@@ -152,6 +152,10 @@ class ImageConfiguration {
   }
 }
 
+/// Performs the decode process for use in [ImageProvider.load].
+///
+/// This callback allows decoupling of the `targetWidth` and `targetHeight`
+/// parameters from implementations of [ImageProvider] that do not use them.
 typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int targetWidth, int targetHeight});
 
 /// Identifies an image without committing to the precise final asset. This
@@ -498,27 +502,27 @@ class _SizeAwareCacheKey {
   final int _height;
 }
 
-/// Re-sizes the image provided to the rendered size.
+/// Re-sizes the image provided to the specified size.
 ///
 /// See also:
 ///
 /// * [Image.network] for example usage when `resizeToFit` parameter is set.
 class ResizedImage extends ImageProvider<_SizeAwareCacheKey> {
   /// Creates an object that re-sizes the image to rendered size.
-  const ResizedImage(this._imageProvider, this.targetWidth, this.targetHeight);
+  const ResizedImage(this._imageProvider, this._resizeWidth, this._resizeHeight);
 
   final ImageProvider _imageProvider;
 
-  final int targetWidth;
-  final int targetHeight;
+  final int _resizeWidth;
+  final int _resizeHeight;
 
   @override
   ImageStreamCompleter load(_SizeAwareCacheKey key, DecoderCallback decode) {
-    if (targetWidth == null && targetHeight == null) {
+    if (_resizeWidth == null && _resizeHeight == null) {
       return _imageProvider.load(key._providerCacheKey, decode);
     } else {
       DecoderCallback decodeResize = (Uint8List bytes, {int targetWidth, int targetHeight}) {
-        return decode(bytes, targetWidth: targetWidth, targetHeight: targetHeight);
+        return decode(bytes, targetWidth: _resizeWidth, targetHeight: _resizeHeight);
       };
       return _imageProvider.load(key._providerCacheKey, decodeResize);
     }
@@ -527,7 +531,7 @@ class ResizedImage extends ImageProvider<_SizeAwareCacheKey> {
   @override
   Future<_SizeAwareCacheKey> obtainKey(ImageConfiguration configuration) async {
     final dynamic providerCacheKey = await _imageProvider.obtainKey(configuration);
-    return _SizeAwareCacheKey(providerCacheKey, targetWidth, targetHeight);
+    return _SizeAwareCacheKey(providerCacheKey, _resizeWidth, _resizeHeight);
   }
 }
 
