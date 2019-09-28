@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 
-int confirmCount = 0;
-int cancelCount = 0;
+bool confirmCalled = false;
+bool cancelCalled = false;
 
 class TestInkSplash extends InkSplash {
   TestInkSplash({
@@ -39,13 +39,13 @@ class TestInkSplash extends InkSplash {
 
   @override
   void confirm() {
-    confirmCount += 1;
+    confirmCalled = true;
     super.confirm();
   }
 
   @override
   void cancel() {
-    cancelCount += 1;
+    cancelCalled = true;
     super.cancel();
   }
 }
@@ -84,7 +84,12 @@ class TestInkSplashFactory extends InteractiveInkFeatureFactory {
 }
 
 void main() {
-  testWidgets('Tap and no focus causes a splash', (WidgetTester tester) async {
+  setUp(() {
+    confirmCalled = false;
+    cancelCalled = false;
+  });
+
+  testWidgets('Tapping should never cause a splash', (WidgetTester tester) async {
     final Key textField1 = UniqueKey();
     final Key textField2 = UniqueKey();
 
@@ -117,41 +122,33 @@ void main() {
       )
     );
 
-    confirmCount = 0;
-    cancelCount = 0;
+    await tester.tap(find.byKey(textField1));
+    await tester.pumpAndSettle();
+    expect(confirmCalled, isFalse);
+    expect(cancelCalled, isFalse);
 
     await tester.tap(find.byKey(textField1));
     await tester.pumpAndSettle();
-    expect(confirmCount, 1);
-    expect(cancelCount, 0);
+    expect(confirmCalled, isFalse);
+    expect(cancelCalled, isFalse);
 
-    // textField1 already has the focus, no new splash
-    await tester.tap(find.byKey(textField1));
-    await tester.pumpAndSettle();
-    expect(confirmCount, 1);
-    expect(cancelCount, 0);
-
-    // textField2 gets the focus and a splash
     await tester.tap(find.byKey(textField2));
     await tester.pumpAndSettle();
-    expect(confirmCount, 2);
-    expect(cancelCount, 0);
+    expect(confirmCalled, isFalse);
+    expect(cancelCalled, isFalse);
 
-    // Tap outside of textField1's editable. It still gets focus and splash.
     await tester.tapAt(tester.getTopLeft(find.byKey(textField1)));
     await tester.pumpAndSettle();
-    expect(confirmCount, 3);
-    expect(cancelCount, 0);
+    expect(confirmCalled, isFalse);
+    expect(cancelCalled, isFalse);
 
-    // Tap in the center of textField2's editable. It still gets the focus
-    // and the splash. There is no splash cancel.
     await tester.tap(find.byKey(textField2));
     await tester.pumpAndSettle();
-    expect(confirmCount, 4);
-    expect(cancelCount, 0);
+    expect(confirmCalled, isFalse);
+    expect(cancelCalled, isFalse);
   });
 
-  testWidgets('Splash cancel', (WidgetTester tester) async {
+  testWidgets('Splash should never be created or canceled', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
@@ -180,29 +177,22 @@ void main() {
       )
     );
 
-    confirmCount = 0;
-    cancelCount = 0;
-
-    // Pointer is dragged below the textfield, splash is canceled.
+    // If there were a splash, this would cancel the splash.
     final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.text('label1')));
 
-    // Splashes start on tapDown.
-    // If the timeout is less than kPressTimeout the recognizer will just trigger
-    // the onTapCancel callback. If the timeout is greater or equal to kPressTimeout
-    // and less than kLongPressTimeout then onTapDown, onCancel will be called.
     await tester.pump(kPressTimeout);
 
     await gesture1.moveTo(const Offset(400.0, 300.0));
     await gesture1.up();
-    expect(confirmCount, 0);
-    expect(cancelCount, 1);
+    expect(confirmCalled, isFalse);
+    expect(cancelCalled, isFalse);
 
-    // Pointer is dragged upwards causing a scroll, splash is canceled.
+    // Pointer is dragged upwards causing a scroll, splash would be canceled.
     final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.text('label2')));
     await tester.pump(kPressTimeout);
     await gesture2.moveBy(const Offset(0.0, -200.0));
     await gesture2.up();
-    expect(confirmCount, 0);
-    expect(cancelCount, 2);
+    expect(confirmCalled, isFalse);
+    expect(cancelCalled, isFalse);
   });
 }
