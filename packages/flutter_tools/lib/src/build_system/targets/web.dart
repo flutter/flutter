@@ -46,7 +46,7 @@ class WebEntrypointTarget extends Target {
     final String targetFile = environment.defines[kTargetFile];
     final bool shouldInitializePlatform = environment.defines[kInitializePlatform] == 'true';
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
-    final String import = fs.path.absolute(targetFile);
+    final String import = fs.file(fs.path.absolute(targetFile)).uri.toString();
 
     String contents;
     if (hasPlugins) {
