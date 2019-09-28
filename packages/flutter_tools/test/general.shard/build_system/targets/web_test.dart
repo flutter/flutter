@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
@@ -50,7 +51,11 @@ void main() {
     expect(generated, contains('entrypoint.main();'));
 
     // Import.
-    expect(generated, contains('import "file:///lib/main.dart" as entrypoint;'));
+    if (platform.isWindows) {
+      expect(generated, contains('import "file:///C:/lib/main.dart" as entrypoint;'));
+    } else {
+      expect(generated, contains('import "file:///lib/main.dart" as entrypoint;'));
+    }
   }));
 
   test('WebEntrypointTarget generates an entrypoint without plugins and init platform', () => testbed.run(() async {
@@ -120,10 +125,10 @@ void main() {
       '--libraries-spec=' + fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json'),
       '-O1', // lowest optimizations.
       '-o',
-      environment.buildDir.childFile('main.dart.js').path,
+      environment.buildDir.childFile('main.dart.js').absolute.path,
       '--packages=.packages',
       '-Ddart.vm.profile=true',
-      environment.buildDir.childFile('main.dart').path,
+      environment.buildDir.childFile('main.dart').absolute.path,
     ];
     verify(processManager.run(expected)).called(1);
   }, overrides: <Type, Generator>{
@@ -143,10 +148,10 @@ void main() {
       '--libraries-spec=' + fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json'),
       '-O4', // highest optimizations.
       '-o',
-      environment.buildDir.childFile('main.dart.js').path,
+      environment.buildDir.childFile('main.dart.js').absolute.path,
       '--packages=.packages',
       '-Ddart.vm.product=true',
-      environment.buildDir.childFile('main.dart').path,
+      environment.buildDir.childFile('main.dart').absolute.path,
     ];
     verify(processManager.run(expected)).called(1);
   }, overrides: <Type, Generator>{
@@ -167,10 +172,10 @@ void main() {
       '--libraries-spec=' + fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json'),
       '-O3', // configured optimizations.
       '-o',
-      environment.buildDir.childFile('main.dart.js').path,
+      environment.buildDir.childFile('main.dart.js').absolute.path,
       '--packages=.packages',
       '-Ddart.vm.product=true',
-      environment.buildDir.childFile('main.dart').path,
+      environment.buildDir.childFile('main.dart').absolute.path,
     ];
     verify(processManager.run(expected)).called(1);
   }, overrides: <Type, Generator>{
