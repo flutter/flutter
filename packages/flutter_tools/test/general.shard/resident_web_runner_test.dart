@@ -189,6 +189,18 @@ void main() {
       'cd29': 'false',
       'cd30': 'true',
     })).called(1);
+    verify(Usage.instance.sendEvent('hot', 'compile', parameters: <String, String>{
+      'cd27': 'web-javascript',
+      'cd28': null,
+      'cd29': 'false',
+      'cd30': 'true',
+    })).called(1);
+    verify(Usage.instance.sendEvent('hot', 'refresh', parameters: <String, String>{
+      'cd27': 'web-javascript',
+      'cd28': null,
+      'cd29': 'false',
+      'cd30': 'true',
+    })).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -211,6 +223,18 @@ void main() {
     expect(result.code, 0);
 	  // ensure that analytics are sent.
     verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
+      'cd27': 'web-javascript',
+      'cd28': null,
+      'cd29': 'false',
+      'cd30': 'true',
+    })).called(1);
+    verify(Usage.instance.sendEvent('hot', 'compile', parameters: <String, String>{
+      'cd27': 'web-javascript',
+      'cd28': null,
+      'cd29': 'false',
+      'cd30': 'true',
+    })).called(1);
+    verify(Usage.instance.sendEvent('hot', 'refresh', parameters: <String, String>{
       'cd27': 'web-javascript',
       'cd28': null,
       'cd29': 'false',
