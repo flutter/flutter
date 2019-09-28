@@ -11,8 +11,8 @@ import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../../src/common.dart';
+import '../../../src/mocks.dart';
 import '../../../src/testbed.dart';
-import '../../commands/upgrade_test.dart';
 
 void main() {
   Testbed testbed;
@@ -110,7 +110,7 @@ void main() {
   test('Dart2JSTarget calls dart2js with expected args in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
     when(processManager.run(any)).thenAnswer((Invocation invocation) async {
-      return FakeProcessResult()..exitCode = 0;
+      return FakeProcessResult(exitCode: 0);
     });
     await const Dart2JSTarget().build(environment);
 
@@ -133,7 +133,7 @@ void main() {
   test('Dart2JSTarget calls dart2js with expected args in release mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     when(processManager.run(any)).thenAnswer((Invocation invocation) async {
-      return FakeProcessResult()..exitCode = 0;
+      return FakeProcessResult(exitCode: 0);
     });
     await const Dart2JSTarget().build(environment);
 
@@ -157,7 +157,7 @@ void main() {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kDart2jsOptimization] = 'O3';
     when(processManager.run(any)).thenAnswer((Invocation invocation) async {
-      return FakeProcessResult()..exitCode = 0;
+      return FakeProcessResult(exitCode: 0);
     });
     await const Dart2JSTarget().build(environment);
 
