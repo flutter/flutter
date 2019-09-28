@@ -16,6 +16,7 @@ void main() {
   setUp(() {
     testbed = Testbed(setup: () {
       environment = Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
       );
       fs.file(fs.path.join('packages', 'flutter_tools', 'lib', 'src',
@@ -38,7 +39,7 @@ flutter:
   });
 
   test('Copies files to correct asset directory', () => testbed.run(() async {
-    await const CopyAssets().build(<File>[], environment);
+    await const CopyAssets().build(environment);
 
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'AssetManifest.json')).existsSync(), true);
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'FontManifest.json')).existsSync(), true);
@@ -48,7 +49,7 @@ flutter:
   }));
 
   test('Does not leave stale files in build directory', () => testbed.run(() async {
-    await const CopyAssets().build(<File>[], environment);
+    await const CopyAssets().build(environment);
 
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), true);
     // Modify manifest to remove asset.
@@ -59,7 +60,7 @@ name: example
 
 flutter:
 ''');
-    await const CopyAssets().build(<File>[], environment);
+    await const CopyAssets().build(environment);
 
     // See https://github.com/flutter/flutter/issues/35293
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), false);
@@ -69,7 +70,8 @@ flutter:
     fs.file('pubspec.yaml')
       ..writeAsStringSync('name: foo\ndependencies:\n  foo: any\n');
 
-    await const FlutterPlugins().build(<File>[], Environment(
+    await const FlutterPlugins().build(Environment(
+      outputDir: fs.currentDirectory,
       projectDir: fs.currentDirectory,
     ));
 

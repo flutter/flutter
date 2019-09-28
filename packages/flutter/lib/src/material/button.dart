@@ -332,6 +332,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
     final Widget result = Focus(
       focusNode: widget.focusNode,
+      canRequestFocus: widget.enabled,
       onFocusChange: _handleFocusedChanged,
       autofocus: widget.autofocus,
       child: ConstrainedBox(

@@ -31,6 +31,7 @@ void main() {
     testbed = Testbed(setup: () {
       Cache.flutterRoot = '';
       environment = Environment(
+        outputDir: fs.currentDirectory,
         projectDir: fs.currentDirectory,
       );
       fs.file('bin/cache/artifacts/engine/linux-x64/libflutter_linux_glfw.so').createSync(recursive: true);

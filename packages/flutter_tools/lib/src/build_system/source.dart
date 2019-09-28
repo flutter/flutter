@@ -71,6 +71,10 @@ class SourceVisitor {
         segments.addAll(
             fs.path.split(environment.flutterRootDir.absolute.path));
         break;
+      case Environment.kOutputDirectory:
+        segments.addAll(
+            fs.path.split(environment.outputDir.resolveSymbolicLinksSync()));
+        break;
       default:
         throw InvalidPatternException(pattern);
     }
@@ -114,6 +118,15 @@ class SourceVisitor {
     }
   }
 
+  /// Visit a [Source] which contains a [SourceBehavior].
+  void visitBehavior(SourceBehavior sourceBehavior) {
+    if (inputs) {
+      sources.addAll(sourceBehavior.inputs(environment));
+    } else {
+      sources.addAll(sourceBehavior.outputs(environment));
+    }
+  }
+
   /// Visit a [Source] which is defined by an [Artifact] from the flutter cache.
   ///
   /// If the [Artifact] points to a directory then all child files are included.
@@ -140,6 +153,9 @@ abstract class Source {
   /// This source is produced by invoking the provided function.
   const factory Source.function(InputFunction function) = _FunctionSource;
 
+  /// This source is produced by the [SourceBehavior] class.
+  const factory Source.behavior(SourceBehavior behavior) = _SourceBehavior;
+
   /// The source is provided by an [Artifact].
   ///
   /// If [artifact] points to a directory then all child files are included.
@@ -158,6 +174,29 @@ abstract class Source {
   /// provided they do not use any wildcards. [Source.behavior] and
   /// [Source.function] are always implicit.
   bool get implicit;
+}
+
+/// An interface for describing input and output copies together.
+abstract class SourceBehavior {
+  const SourceBehavior();
+
+  /// The inputs for a particular target.
+  List<File> inputs(Environment environment);
+
+  /// The outputs for a particular target.
+  List<File> outputs(Environment environment);
+}
+
+class _SourceBehavior implements Source {
+  const _SourceBehavior(this.value);
+
+  final SourceBehavior value;
+
+  @override
+  void accept(SourceVisitor visitor) => visitor.visitBehavior(value);
+
+  @override
+  bool get implicit => true;
 }
 
 class _FunctionSource implements Source {

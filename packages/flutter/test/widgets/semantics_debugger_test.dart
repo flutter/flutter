@@ -452,8 +452,11 @@ void main() {
       ),
     );
 
+    final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester);
+    final RenderObject renderTextfield = tester.renderObject(find.descendant(of: find.byKey(textField), matching: find.byType(Semantics)).first);
+
     expect(
-      _getMessageShownInSemanticsDebugger(widgetKey: textField, debuggerKey: debugger, tester: tester),
+      semanticsDebuggerPainter.getMessage(renderTextfield.debugSemantics),
       'textfield',
     );
   });
@@ -464,11 +467,19 @@ String _getMessageShownInSemanticsDebugger({
   @required Key debuggerKey,
   @required WidgetTester tester,
 }) {
+  final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debuggerKey, tester: tester);
+  return semanticsDebuggerPainter.getMessage(tester.renderObject(find.byKey(widgetKey)).debugSemantics);
+}
+
+dynamic _getSemanticsDebuggerPainter({
+  @required Key debuggerKey,
+  @required WidgetTester tester,
+}) {
   final CustomPaint customPaint = tester.widgetList(find.descendant(
     of: find.byKey(debuggerKey),
     matching: find.byType(CustomPaint),
   )).first;
   final dynamic semanticsDebuggerPainter = customPaint.foregroundPainter;
   expect(semanticsDebuggerPainter.runtimeType.toString(), '_SemanticsDebuggerPainter');
-  return semanticsDebuggerPainter.getMessage(tester.renderObject(find.byKey(widgetKey)).debugSemantics);
+  return semanticsDebuggerPainter;
 }

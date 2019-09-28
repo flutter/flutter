@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 
-import '../base/file_system.dart';
 import 'build_system.dart';
 import 'exceptions.dart';
 
@@ -73,7 +72,7 @@ class _RootTarget extends Target {
   String get name => definition.name;
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async { }
+  Future<void> build(Environment environment) async { }
 
   @override
   List<Source> get inputs => const <Source>[];
@@ -89,7 +88,7 @@ class _AggregateTarget extends Target {
   final TargetGroup phase;
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async { }
+  Future<void> build(Environment environment) async { }
 
   @override
   final List<Target> dependencies;

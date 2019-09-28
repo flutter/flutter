@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'groups.dart';
-import 'targets/assets.dart';
 import 'targets/macos.dart';
 
 /// All currently available build definitions.
@@ -19,7 +18,6 @@ const String kMacOSOutput = '{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework
 const BuildDefinition debugMacOSApplication = BuildDefinition(
   name: 'debug_macos_application',
   groups: <TargetGroup>[
-    AssetsBuildPhase(outputPrefix: kMacOSOutput),
     TargetGroup.static(
       name: 'macos',
       target: DebugMacOSBundleFlutterAssets(),
@@ -32,7 +30,6 @@ const BuildDefinition debugMacOSApplication = BuildDefinition(
 const BuildDefinition profileMacOSApplication = BuildDefinition(
   name: 'profile_macos_application',
   groups: <TargetGroup>[
-    AssetsBuildPhase(outputPrefix: kMacOSOutput),
     TargetGroup.static(
       name: 'macos',
       target: ProfileMacOSBundleFlutterAssets(),
@@ -45,7 +42,6 @@ const BuildDefinition profileMacOSApplication = BuildDefinition(
 const BuildDefinition releaseMacOSApplication = BuildDefinition(
   name: 'release_macos_application',
   groups: <TargetGroup>[
-    AssetsBuildPhase(outputPrefix: kMacOSOutput),
     TargetGroup.static(
       name: 'macos',
       target: ReleaseMacOSBundleFlutterAssets(),

@@ -61,7 +61,69 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.widgetWithText(DefaultTextStyle, 'Ok'));
 
-    expect(widget.style.color, CupertinoColors.destructiveRed);
+    expect(widget.style.color, const CupertinoDynamicColor.withBrightnessAndContrast(
+      color: Color.fromARGB(255, 255, 59, 48),
+      darkColor: Color.fromARGB(255, 255, 69, 58),
+      highContrastColor: Color.fromARGB(255, 215, 0, 21),
+      darkHighContrastColor: Color.fromARGB(255, 255, 105, 97),
+    ));
+  });
+
+  testWidgets('Action sheet dark mode', (WidgetTester tester) async {
+    final Widget action = CupertinoActionSheetAction(
+      child: const Text('action'),
+      onPressed: () {},
+    );
+
+    Brightness brightness = Brightness.light;
+    StateSetter stateSetter;
+
+    TextStyle actionTextStyle(String text) {
+      return tester.widget<DefaultTextStyle>(
+        find.descendant(
+          of: find.widgetWithText(CupertinoActionSheetAction, text),
+          matching: find.byType(DefaultTextStyle),
+        )
+      ).style;
+    }
+
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            stateSetter = setter;
+            return CupertinoTheme(
+              data: CupertinoThemeData(
+                brightness: brightness,
+                primaryColor: const CupertinoDynamicColor.withBrightnessAndContrast(
+                  color: Color.fromARGB(255, 0, 122, 255),
+                  darkColor: Color.fromARGB(255, 10, 132, 255),
+                  highContrastColor: Color.fromARGB(255, 0, 64, 221),
+                  darkHighContrastColor: Color.fromARGB(255, 64, 156, 255),
+                ),
+              ),
+              child: CupertinoActionSheet(actions: <Widget>[action]),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    expect(
+      actionTextStyle('action').color.value,
+      const Color.fromARGB(255, 0, 122, 255).value,
+    );
+
+    stateSetter(() { brightness = Brightness.dark; });
+    await tester.pump();
+
+    expect(
+      actionTextStyle('action').color.value,
+      const Color.fromARGB(255, 10, 132, 255).value,
+    );
   });
 
   testWidgets('Action sheet default text style', (WidgetTester tester) async {

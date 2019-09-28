@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/src/interface/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/groups.dart';
@@ -29,7 +28,10 @@ void main() {
         TestPhaseGoodbye(),
       ]
     );
-    final Target result = await definition.createBuild(Environment(projectDir: fs.currentDirectory));
+    final Target result = await definition.createBuild(Environment(
+      projectDir: fs.currentDirectory,
+      outputDir: fs.currentDirectory,
+    ));
 
     expect(<String>[for (Target target in result.dependencies) target.name], unorderedEquals(<String>['hello', 'goodbye']));
     expect(<String>[for (Target target in result.dependencies.first.dependencies) target.name], unorderedEquals(<String>['a']));
@@ -77,7 +79,7 @@ class TestTarget extends Target {
   final String name;
 
   @override
-  Future<void> build(List<File> inputFiles, Environment environment) async { }
+  Future<void> build(Environment environment) async { }
 
   @override
   List<Target> get dependencies => <Target>[];

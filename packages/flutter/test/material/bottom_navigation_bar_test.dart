@@ -1431,18 +1431,21 @@ void main() {
   testWidgets('BottomNavigationBar item title should not be nullable', (WidgetTester tester) async {
     expect(() {
       MaterialApp(
-          home: Scaffold(
-              bottomNavigationBar: BottomNavigationBar(
-                  type: BottomNavigationBarType.shifting,
-                  items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.ac_unit),
-              title: Text('AC'),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.access_alarm),
-            ),
-          ])));
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+              ),
+            ],
+          ),
+        ),
+      );
     }, throwsA(isInstanceOf<AssertionError>()));
   });
 
@@ -1677,7 +1680,7 @@ EdgeInsets _itemPadding(WidgetTester tester, IconData icon) {
   return tester.widget<Padding>(
       find.descendant(
         of: find.ancestor(of: find.byIcon(icon), matching: find.byType(InkResponse)),
-        matching: find.byType(Padding)
+        matching: find.byType(Padding),
       ).first,
     ).padding.resolve(TextDirection.ltr);
 }
