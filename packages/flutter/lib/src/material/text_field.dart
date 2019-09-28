@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +11,6 @@ import 'package:flutter/gestures.dart';
 
 import 'debug.dart';
 import 'feedback.dart';
-import 'ink_well.dart' show InteractiveInkFeature;
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -43,12 +40,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
        super(delegate: state);
 
   final _TextFieldState _state;
-
-  @override
-  void onTapDown(TapDownDetails details) {
-    super.onTapDown(details);
-    _state._startSplash(details.globalPosition);
-  }
 
   @override
   void onForcePressStart(ForcePressDetails details) {
@@ -100,14 +91,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
       }
     }
     _state._requestKeyboard();
-    _state._confirmCurrentSplash();
     if (_state.widget.onTap != null)
       _state.widget.onTap();
-  }
-
-  @override
-  void onSingleTapCancel() {
-    _state._cancelCurrentSplash();
   }
 
   @override
@@ -127,13 +112,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
           break;
       }
     }
-    _state._confirmCurrentSplash();
-  }
-
-  @override
-  void onDragSelectionStart(DragStartDetails details) {
-    super.onDragSelectionStart(details);
-    _state._startSplash(details.globalPosition);
   }
 }
 
@@ -160,9 +138,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// extra padding introduced by the decoration to save space for the labels.
 ///
 /// If [decoration] is non-null (which is the default), the text field requires
-/// one of its ancestors to be a [Material] widget. When the [TextField] is
-/// tapped an ink splash that paints on the material is triggered, see
-/// [ThemeData.splashFactory].
+/// one of its ancestors to be a [Material] widget.
 ///
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
 /// consider using [TextFormField].
@@ -720,10 +696,7 @@ class TextField extends StatefulWidget {
   }
 }
 
-class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixin implements TextSelectionGestureDetectorBuilderDelegate {
-  Set<InteractiveInkFeature> _splashes;
-  InteractiveInkFeature _currentSplash;
-
+class _TextFieldState extends State<TextField> implements TextSelectionGestureDetectorBuilderDelegate {
   TextEditingController _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller;
 
@@ -905,75 +878,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     }
   }
 
-  InteractiveInkFeature _createInkFeature(Offset globalPosition) {
-    final MaterialInkController inkController = Material.of(context);
-    final ThemeData themeData = Theme.of(context);
-    final BuildContext editableContext = editableTextKey.currentContext;
-    final RenderBox referenceBox = InputDecorator.containerOf(editableContext) ?? editableContext.findRenderObject();
-    final Offset position = referenceBox.globalToLocal(globalPosition);
-    final Color color = themeData.splashColor;
-
-    InteractiveInkFeature splash;
-    void handleRemoved() {
-      if (_splashes != null) {
-        assert(_splashes.contains(splash));
-        _splashes.remove(splash);
-        if (_currentSplash == splash)
-          _currentSplash = null;
-        updateKeepAlive();
-      } // else we're probably in deactivate()
-    }
-
-    splash = themeData.splashFactory.create(
-      controller: inkController,
-      referenceBox: referenceBox,
-      position: position,
-      color: color,
-      containedInkWell: true,
-      // TODO(hansmuller): splash clip borderRadius should match the input decorator's border.
-      borderRadius: BorderRadius.zero,
-      onRemoved: handleRemoved,
-      textDirection: Directionality.of(context),
-    );
-
-    return splash;
-  }
-
-  void _startSplash(Offset globalPosition) {
-    if (_effectiveFocusNode.hasFocus)
-      return;
-    final InteractiveInkFeature splash = _createInkFeature(globalPosition);
-    _splashes ??= HashSet<InteractiveInkFeature>();
-    _splashes.add(splash);
-    _currentSplash = splash;
-    updateKeepAlive();
-  }
-
-  void _confirmCurrentSplash() {
-    _currentSplash?.confirm();
-    _currentSplash = null;
-  }
-
-  void _cancelCurrentSplash() {
-    _currentSplash?.cancel();
-  }
-
-  @override
-  bool get wantKeepAlive => _splashes != null && _splashes.isNotEmpty;
-
-  @override
-  void deactivate() {
-    if (_splashes != null) {
-      final Set<InteractiveInkFeature> splashes = _splashes;
-      _splashes = null;
-      for (InteractiveInkFeature splash in splashes)
-        splash.dispose();
-      _currentSplash = null;
-    }
-    assert(_currentSplash == null);
-    super.deactivate();
-  }
-
   void _handleMouseEnter(PointerEnterEvent event) => _handleHover(true);
   void _handleMouseExit(PointerExitEvent event) => _handleHover(false);
 
@@ -987,7 +891,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasMaterial(context));
     // TODO(jonahwilliams): uncomment out this check once we have migrated tests.
     // assert(debugCheckHasMaterialLocalizations(context));
