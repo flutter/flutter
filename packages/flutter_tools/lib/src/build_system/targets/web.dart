@@ -21,6 +21,11 @@ const String kInitializePlatform = 'InitializePlatform';
 /// Whether the application has web plugins.
 const String kHasWebPlugins = 'HasWebPlugins';
 
+/// An override for the dart2js build mode.
+///
+/// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
+const String kDart2jsOptimization = 'Dart2jsOptimization';
+
 /// Generates an entrypoint for a web target.
 class WebEntrypointTarget extends Target {
   const WebEntrypointTarget();
@@ -116,6 +121,7 @@ class Dart2JSTarget extends Target {
 
   @override
   Future<void> build(Environment environment) async {
+    final String dart2jsOptimization = environment.defines[kDart2jsOptimization];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String specPath = fs.path.join(artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
     final String packageFile = FlutterProject.fromDirectory(environment.projectDir).hasBuilders
@@ -125,7 +131,9 @@ class Dart2JSTarget extends Target {
       artifacts.getArtifactPath(Artifact.engineDartBinary),
       artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
-      if (buildMode == BuildMode.profile)
+      if (dart2jsOptimization != null)
+        '-$dart2jsOptimization'
+      else if (buildMode == BuildMode.profile)
         '-O1'
       else
         '-O4',
