@@ -149,7 +149,7 @@ class FileHashStore {
     try {
       final String absolutePath = file.path;
       final String previousHash = previousHashes[absolutePath];
-      final Digest digest = await md5.bind(file.openRead()).last;
+      final Digest digest = md5.convert(file.readAsBytesSync());
       final String currentHash = digest.toString();
       if (currentHash != previousHash) {
         dirty.add(file);

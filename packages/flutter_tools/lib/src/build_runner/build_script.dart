@@ -51,8 +51,7 @@ const Set<String> skipPlatformCheckPackages = <String>{
   'video_player',
 };
 
-final DartPlatform flutterWebPlatform =
-    DartPlatform.register('flutter_web', <String>[
+final DartPlatform flutterWebPlatform = DartPlatform.register('flutter_web', <String>[
   'async',
   'collection',
   'convert',
@@ -201,14 +200,14 @@ class FlutterWebTestEntrypointBuilder implements Builder {
 
   @override
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
-        '.dart': <String>[
-          ddcBootstrapExtension,
-          jsEntrypointExtension,
-          jsEntrypointSourceMapExtension,
-          jsEntrypointArchiveExtension,
-          digestsEntrypointExtension,
-        ],
-      };
+    '.dart': <String>[
+      ddcBootstrapExtension,
+      jsEntrypointExtension,
+      jsEntrypointSourceMapExtension,
+      jsEntrypointArchiveExtension,
+      digestsEntrypointExtension,
+    ],
+  };
 
   @override
   Future<void> build(BuildStep buildStep) async {
@@ -228,14 +227,14 @@ class FlutterWebEntrypointBuilder implements Builder {
 
   @override
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
-        '.dart': <String>[
-          ddcBootstrapExtension,
-          jsEntrypointExtension,
-          jsEntrypointSourceMapExtension,
-          jsEntrypointArchiveExtension,
-          digestsEntrypointExtension,
-        ],
-      };
+    '.dart': <String>[
+      ddcBootstrapExtension,
+      jsEntrypointExtension,
+      jsEntrypointSourceMapExtension,
+      jsEntrypointArchiveExtension,
+      digestsEntrypointExtension,
+    ],
+  };
 
   @override
   Future<void> build(BuildStep buildStep) async {

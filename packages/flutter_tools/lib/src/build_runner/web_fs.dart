@@ -150,7 +150,7 @@ class WebFs {
     _client.startBuild();
     await for (BuildResults results in _client.buildResults) {
       final BuildResult result = results.results.firstWhere((BuildResult result) {
-        return result.target == 'web';
+        return result.target == kBuildTargetName;
       });
       if (result.status == BuildStatus.failed) {
         return false;
@@ -176,7 +176,14 @@ class WebFs {
     if (!flutterProject.dartTool.existsSync()) {
       flutterProject.dartTool.createSync(recursive: true);
     }
-    final bool useBuildRunner = buildInfo.isDebug;
+    // Start the build daemon and run an initial build.
+    final Completer<bool> inititalBuild = Completer<bool>();
+
+    // Initialize the asset bundle.
+    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+    await assetBundle.build();
+    await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
+
     final String targetBaseName = fs.path
       .withoutExtension(target).replaceFirst('lib${fs.path.separator}', '');
     final Map<String, String> mappedUrls = <String, String>{
@@ -217,7 +224,8 @@ class WebFs {
     Handler handler;
     Dwds dwds;
     BuildDaemonClient client;
-    if (useBuildRunner) {
+    StreamSubscription<void> firstBuild;
+    if (buildInfo.isDebug) {
       final bool hasWebPlugins = findPlugins(flutterProject)
           .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
       // Start the build daemon and run an initial build.
@@ -231,10 +239,24 @@ class WebFs {
       client.startBuild();
       // Only provide relevant build results
       final Stream<BuildResult> filteredBuildResults = client.buildResults
-          .asyncMap<BuildResult>((BuildResults results) {
-            return results.results
-              .firstWhere((BuildResult result) => result.target == kBuildTargetName);
-          });
+        .asyncMap<BuildResult>((BuildResults results) {
+          return results.results
+            .firstWhere((BuildResult result) => result.target == kBuildTargetName);
+        });
+      firstBuild = client.buildResults.listen((BuildResults buildResults) {
+        if (inititalBuild.isCompleted) {
+          return;
+        }
+        final BuildResult result = buildResults.results.firstWhere((BuildResult result) {
+          return result.target == kBuildTargetName;
+        });
+        if (result.status == BuildStatus.failed) {
+          inititalBuild.complete(false);
+        }
+        if (result.status == BuildStatus.succeeded) {
+          inititalBuild.complete(true);
+        }
+      });
       final int daemonAssetPort = buildDaemonCreator.assetServerPort(fs.currentDirectory);
 
       // Initialize the asset bundle.
@@ -263,6 +285,7 @@ class WebFs {
       }
     } else {
       await buildWeb(flutterProject, target, buildInfo, initializePlatform);
+      inititalBuild.complete(true);
     }
 
     final AssetServer assetServer = buildInfo.isDebug
@@ -273,7 +296,7 @@ class WebFs {
     cascade = cascade.add(assetServer.handle);
     final HttpServer server = await httpMultiServerFactory(hostname ?? _kHostName, hostPort);
     shelf_io.serveRequests(server, cascade.handler);
-    return WebFs(
+    final WebFs webFS = WebFs(
       client,
       server,
       dwds,
@@ -285,6 +308,11 @@ class WebFs {
       buildInfo,
       initializePlatform,
     );
+    if (!await inititalBuild.future) {
+      throw Exception('Failed to compile for the web.');
+    }
+    await firstBuild?.cancel();
+    return webFS;
   }
 }
 

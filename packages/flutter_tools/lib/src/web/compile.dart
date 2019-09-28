@@ -44,6 +44,7 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
   ));
   if (!result.success) {
     for (ExceptionMeasurement measurement in result.exceptions.values) {
+      printError(measurement.stackTrace.toString());
       printError(measurement.exception.toString());
     }
     throwToolExit('Failed to compile application for the Web.');
