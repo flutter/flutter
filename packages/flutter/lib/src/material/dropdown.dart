@@ -610,6 +610,7 @@ class DropdownButton<T> extends StatefulWidget {
     @required this.onChanged,
     this.elevation = 8,
     this.style,
+    this.menuItemStyle,
     this.underline,
     this.icon,
     this.iconDisabledColor,
@@ -708,11 +709,19 @@ class DropdownButton<T> extends StatefulWidget {
   final int elevation;
 
   /// The text style to use for text in the dropdown button and the dropdown
-  /// menu that appears when you tap the button.
+  /// menu that appears when you tap the button. If you want to have a separate
+  /// text style for drop down menu when you tap the button then add
+  /// the [menuItemStyle] property.
   ///
   /// Defaults to the [TextTheme.subhead] value of the current
   /// [ThemeData.textTheme] of the current [Theme].
   final TextStyle style;
+
+  /// The text style to use for text in the dropdown menu that appears
+  /// when you tap the button.
+  ///
+  /// Defaults to the [style] value.
+  final TextStyle menuItemStyle;
 
   /// The widget to use for drawing the drop-down button's underline.
   ///
@@ -834,7 +843,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       selectedIndex: _selectedIndex ?? 0,
       elevation: widget.elevation,
       theme: Theme.of(context, shadowThemeOnly: true),
-      style: _textStyle,
+      style: widget.menuItemStyle ?? _textStyle,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     );
 
