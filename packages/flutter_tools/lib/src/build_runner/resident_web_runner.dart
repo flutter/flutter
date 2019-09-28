@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
@@ -22,6 +21,7 @@ import '../globals.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
+import '../web/chrome.dart';
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
 import 'web_fs.dart';

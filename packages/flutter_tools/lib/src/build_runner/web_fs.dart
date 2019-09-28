@@ -11,7 +11,6 @@ import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
 import 'package:dwds/dwds.dart';
-import 'package:flutter_tools/src/web/compile.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
@@ -36,6 +35,7 @@ import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../web/chrome.dart';
+import '../web/compile.dart';
 
 /// The name of the built web project.
 const String kBuildTargetName = 'web';
