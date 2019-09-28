@@ -64,7 +64,7 @@ class SourceVisitor implements ResolvedFiles {
       return;
     }
     final String contents = depfile.readAsStringSync();
-    final List<String> colonSeparated = contents.split(':');
+    final List<String> colonSeparated = contents.split(': ');
     if (inputs) {
       sources.addAll(_processList(colonSeparated[1].trim()));
     } else {
