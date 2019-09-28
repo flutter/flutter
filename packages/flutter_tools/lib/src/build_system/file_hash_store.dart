@@ -139,9 +139,8 @@ class FileHashStore {
   /// that were dirty.
   Future<List<File>> hashFiles(List<File> files) async {
     final List<File> dirty = <File>[];
-    final Pool pool = Pool(32);
     await Future.wait(<Future<void>>[
-      for (File file in files) _hashFile(file, dirty, pool)]);
+      for (File file in files) _hashFile(file, dirty, Pool(32))]);
     return dirty;
   }
 

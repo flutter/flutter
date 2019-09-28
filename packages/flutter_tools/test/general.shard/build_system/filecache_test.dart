@@ -59,7 +59,7 @@ void main() {
     final FileHashStore newFileCache = FileHashStore(environment);
     newFileCache.initialize();
     expect(newFileCache.currentHashes, isEmpty);
-    expect(newFileCache.previousHashes[fs.path.absolute('foo.dart')],  currentHash);
+    expect(newFileCache.previousHashes['foo.dart'],  currentHash);
     newFileCache.persist();
 
     // Still persisted correctly.
