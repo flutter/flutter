@@ -324,15 +324,29 @@ class Actions extends InheritedWidget {
       return false;
     }
     // Invoke the action we found using the dispatcher from the Actions we
-    // found, using the given focus node. Or null, if nullOk is true, and we
+    // found, using the given focus node. Or false, if nullOk is true, and we
     // didn't find something.
-    return actions?.dispatcher?.invokeAction(action, intent, focusNode: focusNode);
+    return actions?.dispatcher?.invokeAction(action, intent, focusNode: focusNode) ?? false;
   }
 
   @override
   bool updateShouldNotify(Actions oldWidget) {
     return oldWidget.dispatcher != dispatcher || oldWidget.actions != actions;
   }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return !updateShouldNotify(other);
+  }
+
+  @override
+  int get hashCode => hashValues(dispatcher, actions);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -495,11 +495,6 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  @override
   void didUpdateWidget(InkResponse oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
@@ -671,6 +666,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     Offset globalPosition;
     if (context != null) {
       final RenderBox referenceBox = context.findRenderObject();
+      assert(referenceBox.hasSize, 'InkResponse must be done with layout before starting a splash.');
       globalPosition = referenceBox.localToGlobal(referenceBox.paintBounds.center);
     } else {
       globalPosition = details.globalPosition;
