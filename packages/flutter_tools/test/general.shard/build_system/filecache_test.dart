@@ -47,13 +47,13 @@ void main() {
     fileCache.initialize();
     await fileCache.hashFiles(<File>[file]);
     fileCache.persist();
-    final String currentHash =  fileCache.currentHashes[file.resolveSymbolicLinksSync()];
+    final String currentHash =  fileCache.currentHashes[file.path];
     final List<int> buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
         .readAsBytesSync();
     FileStorage fileStorage = FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files.single.hash, currentHash);
-    expect(fileStorage.files.single.path, file.resolveSymbolicLinksSync());
+    expect(fileStorage.files.single.path, file.path);
 
 
     final FileHashStore newFileCache = FileHashStore(environment);
@@ -66,7 +66,7 @@ void main() {
     fileStorage = FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files.single.hash, currentHash);
-    expect(fileStorage.files.single.path, file.resolveSymbolicLinksSync());
+    expect(fileStorage.files.single.path, file.path);
   }));
 
   test('handles persisting with a missing build directory', () => testbed.run(() async {
