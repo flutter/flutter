@@ -213,7 +213,7 @@ void main() {
       unselectedWidgetColor: Colors.black,
       disabledColor: Colors.black,
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
-      toggleButtonsTheme: const ToggleButtonsThemeData( textStyle: TextStyle(color: Colors.black)),
+      toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       buttonColor: Colors.black,
       secondaryHeaderColor: Colors.black,
       textSelectionColor: Colors.black,
