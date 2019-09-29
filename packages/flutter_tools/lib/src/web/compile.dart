@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:archive/archive.dart';
 import 'package:meta/meta.dart';
 
 import '../asset.dart';
@@ -18,7 +19,7 @@ import '../reporting/reporting.dart';
 /// The [WebCompilationProxy] instance.
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
 
-Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo buildInfo) async {
+Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo buildInfo, bool initializePlatform) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
   }
@@ -31,6 +32,8 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
     result = await webCompilationProxy.initialize(
       projectDirectory: FlutterProject.current().directory,
       mode: buildInfo.mode,
+      projectName: flutterProject.manifest.appName,
+      initializePlatform: initializePlatform,
     );
     if (result) {
       // Places assets adjacent to the web stuff.
@@ -44,11 +47,25 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
         'build',
         'flutter_web',
         flutterProject.manifest.appName,
-        '${fs.path.withoutExtension(target)}_web_entrypoint.dart.js'
+        '${fs.path.withoutExtension(target)}_web_entrypoint.dart.js',
+      );
+      // Check for deferred import outputs.
+      final File dart2jsArchive = fs.file(fs.path.join(
+        flutterProject.dartTool.path,
+        'build',
+        'flutter_web',
+        '${flutterProject.manifest.appName}',
+        '${fs.path.withoutExtension(target)}_web_entrypoint.dart.js.tar.gz'),
       );
       fs.file(outputPath).copySync(fs.path.join(outputDir.path, 'main.dart.js'));
       fs.file('$outputPath.map').copySync(fs.path.join(outputDir.path, 'main.dart.js.map'));
       flutterProject.web.indexFile.copySync(fs.path.join(outputDir.path, 'index.html'));
+      if (dart2jsArchive.existsSync()) {
+        final Archive archive = TarDecoder().decodeBytes(dart2jsArchive.readAsBytesSync());
+        for (ArchiveFile file in archive.files) {
+          outputDir.childFile(file.name).writeAsBytesSync(file.content);
+        }
+      }
     }
   } catch (err) {
     printError(err.toString());
@@ -80,14 +97,11 @@ class WebCompilationProxy {
   /// the entrypoints for dart2js to later take over.
   Future<bool> initialize({
     @required Directory projectDirectory,
+    @required String projectName,
     String testOutputDir,
     BuildMode mode,
+    bool initializePlatform,
   }) async {
-    throw UnimplementedError();
-  }
-
-  /// Invalidate the source files in `inputs` and recompile them to JavaScript.
-  Future<void> invalidate({@required List<Uri> inputs}) async {
     throw UnimplementedError();
   }
 }

@@ -8,11 +8,11 @@ import 'dart:io';
 import 'package:build/build.dart';
 import 'package:build_runner_core/build_runner_core.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_runner/web_compilation_delegate.dart';
 import 'package:glob/glob.dart';
 
 import '../../src/common.dart';
+import '../../src/io.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -58,7 +58,10 @@ void main() {
           AssetId('foobar', 'lib/main.dart'),
         ]));
       }, FlutterIOOverrides(fileSystem: fs));
-    }));
+     // Some component of either dart:io or build_runner normalizes file uris
+     // into file paths for windows. This doesn't seem to work with IOOverrides
+     // leaving all filepaths on windows with forward slashes.
+    }), skip: Platform.isWindows);
   });
 }
 

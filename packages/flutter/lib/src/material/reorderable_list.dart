@@ -4,8 +4,9 @@
 
 import 'dart:math';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
 import 'material.dart';
@@ -344,7 +345,11 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   // Handles up the logic for dragging and reordering items in the list.
   Widget _wrap(Widget toWrap, int index, BoxConstraints constraints) {
     assert(toWrap.key != null);
-    final GlobalObjectKey keyIndexGlobalKey = GlobalObjectKey(toWrap.key);
+    final _ScopedValueGlobalKey<_ReorderableListContentState> keyIndexGlobalKey =
+        _ScopedValueGlobalKey<_ReorderableListContentState>(
+      scope: this,
+      value: toWrap.key,
+    );
     // We pass the toWrapWithGlobalKey into the Draggable so that when a list
     // item gets dragged, the accessibility framework can preserve the selected
     // state of the dragging item.
@@ -538,13 +543,6 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     assert(debugCheckHasMaterialLocalizations(context));
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      final List<Widget> wrappedChildren = <Widget>[];
-      if (widget.header != null) {
-        wrappedChildren.add(widget.header);
-      }
-      for (int i = 0; i < widget.children.length; i += 1) {
-        wrappedChildren.add(_wrap(widget.children[i], i, constraints));
-      }
       const Key endWidgetKey = Key('DraggableList - End Widget');
       Widget finalDropArea;
       switch (widget.scrollDirection) {
@@ -564,26 +562,49 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           );
           break;
       }
-      if (widget.reverse) {
-        wrappedChildren.insert(0, _wrap(
-          finalDropArea,
-          widget.children.length,
-          constraints),
-        );
-      } else {
-        wrappedChildren.add(_wrap(
-          finalDropArea,
-          widget.children.length,
-          constraints),
-        );
-      }
       return SingleChildScrollView(
         scrollDirection: widget.scrollDirection,
-        child: _buildContainerForScrollDirection(children: wrappedChildren),
         padding: widget.padding,
         controller: _scrollController,
         reverse: widget.reverse,
+        child: _buildContainerForScrollDirection(
+          children: <Widget>[
+            if (widget.reverse) _wrap(finalDropArea, widget.children.length, constraints),
+            if (widget.header != null) widget.header,
+            for (int i = 0; i < widget.children.length; i += 1) _wrap(widget.children[i], i, constraints),
+            if (!widget.reverse) _wrap(finalDropArea, widget.children.length, constraints),
+          ],
+        ),
       );
     });
+  }
+}
+
+/// A [GlobalKey] that uses a scope and a value to determine equality.
+///
+/// The scope is compared using [identical], while the value is compared
+/// using [operator ==]. This allows a locally scoped value to be turned
+/// into a globally unique key.
+class _ScopedValueGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
+  const _ScopedValueGlobalKey({this.scope, this.value}) : super.constructor();
+
+  final Object scope;
+  final Object value;
+
+  @override
+  int get hashCode => hashValues(identityHashCode(scope), value.hashCode);
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    final _ScopedValueGlobalKey<T> typedOther = other;
+    return identical(scope, typedOther.scope) && value == typedOther.value;
+  }
+
+  @override
+  String toString() {
+    return '[$runtimeType ${describeIdentity(scope)} ${describeIdentity(value)}]';
   }
 }

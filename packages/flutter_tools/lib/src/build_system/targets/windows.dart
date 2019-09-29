@@ -32,7 +32,6 @@ class UnpackWindows extends Target {
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_plugin_registrar.h'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.h'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/icudtl.dat'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/cpp_client_wrapper/*'),
   ];
 
   @override

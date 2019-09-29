@@ -156,21 +156,22 @@ class DecorationImage {
 
   @override
   String toString() {
-    final List<String> properties = <String>[];
-    properties.add('$image');
-    if (colorFilter != null)
-      properties.add('$colorFilter');
-    if (fit != null &&
-        !(fit == BoxFit.fill && centerSlice != null) &&
-        !(fit == BoxFit.scaleDown && centerSlice == null))
-      properties.add('$fit');
-    properties.add('$alignment');
-    if (centerSlice != null)
-      properties.add('centerSlice: $centerSlice');
-    if (repeat != ImageRepeat.noRepeat)
-      properties.add('$repeat');
-    if (matchTextDirection)
-      properties.add('match text direction');
+    final List<String> properties = <String>[
+      '$image',
+      if (colorFilter != null)
+        '$colorFilter',
+      if (fit != null &&
+          !(fit == BoxFit.fill && centerSlice != null) &&
+          !(fit == BoxFit.scaleDown && centerSlice == null))
+        '$fit',
+      '$alignment',
+      if (centerSlice != null)
+        'centerSlice: $centerSlice',
+      if (repeat != ImageRepeat.noRepeat)
+        '$repeat',
+      if (matchTextDirection)
+        'match text direction',
+    ];
     return '$runtimeType(${properties.join(", ")})';
   }
 }

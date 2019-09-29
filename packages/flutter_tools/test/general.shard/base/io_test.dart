@@ -11,6 +11,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/io.dart';
 
 void main() {
   test('IOOverrides can inject a memory file system', () async {

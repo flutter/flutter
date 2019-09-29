@@ -92,6 +92,9 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.frontendServerSnapshotForEngineDartSdk:
       return 'frontend_server.dart.snapshot';
     case Artifact.engineDartBinary:
+      if (platform == TargetPlatform.windows_x64) {
+        return 'dart.exe';
+      }
       return 'dart';
     case Artifact.dart2jsSnapshot:
       return 'dart2js.dart.snapshot';
@@ -153,6 +156,19 @@ abstract class Artifacts {
   // Returns which set of engine artifacts is currently used for the [platform]
   // and [mode] combination.
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]);
+}
+
+TargetPlatform get _currentHostPlatform {
+  if (platform.isMacOS) {
+    return TargetPlatform.darwin_x64;
+  }
+  if (platform.isLinux) {
+    return TargetPlatform.linux_x64;
+  }
+  if (platform.isWindows) {
+    return TargetPlatform.windows_x64;
+  }
+  throw UnimplementedError('Host OS not supported.');
 }
 
 /// Manages the engine artifacts downloaded to the local cache.
@@ -265,7 +281,7 @@ class CachedArtifacts extends Artifacts {
       case Artifact.engineDartSdkPath:
         return dartSdkPath;
       case Artifact.engineDartBinary:
-        return fs.path.join(dartSdkPath, 'bin', _artifactToFileName(artifact));
+        return fs.path.join(dartSdkPath, 'bin', _artifactToFileName(artifact, platform));
       case Artifact.platformKernelDill:
         return fs.path.join(_getFlutterPatchedSdkPath(mode), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
@@ -334,16 +350,6 @@ class CachedArtifacts extends Artifacts {
     assert(false, 'Invalid platform $platform.');
     return null;
   }
-
-  TargetPlatform get _currentHostPlatform {
-    if (platform.isMacOS)
-      return TargetPlatform.darwin_x64;
-    if (platform.isLinux)
-      return TargetPlatform.linux_x64;
-    if (platform.isWindows)
-      return TargetPlatform.windows_x64;
-    throw UnimplementedError('Host OS not supported.');
-  }
 }
 
 /// Manages the artifacts of a locally built engine.
@@ -356,7 +362,8 @@ class LocalEngineArtifacts extends Artifacts {
 
   @override
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
-    final String artifactFileName = _artifactToFileName(artifact);
+    platform ??= _currentHostPlatform;
+    final String artifactFileName = _artifactToFileName(artifact, platform);
     switch (artifact) {
       case Artifact.snapshotDart:
         return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', artifactFileName);
@@ -439,8 +446,9 @@ class LocalEngineArtifacts extends Artifacts {
     final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot);
     for (String clangDir in clangDirs) {
       final String genSnapshotPath = fs.path.join(engineOutPath, clangDir, genSnapshotName);
-      if (processManager.canRun(genSnapshotPath))
+      if (processManager.canRun(genSnapshotPath)) {
         return genSnapshotPath;
+      }
     }
     throw Exception('Unable to find $genSnapshotName');
   }

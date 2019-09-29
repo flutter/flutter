@@ -4,6 +4,7 @@
 
 import 'package:build_daemon/client.dart';
 import 'package:build_daemon/data/build_status.dart';
+import 'package:built_collection/built_collection.dart';
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -26,23 +27,41 @@ void main() {
   MockHttpMultiServer mockHttpMultiServer;
   MockBuildDaemonClient mockBuildDaemonClient;
   MockOperatingSystemUtils mockOperatingSystemUtils;
+  bool lastInitializePlatform;
+  dynamic lastAddress;
+  int lastPort;
 
   setUp(() {
+    lastAddress = null;
+    lastPort = null;
+    lastInitializePlatform = null;
     mockBuildDaemonCreator =  MockBuildDaemonCreator();
     mockChromeLauncher = MockChromeLauncher();
     mockHttpMultiServer = MockHttpMultiServer();
     mockBuildDaemonClient = MockBuildDaemonClient();
     mockOperatingSystemUtils = MockOperatingSystemUtils();
     mockDwds = MockDwds();
-    when(mockBuildDaemonCreator.startBuildDaemon(any, release: anyNamed('release')))
-      .thenAnswer((Invocation _) async {
+    when(mockBuildDaemonCreator.startBuildDaemon(any, release: anyNamed('release'), initializePlatform: anyNamed('initializePlatform')))
+      .thenAnswer((Invocation invocation) async {
+        lastInitializePlatform = invocation.namedArguments[#initializePlatform];
         return mockBuildDaemonClient;
       });
     when(mockOperatingSystemUtils.findFreePort()).thenAnswer((Invocation _) async {
       return 1234;
     });
     when(mockBuildDaemonClient.buildResults).thenAnswer((Invocation _) {
-      return const Stream<BuildResults>.empty();
+      return Stream<BuildResults>.fromFuture(Future<BuildResults>.value(
+        BuildResults((BuildResultsBuilder builder) {
+          builder.results = ListBuilder<BuildResult>(
+            <BuildResult>[
+              DefaultBuildResult((DefaultBuildResultBuilder builder) {
+                builder.target = 'web';
+                builder.status = BuildStatus.succeeded;
+              })
+            ]
+          );
+        })
+      ));
     });
     when(mockBuildDaemonCreator.assetServerPort(any)).thenReturn(4321);
     testbed = Testbed(
@@ -56,6 +75,8 @@ void main() {
         BuildDaemonCreator: () => mockBuildDaemonCreator,
         ChromeLauncher: () => mockChromeLauncher,
         HttpMultiServerFactory: () => (dynamic address, int port) async {
+          lastAddress = address;
+          lastPort = port;
           return mockHttpMultiServer;
         },
         DwdsFactory: () => ({
@@ -69,29 +90,96 @@ void main() {
           bool serveDevTools,
           LogWriter logWriter,
           bool verbose,
-          bool enableDebugExtension}) async {
-            return mockDwds;
+          bool enableDebugExtension,
+        }) async {
+          return mockDwds;
         },
-      }
+      },
     );
   });
 
   test('Can create webFs from mocked interfaces', () => testbed.run(() async {
     final FlutterProject flutterProject = FlutterProject.current();
     await WebFs.start(
+      skipDwds: false,
       target: fs.path.join('lib', 'main.dart'),
       buildInfo: BuildInfo.debug,
       flutterProject: flutterProject,
+      initializePlatform: true,
+      hostname: null,
+      port: null,
     );
 
     // The build daemon is told to build once.
     verify(mockBuildDaemonClient.startBuild()).called(1);
 
-    // Chrome is launched based on port from above.
-    verify(mockChromeLauncher.launch('http://localhost:1234/')).called(1);
+    // .dart_tool directory is created.
+    expect(flutterProject.dartTool.existsSync(), true);
+    expect(lastInitializePlatform, true);
+  }));
+
+  test('Can create webFs from mocked interfaces with initializePlatform', () => testbed.run(() async {
+    final FlutterProject flutterProject = FlutterProject.current();
+    await WebFs.start(
+      skipDwds: false,
+      target: fs.path.join('lib', 'main.dart'),
+      buildInfo: BuildInfo.debug,
+      flutterProject: flutterProject,
+      initializePlatform: false,
+      hostname: null,
+      port: null,
+    );
+
+    // The build daemon is told to build once.
+    verify(mockBuildDaemonClient.startBuild()).called(1);
 
     // .dart_tool directory is created.
     expect(flutterProject.dartTool.existsSync(), true);
+    expect(lastInitializePlatform, false);
+  }));
+
+  test('Uses provided port number and hostname.', () => testbed.run(() async {
+    final FlutterProject flutterProject = FlutterProject.current();
+    await WebFs.start(
+      skipDwds: false,
+      target: fs.path.join('lib', 'main.dart'),
+      buildInfo: BuildInfo.debug,
+      flutterProject: flutterProject,
+      initializePlatform: false,
+      hostname: 'foo',
+      port: '1234',
+    );
+
+    expect(lastPort, 1234);
+    expect(lastAddress, contains('foo'));
+  }));
+
+  test('Throws exception if build fails', () => testbed.run(() async {
+    when(mockBuildDaemonClient.buildResults).thenAnswer((Invocation _) {
+      return Stream<BuildResults>.fromFuture(Future<BuildResults>.value(
+        BuildResults((BuildResultsBuilder builder) {
+          builder.results = ListBuilder<BuildResult>(
+            <BuildResult>[
+              DefaultBuildResult((DefaultBuildResultBuilder builder) {
+                builder.target = 'web';
+                builder.status = BuildStatus.failed;
+              })
+            ]
+          );
+        })
+      ));
+    });
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(WebFs.start(
+      skipDwds: false,
+      target: fs.path.join('lib', 'main.dart'),
+      buildInfo: BuildInfo.debug,
+      flutterProject: flutterProject,
+      initializePlatform: false,
+      hostname: 'foo',
+      port: '1234',
+    ), throwsA(isInstanceOf<Exception>()));
   }));
 }
 

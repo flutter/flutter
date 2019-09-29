@@ -26,11 +26,9 @@
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
-import 'dart:io' as io show exit, IOSink, Process, ProcessSignal, stderr, stdin,
-    Stdout, stdout, IOOverrides, Directory, File, Link;
+import 'dart:io' as io show exit, IOSink, Process, ProcessInfo, ProcessSignal,
+    stderr, stdin, Stdout, stdout;
 
-import 'package:file/file.dart' hide File, Directory, Link, FileSystemEntity;
-import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 
 import 'context.dart';
@@ -65,6 +63,7 @@ export 'dart:io'
         // Platform          NO! use `platform.dart`
         Process,
         ProcessException,
+        // ProcessInfo,      NO! use `io.dart`
         ProcessResult,
         // ProcessSignal     NO! Use [ProcessSignal] below.
         ProcessStartMode,
@@ -82,135 +81,6 @@ export 'dart:io'
         WebSocket,
         WebSocketException,
         WebSocketTransformer;
-
-/// An [IOOverrides] that can delegate to [FileSystem] implementation if provided.
-///
-/// Does not override any of the socket facilities.
-///
-/// Do not provide a [LocalFileSystem] as a delegate. Since internally this calls
-/// out to `dart:io` classes, it will result in a stack overflow error as the
-/// IOOverrides and LocalFileSystem call eachother endlessly.
-///
-/// The only safe delegate types are those that do not call out to `dart:io`,
-/// like the [MemoryFileSystem].
-class FlutterIOOverrides extends io.IOOverrides {
-  FlutterIOOverrides({ FileSystem fileSystem })
-    : _fileSystemDelegate = fileSystem;
-
-  final FileSystem _fileSystemDelegate;
-
-  @override
-  io.Directory createDirectory(String path) {
-    if (_fileSystemDelegate == null) {
-      return super.createDirectory(path);
-    }
-    return _fileSystemDelegate.directory(path);
-  }
-
-  @override
-  io.File createFile(String path) {
-    if (_fileSystemDelegate == null) {
-      return super.createFile(path);
-    }
-    return _fileSystemDelegate.file(path);
-  }
-
-  @override
-  io.Link createLink(String path) {
-    if (_fileSystemDelegate == null) {
-      return super.createLink(path);
-    }
-    return _fileSystemDelegate.link(path);
-  }
-
-  @override
-  Stream<FileSystemEvent> fsWatch(String path, int events, bool recursive) {
-    if (_fileSystemDelegate == null) {
-      return super.fsWatch(path, events, recursive);
-    }
-    return _fileSystemDelegate.file(path).watch(events: events, recursive: recursive);
-  }
-
-  @override
-  bool fsWatchIsSupported() {
-    if (_fileSystemDelegate == null) {
-      return super.fsWatchIsSupported();
-    }
-    return _fileSystemDelegate.isWatchSupported;
-  }
-
-  @override
-  Future<FileSystemEntityType> fseGetType(String path, bool followLinks) {
-    if (_fileSystemDelegate == null) {
-      return super.fseGetType(path, followLinks);
-    }
-    return _fileSystemDelegate.type(path, followLinks: followLinks ?? true);
-  }
-
-  @override
-  FileSystemEntityType fseGetTypeSync(String path, bool followLinks) {
-    if (_fileSystemDelegate == null) {
-      return super.fseGetTypeSync(path, followLinks);
-    }
-    return _fileSystemDelegate.typeSync(path, followLinks: followLinks ?? true);
-  }
-
-  @override
-  Future<bool> fseIdentical(String path1, String path2) {
-    if (_fileSystemDelegate == null) {
-      return super.fseIdentical(path1, path2);
-    }
-    return _fileSystemDelegate.identical(path1, path2);
-  }
-
-  @override
-  bool fseIdenticalSync(String path1, String path2) {
-    if (_fileSystemDelegate == null) {
-      return super.fseIdenticalSync(path1, path2);
-    }
-    return _fileSystemDelegate.identicalSync(path1, path2);
-  }
-
-  @override
-  io.Directory getCurrentDirectory() {
-    if (_fileSystemDelegate == null) {
-      return super.getCurrentDirectory();
-    }
-    return _fileSystemDelegate.currentDirectory;
-  }
-
-  @override
-  io.Directory getSystemTempDirectory() {
-    if (_fileSystemDelegate == null) {
-      return super.getSystemTempDirectory();
-    }
-    return _fileSystemDelegate.systemTempDirectory;
-  }
-
-  @override
-  void setCurrentDirectory(String path) {
-    if (_fileSystemDelegate == null) {
-      return super.setCurrentDirectory(path);
-    }
-    _fileSystemDelegate.currentDirectory = path;
-  }
-
-  @override
-  Future<FileStat> stat(String path) {
-    if (_fileSystemDelegate == null) {
-      return super.stat(path);
-    }
-    return _fileSystemDelegate.stat(path);
-  }
-
-  @override
-  FileStat statSync(String path) {
-    if (_fileSystemDelegate == null) {
-      return super.statSync(path);
-    }
-    return _fileSystemDelegate.statSync(path);
-  }
-}
 
 /// Exits the process with the given [exitCode].
 typedef ExitFunction = void Function(int exitCode);
@@ -296,8 +166,9 @@ class _PosixProcessSignal extends ProcessSignal {
 
   @override
   Stream<ProcessSignal> watch() {
-    if (platform.isWindows)
+    if (platform.isWindows) {
       return const Stream<ProcessSignal>.empty();
+    }
     return super.watch();
   }
 }
@@ -319,3 +190,25 @@ Stdio get stdio => context.get<Stdio>() ?? const Stdio();
 io.Stdout get stdout => stdio.stdout;
 Stream<List<int>> get stdin => stdio.stdin;
 io.IOSink get stderr => stdio.stderr;
+
+/// An overridable version of io.ProcessInfo.
+abstract class ProcessInfo {
+  factory ProcessInfo() => _DefaultProcessInfo();
+
+  static ProcessInfo get instance => context.get<ProcessInfo>();
+
+  int get currentRss;
+
+  int get maxRss;
+}
+
+ProcessInfo get processInfo => ProcessInfo.instance;
+
+/// The default implementation of [ProcessInfo], which uses [io.ProcessInfo].
+class _DefaultProcessInfo implements ProcessInfo {
+  @override
+  int get currentRss => io.ProcessInfo.currentRss;
+
+  @override
+  int get maxRss => io.ProcessInfo.maxRss;
+}

@@ -537,7 +537,7 @@ void main() {
         child: Scaffold(
           floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.send),
-            onPressed: () {}
+            onPressed: () {},
           ),
           body: Builder(
             builder: (BuildContext context) {
@@ -693,7 +693,7 @@ void main() {
         child: Scaffold(
           floatingActionButton: FloatingActionButton(
               child: const Icon(Icons.send),
-              onPressed: () {}
+              onPressed: () {},
           ),
           body: Builder(
             builder: (BuildContext context) {
@@ -731,7 +731,7 @@ void main() {
       resizeToAvoidBottomInset: false,
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.send),
-        onPressed: () {}
+        onPressed: () {},
       ),
       body: Builder(
         builder: (BuildContext context) {
@@ -756,7 +756,7 @@ void main() {
         data: const MediaQueryData(
           padding: EdgeInsets.only(bottom: 20.0),
         ),
-        child: child
+        child: child,
       )
     );
     await tester.tap(find.text('X'));

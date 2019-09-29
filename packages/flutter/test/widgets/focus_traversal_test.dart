@@ -235,6 +235,71 @@ void main() {
       expect(secondFocusNode.hasFocus, isFalse);
       expect(scope.hasFocus, isTrue);
     });
+    testWidgets('Find the initial focus when a route is pushed or popped.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final FocusNode testNode1 = FocusNode(debugLabel: 'First Focus Node');
+      final FocusNode testNode2 = FocusNode(debugLabel: 'Second Focus Node');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DefaultFocusTraversal(
+            policy: WidgetOrderFocusTraversalPolicy(),
+            child: Center(
+              child: Builder(builder: (BuildContext context) {
+                return MaterialButton(
+                  key: key1,
+                  focusNode: testNode1,
+                  autofocus: true,
+                  onPressed: () {
+                    Navigator.of(context).push<void>(
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) {
+                          return Center(
+                            child: MaterialButton(
+                              key: key2,
+                              focusNode: testNode2,
+                              autofocus: true,
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('Go Back'),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('Go Forward'),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+
+      final Element firstChild = tester.element(find.text('Go Forward'));
+      final FocusNode firstFocusNode = Focus.of(firstChild);
+      final FocusNode scope = Focus.of(firstChild).enclosingScope;
+      await tester.pump();
+
+      expect(firstFocusNode.hasFocus, isTrue);
+      expect(scope.hasFocus, isTrue);
+
+      await tester.tap(find.text('Go Forward'));
+      await tester.pumpAndSettle();
+
+      final Element secondChild = tester.element(find.text('Go Back'));
+      final FocusNode secondFocusNode = Focus.of(secondChild);
+
+      expect(firstFocusNode.hasFocus, isFalse);
+      expect(secondFocusNode.hasFocus, isTrue);
+
+      await tester.tap(find.text('Go Back'));
+      await tester.pumpAndSettle();
+
+      expect(firstFocusNode.hasFocus, isTrue);
+      expect(scope.hasFocus, isTrue);
+    });
   });
   group(ReadingOrderTraversalPolicy, () {
     testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
