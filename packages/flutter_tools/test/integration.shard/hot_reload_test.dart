@@ -8,6 +8,7 @@
 // the command line process.
 @Tags(<String>['no_coverage'])
 import 'dart:async';
+import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -43,7 +44,13 @@ void main() {
 
     test('newly added code executes during hot reload', () async {
       await _flutter.run();
+      if (Platform.isWindows) {
+        await Future<void>.delayed(const Duration(milliseconds: 100)); 
+      }
       _project.uncommentHotReloadPrint();
+      if (Platform.isWindows) {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      }
       final StringBuffer stdout = StringBuffer();
       final StreamSubscription<String> subscription = _flutter.stdout.listen(stdout.writeln);
       try {

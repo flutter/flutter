@@ -22,7 +22,7 @@ Directory createResolvedTempDirectorySync(String prefix) {
 void writeFile(String path, String content) {
   fs.file(path)
     ..createSync(recursive: true)
-    ..writeAsStringSync(content, flush: true);
+    ..writeAsStringSync(content);
 }
 
 void writePackages(String folder) {
