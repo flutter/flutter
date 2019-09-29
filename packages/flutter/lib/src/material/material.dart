@@ -773,7 +773,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
         textDirection: Directionality.of(context),
       ),
       clipBehavior: widget.clipBehavior,
-      elevation: elevation,
+      elevation: 0,
       color: _elevationOverlayColor(context, widget.color, elevation),
       shadowColor: _shadowColor.evaluate(animation),
     );
