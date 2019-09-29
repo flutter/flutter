@@ -535,11 +535,11 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  simple_animation_perf_ios:
+  simple_animation_perf_iphonexs:
     description: >
       Measure CPU/GPU usage percentages of a simple animation.
     stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
+    required_agent_capabilities: ["mac/iphonexs"]
 
   smoke_catalina_start_up_ios:
     description: >
