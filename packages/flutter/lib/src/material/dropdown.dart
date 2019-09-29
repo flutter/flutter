@@ -765,6 +765,7 @@ class DropdownButton<T> extends StatefulWidget {
 }
 
 class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindingObserver {
+  bool _canDismiss = false;
   int _selectedIndex;
   _DropdownRoute<T> _dropdownRoute;
 
@@ -786,7 +787,11 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Defined by WidgetsBindingObserver
   @override
   void didChangeMetrics() {
-    _removeDropdownRoute();
+    if (_canDismiss) {
+      _removeDropdownRoute();
+    } else {
+      _canDismiss = true;
+    }
   }
 
   void _removeDropdownRoute() {
@@ -837,6 +842,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       style: _textStyle,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     );
+    _canDismiss = FocusScope.of(context).hasPrimaryFocus;
 
     Navigator.push(context, _dropdownRoute).then<void>((_DropdownRouteResult<T> newValue) {
       _dropdownRoute = null;
