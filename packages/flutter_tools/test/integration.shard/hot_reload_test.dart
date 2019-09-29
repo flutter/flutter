@@ -45,11 +45,11 @@ void main() {
     test('newly added code executes during hot reload', () async {
       await _flutter.run();
       if (Platform.isWindows) {
-        await Future<void>.delayed(const Duration(milliseconds: 100));
+        await Future<void>.delayed(const Duration(milliseconds: 250));
       }
       _project.uncommentHotReloadPrint();
       if (Platform.isWindows) {
-        await Future<void>.delayed(const Duration(milliseconds: 100));
+        await Future<void>.delayed(const Duration(milliseconds: 250));
       }
       final StringBuffer stdout = StringBuffer();
       final StreamSubscription<String> subscription = _flutter.stdout.listen(stdout.writeln);
