@@ -18,8 +18,13 @@ import '../../../src/testbed.dart';
 void main() {
   Testbed testbed;
   Environment environment;
+  MockPlatform mockPlatform;
 
   setUp(() {
+    mockPlatform = MockPlatform();
+    when(mockPlatform.isWindows).thenReturn(false);
+    when(mockPlatform.isMacOS).thenReturn(true);
+    when(mockPlatform.isLinux).thenReturn(false);
     testbed = Testbed(setup: () {
       environment = Environment(
         projectDir: fs.currentDirectory,
@@ -30,6 +35,8 @@ void main() {
         }
       );
       environment.buildDir.createSync(recursive: true);
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatform,
     });
   });
 
@@ -184,3 +191,4 @@ void main() {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockPlatform extends Mock implements Platform {}
