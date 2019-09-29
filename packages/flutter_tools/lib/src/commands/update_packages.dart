@@ -27,11 +27,6 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'test_api': '0.2.5',     //  |
   'test_core': '0.2.5',    //  |
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
-  'build_runner_core': '3.1.1',    //  | Temporarily prevent the test web_tests-linux from failing.
-  'build_daemon': '2.0.0',         //  | See https://github.com/flutter/flutter/issues/40989
-  'build_web_compilers': '2.3.0',  //  |
-  'build_resolvers': '1.0.7',      //  |
-  'build_runner': '1.6.9',         //  |
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
