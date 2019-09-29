@@ -56,6 +56,8 @@ enum Artifact {
   skyEnginePath,
   /// The location of the macOS engine podspec file.
   flutterMacOSPodspec,
+  /// The location of the frontend server package.
+  frontendServerSource,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -126,6 +128,9 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'sky_engine';
     case Artifact.flutterMacOSPodspec:
       return 'FlutterMacOS.podspec';
+    case Artifact.frontendServerSource:
+      return 'frontend_server';
+      break;
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -422,6 +427,9 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
       case Artifact.flutterMacOSPodspec:
         return fs.path.join(_hostEngineOutPath, _artifactToFileName(artifact));
+      case Artifact.frontendServerSource:
+        return fs.path.join(_engineSrcPath, 'flutter', _artifactToFileName(artifact));
+        break;
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

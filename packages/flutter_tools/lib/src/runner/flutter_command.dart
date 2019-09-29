@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/kernel/compiler_generator.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/strings.dart';
 
@@ -446,6 +447,7 @@ abstract class FlutterCommand extends Command<void> {
         if (flutterUsage.isFirstRun) {
           flutterUsage.printWelcome();
         }
+        await compilerGenerator.generate();
         final String commandPath = await usagePath;
         FlutterCommandResult commandResult;
         try {

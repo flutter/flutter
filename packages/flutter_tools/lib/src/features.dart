@@ -36,6 +36,9 @@ class FeatureFlags {
   /// Whether flutter desktop for Windows is enabled.
   bool get isWindowsEnabled => _isEnabled(flutterWindowsDesktopFeature);
 
+  /// Whether custom kernel transformers is enabled.
+  bool get isKernelTransformersEnabled => _isEnabled(kernelTransformersFeature);
+
   // Calculate whether a particular feature is enabled for the current channel.
   static bool _isEnabled(Feature feature) {
     final String currentChannel = FlutterVersion.instance.channel;
@@ -124,6 +127,16 @@ const Feature flutterBuildPluginAsAarFeature = Feature(
     available: true,
     enabledByDefault: false,
   ),
+);
+
+/// The [Feature] for injection of custom kernel transformers.
+const Feature kernelTransformersFeature = Feature(
+  name: 'Support injecting custom kernel transformers into the Dart compiler',
+  configSetting: 'enable-custom-kernel-transformers',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  )
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.

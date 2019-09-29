@@ -225,24 +225,31 @@ class FlutterProject {
     await injectPlugins(this, checkProjects: checkProjects);
   }
 
-  /// Return the set of builders used by this package.
-  YamlMap get builders {
+  /// A cached pubspec value.
+  YamlMap _yamlMap;
+  YamlMap _readMap(String key) {
     if (!pubspecFile.existsSync()) {
       return null;
     }
-    final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync());
+    _yamlMap ??= loadYaml(pubspecFile.readAsStringSync());
     // If the pubspec file is empty, this will be null.
-    if (pubspec == null) {
+    if (_yamlMap == null) {
       return null;
     }
-    return pubspec['builders'];
+    return _yamlMap[key];
   }
 
+  /// Return the set of builders used by this package.
+  YamlMap get builders => _readMap('builders');
+
+  /// Returns the set of kernel transformers used by this package.
+  YamlMap get transformers => _readMap('transformers');
+
   /// Whether there are any builders used by this package.
-  bool get hasBuilders {
-    final YamlMap result = builders;
-    return result != null && result.isNotEmpty;
-  }
+  bool get hasBuilders => builders != null && builders.isNotEmpty;
+
+  /// Whether there are any kernel transformers used by this package.
+  bool get hasTransformers => transformers != null && transformers.isNotEmpty;
 }
 
 /// Represents an Xcode-based sub-project.

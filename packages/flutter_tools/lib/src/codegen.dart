@@ -85,9 +85,10 @@ abstract class CodegenDaemon {
 /// supported here. Using the build pipeline implies a fixed multiroot
 /// filesystem and requires a pubspec.
 class CodeGeneratingKernelCompiler implements KernelCompiler {
-  const CodeGeneratingKernelCompiler();
+  CodeGeneratingKernelCompiler({File frontendServerOverride})
+    : _delegate = KernelCompiler(frontendServerOverride: frontendServerOverride);
 
-  static const KernelCompiler _delegate = KernelCompiler();
+  final KernelCompiler _delegate;
 
   @override
   Future<CompilerOutput> compile({
