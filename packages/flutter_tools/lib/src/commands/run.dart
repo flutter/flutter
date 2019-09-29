@@ -43,6 +43,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       )
       ..addOption('route',
         help: 'Which route to load when running the app.',
+      )
+      ..addOption('vmservice-out-file',
+        help: 'A file to write the attached vmservice uri to after an'
+          ' application is started.',
+        valueHelp: 'project/example/out.txt'
       );
     usesWebOptions(hide: !verboseHelp);
     usesTargetOption();
@@ -307,6 +312,7 @@ class RunCommand extends RunCommandBase {
         hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] : '',
         port: featureFlags.isWebEnabled ? argResults['web-port'] : '',
         browserLaunch: featureFlags.isWebEnabled ? argResults['web-browser-launch'] : null,
+        vmserviceOutFile: argResults['vmservice-out-file'],
       );
     }
   }
