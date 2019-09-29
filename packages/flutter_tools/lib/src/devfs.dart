@@ -311,9 +311,8 @@ class _DevFSHttpWriter {
         final Stream<List<int>> contents = content.contentsAsCompressedStream();
         await request.addStream(contents);
         final HttpClientResponse response = await request.close();
-        response.listen((List<int> data) { print(utf8.decode(data)); },
-            onError: (dynamic error) { print('error: $error'); },
-            onDone: () { print('done'); },
+        response.listen((_) => null,
+            onError: (dynamic error) { printTrace('error: $error'); },
             cancelOnError: true);
         break;
       } catch (error, trace) {
