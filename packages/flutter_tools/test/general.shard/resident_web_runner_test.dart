@@ -191,6 +191,7 @@ void main() {
     })).called(1);
     verify(Usage.instance.sendTiming('hot', 'web-restart', any)).called(1);
     verify(Usage.instance.sendTiming('hot', 'web-refresh', any)).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -220,6 +221,7 @@ void main() {
     })).called(1);
     verify(Usage.instance.sendTiming('hot', 'web-restart', any)).called(1);
     verify(Usage.instance.sendTiming('hot', 'web-refresh', any)).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
