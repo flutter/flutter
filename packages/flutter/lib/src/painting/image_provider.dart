@@ -395,8 +395,6 @@ abstract class ImageProvider<T> {
   /// image as well as a way to supply parameters as a closure.
   ///
   /// See also:
-  ///   * [Image.network]'s [resizeToFit] parameter for how this is intended to
-  ///      be consumed.
   ///   * [ResizedImage] for modifying the key to account for target dimensions.
   @protected
   ImageStreamCompleter load(T key, DecoderCallback decode);
@@ -496,10 +494,6 @@ class _SizeAwareCacheKey {
 }
 
 /// Re-sizes the cache of the image provided to the specified size.
-///
-/// See also:
-///
-/// * [Image.network] for example usage when `resizeToFit` parameter is set.
 class ResizedImage extends ImageProvider<_SizeAwareCacheKey> {
   /// Creates an object that re-sizes the cache of the image to the specified size.
   ///
