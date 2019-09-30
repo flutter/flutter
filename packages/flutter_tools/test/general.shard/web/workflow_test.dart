@@ -68,11 +68,7 @@ void main() {
     }));
 
     test('does not apply on other platforms', () => testbed.run(() {
-      when(mockProcessManager.canRun('chrome')).thenReturn(false);
       expect(workflow.appliesToHostPlatform, false);
-      expect(workflow.canLaunchDevices, false);
-      expect(workflow.canListDevices, false);
-      expect(workflow.canListEmulators, false);
     }, overrides: <Type, Generator>{
       Platform: () => notSupported,
     }));

@@ -15,7 +15,6 @@ import '../features.dart';
 import '../globals.dart';
 import '../project.dart';
 import 'chrome.dart';
-import 'workflow.dart';
 
 class WebApplicationPackage extends ApplicationPackage {
   WebApplicationPackage(this.flutterProject) : super(id: flutterProject.manifest.appName);
@@ -81,7 +80,7 @@ class ChromeDevice extends Device {
   Future<String> get emulatorId async => null;
 
   @override
-  bool isSupported() =>  featureFlags.isWebEnabled && canFindChrome();
+  bool isSupported() =>  featureFlags.isWebEnabled && chromeLauncher.canFindChrome();
 
   @override
   String get name => 'Chrome';
@@ -162,6 +161,7 @@ class ChromeDevice extends Device {
 class WebDevices extends PollingDeviceDiscovery {
   WebDevices() : super('chrome');
 
+  final bool _chromeIsAvailable = chromeLauncher.canFindChrome();
   final ChromeDevice _webDevice = ChromeDevice();
   final WebServerDevice _webServerDevice = WebServerDevice();
 
@@ -171,7 +171,8 @@ class WebDevices extends PollingDeviceDiscovery {
   @override
   Future<List<Device>> pollingGetDevices() async {
     return <Device>[
-      _webDevice,
+      if (_chromeIsAvailable)
+        _webDevice,
       _webServerDevice,
     ];
   }
