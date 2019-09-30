@@ -55,9 +55,9 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
   );
 }
 
-ImageProvider<dynamic> _resizeIfNeeded(int targetWidth, int targetHeight, ImageProvider<dynamic> provider) {
-  if (targetWidth != null || targetHeight != null) {
-    return ResizedImage(provider, targetWidth, targetHeight);
+ImageProvider<dynamic> _resizeIfNeeded(int cacheWidth, int cacheHeight, ImageProvider<dynamic> provider) {
+  if (cacheWidth != null || cacheHeight != null) {
+    return ResizedImage(provider, cacheWidth, cacheHeight);
   } else {
     return provider;
   }
@@ -314,11 +314,11 @@ class Image extends StatefulWidget {
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
-  /// If [resizeToFit] is true, it indicates to the engine that this image must
-  /// be resized. The image will be resized to the container's rendered dimensions.
-  /// The image will be rendered to the constraints of the layout or [width]
-  /// and [height] regardless of this parameter. This parameter is primarily
-  /// intended to reduce the memory usage of [ImageCache].
+  /// If [cacheWidth] and/or [cacheHeight] is provided, it indicates to the
+  /// engine that cached image must be resized. The image will be rendered
+  /// to the constraints of the layout or [width] and [height] regardless of
+  /// these parameters. These parameters are primarily intended to reduce
+  /// the memory usage of [ImageCache].
   Image.network(
     String src, {
     Key key,
@@ -339,9 +339,9 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
     Map<String, String> headers,
-    int resizeWidth,
-    int resizeHeight,
-  }) : image = _resizeIfNeeded(resizeWidth, resizeHeight, NetworkImage(src, scale: scale, headers: headers)),
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -366,11 +366,11 @@ class Image extends StatefulWidget {
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
-  /// If [resizeToFit] is true, it indicates to the engine that this image must
-  /// be resized. The image will be resized to the container's rendered dimensions.
-  /// The image will be rendered to the constraints of the layout or [width]
-  /// and [height] regardless of this parameter. This parameter is primarily
-  /// intended to reduce the memory usage of [ImageCache].
+  /// If [cacheWidth] and/or [cacheHeight] is provided, it indicates to the
+  /// engine that cached image must be resized. The image will be rendered
+  /// to the constraints of the layout or [width] and [height] regardless of
+  /// these parameters. These parameters are primarily intended to reduce
+  /// the memory usage of [ImageCache].
   Image.file(
     File file, {
     Key key,
@@ -389,9 +389,9 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-    int resizeWidth,
-    int resizeHeight,
-  }) : image = _resizeIfNeeded(resizeWidth, resizeHeight, FileImage(file, scale: scale)),
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
@@ -573,11 +573,11 @@ class Image extends StatefulWidget {
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
-  /// If [resizeToFit] is true, it indicates to the engine that this image must
-  /// be resized. The image will be resized to the container's rendered dimensions.
-  /// The image will be rendered to the constraints of the layout or [width]
-  /// and [height] regardless of this parameter. This parameter is primarily
-  /// intended to reduce the memory usage of [ImageCache].
+  /// If [cacheWidth] and/or [cacheHeight] is provided, it indicates to the
+  /// engine that cached image must be resized. The image will be rendered
+  /// to the constraints of the layout or [width] and [height] regardless of
+  /// these parameters. These parameters are primarily intended to reduce
+  /// the memory usage of [ImageCache].
   Image.memory(
     Uint8List bytes, {
     Key key,
@@ -596,9 +596,9 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-    int resizeWidth,
-    int resizeHeight,
-  }) : image = _resizeIfNeeded(resizeWidth, resizeHeight, MemoryImage(bytes, scale: scale)),
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),

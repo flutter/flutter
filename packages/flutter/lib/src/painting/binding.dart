@@ -71,13 +71,13 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
 
   /// Calls through to [dart:ui] with [decodedCacheRatioCap] from [ImageCache].
   Future<ui.Codec> instantiateImageCodec(Uint8List list, {
-    int targetWidth,
-    int targetHeight,
+    int cacheWidth,
+    int cacheHeight,
   }) {
     return ui.instantiateImageCodec(
       list,
-      targetWidth: targetWidth ?? ui.kDoNotResizeDimension,
-      targetHeight: targetHeight ?? ui.kDoNotResizeDimension,
+      targetWidth: cacheWidth ?? ui.kDoNotResizeDimension,
+      targetHeight: cacheHeight ?? ui.kDoNotResizeDimension,
     );
   }
 

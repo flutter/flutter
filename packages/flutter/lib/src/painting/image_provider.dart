@@ -154,9 +154,9 @@ class ImageConfiguration {
 
 /// Performs the decode process for use in [ImageProvider.load].
 ///
-/// This callback allows decoupling of the `targetWidth` and `targetHeight`
+/// This callback allows decoupling of the `cacheWidth` and `cacheHeight`
 /// parameters from implementations of [ImageProvider] that do not use them.
-typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int targetWidth, int targetHeight});
+typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int cacheWidth, int cacheHeight});
 
 /// Identifies an image without committing to the precise final asset. This
 /// allows a set of images to be identified and for the precise image to later
@@ -321,8 +321,8 @@ abstract class ImageProvider<T> {
         final ImageStreamCompleter completer = PaintingBinding.instance
             .imageCache.putIfAbsent(
               key,
-              () => load(key, (Uint8List bytes, {int targetWidth, int targetHeight}) {
-                return PaintingBinding.instance.instantiateImageCodec(bytes, targetWidth: targetWidth, targetHeight: targetHeight);
+              () => load(key, (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+                return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
               }),
               onError: handleError);
         if (completer != null) {
@@ -391,15 +391,8 @@ abstract class ImageProvider<T> {
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
   ///
-  /// If [targetHeight] or [targetWidth] are specified, the image returned
-  /// through the [ImageStreamCompleter] will be resized. It is discouraged
-  /// to use these parameters directly as it could result in the following
-  /// scenario:
-  ///
-  ///   1. call [load] with [h1, w1].
-  ///   2. [ImageCache] will cache image with [h1, w1] dimensions.
-  ///   3. call [load] with [h2, w2], [ImageCache] could return the previously
-  ///      cached image if [obtainKey] does not account for target dimensions.
+  /// The [decode] callback provides the logic to obtain the codec for the
+  /// image as well as a way to supply parameters as a closure.
   ///
   /// See also:
   ///   * [Image.network]'s [resizeToFit] parameter for how this is intended to
@@ -502,27 +495,30 @@ class _SizeAwareCacheKey {
   final int _height;
 }
 
-/// Re-sizes the image provided to the specified size.
+/// Re-sizes the cache of the image provided to the specified size.
 ///
 /// See also:
 ///
 /// * [Image.network] for example usage when `resizeToFit` parameter is set.
 class ResizedImage extends ImageProvider<_SizeAwareCacheKey> {
-  /// Creates an object that re-sizes the image to rendered size.
-  const ResizedImage(this._imageProvider, this._resizeWidth, this._resizeHeight);
+  /// Creates an object that re-sizes the cache of the image to the specified size.
+  ///
+  /// The image cached and returned through the [ImageStreamCompleter] will be
+  /// resized from its native resolution.
+  const ResizedImage(this._imageProvider, this._cacheWidth, this._cacheHeight);
 
   final ImageProvider _imageProvider;
 
-  final int _resizeWidth;
-  final int _resizeHeight;
+  final int _cacheWidth;
+  final int _cacheHeight;
 
   @override
   ImageStreamCompleter load(_SizeAwareCacheKey key, DecoderCallback decode) {
-    if (_resizeWidth == null && _resizeHeight == null) {
+    if (_cacheWidth == null && _cacheHeight == null) {
       return _imageProvider.load(key._providerCacheKey, decode);
     } else {
-      DecoderCallback decodeResize = (Uint8List bytes, {int targetWidth, int targetHeight}) {
-        return decode(bytes, targetWidth: _resizeWidth, targetHeight: _resizeHeight);
+      DecoderCallback decodeResize = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+        return decode(bytes, cacheWidth: _cacheWidth, cacheHeight: _cacheHeight);
       };
       return _imageProvider.load(key._providerCacheKey, decodeResize);
     }
@@ -531,7 +527,7 @@ class ResizedImage extends ImageProvider<_SizeAwareCacheKey> {
   @override
   Future<_SizeAwareCacheKey> obtainKey(ImageConfiguration configuration) async {
     final dynamic providerCacheKey = await _imageProvider.obtainKey(configuration);
-    return _SizeAwareCacheKey(providerCacheKey, _resizeWidth, _resizeHeight);
+    return _SizeAwareCacheKey(providerCacheKey, _cacheWidth, _cacheHeight);
   }
 }
 
@@ -671,7 +667,6 @@ class MemoryImage extends ImageProvider<MemoryImage> {
     assert(key == this);
 
     return decode(bytes);
-    // return PaintingBinding.instance.instantiateImageCodec(bytes, targetWidth: targetWidth, targetHeight: targetHeight);
   }
 
   @override
