@@ -49,7 +49,9 @@ void main() {
       return const Stream<List<int>>.empty();
     });
     when(linuxPlatform.isLinux).thenReturn(true);
+    when(linuxPlatform.isWindows).thenReturn(false);
     when(notLinuxPlatform.isLinux).thenReturn(false);
+    when(notLinuxPlatform.isWindows).thenReturn(false);
   });
 
   testUsingContext('Linux build fails when there is no linux project', () async {
