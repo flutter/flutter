@@ -3621,11 +3621,12 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isButton, value);
   }
 
-  /// Whether the owning [RenderObject] is a link (true) or not (false).
-  bool get isLink => _hasFlag(SemanticsFlag.isLink);
-  set isLink(bool value) {
-    _setFlag(SemanticsFlag.isLink, value);
-  }
+  // TODO(Piinks): Restore when https://github.com/flutter/engine/pull/12453 lands
+//  /// Whether the owning [RenderObject] is a link (true) or not (false).
+//  bool get isLink => _hasFlag(SemanticsFlag.isLink);
+//  set isLink(bool value) {
+//    _setFlag(SemanticsFlag.isLink, value);
+//  }
 
   /// Whether the owning [RenderObject] is a header (true) or not (false).
   bool get isHeader => _hasFlag(SemanticsFlag.isHeader);
