@@ -22,7 +22,6 @@ class TextField extends RoleManager {
     persistentTextEditingElement = PersistentTextEditingElement(
       textEditing,
       editableDomElement,
-      onDomElementSwap: _setupDomElement,
     );
     _setupDomElement();
   }
