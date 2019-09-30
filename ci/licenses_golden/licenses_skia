@@ -1,4 +1,4 @@
-Signature: da94cce1d611066ad51ea2c227805f9f
+Signature: e5e93f20c116ab2287c0606ea61667f2
 
 UNUSED LICENSES:
 
@@ -3610,8 +3610,8 @@ FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferImageGenerator.h
 FILE: ../../../third_party/skia/src/gpu/GrBackendSurface.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBackendTextureImageGenerator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBackendTextureImageGenerator.h
-FILE: ../../../third_party/skia/src/gpu/GrColorSpaceInfo.cpp
-FILE: ../../../third_party/skia/src/gpu/GrColorSpaceInfo.h
+FILE: ../../../third_party/skia/src/gpu/GrColorInfo.cpp
+FILE: ../../../third_party/skia/src/gpu/GrColorInfo.h
 FILE: ../../../third_party/skia/src/gpu/GrDeferredProxyUploader.h
 FILE: ../../../third_party/skia/src/gpu/GrDeferredUpload.h
 FILE: ../../../third_party/skia/src/gpu/GrOnFlushResourceProvider.cpp
