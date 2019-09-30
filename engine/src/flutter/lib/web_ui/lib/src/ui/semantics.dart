@@ -293,6 +293,7 @@ class SemanticsFlag {
   static const int _kHasImplicitScrollingIndex = 1 << 18;
   static const int _kIsMultilineIndex = 1 << 19;
   static const int _kIsReadOnlyIndex = 1 << 20;
+  static const int _kIsFocusableIndex = 1 << 21;
 
   const SemanticsFlag._(this.index);
 
@@ -350,6 +351,11 @@ class SemanticsFlag {
   ///
   /// Only applicable when [isTextField] is true.
   static const SemanticsFlag isReadOnly = SemanticsFlag._(_kIsReadOnlyIndex);
+
+  /// Whether the semantic node is able to hold the user's focus.
+  ///
+  /// The focused element is usually the current receiver of keyboard inputs.
+  static const SemanticsFlag isFocusable = SemanticsFlag._(_kIsFocusableIndex);
 
   /// Whether the semantic node currently holds the user's focus.
   ///
@@ -517,6 +523,7 @@ class SemanticsFlag {
     _kIsSelectedIndex: isSelected,
     _kIsButtonIndex: isButton,
     _kIsTextFieldIndex: isTextField,
+    _kIsFocusableIndex: isFocusable,
     _kIsFocusedIndex: isFocused,
     _kHasEnabledStateIndex: hasEnabledState,
     _kIsEnabledIndex: isEnabled,
@@ -548,6 +555,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.isButton';
       case _kIsTextFieldIndex:
         return 'SemanticsFlag.isTextField';
+      case _kIsFocusableIndex:
+        return 'SemanticsFlag.isFocusable';
       case _kIsFocusedIndex:
         return 'SemanticsFlag.isFocused';
       case _kHasEnabledStateIndex:
