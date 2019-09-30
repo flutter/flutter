@@ -118,19 +118,23 @@ void main() {
       final RealMockVMService vmService = RealMockVMService();
       final RealMockVM vm = RealMockVM();
       final Map<String, dynamic> response =  <String, dynamic>{ 'uri': 'file://abc' };
-      when(vm.createDevFS(any)).thenAnswer((_) => Future<Map<String, dynamic>>.value(response));
+      when(vm.createDevFS(any)).thenAnswer((Invocation invocation) {
+        return Future<Map<String, dynamic>>.value(response);
+      });
       when(vmService.vm).thenReturn(vm);
 
       reset(httpClient);
 
       final MockHttpClientRequest httpRequest = MockHttpClientRequest();
       when(httpRequest.headers).thenReturn(MockHttpHeaders());
-      when(httpClient.putUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(httpRequest));
+      when(httpClient.putUrl(any)).thenAnswer((Invocation invocation) {
+        return Future<HttpClientRequest>.value(httpRequest);
+      });
       final MockHttpClientResponse httpClientResponse = MockHttpClientResponse();
       int nRequest = 0;
-      const int FAILED_ATTEMPTS = 5;
-      when(httpRequest.close()).thenAnswer((_) {
-        if (nRequest++ < FAILED_ATTEMPTS) {
+      const int kFailedAttempts = 5;
+      when(httpRequest.close()).thenAnswer((Invocation invocation) {
+        if (nRequest++ < kFailedAttempts) {
           throw 'Connection resert by peer';
         }
         return Future<HttpClientResponse>.value(httpClientResponse);
@@ -150,8 +154,8 @@ void main() {
 
       expect(report.syncedBytes, 22);
       expect(report.success, isTrue);
-      verify(httpClient.putUrl(any)).called(FAILED_ATTEMPTS + 1);
-      verify(httpRequest.close()).called(FAILED_ATTEMPTS + 1);
+      verify(httpClient.putUrl(any)).called(kFailedAttempts + 1);
+      verify(httpRequest.close()).called(kFailedAttempts + 1);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });

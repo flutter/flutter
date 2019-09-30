@@ -289,7 +289,7 @@ class _DevFSHttpWriter {
     while ((_inFlight < kMaxInFlight) && (!_completer.isCompleted) && _outstanding.isNotEmpty) {
       final Uri deviceUri = _outstanding.keys.first;
       final DevFSContent content = _outstanding.remove(deviceUri);
-      _startWrite(deviceUri, content, /* retry= */ 10);
+      _startWrite(deviceUri, content, retry: 10);
       _inFlight += 1;
     }
     if ((_inFlight == 0) && (!_completer.isCompleted) && _outstanding.isEmpty) {
@@ -299,9 +299,9 @@ class _DevFSHttpWriter {
 
   Future<void> _startWrite(
     Uri deviceUri,
-    DevFSContent content, [
+    DevFSContent content, {
     int retry = 0,
-  ]) async {
+  }) async {
     while(true) {
       try {
         final HttpClientRequest request = await _client.putUrl(httpAddress);
@@ -318,7 +318,8 @@ class _DevFSHttpWriter {
       } catch (error, trace) {
         if (!_completer.isCompleted) {
           printTrace('Error writing "$deviceUri" to DevFS: $error');
-          if (retry-- > 0) {
+          if (retry > 0) {
+            retry--;
             printTrace('trying again in a few - $retry more attempts left');
             await Future<void>.delayed(const Duration(milliseconds: 500));
             continue;
