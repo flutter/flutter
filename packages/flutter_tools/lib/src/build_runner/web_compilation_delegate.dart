@@ -125,20 +125,20 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
   @override
   Stream<AssetId> findAssets(Glob glob, {String package}) async* {
     if (package == null || packageGraph.root.name == package) {
+      final String generatedRoot = fs.path.join(
+        generatedDirectory.path, packageGraph.root.name
+      );
       await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: packageGraph.root.path)) {
-        if (entity is io.File && _isNotHidden(entity)) {
+        if (entity is io.File && _isNotHidden(entity) && !fs.path.isWithin(generatedRoot, entity.path)) {
           yield _fileToAssetId(entity, packageGraph.root);
         }
       }
-      final String generatedRoot = fs.path.join(
-        generatedDirectory.path, packageGraph.root.name,
-      );
       if (!fs.isDirectorySync(generatedRoot)) {
         return;
       }
       await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: generatedRoot)) {
         if (entity is io.File && _isNotHidden(entity)) {
-          yield _fileToAssetId(entity, packageGraph.root, generatedRoot);
+          yield _fileToAssetId(entity, packageGraph.root, fs.path.relative(generatedRoot), true);
         }
       }
       return;
@@ -161,9 +161,14 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
   }
 
   /// Creates an [AssetId] for [file], which is a part of [packageNode].
-  AssetId _fileToAssetId(io.File file, core.PackageNode packageNode, [String root]) {
+  AssetId _fileToAssetId(io.File file, core.PackageNode packageNode, [String root, bool generated = false]) {
     final String filePath = path.normalize(file.absolute.path);
-    final String relativePath = path.relative(filePath, from: root ?? packageNode.path);
+    String relativePath;
+    if (generated) {
+      relativePath = filePath.substring(root.length + 2);
+    } else {
+      relativePath = path.relative(filePath, from: packageNode.path);
+    }
     return AssetId(packageNode.name, relativePath);
   }
 }
