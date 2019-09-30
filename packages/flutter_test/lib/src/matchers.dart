@@ -490,8 +490,7 @@ Matcher matchesSemantics({
     if (isChecked) SemanticsFlag.isChecked,
     if (isSelected) SemanticsFlag.isSelected,
     if (isButton) SemanticsFlag.isButton,
-    // TODO(Piinks): Restore when https://github.com/flutter/engine/pull/12453 lands
-//    if (isLink) SemanticsFlag.isLink,
+    if (isLink) SemanticsFlag.isLink,
     if (isTextField) SemanticsFlag.isTextField,
     if (isReadOnly) SemanticsFlag.isReadOnly,
     if (isFocused) SemanticsFlag.isFocused,
