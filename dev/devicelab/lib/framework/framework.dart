@@ -56,7 +56,9 @@ class _TaskRunner {
     });
     registerExtension('ext.cocoonRunnerReady',
         (String method, Map<String, String> parameters) async {
-      return ServiceExtensionResponse.result('"ready"');
+      return ServiceExtensionResponse.result(
+        json.encode(<String, dynamic>{'result': 'ready'})
+      );
     });
   }
 
