@@ -8,7 +8,6 @@
 // the command line process.
 @Tags(<String>['no_coverage'])
 import 'dart:async';
-import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/common.dart';
