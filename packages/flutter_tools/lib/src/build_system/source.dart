@@ -215,8 +215,7 @@ abstract class Source {
   /// The source is provided by an [Artifact].
   ///
   /// If [artifact] points to a directory then all child files are included.
-  const factory Source.artifact(Artifact artifact, {TargetPlatform platform,
-      BuildMode mode}) = _ArtifactSource;
+  const factory Source.artifact(Artifact artifact, {TargetPlatform platform, BuildMode mode}) = _ArtifactSource;
 
   /// The source is provided by a depfile generated at runtime.
   ///

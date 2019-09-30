@@ -1483,7 +1483,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   ///
   /// The [materialTheme] parameter must not be null.
   MaterialBasedCupertinoThemeData({
-      @required ThemeData materialTheme,
+    @required ThemeData materialTheme,
   }) : this._(
     materialTheme,
     (materialTheme.cupertinoOverrideTheme ?? const CupertinoThemeData()).noDefault(),

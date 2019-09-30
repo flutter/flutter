@@ -34,10 +34,11 @@ Future<void> _timedBuildStep(String name, Future<void> Function() action) async 
 // 2. Create a manifest file for assets.
 // 3. Using these manifests, use the Fuchsia SDK 'pm' tool to create the
 //    Fuchsia package.
-Future<void> buildFuchsia(
-    {@required FuchsiaProject fuchsiaProject,
-    @required String target, // E.g., lib/main.dart
-    BuildInfo buildInfo = BuildInfo.debug}) async {
+Future<void> buildFuchsia({
+  @required FuchsiaProject fuchsiaProject,
+  @required String target, // E.g., lib/main.dart
+  BuildInfo buildInfo = BuildInfo.debug,
+}) async {
   final Directory outDir = fs.directory(getFuchsiaBuildDirectory());
   if (!outDir.existsSync()) {
     outDir.createSync(recursive: true);
@@ -53,9 +54,10 @@ Future<void> buildFuchsia(
 }
 
 Future<void> _buildAssets(
-    FuchsiaProject fuchsiaProject,
-    String target, // lib/main.dart
-    BuildInfo buildInfo) async {
+  FuchsiaProject fuchsiaProject,
+  String target, // lib/main.dart
+  BuildInfo buildInfo,
+) async {
   final String assetDir = getAssetBuildDirectory();
   final AssetBundle assets = await buildAssets(
     manifestPath: fuchsiaProject.project.pubspecFile.path,
@@ -110,9 +112,10 @@ void _rewriteCmx(BuildMode mode, File src, File dst) {
 
 // TODO(zra): Allow supplying a signing key.
 Future<void> _buildPackage(
-    FuchsiaProject fuchsiaProject,
-    String target, // lib/main.dart
-    BuildInfo buildInfo) async {
+  FuchsiaProject fuchsiaProject,
+  String target, // lib/main.dart
+  BuildInfo buildInfo,
+) async {
   final String outDir = getFuchsiaBuildDirectory();
   final String pkgDir = fs.path.join(outDir, 'pkg');
   final String appName = fuchsiaProject.project.manifest.appName;
