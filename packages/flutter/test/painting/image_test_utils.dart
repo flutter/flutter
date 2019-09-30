@@ -31,7 +31,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key, {int targetWidth, int targetHeight}) =>
+  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) =>
       OneFrameImageStreamCompleter(_completer.future);
 
   ImageInfo complete() {

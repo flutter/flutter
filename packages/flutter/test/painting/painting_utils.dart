@@ -14,7 +14,7 @@ class PaintingBindingSpy extends BindingBase with ServicesBinding, PaintingBindi
   int get instantiateImageCodecCalledCount => counter;
 
   @override
-  Future<ui.Codec> instantiateImageCodec(Uint8List list, {int targetWidth, int targetHeight}) {
+  Future<ui.Codec> instantiateImageCodec(Uint8List list, DecoderCallback decode) {
     counter++;
     return ui.instantiateImageCodec(list);
   }
