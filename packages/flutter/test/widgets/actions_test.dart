@@ -254,7 +254,8 @@ void main() {
 
       await tester.pump();
       final ActionDispatcher dispatcher = Actions.of(
-        containerKey.currentContext, nullOk: true,
+        containerKey.currentContext,
+        nullOk: true,
       );
       expect(dispatcher, equals(testDispatcher));
     });
@@ -294,7 +295,10 @@ void main() {
     testWidgets('default $Actions debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-      Actions(actions: const <LocalKey, ActionFactory>{}, child: Container()).debugFillProperties(builder);
+      Actions(
+        actions: const <LocalKey, ActionFactory>{},
+        child: Container(),
+      ).debugFillProperties(builder);
 
       final List<String> description = builder.properties
         .where((DiagnosticsNode node) {
