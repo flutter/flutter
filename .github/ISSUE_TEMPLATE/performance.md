@@ -49,13 +49,15 @@ assignees: ''
 -->
 
 <!--
-     Please tell us on which platform(s) the problem occurs (Android / iOS / Web / Desktop)
-     Which OS version is the test system running?
+     Please tell us on which host platform you use to build / debug your app
+     Which target platform(s) the problem occurs (Android / iOS / Web / macOS / Linux / Windows)
+     Which target OS version, for Web, browser, is the test system running?
      Does the problem occur on emulator/simulator as well as on physical devices?
 -->
 
-**Platform:**
-**OS version:**
+**Host Platform:**
+**Target Platform:**
+**Target OS version/browser:**
 **Devices:**
 
 ## Logs
