@@ -304,8 +304,7 @@ class _DecoyChild extends StatefulWidget {
 }
 
 class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin {
-  // TODO(justinmc): Replace with real system colors when dark mode is
-  // supported for iOS.
+  // TODO(justinmc): Replace with real dark mode colors.
   //static const Color _darkModeMaskColor = Color(0xAAFFFFFF);
   static const Color _lightModeMaskColor = Color(0xFF888888);
   static const Color _masklessColor = Color(0xFFFFFFFF);
@@ -591,9 +590,6 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    // TODO(justinmc): Is it bad to put this OrientationBuilder so high in the
-    // tree and pass orientation around like this? I could also get it from
-    // context or use multiple OrientationBuilders.
     return OrientationBuilder(
       builder: (BuildContext context, Orientation orientation) {
         _lastOrientation = orientation;
