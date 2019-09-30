@@ -1,4 +1,4 @@
-Signature: 877193075413edb1ff5b362c3d87ec45
+Signature: da94cce1d611066ad51ea2c227805f9f
 
 UNUSED LICENSES:
 
@@ -1351,6 +1351,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/opencl_intel_neo_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/opencl_ocl_icd_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/procdump_win/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/protoc/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/provisioning_profile_ios/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/skimage/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/skp/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/skparagraph/VERSION
@@ -3820,6 +3821,7 @@ FILE: ../../../third_party/skia/src/core/SkVM.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkImageFilters.cpp
 FILE: ../../../third_party/skia/src/gpu/GrCopyRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrCopyRenderTask.h
+FILE: ../../../third_party/skia/src/gpu/GrImageInfo.h
 FILE: ../../../third_party/skia/src/gpu/GrRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrShaderUtils.cpp
