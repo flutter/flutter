@@ -27,7 +27,7 @@ source_set("utils") {
   ]
 
   deps = [
-    "$fuchsia_sdk_root/fidl:fuchsia.crash",
+    "$fuchsia_sdk_root/fidl:fuchsia.feedback",
     "$fuchsia_sdk_root/fidl:fuchsia.mem",
     "$fuchsia_sdk_root/pkg:async-loop",
     "$fuchsia_sdk_root/pkg:async-loop-cpp",
