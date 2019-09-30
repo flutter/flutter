@@ -35,163 +35,6 @@ void ensureTestGestureBinding() {
   assert(GestureBinding.instance != null);
 }
 
-ui.PointerData _pointerData(
-  PointerChange change,
-  Offset logicalPosition, {
-  int device = 0,
-}) {
-  return ui.PointerData(
-    change: change,
-    physicalX: logicalPosition.dx * ui.window.devicePixelRatio,
-    physicalY: logicalPosition.dy * ui.window.devicePixelRatio,
-    kind: PointerDeviceKind.mouse,
-    device: device,
-  );
-}
-
-class _EventCriticalFieldsMatcher extends Matcher {
-  _EventCriticalFieldsMatcher(this._expected)
-    : assert(_expected != null);
-
-  final PointerEvent _expected;
-
-  bool _matchesField(Map<dynamic, dynamic> matchState, String field,
-      dynamic actual, dynamic expected) {
-    if (actual != expected) {
-      addStateInfo(matchState, <dynamic, dynamic>{
-        'field': field,
-        'expected': expected,
-        'actual': actual,
-      });
-      return false;
-    }
-    return true;
-  }
-
-  @override
-  bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {
-    if (untypedItem.runtimeType != _expected.runtimeType) {
-      return false;
-    }
-
-    final PointerEvent actual = untypedItem;
-    if (!(
-      _matchesField(matchState, 'kind', actual.kind, PointerDeviceKind.mouse) &&
-      _matchesField(matchState, 'position', actual.position, _expected.position) &&
-      _matchesField(matchState, 'device', actual.device, _expected.device)
-    )) {
-      return false;
-    }
-    return true;
-  }
-
-  @override
-  Description describe(Description description) {
-    return description
-      .add('event (critical fields only) ')
-      .addDescriptionOf(_expected);
-  }
-
-  @override
-  Description describeMismatch(
-    dynamic item,
-    Description mismatchDescription,
-    Map<dynamic, dynamic> matchState,
-    bool verbose,
-  ) {
-    if (item.runtimeType != _expected.runtimeType) {
-      return mismatchDescription
-        .add('is ')
-        .addDescriptionOf(item.runtimeType)
-        .add(' and doesn\'t match ')
-        .addDescriptionOf(_expected.runtimeType);
-    }
-    return mismatchDescription
-      .add('has ')
-      .addDescriptionOf(matchState['actual'])
-      .add(' at field `${matchState['field']}`, which doesn\'t match the expected ')
-      .addDescriptionOf(matchState['expected']);
-  }
-}
-
-class _EventListCriticalFieldsMatcher extends Matcher {
-  _EventListCriticalFieldsMatcher(this._expected);
-
-  final Iterable<PointerEvent> _expected;
-
-  @override
-  bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {
-    if (untypedItem is! Iterable<PointerEvent>)
-      return false;
-    final Iterable<PointerEvent> item = untypedItem;
-    final Iterator<PointerEvent> iterator = item.iterator;
-    if (item.length != _expected.length)
-      return false;
-    int i = 0;
-    for (final PointerEvent e in _expected) {
-      iterator.moveNext();
-      final Matcher matcher = _EventCriticalFieldsMatcher(e);
-      final Map<dynamic, dynamic> subState = <dynamic, dynamic>{};
-      final PointerEvent actual = iterator.current;
-      if (!matcher.matches(actual, subState)) {
-        addStateInfo(matchState, <dynamic, dynamic>{
-          'index': i,
-          'expected': e,
-          'actual': actual,
-          'matcher': matcher,
-          'state': subState,
-        });
-        return false;
-      }
-      i++;
-    }
-    return true;
-  }
-
-  @override
-  Description describe(Description description) {
-    return description
-      .add('event list (critical fields only) ')
-      .addDescriptionOf(_expected);
-  }
-
-  @override
-  Description describeMismatch(
-    dynamic item,
-    Description mismatchDescription,
-    Map<dynamic, dynamic> matchState,
-    bool verbose,
-  ) {
-    if (item is! Iterable<PointerEvent>) {
-      return mismatchDescription
-        .add('is type ${item.runtimeType} instead of Iterable<PointerEvent>');
-    } else if (item.length != _expected.length) {
-      return mismatchDescription
-        .add('has length ${item.length} instead of ${_expected.length}');
-    } else if (matchState['matcher'] == null) {
-      return mismatchDescription
-        .add('met unexpected fatal error');
-    } else {
-      mismatchDescription
-        .add('has\n  ')
-        .addDescriptionOf(matchState['actual'])
-        .add('\nat index ${matchState['index']}, which doesn\'t match\n  ')
-        .addDescriptionOf(matchState['expected'])
-        .add('\nsince it ');
-      final Description subDescription = StringDescription();
-      final Matcher matcher = matchState['matcher'];
-      matcher.describeMismatch(matchState['actual'], subDescription,
-        matchState['state'], verbose);
-      mismatchDescription.add(subDescription.toString());
-      return mismatchDescription;
-    }
-  }
-}
-
-Matcher _equalsToEventsOnCriticalFields(List<PointerEvent> source) {
-  return _EventListCriticalFieldsMatcher(source);
-}
-
 void main() {
   setUp(ensureTestGestureBinding);
 
@@ -384,4 +227,161 @@ void main() {
       const PointerHoverEvent(position: Offset(1.0, 101.0), delta: Offset(1.0, 101.0)),
     ]));
   });
+}
+
+ui.PointerData _pointerData(
+  PointerChange change,
+  Offset logicalPosition, {
+  int device = 0,
+}) {
+  return ui.PointerData(
+    change: change,
+    physicalX: logicalPosition.dx * ui.window.devicePixelRatio,
+    physicalY: logicalPosition.dy * ui.window.devicePixelRatio,
+    kind: PointerDeviceKind.mouse,
+    device: device,
+  );
+}
+
+class _EventCriticalFieldsMatcher extends Matcher {
+  _EventCriticalFieldsMatcher(this._expected)
+    : assert(_expected != null);
+
+  final PointerEvent _expected;
+
+  bool _matchesField(Map<dynamic, dynamic> matchState, String field,
+      dynamic actual, dynamic expected) {
+    if (actual != expected) {
+      addStateInfo(matchState, <dynamic, dynamic>{
+        'field': field,
+        'expected': expected,
+        'actual': actual,
+      });
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {
+    if (untypedItem.runtimeType != _expected.runtimeType) {
+      return false;
+    }
+
+    final PointerEvent actual = untypedItem;
+    if (!(
+      _matchesField(matchState, 'kind', actual.kind, PointerDeviceKind.mouse) &&
+      _matchesField(matchState, 'position', actual.position, _expected.position) &&
+      _matchesField(matchState, 'device', actual.device, _expected.device)
+    )) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  Description describe(Description description) {
+    return description
+      .add('event (critical fields only) ')
+      .addDescriptionOf(_expected);
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    if (item.runtimeType != _expected.runtimeType) {
+      return mismatchDescription
+        .add('is ')
+        .addDescriptionOf(item.runtimeType)
+        .add(' and doesn\'t match ')
+        .addDescriptionOf(_expected.runtimeType);
+    }
+    return mismatchDescription
+      .add('has ')
+      .addDescriptionOf(matchState['actual'])
+      .add(' at field `${matchState['field']}`, which doesn\'t match the expected ')
+      .addDescriptionOf(matchState['expected']);
+  }
+}
+
+class _EventListCriticalFieldsMatcher extends Matcher {
+  _EventListCriticalFieldsMatcher(this._expected);
+
+  final Iterable<PointerEvent> _expected;
+
+  @override
+  bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {
+    if (untypedItem is! Iterable<PointerEvent>)
+      return false;
+    final Iterable<PointerEvent> item = untypedItem;
+    final Iterator<PointerEvent> iterator = item.iterator;
+    if (item.length != _expected.length)
+      return false;
+    int i = 0;
+    for (final PointerEvent e in _expected) {
+      iterator.moveNext();
+      final Matcher matcher = _EventCriticalFieldsMatcher(e);
+      final Map<dynamic, dynamic> subState = <dynamic, dynamic>{};
+      final PointerEvent actual = iterator.current;
+      if (!matcher.matches(actual, subState)) {
+        addStateInfo(matchState, <dynamic, dynamic>{
+          'index': i,
+          'expected': e,
+          'actual': actual,
+          'matcher': matcher,
+          'state': subState,
+        });
+        return false;
+      }
+      i++;
+    }
+    return true;
+  }
+
+  @override
+  Description describe(Description description) {
+    return description
+      .add('event list (critical fields only) ')
+      .addDescriptionOf(_expected);
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    if (item is! Iterable<PointerEvent>) {
+      return mismatchDescription
+        .add('is type ${item.runtimeType} instead of Iterable<PointerEvent>');
+    } else if (item.length != _expected.length) {
+      return mismatchDescription
+        .add('has length ${item.length} instead of ${_expected.length}');
+    } else if (matchState['matcher'] == null) {
+      return mismatchDescription
+        .add('met unexpected fatal error');
+    } else {
+      mismatchDescription
+        .add('has\n  ')
+        .addDescriptionOf(matchState['actual'])
+        .add('\nat index ${matchState['index']}, which doesn\'t match\n  ')
+        .addDescriptionOf(matchState['expected'])
+        .add('\nsince it ');
+      final Description subDescription = StringDescription();
+      final Matcher matcher = matchState['matcher'];
+      matcher.describeMismatch(matchState['actual'], subDescription,
+        matchState['state'], verbose);
+      mismatchDescription.add(subDescription.toString());
+      return mismatchDescription;
+    }
+  }
+}
+
+Matcher _equalsToEventsOnCriticalFields(List<PointerEvent> source) {
+  return _EventListCriticalFieldsMatcher(source);
 }
