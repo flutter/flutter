@@ -1183,6 +1183,7 @@ void main() {
         child: MaterialButton(
           disabledColor: Color(0xff00ff00),
           onPressed: null,
+          onLongPress: null,
           child: Text('button'),
         ),
       ),
@@ -1190,5 +1191,66 @@ void main() {
 
     final Material material = tester.widget<Material>(rawButtonMaterial);
     expect(material.color, const Color(0xff00ff00));
+  });
+
+  testWidgets('MaterialButton should be enabled when onLongPress is not null.', (WidgetTester tester) async {
+
+    final Finder rawButtonMaterial = find.descendant(
+      of: find.byType(MaterialButton),
+      matching: find.byType(Material),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          color: Color(0xffff00ff),
+          onPressed: null,
+          onLongPress: () { /* to make sure the button is enabled */ },
+          child: Text('button'),
+        ),
+      ),
+    );
+
+    final Material material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.color, const Color(0xffff00ff));
+  });
+
+  testWidgets('MaterialButton onPressed callback', (WidgetTester tester) async {
+    bool didPressButton = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          onPressed: () {
+            didPressButton = true;
+          },
+          child: Text('button'),
+        ),
+      ),
+    );
+
+    expect(didPressButton, isFalse);
+    await tester.press(find.byType(MaterialButton));
+    expect(didPressButton, isTrue);
+  });
+
+  testWidgets('MaterialButton onLongPress callback', (WidgetTester tester) async {
+    bool didLongPressButton = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          onLongPress: () {
+            didLongPressButton = true;
+          },
+          child: Text('button'),
+        ),
+      ),
+    );
+
+    expect(didLongPressButton, isFalse);
+    await tester.longPress(find.byType(MaterialButton));
+    expect(didLongPressButton, isTrue);
   });
 }
