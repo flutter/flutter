@@ -88,6 +88,12 @@ sk_sp<GrContext> PlatformView::CreateResourceContext() const {
 
 void PlatformView::ReleaseResourceContext() const {}
 
+PointerDataDispatcherMaker PlatformView::GetDispatcherMaker() {
+  return [](DefaultPointerDataDispatcher::Delegate& delegate) {
+    return std::make_unique<DefaultPointerDataDispatcher>(delegate);
+  };
+}
+
 fml::WeakPtr<PlatformView> PlatformView::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
 }

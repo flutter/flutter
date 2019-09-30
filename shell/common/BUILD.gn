@@ -74,6 +74,8 @@ source_set("common") {
     "pipeline.h",
     "platform_view.cc",
     "platform_view.h",
+    "pointer_data_dispatcher.cc",
+    "pointer_data_dispatcher.h",
     "rasterizer.cc",
     "rasterizer.h",
     "run_configuration.cc",
@@ -156,6 +158,7 @@ if (current_toolchain == host_toolchain) {
   shell_host_executable("shell_unittests") {
     sources = [
       "canvas_spy_unittests.cc",
+      "input_events_unittests.cc",
       "pipeline_unittests.cc",
       "shell_test.cc",
       "shell_test.h",
