@@ -2352,6 +2352,7 @@ void main() {
   });
 
   testWidgets('DefaultTabController should allow for a length of zero', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/20292.
     List<String> tabTextContent = <String>[];
 
     await tester.pumpWidget(
@@ -2365,18 +2366,15 @@ void main() {
                   title: const Text('Default TabBar Preview'),
                   bottom: tabTextContent.isNotEmpty
                     ? TabBar(
-                      isScrollable: true,
-                      tabs: tabTextContent.map((String textContent) {
-                        return Tab(text: textContent);
-                      }).toList(),
-                    )
+                       isScrollable: true,
+                       tabs: tabTextContent.map((String textContent) => Tab(text: textContent)).toList(),
+                     )
                     : null,
                 ),
                 body: tabTextContent.isNotEmpty
                   ? TabBarView(
-                    children: tabTextContent.map((String textContent) {
-                      return Tab(text: '$textContent\'s view');
-                    }).toList())
+                      children: tabTextContent.map((String textContent) => Tab(text: '$textContent\'s view')).toList()
+                    )
                   : const Center(child: Text('No tabs')),
                 bottomNavigationBar: BottomAppBar(
                   child: Row(
