@@ -434,6 +434,7 @@ class DevFS {
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
+    final DateTime candidateCompileTime = DateTime.now();
 
     // Update modified files
     final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
@@ -475,7 +476,7 @@ class DevFS {
       return UpdateFSReport(success: false);
     }
     // Only update the last compiled time if we successfully compiled.
-    lastCompiled = DateTime.now();
+    lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
     sources = compilerOutput.sources;
     //
