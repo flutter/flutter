@@ -170,6 +170,8 @@ typedef enum {
   ///
   /// Only applicable when kFlutterSemanticsFlagIsTextField flag is on.
   kFlutterSemanticsFlagIsReadOnly = 1 << 20,
+  /// Whether the semantic node can hold the user's focus.
+  kFlutterSemanticsFlagIsFocusable = 1 << 21,
 } FlutterSemanticsFlag;
 
 typedef enum {
