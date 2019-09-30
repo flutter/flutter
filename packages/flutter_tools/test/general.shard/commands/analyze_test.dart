@@ -23,7 +23,7 @@ void main() {
   Directory tempDir;
   FakePlatform fakePlatform;
   FileSystem fs;
-  MockProcessManager processManager;
+  _MockProcessManager processManager;
   UpgradeCommandRunner realCommandRunner;
 
   setUp(() {
@@ -32,7 +32,7 @@ void main() {
     Cache.flutterRoot = _kFlutterRoot;
     tempDir = fs.systemTempDirectory.createTempSync('flutter_analysis_test.');
     realCommandRunner = UpgradeCommandRunner();
-    processManager = MockProcessManager();
+    processManager = _MockProcessManager();
     fakePlatform = FakePlatform()..environment = Map<String, String>.unmodifiable(<String, String>{
         'ENV1': 'irrelevant',
         'ENV2': 'irrelevant',
@@ -99,3 +99,5 @@ void main() {
     });
   });
 }
+
+class _MockProcessManager extends Mock implements ProcessManager {}
