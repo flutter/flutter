@@ -18,6 +18,9 @@ Future<void> main(List<String> arguments) async {
   final String localEngine = Platform.environment['LOCAL_ENGINE'];
   final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
 
+  final String flutterExecutable = path.join(
+      flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+
   Directory.current = projectDirectory;
 
   if (localEngine != null && !localEngine.contains(buildMode)) {
@@ -34,21 +37,29 @@ or
     exit(1);
   }
 
-  String cacheDirectory;
-  switch (targetPlatform) {
-    case 'linux-x64':
-      cacheDirectory = 'linux/flutter/ephemeral';
-      break;
-    case 'windows-x64':
-      cacheDirectory = 'windows/flutter/ephemeral';
-      break;
-    default:
-      stderr.write('Unsupported target platform $targetPlatform');
+  if (targetPlatform == 'linux-x64') {
+    final ProcessResult unpackResult = await Process.run(
+        flutterExecutable,
+        <String>[
+          '--suppress-analytics',
+          '--verbose',
+          if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
+          if (localEngine != null) '--local-engine=$localEngine',
+          'assemble',
+          '-dTargetPlatform=$targetPlatform',
+          '-dBuildMode=$buildMode',
+          '-dTargetFile=$flutterTarget',
+          '--output=build',
+          '${buildMode}_bundle_linux_assets',
+        ]);
+    if (unpackResult.exitCode != 0) {
+      stderr.write(unpackResult.stderr);
       exit(1);
+    }
+    return;
   }
 
-  final String flutterExecutable = path.join(
-      flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+  const String cacheDirectory = 'windows/flutter/ephemeral';
   final ProcessResult unpackResult = await Process.run(
     flutterExecutable,
     <String>[

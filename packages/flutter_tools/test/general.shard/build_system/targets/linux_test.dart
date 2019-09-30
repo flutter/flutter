@@ -49,7 +49,7 @@ void main() {
   });
 
   test('Copies files to correct cache directory', () => testbed.run(() async {
-    final BuildResult result = await buildSystem.build(const UnpackLinux(), environment);
+    final BuildResult result = await buildSystem.build(const UnpackLinuxDebug(), environment);
 
     expect(result.hasException, false);
     expect(fs.file('linux/flutter/libflutter_linux_glfw.so').existsSync(), true);
@@ -62,21 +62,21 @@ void main() {
   }));
 
   test('Does not re-copy files unecessarily', () => testbed.run(() async {
-    await buildSystem.build(const UnpackLinux(), environment);
+    await buildSystem.build(const UnpackLinuxDebug(), environment);
     // Set a date in the far distant past to deal with the limited resolution
     // of the windows filesystem.
     final DateTime theDistantPast = DateTime(1991, 8, 23);
     fs.file('linux/flutter/libflutter_linux_glfw.so').setLastModifiedSync(theDistantPast);
-    await buildSystem.build(const UnpackLinux(), environment);
+    await buildSystem.build(const UnpackLinuxDebug(), environment);
 
     expect(fs.file('linux/flutter/libflutter_linux_glfw.so').statSync().modified, equals(theDistantPast));
   }));
 
   test('Detects changes in input cache files', () => testbed.run(() async {
-    await buildSystem.build(const UnpackLinux(), environment);
+    await buildSystem.build(const UnpackLinuxDebug(), environment);
     fs.file('bin/cache/artifacts/engine/linux-x64/libflutter_linux_glfw.so').writeAsStringSync('asd'); // modify cache.
 
-    await buildSystem.build(const UnpackLinux(), environment);
+    await buildSystem.build(const UnpackLinuxDebug(), environment);
 
     expect(fs.file('linux/flutter/libflutter_linux_glfw.so').readAsStringSync(), 'asd');
   }));
