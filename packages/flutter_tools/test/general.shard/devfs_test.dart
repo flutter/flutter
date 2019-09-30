@@ -185,6 +185,7 @@ void main() {
         any,
         any,
         outputPath: anyNamed('outputPath'),
+        packagesFilePath: anyNamed('packagesFilePath'),
       )).thenAnswer((Invocation invocation) {
         return Future<CompilerOutput>.value(const CompilerOutput('example', 2, <Uri>[]));
       });
@@ -203,6 +204,38 @@ void main() {
       FileSystem: () => fs,
     });
 
+    testUsingContext('correctly updates last compiled time when compilation does not fail', () async {
+      devFS = DevFS(vmService, 'test', tempDir);
+      // simulate package
+      final File sourceFile = await _createPackage(fs, 'somepkg', 'main.dart');
+
+      await devFS.create();
+      final DateTime previousCompile = devFS.lastCompiled;
+
+      final RealMockResidentCompiler residentCompiler = RealMockResidentCompiler();
+      when(residentCompiler.recompile(
+        any,
+        any,
+        outputPath: anyNamed('outputPath'),
+        packagesFilePath: anyNamed('packagesFilePath'),
+      )).thenAnswer((Invocation invocation) {
+        fs.file('example').createSync();
+        return Future<CompilerOutput>.value(CompilerOutput('example', 0, <Uri>[sourceFile.uri]));
+      });
+
+      final UpdateFSReport report = await devFS.update(
+        mainPath: 'lib/main.dart',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
+        invalidatedFiles: <Uri>[],
+      );
+
+      expect(report.success, true);
+      expect(devFS.lastCompiled, isNot(previousCompile));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
   });
 }
 
@@ -309,7 +342,7 @@ void _cleanupTempDirs() {
   }
 }
 
-Future<void> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash = false }) async {
+Future<File> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash = false }) async {
   final Directory pkgTempDir = _newTempDir(fs);
   String pkgFilePath = fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName);
   if (doubleSlash) {
@@ -325,6 +358,7 @@ Future<void> _createPackage(FileSystem fs, String pkgName, String pkgFileName, {
   _packages.forEach((String pkgName, Uri pkgUri) {
     sb.writeln('$pkgName:$pkgUri');
   });
-  fs.file(fs.path.join(_tempDirs[0].path, '.packages')).writeAsStringSync(sb.toString());
+  return fs.file(fs.path.join(_tempDirs[0].path, '.packages'))
+    ..writeAsStringSync(sb.toString());
 }
 
