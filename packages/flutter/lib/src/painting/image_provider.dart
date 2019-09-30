@@ -491,6 +491,19 @@ class _SizeAwareCacheKey {
   final dynamic _providerCacheKey;
   final int _width;
   final int _height;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final _SizeAwareCacheKey typedOther = other;
+    return _providerCacheKey == typedOther._providerCacheKey
+        && _width == typedOther._width
+        && _height == typedOther._height;
+  }
+
+  @override
+  int get hashCode => hashValues(_providerCacheKey, _width, _height);
 }
 
 /// Re-sizes the cache of the image provided to the specified size.
@@ -511,7 +524,7 @@ class ResizedImage extends ImageProvider<_SizeAwareCacheKey> {
     if (_cacheWidth == null && _cacheHeight == null) {
       return _imageProvider.load(key._providerCacheKey, decode);
     } else {
-      DecoderCallback decodeResize = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+      final DecoderCallback decodeResize = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
         return decode(bytes, cacheWidth: _cacheWidth, cacheHeight: _cacheHeight);
       };
       return _imageProvider.load(key._providerCacheKey, decodeResize);

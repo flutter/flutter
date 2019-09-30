@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
+import 'image_provider.dart';
 
 /// The dart:html implemenation of [image_provider.NetworkImage].
 class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkImage> implements image_provider.NetworkImage {

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data' show Uint8List;
-import 'dart:ui' as ui show instantiateImageCodec, Codec, kDoNotResizeDimension, Size;
+import 'dart:ui' as ui show instantiateImageCodec, Codec, kDoNotResizeDimension;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show ServicesBinding;
 
