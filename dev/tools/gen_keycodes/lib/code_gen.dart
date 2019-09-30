@@ -267,7 +267,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     final StringBuffer result = StringBuffer();
     for (Key entry in keyData.data) {
       if (entry.name != null) {
-        result.writeln('  "${entry.name}": LogicalKeyboardKey.${entry.constantName},');
+        result.writeln("  '${entry.name}': LogicalKeyboardKey.${entry.constantName},");
       }
     }
     return result.toString().trimRight();
@@ -278,7 +278,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     final StringBuffer result = StringBuffer();
     for (Key entry in keyData.data) {
       if (entry.name != null) {
-        result.writeln('  "${entry.name}": PhysicalKeyboardKey.${entry.constantName},');
+        result.writeln("  '${entry.name}': PhysicalKeyboardKey.${entry.constantName},");
       }
     }
     return result.toString().trimRight();
@@ -289,7 +289,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     final StringBuffer result = StringBuffer();
     for (Key entry in numpadKeyData) {
       if (entry.name != null) {
-        result.writeln('  "${entry.name}": LogicalKeyboardKey.${entry.constantName},');
+        result.writeln("  '${entry.name}': LogicalKeyboardKey.${entry.constantName},");
       }
     }
     return result.toString().trimRight();
