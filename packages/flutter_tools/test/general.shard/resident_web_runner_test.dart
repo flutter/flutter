@@ -173,7 +173,7 @@ void main() {
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
+    when(mockWebFs.recompile()).thenAnswer((Invocation invocation) async {
       return true;
     });
     when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
@@ -189,6 +189,9 @@ void main() {
       'cd29': 'false',
       'cd30': 'true',
     })).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-restart', any)).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-refresh', any)).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -200,7 +203,7 @@ void main() {
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
+    when(mockWebFs.recompile()).thenAnswer((Invocation invocation) async {
       return true;
     });
     when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
@@ -216,6 +219,9 @@ void main() {
       'cd29': 'false',
       'cd30': 'true',
     })).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-restart', any)).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-refresh', any)).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
