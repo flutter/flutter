@@ -9,7 +9,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
-import 'binding.dart';
 import 'debug.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';

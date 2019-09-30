@@ -19,7 +19,7 @@ import 'mocks_for_image_cache.dart';
 
 void main() {
 
-  DecoderCallback basicDecoder = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+  final DecoderCallback basicDecoder = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
     return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
   };
 
