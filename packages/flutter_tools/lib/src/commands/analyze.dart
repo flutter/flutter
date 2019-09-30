@@ -4,7 +4,10 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/process.dart';
+
 import '../base/file_system.dart';
+import '../cache.dart';
 import '../runner/flutter_command.dart';
 import 'analyze_continuously.dart';
 import 'analyze_once.dart';
@@ -86,6 +89,18 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    print('object');
+    if (argResults['flutter-repo']) {
+      await processUtils.stream(
+        <String>[
+          fs.path.join('bin', 'flutter'),
+          'update-packages',
+        ],
+      workingDirectory: Cache.flutterRoot,
+      allowReentrantFlutter: true,
+      );
+    }
+
     if (argResults['watch']) {
       await AnalyzeContinuously(
         argResults,
