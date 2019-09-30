@@ -4,15 +4,10 @@
 
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
+#include "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
 
-#ifndef __has_feature
-#define __has_feature(x) 0 /* for non-clang compilers */
-#endif
-
-#if !__has_feature(objc_arc)
-#error ARC must be enabled!
-#endif
+FLUTTER_ASSERT_ARC
 
 @interface FlutterBinaryMessengerRelayTest : XCTestCase
 @end

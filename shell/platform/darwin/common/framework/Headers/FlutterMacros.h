@@ -37,4 +37,12 @@
  */
 #define FLUTTER_UNAVAILABLE(msg) __attribute__((__unavailable__(msg)))
 
+#if __has_feature(objc_arc)
+#define FLUTTER_ASSERT_ARC
+#define FLUTTER_ASSERT_NOT_ARC #error ARC must be disabled!
+#else
+#define FLUTTER_ASSERT_ARC #error ARC must be enabled!
+#define FLUTTER_ASSERT_NOT_ARC
+#endif
+
 #endif  // FLUTTER_FLUTTERMACROS_H_
