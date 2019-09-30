@@ -190,7 +190,7 @@ String parseVersionForWindows(String input) {
 /// A special device type to allow serving for arbitrary browsers.
 class WebServerDevice extends Device {
   WebServerDevice() : super(
-    'web',
+    'headless-server',
     platformType: PlatformType.web,
     category: Category.web,
     ephemeral: false,
@@ -228,7 +228,7 @@ class WebServerDevice extends Device {
   }
 
   @override
-  String get name => 'Server';
+  String get name => 'Headless Server';
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
