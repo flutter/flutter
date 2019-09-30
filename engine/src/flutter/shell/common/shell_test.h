@@ -9,6 +9,7 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/shell.h"
@@ -28,9 +29,11 @@ class ShellTest : public ThreadTest {
   ~ShellTest();
 
   Settings CreateSettingsForFixture();
-  std::unique_ptr<Shell> CreateShell(Settings settings);
   std::unique_ptr<Shell> CreateShell(Settings settings,
-                                     TaskRunners task_runners);
+                                     bool simulate_vsync = false);
+  std::unique_ptr<Shell> CreateShell(Settings settings,
+                                     TaskRunners task_runners,
+                                     bool simulate_vsync = false);
   TaskRunners GetTaskRunnersForFixture();
 
   void SendEnginePlatformMessage(Shell* shell,
@@ -41,8 +44,14 @@ class ShellTest : public ThreadTest {
   static void PlatformViewNotifyCreated(
       Shell* shell);  // This creates the surface
   static void RunEngine(Shell* shell, RunConfiguration configuration);
+  static void RestartEngine(Shell* shell, RunConfiguration configuration);
+
+  /// Issue as many VSYNC as needed to flush the UI tasks so far, and reset
+  /// the `will_draw_new_frame` to true.
+  static void VSyncFlush(Shell* shell, bool& will_draw_new_frame);
 
   static void PumpOneFrame(Shell* shell);
+  static void DispatchFakePointerData(Shell* shell);
 
   // Declare |UnreportedTimingsCount|, |GetNeedsReportTimings| and
   // |SetNeedsReportTimings| inside |ShellTest| mainly for easier friend class
@@ -73,18 +82,56 @@ class ShellTest : public ThreadTest {
   void SetSnapshotsAndAssets(Settings& settings);
 };
 
+class ShellTestVsyncClock {
+ public:
+  /// Simulate that a vsync signal is triggered.
+  void SimulateVSync();
+
+  /// A future that will return the index the next vsync signal.
+  std::future<int> NextVSync();
+
+ private:
+  std::mutex mutex_;
+  std::vector<std::promise<int>> vsync_promised_ FML_GUARDED_BY(mutex_);
+  size_t vsync_issued_ FML_GUARDED_BY(mutex_) = 0;
+};
+
+class ShellTestVsyncWaiter : public VsyncWaiter {
+ public:
+  ShellTestVsyncWaiter(TaskRunners task_runners, ShellTestVsyncClock& clock)
+      : VsyncWaiter(std::move(task_runners)), clock_(clock) {}
+
+ protected:
+  void AwaitVSync() override;
+
+ private:
+  ShellTestVsyncClock& clock_;
+};
+
 class ShellTestPlatformView : public PlatformView, public GPUSurfaceGLDelegate {
  public:
   ShellTestPlatformView(PlatformView::Delegate& delegate,
-                        TaskRunners task_runners);
+                        TaskRunners task_runners,
+                        bool simulate_vsync = false);
 
   ~ShellTestPlatformView() override;
+
+  void SimulateVSync();
 
  private:
   TestGLSurface gl_surface_;
 
+  bool simulate_vsync_ = false;
+  ShellTestVsyncClock vsync_clock_;
+
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;
+
+  // |PlatformView|
+  std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
+
+  // |PlatformView|
+  PointerDataDispatcherMaker GetDispatcherMaker() override;
 
   // |GPUSurfaceGLDelegate|
   bool GLContextMakeCurrent() override;

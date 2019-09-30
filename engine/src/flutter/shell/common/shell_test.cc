@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <future>
 #define FML_USED_ON_EMBEDDER
 
 #include "flutter/shell/common/shell_test.h"
@@ -101,6 +102,39 @@ void ShellTest::RunEngine(Shell* shell, RunConfiguration configuration) {
   latch.Wait();
 }
 
+void ShellTest::RestartEngine(Shell* shell, RunConfiguration configuration) {
+  std::promise<bool> restarted;
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetUITaskRunner(),
+      [shell, &restarted, &configuration]() {
+        restarted.set_value(shell->engine_->Restart(std::move(configuration)));
+      });
+  ASSERT_TRUE(restarted.get_future().get());
+}
+
+void ShellTest::VSyncFlush(Shell* shell, bool& will_draw_new_frame) {
+  fml::AutoResetWaitableEvent latch;
+  shell->GetTaskRunners().GetPlatformTaskRunner()->PostTask(
+      [shell, &will_draw_new_frame, &latch] {
+        // The following UI task ensures that all previous UI tasks are flushed.
+        fml::AutoResetWaitableEvent ui_latch;
+        shell->GetTaskRunners().GetUITaskRunner()->PostTask(
+            [&ui_latch, &will_draw_new_frame]() {
+              will_draw_new_frame = true;
+              ui_latch.Signal();
+            });
+
+        ShellTestPlatformView* test_platform_view =
+            static_cast<ShellTestPlatformView*>(shell->GetPlatformView().get());
+        do {
+          test_platform_view->SimulateVSync();
+        } while (ui_latch.WaitWithTimeout(fml::TimeDelta::FromMilliseconds(1)));
+
+        latch.Signal();
+      });
+  latch.Wait();
+}
+
 void ShellTest::PumpOneFrame(Shell* shell) {
   // Set viewport to nonempty, and call Animator::BeginFrame to make the layer
   // tree pipeline nonempty. Without either of this, the layer tree below
@@ -129,6 +163,16 @@ void ShellTest::PumpOneFrame(Shell* shell) {
         runtime_delegate->Render(std::move(layer_tree));
         latch.Signal();
       });
+  latch.Wait();
+}
+
+void ShellTest::DispatchFakePointerData(Shell* shell) {
+  fml::AutoResetWaitableEvent latch;
+  shell->GetTaskRunners().GetPlatformTaskRunner()->PostTask([&latch, shell]() {
+    auto packet = std::make_unique<PointerDataPacket>(1);
+    shell->OnPlatformViewDispatchPointerDataPacket(std::move(packet));
+    latch.Signal();
+  });
   latch.Wait();
 }
 
@@ -175,17 +219,20 @@ TaskRunners ShellTest::GetTaskRunnersForFixture() {
   };
 }
 
-std::unique_ptr<Shell> ShellTest::CreateShell(Settings settings) {
-  return CreateShell(std::move(settings), GetTaskRunnersForFixture());
+std::unique_ptr<Shell> ShellTest::CreateShell(Settings settings,
+                                              bool simulate_vsync) {
+  return CreateShell(std::move(settings), GetTaskRunnersForFixture(),
+                     simulate_vsync);
 }
 
 std::unique_ptr<Shell> ShellTest::CreateShell(Settings settings,
-                                              TaskRunners task_runners) {
+                                              TaskRunners task_runners,
+                                              bool simulate_vsync) {
   return Shell::Create(
       task_runners, settings,
-      [](Shell& shell) {
-        return std::make_unique<ShellTestPlatformView>(shell,
-                                                       shell.GetTaskRunners());
+      [simulate_vsync](Shell& shell) {
+        return std::make_unique<ShellTestPlatformView>(
+            shell, shell.GetTaskRunners(), simulate_vsync);
       },
       [](Shell& shell) {
         return std::make_unique<Rasterizer>(shell, shell.GetTaskRunners());
@@ -215,16 +262,75 @@ void ShellTest::AddNativeCallback(std::string name,
   native_resolver_->AddNativeCallback(std::move(name), callback);
 }
 
+void ShellTestVsyncClock::SimulateVSync() {
+  std::scoped_lock lock(mutex_);
+  if (vsync_issued_ >= vsync_promised_.size()) {
+    vsync_promised_.emplace_back();
+  }
+  FML_CHECK(vsync_issued_ < vsync_promised_.size());
+  vsync_promised_[vsync_issued_].set_value(vsync_issued_);
+  vsync_issued_ += 1;
+}
+
+std::future<int> ShellTestVsyncClock::NextVSync() {
+  std::scoped_lock lock(mutex_);
+  vsync_promised_.emplace_back();
+  return vsync_promised_.back().get_future();
+}
+
+void ShellTestVsyncWaiter::AwaitVSync() {
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+  auto vsync_future = clock_.NextVSync();
+
+  auto async_wait = std::async([&vsync_future, this]() {
+    vsync_future.wait();
+
+    // Post the `FireCallback` to the Platform thread so earlier Platform tasks
+    // (specifically, the `VSyncFlush` call) will be finished before
+    // `FireCallback` is executed. This is only needed for our unit tests.
+    //
+    // Without this, the repeated VSYNC signals in `VSyncFlush` may start both
+    // the current frame in the UI thread and the next frame in the secondary
+    // callback (both of them are waiting for VSYNCs). That breaks the unit
+    // test's assumption that each frame's VSYNC must be issued by different
+    // `VSyncFlush` call (which resets the `will_draw_new_frame` bit).
+    //
+    // For example, HandlesActualIphoneXsInputEvents will fail without this.
+    task_runners_.GetPlatformTaskRunner()->PostTask([this]() {
+      FireCallback(fml::TimePoint::Now(), fml::TimePoint::Now());
+    });
+  });
+}
+
 ShellTestPlatformView::ShellTestPlatformView(PlatformView::Delegate& delegate,
-                                             TaskRunners task_runners)
+                                             TaskRunners task_runners,
+                                             bool simulate_vsync)
     : PlatformView(delegate, std::move(task_runners)),
-      gl_surface_(SkISize::Make(800, 600)) {}
+      gl_surface_(SkISize::Make(800, 600)),
+      simulate_vsync_(simulate_vsync) {}
 
 ShellTestPlatformView::~ShellTestPlatformView() = default;
+
+std::unique_ptr<VsyncWaiter> ShellTestPlatformView::CreateVSyncWaiter() {
+  return simulate_vsync_ ? std::make_unique<ShellTestVsyncWaiter>(task_runners_,
+                                                                  vsync_clock_)
+                         : PlatformView::CreateVSyncWaiter();
+}
+
+void ShellTestPlatformView::SimulateVSync() {
+  vsync_clock_.SimulateVSync();
+}
 
 // |PlatformView|
 std::unique_ptr<Surface> ShellTestPlatformView::CreateRenderingSurface() {
   return std::make_unique<GPUSurfaceGL>(this, true);
+}
+
+// |PlatformView|
+PointerDataDispatcherMaker ShellTestPlatformView::GetDispatcherMaker() {
+  return [](DefaultPointerDataDispatcher::Delegate& delegate) {
+    return std::make_unique<SmoothPointerDataDispatcher>(delegate);
+  };
 }
 
 // |GPUSurfaceGLDelegate|
