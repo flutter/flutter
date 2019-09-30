@@ -92,6 +92,75 @@ void main() {
     }, skip: Platform.isWindows); // TODO(jonahwilliams): fix or disable this functionality.
   });
 
+  group('mocked http client', () {
+    HttpOverrides savedHttpOverrides;
+    HttpClient httpClient;
+
+    setUpAll(() {
+      tempDir = _newTempDir(fs);
+      basePath = tempDir.path;
+      savedHttpOverrides = HttpOverrides.current;
+      httpClient = MockOddlyFailingHttpClient();
+      HttpOverrides.global = MyHttpOverrides(httpClient);
+    });
+
+    tearDownAll(() async {
+      HttpOverrides.global = savedHttpOverrides;
+    });
+
+    testUsingContext('retry uploads when failure', () async {
+      final File file = fs.file(fs.path.join(basePath, filePath));
+      await file.parent.create(recursive: true);
+      file.writeAsBytesSync(<int>[1, 2, 3]);
+      // simulate package
+      await _createPackage(fs, 'somepkg', 'somefile.txt');
+
+      final RealMockVMService vmService = RealMockVMService();
+      final RealMockVM vm = RealMockVM();
+      final Map<String, dynamic> response =  <String, dynamic>{ 'uri': 'file://abc' };
+      when(vm.createDevFS(any)).thenAnswer((Invocation invocation) {
+        return Future<Map<String, dynamic>>.value(response);
+      });
+      when(vmService.vm).thenReturn(vm);
+
+      reset(httpClient);
+
+      final MockHttpClientRequest httpRequest = MockHttpClientRequest();
+      when(httpRequest.headers).thenReturn(MockHttpHeaders());
+      when(httpClient.putUrl(any)).thenAnswer((Invocation invocation) {
+        return Future<HttpClientRequest>.value(httpRequest);
+      });
+      final MockHttpClientResponse httpClientResponse = MockHttpClientResponse();
+      int nRequest = 0;
+      const int kFailedAttempts = 5;
+      when(httpRequest.close()).thenAnswer((Invocation invocation) {
+        if (nRequest++ < kFailedAttempts) {
+          throw 'Connection resert by peer';
+        }
+        return Future<HttpClientResponse>.value(httpClientResponse);
+      });
+
+      devFS = DevFS(vmService, 'test', tempDir);
+      await devFS.create();
+
+      final MockResidentCompiler residentCompiler = MockResidentCompiler();
+      final UpdateFSReport report = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
+        invalidatedFiles: <Uri>[],
+      );
+
+      expect(report.syncedBytes, 22);
+      expect(report.success, isTrue);
+      verify(httpClient.putUrl(any)).called(kFailedAttempts + 1);
+      verify(httpRequest.close()).called(kFailedAttempts + 1);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
+  });
+
   group('devfs remote', () {
     MockVMService vmService;
     final MockResidentCompiler residentCompiler = MockResidentCompiler();
@@ -200,7 +269,6 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
-
   });
 }
 
@@ -326,3 +394,25 @@ Future<void> _createPackage(FileSystem fs, String pkgName, String pkgFileName, {
   fs.file(fs.path.join(_tempDirs[0].path, '.packages')).writeAsStringSync(sb.toString());
 }
 
+class RealMockVM extends Mock implements VM {
+
+}
+
+class RealMockVMService extends Mock implements VMService {
+
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  MyHttpOverrides(this._httpClient);
+  @override
+  HttpClient createHttpClient(SecurityContext context) {
+    return _httpClient;
+  }
+
+  final HttpClient _httpClient;
+}
+
+class MockOddlyFailingHttpClient extends Mock implements HttpClient {}
+class MockHttpClientRequest extends Mock implements HttpClientRequest {}
+class MockHttpHeaders extends Mock implements HttpHeaders {}
+class MockHttpClientResponse extends Mock implements HttpClientResponse {}
