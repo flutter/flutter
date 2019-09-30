@@ -5,7 +5,7 @@
 
 Flutter is Google's mobile app SDK for crafting high-quality native interfaces
 on iOS and Android in record time. Flutter works with existing code, is used by
-developers and organizations around the world, and is free and open source.
+developers and organizations around the world, and is free and open source.Flutter is an open-source mobile application development framework created by Google. It is used to develop applications for Android and iOS, as well as being the primary method of creating applications for Google Fuchsia.
 
 ## Documentation
 
