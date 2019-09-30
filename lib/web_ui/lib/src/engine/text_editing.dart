@@ -12,7 +12,7 @@ void _emptyCallback(dynamic _) {}
 /// These style attributes are constant throughout the life time of an input
 /// element.
 ///
-/// They are assigned once during the creation of the dom element.
+/// They are assigned once during the creation of the DOM element.
 void _setStaticStyleAttributes(html.HtmlElement domElement) {
   final html.CssStyleDeclaration elementStyle = domElement.style;
   elementStyle
@@ -66,6 +66,29 @@ class EditingState {
         baseOffset = flutterEditingState['selectionBase'],
         extentOffset = flutterEditingState['selectionExtent'];
 
+  /// Creates an [EditingState] instance using values from the editing element
+  /// in the DOM.
+  ///
+  /// [domElement] can be a [InputElement] or a [TextAreaElement] depending on
+  /// the [InputType] of the text field.
+  factory EditingState.fromDomElement(html.HtmlElement domElement) {
+    if (domElement is html.InputElement) {
+      html.InputElement element = domElement;
+      return EditingState(
+          text: element.value,
+          baseOffset: element.selectionStart,
+          extentOffset: element.selectionEnd);
+    } else if (domElement is html.TextAreaElement) {
+      html.TextAreaElement element = domElement;
+      return EditingState(
+          text: element.value,
+          baseOffset: element.selectionStart,
+          extentOffset: element.selectionEnd);
+    } else {
+      throw UnsupportedError('Initialized with unsupported input type');
+    }
+  }
+
   /// The counterpart of [EditingState.fromFlutter]. It generates a Map that
   /// can be sent to Flutter.
   // TODO(mdebbar): Should we get `selectionAffinity` and other properties from flutter's editing state?
@@ -109,6 +132,24 @@ class EditingState {
     return assertionsEnabled
         ? 'EditingState("$text", base:$baseOffset, extent:$extentOffset)'
         : super.toString();
+  }
+
+  /// Sets the selection values of a DOM element using this [EditingState].
+  ///
+  /// [domElement] can be a [InputElement] or a [TextAreaElement] depending on
+  /// the [InputType] of the text field.
+  void applyToDomElement(html.HtmlElement domElement) {
+    if (domElement is html.InputElement) {
+      html.InputElement element = domElement;
+      element.value = text;
+      element.setSelectionRange(baseOffset, extentOffset);
+    } else if (domElement is html.TextAreaElement) {
+      html.TextAreaElement element = domElement;
+      element.value = text;
+      element.setSelectionRange(baseOffset, extentOffset);
+    } else {
+      throw UnsupportedError('Unsupported DOM element type');
+    }
   }
 }
 
@@ -163,33 +204,6 @@ class InputConfiguration {
 
 typedef _OnChangeCallback = void Function(EditingState editingState);
 
-enum ElementType {
-  /// The backing element is an `<input>`.
-  input,
-
-  /// The backing element is a `<textarea>`.
-  textarea,
-
-  /// The backing element is a `<span contenteditable="true">`.
-  contentEditable,
-}
-
-ElementType _getTypeFromElement(html.HtmlElement domElement) {
-  if (domElement is html.InputElement) {
-    return ElementType.input;
-  }
-  if (domElement is html.TextAreaElement) {
-    return ElementType.textarea;
-  }
-  final String contentEditable = domElement.contentEditable;
-  if (contentEditable != null &&
-      contentEditable.isNotEmpty &&
-      contentEditable != 'inherit') {
-    return ElementType.contentEditable;
-  }
-  return null;
-}
-
 /// Wraps the DOM element used to provide text editing capabilities.
 ///
 /// The backing DOM element could be one of:
@@ -226,16 +240,8 @@ class TextEditingElement {
   EditingState _lastEditingState;
   _OnChangeCallback _onChange;
 
-  SelectionChangeDetection _selectionDetection;
-
   final List<StreamSubscription<html.Event>> _subscriptions =
       <StreamSubscription<html.Event>>[];
-
-  ElementType get _elementType {
-    final ElementType type = _getTypeFromElement(domElement);
-    assert(type != null);
-    return type;
-  }
 
   /// On iOS, sets the location of the input element after focusing on it.
   ///
@@ -275,7 +281,6 @@ class TextEditingElement {
 
     _initDomElement(inputConfig);
     _enabled = true;
-    _selectionDetection = SelectionChangeDetection(domElement);
     _onChange = onChange;
 
     // Chrome on Android will hide the onscreen keyboard when you tap outside
@@ -305,20 +310,29 @@ class TextEditingElement {
     }
 
     // Subscribe to text and selection changes.
-    _subscriptions
-      ..add(html.document.onSelectionChange.listen(_handleChange))
-      ..add(domElement.onInput.listen(_handleChange));
+    _subscriptions.add(domElement.onInput.listen(_handleChange));
 
-    // In Firefox, when cursor moves, nor selectionChange neither onInput
-    // events are triggered. We are listening to keyup event to decide
-    // if the user shifted the cursor.
-    // See [SelectionChangeDetection].
+    /// Detects changes in text selection.
+    ///
+    /// Currently only used in Firefox.
+    ///
+    /// In Firefox, when cursor moves, neither selectionChange nor onInput
+    /// events are triggered. We are listening to keyup event. Selection start,
+    /// end values are used to decide if the text cursor moved.
+    ///
+    /// Specific keycodes are not checked since users/applications can bind
+    /// their own keys to move the text cursor.
+    /// Decides if the selection has changed (cursor moved) compared to the
+    /// previous values.
+    ///
+    /// After each keyup, the start/end values of the selection is compared to the
+    /// previously saved editing state.
     if (browserEngine == BrowserEngine.firefox) {
       _subscriptions.add(domElement.onKeyUp.listen((event) {
-        if (_selectionDetection.detectChange()) {
-          _handleChange(event);
-        }
+        _handleChange(event);
       }));
+    } else {
+      _subscriptions.add(html.document.onSelectionChange.listen(_handleChange));
     }
   }
 
@@ -339,7 +353,6 @@ class TextEditingElement {
     _positionInputElementTimer = null;
     owner.inputPositioned = false;
     _removeDomElement();
-    _selectionDetection = null;
   }
 
   void _initDomElement(InputConfiguration inputConfig) {
@@ -400,33 +413,7 @@ class TextEditingElement {
       return;
     }
 
-    switch (_elementType) {
-      case ElementType.input:
-        final html.InputElement input = domElement;
-        input.value = editingState.text;
-        input.setSelectionRange(
-          editingState.baseOffset,
-          editingState.extentOffset,
-        );
-        break;
-
-      case ElementType.textarea:
-        final html.TextAreaElement textarea = domElement;
-        textarea.value = editingState.text;
-        textarea.setSelectionRange(
-          editingState.baseOffset,
-          editingState.extentOffset,
-        );
-        break;
-
-      case ElementType.contentEditable:
-        domRenderer.clearDom(domElement);
-        domElement.append(html.Text(editingState.text));
-        html.window.getSelection()
-          ..removeAllRanges()
-          ..addRange(_createRange(editingState));
-        break;
-    }
+    _lastEditingState.applyToDomElement(domElement);
 
     if (owner.inputElementNeedsToBePositioned) {
       _preventShiftDuringFocus();
@@ -436,92 +423,17 @@ class TextEditingElement {
     domElement.focus();
   }
 
-  /// Swap out the current DOM element and replace it with a new one of type
-  /// [newElementType].
-  ///
-  /// Ideally, swapping the underlying DOM element should be seamless to the
-  /// user of this class.
-  ///
-  /// See also:
-  ///
-  /// * [PersistentTextEditingElement._swapDomElement], which notifies its users
-  ///   that the element has been swapped.
-  void _swapDomElement(ElementType newElementType) {
-    // TODO(mdebbar): Create the appropriate dom element and initialize it.
-  }
-
   void _handleChange(html.Event event) {
-    _lastEditingState = calculateEditingState();
-    _onChange(_lastEditingState);
-  }
-
-  @visibleForTesting
-  EditingState calculateEditingState() {
     assert(domElement != null);
 
-    EditingState editingState;
-    switch (_elementType) {
-      case ElementType.input:
-        final html.InputElement inputElement = domElement;
-        editingState = EditingState(
-          text: inputElement.value,
-          baseOffset: inputElement.selectionStart,
-          extentOffset: inputElement.selectionEnd,
-        );
-        break;
+    EditingState newEditingState = EditingState.fromDomElement(domElement);
 
-      case ElementType.textarea:
-        final html.TextAreaElement textAreaElement = domElement;
-        editingState = EditingState(
-          text: textAreaElement.value,
-          baseOffset: textAreaElement.selectionStart,
-          extentOffset: textAreaElement.selectionEnd,
-        );
-        break;
+    assert(newEditingState != null);
 
-      case ElementType.contentEditable:
-        // In a contenteditable element, we want `innerText` since it correctly
-        // converts <br> to newline characters, for example.
-        //
-        // If we later decide to use <input> and/or <textarea> then we can go back
-        // to using `textContent` (or `value` in the case of <input>)
-        final String text = js_util.getProperty(domElement, 'innerText');
-        if (domElement.childNodes.length > 1) {
-          // Having multiple child nodes in a content editable element means one of
-          // two things:
-          // 1. Text contains new lines.
-          // 2. User pasted rich text.
-          final int prevSelectionEnd = math.max(
-              _lastEditingState.baseOffset, _lastEditingState.extentOffset);
-          final String prevText = _lastEditingState.text;
-          final int offsetFromEnd = prevText.length - prevSelectionEnd;
-
-          final int newSelectionExtent = text.length - offsetFromEnd;
-          // TODO(mdebbar): we may need to `setEditingState()` here.
-          editingState = EditingState(
-            text: text,
-            baseOffset: newSelectionExtent,
-            extentOffset: newSelectionExtent,
-          );
-        } else {
-          final html.Selection selection = html.window.getSelection();
-          editingState = EditingState(
-            text: text,
-            baseOffset: selection.baseOffset,
-            extentOffset: selection.extentOffset,
-          );
-        }
+    if (newEditingState != _lastEditingState) {
+      _lastEditingState = newEditingState;
+      _onChange(_lastEditingState);
     }
-
-    assert(editingState != null);
-    return editingState;
-  }
-
-  html.Range _createRange(EditingState editingState) {
-    final html.Node firstChild = domElement.firstChild;
-    return html.document.createRange()
-      ..setStart(firstChild, editingState.baseOffset)
-      ..setEnd(firstChild, editingState.extentOffset);
   }
 }
 
@@ -543,18 +455,14 @@ class PersistentTextEditingElement extends TextEditingElement {
   /// [domElement] so the caller can insert it before calling
   /// [PersistentTextEditingElement.enable].
   PersistentTextEditingElement(
-    HybridTextEditing owner,
-    html.HtmlElement domElement, {
-    @required html.VoidCallback onDomElementSwap,
-  })  : _onDomElementSwap = onDomElementSwap,
-        super(owner) {
-    // Make sure the dom element is of a type that we support for text editing.
+      HybridTextEditing owner, html.HtmlElement domElement)
+      : super(owner) {
+    // Make sure the DOM element is of a type that we support for text editing.
     // TODO(yjbanov): move into initializer list when https://github.com/dart-lang/sdk/issues/37881 is fixed.
-    assert(_getTypeFromElement(domElement) != null);
+    assert((domElement is html.InputElement) ||
+        (domElement is html.TextAreaElement));
     this.domElement = domElement;
   }
-
-  final html.VoidCallback _onDomElementSwap;
 
   @override
   void _initDomElement(InputConfiguration inputConfig) {
@@ -581,16 +489,6 @@ class PersistentTextEditingElement extends TextEditingElement {
     // switch to a new text field. If we refocus here, we break that
     // functionality and the user can't switch from one text field to another in
     // accessibility mode.
-  }
-
-  @override
-  void _swapDomElement(ElementType newElementType) {
-    super._swapDomElement(newElementType);
-
-    // Unfortunately, in persistent mode, the user of this class has to be
-    // notified that the element is being swapped.
-    // TODO(mdebbar): do we need to call `old.replaceWith(new)` here?
-    _onDomElementSwap();
   }
 }
 
@@ -815,7 +713,7 @@ class HybridTextEditing {
     }
   }
 
-  /// Set style to the native dom element used for text editing.
+  /// Set style to the native DOM element used for text editing.
   ///
   /// It will be located exactly in the same place with the editable widgets,
   /// however it's contents and cursor will be invisible.
@@ -836,7 +734,7 @@ class HybridTextEditing {
   // TODO(flutter_web): After the browser closes and re-opens the virtual
   // shifts the page in iOS. Call this method from visibility change listener
   // attached to body.
-  /// Set the dom element's location somewhere outside of the screen.
+  /// Set the DOM element's location somewhere outside of the screen.
   ///
   /// This is useful for not triggering a scroll when iOS virtual keyboard is
   /// coming up.
@@ -900,63 +798,4 @@ class _EditableSizeAndTransform {
   final double width;
   final double height;
   final Float64List transform;
-}
-
-/// Detects changes in text selection.
-///
-/// Currently only used in Firefox.
-///
-/// In Firefox, when cursor moves, neither selectionChange nor onInput
-/// events are triggered. We are listening to keyup event. Selection start,
-/// end values are used to decide if the text cursor moved.
-///
-/// Specific keycodes are not checked since users/applicatins can bind their own
-/// keys to move the text cursor.
-class SelectionChangeDetection {
-  final html.HtmlElement _domElement;
-  int _start = -1;
-  int _end = -1;
-
-  SelectionChangeDetection(this._domElement) {
-    if (_domElement is html.InputElement) {
-      html.InputElement element = _domElement;
-      _saveSelection(element.selectionStart, element.selectionEnd);
-    } else if (_domElement is html.TextAreaElement) {
-      html.TextAreaElement element = _domElement;
-      _saveSelection(element.selectionStart, element.selectionEnd);
-    } else {
-      throw UnsupportedError('Initialized with unsupported input type');
-    }
-  }
-
-  /// Decides if the selection has changed (cursor moved) compared to the
-  /// previous values.
-  ///
-  /// After each keyup, the start/end values of the selection is compared to the
-  /// previously saved start/end values.
-  bool detectChange() {
-    if (_domElement is html.InputElement) {
-      html.InputElement element = _domElement;
-      return _compareSelection(element.selectionStart, element.selectionEnd);
-    }
-    if (_domElement is html.TextAreaElement) {
-      html.TextAreaElement element = _domElement;
-      return _compareSelection(element.selectionStart, element.selectionEnd);
-    }
-    throw UnsupportedError('Unsupported input type');
-  }
-
-  void _saveSelection(int selectionStart, int selectionEnd) {
-    _start = selectionStart;
-    _end = selectionEnd;
-  }
-
-  bool _compareSelection(int selectionStart, int selectionEnd) {
-    if (selectionStart != _start || selectionEnd != _end) {
-      _saveSelection(selectionStart, selectionEnd);
-      return true;
-    } else {
-      return false;
-    }
-  }
 }
