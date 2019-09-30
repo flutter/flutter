@@ -1,6 +1,5 @@
 
 import 'package:kernel/ast.dart';
-import 'package:vm/frontend_server.dart';
 
 class KernelTransformer extends Transformer {
   @override

@@ -6,9 +6,8 @@ environment:
 
 dependencies:
   front_end:
+    path:
+      /Users/jonahwilliams/Documents/engine/src/third_party/dart/pkg/front_end
   kernel:
-  vm: any
-
-dependency_overrides:
-  vm:
-    path: /Users/jonahwilliams/Documents/engine/src/third_party/dart/pkg/vm
+    path:
+      /Users/jonahwilliams/Documents/engine/src/third_party/dart/pkg/kernel

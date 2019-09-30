@@ -16,7 +16,6 @@ import '../base/process_manager.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
-import '../features.dart';
 import '../globals.dart';
 import '../project.dart';
 
@@ -39,9 +38,9 @@ class _PubspecBasedCompilerGenerator implements CompilerGenerator {
   @override
   Future<void> generate() async {
     final FlutterProject flutterProject = FlutterProject.current();
-    if (featureFlags.isKernelTransformersEnabled) {
-      return;
-    }
+    // if (featureFlags.isKernelTransformersEnabled) {
+    //   return;
+    // }
     final YamlMap transformers = flutterProject.transformers;
     if (transformers == null || transformers.isEmpty) {
       return;
@@ -76,6 +75,8 @@ class _PubspecBasedCompilerGenerator implements CompilerGenerator {
         }
       }
       if (digestsAreEqual) {
+        KernelCompilerFactory.frontendServerLocation = buildSnapshot;
+        ResidentCompiler.frontendServerOverride = buildSnapshot;
         return;
       }
     }
@@ -125,8 +126,7 @@ class _PubspecBasedCompilerGenerator implements CompilerGenerator {
       }
       scriptIdFile.writeAsBytesSync(appliedBuilderDigest);
 
-      _writeEntrypoint(transformers.keys.toList(), generatedDirectory);
-
+      _writeEntrypoint(transformers.keys.cast<String>().toList(), generatedDirectory);
 
       final ProcessResult result = await processManager.run(<String>[
         artifacts.getArtifactPath(Artifact.engineDartBinary),
@@ -141,8 +141,7 @@ class _PubspecBasedCompilerGenerator implements CompilerGenerator {
     } finally {
       status.stop();
     }
-
-    KernelCompilerFactory.overrideArtifactLocation(buildSnapshot);
+    KernelCompilerFactory.frontendServerLocation = buildSnapshot;
     ResidentCompiler.frontendServerOverride = buildSnapshot;
   }
 
@@ -154,6 +153,7 @@ class _PubspecBasedCompilerGenerator implements CompilerGenerator {
 import 'dart:io';
 
 import 'package:frontend_server/server.dart';
+
 ''');
     for (String transformer in transformers) {
       final Uri packageUri = packageMap[transformer].resolve('$transformer.dart');
@@ -163,7 +163,7 @@ import 'package:frontend_server/server.dart';
     buffer.write('''
 final CompositeProgramTransformer transformer = CompositeProgramTransformer(
 [${<String>[for (int i = 0; i < transformers.length; i++) 'i$i.KernelTransformer()'].join(',')}]
-)
+);
 
 void main(List<String> args) async {
   final int exitCode = await starter(args, transformer: transformer);

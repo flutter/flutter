@@ -28,15 +28,12 @@ class KernelCompilerFactory {
 
   Future<KernelCompiler> create(FlutterProject flutterProject) async {
     if (flutterProject == null || !flutterProject.hasBuilders) {
-      return KernelCompiler(frontendServerOverride: _frontendServerLocation);
+      return KernelCompiler(frontendServerOverride: frontendServerLocation);
     }
-    return CodeGeneratingKernelCompiler(frontendServerOverride: _frontendServerLocation);
+    return CodeGeneratingKernelCompiler(frontendServerOverride: frontendServerLocation);
   }
 
-  static File _frontendServerLocation;
-  static void overrideArtifactLocation(File frontendServerLocation) {
-    _frontendServerLocation = frontendServerLocation;
-  }
+  static File frontendServerLocation;
 }
 
 typedef CompilerMessageConsumer = void Function(String message, { bool emphasis, TerminalColor color });
@@ -267,7 +264,7 @@ class KernelCompiler {
     String initializeFromDill,
     String platformDill,
   }) async {
-    final String frontendServer = _frontendServerOverride.path ?? artifacts.getArtifactPath(
+    final String frontendServer = _frontendServerOverride?.path ?? artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
@@ -566,7 +563,8 @@ class ResidentCompiler {
     String outputPath,
     String packagesFilePath,
   ) async {
-    final String frontendServer = frontendServerOverride.path ?? artifacts.getArtifactPath(
+    print(frontendServerOverride);
+    final String frontendServer = frontendServerOverride?.path ?? artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
     final List<String> command = <String>[
