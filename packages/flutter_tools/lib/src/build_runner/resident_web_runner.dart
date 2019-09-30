@@ -264,9 +264,17 @@ class ResidentWebRunner extends ResidentRunner {
       return OperationResult(1, 'Failed to recompile application.');
     }
     if (supportsServiceProtocol) {
+      // Send an event for only recompilation.
+      final Duration recompileDuration = timer.elapsed;
+      flutterUsage.sendTiming('hot', 'web-recompile', recompileDuration);
       try {
         final vmservice.Response reloadResponse = await _vmService.callServiceExtension('hotRestart');
         printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+
+        // Send timing analytics for full restart and for refresh.
+        flutterUsage.sendTiming('hot', 'web-restart', timer.elapsed);
+        flutterUsage.sendTiming('hot', 'web-refresh', timer.elapsed - recompileDuration);
+
         return reloadResponse.type == 'Success'
             ? OperationResult.ok
             : OperationResult(1, reloadResponse.toString());
