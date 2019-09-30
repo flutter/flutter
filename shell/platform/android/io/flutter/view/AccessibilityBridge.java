@@ -1271,7 +1271,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
         if (lastAdded != null && lastAdded.id != previousRouteId) {
             previousRouteId = lastAdded.id;
-            createAndSendWindowChangeEvent(lastAdded);
+            sendWindowChangeEvent(lastAdded);
         }
         flutterNavigationStack.clear();
         for (SemanticsNode semanticsNode : newRoutes) {
@@ -1290,7 +1290,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
         // TODO(goderbauer): Send this event only once (!) for changed subtrees,
         //     see https://github.com/flutter/flutter/issues/14534
-        sendAccessibilityEvent(0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        sendWindowContentChangeEvent(0);
 
         for (SemanticsNode object : updated) {
             if (object.didScroll()) {
@@ -1362,13 +1362,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 String label = object.label == null ? "" : object.label;
                 String previousLabel = object.previousLabel == null ? "" : object.label;
                 if (!label.equals(previousLabel) || !object.hadFlag(Flag.IS_LIVE_REGION)) {
-                    sendAccessibilityEvent(object.id, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+                    sendWindowContentChangeEvent(object.id);
                 }
             } else if (object.hasFlag(Flag.IS_TEXT_FIELD) && object.didChangeLabel()
                     && inputFocusedSemanticsNode != null && inputFocusedSemanticsNode.id == object.id) {
                 // Text fields should announce when their label changes while focused. We use a live
                 // region tag to do so, and this event triggers that update.
-                sendAccessibilityEvent(object.id, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+                sendWindowContentChangeEvent(object.id);
             }
             if (accessibilityFocusedSemanticsNode != null && accessibilityFocusedSemanticsNode.id == object.id
                     && !object.hadFlag(Flag.IS_SELECTED) && object.hasFlag(Flag.IS_SELECTED)) {
@@ -1472,19 +1472,40 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     /**
-     * Factory method that creates a {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED} and sends
-     * the event to Android's accessibility system.
+     * Creates a {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED} and sends the event to
+     * Android's accessibility system.
      *
      * The given {@code route} should be a {@link SemanticsNode} that represents a navigation route
      * in the Flutter app.
      */
-    private void createAndSendWindowChangeEvent(@NonNull SemanticsNode route) {
+    private void sendWindowChangeEvent(@NonNull SemanticsNode route) {
         AccessibilityEvent event = obtainAccessibilityEvent(
             route.id,
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
         );
         String routeName = route.getRouteName();
         event.getText().add(routeName);
+        sendAccessibilityEvent(event);
+    }
+
+    /**
+     * Creates a {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} and sends the event to
+     * Android's accessibility system.
+     *
+     * It sets the content change types to {@link AccessibilityEvent#CONTENT_CHANGE_TYPE_SUBTREE}
+     * when supported by the API level.
+     *
+     * The given {@code virtualViewId} should be a {@link SemanticsNode} below which the content has
+     * changed.
+     */
+    private void sendWindowContentChangeEvent(int virtualViewId) {
+        AccessibilityEvent event = obtainAccessibilityEvent(
+            virtualViewId,
+            AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+        );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            event.setContentChangeTypes(AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
+        }
         sendAccessibilityEvent(event);
     }
 
@@ -1559,7 +1580,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
         accessibilityFocusedSemanticsNode = null;
         hoveredObject = null;
-        sendAccessibilityEvent(0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        sendWindowContentChangeEvent(0);
     }
 
     /**
@@ -1626,7 +1647,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         HAS_IMPLICIT_SCROLLING(1 << 18),
         // The Dart API defines the following flag but it isn't used in Android.
         // IS_MULTILINE(1 << 19);
-        IS_READ_ONLY(1 << 20);
+        IS_READ_ONLY(1 << 20),
+        IS_FOCUSABLE(1 << 21);
 
         final int value;
 
@@ -2000,6 +2022,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             if (hasFlag(Flag.SCOPES_ROUTE)) {
                 return false;
             }
+            if (hasFlag(Flag.IS_FOCUSABLE)) {
+                return true;
+            }
+            // If not explicitly set as focusable, then use our legacy
+            // algorithm. Once all focusable widgets have a Focus widget, then
+            // this won't be needed.
             int scrollableActions = Action.SCROLL_RIGHT.value | Action.SCROLL_LEFT.value
                     | Action.SCROLL_UP.value | Action.SCROLL_DOWN.value;
             return (actions & ~scrollableActions) != 0 || flags != 0

@@ -72,6 +72,7 @@ enum class SemanticsFlags : int32_t {
   // The Dart API defines the following flag but it isn't used in iOS.
   // kIsMultiline = 1 << 19,
   kIsReadOnly = 1 << 20,
+  kIsFocusable = 1 << 21,
 };
 
 const int kScrollableSemanticsFlags =
