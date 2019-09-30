@@ -17,12 +17,17 @@
 #include <sys/stat.h>
 #include <zircon/dlfcn.h>
 #include <zircon/status.h>
+#include <zircon/types.h>
+#include <memory>
 #include <regex>
 #include <sstream>
 
+#include "flutter/fml/mapping.h"
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/fml/unique_fd.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/shell/common/switches.h"
+#include "lib/fdio/io.h"
 #include "runtime/dart/utils/files.h"
 #include "runtime/dart/utils/handle_exception.h"
 #include "runtime/dart/utils/tempfs.h"
@@ -31,6 +36,13 @@
 #include "task_observers.h"
 #include "task_runner_adapter.h"
 #include "thread.h"
+
+// TODO(kaushikiska): Use these constants from ::llcpp::fuchsia::io
+// Can read from target object.
+constexpr uint32_t OPEN_RIGHT_READABLE = 1u;
+
+// Connection can map target object executable.
+constexpr uint32_t OPEN_RIGHT_EXECUTABLE = 8u;
 
 namespace flutter_runner {
 
@@ -67,6 +79,30 @@ static std::string DebugLabelForURL(const std::string& url) {
   } else {
     return {url, found + 1};
   }
+}
+
+static std::unique_ptr<fml::FileMapping> MakeReadExecMapping(const char* path) {
+  int fd = 0;
+  // The returned file descriptor is compatible with standard posix operations
+  // such as close, mmap, etc. We only need to treat open/open_at specially.
+  zx_status_t status =
+      fdio_open_fd(path, OPEN_RIGHT_READABLE | OPEN_RIGHT_EXECUTABLE, &fd);
+
+  if (status != ZX_OK) {
+    return nullptr;
+  }
+
+  using Protection = fml::FileMapping::Protection;
+
+  auto mapping = std::make_unique<fml::FileMapping>(
+      fml::UniqueFD{fd}, std::initializer_list<Protection>{
+                             Protection::kRead, Protection::kExecute});
+
+  if (!mapping->IsValid()) {
+    return nullptr;
+  }
+
+  return mapping;
 }
 
 Application::Application(
@@ -218,11 +254,16 @@ Application::Application(
 
   // Compare flutter_jit_runner in BUILD.gn.
   settings_.vm_snapshot_data_path = "pkg/data/vm_snapshot_data.bin";
-  settings_.vm_snapshot_instr_path = "pkg/data/vm_snapshot_instructions.bin";
+  settings_.vm_snapshot_instr = []() {
+    return MakeReadExecMapping("/pkg/data/vm_snapshot_instructions.bin");
+  };
+
   settings_.isolate_snapshot_data_path =
       "pkg/data/isolate_core_snapshot_data.bin";
-  settings_.isolate_snapshot_instr_path =
-      "pkg/data/isolate_core_snapshot_instructions.bin";
+  settings_.isolate_snapshot_instr = []() {
+    return MakeReadExecMapping(
+        "/pkg/data/isolate_core_snapshot_instructions.bin");
+  };
 
   {
     // Check if we can use the snapshot with the framework already loaded.
@@ -236,12 +277,15 @@ Application::Application(
         (runner_framework.compare(app_framework) == 0)) {
       settings_.vm_snapshot_data_path =
           "pkg/data/framework_vm_snapshot_data.bin";
-      settings_.vm_snapshot_instr_path =
-          "pkg/data/framework_vm_snapshot_instructions.bin";
+      settings_.vm_snapshot_instr = []() {
+        return MakeReadExecMapping("/pkg/data/vm_snapshot_instructions.bin");
+      };
       settings_.isolate_snapshot_data_path =
           "pkg/data/framework_isolate_core_snapshot_data.bin";
-      settings_.isolate_snapshot_instr_path =
-          "pkg/data/framework_isolate_core_snapshot_instructions.bin";
+      settings_.isolate_snapshot_instr = []() {
+        return MakeReadExecMapping(
+            "/pkg/data/isolate_core_snapshot_instructions.bin");
+      };
 
       FML_LOG(INFO) << "Using snapshot with framework for "
                     << package.resolved_url;
