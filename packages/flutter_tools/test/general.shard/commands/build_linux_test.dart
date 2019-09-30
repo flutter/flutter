@@ -54,6 +54,26 @@ void main() {
     when(notLinuxPlatform.isWindows).thenReturn(false);
   });
 
+  // Creates the mock files necessary to run a build.
+  void setUpMockProjectFilesForBuild() {
+    fs.file('linux/build.sh').createSync(recursive: true);
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+  }
+
+  // Sets up mock expectation for running 'make'.
+  void expectMakeInvocationWithMode(String buildModeName) {
+    when(mockProcessManager.start(<String>[
+      'make',
+      '-C',
+      '/linux',
+      'BUILD=$buildModeName',
+    ])).thenAnswer((Invocation invocation) async {
+      return mockProcess;
+    });
+  }
+
   testUsingContext('Linux build fails when there is no linux project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
@@ -69,10 +89,7 @@ void main() {
   testUsingContext('Linux build fails on non-linux platform', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file('linux/build.sh').createSync(recursive: true);
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    setUpMockProjectFilesForBuild();
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux']
@@ -86,23 +103,45 @@ void main() {
   testUsingContext('Linux build invokes make and writes temporary files', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file('linux/build.sh').createSync(recursive: true);
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-
-    when(mockProcessManager.start(<String>[
-      'make',
-      '-C',
-      '/linux',
-    ], runInShell: true)).thenAnswer((Invocation invocation) async {
-      return mockProcess;
-    });
+    setUpMockProjectFilesForBuild();
+    expectMakeInvocationWithMode('release');
 
     await createTestCommandRunner(command).run(
       const <String>['build', 'linux']
     );
     expect(fs.file('linux/flutter/ephemeral/generated_config.mk').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => mockProcessManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('Linux build --debug passes debug mode to make', () async {
+    final BuildCommand command = BuildCommand();
+    applyMocksToCommand(command);
+    setUpMockProjectFilesForBuild();
+    expectMakeInvocationWithMode('debug');
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--debug']
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => mockProcessManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('Linux build --profile passes profile mode to make', () async {
+    final BuildCommand command = BuildCommand();
+    applyMocksToCommand(command);
+    setUpMockProjectFilesForBuild();
+    expectMakeInvocationWithMode('profile');
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--profile']
+    );
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
@@ -140,18 +179,8 @@ BINARY_NAME=fizz_bar
   testUsingContext('Release build prints an under-construction warning', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file('linux/build.sh').createSync(recursive: true);
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-
-    when(mockProcessManager.start(<String>[
-      'make',
-      '-C',
-      '/linux',
-    ], runInShell: true)).thenAnswer((Invocation invocation) async {
-      return mockProcess;
-    });
+    setUpMockProjectFilesForBuild();
+    expectMakeInvocationWithMode('release');
 
     await createTestCommandRunner(command).run(
       const <String>['build', 'linux']
