@@ -295,7 +295,7 @@ class Image extends StatefulWidget {
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
-  /// The [src], [scale], [resizeToFit] and [repeat] arguments must not be null.
+  /// The [src], [scale] and [repeat] arguments must not be null.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
