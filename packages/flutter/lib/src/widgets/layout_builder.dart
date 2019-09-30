@@ -107,7 +107,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
               informationCollector: () sync* {
                 yield DiagnosticsDebugCreator(DebugCreator(this));
               },
-            )
+            ),
           );
         }
       }
@@ -123,7 +123,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
             informationCollector: () sync* {
               yield DiagnosticsDebugCreator(DebugCreator(this));
             },
-          )
+          ),
         );
         _child = updateChild(null, built, slot);
       }

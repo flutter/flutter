@@ -663,7 +663,7 @@ void _parseAssetFromFile(
         baseDir: asset.baseDir,
         entryUri: entryUri,
         relativeUri: relativeUri,
-        )
+      ),
     );
   }
 

@@ -57,8 +57,8 @@ void main() {
               DefaultBuildResult((DefaultBuildResultBuilder builder) {
                 builder.target = 'web';
                 builder.status = BuildStatus.succeeded;
-              })
-            ]
+              }),
+            ],
           );
         })
       ));
@@ -163,8 +163,8 @@ void main() {
               DefaultBuildResult((DefaultBuildResultBuilder builder) {
                 builder.target = 'web';
                 builder.status = BuildStatus.failed;
-              })
-            ]
+              }),
+            ],
           );
         })
       ));

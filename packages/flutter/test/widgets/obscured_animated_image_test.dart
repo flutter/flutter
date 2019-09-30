@@ -25,7 +25,7 @@ Future<void> main() async {
         routes: <String, WidgetBuilder>{
           '/page': (BuildContext context) => Container(),
         },
-      )
+      ),
     );
     final RenderImage renderImage = tester.renderObject(find.byType(Image));
     final ui.Image image1 = renderImage.image;
