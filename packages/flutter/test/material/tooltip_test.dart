@@ -577,6 +577,7 @@ void main() {
   });
 
   testWidgets('Tooltip overlay respects ambient Directionality', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/40702.
     Widget buildApp(String text, TextDirection textDirection) {
       return MaterialApp(
         home: Directionality(
