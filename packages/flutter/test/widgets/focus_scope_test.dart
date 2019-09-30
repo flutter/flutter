@@ -1304,11 +1304,20 @@ void main() {
 
     expect(key.currentState.focusNode.hasFocus, isFalse);
     expect(semantics.hasFlag(SemanticsFlag.isFocused), isFalse);
+    expect(semantics.hasFlag(SemanticsFlag.isFocusable), isTrue);
 
     FocusScope.of(key.currentContext).requestFocus(key.currentState.focusNode);
     await tester.pumpAndSettle();
 
     expect(key.currentState.focusNode.hasFocus, isTrue);
     expect(semantics.hasFlag(SemanticsFlag.isFocused), isTrue);
+    expect(semantics.hasFlag(SemanticsFlag.isFocusable), isTrue);
+
+    key.currentState.focusNode.canRequestFocus = false;
+    await tester.pumpAndSettle();
+
+    expect(key.currentState.focusNode.hasFocus, isFalse);
+    expect(semantics.hasFlag(SemanticsFlag.isFocused), isFalse);
+    expect(semantics.hasFlag(SemanticsFlag.isFocusable), isFalse);
   });
 }

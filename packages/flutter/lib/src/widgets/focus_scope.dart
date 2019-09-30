@@ -434,6 +434,7 @@ class _FocusState extends State<Focus> {
     return _FocusMarker(
       node: focusNode,
       child: Semantics(
+        focusable: focusNode.canRequestFocus,
         focused: focusNode.hasFocus,
         child: widget.child,
       ),
