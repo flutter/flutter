@@ -140,7 +140,7 @@ class FileHashStore {
   Future<List<File>> hashFiles(List<File> files) async {
     final List<File> dirty = <File>[];
     await Future.wait(<Future<void>>[
-      for (File file in files) _hashFile(file, dirty, Pool(32))]);
+      for (File file in files) _hashFile(file, dirty, Pool(kMaxOpenFiles))]);
     return dirty;
   }
 
@@ -149,7 +149,7 @@ class FileHashStore {
     try {
       final String absolutePath = file.path;
       final String previousHash = previousHashes[absolutePath];
-      final Digest digest = md5.convert(file.readAsBytesSync());
+      final Digest digest = md5.convert(await file.readAsBytes());
       final String currentHash = digest.toString();
       if (currentHash != previousHash) {
         dirty.add(file);
