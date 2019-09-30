@@ -38,7 +38,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.byKey(popupMenuButtonKey));
@@ -108,7 +108,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.byKey(popupMenuButtonKey));
@@ -142,7 +142,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.byKey(dropdownMenuButtonKey));
@@ -176,7 +176,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('SHOW'));
@@ -213,7 +213,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('SHOW'));
@@ -251,7 +251,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('SHOW'));
@@ -268,7 +268,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(iconTheme: const IconThemeData(color: Colors.green, size: 10.0)),
         home: const Icon(Icons.computer),
-      )
+      ),
     );
 
     RenderParagraph glyphText = tester.renderObject(find.byType(RichText));
@@ -338,7 +338,7 @@ void main() {
       primaryTextTheme: fallback.primaryTextTheme.copyWith(
         body1: fallback.primaryTextTheme.body1.copyWith(
           fontSize: _kMagicFontSize,
-        )
+        ),
       ),
     );
     expect(customTheme.primaryTextTheme.body1.fontSize, _kMagicFontSize);

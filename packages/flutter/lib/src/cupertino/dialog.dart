@@ -1554,7 +1554,7 @@ class _RenderCupertinoDialogActions extends RenderBox
               firstChild.size.height,
               lastChild.size.height,
             ),
-          )
+          ),
         );
       }
     } else {

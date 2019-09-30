@@ -150,7 +150,7 @@ class Plugin {
       final int numKeys = yaml.keys.toSet().length;
       if (numKeys != 1) {
         return <String>[
-          'Invalid plugin specification. There must be only one key: "platforms", found multiple: ${yaml.keys.join(',')}'
+          'Invalid plugin specification. There must be only one key: "platforms", found multiple: ${yaml.keys.join(',')}',
         ];
       } else {
         return _validateMultiPlatformYaml(yaml['platforms']);

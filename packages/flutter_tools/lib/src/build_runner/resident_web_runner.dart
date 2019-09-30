@@ -185,7 +185,7 @@ class ResidentWebRunner extends ResidentRunner {
         mainPath: target,
         debuggingOptions: debuggingOptions,
         platformArgs: <String, Object>{
-          'uri': _webFs.uri
+          'uri': _webFs.uri,
         },
       );
       if (supportsServiceProtocol) {

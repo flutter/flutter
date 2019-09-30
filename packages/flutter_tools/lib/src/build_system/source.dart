@@ -136,7 +136,7 @@ class SourceVisitor {
       sources.addAll(<File>[
         for (FileSystemEntity entity in fs.directory(path).listSync(recursive: true))
           if (entity is File)
-            entity
+            entity,
       ]);
     } else {
       sources.add(fs.file(path));

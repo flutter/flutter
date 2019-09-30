@@ -517,7 +517,7 @@ void main() {
                 delegate: SliverChildListDelegate(<Widget>[
                   Text('child', key: GlobalKey()),
                 ]),
-              )
+              ),
             ],
           ),
         ),

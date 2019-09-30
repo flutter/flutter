@@ -2926,10 +2926,10 @@ void main() {
                 controller: TextEditingController(text: 'lorem'),
                 enabled: false,
               ),
-            )
+            ),
           ),
-        )
-      )
+        ),
+      ),
     );
 
     await expectLater(
