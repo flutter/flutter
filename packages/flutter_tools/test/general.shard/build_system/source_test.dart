@@ -4,11 +4,13 @@
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/source.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -17,8 +19,11 @@ void main() {
   Testbed testbed;
   SourceVisitor visitor;
   Environment environment;
+  MockPlatform mockPlatform;
 
   setUp(() {
+    mockPlatform = MockPlatform();
+    when(mockPlatform.isWindows).thenReturn(true);
     testbed = Testbed(setup: () {
       fs.directory('cache').createSync();
       final Directory outputs = fs.directory('outputs')
@@ -155,6 +160,62 @@ void main() {
     missingSource.accept(visitor);
     expect(visitor.sources, isEmpty);
   }));
+
+  test('can resolve a missing depfile', () => testbed.run(() {
+    const Source depfile = Source.depfile('foo.d');
+
+    depfile.accept(visitor);
+    expect(visitor.sources, isEmpty);
+    expect(visitor.containsNewDepfile, true);
+  }));
+
+  test('can resolve a populated depfile', () => testbed.run(() {
+    const Source depfile = Source.depfile('foo.d');
+    environment.buildDir.childFile('foo.d')
+      .writeAsStringSync('a.dart : c.dart');
+
+    depfile.accept(visitor);
+    expect(visitor.sources.single.path, 'c.dart');
+    expect(visitor.containsNewDepfile, false);
+
+    final SourceVisitor outputVisitor = SourceVisitor(environment, false);
+    depfile.accept(outputVisitor);
+
+    expect(outputVisitor.sources.single.path, 'a.dart');
+    expect(outputVisitor.containsNewDepfile, false);
+  }));
+
+  test('does not crash on completely invalid depfile', () => testbed.run(() {
+    const Source depfile = Source.depfile('foo.d');
+    environment.buildDir.childFile('foo.d')
+        .writeAsStringSync('hello, world');
+
+    depfile.accept(visitor);
+    expect(visitor.sources, isEmpty);
+    expect(visitor.containsNewDepfile, false);
+  }));
+
+  test('can parse depfile with windows paths', () => testbed.run(() {
+    const Source depfile = Source.depfile('foo.d');
+    environment.buildDir.childFile('foo.d')
+        .writeAsStringSync(r'a.dart: C:\\foo\\bar.txt');
+
+    depfile.accept(visitor);
+    expect(visitor.sources.single.path, r'C:\foo\bar.txt');
+    expect(visitor.containsNewDepfile, false);
+  }, overrides: <Type, Generator>{
+    Platform: () => mockPlatform,
+  }));
+
+  test('can parse depfile with spaces in paths', () => testbed.run(() {
+    const Source depfile = Source.depfile('foo.d');
+    environment.buildDir.childFile('foo.d')
+        .writeAsStringSync(r'a.dart: foo\ bar.txt');
+
+    depfile.accept(visitor);
+    expect(visitor.sources.single.path, r'foo bar.txt');
+    expect(visitor.containsNewDepfile, false);
+  }));
 }
 
 class TestBehavior extends SourceBehavior {
@@ -168,3 +229,6 @@ class TestBehavior extends SourceBehavior {
     return null;
   }
 }
+
+class MockPlatform extends Mock implements Platform {}
+

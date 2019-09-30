@@ -312,6 +312,28 @@ void main() {
 
     expect(() => checkCycles(barTarget), throwsA(isInstanceOf<CycleException>()));
   });
+
+  test('Target with depfile dependency will not run twice without invalidation', () => testbed.run(() async {
+    int called = 0;
+    final TestTarget target = TestTarget((Environment environment) async {
+      environment.buildDir.childFile('example.d')
+        .writeAsStringSync('a.txt: b.txt');
+      fs.file('a.txt').writeAsStringSync('a');
+      called += 1;
+    })
+      ..inputs = const <Source>[Source.depfile('example.d')]
+      ..outputs = const <Source>[Source.depfile('example.d')];
+    fs.file('b.txt').writeAsStringSync('b');
+
+    await buildSystem.build(target, environment);
+
+    expect(fs.file('a.txt').existsSync(), true);
+    expect(called, 1);
+
+    // Second build is up to date due to depfil parse.
+    await buildSystem.build(target, environment);
+    expect(called, 1);
+  }));
 }
 
 class MockPlatform extends Mock implements Platform {}

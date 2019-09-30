@@ -121,16 +121,17 @@ abstract class Target {
 
   /// Create a [Node] with resolved inputs and outputs.
   Node _toNode(Environment environment) {
-    final List<File> inputs = resolveInputs(environment);
-    final List<File> outputs = resolveOutputs(environment);
+    final ResolvedFiles inputsFiles = resolveInputs(environment);
+    final ResolvedFiles outputFiles = resolveOutputs(environment);
     return Node(
       this,
-      inputs,
-      outputs,
+      inputsFiles.sources,
+      outputFiles.sources,
       <Node>[
         for (Target target in dependencies) target._toNode(environment),
       ],
       environment,
+      inputsFiles.containsNewDepfile,
     );
   }
 
@@ -168,9 +169,7 @@ abstract class Target {
 
   /// Resolve the set of input patterns and functions into a concrete list of
   /// files.
-  List<File> resolveInputs(
-    Environment environment,
-  ) {
+  ResolvedFiles resolveInputs(Environment environment) {
     return _resolveConfiguration(inputs, environment, implicit: true, inputs: true);
   }
 
@@ -178,11 +177,8 @@ abstract class Target {
   ///
   /// The [implicit] flag controls whether it is safe to evaluate [Source]s
   /// which uses functions, behaviors, or patterns.
-  List<File> resolveOutputs(
-    Environment environment,
-  ) {
-    final List<File> outputEntities = _resolveConfiguration(outputs, environment, inputs: false);
-    return outputEntities;
+  ResolvedFiles resolveOutputs(Environment environment) {
+    return _resolveConfiguration(outputs, environment, inputs: false);
   }
 
   /// Performs a fold across this target and its dependencies.
@@ -200,13 +196,15 @@ abstract class Target {
   Map<String, Object> toJson(Environment environment) {
     return <String, Object>{
       'name': name,
-      'dependencies': dependencies.map((Target target) => target.name).toList(),
-      'inputs': resolveInputs(environment)
-          .map((File file) => file.path)
-          .toList(),
-      'outputs': resolveOutputs(environment)
-          .map((File file) => file.path)
-          .toList(),
+      'dependencies': <String>[
+        for (Target target in dependencies) target.name
+      ],
+      'inputs': <String>[
+        for (File file in resolveInputs(environment).sources) file.path,
+      ],
+      'outputs': <String>[
+        for (File file in resolveOutputs(environment).sources) file.path,
+      ],
       'stamp': _findStampFile(environment).absolute.path,
     };
   }
@@ -217,13 +215,14 @@ abstract class Target {
     return environment.buildDir.childFile(fileName);
   }
 
-  static List<File> _resolveConfiguration(
-      List<Source> config, Environment environment, { bool implicit = true, bool inputs = true }) {
+  static ResolvedFiles _resolveConfiguration(List<Source> config, Environment environment, {
+    bool implicit = true, bool inputs = true,
+  }) {
     final SourceVisitor collector = SourceVisitor(environment, inputs);
     for (Source source in config) {
       source.accept(collector);
     }
-    return collector.sources;
+    return collector;
   }
 }
 
@@ -481,49 +480,70 @@ class _BuildInstance {
     final Stopwatch stopwatch = Stopwatch()..start();
     bool passed = true;
     bool skipped = false;
-    try {
-      final bool canSkip = await node.computeChanges(environment, fileCache);
+
+    // The build system produces a list of aggregate input and output
+    // files for the overall build. This list is provided to a hosting build
+    // system, such as Xcode, to configure logic for when to skip the
+    // rule/phase which contains the flutter build.
+    //
+    // When looking at the inputs and outputs for the individual rules, we need
+    // to be careful to remove inputs that were actually output from previous
+    // build steps. This indicates that the file is an intermediary. If
+    // these files are included as both inputs and outputs then it isn't
+    // possible to construct a DAG describing the build.
+    void updateGraph() {
+      for (File output in node.outputs) {
+        outputFiles[output.path] = output;
+      }
       for (File input in node.inputs) {
-        // The build system should produce a list of aggregate input and output
-        // files for the overall build. The goal is to provide this to a hosting
-        // build system, such as Xcode, to configure logic for when to skip the
-        // rule/phase which contains the flutter build. When looking at the
-        // inputs and outputs for the individual rules, we need to be careful to
-        // remove inputs that were actually output from previous build steps.
-        // This indicates that the file is actual an output or intermediary. If
-        // these files are included as both inputs and outputs then it isn't
-        // possible to construct a DAG describing the build.
         final String resolvedPath = input.resolveSymbolicLinksSync();
         if (outputFiles.containsKey(resolvedPath)) {
           continue;
         }
         inputFiles[resolvedPath] = input;
       }
+    }
+
+    try {
+      // If we're missing a depfile, wait until after evaluating the target to
+      // compute changes.
+      final bool canSkip = !node.missingDepfile &&
+        await node.computeChanges(environment, fileCache);
+
       if (canSkip) {
         skipped = true;
         printTrace('Skipping target: ${node.target.name}');
-        for (File output in node.outputs) {
-          outputFiles[output.path] = output;
-        }
-      } else {
-        printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
-        await node.target.build(environment);
-        printTrace('${node.target.name}: Complete');
+        updateGraph();
+        return passed;
+      }
+      printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
+      await node.target.build(environment);
+      printTrace('${node.target.name}: Complete');
 
-        // Update hashes for output files.
-        await fileCache.hashFiles(node.outputs);
-        node.target._writeStamp(node.inputs, node.outputs, environment);
-        for (File output in node.outputs) {
-          outputFiles[output.path] = output;
+      // If we were missing the depfile, resolve files after executing the
+      // target so that all file hashes are up to date on the next run.
+      if (node.missingDepfile) {
+        node.inputs.clear();
+        node.outputs.clear();
+        node.inputs.addAll(node.target.resolveInputs(environment).sources);
+        node.outputs.addAll(node.target.resolveOutputs(environment).sources);
+        await fileCache.hashFiles(node.inputs);
+      }
+
+      // Update hashes for output files.
+      await fileCache.hashFiles(node.outputs);
+      node.target._writeStamp(node.inputs, node.outputs, environment);
+      updateGraph();
+
+      // Delete outputs from previous stages that are no longer a part of the
+      // build.
+      for (String previousOutput in node.previousOutputs) {
+        if (outputFiles.containsKey(previousOutput)) {
+          continue;
         }
-        // Delete outputs from previous stages that are no longer a part of the build.
-        for (String previousOutput in node.previousOutputs) {
-          if (!outputFiles.containsKey(previousOutput)) {
-            final File previousFile = fs.file(previousOutput);
-            if (previousFile.existsSync()) {
-              previousFile.deleteSync();
-            }
-          }
+        final File previousFile = fs.file(previousOutput);
+        if (previousFile.existsSync()) {
+          previousFile.deleteSync();
         }
       }
     } catch (exception, stackTrace) {
@@ -604,7 +624,7 @@ void verifyOutputDirectories(List<File> outputs, Environment environment, Target
 /// A node in the build graph.
 class Node {
   Node(this.target, this.inputs, this.outputs, this.dependencies,
-      Environment environment) {
+      Environment environment, this.missingDepfile) {
     final File stamp = target._findStampFile(environment);
 
     // If the stamp file doesn't exist, we haven't run this step before and
@@ -650,6 +670,12 @@ class Node {
   ///
   /// These files may not yet exist if the target hasn't run yet.
   final List<File> outputs;
+
+  /// Whether this node is missing a depfile.
+  ///
+  /// This requires an additional pass of source resolution after the target
+  /// has been executed.
+  final bool missingDepfile;
 
   /// The target definition which contains the build action to invoke.
   final Target target;
