@@ -710,6 +710,52 @@ class DropdownButton<T> extends StatefulWidget {
   /// The text style to use for text in the dropdown button and the dropdown
   /// menu that appears when you tap the button.
   ///
+  /// To use a separate text style for the dropdown button, consider using
+  /// [selectedItemBuilder].
+  ///
+  /// {@tool snippet --template=stateful_widget_scaffold}
+  ///
+  /// This sample shows a `DropdownButton` with a dropdown button text style
+  /// that is unique from its menu items.
+  ///
+  /// ```dart
+  /// List<String> options = <String>['One', 'Two', 'Free', 'Four'];
+  /// String dropdownValue = 'One';
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Container(
+  ///     color: Colors.blue,
+  ///     child: Center(
+  ///       child: DropdownButton<String>(
+  ///         value: dropdownValue,
+  ///         onChanged: (String newValue) {
+  ///           setState(() {
+  ///             dropdownValue = newValue;
+  ///           });
+  ///         },
+  ///         style: TextStyle(color: Colors.blue),
+  ///         selectedItemBuilder: (BuildContext context) {
+  ///           return options.map((String value) {
+  ///             return Text(
+  ///               dropdownValue,
+  ///               style: TextStyle(color: Colors.white),
+  ///             );
+  ///           }).toList();
+  ///         },
+  ///         items: options.map<DropdownMenuItem<String>>((String value) {
+  ///           return DropdownMenuItem<String>(
+  ///             value: value,
+  ///             child: Text(value),
+  ///           );
+  ///         }).toList(),
+  ///       ),
+  ///     ),
+  ///   ),
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
   /// Defaults to the [TextTheme.subhead] value of the current
   /// [ThemeData.textTheme] of the current [Theme].
   final TextStyle style;
