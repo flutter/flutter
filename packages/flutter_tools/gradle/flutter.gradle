@@ -576,12 +576,13 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-            def compileTasks = targetPlatforms.collect { targetArch ->
+            String variantBuildMode = buildModeFor(variant.buildType)
+            List<FlutterTask> compileTasks = targetPlatforms.collect { targetArch ->
                 String taskName = toCammelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name, targetArch.replace('android-', '')])
                 project.tasks.create(name: taskName, type: FlutterTask) {
                     flutterRoot this.flutterRoot
                     flutterExecutable this.flutterExecutable
-                    buildMode buildModeFor(variant.buildType)
+                    buildMode variantBuildMode
                     localEngine this.localEngine
                     localEngineSrcPath this.localEngineSrcPath
                     abi PLATFORM_ARCH_MAP[targetArch]
@@ -601,7 +602,7 @@ class FlutterPlugin implements Plugin<Project> {
                     extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 }
             }
-            def libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
+            File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name
@@ -619,33 +620,70 @@ class FlutterPlugin implements Plugin<Project> {
             addApiDependencies(project, variant.name, project.files {
                 packFlutterAppAotTask
             })
-            // We know that the flutter app is a subproject in another Android app when these tasks exist.
             Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
             Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
+            // In add to app scenarios, :flutter is a subproject of another Android app.
+            // We know that :flutter is used as a subproject when these tasks exist.
+            boolean isUsedAsSubproject = packageAssets && cleanPackageAssets
             Task copyFlutterAssetsTask = project.tasks.create(name: "copyFlutterAssets${variant.name.capitalize()}", type: Copy) {
                 dependsOn compileTasks
-                if (packageAssets && cleanPackageAssets) {
+                compileTasks.each { flutterTask ->
+                    // Add flutter_assets.
+                    with flutterTask.assets
+                }
+                if (isUsedAsSubproject) {
                     dependsOn packageAssets
                     dependsOn cleanPackageAssets
                     into packageAssets.outputDir
-                } else {
-                    // `variant.mergeAssets` will be removed at the end of 2019.
-                    def mergeAssets = variant.hasProperty("mergeAssetsProvider") ?
-                        variant.mergeAssetsProvider.get() : variant.mergeAssets
-                    dependsOn mergeAssets
-                    dependsOn "clean${mergeAssets.name.capitalize()}"
-                    mergeAssets.mustRunAfter("clean${mergeAssets.name.capitalize()}")
-                    into mergeAssets.outputDir
+                    return
                 }
-                compileTasks.each { flutterTask ->
-                    with flutterTask.assets
+                // `variant.mergeAssets` will be removed at the end of 2019.
+                def mergeAssets = variant.hasProperty("mergeAssetsProvider") ?
+                    variant.mergeAssetsProvider.get() : variant.mergeAssets
+                dependsOn mergeAssets
+                dependsOn "clean${mergeAssets.name.capitalize()}"
+                mergeAssets.mustRunAfter("clean${mergeAssets.name.capitalize()}")
+                into mergeAssets.outputDir
+            }
+            if (!isUsedAsSubproject) {
+                variant.mergeResources.dependsOn(copyFlutterAssetsTask)
+                return
+            }
+            // Flutter module included as a subproject in add to app.
+            Project appProject = project.rootProject.findProject(':app')
+            assert appProject != null
+            appProject.afterEvaluate {
+                assert appProject.android != null
+                appProject.android.applicationVariants.all { appProjectVariant ->
+                    // Find a compatible application variant in the host app.
+                    //
+                    // For example, consider a host app that defines the following variants:
+                    // | ----------------- | ----------------------------- |
+                    // |   Build Variant   |   Flutter Equivalent Variant  |
+                    // | ----------------- | ----------------------------- |
+                    // |   freeRelease     |   relese                      |
+                    // |   freeDebug       |   debug                       |
+                    // |   freeDevelop     |   debug                       |
+                    // |   profile         |   profile                     |
+                    // | ----------------- | ----------------------------- |
+                    //
+                    // This mapping is based on the following rules:
+                    // 1. If the host app build variant name is `profile` then the equivalent
+                    //    Flutter variant is `profile`.
+                    // 2. If the host app build variant is debuggable
+                    //    (e.g. `buildType.debuggable = true`), then the equivalent Flutter
+                    //    variant is `debug`.
+                    // 3. Otherwise, the equivalent Flutter variant is `release`.
+                    if (buildModeFor(appProjectVariant.buildType) != variantBuildMode) {
+                        return
+                    }
+                    Task mergeAssets = project
+                        .tasks
+                        .findByPath(":app:merge${appProjectVariant.name.capitalize()}Assets")
+                    assert mergeAssets
+                    mergeAssets.dependsOn(copyFlutterAssetsTask)
                 }
             }
-            def variantOutput = variant.outputs.first()
-            // `variantOutput.processResources` will be removed at the end of 2019.
-            def processResources = variantOutput.hasProperty("processResourcesProvider") ?
-                variantOutput.processResourcesProvider.get() : variantOutput.processResources
-            processResources.dependsOn(copyFlutterAssetsTask)
         }
         if (project.android.hasProperty("applicationVariants")) {
             project.android.applicationVariants.all addFlutterDeps

@@ -684,7 +684,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('Menu Button'));

@@ -161,7 +161,7 @@ class FlutterPlugins extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/.flutter-plugins')
+    Source.pattern('{PROJECT_DIR}/.flutter-plugins'),
   ];
 
   @override

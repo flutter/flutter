@@ -12,11 +12,20 @@ typedef SignalHandler = FutureOr<void> Function(ProcessSignal signal);
 
 Signals get signals => Signals.instance;
 
+// The default list of signals that should cause the process to exit.
+const List<ProcessSignal> _defaultExitSignals = <ProcessSignal>[
+  ProcessSignal.SIGTERM,
+  ProcessSignal.SIGINT,
+  ProcessSignal.SIGKILL,
+];
+
 /// A class that manages signal handlers
 ///
 /// Signal handlers are run in the order that they were added.
 abstract class Signals {
-  factory Signals() => _DefaultSignals._();
+  factory Signals({
+    List<ProcessSignal> exitSignals = _defaultExitSignals,
+  }) => _DefaultSignals._(exitSignals);
 
   static Signals get instance => context.get<Signals>();
 
@@ -40,7 +49,9 @@ abstract class Signals {
 }
 
 class _DefaultSignals implements Signals {
-  _DefaultSignals._();
+  _DefaultSignals._(this.exitSignals);
+
+  final List<ProcessSignal> exitSignals;
 
   // A table mapping (signal, token) -> signal handler.
   final Map<ProcessSignal, Map<Object, SignalHandler>> _handlersTable =
@@ -119,12 +130,5 @@ class _DefaultSignals implements Signals {
     }
   }
 
-  // The list of signals that should cause the process to exit.
-  static const List<ProcessSignal> _exitingSignals = <ProcessSignal>[
-    ProcessSignal.SIGTERM,
-    ProcessSignal.SIGINT,
-    ProcessSignal.SIGKILL,
-  ];
-
-  bool _shouldExitFor(ProcessSignal signal) => _exitingSignals.contains(signal);
+  bool _shouldExitFor(ProcessSignal signal) => exitSignals.contains(signal);
 }
