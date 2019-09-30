@@ -15,9 +15,9 @@ typedef InputFunction = List<File> Function(Environment environment);
 
 /// A set of source files.
 abstract class ResolvedFiles {
-  /// Whether any of the sources we evaluated contained a depfile that was missing.
+  /// Whether any of the sources we evaluated contained a missing depfile.
   ///
-  /// If so, the build system need sto rerun the visitor after executing the
+  /// If so, the build system needs to rerun the visitor after executing the
   /// build to ensure all hashes are up to date.
   bool get containsNewDepfile;
 
@@ -57,6 +57,7 @@ class SourceVisitor implements ResolvedFiles {
   /// If the file is missing, this visitor is marked as [containsNewDepfile].
   /// This is used by the [Node] class to tell the [BuildSystem] to
   /// defer hash computation until after executing the target.
+  // depfile logic adopted from https://github.com/flutter/flutter/blob/7065e4330624a5a216c8ffbace0a462617dc1bf5/dev/devicelab/lib/framework/apk_utils.dart#L390
   void visitDepfile(String name) {
     final File depfile = environment.buildDir.childFile(name);
     if (!depfile.existsSync()) {
@@ -65,6 +66,10 @@ class SourceVisitor implements ResolvedFiles {
     }
     final String contents = depfile.readAsStringSync();
     final List<String> colonSeparated = contents.split(': ');
+    if (colonSeparated.length != 2) {
+      printError('Invalid depfile: ${depfile.path}');
+      return;
+    }
     if (inputs) {
       sources.addAll(_processList(colonSeparated[1].trim()));
     } else {

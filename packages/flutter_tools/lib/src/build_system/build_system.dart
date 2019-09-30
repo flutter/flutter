@@ -481,13 +481,14 @@ class _BuildInstance {
     bool passed = true;
     bool skipped = false;
 
-    // The build system should produce a list of aggregate input and output
-    // files for the overall build. The goal is to provide this to a hosting
-    // build system, such as Xcode, to configure logic for when to skip the
-    // rule/phase which contains the flutter build. When looking at the
-    // inputs and outputs for the individual rules, we need to be careful to
-    // remove inputs that were actually output from previous build steps.
-    // This indicates that the file is actual an output or intermediary. If
+    // The build system produces a list of aggregate input and output
+    // files for the overall build. This list is provided to a hosting build
+    // system, such as Xcode, to configure logic for when to skip the
+    // rule/phase which contains the flutter build.
+    //
+    // When looking at the inputs and outputs for the individual rules, we need
+    // to be careful to remove inputs that were actually output from previous
+    // build steps. This indicates that the file is an intermediary. If
     // these files are included as both inputs and outputs then it isn't
     // possible to construct a DAG describing the build.
     void updateGraph() {
@@ -513,34 +514,36 @@ class _BuildInstance {
         skipped = true;
         printTrace('Skipping target: ${node.target.name}');
         updateGraph();
-      } else {
-        printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
-        await node.target.build(environment);
-        printTrace('${node.target.name}: Complete');
+        return passed;
+      }
+      printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
+      await node.target.build(environment);
+      printTrace('${node.target.name}: Complete');
 
-        // If we were missing the depfile, resolve files after executing the
-        // target so that all file hashes are up to date on the next run.
-        if (node.missingDepfile) {
-          node.inputs.clear();
-          node.outputs.clear();
-          node.inputs.addAll(node.target.resolveInputs(environment).sources);
-          node.outputs.addAll(node.target.resolveOutputs(environment).sources);
-          await fileCache.hashFiles(node.inputs);
+      // If we were missing the depfile, resolve files after executing the
+      // target so that all file hashes are up to date on the next run.
+      if (node.missingDepfile) {
+        node.inputs.clear();
+        node.outputs.clear();
+        node.inputs.addAll(node.target.resolveInputs(environment).sources);
+        node.outputs.addAll(node.target.resolveOutputs(environment).sources);
+        await fileCache.hashFiles(node.inputs);
+      }
+
+      // Update hashes for output files.
+      await fileCache.hashFiles(node.outputs);
+      node.target._writeStamp(node.inputs, node.outputs, environment);
+      updateGraph();
+
+      // Delete outputs from previous stages that are no longer a part of the
+      // build.
+      for (String previousOutput in node.previousOutputs) {
+        if (outputFiles.containsKey(previousOutput)) {
+          continue;
         }
-
-        // Update hashes for output files.
-        await fileCache.hashFiles(node.outputs);
-        node.target._writeStamp(node.inputs, node.outputs, environment);
-        updateGraph();
-
-        // Delete outputs from previous stages that are no longer a part of the build.
-        for (String previousOutput in node.previousOutputs) {
-          if (!outputFiles.containsKey(previousOutput)) {
-            final File previousFile = fs.file(previousOutput);
-            if (previousFile.existsSync()) {
-              previousFile.deleteSync();
-            }
-          }
+        final File previousFile = fs.file(previousOutput);
+        if (previousFile.existsSync()) {
+          previousFile.deleteSync();
         }
       }
     } catch (exception, stackTrace) {
