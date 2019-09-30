@@ -3276,6 +3276,55 @@ void main() {
       tester.binding.window.physicalSizeTestValue = null;
       tester.binding.window.devicePixelRatioTestValue = null;
     });
+
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/37046.
+    testWidgets('No exceptions when showing selection menu inside of nested Navigators', (WidgetTester tester) async {
+      const String testValue = '123456';
+      final TextEditingController controller = TextEditingController(
+        text: testValue,
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: 100,
+                    color: CupertinoColors.activeOrange,
+                  ),
+                  Expanded(
+                    child: Navigator(
+                      onGenerateRoute: (_) =>
+                        CupertinoPageRoute<void>(builder: (_) => Container(
+                          child: CupertinoTextField(
+                            controller: controller,
+                          ),
+                        )),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // No text selection toolbar.
+      expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
+
+      // Double tap on the text in the input.
+      await tester.pumpAndSettle();
+      await tester.tapAt(textOffsetToPosition(tester, testValue.length ~/ 2));
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tapAt(textOffsetToPosition(tester, testValue.length ~/ 2));
+      await tester.pumpAndSettle();
+
+      // Now the text selection toolbar is showing and there were no exceptions.
+      expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
+      expect(tester.takeException(), null);
+    });
   });
 
   group('textAlignVertical position', () {
