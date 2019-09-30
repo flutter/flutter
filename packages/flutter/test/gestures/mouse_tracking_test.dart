@@ -55,6 +55,19 @@ class _EventCriticalFieldsMatcher extends Matcher {
 
   final PointerEvent _expected;
 
+  bool _matchesField(Map<dynamic, dynamic> matchState, String field,
+      dynamic actual, dynamic expected) {
+    if (actual != expected) {
+      addStateInfo(matchState, <dynamic, dynamic>{
+        'field': field,
+        'expected': expected,
+        'actual': actual,
+      });
+      return false;
+    }
+    return true;
+  }
+
   @override
   bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {
     if (untypedItem.runtimeType != _expected.runtimeType) {
@@ -62,33 +75,13 @@ class _EventCriticalFieldsMatcher extends Matcher {
     }
 
     final PointerEvent actual = untypedItem;
-    if (actual.kind != PointerDeviceKind.mouse) {
-      addStateInfo(matchState, <dynamic, dynamic>{
-        'field': 'kind',
-        'expected': PointerDeviceKind.mouse,
-        'actual': actual.kind,
-      });
+    if (!(
+      _matchesField(matchState, 'kind', actual.kind, PointerDeviceKind.mouse) &&
+      _matchesField(matchState, 'position', actual.position, _expected.position) &&
+      _matchesField(matchState, 'device', actual.device, _expected.device)
+    )) {
       return false;
     }
-
-    if (actual.position != _expected.position) {
-      addStateInfo(matchState, <dynamic, dynamic>{
-        'field': 'position',
-        'expected': _expected.position,
-        'actual': actual.position,
-      });
-      return false;
-    }
-
-    if (actual.device != _expected.device) {
-      addStateInfo(matchState, <dynamic, dynamic>{
-        'field': 'device',
-        'expected': _expected.device,
-        'actual': actual.device,
-      });
-      return false;
-    }
-
     return true;
   }
 
@@ -364,11 +357,11 @@ void main() {
     ui.window.onPointerDataPacket(packet1);
     ui.window.onPointerDataPacket(packet2);
     expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 0.0), delta: Offset(0.0, 0.0)),
-      const PointerHoverEvent(position: Offset(0.0, 0.0), delta: Offset(0.0, 0.0)),
-      const PointerHoverEvent(position: Offset(1.0, 101.0), delta: Offset(1.0, 100.0)),
-      const PointerHoverEvent(position: Offset(1.0, 201.0), delta: Offset(0.0, 100.0)),
-      const PointerExitEvent(position: Offset(1.0, 201.0), delta: Offset(0.0, 0.0)),
+      const PointerEnterEvent(position: Offset(0.0, 0.0)),
+      const PointerHoverEvent(position: Offset(0.0, 0.0)),
+      const PointerHoverEvent(position: Offset(1.0, 101.0)),
+      const PointerHoverEvent(position: Offset(1.0, 201.0)),
+      const PointerExitEvent(position: Offset(1.0, 201.0)),
     ]));
   });
 
