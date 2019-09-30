@@ -700,7 +700,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final Finder tooltip = find.byType(Tooltip);
@@ -758,7 +758,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final Finder tooltip = find.byType(Tooltip);
@@ -824,7 +824,7 @@ void main() {
           label: 'TIP',
           textDirection: TextDirection.ltr,
         ),
-      ]
+      ],
     );
 
     expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));

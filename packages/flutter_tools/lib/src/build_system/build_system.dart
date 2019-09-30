@@ -128,7 +128,7 @@ abstract class Target {
       inputs,
       outputs,
       <Node>[
-        for (Target target in dependencies) target._toNode(environment)
+        for (Target target in dependencies) target._toNode(environment),
       ],
       environment,
     );
@@ -680,7 +680,7 @@ class Node {
     FileHashStore fileHashStore,
   ) async {
     final Set<String> currentOutputPaths = <String>{
-      for (File file in outputs) file.path
+      for (File file in outputs) file.path,
     };
     // For each input, first determine if we've already computed the hash
     // for it. Then collect it to be sent off for hashing as a group.

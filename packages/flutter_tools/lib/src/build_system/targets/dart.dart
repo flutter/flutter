@@ -149,7 +149,7 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.behavior(AssetOutputBehavior())
+    Source.behavior(AssetOutputBehavior()),
   ];
 
   @override

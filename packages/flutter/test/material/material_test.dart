@@ -225,8 +225,8 @@ void main() {
             applyElevationOverlayColor: false,
             colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
           ),
-          child: buildMaterial(color: surfaceColor, elevation: 8.0))
-      );
+          child: buildMaterial(color: surfaceColor, elevation: 8.0),
+      ));
       final RenderPhysicalShape model = getModel(tester);
       expect(model.color, equals(surfaceColor));
     });
@@ -259,7 +259,7 @@ void main() {
                 color: surfaceColor,
                 elevation: test.elevation,
               ),
-            )
+            ),
         );
         await tester.pumpAndSettle(); // wait for the elevation animation to finish
         final RenderPhysicalShape model = getModel(tester);
@@ -278,7 +278,7 @@ void main() {
                 color: Colors.cyan,
                 elevation: 8.0,
             ),
-          )
+          ),
       );
       final RenderPhysicalShape model = getModel(tester);
       expect(model.color, equals(Colors.cyan));
@@ -294,7 +294,7 @@ void main() {
             key: materialKey,
             type: MaterialType.transparency,
             child: const SizedBox(width: 100.0, height: 100.0),
-          )
+          ),
       );
 
       expect(find.byKey(materialKey), hasNoImmediateClip);
@@ -309,7 +309,7 @@ void main() {
               type: MaterialType.transparency,
               child: const SizedBox(width: 100.0, height: 100.0),
               clipBehavior: null,
-            )
+            ),
         );
       }
 
@@ -324,7 +324,7 @@ void main() {
           type: MaterialType.transparency,
           child: const SizedBox(width: 100.0, height: 100.0),
           clipBehavior: Clip.antiAlias,
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), clipsWithBoundingRect);
@@ -339,7 +339,7 @@ void main() {
           borderRadius: const BorderRadius.all(Radius.circular(10.0)),
           child: const SizedBox(width: 100.0, height: 100.0),
           clipBehavior: Clip.antiAlias,
-        )
+        ),
       );
 
       expect(
@@ -359,7 +359,7 @@ void main() {
           shape: const StadiumBorder(),
           child: const SizedBox(width: 100.0, height: 100.0),
           clipBehavior: Clip.antiAlias,
-        )
+        ),
       );
 
       expect(
@@ -442,7 +442,7 @@ void main() {
           key: materialKey,
           type: MaterialType.canvas,
           child: const SizedBox(width: 100.0, height: 100.0),
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
@@ -461,7 +461,7 @@ void main() {
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
           child: const SizedBox(width: 100.0, height: 100.0),
           elevation: 1.0,
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
@@ -480,7 +480,7 @@ void main() {
           shape: const StadiumBorder(),
           child: const SizedBox(width: 100.0, height: 100.0),
           elevation: 1.0,
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalShape(
@@ -496,7 +496,7 @@ void main() {
           key: materialKey,
           type: MaterialType.card,
           child: const SizedBox(width: 100.0, height: 100.0),
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
@@ -515,7 +515,7 @@ void main() {
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
           elevation: 5.0,
           child: const SizedBox(width: 100.0, height: 100.0),
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
@@ -534,7 +534,7 @@ void main() {
           shape: const StadiumBorder(),
           elevation: 5.0,
           child: const SizedBox(width: 100.0, height: 100.0),
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalShape(
@@ -551,7 +551,7 @@ void main() {
           type: MaterialType.circle,
           child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
@@ -568,7 +568,7 @@ void main() {
           type: MaterialType.button,
           child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
@@ -588,7 +588,7 @@ void main() {
           color: const Color(0xFF0000FF),
           borderRadius: const BorderRadius.all(Radius.circular(6.0)),
           elevation: 4.0,
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
@@ -608,7 +608,7 @@ void main() {
           color: const Color(0xFF0000FF),
           shape: const StadiumBorder(),
           elevation: 4.0,
-        )
+        ),
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalShape(
@@ -633,7 +633,7 @@ void main() {
               color: Color(0xFF0000FF),
             ),
           ),
-        )
+        ),
       );
 
       final RenderBox box = tester.renderObject(find.byKey(materialKey));
@@ -653,7 +653,7 @@ void main() {
               color: Color(0xFF0000FF),
             ),
           ),
-        )
+        ),
       );
 
       final RenderBox box = tester.renderObject(find.byKey(materialKey));
@@ -668,7 +668,7 @@ void main() {
           type: MaterialType.transparency,
           child: const SizedBox(width: 100.0, height: 100.0),
           shape: const CircleBorder(),
-        )
+        ),
       );
 
       final RenderBox box = tester.renderObject(find.byKey(materialKey));

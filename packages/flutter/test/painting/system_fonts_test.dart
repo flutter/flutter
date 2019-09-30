@@ -15,7 +15,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Text('text widget'),
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -33,7 +33,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: SelectableText('text widget'),
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -54,8 +54,7 @@ void main() {
         location: BannerLocation.topStart,
         textDirection: TextDirection.ltr,
         layoutDirection: TextDirection.ltr,
-
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -74,8 +73,8 @@ void main() {
       CupertinoApp(
         home: CupertinoDatePicker(
           onDateTimeChanged: (DateTime dateTime) { },
-        )
-      )
+        ),
+      ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
     final Map<int, double> cache = state.estimatedColumnWidths;
@@ -100,8 +99,8 @@ void main() {
         home: CupertinoDatePicker(
           mode: CupertinoDatePickerMode.date,
           onDateTimeChanged: (DateTime dateTime) { },
-        )
-      )
+        ),
+      ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
     final Map<int, double> cache = state.estimatedColumnWidths;
@@ -126,8 +125,8 @@ void main() {
       CupertinoApp(
         home: CupertinoTimerPicker(
           onTimerDurationChanged: (Duration d) { },
-        )
-      )
+        ),
+      ),
     );
     final dynamic state = tester.state(find.byType(CupertinoTimerPicker));
     // Simulates wrong metrics due to font missing.
@@ -159,7 +158,7 @@ void main() {
             onChanged: (RangeValues values) { },
           ),
         ),
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -182,7 +181,7 @@ void main() {
             onChanged: (double value) { },
           ),
         ),
-      )
+      ),
     );
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -223,7 +222,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -239,7 +238,7 @@ void main() {
       find.descendant(
         of: find.byKey(const Key('parent')),
         matching: find.byType(CustomPaint),
-      ).first
+      ).first,
     );
     expect(renderObject.debugNeedsPaint, isTrue);
   });

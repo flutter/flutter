@@ -310,7 +310,7 @@ void main() {
       home: Scaffold(
         key: scaffoldKey,
         body: const Center(child: Text('body')),
-      )
+      ),
     ));
 
 
