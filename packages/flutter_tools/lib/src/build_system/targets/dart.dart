@@ -127,7 +127,7 @@ class CopyFlutterBundle extends Target {
 /// A helper function to copy an [assetBundle] into an [environment]'s output directory,
 /// plus an optional [pathSuffix]
 Future<void> copyAssets(AssetBundle assetBundle, Environment environment, [String pathSuffix = '']) async {
-  final Pool pool = Pool(64);
+  final Pool pool = Pool(kMaxOpenFiles);
   await Future.wait<void>(
     assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();

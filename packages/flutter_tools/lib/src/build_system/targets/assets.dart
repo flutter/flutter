@@ -127,7 +127,7 @@ class CopyAssets extends Target {
       packagesPath: environment.projectDir.childFile('.packages').path,
     );
     // Limit number of open files to avoid running out of file descriptors.
-    final Pool pool = Pool(64);
+    final Pool pool = Pool(kMaxOpenFiles);
     await Future.wait<void>(
       assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
         final PoolResource resource = await pool.request();
