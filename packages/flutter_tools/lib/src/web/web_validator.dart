@@ -5,7 +5,6 @@
 import '../base/platform.dart';
 import '../doctor.dart';
 import 'chrome.dart';
-import 'workflow.dart';
 
 /// A validator that checks whether chrome is installed and can run.
 class WebValidator extends DoctorValidator {
@@ -14,7 +13,7 @@ class WebValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final String chrome = findChromeExecutable();
-    final bool canRunChrome = canFindChrome();
+    final bool canRunChrome = chromeLauncher.canFindChrome();
     final List<ValidationMessage> messages = <ValidationMessage>[
       if (platform.environment.containsKey(kChromeEnvironment))
         if (!canRunChrome)
