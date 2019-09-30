@@ -2394,7 +2394,7 @@ void main() {
                         },
                       ),
                       IconButton(
-                        key: const Key('Del tab'),
+                        key: const Key('Delete tab'),
                         icon: const Icon(Icons.delete),
                         onPressed: () {
                           setState(() {
@@ -2418,7 +2418,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Tab 1'), findsOneWidget);
     expect(find.text('Tab 1\'s view'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('Del tab')));
+    await tester.tap(find.byKey(const Key('Delete tab')));
     await tester.pumpAndSettle();
     expect(find.text('No tabs'), findsOneWidget);
   });
