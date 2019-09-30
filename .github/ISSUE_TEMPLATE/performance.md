@@ -48,6 +48,16 @@ assignees: ''
        https://medium.com/flutter-io/profiling-flutter-applications-using-the-timeline-a1a434964af03#a499
 -->
 
+<!--
+     Please tell us on which platform(s) the problem occurs (Android / iOS / Web / Desktop)
+     Which OS version is the test system running?
+     Does the problem occur on emulator/simulator as well as on physical devices?
+-->
+
+**Platform:**
+**OS version:**
+**Devices:**
+
 ## Logs
 
 <!--
