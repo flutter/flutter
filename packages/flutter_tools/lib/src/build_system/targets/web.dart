@@ -194,7 +194,8 @@ class WebReleaseBundle extends Target {
     }
     environment.projectDir
       .childDirectory('web')
-      .childFile('index.html').copySync(fs.path.join(environment.outputDir.path, 'index.html'));
+      .childFile('index.html')
+      .copySync(fs.path.join(environment.outputDir.path, 'index.html'));
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build();
     await copyAssets(assetBundle, environment, 'assets');

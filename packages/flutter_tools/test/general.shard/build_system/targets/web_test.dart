@@ -19,12 +19,20 @@ void main() {
   Testbed testbed;
   Environment environment;
   MockPlatform mockPlatform;
+  MockPlatform  mockWindowsPlatform;
 
   setUp(() {
     mockPlatform = MockPlatform();
+    mockWindowsPlatform = MockPlatform();
+
     when(mockPlatform.isWindows).thenReturn(false);
     when(mockPlatform.isMacOS).thenReturn(true);
     when(mockPlatform.isLinux).thenReturn(false);
+
+    when(mockWindowsPlatform.isWindows).thenReturn(true);
+    when(mockWindowsPlatform.isMacOS).thenReturn(false);
+    when(mockWindowsPlatform.isLinux).thenReturn(false);
+
     testbed = Testbed(setup: () {
       environment = Environment(
         projectDir: fs.currentDirectory,
@@ -58,11 +66,30 @@ void main() {
     expect(generated, contains('entrypoint.main();'));
 
     // Import.
-    if (platform.isWindows) {
-      expect(generated, contains('import "file:///C:/lib/main.dart" as entrypoint;'));
-    } else {
-      expect(generated, contains('import "file:///lib/main.dart" as entrypoint;'));
-    }
+    expect(generated, contains('import "file:///lib/main.dart" as entrypoint;'));
+  }));
+
+  test('WebEntrypointTarget generates an entrypoint with plugins and init platform on windows', () => testbed.run(() async {
+    environment.defines[kHasWebPlugins] = 'true';
+    environment.defines[kInitializePlatform] = 'true';
+    await const WebEntrypointTarget().build(environment);
+
+    final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
+
+    // Plugins
+    expect(generated, contains("import 'generated_plugin_registrant.dart';"));
+    expect(generated, contains('registerPlugins(webPluginRegistry);'));
+
+    // Platform
+    expect(generated, contains('if (true) {'));
+
+    // Main
+    expect(generated, contains('entrypoint.main();'));
+
+    // Import.
+    expect(generated, contains('import "file:///C:/lib/main.dart" as entrypoint;'));
+  }, overrides: <Type, Generator>{
+    Platform: () => mockWindowsPlatform,
   }));
 
   test('WebEntrypointTarget generates an entrypoint without plugins and init platform', () => testbed.run(() async {

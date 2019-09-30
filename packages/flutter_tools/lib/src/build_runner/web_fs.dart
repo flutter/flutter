@@ -176,8 +176,7 @@ class WebFs {
     if (!flutterProject.dartTool.existsSync()) {
       flutterProject.dartTool.createSync(recursive: true);
     }
-    // Start the build daemon and run an initial build.
-    final Completer<bool> initialBuild = Completer<bool>();
+    final Completer<bool> firstBuildCompleter = Completer<bool>();
 
     // Initialize the asset bundle.
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
@@ -243,18 +242,19 @@ class WebFs {
           return results.results
             .firstWhere((BuildResult result) => result.target == kBuildTargetName);
         });
+      // Start the build daemon and run an initial build.
       firstBuild = client.buildResults.listen((BuildResults buildResults) {
-        if (initialBuild.isCompleted) {
+        if (firstBuildCompleter.isCompleted) {
           return;
         }
         final BuildResult result = buildResults.results.firstWhere((BuildResult result) {
           return result.target == kBuildTargetName;
         });
         if (result.status == BuildStatus.failed) {
-          initialBuild.complete(false);
+          firstBuildCompleter.complete(false);
         }
         if (result.status == BuildStatus.succeeded) {
-          initialBuild.complete(true);
+          firstBuildCompleter.complete(true);
         }
       });
       final int daemonAssetPort = buildDaemonCreator.assetServerPort(fs.currentDirectory);
@@ -285,7 +285,7 @@ class WebFs {
       }
     } else {
       await buildWeb(flutterProject, target, buildInfo, initializePlatform);
-      initialBuild.complete(true);
+      firstBuildCompleter.complete(true);
     }
 
     final AssetServer assetServer = buildInfo.isDebug
@@ -308,7 +308,7 @@ class WebFs {
       buildInfo,
       initializePlatform,
     );
-    if (!await initialBuild.future) {
+    if (!await firstBuildCompleter.future) {
       throw Exception('Failed to compile for the web.');
     }
     await firstBuild?.cancel();

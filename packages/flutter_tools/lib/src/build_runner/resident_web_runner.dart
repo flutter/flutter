@@ -285,6 +285,7 @@ class ResidentWebRunner extends ResidentRunner {
         ).send();
       }
     }
+    // Allows browser refresh hot restart on non-debug builds.
     if (device is ChromeDevice && debuggingOptions.browserLaunch) {
       try {
         final Chrome chrome = await ChromeLauncher.connectedInstance;
