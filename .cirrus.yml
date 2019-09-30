@@ -414,7 +414,7 @@ task:
   print_date_script:
     - date
   install_cocoapods_script:
-    - sudo gem install cocoapods -v 1.7.5 --no-document
+    - sudo gem install cocoapods --no-document
   git_fetch_script:
     - git clean -xfd
     - git fetch origin
@@ -486,7 +486,7 @@ task:
   print_date_script:
     - date
   install_cocoapods_script:
-    - sudo gem install cocoapods -v 1.7.5 --no-document
+    - sudo gem install cocoapods --no-document
   git_fetch_script:
     - git clean -xfd
     - git fetch origin
