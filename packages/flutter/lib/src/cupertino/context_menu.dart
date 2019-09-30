@@ -207,10 +207,11 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
           _childOpacity = 0.0;
         });
         _openContextMenu();
-        // TODO(justinmc): I have to keep this on the screen for 1 frame because
-        // otherwise I see a white flash. I think it's because I have to render
-        // one frame offscreen. Any better way to do this?
-        Future<void>.delayed(const Duration(milliseconds: 1)).then((_) {
+        // Keep the decoy on the screen for one extra frame. We have to do this
+        // because _ContextMenuRoute renders its first frame offscreen.
+        // Otherwise there would be a visible flash when nothing is rendered for
+        // one frame.
+        Future<void>.delayed(const Duration(milliseconds: 0)).then((_) {
           _lastOverlayEntry?.remove();
           _lastOverlayEntry = null;
           _decoyController.reset();
