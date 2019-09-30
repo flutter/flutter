@@ -2411,11 +2411,14 @@ void main() {
       ),
     );
 
+    // Initializes with zero tabs properly
     expect(find.text('No tabs'), findsOneWidget);
     await tester.tap(find.byKey(const Key('Add tab')));
     await tester.pumpAndSettle();
     expect(find.text('Tab 1'), findsOneWidget);
     expect(find.text('Tab 1\'s view'), findsOneWidget);
+
+    // Dynamically updates to zero tabs properly
     await tester.tap(find.byKey(const Key('Delete tab')));
     await tester.pumpAndSettle();
     expect(find.text('No tabs'), findsOneWidget);
