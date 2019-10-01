@@ -49,6 +49,8 @@ class RawKeyboardListener extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
 
+  /// Controls whether this widget has keyboard focus.
+  ///
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
