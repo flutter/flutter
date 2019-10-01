@@ -10,6 +10,7 @@ import 'package:build_daemon/constants.dart' as daemon;
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
+import 'package:dwds/asset_handler.dart';
 import 'package:dwds/dwds.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
@@ -56,9 +57,7 @@ typedef HttpMultiServerFactory = Future<HttpServer> Function(dynamic address, in
 
 /// A function with the same signature as [Dwds.start].
 typedef DwdsFactory = Future<Dwds> Function({
-  @required int applicationPort,
-  @required int assetServerPort,
-  @required String applicationTarget,
+  @required AssetHandler assetHandler,
   @required Stream<BuildResult> buildResults,
   @required ConnectionProvider chromeConnection,
   String hostname,
@@ -239,11 +238,14 @@ class WebFs {
     Handler handler;
     Dwds dwds;
     if (!skipDwds) {
+      BuilderRunnerAssetHandler handler = BuildRunnerAssetHandler(
+        daemonAssetPort, 
+        kBuildTargetName, 
+        hostname ?? _kHostName, 
+        hostPort);
       dwds = await dwdsFactory(
+        assetHandler: handler,
         hostname: hostname ?? _kHostName,
-        applicationPort: hostPort,
-        applicationTarget: kBuildTargetName,
-        assetServerPort: daemonAssetPort,
         buildResults: filteredBuildResults,
         chromeConnection: () async {
           return (await ChromeLauncher.connectedInstance).chromeConnection;
