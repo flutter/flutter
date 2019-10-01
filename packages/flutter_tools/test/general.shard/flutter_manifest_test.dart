@@ -589,7 +589,7 @@ flutter:
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       final List<Uri> assets = flutterManifest.assets;
 
-      expect(logger.errorText, contains('Asset manifest contains invalid uri: null.'));
+      expect(logger.errorText, contains('Asset manifest contains a null or empty uri.'));
       expect(assets.length, 1);
     });
   });

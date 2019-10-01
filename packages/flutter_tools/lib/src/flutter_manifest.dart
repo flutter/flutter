@@ -186,22 +186,20 @@ class FlutterManifest {
         : fontList.map<Map<String, dynamic>>(castStringKeyedMap).toList();
   }
 
-  List<Uri> get assets {
+  List<Uri> get assets => _assets ??= _computeAssets();
+  List<Uri> _assets;
+  List<Uri> _computeAssets() {
     final List<dynamic> assets = _flutterDescriptor['assets'];
     if (assets == null) {
       return const <Uri>[];
     }
     final List<Uri> results = <Uri>[];
     for (Object asset in assets) {
-      if (asset is! String) {
-        printError('Asset manifest contains invalid uri: $asset.');
+      if (asset is! String || asset == null || asset == '') {
+        printError('Asset manifest contains a null or empty uri.');
         continue;
       }
       final String stringAsset = asset;
-      if (stringAsset == null || stringAsset.isEmpty) {
-        printError('Asset manifest contains invalid uri: $asset.');
-        continue;
-      }
       try {
         results.add(Uri.parse(Uri.encodeFull(stringAsset)));
       } on FormatException {
