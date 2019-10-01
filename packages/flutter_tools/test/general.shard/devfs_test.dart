@@ -272,7 +272,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
-    
+
     testUsingContext('correctly updates last compiled time when compilation does not fail', () async {
       devFS = DevFS(vmService, 'test', tempDir);
       // simulate package
