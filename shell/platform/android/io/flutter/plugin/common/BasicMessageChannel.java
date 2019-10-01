@@ -9,6 +9,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.util.Log;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.Locale;
 
 import io.flutter.BuildConfig;
 import io.flutter.plugin.common.BinaryMessenger.BinaryReply;
@@ -29,6 +31,8 @@ import io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler;
  */
 public final class BasicMessageChannel<T> {
     private static final String TAG = "BasicMessageChannel#";
+    public static final String CHANNEL_BUFFERS_CHANNEL =
+        "dev.flutter/channel-buffers";
 
     @NonNull
     private final BinaryMessenger messenger;
@@ -100,6 +104,18 @@ public final class BasicMessageChannel<T> {
     public void setMessageHandler(@Nullable final MessageHandler<T> handler) {
         messenger.setMessageHandler(name,
             handler == null ? null : new IncomingMessageHandler(handler));
+    }
+
+    /**
+     * Adjusts the number of messages that will get buffered when sending messages to
+     * channels that aren't fully setup yet.  For example, the engine isn't running
+     * yet or the channel's message handler isn't setup on the Dart side yet.
+     */
+    public void resizeChannelBuffer(int newSize) {
+        Charset charset = Charset.forName("UTF-8");
+        String messageString = String.format(Locale.US, "resize\r%s\r%d", name, newSize);
+        ByteBuffer message = ByteBuffer.wrap(messageString.getBytes(charset));
+        messenger.send(CHANNEL_BUFFERS_CHANNEL, message);
     }
 
     /**

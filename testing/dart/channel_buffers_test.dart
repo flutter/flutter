@@ -18,6 +18,10 @@ void main() {
     return utf8.decode(list);
   }
 
+  void _resize(ui.ChannelBuffers buffers, String name, int newSize) {
+    buffers.handleMessage(_makeByteData("resize\r$name\r$newSize"));
+  }
+
   test('push drain', () async {
     String channel = "foo";
     ByteData data = _makeByteData('bar');
@@ -35,7 +39,7 @@ void main() {
     ByteData data = _makeByteData('bar');
     ui.ChannelBuffers buffers = ui.ChannelBuffers();
     ui.PlatformMessageResponseCallback callback = (ByteData responseData) {};
-    buffers.resize(channel, 0);
+    _resize(buffers, channel, 0);
     buffers.push(channel, data, callback);
     bool didCall = false;
     await buffers.drain(channel, (ByteData drainedData, ui.PlatformMessageResponseCallback drainedCallback) {
@@ -64,7 +68,7 @@ void main() {
     ByteData four = _makeByteData('four');
     ui.ChannelBuffers buffers = ui.ChannelBuffers();
     ui.PlatformMessageResponseCallback callback = (ByteData responseData) {};
-    buffers.resize(channel, 3);
+    _resize(buffers, channel, 3);
     expect(buffers.push(channel, one, callback), equals(false));
     expect(buffers.push(channel, two, callback), equals(false));
     expect(buffers.push(channel, three, callback), equals(false));
@@ -84,11 +88,11 @@ void main() {
     ByteData one = _makeByteData('one');
     ByteData two = _makeByteData('two');
     ui.ChannelBuffers buffers = ui.ChannelBuffers();
-    buffers.resize(channel, 100);
+    _resize(buffers, channel, 100);
     ui.PlatformMessageResponseCallback callback = (ByteData responseData) {};
     expect(buffers.push(channel, one, callback), equals(false));
     expect(buffers.push(channel, two, callback), equals(false));
-    buffers.resize(channel, 1);
+    _resize(buffers, channel, 1);
     int counter = 0;
     await buffers.drain(channel, (ByteData drainedData, ui.PlatformMessageResponseCallback drainedCallback) {
       if (counter++ == 0) {
@@ -109,10 +113,10 @@ void main() {
       didCallCallback = true;
     };
     ui.PlatformMessageResponseCallback twoCallback = (ByteData responseData) {};
-    buffers.resize(channel, 100);
+    _resize(buffers, channel, 100);
     expect(buffers.push(channel, one, oneCallback), equals(false));
     expect(buffers.push(channel, two, twoCallback), equals(false));
-    buffers.resize(channel, 1);
+    _resize(buffers, channel, 1);
     expect(didCallCallback, equals(true));
   });
 
@@ -126,9 +130,21 @@ void main() {
       didCallCallback = true;
     };
     ui.PlatformMessageResponseCallback twoCallback = (ByteData responseData) {};
-    buffers.resize(channel, 1);
+    _resize(buffers, channel, 1);
     expect(buffers.push(channel, one, oneCallback), equals(false));
     expect(buffers.push(channel, two, twoCallback), equals(true));
     expect(didCallCallback, equals(true));
+  });
+
+  test('handle garbage', () async {
+    ui.ChannelBuffers buffers = ui.ChannelBuffers();
+    expect(() => buffers.handleMessage(_makeByteData("asdfasdf")),
+           throwsException);
+  });
+
+  test('handle resize garbage', () async {
+    ui.ChannelBuffers buffers = ui.ChannelBuffers();
+    expect(() => buffers.handleMessage(_makeByteData("resize\rfoo\rbar")),
+           throwsException);
   });
 }

@@ -16,8 +16,8 @@ class ChannelBuffers {
     return true;
   }
 
-  /// Noop in web_ui, caches are always size zero.
-  void resize(String channel, int newSize) {}
+  /// A noop since the web_ui implementation doesn't handle any messages.
+  void handleMessage(ByteData data) {}
 
   /// Remove and process all stored messages for a given channel.
   ///

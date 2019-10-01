@@ -139,4 +139,22 @@
   [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
+- (void)testResize {
+  NSString* channelName = @"foo";
+  id binaryMessenger = OCMStrictProtocolMock(@protocol(FlutterBinaryMessenger));
+  id codec = OCMProtocolMock(@protocol(FlutterMethodCodec));
+  FlutterBasicMessageChannel* channel =
+      [[FlutterBasicMessageChannel alloc] initWithName:channelName
+                                       binaryMessenger:binaryMessenger
+                                                 codec:codec];
+  XCTAssertNotNil(channel);
+
+  NSString* expectedMessageString =
+      [NSString stringWithFormat:@"resize\r%@\r%@", channelName, @100];
+  NSData* expectedMessage = [expectedMessageString dataUsingEncoding:NSUTF8StringEncoding];
+  OCMExpect([binaryMessenger sendOnChannel:@"dev.flutter/channel-buffers" message:expectedMessage]);
+  [channel resizeChannelBuffer:100];
+  OCMVerifyAll(binaryMessenger);
+}
+
 @end
