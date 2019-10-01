@@ -229,7 +229,7 @@ void main() {
               ),
             ),
           ),
-        )
+        ),
     );
 
     await expectLater(
@@ -482,7 +482,7 @@ void main() {
         TextDecoration.underline,
         TextDecoration.overline,
         TextDecoration.lineThrough,
-      ]
+      ],
     );
 
     await tester.pumpWidget(
@@ -523,7 +523,7 @@ void main() {
         TextDecoration.underline,
         TextDecoration.overline,
         TextDecoration.lineThrough,
-      ]
+      ],
     );
 
     await tester.pumpWidget(
@@ -619,7 +619,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           child: Checkbox(value: false, onChanged: null),
@@ -631,7 +631,7 @@ void main() {
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: null),
-                          )
+                          ),
                         ),
                         WidgetSpan(
                           child: Text('embedded'),

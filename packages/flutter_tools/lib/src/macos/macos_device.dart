@@ -97,7 +97,7 @@ class MacOSDevice extends Device {
 
     _lastBuiltMode = debuggingOptions?.buildInfo?.mode;
     final Process process = await processManager.start(<String>[
-      executable
+      executable,
     ]);
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();

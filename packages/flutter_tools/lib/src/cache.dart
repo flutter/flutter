@@ -849,7 +849,7 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
       else if (platform.isLinux)
         ...<List<String>>[
           ..._linuxBinaryDirs,
-        ]
+        ],
     ];
   }
 

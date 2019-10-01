@@ -167,7 +167,7 @@ void main() {
           expect(outputExpression.errorCount, 0);
           lastExpressionCompleted.complete(true);
         },
-      )
+      ),
     );
 
     compileResponseCompleter.complete(Future<List<int>>.value(utf8.encode(

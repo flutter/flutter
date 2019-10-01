@@ -180,7 +180,7 @@ class TestCommand extends FastFlutterCommand {
           if (fs.isDirectorySync(path))
             ..._findTests(fs.directory(path))
           else
-            path
+            path,
       ];
     }
 

@@ -54,7 +54,7 @@ class VisualStudioValidator extends DoctorValidator {
             userMessages.visualStudioMissingComponents(
                 visualStudio.workloadDescription,
                 visualStudio.necessaryComponentDescriptions(majorVersion),
-            )
+            ),
         ));
       }
       versionInfo = '${visualStudio.displayName} ${visualStudio.displayVersion}';
@@ -64,7 +64,7 @@ class VisualStudioValidator extends DoctorValidator {
         userMessages.visualStudioMissing(
           visualStudio.workloadDescription,
           visualStudio.necessaryComponentDescriptions(majorVersion),
-        )
+        ),
       ));
     }
 

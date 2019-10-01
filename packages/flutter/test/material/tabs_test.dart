@@ -1009,7 +1009,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     // expect first tab to be selected

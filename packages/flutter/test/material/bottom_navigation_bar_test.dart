@@ -35,7 +35,7 @@ void main() {
             },
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('Alarm'));
@@ -57,10 +57,10 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
+            ],
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
@@ -94,7 +94,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     const double selectedFontSize = 14.0;
@@ -146,7 +146,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
     );
 
     final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
@@ -187,7 +187,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
     );
 
     final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
@@ -221,7 +221,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
@@ -259,7 +259,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
@@ -303,7 +303,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     final EdgeInsets selectedItemPadding = _itemPadding(tester, Icons.ac_unit);
@@ -346,7 +346,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
     );
 
     final EdgeInsets selectedItemPadding = _itemPadding(tester, Icons.ac_unit);
@@ -388,7 +388,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
     );
 
     final EdgeInsets selectedItemPadding = _itemPadding(tester, Icons.ac_unit);
@@ -417,7 +417,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     const double selectedFontSize = 14.0;
@@ -460,7 +460,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, selectedFontSize);
@@ -509,7 +509,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, selectedFontSize);
@@ -536,7 +536,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     expect(_getOpacity(tester, 'AC'), equals(1.0));
@@ -564,7 +564,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     expect(_getMaterial(tester).color, equals(color));
@@ -593,7 +593,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     expect(_getMaterial(tester).color, equals(itemColor));
@@ -642,7 +642,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(fixedColor));
@@ -669,7 +669,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     expect(_getMaterial(tester).elevation, equals(customElevation));
@@ -691,11 +691,11 @@ void main() {
                   icon: Icon(Icons.access_alarm),
                   title: Text('Alarm'),
                 ),
-              ]
+              ],
             ),
           ),
         ),
-      )
+      ),
     );
 
     const double labelBottomMargin = 7.0; // 7 == defaulted selectedFontSize / 2.0.
@@ -722,7 +722,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     Iterable<RenderBox> actions = tester.renderObjectList(find.byType(InkResponse));
@@ -748,7 +748,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
@@ -785,7 +785,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     // We want to make sure that the last label does not get displaced,
@@ -847,7 +847,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('Alarm'));
@@ -885,7 +885,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('Alarm'));
@@ -1658,7 +1658,7 @@ double _getOpacity(WidgetTester tester, String textValue) {
       find.ancestor(
         of: find.text(textValue),
         matching: find.byType(FadeTransition),
-      ).first
+      ).first,
   );
   return opacityWidget.opacity.value;
 }
