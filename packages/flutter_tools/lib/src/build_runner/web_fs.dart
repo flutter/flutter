@@ -11,6 +11,7 @@ import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
 import 'package:dwds/dwds.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
@@ -161,6 +162,18 @@ class WebFs {
     if (!flutterProject.dartTool.existsSync()) {
       flutterProject.dartTool.createSync(recursive: true);
     }
+    // Workaround for https://github.com/flutter/flutter/issues/41681.
+    final String toolPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools');
+    if (!fs.isFileSync(fs.path.join(toolPath, '.packages'))) {
+      await pubGet(
+        context: PubContext.pubGet,
+        directory: toolPath,
+        offline: true,
+        skipPubspecYamlCheck: true,
+        checkLastModified: false,
+      );
+    }
+
     final bool hasWebPlugins = findPlugins(flutterProject)
         .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     // Start the build daemon and run an initial build.
