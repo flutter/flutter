@@ -1,5 +1,5 @@
 ---
-name: I have a performance problem with my application
+name: My app is slow or missing frames.
 about: You are writing an application but have discovered that it is slow, you are
   not hitting 60Hz, or you are getting jank (missed frames).
 title: ''
