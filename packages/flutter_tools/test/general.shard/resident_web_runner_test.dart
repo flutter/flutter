@@ -50,18 +50,19 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-      WebFsFactory: () => ({
-        @required String target,
-        @required FlutterProject flutterProject,
-        @required BuildInfo buildInfo,
-        @required bool skipDwds,
-        @required bool initializePlatform,
-        @required String hostname,
-        @required String port,
-      }) async {
-        return mockWebFs;
+        WebFsFactory: () => ({
+          @required String target,
+          @required FlutterProject flutterProject,
+          @required BuildInfo buildInfo,
+          @required bool skipDwds,
+          @required bool initializePlatform,
+          @required String hostname,
+          @required String port,
+        }) async {
+          return mockWebFs;
+        },
       },
-    });
+    );
   });
 
   void _setupMocks() {
@@ -154,7 +155,7 @@ void main() {
         'type': 'Event',
         'kind': 'WriteEvent',
         'timestamp': 1569473488296,
-        'bytes': base64.encode('THIS MESSAGE IS IMPORTANT'.codeUnits)
+        'bytes': base64.encode('THIS MESSAGE IS IMPORTANT'.codeUnits),
       }));
     });
     unawaited(residentWebRunner.run(
@@ -172,7 +173,7 @@ void main() {
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
+    when(mockWebFs.recompile()).thenAnswer((Invocation invocation) async {
       return true;
     });
     when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
@@ -188,6 +189,9 @@ void main() {
       'cd29': 'false',
       'cd30': 'true',
     })).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-restart', any)).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-refresh', any)).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -199,7 +203,7 @@ void main() {
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
+    when(mockWebFs.recompile()).thenAnswer((Invocation invocation) async {
       return true;
     });
     when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
@@ -215,6 +219,9 @@ void main() {
       'cd29': 'false',
       'cd30': 'true',
     })).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-restart', any)).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-refresh', any)).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));

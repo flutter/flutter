@@ -107,7 +107,7 @@ double getOpacity(WidgetTester tester, String textValue) {
     find.ancestor(
       of: find.text(textValue),
       matching: find.byType(FadeTransition),
-    ).first
+    ).first,
   );
   return opacityWidget.opacity.value;
 }
@@ -2564,7 +2564,7 @@ void main() {
         find.ancestor(
           of: find.text('label'),
           matching: find.byType(AnimatedDefaultTextStyle),
-        )
+        ),
       ).style;
     }
     expect(getLabelStyle().color, labelStyle.color);
@@ -2667,7 +2667,7 @@ void main() {
         focusColor: Colors.blue,
         border: InputBorder.none,
         alignLabelWithHint: true,
-      )
+      ),
     );
 
     expect(decoration.labelStyle, themeStyle);

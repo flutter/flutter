@@ -59,8 +59,8 @@ void main() {
               ),
             ),
           ),
-        )
-      )
+        ),
+      ),
     );
 
     SchedulerBinding.instance.debugAssertNoTransientCallbacks('Building a list with a scrollbar triggered an animation.');
@@ -90,13 +90,13 @@ void main() {
             ],
           ),
         ),
-      ))
+      )),
     );
 
     final CustomPaint custom = tester.widget(find.descendant(
       of: find.byType(Scrollbar),
-      matching: find.byType(CustomPaint)).first
-    );
+      matching: find.byType(CustomPaint),
+    ).first);
     final dynamic scrollPainter = custom.foregroundPainter;
     // Dragging makes the scrollbar first appear.
     await tester.drag(find.text('0'), const Offset(0.0, -10.0));

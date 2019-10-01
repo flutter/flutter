@@ -25,7 +25,7 @@ void main() {
           materialTapTargetSize: MaterialTapTargetSize.padded,
           child: const Text('+'),
         ),
-      )
+      ),
     );
 
     await tester.tapAt(const Offset(40.0, 400.0));
@@ -52,23 +52,25 @@ void main() {
     expect(semantics, hasSemantics(
       TestSemantics.root(
         children: <TestSemantics>[
-        TestSemantics(
-          id: 1,
-          flags: <SemanticsFlag>[
-            SemanticsFlag.isButton,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
-          ],
-          actions: <SemanticsAction>[
-            SemanticsAction.tap,
-          ],
-          label: '+',
-          textDirection: TextDirection.ltr,
-          rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
-          children: <TestSemantics>[],
-        ),
-      ]
-    ), ignoreTransform: true));
+          TestSemantics(
+            id: 1,
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+            ],
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+            ],
+            label: '+',
+            textDirection: TextDirection.ltr,
+            rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+            children: <TestSemantics>[],
+          ),
+        ],
+      ),
+      ignoreTransform: true,
+    ));
 
     semantics.dispose();
   });

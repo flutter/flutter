@@ -158,6 +158,19 @@ abstract class Artifacts {
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]);
 }
 
+TargetPlatform get _currentHostPlatform {
+  if (platform.isMacOS) {
+    return TargetPlatform.darwin_x64;
+  }
+  if (platform.isLinux) {
+    return TargetPlatform.linux_x64;
+  }
+  if (platform.isWindows) {
+    return TargetPlatform.windows_x64;
+  }
+  throw UnimplementedError('Host OS not supported.');
+}
+
 /// Manages the engine artifacts downloaded to the local cache.
 class CachedArtifacts extends Artifacts {
 
@@ -337,19 +350,6 @@ class CachedArtifacts extends Artifacts {
     assert(false, 'Invalid platform $platform.');
     return null;
   }
-
-  TargetPlatform get _currentHostPlatform {
-    if (platform.isMacOS) {
-      return TargetPlatform.darwin_x64;
-    }
-    if (platform.isLinux) {
-      return TargetPlatform.linux_x64;
-    }
-    if (platform.isWindows) {
-      return TargetPlatform.windows_x64;
-    }
-    throw UnimplementedError('Host OS not supported.');
-  }
 }
 
 /// Manages the artifacts of a locally built engine.
@@ -362,7 +362,8 @@ class LocalEngineArtifacts extends Artifacts {
 
   @override
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
-    final String artifactFileName = _artifactToFileName(artifact);
+    platform ??= _currentHostPlatform;
+    final String artifactFileName = _artifactToFileName(artifact, platform);
     switch (artifact) {
       case Artifact.snapshotDart:
         return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', artifactFileName);

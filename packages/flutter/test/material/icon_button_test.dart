@@ -299,7 +299,7 @@ void main() {
           ],
           label: 'link',
         ),
-      ]
+      ],
     ), ignoreId: true, ignoreTransform: true));
 
     semantics.dispose();
@@ -327,7 +327,7 @@ void main() {
             ],
             label: 'link',
           ),
-        ]
+        ],
     ), ignoreId: true, ignoreTransform: true));
 
     semantics.dispose();

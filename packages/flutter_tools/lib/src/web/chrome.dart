@@ -71,6 +71,16 @@ class ChromeLauncher {
 
   static final Completer<Chrome> _currentCompleter = Completer<Chrome>();
 
+  /// Whether we can locate the chrome executable.
+  bool canFindChrome() {
+    final String chrome = findChromeExecutable();
+    try {
+      return processManager.canRun(chrome);
+    } on ArgumentError {
+      return false;
+    }
+  }
+
   /// Launch the chrome browser to a particular `host` page.
   ///
   /// `headless` defaults to false, and controls whether we open a headless or

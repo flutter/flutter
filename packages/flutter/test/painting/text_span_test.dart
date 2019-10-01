@@ -180,7 +180,7 @@ void main() {
                 WidgetSpan(child: SizedBox(width: 10, height: 10)),
                 TextSpan(text: 'The sky is falling :)'),
               ],
-            )
+            ),
           ),
         ),
         TextSpan(text: 'c'),
@@ -198,7 +198,7 @@ void main() {
                 WidgetSpan(child: SizedBox(width: 10, height: 11)),
                 TextSpan(text: 'The sky is falling :)'),
               ],
-            )
+            ),
           ),
         ),
         TextSpan(text: 'c'),

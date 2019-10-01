@@ -24,7 +24,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
@@ -60,7 +60,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
@@ -96,7 +96,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
@@ -466,7 +466,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
     expect(_pointerDown, isFalse);
     await tester.tap(find.byKey(key1));

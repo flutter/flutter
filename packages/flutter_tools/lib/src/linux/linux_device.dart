@@ -87,7 +87,7 @@ class LinuxDevice extends Device {
       );
     }
     final Process process = await processManager.start(<String>[
-      package.executable(debuggingOptions?.buildInfo?.mode)
+      package.executable(debuggingOptions?.buildInfo?.mode),
     ]);
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();

@@ -742,7 +742,7 @@ void main() {
                   content: const Text('I am a snack bar.'),
                   duration: const Duration(seconds: 2),
                   action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-                )
+                ),
               );
             },
             child: const Text('X'),
@@ -757,7 +757,7 @@ void main() {
           padding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
-      )
+      ),
     );
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(); // Show snackbar

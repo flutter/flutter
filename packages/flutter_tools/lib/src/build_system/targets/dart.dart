@@ -73,7 +73,7 @@ class CopyFlutterBundle extends Target {
     Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.behavior(AssetOutputBehavior())
+    Source.behavior(AssetOutputBehavior()),
   ];
 
   @override
@@ -84,7 +84,7 @@ class CopyFlutterBundle extends Target {
     Source.pattern('{OUTPUT_DIR}/AssetManifest.json'),
     Source.pattern('{OUTPUT_DIR}/FontManifest.json'),
     Source.pattern('{OUTPUT_DIR}/LICENSE'),
-    Source.behavior(AssetOutputBehavior())
+    Source.behavior(AssetOutputBehavior()),
   ];
 
   @override
@@ -149,7 +149,7 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.behavior(AssetOutputBehavior())
+    Source.behavior(AssetOutputBehavior()),
   ];
 
   @override
@@ -157,7 +157,7 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
     Source.pattern('{OUTPUT_DIR}/AssetManifest.json'),
     Source.pattern('{OUTPUT_DIR}/FontManifest.json'),
     Source.pattern('{OUTPUT_DIR}/LICENSE'),
-    Source.behavior(AssetOutputBehavior())
+    Source.behavior(AssetOutputBehavior()),
   ];
 
   @override
@@ -176,15 +176,15 @@ class KernelSnapshot extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
-    Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and in .packages
     Source.artifact(Artifact.platformKernelDill),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
+    Source.depfile('kernel_snapshot.d'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/app.dill'),
+    Source.depfile('kernel_snapshot.d'),
   ];
 
   @override
@@ -213,6 +213,7 @@ class KernelSnapshot extends Target {
       packagesPath: packagesPath,
       linkPlatformKernelIn: buildMode == BuildMode.release,
       mainPath: targetFileAbsolute,
+      depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
     );
     if (output == null || output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');

@@ -44,7 +44,7 @@ class Title extends StatelessWidget {
       ApplicationSwitcherDescription(
         label: title,
         primaryColor: color.value,
-      )
+      ),
     );
     return child;
   }
