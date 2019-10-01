@@ -4,6 +4,7 @@
 
 @TestOn('!chrome') // asset bundle behaves differently.
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image, ImageByteFormat;
 
@@ -145,6 +146,28 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [ 
             width: imageSize,
             fit: BoxFit.fill,
           ),
+      ),
+    ),
+  );
+}
+
+Widget buildImageCacheResized(String name, Key key, int width, int height, int cacheWidth, int cacheHeight) {
+  return Center(
+    child: RepaintBoundary(
+      child: Container(
+        width: 250,
+        height: 250,
+        child: Center(
+          child: Image.file(
+            File('test/widgets/assets/sample.png'),
+            key: key,
+            excludeFromSemantics: true,
+            width: width.toDouble(),
+            height: height.toDouble(),
+            cacheWidth: cacheWidth,
+            cacheHeight: cacheHeight,
+          ),
+        ),
       ),
     ),
   );
@@ -302,5 +325,27 @@ void main() {
     expect(getRenderImage(tester, key).size, const Size(480.0, 480.0));
     expect(getTestImage(tester, key).scale, 10.0);
   });
+
+  testWidgets('Image cache resize upscale display 5', (WidgetTester tester) async {
+    const double ratio = 1.0;
+    Key key = GlobalKey();
+    await pumpTreeToLayout(tester, buildImageCacheResized(image, key, 5, 5, 20, 20));
+    expect(getRenderImage(tester, key).size, const Size(5.0, 5.0));
+  });
+
+  testWidgets('Image cache resize upscale display 50', (WidgetTester tester) async {
+    const double ratio = 1.0;
+    Key key = GlobalKey();
+    await pumpTreeToLayout(tester, buildImageCacheResized(image, key, 50, 50, 20, 20));
+    expect(getRenderImage(tester, key).size, const Size(50.0, 50.0));
+  });
+
+  testWidgets('Image cache resize downscale display 5', (WidgetTester tester) async {
+    const double ratio = 1.0;
+    Key key = GlobalKey();
+    await pumpTreeToLayout(tester, buildImageCacheResized(image, key, 5, 5, 1, 1));
+    expect(getRenderImage(tester, key).size, const Size(5.0, 5.0));
+  });
+
 
 }

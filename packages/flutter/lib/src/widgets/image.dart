@@ -430,6 +430,12 @@ class Image extends StatefulWidget {
   /// density, the exact path must be provided (e.g. `images/2x/cat.png`).
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  /// 
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   ///
   /// The [name] and [repeat] arguments must not be null.
   ///
@@ -547,9 +553,12 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     String package,
     this.filterQuality = FilterQuality.low,
-  }) : image = scale != null
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, scale != null
          ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
-         : AssetImage(name, bundle: bundle, package: package),
+         : AssetImage(name, bundle: bundle, package: package)
+       ),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
