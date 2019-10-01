@@ -3,19 +3,21 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io' hide Platform;
-import 'dart:typed_data';
 
 import 'package:mockito/mockito.dart';
-import 'package:path/path.dart' as path;
-import 'package:platform/platform.dart' show FakePlatform;
 
 import '../test.dart';
 import 'common.dart';
-import 'fake_process_manager.dart';
+
+class MockFile extends Mock implements File {}
 
 void main() {
+  MockFile file;
+  setUp(() {
+    file = MockFile();
+    when(file.existsSync()).thenReturn(true);
+  });
   group('verifyVersion()', () {
     test('passes for valid version strings', () async {
       const List<String> valid_versions = <String>[
@@ -26,7 +28,8 @@ void main() {
         '1.2.3+hotfix.12-pre.12',
       ];
       for (String version in valid_versions) {
-        expect(await verifyVersion(version), isTrue, reason: '$version is invalid');
+        when(file.readAsString()).thenAnswer((Invocation invocation) => Future<String>.value(version));
+        expect(await verifyVersion(version, file), isTrue, reason: '$version is invalid');
       }
     });
 
@@ -40,7 +43,8 @@ void main() {
         '  1.2.3',
       ];
       for (String version in invalid_versions) {
-        expect(await verifyVersion(version), isFalse);
+        when(file.readAsString()).thenAnswer((Invocation invocation) => Future<String>.value(version));
+        expect(await verifyVersion(version, file), isFalse);
       }
     });
   });
