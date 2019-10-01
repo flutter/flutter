@@ -22,7 +22,8 @@ class WebValidator extends DoctorValidator {
           ValidationMessage('$kChromeEnvironment = $chrome')
       else
         if (!canRunChrome)
-          ValidationMessage.hint('$kChromeEnvironment not set')
+          ValidationMessage.hint('Cannot find Chrome. Try setting '
+            '$kChromeEnvironment to a Chrome executable.')
         else
           ValidationMessage('Chrome at $chrome'),
     ];
