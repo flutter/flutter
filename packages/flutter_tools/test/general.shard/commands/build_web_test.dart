@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
-import 'package:archive/archive.dart';
 import 'package:args/command_runner.dart';
-import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -26,10 +22,8 @@ import '../../src/common.dart';
 import '../../src/testbed.dart';
 
 void main() {
-  MockWebCompilationProxy mockWebCompilationProxy;
   Testbed testbed;
   MockPlatform mockPlatform;
-  bool addArchive = false;
 
   setUpAll(() {
     Cache.flutterRoot = '';
@@ -37,8 +31,6 @@ void main() {
   });
 
   setUp(() {
-    addArchive = false;
-    mockWebCompilationProxy = MockWebCompilationProxy();
     testbed = Testbed(setup: () {
       fs.file('pubspec.yaml')
         ..createSync()
@@ -46,46 +38,12 @@ void main() {
       fs.file('.packages').createSync();
       fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      when(mockWebCompilationProxy.initialize(
-        projectName: anyNamed('projectName'),
-        projectDirectory: anyNamed('projectDirectory'),
-        mode: anyNamed('mode'),
-        initializePlatform: anyNamed('initializePlatform'),
-      )).thenAnswer((Invocation invocation) {
-        final String prefix = fs.path.join('.dart_tool', 'build', 'flutter_web', 'foo', 'lib');
-        final String path = fs.path.join(prefix, 'main_web_entrypoint.dart.js');
-        fs.file(path).createSync(recursive: true);
-        fs.file('$path.map').createSync();
-        if (addArchive) {
-          final List<int> bytes = utf8.encode('void main() {}');
-          final TarEncoder encoder = TarEncoder();
-          final Archive archive = Archive()
-            ..addFile(ArchiveFile.noCompress('main_web_entrypoint.1.dart.js', bytes.length, bytes));
-          fs.file(fs.path.join(prefix, 'main_web_entrypoint.dart.js.tar.gz'))
-            ..writeAsBytes(encoder.encode(archive));
-        }
-        return Future<bool>.value(true);
-      });
     }, overrides: <Type, Generator>{
-      WebCompilationProxy: () => mockWebCompilationProxy,
       Platform: () => mockPlatform,
       FlutterVersion: () => MockFlutterVersion(),
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     });
   });
-
-  test('Copies generated part files out of build directory', () => testbed.run(() async {
-    addArchive = true;
-    await buildWeb(
-      FlutterProject.current(),
-      fs.path.join('lib', 'main.dart'),
-      BuildInfo.release,
-      false,
-    );
-
-    expect(fs.file(fs.path.join('build', 'web', 'main_web_entrypoint.1.dart.js')), exists);
-    expect(fs.file(fs.path.join('build', 'web', 'main.dart.js')), exists);
-  }));
 
   test('Refuses to build for web when missing index.html', () => testbed.run(() async {
     fs.file(fs.path.join('web', 'index.html')).deleteSync();

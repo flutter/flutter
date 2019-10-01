@@ -39,37 +39,37 @@ void main() {
     expect(fileStorage.version, 2);
   }));
 
-  test('saves and restores to file cache', () => testbed.run(() {
+  test('saves and restores to file cache', () => testbed.run(() async {
     final File file = fs.file('foo.dart')
       ..createSync()
       ..writeAsStringSync('hello');
     final FileHashStore fileCache = FileHashStore(environment);
     fileCache.initialize();
-    fileCache.hashFiles(<File>[file]);
+    await fileCache.hashFiles(<File>[file]);
     fileCache.persist();
-    final String currentHash =  fileCache.currentHashes[file.resolveSymbolicLinksSync()];
+    final String currentHash =  fileCache.currentHashes[file.path];
     final List<int> buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
         .readAsBytesSync();
     FileStorage fileStorage = FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files.single.hash, currentHash);
-    expect(fileStorage.files.single.path, file.resolveSymbolicLinksSync());
+    expect(fileStorage.files.single.path, file.path);
 
 
     final FileHashStore newFileCache = FileHashStore(environment);
     newFileCache.initialize();
     expect(newFileCache.currentHashes, isEmpty);
-    expect(newFileCache.previousHashes[fs.path.absolute('foo.dart')],  currentHash);
+    expect(newFileCache.previousHashes['foo.dart'],  currentHash);
     newFileCache.persist();
 
     // Still persisted correctly.
     fileStorage = FileStorage.fromBuffer(buffer);
 
     expect(fileStorage.files.single.hash, currentHash);
-    expect(fileStorage.files.single.path, file.resolveSymbolicLinksSync());
+    expect(fileStorage.files.single.path, file.path);
   }));
 
-  test('handles persisting with a missing build directory', () => testbed.run(() {
+  test('handles persisting with a missing build directory', () => testbed.run(() async {
     final File file = fs.file('foo.dart')
       ..createSync()
       ..writeAsStringSync('hello');
@@ -77,7 +77,7 @@ void main() {
     fileCache.initialize();
     environment.buildDir.deleteSync(recursive: true);
 
-    fileCache.hashFiles(<File>[file]);
+    await fileCache.hashFiles(<File>[file]);
     // Does not throw.
     fileCache.persist();
   }));
