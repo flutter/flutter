@@ -330,7 +330,8 @@ task:
     - name: bots_tests-windows
       skip: "!changesInclude('dev/bots/**')"
       test_script:
-        - (cd ./dev/bots && pub run test)
+        - cd dev\bots
+        - pub run test
     - name: tests_widgets-windows
       skip: "!changesInclude('packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
