@@ -22,7 +22,7 @@ void main() {
         fs.file(fs.path.join('web', 'index.html'))
           ..createSync(recursive: true)
           ..writeAsStringSync('hello');
-        assetServer = DebugAssetServer(FlutterProject.current(), fs.path.join('main'));
+        assetServer = AssetServer(FlutterProject.current(), fs.path.join('main'));
       }
     );
   });
