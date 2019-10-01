@@ -14,6 +14,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'image_data.dart';
+
 class TestImage implements ui.Image {
   TestImage(this.scale);
   final double scale;
@@ -158,10 +160,12 @@ Widget buildImageCacheResized(String name, Key key, int width, int height, int c
         width: 250,
         height: 250,
         child: Center(
-          child: Image.file(
-            File('test/widgets/assets/sample.png'),
+          child: Image.memory(
+            Uint8List.fromList(kTransparentImage),
             key: key,
             excludeFromSemantics: true,
+            color: Color(0xFF00FFFF),
+            colorBlendMode: BlendMode.plus,
             width: width.toDouble(),
             height: height.toDouble(),
             cacheWidth: cacheWidth,
@@ -346,6 +350,5 @@ void main() {
     await pumpTreeToLayout(tester, buildImageCacheResized(image, key, 5, 5, 1, 1));
     expect(getRenderImage(tester, key).size, const Size(5.0, 5.0));
   });
-
 
 }

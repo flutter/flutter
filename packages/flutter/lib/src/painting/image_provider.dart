@@ -516,38 +516,40 @@ class _SizeAwareCacheKey {
 /// The decoded image may still be displayed at resolutions other than the
 /// cached resolution provided here.
 class ResizedImage extends ImageProvider<_SizeAwareCacheKey> {
-  /// Creates an object that decodes the image to the specified size.
+  /// Creates an ImageProvider that decodes the image to the specified size.
   ///
-  /// The image cached and returned through the [ImageStreamCompleter] will be
-  /// resized from its native resolution.
+  /// The cached image will be directly decoded and stored at the resolution
+  /// defined by `width` and `height`. The image will lose detail and
+  /// use less memory if resized to a resolution smaller than the native
+  /// resolution.
   const ResizedImage(
-    this._imageProvider,
-    this._cacheWidth,
-    this._cacheHeight
-  ) : assert (_cacheWidth != null || _cacheHeight != null);
+    this.imageProvider,
+    this.width,
+    this.height
+  ) : assert (width != null || height != null);
 
-  final ImageProvider _imageProvider;
+  final ImageProvider imageProvider;
 
-  final int _cacheWidth;
-  final int _cacheHeight;
+  final int width;
+  final int height;
 
   @override
   ImageStreamCompleter load(_SizeAwareCacheKey key, DecoderCallback decode) {
-    if (_cacheWidth == null && _cacheHeight == null) {
-      return _imageProvider.load(key.providerCacheKey, decode);
+    if (width == null && height == null) {
+      return imageProvider.load(key.providerCacheKey, decode);
     } else {
       final DecoderCallback decodeResize = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
         assert(cacheWidth == null && cacheHeight == null);
-        return decode(bytes, cacheWidth: _cacheWidth, cacheHeight: _cacheHeight);
+        return decode(bytes, cacheWidth: width, cacheHeight: height);
       };
-      return _imageProvider.load(key.providerCacheKey, decodeResize);
+      return imageProvider.load(key.providerCacheKey, decodeResize);
     }
   }
 
   @override
   Future<_SizeAwareCacheKey> obtainKey(ImageConfiguration configuration) async {
-    final dynamic providerCacheKey = await _imageProvider.obtainKey(configuration);
-    return _SizeAwareCacheKey(providerCacheKey, _cacheWidth, _cacheHeight);
+    final dynamic providerCacheKey = await imageProvider.obtainKey(configuration);
+    return _SizeAwareCacheKey(providerCacheKey, width, height);
   }
 }
 
