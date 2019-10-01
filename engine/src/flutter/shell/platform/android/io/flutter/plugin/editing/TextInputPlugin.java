@@ -18,6 +18,7 @@ import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodSubtype;
 
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -320,10 +321,15 @@ public class TextInputPlugin {
     // and stops it from trying to incorrectly combine characters. However this also has some
     // negative performance implications, so we don't want to apply this workaround in every case.
     @SuppressLint("NewApi") // New API guard is inline, the linter can't see it.
+    @SuppressWarnings("deprecation")
     private boolean isRestartAlwaysRequired() {
+        InputMethodSubtype subtype = mImm.getCurrentInputMethodSubtype();
+        if (subtype == null) {
+            return false;
+        }
         String language = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                ? mImm.getCurrentInputMethodSubtype().getLanguageTag()
-                : mImm.getCurrentInputMethodSubtype().getLocale();
+                ? subtype.getLanguageTag()
+                : subtype.getLocale();
         return Build.MANUFACTURER.equals("samsung") && language.equals("ko");
     }
 
