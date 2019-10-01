@@ -115,35 +115,29 @@ class CopyFlutterBundle extends Target {
 
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build();
-    await copyAssets(assetBundle, environment);
+    final Pool pool = Pool(64);
+    await Future.wait<void>(
+      assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+        final PoolResource resource = await pool.request();
+        try {
+          final File file = fs.file(fs.path.join(environment.outputDir.path, entry.key));
+          file.parent.createSync(recursive: true);
+          final DevFSContent content = entry.value;
+          if (content is DevFSFileContent && content.file is File) {
+            await (content.file as File).copy(file.path);
+          } else {
+            await file.writeAsBytes(await entry.value.contentsAsBytes());
+          }
+        } finally {
+          resource.release();
+        }
+      }));
   }
 
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
   ];
-}
-
-/// A helper function to copy an [assetBundle] into an [environment]'s output directory,
-/// plus an optional [pathSuffix]
-Future<void> copyAssets(AssetBundle assetBundle, Environment environment, [String pathSuffix = '']) async {
-  final Pool pool = Pool(kMaxOpenFiles);
-  await Future.wait<void>(
-    assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
-      final PoolResource resource = await pool.request();
-      try {
-        final File file = fs.file(fs.path.join(environment.outputDir.path, pathSuffix, entry.key));
-        file.parent.createSync(recursive: true);
-        final DevFSContent content = entry.value;
-        if (content is DevFSFileContent && content.file is File) {
-          await (content.file as File).copy(file.path);
-        } else {
-          await file.writeAsBytes(await entry.value.contentsAsBytes());
-        }
-      } finally {
-        resource.release();
-      }
-  }));
 }
 
 /// Copies the prebuilt flutter bundle for release mode.
