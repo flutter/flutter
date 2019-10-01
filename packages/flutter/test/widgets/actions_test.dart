@@ -297,6 +297,7 @@ void main() {
 
       Actions(
         actions: const <LocalKey, ActionFactory>{},
+        dispatcher: const ActionDispatcher(),
         child: Container(),
       ).debugFillProperties(builder);
 
@@ -315,6 +316,7 @@ void main() {
 
       Actions(
         key: const ValueKey<String>('foo'),
+        dispatcher: const ActionDispatcher(),
         actions: <LocalKey, ActionFactory>{
           const ValueKey<String>('bar'): () => TestAction(onInvoke: (FocusNode node, Intent intent) {}),
         },
