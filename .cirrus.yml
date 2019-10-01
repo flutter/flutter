@@ -327,6 +327,10 @@ task:
     - flutter update-packages
     - git fetch origin master
   matrix:
+    - name: bots_tests-windows
+      skip: "!changesInclude('dev/bots/**')"
+      test_script:
+        - (cd ./dev/bots && pub run test)
     - name: tests_widgets-windows
       skip: "!changesInclude('packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
@@ -503,6 +507,10 @@ task:
     - bin/flutter doctor -v
     - bin/flutter update-packages
   matrix:
+    - name: bots_tests-macos
+      skip: "!changesInclude('dev/bots/**')"
+      test_script:
+        - (cd ./dev/bots && pub run test)
     - name: tests_widgets-macos
       only_if: $CIRRUS_BRANCH == 'master'
       env:
