@@ -58,9 +58,8 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 ImageProvider<dynamic> _resizeIfNeeded(int cacheWidth, int cacheHeight, ImageProvider<dynamic> provider) {
   if (cacheWidth != null || cacheHeight != null) {
     return ResizedImage(provider, cacheWidth, cacheHeight);
-  } else {
-    return provider;
   }
+  return provider;
 }
 
 /// Prefetches an image into the image cache.
@@ -295,7 +294,7 @@ class Image extends StatefulWidget {
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
-  /// The [src], [scale] and [repeat] arguments must not be null.
+  /// The [src], [scale], and [repeat] arguments must not be null.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -314,11 +313,11 @@ class Image extends StatefulWidget {
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
-  /// If [cacheWidth] and/or [cacheHeight] is provided, it indicates to the
-  /// engine that cached image must be resized. The image will be rendered
-  /// to the constraints of the layout or [width] and [height] regardless of
-  /// these parameters. These parameters are primarily intended to reduce
-  /// the memory usage of [ImageCache].
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   Image.network(
     String src, {
     Key key,
@@ -345,6 +344,8 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
@@ -366,11 +367,11 @@ class Image extends StatefulWidget {
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
-  /// If [cacheWidth] and/or [cacheHeight] is provided, it indicates to the
-  /// engine that cached image must be resized. The image will be rendered
-  /// to the constraints of the layout or [width] and [height] regardless of
-  /// these parameters. These parameters are primarily intended to reduce
-  /// the memory usage of [ImageCache].
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   Image.file(
     File file, {
     Key key,
@@ -397,6 +398,8 @@ class Image extends StatefulWidget {
        assert(repeat != null),
        assert(filterQuality != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
 
@@ -573,11 +576,11 @@ class Image extends StatefulWidget {
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
-  /// If [cacheWidth] and/or [cacheHeight] is provided, it indicates to the
-  /// engine that cached image must be resized. The image will be rendered
-  /// to the constraints of the layout or [width] and [height] regardless of
-  /// these parameters. These parameters are primarily intended to reduce
-  /// the memory usage of [ImageCache].
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   Image.memory(
     Uint8List bytes, {
     Key key,
@@ -603,6 +606,8 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
   /// The image to display.

@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
-import 'image_provider.dart';
 
 /// The dart:html implemenation of [image_provider.NetworkImage].
 class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkImage> implements image_provider.NetworkImage {
@@ -35,7 +34,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  ImageStreamCompleter load(image_provider.NetworkImage key, DecoderCallback decode) {
+  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
@@ -49,7 +48,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   // TODO(garyq): Handle DecoderCallback on web.
-  Future<ui.Codec> _loadAsync(NetworkImage key, DecoderCallback decode) async {
+  Future<ui.Codec> _loadAsync(NetworkImage key, image_provider.DecoderCallback decode) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
