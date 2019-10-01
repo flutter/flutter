@@ -47,10 +47,12 @@ Future<void> getPackages(String folder) async {
     'get',
   ];
   final Process process = await processManager.start(command, workingDirectory: folder);
+  final StringBuffer output = StringBuffer();
   final StringBuffer errorOutput = StringBuffer();
+  process.stdout.transform(utf8.decoder).listen(output.write);
   process.stderr.transform(utf8.decoder).listen(errorOutput.write);
   final int exitCode = await process.exitCode;
   if (exitCode != 0) {
-    throw Exception('flutter pub get failed: $errorOutput');
+    throw Exception('flutter pub get failed: $errorOutput\n$output');
   }
 }
