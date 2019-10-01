@@ -1,4 +1,4 @@
-Signature: c7105240e4c062ab25541a2a200a5ca1
+Signature: 3d0513d74f018e0557356e72da81b44f
 
 UNUSED LICENSES:
 
@@ -7468,7 +7468,10 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/timelin
 FILE: ../../../third_party/dart/runtime/platform/elf.h
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_api_table.dart
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_ffi_api.dart
+FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_type_table.dart
+FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_util.dart
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/gen_api_table.dart
+FILE: ../../../third_party/dart/runtime/tools/dartfuzz/gen_type_table.dart
 FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.html
 FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.js
 FILE: ../../../third_party/dart/runtime/tools/run_clang_tidy.dart
@@ -8456,7 +8459,6 @@ FILE: ../../../third_party/dart/runtime/bin/typed_data_utils.h
 FILE: ../../../third_party/dart/runtime/include/dart_embedder_api.h
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz.dart
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_test.dart
-FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_values.dart
 FILE: ../../../third_party/dart/runtime/vm/base64.cc
 FILE: ../../../third_party/dart/runtime/vm/base64.h
 FILE: ../../../third_party/dart/runtime/vm/base64_test.cc
