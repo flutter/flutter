@@ -25,13 +25,6 @@ export 'source.dart';
 /// The [BuildSystem] instance.
 BuildSystem get buildSystem => context.get<BuildSystem>();
 
-/// A reasonable amount of files to open at the same time.
-///
-/// This number is somewhat arbitrary - it is difficult to detect whether
-/// or not we'll run out of file descriptiors when using async dart:io
-/// APIs.
-const int kMaxOpenFiles = 64;
-
 /// Configuration for the build system itself.
 class BuildSystemConfig {
   /// Create a new [BuildSystemConfig].

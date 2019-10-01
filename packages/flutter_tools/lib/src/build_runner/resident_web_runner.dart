@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
-import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -21,7 +20,6 @@ import '../globals.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
-import '../web/chrome.dart';
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
 import 'web_fs.dart';
@@ -172,7 +170,7 @@ class ResidentWebRunner extends ResidentRunner {
         initializePlatform: debuggingOptions.initializePlatform,
         hostname: debuggingOptions.hostname,
         port: debuggingOptions.port,
-        skipDwds: device is WebServerDevice || !debuggingOptions.buildInfo.isDebug,
+        skipDwds: device is WebServerDevice,
       );
       // When connecting to a browser, update the message with a seemsSlow notification
       // to handle the case where we fail to connect.
@@ -291,21 +289,6 @@ class ResidentWebRunner extends ResidentRunner {
           fullRestart: true,
           reason: reason,
         ).send();
-      }
-    }
-    // Allows browser refresh hot restart on non-debug builds.
-    if (device is ChromeDevice && debuggingOptions.browserLaunch) {
-      try {
-        final Chrome chrome = await ChromeLauncher.connectedInstance;
-        final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
-          return chromeTab.url.contains(debuggingOptions.hostname);
-        });
-        final WipConnection wipConnection = await chromeTab.connect();
-        await wipConnection.sendCommand('Page.reload');
-        status.stop();
-        return OperationResult.ok;
-      } catch (err) {
-        // Ignore error and continue with posted message;
       }
     }
     status.stop();

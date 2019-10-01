@@ -50,9 +50,7 @@ class AssetBehavior extends SourceBehavior {
 
 /// A specific asset behavior for building bundles.
 class AssetOutputBehavior extends SourceBehavior {
-  const AssetOutputBehavior([this._pathSuffix = '']);
-
-  final String _pathSuffix;
+  const AssetOutputBehavior();
 
   @override
   List<File> inputs(Environment environment) {
@@ -66,7 +64,7 @@ class AssetOutputBehavior extends SourceBehavior {
     final List<File> results = <File>[];
     final Iterable<DevFSFileContent> files = assetBundle.entries.values.whereType<DevFSFileContent>();
     for (DevFSFileContent devFsContent in files) {
-      results.add(fs.file(fs.path.join(_pathSuffix, devFsContent.file.path)));
+      results.add(fs.file(devFsContent.file.path));
     }
     return results;
   }
@@ -80,7 +78,7 @@ class AssetOutputBehavior extends SourceBehavior {
     );
     final List<File> results = <File>[];
     for (String key in assetBundle.entries.keys) {
-      final File file = fs.file(fs.path.join(environment.outputDir.path, _pathSuffix, key));
+      final File file = fs.file(fs.path.join(environment.outputDir.path, key));
       results.add(file);
     }
     return results;
@@ -127,7 +125,7 @@ class CopyAssets extends Target {
       packagesPath: environment.projectDir.childFile('.packages').path,
     );
     // Limit number of open files to avoid running out of file descriptors.
-    final Pool pool = Pool(kMaxOpenFiles);
+    final Pool pool = Pool(64);
     await Future.wait<void>(
       assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
         final PoolResource resource = await pool.request();
