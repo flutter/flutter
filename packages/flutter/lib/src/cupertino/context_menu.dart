@@ -12,7 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'context_menu_sheet_action.dart';
 
 // The scale of the child at the time that the ContextMenu opens.
-const double _kOpenScale = 1.2;
+const double _kOpenScale = 1.05;
 
 typedef _DismissCallback = void Function(
   BuildContext context,
@@ -97,6 +97,9 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   AnimationController _decoyController;
   Rect _decoyChildEndRect;
 
+  // This value was eyeballed from a physical iOS 13.1.2 device.
+  static const _decoyDuration = Duration(milliseconds: 550);
+
   OverlayEntry _lastOverlayEntry;
   double _childOpacity = 1.0;
   _ContextMenuRoute<void> _route;
@@ -105,7 +108,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   void initState() {
     super.initState();
     _decoyController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: _decoyDuration,
       vsync: this,
     );
     _decoyController.addStatusListener(_onDecoyAnimationStatusChange);
@@ -136,8 +139,6 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
   // Push the new route and open the ContextMenu overlay.
   void _openContextMenu() {
-    HapticFeedback.lightImpact();
-
     setState(() {
       _childOpacity = 0.0;
     });
@@ -316,22 +317,51 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
   @override
   void initState() {
     super.initState();
+    // Change the color of the child during the initial part of the decoy bounce
+    // animation. The interval was eyeballed from an iOS 13.1.2 device.
     _mask = _OnOffAnimation<Color>(
       controller: widget.controller,
       onValue: _lightModeMaskColor,
       offValue: _masklessColor,
       intervalOn: 0.0,
-      intervalOff: 0.4,
+      intervalOff: 0.5,
     );
-    _rect = RectTween(
-      begin: widget.beginRect,
-      end: widget.endRect,
-    ).animate(
-      CurvedAnimation(
-        parent: widget.controller,
-        curve: Curves.easeInBack,
+
+    final Rect midRect =  widget.beginRect.deflate(
+      widget.beginRect.width * (_kOpenScale - 1.0) / 2,
+    );
+    _rect = TweenSequence(<TweenSequenceItem<Rect>>[
+      TweenSequenceItem<Rect>(
+        tween: RectTween(
+          begin: widget.beginRect,
+          end: midRect,
+        ).chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 1.0,
       ),
-    );
+      TweenSequenceItem<Rect>(
+        tween: RectTween(
+          begin: midRect,
+          end: widget.endRect,
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 1.0,
+      ),
+    ]).animate(widget.controller);
+    _rect.addListener(_rectListener);
+  }
+
+  // Listen to the _rect animation and vibrate when it reaches the halfway point
+  // and switches from animating down to up.
+  void _rectListener() {
+    if (widget.controller.value < 0.5) {
+      return;
+    }
+    HapticFeedback.selectionClick();
+    _rect.removeListener(_rectListener);
+  }
+
+  void dispose() {
+    _rect.removeListener(_rectListener);
+    super.dispose();
   }
 
   Widget _buildAnimation(BuildContext context, Widget child) {
@@ -399,7 +429,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
   // Barrier color for a Cupertino modal barrier.
   static const Color _kModalBarrierColor = Color(0x6604040F);
-  // The duration of the transition used when a modal popup is shown.
+  // The duration of the transition used when a modal popup is shown. Eyeballed
+  // from a device running iOS 13.1.2.
   static const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
   final List<ContextMenuSheetAction> _actions;
@@ -407,10 +438,32 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   final VoidCallback _onTap;
   double _scale = 1.0;
 
-  final RectTween _rectTween = RectTween();
-  final RectTween _rectTweenReverse = RectTween();
-  final RectTween _sheetRectTween = RectTween();
-  final Tween<double> _sheetScaleTween = Tween<double>();
+  static final CurveTween _curve = CurveTween(
+    curve: Curves.easeOutBack,
+  );
+  static final CurveTween _curveReverse = CurveTween(
+    curve: Curves.easeInBack,
+  );
+  static final RectTween _rectTween = RectTween();
+  static final Animatable<Rect> _rectAnimatable = _rectTween.chain(_curve);
+  static final RectTween _rectTweenReverse = RectTween();
+  static final Animatable<Rect> _rectAnimatableReverse = _rectTweenReverse.chain(
+    _curveReverse,
+  );
+  static final RectTween _sheetRectTween = RectTween();
+  static final Animatable<Rect> _sheetRectAnimatable = _sheetRectTween.chain(
+    _curve,
+  );
+  static final Animatable<Rect> _sheetRectAnimatableReverse = _sheetRectTween.chain(
+    _curveReverse,
+  );
+  static final Tween<double> _sheetScaleTween = Tween<double>();
+  static final Animatable<double> _sheetScaleAnimatable = _sheetScaleTween.chain(
+    _curve,
+  );
+  static final Animatable<double> _sheetScaleAnimatableReverse = _sheetScaleTween.chain(
+    _curveReverse,
+  );
   final Tween<double> _opacityTween = Tween<double>(begin: 0.0, end: 1.0);
   Animation<double> _sheetOpacity;
   Animation<double> _sheetScale;
@@ -563,15 +616,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
   @override
   Animation<double> createAnimation() {
-    final CurvedAnimation animation = CurvedAnimation(
-      parent: super.createAnimation(),
-      curve: Curves.linearToEaseOut,
-    );
+    final Animation<double> animation = super.createAnimation();
     _sheetOpacity = _opacityTween.animate(CurvedAnimation(
-      parent: animation,
-      curve: Curves.linear,
-    ));
-    _sheetScale = _sheetScaleTween.animate(CurvedAnimation(
       parent: animation,
       curve: Curves.linear,
     ));
@@ -593,13 +639,20 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     return OrientationBuilder(
       builder: (BuildContext context, Orientation orientation) {
         _lastOrientation = orientation;
-        final bool reverse = animation.status == AnimationStatus.reverse;
-        final Rect rect = reverse ? _rectTweenReverse.evaluate(animation) : _rectTween.evaluate(animation);
-        final Rect sheetRect = _sheetRectTween.evaluate(animation);
 
         // While the animation is running, render everything in a Stack so that
         // they're movable.
         if (!animation.isCompleted) {
+          final bool reverse = animation.status == AnimationStatus.reverse;
+          final Rect rect = reverse
+            ? _rectAnimatableReverse.evaluate(animation)
+            : _rectAnimatable.evaluate(animation);
+          final Rect sheetRect = reverse
+            ? _sheetRectAnimatableReverse.evaluate(animation)
+            : _sheetRectAnimatable.evaluate(animation);
+          final double sheetScale = reverse
+            ? _sheetScaleAnimatableReverse.evaluate(animation)
+            : _sheetScaleAnimatable.evaluate(animation);
           return Stack(
             children: <Widget>[
               Positioned.fromRect(
@@ -608,7 +661,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
                   opacity: _sheetOpacity.value,
                   child: Transform.scale(
                     alignment: getSheetAlignment(_contextMenuOrientation),
-                    scale: _sheetScale.value,
+                    scale: sheetScale,
                     child: _ContextMenuSheet(
                       key: _sheetGlobalKey,
                       actions: _actions,
