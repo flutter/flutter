@@ -54,30 +54,26 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> items = <Widget>[];
     final MaterialLocalizations localizations =
         MaterialLocalizations.of(context);
-
-    if (widget.handleCut != null)
-      items.add(FlatButton(
-        child: Text(localizations.cutButtonLabel),
-        onPressed: widget.handleCut,
-      ));
-    if (widget.handleCopy != null)
-      items.add(FlatButton(
-        child: Text(localizations.copyButtonLabel),
-        onPressed: widget.handleCopy,
-      ));
-    if (widget.handlePaste != null)
-      items.add(FlatButton(
-        child: Text(localizations.pasteButtonLabel),
-        onPressed: widget.handlePaste,
-      ));
-    if (widget.handleSelectAll != null)
-      items.add(FlatButton(
-        child: Text(localizations.selectAllButtonLabel),
-        onPressed: widget.handleSelectAll,
-      ));
+    final List<Widget> items = <Widget>[
+      if (widget.handleCut != null)
+        FlatButton(
+            child: Text(localizations.cutButtonLabel),
+            onPressed: widget.handleCut),
+      if (widget.handleCopy != null)
+        FlatButton(
+            child: Text(localizations.copyButtonLabel),
+            onPressed: widget.handleCopy),
+      if (widget.handlePaste != null)
+        FlatButton(
+            child: Text(localizations.pasteButtonLabel),
+            onPressed: widget.handlePaste),
+      if (widget.handleSelectAll != null)
+        FlatButton(
+            child: Text(localizations.selectAllButtonLabel),
+            onPressed: widget.handleSelectAll),
+    ];
 
     // If there is no option available, build an empty widget.
     if (items.isEmpty) {
@@ -98,7 +94,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
             });
           },
           icon: const Icon(Icons.more_vert),
-          label: Text(''),
+          label: const Text(''),
         )
       ];
 
@@ -333,7 +329,8 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     // Android allows SelectAll when selection is not collapsed, unless
     // everything has already been selected.
     final TextEditingValue value = delegate.textEditingValue;
-    return value.text.isNotEmpty &&
+    return delegate.selectAllEnabled &&
+        value.text.isNotEmpty &&
         !(value.selection.start == 0 &&
             value.selection.end == value.text.length);
   }
