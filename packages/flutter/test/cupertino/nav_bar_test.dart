@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
-import 'colors_test.dart' show isSameColorAs;
 
 int count = 0;
 

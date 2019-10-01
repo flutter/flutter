@@ -12,7 +12,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
-import 'colors_test.dart' show isSameColorAs;
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{

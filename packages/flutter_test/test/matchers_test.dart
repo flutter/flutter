@@ -237,6 +237,43 @@ void main() {
     );
   });
 
+  test('isSameColorAs', () {
+    expect(
+      const Color(0x87654321),
+      _CustomColor(0x87654321),
+    );
+
+    expect(
+      _CustomColor(0x87654321),
+      const Color(0x87654321),
+    );
+
+    expect(
+      const Color(0x12345678),
+      isNot(_CustomColor(0x87654321)),
+    );
+
+    expect(
+      _CustomColor(0x87654321),
+      isNot(const Color(0x12345678)),
+    );
+
+    expect(
+      _CustomColor(0xFF123456),
+      _CustomColor(0xFF123456),
+    );
+
+    expect(
+      _CustomColor(0xFF123456)..isEqual = false,
+      _CustomColor(0xFF123456)..isEqual = true,
+    );
+
+    expect(
+      _CustomColor(0xFF123456)..isEqual = false,
+      _CustomColor(0xFF123456)..isEqual = false,
+    );
+  });
+
   group('coversSameAreaAs', () {
     test('empty Paths', () {
       expect(
@@ -669,4 +706,15 @@ class _FakeSemanticsNode extends SemanticsNode {
   SemanticsData data;
   @override
   SemanticsData getSemanticsData() => data;
+}
+
+class _CustomColor extends Color {
+  _CustomColor(value) : super(value);
+  bool isEqual;
+
+  @override
+  operator =(dynamic other) => isEqual ?? super.=(other);
+
+  @override
+  int get hashCode => hashValue(super.hashCode, isEqual);
 }

@@ -12,17 +12,17 @@ import 'text_theme.dart';
 export 'package:flutter/services.dart' show Brightness;
 
 // Values derived from https://developer.apple.com/design/resources/.
-const _NoDefaultCupertinoThemeData _kDefaultTheme = _NoDefaultCupertinoThemeData(
+const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
   null,
   CupertinoColors.systemBlue,
   CupertinoColors.systemBackground,
-  CupertinoTextThemeData(),
   CupertinoDynamicColor.withBrightness(
     color: Color(0xF0F9F9F9),
     darkColor: Color(0xF01D1D1D),
     // For toolbar or tabbar the dark color is 0xF0161616
   ),
   CupertinoColors.systemBackground,
+  _CupertinoTextThemeDefaults(CupertinoColors.label, CupertinoColors.inactiveGray),
 );
 
 /// Applies a visual styling theme to descendant Cupertino widgets.
@@ -180,7 +180,7 @@ class CupertinoThemeData extends Diagnosticable {
     this._defaults,
   );
 
-  final _NoDefaultCupertinoThemeData _defaults;
+  final _CupertinoThemeDefaults _defaults;
 
   /// The general brightness theme of the [CupertinoThemeData].
   ///
@@ -221,7 +221,9 @@ class CupertinoThemeData extends Diagnosticable {
   /// Derived from [brightness] and [primaryColor] if unspecified, including
   /// [brightness] and [primaryColor] of a Material [ThemeData] if coming
   /// from a Material [Theme].
-  CupertinoTextThemeData get textTheme => _textTheme ?? _defaults.textTheme;
+  CupertinoTextThemeData get textTheme {
+    return _textTheme ?? _defaults?.textThemeDefaults?.createDefaults(primaryColor: primaryColor);
+  }
   final CupertinoTextThemeData _textTheme;
 
   /// Background color of the top nav bar and bottom tab bar.
@@ -373,4 +375,99 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
       scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
     );
   }
+}
+
+@immutable
+class _CupertinoThemeDefaults {
+  const _CupertinoThemeDefaults(
+    this.brightness,
+    this.primaryColor,
+    this.primaryContrastingColor,
+    this.barBackgroundColor,
+    this.scaffoldBackgroundColor,
+    this.textThemeDefaults,
+  );
+
+  final Brightness brightness;
+  final Color primaryColor;
+  final Color primaryContrastingColor;
+  final Color barBackgroundColor;
+  final Color scaffoldBackgroundColor;
+  final _CupertinoTextThemeDefaults textThemeDefaults;
+
+  _CupertinoThemeDefaults resolveFrom(BuildContext context, { @required bool nullOk }) {
+    assert(nullOk != null);
+    Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+
+    return _CupertinoThemeDefaults(
+      brightness,
+      convertColor(primaryColor),
+      convertColor(primaryContrastingColor),
+      convertColor(barBackgroundColor),
+      convertColor(scaffoldBackgroundColor),
+      textThemeDefaults?.resolveFrom(context, nullOk: nullOk),
+    );
+  }
+}
+
+@immutable
+class _CupertinoTextThemeDefaults {
+  const _CupertinoTextThemeDefaults(
+    this.labelColor,
+    this.inactiveGray,
+  );
+
+  final Color labelColor;
+  final Color inactiveGray;
+
+  _CupertinoTextThemeDefaults resolveFrom(BuildContext context, { @required bool nullOk }) {
+    return _CupertinoTextThemeDefaults(
+      CupertinoDynamicColor.resolve(labelColor, context, nullOk: nullOk),
+      CupertinoDynamicColor.resolve(inactiveGray, context, nullOk: nullOk),
+    );
+  }
+
+  CupertinoTextThemeData createDefaults({ @required Color primaryColor }) {
+    assert(primaryColor != null);
+    return _DefaultCupertinoTextThemeData(
+      primaryColor: primaryColor,
+      labelColor: labelColor,
+      inactiveGray: inactiveGray,
+    );
+  }
+}
+
+// CupertinoTextThemeData with no text styles explicitly specified.
+// The implementation of this class may need to be updated when any of the default
+// text styles changes.
+class _DefaultCupertinoTextThemeData extends CupertinoTextThemeData {
+  const _DefaultCupertinoTextThemeData({
+    @required this.labelColor,
+    @required this.inactiveGray,
+    @required Color primaryColor,
+  }) : assert(labelColor != null),
+       assert(inactiveGray != null),
+       assert(primaryColor != null),
+       super(primaryColor: primaryColor);
+
+  final Color labelColor;
+  final Color inactiveGray;
+
+  @override
+  TextStyle get textStyle => super.textStyle.copyWith(color: labelColor);
+
+  @override
+  TextStyle get tabLabelTextStyle => super.tabLabelTextStyle.copyWith(color: inactiveGray);
+
+  @override
+  TextStyle get navTitleTextStyle => super.navTitleTextStyle.copyWith(color: labelColor);
+
+  @override
+  TextStyle get navLargeTitleTextStyle => super.navLargeTitleTextStyle.copyWith(color: labelColor);
+
+  @override
+  TextStyle get pickerTextStyle => super.pickerTextStyle.copyWith(color: labelColor);
+
+  @override
+  TextStyle get dateTimePickerTextStyle => super.dateTimePickerTextStyle.copyWith(color: labelColor);
 }

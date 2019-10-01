@@ -8,7 +8,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
-import 'colors_test.dart' show isSameColorAs;
 
 const TextStyle testStyle = TextStyle(
   fontFamily: 'Ahem',
@@ -342,7 +341,7 @@ void main() {
         ),
       ),
     );
-    expect(textStyle.color, CupertinoColors.black);
+    expect(textStyle.color, isSameColorAs(CupertinoColors.black));
     decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),

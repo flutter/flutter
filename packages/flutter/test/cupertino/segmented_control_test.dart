@@ -7,7 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
-import 'colors_test.dart' show isSameColorAs;
 
 dynamic getRenderSegmentedControl(WidgetTester tester) {
   return tester.allRenderObjects.firstWhere(
@@ -345,8 +344,8 @@ void main() {
       textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
       iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
-      expect(textStyle.style.color.value, CupertinoColors.activeOrange.darkColor.value);
-      expect(iconTheme.color, CupertinoColors.black);
+      expect(textStyle.style.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
+      expect(iconTheme.color, isSameColorAs(CupertinoColors.black));
     },
   );
 

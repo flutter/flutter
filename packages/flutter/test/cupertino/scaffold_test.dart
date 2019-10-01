@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/mock_canvas.dart';
-import 'colors_test.dart' show isSameColorAs;
 
 /// Integration tests testing both [CupertinoPageScaffold] and [CupertinoTabScaffold].
 void main() {

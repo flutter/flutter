@@ -8,6 +8,10 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
+// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
+// accordingly if you're going to change the default color here, as their
+// implementation depends on the default value of the color field.
+//
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultTextStyle = TextStyle(
   inherit: false,
@@ -18,6 +22,10 @@ const TextStyle _kDefaultTextStyle = TextStyle(
   decoration: TextDecoration.none,
 );
 
+// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
+// accordingly if you're going to change the default color here, as their
+// implementation depends on the default value of the color field.
+//
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultActionTextStyle = TextStyle(
   inherit: false,
@@ -28,6 +36,10 @@ const TextStyle _kDefaultActionTextStyle = TextStyle(
   decoration: TextDecoration.none,
 );
 
+// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
+// accordingly if you're going to change the default color here, as their
+// implementation depends on the default value of the color field.
+//
 // Values derived from https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultTabLabelTextStyle = TextStyle(
   inherit: false,
@@ -37,6 +49,9 @@ const TextStyle _kDefaultTabLabelTextStyle = TextStyle(
   color: CupertinoColors.inactiveGray,
 );
 
+// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
+// accordingly if you're going to change the default color here, as their
+// implementation depends on the default value of the color field.
 const TextStyle _kDefaultMiddleTitleTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Text',
@@ -46,6 +61,9 @@ const TextStyle _kDefaultMiddleTitleTextStyle = TextStyle(
   color: CupertinoColors.label,
 );
 
+// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
+// accordingly if you're going to change the default color here, as their
+// implementation depends on the default value of the color field.
 const TextStyle _kDefaultLargeTitleTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Display',
@@ -55,6 +73,10 @@ const TextStyle _kDefaultLargeTitleTextStyle = TextStyle(
   color: CupertinoColors.label,
 );
 
+// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
+// accordingly if you're going to change the default color here, as their
+// implementation depends on the default value of the color field.
+//
 // Inspected on iOS 13 simulator with "Debug View Hierarchy".
 // Value extracted from off-center labels. Centered labels have a font size of 25pt.
 const TextStyle _kDefaultPickerTextStyle = TextStyle(
@@ -66,6 +88,10 @@ const TextStyle _kDefaultPickerTextStyle = TextStyle(
   color: CupertinoColors.label,
 );
 
+// Please update _DefaultCupertinoTextThemeData and _DefaultCupertinoTextThemeData
+// accordingly if you're going to change the default color here, as their
+// implementation depends on the default value of the color field.
+//
 // Inspected on iOS 13 simulator with "Debug View Hierarchy".
 // Value extracted from off-center labels. Centered labels have a font size of 25pt.
 const TextStyle _kDefaultDateTimePickerTextStyle = TextStyle(
@@ -230,30 +256,36 @@ class CupertinoTextThemeData extends Diagnosticable {
 
 @immutable
 class _DefaultCupertinoTextThemeData extends Diagnosticable {
-  const _DefaultCupertinoTextThemeData({ this.labelColor });
+  const _DefaultCupertinoTextThemeData({
+    this.labelColor = CupertinoColors.label,
+    this.inactiveGrayColor = CupertinoColors.inactiveGray,
+  }) : assert(labelColor != null),
+       assert(inactiveGrayColor != null);
 
   final Color labelColor;
+  final Color inactiveGrayColor;
 
-  TextStyle _applyLabelColor(TextStyle original) {
-    return labelColor == null || original?.color == labelColor
+  static TextStyle applyLabelColor(TextStyle original, Color color) {
+    return original?.color == color
       ?  original
-      :  original?.copyWith(color: labelColor);
+      :  original?.copyWith(color: color);
   }
 
-  TextStyle get textStyle => _applyLabelColor(_kDefaultTextStyle);
-  TextStyle get tabLabelTextStyle => _applyLabelColor(_kDefaultTabLabelTextStyle);
-  TextStyle get navTitleTextStyle => _applyLabelColor(_kDefaultMiddleTitleTextStyle);
-  TextStyle get navLargeTitleTextStyle => _applyLabelColor(_kDefaultLargeTitleTextStyle);
-  TextStyle get pickerTextStyle => _applyLabelColor(_kDefaultPickerTextStyle);
-  TextStyle get dateTimePickerTextStyle => _applyLabelColor(_kDefaultDateTimePickerTextStyle);
+  TextStyle get textStyle => applyLabelColor(_kDefaultTextStyle, labelColor);
+  TextStyle get tabLabelTextStyle => applyLabelColor(_kDefaultTabLabelTextStyle, inactiveGrayColor);
+  TextStyle get navTitleTextStyle => applyLabelColor(_kDefaultMiddleTitleTextStyle, labelColor);
+  TextStyle get navLargeTitleTextStyle => applyLabelColor(_kDefaultLargeTitleTextStyle, labelColor);
+  TextStyle get pickerTextStyle => applyLabelColor(_kDefaultPickerTextStyle, labelColor);
+  TextStyle get dateTimePickerTextStyle => applyLabelColor(_kDefaultDateTimePickerTextStyle, labelColor);
 
   TextStyle actionTextStyle({ Color primaryColor }) => _kDefaultActionTextStyle.copyWith(color: primaryColor);
   TextStyle navActionTextStyle({ Color primaryColor }) => actionTextStyle(primaryColor: primaryColor);
 
   _DefaultCupertinoTextThemeData resolveFrom(BuildContext context, bool nullOk) {
-    final Color resolved = CupertinoDynamicColor.resolve(labelColor ?? CupertinoColors.label, context, nullOk: nullOk);
-    return resolved == labelColor || (resolved == CupertinoColors.label && labelColor == null)
+    final Color resolvedLabelColor = CupertinoDynamicColor.resolve(labelColor, context, nullOk: nullOk);
+    final Color resolvedInactiveGray = CupertinoDynamicColor.resolve(inactiveGrayColor, context, nullOk: nullOk);
+    return resolvedLabelColor == labelColor && resolvedInactiveGray == CupertinoColors.inactiveGray
       ? this
-      : _DefaultCupertinoTextThemeData(labelColor: resolved);
+      : _DefaultCupertinoTextThemeData(labelColor: resolvedLabelColor, inactiveGrayColor: resolvedInactiveGray);
   }
 }

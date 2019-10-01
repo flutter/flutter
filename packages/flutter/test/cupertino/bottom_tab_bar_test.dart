@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
 import '../widgets/semantics_tester.dart';
-import 'colors_test.dart' show isSameColorAs;
 
 Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async {
   await tester.pumpWidget(

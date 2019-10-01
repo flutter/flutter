@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'colors_test.dart' show isSameColorAs;
 
 int buildCount;
 CupertinoThemeData actualTheme;
