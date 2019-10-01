@@ -555,7 +555,7 @@ void main() {
             return Text('Different page ${index + 1}');
           },
         ),
-      )
+      ),
     );
 
     expect(tabsBuilt, const <int>[0, 1]);
@@ -654,7 +654,7 @@ void main() {
               );
             },
           ),
-        )
+        ),
       );
 
       expect(tabsPainted, const <int> [0]);
@@ -676,7 +676,7 @@ void main() {
               );
             },
           ),
-        )
+        ),
       );
 
       expect(tabsPainted, const <int> [0, 0]);
@@ -870,10 +870,10 @@ void main() {
                     );
                   },
                 ),
-              ]
-            )
-          )
-        )
+              ],
+            ),
+          ),
+        ),
       );
       expect(tabsPainted0, const <int>[2, 0, 1, 2]);
       expect(tabsPainted1, const <int>[2, 0]);
@@ -893,7 +893,7 @@ void main() {
             controller: controller,
             tabBuilder: (BuildContext context, int index) => Text('Different page ${index + 1}'),
           ),
-        )
+        ),
       );
     } on AssertionError catch (e) {
       expect(e.toString(), contains('controller.index < tabBar.items.length'));
@@ -908,7 +908,7 @@ void main() {
           controller: controller,
           tabBuilder: (BuildContext context, int index) => Text('Different page ${index + 1}'),
         ),
-      )
+      ),
     );
 
     expect(tester.takeException(), null);
@@ -937,7 +937,7 @@ void main() {
               return Container();
             },
           ),
-        )
+        ),
     );
 
     for (int i = 0; i < 3; i++) {
@@ -959,7 +959,7 @@ void main() {
               return Container();
             },
           ),
-        )
+        ),
     );
     for (int i = 0; i < 5; i++) {
       controller.index = i;

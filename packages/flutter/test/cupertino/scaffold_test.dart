@@ -177,7 +177,7 @@ void main() {
           data:  MediaQueryData(viewInsets: EdgeInsets.only(bottom: 20.0)),
           child: child,
         ),
-      )
+      ),
     );
 
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
@@ -193,7 +193,7 @@ void main() {
           ),
           child: child,
         ),
-      )
+      ),
     );
     final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
     expect(initialPoint, finalPoint);

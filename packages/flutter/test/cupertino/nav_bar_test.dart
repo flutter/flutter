@@ -963,7 +963,7 @@ void main() {
               child: Placeholder(),
             );
           },
-        )
+        ),
       );
 
       await tester.pump();
@@ -975,7 +975,7 @@ void main() {
           builder: (BuildContext context) {
             return const CupertinoNavigationBarBackButton();
           },
-        )
+        ),
       );
 
       await tester.pump();
@@ -1004,7 +1004,7 @@ void main() {
               child: Placeholder(),
             );
           },
-        )
+        ),
       );
 
       await tester.pump();
@@ -1023,7 +1023,7 @@ void main() {
               child: const Placeholder(),
             );
           },
-        )
+        ),
       );
 
       await tester.pump();

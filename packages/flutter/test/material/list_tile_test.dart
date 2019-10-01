@@ -392,7 +392,7 @@ void main() {
               SemanticsFlag.hasEnabledState,
             ],
           ),
-        ]
+        ],
       ),
       ignoreTransform: true, ignoreId: true, ignoreRect: true),
     );

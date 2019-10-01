@@ -64,63 +64,6 @@ void main() {
         throwsAssertionError,
       );
     });
-
-    testWidgets('ListWheelScrollView needs valid overAndUnderCenterOpacity', (WidgetTester tester) async {
-      expect(
-        () {
-          ListWheelScrollView(
-            overAndUnderCenterOpacity: null,
-            itemExtent: 20.0,
-            children: <Widget>[Container()],
-          );
-        },
-        throwsAssertionError,
-      );
-
-      expect(
-        () {
-          ListWheelScrollView(
-            overAndUnderCenterOpacity: -1,
-            itemExtent: 20.0,
-            children: <Widget>[Container()],
-          );
-        },
-        throwsAssertionError,
-      );
-
-      expect(
-        () {
-          ListWheelScrollView(
-            overAndUnderCenterOpacity: 2,
-            itemExtent: 20.0,
-            children: <Widget>[Container()],
-          );
-        },
-        throwsAssertionError,
-      );
-
-      expect(
-        () {
-          ListWheelScrollView(
-            overAndUnderCenterOpacity: 1,
-            itemExtent: 20.0,
-            children: <Widget>[Container()],
-          );
-        },
-        isNot(throwsAssertionError),
-      );
-
-      expect(
-        () {
-          ListWheelScrollView(
-            overAndUnderCenterOpacity: 0,
-            itemExtent: 20.0,
-            children: <Widget>[Container()],
-          );
-        },
-        isNot(throwsAssertionError),
-      );
-    });
   });
 
   group('infinite scrolling', () {
@@ -191,7 +134,7 @@ void main() {
               },
             ),
           ),
-        )
+        ),
       );
 
       // Can be scrolled infinitely for negative indexes.
@@ -240,7 +183,7 @@ void main() {
               },
             ),
           ),
-        )
+        ),
       );
 
       expect(paintedChildren, <int>[-13, -12, -11, -10, -9, -8, -7]);
@@ -356,7 +299,7 @@ void main() {
               },
             ),
           ),
-        )
+        ),
       );
 
       // Scrolls up and down to check if builder is called twice.
@@ -383,7 +326,7 @@ void main() {
               return Text(index.toString());
             }),
           ),
-        )
+        ),
       );
 
       final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent;
@@ -420,7 +363,7 @@ void main() {
               return Text(index.toString());
             }),
           ),
-        )
+        ),
       );
 
       final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent;
@@ -442,7 +385,7 @@ void main() {
               return Text(index.toString());
             }),
           ),
-        )
+        ),
       );
 
       // 12 instead of 6 children are laid out + 1 because the middle item is
@@ -594,7 +537,7 @@ void main() {
         find.byKey(const Key('list_wheel_scroll_view')),
         matchesGoldenFile(
           'list_wheel_scroll_view.center_child.magnified.png',
-          version: 1,
+          version: null,
         ),
       );
     }, skip: isBrowser);
@@ -651,7 +594,7 @@ void main() {
         find.byKey(const Key('list_wheel_scroll_view')),
         matchesGoldenFile(
           'list_wheel_scroll_view.curved_wheel.left.png',
-          version: 1,
+          version: null,
         ),
       );
     }, skip: isBrowser);
