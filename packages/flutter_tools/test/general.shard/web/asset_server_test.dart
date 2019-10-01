@@ -33,7 +33,7 @@ void main() {
 
     expect(response.headers, <String, String>{
       'Content-Type': 'text/html',
-      'content-length': '5'
+      'content-length': '5',
     });
     expect(await response.readAsString(), 'hello');
   }));

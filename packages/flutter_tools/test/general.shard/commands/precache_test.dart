@@ -37,7 +37,7 @@ void main() {
           '--windows',
           '--fuchsia',
           '--flutter_runner',
-        ]
+        ],
       );
       expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
@@ -67,7 +67,7 @@ void main() {
           'precache',
           '--no-ios',
           '--android',
-        ]
+        ],
       );
       expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
@@ -92,7 +92,7 @@ void main() {
           '--android_gen_snapshot',
           '--android_maven',
           '--android_internal_build',
-        ]
+        ],
       );
       expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
@@ -125,7 +125,7 @@ void main() {
           '--windows',
           '--fuchsia',
           '--flutter_runner',
-        ]
+        ],
       );
       expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,

@@ -107,7 +107,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
           hasPlugins: hasPlugins,
           initializePlatform: initializePlatform,
         );
-      }
+      },
     ],
     core.toRoot(),
     hideOutput: true,
@@ -148,9 +148,11 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               librariesPath: path.absolute(path.join(builderOptions.config['flutterWebSdk'], 'libraries.json')),
               kernelTargetName: 'ddc',
               useIncrementalCompiler: true,
+              trackUnusedInputs: true,
             ),
         (BuilderOptions builderOptions) => DevCompilerBuilder(
               useIncrementalCompiler: true,
+              trackUnusedInputs: true,
               platform: flutterWebPlatform,
               platformSdk: builderOptions.config['flutterWebSdk'],
               sdkKernelPath: path.url.join('kernel', 'flutter_ddc_sdk.dill'),
@@ -263,7 +265,7 @@ class FlutterWebTestBootstrapBuilder implements Builder {
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
     '_test.dart': <String>[
       '_test.dart.browser_test.dart',
-    ]
+    ],
   };
 
   @override

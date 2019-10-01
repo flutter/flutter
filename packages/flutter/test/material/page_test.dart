@@ -19,7 +19,7 @@ void main() {
             return const Material(child: Text('Page 2'));
           },
         },
-      )
+      ),
     );
 
     final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
@@ -81,7 +81,7 @@ void main() {
             );
           },
         },
-      )
+      ),
     );
 
     final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
@@ -151,7 +151,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
         home: const Material(child: Text('Page 1')),
-      )
+      ),
     );
 
     final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
@@ -217,7 +217,7 @@ void main() {
             return const Scaffold(body: Text('Page 2'));
           },
         },
-      )
+      ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
@@ -248,7 +248,7 @@ void main() {
             return const Scaffold(body: Text('Page 2'));
           },
         },
-      )
+      ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
@@ -352,7 +352,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
         home: const Scaffold(body: Text('Page 1')),
-      )
+      ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(MaterialPageRoute<void>(
@@ -388,7 +388,7 @@ void main() {
             return const Material(child: Text('Page 2'));
           },
         },
-      )
+      ),
     );
 
     final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
@@ -423,7 +423,7 @@ void main() {
             return const Material(child: Text('Page 2'));
           },
         },
-      )
+      ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
