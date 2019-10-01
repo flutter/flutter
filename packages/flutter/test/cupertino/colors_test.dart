@@ -27,6 +27,26 @@ class DependentWidget extends StatelessWidget {
   }
 }
 
+Matcher isSameColorAs(Color color) => _ColorMatcher(targetColor: color);
+
+class _ColorMatcher extends Matcher {
+  const _ColorMatcher({
+    @required this.targetColor,
+  }) : assert(targetColor != null);
+
+  final Color targetColor;
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is Color)
+      return item.value == targetColor.value;
+    return false;
+  }
+
+  @override
+  Description describe(Description description) => description.add('matches color $targetColor');
+}
+
 const Color color0 = Color(0xFF000000);
 const Color color1 = Color(0xFF000001);
 const Color color2 = Color(0xFF000002);

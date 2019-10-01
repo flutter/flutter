@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/mock_canvas.dart';
+import 'colors_test.dart' show isSameColorAs;
 
 /// Integration tests testing both [CupertinoPageScaffold] and [CupertinoTabScaffold].
 void main() {
@@ -411,7 +412,7 @@ void main() {
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
     final BoxDecoration decoration = decoratedBox.decoration;
-    expect(decoration.color, CupertinoColors.white);
+    expect(decoration.color, isSameColorAs(CupertinoColors.white));
   });
 
   testWidgets('Overrides background color', (WidgetTester tester) async {

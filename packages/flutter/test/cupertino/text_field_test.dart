@@ -12,6 +12,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import 'colors_test.dart' show isSameColorAs;
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
@@ -2669,7 +2670,7 @@ void main() {
         tester.renderObject<RenderEditable>(
           find.byElementPredicate((Element element) => element.renderObject is RenderEditable)
         ).text.style.color,
-        CupertinoColors.white,
+        isSameColorAs(CupertinoColors.white),
       );
     },
   );
@@ -2819,7 +2820,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(renderEditable.cursorColor, CupertinoColors.activeOrange.darkColor);
+    expect(renderEditable.cursorColor, CupertinoColors.activeBlue.darkColor);
 
     await tester.pumpWidget(
       const CupertinoApp(

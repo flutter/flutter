@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'colors_test.dart' show isSameColorAs;
+
 int buildCount;
 CupertinoThemeData actualTheme;
 IconThemeData actualIconTheme;
@@ -59,7 +61,7 @@ void main() {
       primaryColor: CupertinoColors.destructiveRed,
     ));
 
-    expect(theme.textTheme.actionTextStyle.color, CupertinoColors.destructiveRed);
+    expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.destructiveRed));
   });
 
   testWidgets('Dependent attribute can be overridden from cascaded value', (WidgetTester tester) async {
@@ -71,9 +73,9 @@ void main() {
     ));
 
     // The brightness still cascaded down to the background color.
-    expect(theme.scaffoldBackgroundColor, CupertinoColors.black);
+    expect(theme.scaffoldBackgroundColor, isSameColorAs(CupertinoColors.black));
     // But not to the font color which we overrode.
-    expect(theme.textTheme.textStyle.color, CupertinoColors.black);
+    expect(theme.textTheme.textStyle.color, isSameColorAs(CupertinoColors.black));
   });
 
   testWidgets(
@@ -125,13 +127,13 @@ void main() {
       );
 
       final CupertinoThemeData theme = await testTheme(tester, originalTheme.copyWith(
-        primaryColor: CupertinoColors.activeGreen,
+        primaryColor: CupertinoColors.systemGreen,
       ));
 
       expect(theme.brightness, Brightness.dark);
       expect(theme.primaryColor.value, CupertinoColors.systemGreen.darkColor.value);
       // Now check calculated derivatives.
-      expect(theme.textTheme.actionTextStyle.color.value, CupertinoColors.systemGreen.darkColor.value);
+      expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.systemGreen.darkColor));
       expect(theme.scaffoldBackgroundColor.value, CupertinoColors.black.value);
     },
   );

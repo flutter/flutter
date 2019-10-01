@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/rendering_tester.dart';
+import 'colors_test.dart' show isSameColorAs;
 
 List<int> selectedTabs;
 
@@ -340,7 +341,7 @@ void main() {
       matching: find.byType(DecoratedBox),
     )).decoration;
 
-    expect(tabDecoration.color, const Color(0xCCF8F8F8));
+    expect(tabDecoration.color, isSameColorAs(const Color(0xCCF8F8F8)));
 
     await tester.tap(find.text('Tab 2'));
     await tester.pump();

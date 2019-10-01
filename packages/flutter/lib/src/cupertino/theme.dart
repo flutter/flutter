@@ -12,8 +12,18 @@ import 'text_theme.dart';
 export 'package:flutter/services.dart' show Brightness;
 
 // Values derived from https://developer.apple.com/design/resources/.
-const Color _kDefaultBarLightBackgroundColor = Color(0xCCF8F8F8);
-const Color _kDefaultBarDarkBackgroundColor = Color(0xB7212121);
+const _NoDefaultCupertinoThemeData _kDefaultTheme = _NoDefaultCupertinoThemeData(
+  null,
+  CupertinoColors.systemBlue,
+  CupertinoColors.systemBackground,
+  CupertinoTextThemeData(),
+  CupertinoDynamicColor.withBrightness(
+    color: Color(0xF0F9F9F9),
+    darkColor: Color(0xF01D1D1D),
+    // For toolbar or tabbar the dark color is 0xF0161616
+  ),
+  CupertinoColors.systemBackground,
+);
 
 /// Applies a visual styling theme to descendant Cupertino widgets.
 ///
@@ -144,15 +154,33 @@ class CupertinoThemeData extends Diagnosticable {
   /// Used by subclasses to get the superclass's defaulting behaviors.
   @protected
   const CupertinoThemeData.raw(
+    Brightness brightness,
+    Color primaryColor,
+    Color primaryContrastingColor,
+    CupertinoTextThemeData textTheme,
+    Color barBackgroundColor,
+    Color scaffoldBackgroundColor,
+  ) : this._rawWithDefaults(
+    brightness,
+    primaryColor,
+    primaryContrastingColor,
+    textTheme,
+    barBackgroundColor,
+    scaffoldBackgroundColor,
+    _kDefaultTheme,
+  );
+
+  const CupertinoThemeData._rawWithDefaults(
     this._brightness,
     this._primaryColor,
     this._primaryContrastingColor,
     this._textTheme,
     this._barBackgroundColor,
     this._scaffoldBackgroundColor,
+    this._defaults,
   );
 
-  bool get _isLight => brightness == Brightness.light;
+  final _NoDefaultCupertinoThemeData _defaults;
 
   /// The general brightness theme of the [CupertinoThemeData].
   ///
@@ -175,10 +203,7 @@ class CupertinoThemeData extends Diagnosticable {
   /// iOS styling, the [primaryColor] is more sparsely used than in Material
   /// Design where the [primaryColor] can appear on non-interactive surfaces like
   /// the [AppBar] background, [TextField] borders etc.
-  Color get primaryColor {
-    return _primaryColor ??
-        (_isLight ? CupertinoColors.activeBlue : CupertinoColors.activeOrange);
-  }
+  Color get primaryColor => _primaryColor ?? _defaults.primaryColor;
   final Color _primaryColor;
 
   /// A color used for content that must contrast against a [primaryColor] background.
@@ -188,10 +213,7 @@ class CupertinoThemeData extends Diagnosticable {
   ///
   /// If coming from a Material [Theme] and unspecified, [primaryContrastingColor]
   /// will be derived from the Material [ThemeData]'s `colorScheme.onPrimary`.
-  Color get primaryContrastingColor {
-    return _primaryContrastingColor ??
-        (_isLight ? CupertinoColors.white : CupertinoColors.black);
-  }
+  Color get primaryContrastingColor => _primaryContrastingColor ?? _defaults.primaryContrastingColor;
   final Color _primaryContrastingColor;
 
   /// Text styles used by Cupertino widgets.
@@ -199,31 +221,20 @@ class CupertinoThemeData extends Diagnosticable {
   /// Derived from [brightness] and [primaryColor] if unspecified, including
   /// [brightness] and [primaryColor] of a Material [ThemeData] if coming
   /// from a Material [Theme].
-  CupertinoTextThemeData get textTheme {
-    return _textTheme ?? CupertinoTextThemeData(
-      brightness: brightness,
-      primaryColor: primaryColor,
-    );
-  }
+  CupertinoTextThemeData get textTheme => _textTheme ?? _defaults.textTheme;
   final CupertinoTextThemeData _textTheme;
 
   /// Background color of the top nav bar and bottom tab bar.
   ///
   /// Defaults to a light gray or a dark gray translucent color depending
   /// on the [brightness].
-  Color get barBackgroundColor {
-    return _barBackgroundColor ??
-        (_isLight ? _kDefaultBarLightBackgroundColor : _kDefaultBarDarkBackgroundColor);
-  }
+  Color get barBackgroundColor => _barBackgroundColor ?? _defaults.barBackgroundColor;
   final Color _barBackgroundColor;
 
   /// Background color of the scaffold.
   ///
   /// Defaults to white or black depending on the [brightness].
-  Color get scaffoldBackgroundColor {
-    return _scaffoldBackgroundColor ??
-        (_isLight ? CupertinoColors.white : CupertinoColors.black);
-  }
+  Color get scaffoldBackgroundColor => _scaffoldBackgroundColor ?? _defaults.scaffoldBackgroundColor;
   final Color _scaffoldBackgroundColor;
 
   /// Return an instance of the [CupertinoThemeData] whose property getters
@@ -250,12 +261,14 @@ class CupertinoThemeData extends Diagnosticable {
   CupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
     Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
-    return copyWith(
-      primaryColor: convertColor(primaryColor),
-      primaryContrastingColor: convertColor(primaryContrastingColor),
-      textTheme: textTheme?.resolveFrom(context, nullOk: nullOk),
-      barBackgroundColor: convertColor(barBackgroundColor),
-      scaffoldBackgroundColor: convertColor(scaffoldBackgroundColor),
+    return CupertinoThemeData._rawWithDefaults(
+      _brightness,
+      convertColor(_primaryColor),
+      convertColor(_primaryContrastingColor),
+      textTheme?.resolveFrom(context, nullOk: nullOk),
+      convertColor(_barBackgroundColor),
+      convertColor(_scaffoldBackgroundColor),
+      _defaults.resolveFrom(context, nullOk: nullOk),
     );
   }
 
@@ -305,13 +318,14 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
     this.textTheme,
     this.barBackgroundColor,
     this.scaffoldBackgroundColor,
-  ) : super.raw(
+  ) : super._rawWithDefaults(
         brightness,
         primaryColor,
         primaryContrastingColor,
         textTheme,
         barBackgroundColor,
         scaffoldBackgroundColor,
+        null,
       );
 
   @override
