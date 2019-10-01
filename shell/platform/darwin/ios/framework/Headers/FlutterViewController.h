@@ -15,6 +15,8 @@
 #include "FlutterPlugin.h"
 #include "FlutterTexture.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class FlutterEngine;
 
 /**
@@ -55,8 +57,8 @@ FLUTTER_EXPORT
  * @param nibBundleOrNil The NIB bundle.
  */
 - (instancetype)initWithEngine:(FlutterEngine*)engine
-                       nibName:(NSString*)nibNameOrNil
-                        bundle:(NSBundle*)nibBundleOrNil NS_DESIGNATED_INITIALIZER;
+                       nibName:(nullable NSString*)nibName
+                        bundle:(nullable NSBundle*)nibBundle NS_DESIGNATED_INITIALIZER;
 
 /**
  * Initializes a new FlutterViewController and `FlutterEngine` with the specified
@@ -66,9 +68,9 @@ FLUTTER_EXPORT
  * @param nibNameOrNil The NIB name to initialize this UIViewController with.
  * @param nibBundleOrNil The NIB bundle.
  */
-- (instancetype)initWithProject:(FlutterDartProject*)projectOrNil
-                        nibName:(NSString*)nibNameOrNil
-                         bundle:(NSBundle*)nibBundleOrNil NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithProject:(nullable FlutterDartProject*)project
+                        nibName:(nullable NSString*)nibName
+                         bundle:(nullable NSBundle*)nibBundle NS_DESIGNATED_INITIALIZER;
 
 - (void)handleStatusBarTouches:(UIEvent*)event;
 
@@ -183,5 +185,7 @@ FLUTTER_EXPORT
 @property(nonatomic, readonly) NSObject<FlutterBinaryMessenger>* binaryMessenger;
 
 @end
+
+NS_ASSUME_NONNULL_END
 
 #endif  // FLUTTER_FLUTTERVIEWCONTROLLER_H_
