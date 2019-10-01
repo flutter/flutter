@@ -19,7 +19,7 @@ const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
   CupertinoDynamicColor.withBrightness(
     color: Color(0xF0F9F9F9),
     darkColor: Color(0xF01D1D1D),
-    // For toolbar or tabbar the dark color is 0xF0161616
+    // Values extracted from navigation bar. For toolbar or tabbar the dark color is 0xF0161616.
   ),
   CupertinoColors.systemBackground,
   _CupertinoTextThemeDefaults(CupertinoColors.label, CupertinoColors.inactiveGray),
@@ -195,8 +195,7 @@ class CupertinoThemeData extends Diagnosticable {
   /// A color used on interactive elements of the theme.
   ///
   /// This color is generally used on text and icons in buttons and tappable
-  /// elements. Defaults to [CupertinoColors.activeBlue] or
-  /// [CupertinoColors.activeOrange] when [brightness] is light or dark.
+  /// elements. Defaults to [CupertinoColors.activeBlue].
   ///
   /// If coming from a Material [Theme] and unspecified, [primaryColor] will be
   /// derived from the Material [ThemeData]'s `colorScheme.primary`. However, in
@@ -222,7 +221,7 @@ class CupertinoThemeData extends Diagnosticable {
   /// [brightness] and [primaryColor] of a Material [ThemeData] if coming
   /// from a Material [Theme].
   CupertinoTextThemeData get textTheme {
-    return _textTheme ?? _defaults?.textThemeDefaults?.createDefaults(primaryColor: primaryColor);
+    return _textTheme ?? _defaults.textThemeDefaults.createDefaults(primaryColor: primaryColor);
   }
   final CupertinoTextThemeData _textTheme;
 
@@ -278,9 +277,9 @@ class CupertinoThemeData extends Diagnosticable {
   ///
   /// Only the current instance's specified attributes are copied instead of
   /// derived values. For instance, if the current [primaryColor] is implied
-  /// to be [CupertinoColors.activeOrange] due to the current [brightness],
-  /// copying with a different [brightness] will also change the copy's
-  /// implied [primaryColor].
+  /// to be [CupertinoColors.activeOrange] due to the current [primaryColor],
+  /// copying with a different [primaryColor] will also change the copy's
+  /// implied [textTheme].
   CupertinoThemeData copyWith({
     Brightness brightness,
     Color primaryColor,
@@ -289,13 +288,14 @@ class CupertinoThemeData extends Diagnosticable {
     Color barBackgroundColor,
     Color scaffoldBackgroundColor,
   }) {
-    return CupertinoThemeData(
-      brightness: brightness ?? _brightness,
-      primaryColor: primaryColor ?? _primaryColor,
-      primaryContrastingColor: primaryContrastingColor ?? _primaryContrastingColor,
-      textTheme: textTheme ?? _textTheme,
-      barBackgroundColor: barBackgroundColor ?? _barBackgroundColor,
-      scaffoldBackgroundColor: scaffoldBackgroundColor ?? _scaffoldBackgroundColor,
+    return CupertinoThemeData._rawWithDefaults(
+      brightness ?? _brightness,
+      primaryColor ?? _primaryColor,
+      primaryContrastingColor ?? _primaryContrastingColor,
+      textTheme ?? _textTheme,
+      barBackgroundColor ?? _barBackgroundColor,
+      scaffoldBackgroundColor ?? _scaffoldBackgroundColor,
+      _defaults,
     );
   }
 

@@ -124,10 +124,9 @@ TextStyle _resolveTextStyle(TextStyle style, BuildContext context, bool nullOk) 
 class CupertinoTextThemeData extends Diagnosticable {
   /// Create a [CupertinoTextThemeData].
   ///
-  /// The [primaryColor] and [isLight] parameters are used to derive TextStyle
-  /// defaults of other attributes such as [textStyle] and [actionTextStyle]
-  /// etc. The default value of [primaryColor] is [CupertinoColors.activeBlue]
-  /// and the default value of [isLight] is true.
+  /// The [primaryColor] is used to derive TextStyle defaults of other attributes
+  /// such as [textStyle] and [actionTextStyle] etc. The default value of [primaryColor]
+  /// is [CupertinoColors.activeBlue].
   ///
   /// Other [TextStyle] parameters default to default iOS text styles when
   /// unspecified.
