@@ -8,3 +8,4 @@ dependencies:
    path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_engine
  sky_services:
    path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_services
+ vector_math: ^2.0.8
