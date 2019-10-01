@@ -321,9 +321,7 @@ abstract class ImageProvider<T> {
         final ImageStreamCompleter completer = PaintingBinding.instance
             .imageCache.putIfAbsent(
               key,
-              () => load(key, (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
-                return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
-              }),
+              () => load(key, PaintingBinding.instance.instantiateImageCodec),
               onError: handleError);
         if (completer != null) {
           stream.setCompleter(completer);
@@ -392,10 +390,11 @@ abstract class ImageProvider<T> {
   /// image.
   ///
   /// The [decode] callback provides the logic to obtain the codec for the
-  /// image as well as a way to supply parameters as a closure.
+  /// image.
   ///
   /// See also:
-  ///   * [ResizedImage] for modifying the key to account for target dimensions.
+  ///
+  ///   * [ResizedImage] for modifying the key to account for cache dimensions.
   @protected
   ImageStreamCompleter load(T key, DecoderCallback decode);
 
@@ -486,33 +485,46 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
 }
 
 class _SizeAwareCacheKey {
-  const _SizeAwareCacheKey(this._providerCacheKey, this._width, this._height);
+  const _SizeAwareCacheKey(this.providerCacheKey, this.width, this.height);
 
-  final dynamic _providerCacheKey;
-  final int _width;
-  final int _height;
+  final dynamic providerCacheKey;
+
+  final int width;
+
+  final int height;
 
   @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
     final _SizeAwareCacheKey typedOther = other;
-    return _providerCacheKey == typedOther._providerCacheKey
-        && _width == typedOther._width
-        && _height == typedOther._height;
+    return providerCacheKey == typedOther.providerCacheKey
+        && width == typedOther.width
+        && height == typedOther.height;
   }
 
   @override
-  int get hashCode => hashValues(_providerCacheKey, _width, _height);
+  int get hashCode => hashValues(providerCacheKey, width, height);
 }
 
-/// Re-sizes the cache of the image provided to the specified size.
+/// [ResizedImage] instructs Flutter to decode the image at the specified
+/// dimensions instead of at native resolution.
+///
+/// This allows finer control of the size of the image in [ImageCache] and is
+/// generally used to reduce the memory footprint of [ImageCache].
+///
+/// The decoded image may still be displayed at resolutions other than the
+/// cached resolution provided here.
 class ResizedImage extends ImageProvider<_SizeAwareCacheKey> {
-  /// Creates an object that re-sizes the cache of the image to the specified size.
+  /// Creates an object that decodes the image to the specified size.
   ///
   /// The image cached and returned through the [ImageStreamCompleter] will be
   /// resized from its native resolution.
-  const ResizedImage(this._imageProvider, this._cacheWidth, this._cacheHeight);
+  const ResizedImage(
+    this._imageProvider,
+    this._cacheWidth,
+    this._cacheHeight
+  ) : assert (_cacheWidth != null || _cacheHeight != null);
 
   final ImageProvider _imageProvider;
 
@@ -522,12 +534,13 @@ class ResizedImage extends ImageProvider<_SizeAwareCacheKey> {
   @override
   ImageStreamCompleter load(_SizeAwareCacheKey key, DecoderCallback decode) {
     if (_cacheWidth == null && _cacheHeight == null) {
-      return _imageProvider.load(key._providerCacheKey, decode);
+      return _imageProvider.load(key.providerCacheKey, decode);
     } else {
       final DecoderCallback decodeResize = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+        assert(cacheWidth == null && cacheHeight == null);
         return decode(bytes, cacheWidth: _cacheWidth, cacheHeight: _cacheHeight);
       };
-      return _imageProvider.load(key._providerCacheKey, decodeResize);
+      return _imageProvider.load(key.providerCacheKey, decodeResize);
     }
   }
 

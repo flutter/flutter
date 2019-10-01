@@ -70,12 +70,15 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   ImageCache createImageCache() => ImageCache();
 
   /// Calls through to [dart:ui] with [decodedCacheRatioCap] from [ImageCache].
-  Future<ui.Codec> instantiateImageCodec(Uint8List list, {
+  ///
+  /// The [cacheWidth] and [cacheHeight] parameters, when specified, indicate the
+  /// resoluton to decode the image to.
+  Future<ui.Codec> instantiateImageCodec(Uint8List bytes, {
     int cacheWidth,
     int cacheHeight,
   }) {
     return ui.instantiateImageCodec(
-      list,
+      bytes,
       targetWidth: cacheWidth ?? ui.kDoNotResizeDimension,
       targetHeight: cacheHeight ?? ui.kDoNotResizeDimension,
     );

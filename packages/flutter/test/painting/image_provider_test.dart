@@ -318,7 +318,9 @@ void main() {
     final Size rawImageSize = await _resolveAndGetSize(imageProvider);
     expect(rawImageSize, const Size(1, 1));
 
-    final ResizedImage resizedImage = ResizedImage(MemoryImage(bytes), null, null);
+    // Cannot pass in two null arguments for cache dimensions, so will use the regular
+    // MemoryImage
+    final MemoryImage resizedImage = MemoryImage(bytes);
     final Size resizedImageSize = await _resolveAndGetSize(resizedImage);
     expect(resizedImageSize, const Size(1, 1));
   });
