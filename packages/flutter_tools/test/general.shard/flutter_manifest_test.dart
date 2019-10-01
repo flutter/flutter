@@ -594,26 +594,6 @@ flutter:
     });
   });
 
-  testUsingContext('Does not crash on invalid URI', () async {
-      final BufferLogger logger = context.get<Logger>();
-      const String manifest = '''
-name: test
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-  uses-material-design: true
-  fonts:
-    - family: foo
-      fonts:
-        - asset: a/bar
-    - string
-''';
-      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
-      expect(flutterManifest, null);
-      expect(logger.errorText, contains('Expected a map.'));
-    });
-
   group('FlutterManifest with MemoryFileSystem', () {
     Future<void> assertSchemaIsReadable() async {
       const String manifest = '''
