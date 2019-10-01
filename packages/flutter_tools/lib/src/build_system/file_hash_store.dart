@@ -7,6 +7,7 @@ import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:pool/pool.dart';
 
 import '../base/file_system.dart';
 import '../convert.dart';
@@ -69,13 +70,6 @@ class FileHash {
 ///
 /// The format of the file store is subject to change and not part of its API.
 ///
-/// To regenerate the protobuf entries used to construct the cache:
-///   1. If not already installed, https://developers.google.com/protocol-buffers/docs/downloads
-///   2. pub global active `protoc-gen-dart`
-///   3. protoc -I=lib/src/build_system/  --dart_out=lib/src/build_system/  lib/src/build_system/filecache.proto
-///   4. Add licenses headers to the newly generated file and check-in.
-///
-/// See also: https://developers.google.com/protocol-buffers/docs/darttutorial
 // TODO(jonahwilliams): find a better way to clear out old entries, perhaps
 // track the last access or modification date?
 class FileHashStore {
@@ -141,24 +135,28 @@ class FileHashStore {
 
   /// Computes a hash of the provided files and returns a list of entities
   /// that were dirty.
-  // TODO(jonahwilliams): compare hash performance with md5 tool on macOS and
-  // linux and certutil on Windows, as well as dividing up computation across
-  // isolates. This also related to the current performance issue with checking
-  // APKs before installing them on device.
   Future<List<File>> hashFiles(List<File> files) async {
     final List<File> dirty = <File>[];
-    for (File file in files) {
-      final String absolutePath = file.resolveSymbolicLinksSync();
-      final String previousHash = previousHashes[absolutePath];
-      final List<int> bytes = file.readAsBytesSync();
-      final String currentHash = md5.convert(bytes).toString();
+    final Pool openFiles = Pool(kMaxOpenFiles);
+    await Future.wait(<Future<void>>[
+      for (File file in files) _hashFile(file, dirty, openFiles)]);
+    return dirty;
+  }
 
+  Future<void> _hashFile(File file, List<File> dirty, Pool pool) async {
+    final PoolResource resource = await pool.request();
+    try {
+      final String absolutePath = file.path;
+      final String previousHash = previousHashes[absolutePath];
+      final Digest digest = md5.convert(await file.readAsBytes());
+      final String currentHash = digest.toString();
       if (currentHash != previousHash) {
         dirty.add(file);
       }
       currentHashes[absolutePath] = currentHash;
+    } finally {
+      resource.release();
     }
-    return dirty;
   }
 
   File get _cacheFile => environment.buildDir.childFile(_kFileCache);
