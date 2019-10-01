@@ -563,6 +563,8 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
