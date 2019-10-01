@@ -23,8 +23,7 @@ class FileStorage {
     final int version = json['version'];
     final List<Object> rawCachedFiles = json['files'];
     final List<FileHash> cachedFiles = <FileHash>[
-      for (Map<String, Object> rawFile in rawCachedFiles)
-        FileHash.fromJson(rawFile)
+      for (Map<String, Object> rawFile in rawCachedFiles) FileHash.fromJson(rawFile),
     ];
     return FileStorage(version, cachedFiles);
   }
@@ -36,8 +35,7 @@ class FileStorage {
     final Map<String, Object> json = <String, Object>{
       'version': version,
       'files': <Object>[
-        for (FileHash file in files)
-          file.toJson()
+        for (FileHash file in files) file.toJson(),
       ],
     };
     return utf8.encode(jsonEncode(json));
@@ -139,8 +137,9 @@ class FileHashStore {
   /// that were dirty.
   Future<List<File>> hashFiles(List<File> files) async {
     final List<File> dirty = <File>[];
+    final Pool openFiles = Pool(kMaxOpenFiles);
     await Future.wait(<Future<void>>[
-      for (File file in files) _hashFile(file, dirty, Pool(kMaxOpenFiles))]);
+      for (File file in files) _hashFile(file, dirty, openFiles)]);
     return dirty;
   }
 
