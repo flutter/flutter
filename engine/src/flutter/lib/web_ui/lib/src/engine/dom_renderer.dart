@@ -262,12 +262,22 @@ flt-semantics input[type=range] {
           '  background-color: transparent;'
           '}',
           sheet.cssRules.length);
+      sheet.insertRule(
+          'textarea::-moz-selection {'
+          '  background-color: transparent;'
+          '}',
+          sheet.cssRules.length);
     } else {
       // On iOS, the invisible semantic text field has a visible cursor and
       // selection highlight. The following 2 CSS rules force everything to be
       // transparent.
       sheet.insertRule(
           'input::selection {'
+          '  background-color: transparent;'
+          '}',
+          sheet.cssRules.length);
+      sheet.insertRule(
+          'textarea::selection {'
           '  background-color: transparent;'
           '}',
           sheet.cssRules.length);
