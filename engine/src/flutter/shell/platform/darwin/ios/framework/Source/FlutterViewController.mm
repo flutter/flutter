@@ -71,10 +71,10 @@ typedef enum UIAccessibilityContrast : NSInteger {
 #pragma mark - Manage and override all designated initializers
 
 - (instancetype)initWithEngine:(FlutterEngine*)engine
-                       nibName:(NSString*)nibNameOrNil
-                        bundle:(NSBundle*)nibBundleOrNil {
+                       nibName:(nullable NSString*)nibName
+                        bundle:(nullable NSBundle*)nibBundle {
   NSAssert(engine != nil, @"Engine is required");
-  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+  self = [super initWithNibName:nibName bundle:nibBundle];
   if (self) {
     _viewOpaque = YES;
     _engine.reset([engine retain]);
@@ -90,15 +90,15 @@ typedef enum UIAccessibilityContrast : NSInteger {
   return self;
 }
 
-- (instancetype)initWithProject:(FlutterDartProject*)projectOrNil
-                        nibName:(NSString*)nibNameOrNil
-                         bundle:(NSBundle*)nibBundleOrNil {
-  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+- (instancetype)initWithProject:(nullable FlutterDartProject*)project
+                        nibName:(nullable NSString*)nibName
+                         bundle:(nullable NSBundle*)nibBundle {
+  self = [super initWithNibName:nibName bundle:nibBundle];
   if (self) {
     _viewOpaque = YES;
     _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterViewController>>(self);
     _engine.reset([[FlutterEngine alloc] initWithName:@"io.flutter"
-                                              project:projectOrNil
+                                              project:project
                                allowHeadlessExecution:NO]);
     _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine opaque:self.isViewOpaque]);
     [_engine.get() createShell:nil libraryURI:nil];
