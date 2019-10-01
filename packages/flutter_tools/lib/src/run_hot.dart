@@ -1041,10 +1041,18 @@ class ProjectFileInvalidator {
   static const String _pubCachePathWindows = 'Pub/Cache';
 
   static List<Uri> findInvalidated({
-    @required DateTime lastCompiled,
+    @required DateTime /*?*/ lastCompiled,
     @required List<Uri> urisToMonitor,
     @required String packagesPath,
   }) {
+    assert(urisToMonitor != null);
+    assert(packagesPath != null);
+
+    if (lastCompiled == null) {
+      assert(urisToMonitor.isEmpty);
+      return <Uri>[];
+    }
+
     final List<Uri> invalidatedFiles = <Uri>[];
     int scanned = 0;
     final Stopwatch stopwatch = Stopwatch()..start();
@@ -1057,17 +1065,13 @@ class ProjectFileInvalidator {
       final DateTime updatedAt = fs.statSync(
           uri.toFilePath(windows: platform.isWindows)).modified;
       scanned++;
-      if (updatedAt == null) {
-        continue;
-      }
-      if (updatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
+      if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
         invalidatedFiles.add(uri);
       }
     }
-    // we need to check the .packages file too since it is not used in compilation.
+    // We need to check the .packages file too since it is not used in compilation.
     final DateTime packagesUpdatedAt = fs.statSync(packagesPath).modified;
-    if (lastCompiled != null && packagesUpdatedAt != null
-        && packagesUpdatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
+    if (packagesUpdatedAt != null && packagesUpdatedAt.isAfter(lastCompiled)) {
       invalidatedFiles.add(fs.file(packagesPath).uri);
       scanned++;
     }
