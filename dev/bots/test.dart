@@ -282,10 +282,9 @@ Future<void> _runBuildTests() async {
   }
   // Web compilation tests.
   await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'), path.join('lib', 'main.dart'));
-  // Should fail to compile with dart:io.
+  // Should not fail to compile with dart:io.
   await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web_compile_tests'),
     path.join('lib', 'dart_io_import.dart'),
-    expectNonZeroExit: true,
   );
 
   print('${bold}DONE: All build tests successful.$reset');
