@@ -1,0 +1,95 @@
+# [![Flutter logo][]][flutter.dev]
+
+[![Build Status - Cirrus][]][Build status]
+[![Gitter Channel][]][Gitter badge]
+
+Flutter é o SDK de apps mobile da Google pra criar interfaces nativas de alta qualidade
+no iOS e Android em tempo recorde. Flutter funciona com código já existente, é usado por diversos
+desenvolvedores e organizações ao redor do mundo, além de ser gratuito e open source.
+
+## Documentação
+
+* [Instale o Flutter](https://flutter.dev/get-started/)
+* [Documentação do Flutter](https://flutter.dev/docs)
+* [Wiki de Desenvolvimento](https://github.com/flutter/flutter/wiki)
+* [Contribuindo pro Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
+
+Para anúncios sobre novos releases e mudanças importantes, siga o mailing list
+[flutter-announce@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-announce).
+
+## Sobre o Flutter
+
+Nós achamos que o Flutter vai te ajudar a criar apps bonitos, rápidos, com um modelo de desenvolvimento produtivo,
+extensível e aberto.
+
+### Aplicações Lindas
+
+Nós queremos permitir que designers entreguem toda sua visão criativa sem serem forçados
+à remodelar seu projeto graças as limitações do framework que ele está usando.
+A [layered architecture] do Flutter te dá controle sobre cada pixel na
+tela, e suas capacidades poderosas de composição te deixam sobrepor e animar
+gráficos, vídeos, textos e controles sem limitações. O Flutter inclue um 
+[set de widgets][widget catalog] inteiro que te dará experiências pixel-perfect tanto no
+iOS quanto no Android.
+
+![Reflectly hero image][Reflectly hero image]
+
+### Aplicações Rápidas
+
+Flutter é rápido. Isso é providenciado pela mesma biblioteca gráfica 2D acelerada por hardware [Skia] 
+que sustenta o Chrome e o Android. Nós arquitetamos o Flutter pra suportar
+gráficos sem glitchs e artefatos na velocidade nativa do seu dispositivo.
+O código Flutter é alimentado pela famosa [Dart platform], que permite
+compilar para código ARM nativo 32-bit e 64-bit pra iOS e Android.
+
+### Desenvolvimento Produtivo
+
+Flutter oferece hot reload stateful, permitindo que você faça mudanças no código
+e veja os resultados instantaneamente sem reiniciar o app ou perder seu state.
+
+[![Hot reload animation][]][Hot reload]
+
+### Modelo Extensivo e Aberto
+
+Flutter funciona com qualquer ferramenta de desenvolvimento, mas inclue plugins pro
+[Visual Studio Code] e pro [IntelliJ / Android Studio]. Flutter oferece
+[milhares de pacotes][Flutter packages] pra acelerar seu desenvolvimento, independente
+da sua plataforma-alvo. E acessar os recursos da plataforma é simples. Aqui está um
+trecho do nosso [interop example]:
+
+```dart
+Future<void> getBatteryLevel() async {
+  var batteryLevel = 'Desconhecido';
+  try {
+    int result = await methodChannel.invokeMethod('getBatteryLevel');
+    batteryLevel = 'Nível de Bateria: $result%';
+  } on PlatformException {
+    batteryLevel = 'Ocorreu um erro ao pegar o Nível de Bateria.';
+  }
+  setState(() {
+    _batteryLevel = batteryLevel;
+  });
+}
+```
+
+Flutter é um projeto totalmente open source, e nós adoramos contribuições.
+Pra mais informações em como iniciar suas contribuições, acesse o
+[guia do contribuidor](CONTRIBUTING.md).
+
+[Flutter logo]: https://flutter.dev/assets/flutter-lockup-4cb0ee072ab312e59784d9fbf4fb7ad42688a7fdaea1270ccf6bbf4f34b7e03f.svg
+[flutter.dev]: https://flutter.dev
+[Build Status - Cirrus]: https://api.cirrus-ci.com/github/flutter/flutter.svg
+[Build status]: https://cirrus-ci.com/github/flutter/flutter/master
+[Gitter Channel]: https://badges.gitter.im/flutter/flutter.svg
+[Gitter badge]: https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+[layered architecture]: https://flutter.dev/docs/resources/inside-flutter
+[widget catalog]: https://flutter.dev/widgets/
+[Reflectly hero image]: https://github.com/flutter/website/blob/master/src/images/homepage/reflectly-hero-600px.png
+[Skia]: https://skia.org/
+[Dart platform]: https://dart.dev/
+[Hot reload animation]: https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/tools/android-studio/hot-reload.gif
+[Hot reload]: https://flutter.dev/docs/development/tools/hot-reload
+[Visual Studio Code]: https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter
+[IntelliJ / Android Studio]: https://plugins.jetbrains.com/plugin/9212-flutter
+[Flutter packages]: https://pub.dev/flutter
+[interop example]: https://github.com/flutter/flutter/tree/master/examples/platform_channel
