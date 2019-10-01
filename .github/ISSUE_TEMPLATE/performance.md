@@ -3,7 +3,7 @@ name: I have a performance problem with my application
 about: You are writing an application but have discovered that it is slow, you are
   not hitting 60Hz, or you are getting jank (missed frames).
 title: ''
-labels: 'severe: performance'
+labels: 'created via performance template'
 assignees: ''
 
 ---
