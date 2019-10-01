@@ -189,19 +189,18 @@ void main() {
 
   testWidgets('Nav bar respects themes', (WidgetTester tester) async {
     count = 0x000000;
-    const CupertinoDynamicColor orange = CupertinoColors.activeOrange;
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
             onPressed: () { },
-            child: _ExpectStyles(color: orange.darkColor, index: 0x000001),
+            child: _ExpectStyles(color: CupertinoColors.systemBlue.darkColor, index: 0x000001),
           ),
           middle: const _ExpectStyles(color: CupertinoColors.white, index: 0x000100),
           trailing: CupertinoButton(
             onPressed: () { },
-            child: _ExpectStyles(color: orange.darkColor, index: 0x010000),
+            child: _ExpectStyles(color: CupertinoColors.systemBlue.darkColor, index: 0x010000),
           ),
         ),
       ),

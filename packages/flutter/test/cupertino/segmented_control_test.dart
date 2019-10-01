@@ -336,7 +336,7 @@ void main() {
       IconThemeData iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
       expect(textStyle.style.color, isSameColorAs(CupertinoColors.black));
-      expect(iconTheme.color, isSameColorAs(CupertinoColors.activeOrange.darkColor));
+      expect(iconTheme.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
 
       await tester.tap(find.byIcon(const IconData(1)));
       await tester.pump();
@@ -1148,7 +1148,7 @@ void main() {
 
     // Press on C has no effect while B is held down.
     expect(getBackgroundColor(tester, 1), const Color(0x33007aff));
-    expect(getBackgroundColor(tester, 2), CupertinoColors.white);
+    expect(getBackgroundColor(tester, 2), isSameColorAs(CupertinoColors.white));
   });
 
   testWidgets('Transition is triggered while a transition is already occurring', (WidgetTester tester) async {
@@ -1205,7 +1205,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 100));
     // A background color has reached unselected state.
-    expect(getBackgroundColor(tester, 0), CupertinoColors.white);
+    expect(getBackgroundColor(tester, 0), isSameColorAs(CupertinoColors.white));
     expect(getBackgroundColor(tester, 2), const Color(0xe0007aff));
 
     await tester.pump(const Duration(milliseconds: 40));

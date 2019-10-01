@@ -427,10 +427,9 @@ void main() {
       ),
     );
 
-    const CupertinoDynamicColor orange = CupertinoColors.activeOrange;
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: orange.darkColor),
+      paints..rrect(color: CupertinoColors.systemBlue.darkColor),
     );
   });
 

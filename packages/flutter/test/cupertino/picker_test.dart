@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import 'colors_test.dart' show isSameColorAs;
 
 void main() {
   testWidgets('Picker respects theme styling', (WidgetTester tester) async {
@@ -36,7 +37,8 @@ void main() {
 
     final RenderParagraph paragraph = tester.renderObject(find.text('1'));
 
-    expect(paragraph.text.style, const TextStyle(
+    expect(paragraph.text.style.color, isSameColorAs(CupertinoColors.black));
+    expect(paragraph.text.style.copyWith(color: CupertinoColors.black), const TextStyle(
       inherit: false,
       fontFamily: '.SF Pro Display',
       fontSize: 25.0,

@@ -328,7 +328,7 @@ void main() {
         ),
       ),
     );
-    expect(textStyle.color.value, CupertinoColors.activeOrange.darkColor.value);
+    expect(textStyle.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -349,7 +349,7 @@ void main() {
         matching: find.byType(DecoratedBox),
       )
     ).decoration;
-    expect(decoration.color.value, CupertinoColors.activeOrange.darkColor.value);
+    expect(decoration.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
   });
 }
 

@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
 import '../widgets/semantics_tester.dart';
+import 'colors_test.dart' show isSameColorAs;
 
 Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async {
   await tester.pumpWidget(
@@ -218,7 +219,7 @@ void main() {
       matching: find.byType(RichText),
     ));
 
-    expect(actualActive.text.style.color.value, CupertinoColors.activeOrange.darkColor.value);
+    expect(actualActive.text.style.color, isSameColorAs(CupertinoColors.activeBlue.darkColor));
   });
 
   testWidgets('Use active icon', (WidgetTester tester) async {
