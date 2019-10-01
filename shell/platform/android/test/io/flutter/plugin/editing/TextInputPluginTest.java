@@ -69,6 +69,19 @@ public class TextInputPluginTest {
         assertEquals(2, testImm.getRestartCount(testView));
     }
 
+    @Test
+    public void setTextInputEditingState_nullInputMethodSubtype() {
+        TestImm testImm = Shadow.extract(RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+        testImm.setCurrentInputMethodSubtype(null);
+
+        View testView = new View(RuntimeEnvironment.application);
+        TextInputPlugin textInputPlugin = new TextInputPlugin(testView, mock(DartExecutor.class), mock(PlatformViewsController.class));
+        textInputPlugin.setTextInputClient(0, new TextInputChannel.Configuration(false, false, TextInputChannel.TextCapitalization.NONE, null, null, null));
+        // There's a pending restart since we initialized the text input client. Flush that now.
+        textInputPlugin.setTextInputEditingState(testView, new TextInputChannel.TextEditState("", 0, 0));
+        assertEquals(1, testImm.getRestartCount(testView));
+    }
+
     @Implements(InputMethodManager.class)
     public static class TestImm extends ShadowInputMethodManager {
         private InputMethodSubtype currentInputMethodSubtype;
@@ -97,4 +110,3 @@ public class TextInputPluginTest {
         }
     }
 }
-
