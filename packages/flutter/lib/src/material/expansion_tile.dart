@@ -40,7 +40,7 @@ class ExpansionTile extends StatefulWidget {
     this.children = const <Widget>[],
     this.trailing,
     this.initiallyExpanded = false,
-    this.maintainsState = true,
+    this.maintainsState = false,
   }) : assert(initiallyExpanded != null),
        super(key: key);
 
