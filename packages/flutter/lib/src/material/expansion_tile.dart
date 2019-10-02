@@ -78,7 +78,8 @@ class ExpansionTile extends StatefulWidget {
   /// Specifies if the state of the children is maintained when the tile expands and collapses
   ///
   /// When true, the children are kept in the tree while the tile is collapsed. 
-  /// When false, the children are removed from the tree every time the tile is collapsed.
+  /// When false (default), the children are removed from the tree when the tile is 
+  /// collapsed and recreated upon expansion.
   final bool maintainsState;
 
   @override
