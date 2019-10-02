@@ -66,6 +66,7 @@ class HotRunner extends ResidentRunner {
     String dillOutputPath,
     bool stayResident = true,
     bool ipv6 = false,
+    this.asyncScanning = false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -79,6 +80,7 @@ class HotRunner extends ResidentRunner {
   final bool benchmarkMode;
   final File applicationBinary;
   final bool hostIsIde;
+  final bool asyncScanning;
   bool _didAttach = false;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
@@ -296,11 +298,13 @@ class HotRunner extends ResidentRunner {
 
     // Picking up first device's compiler as a source of truth - compilers
     // for all devices should be in sync.
-    final List<Uri> invalidatedFiles = ProjectFileInvalidator.findInvalidated(
-      lastCompiled: flutterDevices[0].devFS.lastCompiled,
-      urisToMonitor: flutterDevices[0].devFS.sources,
-      packagesPath: packagesFilePath,
-    );
+    final List<Uri> invalidatedFiles =
+      await ProjectFileInvalidator.findInvalidated(
+        lastCompiled: flutterDevices[0].devFS.lastCompiled,
+        urisToMonitor: flutterDevices[0].devFS.sources,
+        packagesPath: packagesFilePath,
+        asyncScanning: asyncScanning,
+      );
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
@@ -1044,11 +1048,12 @@ class ProjectFileInvalidator {
   static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
-  static List<Uri> findInvalidated({
+  static Future<List<Uri>> findInvalidated({
     @required DateTime lastCompiled,
     @required List<Uri> urisToMonitor,
     @required String packagesPath,
-  }) {
+    bool asyncScanning = false,
+  }) async {
     assert(urisToMonitor != null);
     assert(packagesPath != null);
 
@@ -1068,17 +1073,33 @@ class ProjectFileInvalidator {
       fs.file(packagesPath).uri,
     ];
     final List<Uri> invalidatedFiles = <Uri>[];
-    for (final Uri uri in urisToScan) {
-      final DateTime updatedAt = fs.statSync(
-        uri.toFilePath(windows: platform.isWindows),
-      ).modified;
-      if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
-        invalidatedFiles.add(uri);
+
+    if (asyncScanning) {
+      final List<Future<void>> waitList = <Future<void>>[];
+      for (final Uri uri in urisToScan) {
+        waitList.add(fs
+            .stat(uri.toFilePath(windows: platform.isWindows))
+            .then((FileStat stat) {
+          final DateTime updatedAt = stat.modified;
+          if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+            invalidatedFiles.add(uri);
+          }
+        }));
+      }
+      await Future.wait<void>(waitList);
+    } else {
+      for (final Uri uri in urisToScan) {
+        final DateTime updatedAt = fs.statSync(
+            uri.toFilePath(windows: platform.isWindows)).modified;
+        if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+          invalidatedFiles.add(uri);
+        }
       }
     }
     printTrace(
       'Scanned through ${urisToScan.length} files in '
-      '${stopwatch.elapsedMilliseconds}ms',
+      '${stopwatch.elapsedMilliseconds}ms'
+      '${asyncScanning ? " (async)" : ""}',
     );
     return invalidatedFiles;
   }

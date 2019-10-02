@@ -16,7 +16,7 @@ void main() {
   group('ProjectFileInvalidator', () {
     testUsingContext('No last compile', () async {
       expect(
-        ProjectFileInvalidator.findInvalidated(
+        await ProjectFileInvalidator.findInvalidated(
           lastCompiled: null,
           urisToMonitor: <Uri>[],
           packagesPath: '',
@@ -27,7 +27,7 @@ void main() {
 
     testUsingContext('Empty project', () async {
       expect(
-        ProjectFileInvalidator.findInvalidated(
+        await ProjectFileInvalidator.findInvalidated(
           lastCompiled: inFuture,
           urisToMonitor: <Uri>[],
           packagesPath: '',
@@ -41,7 +41,7 @@ void main() {
 
     testUsingContext('Non-existent files are ignored', () async {
       expect(
-        ProjectFileInvalidator.findInvalidated(
+        await ProjectFileInvalidator.findInvalidated(
           lastCompiled: inFuture,
           urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
           packagesPath: '',
