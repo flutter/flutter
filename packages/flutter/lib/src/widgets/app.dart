@@ -7,6 +7,7 @@ import 'dart:collection' show HashMap;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'banner.dart';
@@ -20,6 +21,7 @@ import 'navigator.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
 import 'semantics_debugger.dart';
+import 'shortcuts.dart';
 import 'text.dart';
 import 'title.dart';
 import 'widget_inspector.dart';
@@ -1195,18 +1197,23 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
     assert(_debugCheckLocalizations(appLocale));
 
-    return Actions(
-      actions: <LocalKey, ActionFactory>{
-        DoNothingAction.key: () => const DoNothingAction(),
+    return Shortcuts(
+      shortcuts: <LogicalKeySet, Intent>{
+        LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
       },
-      child: DefaultFocusTraversal(
-        policy: ReadingOrderTraversalPolicy(),
-        child: MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
-          child: Localizations(
-            locale: appLocale,
-            delegates: _localizationsDelegates.toList(),
-            child: title,
+      child: Actions(
+        actions: <LocalKey, ActionFactory>{
+          DoNothingAction.key: () => const DoNothingAction(),
+        },
+        child: DefaultFocusTraversal(
+          policy: ReadingOrderTraversalPolicy(),
+          child: MediaQuery(
+            data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+            child: Localizations(
+              locale: appLocale,
+              delegates: _localizationsDelegates.toList(),
+              child: title,
+            ),
           ),
         ),
       ),
