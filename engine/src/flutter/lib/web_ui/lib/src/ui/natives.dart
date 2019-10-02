@@ -4,6 +4,24 @@
 
 part of ui;
 
+// Corelib 'print' implementation.
+void _print(dynamic arg) {
+  _Logger._printString(arg.toString());
+}
+
+void _printDebug(dynamic arg) {
+  _Logger._printDebugString(arg.toString());
+}
+
+class _Logger {
+  static void _printString(String s) {
+    print(s);
+  }
+  static void _printDebugString(String s) {
+    html.window.console.error(s);
+  }
+}
+
 /// Returns runtime Dart compilation trace as a UTF-8 encoded memory buffer.
 ///
 /// The buffer contains a list of symbols compiled by the Dart JIT at runtime up to the point
