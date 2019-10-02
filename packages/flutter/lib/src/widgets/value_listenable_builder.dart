@@ -18,6 +18,9 @@ import 'framework.dart';
 ///    a [ValueListenable] changes value.
 typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, Widget child);
 
+/// A callback that allows for only rebuilding on certain changed value.
+typedef ShouldRebuildCallback<T> = bool Function(T oldValue, T newValue);
+
 /// A widget whose content stays synced with a [ValueListenable].
 ///
 /// Given a [ValueListenable<T>] and a [builder] which builds widgets from
@@ -117,9 +120,10 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   const ValueListenableBuilder({
     @required this.valueListenable,
     @required this.builder,
+    this.shouldRebuild,
     this.child,
-  }) : assert(valueListenable != null),
-       assert(builder != null);
+  })  : assert(valueListenable != null),
+        assert(builder != null);
 
   /// The [ValueListenable] whose value you depend on in order to build.
   ///
@@ -137,6 +141,10 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   ///
   /// Must not be null.
   final ValueWidgetBuilder<T> builder;
+
+  /// An optional [ShouldRebuildCallback] which specifies whether a new value should
+  /// trigger a rebuild or not.
+  final ShouldRebuildCallback<T> shouldRebuild;
 
   /// A [valueListenable]-independent widget which is passed back to the [builder].
   ///
@@ -177,7 +185,11 @@ class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
   }
 
   void _valueChanged() {
-    setState(() { value = widget.valueListenable.value; });
+    if (widget.shouldRebuild == null || widget.shouldRebuild(value, widget.valueListenable.value)) {
+      setState(() {
+        value = widget.valueListenable.value;
+      });
+    }
   }
 
   @override

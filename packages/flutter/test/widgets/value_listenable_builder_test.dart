@@ -10,16 +10,17 @@ void main() {
   SpyStringValueNotifier valueListenable;
   Widget textBuilderUnderTest;
 
-  Widget builderForValueListenable(
-    ValueListenable<String> valueListenable,
-  ) {
+  Widget builderForValueListenable(ValueListenable<String> valueListenable,
+      {ShouldRebuildCallback<String> shouldRebuild}) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: ValueListenableBuilder<String>(
         valueListenable: valueListenable,
+        shouldRebuild: shouldRebuild,
         builder: (BuildContext context, String value, Widget child) {
-          if (value == null)
+          if (value == null) {
             return const Placeholder();
+          }
           return Text(value);
         },
       ),
@@ -58,6 +59,53 @@ void main() {
     expect(find.text('Dinesh'), findsOneWidget);
   });
 
+  testWidgets('ShouldRebuild gets called once when value changes', (WidgetTester tester) async {
+    int shouldRebuildCalls = 0;
+    textBuilderUnderTest = builderForValueListenable(valueListenable, shouldRebuild: (_, __) {
+      shouldRebuildCalls++;
+      return true;
+    });
+    await tester.pumpWidget(textBuilderUnderTest);
+
+    valueListenable.value = 'Gilfoyle';
+    await tester.pump();
+    expect(shouldRebuildCalls, 1);
+    valueListenable.value = 'Dinesh';
+    await tester.pump();
+    expect(shouldRebuildCalls, 2);
+  });
+
+  testWidgets('Widget updates when shouldRebuild returns true', (WidgetTester tester) async {
+    textBuilderUnderTest =
+        builderForValueListenable(valueListenable, shouldRebuild: (_, __) => true);
+    await tester.pumpWidget(textBuilderUnderTest);
+
+    valueListenable.value = 'Gilfoyle';
+    await tester.pump();
+    expect(find.text('Gilfoyle'), findsOneWidget);
+
+    valueListenable.value = 'Dinesh';
+    await tester.pump();
+    expect(find.text('Gilfoyle'), findsNothing);
+    expect(find.text('Dinesh'), findsOneWidget);
+  });
+
+  testWidgets('Widget does not update when shouldRebuild returns false',
+      (WidgetTester tester) async {
+    textBuilderUnderTest = builderForValueListenable(valueListenable,
+        shouldRebuild: (String oldValue, __) => oldValue == null);
+    await tester.pumpWidget(textBuilderUnderTest);
+
+    valueListenable.value = 'Gilfoyle';
+    await tester.pump();
+    expect(find.text('Gilfoyle'), findsOneWidget);
+
+    valueListenable.value = 'Dinesh';
+    await tester.pump();
+    expect(find.text('Gilfoyle'), findsOneWidget);
+    expect(find.text('Dinesh'), findsNothing);
+  });
+
   testWidgets('Can change listenable', (WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
@@ -65,8 +113,7 @@ void main() {
     await tester.pump();
     expect(find.text('Gilfoyle'), findsOneWidget);
 
-    final ValueListenable<String> differentListenable =
-        SpyStringValueNotifier('Hendricks');
+    final ValueListenable<String> differentListenable = SpyStringValueNotifier('Hendricks');
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));
 
@@ -74,15 +121,15 @@ void main() {
     expect(find.text('Hendricks'), findsOneWidget);
   });
 
-  testWidgets('Stops listening to old listenable after chainging listenable', (WidgetTester tester) async {
+  testWidgets('Stops listening to old listenable after chainging listenable',
+      (WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
     valueListenable.value = 'Gilfoyle';
     await tester.pump();
     expect(find.text('Gilfoyle'), findsOneWidget);
 
-    final ValueListenable<String> differentListenable =
-       SpyStringValueNotifier('Hendricks');
+    final ValueListenable<String> differentListenable = SpyStringValueNotifier('Hendricks');
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));
 
