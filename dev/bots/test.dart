@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:googleapis/bigquery/v2.dart' as bq;
 import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'flutter_compact_formatter.dart';
@@ -153,7 +154,10 @@ Future<void> _runSmokeTests() async {
   );
 
   // Verify that we correctly generated the version file.
-  await _verifyVersion(path.join(flutterRoot, 'version'));
+  final bool validVersion = await verifyVersion(path.join(flutterRoot, 'version'));
+  if (!validVersion) {
+    exit(1);
+  }
 }
 
 Future<bq.BigqueryApi> _getBigqueryApi() async {
@@ -924,27 +928,31 @@ Future<void> _runFlutterTest(String workingDirectory, {
   }
 }
 
-Future<void> _verifyVersion(String filename) async {
-  if (!File(filename).existsSync()) {
+// the optional `file` argument is an override for testing
+@visibleForTesting
+Future<bool> verifyVersion(String filename, [File file]) async {
+  final RegExp pattern = RegExp(r'^\d+\.\d+\.\d+(\+hotfix\.\d+)?(-pre\.\d+)?$');
+  file ??= File(filename);
+  final String version = await file.readAsString();
+  if (!file.existsSync()) {
     print('$redLine');
     print('The version logic failed to create the Flutter version file.');
     print('$redLine');
-    exit(1);
+    return false;
   }
-  final String version = await File(filename).readAsString();
   if (version == '0.0.0-unknown') {
     print('$redLine');
     print('The version logic failed to determine the Flutter version.');
     print('$redLine');
-    exit(1);
+    return false;
   }
-  final RegExp pattern = RegExp(r'^\d+\.\d+\.\d+(?:|-pre\.\d+|\+hotfix\.\d+)$');
   if (!version.contains(pattern)) {
     print('$redLine');
-    print('The version logic generated an invalid version string.');
+    print('The version logic generated an invalid version string: "$version".');
     print('$redLine');
-    exit(1);
+    return false;
   }
+  return true;
 }
 
 Future<void> _runIntegrationTests() async {
