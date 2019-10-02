@@ -572,6 +572,26 @@ flutter:
       expect(flutterManifest, null);
       expect(logger.errorText, contains('Expected a map.'));
     });
+
+    testUsingContext('Does not crash on empty entry', () async {
+      final BufferLogger logger = context.get<Logger>();
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - lib/gallery/example_code.dart
+    -
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      final List<Uri> assets = flutterManifest.assets;
+
+      expect(logger.errorText, contains('Asset manifest contains a null or empty uri.'));
+      expect(assets.length, 1);
+    });
   });
 
   group('FlutterManifest with MemoryFileSystem', () {
