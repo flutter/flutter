@@ -21,7 +21,7 @@ class SystemNavigator {
   /// `dismissViewControllerAnimated:completion:` if the top view
   /// controller is a `FlutterViewController`.
   ///
-  /// The optional [animated] parameter is ignored on all platforms
+  /// The optional `animated` parameter is ignored on all platforms
   /// except iOS where it is an argument to the aforementioned
   /// methods.
   ///
