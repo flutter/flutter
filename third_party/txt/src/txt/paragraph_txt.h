@@ -359,6 +359,12 @@ class ParagraphTxt : public Paragraph {
 
   bool IsStrutValid() const;
 
+  void UpdateLineMetrics(const SkFontMetrics& metrics,
+                         const TextStyle& style,
+                         double& max_ascent,
+                         double& max_descent,
+                         double& max_unscaled_ascent,
+                         PlaceholderRun* placeholder_run);
   // Calculate the starting X offset of a line based on the line's width and
   // alignment.
   double GetLineXOffset(double line_total_advance,

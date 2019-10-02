@@ -1108,39 +1108,10 @@ void ParagraphTxt::Layout(double width) {
     double max_ascent = strut_.ascent + strut_.half_leading;
     double max_descent = strut_.descent + strut_.half_leading;
     double max_unscaled_ascent = 0;
-    auto update_line_metrics = [&](const SkFontMetrics& metrics,
-                                   const TextStyle& style,
-                                   PlaceholderRun* placeholder_run) {
-      if (!strut_.force_strut) {
-        double ascent;
-        double descent;
-        if (style.has_height_override) {
-          // Scale the ascent and descent such that the sum of ascent and
-          // descent is `fontsize * style.height * style.font_size`.
-          double metrics_height = -metrics.fAscent + metrics.fDescent;
-          ascent = (-metrics.fAscent / metrics_height) * style.height *
-                   style.font_size;
-          descent = (metrics.fDescent / metrics_height) * style.height *
-                    style.font_size;
-        } else {
-          // Use the font-provided ascent, descent, and leading directly.
-          ascent = (-metrics.fAscent + metrics.fLeading / 2);
-          descent = (metrics.fDescent + metrics.fLeading / 2);
-        }
-        ComputePlaceholder(placeholder_run, ascent, descent);
-
-        max_ascent = std::max(ascent, max_ascent);
-        max_descent = std::max(descent, max_descent);
-      }
-
-      max_unscaled_ascent = std::max(placeholder_run == nullptr
-                                         ? -metrics.fAscent
-                                         : placeholder_run->baseline_offset,
-                                     max_unscaled_ascent);
-    };
     for (const PaintRecord& paint_record : paint_records) {
-      update_line_metrics(paint_record.metrics(), paint_record.style(),
-                          paint_record.GetPlaceholderRun());
+      UpdateLineMetrics(paint_record.metrics(), paint_record.style(),
+                        max_ascent, max_descent, max_unscaled_ascent,
+                        paint_record.GetPlaceholderRun());
     }
 
     // If no fonts were actually rendered, then compute a baseline based on the
@@ -1151,7 +1122,8 @@ void ParagraphTxt::Layout(double width) {
       font.setTypeface(GetDefaultSkiaTypeface(style));
       font.setSize(style.font_size);
       font.getMetrics(&metrics);
-      update_line_metrics(metrics, style, nullptr);
+      UpdateLineMetrics(metrics, style, max_ascent, max_descent,
+                        max_unscaled_ascent, nullptr);
     }
 
     // Calculate the baselines. This is only done on the first line.
@@ -1201,6 +1173,84 @@ void ParagraphTxt::Layout(double width) {
 
   longest_line_ = max_right_ - min_left_;
 }
+
+void ParagraphTxt::UpdateLineMetrics(const SkFontMetrics& metrics,
+                                     const TextStyle& style,
+                                     double& max_ascent,
+                                     double& max_descent,
+                                     double& max_unscaled_ascent,
+                                     PlaceholderRun* placeholder_run) {
+  if (!strut_.force_strut) {
+    double ascent;
+    double descent;
+    if (style.has_height_override) {
+      // Scale the ascent and descent such that the sum of ascent and
+      // descent is `fontsize * style.height * style.font_size`.
+      //
+      // The raw metrics do not add up to fontSize. The state of font
+      // metrics is a mess:
+      //
+      // Each font has 4 sets of vertical metrics:
+      //
+      // * hhea: hheaAscender, hheaDescender, hheaLineGap.
+      //     Used by Apple.
+      // * OS/2 typo: typoAscender, typoDescender, typoLineGap.
+      //     Used sometimes by Windows for layout.
+      // * OS/2 win: winAscent, winDescent.
+      //     Also used by Windows, generally will be cut if extends past
+      //     these metrics.
+      // * EM Square: ascent, descent
+      //     Not actively used, but this defines the 'scale' of the
+      //     units used.
+      //
+      // `Use Typo Metrics` is a boolean that, when enabled, prefers
+      // typo metrics over win metrics. Default is off. Enabled by most
+      // modern fonts.
+      //
+      // In addition to these different sets of metrics, there are also
+      // multiple strategies for using these metrics:
+      //
+      // * Adobe: Set hhea values to typo equivalents.
+      // * Microsoft: Set hhea values to win equivalents.
+      // * Web: Use hhea values for text, regardless of `Use Typo Metrics`
+      //     The hheaLineGap is distributed half across the top and half
+      //     across the bottom of the line.
+      //   Exceptions:
+      //     Windows: All browsers respect `Use Typo Metrics`
+      //     Firefox respects `Use Typo Metrics`.
+      //
+      // This pertains to this code in that it is ambiguous which set of
+      // metrics we are actually using via SkFontMetrics. This in turn
+      // means that if we use the raw metrics, we will see differences
+      // between platforms as well as unpredictable line heights.
+      //
+      // A more thorough explanation is available at
+      // https://glyphsapp.com/tutorials/vertical-metrics
+      //
+      // Doing this ascent/descent normalization to the EM Square allows
+      // a sane, consistent, and reasonable line height to be specified,
+      // though it breaks with what is done by any of the platforms above.
+      double metrics_height = -metrics.fAscent + metrics.fDescent;
+      ascent =
+          (-metrics.fAscent / metrics_height) * style.height * style.font_size;
+      descent =
+          (metrics.fDescent / metrics_height) * style.height * style.font_size;
+    } else {
+      // Use the font-provided ascent, descent, and leading directly.
+      ascent = (-metrics.fAscent + metrics.fLeading / 2);
+      descent = (metrics.fDescent + metrics.fLeading / 2);
+    }
+    ComputePlaceholder(placeholder_run, ascent, descent);
+
+    max_ascent = std::max(ascent, max_ascent);
+    max_descent = std::max(descent, max_descent);
+  }
+
+  max_unscaled_ascent =
+      std::max(placeholder_run == nullptr ? -metrics.fAscent
+                                          : placeholder_run->baseline_offset,
+               max_unscaled_ascent);
+};
 
 double ParagraphTxt::GetLineXOffset(double line_total_advance,
                                     size_t line_number,
