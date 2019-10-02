@@ -737,7 +737,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             result.setChecked(semanticsNode.hasFlag(Flag.IS_TOGGLED));
             result.setClassName("android.widget.Switch");
             result.setContentDescription(semanticsNode.getValueLabelHint());
-        } else {
+        } else if (!semanticsNode.hasFlag(Flag.SCOPES_ROUTE)) {
             // Setting the text directly instead of the content description
             // will replace the "checked" or "not-checked" label.
             result.setText(semanticsNode.getValueLabelHint());
