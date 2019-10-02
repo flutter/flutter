@@ -61,6 +61,24 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
   });
+
+  testUsingContext('executablePathForDevice uses the correct package executable', () async {
+    final MockLinuxApp mockApp = MockLinuxApp();
+    const String debugPath = 'debug/executable';
+    const String profilePath = 'profile/executable';
+    const String releasePath = 'release/executable';
+    when(mockApp.executable(BuildMode.debug)).thenReturn(debugPath);
+    when(mockApp.executable(BuildMode.profile)).thenReturn(profilePath);
+    when(mockApp.executable(BuildMode.release)).thenReturn(releasePath);
+
+    expect(LinuxDevice().executablePathForDevice(mockApp, BuildMode.debug), debugPath);
+    expect(LinuxDevice().executablePathForDevice(mockApp, BuildMode.profile), profilePath);
+    expect(LinuxDevice().executablePathForDevice(mockApp, BuildMode.release), releasePath);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
 }
 
 class MockPlatform extends Mock implements Platform {}
+
+class MockLinuxApp extends Mock implements LinuxApp {}

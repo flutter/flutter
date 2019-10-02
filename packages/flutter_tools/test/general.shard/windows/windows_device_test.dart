@@ -60,7 +60,25 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
     });
+
+    testUsingContext('executablePathForDevice uses the correct package executable', () async {
+      final MockWindowsApp mockApp = MockWindowsApp();
+      const String debugPath = 'debug/executable';
+      const String profilePath = 'profile/executable';
+      const String releasePath = 'release/executable';
+      when(mockApp.executable(BuildMode.debug)).thenReturn(debugPath);
+      when(mockApp.executable(BuildMode.profile)).thenReturn(profilePath);
+      when(mockApp.executable(BuildMode.release)).thenReturn(releasePath);
+
+      expect(WindowsDevice().executablePathForDevice(mockApp, BuildMode.debug), debugPath);
+      expect(WindowsDevice().executablePathForDevice(mockApp, BuildMode.profile), profilePath);
+      expect(WindowsDevice().executablePathForDevice(mockApp, BuildMode.release), releasePath);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
   });
 }
 
 class MockPlatform extends Mock implements Platform {}
+
+class MockWindowsApp extends Mock implements WindowsApp {}

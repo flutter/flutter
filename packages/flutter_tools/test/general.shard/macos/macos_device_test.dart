@@ -67,6 +67,22 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
     });
+
+    testUsingContext('executablePathForDevice uses the correct package executable', () async {
+      final MockMacOSApp mockApp = MockMacOSApp();
+      const String debugPath = 'debug/executable';
+      const String profilePath = 'profile/executable';
+      const String releasePath = 'release/executable';
+      when(mockApp.executable(BuildMode.debug)).thenReturn(debugPath);
+      when(mockApp.executable(BuildMode.profile)).thenReturn(profilePath);
+      when(mockApp.executable(BuildMode.release)).thenReturn(releasePath);
+
+      expect(MacOSDevice().executablePathForDevice(mockApp, BuildMode.debug), debugPath);
+      expect(MacOSDevice().executablePathForDevice(mockApp, BuildMode.profile), profilePath);
+      expect(MacOSDevice().executablePathForDevice(mockApp, BuildMode.release), releasePath);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
   });
 }
 
