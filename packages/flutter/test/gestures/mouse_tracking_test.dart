@@ -93,7 +93,6 @@ void main() {
       _pointerData(PointerChange.hover, const Offset(1.0, 401.0), device: 1),
     ]);
     RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
-    // RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{0});
     isInHitRegionOne = true;
     ui.window.onPointerDataPacket(packet1);
     expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
@@ -124,7 +123,6 @@ void main() {
 
     // add in a second mouse simultaneously.
     ui.window.onPointerDataPacket(packet5);
-    // RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{1});
     expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(1.0, 401.0), device: 1),
       const PointerHoverEvent(position: Offset(1.0, 401.0), device: 1),
@@ -141,7 +139,6 @@ void main() {
     ]);
     isInHitRegionOne = true;
     RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
-    // RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{0});
 
     ui.window.onPointerDataPacket(packet1);
 
@@ -195,7 +192,6 @@ void main() {
     ]);
     isInHitRegionOne = true;
     RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
-    // RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{0});
     ui.window.onPointerDataPacket(packet1);
     ui.window.onPointerDataPacket(packet2);
     expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
@@ -218,7 +214,6 @@ void main() {
     ]);
     isInHitRegionOne = true;
     RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
-    // RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{0});
     ui.window.onPointerDataPacket(packet1);
     ui.window.onPointerDataPacket(packet2);
     expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
