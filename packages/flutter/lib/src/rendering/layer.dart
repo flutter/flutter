@@ -276,17 +276,70 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     parent?._removeChild(this);
   }
 
-  /// Returns the first annotation of type `S` that is found at the point
-  /// described by `localPosition`.
+  /// Search this layer and its subtree for annotations of type `S` at the
+  /// location described by `localPosition`.
   ///
-  /// Returns null if no matching region is found.
+  /// This method is called by the default implementation of [find] and
+  /// [findAll]. Override this method to customize how the layer should search
+  /// for annotations, or if the layer has its own annotations to add.
   ///
-  /// It is encouraged to override [findAnnotations] instead of this method.
-  /// By default this method calls [findAnnotations] with `onlyFirst: true`
-  /// and returns the first result.
+  /// ## About layer annotations
   ///
-  /// The main way for a value to be found here is by pushing an
-  /// [AnnotatedRegionLayer] into the layer tree.
+  /// {@template flutter.rendering.layer.findAnnotations.aboutAnnotations}
+  /// Annotation is an optional object of any type that can be carried with a
+  /// layer. An annotation can be found at a location as long as the owner layer
+  /// contains the location and is walked to.
+  ///
+  /// The annotations are searched by first visitng each child recursively, then
+  /// this layer, resulting in an order from visually front to back. Annotations
+  /// must meet the given restrictions, such as type and position.
+  ///
+  /// The common way for a value to be found here is by pushing an
+  /// [AnnotatedRegionLayer] into the layer tree, or by adding the desired
+  /// annotation by overriding `findAnnotations`.
+  /// {@endtemplate}
+  ///
+  /// ## Parameters and return value
+  ///
+  /// The [result] parameter is where the method output the resultant
+  /// annotations. New annotations found during the walk is added to the tail.
+  ///
+  /// The [onlyFirst] parameter indicates that, if true, the search will stop
+  /// when finding the first qualified annotation; otherwise, it will walk the
+  /// entire subtree.
+  ///
+  /// The return value indicates the opacity of this layer and its subtree at
+  /// this position. If it is true, then this layer's parent should skip the
+  /// children behind this layer. In other words, it is opaque to this type of
+  /// annotation and has absorbed the search so that its siblings behind it are
+  /// not aware of the search. If the return value is false, then the parent
+  /// might continue with other siblings.
+  ///
+  /// The return value does not affect whether the parent adds its own
+  /// annotations; in other words, if a layer is supposed to add an annotation,
+  /// it will always add it even if its children are opaque to this type of
+  /// annotation, after its children. However, the opacity that the parents
+  /// return might be affected by their children, hence making all of its
+  /// ancestors opaque to this type of annotation.
+  @protected
+  bool findAnnotations<S>(
+    AnnotationResult<S> result,
+    Offset localPosition, {
+    @required bool onlyFirst,
+  });
+
+  /// Search this layer and its subtree for the first annotation of type `S`
+  /// under the point described by `localPosition`.
+  ///
+  /// Returns null if no matching annotations are found.
+  ///
+  /// By default this method simply calls [findAnnotations] with `onlyFirst:
+  /// true` and returns the first result. It is encouraged to override
+  /// [findAnnotations] instead of this method.
+  ///
+  /// ## About layer annotations
+  ///
+  /// {@macro flutter.rendering.layer.findAnnotations.aboutAnnotations}
   ///
   /// See also:
   ///
@@ -299,16 +352,18 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     return result.entries.isEmpty ? null : result.entries.first;
   }
 
-  /// Returns an iterable of annotation of type `S` that corresponds to the
-  /// point described by `localPosition` on all layers under the point.
+  /// Search this layer and its subtree for all annotations of type `S` under
+  /// the point described by `localPosition`.
   ///
-  /// Returns a result with empty entries if no matching region is found.
+  /// Returns a result with empty entries if no matching annotations are found.
   ///
-  /// By default this method calls [findAnnotations] and returns its result.
-  /// It is encouraged to override [findAnnotations] instead of this method.
+  /// By default this method simply calls [findAnnotations] with `onlyFirst:
+  /// false` and returns its result. It is encouraged to override
+  /// [findAnnotations] instead of this method.
   ///
-  /// The main way for a value to be found here is by pushing an
-  /// [AnnotatedRegionLayer] into the layer tree.
+  /// ## About layer annotations
+  ///
+  /// {@macro flutter.rendering.layer.findAnnotations.aboutAnnotations}
   ///
   /// See also:
   ///
@@ -320,29 +375,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     findAnnotations<S>(result, localPosition, onlyFirst: false);
     return result;
   }
-
-  /// Finds the list of annotations defined by this layer and its children
-  /// located at the given position.
-  ///
-  /// It adds the annotations of the children to `result` from visually front
-  /// to back, then the annotation of this layer. These annotations must meet
-  /// the given restrictions, such as type `S` and position `localPosition`.
-  ///
-  /// If `onlyFirst` is true, the search will stop after the first result.
-  ///
-  /// If this method returns true, this layer's parent (and potentially
-  /// ancestors) should skip the remaining children. Normally it means that
-  /// this layer is opaque, and has absorbed the finding request.
-  ///
-  /// This method is called by the default implementation of [find] and
-  /// [findAll], and calls itself on different layers recursively. Override
-  /// this method to customize behaviors related to annotations.
-  @protected
-  bool findAnnotations<S>(
-    AnnotationResult<S> result,
-    Offset localPosition, {
-    @required bool onlyFirst,
-  });
 
   /// Override this method to upload this layer to the engine.
   ///
@@ -2211,14 +2243,29 @@ class FollowerLayer extends ContainerLayer {
   }
 }
 
-/// A composited layer which annotates its children with a value.
+/// A composited layer which annotates its children with a value. Pushing this
+/// layer to the tree is the common way of adding an annotation.
 ///
-/// These values can be retrieved using [Layer.find] or [Layer.findAll] with a
-/// given [Offset]. If a [size] is provided to this layer, then the value will
-/// only be added if the provided offset is within the bounds of the layer.
+/// Annotation is an optional object of any type that, when carried with a
+/// layer, can be retrieved using [Layer.find] or [Layer.findAll] with a
+/// position. The search process is done recursively, controlled by a concept
+/// of being opaque to a type of annotation, explained at the return value of
+/// [Layer.findAnnotations].
+///
+/// When an annotation search arrives, this layer first defers the same search
+/// to each of this layer's child, respecting their opacity. Then it adds this
+/// layer's [annotation] if all of the following restrictions are met:
+///
+/// {@template flutter.rendering.annotatedRegionLayer.restrictions}
+/// * The target type must be identical to the annotated type `T`.
+/// * If [size] is provided, the target position must be contained within the
+///   rectangle formed by [size] and [offset].
+/// {@endtemplate}
+///
+/// This layer is opaque to a type of annotation if any child is so, or if
+/// [opaque] is true and the layer's annotation is added.
 class AnnotatedRegionLayer<T> extends ContainerLayer {
-  /// Creates a new layer annotated with [value] that clips to rectangle defined
-  /// by the [size] and [offset] if provided.
+  /// Creates a new layer that annotates its children with [value].
   ///
   /// The [value] provided cannot be null.
   AnnotatedRegionLayer(
@@ -2230,55 +2277,69 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
        assert(opaque != null),
        offset = offset ?? Offset.zero;
 
-  /// The value returned by [find] if the offset is contained within this layer.
+  /// The annotated object, which is added to the result if all restrictions are
+  /// met.
   final T value;
 
-  /// The [size] is optionally used to clip the hit-testing of [find].
+  /// The size of an optional clipping rectangle, used to control whether a
+  /// position is contained by the annotation.
   ///
-  /// If not provided, all offsets are considered to be contained within this
-  /// layer, unless an ancestor layer applies a clip.
-  ///
-  /// If [offset] is set, then the offset is applied to the size region before
-  /// hit testing in [find].
+  /// If [size] is provided, then the annotation is only added if the target
+  /// position is contained by the rectangle formed by [size] and [offset].
+  /// Otherwise no such restriction is applied, and clipping can only be done by
+  /// the ancestor layers.
   final Size size;
 
-  /// The [offset] is optionally used to translate the clip region for the
-  /// hit-testing of [find] by [offset].
+  /// The offset of the optional clipping rectangle that is indicated by [size].
   ///
-  /// If not provided, offset defaults to [Offset.zero].
+  /// The [offset] defaults to [Offset.zero] if not provided, and is ignored if
+  /// [size] is not set.
   ///
-  /// Ignored if [size] is not set.
-  ///
-  /// Unlike [OffsetLayer], this parameter [offset] does not affect the layer's
-  /// children.
+  /// The [offset] only offsets the the clipping rectagle, and does not affect
+  /// how the painting or annotation search is propagated to its children.
   final Offset offset;
 
-  /// Whether this layer should prevent layers visually behind it from being
-  /// hit during a hit test.
+  /// Whether the annotation of this layer should be opaque during an annotation
+  /// search of type `T`, preventing siblings visually behind it from being
+  /// searched.
   ///
-  /// If [opaque] is true, this layer will absorb the hit if this layer contains
-  /// the target position and has the requested annotation.
+  /// If [opaque] is true, and this layer does add its annotation [value],
+  /// then the layer will always be opaque during the search.
   ///
-  /// If [opaque] is false, this layer will not change the absorption value
-  /// returned by its children.
+  /// If [opaque] is false, or if this layer does not add its annotation,
+  /// then the opacity of this layer will be the one returned by the children,
+  /// meaning that it is be opaque if any child is opaque.
   ///
-  /// This defaults to false.
+  /// The [opaque] defaults to false.
   ///
   /// See also:
   ///
+  ///  * [Layer.findAnnotations], which explains the concept of being opaque
+  ///    to a type of annotation as the return value.
   ///  * [HitTestBehavior], which controls similar logic when hit-testing in the
   ///    render tree.
   final bool opaque;
 
-  /// Adds annotations from the children, then from this layer.
+  /// Searches the subtree for annotations of type `S` at the location
+  /// `localPosition`, then adds the annotation [value] if applicable.
   ///
-  /// The children's annotations are always added.
+  /// This method always searches its children, and if any child returns `true`,
+  /// the remaining children are skipped. Regardless of what the children
+  /// returns, this method then adds this layer's annotation if all of the
+  /// following restrictions are met:
   ///
-  /// The layer's annotation [value] is added if the type `S` matches `T`, and
-  /// the target position meets the requirement defined by [size] and [offset].
+  /// {@macro flutter.rendering.annotatedRegionLayer.restrictions}
   ///
-  /// The return value is true if any child returns true, or the layer's
-  /// annotation is added and [opaque] is true.
+  /// This search process respects `onlyFirst`, meaning that when `onlyFirst` is
+  /// true, the search will stop when it finds first annotation from the
+  /// children, and the layer's own annotation is checked only when none is
+  /// given from the children.
+  ///
+  /// The return value is true if any child returns `true`, or if [opaque] is
+  /// true and the layer's annotation is added.
+  ///
+  /// For explanation of layer annotations, parameters and return value, refer
+  /// to [Layer.findAnnotations].
   @override
   @protected
   bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
