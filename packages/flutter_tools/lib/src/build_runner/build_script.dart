@@ -216,7 +216,7 @@ class FlutterWebTestEntrypointBuilder implements Builder {
   Future<void> build(BuildStep buildStep) async {
     log.info('building for target ${buildStep.inputId.path}');
     await bootstrapDdc(buildStep, platform: flutterWebPlatform,
-        skipPlatformCheckPackages: skipPlatformCheckPackages);
+        skipPlatformCheck: true);
   }
 }
 
