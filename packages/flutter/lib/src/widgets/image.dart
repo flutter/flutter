@@ -430,7 +430,7 @@ class Image extends StatefulWidget {
   /// density, the exact path must be provided (e.g. `images/2x/cat.png`).
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
-  /// 
+  ///
   /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
   /// engine that the image must be decoded at the specified size. The image
   /// will be rendered to the constraints of the layout or [width] and [height]
