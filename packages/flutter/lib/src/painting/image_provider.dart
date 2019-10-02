@@ -528,9 +528,13 @@ class ResizedImage extends ImageProvider<_SizeAwareCacheKey> {
     this.height
   ) : assert (width != null || height != null);
 
+  /// The [ImageProvider] that this class wraps.
   final ImageProvider imageProvider;
 
+  /// The width the image should decode to and cache.
   final int width;
+
+  /// The height the image should decode to and cache.
   final int height;
 
   @override

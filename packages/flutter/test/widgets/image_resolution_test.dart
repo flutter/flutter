@@ -4,7 +4,6 @@
 
 @TestOn('!chrome') // asset bundle behaves differently.
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image, ImageByteFormat;
 
@@ -164,7 +163,7 @@ Widget buildImageCacheResized(String name, Key key, int width, int height, int c
             Uint8List.fromList(kTransparentImage),
             key: key,
             excludeFromSemantics: true,
-            color: Color(0xFF00FFFF),
+            color: const Color(0xFF00FFFF),
             colorBlendMode: BlendMode.plus,
             width: width.toDouble(),
             height: height.toDouble(),
@@ -331,22 +330,19 @@ void main() {
   });
 
   testWidgets('Image cache resize upscale display 5', (WidgetTester tester) async {
-    const double ratio = 1.0;
-    Key key = GlobalKey();
+    final Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageCacheResized(image, key, 5, 5, 20, 20));
     expect(getRenderImage(tester, key).size, const Size(5.0, 5.0));
   });
 
   testWidgets('Image cache resize upscale display 50', (WidgetTester tester) async {
-    const double ratio = 1.0;
-    Key key = GlobalKey();
+    final Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageCacheResized(image, key, 50, 50, 20, 20));
     expect(getRenderImage(tester, key).size, const Size(50.0, 50.0));
   });
 
   testWidgets('Image cache resize downscale display 5', (WidgetTester tester) async {
-    const double ratio = 1.0;
-    Key key = GlobalKey();
+    final Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageCacheResized(image, key, 5, 5, 1, 1));
     expect(getRenderImage(tester, key).size, const Size(5.0, 5.0));
   });
