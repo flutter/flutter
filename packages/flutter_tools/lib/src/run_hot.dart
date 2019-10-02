@@ -283,7 +283,7 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<UpdateFSReport> _updateDevFS({ bool fullRestart = false }) async {
-    final bool isFirstUpload = assetBundle.wasBuiltOnce() == false;
+    final bool isFirstUpload = !assetBundle.wasBuiltOnce();
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       printTrace('Updating assets');
@@ -308,7 +308,7 @@ class HotRunner extends ResidentRunner {
         bundle: assetBundle,
         firstBuildTime: firstBuildTime,
         bundleFirstUpload: isFirstUpload,
-        bundleDirty: isFirstUpload == false && rebuildBundle,
+        bundleDirty: !isFirstUpload && rebuildBundle,
         fullRestart: fullRestart,
         projectRootPath: projectRootPath,
         pathToReload: getReloadPath(fullRestart: fullRestart),
