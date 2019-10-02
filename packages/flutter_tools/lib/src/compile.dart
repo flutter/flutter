@@ -101,7 +101,6 @@ class StdoutHandler {
   bool _badState = false;
 
   void handler(String message) {
-    printTrace('-> $message');
     if (_badState) {
       return;
     }
@@ -273,6 +272,11 @@ class KernelCompiler {
     Uri mainUri;
     if (packagesPath != null) {
       mainUri = PackageUriMapper.findUri(mainPath, packagesPath, fileSystemScheme, fileSystemRoots);
+    }
+    // TODO(jonahwilliams): The output file must already exist, but this seems
+    // unnecessary.
+    if (outputFilePath != null && !fs.isFileSync(outputFilePath)) {
+      fs.file(outputFilePath).createSync(recursive: true);
     }
     final List<String> command = <String>[
       engineDartPath,
@@ -520,7 +524,6 @@ class ResidentCompiler {
     printTrace('<- recompile $mainUri$inputKey');
     for (Uri fileUri in request.invalidatedFiles) {
       _server.stdin.writeln(_mapFileUri(fileUri.toString(), packageUriMapper));
-      printTrace('<- ${_mapFileUri(fileUri.toString(), packageUriMapper)}');
     }
     _server.stdin.writeln(inputKey);
     printTrace('<- $inputKey');

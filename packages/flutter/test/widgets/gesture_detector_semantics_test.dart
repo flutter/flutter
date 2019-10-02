@@ -25,7 +25,7 @@ void main() {
           },
           child: Container(),
         ),
-      )
+      ),
     );
 
     expect(semantics, includesNodeWith(
@@ -59,7 +59,7 @@ void main() {
             },
             child: Container(),
           ),
-        )
+        ),
     );
 
     expect(semantics, includesNodeWith(
@@ -125,7 +125,7 @@ void main() {
             instance
               ..onTap = () { logs.add('tap'); };
           },
-        )
+        ),
       });
     };
 
@@ -149,7 +149,7 @@ void main() {
                     instance
                       ..onStart = (_) { logs.add('horizontal'); };
                   },
-                )
+                ),
               },
               child: hasLayoutPerformer ? _TestLayoutPerformer(performLayout: performLayout) : null,
             ),
@@ -186,7 +186,7 @@ void main() {
             gestures: gestures,
             child: Container(),
           ),
-        )
+        ),
       );
 
       expect(semantics, includesNodeWith(
@@ -200,7 +200,7 @@ void main() {
             semantics: _TestSemanticsGestureDelegate(onTap: () {}),
             child: Container(),
           ),
-        )
+        ),
       );
 
       expect(semantics, includesNodeWith(
@@ -222,7 +222,7 @@ void main() {
             semantics: _TestSemanticsGestureDelegate(onTap: () {}),
             child: Container(),
           ),
-        )
+        ),
       );
 
       expect(semantics, includesNodeWith(
@@ -235,7 +235,7 @@ void main() {
             gestures: gestures,
             child: Container(),
           ),
-        )
+        ),
       );
 
       expect(semantics, includesNodeWith(
@@ -257,7 +257,7 @@ void main() {
             semantics: _TestSemanticsGestureDelegate(onTap: () {}),
             child: Container(),
           ),
-        )
+        ),
       );
 
       expect(semantics, includesNodeWith(
@@ -271,7 +271,7 @@ void main() {
             semantics: _TestSemanticsGestureDelegate(onLongPress: () {}),
             child: Container(),
           ),
-        )
+        ),
       );
 
       expect(semantics, includesNodeWith(
@@ -298,7 +298,7 @@ void main() {
             ),
             child: Container(),
           ),
-        )
+        ),
       );
 
       final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
@@ -332,7 +332,7 @@ void main() {
               gestures: _buildGestureMap(null, null),
               child: Container(),
             ),
-          )
+          ),
         );
 
         expect(semantics, isNot(includesNodeWith(
@@ -353,7 +353,7 @@ void main() {
               ),
               child: Container(),
             ),
-          )
+          ),
         );
 
         expect(semantics, includesNodeWith(
@@ -384,7 +384,7 @@ void main() {
               ),
               child: Container(),
             ),
-          )
+          ),
         );
 
         final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
@@ -404,7 +404,7 @@ void main() {
               gestures: _buildGestureMap(null, null),
               child: Container(),
             ),
-          )
+          ),
         );
 
         expect(semantics, isNot(includesNodeWith(
@@ -425,7 +425,7 @@ void main() {
               ),
               child: Container(),
             ),
-          )
+          ),
         );
 
         expect(semantics, includesNodeWith(
@@ -456,7 +456,7 @@ void main() {
               ),
               child: Container(),
             ),
-          )
+          ),
         );
 
         final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
@@ -476,7 +476,7 @@ void main() {
               gestures: _buildGestureMap(null, null),
               child: Container(),
             ),
-          )
+          ),
         );
 
         expect(semantics, isNot(includesNodeWith(
@@ -497,7 +497,7 @@ void main() {
               ),
               child: Container(),
             ),
-          )
+          ),
         );
 
         expect(semantics, includesNodeWith(
@@ -513,7 +513,7 @@ void main() {
               ),
               child: Container(),
             ),
-          )
+          ),
         );
 
         expect(semantics, includesNodeWith(
@@ -556,7 +556,7 @@ void main() {
               gestures: gestures,
               child: Container(),
             ),
-          )
+          ),
         );
 
         final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
@@ -582,7 +582,7 @@ void main() {
               gestures: _buildGestureMap(null, null),
               child: Container(),
             ),
-          )
+          ),
         );
 
         expect(semantics, isNot(includesNodeWith(
@@ -603,7 +603,7 @@ void main() {
               ),
               child: Container(),
             ),
-          )
+          ),
         );
 
         expect(semantics, includesNodeWith(
@@ -647,7 +647,7 @@ void main() {
               gestures: gestures,
               child: Container(),
             ),
-          )
+          ),
         );
 
         final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
@@ -672,7 +672,7 @@ void main() {
             gestures: _buildGestureMap(() => LongPressGestureRecognizer(), null),
             child: Container(),
           ),
-        )
+        ),
       );
 
       expect(semantics, includesNodeWith(
@@ -685,7 +685,7 @@ void main() {
             gestures: _buildGestureMap(() => TapGestureRecognizer(), null),
             child: Container(),
           ),
-        )
+        ),
       );
 
       expect(semantics, includesNodeWith(

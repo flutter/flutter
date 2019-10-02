@@ -104,7 +104,7 @@ void main() {
           maintainBottomViewPadding: true,
           child: Column(
             children: const <Widget>[
-              Expanded(child: Placeholder())
+              Expanded(child: Placeholder()),
             ],
           ),
         ));
@@ -141,7 +141,7 @@ void main() {
             resizeToAvoidBottomInset: false,
             body: Column(
               children: const <Widget>[
-                Expanded(child: Placeholder())
+                Expanded(child: Placeholder()),
               ],
             ),
           ),

@@ -373,25 +373,29 @@ class IOSDevice extends Device {
           debuggingOptions.observatoryPort,
         );
         if (localUri != null) {
+          UsageEvent('ios-mdns', 'success').send();
           return LaunchResult.succeeded(observatoryUri: localUri);
         }
       } catch (error) {
-        printError('Failed to establish a debug connection with $id: $error');
+        printError('Failed to establish a debug connection with $id using mdns: $error');
       }
 
-      // Fallback to manual protocol discovery
+      // Fallback to manual protocol discovery.
+      UsageEvent('ios-mdns', 'failure').send();
       printTrace('mDNS lookup failed, attempting fallback to reading device log.');
       try {
         printTrace('Waiting for observatory port.');
         localUri = await observatoryDiscovery.uri;
         if (localUri != null) {
+          UsageEvent('ios-mdns', 'fallback-success').send();
           return LaunchResult.succeeded(observatoryUri: localUri);
         }
       } catch (error) {
-        printError('Failed to establish a debug connection with $id: $error');
+        printError('Failed to establish a debug connection with $id using logs: $error');
       } finally {
         await observatoryDiscovery?.cancel();
       }
+      UsageEvent('ios-mdns', 'fallback-failure').send();
       return LaunchResult.failed();
     } finally {
       installStatus.stop();

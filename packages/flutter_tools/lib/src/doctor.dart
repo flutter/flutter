@@ -802,7 +802,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       validators.add(ValidatorWithResult(
           userMessages.intellijMacUnknownResult,
           ValidationResult(ValidationType.missing, <ValidationMessage>[
-              ValidationMessage.error(e.message),
+            ValidationMessage.error(e.message),
           ]),
       ));
     }

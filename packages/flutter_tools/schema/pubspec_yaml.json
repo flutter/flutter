@@ -76,7 +76,21 @@
                                         "pluginClass": {"type": "string"}
                                     }
                                 },
+                                "linux": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "pluginClass": {"type": "string"}
+                                    }
+                                },
                                 "macos": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "pluginClass": {"type": "string"}
+                                    }
+                                },
+                                "windows": {
                                     "type": "object",
                                     "additionalProperties": false,
                                     "properties": {
