@@ -83,7 +83,7 @@ Widget overlayWithEntry(OverlayEntry entry) {
         data: const MediaQueryData(size: Size(800.0, 600.0)),
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            entry
+            entry,
           ],
         ),
       ),
@@ -124,7 +124,7 @@ double getOpacity(WidgetTester tester, Finder finder) {
     find.ancestor(
       of: finder,
       matching: find.byType(FadeTransition),
-    )
+    ),
   ).opacity.value;
 }
 
@@ -237,7 +237,7 @@ void main() {
             textFieldValue = value;
           },
         ),
-      )
+      ),
     );
 
     RenderBox findTextFieldBox() => tester.renderObject(find.byKey(textFieldKey));
@@ -368,7 +368,7 @@ void main() {
         overlay(
           child: const TextField(
           ),
-        )
+        ),
     );
 
     final TextField textField = tester.firstWidget(find.byType(TextField));
@@ -382,7 +382,7 @@ void main() {
           child: const TextField(
             cursorRadius: Radius.circular(3.0),
           ),
-        )
+        ),
     );
 
     final TextField textField = tester.firstWidget(find.byType(TextField));
@@ -561,7 +561,7 @@ void main() {
           controller: controller,
           maxLines: null,
         ),
-      )
+      ),
     );
     expect(controller.selection.baseOffset, -1);
     expect(controller.selection.extentOffset, -1);
@@ -675,7 +675,7 @@ void main() {
         child: TextField(
           controller: controller,
         ),
-      )
+      ),
     );
     expect(controller.selection.baseOffset, -1);
     expect(controller.selection.extentOffset, -1);
@@ -703,7 +703,7 @@ void main() {
           controller: controller,
           enableInteractiveSelection: false,
         ),
-      )
+      ),
     );
     expect(controller.selection.baseOffset, -1);
     expect(controller.selection.extentOffset, -1);
@@ -730,7 +730,7 @@ void main() {
         child: TextField(
           controller: controller,
         ),
-      )
+      ),
     );
 
     const String testValue = 'abc def ghi';
@@ -765,7 +765,7 @@ void main() {
         child: TextField(
           controller: controller,
         ),
-      )
+      ),
     );
 
     const String testValue = 'abc def ghi';
@@ -804,7 +804,7 @@ void main() {
         child: TextField(
           controller: controller,
         ),
-      )
+      ),
     );
 
     const String testValue = 'abcdefghi';
@@ -844,7 +844,7 @@ void main() {
         child: TextField(
           controller: controller,
         ),
-      )
+      ),
     );
 
     const String testValue = 'abc def ghi';
@@ -877,7 +877,7 @@ void main() {
             controller: controller,
             readOnly: true,
           ),
-        )
+        ),
     );
     // Read only text field cannot open keyboard.
     await tester.showKeyboard(find.byType(TextField));
@@ -913,7 +913,7 @@ void main() {
               readOnly: true,
             ),
           ),
-        )
+        ),
     );
 
     await tester.tap(find.byType(TextField));
@@ -934,7 +934,7 @@ void main() {
               readOnly: true,
             ),
           ),
-        )
+        ),
     );
 
     await tester.tap(find.byType(TextField));
@@ -997,7 +997,7 @@ void main() {
         const TextEditingValue(
             text: 'readonly',
             composing: TextRange(start: 0, end: 8), // Simulate text composing.
-        )
+        ),
     );
 
     await tester.pumpWidget(
@@ -1006,7 +1006,7 @@ void main() {
             controller: controller,
             readOnly: true,
           ),
-        )
+        ),
     );
 
     final RenderEditable renderEditable = findRenderEditable(tester);
@@ -1112,7 +1112,7 @@ void main() {
           controller: controller,
           enableInteractiveSelection: false,
         ),
-      )
+      ),
     );
 
     const String testValue = 'abc def ghi';
@@ -3702,7 +3702,7 @@ void main() {
               controller: controller,
               readOnly: true,
             ),
-          )
+          ),
       );
 
       await tester.idle();
@@ -4141,7 +4141,7 @@ void main() {
           controller: controller,
           maxLines: null,
         ),
-      )
+      ),
     );
 
     const String testValue = 'x';

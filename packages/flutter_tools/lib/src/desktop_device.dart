@@ -101,7 +101,7 @@ abstract class DesktopDevice extends Device {
     }
 
     final Process process = await processManager.start(<String>[
-      executable
+      executable,
     ]);
     _runningProcesses.add(process);
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));

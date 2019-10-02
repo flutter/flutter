@@ -988,7 +988,7 @@ class ThemeData extends Diagnosticable {
     Color unselectedWidgetColor,
     Color disabledColor,
     ButtonThemeData buttonTheme,
-    ToggleButtonsTheme toggleButtonsTheme,
+    ToggleButtonsThemeData toggleButtonsTheme,
     Color buttonColor,
     Color secondaryHeaderColor,
     Color textSelectionColor,

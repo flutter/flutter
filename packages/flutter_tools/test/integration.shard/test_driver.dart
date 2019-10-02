@@ -620,11 +620,11 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     Future<void> Function() beforeStart,
   }) async {
     await _setupProcess(<String>[
-        'test',
-        '--disable-service-auth-codes',
-        '--machine',
-        '-d',
-        'flutter-tester',
+      'test',
+      '--disable-service-auth-codes',
+      '--machine',
+      '-d',
+      'flutter-tester',
     ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile, beforeStart: beforeStart);
   }
 

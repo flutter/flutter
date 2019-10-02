@@ -21,12 +21,13 @@ void main() {
         controller: fakePlatformViewController,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                  Factory<VerticalDragGestureRecognizer>(
-                    () {
-                      return VerticalDragGestureRecognizer();
-                    },
-                  ),
-                },);
+          Factory<VerticalDragGestureRecognizer>(
+            () {
+              return VerticalDragGestureRecognizer();
+            },
+          ),
+        },
+      );
     });
 
     test('layout should size to max constraint', () {
