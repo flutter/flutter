@@ -101,7 +101,6 @@ class StdoutHandler {
   bool _badState = false;
 
   void handler(String message) {
-    printTrace('-> $message');
     if (_badState) {
       return;
     }
