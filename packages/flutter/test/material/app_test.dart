@@ -392,6 +392,26 @@ void main() {
     );
   });
 
+  testWidgets("WidgetsApp don't rebuild routes when MediaQuery updates", (WidgetTester tester) async {
+    int buildCount = 0;
+
+    await tester.pumpWidget(WidgetsApp(
+      color: const Color.fromARGB(255, 255, 255, 255),
+      onGenerateRoute: (_) {
+        return PageRouteBuilder<void>(pageBuilder: (_, __, ___) {
+          buildCount++;
+          return Container();
+        });
+      },
+    ));
+
+    final TestWidgetsFlutterBinding binding = tester.binding;
+    await binding.setSurfaceSize(const Size(42, 42));
+    await tester.pump();
+
+    expect(buildCount, equals(1));
+  });
+
   testWidgets('Can get text scale from media query', (WidgetTester tester) async {
     double textScaleFactor;
     await tester.pumpWidget(MaterialApp(

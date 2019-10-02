@@ -705,8 +705,7 @@ class WidgetsApp extends StatefulWidget {
   _WidgetsAppState createState() => _WidgetsAppState();
 }
 
-class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserver {
-
+class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // STATE LIFECYCLE
 
   @override
@@ -1004,36 +1003,6 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     });
   }
 
-
-  // METRICS
-
-  @override
-  void didChangeMetrics() {
-    setState(() {
-      // The properties of window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
-  }
-
-  @override
-  void didChangeTextScaleFactor() {
-    setState(() {
-      // The textScaleFactor property of window has changed. We reference
-      // window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
-  }
-
-  // RENDERING
-  @override
-  void didChangePlatformBrightness() {
-    setState(() {
-      // The platformBrightness property of window has changed. We reference
-      // window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
-  }
-
   // BUILDER
 
   bool _debugCheckLocalizations(Locale appLocale) {
@@ -1196,8 +1165,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
     return DefaultFocusTraversal(
       policy: ReadingOrderTraversalPolicy(),
-      child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+      child: _MediaQueryFromWindows(
         child: Localizations(
           locale: appLocale,
           delegates: _localizationsDelegates.toList(),
@@ -1205,5 +1173,65 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         ),
       ),
     );
+  }
+}
+
+class _MediaQueryFromWindows extends StatefulWidget {
+  const _MediaQueryFromWindows({Key key, this.child}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  __MediaQueryFromWindowsState createState() => __MediaQueryFromWindowsState();
+}
+
+class __MediaQueryFromWindowsState extends State<_MediaQueryFromWindows> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  // METRICS
+
+  @override
+  void didChangeMetrics() {
+    setState(() {
+      // The properties of window have changed. We use them in our build
+      // function, so we need setState(), but we don't cache anything locally.
+    });
+  }
+
+  @override
+  void didChangeTextScaleFactor() {
+    setState(() {
+      // The textScaleFactor property of window has changed. We reference
+      // window in our build function, so we need to call setState(), but
+      // we don't need to cache anything locally.
+    });
+  }
+
+  // RENDERING
+  @override
+  void didChangePlatformBrightness() {
+    setState(() {
+      // The platformBrightness property of window has changed. We reference
+      // window in our build function, so we need to call setState(), but
+      // we don't need to cache anything locally.
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+      child: widget.child,
+    );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }
