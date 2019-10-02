@@ -25,7 +25,7 @@ task:
   setup_script: ./dev/bots/cirrus_setup.sh
   matrix:
     - name: docs
-      skip: "!changesInclude('packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'packages/flutter_goldens/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master'"
+      skip: "!changesInclude('dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'packages/flutter_goldens/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master'"
       env:
         SHARD: docs
         # For uploading master docs to Firebase master branch staging site
@@ -67,7 +67,7 @@ task:
         cpu: 4
         memory: 12G
     - name: tests_widgets-linux
-      skip: "!changesInclude('packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+      skip: "!changesInclude('dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
@@ -81,7 +81,7 @@ task:
         cpu: 4
         memory: 12G
     - name: tests_framework_other-linux
-      skip: "!changesInclude('packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+      skip: "!changesInclude('dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
@@ -95,7 +95,7 @@ task:
         cpu: 4
         memory: 12G
     - name: tests_extras-linux
-      skip: "!changesInclude('packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**', 'dev/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+      skip: "!changesInclude('dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**', 'dev/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
@@ -106,23 +106,23 @@ task:
         cpu: 4
         memory: 12G
     # all of the tests except the ones in test/integration and test/commands/create_test for packages/flutter_tools
-    - name: tool_tests-linux
-      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+    - name: tool_tests_general-linux
+      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
-        SUBSHARD: tool
+        SUBSHARD: general
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 12G
-    - name: tool_tests_create-linux
-      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+    - name: tool_tests_commands-linux
+      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
-        SUBSHARD: create
+        SUBSHARD: commands
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
@@ -130,7 +130,7 @@ task:
         memory: 12G
     # all of the tests in test/integration for packages/flutter_tools
     - name: tool_tests_integration-linux
-      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
@@ -141,7 +141,7 @@ task:
         cpu: 4
         memory: 12G
     - name: tool_coverage-linux
-      skip: "!changesInclude('packages/flutter_tools/**/*.dart') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**/*.dart') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
@@ -276,23 +276,22 @@ task:
     - dart --enable-asserts dev\bots\test.dart
   matrix:
     # all of the tests except test/integration and test/commands/create_test for packages/flutter_tools
-    - name: tool_tests-windows
-      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+    - name: tool_tests_general-windows
+      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
-        SUBSHARD: tool
-        SHARD_INDEX: 1
+        SUBSHARD: general
     # all of the tests in test/commands/create_test
-    - name: tool_tests_create-windows
-      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+    - name: tool_tests_commands-windows
+      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
-        SUBSHARD: create
+        SUBSHARD: commands
     # all of the tests in test/integration for packages/flutter_tools
     - name: tool_tests_integration-windows
-      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
@@ -333,7 +332,7 @@ task:
         - cd dev\bots
         - pub run test
     - name: tests_widgets-windows
-      skip: "!changesInclude('packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+      skip: "!changesInclude('dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
@@ -344,7 +343,7 @@ task:
       test_all_script:
         - dart --enable-asserts dev\bots\test.dart
     - name: tests_framework_other-windows
-      skip: "!changesInclude('packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+      skip: "!changesInclude('dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
@@ -355,7 +354,7 @@ task:
       test_all_script:
         - dart --enable-asserts dev\bots\test.dart
     - name: tests_extras-windows
-      skip: "!changesInclude('packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**', 'dev/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+      skip: "!changesInclude('dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**', 'dev/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
@@ -461,20 +460,19 @@ task:
     - bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
   matrix:
     # all of the tests except test/integration and test/commands/create_test for packages/flutter_tools
-    - name: tool_tests-macos
-      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+    - name: tool_tests_general-macos
+      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
-        SUBSHARD: tool
-        SHARD_INDEX: 1
+        SUBSHARD: general
     # all of the tests in test/commands/create_test
-    - name: tool_tests_create-macos
-      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
+    - name: tool_tests_commands-macos
+      skip: "!changesInclude('dev/**', 'packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master' && $CIRRUS_BRANCH != 'stable' && $CIRRUS_BRANCH != 'beta' && $CIRRUS_BRANCH != 'dev'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
-        SUBSHARD: create
+        SUBSHARD: commands
     # all of the tests in test/integration for packages/flutter_tools
     - name: tool_tests_integration-macos
       only_if: $CIRRUS_BRANCH == 'master'
@@ -573,8 +571,8 @@ docker_builder:
     - tests_widgets-linux
     - tests_framework_other-linux
     - tests_extras-linux
-    - tool_tests-linux
-    - tool_tests_create-linux
+    - tool_tests_general-linux
+    - tool_tests_commands-linux
     - tool_tests_integration-linux
     - build_tests-linux
     - integration_tests-linux
