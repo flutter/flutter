@@ -643,7 +643,7 @@ class CupertinoColors {
 /// resolution of a `CupertinoDynamicColor`.
 ///
 /// * [CupertinoTheme.of], a static method that retrieves the ambient [CupertinoThemeData],
-///   and then resolves [CupertinoDynamicColor]s used in the retrieved data implicitly.
+///   and then resolves [CupertinoDynamicColor]s used in the retrieved data.
 @immutable
 class CupertinoDynamicColor extends Color {
   /// Creates an adaptive [Color] that changes its effective color based on the
