@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'context_menu_sheet_action.dart';
 
 // The scale of the child at the time that the ContextMenu opens.
+// This value was eyeballed from a physical device running iOS 13.1.2.
 const double _kOpenScale = 1.05;
 
 typedef _DismissCallback = void Function(
@@ -122,11 +123,8 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
     final double center = screenWidth / 2;
     final bool centerDividesChild = childRect.left < center && childRect.right > center;
-    final double minCenterWidth = screenWidth / 4;
-    final double maxCenterWidth = screenWidth / 3;
-    final bool isCenterWidth = childRect.width >= minCenterWidth
-      && childRect.width <= maxCenterWidth;
-    if (centerDividesChild && isCenterWidth) {
+    final double distanceFromCenter = (center - childRect.center.dx).abs();
+    if (centerDividesChild && distanceFromCenter <= childRect.width / 4) {
       return _ContextMenuOrientation.center;
     }
 
@@ -318,7 +316,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
   void initState() {
     super.initState();
     // Change the color of the child during the initial part of the decoy bounce
-    // animation. The interval was eyeballed from an iOS 13.1.2 device.
+    // animation. The interval was eyeballed from a physical iOS 13.1.2 device.
     _mask = _OnOffAnimation<Color>(
       controller: widget.controller,
       onValue: _lightModeMaskColor,
@@ -430,7 +428,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   // Barrier color for a Cupertino modal barrier.
   static const Color _kModalBarrierColor = Color(0x6604040F);
   // The duration of the transition used when a modal popup is shown. Eyeballed
-  // from a device running iOS 13.1.2.
+  // from a physical device running iOS 13.1.2.
   static const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
   final List<ContextMenuSheetAction> _actions;
@@ -466,7 +464,6 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   );
   final Tween<double> _opacityTween = Tween<double>(begin: 0.0, end: 1.0);
   Animation<double> _sheetOpacity;
-  Animation<double> _sheetScale;
 
   final GlobalKey _childGlobalKey = GlobalKey();
   final GlobalKey _sheetGlobalKey = GlobalKey();

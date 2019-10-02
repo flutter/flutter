@@ -6,26 +6,37 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 
 void main() {
-  const double _kOpenScale = 1.2;
-  final UniqueKey childKey = UniqueKey();
-  final Widget child = Container(
-    key: childKey,
-    width: 100.0,
-    height: 100.0,
-    color: CupertinoColors.activeOrange,
-  );
+  final TestWidgetsFlutterBinding binding =
+    TestWidgetsFlutterBinding.ensureInitialized();
+  const double _kOpenScale = 1.05;
 
-  Widget _getContextMenu() {
+  Widget _getChild() {
+    return Container(
+      width: 300.0,
+      height: 100.0,
+      color: CupertinoColors.activeOrange,
+    );
+  }
+
+  Widget _getContextMenu({
+    Alignment alignment = Alignment.center,
+    screenSize = const Size(800.0, 600.0),
+    Widget child,
+  }) {
     return CupertinoApp(
       home: CupertinoPageScaffold(
-        child: Center(
-          child: ContextMenu(
-            actions: const <ContextMenuSheetAction>[
-              ContextMenuSheetAction(
-                child: Text('ContextMenuSheetAction'),
-              ),
-            ],
-            child: child,
+        child: MediaQuery(
+          data: MediaQueryData(size: screenSize),
+          child: Align(
+            alignment: alignment,
+            child: ContextMenu(
+              actions: <ContextMenuSheetAction>[
+                ContextMenuSheetAction(
+                  child: Text('ContextMenuSheetAction $alignment'),
+                ),
+              ],
+              child: child ?? _getChild(),
+            ),
           ),
         ),
       ),
@@ -51,13 +62,14 @@ void main() {
   Finder _findStaticChild(Widget child) {
     return find.descendant(
       of: _findStatic(),
-      matching: find.byWidgetPredicate((Widget w) => w == child),
+      matching: find.byWidget(child),
     );
   }
 
   group('ContextMenu before and during opening', () {
     testWidgets('An unopened ContextMenu renders child in the same place as without', (WidgetTester tester) async {
       // Measure the child in the scene with no ContextMenu.
+      final Widget child = _getChild();
       await tester.pumpWidget(
         CupertinoApp(
           home: CupertinoPageScaffold(
@@ -67,18 +79,19 @@ void main() {
           ),
         ),
       );
-      final Rect childRect = tester.getRect(find.byKey(childKey));
+      final Rect childRect = tester.getRect(find.byWidget(child));
 
       // When wrapped in a ContextMenu, the child is rendered in the same Rect.
-      await tester.pumpWidget(_getContextMenu());
-      expect(find.byKey(childKey), findsOneWidget);
-      expect(tester.getRect(find.byKey(childKey)), childRect);
+      await tester.pumpWidget(_getContextMenu(child: child));
+      expect(find.byWidget(child), findsOneWidget);
+      expect(tester.getRect(find.byWidget(child)), childRect);
     });
 
     testWidgets('Can open ContextMenu by tap and hold', (WidgetTester tester) async {
-      await tester.pumpWidget(_getContextMenu());
-      expect(find.byKey(childKey), findsOneWidget);
-      final Rect childRect = tester.getRect(find.byKey(childKey));
+      final Widget child = _getChild();
+      await tester.pumpWidget(_getContextMenu(child: child));
+      expect(find.byWidget(child), findsOneWidget);
+      final Rect childRect = tester.getRect(find.byWidget(child));
       expect(find.byType(ShaderMask), findsNothing);
 
       // Start a press on the child.
@@ -111,10 +124,11 @@ void main() {
 
   group('ContextMenu when open', () {
     testWidgets('Can close ContextMenu by background tap', (WidgetTester tester) async {
-      await tester.pumpWidget(_getContextMenu());
+      final Widget child = _getChild();
+      await tester.pumpWidget(_getContextMenu(child: child));
 
       // Open the ContextMenu
-      final Rect childRect = tester.getRect(find.byKey(childKey));
+      final Rect childRect = tester.getRect(find.byWidget(child));
       final TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pumpAndSettle();
       await gesture.up();
@@ -128,10 +142,11 @@ void main() {
     });
 
     testWidgets('Can close ContextMenu by dragging down', (WidgetTester tester) async {
-      await tester.pumpWidget(_getContextMenu());
+      final Widget child = _getChild();
+      await tester.pumpWidget(_getContextMenu(child: child));
 
       // Open the ContextMenu
-      final Rect childRect = tester.getRect(find.byKey(childKey));
+      final Rect childRect = tester.getRect(find.byWidget(child));
       final TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pumpAndSettle();
       await gesture.up();
@@ -169,10 +184,11 @@ void main() {
     });
 
     testWidgets('Can close ContextMenu by flinging down', (WidgetTester tester) async {
-      await tester.pumpWidget(_getContextMenu());
+      final Widget child = _getChild();
+      await tester.pumpWidget(_getContextMenu(child: child));
 
       // Open the ContextMenu
-      final Rect childRect = tester.getRect(find.byKey(childKey));
+      final Rect childRect = tester.getRect(find.byWidget(child));
       final TestGesture gesture = await tester.startGesture(childRect.center);
       await tester.pumpAndSettle();
       await gesture.up();
@@ -190,6 +206,152 @@ void main() {
       await tester.fling(_findStaticChild(child), const Offset(0.0, 100.0), 1000.0);
       await tester.pumpAndSettle();
       expect(_findStatic(), findsNothing);
+    });
+  });
+
+  group('Open layout differs depending on child\'s position on screen', () {
+    testWidgets('Portrait', (WidgetTester tester) async {
+      const Size portraitScreenSize = Size(600.0, 800.0);
+      await binding.setSurfaceSize(portraitScreenSize);
+
+      // Pump a ContextMenu in the center of the screen and open it.
+      final Widget child = _getChild();
+      await tester.pumpWidget(_getContextMenu(
+        alignment: Alignment.center,
+        screenSize: portraitScreenSize,
+        child: child,
+      ));
+      expect(find.byType(ContextMenuSheetAction), findsNothing);
+      Rect childRect = tester.getRect(find.byWidget(child));
+      TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // The position of the action is in the center of the screen.
+      expect(find.byType(ContextMenuSheetAction), findsOneWidget);
+      ContextMenuSheetAction action = tester.widget(find.byType(ContextMenuSheetAction));
+      final Offset center = tester.getTopLeft(find.byType(ContextMenuSheetAction));
+
+      // Close the ContextMenu.
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(_findStatic(), findsNothing);
+
+      // Pump a ContextMenu on the left of the screen and open it.
+      await tester.pumpWidget(_getContextMenu(
+        alignment: Alignment.centerLeft,
+        screenSize: portraitScreenSize,
+        child: child,
+      ));
+      expect(find.byType(ContextMenuSheetAction), findsNothing);
+      await tester.pumpAndSettle();
+      childRect = tester.getRect(find.byWidget(child));
+      gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // The position of the action is on the left of the screen.
+      expect(find.byType(ContextMenuSheetAction), findsOneWidget);
+      action = tester.widget(find.byType(ContextMenuSheetAction));
+      final Offset left = tester.getTopLeft(find.byType(ContextMenuSheetAction));
+      expect(left.dx, lessThan(center.dx));
+
+      // Close the ContextMenu.
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(_findStatic(), findsNothing);
+
+      // Pump a ContextMenu on the right of the screen and open it.
+      await tester.pumpWidget(_getContextMenu(
+        alignment: Alignment.centerRight,
+        screenSize: portraitScreenSize,
+        child: child,
+      ));
+      expect(find.byType(ContextMenuSheetAction), findsNothing);
+      childRect = tester.getRect(find.byWidget(child));
+      gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // The position of the action is on the right of the screen.
+      expect(find.byType(ContextMenuSheetAction), findsOneWidget);
+      action = tester.widget(find.byType(ContextMenuSheetAction));
+      final Offset right = tester.getTopLeft(find.byType(ContextMenuSheetAction));
+      expect(right.dx, greaterThan(center.dx));
+
+      // Set the screen back to its normal size.
+      await binding.setSurfaceSize(const Size(800.0, 600.0));
+    });
+
+    testWidgets('Landscape', (WidgetTester tester) async {
+      // Pump a ContextMenu in the center of the screen and open it.
+      final Widget child = _getChild();
+      await tester.pumpWidget(_getContextMenu(
+        alignment: Alignment.center,
+        child: child,
+      ));
+      expect(find.byType(ContextMenuSheetAction), findsNothing);
+      Rect childRect = tester.getRect(find.byWidget(child));
+      TestGesture gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Landscape doesn't support a centered action list, so the action is on
+      // the left side of the screen.
+      expect(find.byType(ContextMenuSheetAction), findsOneWidget);
+      ContextMenuSheetAction action = tester.widget(find.byType(ContextMenuSheetAction));
+      final Offset center = tester.getTopLeft(find.byType(ContextMenuSheetAction));
+
+      // Close the ContextMenu.
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(_findStatic(), findsNothing);
+
+      // Pump a ContextMenu on the left of the screen and open it.
+      await tester.pumpWidget(_getContextMenu(
+        alignment: Alignment.centerLeft,
+        child: child,
+      ));
+      expect(find.byType(ContextMenuSheetAction), findsNothing);
+      childRect = tester.getRect(find.byWidget(child));
+      gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // The position of the action is on the right of the screen, which is the
+      // same as for center aligned children in landscape.
+      expect(find.byType(ContextMenuSheetAction), findsOneWidget);
+      action = tester.widget(find.byType(ContextMenuSheetAction));
+      final Offset left = tester.getTopLeft(find.byType(ContextMenuSheetAction));
+      expect(left.dx, equals(center.dx));
+
+      // Close the ContextMenu.
+      await tester.tapAt(const Offset(1.0, 1.0));
+      await tester.pumpAndSettle();
+      expect(_findStatic(), findsNothing);
+
+      // Pump a ContextMenu on the right of the screen and open it.
+      await tester.pumpWidget(_getContextMenu(
+        alignment: Alignment.centerRight,
+        child: child,
+      ));
+      expect(find.byType(ContextMenuSheetAction), findsNothing);
+      childRect = tester.getRect(find.byWidget(child));
+      gesture = await tester.startGesture(childRect.center);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // The position of the action is on the left of the screen.
+      expect(find.byType(ContextMenuSheetAction), findsOneWidget);
+      action = tester.widget(find.byType(ContextMenuSheetAction));
+      final Offset right = tester.getTopLeft(find.byType(ContextMenuSheetAction));
+      expect(right.dx, lessThan(left.dx));
     });
   });
 }
