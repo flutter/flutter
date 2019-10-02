@@ -3,13 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:build/build.dart';
 import 'package:build_runner_core/build_runner_core.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_runner/web_compilation_delegate.dart';
+import 'package:glob/glob.dart';
 
 import '../../src/common.dart';
+import '../../src/io.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -34,17 +37,30 @@ void main() {
     });
 
     test('Can find assets from the generated directory', () => testbed.run(() async {
-      final MultirootFileBasedAssetReader reader = MultirootFileBasedAssetReader(
-        packageGraph,
-        fs.directory(fs.path.join('.dart_tool', 'build', 'generated')),
-      );
+      await IOOverrides.runWithIOOverrides(() async {
+        final MultirootFileBasedAssetReader reader = MultirootFileBasedAssetReader(
+          packageGraph,
+          fs.directory(fs.path.join('.dart_tool', 'build', 'generated'))
+        );
+        expect(await reader.canRead(AssetId('foobar', 'lib/bar.dart')), true);
+        expect(await reader.canRead(AssetId('foobar', 'lib/main.dart')), true);
 
-      // Note: we can't read from the regular directory because the default
-      // asset reader uses the regular file system.
-      expect(await reader.canRead(AssetId('foobar', 'lib/bar.dart')), true);
-      expect(await reader.readAsString(AssetId('foobar', 'lib/bar.dart')), 'bar');
-      expect(await reader.readAsBytes(AssetId('foobar', 'lib/bar.dart')), utf8.encode('bar'));
-    }));
+        expect(await reader.readAsString(AssetId('foobar', 'lib/bar.dart')), 'bar');
+        expect(await reader.readAsString(AssetId('foobar', 'lib/main.dart')), 'main');
+
+        expect(await reader.readAsBytes(AssetId('foobar', 'lib/bar.dart')), utf8.encode('bar'));
+        expect(await reader.readAsBytes(AssetId('foobar', 'lib/main.dart')), utf8.encode('main'));
+
+        expect(await reader.findAssets(Glob('**')).toList(), unorderedEquals(<AssetId>[
+          AssetId('foobar', 'pubspec.yaml'),
+          AssetId('foobar', 'lib/bar.dart'),
+          AssetId('foobar', 'lib/main.dart'),
+        ]));
+      }, FlutterIOOverrides(fileSystem: fs));
+     // Some component of either dart:io or build_runner normalizes file uris
+     // into file paths for windows. This doesn't seem to work with IOOverrides
+     // leaving all filepaths on windows with forward slashes.
+    }), skip: Platform.isWindows);
   });
 }
 

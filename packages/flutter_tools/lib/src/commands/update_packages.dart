@@ -27,11 +27,6 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'test_api': '0.2.5',     //  |
   'test_core': '0.2.5',    //  |
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
-  'build_runner_core': '3.1.1',    //  | Temporarily prevent the test web_tests-linux from failing.
-  'build_daemon': '2.0.0',         //  | See https://github.com/flutter/flutter/issues/40989
-  'build_web_compilers': '2.3.0',  //  |
-  'build_resolvers': '1.0.7',      //  |
-  'build_runner': '1.6.9',         //  |
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -1155,7 +1150,7 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
     printStatus('WARNING: the following packages use hard-coded version constraints:');
     final Set<String> allTransitive = <String>{
       for (PubspecDependency dependency in dependencies)
-        dependency.name
+        dependency.name,
     };
     for (String package in _kManuallyPinnedDependencies.keys) {
       // Don't add pinned dependency if it is not in the set of all transitive dependencies.

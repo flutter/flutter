@@ -176,7 +176,7 @@ class HotRunner extends ResidentRunner {
             httpUri: flutterDevices.first.observatoryUris.first,
             wsUri: flutterDevices.first.vmServices.first.wsAddress,
             baseUri: baseUris.first.toString(),
-          )
+          ),
         );
       }
     } catch (error) {

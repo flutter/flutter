@@ -31,7 +31,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -64,7 +64,7 @@ void main() {
             ),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -126,7 +126,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -141,7 +141,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -172,7 +172,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -187,7 +187,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     // Trigger the route push

@@ -12,6 +12,7 @@ import '../../devfs.dart';
 import '../../globals.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
+import 'assets.dart';
 import 'dart.dart';
 
 /// Copies the Linux desktop embedding files to the copy directory.
@@ -79,12 +80,12 @@ class DebugBundleLinuxAssets extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
-    //Source.behavior(AssetOutputBehavior()),
+    Source.behavior(AssetOutputBehavior('flutter_assets')),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
-   // Source.behavior(AssetOutputBehavior()),
+    Source.behavior(AssetOutputBehavior('flutter_assets')),
     Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
     Source.pattern('{OUTPUT_DIR}/flutter_assets/AssetManifest.json'),
     Source.pattern('{OUTPUT_DIR}/flutter_assets/FontManifest.json'),
@@ -111,7 +112,7 @@ class DebugBundleLinuxAssets extends Target {
 
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build();
-    final Pool pool = Pool(64);
+    final Pool pool = Pool(kMaxOpenFiles);
     await Future.wait<void>(
       assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
         final PoolResource resource = await pool.request();
@@ -129,5 +130,4 @@ class DebugBundleLinuxAssets extends Target {
         }
       }));
   }
-
 }

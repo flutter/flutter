@@ -88,7 +88,7 @@ class WindowsDevice extends Device {
       );
     }
     final Process process = await processUtils.start(<String>[
-      package.executable(debuggingOptions?.buildInfo?.mode)
+      package.executable(debuggingOptions?.buildInfo?.mode),
     ]);
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
