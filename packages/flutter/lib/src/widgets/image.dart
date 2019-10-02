@@ -55,9 +55,9 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
   );
 }
 
-ImageProvider<dynamic> _resizeIfNeeded(int cacheWidth, int cacheHeight, ImageProvider<dynamic> provider) {
+ImageProvider<dynamic> _resizeCacheIfNeeded(int cacheWidth, int cacheHeight, ImageProvider<dynamic> provider) {
   if (cacheWidth != null || cacheHeight != null) {
-    return ResizedImage(provider, cacheWidth, cacheHeight);
+    return CustomCacheSizeImage(provider, cacheWidth, cacheHeight);
   }
   return provider;
 }
@@ -340,7 +340,7 @@ class Image extends StatefulWidget {
     Map<String, String> headers,
     int cacheWidth,
     int cacheHeight,
-  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
+  }) : image = _resizeCacheIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -392,7 +392,7 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
     int cacheHeight,
-  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
+  }) : image = _resizeCacheIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
@@ -555,7 +555,7 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
     int cacheHeight,
-  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, scale != null
+  }) : image = _resizeCacheIfNeeded(cacheWidth, cacheHeight, scale != null
          ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
          : AssetImage(name, bundle: bundle, package: package)
        ),
@@ -612,7 +612,7 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
     int cacheHeight,
-  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
+  }) : image = _resizeCacheIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),

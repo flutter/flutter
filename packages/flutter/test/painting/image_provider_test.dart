@@ -299,20 +299,20 @@ void main() {
     });
   });
 
-  test('ResizedImage resizes to the correct dimensions', () async {
+  test('CustomCacheSizeImage resizes to the correct dimensions', () async {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage imageProvider = MemoryImage(bytes);
     final Size rawImageSize = await _resolveAndGetSize(imageProvider);
     expect(rawImageSize, const Size(1, 1));
 
     const Size resizeDims = Size(14, 7);
-    final ResizedImage resizedImage = ResizedImage(MemoryImage(bytes), resizeDims.width.round(), resizeDims.height.round());
+    final CustomCacheSizeImage resizedImage = CustomCacheSizeImage(MemoryImage(bytes), resizeDims.width.round(), resizeDims.height.round());
     const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
     final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
     expect(resizedImageSize, resizeDims);
   });
 
-  test('ResizedImage does not resize when no size is passed', () async {
+  test('CustomCacheSizeImage does not resize when no size is passed', () async {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);
     final MemoryImage imageProvider = MemoryImage(bytes);
     final Size rawImageSize = await _resolveAndGetSize(imageProvider);
