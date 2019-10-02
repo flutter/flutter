@@ -236,7 +236,7 @@ void main() {
           '/a/b': (BuildContext context) => const Text('route "/a/b"'),
           '/b': (BuildContext context) => const Text('route "/b"'),
         },
-      )
+      ),
     );
 
     expect(find.text('route "/"'), findsOneWidget);
@@ -273,7 +273,7 @@ void main() {
               );
             },
           },
-        )
+        ),
     );
     await tester.tap(find.text('X'));
     await tester.pump();
@@ -297,7 +297,7 @@ void main() {
       MaterialApp(
         initialRoute: '/a/b',
         routes: routes,
-      )
+      ),
     );
     expect(find.text('route "/"'), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
@@ -317,7 +317,7 @@ void main() {
       MaterialApp(
         initialRoute: '/a/b/c',
         routes: routes,
-      )
+      ),
     );
     final dynamic exception = tester.takeException();
     expect(exception is String, isTrue);
@@ -339,7 +339,7 @@ void main() {
       MaterialApp(
         initialRoute: '/a',
         routes: routes,
-      )
+      ),
     );
     expect(find.text('route "/"'), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
@@ -350,7 +350,7 @@ void main() {
       MaterialApp(
         initialRoute: '/b',
         routes: routes,
-      )
+      ),
     );
     expect(find.text('route "/"'), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
@@ -375,7 +375,7 @@ void main() {
           log.add('onUnknownRoute ${settings.name}');
           return null;
         },
-      )
+      ),
     );
     expect(tester.takeException(), isFlutterError);
     expect(log, <String>['onGenerateRoute /', 'onUnknownRoute /']);

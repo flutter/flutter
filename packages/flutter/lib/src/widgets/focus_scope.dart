@@ -339,9 +339,9 @@ class _FocusState extends State<Focus> {
       // _createNode is overridden in _FocusScopeState.
       _internalNode ??= _createNode();
     }
+    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
     focusNode.skipTraversal = widget.skipTraversal ?? focusNode.skipTraversal;
     focusNode.canRequestFocus = widget.canRequestFocus ?? focusNode.canRequestFocus;
-    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
     _hasFocus = focusNode.hasFocus;
 
     // Add listener even if the _internalNode existed before, since it should

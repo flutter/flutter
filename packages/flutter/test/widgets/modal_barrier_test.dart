@@ -274,7 +274,7 @@ void main() {
           label: 'Dismiss',
           textDirection: TextDirection.ltr,
         ),
-      ]
+      ],
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 

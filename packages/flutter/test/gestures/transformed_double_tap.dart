@@ -28,7 +28,7 @@ void main() {
                 ),
             ),
           ),
-        )
+        ),
     );
 
     // Move just below kTouchSlop should recognize tap.
@@ -72,7 +72,7 @@ void main() {
                 ),
             ),
           ),
-        )
+        ),
     );
 
     // Move just below kTouchSlop should recognize tap.

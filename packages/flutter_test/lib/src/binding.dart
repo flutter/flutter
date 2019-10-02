@@ -805,6 +805,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         'The MouseTracker thinks that there is still a mouse connected, which indicates that a '
         'test has not removed the mouse pointer which it added. Call removePointer on the '
         'active mouse gesture to remove the mouse pointer.');
+    // ignore: invalid_use_of_visible_for_testing_member
+    RendererBinding.instance.initMouseTracker();
+    // ignore: invalid_use_of_visible_for_testing_member
+    PointerEventConverter.clearPointers();
   }
 }
 

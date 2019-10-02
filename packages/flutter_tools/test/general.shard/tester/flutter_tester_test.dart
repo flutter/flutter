@@ -156,8 +156,7 @@ void main() {
 
       testUsingContext('start', () async {
         final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
-        mockProcess = MockProcess(
-            stdout: Stream<List<int>>.fromIterable(<List<int>>[
+        mockProcess = MockProcess(stdout: Stream<List<int>>.fromIterable(<List<int>>[
           '''
 Observatory listening on $observatoryUri
 Hello!

@@ -282,10 +282,9 @@ Future<void> _runBuildTests() async {
   }
   // Web compilation tests.
   await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'), path.join('lib', 'main.dart'));
-  // Should fail to compile with dart:io.
+  // Should not fail to compile with dart:io.
   await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web_compile_tests'),
     path.join('lib', 'dart_io_import.dart'),
-    expectNonZeroExit: true,
   );
 
   print('${bold}DONE: All build tests successful.$reset');
@@ -468,9 +467,9 @@ Future<void> _runTests() async {
 Future<void> _runWebTests() async {
   // TODO(yjbanov): re-enable when web test cirrus flakiness is resolved
   await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
+    'test/foundation/',
+    'test/physics/',
     // TODO(yjbanov): re-enable when flakiness is resolved
-    // 'test/foundation/',
-    // 'test/physics/',
     // 'test/rendering/',
     // 'test/services/',
     // 'test/painting/',
@@ -801,6 +800,8 @@ Future<void> _runFlutterWebTestBatch(String workingDirectory, {
 }) async {
   final List<String> args = <String>[
     'test',
+    if (_getCiProvider() == CiProviders.cirrus)
+      '--concurrency=1',  // do not parallelize on Cirrus to reduce flakiness
     '-v',
     '--platform=chrome',
     ...?flutterTestArgs,

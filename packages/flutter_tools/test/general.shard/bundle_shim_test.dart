@@ -39,6 +39,7 @@ void main() {
       outputDir: 'example',
       targetPlatform: TargetPlatform.ios,
       depfilePath: 'example.d',
+      precompiled: false,
     );
     expect(fs.file(fs.path.join('example', 'kernel_blob.bin')).existsSync(), true);
     expect(fs.file(fs.path.join('example', 'LICENSE')).existsSync(), true);
@@ -60,6 +61,7 @@ void main() {
       outputDir: 'example',
       targetPlatform: TargetPlatform.linux_x64,
       depfilePath: 'example.d',
+      precompiled: false,
     ), throwsA(isInstanceOf<ToolExit>()));
   }));
 }

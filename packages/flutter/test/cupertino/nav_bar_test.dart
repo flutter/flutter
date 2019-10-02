@@ -334,8 +334,8 @@ void main() {
     });
 
     expect(opacities, <double> [
-        0.0, // Initially the smaller font title is invisible.
-        1.0, // The larger font title is visible.
+      0.0, // Initially the smaller font title is invisible.
+      1.0, // The larger font title is visible.
     ]);
 
     expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
@@ -359,8 +359,8 @@ void main() {
     });
 
     expect(opacities, <double> [
-        1.0, // Smaller font title now visible
-        0.0, // Larger font title invisible.
+      1.0, // Smaller font title now visible
+      0.0, // Larger font title invisible.
     ]);
 
     // The persistent toolbar doesn't move or change size.
@@ -963,7 +963,7 @@ void main() {
               child: Placeholder(),
             );
           },
-        )
+        ),
       );
 
       await tester.pump();
@@ -975,7 +975,7 @@ void main() {
           builder: (BuildContext context) {
             return const CupertinoNavigationBarBackButton();
           },
-        )
+        ),
       );
 
       await tester.pump();
@@ -1004,7 +1004,7 @@ void main() {
               child: Placeholder(),
             );
           },
-        )
+        ),
       );
 
       await tester.pump();
@@ -1023,7 +1023,7 @@ void main() {
               child: const Placeholder(),
             );
           },
-        )
+        ),
       );
 
       await tester.pump();
