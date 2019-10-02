@@ -52,28 +52,51 @@ class Keyboard {
   void _handleHtmlEvent(html.KeyboardEvent event) {
     final Map<String, dynamic> eventData = <String, dynamic>{
       'type': event.type,
-      // TODO(yjbanov): this emulates Android because that the only reasonable
-      //                thing to map to right now (the other choice is fuchsia).
-      //                However, eventually we need to have something that maps
-      //                better to Web.
-      'keymap': 'android',
-      'keyCode': event.keyCode,
+      'keymap': 'web',
+      'code': event.code,
+      'key': event.key,
+      'metaState': _getMetaState(event),
     };
-
-    // TODO(yjbanov): The browser does not report `charCode` for 'keydown' and
-    //                'keyup', only for 'keypress'. This restores the value
-    //                from the 'key' field. However, we need to verify how
-    //                many code units a single key can have. Right now it
-    //                assumes exactly one unit (that's what Flutter framework
-    //                expects). But we'll need a different strategy if other
-    //                code unit counts are possible.
-    if (event.key.codeUnits.length == 1) {
-      eventData['codePoint'] = event.key.codeUnits.first;
-    }
 
     ui.window.onPlatformMessage('flutter/keyevent',
         _messageCodec.encodeMessage(eventData), _noopCallback);
   }
+}
+
+const int _modifierNone = 0x00;
+const int _modifierShift = 0x01;
+const int _modifierAlt = 0x02;
+const int _modifierControl = 0x04;
+const int _modifierMeta = 0x08;
+const int _modifierNumLock = 0x10;
+const int _modifierCapsLock = 0x20;
+const int _modifierScrollLock = 0x40;
+
+/// Creates a bitmask representing the meta state of the [event].
+int _getMetaState(html.KeyboardEvent event) {
+  int metaState = _modifierNone;
+  if (event.getModifierState('Shift')) {
+    metaState |= _modifierShift;
+  }
+  if (event.getModifierState('Alt')) {
+    metaState |= _modifierAlt;
+  }
+  if (event.getModifierState('Control')) {
+    metaState |= _modifierControl;
+  }
+  if (event.getModifierState('Meta')) {
+    metaState |= _modifierMeta;
+  }
+  if (event.getModifierState('NumLock')) {
+    metaState |= _modifierNumLock;
+  }
+  if (event.getModifierState('CapsLock')) {
+    metaState |= _modifierCapsLock;
+  }
+  if (event.getModifierState('ScrollLock')) {
+    metaState |= _modifierScrollLock;
+  }
+  return metaState;
 }
 
 void _noopCallback(ByteData data) {}
