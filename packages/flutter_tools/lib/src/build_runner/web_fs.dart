@@ -29,6 +29,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
+import '../dart/pub.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../platform_plugins.dart';
@@ -176,6 +177,18 @@ class WebFs {
     if (!flutterProject.dartTool.existsSync()) {
       flutterProject.dartTool.createSync(recursive: true);
     }
+    // Workaround for https://github.com/flutter/flutter/issues/41681.
+    final String toolPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools');
+    if (!fs.isFileSync(fs.path.join(toolPath, '.packages'))) {
+      await pubGet(
+        context: PubContext.pubGet,
+        directory: toolPath,
+        offline: true,
+        skipPubspecYamlCheck: true,
+        checkLastModified: false,
+      );
+    }
+
     final Completer<bool> firstBuildCompleter = Completer<bool>();
 
     // Initialize the asset bundle.

@@ -8,7 +8,9 @@ import 'package:built_collection/built_collection.dart';
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/build_runner/web_fs.dart';
@@ -27,6 +29,7 @@ void main() {
   MockHttpMultiServer mockHttpMultiServer;
   MockBuildDaemonClient mockBuildDaemonClient;
   MockOperatingSystemUtils mockOperatingSystemUtils;
+  MockProcessUtils mockProcessUtils;
   bool lastInitializePlatform;
   dynamic lastAddress;
   int lastPort;
@@ -41,6 +44,7 @@ void main() {
     mockBuildDaemonClient = MockBuildDaemonClient();
     mockOperatingSystemUtils = MockOperatingSystemUtils();
     mockDwds = MockDwds();
+    mockProcessUtils = MockProcessUtils();
     when(mockBuildDaemonCreator.startBuildDaemon(any, release: anyNamed('release'), initializePlatform: anyNamed('initializePlatform')))
       .thenAnswer((Invocation invocation) async {
         lastInitializePlatform = invocation.namedArguments[#initializePlatform];
@@ -48,6 +52,17 @@ void main() {
       });
     when(mockOperatingSystemUtils.findFreePort()).thenAnswer((Invocation _) async {
       return 1234;
+    });
+    when(mockProcessUtils.stream(
+      any,
+      workingDirectory: anyNamed('workingDirectory'),
+      mapFunction: anyNamed('mapFunction'),
+      environment: anyNamed('environment'),
+    )).thenAnswer((Invocation invocation) async {
+      final String workingDirectory = invocation.namedArguments[#workingDirectory];
+      fs.file(fs.path.join(workingDirectory, '.packages')).createSync(recursive: true);
+      fs.file(fs.path.join(workingDirectory, 'pubspec.yaml')).createSync();
+      return 0;
     });
     when(mockBuildDaemonClient.buildResults).thenAnswer((Invocation _) {
       return Stream<BuildResults>.fromFuture(Future<BuildResults>.value(
@@ -74,6 +89,7 @@ void main() {
         OperatingSystemUtils: () => mockOperatingSystemUtils,
         BuildDaemonCreator: () => mockBuildDaemonCreator,
         ChromeLauncher: () => mockChromeLauncher,
+        ProcessUtils: () => mockProcessUtils,
         HttpMultiServerFactory: () => (dynamic address, int port) async {
           lastAddress = address;
           lastPort = port;
@@ -109,6 +125,12 @@ void main() {
       hostname: null,
       port: null,
     );
+    // Since the .packages file is missing in the memory filesystem, this should
+    // be called.
+    verify(processUtils.stream(any,
+      workingDirectory: fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
+      mapFunction: anyNamed('mapFunction'),
+      environment: anyNamed('environment'),)).called(1);
 
     // The build daemon is told to build once.
     verify(mockBuildDaemonClient.startBuild()).called(1);
@@ -189,4 +211,4 @@ class MockDwds extends Mock implements Dwds {}
 class MockHttpMultiServer extends Mock implements HttpMultiServer {}
 class MockChromeLauncher extends Mock implements ChromeLauncher {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
-
+class MockProcessUtils extends Mock implements ProcessUtils {}
