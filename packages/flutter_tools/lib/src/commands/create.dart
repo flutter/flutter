@@ -141,8 +141,16 @@ class CreateCommand extends FlutterCommand {
     argParser.addFlag(
       'androidx',
       negatable: true,
-      defaultsTo: false,
+      defaultsTo: true,
       help: 'Generate a project using the AndroidX support libraries',
+    );
+    // Deprecated
+    argParser.addFlag(
+      'macos',
+      negatable: true,
+      defaultsTo: false,
+      hide: true,
+      help: 'Include support for building a macOS application',
     );
     // Deprecated
     argParser.addFlag(
@@ -191,7 +199,7 @@ class CreateCommand extends FlutterCommand {
     }
 
     bool exists(List<String> path) {
-      return fs.directory(fs.path.joinAll(<String>[projectDir.absolute.path] + path)).existsSync();
+      return fs.directory(fs.path.joinAll(<String>[projectDir.absolute.path, ...path])).existsSync();
     }
 
     // If it exists, the project type in the metadata is definitive.
@@ -385,11 +393,12 @@ class CreateCommand extends FlutterCommand {
       androidLanguage: argResults['android-language'],
       iosLanguage: argResults['ios-language'],
       web: featureFlags.isWebEnabled,
+      macos: argResults['macos'],
     );
 
     final String relativeDirPath = fs.path.relative(projectDirPath);
     if (!projectDir.existsSync() || projectDir.listSync().isEmpty) {
-      printStatus('Creating project $relativeDirPath...');
+      printStatus('Creating project $relativeDirPath... androidx: ${argResults['androidx']}');
     } else {
       if (sampleCode != null && !argResults['overwrite']) {
         throwToolExit('Will not overwrite existing project in $relativeDirPath: '
@@ -595,6 +604,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     bool renderDriverTest = false,
     bool withPluginHook = false,
     bool web = false,
+    bool macos = false,
   }) {
     flutterRoot = fs.path.normalize(flutterRoot);
 
@@ -602,12 +612,14 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     final String pluginClass = pluginDartClass.endsWith('Plugin')
         ? pluginDartClass
         : pluginDartClass + 'Plugin';
+    final String appleIdentifier = _createUTIIdentifier(organization, projectName);
 
     return <String, dynamic>{
       'organization': organization,
       'projectName': projectName,
       'androidIdentifier': _createAndroidIdentifier(organization, projectName),
-      'iosIdentifier': _createUTIIdentifier(organization, projectName),
+      'iosIdentifier': appleIdentifier,
+      'macosIdentifier': appleIdentifier,
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidX': androidX,
@@ -623,6 +635,14 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'flutterRevision': FlutterVersion.instance.frameworkRevision,
       'flutterChannel': FlutterVersion.instance.channel,
       'web': web,
+      'macos': macos,
+      'year': DateTime.now().year,
+      // For now, the new plugin schema is only used when a desktop plugin is
+      // enabled. Once the new schema is supported on stable, this should be
+      // removed, and the new schema should always be used.
+      'useNewPluginSchema': macos,
+      // If a desktop platform is included, add a workaround for #31366.
+      'includeTargetPlatformWorkaround': macos,
     };
   }
 

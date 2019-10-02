@@ -372,7 +372,11 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
 
   /// True if the navigation bar's background color has no transparency.
   @override
-  bool get fullObstruction => backgroundColor == null ? null : backgroundColor.alpha == 0xFF;
+  bool shouldFullyObstruct(BuildContext context) {
+    final Color backgroundColor = CupertinoDynamicColor.resolve(this.backgroundColor, context)
+                               ?? CupertinoTheme.of(context).barBackgroundColor;
+    return backgroundColor.alpha == 0xFF;
+  }
 
   @override
   Size get preferredSize {
@@ -1259,7 +1263,8 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
   /// to pop the [Navigator].
   ///
   /// It can, for instance, be used to pop the platform's navigation stack
-  /// instead of Flutter's [Navigator].
+  /// via [SystemNavigator] instead of Flutter's [Navigator] in add-to-app
+  /// situations.
   ///
   /// Defaults to null.
   final VoidCallback onPressed;

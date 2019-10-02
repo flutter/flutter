@@ -371,9 +371,9 @@ void main() {
 
   testWidgets('Dropdown screen edges', (WidgetTester tester) async {
     int value = 4;
-    final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
-    for (int i = 0; i < 20; ++i)
-      items.add(DropdownMenuItem<int>(value: i, child: Text('$i')));
+    final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[
+      for (int i = 0; i < 20; ++i) DropdownMenuItem<int>(value: i, child: Text('$i')),
+    ];
 
     void handleChanged(int newValue) {
       value = newValue;

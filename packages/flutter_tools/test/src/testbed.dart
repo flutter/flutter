@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
@@ -34,7 +35,8 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger to avoid color codes.
   Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
-  FlutterVersion: () => FakeFlutterVersion() // prevent requirement to mock git for test runner.
+  FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
+  Signals: () => FakeSignals(),  // prevent registering actual signal handlers.
 };
 
 /// Manages interaction with the tool injection and runner system.
@@ -110,7 +112,7 @@ class Testbed {
               final Timer result = parent.createPeriodicTimer(zone, period, timer);
               timers[result] = StackTrace.current;
               return result;
-            }
+            },
           ),
           body: () async {
             Cache.flutterRoot = '';
@@ -693,7 +695,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
-    this.isPluginAsAarEnabled = false,
 });
 
   @override
@@ -707,7 +708,4 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isWindowsEnabled;
-
-  @override
-  final bool isPluginAsAarEnabled;
 }

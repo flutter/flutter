@@ -705,15 +705,11 @@ class DeviceDomain extends Domain {
   /// Return a list of the current devices, with each device represented as a map
   /// of properties (id, name, platform, ...).
   Future<List<Map<String, dynamic>>> getDevices([ Map<String, dynamic> args ]) async {
-    final List<Map<String, dynamic>> devicesInfo = <Map<String, dynamic>>[];
-
-    for (PollingDeviceDiscovery discoverer in _discoverers) {
-      for (Device device in await discoverer.devices) {
-        devicesInfo.add(await _deviceToMap(device));
-      }
-    }
-
-    return devicesInfo;
+    return <Map<String, dynamic>>[
+      for (PollingDeviceDiscovery discoverer in _discoverers)
+        for (Device device in await discoverer.devices)
+          await _deviceToMap(device),
+    ];
   }
 
   /// Enable device events.
@@ -899,6 +895,9 @@ class NotifyingLogger extends Logger {
   void dispose() {
     _messageController.close();
   }
+
+  @override
+  void sendNotification(String message, {String progressId}) { }
 }
 
 /// A running application, started by this daemon.
@@ -1108,6 +1107,16 @@ class _AppRunLogger extends Logger {
     } else {
       domain._sendAppEvent(app, 'progress', event);
     }
+  }
+
+  @override
+  void sendNotification(String message, {String progressId}) {
+    final int id = _nextProgressId++;
+    _sendProgressEvent(<String, dynamic>{
+      'id': id.toString(),
+      'progressId': progressId,
+      'finished': true,
+    });
   }
 }
 

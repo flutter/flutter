@@ -64,7 +64,11 @@ void main() {
       });
 
       test('TextField has correct Android semantics', () async {
-        final SerializableFinder normalTextField = find.byValueKey(normalTextFieldKeyValue);
+        final SerializableFinder normalTextField = find.descendant(
+          of: find.byValueKey(normalTextFieldKeyValue),
+          matching: find.byType('Semantics'),
+          firstMatchOnly: true,
+        );
         expect(await getSemantics(normalTextField), hasAndroidSemantics(
           className: AndroidClassName.editText,
           isEditable: true,
@@ -112,7 +116,11 @@ void main() {
       });
 
       test('password TextField has correct Android semantics', () async {
-        final SerializableFinder passwordTextField = find.byValueKey(passwordTextFieldKeyValue);
+        final SerializableFinder passwordTextField = find.descendant(
+          of: find.byValueKey(passwordTextFieldKeyValue),
+          matching: find.byType('Semantics'),
+          firstMatchOnly: true,
+        );
         expect(await getSemantics(passwordTextField), hasAndroidSemantics(
           className: AndroidClassName.editText,
           isEditable: true,

@@ -127,11 +127,16 @@ class VisualStudio {
     // component name is significantly different in different versions.
     // Default to the latest known description, but use a specific string
     // if a known older version is requested.
-    String cppToolchainDescription = 'MSVC v142 - VS 2019 C++ x64/x86 build tools (v14.21)';
+    String cppToolchainDescription = 'MSVC v142 - VS 2019 C++ x64/x86 build tools';
     if (visualStudioMajorVersion == 15) {
-      cppToolchainDescription = 'VC++ 2017 version 15.9 v14.16 latest v141 tools';
+      cppToolchainDescription = 'VC++ 2017 version 15.9 v14.## latest v141 tools';
     }
-
+    // The 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64' ID is assigned to the latest
+    // release of the toolchain, and there can be minor updates within a given version of
+    // Visual Studio. Since it changes over time, listing a precise version would become
+    // wrong after each VC++ toolchain update, so just instruct people to install the
+    // latest version.
+    cppToolchainDescription += '\n - If there are multiple versions, install the latest one';
     return <String, String>{
       // The MSBuild tool and related command-line toolchain.
       'Microsoft.Component.MSBuild': 'MSBuild',

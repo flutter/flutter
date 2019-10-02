@@ -227,7 +227,7 @@ class CupertinoDatePicker extends StatefulWidget {
     this.maximumYear,
     this.minuteInterval = 1,
     this.use24hFormat = false,
-    this.backgroundColor = _kBackgroundColor
+    this.backgroundColor = _kBackgroundColor,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(mode != null),
        assert(onDateTimeChanged != null),
@@ -464,6 +464,23 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     }
 
     previousHourIndex = selectedHour;
+
+    PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
+  }
+
+  void _handleSystemFontsChange () {
+    setState(() {
+      // System fonts change might cause the text layout width to change.
+      // Clears cached width to ensure that they get recalculated with the
+      // new system fonts.
+      estimatedColumnWidths.clear();
+    });
+  }
+
+  @override
+  void dispose() {
+    PaintingBinding.instance.systemFonts.removeListener(_handleSystemFontsChange);
+    super.dispose();
   }
 
   @override
@@ -791,6 +808,21 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     selectedYear = widget.initialDateTime.year;
 
     dayController = FixedExtentScrollController(initialItem: selectedDay - 1);
+
+    PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
+  }
+
+  void _handleSystemFontsChange() {
+    setState(() {
+      // System fonts change might cause the text layout width to change.
+      _refreshEstimatedColumnWidths();
+    });
+  }
+
+  @override
+  void dispose() {
+    PaintingBinding.instance.systemFonts.removeListener(_handleSystemFontsChange);
+    super.dispose();
   }
 
   @override
@@ -803,6 +835,10 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     alignCenterLeft = textDirectionFactor == 1 ? Alignment.centerLeft : Alignment.centerRight;
     alignCenterRight = textDirectionFactor == 1 ? Alignment.centerRight : Alignment.centerLeft;
 
+    _refreshEstimatedColumnWidths();
+  }
+
+  void _refreshEstimatedColumnWidths() {
     estimatedColumnWidths[_PickerColumnType.dayOfMonth.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.dayOfMonth, localizations, context);
     estimatedColumnWidths[_PickerColumnType.month.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.month, localizations, context);
     estimatedColumnWidths[_PickerColumnType.year.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.year, localizations, context);
@@ -1171,6 +1207,22 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
     if (widget.mode != CupertinoTimerPickerMode.hm)
       selectedSecond = widget.initialTimerDuration.inSeconds % 60;
+
+    PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
+  }
+
+  void _handleSystemFontsChange() {
+    setState(() {
+      // System fonts change might cause the text layout width to change.
+      textPainter.markNeedsLayout();
+      _measureLabelMetrics();
+    });
+  }
+
+  @override
+  void dispose() {
+    PaintingBinding.instance.systemFonts.removeListener(_handleSystemFontsChange);
+    super.dispose();
   }
 
   @override
@@ -1190,6 +1242,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     textDirection = Directionality.of(context);
     localizations = CupertinoLocalizations.of(context);
 
+    _measureLabelMetrics();
+  }
+
+  void _measureLabelMetrics() {
     textPainter.textDirection = textDirection;
     final TextStyle textStyle = _textStyleFrom(context);
 
@@ -1206,7 +1262,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     for (String input in numbers) {
       textPainter.text = TextSpan(
         text: input,
-        style: textStyle
+        style: textStyle,
       );
       textPainter.layout();
 
@@ -1218,7 +1274,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
     textPainter.text = TextSpan(
       text: '$widestNumber$widestNumber',
-      style: textStyle
+      style: textStyle,
     );
 
     textPainter.layout();
@@ -1251,7 +1307,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
               text,
               style: const TextStyle(
                 fontSize: _kTimerPickerLabelFontSize,
-                fontWeight: FontWeight.w600
+                fontWeight: FontWeight.w600,
               ),
               maxLines: 1,
               softWrap: false,
@@ -1320,7 +1376,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         ),
         _buildLabel(
           localizations.timerPickerHourLabel(lastSelectedHour ?? selectedHour),
-          additionalPadding
+          additionalPadding,
         ),
       ],
     );
@@ -1453,7 +1509,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       .pickerTextStyle.merge(
         const TextStyle(
           fontSize: _kTimerPickerNumberLabelFontSize,
-        )
+        ),
       );
   }
 
@@ -1474,14 +1530,14 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         // Pad the widget to make it as wide as `_kPickerWidth`.
         columns = <Widget>[
           _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
-          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2))
+          _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2)),
         ];
         break;
       case CupertinoTimerPickerMode.ms:
         // Pad the widget to make it as wide as `_kPickerWidth`.
         columns = <Widget>[
           _buildMinuteColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
-          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2))
+          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2)),
         ];
         break;
       case CupertinoTimerPickerMode.hms:
@@ -1490,7 +1546,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         columns = <Widget>[
           _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
           _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: _kTimerPickerHalfColumnPadding)),
-          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2))
+          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2)),
         ];
         break;
     }
@@ -1505,7 +1561,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         data: themeData.copyWith(
           textTheme: themeData.textTheme.copyWith(
             pickerTextStyle: _textStyleFrom(context),
-          )
+          ),
         ),
         child: Align(
           alignment: widget.alignment,

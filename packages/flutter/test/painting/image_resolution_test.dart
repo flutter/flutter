@@ -115,8 +115,7 @@ void main() {
       }));
     });
 
-    test(
-        'When high-res device and high-res asset not present in bundle then  return main variant', () {
+    test('When high-res device and high-res asset not present in bundle then  return main variant', () {
       const String mainAssetPath = 'assets/normalFolder/normalFile.png';
 
       final Map<String, List<String>> assetBundleMap =
@@ -140,7 +139,7 @@ void main() {
 
       assetImage.obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
-        devicePixelRatio: 3.0)
+        devicePixelRatio: 3.0),
       ).then(expectAsync1((AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, mainAssetPath);
         expect(bundleKey.scale, 1.0);
@@ -173,7 +172,7 @@ void main() {
       // we have 1.0 and 3.0, asking for 1.5 should give
       assetImage.obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
-        devicePixelRatio: deviceRatio)
+        devicePixelRatio: deviceRatio),
       ).then(expectAsync1((AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, expectedAssetPath);
         expect(bundleKey.scale, chosenAssetRatio);

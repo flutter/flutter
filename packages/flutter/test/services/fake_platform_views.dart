@@ -312,7 +312,7 @@ class FakeIosPlatformViewsController {
 
 class FakeHtmlPlatformViewsController {
   FakeHtmlPlatformViewsController() {
-      SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
+    SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
   }
 
   Iterable<FakeHtmlPlatformView> get views => _views.values;

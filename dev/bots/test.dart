@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:googleapis/bigquery/v2.dart' as bq;
 import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'flutter_compact_formatter.dart';
@@ -153,7 +154,10 @@ Future<void> _runSmokeTests() async {
   );
 
   // Verify that we correctly generated the version file.
-  await _verifyVersion(path.join(flutterRoot, 'version'));
+  final bool validVersion = await verifyVersion(path.join(flutterRoot, 'version'));
+  if (!validVersion) {
+    exit(1);
+  }
 }
 
 Future<bq.BigqueryApi> _getBigqueryApi() async {
@@ -184,17 +188,16 @@ Future<bq.BigqueryApi> _getBigqueryApi() async {
 
 // Partition tool tests into two groups, see explanation on `_runToolCoverage`.
 List<List<String>> _partitionToolTests() {
-  final List<String> pending = <String>[];
   final String toolTestDir = path.join(toolRoot, 'test');
-  for (FileSystemEntity entity in Directory(toolTestDir).listSync(recursive: true)) {
-    if (entity is File && entity.path.endsWith('_test.dart')) {
-      final String relativePath = path.relative(entity.path, from: toolRoot);
-      pending.add(relativePath);
-    }
-  }
+  final List<String> pending = <String>[
+    for (FileSystemEntity entity in Directory(toolTestDir).listSync(recursive: true))
+      if (entity is File && entity.path.endsWith('_test.dart'))
+        path.relative(entity.path, from: toolRoot),
+  ];
+
   // Shuffle the tests to avoid giving an expensive test directory like
   // integration to a single run of tests.
-  pending..shuffle();
+  pending.shuffle();
   final int aboutHalf = pending.length ~/ 2;
   final List<String> groupA = pending.take(aboutHalf).toList();
   final List<String> groupB = pending.skip(aboutHalf).toList();
@@ -229,7 +232,7 @@ Future<void> _runToolCoverage() async {
       environment: <String, String>{
         'FLUTTER_ROOT': flutterRoot,
         'SUBSHARD': subshards[i],
-      }
+      },
     );
   }
 }
@@ -283,10 +286,9 @@ Future<void> _runBuildTests() async {
   }
   // Web compilation tests.
   await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'), path.join('lib', 'main.dart'));
-  // Should fail to compile with dart:io.
+  // Should not fail to compile with dart:io.
   await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web_compile_tests'),
     path.join('lib', 'dart_io_import.dart'),
-    expectNonZeroExit: true,
   );
 
   print('${bold}DONE: All build tests successful.$reset');
@@ -300,7 +302,7 @@ Future<void> _flutterBuildDart2js(String relativePathToApplication, String targe
     expectNonZeroExit: expectNonZeroExit,
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
-    }
+    },
   );
   print('Done.');
 }
@@ -469,9 +471,9 @@ Future<void> _runTests() async {
 Future<void> _runWebTests() async {
   // TODO(yjbanov): re-enable when web test cirrus flakiness is resolved
   await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
+    'test/foundation/',
+    'test/physics/',
     // TODO(yjbanov): re-enable when flakiness is resolved
-    // 'test/foundation/',
-    // 'test/physics/',
     // 'test/rendering/',
     // 'test/services/',
     // 'test/painting/',
@@ -512,19 +514,20 @@ Future<void> _buildRunnerTest(
   bool enableFlutterToolAsserts = false,
   bq.TabledataResourceApi tableData,
 }) async {
-  final List<String> args = <String>['run', 'build_runner', 'test', '--', useFlutterTestFormatter ? '-rjson' : '-rcompact', '-j1'];
-  if (!hasColor) {
-    args.add('--no-color');
-  }
-  if (testPath != null) {
-    args.add(testPath);
-  }
+  final List<String> args = <String>[
+    'run',
+    'build_runner',
+    'test',
+    '--',
+    if (useFlutterTestFormatter) '-rjson' else '-rcompact',
+    '-j1',
+    if (!hasColor) '--no-color',
+    if (testPath != null) testPath,
+  ];
   final Map<String, String> pubEnvironment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
+    if (Directory(pubCache).existsSync()) 'PUB_CACHE': pubCache,
   };
-  if (Directory(pubCache).existsSync()) {
-    pubEnvironment['PUB_CACHE'] = pubCache;
-  }
   if (enableFlutterToolAsserts) {
     // If an existing env variable exists append to it, but only if
     // it doesn't appear to already include enable-asserts.
@@ -554,7 +557,7 @@ Future<void> _buildRunnerTest(
       args,
       workingDirectory: workingDirectory,
       environment: pubEnvironment,
-      beforeExit: formatter.finish
+      beforeExit: formatter.finish,
     );
     await _processTestOutput(formatter, testOutput, tableData);
   } else {
@@ -563,7 +566,7 @@ Future<void> _buildRunnerTest(
       args,
       workingDirectory:workingDirectory,
       environment:pubEnvironment,
-      removeLine: (String line) => line.contains('[INFO]')
+      removeLine: (String line) => line.contains('[INFO]'),
     );
   }
 }
@@ -574,15 +577,17 @@ Future<void> _pubRunTest(
   bool enableFlutterToolAsserts = false,
   bq.TabledataResourceApi tableData,
 }) async {
-  final List<String> args = <String>['run', 'test', useFlutterTestFormatter ? '-rjson' : '-rcompact', '-j1'];
-  if (!hasColor)
-    args.add('--no-color');
-  if (testPath != null)
-    args.add(testPath);
-  final Map<String, String> pubEnvironment = <String, String>{};
-  if (Directory(pubCache).existsSync()) {
-    pubEnvironment['PUB_CACHE'] = pubCache;
-  }
+  final List<String> args = <String>[
+    'run',
+    'test',
+    if (useFlutterTestFormatter) '-rjson' else '-rcompact',
+    '-j1',
+    if (!hasColor) '--no-color',
+    if (testPath != null) testPath,
+  ];
+  final Map<String, String> pubEnvironment = <String, String>{
+    if (Directory(pubCache).existsSync()) 'PUB_CACHE': pubCache,
+  };
   if (enableFlutterToolAsserts) {
     // If an existing env variable exists append to it, but only if
     // it doesn't appear to already include enable-asserts.
@@ -799,6 +804,8 @@ Future<void> _runFlutterWebTestBatch(String workingDirectory, {
 }) async {
   final List<String> args = <String>[
     'test',
+    if (_getCiProvider() == CiProviders.cirrus)
+      '--concurrency=1',  // do not parallelize on Cirrus to reduce flakiness
     '-v',
     '--platform=chrome',
     ...?flutterTestArgs,
@@ -921,27 +928,31 @@ Future<void> _runFlutterTest(String workingDirectory, {
   }
 }
 
-Future<void> _verifyVersion(String filename) async {
-  if (!File(filename).existsSync()) {
+// the optional `file` argument is an override for testing
+@visibleForTesting
+Future<bool> verifyVersion(String filename, [File file]) async {
+  final RegExp pattern = RegExp(r'^\d+\.\d+\.\d+(\+hotfix\.\d+)?(-pre\.\d+)?$');
+  file ??= File(filename);
+  final String version = await file.readAsString();
+  if (!file.existsSync()) {
     print('$redLine');
     print('The version logic failed to create the Flutter version file.');
     print('$redLine');
-    exit(1);
+    return false;
   }
-  final String version = await File(filename).readAsString();
   if (version == '0.0.0-unknown') {
     print('$redLine');
     print('The version logic failed to determine the Flutter version.');
     print('$redLine');
-    exit(1);
+    return false;
   }
-  final RegExp pattern = RegExp(r'^\d+\.\d+\.\d+(?:|-pre\.\d+|\+hotfix\.\d+)$');
   if (!version.contains(pattern)) {
     print('$redLine');
-    print('The version logic generated an invalid version string.');
+    print('The version logic generated an invalid version string: "$version".');
     print('$redLine');
-    exit(1);
+    return false;
   }
+  return true;
 }
 
 Future<void> _runIntegrationTests() async {
@@ -1019,6 +1030,8 @@ Future<void> _androidGradleTests(String subShard) async {
     await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
     await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
     await _runDevicelabTest('gradle_r8_test', env: env);
+    await _runDevicelabTest('gradle_non_android_plugin_test', env: env);
+    await _runDevicelabTest('gradle_jetifier_test', env: env);
   }
   if (subShard == 'gradle2') {
     await _runDevicelabTest('gradle_plugin_bundle_test', env: env);

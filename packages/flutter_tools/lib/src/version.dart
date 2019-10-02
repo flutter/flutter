@@ -66,7 +66,7 @@ class FlutterVersion {
         final String remote = channel.substring(0, slash);
         _repositoryUrl = _runGit('git ls-remote --get-url $remote');
         _channel = channel.substring(slash + 1);
-       } else if (channel.isEmpty) {
+      } else if (channel.isEmpty) {
         _channel = 'unknown';
       } else {
         _channel = channel;
@@ -120,14 +120,14 @@ class FlutterVersion {
   }
 
   Map<String, Object> toJson() => <String, Object>{
-        'frameworkVersion': frameworkVersion ?? 'unknown',
-        'channel': channel,
-        'repositoryUrl': repositoryUrl ?? 'unknown source',
-        'frameworkRevision': frameworkRevision,
-        'frameworkCommitDate': frameworkCommitDate,
-        'engineRevision': engineRevision,
-        'dartSdkVersion': dartSdkVersion,
-      };
+    'frameworkVersion': frameworkVersion ?? 'unknown',
+    'channel': channel,
+    'repositoryUrl': repositoryUrl ?? 'unknown source',
+    'frameworkRevision': frameworkRevision,
+    'frameworkCommitDate': frameworkCommitDate,
+    'engineRevision': engineRevision,
+    'dartSdkVersion': dartSdkVersion,
+  };
 
   /// A date String describing the last framework commit.
   String get frameworkCommitDate => _latestGitCommitDate();

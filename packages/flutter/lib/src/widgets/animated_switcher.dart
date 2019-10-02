@@ -276,11 +276,11 @@ class AnimatedSwitcher extends StatefulWidget {
   ///
   /// This is an [AnimatedSwitcherLayoutBuilder] function.
   static Widget defaultLayoutBuilder(Widget currentChild, List<Widget> previousChildren) {
-    List<Widget> children = previousChildren;
-    if (currentChild != null)
-      children = children.toList()..add(currentChild);
     return Stack(
-      children: children,
+      children: <Widget>[
+        ...previousChildren,
+        if (currentChild != null) currentChild,
+      ],
       alignment: Alignment.center,
     );
   }

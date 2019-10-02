@@ -143,11 +143,10 @@ class SliverPersistentHeader extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<SliverPersistentHeaderDelegate>('delegate', delegate));
-    final List<String> flags = <String>[];
-    if (pinned)
-      flags.add('pinned');
-    if (floating)
-      flags.add('floating');
+    final List<String> flags = <String>[
+      if (pinned) 'pinned',
+      if (floating) 'floating',
+    ];
     if (flags.isEmpty)
       flags.add('normal');
     properties.add(IterableProperty<String>('mode', flags));

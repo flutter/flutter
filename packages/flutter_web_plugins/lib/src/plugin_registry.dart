@@ -80,6 +80,8 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
       final MessageHandler handler = _handlers[channel];
       if (handler != null) {
         response = await handler(data);
+      } else {
+        ui.channelBuffers.push(channel, data, callback);
       }
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
@@ -96,8 +98,20 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
   /// Sends a platform message from the platform side back to the framework.
   @override
   Future<ByteData> send(String channel, ByteData message) {
-    throw FlutterError(
-        'Cannot send messages from the platform side to the framework.');
+    final Completer<ByteData> completer = Completer<ByteData>();
+    ui.window.onPlatformMessage(channel, message, (ByteData reply) {
+      try {
+        completer.complete(reply);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'flutter web shell',
+          context: ErrorDescription('during a plugin-to-framework message'),
+        ));
+      }
+    });
+    return completer.future;
   }
 
   @override
@@ -107,6 +121,9 @@ class _PlatformBinaryMessenger extends BinaryMessenger {
       _handlers.remove(channel);
     else
       _handlers[channel] = handler;
+    ui.channelBuffers.drain(channel, (ByteData data, ui.PlatformMessageResponseCallback callback) async {
+      await handlePlatformMessage(channel, data, callback);
+    });
   }
 
   @override

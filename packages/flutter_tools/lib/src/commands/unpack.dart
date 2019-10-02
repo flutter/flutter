@@ -12,8 +12,7 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 /// The directory in the Flutter cache for each platform's artifacts.
-const Map<TargetPlatform, String> flutterArtifactPlatformDirectory =
-    <TargetPlatform, String>{
+const Map<TargetPlatform, String> flutterArtifactPlatformDirectory = <TargetPlatform, String>{
   TargetPlatform.linux_x64: 'linux-x64',
   TargetPlatform.darwin_x64: 'darwin-x64',
   TargetPlatform.windows_x64: 'windows-x64',

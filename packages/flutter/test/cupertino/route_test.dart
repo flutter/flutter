@@ -31,7 +31,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -64,7 +64,7 @@ void main() {
             ),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -95,8 +95,8 @@ void main() {
     });
 
     expect(opacities, <double> [
-        0.0, // Initially the smaller font title is invisible.
-        1.0, // The larger font title is visible.
+      0.0, // Initially the smaller font title is invisible.
+      1.0, // The larger font title is visible.
     ]);
 
     // Check that the large font title is at the right spot.
@@ -126,7 +126,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -141,7 +141,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -172,7 +172,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -187,7 +187,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     // Trigger the route push
@@ -805,15 +805,15 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoPageScaffold(
           child: Builder(builder: (BuildContext context) {
-              return GestureDetector(
-                onTap: () async {
-                  await showCupertinoModalPopup<void>(
-                    context: context,
-                    builder: (BuildContext context) => const SizedBox(),
-                  );
-                },
-                child: const Text('tap'),
-              );
+            return GestureDetector(
+              onTap: () async {
+                await showCupertinoModalPopup<void>(
+                  context: context,
+                  builder: (BuildContext context) => const SizedBox(),
+                );
+              },
+              child: const Text('tap'),
+            );
           }),
         ),
       ),

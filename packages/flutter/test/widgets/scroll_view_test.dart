@@ -350,7 +350,10 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: NotificationListener<OverscrollNotification>(
-          onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+          onNotification: (OverscrollNotification message) {
+            scrolled = true;
+            return false;
+          },
           child: ListView(
             primary: true,
             children: const <Widget>[],
@@ -368,7 +371,10 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: NotificationListener<OverscrollNotification>(
-          onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+          onNotification: (OverscrollNotification message) {
+            scrolled = true;
+            return false;
+          },
           child: ListView(
             primary: false,
             children: const <Widget>[],
@@ -386,7 +392,10 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: NotificationListener<OverscrollNotification>(
-          onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+          onNotification: (OverscrollNotification message) {
+            scrolled = true;
+            return false;
+          },
           child: ListView(
             primary: false,
             physics: const AlwaysScrollableScrollPhysics(),
@@ -405,7 +414,10 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: NotificationListener<OverscrollNotification>(
-          onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+          onNotification: (OverscrollNotification message) {
+            scrolled = true;
+            return false;
+          },
           child: ListView(
             primary: true,
             physics: const ScrollPhysics(),

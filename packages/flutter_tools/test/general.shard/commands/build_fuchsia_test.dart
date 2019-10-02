@@ -39,6 +39,7 @@ void main() {
     fuchsiaArtifactsNoCompiler = MockFuchsiaArtifacts();
 
     when(linuxPlatform.isLinux).thenReturn(true);
+    when(linuxPlatform.isWindows).thenReturn(false);
     when(windowsPlatform.isWindows).thenReturn(true);
     when(windowsPlatform.isLinux).thenReturn(false);
     when(windowsPlatform.isMacOS).thenReturn(false);
@@ -47,8 +48,7 @@ void main() {
   });
 
   group('Fuchsia build fails gracefully when', () {
-    testUsingContext('there is no Fuchsia project',
-        () async {
+    testUsingContext('there is no Fuchsia project', () async {
       final BuildCommand command = BuildCommand();
       applyMocksToCommand(command);
       expect(
