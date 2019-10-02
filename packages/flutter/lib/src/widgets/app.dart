@@ -1199,11 +1199,21 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
     return Shortcuts(
       shortcuts: <LogicalKeySet, Intent>{
+        LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+        LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+        LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+        LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+        LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+        LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
         LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
       },
       child: Actions(
         actions: <LocalKey, ActionFactory>{
           DoNothingAction.key: () => const DoNothingAction(),
+          RequestFocusAction.key: () => RequestFocusAction(),
+          NextFocusAction.key: () => NextFocusAction(),
+          PreviousFocusAction.key: () => PreviousFocusAction(),
+          DirectionalFocusAction.key: () => DirectionalFocusAction(),
         },
         child: DefaultFocusTraversal(
           policy: ReadingOrderTraversalPolicy(),
