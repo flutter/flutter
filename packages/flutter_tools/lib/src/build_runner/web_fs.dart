@@ -263,7 +263,7 @@ class WebFs {
       await assetBundle.build();
       await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
       if (!skipDwds) {
-        BuildRunnerAssetHandler assetHandler = BuildRunnerAssetHandler(
+        final BuildRunnerAssetHandler assetHandler = BuildRunnerAssetHandler(
           daemonAssetPort,
           kBuildTargetName,
           hostname ?? _kHostName,
