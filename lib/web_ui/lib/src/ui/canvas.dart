@@ -2205,7 +2205,7 @@ class Path {
 ///
 /// When iterating across a [PathMetrics]' contours, the [PathMetric] objects
 /// are only valid until the next one is obtained.
-class PathMetrics extends IterableBase<PathMetric> {
+class PathMetrics extends collection.IterableBase<PathMetric> {
   PathMetrics._(Path path, bool forceClosed)
       : _iterator = PathMetricIterator._(PathMetric._(path, forceClosed));
 
