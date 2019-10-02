@@ -2312,6 +2312,11 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   ///
   /// The [opaque] defaults to false.
   ///
+  /// The [opaque] is effectively useless during [Layer.find] (more
+  /// specifically, [Layer.findAnnotations] with `onlyFirst: true`), since the
+  /// search process then skips the remaining tree after finding the first
+  /// annotation.
+  ///
   /// See also:
   ///
   ///  * [Layer.findAnnotations], which explains the concept of being opaque
