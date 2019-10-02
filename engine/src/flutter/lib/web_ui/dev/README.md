@@ -11,7 +11,7 @@
 You could also run `felt help` or `felt help <command>` to get more information about the available commands and arguments.
 
 ## How can I use `felt`?
-Once you have your local copy of the engine [setup](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment), you'll need to add `/path/to/engine/src/flutter/lib/web_ui/dev` to your `PATH`.
+Once you have your local copy of the engine [setup](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment), it's recommended that you add `/path/to/engine/src/flutter/lib/web_ui/dev` to your `PATH`.
 Then you would be able to use the `felt` tool from anywhere:
 ```
 felt check-licenses
@@ -20,6 +20,8 @@ or:
 ```
 felt build --watch
 ```
+
+If you don't want to add `felt` to your path, you can still invoke it using a relative path like `./web_ui/dev/felt <command>`
 
 ## Configuration files
 
