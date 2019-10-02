@@ -127,14 +127,14 @@ void main() {
             mockArtifacts.getArtifactPath(
                 Artifact.ideviceinstaller,
                 platform: anyNamed('platform'),
-            )
+            ),
         ).thenReturn(installerPath);
 
         when(
             mockArtifacts.getArtifactPath(
                 Artifact.iosDeploy,
                 platform: anyNamed('platform'),
-            )
+            ),
         ).thenReturn(iosDeployPath);
 
         when(mockPortForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
@@ -411,7 +411,7 @@ void main() {
             mockArtifacts.getArtifactPath(
                 Artifact.ideviceinstaller,
                 platform: anyNamed('platform'),
-            )
+            ),
         ).thenReturn(installerPath);
       });
 

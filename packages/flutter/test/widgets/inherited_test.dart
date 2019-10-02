@@ -161,7 +161,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     expect(log, equals(<String>['a: 3']));
@@ -237,7 +237,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     expect(log, equals(<String>['a: 3']));
@@ -308,7 +308,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     expect(log, equals(<int>[3]));
@@ -355,7 +355,7 @@ void main() {
           ),
           right: child,
         ),
-      )
+      ),
     );
 
     expect(log, equals(<int>[3]));
@@ -403,7 +403,7 @@ void main() {
       ValueInherited(
         value: 3,
         child: inner,
-      )
+      ),
     );
     expect(inheritedValue, equals(3));
   });
@@ -430,7 +430,7 @@ void main() {
       ValueInherited(
         value: 3,
         child: inner,
-      )
+      ),
     );
     expect(buildCount, equals(1));
   });
@@ -461,7 +461,7 @@ void main() {
       ValueInherited(
         value: 3,
         child: inner,
-      )
+      ),
     );
     expect(buildCount, equals(2));
   });

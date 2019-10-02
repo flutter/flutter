@@ -3966,7 +3966,7 @@ abstract class ComponentElement extends Element {
           informationCollector: () sync* {
             yield DiagnosticsDebugCreator(DebugCreator(this));
           },
-        )
+        ),
       );
     } finally {
       // We delay marking the element as clean until after calling build() so
@@ -3986,7 +3986,7 @@ abstract class ComponentElement extends Element {
           informationCollector: () sync* {
             yield DiagnosticsDebugCreator(DebugCreator(this));
           },
-        )
+        ),
       );
       _child = updateChild(null, built, slot);
     }

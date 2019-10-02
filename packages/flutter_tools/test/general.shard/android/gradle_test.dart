@@ -1379,8 +1379,8 @@ plugin2=${plugin2.path}
       when(mockProcessManager.run(
         any,
         environment: anyNamed('environment'),
-        workingDirectory: anyNamed('workingDirectory'))
-      ).thenAnswer(
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer(
           (_) async => ProcessResult(1, 0, '', ''),
       );
       fs.directory('build/outputs/repo').createSync(recursive: true);

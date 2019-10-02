@@ -302,11 +302,11 @@ void main() {
       ).debugFillProperties(builder);
 
       final List<String> description = builder.properties
-          .where((DiagnosticsNode node) {
-            return !node.isFiltered(DiagnosticLevel.info);
-          })
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
+        .where((DiagnosticsNode node) {
+          return !node.isFiltered(DiagnosticLevel.info);
+        })
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
 
       expect(description[0], equalsIgnoringHashCodes('dispatcher: ActionDispatcher#00000'));
       expect(description[1], equals('actions: {}'));

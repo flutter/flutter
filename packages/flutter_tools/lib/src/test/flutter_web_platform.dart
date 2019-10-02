@@ -412,8 +412,8 @@ class BrowserManager {
     })
       ..cancel();
 
-    // Whenever we get a message, no matter which child channel it's for, we the
-    // know browser is still running code which means the user isn't debugging.
+    // Whenever we get a message, no matter which child channel it's for, we know
+    // the browser is still running code which means the user isn't debugging.
     _channel = MultiChannel<dynamic>(
       webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object> stream) {
         return stream.map((Object message) {
@@ -453,7 +453,13 @@ class BrowserManager {
   /// loaded in the same browser. However, the browser can only load so many at
   /// once, and we want a timeout in case they fail so we only wait for so many
   /// at once.
-  final Pool _pool = Pool(8);
+  // The number 1 is chosen to disallow multiple iframes in the same browser. This
+  // is because in some environments, such as Cirrus CI, tests end up stuck and
+  // time out eventually. The exact reason for timeouts is unknown, but the
+  // hypothesis is that we were the first ones to attempt to run DDK-compiled
+  // tests concurrently in the browser. DDK is known to produce an order of
+  // magnitude bigger and somewhat slower code, which may overload the browser.
+  final Pool _pool = Pool(1);
 
   /// The ID of the next suite to be loaded.
   ///
@@ -544,7 +550,7 @@ class BrowserManager {
         this, null, _browser.remoteDebuggerUri, _onRestartController.stream);
   }
 
-  /// Tells the browser the load a test suite from the URL [url].
+  /// Tells the browser to load a test suite from the URL [url].
   ///
   /// [url] should be an HTML page with a reference to the JS-compiled test
   /// suite. [path] is the path of the original test suite file, which is used

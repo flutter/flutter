@@ -134,7 +134,7 @@ void main() {
               },
             ),
           ),
-        )
+        ),
       );
 
       // Can be scrolled infinitely for negative indexes.
@@ -183,7 +183,7 @@ void main() {
               },
             ),
           ),
-        )
+        ),
       );
 
       expect(paintedChildren, <int>[-13, -12, -11, -10, -9, -8, -7]);
@@ -299,7 +299,7 @@ void main() {
               },
             ),
           ),
-        )
+        ),
       );
 
       // Scrolls up and down to check if builder is called twice.
@@ -326,7 +326,7 @@ void main() {
               return Text(index.toString());
             }),
           ),
-        )
+        ),
       );
 
       final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent;
@@ -363,7 +363,7 @@ void main() {
               return Text(index.toString());
             }),
           ),
-        )
+        ),
       );
 
       final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent;
@@ -385,7 +385,7 @@ void main() {
               return Text(index.toString());
             }),
           ),
-        )
+        ),
       );
 
       // 12 instead of 6 children are laid out + 1 because the middle item is

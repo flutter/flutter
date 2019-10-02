@@ -849,7 +849,7 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
       else if (platform.isLinux)
         ...<List<String>>[
           ..._linuxBinaryDirs,
-        ]
+        ],
     ];
   }
 
@@ -1221,6 +1221,7 @@ const List<List<String>> _androidBinaryDirs = <List<String>>[
   <String>['android-arm64', 'android-arm64/artifacts.zip'],
   <String>['android-arm64-profile', 'android-arm64-profile/artifacts.zip'],
   <String>['android-arm64-release', 'android-arm64-release/artifacts.zip'],
+  <String>['android-x64-release', 'android-x64-release/artifacts.zip'],
 ];
 
 const List<List<String>> _dartSdks = <List<String>> [
