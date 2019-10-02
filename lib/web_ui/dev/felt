@@ -4,31 +4,25 @@ set -e
 # felt: a command-line utility for building and testing Flutter web engine.
 #       It stands for Flutter Engine Local Tester.
 
-FELT_PATH=`which felt`
-if [ -z "$FELT_PATH" ]
-then
-  echo "ERROR: felt is not in your PATH"
-  echo "Fix: add lib/web_ui/dev to your PATH"
-  exit 1
-fi
+FELT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-GCLIENT_PATH=`which gclient`
-if [ -z "$GCLIENT_PATH" ]
+if [ -z "`which gclient`" ]
 then
   echo "ERROR: gclient is not in your PATH"
   echo "Fix: add the path to your installation of depot_tools to your PATH"
   exit 1
 fi
+GCLIENT_PATH=`which gclient`
 
-NINJA_PATH=`which ninja`
-if [ -z "$NINJA_PATH" ]
+if [ -z "`which ninja`" ]
 then
   echo "ERROR: ninja is not in your PATH"
   echo "Fix: add the path to your installation of depot_tools to your PATH"
   exit 1
 fi
+NINJA_PATH=`which ninja`
 
-ENGINE_SRC_DIR="$(dirname $(dirname $(dirname $(dirname $(dirname ${FELT_PATH})))))"
+ENGINE_SRC_DIR="$(dirname $(dirname $(dirname $(dirname ${FELT_DIR}))))"
 FLUTTER_DIR="${ENGINE_SRC_DIR}/flutter"
 WEB_UI_DIR="${FLUTTER_DIR}/lib/web_ui"
 DEV_DIR="${WEB_UI_DIR}/dev"
