@@ -40,6 +40,7 @@ class ExpansionTile extends StatefulWidget {
     this.children = const <Widget>[],
     this.trailing,
     this.initiallyExpanded = false,
+    this.maintainsState = true,
   }) : assert(initiallyExpanded != null),
        super(key: key);
 
@@ -73,6 +74,12 @@ class ExpansionTile extends StatefulWidget {
 
   /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
   final bool initiallyExpanded;
+
+  /// Specifies if the state of the children is maintained when the tile expands and collapses
+  ///
+  /// When true, the children are kept in the tree while the tile is collapsed. 
+  /// When false, the children are removed from the tree every time the tile is collapsed.
+  final bool maintainsState;
 
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
