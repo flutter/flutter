@@ -77,7 +77,7 @@ class AssembleCommand extends FlutterCommand {
     final Target result = _kDefaultTargets
         .firstWhere((Target target) => target.name == name, orElse: () => null);
     if (result == null) {
-      throwToolExit('No target named "${target.name} defined."');
+      throwToolExit('No target named "$name" defined.');
     }
     return result;
   }
