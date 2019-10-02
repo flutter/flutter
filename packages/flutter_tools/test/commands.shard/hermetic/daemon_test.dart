@@ -139,10 +139,10 @@ void main() {
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
-          commands.stream,
-          responses.add,
-          daemonCommand: command,
-          notifyingLogger: notifyingLogger,
+        commands.stream,
+        responses.add,
+        daemonCommand: command,
+        notifyingLogger: notifyingLogger,
       );
 
       commands.add(<String, dynamic>{

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This test performs too poorly to run with coverage enabled.
-@Tags(<String>['create', 'no_coverage'])
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -24,7 +22,6 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-
 
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
@@ -116,7 +113,9 @@ void main() {
       'ios/',
     ]);
     return _runFlutterTest(projectDir);
-  }, timeout: allowForRemotePubInvocation);
+  },
+    timeout: allowForRemotePubInvocation,
+  );
 
   testUsingContext('cannot create a project if non-empty non-project directory exists with .metadata', () async {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);

@@ -29,7 +29,7 @@ void main() {
           fs.path.join('flutter', 'packages', 'flutter_test', 'pubspec.yaml'),
           fs.path.join('flutter', 'bin', 'cache', 'artifacts', 'gradle_wrapper', 'wrapper'),
           fs.path.join('usr', 'local', 'bin', 'adb'),
-          fs.path.join('Android', 'platform-tools', 'foo'),
+          fs.path.join('Android', 'platform-tools', 'adb.exe'),
         ];
         for (String path in paths) {
           fs.file(path).createSync(recursive: true);
@@ -43,25 +43,17 @@ void main() {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>[
-        'create', '--flutter-root=flutter', '--no-pub', '--template=module', 'testy']);
-      expect(await command.usageValues,
-             containsPair(CustomDimensions.commandCreateProjectType, 'module'));
+      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=module', 'testy']);
+      expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'module'));
 
-      await runner.run(<String>[
-        'create',  '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
-      expect(await command.usageValues,
-             containsPair(CustomDimensions.commandCreateProjectType, 'app'));
+      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
+      expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'app'));
 
-      await runner.run(<String>[
-        'create',  '--flutter-root=flutter', '--no-pub', '--template=package', 'testy']);
-      expect(await command.usageValues,
-             containsPair(CustomDimensions.commandCreateProjectType, 'package'));
+      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=package', 'testy']);
+      expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'package'));
 
-      await runner.run(<String>[
-        'create', '--flutter-root=flutter', '--no-pub', '--template=plugin', 'testy']);
-      expect(await command.usageValues,
-             containsPair(CustomDimensions.commandCreateProjectType, 'plugin'));
+      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=plugin', 'testy']);
+      expect(await command.usageValues, containsPair(CustomDimensions.commandCreateProjectType, 'plugin'));
     }));
 
     test('set iOS host language type as usage value', () => testbed.run(() async {

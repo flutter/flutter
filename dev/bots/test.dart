@@ -33,8 +33,7 @@ final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
-
-final bool noUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] == 'true';
+final bool canUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] != 'true';
 
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
@@ -186,84 +185,51 @@ Future<bq.BigqueryApi> _getBigqueryApi() async {
   }
 }
 
-// Partition tool tests into two groups, see explanation on `_runToolCoverage`.
-List<List<String>> _partitionToolTests() {
-  final String toolTestDir = path.join(toolRoot, 'test');
-  final List<String> pending = <String>[
-    for (FileSystemEntity entity in Directory(toolTestDir).listSync(recursive: true))
-      if (entity is File && entity.path.endsWith('_test.dart'))
-        path.relative(entity.path, from: toolRoot),
-  ];
-
-  // Shuffle the tests to avoid giving an expensive test directory like
-  // integration to a single run of tests.
-  pending.shuffle();
-  final int aboutHalf = pending.length ~/ 2;
-  final List<String> groupA = pending.take(aboutHalf).toList();
-  final List<String> groupB = pending.skip(aboutHalf).toList();
-  return <List<String>>[groupA, groupB];
-}
-
-// Tools tests run with coverage enabled have much higher memory usage than
-// our current CI infrastructure can support. We partition the tests into
-// two sets and run them in separate invocations of dart to reduce peak memory
-// usage. codecov.io automatically handles merging different coverage files
-// together, so producing separate files is OK.
-//
-// See: https://github.com/flutter/flutter/issues/35025
 Future<void> _runToolCoverage() async {
-  final List<List<String>> tests = _partitionToolTests();
-  // Precompile tests to speed up subsequent runs.
-  await runCommand(
+  await runCommand( // Precompile tests to speed up subsequent runs.
     pub,
     <String>['run', 'build_runner', 'build'],
     workingDirectory: toolRoot,
   );
-
-  // The name of this subshard has to match the --file path provided at
-  // the end of this test script in `.cirrus.yml`.
-  const List<String> subshards = <String>['A', 'B'];
-  for (int i = 0; i < tests.length; i++) {
-    final List<String> testGroup = tests[i];
-    await runCommand(
-      dart,
-      <String>[path.join('tool', 'tool_coverage.dart'), '--', ...testGroup],
-      workingDirectory: toolRoot,
-      environment: <String, String>{
-        'FLUTTER_ROOT': flutterRoot,
-        'SUBSHARD': subshards[i],
-      },
-    );
-  }
+  await runCommand(
+    dart,
+    <String>[path.join('tool', 'tool_coverage.dart')],
+    workingDirectory: toolRoot,
+    environment: <String, String>{
+      'FLUTTER_ROOT': flutterRoot,
+    }
+  );
 }
 
 Future<void> _runToolTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
   await _runSmokeTests();
 
-  // The flutter_tool will currently be snapshotted without asserts. We need
-  // to force it to be regenerated with them enabled.
-  if (!Platform.isWindows) {
-    File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot')).deleteSync();
-    File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp')).deleteSync();
-  }
-  // reduce overhead of build_runner in the create case.
-  if (noUseBuildRunner || Platform.environment['SUBSHARD'] == 'create') {
-    await _pubRunTest(
-      path.join(flutterRoot, 'packages', 'flutter_tools'),
-      tableData: bigqueryApi?.tabledata,
-      enableFlutterToolAsserts: !Platform.isWindows,
-    );
-  } else {
-    await _buildRunnerTest(
-      path.join(flutterRoot, 'packages', 'flutter_tools'),
-      flutterRoot,
-      tableData: bigqueryApi?.tabledata,
-      enableFlutterToolAsserts: !Platform.isWindows,
-    );
-  }
+  const String kDotShard = '.shard';
+  const String kTest = 'test';
+  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
-  print('${bold}DONE: All tests successful.$reset');
+  final Map<String, ShardRunner> subshards = Map<String, ShardRunner>.fromIterable(
+    Directory(path.join(toolsPath, kTest))
+      .listSync()
+      .map<String>((FileSystemEntity entry) => entry.path)
+      .where((String name) => name.endsWith(kDotShard))
+      .map<String>((String name) => path.basenameWithoutExtension(name)),
+    // The `dynamic` on the next line is because Map.fromIterable isn't generic.
+    value: (dynamic subshard) => () async {
+      await _pubRunTest(
+        toolsPath,
+        testPath: path.join(kTest, '$subshard$kDotShard'),
+        useBuildRunner: canUseBuildRunner,
+        tableData: bigqueryApi?.tabledata,
+        // TODO(ianh): The integration tests fail to start on Windows if asserts are enabled.
+        // See https://github.com/flutter/flutter/issues/36476
+        enableFlutterToolAsserts: !(subshard == 'integration' && Platform.isWindows),
+      );
+    },
+  );
+
+  await selectSubshard(subshards);
 }
 
 /// Verifies that AOT, APK, and IPA (if on macOS) builds the
@@ -503,53 +469,45 @@ Future<void> _runCoverage() async {
     print('This file should have been generated by the `flutter test --coverage` script, but was not.');
     exit(1);
   }
-
   print('${bold}DONE: Coverage collection successful.$reset');
 }
 
-Future<void> _buildRunnerTest(
-  String workingDirectory,
-  String flutterRoot, {
+Future<void> _pubRunTest(String workingDirectory, {
   String testPath,
-  bool enableFlutterToolAsserts = false,
+  bool enableFlutterToolAsserts = true,
+  bool useBuildRunner = false,
   bq.TabledataResourceApi tableData,
 }) async {
-  final List<String> args = <String>[
-    'run',
-    'build_runner',
-    'test',
-    '--',
-    if (useFlutterTestFormatter) '-rjson' else '-rcompact',
-    '-j1',
-    if (!hasColor) '--no-color',
-    if (testPath != null) testPath,
-  ];
+  final List<String> args = <String>['run', '--verbose'];
+  if (useBuildRunner) {
+    args.addAll(<String>['build_runner', 'test', '--']);
+  } else {
+    args.add('test');
+  }
+  args.add(useFlutterTestFormatter ? '-rjson' : '-rcompact');
+  args.add('-j1'); // TODO(ianh): Scale based on CPUs.
+  if (!hasColor)
+    args.add('--no-color');
+  if (testPath != null)
+    args.add(testPath);
   final Map<String, String> pubEnvironment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
-    if (Directory(pubCache).existsSync()) 'PUB_CACHE': pubCache,
   };
+  if (Directory(pubCache).existsSync()) {
+    pubEnvironment['PUB_CACHE'] = pubCache;
+  }
   if (enableFlutterToolAsserts) {
     // If an existing env variable exists append to it, but only if
     // it doesn't appear to already include enable-asserts.
     String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
     if (!toolsArgs.contains('--enable-asserts'))
-        toolsArgs += ' --enable-asserts';
+      toolsArgs += ' --enable-asserts';
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
+    // The flutter_tool will originally have been snapshotted without asserts.
+    // We need to force it to be regenerated with them enabled.
+    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'));
+    deleteFile(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp'));
   }
-
-  final String subShard = Platform.environment['SUBSHARD'];
-  switch (subShard) {
-    case 'integration':
-      args.addAll(<String>['--tags', 'integration']);
-      break;
-    case 'create':
-      args.addAll(<String>['--tags', 'create']);
-      break;
-    case 'tool':
-      args.addAll(<String>['-x', 'integration', '-x', 'create']);
-      break;
-  }
-
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
     final Stream<String> testOutput = runAndGetStdout(
@@ -564,68 +522,19 @@ Future<void> _buildRunnerTest(
     await runCommand(
       pub,
       args,
-      workingDirectory:workingDirectory,
-      environment:pubEnvironment,
-      removeLine: (String line) => line.contains('[INFO]'),
+      workingDirectory: workingDirectory,
+      environment: pubEnvironment,
+      removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
     );
   }
 }
 
-Future<void> _pubRunTest(
-  String workingDirectory, {
-  String testPath,
-  bool enableFlutterToolAsserts = false,
-  bq.TabledataResourceApi tableData,
-}) async {
-  final List<String> args = <String>[
-    'run',
-    'test',
-    if (useFlutterTestFormatter) '-rjson' else '-rcompact',
-    '-j1',
-    if (!hasColor) '--no-color',
-    if (testPath != null) testPath,
-  ];
-  final Map<String, String> pubEnvironment = <String, String>{
-    if (Directory(pubCache).existsSync()) 'PUB_CACHE': pubCache,
-  };
-  if (enableFlutterToolAsserts) {
-    // If an existing env variable exists append to it, but only if
-    // it doesn't appear to already include enable-asserts.
-    String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
-    if (!toolsArgs.contains('--enable-asserts'))
-        toolsArgs += ' --enable-asserts';
-    pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
-  }
-
-  final String subShard = Platform.environment['SUBSHARD'];
-  switch (subShard) {
-    case 'integration':
-      args.addAll(<String>['--tags', 'integration']);
-      break;
-    case 'tool':
-      args.addAll(<String>['--exclude-tags', 'integration']);
-      break;
-    case 'create':
-      args.addAll(<String>[path.join('test', 'general.shard', 'commands', 'create_test.dart')]);
-      break;
-  }
-
-  if (useFlutterTestFormatter) {
-    final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-    final Stream<String> testOutput = runAndGetStdout(
-      pub,
-      args,
-      workingDirectory: workingDirectory,
-      beforeExit: formatter.finish,
-    );
-    await _processTestOutput(formatter, testOutput, tableData);
-  } else {
-    await runCommand(
-      pub,
-      args,
-      workingDirectory: workingDirectory,
-    );
-  }
+void deleteFile(String path) {
+  // There's a race condition here but in theory we're not racing anyone
+  // while this script runs, so should be ok.
+  final File file = File(path);
+  if (file.existsSync())
+    file.deleteSync();
 }
 
 enum CiProviders {
@@ -1037,5 +946,27 @@ Future<void> _androidGradleTests(String subShard) async {
     await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
     await _runDevicelabTest('module_test', env: env);
     await _runDevicelabTest('module_host_with_custom_build_test', env: env);
+  }
+}
+
+Future<void> selectShard(Map<String, ShardRunner> shards) => _runFromList(shards, 'SHARD', 'shard');
+Future<void> selectSubshard(Map<String, ShardRunner> subshards) => _runFromList(subshards, 'SUBSHARD', 'subshard');
+
+Future<void> _runFromList(Map<String, ShardRunner> items, String key, String name) async {
+  final String item = Platform.environment[key];
+  if (item != null) {
+    if (!items.containsKey(item)) {
+      print('${red}Invalid $name: $item$reset');
+      print('The available ${name}s are: ${items.keys.join(", ")}');
+      exit(1);
+    }
+    print('$bold$key=$item$reset');
+    await items[item]();
+  } else {
+    for (String currentItem in items.keys) {
+      print('$bold$key=$currentItem$reset');
+      await items[currentItem]();
+      print('');
+    }
   }
 }
