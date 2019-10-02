@@ -297,6 +297,44 @@ class Material extends StatefulWidget {
     return result;
   }
 
+  /// Computes the appropriate overlay color used to indicate elevation in
+  /// dark themes.
+  ///
+  /// If the surrounding [Theme.applyElevationOverlayColor] is true, and
+  /// [background] is [Theme.colorScheme.surface] then this will return
+  /// a version of the given color with a semi-transparent [Theme.colorScheme.onSurface]
+  /// overlaid on top of it. The opacity of the overlay is controlled by the
+  /// [elevation].
+  ///
+  /// Otherwise it will just return the [background] unmodified.
+  ///
+  /// Most applications will not need to use this directly as the [Material]
+  /// widget will handle applying the overlay for you. This is only for cases
+  /// where you need custom painting, but would like to use an overlay that
+  /// matches the built-in widgets.
+  ///
+  /// See also:
+  ///
+  ///   * [ThemeData.applyElevationOverlayColor] which controls the whether
+  ///     an overlay color will be applied to indicate elevation.
+  ///   * https://material.io/design/color/dark-theme.html#properties which
+  ///     specifies the exact overlay values for a given elevation.
+  static Color elevationOverlayColor(BuildContext context, Color background, double elevation) {
+    final ThemeData theme = Theme.of(context);
+    if (elevation > 0.0 &&
+        theme.applyElevationOverlayColor &&
+        background == theme.colorScheme.surface) {
+
+      // Compute the opacity for the given elevation
+      // This formula matches the values in the spec:
+      // https://material.io/design/color/dark-theme.html#properties
+      final double opacity = (4.5 * math.log(elevation + 1) + 2) / 100.0;
+      final Color overlay = theme.colorScheme.onSurface.withOpacity(opacity);
+      return Color.alphaBlend(overlay, background);
+    }
+    return background;
+  }
+
   @override
   _MaterialState createState() => _MaterialState();
 
@@ -315,24 +353,6 @@ class Material extends StatefulWidget {
 
   /// The default radius of an ink splash in logical pixels.
   static const double defaultSplashRadius = 35.0;
-}
-
-// Apply a semi-transparent colorScheme.onSurface to surface colors to
-// indicate the level of elevation.
-Color _elevationOverlayColor(BuildContext context, Color background, double elevation) {
-  final ThemeData theme = Theme.of(context);
-  if (elevation > 0.0 &&
-      theme.applyElevationOverlayColor &&
-      background == theme.colorScheme.surface) {
-
-    // Compute the opacity for the given elevation
-    // This formula matches the values in the spec:
-    // https://material.io/design/color/dark-theme.html#properties
-    final double opacity = (4.5 * math.log(elevation + 1) + 2) / 100.0;
-    final Color overlay = theme.colorScheme.onSurface.withOpacity(opacity);
-    return Color.alphaBlend(overlay, background);
-  }
-  return background;
 }
 
 class _MaterialState extends State<Material> with TickerProviderStateMixin {
@@ -405,7 +425,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         clipBehavior: widget.clipBehavior,
         borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
-        color: _elevationOverlayColor(context, backgroundColor, widget.elevation),
+        color: Material.elevationOverlayColor(context, backgroundColor, widget.elevation),
         shadowColor: widget.shadowColor,
         animateColor: false,
         child: contents,
@@ -773,7 +793,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       ),
       clipBehavior: widget.clipBehavior,
       elevation: elevation,
-      color: _elevationOverlayColor(context, widget.color, elevation),
+      color: Material.elevationOverlayColor(context, widget.color, elevation),
       shadowColor: _shadowColor.evaluate(animation),
     );
   }

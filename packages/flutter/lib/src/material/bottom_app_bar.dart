@@ -127,10 +127,13 @@ class _BottomAppBarState extends State<BottomAppBar> {
         notchMargin: widget.notchMargin,
       )
       : const ShapeBorderClipper(shape: RoundedRectangleBorder());
+    final double elevation = widget.elevation ?? babTheme.elevation ?? _defaultElevation;
+    final Color color = widget.color ?? babTheme.color ?? Theme.of(context).bottomAppBarColor;
+    final Color effectiveColor = Material.elevationOverlayColor(context, color, elevation);
     return PhysicalShape(
       clipper: clipper,
-      elevation: widget.elevation ?? babTheme.elevation ?? _defaultElevation,
-      color: widget.color ?? babTheme.color ?? Theme.of(context).bottomAppBarColor,
+      elevation: elevation,
+      color: effectiveColor,
       clipBehavior: widget.clipBehavior,
       child: Material(
         type: MaterialType.transparency,
