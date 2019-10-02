@@ -137,7 +137,7 @@ class Focus extends StatefulWidget {
   ///
   /// The [child] argument is required and must not be null.
   ///
-  /// The [autofocus] and [skipTraversal] arguments must not be null.
+  /// The [autofocus] argument must not be null.
   const Focus({
     Key key,
     @required this.child,
