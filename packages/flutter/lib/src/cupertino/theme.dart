@@ -184,8 +184,8 @@ class CupertinoThemeData extends Diagnosticable {
 
   /// The general brightness theme of the [CupertinoThemeData].
   ///
-  /// Affects all other theme properties when unspecified. Defaults to
-  /// [Brightness.light].
+  /// Overrides the ambient [MediaQueryData.platformBrightness] when specified.
+  /// Defaults to [Brightness.light].
   ///
   /// If coming from a Material [Theme] and unspecified, [brightness] will be
   /// derived from the Material [ThemeData]'s `brightness`.
@@ -217,9 +217,8 @@ class CupertinoThemeData extends Diagnosticable {
 
   /// Text styles used by Cupertino widgets.
   ///
-  /// Derived from [brightness] and [primaryColor] if unspecified, including
-  /// [brightness] and [primaryColor] of a Material [ThemeData] if coming
-  /// from a Material [Theme].
+  /// Derived [primaryColor] if unspecified, including [primaryColor] of a Material
+  /// [ThemeData] if coming from a Material [Theme].
   CupertinoTextThemeData get textTheme {
     return _textTheme ?? _defaults.textThemeDefaults.createDefaults(primaryColor: primaryColor);
   }
@@ -228,13 +227,13 @@ class CupertinoThemeData extends Diagnosticable {
   /// Background color of the top nav bar and bottom tab bar.
   ///
   /// Defaults to a light gray or a dark gray translucent color depending
-  /// on the [brightness].
+  /// on the brightness of the [BuildContext] it last resolved against.
   Color get barBackgroundColor => _barBackgroundColor ?? _defaults.barBackgroundColor;
   final Color _barBackgroundColor;
 
   /// Background color of the scaffold.
   ///
-  /// Defaults to white or black depending on the [brightness].
+  /// Defaults to [CupertinoColors.systemBackground].
   Color get scaffoldBackgroundColor => _scaffoldBackgroundColor ?? _defaults.scaffoldBackgroundColor;
   final Color _scaffoldBackgroundColor;
 
@@ -254,8 +253,8 @@ class CupertinoThemeData extends Diagnosticable {
     );
   }
 
-  /// Return a new `CupertinoThemeData` whose colors are from this `CupertinoThemeData`,
-  /// but resolved aginst the given [BuildContext].
+  /// Return a new `CupertinoThemeData` with all its colors resolved aginst the
+  /// given [BuildContext].
   ///
   /// It will be called in [CupertinoTheme.of].
   @protected

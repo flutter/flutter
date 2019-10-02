@@ -543,45 +543,107 @@ class CupertinoColors {
 /// effective color (i.e. [CupertinoDynamicColor.value] will come from the effective
 /// color), which is determined by the [BuildContext] it is last resolved against.
 /// If it has never been resolved, the light, normal contrast, base elevation variant
-/// [CupertinoDynamicColor.color] will be the effective color.
+/// [CupertinoDynamicColor.color] will be the default effective color.
+///
+/// ### Using a [CupertinoDynamicColor] in Cupertino widgets
+///
+/// When a Cupertino widget is provided with a `CupertinoDynamicColor`, either
+/// directly in its constructor, or from an [InheritedWidget] it depends on (for example,
+/// [DefaultTextStyle]), the widget will automatically resolve the color using
+/// [CupertinoDynamicColor.resolve] against their own [BuildContext], on a best-effort
+/// basis.
+///
 /// {@tool sample}
-///
-/// The following snippet will create a [CupertinoButton] whose background color
-/// is _lightModeColor_ in light mode and changes automatically to _darkModeColor_
-/// in dark mode.
-///
+/// The following snippet will create a [CupertinoButton] that appears _lightModeColor_
+/// in light mode, and changes automatically to _darkModeColor_ in dark mode.
 ///
 /// ```dart
-/// CupertinoButton(
-///   child: child,
-///   color: CupertinoDynamicColor.withBrightness(
-///     color: lightModeColor,
-///     darkColor: darkModeColor,
-///   ),
-///   onTap: () => null,
-/// )
+// CupertinoDynamicColor works out of box in a CupertinoButton.
+/// import 'button.dart';
+/// Widget build(BuildContext context) {
+///   return CupertinoButton(
+///     child: child,
+///     color: CupertinoDynamicColor.withBrightness(
+///       color: lightModeColor,
+///       darkColor: darkModeColor,
+///     ),
+///     onPressed: () => null,
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
-/// When a Cupertino component is provided with a `CupertinoDynamicColor`, either
-/// directly in its constructor, or from an [InheritedWidget] it depends on (for example,
-/// [DefaultTextStyle]), the component will automatically resolve the color by calling
-/// [CupertinoDynamicColor.resolve], using their own [BuildContext].
+/// ### Using a [CupertinoDynamicColor] from a [CupertinoTheme].
+///
+/// When referring to a [CupertinoTheme] color, generally the color will have
+/// already adapted to the ambient [BuildContext], as [CupertinoTheme.of] implicitly
+/// resolves all the colors used in the retrieved [CupertinoThemeData] against
+/// the ambient [BuildContext].
+///
+/// {@tool sample}
+/// The following snippet creates a [Container] with the `primaryColor` of the
+/// current theme. If `primaryColor` is a [CupertinoDynamicColor], the container
+/// will be adaptive, thanks to [CupertinoTheme.of]: it will switch to `primaryColor`'s
+/// dark variant once dark mode is turned on, and turns to primaryColor`'s high
+/// contrast variant when [MediaQueryData.highContrast] is requested in the ambient
+/// [MediaQuery], etc.
+///
+/// ```dart
+/// import 'package:flutter/widgets.dart';
+///
+/// // Container is not a Cupertino widget, but CupertinoTheme.of implicitly resolves
+/// // colors used in the retrieved CupertinoThemeData.
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: CupertinoTheme.of(context).primaryColor,
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ### Manually Resolving a [CupertinoColor]
 ///
 /// When used outside of a Cupertino component, or wrapped in an object opaque to
-/// the receiving Cupertino component, such color resolution is not guaranteed to
-/// happen automatically. It's essential to call [CupertinoDynamicColor.resolve]
-/// with the correct [BuildContext] before using the color to paint, to get the
-/// correct the color for painting. For example, to use a custom [Border] in a
-/// [CupertinoNavigationBar], the colors used in the [Border] have to be resolved
-/// manually before passing to [CupertinoNavigationBar]'s constructor, as
-/// [CupertinoNavigationBar] does not know how to resolve colors used in the [Border].
+/// the receiving Cupertino component, you may have to manually resolve the color
+/// using [CupertinoDynamicColor.resolve] before painting. For example, to use a
+/// custom [Border] in a [CupertinoNavigationBar], the colors used in the [Border]
+/// have to be resolved manually before being passed to [CupertinoNavigationBar]'s
+/// constructor, as [CupertinoNavigationBar] does not know how to resolve colors
+/// used in the [Border].
+///
+/// {@tool sample}
+///
+/// The following snippet demostrates two cases where you have to manually resolve
+/// a [CupertinoDynamicColor]: [CupertinoColors.systemBlue].
+///
+/// ```dart
+/// import 'nav_bar.dart';
+/// Widget build(BuildContext context) {
+///   final Color resolvedColor = CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context);
+///   return CupertinoNavigationBar(
+///     // CupertinoNavigationBar does not know how to resolve colors used in
+///     // a Border class.
+///     border: Border(bottom: BorderSide(color: resolvedColor)),
+///   );
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   final Color resolvedColor = CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context);
+///   // Container is not a Cupertino widget.
+///   return Container(color: resolvedColor);
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
 /// * [CupertinoUserInterfaceLevel], an [InheritedWidget] that may affect color
 /// resolution of a `CupertinoDynamicColor`.
-/// * https://developer.apple.com/documentation/uikit/uicolor/3238042-resolvedcolor.
+///
+/// * [CupertinoTheme.of], a static method that retrieves the ambient [CupertinoThemeData],
+///   and then resolves [CupertinoDynamicColor]s used in the retrieved data implicitly.
 @immutable
 class CupertinoDynamicColor extends Color {
   /// Creates an adaptive [Color] that changes its effective color based on the
