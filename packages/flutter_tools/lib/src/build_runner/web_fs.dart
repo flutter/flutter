@@ -221,7 +221,6 @@ class WebFs {
 
     Handler handler;
     Dwds dwds;
-<<<<<<< HEAD
     BuildDaemonClient client;
     StreamSubscription<void> firstBuild;
     if (buildInfo.isDebug) {
@@ -264,9 +263,14 @@ class WebFs {
       await assetBundle.build();
       await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
       if (!skipDwds) {
+        BuildRunnerAssetHandler assetHandler = BuildRunnerAssetHandler(
+          daemonAssetPort,
+          kBuildTargetName,
+          hostname ?? _kHostName,
+          hostPort);
         dwds = await dwdsFactory(
           hostname: hostname ?? _kHostName,
-          assetHandler: handler,
+          assetHandler: assetHandler,
           buildResults: filteredBuildResults,
           chromeConnection: () async {
             return (await ChromeLauncher.connectedInstance).chromeConnection;
