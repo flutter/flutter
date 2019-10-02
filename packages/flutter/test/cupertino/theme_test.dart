@@ -129,10 +129,10 @@ void main() {
       ));
 
       expect(theme.brightness, Brightness.dark);
-      expect(theme.primaryColor.value, CupertinoColors.systemGreen.darkColor.value);
+      expect(theme.primaryColor, isSameColorAs(CupertinoColors.systemGreen.darkColor));
       // Now check calculated derivatives.
       expect(theme.textTheme.actionTextStyle.color, isSameColorAs(CupertinoColors.systemGreen.darkColor));
-      expect(theme.scaffoldBackgroundColor.value, CupertinoColors.black.value);
+      expect(theme.scaffoldBackgroundColor, isSameColorAs(CupertinoColors.black));
     },
   );
 
@@ -155,4 +155,56 @@ void main() {
     expect(buildCount, 2);
     expect(iconTheme.color, CupertinoColors.activeOrange);
   });
+
+  Brightness currentBrightness;
+  void colorMatches(Color componentColor, CupertinoDynamicColor expectedDynamicColor) {
+    switch (currentBrightness) {
+      case Brightness.light:
+        expect(componentColor, isSameColorAs(expectedDynamicColor.color));
+        break;
+      case Brightness.dark:
+        expect(componentColor, isSameColorAs(expectedDynamicColor.darkColor));
+        break;
+    }
+  }
+
+  final Function dynamicColorsTestGroup = () {
+    testWidgets('CupertinoTheme.of resolves colors', (WidgetTester tester) async {
+      final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: CupertinoColors.systemRed);
+      final CupertinoThemeData theme = await testTheme(tester, data);
+
+      expect(data.primaryColor, isSameColorAs(CupertinoColors.systemRed.color));
+      colorMatches(theme.primaryColor, CupertinoColors.systemRed);
+    });
+
+    testWidgets('CupertinoTheme.of resolves default values', (WidgetTester tester) async {
+      const CupertinoDynamicColor primaryColor = CupertinoColors.systemRed;
+      final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: primaryColor);
+
+      const CupertinoDynamicColor barBackgroundColor = CupertinoDynamicColor.withBrightness(
+        color: Color(0xF0F9F9F9),
+        darkColor: Color(0xF01D1D1D),
+      );
+
+      final CupertinoThemeData theme = await testTheme(tester, data);
+
+      colorMatches(theme.primaryContrastingColor, CupertinoColors.systemBackground);
+      colorMatches(theme.barBackgroundColor, barBackgroundColor);
+      colorMatches(theme.scaffoldBackgroundColor, CupertinoColors.systemBackground);
+      colorMatches(theme.textTheme.textStyle.color, CupertinoColors.label);
+      colorMatches(theme.textTheme.actionTextStyle.color, primaryColor);
+      colorMatches(theme.textTheme.tabLabelTextStyle.color, CupertinoColors.inactiveGray);
+      colorMatches(theme.textTheme.navTitleTextStyle.color, CupertinoColors.label);
+      colorMatches(theme.textTheme.navLargeTitleTextStyle.color, CupertinoColors.label);
+      colorMatches(theme.textTheme.navActionTextStyle.color, primaryColor);
+      colorMatches(theme.textTheme.pickerTextStyle.color, CupertinoColors.label);
+      colorMatches(theme.textTheme.dateTimePickerTextStyle.color, CupertinoColors.label);
+    });
+  };
+
+  currentBrightness = Brightness.light;
+  group('light colors', dynamicColorsTestGroup);
+
+  currentBrightness = Brightness.dark;
+  group('dark colors', dynamicColorsTestGroup);
 }

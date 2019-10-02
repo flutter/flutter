@@ -58,10 +58,10 @@ class CupertinoTheme extends StatelessWidget {
   /// The [CupertinoThemeData] styling for this theme.
   final CupertinoThemeData data;
 
-  /// Retrieve the [CupertinoThemeData] from an ancestor [CupertinoTheme] widget.
-  ///
-  /// Returns a default [CupertinoThemeData] if no [CupertinoTheme] widgets
-  /// exist in the ancestry tree.
+  /// Retrieve the [CupertinoThemeData] from an ancestor [CupertinoTheme] widget,
+  /// or a default [CupertinoThemeData] if no [CupertinoTheme] widgets exist
+  /// in the ancestry tree, and resolve all the colors defined in that
+  /// [CupertinoThemeData] against the given [BuildContext] on a best-effort basis.
   static CupertinoThemeData of(BuildContext context) {
     final _InheritedCupertinoTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedCupertinoTheme);
     return (inheritedTheme?.theme?.data ?? const CupertinoThemeData()).resolveFrom(context, nullOk: true);
@@ -70,8 +70,8 @@ class CupertinoTheme extends StatelessWidget {
   /// Retrieve the [Brightness] value from the closest ancestor [CupertinoTheme]
   /// widget.
   ///
-  /// If no ancestral [CupertinoTheme] widget with explicit brightness value could
-  /// be found, the method will resort to the closest ancestor [MediaQuery] widget.
+  /// If no [CupertinoTheme] ancestor with explicit brightness value could be
+  /// found, the method will resort to the closest ancestor [MediaQuery] widget.
   ///
   /// Throws an exception if no such [CupertinoTheme] or [MediaQuery] widgets exist
   /// in the ancestry tree, unless [nullOk] is set to true.
