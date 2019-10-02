@@ -1808,28 +1808,6 @@ void main() {
     expect(find.byType(InkWell), findsOneWidget);
   });
 
-  testWidgets('Chips should use Ink instead of Container for delete icon ripple', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/41461
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Chip(
-            onDeleted: () { },
-            backgroundColor: Colors.pink,
-            label: const Text('Chip with delete icon'),
-          ),
-        ),
-      ),
-    );
-    expect(
-      find.descendant(
-        of: find.byType(InkWell),
-        matching: find.byType(Container),
-      ),
-      findsNothing,
-    );
-  });
-
   testWidgets('RawChip.selected can not be null', (WidgetTester tester) async {
     expect(() async {
       MaterialApp(
@@ -1928,6 +1906,36 @@ void main() {
 
     // Teardown.
     await gesture.removePointer();
+  });
+
+  testWidgets('Chips with background color should have delete icon ripple and splash in the foreground', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/41461
+    final Key deleteKey = UniqueKey();
+    await tester.pumpWidget(
+      _wrapForChip(
+        child: Chip(
+          onDeleted: () { },
+          backgroundColor: Colors.pink,
+          label: const Text('Chip with delete icon'),
+          deleteIcon: Icon(Icons.cancel, key: deleteKey),
+        ),
+      ),
+    );
+    final Offset center = tester.getCenter(find.byKey(deleteKey));
+
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start gesture
+    await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
+    final RenderBox box = Material.of(tester.element(find.byType(InkResponse))) as dynamic;
+    expect(
+      box,
+      paints
+        ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 342.0, 32.0))
+        ..path(color: Colors.pink[500])
+        ..circle(x: 12.0, y: 12.0, radius: 0, color: const Color(0x66c8c8c8))
+        ..circle(x: 326.0, y: 16.0, radius: 35.0, color: const Color(0x00bcbcbc))
+    );
+    await gesture.up();
   });
 
   testWidgets('loses focus when disabled', (WidgetTester tester) async {
