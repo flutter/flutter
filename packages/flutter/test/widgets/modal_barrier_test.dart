@@ -130,7 +130,7 @@ void main() {
     await tester.pump(); // begin transition
     await tester.pump(const Duration(seconds: 1)); // end transition
 
-    // Tap on the barrier to dismiss it
+    // Press the barrier to dismiss it
     await tester.press(find.byKey(const ValueKey<String>('barrier')));
     await tester.pump(); // begin transition
     await tester.pump(const Duration(seconds: 1)); // end transition
@@ -155,8 +155,33 @@ void main() {
     await tester.pump(); // begin transition
     await tester.pump(const Duration(seconds: 1)); // end transition
 
-    // Tap on the barrier to dismiss it
+    // Press the barrier to dismiss it
     await tester.press(find.byKey(const ValueKey<String>('barrier')), buttons: kSecondaryButton);
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
+
+    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
+      reason: 'The route should have been dismissed by tapping the barrier.');
+  });
+
+  testWidgets('ModalBarrier may pop the Navigator when competing with other gestures', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => FirstWidget(),
+      '/modal': (BuildContext context) => SecondWidgetWithCompetence (),
+    };
+
+    await tester.pumpWidget(MaterialApp(routes: routes));
+
+    // Initially the barrier is not visible
+    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
+
+    // Tapping on X routes to the barrier
+    await tester.tap(find.text('X'));
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
+
+    // Tap on the barrier to dismiss it
+    await tester.tap(find.byKey(const ValueKey<String>('barrier')));
     await tester.pump(); // begin transition
     await tester.pump(const Duration(seconds: 1)); // end transition
 
@@ -313,6 +338,25 @@ class SecondWidget extends StatelessWidget {
     return const ModalBarrier(
       key: ValueKey<String>('barrier'),
       dismissible: true,
+    );
+  }
+}
+
+class SecondWidgetWithCompetence extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        const ModalBarrier(
+          key: ValueKey<String>('barrier'),
+          dismissible: true,
+        ),
+        GestureDetector(
+          onVerticalDragStart: (_) {},
+          behavior: HitTestBehavior.translucent,
+          child: Container(),
+        )
+      ],
     );
   }
 }
