@@ -137,7 +137,7 @@ class MouseTracker extends ChangeNotifier {
     final _TrackedAnnotation trackedAnnotation = _findAnnotation(annotation);
     for (int deviceId in trackedAnnotation.activeDevices) {
       if (annotation.onExit != null) {
-        final PointerEvent event = _lastMouseEvent[deviceId] ?? _pendingRemovals[deviceId];
+        final PointerEvent event = _lastMouseEvent[deviceId];
         assert(event != null);
         annotation.onExit(PointerExitEvent.fromMouseEvent(event));
       }
@@ -185,7 +185,7 @@ class MouseTracker extends ChangeNotifier {
         _addMouseEvent(deviceId, event);
         if (lastEvent == null ||
             lastEvent is PointerAddedEvent || lastEvent.position != event.position) {
-          // Only schedule a frame if we have our first event, or if the
+          // Only send notifications if we have our first event, or if the
           // location of the mouse has changed, and only if there are tracked annotations.
           sendMouseNotifications(<int>{deviceId});
         }
@@ -229,7 +229,7 @@ class MouseTracker extends ChangeNotifier {
 
     void exitAnnotation(_TrackedAnnotation trackedAnnotation, int deviceId) {
       if (trackedAnnotation.annotation?.onExit != null && trackedAnnotation.activeDevices.contains(deviceId)) {
-        final PointerEvent event = _lastMouseEvent[deviceId] ?? _pendingRemovals[deviceId];
+        final PointerEvent event = _lastMouseEvent[deviceId];
         assert(event != null);
         trackedAnnotation.annotation.onExit(PointerExitEvent.fromMouseEvent(event));
       }
@@ -299,6 +299,10 @@ class MouseTracker extends ChangeNotifier {
         }
       }
     } finally {
+      for (final int device in _pendingRemovals) {
+        assert(_lastMouseEvent.containsKey(device));
+        _lastMouseEvent.remove(device);
+      }
       _pendingRemovals.clear();
     }
   }
@@ -318,8 +322,8 @@ class MouseTracker extends ChangeNotifier {
   void _removeMouseEvent(int deviceId, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
     assert(event is PointerRemovedEvent);
-    _pendingRemovals[deviceId] = event;
-    _lastMouseEvent.remove(deviceId);
+    _pendingRemovals.add(deviceId);
+    _lastMouseEvent[deviceId] = event;
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
     }
@@ -327,13 +331,18 @@ class MouseTracker extends ChangeNotifier {
 
   // A list of device IDs that should be removed and notified when scheduling a
   // mouse position check.
-  final Map<int, PointerRemovedEvent> _pendingRemovals = <int, PointerRemovedEvent>{};
+  final Set<int> _pendingRemovals = <int>{};
 
   /// The most recent mouse event observed for each mouse device ID observed.
   ///
-  /// May be null if no mouse is connected, or hasn't produced an event yet.
+  /// It is a source-of-truth for all connected mouse devices, except for the
+  /// ones in [_pedingRemovals], which will be removed as soon as the next
+  /// position check.
+  ///
+  /// The value may be null if no mouse is connected, or hasn't produced an
+  /// event yet.
   final Map<int, PointerEvent> _lastMouseEvent = <int, PointerEvent>{};
 
   /// Whether or not a mouse is connected and has produced events.
-  bool get mouseIsConnected => _lastMouseEvent.isNotEmpty;
+  bool get mouseIsConnected => _lastMouseEvent.length > _pendingRemovals.length;
 }
