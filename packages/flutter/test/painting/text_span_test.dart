@@ -229,9 +229,9 @@ void main() {
       ],
     );
 
-    expect(textSpan.getSpanForPosition(TextPosition(offset: 0)).runtimeType, TextSpan);
-    expect(textSpan.getSpanForPosition(TextPosition(offset: 1)).runtimeType, TextSpan);
-    expect(textSpan.getSpanForPosition(TextPosition(offset: 2)).runtimeType, WidgetSpan);
-    expect(textSpan.getSpanForPosition(TextPosition(offset: 3)).runtimeType, TextSpan);
+    expect(textSpan.getSpanForPosition(const TextPosition(offset: 0)).runtimeType, TextSpan);
+    expect(textSpan.getSpanForPosition(const TextPosition(offset: 1)).runtimeType, TextSpan);
+    expect(textSpan.getSpanForPosition(const TextPosition(offset: 2)).runtimeType, WidgetSpan);
+    expect(textSpan.getSpanForPosition(const TextPosition(offset: 3)).runtimeType, TextSpan);
   });
 }
