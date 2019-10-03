@@ -589,8 +589,8 @@ void main() {
     await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
     await tester.pump();
 
-    // Selected text shows 2 toolbar buttons.
-    expect(find.byType(FlatButton), findsNWidgets(2));
+    // Selected text shows 'COPY'.
+    expect(find.byType(FlatButton), find.text('COPY'));
   }, skip: isBrowser);
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
