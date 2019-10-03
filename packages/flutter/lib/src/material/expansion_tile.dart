@@ -205,10 +205,11 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     final bool closed = !_isExpanded && _controller.isDismissed;
+    final bool shouldRemoveChildren = closed && !widget.maintainsState;
     return AnimatedBuilder(
       animation: _controller.view,
       builder: _buildChildren,
-      child: (closed && !widget.maintainsState) ? null : Column(children: widget.children),
+      child: shouldRemoveChildren ? null : Column(children: widget.children),
     );
 
   }
