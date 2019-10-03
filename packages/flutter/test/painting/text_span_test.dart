@@ -209,4 +209,29 @@ void main() {
     expect(textSpan1.compareTo(textSpan1), RenderComparison.identical);
     expect(textSpan2.compareTo(textSpan2), RenderComparison.identical);
   });
+
+  test('GetSpanForPosition with WidgetSpan', () {
+    const TextSpan textSpan = TextSpan(
+      text: 'a',
+      children: <InlineSpan>[
+        TextSpan(text: 'b'),
+        WidgetSpan(
+          child: Text.rich(
+            TextSpan(
+              children: <InlineSpan>[
+                WidgetSpan(child: SizedBox(width: 10, height: 10)),
+                TextSpan(text: 'The sky is falling :)'),
+              ],
+            ),
+          ),
+        ),
+        TextSpan(text: 'c'),
+      ],
+    );
+
+    expect(textSpan.getSpanForPosition(const TextPosition(offset: 0)).runtimeType, TextSpan);
+    expect(textSpan.getSpanForPosition(const TextPosition(offset: 1)).runtimeType, TextSpan);
+    expect(textSpan.getSpanForPosition(const TextPosition(offset: 2)).runtimeType, WidgetSpan);
+    expect(textSpan.getSpanForPosition(const TextPosition(offset: 3)).runtimeType, TextSpan);
+  });
 }

@@ -626,6 +626,7 @@ class CupertinoColors {
 ///     border: Border(bottom: BorderSide(color: resolvedColor)),
 ///   );
 /// }
+/// ```
 ///
 /// ```dart
 /// @override
