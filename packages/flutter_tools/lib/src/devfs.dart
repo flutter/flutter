@@ -289,7 +289,7 @@ class _DevFSHttpWriter {
     while ((_inFlight < kMaxInFlight) && (!_completer.isCompleted) && _outstanding.isNotEmpty) {
       final Uri deviceUri = _outstanding.keys.first;
       final DevFSContent content = _outstanding.remove(deviceUri);
-      _startWrite(deviceUri, content);
+      _startWrite(deviceUri, content, retry: 10);
       _inFlight += 1;
     }
     if ((_inFlight == 0) && (!_completer.isCompleted) && _outstanding.isEmpty) {
@@ -299,22 +299,33 @@ class _DevFSHttpWriter {
 
   Future<void> _startWrite(
     Uri deviceUri,
-    DevFSContent content, [
+    DevFSContent content, {
     int retry = 0,
-  ]) async {
-    try {
-      final HttpClientRequest request = await _client.putUrl(httpAddress);
-      request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
-      request.headers.add('dev_fs_name', fsName);
-      request.headers.add('dev_fs_uri_b64', base64.encode(utf8.encode('$deviceUri')));
-      final Stream<List<int>> contents = content.contentsAsCompressedStream();
-      await request.addStream(contents);
-      final HttpClientResponse response = await request.close();
-      await response.drain<void>();
-    } catch (error, trace) {
-      if (!_completer.isCompleted) {
-        printTrace('Error writing "$deviceUri" to DevFS: $error');
-        _completer.completeError(error, trace);
+  }) async {
+    while(true) {
+      try {
+        final HttpClientRequest request = await _client.putUrl(httpAddress);
+        request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
+        request.headers.add('dev_fs_name', fsName);
+        request.headers.add('dev_fs_uri_b64', base64.encode(utf8.encode('$deviceUri')));
+        final Stream<List<int>> contents = content.contentsAsCompressedStream();
+        await request.addStream(contents);
+        final HttpClientResponse response = await request.close();
+        response.listen((_) => null,
+            onError: (dynamic error) { printTrace('error: $error'); },
+            cancelOnError: true);
+        break;
+      } catch (error, trace) {
+        if (!_completer.isCompleted) {
+          printTrace('Error writing "$deviceUri" to DevFS: $error');
+          if (retry > 0) {
+            retry--;
+            printTrace('trying again in a few - $retry more attempts left');
+            await Future<void>.delayed(const Duration(milliseconds: 500));
+            continue;
+          }
+          _completer.completeError(error, trace);
+        }
       }
     }
     _inFlight -= 1;
@@ -434,6 +445,7 @@ class DevFS {
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
+    final DateTime candidateCompileTime = DateTime.now();
 
     // Update modified files
     final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
@@ -465,7 +477,6 @@ class DevFS {
       generator.reset();
     }
     printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
-    lastCompiled = DateTime.now();
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
       invalidatedFiles,
@@ -475,6 +486,8 @@ class DevFS {
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
     }
+    // Only update the last compiled time if we successfully compiled.
+    lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
     sources = compilerOutput.sources;
     //

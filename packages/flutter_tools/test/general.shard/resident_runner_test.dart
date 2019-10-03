@@ -81,7 +81,7 @@ void main() {
     });
     when(mockFlutterDevice.devFS).thenReturn(mockDevFS);
     when(mockFlutterDevice.views).thenReturn(<FlutterView>[
-      mockFlutterView
+      mockFlutterView,
     ]);
     when(mockFlutterDevice.device).thenReturn(mockDevice);
     when(mockFlutterView.uiIsolate).thenReturn(mockIsolate);

@@ -53,7 +53,7 @@ void main() {
           disabledElevation: disabledElevation,
           highlightElevation: highlightElevation,
           shape: shape,
-        )
+        ),
       ),
       home: Scaffold(
         floatingActionButton: FloatingActionButton(

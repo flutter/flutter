@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/assets.dart';
@@ -13,13 +12,11 @@ import '../build_system/targets/dart.dart';
 import '../build_system/targets/ios.dart';
 import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
+import '../build_system/targets/web.dart';
 import '../build_system/targets/windows.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
-
-/// The [BuildSystem] instance.
-BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// All currently implemented targets.
 const List<Target> _kDefaultTargets = <Target>[
@@ -35,6 +32,7 @@ const List<Target> _kDefaultTargets = <Target>[
   DebugMacOSBundleFlutterAssets(),
   ProfileMacOSBundleFlutterAssets(),
   ReleaseMacOSBundleFlutterAssets(),
+  WebReleaseBundle(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build

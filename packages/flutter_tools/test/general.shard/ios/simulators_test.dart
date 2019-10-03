@@ -222,12 +222,12 @@ void main() {
         await deviceUnderTest.takeScreenshot(mockFile);
         verify(mockProcessManager.run(
           <String>[
-              '/usr/bin/xcrun',
-              'simctl',
-              'io',
-              'x',
-              'screenshot',
-              fs.path.join('some', 'path', 'to', 'screenshot.png'),
+            '/usr/bin/xcrun',
+            'simctl',
+            'io',
+            'x',
+            'screenshot',
+            fs.path.join('some', 'path', 'to', 'screenshot.png'),
           ],
           environment: null,
           workingDirectory: null,

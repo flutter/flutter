@@ -146,10 +146,11 @@ class Focus extends StatefulWidget {
     this.onFocusChange,
     this.onKey,
     this.debugLabel,
-    this.canRequestFocus,
+    this.canRequestFocus = true,
     this.skipTraversal,
   })  : assert(child != null),
         assert(autofocus != null),
+        assert(canRequestFocus != null),
         super(key: key);
 
   /// A debug label for this widget.
@@ -186,7 +187,7 @@ class Focus extends StatefulWidget {
 
   /// Handler called when the focus changes.
   ///
-  /// Called with true if this node gains focus, and false if it loses
+  /// Called with true if this widget's node gains focus, and false if it loses
   /// focus.
   final ValueChanged<bool> onFocusChange;
 
@@ -230,6 +231,7 @@ class Focus extends StatefulWidget {
   /// still be focused explicitly.
   final bool skipTraversal;
 
+  /// {@template flutter.widgets.Focus.canRequestFocus}
   /// If true, this widget may request the primary focus.
   ///
   /// Defaults to true.  Set to false if you want the [FocusNode] this widget
@@ -249,6 +251,7 @@ class Focus extends StatefulWidget {
   ///     its descendants.
   ///   - [FocusTraversalPolicy], a class that can be extended to describe a
   ///     traversal policy.
+  /// {@endtemplate}
   final bool canRequestFocus;
 
   /// Returns the [focusNode] of the [Focus] that most tightly encloses the
@@ -339,9 +342,9 @@ class _FocusState extends State<Focus> {
       // _createNode is overridden in _FocusScopeState.
       _internalNode ??= _createNode();
     }
+    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
     focusNode.skipTraversal = widget.skipTraversal ?? focusNode.skipTraversal;
     focusNode.canRequestFocus = widget.canRequestFocus ?? focusNode.canRequestFocus;
-    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
     _hasFocus = focusNode.hasFocus;
 
     // Add listener even if the _internalNode existed before, since it should
