@@ -407,6 +407,10 @@ void main() {
 
     final TestWidgetsFlutterBinding binding = tester.binding;
     await binding.setSurfaceSize(const Size(42, 42));
+    // we have to reset the screen size, otherwise it may cause other tests
+    // to fail due to an overflow exception.
+    addTearDown(() => binding.setSurfaceSize(null));
+
     await tester.pump();
 
     expect(buildCount, equals(1));
