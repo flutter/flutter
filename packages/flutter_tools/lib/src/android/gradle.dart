@@ -820,9 +820,8 @@ Future<void> _buildGradleProjectV2(
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
       environment: gradleEnv,
-      // TODO(mklim): if AndroidX warnings are no longer required, this
-      // mapFunction and all its associated variabled can be replaced with just
-      // `filter: ndkMessagefilter`.
+      // TODO(mklim): if AndroidX warnings are no longer required, we can remove
+      // them from this map function.
       mapFunction: (String line) {
         final bool isAndroidXPluginWarning = androidXPluginWarningRegex.hasMatch(line);
         if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
