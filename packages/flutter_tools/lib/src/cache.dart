@@ -1197,6 +1197,7 @@ const List<List<String>> _linuxBinaryDirs = <List<String>>[
   <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
   <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
   <String>['android-arm64-release/linux-x64', 'android-arm64-release/linux-x64.zip'],
+  <String>['android-x64-release/linux-x64', 'android-x64-release/linux-x64.zip'],
 ];
 
 const List<List<String>> _windowsBinaryDirs = <List<String>>[
