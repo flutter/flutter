@@ -1327,8 +1327,8 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
 
-      // Selected text shows 1 toolbar button.
-      expect(find.byType(CupertinoButton), findsNWidgets(1));
+      // Selected text shows 'Copy'.
+      expect(find.byType(CupertinoButton), find.text('Copy'));
   });
   testWidgets('Read only text field', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'readonly');
