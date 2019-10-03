@@ -96,6 +96,29 @@ class TweenSequence<T> extends Animatable<T> {
   String toString() => 'TweenSequence(${_items.length} items)';
 }
 
+class FlippedTweenSequence extends TweenSequence<double> {
+  /// Creates a flipped [TweenSequence].
+  ///
+  /// The [tweenSequence] argument must not be null.
+  FlippedTweenSequence(List<TweenSequenceItem<double>> items)
+    : assert(items != null),
+      super(items);
+
+  @override
+  double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
+    if (t == 1.0)
+      return _evaluateAt(t, _items.length - 1);
+    for (int index = 0; index < _items.length; index++) {
+      if (_intervals[index].contains(1.0 - t))
+        return 1.0 - _evaluateAt(1.0 - t, index);
+    }
+    // Should be unreachable.
+    assert(false, 'TweenSequence.evaluate() could not find a interval for $t');
+    return null;
+  }
+}
+
 /// A simple holder for one element of a [TweenSequence].
 class TweenSequenceItem<T> {
   /// Construct a TweenSequenceItem.

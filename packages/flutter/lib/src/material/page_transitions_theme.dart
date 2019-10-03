@@ -162,20 +162,20 @@ class _ZoomPageTransition extends StatelessWidget {
 
   // A curve sequence similar to the 'fastOutExtraSlowIn' curve used in the
   // native transition.
-  static final TweenSequence<double> _scaleCurveSequence = TweenSequence<double>(
-    <TweenSequenceItem<double>>[
-      TweenSequenceItem<double>(
-        tween: Tween<double>(begin: 0.0, end: 0.4)
-          .chain(CurveTween(curve: const Cubic(0.05, 0.0, 0.133333, 0.06))),
-        weight: 0.166666,
-      ),
-      TweenSequenceItem<double>(
-        tween: Tween<double>(begin: 0.4, end: 1.0)
-          .chain(CurveTween(curve: const Cubic(0.208333, 0.82, 0.25, 1.0))),
-        weight: 1.0 - 0.166666,
-      ),
-    ],
-  );
+  static final List<TweenSequenceItem<double>> fastOutExtraSlowInTweenSequenceItems = <TweenSequenceItem<double>>[
+    TweenSequenceItem<double>(
+      tween: Tween<double>(begin: 0.0, end: 0.4)
+        .chain(CurveTween(curve: const Cubic(0.05, 0.0, 0.133333, 0.06))),
+      weight: 0.166666,
+    ),
+    TweenSequenceItem<double>(
+      tween: Tween<double>(begin: 0.4, end: 1.0)
+        .chain(CurveTween(curve: const Cubic(0.208333, 0.82, 0.25, 1.0))),
+      weight: 1.0 - 0.166666,
+    ),
+  ];
+  static final TweenSequence<double> _scaleCurveSequence = TweenSequence<double>(fastOutExtraSlowInTweenSequenceItems);
+  static final FlippedTweenSequence _flippedScaleCurveSequence = FlippedTweenSequence(fastOutExtraSlowInTweenSequenceItems);
 
   final Animation<double> animation;
   final Animation<double> secondaryAnimation;
@@ -204,11 +204,11 @@ class _ZoomPageTransition extends StatelessWidget {
       ));
 
     final Animation<double> _reverseEndScreenScaleTransition = Tween<double>(begin: 1.00, end: 1.10)
-      .chain(_scaleCurveSequence) // REVERSE CURVE SEQUENCE
+      .chain(_flippedScaleCurveSequence)
       .animate(secondaryAnimation);
 
     final Animation<double> _reverseStartScreenScaleTransition = Tween<double>(begin: 0.9, end: 1.0)
-      .chain(_scaleCurveSequence) // REVERSE CURVE SEQUENCE
+      .chain(_flippedScaleCurveSequence)
       .animate(animation);
 
     final Animation<double> _reverseStartScreenFadeTransition = Tween<double>(begin: 0.0, end: 1.00)
@@ -232,8 +232,6 @@ class _ZoomPageTransition extends StatelessWidget {
             ),
           );
         } else if (animation.status == AnimationStatus.reverse) {
-          print(_reverseStartScreenScaleTransition.value);
-          print(_reverseStartScreenFadeTransition.value);
           return ScaleTransition(
             scale: _reverseStartScreenScaleTransition,
             child: FadeTransition(
