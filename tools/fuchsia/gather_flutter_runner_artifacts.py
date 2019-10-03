@@ -40,19 +40,7 @@ def CopyPath(src, dst):
       raise
 
 
-def CreateMetaPackage(dst_root, far_name):
-  meta = os.path.join(dst_root, 'meta')
-  if not os.path.isdir(meta):
-    os.makedirs(meta)
-  content = {}
-  content['name'] = far_name
-  content['version'] = '0'
-  package = os.path.join(meta, 'package')
-  with open(package, 'w') as out_file:
-    json.dump(content, out_file)
-
-
-def GatherArtifacts(src_root, dst_root, create_meta_package=True):
+def GatherArtifacts(src_root, dst_root):
   if not os.path.exists(dst_root):
     os.makedirs(dst_root)
   else:
@@ -65,9 +53,6 @@ def GatherArtifacts(src_root, dst_root, create_meta_package=True):
       print 'Unable to find artifact: ', str(src_full)
       sys.exit(1)
     CopyPath(src_full, dst_full)
-
-  if create_meta_package:
-    CreateMetaPackage(dst_root, 'flutter_runner')
 
 
 def main():

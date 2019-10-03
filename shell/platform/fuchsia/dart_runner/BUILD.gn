@@ -8,7 +8,7 @@ import("//build/fuchsia/sdk.gni")
 import("$flutter_root/common/fuchsia_config.gni")
 import("$flutter_root/tools/fuchsia/common_libs.gni")
 import("$flutter_root/tools/fuchsia/dart.gni")
-import("$flutter_root/tools/fuchsia/package_dir.gni")
+import("$flutter_root/tools/fuchsia/fuchsia_archive.gni")
 
 template("runner") {
   assert(defined(invoker.product), "The parameter 'product' must be defined")
@@ -100,7 +100,7 @@ template("jit_runner_package") {
     product_suffix = "_product"
   }
 
-  package_dir(target_name) {
+  fuchsia_archive(target_name) {
     deps = [
       ":dart_jit${product_suffix}_runner_bin",
       "kernel:kernel_core_snapshot${product_suffix}",
