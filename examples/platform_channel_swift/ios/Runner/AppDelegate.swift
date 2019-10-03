@@ -67,7 +67,7 @@ enum MyFlutterErrorCode {
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(AppDelegate.onBatteryStateDidChange),
-      name: NSNotification.Name.UIDeviceBatteryStateDidChange,
+      name: UIDevice.batteryStateDidChangeNotification,
       object: nil)
     return nil
   }

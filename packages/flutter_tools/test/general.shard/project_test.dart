@@ -314,7 +314,7 @@ void main() {
         when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
           (_) {
             return Future<Map<String, String>>.value(<String, String>{
-              'SWIFT_VERSION': '4.0',
+              'SWIFT_VERSION': '5.0',
             });
         });
         addAndroidGradleFile(project.directory,
