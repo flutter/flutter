@@ -1,12 +1,18 @@
 package {{androidIdentifier}}
 
 {{#useNewAndroidEmbedding}}
+{{#androidX}}
+import androidx.annotation.NonNull;
+{{/androidX}}
+{{^androidX}}
+import android.support.annotation.NonNull;
+{{/androidX}}
 import dev.flutter.plugins.GeneratedPluginRegistrant
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 
 class MainActivity: FlutterActivity() {
-  override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+  override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
     GeneratedPluginRegistrant.registerWith(flutterEngine);
   }
 }

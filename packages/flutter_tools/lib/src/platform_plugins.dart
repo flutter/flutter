@@ -21,7 +21,7 @@ abstract class PluginPlatform {
 /// The required fields include: [name] of the plugin, [package] of the plugin and
 /// the [pluginClass] that will be the entry point to the plugin's native code.
 class AndroidPlugin extends PluginPlatform {
-  const AndroidPlugin({
+  AndroidPlugin({
     @required this.name,
     @required this.package,
     @required this.pluginClass,
@@ -47,9 +47,16 @@ class AndroidPlugin extends PluginPlatform {
 
   static const String kConfigKey = 'android';
 
+  /// The plugin name defined in pubspec.yaml.
   final String name;
+
+  /// The plugin package name defined in pubspec.yaml.
   final String package;
+
+  /// The plugin main class defined in pubspec.yaml.
   final String pluginClass;
+
+  /// The absolute path to the plugin in the pub cache.
   final String pluginPath;
 
   @override
@@ -62,8 +69,14 @@ class AndroidPlugin extends PluginPlatform {
     };
   }
 
+  bool _didUseNewEmbedding;
+
   /// Returns [true] if the plugin is using the new Android embedding.
-  bool get _usesNewEmbedding {
+  bool get _usesNewEmbedding => _didUseNewEmbedding ??= _checkIfPluginUsesNewEmbedding();
+
+  // Checks if the plugin uses the new embedding by checking if the plugin class contains
+  // a reference to `io.flutter.embedding.engine.plugins.FlutterPlugin`.
+  bool _checkIfPluginUsesNewEmbedding() {
     if (pluginPath == null) {
       return false;
     }
@@ -81,6 +94,8 @@ class AndroidPlugin extends PluginPlatform {
         '$pluginClass.java',
       )
     );
+    // Check if the plugin is implemented in Kotlin since the plugin's pubspec.yaml
+    // doesn't include this information.
     if (!mainPluginClass.existsSync()) {
       mainPluginClass = fs.file(
         fs.path.join(
