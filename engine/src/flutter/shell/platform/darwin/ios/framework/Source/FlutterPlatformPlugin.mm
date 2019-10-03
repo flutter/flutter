@@ -79,7 +79,8 @@ using namespace flutter;
     [self setSystemChromeSystemUIOverlayStyle:args];
     result(nil);
   } else if ([method isEqualToString:@"SystemNavigator.pop"]) {
-    [self popSystemNavigator];
+    NSNumber* isAnimated = args;
+    [self popSystemNavigator:isAnimated.boolValue];
     result(nil);
   } else if ([method isEqualToString:@"Clipboard.getData"]) {
     result([self getClipboardData:args]);
@@ -194,7 +195,7 @@ using namespace flutter;
   }
 }
 
-- (void)popSystemNavigator {
+- (void)popSystemNavigator:(BOOL)isAnimated {
   // Apple's human user guidelines say not to terminate iOS applications. However, if the
   // root view of the app is a navigation controller, it is instructed to back up a level
   // in the navigation hierarchy.
@@ -202,11 +203,11 @@ using namespace flutter;
   // outside the context of a UINavigationController, and still wants to be popped.
   UIViewController* viewController = [UIApplication sharedApplication].keyWindow.rootViewController;
   if ([viewController isKindOfClass:[UINavigationController class]]) {
-    [((UINavigationController*)viewController) popViewControllerAnimated:NO];
+    [((UINavigationController*)viewController) popViewControllerAnimated:isAnimated];
   } else {
     auto engineViewController = static_cast<UIViewController*>([_engine.get() viewController]);
     if (engineViewController != viewController) {
-      [engineViewController dismissViewControllerAnimated:NO completion:nil];
+      [engineViewController dismissViewControllerAnimated:isAnimated completion:nil];
     }
   }
 }
