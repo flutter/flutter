@@ -292,8 +292,7 @@ class Environment {
       buffer.write(key);
       buffer.write(defines[key]);
     }
-    // in case there was no configuration, provide some value.
-    buffer.write('Flutter is awesome');
+    buffer.write(outputDir.path);
     final String output = buffer.toString();
     final Digest digest = md5.convert(utf8.encode(output));
     buildPrefix = hex.encode(digest.bytes);
