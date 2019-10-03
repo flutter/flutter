@@ -1293,7 +1293,7 @@ void main() {
 
   testWidgets('text field toolbar options correctly changes options', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
-      text: "Atwater Peel Sherbrooke Bonaventure",
+      text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     await tester.pumpWidget(
       CupertinoApp(
@@ -1328,7 +1328,10 @@ void main() {
       );
 
       // Selected text shows 'Copy'.
+      expect(find.text('Paste'), findsNothing);
       expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Select All'), findsNothing);
   });
   testWidgets('Read only text field', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'readonly');
