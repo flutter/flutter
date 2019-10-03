@@ -13,8 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart'
-    show DragStartBehavior, PointerDeviceKind;
+import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
