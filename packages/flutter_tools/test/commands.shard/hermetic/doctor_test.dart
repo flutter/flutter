@@ -225,7 +225,11 @@ void main() {
       await doctor.diagnose(verbose: false);
 
       expect(
-        verify(mockUsage.sendEvent('doctorResult.PassingValidator', captureAny)).captured,
+        verify(mockUsage.sendEvent(
+          'doctorResult.PassingValidator',
+          captureAny,
+          label: anyNamed('label'),
+        )).captured,
         <dynamic>['installed', 'installed', 'installed'],
       );
     }, overrides: <Type, Generator>{
@@ -238,15 +242,27 @@ void main() {
       await FakePassingDoctor().diagnose(verbose: false);
 
       expect(
-        verify(mockUsage.sendEvent('doctorResult.PassingValidator', captureAny)).captured,
+        verify(mockUsage.sendEvent(
+          'doctorResult.PassingValidator',
+          captureAny,
+          label: anyNamed('label'),
+        )).captured,
         <dynamic>['installed', 'installed'],
       );
       expect(
-        verify(mockUsage.sendEvent('doctorResult.PartialValidatorWithHintsOnly', captureAny)).captured,
+        verify(mockUsage.sendEvent(
+          'doctorResult.PartialValidatorWithHintsOnly',
+          captureAny,
+          label: anyNamed('label'),
+        )).captured,
         <dynamic>['partial'],
       );
       expect(
-        verify(mockUsage.sendEvent('doctorResult.PartialValidatorWithErrors', captureAny)).captured,
+        verify(mockUsage.sendEvent(
+          'doctorResult.PartialValidatorWithErrors',
+          captureAny,
+          label: anyNamed('label'),
+        )).captured,
         <dynamic>['partial'],
       );
     }, overrides: <Type, Generator>{
@@ -258,23 +274,43 @@ void main() {
       await FakeDoctor().diagnose(verbose: false);
 
       expect(
-        verify(mockUsage.sendEvent('doctorResult.PassingValidator', captureAny)).captured,
+        verify(mockUsage.sendEvent(
+          'doctorResult.PassingValidator',
+          captureAny,
+          label: anyNamed('label'),
+        )).captured,
         <dynamic>['installed'],
       );
       expect(
-        verify(mockUsage.sendEvent('doctorResult.MissingValidator', captureAny)).captured,
+        verify(mockUsage.sendEvent(
+          'doctorResult.MissingValidator',
+          captureAny,
+          label: anyNamed('label'),
+        )).captured,
         <dynamic>['missing'],
       );
       expect(
-        verify(mockUsage.sendEvent('doctorResult.NotAvailableValidator', captureAny)).captured,
+        verify(mockUsage.sendEvent(
+          'doctorResult.NotAvailableValidator',
+          captureAny,
+          label: anyNamed('label'),
+        )).captured,
         <dynamic>['notAvailable'],
       );
       expect(
-        verify(mockUsage.sendEvent('doctorResult.PartialValidatorWithHintsOnly', captureAny)).captured,
+        verify(mockUsage.sendEvent(
+          'doctorResult.PartialValidatorWithHintsOnly',
+          captureAny,
+          label: anyNamed('label'),
+        )).captured,
         <dynamic>['partial'],
       );
       expect(
-        verify(mockUsage.sendEvent('doctorResult.PartialValidatorWithErrors', captureAny)).captured,
+        verify(mockUsage.sendEvent(
+          'doctorResult.PartialValidatorWithErrors',
+          captureAny,
+          label: anyNamed('label'),
+        )).captured,
         <dynamic>['partial'],
       );
     }, overrides: <Type, Generator>{
@@ -286,11 +322,19 @@ void main() {
       await FakeGroupedDoctor().diagnose(verbose: false);
 
       expect(
-        verify(mockUsage.sendEvent('doctorResult.PassingGroupedValidator', captureAny)).captured,
+        verify(mockUsage.sendEvent(
+          'doctorResult.PassingGroupedValidator',
+          captureAny,
+          label: anyNamed('label'),
+        )).captured,
         <dynamic>['installed', 'installed', 'installed'],
       );
       expect(
-        verify(mockUsage.sendEvent('doctorResult.MissingGroupedValidator', captureAny)).captured,
+        verify(mockUsage.sendEvent(
+          'doctorResult.MissingGroupedValidator',
+          captureAny,
+          label: anyNamed('label'),
+        )).captured,
         <dynamic>['missing'],
       );
     }, overrides: <Type, Generator>{
