@@ -121,7 +121,6 @@ void main() {
       ),
     ]);
     RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
-    RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{0});
     isInHitRegionOne = true;
     ui.window.onPointerDataPacket(packet1);
     expect(enter.length, equals(1), reason: 'enter contains $enter');
@@ -170,19 +169,15 @@ void main() {
     // add in a second mouse simultaneously.
     clear();
     ui.window.onPointerDataPacket(packet5);
-    RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{1});
     expect(enter.length, equals(1), reason: 'enter contains $enter');
     expect(enter.first.position, equals(const Offset(1.0, 401.0)));
     expect(enter.first.device, equals(1));
     expect(enter.first.runtimeType, equals(PointerEnterEvent));
     expect(exit.length, equals(0), reason: 'exit contains $exit');
-    expect(move.length, equals(2), reason: 'move contains $move');
+    expect(move.length, equals(1), reason: 'move contains $move');
     expect(move.first.position, equals(const Offset(1.0, 401.0)));
     expect(move.first.device, equals(1));
     expect(move.first.runtimeType, equals(PointerHoverEvent));
-    expect(move.last.position, equals(const Offset(1.0, 401.0)));
-    expect(move.last.device, equals(1));
-    expect(move.last.runtimeType, equals(PointerHoverEvent));
   });
 
   test('detects exit when annotated layer no longer hit', () {
@@ -210,7 +205,6 @@ void main() {
     ]);
     isInHitRegionOne = true;
     RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
-    RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{0});
 
     ui.window.onPointerDataPacket(packet1);
 
@@ -293,7 +287,6 @@ void main() {
     ]);
     isInHitRegionOne = true;
     RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
-    RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{0});
     ui.window.onPointerDataPacket(packet1);
     ui.window.onPointerDataPacket(packet2);
     expect(enter.length, equals(1), reason: 'enter contains $enter');
@@ -352,7 +345,6 @@ void main() {
     ]);
     isInHitRegionOne = true;
     RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
-    RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{0});
     ui.window.onPointerDataPacket(packet1);
     ui.window.onPointerDataPacket(packet2);
     expect(enter.length, equals(1), reason: 'enter contains $enter');
