@@ -215,4 +215,41 @@ void main() {
     expect(iconColor(expandedIconKey), _unselectedWidgetColor);
     expect(iconColor(collapsedIconKey), _accentColor);
   });
+
+  testWidgets('ExpansionTile maintainsState', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.iOS,
+          dividerColor: _dividerColor,
+        ),
+        home: Material(
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                ExpansionTile(
+                  initiallyExpanded: false,
+                  maintainsState: true,
+                  children: <Widget>[
+                    Text('Maintaining State'),
+                  ],
+                ),
+                ExpansionTile(
+                  initiallyExpanded: false,
+                  maintainsState: false,
+                  children: <Widget>[
+                    Text('Discarding State'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+    ));
+
+    // This text should be there while ExpansionTile collapsed
+    expect(find.text('Maintaining State'), findsOneWidget);
+    // This text shouldn't be there while ExpansionTile collapsed
+    expect(find.text('Discarding State'), findsNothing);
+  });
 }
