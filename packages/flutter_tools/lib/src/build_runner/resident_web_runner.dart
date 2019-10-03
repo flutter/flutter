@@ -120,7 +120,7 @@ class ResidentWebRunner extends ResidentRunner {
     }
     const String fire = '🔥';
     const String rawMessage =
-        '  To hot restart (and rebuild state), press "R".';
+        '  To hot restart (and rebuild state), press "r" or "R".';
     final String message = terminal.color(
       fire + terminal.bolden(rawMessage),
       TerminalColor.red,
