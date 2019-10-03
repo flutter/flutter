@@ -90,7 +90,7 @@ task:
 task:
   gce_instance:
     image_project: flutter-cirrus
-    image_name: flutter-engine-windows-server-2016-core
+    image_name: flutter-engine-windows-server-2016
     zone: us-central1-a
     platform: windows
     cpu: 32
@@ -109,11 +109,14 @@ task:
     cd %ENGINE_PATH%/src
     gclient sync
   matrix:
-    - name: build_windows_unopt_debug
+    - name: build_and_test_windows_unopt_debug
       compile_host_script: |
         cd %ENGINE_PATH%/src
         python flutter/tools/gn --runtime-mode debug --unoptimized
         ninja -C out/host_debug_unopt
+      test_host_script: |
+        cd %ENGINE_PATH%/src
+        python flutter/testing/run_tests.py --type=engine --engine-filter=flutter_windows_unittests,client_wrapper_windows_unittests
     - name: build_windows_opt_debug
       compile_host_script: |
         cd %ENGINE_PATH%/src

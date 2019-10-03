@@ -84,8 +84,9 @@ executable("client_wrapper_glfw_unittests") {
     "$flutter_root/shell/platform/common/cpp/client_wrapper:client_wrapper_library_stubs",
     "$flutter_root/testing",
 
-    # TODO: Consider refactoring flutter_root/testing so that there's a testing
+    # TODO(chunhtai): Consider refactoring flutter_root/testing so that there's a testing
     # target that doesn't require a Dart runtime to be linked in.
+    # https://github.com/flutter/flutter/issues/41414.
     "//third_party/dart/runtime:libdart_jit",
   ]
 }

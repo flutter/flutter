@@ -83,6 +83,10 @@ def RunCCTests(build_dir, filter):
   # https://github.com/flutter/flutter/issues/36294
   if not IsWindows():
     RunEngineExecutable(build_dir, 'embedder_unittests', filter, shuffle_flags)
+  else:
+    RunEngineExecutable(build_dir, 'flutter_windows_unittests', filter, shuffle_flags)
+
+    RunEngineExecutable(build_dir, 'client_wrapper_windows_unittests', filter, shuffle_flags)
 
   flow_flags = ['--gtest_filter=-PerformanceOverlayLayer.Gold']
   if IsLinux():
