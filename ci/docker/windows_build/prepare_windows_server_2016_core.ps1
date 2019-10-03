@@ -1,5 +1,5 @@
 # The following powershell script prepares the VM image
-# flutter-engine-windows-server-2016-core used by Flutter engine's
+# flutter-engine-windows-server-2016 used by Flutter engine's
 # build_windows presubmit tests (see .cirrus.yml).
 #
 # The exact step of generating the VM image is:
