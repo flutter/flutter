@@ -165,13 +165,13 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       height: childRect.height * _kOpenScale,
     );
 
-    // TODO(justinmc): Using Overlay.of(context) means that this pops on top of
-    // the AppBar, but it doesn't on native. Is there any way around this? The
-    // reason that I do this in an Overlay is that it needs to sit on top of
-    // widgets adjacent to it.
-    // Also, I noticed that I'm having the same theme problem where a widget in
-    // the Overlay might not be themed the same as it is otherwise. Sizing can
-    // also potentially be a problem if the child was sized by its parent before.
+    // TODO(justinmc): There is a known inconsistency with native here, due to
+    // doing the bounce animation using a decoy in the top level Overlay. The
+    // decoy will pop on top of the AppBar if the child is partially behind it,
+    // such as a top item in a partially scrolled view. However, if we don't use
+    // an overlay, then the decoy will appear behind its neighboring widget when
+    // it expands. This may be solveable by adding a widget to Scaffold that's
+    // undernearth the AppBar.
     return OverlayEntry(
       opaque: false,
       builder: (BuildContext context) {
@@ -1117,7 +1117,7 @@ class _ContextMenuSheet extends StatelessWidget {
   }
 }
 
-// An animation that switches immediately between two colors.
+// An animation that switches between two colors.
 //
 // The transition is immediate, so there are no intermediate values or
 // interpolation. The color switches from offColor to onColor and back to
