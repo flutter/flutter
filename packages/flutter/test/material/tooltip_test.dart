@@ -576,6 +576,39 @@ void main() {
     expect(textStyle.decoration, TextDecoration.underline);
   });
 
+  testWidgets('Tooltip overlay respects ambient Directionality', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/40702.
+    Widget buildApp(String text, TextDirection textDirection) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: Center(
+            child: Tooltip(
+              message: text,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                color: Colors.green[500],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(tooltipText, TextDirection.rtl));
+    await tester.longPress(find.byType(Tooltip));
+    expect(find.text(tooltipText), findsOneWidget);
+    RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
+    expect(tooltipRenderParagraph.textDirection, TextDirection.rtl);
+
+    await tester.pumpWidget(buildApp(tooltipText, TextDirection.ltr));
+    await tester.longPress(find.byType(Tooltip));
+    expect(find.text(tooltipText), findsOneWidget);
+    tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
+    expect(tooltipRenderParagraph.textDirection, TextDirection.ltr);
+  });
+
   testWidgets('Tooltip overlay wrapped with a non-fallback DefaultTextStyle widget', (WidgetTester tester) async {
     // A Material widget is needed as an ancestor of the Text widget.
     // It is invalid to have text in a Material application that

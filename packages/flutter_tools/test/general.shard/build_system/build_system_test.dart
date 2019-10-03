@@ -334,6 +334,13 @@ void main() {
     await buildSystem.build(target, environment);
     expect(called, 1);
   }));
+
+  test('output directory is an input to the build',  () => testbed.run(() async {
+    final Environment environmentA = Environment(projectDir: fs.currentDirectory, outputDir: fs.directory('a'));
+    final Environment environmentB = Environment(projectDir: fs.currentDirectory, outputDir: fs.directory('b'));
+
+    expect(environmentA.buildDir.path, isNot(environmentB.buildDir.path));
+  }));
 }
 
 class MockPlatform extends Mock implements Platform {}
