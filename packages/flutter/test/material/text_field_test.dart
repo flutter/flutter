@@ -590,7 +590,7 @@ void main() {
     await tester.pump();
 
     // Selected text shows 'COPY'.
-    expect(find.byType(FlatButton), find.text('COPY'));
+    expect(find.text('COPY'), findsOneWidget);
   }, skip: isBrowser);
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.

@@ -1328,7 +1328,7 @@ void main() {
       );
 
       // Selected text shows 'Copy'.
-      expect(find.byType(CupertinoButton), find.text('Copy'));
+      expect(find.text('Copy'), findsOneWidget);
   });
   testWidgets('Read only text field', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'readonly');
