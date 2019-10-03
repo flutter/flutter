@@ -43,6 +43,8 @@ fml::WeakPtr<FlutterViewController> PlatformViewIOS::GetOwnerViewController() co
 }
 
 void PlatformViewIOS::SetOwnerViewController(fml::WeakPtr<FlutterViewController> owner_controller) {
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  std::lock_guard<std::mutex> guard(ios_surface_mutex_);
   if (ios_surface_ || !owner_controller) {
     NotifyDestroyed();
     ios_surface_.reset();
@@ -92,6 +94,8 @@ void PlatformViewIOS::RegisterExternalTexture(int64_t texture_id,
 
 // |PlatformView|
 std::unique_ptr<Surface> PlatformViewIOS::CreateRenderingSurface() {
+  FML_DCHECK(task_runners_.GetGPUTaskRunner()->RunsTasksOnCurrentThread());
+  std::lock_guard<std::mutex> guard(ios_surface_mutex_);
   if (!ios_surface_) {
     FML_DLOG(INFO) << "Could not CreateRenderingSurface, this PlatformViewIOS "
                       "has no ViewController.";
@@ -102,6 +106,7 @@ std::unique_ptr<Surface> PlatformViewIOS::CreateRenderingSurface() {
 
 // |PlatformView|
 sk_sp<GrContext> PlatformViewIOS::CreateResourceContext() const {
+  FML_DCHECK(task_runners_.GetIOTaskRunner()->RunsTasksOnCurrentThread());
   if (!gl_context_ || !gl_context_->ResourceMakeCurrent()) {
     FML_DLOG(INFO) << "Could not make resource context current on IO thread. "
                       "Async texture uploads will be disabled. On Simulators, "
