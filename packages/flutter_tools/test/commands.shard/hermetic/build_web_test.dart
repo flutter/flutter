@@ -5,20 +5,25 @@
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
+import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -86,6 +91,71 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
   }));
 
+  test('Builds a web bundle - end to end', () => testbed.run(() async {
+    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
+    final List<String> dependencies = <String>[
+      fs.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'web.dart'),
+      fs.path.join('bin', 'cache', 'flutter_web_sdk'),
+      fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
+      fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+      fs.path.join('bin', 'cache', 'dart-sdk '),
+    ];
+    for (String dependency in dependencies) {
+      fs.file(dependency).createSync(recursive: true);
+    }
+
+    // Project files.
+    fs.file('.packages')
+      ..writeAsStringSync('''
+foo:lib/
+fizz:bar/lib/
+''');
+    fs.file('pubspec.yaml')
+      ..writeAsStringSync('''
+name: foo
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fizz:
+    path:
+      bar/
+''');
+    fs.file(fs.path.join('bar', 'pubspec.yaml'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+name: bar
+
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: UrlLauncherPlugin
+        fileName: url_launcher_web.dart
+''');
+    fs.file(fs.path.join('bar', 'lib', 'url_launcher_web.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+class UrlLauncherPlugin {}
+''');
+    fs.file(fs.path.join('lib', 'main.dart'))
+      ..writeAsStringSync('void main() { }');
+
+    // Process calls. We're not testing that these invocations are correct because
+    // that is covered in targets/web_test.dart.
+    fs.file(fs.path.join('.dart_tool', 'flutter_build', '61f7a30d1a3dbdc8a1baebbf511a0b79', 'main.dart.js')).createSync(recursive: true);
+    when(processManager.run(any)).thenAnswer((Invocation invocation) async {
+      return FakeProcessResult();
+    });
+
+    await runner.run(<String>['build', 'web']);
+
+    expect(fs.file(fs.path.join('lib', 'generated_plugin_registrant.dart')).existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    ProcessManager: () => MockProcessManager(),
+  }));
+
   test('hidden if feature flag is not enabled', () => testbed.run(() async {
     expect(BuildWebCommand().hidden, true);
   }, overrides: <Type, Generator>{
@@ -99,6 +169,7 @@ void main() {
   }));
 }
 
+class MockProcessManager extends Mock implements ProcessManager {}
 class MockWebCompilationProxy extends Mock implements WebCompilationProxy {}
 class MockPlatform extends Mock implements Platform {
   @override
