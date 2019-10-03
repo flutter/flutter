@@ -581,8 +581,11 @@ void main() {
     await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
     await tester.pump();
 
-    // Selected text shows 'COPY'.
-    expect(find.text('COPY'), findsOneWidget);
+    // Selected text shows 'COPY', and not 'PASTE', 'CUT', 'SELECT ALL'.
+    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('CUT'), findsNothing);
+    expect(find.text('SELECT ALL'), findsNothing);
   }, skip: isBrowser);
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
