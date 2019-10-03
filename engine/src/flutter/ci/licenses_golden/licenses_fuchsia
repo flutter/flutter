@@ -1,4 +1,4 @@
-Signature: 2f2e27538a6db3c9d1dde778fc707962
+Signature: 45140218593bb89255ba3f5c8700d8b9
 
 UNUSED LICENSES:
 
@@ -2406,7 +2406,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/logger.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/module.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/service_connection.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/agent/agent.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/agent/agent_task_handler.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/agent/internal/_agent_context.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/agent/internal/_agent_impl.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/entity/entity.dart
@@ -2735,7 +2734,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/presentation_info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/audio_capturer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/buffer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.auth/account/account.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.auth/account_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent/agent.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent/agent_context.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/agent/agent_controller/agent_controller.fidl
