@@ -112,8 +112,13 @@ public final class BasicMessageChannel<T> {
      * yet or the channel's message handler isn't setup on the Dart side yet.
      */
     public void resizeChannelBuffer(int newSize) {
+        resizeChannelBuffer(messenger, name, newSize);
+    }
+
+    static void resizeChannelBuffer(
+            @NonNull BinaryMessenger messenger, @NonNull String channel, int newSize) {
         Charset charset = Charset.forName("UTF-8");
-        String messageString = String.format(Locale.US, "resize\r%s\r%d", name, newSize);
+        String messageString = String.format(Locale.US, "resize\r%s\r%d", channel, newSize);
         ByteBuffer message = ByteBuffer.wrap(messageString.getBytes(charset));
         messenger.send(CHANNEL_BUFFERS_CHANNEL, message);
     }

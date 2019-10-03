@@ -252,6 +252,14 @@ FLUTTER_EXPORT
  * @param handler The method call handler.
  */
 - (void)setMethodCallHandler:(FlutterMethodCallHandler _Nullable)handler;
+
+/**
+ * Adjusts the number of messages that will get buffered when sending messages to
+ * channels that aren't fully setup yet.  For example, the engine isn't running
+ * yet or the channel's message handler isn't setup on the Dart side yet.
+ */
+- (void)resizeChannelBuffer:(NSInteger)newSize;
+
 @end
 
 /**
