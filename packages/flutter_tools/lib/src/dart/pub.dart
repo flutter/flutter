@@ -15,6 +15,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../globals.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'sdk.dart';
 
@@ -54,6 +55,10 @@ class PubContext {
 
   @override
   String toString() => 'PubContext: ${_values.join(':')}';
+
+  String toAnalyticsString()  {
+    return _values.map((String s) => s.replaceAll('_', '-')).toList().join('-');
+  }
 }
 
 bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
@@ -128,7 +133,9 @@ Future<void> pubGet({
   }
 
   if (dotPackages.lastModifiedSync().isBefore(pubSpecYaml.lastModifiedSync())) {
-    throwToolExit('$directory: pub did not update .packages file (pubspec.yaml timestamp: ${pubSpecYaml.lastModifiedSync()}; .packages timestamp: ${dotPackages.lastModifiedSync()}).');
+    throwToolExit('$directory: pub did not update .packages file '
+                  '(pubspec.yaml timestamp: ${pubSpecYaml.lastModifiedSync()}; '
+                  '.packages timestamp: ${dotPackages.lastModifiedSync()}).');
   }
 }
 
@@ -155,6 +162,17 @@ Future<void> pub(
 }) async {
   showTraceForErrors ??= isRunningOnBot;
 
+  bool versionSolvingFailed = false;
+  String filterWrapper(String line) {
+    if (line.contains('version solving failed')) {
+      versionSolvingFailed = true;
+    }
+    if (filter == null) {
+      return line;
+    }
+    return filter(line);
+  }
+
   if (showTraceForErrors) {
     arguments.insert(0, '--trace');
   }
@@ -166,12 +184,13 @@ Future<void> pub(
     code = await processUtils.stream(
       _pubCommand(arguments),
       workingDirectory: directory,
-      mapFunction: filter,
+      mapFunction: filterWrapper,
       environment: _createPubEnvironment(context),
     );
     if (code != 69) { // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
       break;
     }
+    versionSolvingFailed = false;
     printStatus('$failureMessage ($code) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
     await Future<void>.delayed(Duration(seconds: duration));
     if (duration < 64) {
@@ -179,6 +198,18 @@ Future<void> pub(
     }
   }
   assert(code != null);
+
+  String result = 'success';
+  if (versionSolvingFailed) {
+    result = 'version-solving-failed';
+  } else if (code != 0) {
+    result = 'failure';
+  }
+  PubResultEvent(
+    context: context.toAnalyticsString(),
+    result: result,
+  ).send();
+
   if (code != 0) {
     throwToolExit('$failureMessage ($code)', exitCode: code);
   }

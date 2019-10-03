@@ -139,8 +139,9 @@ class CrashingUsage implements Usage {
   void sendEvent(
     String category,
     String parameter, {
+    String label,
     Map<String, String> parameters,
-  }) => _impl.sendEvent(category, parameter, parameters: parameters);
+  }) => _impl.sendEvent(category, parameter, label: label, parameters: parameters);
 
   @override
   void sendTiming(

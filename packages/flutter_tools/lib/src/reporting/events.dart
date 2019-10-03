@@ -9,13 +9,16 @@ part of reporting;
 /// If sending values for custom dimensions is required, extend this class as
 /// below.
 class UsageEvent {
-  UsageEvent(this.category, this.parameter);
+  UsageEvent(this.category, this.parameter, {
+    this.label,
+  });
 
   final String category;
   final String parameter;
+  final String label;
 
   void send() {
-    flutterUsage.sendEvent(category, parameter);
+    flutterUsage.sendEvent(category, parameter, label: label);
   }
 }
 
@@ -101,7 +104,7 @@ class DoctorResultEvent extends UsageEvent {
   @override
   void send() {
     if (validator is! GroupedValidator) {
-      flutterUsage.sendEvent(category, parameter);
+      flutterUsage.sendEvent(category, parameter, label: label);
       return;
     }
     final GroupedValidator group = validator;
@@ -114,10 +117,11 @@ class DoctorResultEvent extends UsageEvent {
 }
 
 /// An event that reports success or failure of a pub get.
-class PubGetEvent extends UsageEvent {
-  PubGetEvent({
-    @required bool success,
-  }) : super('packages-pub-get', success ? 'success' : 'failure');
+class PubResultEvent extends UsageEvent {
+  PubResultEvent({
+    @required String context,
+    @required String result,
+  }) : super('pub', context, label: result);
 }
 
 /// An event that reports something about a build.
