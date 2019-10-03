@@ -146,6 +146,116 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
   }
 }
 
+class _ZoomPageTransition extends StatelessWidget {
+  const _ZoomPageTransition({
+    Key key,
+    this.animation,
+    this.secondaryAnimation,
+    this.child,
+  }) : super(key: key);
+
+  // The scrim obscures the old page by becoming increasingly opaque.
+  static final Tween<double> _scrimOpacityTween = Tween<double>(
+    begin: 0.0,
+    end: 0.60,
+  );
+
+  // A curve sequence similar to the 'fastOutExtraSlowIn' curve used in the
+  // native transition.
+  static final TweenSequence<double> _scaleCurveSequence = TweenSequence<double>(
+    <TweenSequenceItem<double>>[
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: 0.0, end: 0.4)
+          .chain(CurveTween(curve: const Cubic(0.05, 0.0, 0.133333, 0.06))),
+        weight: 0.166666,
+      ),
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: 0.4, end: 1.0)
+          .chain(CurveTween(curve: const Cubic(0.208333, 0.82, 0.25, 1.0))),
+        weight: 1.0 - 0.166666,
+      ),
+    ],
+  );
+
+  final Animation<double> animation;
+  final Animation<double> secondaryAnimation;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final Animation<double> _scrimOpacityAnimation = _scrimOpacityTween
+      .chain(Tween<double>(begin: 0.2075, end: 0.4175))
+      .animate(animation);
+
+    final Animation<double> _forwardEndScreenScaleTransition = Tween<double>(begin: 0.85, end: 1.00)
+      .chain(_scaleCurveSequence)
+      .animate(animation);
+
+    final Animation<double> _forwardEndScreenFadeTransition = Tween<double>(begin: 0.0, end: 1.00)
+      .animate(CurvedAnimation(
+        parent: animation,
+        curve: const Interval(0.125, 0.250),
+      ));
+
+    final Animation<double> _reverseEndScreenScaleTransition = Tween<double>(begin: 0.100, end: 0.90)
+      .chain(_scaleCurveSequence)
+      .animate(animation);
+
+    final Animation<double> _reverseStartScreenScaleTransition = Tween<double>(begin: 1.00, end: 1.10)
+      .chain(_scaleCurveSequence) // REVERSE CURVE SEQUENCE
+      .animate(secondaryAnimation);
+
+    final Animation<double> _reverseEndScreenFadeTransition = Tween<double>(begin: 0.0, end: 1.00)
+      .animate(CurvedAnimation(
+        parent: animation,
+        curve: const Interval(1 - 0.2075, 1 - 0.0825),
+      ));
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget child) {
+        if (animation.status == AnimationStatus.forward) {
+          return Container(
+            color: Colors.black.withOpacity(_scrimOpacityAnimation.value),
+            child: FadeTransition(
+              opacity: _forwardEndScreenFadeTransition,
+              child: ScaleTransition(
+                scale: _forwardEndScreenScaleTransition,
+                child: child,
+              ),
+            ),
+          );
+        } else if (animation.status == AnimationStatus.reverse) {
+          return FadeTransition(
+            opacity: _reverseEndScreenFadeTransition,
+            child: ScaleTransition(
+              scale: _reverseEndScreenScaleTransition,
+              child: child,
+            ),
+          );
+        }
+        return child;
+      },
+      child: AnimatedBuilder(
+        animation: secondaryAnimation,
+        builder: (BuildContext context, Widget child) {
+          if (secondaryAnimation.status == AnimationStatus.forward) {
+            // ADD FORWARD TRANSITION
+            return child;
+          } else if (secondaryAnimation.status == AnimationStatus.reverse) {
+            return ScaleTransition(
+              scale: _reverseStartScreenScaleTransition,
+              child: child,
+            );
+          }
+          return child;
+        },
+        child: child,
+      ),
+    );
+  }
+}
+
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation.
 ///
@@ -231,6 +341,26 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     return _OpenUpwardsPageTransition(
+      animation: animation,
+      secondaryAnimation: secondaryAnimation,
+      child: child,
+    );
+  }
+}
+
+class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
+  /// Construct a [ZoomPageTransitionsBuilder].
+  const ZoomPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return _ZoomPageTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
       child: child,
