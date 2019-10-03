@@ -1180,7 +1180,7 @@ class CommonFinders {
   SerializableFinder text(String text) => ByText(text);
 
   /// Finds widgets by [key]. Only [String] and [int] values can be used.
-  SerializableFinder byValueKey(dynamic key, {bool skipOffstage = true}) => ByValueKey(key, skipOffstage: skipOffstage);
+  SerializableFinder byValueKey(dynamic key) => ByValueKey(key);
 
   /// Finds widgets with a tooltip with the given [message].
   SerializableFinder byTooltip(String message) => ByTooltipMessage(message);

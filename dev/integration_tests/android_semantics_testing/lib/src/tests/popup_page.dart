@@ -8,7 +8,7 @@ import 'popup_constants.dart';
 
 export 'popup_constants.dart';
 
-/// A page with a normal text field and a password field.
+/// A page with a popup menu, a dropdown menu, and a modal alert.
 class PopupControlsPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _PopupControlsPageState();

@@ -5,13 +5,13 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:android_semantics_testing/src/tests/popup_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 import 'src/tests/controls_page.dart';
+import 'src/tests/popup_constants.dart';
 import 'src/tests/popup_page.dart';
 import 'src/tests/text_field_page.dart';
 

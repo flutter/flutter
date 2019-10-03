@@ -309,9 +309,9 @@ class FlutterDriverExtension {
   Finder _createByValueKeyFinder(ByValueKey arguments) {
     switch (arguments.keyValueType) {
       case 'int':
-        return find.byKey(ValueKey<int>(arguments.keyValue), skipOffstage: arguments.skipOffstage);
+        return find.byKey(ValueKey<int>(arguments.keyValue));
       case 'String':
-        return find.byKey(ValueKey<String>(arguments.keyValue), skipOffstage: arguments.skipOffstage);
+        return find.byKey(ValueKey<String>(arguments.keyValue));
       default:
         throw 'Unsupported ByValueKey type: ${arguments.keyValueType}';
     }
