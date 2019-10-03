@@ -96,27 +96,27 @@ void main() {
     RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{0});
     isInHitRegionOne = true;
     ui.window.onPointerDataPacket(packet1);
-    expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(0.0, 0.0)),
     ]));
     clear();
 
     ui.window.onPointerDataPacket(packet2);
-    expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerHoverEvent(position: Offset(1.0, 101.0)),
     ]));
     clear();
 
     ui.window.onPointerDataPacket(packet3);
-    expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerHoverEvent(position: Offset(1.0, 201.0)),
       const PointerExitEvent(position: Offset(1.0, 201.0)),
     ]));
 
     clear();
     ui.window.onPointerDataPacket(packet4);
-    expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(1.0, 301.0)),
       const PointerHoverEvent(position: Offset(1.0, 301.0)),
     ]));
@@ -125,7 +125,7 @@ void main() {
     clear();
     ui.window.onPointerDataPacket(packet5);
     RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{1});
-    expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(1.0, 401.0), device: 1),
       const PointerHoverEvent(position: Offset(1.0, 401.0), device: 1),
       const PointerHoverEvent(position: Offset(1.0, 401.0), device: 1),
@@ -146,7 +146,7 @@ void main() {
 
     ui.window.onPointerDataPacket(packet1);
 
-    expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(1.0, 101.0)),
@@ -156,7 +156,7 @@ void main() {
     isInHitRegionOne = false;
 
     ui.window.onPointerDataPacket(packet2);
-    expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerExitEvent(position: Offset(1.0, 201.0)),
     ]));
 
@@ -166,7 +166,7 @@ void main() {
     isInHitRegionOne = false;
 
     ui.window.onPointerDataPacket(packet2);
-    expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
   });
 
@@ -199,7 +199,7 @@ void main() {
     RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{0});
     ui.window.onPointerDataPacket(packet1);
     ui.window.onPointerDataPacket(packet2);
-    expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(1.0, 101.0)),
@@ -222,7 +222,7 @@ void main() {
     RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{0});
     ui.window.onPointerDataPacket(packet1);
     ui.window.onPointerDataPacket(packet2);
-    expect(events, _equalsToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(0.0, 0.0), delta: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(0.0, 0.0), delta: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(1.0, 101.0), delta: Offset(1.0, 101.0)),
@@ -383,6 +383,6 @@ class _EventListCriticalFieldsMatcher extends Matcher {
   }
 }
 
-Matcher _equalsToEventsOnCriticalFields(List<PointerEvent> source) {
+Matcher _equalToEventsOnCriticalFields(List<PointerEvent> source) {
   return _EventListCriticalFieldsMatcher(source);
 }
