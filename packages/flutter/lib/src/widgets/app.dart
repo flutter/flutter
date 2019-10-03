@@ -1205,7 +1205,6 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
         LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
         LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
-        LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
       },
       child: Actions(
         actions: <LocalKey, ActionFactory>{
