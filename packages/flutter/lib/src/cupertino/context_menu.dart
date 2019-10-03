@@ -99,7 +99,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   Rect _decoyChildEndRect;
 
   // This value was eyeballed from a physical iOS 13.1.2 device.
-  static const _decoyDuration = Duration(milliseconds: 550);
+  static const Duration _decoyDuration = Duration(milliseconds: 550);
 
   OverlayEntry _lastOverlayEntry;
   double _childOpacity = 1.0;
@@ -328,7 +328,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
     final Rect midRect =  widget.beginRect.deflate(
       widget.beginRect.width * (_kOpenScale - 1.0) / 2,
     );
-    _rect = TweenSequence(<TweenSequenceItem<Rect>>[
+    _rect = TweenSequence<Rect>(<TweenSequenceItem<Rect>>[
       TweenSequenceItem<Rect>(
         tween: RectTween(
           begin: widget.beginRect,
@@ -357,6 +357,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
     _rect.removeListener(_rectListener);
   }
 
+  @override
   void dispose() {
     _rect.removeListener(_rectListener);
     super.dispose();

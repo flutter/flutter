@@ -20,7 +20,7 @@ void main() {
 
   Widget _getContextMenu({
     Alignment alignment = Alignment.center,
-    screenSize = const Size(800.0, 600.0),
+    Size screenSize = const Size(800.0, 600.0),
     Widget child,
   }) {
     return CupertinoApp(
@@ -230,7 +230,6 @@ void main() {
 
       // The position of the action is in the center of the screen.
       expect(find.byType(ContextMenuSheetAction), findsOneWidget);
-      ContextMenuSheetAction action = tester.widget(find.byType(ContextMenuSheetAction));
       final Offset center = tester.getTopLeft(find.byType(ContextMenuSheetAction));
 
       // Close the ContextMenu.
@@ -254,7 +253,6 @@ void main() {
 
       // The position of the action is on the left of the screen.
       expect(find.byType(ContextMenuSheetAction), findsOneWidget);
-      action = tester.widget(find.byType(ContextMenuSheetAction));
       final Offset left = tester.getTopLeft(find.byType(ContextMenuSheetAction));
       expect(left.dx, lessThan(center.dx));
 
@@ -278,7 +276,6 @@ void main() {
 
       // The position of the action is on the right of the screen.
       expect(find.byType(ContextMenuSheetAction), findsOneWidget);
-      action = tester.widget(find.byType(ContextMenuSheetAction));
       final Offset right = tester.getTopLeft(find.byType(ContextMenuSheetAction));
       expect(right.dx, greaterThan(center.dx));
 
@@ -303,7 +300,6 @@ void main() {
       // Landscape doesn't support a centered action list, so the action is on
       // the left side of the screen.
       expect(find.byType(ContextMenuSheetAction), findsOneWidget);
-      ContextMenuSheetAction action = tester.widget(find.byType(ContextMenuSheetAction));
       final Offset center = tester.getTopLeft(find.byType(ContextMenuSheetAction));
 
       // Close the ContextMenu.
@@ -326,7 +322,6 @@ void main() {
       // The position of the action is on the right of the screen, which is the
       // same as for center aligned children in landscape.
       expect(find.byType(ContextMenuSheetAction), findsOneWidget);
-      action = tester.widget(find.byType(ContextMenuSheetAction));
       final Offset left = tester.getTopLeft(find.byType(ContextMenuSheetAction));
       expect(left.dx, equals(center.dx));
 
@@ -349,7 +344,6 @@ void main() {
 
       // The position of the action is on the left of the screen.
       expect(find.byType(ContextMenuSheetAction), findsOneWidget);
-      action = tester.widget(find.byType(ContextMenuSheetAction));
       final Offset right = tester.getTopLeft(find.byType(ContextMenuSheetAction));
       expect(right.dx, lessThan(left.dx));
     });
