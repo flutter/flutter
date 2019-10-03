@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'package:flutter/gestures.dart' show kMinFlingVelocity;
+import 'package:flutter/gestures.dart' show kMinFlingVelocity, kLongPressTimeout;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -56,7 +56,6 @@ class ContextMenu extends StatefulWidget {
        assert(child != null),
        super(key: key);
 
-
   /// The widget that can be "opened" with the ContextMenu.
   ///
   /// When the context menu is long-pressed or 3d touched the menu will open and
@@ -98,9 +97,6 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   AnimationController _decoyController;
   Rect _decoyChildEndRect;
 
-  // This value was eyeballed from a physical iOS 13.1.2 device.
-  static const Duration _decoyDuration = Duration(milliseconds: 550);
-
   OverlayEntry _lastOverlayEntry;
   double _childOpacity = 1.0;
   _ContextMenuRoute<void> _route;
@@ -109,7 +105,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   void initState() {
     super.initState();
     _decoyController = AnimationController(
-      duration: _decoyDuration,
+      duration: kLongPressTimeout,
       vsync: this,
     );
     _decoyController.addStatusListener(_onDecoyAnimationStatusChange);
@@ -235,19 +231,19 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   }
 
   void _onTap() {
-    if (_decoyController.isAnimating) {
+    if (_decoyController.isAnimating && _decoyController.value < 0.5) {
       _decoyController.reverse();
     }
   }
 
   void _onTapCancel() {
-    if (_decoyController.isAnimating) {
+    if (_decoyController.isAnimating && _decoyController.value < 0.5) {
       _decoyController.reverse();
     }
   }
 
   void _onTapUp(TapUpDetails details) {
-    if (_decoyController.isAnimating) {
+    if (_decoyController.isAnimating && _decoyController.value < 0.5) {
       _decoyController.reverse();
     }
   }
