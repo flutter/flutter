@@ -7,6 +7,7 @@ import 'dart:collection' show HashMap;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'banner.dart';
@@ -20,6 +21,7 @@ import 'navigator.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
 import 'semantics_debugger.dart';
+import 'shortcuts.dart';
 import 'text.dart';
 import 'title.dart';
 import 'widget_inspector.dart';
@@ -1164,17 +1166,32 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
 
-    return Actions(
-      actions: <LocalKey, ActionFactory>{
-        DoNothingAction.key: () => const DoNothingAction(),
+    return Shortcuts(
+      shortcuts: <LogicalKeySet, Intent>{
+        LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+        LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+        LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+        LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+        LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+        LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+        LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
       },
-      child: DefaultFocusTraversal(
-        policy: ReadingOrderTraversalPolicy(),
-        child: _MediaQueryFromWindows(
-          child: Localizations(
-            locale: appLocale,
-            delegates: _localizationsDelegates.toList(),
-            child: title,
+      child: Actions(
+        actions: <LocalKey, ActionFactory>{
+          DoNothingAction.key: () => const DoNothingAction(),
+          RequestFocusAction.key: () => RequestFocusAction(),
+          NextFocusAction.key: () => NextFocusAction(),
+          PreviousFocusAction.key: () => PreviousFocusAction(),
+          DirectionalFocusAction.key: () => DirectionalFocusAction(),
+        },
+        child: DefaultFocusTraversal(
+          policy: ReadingOrderTraversalPolicy(),
+          child: _MediaQueryFromWindows(
+            child: Localizations(
+              locale: appLocale,
+              delegates: _localizationsDelegates.toList(),
+              child: title,
+            ),
           ),
         ),
       ),
