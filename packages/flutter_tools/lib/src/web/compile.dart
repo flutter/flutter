@@ -27,6 +27,9 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
   }
   final bool hasWebPlugins = findPlugins(flutterProject)
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+  if (hasWebPlugins) {
+    await flutterProject.ensureReadyForPlatformSpecificTooling();
+  }
   final Status status = logger.startProgress('Compiling $target for the Web...', timeout: null);
   final Stopwatch sw = Stopwatch()..start();
   final BuildResult result = await const BuildSystem().build(const WebReleaseBundle(), Environment(
