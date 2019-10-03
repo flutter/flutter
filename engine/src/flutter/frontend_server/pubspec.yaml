@@ -4,6 +4,10 @@ description: Communication pipe to Dart Frontend
 homepage: http://flutter.io
 author: Flutter Authors <flutter-dev@googlegroups.com>
 
+environment:
+  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
+  sdk: ">=2.2.2 <3.0.0"
+
 dependencies:
   args: any
   async: any
@@ -22,36 +26,3 @@ dependencies:
   typed_data: any
   usage: any
   vm: any
-
-dev_dependencies:
-  analyzer: any
-  boolean_selector: any
-  cli_util: any
-  csslib: any
-  glob: any
-  html: any
-  http: any
-  http_multi_server: any
-  http_parser: any
-  matcher: any
-  mime: any
-  mockito: any
-  package_resolver: any
-  plugin: any
-  pool: any
-  pub_semver: any
-  shelf: any
-  shelf_packages_handler: any
-  shelf_static: any
-  shelf_web_socket: any
-  source_map_stack_trace: any
-  source_maps: any
-  stack_trace: any
-  stream_channel: any
-  string_scanner: any
-  test: any
-  utf: any
-  watcher: any
-  web_socket_channel: any
-  when: any
-  yaml: any
