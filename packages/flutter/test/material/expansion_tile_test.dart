@@ -226,8 +226,9 @@ void main() {
         home: Material(
           child: SingleChildScrollView(
             child: Column(
-              children: <Widget>[
+              children: const <Widget>[
                 ExpansionTile(
+                  title: Text('Tile 1'),
                   initiallyExpanded: false,
                   maintainsState: true,
                   children: <Widget>[
@@ -235,6 +236,7 @@ void main() {
                   ],
                 ),
                 ExpansionTile(
+                  title: Text('Title 2'),
                   initiallyExpanded: false,
                   maintainsState: false,
                   children: <Widget>[
