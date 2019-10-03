@@ -1,4 +1,4 @@
-Signature: 4ea3f2a92943d49f7a2f95e532749f03
+Signature: bb951fce67179fd71f09bff1bd00530f
 
 UNUSED LICENSES:
 
@@ -1156,10 +1156,7 @@ FILE: ../../../third_party/skia/src/ports/SkFontMgr_fuchsia.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLByteCode.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.h
-FILE: ../../../third_party/skia/src/sksl/SkSLJIT.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLJIT.h
 FILE: ../../../third_party/skia/src/sksl/SkSLPipelineStageCodeGenerator.cpp
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLAppendStage.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.cpp
 FILE: ../../../third_party/skia/src/utils/Sk3D.cpp
 FILE: ../../../third_party/skia/src/utils/SkAnimCodecPlayer.cpp
@@ -1688,6 +1685,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/interface.js
 FILE: ../../../third_party/skia/modules/canvaskit/karma.bench.conf.js
 FILE: ../../../third_party/skia/modules/canvaskit/karma.conf.js
 FILE: ../../../third_party/skia/modules/canvaskit/package.json
+FILE: ../../../third_party/skia/modules/canvaskit/paragraph.js
 FILE: ../../../third_party/skia/modules/canvaskit/perf/animation.bench.js
 FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/confetti.json
 FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/drinks.json
@@ -1811,7 +1809,6 @@ FILE: ../../../third_party/skia/src/sksl/sksl_frag.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_geom.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_gpu.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_interp.inc
-FILE: ../../../third_party/skia/src/sksl/sksl_mixer.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_pipeline.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_vert.inc
 ----------------------------------------------------------------------------------------------------
@@ -3797,6 +3794,7 @@ FILE: ../../../third_party/skia/include/private/GrGLTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkThreadAnnotations.h
 FILE: ../../../third_party/skia/modules/canvaskit/WasmAliases.h
 FILE: ../../../third_party/skia/modules/canvaskit/fonts/nofonts.cpp
+FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/particles_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/skottie_bindings.cpp
 FILE: ../../../third_party/skia/modules/particles/include/SkCurve.h
@@ -3819,6 +3817,8 @@ FILE: ../../../third_party/skia/src/core/SkImageFilter_Base.h
 FILE: ../../../third_party/skia/src/core/SkVM.cpp
 FILE: ../../../third_party/skia/src/core/SkVM.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkImageFilters.cpp
+FILE: ../../../third_party/skia/src/gpu/GrClientMappedBufferManager.cpp
+FILE: ../../../third_party/skia/src/gpu/GrClientMappedBufferManager.h
 FILE: ../../../third_party/skia/src/gpu/GrCopyRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrCopyRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrImageInfo.h
