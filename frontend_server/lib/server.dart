@@ -11,21 +11,30 @@ import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:vm/incremental_compiler.dart';
-import 'package:vm/frontend_server.dart' as frontend show FrontendCompiler,
-    CompilerInterface, listenAndCompile, argParser, usage;
+import 'package:vm/frontend_server.dart' as frontend
+    show
+        FrontendCompiler,
+        CompilerInterface,
+        listenAndCompile,
+        argParser,
+        usage,
+        ProgramTransformer;
 
 /// Wrapper around [FrontendCompiler] that adds [widgetCreatorTracker] kernel
 /// transformation to the compilation.
-class _FlutterFrontendCompiler implements frontend.CompilerInterface{
+class _FlutterFrontendCompiler implements frontend.CompilerInterface {
   final frontend.CompilerInterface _compiler;
 
   _FlutterFrontendCompiler(StringSink output,
-      {bool unsafePackageSerialization}) :
-          _compiler = frontend.FrontendCompiler(output,
-          unsafePackageSerialization: unsafePackageSerialization);
+      {bool unsafePackageSerialization,
+      frontend.ProgramTransformer transformer})
+      : _compiler = frontend.FrontendCompiler(output,
+            transformer: transformer,
+            unsafePackageSerialization: unsafePackageSerialization);
 
   @override
-  Future<bool> compile(String filename, ArgResults options, {IncrementalCompiler generator}) async {
+  Future<bool> compile(String filename, ArgResults options,
+      {IncrementalCompiler generator}) async {
     return _compiler.compile(filename, options, generator: generator);
   }
 
@@ -57,8 +66,8 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface{
       String libraryUri,
       String klass,
       bool isStatic) {
-    return _compiler.compileExpression(expression, definitions, typeDefinitions,
-        libraryUri, klass, isStatic);
+    return _compiler.compileExpression(
+        expression, definitions, typeDefinitions, libraryUri, klass, isStatic);
   }
 
   @override
@@ -77,11 +86,12 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface{
 /// `compiler` is an optional parameter so it can be replaced with mocked
 /// version for testing.
 Future<int> starter(
-    List<String> args, {
-      frontend.CompilerInterface compiler,
-      Stream<List<int>> input,
-      StringSink output,
-    }) async {
+  List<String> args, {
+  frontend.CompilerInterface compiler,
+  Stream<List<int>> input,
+  StringSink output,
+  frontend.ProgramTransformer transformer,
+}) async {
   ArgResults options;
   try {
     options = frontend.argParser.parse(args);
@@ -98,7 +108,8 @@ Future<int> starter(
 
     final String input = options.rest[0];
     final String sdkRoot = options['sdk-root'];
-    final Directory temp = Directory.systemTemp.createTempSync('train_frontend_server');
+    final Directory temp =
+        Directory.systemTemp.createTempSync('train_frontend_server');
     try {
       final String outputTrainingDill = path.join(temp.path, 'app.dill');
       options = frontend.argParser.parse(<String>[
@@ -126,6 +137,7 @@ Future<int> starter(
   }
 
   compiler ??= _FlutterFrontendCompiler(output,
+      transformer: transformer,
       unsafePackageSerialization: options['unsafe-package-serialization']);
 
   if (options.rest.isNotEmpty) {
