@@ -132,7 +132,7 @@ class MouseTracker extends ChangeNotifier {
   /// layer tree.
   ///
   /// If the associated layer is not removed, and receives a hit, then
-  /// [sendMouseNotifications] will assert the next time it is called.
+  /// [_sendMouseNotifications] will assert the next time it is called.
   void detachAnnotation(MouseTrackerAnnotation annotation) {
     final _TrackedAnnotation trackedAnnotation = _findAnnotation(annotation);
     for (int deviceId in trackedAnnotation.activeDevices) {
@@ -155,7 +155,7 @@ class MouseTracker extends ChangeNotifier {
     if (_trackedAnnotations.isNotEmpty && !_scheduledPostFramePositionCheck) {
       _scheduledPostFramePositionCheck = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        sendMouseNotifications(_lastMouseEvent.keys);
+        _sendMouseNotifications(_lastMouseEvent.keys);
         _scheduledPostFramePositionCheck = false;
       });
     }
@@ -171,14 +171,14 @@ class MouseTracker extends ChangeNotifier {
       // If we are adding the device again, then we're not removing it anymore.
       _pendingRemovals.remove(deviceId);
       _addMouseEvent(deviceId, event);
-      sendMouseNotifications(<int>{deviceId});
+      _sendMouseNotifications(<int>{deviceId});
       return;
     }
     if (event is PointerRemovedEvent) {
       _removeMouseEvent(deviceId, event);
       // If the mouse was removed, then we need to schedule one more check to
       // exit any annotations that were active.
-      sendMouseNotifications(<int>{deviceId});
+      _sendMouseNotifications(<int>{deviceId});
     } else {
       if (event is PointerMoveEvent || event is PointerHoverEvent || event is PointerDownEvent) {
         final PointerEvent lastEvent = _lastMouseEvent[deviceId];
@@ -187,7 +187,7 @@ class MouseTracker extends ChangeNotifier {
             lastEvent is PointerAddedEvent || lastEvent.position != event.position) {
           // Only schedule a frame if we have our first event, or if the
           // location of the mouse has changed, and only if there are tracked annotations.
-          sendMouseNotifications(<int>{deviceId});
+          _sendMouseNotifications(<int>{deviceId});
         }
       }
     }
@@ -218,11 +218,7 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// This is called from a post-frame callback when the layer tree has been
   /// updated, right after rendering the frame.
-  ///
-  /// This function is only public to allow for proper testing of the
-  /// MouseTracker. Do not call in other contexts.
-  @visibleForTesting
-  void sendMouseNotifications(Iterable<int> deviceIds) {
+  void _sendMouseNotifications(Iterable<int> deviceIds) {
     if (_trackedAnnotations.isEmpty) {
       return;
     }
