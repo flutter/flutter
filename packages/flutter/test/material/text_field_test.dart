@@ -35,33 +35,29 @@ class MockClipboard {
   }
 }
 
-class MaterialLocalizationsDelegate
-    extends LocalizationsDelegate<MaterialLocalizations> {
+class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
   bool isSupported(Locale locale) => true;
 
   @override
-  Future<MaterialLocalizations> load(Locale locale) =>
-      DefaultMaterialLocalizations.load(locale);
+  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
 
   @override
   bool shouldReload(MaterialLocalizationsDelegate old) => false;
 }
 
-class WidgetsLocalizationsDelegate
-    extends LocalizationsDelegate<WidgetsLocalizations> {
+class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
   @override
   bool isSupported(Locale locale) => true;
 
   @override
-  Future<WidgetsLocalizations> load(Locale locale) =>
-      DefaultWidgetsLocalizations.load(locale);
+  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
 
   @override
   bool shouldReload(WidgetsLocalizationsDelegate old) => false;
 }
 
-Widget overlay({Widget child}) {
+Widget overlay({ Widget child }) {
   final OverlayEntry entry = OverlayEntry(
     builder: (BuildContext context) {
       return Center(
@@ -95,7 +91,7 @@ Widget overlayWithEntry(OverlayEntry entry) {
   );
 }
 
-Widget boilerplate({Widget child}) {
+Widget boilerplate({ Widget child }) {
   return MaterialApp(
     home: Localizations(
       locale: const Locale('en', 'US'),
@@ -124,26 +120,26 @@ Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
 }
 
 double getOpacity(WidgetTester tester, Finder finder) {
-  return tester
-      .widget<FadeTransition>(find.ancestor(
-        of: finder,
-        matching: find.byType(FadeTransition),
-      ))
-      .opacity
-      .value;
+  return tester.widget<FadeTransition>(
+    find.ancestor(
+      of: finder,
+      matching: find.byType(FadeTransition),
+    ),
+  ).opacity.value;
 }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
-  SystemChannels.platform
-      .setMockMethodCallHandler(mockClipboard.handleMethodCall);
+  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
-  const String kThreeLines = 'First line of text is\n'
-      'Second line goes until\n'
-      'Third line of stuff';
+  const String kThreeLines =
+    'First line of text is\n'
+    'Second line goes until\n'
+    'Third line of stuff';
   const String kMoreThanFourLines =
-      kThreeLines + '\nFourth line won\'t display and ends at';
+    kThreeLines +
+    '\nFourth line won\'t display and ends at';
 
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {
@@ -158,14 +154,12 @@ void main() {
       }
       child.visitChildren(recursiveFinder);
     }
-
     root.visitChildren(recursiveFinder);
     expect(renderEditable, isNotNull);
     return renderEditable;
   }
 
-  List<TextSelectionPoint> globalize(
-      Iterable<TextSelectionPoint> points, RenderBox box) {
+  List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
     return points.map<TextSelectionPoint>((TextSelectionPoint point) {
       return TextSelectionPoint(
         box.localToGlobal(point.point),
@@ -208,9 +202,8 @@ void main() {
     );
   }
 
-  testWidgets('TextField passes onEditingComplete to EditableText',
-      (WidgetTester tester) async {
-    final VoidCallback onEditingComplete = () {};
+  testWidgets('TextField passes onEditingComplete to EditableText', (WidgetTester tester) async {
+    final VoidCallback onEditingComplete = () { };
 
     await tester.pumpWidget(
       MaterialApp(
@@ -247,8 +240,7 @@ void main() {
       ),
     );
 
-    RenderBox findTextFieldBox() =>
-        tester.renderObject(find.byKey(textFieldKey));
+    RenderBox findTextFieldBox() => tester.renderObject(find.byKey(textFieldKey));
 
     final RenderBox inputBox = findTextFieldBox();
     final Size emptyInputSize = inputBox.size;
@@ -284,8 +276,7 @@ void main() {
     );
     await tester.showKeyboard(find.byType(TextField));
 
-    final EditableTextState editableText =
-        tester.state(find.byType(EditableText));
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
 
     // Check that the cursor visibility toggles after each blink interval.
     Future<void> checkCursorToggle() async {
@@ -328,8 +319,7 @@ void main() {
     await tester.tap(textFinder);
     await tester.pump();
 
-    final EditableTextState editableTextState =
-        tester.firstState(find.byType(EditableText));
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     expect(renderEditable.cursorColor.alpha, 255);
@@ -365,8 +355,7 @@ void main() {
       ),
     );
 
-    final EditableTextState editableTextState =
-        tester.firstState(find.byType(EditableText));
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     expect(renderEditable.cursorRadius, const Radius.circular(2.0));
@@ -462,8 +451,7 @@ void main() {
     );
   });
 
-  testWidgets('text field selection toolbar renders correctly inside opacity',
-      (WidgetTester tester) async {
+  testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -486,16 +474,17 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
 
     const String testValue = 'A B C';
-    tester.testTextInput
-        .updateEditingValue(const TextEditingValue(text: testValue));
+    tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: testValue
+        )
+    );
     await tester.pump();
 
     // The selectWordsInRange with SelectionChangedCause.tap seems to be needed to show the toolbar.
     // (This is true even if we provide selection parameter to the TextEditingValue above.)
-    final EditableTextState state =
-        tester.state<EditableTextState>(find.byType(EditableText));
-    state.renderEditable.selectWordsInRange(
-        from: const Offset(0, 0), cause: SelectionChangedCause.tap);
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.renderEditable.selectWordsInRange(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
 
     expect(state.showToolbar(), true);
 
