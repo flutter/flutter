@@ -1041,7 +1041,7 @@ class ProjectFileInvalidator {
   static const String _pubCachePathWindows = 'Pub/Cache';
 
   static List<Uri> findInvalidated({
-    @required DateTime /*?*/ lastCompiled,
+    @required DateTime lastCompiled,
     @required List<Uri> urisToMonitor,
     @required String packagesPath,
   }) {
