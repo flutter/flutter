@@ -261,6 +261,7 @@ class CupertinoTextField extends StatefulWidget {
          'minLines and maxLines must be null when expands is true.',
        ),
        assert(maxLength == null || maxLength > 0),
+       assert(enableInteractiveSelection != null),
        assert(clearButtonMode != null),
        assert(prefixMode != null),
        assert(suffixMode != null),

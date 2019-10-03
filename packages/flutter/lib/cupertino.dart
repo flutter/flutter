@@ -32,6 +32,7 @@ export 'src/cupertino/switch.dart';
 export 'src/cupertino/tab_scaffold.dart';
 export 'src/cupertino/tab_view.dart';
 export 'src/cupertino/text_field.dart';
+export 'src/cupertino/text_form_field.dart';
 export 'src/cupertino/text_selection.dart';
 export 'src/cupertino/text_theme.dart';
 export 'src/cupertino/theme.dart';
