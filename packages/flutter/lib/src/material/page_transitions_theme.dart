@@ -183,13 +183,19 @@ class _ZoomPageTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> _scrimOpacityAnimation = _scrimOpacityTween
-      .chain(Tween<double>(begin: 0.2075, end: 0.4175))
-      .animate(animation);
+    final Animation<double> _forwardScrimOpacityAnimation = _scrimOpacityTween
+      .animate(CurvedAnimation(
+        parent: animation,
+        curve: const Interval(0.2075, 0.4175),
+      ));
 
     final Animation<double> _forwardEndScreenScaleTransition = Tween<double>(begin: 0.85, end: 1.00)
       .chain(_scaleCurveSequence)
       .animate(animation);
+
+    final Animation<double> _forwardStartScreenScaleTransition = Tween<double>(begin: 1.00, end: 1.05)
+      .chain(_scaleCurveSequence)
+      .animate(secondaryAnimation);
 
     final Animation<double> _forwardEndScreenFadeTransition = Tween<double>(begin: 0.0, end: 1.00)
       .animate(CurvedAnimation(
@@ -197,15 +203,15 @@ class _ZoomPageTransition extends StatelessWidget {
         curve: const Interval(0.125, 0.250),
       ));
 
-    final Animation<double> _reverseEndScreenScaleTransition = Tween<double>(begin: 0.100, end: 0.90)
-      .chain(_scaleCurveSequence)
-      .animate(animation);
-
-    final Animation<double> _reverseStartScreenScaleTransition = Tween<double>(begin: 1.00, end: 1.10)
+    final Animation<double> _reverseEndScreenScaleTransition = Tween<double>(begin: 1.00, end: 1.10)
       .chain(_scaleCurveSequence) // REVERSE CURVE SEQUENCE
       .animate(secondaryAnimation);
 
-    final Animation<double> _reverseEndScreenFadeTransition = Tween<double>(begin: 0.0, end: 1.00)
+    final Animation<double> _reverseStartScreenScaleTransition = Tween<double>(begin: 0.9, end: 1.0)
+      .chain(_scaleCurveSequence) // REVERSE CURVE SEQUENCE
+      .animate(animation);
+
+    final Animation<double> _reverseStartScreenFadeTransition = Tween<double>(begin: 0.0, end: 1.00)
       .animate(CurvedAnimation(
         parent: animation,
         curve: const Interval(1 - 0.2075, 1 - 0.0825),
@@ -216,7 +222,7 @@ class _ZoomPageTransition extends StatelessWidget {
       builder: (BuildContext context, Widget child) {
         if (animation.status == AnimationStatus.forward) {
           return Container(
-            color: Colors.black.withOpacity(_scrimOpacityAnimation.value),
+            color: Colors.black.withOpacity(_forwardScrimOpacityAnimation.value),
             child: FadeTransition(
               opacity: _forwardEndScreenFadeTransition,
               child: ScaleTransition(
@@ -226,10 +232,12 @@ class _ZoomPageTransition extends StatelessWidget {
             ),
           );
         } else if (animation.status == AnimationStatus.reverse) {
-          return FadeTransition(
-            opacity: _reverseEndScreenFadeTransition,
-            child: ScaleTransition(
-              scale: _reverseEndScreenScaleTransition,
+          print(_reverseStartScreenScaleTransition.value);
+          print(_reverseStartScreenFadeTransition.value);
+          return ScaleTransition(
+            scale: _reverseStartScreenScaleTransition,
+            child: FadeTransition(
+              opacity: _reverseStartScreenFadeTransition,
               child: child,
             ),
           );
@@ -240,11 +248,13 @@ class _ZoomPageTransition extends StatelessWidget {
         animation: secondaryAnimation,
         builder: (BuildContext context, Widget child) {
           if (secondaryAnimation.status == AnimationStatus.forward) {
-            // ADD FORWARD TRANSITION
-            return child;
+            return ScaleTransition(
+              scale: _forwardStartScreenScaleTransition,
+              child: child,
+            );
           } else if (secondaryAnimation.status == AnimationStatus.reverse) {
             return ScaleTransition(
-              scale: _reverseStartScreenScaleTransition,
+              scale: _reverseEndScreenScaleTransition,
               child: child,
             );
           }
