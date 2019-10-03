@@ -560,18 +560,17 @@ class CupertinoColors {
 /// mode, and changes automatically to black in dark mode.
 ///
 /// ```dart
-/// @override
-/// Widget build(BuildContext context) {
+/// Builder(builder: (BuildContext context) {
 ///   return CupertinoButton(
 ///     child: child,
-/// // CupertinoDynamicColor works out of box in a CupertinoButton.
+///     // CupertinoDynamicColor works out of box in a CupertinoButton.
 ///     color: CupertinoDynamicColor.withBrightness(
 ///       color: CupertinoColors.white,
 ///       darkColor: CupertinoColors.black,
 ///     ),
 ///     onPressed: () => null,
 ///   );
-/// }
+/// })
 /// ```
 /// {@end-tool}
 ///
@@ -591,14 +590,13 @@ class CupertinoColors {
 /// [MediaQuery], etc.
 ///
 /// ```dart
-/// @override
-/// Widget build(BuildContext context) {
-/// // Container is not a Cupertino widget, but CupertinoTheme.of implicitly resolves
-/// // colors used in the retrieved CupertinoThemeData.
+/// Builder(builder:(BuildContext context) {
+///   // Container is not a Cupertino widget, but CupertinoTheme.of implicitly resolves
+///   // colors used in the retrieved CupertinoThemeData.
 ///   return Container(
 ///     color: CupertinoTheme.of(context).primaryColor,
 ///   );
-/// }
+/// })
 /// ```
 /// {@end-tool}
 ///
@@ -617,24 +615,22 @@ class CupertinoColors {
 /// a [CupertinoDynamicColor]: [CupertinoColors.systemBlue].
 ///
 /// ```dart
-/// @override
-/// Widget build(BuildContext context) {
+/// Builder(builder: (BuildContext context) {
 ///   final Color resolvedColor = CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context);
 ///   return CupertinoNavigationBar(
 ///     // CupertinoNavigationBar does not know how to resolve colors used in
 ///     // a Border class.
 ///     border: Border(bottom: BorderSide(color: resolvedColor)),
 ///   );
-/// }
+/// })
 /// ```
 ///
 /// ```dart
-/// @override
-/// Widget build(BuildContext context) {
+/// Builder(builder: (BuildContext context) {
 ///   final Color resolvedColor = CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context);
 ///   // Container is not a Cupertino widget.
 ///   return Container(color: resolvedColor);
-/// }
+/// })
 /// ```
 /// {@end-tool}
 ///
