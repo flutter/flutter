@@ -559,8 +559,8 @@ void main() {
       const TextSelection(baseOffset: 8, extentOffset: 12),
     );
 
-    // Selected text shows 1 toolbar button.
-    expect(find.byType(CupertinoButton), findsNWidgets(1));
+    // Selected text shows 'Copy'.
+    expect(find.text('Copy'), findsOneWidget);
   }, skip: isBrowser);
 
   testWidgets('text field toolbar options correctly changes options (Android)',
