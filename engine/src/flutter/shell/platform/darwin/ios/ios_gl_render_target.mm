@@ -11,22 +11,23 @@
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
 namespace flutter {
+
 IOSGLRenderTarget::IOSGLRenderTarget(fml::scoped_nsobject<CAEAGLLayer> layer,
-                                     fml::WeakPtr<IOSGLContext> onscreen_gl_context,
-                                     fml::WeakPtr<IOSGLContext> resource_gl_context)
+                                     EAGLContext* context,
+                                     EAGLContext* resource_context)
     : layer_(std::move(layer)),
-      onscreen_gl_context_(std::move(onscreen_gl_context)),
-      resource_gl_context_(std::move(resource_gl_context)),
+      context_([context retain]),
+      resource_context_([resource_context retain]),
       framebuffer_(GL_NONE),
       colorbuffer_(GL_NONE),
       storage_size_width_(0),
       storage_size_height_(0),
       valid_(false) {
   FML_DCHECK(layer_ != nullptr);
-  FML_DCHECK(onscreen_gl_context_);
-  FML_DCHECK(resource_gl_context_);
+  FML_DCHECK(context_ != nullptr);
+  FML_DCHECK(resource_context_ != nullptr);
 
-  bool context_current = onscreen_gl_context_->MakeCurrent();
+  bool context_current = [EAGLContext setCurrentContext:context_];
 
   FML_DCHECK(context_current);
   FML_DCHECK(glGetError() == GL_NO_ERROR);
@@ -62,7 +63,7 @@ IOSGLRenderTarget::IOSGLRenderTarget(fml::scoped_nsobject<CAEAGLLayer> layer,
 
 IOSGLRenderTarget::~IOSGLRenderTarget() {
   EAGLContext* context = EAGLContext.currentContext;
-  onscreen_gl_context_->MakeCurrent();
+  [EAGLContext setCurrentContext:context_];
   FML_DCHECK(glGetError() == GL_NO_ERROR);
 
   // Deletes on GL_NONEs are ignored
@@ -104,7 +105,7 @@ bool IOSGLRenderTarget::UpdateStorageSizeIfNecessary() {
 
   FML_DCHECK(glGetError() == GL_NO_ERROR);
 
-  if (!onscreen_gl_context_->MakeCurrent()) {
+  if (![EAGLContext setCurrentContext:context_]) {
     return false;
   }
 
@@ -115,7 +116,7 @@ bool IOSGLRenderTarget::UpdateStorageSizeIfNecessary() {
   glBindRenderbuffer(GL_RENDERBUFFER, colorbuffer_);
   FML_DCHECK(glGetError() == GL_NO_ERROR);
 
-  if (!onscreen_gl_context_->BindRenderbufferStorage(layer_)) {
+  if (![context_.get() renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer_.get()]) {
     return false;
   }
 
@@ -132,11 +133,11 @@ bool IOSGLRenderTarget::UpdateStorageSizeIfNecessary() {
 }
 
 bool IOSGLRenderTarget::MakeCurrent() {
-  return UpdateStorageSizeIfNecessary() && onscreen_gl_context_->MakeCurrent();
+  return UpdateStorageSizeIfNecessary() && [EAGLContext setCurrentContext:context_.get()];
 }
 
 bool IOSGLRenderTarget::ResourceMakeCurrent() {
-  return resource_gl_context_->MakeCurrent();
+  return [EAGLContext setCurrentContext:resource_context_.get()];
 }
 
 }  // namespace flutter
