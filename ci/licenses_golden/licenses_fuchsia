@@ -1,4 +1,4 @@
-Signature: fee85387573f1913048d41640d0784cd
+Signature: 2f2e27538a6db3c9d1dde778fc707962
 
 UNUSED LICENSES:
 
@@ -468,7 +468,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castconfig/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.crash/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
@@ -549,6 +548,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/meta.json
@@ -1253,7 +1253,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/cast_system_info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.crash/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/deprecated_time_service.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/deprecated_time_zone.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
@@ -1442,6 +1441,9 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect/vmo/snapshot.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/agent.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/include/lib/modular/cpp/agent.h
+FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/test_harness_builder.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/test_harness_launcher.cc
@@ -2019,7 +2021,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castconfig/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.crash/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
@@ -2100,6 +2101,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/modular_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/modular_testing_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/meta.json
@@ -2457,7 +2459,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/nullables.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/camera.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera/manager.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/cobalt.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.crash/analyzer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/tiles.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.ethernet/ethernet.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/encoded_image.fidl
