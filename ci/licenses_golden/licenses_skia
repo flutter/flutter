@@ -1,4 +1,4 @@
-Signature: d8143e894edd65c078d2547afc4ed0e9
+Signature: 564536884f579bf04cd44f289365a880
 
 UNUSED LICENSES:
 
@@ -3819,8 +3819,6 @@ FILE: ../../../third_party/skia/src/core/SkImageFilter_Base.h
 FILE: ../../../third_party/skia/src/core/SkVM.cpp
 FILE: ../../../third_party/skia/src/core/SkVM.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkImageFilters.cpp
-FILE: ../../../third_party/skia/src/gpu/GrClientMappedBufferManager.cpp
-FILE: ../../../third_party/skia/src/gpu/GrClientMappedBufferManager.h
 FILE: ../../../third_party/skia/src/gpu/GrCopyRenderTask.cpp
 FILE: ../../../third_party/skia/src/gpu/GrCopyRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrImageInfo.h
