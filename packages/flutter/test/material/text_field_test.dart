@@ -548,8 +548,11 @@ void main() {
       const TextSelection(baseOffset: 8, extentOffset: 12),
     );
 
-    // Selected text shows 'Copy'.
+    // Selected text shows 'Copy', and not 'Paste', 'Cut', 'Select All'.
+    expect(find.text('Paste'), findsNothing);
     expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Select All'), findsNothing);
   }, skip: isBrowser);
 
   testWidgets('text field toolbar options correctly changes options (Android)',
