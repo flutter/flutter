@@ -469,10 +469,10 @@ class ColorProperty extends DiagnosticsProperty<Color> {
   ColorProperty(
     String name,
     Color value, {
-      bool showName = true,
-      Object defaultValue = kNoDefaultValue,
-      DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-      DiagnosticLevel level = DiagnosticLevel.info,
+    bool showName = true,
+    Object defaultValue = kNoDefaultValue,
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
+    DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(style != null),
        assert(level != null),
