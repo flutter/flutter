@@ -14,9 +14,10 @@
 
 namespace flutter_runner {
 AccessibilityBridge::AccessibilityBridge(
+    Delegate& delegate,
     const std::shared_ptr<sys::ServiceDirectory> services,
     fuchsia::ui::views::ViewRef view_ref)
-    : binding_(this) {
+    : delegate_(delegate), binding_(this) {
   services->Connect(fuchsia::accessibility::semantics::SemanticsManager::Name_,
                     fuchsia_semantics_manager_.NewRequest().TakeChannel());
   fuchsia_semantics_manager_.set_error_handler([](zx_status_t status) {
@@ -239,5 +240,12 @@ void AccessibilityBridge::HitTest(
     fuchsia::math::PointF local_point,
     fuchsia::accessibility::semantics::SemanticListener::HitTestCallback
         callback) {}
+
+// |fuchsia::accessibility::semantics::SemanticListener|
+void AccessibilityBridge::OnSemanticsModeChanged(
+    bool enabled,
+    OnSemanticsModeChangedCallback callback) {
+  delegate_.SetSemanticsEnabled(enabled);
+}
 
 }  // namespace flutter_runner
