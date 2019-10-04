@@ -115,16 +115,8 @@ config("compiler") {
       ]
     }
     if (is_asan) {
-      asan_blacklist_path =
-          rebase_path("//tools/memory/asan/blacklist.txt", root_build_dir)
-      cflags += [
-        "-fsanitize=address",
-        "-fsanitize-blacklist=$asan_blacklist_path",
-      ]
-      if (is_mac) {
-        cflags += [ "-mllvm -asan-globals=0" ]  # http://crbug.com/352073
-        # TODO(GYP): deal with mac_bundles.
-      }
+      cflags += [ "-fsanitize=address" ]
+      ldflags += [ "-fsanitize=address" ]
     }
     if (is_lsan) {
       cflags += [ "-fsanitize=leak" ]
