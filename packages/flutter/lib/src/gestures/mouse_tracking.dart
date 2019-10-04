@@ -127,8 +127,8 @@ class MouseTracker extends ChangeNotifier {
   // information it provides.
   //
   // It is a source-of-truth for the list of connected mouse devices, except
-  // for the ones with `pendedRemoval` true, which will be removed as soon as
-  // the next position check.
+  // for the ones whose `pendedRemoval` is true, which will be removed as soon
+  // as the next position check.
   final Map<int, _MouseState> _mouseStates = <int, _MouseState>{};
 
   // The number of attached annotations. When it's 0, [_sendMouseNotifications]
@@ -142,7 +142,15 @@ class MouseTracker extends ChangeNotifier {
   /// Whether or not a mouse is connected and has produced events.
   bool get mouseIsConnected => _mouseStates.length > _pendingRemovalCount;
 
-  /// Track an annotation so that if the mouse enters it, we send it events.
+  /// Notify [MouseTracker] that a new mouse tracker annotation has started to
+  /// take effect.
+  ///
+  /// This triggers [MouseTracker] to schedule a mouse position check during the
+  /// post frame to see if this new annotation might trigger enter events.
+  ///
+  /// The [MouseTracker] also uses this to track the number of attached
+  /// annotations, and will skip mouse position checks if there is no
+  /// annotations attached.
   ///
   /// This is typically called when the [AnnotatedRegion] containing this
   /// annotation has been added to the layer tree.
@@ -156,11 +164,18 @@ class MouseTracker extends ChangeNotifier {
     _annotationCount++;
   }
 
-  /// Stops tracking an annotation, indicating that it has been removed from the
-  /// layer tree.
+  /// Notify [MouseTracker] that a mouse tracker annotation that was previously
+  /// attached has stopped taking effect.
   ///
-  /// If the associated layer is not removed, and receives a hit, then
-  /// [sendMouseNotifications] will assert the next time it is called.
+  /// This triggers [MouseTracker] to perform a mouse position check immediately
+  /// to see if this annotation removal might trigger exit events.
+  ///
+  /// The [MouseTracker] also uses this to track the number of attached
+  /// annotations, and will skip mouse position checks if there is no
+  /// annotations attached.
+  ///
+  /// This is typically called when the [AnnotatedRegion] containing this
+  /// annotation has been removed from the layer tree.
   void detachAnnotation(MouseTrackerAnnotation annotation) {
     _mouseStates.forEach((int device, _MouseState mouseState) {
       if (mouseState.lastAnnotations.contains(annotation)) {
