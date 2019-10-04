@@ -65,7 +65,7 @@ void main() {
         isMethodCall(
           'routePushed',
           arguments: <String, dynamic>{
-            'previousRouteName': '',
+            'previousRouteName': null,
             'routeName': '/',
           },
         ));
@@ -132,7 +132,7 @@ void main() {
         isMethodCall(
           'routePushed',
           arguments: <String, dynamic>{
-            'previousRouteName': '',
+            'previousRouteName': null,
             'routeName': '/',
           },
         ));
@@ -196,7 +196,7 @@ void main() {
     expect(
       log.last,
       isMethodCall('routePushed', arguments: <String, dynamic>{
-        'previousRouteName': '',
+        'previousRouteName': null,
         'routeName': '/home',
       }),
     );
@@ -210,7 +210,7 @@ void main() {
       log.last,
       isMethodCall('routePushed', arguments: <String, dynamic>{
         'previousRouteName': '/home',
-        'routeName': '',
+        'routeName': null,
       }),
     );
   });

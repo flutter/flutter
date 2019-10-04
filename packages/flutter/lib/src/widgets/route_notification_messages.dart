@@ -32,8 +32,8 @@ class RouteNotificationMessages {
     SystemChannels.navigation.invokeMethod<void>(
       methodName,
       <String, dynamic>{
-        'previousRouteName': previousRouteName ?? '',
-        'routeName': routeName ?? '',
+        'previousRouteName': previousRouteName,
+        'routeName': routeName,
       },
     );
   }
