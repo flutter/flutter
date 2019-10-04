@@ -10,8 +10,7 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
-import 'package:vm_service/vm_service.dart';
-import 'package:vm_service/vm_service_io.dart';
+import 'package:vm_service_client/vm_service_client.dart';
 
 void main() {
   task(() async {
@@ -54,56 +53,52 @@ void main() {
       if (!ok)
         throw 'Failed to run test app.';
 
-      final VmService client = await vmServiceConnectUri('ws://localhost:$vmServicePort/ws');
+      final VMServiceClient client = VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
       final VM vm = await client.getVM();
-      final IsolateRef isolateRef = vm.isolates.first;
+      final VMIsolateRef isolate = vm.isolates.first;
 
-      client.streamListen(EventStreams.kExtension);
-
-      final StreamController<Event> frameEventsController = StreamController<Event>();
-      final StreamController<Event> navigationEventsController = StreamController<Event>();
-      client.onExtensionEvent.listen((Event event) {
-        if (event.extensionKind == 'Flutter.Frame') {
+      final StreamController<VMExtensionEvent> frameEventsController = StreamController<VMExtensionEvent>();
+      final StreamController<VMExtensionEvent> navigationEventsController = StreamController<VMExtensionEvent>();
+      isolate.onExtensionEvent.listen((VMExtensionEvent event) {
+        if (event.kind == 'Flutter.Frame') {
           frameEventsController.add(event);
-        } else if (event.extensionKind == 'Flutter.Navigation') {
+        } else if (event.kind == 'Flutter.Navigation') {
           navigationEventsController.add(event);
         }
       });
 
-      final Stream<Event> frameEvents = frameEventsController.stream;
-      final Stream<Event> navigationEvents = navigationEventsController.stream;
+      final Stream<VMExtensionEvent> frameEvents = frameEventsController.stream;
+      final Stream<VMExtensionEvent> navigationEvents = navigationEventsController.stream;
 
       print('reassembling app...');
-      final Future<Event> frameFuture = frameEvents.first;
-      await client.callServiceExtension('ext.flutter.reassemble', isolateId: isolateRef.id);
+      final Future<VMExtensionEvent> frameFuture = frameEvents.first;
+      await isolate.invokeExtension('ext.flutter.reassemble');
 
       // ensure we get an event
-      final Event event = await frameFuture;
-      print('${event.extensionKind}: ${event.extensionData}');
-
-      final Map<String, dynamic> eventData = event.extensionData.data.cast<String, dynamic>();
+      final VMExtensionEvent event = await frameFuture;
+      print('${event.kind}: ${event.data}');
 
       // validate the fields
       // {number: 8, startTime: 0, elapsed: 1437, build: 600, raster: 800}
-      expect(eventData['number'] is int);
-      expect(eventData['number'] >= 0);
-      expect(eventData['startTime'] is int);
-      expect(eventData['startTime'] >= 0);
-      expect(eventData['elapsed'] is int);
-      expect(eventData['elapsed'] >= 0);
-      expect(eventData['build'] is int);
-      expect(eventData['build'] >= 0);
-      expect(eventData['raster'] is int);
-      expect(eventData['raster'] >= 0);
+      expect(event.data['number'] is int);
+      expect(event.data['number'] >= 0);
+      expect(event.data['startTime'] is int);
+      expect(event.data['startTime'] >= 0);
+      expect(event.data['elapsed'] is int);
+      expect(event.data['elapsed'] >= 0);
+      expect(event.data['build'] is int);
+      expect(event.data['build'] >= 0);
+      expect(event.data['raster'] is int);
+      expect(event.data['raster'] >= 0);
 
-      final Future<Event> navigationFuture = navigationEvents.first;
+      final Future<VMExtensionEvent> navigationFuture = navigationEvents.first;
       // This tap triggers a navigation event.
       device.tap(100, 200);
 
-      final Event navigationEvent = await navigationFuture;
+      final VMExtensionEvent navigationEvent = await navigationFuture;
       // validate the fields
-      expect(navigationEvent.extensionData.data['route'] is Map<dynamic, dynamic>);
-      final Map<dynamic, dynamic> route = navigationEvent.extensionData.data['route'];
+      expect(navigationEvent.data['route'] is Map<dynamic, dynamic>);
+      final Map<dynamic, dynamic> route = navigationEvent.data['route'];
       expect(route['description'] is String);
       expect(route['settings'] is Map<dynamic, dynamic>);
       final Map<dynamic, dynamic> settings = route['settings'];
