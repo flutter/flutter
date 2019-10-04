@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -65,7 +65,7 @@ class _FontWeightTween extends Tween<FontWeight> {
   FontWeight lerp(double t) => FontWeight.lerp(begin, end, t);
 }
 
-/// An iOS-style segmented control.
+/// An iOS 13 style segmented control.
 ///
 /// Displays the widgets provided in the [Map] of [children] in a
 /// horizontal list. Used to select between a number of mutually exclusive
@@ -126,12 +126,14 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
     @required this.children,
     @required this.onValueChanged,
     this.controller,
+    this.isMomentary = false,
     this.thumbColor = _kThumbColor,
     this.padding,
     this.backgroundColor = CupertinoColors.tertiarySystemFill,
   }) : assert(children != null),
        assert(children.length >= 2),
        assert(onValueChanged != null),
+       assert(isMomentary != null),
        assert(
          controller.value == null || children.keys.any((T child) => child == controller.value),
          "The controller's value must be either null or one of the keys in the children map.",
@@ -200,6 +202,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
 
   final Color backgroundColor;
   final Color thumbColor;
+  final bool isMomentary;
 
   /// The CupertinoSegmentedControl will be placed inside this padding
   ///
@@ -860,11 +863,11 @@ class _RenderSegmentedControl<T> extends RenderBox
 
       if (_needsThumbAnimationUpdate) {
         // Needs to ensure _currentThumbRect is valid.
-        currentThumbTween = RectTween(begin: currentThumbRect, end: unscaledThumbTargetRect);
+        currentThumbTween = RectTween(begin: currentThumbRect ?? unscaledThumbTargetRect, end: unscaledThumbTargetRect);
 
         for (int i = 0; i < childCount - 1; i++) {
           // The separator associated with the last child will not be painted (unless
-          // a new trailing segment is added), and its opacity will always be 1.
+          // a new segment is appended to the child list), and its opacity will always be 1.
           final bool shouldFadeOut = i == selectedIndex || i == selectedIndex - 1;
           final RenderBox child = children[i];
           final _ChildAnimationManifest manifest = childAnimations[child];
