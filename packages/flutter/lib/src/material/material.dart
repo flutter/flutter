@@ -836,7 +836,7 @@ class ElevationOverlay {
 
   /// Computes the appropriate overlay color used to indicate elevation in
   /// dark themes.
-  /// 
+  ///
   /// See also:
   ///
   ///   * https://material.io/design/color/dark-theme.html#properties which
