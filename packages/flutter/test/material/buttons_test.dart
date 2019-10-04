@@ -1204,10 +1204,10 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: MaterialButton(
-          color: Color(0xffff00ff),
+          color: const Color(0xffff00ff),
           onPressed: null,
           onLongPress: () { /* to make sure the button is enabled */ },
-          child: Text('button'),
+          child: const Text('button'),
         ),
       ),
     );
@@ -1225,7 +1225,7 @@ void main() {
           onPressed: () {
             didPressButton = true;
           },
-          child: Text('button'),
+          child: const Text('button'),
         ),
       ),
     );
@@ -1241,10 +1241,11 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: MaterialButton(
+          onPressed: null,
           onLongPress: () {
             didLongPressButton = true;
           },
-          child: Text('button'),
+          child: const Text('button'),
         ),
       ),
     );
