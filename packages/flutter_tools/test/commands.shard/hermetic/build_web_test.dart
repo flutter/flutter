@@ -6,8 +6,8 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
@@ -18,10 +18,8 @@ import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
-import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -141,9 +139,8 @@ class UrlLauncherPlugin {}
 
     // Process calls. We're not testing that these invocations are correct because
     // that is covered in targets/web_test.dart.
-    fs.file(fs.path.join('.dart_tool', 'flutter_build', '61f7a30d1a3dbdc8a1baebbf511a0b79', 'main.dart.js')).createSync(recursive: true);
-    when(processManager.run(any)).thenAnswer((Invocation invocation) async {
-      return FakeProcessResult();
+    when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+      return BuildResult(success: true);
     });
 
     await runner.run(<String>['build', 'web']);
@@ -151,7 +148,7 @@ class UrlLauncherPlugin {}
     expect(fs.file(fs.path.join('lib', 'generated_plugin_registrant.dart')).existsSync(), true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => MockProcessManager(),
+    BuildSystem: () => MockBuildSystem(),
   }));
 
   test('hidden if feature flag is not enabled', () => testbed.run(() async {
@@ -167,7 +164,7 @@ class UrlLauncherPlugin {}
   }));
 }
 
-class MockProcessManager extends Mock implements ProcessManager {}
+class MockBuildSystem extends Mock implements BuildSystem {}
 class MockWebCompilationProxy extends Mock implements WebCompilationProxy {}
 class MockPlatform extends Mock implements Platform {
   @override
