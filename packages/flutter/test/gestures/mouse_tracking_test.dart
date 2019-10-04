@@ -17,14 +17,35 @@ import '../flutter_test_alternative.dart';
 typedef HandleEventCallback = void Function(PointerEvent event);
 
 class TestGestureFlutterBinding extends BindingBase with ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, RendererBinding {
-  HandleEventCallback callback;
-
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
-    super.handleEvent(event, entry);
-    if (callback != null) {
-      callback(event);
+  void initInstances() {
+    super.initInstances();
+    postFrameCallbacks = <void Function(Duration)>[];
+  }
+
+  // HandleEventCallback callback;
+
+  // @override
+  // void handleEvent(PointerEvent event, HitTestEntry entry) {
+  //   super.handleEvent(event, entry);
+  //   if (callback != null) {
+  //     callback(event);
+  //   }
+  // }
+
+  List<void Function(Duration)> postFrameCallbacks;
+
+  // Proxy post-frame callbacks
+  @override
+  void addPostFrameCallback(void Function(Duration) callback) {
+    postFrameCallbacks.add(callback);
+  }
+
+  void flushPostFrameCallbacks(Duration duration) {
+    for (final void Function(Duration) callback in postFrameCallbacks) {
+      callback(duration);
     }
+    postFrameCallbacks.clear();
   }
 }
 
@@ -36,13 +57,13 @@ void ensureTestGestureBinding() {
 }
 
 void main() {
-  void _setUpMouseAnnotationFinder(MouseDetectorAnnotationFinder annotationFinder) {
-    RendererBinding.instance.initMouseTracker(
-      MouseTracker(
-        GestureBinding.instance.pointerRouter,
-        annotationFinder,
-      ),
+  MouseTracker _setUpMouseAnnotationFinder(MouseDetectorAnnotationFinder annotationFinder) {
+    final MouseTracker mouseTracker = MouseTracker(
+      GestureBinding.instance.pointerRouter,
+      annotationFinder,
     );
+    RendererBinding.instance.initMouseTracker(mouseTracker);
+    return mouseTracker;
   }
 
   // Set up a trivial test environment that includes one annotation, which adds
@@ -64,7 +85,7 @@ void main() {
     PointerEventConverter.clearPointers();
   });
 
-  test('Should process enter, hover, and exit callbacks triggered by mouse events', () {
+  test('should detect enter, hover, and exit from Added, Hover, and Removed events', () {
     final List<PointerEvent> events = <PointerEvent>[];
     _setUpWithOneAnnotation(logEvents: events);
 
@@ -108,7 +129,7 @@ void main() {
     events.clear();
   });
 
-  test('Should correctly handle multiple devices', () {
+  test('should correctly handle multiple devices', () {
     final List<PointerEvent> events = <PointerEvent>[];
     _setUpWithOneAnnotation(logEvents: events);
 
@@ -169,7 +190,37 @@ void main() {
     events.clear();
   });
 
-  test('detects exit when annotated layer no longer hit', () {
+  test('should not handle non-hover events', () {
+    final List<PointerEvent> events = <PointerEvent>[];
+    _setUpWithOneAnnotation(logEvents: events);
+
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.down, const Offset(0.0, 101.0)),
+    ]));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      // This Enter event is triggered by the [PointerAddedEvent] that was
+      // synthesized during the event normalization of pointer event converter.
+      // The [PointerDownEvent] is ignored by [MouseTracker].
+      const PointerEnterEvent(position: Offset(0.0, 101.0)),
+    ]));
+    events.clear();
+
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.move, const Offset(0.0, 201.0)),
+    ]));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+    ]));
+    events.clear();
+
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.up, const Offset(0.0, 301.0)),
+    ]));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+    ]));
+    events.clear();
+  });
+
+  test('should detect enter or exit when annotations are attached or detached', () {
     bool isInHitRegion;
     final List<PointerEvent> events = <PointerEvent>[];
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
@@ -177,48 +228,44 @@ void main() {
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
+    final MouseTracker mouseTracker = _setUpMouseAnnotationFinder((Offset position) sync* {
       if (isInHitRegion) {
         yield annotation;
       }
     });
-    void clear() => events.clear();
 
-    final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(0.0, 0.0)),
-      _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
-    ]);
-    final ui.PointerDataPacket packet2 = ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(1.0, 201.0)),
-    ]);
+    isInHitRegion = false;
 
+    // Connect a mouse when there is no annotation
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(0.0, 100.0)),
+    ]));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+    ]));
+    expect(mouseTracker.mouseIsConnected, isTrue);
+    events.clear();
+
+    // Attach an annotation
     isInHitRegion = true;
     RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
-
-    ui.window.onPointerDataPacket(packet1);
-
+    // No callbacks are triggered immediately
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 0.0)),
-      const PointerHoverEvent(position: Offset(0.0, 0.0)),
-      const PointerHoverEvent(position: Offset(1.0, 101.0)),
     ]));
-    // Simulate layer going away by detaching it.
-    clear();
+    expect(_binding.postFrameCallbacks, hasLength(1));
+
+    _binding.flushPostFrameCallbacks(Duration.zero);
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerEnterEvent(position: Offset(0.0, 100.0)),
+    ]));
+    events.clear();
+
+    // Detach the annotation
     isInHitRegion = false;
-
-    ui.window.onPointerDataPacket(packet2);
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerExitEvent(position: Offset(1.0, 201.0)),
-    ]));
-
-    // Actually detach annotation. Shouldn't receive hit.
     RendererBinding.instance.mouseTracker.detachAnnotation(annotation);
-    clear();
-    isInHitRegion = false;
-
-    ui.window.onPointerDataPacket(packet2);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerExitEvent(position: Offset(0.0, 100.0)),
     ]));
+    expect(_binding.postFrameCallbacks, hasLength(0));
   });
 
   test("don't flip out if not all mouse events are listened to", () {
@@ -271,27 +318,6 @@ void main() {
       const PointerHoverEvent(position: Offset(1.0, 101.0)),
       const PointerHoverEvent(position: Offset(1.0, 201.0)),
       const PointerExitEvent(position: Offset(1.0, 201.0)),
-    ]));
-  });
-
-  test('handles mouse down and move', () {
-    final List<PointerEvent> events = <PointerEvent>[];
-    _setUpWithOneAnnotation(logEvents: events);
-
-    final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(0.0, 0.0)),
-      _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
-    ]);
-    final ui.PointerDataPacket packet2 = ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.down, const Offset(1.0, 101.0)),
-      _pointerData(PointerChange.move, const Offset(1.0, 201.0)),
-    ]);
-    ui.window.onPointerDataPacket(packet1);
-    ui.window.onPointerDataPacket(packet2);
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 0.0), delta: Offset(0.0, 0.0)),
-      const PointerHoverEvent(position: Offset(0.0, 0.0), delta: Offset(0.0, 0.0)),
-      const PointerHoverEvent(position: Offset(1.0, 101.0), delta: Offset(1.0, 101.0)),
     ]));
   });
 }

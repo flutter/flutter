@@ -48,7 +48,7 @@ class _MouseState {
   PointerEvent _mostRecentEvent;
 
   // Whether this device should be removed the next time it's updated.
-  bool pendingRemoval;
+  bool pendingRemoval = false;
 }
 
 /// The annotation object used to annotate layers that are interested in mouse
@@ -142,6 +142,8 @@ class MouseTracker extends ChangeNotifier {
   /// Whether or not a mouse is connected and has produced events.
   bool get mouseIsConnected => _mouseStates.length > _pendingRemovalCount;
 
+  bool isAnnotationAttached(MouseTrackerAnnotation tracker) => false;
+
   /// Notify [MouseTracker] that a new mouse tracker annotation has started to
   /// take effect.
   ///
@@ -158,10 +160,10 @@ class MouseTracker extends ChangeNotifier {
     // Schedule a check so that we test this new annotation to see if any mouse
     // is currently inside its region. It has to happen after the frame is
     // complete so that the annotation layer has been added before the check.
+    _annotationCount++;
     if (mouseIsConnected) {
       _scheduleMousePositionCheck();
     }
-    _annotationCount++;
   }
 
   /// Notify [MouseTracker] that a mouse tracker annotation that was previously
@@ -222,19 +224,14 @@ class MouseTracker extends ChangeNotifier {
     }
     final int deviceId = event.device;
     if (event is PointerAddedEvent) {
-      _addMouseEvent(deviceId, event);
-      // Adding the device again means it's not being removed during this frame.
-      _setPendingRemoval(deviceId, false);
+      _addMouseDevice(deviceId, event);
       sendMouseNotifications(<int>{deviceId});
     } else if (event is PointerRemovedEvent) {
-      _removeMouseEvent(deviceId, event);
+      _removeMouseDevice(deviceId, event);
       // If the mouse was removed, then we need to schedule one more check to
       // exit any annotations that were active.
       sendMouseNotifications(<int>{deviceId});
-    } else if (event is PointerMoveEvent ||
-               event is PointerHoverEvent ||
-               event is PointerDownEvent ||
-               event is PointerUpEvent) {
+    } else if (event is PointerHoverEvent) {
       final _MouseState mouseState = _mouseStates[deviceId];
       assert(mouseState != null);
       final PointerEvent previousEvent = mouseState.mostRecentEvent;
@@ -288,7 +285,7 @@ class MouseTracker extends ChangeNotifier {
       // Send exit events in visual order.
       final Iterable<MouseTrackerAnnotation> exitingAnnotations = lastAnnotations
         .difference(nextAnnotations);
-      for (final MouseTrackerAnnotation annotation in exitingAnnotations ) {
+      for (final MouseTrackerAnnotation annotation in exitingAnnotations) {
         if (annotation.onExit != null) {
           annotation.onExit(PointerExitEvent.fromMouseEvent(mostRecentEvent));
         }
@@ -320,21 +317,26 @@ class MouseTracker extends ChangeNotifier {
     }
   }
 
-  void _addMouseEvent(int deviceId, PointerEvent event) {
+  void _addMouseDevice(int deviceId, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
-    assert(!_mouseStates.containsKey(deviceId)
-        || _mouseStates[deviceId].pendingRemoval,
-      'Unexpected request to add device $deviceId, which has already been '
-      'added and is not pending removal.');
-    _mouseStates.putIfAbsent(deviceId, () => _MouseState(mostRecentEvent: event));
-    // Adding the device again means it's not being removed during this frame.
-    _setPendingRemoval(deviceId, false);
+    final _MouseState mouseState = _mouseStates[deviceId];
+    assert(event is PointerAddedEvent);
+    if (mouseState == null) {
+      _mouseStates[deviceId] = _MouseState(mostRecentEvent: event);
+    } else {
+      assert(_mouseStates[deviceId].pendingRemoval,
+        'Unexpected request to add device $deviceId, which has already been '
+        'added and is not pending removal.');
+      mouseState.mostRecentEvent = event;
+      // Adding the device again means it's not being removed during this frame.
+      _setPendingRemoval(deviceId, false);
+    }
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
     }
   }
 
-  void _removeMouseEvent(int deviceId, PointerEvent event) {
+  void _removeMouseDevice(int deviceId, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
     assert(_mouseStates.containsKey(deviceId),
       'Unexpected request to remove device $deviceId, which has not been '
