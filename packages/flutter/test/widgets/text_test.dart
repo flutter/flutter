@@ -402,6 +402,40 @@ void main() {
     semantics.dispose();
   }, skip: true); // TODO(jonahwilliams): correct once https://github.com/flutter/flutter/issues/20891 is resolved.
 
+  testWidgets('TapGesture recognizer contributes link semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      RichText(
+        text: TextSpan(
+          text: 'click here',
+          recognizer: TapGestureRecognizer(),
+        ),
+        textDirection: TextDirection.ltr,
+      )
+    );
+
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+            ],
+            label: 'click here',
+            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            transform: Matrix4.translationValues(356.0, 276.0, 0.0),
+            flags: <SemanticsFlag>[
+              //SemanticsFlag.isLink,
+            ],
+          ),
+        ],
+      ),
+      ignoreId: true,
+    ));
+
+    semantics.dispose();
+  });
+
   testWidgets('inline widgets generate semantic nodes', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');

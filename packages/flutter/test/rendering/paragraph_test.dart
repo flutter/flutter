@@ -417,20 +417,4 @@ void main() {
     expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0 , TextDirection.ltr));
   // Ahem-based tests don't yet quite work on Windows or some MacOS environments
   }, skip: isWindows || isMacOS || isBrowser);
-
-  test('automatic link sematics', () {
-    // Regression test for https://github.com/flutter/flutter/issues/18175
-
-    final RenderParagraph paragraph = RenderParagraph(
-      TextSpan(
-        text: 'click me',
-        recognizer: TapGestureRecognizer(),
-      ),
-    );
-    layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
-
-    final SemanticsNode node = paragraph.debugSemantics;
-    print(node);
-
-  });
 }
