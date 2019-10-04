@@ -133,9 +133,9 @@ Future<void> pubGet({
   }
 
   if (dotPackages.lastModifiedSync().isBefore(pubSpecYaml.lastModifiedSync())) {
-    throwToolExit('$directory: pub did not update .packages file '
-                  '(pubspec.yaml timestamp: ${pubSpecYaml.lastModifiedSync()}; '
-                  '.packages timestamp: ${dotPackages.lastModifiedSync()}).');
+    printError('$directory: pub did not update .packages file '
+               '(pubspec.yaml timestamp: ${pubSpecYaml.lastModifiedSync()}; '
+               '.packages timestamp: ${dotPackages.lastModifiedSync()}).');
   }
 }
 
