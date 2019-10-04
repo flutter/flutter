@@ -52,6 +52,7 @@ void main() {
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(null);
     final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
+      enableAsserts: true,
       trackWidgetCreation: false,
     );
 
@@ -75,6 +76,7 @@ void main() {
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(null);
     final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
+      enableAsserts: true,
       trackWidgetCreation: false,
     );
 
@@ -101,6 +103,7 @@ void main() {
     final CompilerOutput output = await kernelCompiler.compile(
       sdkRoot: '/path/to/sdkroot',
       mainPath: '/path/to/main.dart',
+      enableAsserts: true,
       trackWidgetCreation: false,
     );
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
