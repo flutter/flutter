@@ -673,7 +673,9 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, indicates that this subtree represents a link.
   ///
-  /// TalkBack/VoiceOver provides users with a hint when a link is focused.
+  /// iOS's VoiceOver provides users with a unique hint when a link is focused.
+  /// Android's Talkback will announce a link hint the same way it does a
+  /// button.
   final bool link;
 
   /// If non-null, indicates that this subtree represents a header.
