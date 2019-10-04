@@ -1231,7 +1231,7 @@ void main() {
     );
 
     expect(didPressButton, isFalse);
-    await tester.press(find.byType(MaterialButton));
+    await tester.tap(find.byType(MaterialButton));
     expect(didPressButton, isTrue);
   });
 
