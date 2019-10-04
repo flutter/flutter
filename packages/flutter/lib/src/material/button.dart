@@ -77,16 +77,16 @@ class RawMaterialButton extends StatefulWidget {
   /// Called when the button is tapped or otherwise activated.
   ///
   /// If this callback and [onLongPress] are null, then the button will be disabled.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [enabled], which is true if the button is enabled.
   final VoidCallback onPressed;
 
   /// Called when the button is long-pressed.
-  /// 
+  ///
   /// If this callback and [onPressed] are null, then the button will be disabled.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [enabled], which is true if the button is enabled.
