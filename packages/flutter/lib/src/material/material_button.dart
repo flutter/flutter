@@ -76,6 +76,7 @@ class MaterialButton extends StatelessWidget {
     this.animationDuration,
     this.minWidth,
     this.height,
+    this.enableFeedback = true,
     this.child,
   }) : assert(clipBehavior != null),
        assert(autofocus != null),
@@ -341,6 +342,16 @@ class MaterialButton extends StatelessWidget {
   /// Defaults to the value from the current [ButtonTheme].
   final double height;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool enableFeedback;
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -348,6 +359,7 @@ class MaterialButton extends StatelessWidget {
 
     return RawMaterialButton(
       onPressed: onPressed,
+      enableFeedback: enableFeedback,
       onHighlightChanged: onHighlightChanged,
       fillColor: buttonTheme.getFillColor(this),
       textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
