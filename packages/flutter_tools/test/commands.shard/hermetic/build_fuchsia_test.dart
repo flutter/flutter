@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -23,7 +24,6 @@ import '../../src/mocks.dart';
 void main() {
   Cache.disableLocking();
 
-  MemoryFileSystem memoryFileSystem;
   MockPlatform linuxPlatform;
   MockPlatform windowsPlatform;
   MockFuchsiaSdk fuchsiaSdk;
@@ -31,7 +31,6 @@ void main() {
   MockFuchsiaArtifacts fuchsiaArtifactsNoCompiler;
 
   setUp(() {
-    memoryFileSystem = MemoryFileSystem();
     linuxPlatform = MockPlatform();
     windowsPlatform = MockPlatform();
     fuchsiaSdk = MockFuchsiaSdk();
@@ -57,7 +56,8 @@ void main() {
           throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
-      FileSystem: () => memoryFileSystem,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FuchsiaArtifacts: () => fuchsiaArtifacts,
     });
 
@@ -74,7 +74,8 @@ void main() {
           throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
-      FileSystem: () => memoryFileSystem,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FuchsiaArtifacts: () => fuchsiaArtifacts,
     });
 
@@ -96,7 +97,8 @@ void main() {
           throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,
-      FileSystem: () => memoryFileSystem,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FuchsiaArtifacts: () => fuchsiaArtifacts,
     });
 
@@ -118,7 +120,8 @@ void main() {
           throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
-      FileSystem: () => memoryFileSystem,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
       FuchsiaArtifacts: () => fuchsiaArtifactsNoCompiler,
     });
   });
@@ -143,7 +146,8 @@ void main() {
     expect(fs.file(farPath).existsSync(), isTrue);
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
-    FileSystem: () => memoryFileSystem,
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     FuchsiaSdk: () => fuchsiaSdk,
   });
 }

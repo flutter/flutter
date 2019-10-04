@@ -20,12 +20,18 @@ void main() {
     testUsingContext('recursively creates a directory if it does not exist', () async {
       ensureDirectoryExists('foo/bar/baz.flx');
       expect(fs.isDirectorySync('foo/bar'), true);
-    }, overrides: <Type, Generator>{FileSystem: () => fs});
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    });
 
     testUsingContext('throws tool exit on failure to create', () async {
       fs.file('foo').createSync();
       expect(() => ensureDirectoryExists('foo/bar.flx'), throwsToolExit());
-    }, overrides: <Type, Generator>{FileSystem: () => fs});
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    });
   });
 
   group('copyDirectorySync', () {
@@ -80,6 +86,7 @@ void main() {
       expect(destination.childDirectory('nested').childFile('a.txt').existsSync(), isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
     });
   });
 
