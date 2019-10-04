@@ -7,6 +7,7 @@ assert(is_fuchsia)
 import("//build/fuchsia/sdk.gni")
 import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/gpu/gpu.gni")
+import("$flutter_root/testing/testing.gni")
 import("$flutter_root/tools/fuchsia/common_libs.gni")
 import("$flutter_root/tools/fuchsia/dart.gni")
 import("$flutter_root/tools/fuchsia/fuchsia_archive.gni")
@@ -241,6 +242,10 @@ jit_runner("flutter_jit_product_runner") {
   product = true
 }
 
+test_fixtures("flutter_runner_fixtures") {
+  fixtures = []
+}
+
 executable("flutter_runner_unittests") {
   testonly = true
 
@@ -268,6 +273,7 @@ executable("flutter_runner_unittests") {
 
   deps = [
     ":aot",
+    ":flutter_runner_fixtures",
     "//build/fuchsia/fidl:fuchsia.accessibility.semantics",
     "//build/fuchsia/fidl:fuchsia.modular",
     "//build/fuchsia/pkg:async-loop-cpp",
