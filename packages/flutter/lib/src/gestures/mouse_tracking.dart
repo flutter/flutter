@@ -233,7 +233,8 @@ class MouseTracker extends ChangeNotifier {
       sendMouseNotifications(<int>{deviceId});
     } else if (event is PointerMoveEvent ||
                event is PointerHoverEvent ||
-               event is PointerDownEvent) {
+               event is PointerDownEvent ||
+               event is PointerUpEvent) {
       final _MouseState mouseState = _mouseStates[deviceId];
       assert(mouseState != null);
       final PointerEvent previousEvent = mouseState.mostRecentEvent;
