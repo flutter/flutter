@@ -242,7 +242,7 @@ class FlutterWebEntrypointBuilder implements Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
     await bootstrapDdc(buildStep, platform: flutterWebPlatform,
-        skipPlatformCheckPackages: skipPlatformCheckPackages);
+        skipPlatformCheck: true);
   }
 }
 
