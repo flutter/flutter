@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:archive/archive.dart';
 import 'package:meta/meta.dart';
 
-import '../asset.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
-import '../bundle.dart';
+import '../build_system/build_system.dart';
+import '../build_system/targets/dart.dart';
+import '../build_system/targets/web.dart';
 import '../globals.dart';
+import '../platform_plugins.dart';
+import '../plugins.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 
@@ -23,64 +25,32 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
   }
+  final bool hasWebPlugins = findPlugins(flutterProject)
+    .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   final Status status = logger.startProgress('Compiling $target for the Web...', timeout: null);
   final Stopwatch sw = Stopwatch()..start();
-  final Directory outputDir = fs.directory(getWebBuildDirectory())
-    ..createSync(recursive: true);
-  bool result;
-  try {
-    result = await webCompilationProxy.initialize(
-      projectDirectory: FlutterProject.current().directory,
-      mode: buildInfo.mode,
-      projectName: flutterProject.manifest.appName,
-      initializePlatform: initializePlatform,
-    );
-    if (result) {
-      // Places assets adjacent to the web stuff.
-      final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-      await assetBundle.build();
-      await writeBundle(fs.directory(fs.path.join(outputDir.path, 'assets')), assetBundle.entries);
-
-      // Copy results to output directory.
-      final String outputPath = fs.path.join(
-        flutterProject.dartTool.path,
-        'build',
-        'flutter_web',
-        flutterProject.manifest.appName,
-        '${fs.path.withoutExtension(target)}_web_entrypoint.dart.js',
-      );
-      // Check for deferred import outputs.
-      final File dart2jsArchive = fs.file(fs.path.join(
-        flutterProject.dartTool.path,
-        'build',
-        'flutter_web',
-        '${flutterProject.manifest.appName}',
-        '${fs.path.withoutExtension(target)}_web_entrypoint.dart.js.tar.gz'),
-      );
-      fs.file(outputPath).copySync(fs.path.join(outputDir.path, 'main.dart.js'));
-      fs.file('$outputPath.map').copySync(fs.path.join(outputDir.path, 'main.dart.js.map'));
-      flutterProject.web.indexFile.copySync(fs.path.join(outputDir.path, 'index.html'));
-      if (dart2jsArchive.existsSync()) {
-        final Archive archive = TarDecoder().decodeBytes(dart2jsArchive.readAsBytesSync());
-        for (ArchiveFile file in archive.files) {
-          outputDir.childFile(file.name).writeAsBytesSync(file.content);
-        }
-      }
+  final BuildResult result = await const BuildSystem().build(const WebReleaseBundle(), Environment(
+    outputDir: fs.directory(getWebBuildDirectory()),
+    projectDir: fs.currentDirectory,
+    buildDir: flutterProject.directory
+      .childDirectory('.dart_tool')
+      .childDirectory('flutter_build'),
+    defines: <String, String>{
+      kBuildMode: getNameForBuildMode(buildInfo.mode),
+      kTargetFile: target,
+      kInitializePlatform: initializePlatform.toString(),
+      kHasWebPlugins: hasWebPlugins.toString(),
+    },
+  ));
+  if (!result.success) {
+    for (ExceptionMeasurement measurement in result.exceptions.values) {
+      printError(measurement.stackTrace.toString());
+      printError(measurement.exception.toString());
     }
-  } catch (err) {
-    printError(err.toString());
-    result = false;
-  } finally {
-    status.stop();
+    throwToolExit('Failed to compile application for the Web.');
   }
-  if (result == false) {
-    throwToolExit('Failed to compile $target for the Web.');
-  }
-  String buildName = 'ddc';
-  if (buildInfo.isRelease) {
-    buildName = 'dart2js';
-  }
-  flutterUsage.sendTiming('build', buildName, Duration(milliseconds: sw.elapsedMilliseconds));
+  status.stop();
+  flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 /// An indirection on web compilation.

@@ -25,6 +25,13 @@ export 'source.dart';
 /// The [BuildSystem] instance.
 BuildSystem get buildSystem => context.get<BuildSystem>();
 
+/// A reasonable amount of files to open at the same time.
+///
+/// This number is somewhat arbitrary - it is difficult to detect whether
+/// or not we'll run out of file descriptiors when using async dart:io
+/// APIs.
+const int kMaxOpenFiles = 64;
+
 /// Configuration for the build system itself.
 class BuildSystemConfig {
   /// Create a new [BuildSystemConfig].
@@ -285,8 +292,7 @@ class Environment {
       buffer.write(key);
       buffer.write(defines[key]);
     }
-    // in case there was no configuration, provide some value.
-    buffer.write('Flutter is awesome');
+    buffer.write(outputDir.path);
     final String output = buffer.toString();
     final Digest digest = md5.convert(utf8.encode(output));
     buildPrefix = hex.encode(digest.bytes);
