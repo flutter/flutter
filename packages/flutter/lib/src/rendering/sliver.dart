@@ -950,7 +950,13 @@ class SliverPhysicalParentData extends ParentData {
 
 /// Parent data for slivers that have multiple children and that position their
 /// children using absolute coordinates.
-class SliverPhysicalContainerParentData extends SliverPhysicalParentData with ContainerParentDataMixin<RenderSliver> { }
+class SliverPhysicalContainerParentData extends SliverPhysicalParentData with ContainerParentDataMixin<RenderSliver> {
+  /// The flex factor to use for this child
+  int flex;
+
+  @override
+  String toString() => '${super.toString()}; flex=$flex';
+}
 
 List<DiagnosticsNode> _debugCompareFloats(String labelA, double valueA, String labelB, double valueB) {
   return <DiagnosticsNode>[
