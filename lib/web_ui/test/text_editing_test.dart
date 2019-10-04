@@ -75,6 +75,10 @@ void main() {
       expect(document.activeElement, input);
       expect(editingElement.domElement, input);
 
+      // Input is appended to the glass pane.
+      expect(domRenderer.glassPaneElement.contains(editingElement.domElement),
+          isTrue);
+
       editingElement.disable();
       expect(
         document.getElementsByTagName('input'),

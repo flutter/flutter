@@ -341,6 +341,10 @@ class TextEditingElement {
       _subscriptions.add(domElement.onKeyUp.listen((event) {
         _handleChange(event);
       }));
+      /// In Firefox the context menu item "Select All" does not work without
+      /// listening to onSelect. On the other browsers onSelectionChange is
+      /// enough for covering "Select All" functionality.
+      _subscriptions.add(domElement.onSelect.listen(_handleChange));
     } else {
       _subscriptions.add(html.document.onSelectionChange.listen(_handleChange));
     }
@@ -379,7 +383,7 @@ class TextEditingElement {
         throw UnsupportedError(
             'Unsupported input type: ${inputConfig.inputType}');
     }
-    html.document.body.append(domElement);
+    domRenderer.glassPaneElement.append(domElement);
   }
 
   void _removeDomElement() {
