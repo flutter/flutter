@@ -16,7 +16,8 @@ namespace flutter {
 
 IOSExternalTextureGL::IOSExternalTextureGL(int64_t textureId,
                                            NSObject<FlutterTexture>* externalTexture)
-    : Texture(textureId), external_texture_(externalTexture) {
+    : Texture(textureId),
+      external_texture_(fml::scoped_nsobject<NSObject<FlutterTexture>>([externalTexture retain])) {
   FML_DCHECK(external_texture_);
 }
 
@@ -65,7 +66,7 @@ void IOSExternalTextureGL::Paint(SkCanvas& canvas,
                                  GrContext* context) {
   EnsureTextureCacheExists();
   if (NeedUpdateTexture(freeze)) {
-    auto pixelBuffer = [external_texture_ copyPixelBuffer];
+    auto pixelBuffer = [external_texture_.get() copyPixelBuffer];
     if (pixelBuffer) {
       buffer_ref_.Reset(pixelBuffer);
     }
