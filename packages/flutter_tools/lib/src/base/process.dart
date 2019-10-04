@@ -151,6 +151,19 @@ typedef RunResultChecker = bool Function(int);
 
 ProcessUtils get processUtils => ProcessUtils.instance;
 
+/// Extension methods that add type safe getters to stdout and stderr strings.
+extension TypesafeProcess on ProcessResult {
+  /// stdout as a utf8 encoded string.
+  ///
+  /// This is only valud if an encoding was provided to the spawned process.
+  String get stdoutText => this.stdout?.toString();
+
+  /// stderr as a utf8 encoded string.
+  ///
+  /// This is only valud if an encoding was provided to the spawned process.
+  String get stderrText => this.stderr?.toString();
+}
+
 abstract class ProcessUtils {
   factory ProcessUtils() => _DefaultProcessUtils();
 

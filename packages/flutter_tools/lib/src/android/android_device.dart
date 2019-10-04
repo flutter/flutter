@@ -104,10 +104,10 @@ class AndroidDevice extends Device {
           stderrEncoding: latin1,
         );
         if (result.exitCode == 0 || allowHeapCorruptionOnWindows(result.exitCode)) {
-          _properties = parseAdbDeviceProperties(result.stdout);
+          _properties = parseAdbDeviceProperties(result.stdoutText);
         } else {
           printError('Error ${result.exitCode} retrieving device properties for $name:');
-          printError(result.stderr);
+          printError(result.stderrText);
         }
       } on ProcessException catch (error) {
         printError('Error retrieving device properties for $name: $error');
