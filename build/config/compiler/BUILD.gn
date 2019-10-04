@@ -122,12 +122,8 @@ config("compiler") {
       cflags += [ "-fsanitize=leak" ]
     }
     if (is_tsan) {
-      tsan_blacklist_path =
-          rebase_path("//tools/memory/tsan_v2/ignores.txt", root_build_dir)
-      cflags += [
-        "-fsanitize=thread",
-        "-fsanitize-blacklist=$tsan_blacklist_path",
-      ]
+      cflags += [ "-fsanitize=thread" ]
+      ldflags += [ "-fsanitize=thread" ]
     }
     if (is_msan) {
       msan_blacklist_path =
