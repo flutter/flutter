@@ -212,12 +212,12 @@ class MouseTracker extends ChangeNotifier {
     return _trackedAnnotations.containsKey(annotation);
   }
 
-  /// Tells interested objects that a mouse has entered, exited, or moved, given
-  /// a callback to fetch the [MouseTrackerAnnotation] associated with a global
-  /// offset.
-  ///
-  /// This is called from a post-frame callback when the layer tree has been
-  /// updated, right after rendering the frame.
+  // Tells interested objects that a mouse has entered, exited, or moved, given
+  // a callback to fetch the [MouseTrackerAnnotation] associated with a global
+  // offset.
+  //
+  // This is called from a post-frame callback when the layer tree has been
+  // updated, right after rendering the frame.
   void _sendMouseNotifications(Iterable<int> deviceIds) {
     if (_trackedAnnotations.isEmpty) {
       return;
