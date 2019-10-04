@@ -645,7 +645,9 @@ class FlutterPlugin implements Plugin<Project> {
                 into mergeAssets.outputDir
             }
             if (!isUsedAsSubproject) {
-                variant.mergeResources.dependsOn(copyFlutterAssetsTask)
+                def mergeResources = variant.hasProperty("mergeResourcesProvider") ?
+                    variant.mergeResourcesProvider.get() : variant.mergeResources
+                mergeResources.dependsOn(copyFlutterAssetsTask)
                 return
             }
             // Flutter module included as a subproject in add to app.
