@@ -43,17 +43,11 @@ config("feature_flags") {
   if (use_nss_certs) {
     defines += [ "USE_NSS_CERTS=1" ]
   }
-  if (use_allocator != "tcmalloc") {
-    defines += [ "NO_TCMALLOC" ]
-  }
   if (is_asan) {
     defines += [ "ADDRESS_SANITIZER" ]
   }
   if (is_lsan) {
-    defines += [
-      "LEAK_SANITIZER",
-      "WTF_USE_LEAK_SANITIZER=1",
-    ]
+    defines += [ "LEAK_SANITIZER" ]
   }
   if (is_tsan) {
     defines += [
