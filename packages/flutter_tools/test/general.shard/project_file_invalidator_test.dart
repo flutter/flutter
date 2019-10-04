@@ -12,6 +12,12 @@ import '../src/context.dart';
 void main() {
   group('ProjectFileInvalidator', () {
     final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+    testUsingContext('No last compile', () async {
+      expect(
+        ProjectFileInvalidator.findInvalidated(lastCompiled: null, urisToMonitor: <Uri>[], packagesPath: ''),
+        isEmpty);
+    });
+
     testUsingContext('Empty project', () async {
       expect(
         ProjectFileInvalidator.findInvalidated(lastCompiled: DateTime.now(), urisToMonitor: <Uri>[], packagesPath: ''),
