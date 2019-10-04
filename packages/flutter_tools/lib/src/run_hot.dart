@@ -22,6 +22,7 @@ import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
+import 'ios/devices.dart';
 import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
@@ -254,7 +255,9 @@ class HotRunner extends ResidentRunner {
 
     firstBuildTime = DateTime.now();
 
+    printTrace('in hot runner');
     for (FlutterDevice device in flutterDevices) {
+      printTrace('about to invoke .runHot() for device ${device.device.toString()}');
       final int result = await device.runHot(
         hotRunner: this,
         route: route,
@@ -1031,6 +1034,9 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAtFinish() async {
+    for (FlutterDevice flutterDevice in flutterDevices) {
+      flutterDevice.device.killSubProcesses();
+    }
     await _cleanupDevFS();
     await stopEchoingDeviceLog();
   }

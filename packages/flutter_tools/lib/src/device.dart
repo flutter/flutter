@@ -473,6 +473,9 @@ abstract class Device {
   static Future<void> printDevices(List<Device> devices) async {
     await descriptions(devices).forEach(printStatus);
   }
+
+  /// Kill any sub-processes that were spawned in support of this device.
+  void killSubProcesses() {}
 }
 
 class DebuggingOptions {

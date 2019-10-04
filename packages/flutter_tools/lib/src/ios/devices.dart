@@ -139,6 +139,7 @@ class IOSDevice extends Device {
 
   String _installerPath;
   String _iproxyPath;
+  Process _iproxyProcess;
 
   final String _sdkVersion;
 
@@ -449,6 +450,15 @@ class IOSDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.ios.existsSync();
   }
+
+  @override
+  void killSubProcesses() {
+    // We only unset `iproxyProcess` if we successfully killed it
+    final bool result = _iproxyProcess?.kill() ?? false;
+    if (result) {
+      _iproxyProcess = null;
+    }
+  }
 }
 
 /// Decodes a vis-encoded syslog string to a UTF-8 representation.
@@ -618,7 +628,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
 
     bool connected = false;
     while (!connected) {
-      printTrace('attempting to forward device port $devicePort to host port $hostPort');
+      printTrace('Attempting to forward device port $devicePort to host port $hostPort');
       // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
       process = await processUtils.start(
         <String>[
@@ -634,6 +644,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
       // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
       connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
       if (!connected) {
+        process.kill();
         if (autoselect) {
           hostPort += 1;
           if (hostPort > 65535) {
@@ -646,6 +657,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     }
     assert(connected);
     assert(process != null);
+    device._iproxyProcess = process;
 
     final ForwardedPort forwardedPort = ForwardedPort.withContext(
       hostPort, devicePort, process,

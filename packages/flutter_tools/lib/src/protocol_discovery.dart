@@ -48,7 +48,10 @@ class ProtocolDiscovery {
   StreamSubscription<String> _deviceLogSubscription;
 
   /// The discovered service URI.
-  Future<Uri> get uri => _completer.future;
+  Future<Uri> get uri async {
+    final Uri rawUri = await _completer.future;
+    return await _forwardPort(rawUri);
+  }
 
   Future<void> cancel() => _stopScrapingLogs();
 
@@ -74,9 +77,8 @@ class ProtocolDiscovery {
     if (uri != null) {
       assert(!_completer.isCompleted);
       _stopScrapingLogs();
-      _completer.complete(_forwardPort(uri));
+      _completer.complete(uri);
     }
-
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
