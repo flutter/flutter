@@ -140,8 +140,8 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               platform: flutterWebPlatform,
               librariesPath: path.absolute(path.join(builderOptions.config['flutterWebSdk'], 'libraries.json')),
               kernelTargetName: 'ddc',
-              // useIncrementalCompiler: true,
-              // trackUnusedInputs: true,
+              useIncrementalCompiler: true,
+              trackUnusedInputs: true,
             ),
         (BuilderOptions builderOptions) => DevCompilerBuilder(
               useIncrementalCompiler: true,
