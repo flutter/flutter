@@ -230,8 +230,9 @@ void main() {
           contains('To learn more, see: https://developer.android.com/studio/build/shrink-code'));
 
       verify(mockUsage.sendEvent(
-        'build-appbundle',
-        'r8-failure',
+        'build',
+        'appbundle',
+        label: 'r8-failure',
         parameters: anyNamed('parameters'),
       )).called(1);
     },
