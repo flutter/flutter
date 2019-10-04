@@ -474,43 +474,45 @@ class _BottomNavigationTile extends StatelessWidget {
       child: Semantics(
         container: true,
         selected: selected,
-        child: Stack(
-          children: <Widget>[
-            InkResponse(
-              onTap: onTap,
-              child: Padding(
-                padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    _TileIcon(
-                      colorTween: colorTween,
-                      animation: animation,
-                      iconSize: iconSize,
-                      selected: selected,
-                      item: item,
-                      selectedIconTheme: selectedIconTheme,
-                      unselectedIconTheme: unselectedIconTheme,
-                    ),
-                    _Label(
-                      colorTween: colorTween,
-                      animation: animation,
-                      item: item,
-                      selectedLabelStyle: selectedLabelStyle,
-                      unselectedLabelStyle: unselectedLabelStyle,
-                      showSelectedLabels: showSelectedLabels,
-                      showUnselectedLabels: showUnselectedLabels,
-                    ),
-                  ],
+        child: Focus(
+          child: Stack(
+            children: <Widget>[
+              InkResponse(
+                onTap: onTap,
+                child: Padding(
+                  padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      _TileIcon(
+                        colorTween: colorTween,
+                        animation: animation,
+                        iconSize: iconSize,
+                        selected: selected,
+                        item: item,
+                        selectedIconTheme: selectedIconTheme,
+                        unselectedIconTheme: unselectedIconTheme,
+                      ),
+                      _Label(
+                        colorTween: colorTween,
+                        animation: animation,
+                        item: item,
+                        selectedLabelStyle: selectedLabelStyle,
+                        unselectedLabelStyle: unselectedLabelStyle,
+                        showSelectedLabels: showSelectedLabels,
+                        showUnselectedLabels: showUnselectedLabels,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Semantics(
-              label: indexLabel,
-            ),
-          ],
+              Semantics(
+                label: indexLabel,
+              ),
+            ],
+          ),
         ),
       ),
     );

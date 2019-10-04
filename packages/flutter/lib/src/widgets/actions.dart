@@ -345,20 +345,6 @@ class Actions extends InheritedWidget {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    if (identical(this, other)) {
-      return true;
-    }
-    return !updateShouldNotify(other);
-  }
-
-  @override
-  int get hashCode => hashValues(dispatcher, actions);
-
-  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ActionDispatcher>('dispatcher', dispatcher));
@@ -381,17 +367,4 @@ class DoNothingAction extends Action {
 
   @override
   void invoke(FocusNode node, Intent intent) { }
-}
-
-/// An action that invokes the currently focused control.
-///
-/// This is an abstract class that serves as a base class for actions that
-/// activate a control. It is bound to [LogicalKeyboardKey.enter] in the default
-/// keyboard map in [WidgetsApp].
-abstract class ActivateAction extends Action {
-  /// Creates a [ActivateAction] with a fixed [key];
-  const ActivateAction() : super(key);
-
-  /// The [LocalKey] that uniquely identifies this action.
-  static const LocalKey key = ValueKey<Type>(ActivateAction);
 }

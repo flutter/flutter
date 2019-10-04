@@ -5,77 +5,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/services/keyboard_key.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('RawMaterialButton responds when tapped', (WidgetTester tester) async {
-    bool pressed = false;
-    const Color splashColor = Color(0xff00ff00);
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: RawMaterialButton(
-            splashColor: splashColor,
-            onPressed: () { pressed = true; },
-            child: const Text('BUTTON'),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('BUTTON'));
-    await tester.pump(const Duration(milliseconds: 10));
-
-    final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as dynamic;
-    expect(splash, paints..circle(color: splashColor));
-
-    await tester.pumpAndSettle();
-
-    expect(pressed, isTrue);
-  });
-
-  testWidgets('RawMaterialButton responds to shortcut when activated', (WidgetTester tester) async {
-    bool pressed = false;
-    final FocusNode focusNode = FocusNode(debugLabel: 'Test Button');
-    const Color splashColor = Color(0xff00ff00);
-    await tester.pumpWidget(
-      Shortcuts(
-        shortcuts: <LogicalKeySet, Intent>{
-          LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
-        },
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: RawMaterialButton(
-              splashColor: splashColor,
-              focusNode: focusNode,
-              onPressed: () { pressed = true; },
-              child: const Text('BUTTON'),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    focusNode.requestFocus();
-    await tester.pump();
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump(const Duration(milliseconds: 10));
-
-    final RenderBox splash = Material.of(tester.element(find.byType(InkWell))) as dynamic;
-    expect(splash, paints..circle(color: splashColor));
-
-    await tester.pumpAndSettle();
-
-    expect(pressed, isTrue);
-  });
-
   testWidgets('materialTapTargetSize.padded expands hit test area', (WidgetTester tester) async {
     int pressed = 0;
 

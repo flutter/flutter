@@ -103,9 +103,9 @@ void main() {
               splashColor: const Color(0xffff0000),
               focusColor: const Color(0xff0000ff),
               highlightColor: const Color(0xf00fffff),
-              onTap: () { },
-              onLongPress: () { },
-              onHover: (bool hover) { },
+              onTap: () {},
+              onLongPress: () {},
+              onHover: (bool hover) {},
             ),
           ),
         ),
@@ -123,29 +123,29 @@ void main() {
   testWidgets('ink response changes color on focus', (WidgetTester tester) async {
     WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
-    await tester.pumpWidget(
-      Material(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
+    await tester.pumpWidget(Material(
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Focus(
+            focusNode: focusNode,
             child: Container(
               width: 100,
               height: 100,
               child: InkWell(
-                focusNode: focusNode,
                 hoverColor: const Color(0xff00ff00),
                 splashColor: const Color(0xffff0000),
                 focusColor: const Color(0xff0000ff),
                 highlightColor: const Color(0xf00fffff),
-                onTap: () { },
-                onLongPress: () { },
-                onHover: (bool hover) { },
+                onTap: () {},
+                onLongPress: () {},
+                onHover: (bool hover) {},
               ),
             ),
           ),
         ),
       ),
-    );
+    ));
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
@@ -172,9 +172,9 @@ void main() {
                   splashColor: const Color(0xffff0000),
                   focusColor: const Color(0xff0000ff),
                   highlightColor: const Color(0xf00fffff),
-                  onTap: () { },
-                  onLongPress: () { },
-                  onHover: (bool hover) { },
+                  onTap: () {},
+                  onLongPress: () {},
+                  onHover: (bool hover) {},
               ),
             ),
           ),
@@ -206,8 +206,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: InkWell(
-              onTap: () { },
-              onLongPress: () { },
+              onTap: () {},
+              onLongPress: () {},
             ),
           ),
         ),
@@ -234,8 +234,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: InkWell(
-              onTap: () { },
-              onLongPress: () { },
+              onTap: () {},
+              onLongPress: () {},
               enableFeedback: false,
             ),
           ),
@@ -301,7 +301,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Material(
         child: InkWell(
-          onTap: () { },
+          onTap: () {},
           child: const Text('Button'),
         ),
       ),
@@ -312,7 +312,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Material(
         child: InkWell(
-          onTap: () { },
+          onTap: () {},
           child: const Text('Button'),
           excludeFromSemantics: true,
         ),
