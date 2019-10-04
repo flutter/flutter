@@ -220,7 +220,7 @@ void main() {
     events.clear();
   });
 
-  test('should detect enter or exit when annotations are attached or detached', () {
+  test('should detect enter or exit when annotations are attached or detached on the pointer', () {
     bool isInHitRegion;
     final List<PointerEvent> events = <PointerEvent>[];
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
@@ -268,6 +268,50 @@ void main() {
     expect(_binding.postFrameCallbacks, hasLength(0));
   });
 
+  test('should correctly stay quiet when annotations are attached or detached not on the pointer', () {
+    final List<PointerEvent> events = <PointerEvent>[];
+    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) => events.add(event),
+      onHover: (PointerHoverEvent event) => events.add(event),
+      onExit: (PointerExitEvent event) => events.add(event),
+    );
+    final MouseTracker mouseTracker = _setUpMouseAnnotationFinder((Offset position) sync* {
+      // This annotation is never in the region
+    });
+
+    // Connect a mouse when there is no annotation
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(0.0, 100.0)),
+    ]));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+    ]));
+    expect(mouseTracker.mouseIsConnected, isTrue);
+    events.clear();
+
+    // Attach an annotation out of region
+    RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+    ]));
+    expect(_binding.postFrameCallbacks, hasLength(1));
+
+    _binding.flushPostFrameCallbacks(Duration.zero);
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+    ]));
+    events.clear();
+
+    // Detach the annotation
+    RendererBinding.instance.mouseTracker.detachAnnotation(annotation);
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+    ]));
+    expect(_binding.postFrameCallbacks, hasLength(0));
+
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.remove, const Offset(0.0, 100.0)),
+    ]));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+    ]));
+  });
+
   test('should not flip out if not all mouse events are listened to', () {
     bool isInHitRegionOne = true;
     bool isInHitRegionTwo = false;
@@ -297,6 +341,49 @@ void main() {
     isInHitRegionTwo = false;
 
     // Passes if no errors are thrown
+  });
+
+  test('should not call annotationFinder when no annotations are attached', () {
+    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) {},
+    );
+    int finderCalled = 0;
+    final MouseTracker mouseTracker = _setUpMouseAnnotationFinder((Offset position) sync* {
+      finderCalled++;
+      // This annotation is never in the region
+    });
+
+    // When no annotations are attached, hovering should not call finder.
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(0.0, 101.0)),
+    ]));
+    expect(finderCalled, 0);
+
+    // Attaching should call finder during the post frame.
+    mouseTracker.attachAnnotation(annotation);
+    expect(finderCalled, 0);
+
+    _binding.flushPostFrameCallbacks(Duration.zero);
+    expect(finderCalled, 1);
+    finderCalled = 0;
+
+    // When annotations are attached, hovering should call finder.
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(0.0, 201.0)),
+    ]));
+    expect(finderCalled, 1);
+    finderCalled = 0;
+
+    // Detaching an annotation should not call finder (because only history
+    // records are needed).
+    mouseTracker.detachAnnotation(annotation);
+    expect(finderCalled, 0);
+
+    // When all annotations are detached, hovering should not call finder.
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(0.0, 201.0)),
+    ]));
+    expect(finderCalled, 0);
   });
 }
 
