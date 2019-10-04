@@ -1058,7 +1058,7 @@ class ProjectFileInvalidator {
 
     final List<Uri> urisToScan = <Uri>[
       // Don't watch pub cache directories to speed things up a little.
-      ...urisToMonitor.where((Uri uri) => !_isInPubCache(uri)),
+      ...urisToMonitor.where(_isNotInPubCache),
 
       // We need to check the .packages file too since it is not used in compilation.
       fs.file(packagesPath).uri,
@@ -1078,8 +1078,8 @@ class ProjectFileInvalidator {
     return invalidatedFiles;
   }
 
-  static bool _isInPubCache(Uri uri) {
-    return (platform.isWindows && uri.path.contains(_pubCachePathWindows))
-        || uri.path.contains(_pubCachePathLinuxAndMac);
+  static bool _isNotInPubCache(Uri uri) {
+    return !(platform.isWindows && uri.path.contains(_pubCachePathWindows))
+        && !uri.path.contains(_pubCachePathLinuxAndMac);
   }
 }
