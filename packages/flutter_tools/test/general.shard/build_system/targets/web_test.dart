@@ -56,7 +56,7 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, contains("import 'generated_plugin_registrant.dart';"));
+    expect(generated, contains("import 'file:///lib/generated_plugin_registrant.dart';"));
     expect(generated, contains('registerPlugins(webPluginRegistry);'));
 
     // Platform
@@ -77,7 +77,7 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, contains("import 'generated_plugin_registrant.dart';"));
+    expect(generated, contains("import 'file:///C:/lib/generated_plugin_registrant.dart';"));
     expect(generated, contains('registerPlugins(webPluginRegistry);'));
 
     // Platform
@@ -100,7 +100,7 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, isNot(contains("import 'generated_plugin_registrant.dart';")));
+    expect(generated, isNot(contains("import 'file:///lib/generated_plugin_registrant.dart';")));
     expect(generated, isNot(contains('registerPlugins(webPluginRegistry);')));
 
     // Platform
@@ -118,7 +118,7 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, contains("import 'generated_plugin_registrant.dart';"));
+    expect(generated, contains("import 'file:///lib/generated_plugin_registrant.dart';"));
     expect(generated, contains('registerPlugins(webPluginRegistry);'));
 
     // Platform
@@ -136,7 +136,7 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, isNot(contains("import 'generated_plugin_registrant.dart';")));
+    expect(generated, isNot(contains("import 'file:///lib/generated_plugin_registrant.dart';")));
     expect(generated, isNot(contains('registerPlugins(webPluginRegistry);')));
 
     // Platform
