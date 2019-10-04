@@ -57,7 +57,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 
 ImageProvider<dynamic> _resizeCacheIfNeeded(int cacheWidth, int cacheHeight, ImageProvider<dynamic> provider) {
   if (cacheWidth != null || cacheHeight != null) {
-    return CustomCacheSizeImage(provider, cacheWidth, cacheHeight);
+    return CustomCacheSizeImage(provider, width: cacheWidth, height: cacheHeight);
   }
   return provider;
 }
