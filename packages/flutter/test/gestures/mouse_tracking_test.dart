@@ -36,48 +36,32 @@ void ensureTestGestureBinding() {
 }
 
 void main() {
-  setUp(ensureTestGestureBinding);
-
-  final List<PointerEvent> events1 = <PointerEvent>[];
-  final List<PointerEvent> events2 = <PointerEvent>[];
-  final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
-    onEnter: (PointerEnterEvent event) => events1.add(event),
-    onHover: (PointerHoverEvent event) => events1.add(event),
-    onExit: (PointerExitEvent event) => events1.add(event),
-  );
-  // Only respond to some mouse events.
-  final MouseTrackerAnnotation partialAnnotation = MouseTrackerAnnotation(
-    onEnter: (PointerEnterEvent event) => events2.add(event),
-    onHover: (PointerHoverEvent event) => events2.add(event),
-  );
-  bool isInHitRegionOne;
-  bool isInHitRegionTwo;
-
-  void clear() {
-    events1.clear();
-    events2.clear();
-  }
-
-  setUp(() {
-    clear();
-    isInHitRegionOne = true;
-    isInHitRegionTwo = false;
+  void setMouseAnnotationFinder(MouseDetectorAnnotationFinder annotationFinder) {
     RendererBinding.instance.initMouseTracker(
       MouseTracker(
         GestureBinding.instance.pointerRouter,
-        (Offset position) sync* {
-          if (isInHitRegionOne)
-            yield annotation;
-          else if (isInHitRegionTwo) {
-            yield partialAnnotation;
-          }
-        },
+        annotationFinder,
       ),
     );
+  }
+
+  setUp(() {
+    ensureTestGestureBinding();
     PointerEventConverter.clearPointers();
   });
 
   test('receives and processes mouse hover events', () {
+    final List<PointerEvent> events = <PointerEvent>[];
+    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) => events.add(event),
+      onHover: (PointerHoverEvent event) => events.add(event),
+      onExit: (PointerExitEvent event) => events.add(event),
+    );
+    setMouseAnnotationFinder((Offset position) sync* {
+      yield annotation;
+    });
+    void clear() => events.clear();
+
     final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
       // Will implicitly also add a PointerAdded event.
       _pointerData(PointerChange.hover, const Offset(0.0, 0.0)),
@@ -95,29 +79,28 @@ void main() {
       _pointerData(PointerChange.hover, const Offset(1.0, 401.0), device: 1),
     ]);
     RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
-    isInHitRegionOne = true;
     ui.window.onPointerDataPacket(packet1);
-    expect(events1, _equalToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(0.0, 0.0)),
     ]));
     clear();
 
     ui.window.onPointerDataPacket(packet2);
-    expect(events1, _equalToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerHoverEvent(position: Offset(1.0, 101.0)),
     ]));
     clear();
 
     ui.window.onPointerDataPacket(packet3);
-    expect(events1, _equalToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerHoverEvent(position: Offset(1.0, 201.0)),
       const PointerExitEvent(position: Offset(1.0, 201.0)),
     ]));
 
     clear();
     ui.window.onPointerDataPacket(packet4);
-    expect(events1, _equalToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(1.0, 301.0)),
       const PointerHoverEvent(position: Offset(1.0, 301.0)),
     ]));
@@ -126,7 +109,7 @@ void main() {
     clear();
     ui.window.onPointerDataPacket(packet5);
     RendererBinding.instance.mouseTracker.sendMouseNotifications(<int>{1});
-    expect(events1, _equalToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(1.0, 401.0), device: 1),
       const PointerHoverEvent(position: Offset(1.0, 401.0), device: 1),
       const PointerHoverEvent(position: Offset(1.0, 401.0), device: 1),
@@ -134,6 +117,20 @@ void main() {
   });
 
   test('detects exit when annotated layer no longer hit', () {
+    bool isInHitRegion;
+    final List<PointerEvent> events = <PointerEvent>[];
+    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) => events.add(event),
+      onHover: (PointerHoverEvent event) => events.add(event),
+      onExit: (PointerExitEvent event) => events.add(event),
+    );
+    setMouseAnnotationFinder((Offset position) sync* {
+      if (isInHitRegion) {
+        yield annotation;
+      }
+    });
+    void clear() => events.clear();
+
     final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 0.0)),
       _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
@@ -141,54 +138,78 @@ void main() {
     final ui.PointerDataPacket packet2 = ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(1.0, 201.0)),
     ]);
-    isInHitRegionOne = true;
+
+    isInHitRegion = true;
     RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
 
     ui.window.onPointerDataPacket(packet1);
 
-    expect(events1, _equalToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(1.0, 101.0)),
     ]));
     // Simulate layer going away by detaching it.
     clear();
-    isInHitRegionOne = false;
+    isInHitRegion = false;
 
     ui.window.onPointerDataPacket(packet2);
-    expect(events1, _equalToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerExitEvent(position: Offset(1.0, 201.0)),
-    ]));
-    expect(events2, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
 
     // Actually detach annotation. Shouldn't receive hit.
     RendererBinding.instance.mouseTracker.detachAnnotation(annotation);
     clear();
-    isInHitRegionOne = false;
+    isInHitRegion = false;
 
     ui.window.onPointerDataPacket(packet2);
-    expect(events2, _equalToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
   });
 
   test("don't flip out if not all mouse events are listened to", () {
+    bool isInHitRegionOne = true;
+    bool isInHitRegionTwo = false;
+    final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) {}
+    );
+    final MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation(
+      onExit: (PointerExitEvent event) {}
+    );
+    setMouseAnnotationFinder((Offset position) sync* {
+      if (isInHitRegionOne)
+        yield annotation1;
+      else if (isInHitRegionTwo)
+        yield annotation2;
+    });
+
     final ui.PointerDataPacket packet = ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
     ]);
 
     isInHitRegionOne = false;
     isInHitRegionTwo = true;
-    RendererBinding.instance.mouseTracker.attachAnnotation(partialAnnotation);
+    RendererBinding.instance.mouseTracker.attachAnnotation(annotation2);
 
     ui.window.onPointerDataPacket(packet);
-    RendererBinding.instance.mouseTracker.detachAnnotation(partialAnnotation);
+    RendererBinding.instance.mouseTracker.detachAnnotation(annotation2);
     isInHitRegionTwo = false;
 
     // Passes if no errors are thrown
   });
 
   test('detects exit when mouse goes away', () {
+    final List<PointerEvent> events = <PointerEvent>[];
+    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) => events.add(event),
+      onHover: (PointerHoverEvent event) => events.add(event),
+      onExit: (PointerExitEvent event) => events.add(event),
+    );
+    setMouseAnnotationFinder((Offset position) sync* {
+      yield annotation;
+    });
+
     final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 0.0)),
       _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
@@ -196,11 +217,10 @@ void main() {
     final ui.PointerDataPacket packet2 = ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(1.0, 201.0)),
     ]);
-    isInHitRegionOne = true;
     RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
     ui.window.onPointerDataPacket(packet1);
     ui.window.onPointerDataPacket(packet2);
-    expect(events1, _equalToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(1.0, 101.0)),
@@ -210,6 +230,16 @@ void main() {
   });
 
   test('handles mouse down and move', () {
+    final List<PointerEvent> events = <PointerEvent>[];
+    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) => events.add(event),
+      onHover: (PointerHoverEvent event) => events.add(event),
+      onExit: (PointerExitEvent event) => events.add(event),
+    );
+    setMouseAnnotationFinder((Offset position) sync* {
+      yield annotation;
+    });
+
     final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 0.0)),
       _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
@@ -218,11 +248,10 @@ void main() {
       _pointerData(PointerChange.down, const Offset(1.0, 101.0)),
       _pointerData(PointerChange.move, const Offset(1.0, 201.0)),
     ]);
-    isInHitRegionOne = true;
     RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
     ui.window.onPointerDataPacket(packet1);
     ui.window.onPointerDataPacket(packet2);
-    expect(events1, _equalToEventsOnCriticalFields(<PointerEvent>[
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(0.0, 0.0), delta: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(0.0, 0.0), delta: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(1.0, 101.0), delta: Offset(1.0, 101.0)),
