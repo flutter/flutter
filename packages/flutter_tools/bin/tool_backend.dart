@@ -17,10 +17,6 @@ Future<void> main(List<String> arguments) async {
   final String flutterEngine = Platform.environment['FLUTTER_ENGINE'];
   final String localEngine = Platform.environment['LOCAL_ENGINE'];
   final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
-
-  final String flutterExecutable = path.join(
-      flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
-
   Directory.current = projectDirectory;
 
   if (localEngine != null && !localEngine.contains(buildMode)) {
@@ -36,8 +32,12 @@ or
 ''');
     exit(1);
   }
+  final String flutterExecutable = path.join(
+    flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 
   if (targetPlatform == 'linux-x64') {
+    // TODO(jonahwilliams): currently all builds are debug builds. Remove the
+    // hardcoded mode when profile and release support is added.
     final ProcessResult unpackResult = await Process.run(
         flutterExecutable,
         <String>[
@@ -47,10 +47,10 @@ or
           if (localEngine != null) '--local-engine=$localEngine',
           'assemble',
           '-dTargetPlatform=$targetPlatform',
-          '-dBuildMode=$buildMode',
+          '-dBuildMode=debug',
           '-dTargetFile=$flutterTarget',
           '--output=build',
-          '${buildMode}_bundle_linux_assets',
+          'debug_bundle_linux_assets',
         ]);
     if (unpackResult.exitCode != 0) {
       stderr.write(unpackResult.stderr);
