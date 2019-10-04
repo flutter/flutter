@@ -1379,8 +1379,8 @@ plugin2=${plugin2.path}
       when(mockProcessManager.run(
         any,
         environment: anyNamed('environment'),
-        workingDirectory: anyNamed('workingDirectory'))
-      ).thenAnswer(
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer(
           (_) async => ProcessResult(1, 0, '', ''),
       );
       fs.directory('build/outputs/repo').createSync(recursive: true);
@@ -1401,14 +1401,14 @@ plugin2=${plugin2.path}
       expect(actualGradlewCall, contains('/path/to/project/.android/gradlew'));
       expect(actualGradlewCall, contains('-PlocalEngineOut=out/android_arm'));
     }, overrides: <Type, Generator>{
-        AndroidSdk: () => mockAndroidSdk,
-        AndroidStudio: () => mockAndroidStudio,
-        Artifacts: () => mockArtifacts,
-        Cache: () => cache,
-        ProcessManager: () => mockProcessManager,
-        Platform: () => android,
-        FileSystem: () => fs,
-      });
+      AndroidSdk: () => mockAndroidSdk,
+      AndroidStudio: () => mockAndroidStudio,
+      Artifacts: () => mockArtifacts,
+      Cache: () => cache,
+      ProcessManager: () => mockProcessManager,
+      Platform: () => android,
+      FileSystem: () => fs,
+    });
   });
 }
 

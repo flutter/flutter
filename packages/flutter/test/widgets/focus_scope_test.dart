@@ -226,7 +226,7 @@ void main() {
             ' │ context: FocusScope\n'
             ' │ FOCUSED\n'
             ' │ debugLabel: "Parent Scope Node"\n'
-            ' │ focusedChild: FocusNode#00000\n'
+            ' │ focusedChildren: FocusNode#00000(Child)\n'
             ' │\n'
             ' └─Child 1: FocusNode#00000\n'
             '     context: Focus\n'
@@ -240,13 +240,13 @@ void main() {
         equalsIgnoringHashCodes('FocusScopeNode#00000\n'
             ' │ FOCUSED\n'
             ' │ debugLabel: "Root Focus Scope"\n'
-            ' │ focusedChild: FocusScopeNode#00000\n'
+            ' │ focusedChildren: FocusScopeNode#00000(Parent Scope Node)\n'
             ' │\n'
             ' └─Child 1: FocusScopeNode#00000\n'
             '   │ context: FocusScope\n'
             '   │ FOCUSED\n'
             '   │ debugLabel: "Parent Scope Node"\n'
-            '   │ focusedChild: FocusNode#00000\n'
+            '   │ focusedChildren: FocusNode#00000(Child)\n'
             '   │\n'
             '   └─Child 1: FocusNode#00000\n'
             '       context: Focus\n'
@@ -733,8 +733,8 @@ void main() {
 
       await tester.pump();
 
-      expect(keyB.currentState.focusNode.hasFocus, isFalse);
-      expect(find.text('b'), findsOneWidget);
+      expect(keyB.currentState.focusNode.hasFocus, isTrue);
+      expect(find.text('B FOCUSED'), findsOneWidget);
     });
 
     testWidgets("Removing unpinned focused scope doesn't move focus to focused widget within next FocusScope", (WidgetTester tester) async {
@@ -814,8 +814,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(keyB.currentState.focusNode.hasFocus, isFalse);
-      expect(find.text('b'), findsOneWidget);
+      expect(keyB.currentState.focusNode.hasFocus, isTrue);
+      expect(find.text('B FOCUSED'), findsOneWidget);
     });
 
     testWidgets('Moving widget from one scope to another retains focus', (WidgetTester tester) async {

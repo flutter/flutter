@@ -171,7 +171,7 @@ Future<void> _pumpCheckmarkChip(
           );
         },
       ),
-    )
+    ),
   );
 }
 
@@ -333,7 +333,7 @@ void main() {
                     label: Text(text),
                     onDeleted: onDeleted,
                   ),
-                ]
+                ],
               ),
             ),
           ),
@@ -1783,7 +1783,7 @@ void main() {
         matching: find.byWidgetPredicate((Widget widget) {
           return widget.runtimeType.toString() == '_ChipRenderWidget';
         }),
-      )
+      ),
     );
     const Color selectScrimColor = Color(0x60191919);
     expect(rawChip, paints..path(color: selectScrimColor, includes: <Offset>[

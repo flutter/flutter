@@ -389,25 +389,29 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
 
 class _Dependencies {
   _Dependencies(String depfilePath) {
-    final RegExp _separatorExpr = RegExp(r'([^\\]) ');
-    final RegExp _escapeExpr = RegExp(r'\\(.)');
-
     // Depfile format:
     // outfile1 outfile2 : file1.dart file2.dart file3.dart file\ 4.dart
     final String contents = File(depfilePath).readAsStringSync();
-    final List<String> colonSeparated = contents.split(': ');
-    target = colonSeparated[0].trim();
-    dependencies = colonSeparated[1]
-        // Put every file on right-hand side on the separate line
+    final List<String> colonSeparated = contents.split(':');
+    targets = _processList(colonSeparated[0].trim());
+    dependencies = _processList(colonSeparated[1].trim());
+  }
+
+  final RegExp _separatorExpr = RegExp(r'([^\\]) ');
+  final RegExp _escapeExpr = RegExp(r'\\(.)');
+
+  Set<String> _processList(String rawText) {
+    return rawText
+    // Put every file on right-hand side on the separate line
         .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
         .split('\n')
-        // Expand escape sequences, so that '\ ', for example,ß becomes ' '
+    // Expand escape sequences, so that '\ ', for example,ß becomes ' '
         .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
         .where((String path) => path.isNotEmpty)
         .toSet();
   }
 
-  String target;
+  Set<String> targets;
   Set<String> dependencies;
 }
 
@@ -416,6 +420,6 @@ String validateSnapshotDependency(FlutterProject project, String expectedTarget)
   final _Dependencies deps = _Dependencies(
       path.join(project.rootPath, 'build', 'app', 'intermediates',
           'flutter', 'debug', 'android-arm', 'snapshot_blob.bin.d'));
-  return deps.target == expectedTarget ? null :
-    'Dependency file should have $expectedTarget as target. Instead has ${deps.target}';
+  return deps.targets.any((String target) => target.contains(expectedTarget)) ? null :
+  'Dependency file should have $expectedTarget as target. Instead has ${deps.targets}';
 }

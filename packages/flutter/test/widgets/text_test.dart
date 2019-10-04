@@ -354,7 +354,7 @@ void main() {
           ],
         ),
         textDirection: TextDirection.ltr,
-      )
+      ),
     );
     // The expected visual order of the text is:
     //   hello world RIS OD you OD WOH YOB good bye

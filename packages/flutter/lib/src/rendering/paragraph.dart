@@ -442,8 +442,14 @@ class RenderParagraph extends RenderBox
     _layoutTextWithConstraints(constraints);
     final Offset offset = entry.localPosition;
     final TextPosition position = _textPainter.getPositionForOffset(offset);
-    final TextSpan span = _textPainter.text.getSpanForPosition(position);
-    span?.recognizer?.addPointer(event);
+    final InlineSpan span = _textPainter.text.getSpanForPosition(position);
+    if (span == null) {
+      return;
+    }
+    if (span is TextSpan) {
+      final TextSpan textSpan = span;
+      textSpan.recognizer?.addPointer(event);
+    }
   }
 
   bool _needsClipping = false;

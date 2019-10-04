@@ -74,7 +74,7 @@ void main() {
       final List<SemanticsNode> children = <SemanticsNode>[
         SemanticsNode()
           ..isMergedIntoParent = true
-          ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
+          ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
       ];
 
       node.updateWith(
@@ -82,7 +82,7 @@ void main() {
         childrenInInversePaintOrder: children,
       );
 
-      children.add( SemanticsNode()
+      children.add(SemanticsNode()
         ..isMergedIntoParent = true
         ..rect = const Rect.fromLTRB(42.0, 42.0, 10.0, 10.0)
       );

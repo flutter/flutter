@@ -20,6 +20,7 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'base/signals.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
@@ -106,6 +107,7 @@ Future<T> runInContext<T>(
       OperatingSystemUtils: () => OperatingSystemUtils(),
       ProcessInfo: () => ProcessInfo(),
       ProcessUtils: () => ProcessUtils(),
+      Signals: () => Signals(),
       SimControl: () => SimControl(),
       Stdio: () => const Stdio(),
       SystemClock: () => const SystemClock(),

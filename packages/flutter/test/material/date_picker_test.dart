@@ -707,7 +707,7 @@ void _tests() {
             );
           },
         ),
-      )
+      ),
     );
 
     final Finder chevronFinder = find.byType(IconButton);

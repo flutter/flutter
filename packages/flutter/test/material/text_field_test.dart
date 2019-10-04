@@ -83,7 +83,7 @@ Widget overlayWithEntry(OverlayEntry entry) {
         data: const MediaQueryData(size: Size(800.0, 600.0)),
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            entry
+            entry,
           ],
         ),
       ),
@@ -124,7 +124,7 @@ double getOpacity(WidgetTester tester, Finder finder) {
     find.ancestor(
       of: finder,
       matching: find.byType(FadeTransition),
-    )
+    ),
   ).opacity.value;
 }
 
@@ -237,7 +237,7 @@ void main() {
             textFieldValue = value;
           },
         ),
-      )
+      ),
     );
 
     RenderBox findTextFieldBox() => tester.renderObject(find.byKey(textFieldKey));
@@ -368,7 +368,7 @@ void main() {
         overlay(
           child: const TextField(
           ),
-        )
+        ),
     );
 
     final TextField textField = tester.firstWidget(find.byType(TextField));
@@ -382,7 +382,7 @@ void main() {
           child: const TextField(
             cursorRadius: Radius.circular(3.0),
           ),
-        )
+        ),
     );
 
     final TextField textField = tester.firstWidget(find.byType(TextField));
@@ -505,6 +505,89 @@ void main() {
     );
   }, skip: isBrowser);
 
+  testWidgets('text field toolbar options correctly changes options (iOS)',
+      (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.iOS),
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+                toolbarOptions: const ToolbarOptions(copy: true),
+              ),
+            ),
+          ),
+        ),
+      );
+
+    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+    // This tap just puts the cursor somewhere different than where the double
+    // tap will occur to test that the double tap moves the existing cursor first.
+    await tester.tapAt(textfieldStart + const Offset(50.0, 5.0));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+    await tester.pump(const Duration(milliseconds: 50));
+    // First tap moved the cursor.
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(
+          offset: 8, affinity: TextAffinity.downstream),
+    );
+    await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+    await tester.pump();
+
+    // Second tap selects the word around the cursor.
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 8, extentOffset: 12),
+    );
+
+    // Selected text shows 'Copy', and not 'Paste', 'Cut', 'Select All'.
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Select All'), findsNothing);
+  }, skip: isBrowser);
+
+  testWidgets('text field toolbar options correctly changes options (Android)',
+      (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+              toolbarOptions: const ToolbarOptions(copy: true),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+
+    await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
+    await tester.pump();
+
+    // Selected text shows 'COPY', and not 'PASTE', 'CUT', 'SELECT ALL'.
+    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('COPY'), findsOneWidget);
+    expect(find.text('CUT'), findsNothing);
+    expect(find.text('SELECT ALL'), findsNothing);
+  }, skip: isBrowser);
+
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
   /*
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
@@ -561,7 +644,7 @@ void main() {
           controller: controller,
           maxLines: null,
         ),
-      )
+      ),
     );
     expect(controller.selection.baseOffset, -1);
     expect(controller.selection.extentOffset, -1);
@@ -675,7 +758,7 @@ void main() {
         child: TextField(
           controller: controller,
         ),
-      )
+      ),
     );
     expect(controller.selection.baseOffset, -1);
     expect(controller.selection.extentOffset, -1);
@@ -703,7 +786,7 @@ void main() {
           controller: controller,
           enableInteractiveSelection: false,
         ),
-      )
+      ),
     );
     expect(controller.selection.baseOffset, -1);
     expect(controller.selection.extentOffset, -1);
@@ -730,7 +813,7 @@ void main() {
         child: TextField(
           controller: controller,
         ),
-      )
+      ),
     );
 
     const String testValue = 'abc def ghi';
@@ -765,7 +848,7 @@ void main() {
         child: TextField(
           controller: controller,
         ),
-      )
+      ),
     );
 
     const String testValue = 'abc def ghi';
@@ -804,7 +887,7 @@ void main() {
         child: TextField(
           controller: controller,
         ),
-      )
+      ),
     );
 
     const String testValue = 'abcdefghi';
@@ -844,7 +927,7 @@ void main() {
         child: TextField(
           controller: controller,
         ),
-      )
+      ),
     );
 
     const String testValue = 'abc def ghi';
@@ -877,7 +960,7 @@ void main() {
             controller: controller,
             readOnly: true,
           ),
-        )
+        ),
     );
     // Read only text field cannot open keyboard.
     await tester.showKeyboard(find.byType(TextField));
@@ -913,7 +996,7 @@ void main() {
               readOnly: true,
             ),
           ),
-        )
+        ),
     );
 
     await tester.tap(find.byType(TextField));
@@ -934,7 +1017,7 @@ void main() {
               readOnly: true,
             ),
           ),
-        )
+        ),
     );
 
     await tester.tap(find.byType(TextField));
@@ -997,7 +1080,7 @@ void main() {
         const TextEditingValue(
             text: 'readonly',
             composing: TextRange(start: 0, end: 8), // Simulate text composing.
-        )
+        ),
     );
 
     await tester.pumpWidget(
@@ -1006,7 +1089,7 @@ void main() {
             controller: controller,
             readOnly: true,
           ),
-        )
+        ),
     );
 
     final RenderEditable renderEditable = findRenderEditable(tester);
@@ -1112,7 +1195,7 @@ void main() {
           controller: controller,
           enableInteractiveSelection: false,
         ),
-      )
+      ),
     );
 
     const String testValue = 'abc def ghi';
@@ -3702,7 +3785,7 @@ void main() {
               controller: controller,
               readOnly: true,
             ),
-          )
+          ),
       );
 
       await tester.idle();
@@ -4141,7 +4224,7 @@ void main() {
           controller: controller,
           maxLines: null,
         ),
-      )
+      ),
     );
 
     const String testValue = 'x';

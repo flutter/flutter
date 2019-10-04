@@ -133,7 +133,12 @@ abstract class Route<T> {
   /// The [didChangeNext] and [didChangePrevious] methods are typically called
   /// immediately after this method is called.
   @protected
-  TickerFuture didPush() => TickerFuture.complete();
+  @mustCallSuper
+  TickerFuture didPush() {
+    return TickerFuture.complete()..then<void>((void _) {
+      navigator.focusScopeNode.requestFocus();
+    });
+  }
 
   /// Called after [install] when the route replaced another in the navigator.
   ///
