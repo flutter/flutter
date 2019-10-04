@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -132,10 +133,10 @@ Future<void> pubGet({
     throwToolExit('$directory: pub did not create .packages file.');
   }
 
-  if (dotPackages.lastModifiedSync().isBefore(pubSpecYaml.lastModifiedSync())) {
-    printError('$directory: pub did not update .packages file '
-               '(pubspec.yaml timestamp: ${pubSpecYaml.lastModifiedSync()}; '
-               '.packages timestamp: ${dotPackages.lastModifiedSync()}).');
+  if (fs is! MemoryFileSystem && dotPackages.lastModifiedSync().isBefore(pubSpecYaml.lastModifiedSync())) {
+    throwToolExit('$directory: pub did not update .packages file '
+                  '(pubspec.yaml timestamp: ${pubSpecYaml.lastModifiedSync()}; '
+                  '.packages timestamp: ${dotPackages.lastModifiedSync()}).');
   }
 }
 
