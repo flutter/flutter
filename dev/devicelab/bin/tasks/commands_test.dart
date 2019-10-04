@@ -6,12 +6,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-import 'package:vm_service_client/vm_service_client.dart';
-
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
+import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service_io.dart';
 
 void main() {
   task(() async {
@@ -56,7 +56,7 @@ void main() {
       if (!ok)
         throw 'Failed to run test app.';
 
-      final VMServiceClient client = VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
+      final VmService client = await vmServiceConnectUri('ws://localhost:$vmServicePort/ws');
 
       final DriveHelper driver = DriveHelper(vmServicePort);
 
@@ -96,7 +96,7 @@ void main() {
       if (result != 0)
         throw 'Received unexpected exit code $result from run process.';
       print('test: validating that the app has in fact closed...');
-      await client.done.timeout(const Duration(seconds: 5));
+      await client.onDone.timeout(const Duration(seconds: 5));
     });
     return TaskResult.success(null);
   });

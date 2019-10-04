@@ -6,12 +6,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-import 'package:vm_service_client/vm_service_client.dart';
-
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
+import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service_io.dart';
 
 void main() {
   Map<String, dynamic> parseFlutterResponse(String line) {
@@ -84,7 +84,7 @@ void main() {
       if (!ok)
         throw 'Failed to run test app.';
 
-      final VMServiceClient client = VMServiceClient.connect(vmServiceUri);
+      final VmService client = await vmServiceConnectUri(vmServiceUri.toString());
 
       int id = 1;
       Future<Map<String, dynamic>> sendRequest(String method, dynamic params) async {
@@ -159,7 +159,7 @@ void main() {
       if (result != 0)
         throw 'Received unexpected exit code $result from run process.';
       print('test: validating that the app has in fact closed...');
-      await client.done;
+      await client.onDone;
     });
     return TaskResult.success(null);
   });
