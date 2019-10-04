@@ -552,7 +552,7 @@ class CupertinoColors {
 /// When a Cupertino widget is provided with a `CupertinoDynamicColor`, either
 /// directly in its constructor, or from an [InheritedWidget] it depends on (for example,
 /// [DefaultTextStyle]), the widget will automatically resolve the color using
-/// [CupertinoDynamicColor.resolve] against their own [BuildContext], on a best-effort
+/// [CupertinoDynamicColor.resolve] against its own [BuildContext], on a best-effort
 /// basis.
 ///
 /// {@tool sample}

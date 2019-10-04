@@ -103,19 +103,11 @@ const TextStyle _kDefaultDateTimePickerTextStyle = TextStyle(
 );
 
 TextStyle _resolveTextStyle(TextStyle style, BuildContext context, bool nullOk) {
-  // This does not change the shadow color, etc.
-  Paint foreground, background;
-  if (style?.foreground != null)
-    foreground..color = CupertinoDynamicColor.resolve(style?.foreground?.color, context, nullOk: nullOk);
-  if (style?.background != null)
-    background..color = CupertinoDynamicColor.resolve(style?.background?.color, context, nullOk: nullOk);
-
+  // This does not resolve the shadow color, foreground, background, etc.
   return style?.copyWith(
     color: CupertinoDynamicColor.resolve(style?.color, context, nullOk: nullOk),
     backgroundColor: CupertinoDynamicColor.resolve(style?.backgroundColor, context, nullOk: nullOk),
     decorationColor: CupertinoDynamicColor.resolve(style?.decorationColor, context, nullOk: nullOk),
-    foreground: foreground,
-    background: background,
   );
 }
 
