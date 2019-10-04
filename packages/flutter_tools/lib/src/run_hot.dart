@@ -1078,7 +1078,8 @@ class ProjectFileInvalidator {
     return invalidatedFiles;
   }
 
-  static bool _isInPubCache(Uri uri) =>
-    (platform.isWindows && uri.path.contains(_pubCachePathWindows))
-    || uri.path.contains(_pubCachePathLinuxAndMac);
+  static bool _isInPubCache(Uri uri) {
+    return (platform.isWindows && uri.path.contains(_pubCachePathWindows))
+        || uri.path.contains(_pubCachePathLinuxAndMac);
+  }
 }
