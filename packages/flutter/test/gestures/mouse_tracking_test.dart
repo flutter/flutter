@@ -268,7 +268,7 @@ void main() {
     expect(_binding.postFrameCallbacks, hasLength(0));
   });
 
-  test("don't flip out if not all mouse events are listened to", () {
+  test('should not flip out if not all mouse events are listened to', () {
     bool isInHitRegionOne = true;
     bool isInHitRegionTwo = false;
     final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
@@ -297,28 +297,6 @@ void main() {
     isInHitRegionTwo = false;
 
     // Passes if no errors are thrown
-  });
-
-  test('detects exit when mouse goes away', () {
-    final List<PointerEvent> events = <PointerEvent>[];
-    _setUpWithOneAnnotation(logEvents: events);
-
-    final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(0.0, 0.0)),
-      _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
-    ]);
-    final ui.PointerDataPacket packet2 = ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.remove, const Offset(1.0, 201.0)),
-    ]);
-    ui.window.onPointerDataPacket(packet1);
-    ui.window.onPointerDataPacket(packet2);
-    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 0.0)),
-      const PointerHoverEvent(position: Offset(0.0, 0.0)),
-      const PointerHoverEvent(position: Offset(1.0, 101.0)),
-      const PointerHoverEvent(position: Offset(1.0, 201.0)),
-      const PointerExitEvent(position: Offset(1.0, 201.0)),
-    ]));
   });
 }
 
