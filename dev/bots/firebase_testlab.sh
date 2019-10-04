@@ -30,6 +30,12 @@ function test_app_bundle() {
   pushd "$@"
   ../../../bin/flutter build appbundle --target-platform android-arm,android-arm64
 
+  aab="build/app/outputs/bundle/release/app-release.aab"
+
+  # If the app bundle doesn't exist, then exit with code 1.
+  if [ ! -f "$aab" ]; then
+    exit 1
+  fi
   # Firebase Test Lab tests are currently known to be failing with
   # "Firebase Test Lab infrastructure failure: Error during preprocessing"
   # Remove "|| exit 0" once the failures are resolved
@@ -37,16 +43,16 @@ function test_app_bundle() {
 
   # Run the test.
   gcloud firebase test android run --type robo \
-    --app build/app/outputs/bundle/release/app.aab \
+    --app "$aab" \
     --timeout 2m \
     --results-bucket=gs://flutter_firebase_testlab \
     --results-dir="$@"/"$GIT_REVISION"/"$CIRRUS_BUILD_ID" || exit 0
 
-    # Check logcat for "E/flutter" - if it's there, something's wrong.
-    gsutil cp gs://flutter_firebase_testlab/"$@"/"$GIT_REVISION"/"$CIRRUS_BUILD_ID"/walleye-26-en-portrait/logcat /tmp/logcat
-    ! grep "E/flutter" /tmp/logcat || false
-    grep "I/flutter" /tmp/logcat
-    popd
+  # Check logcat for "E/flutter" - if it's there, something's wrong.
+  gsutil cp gs://flutter_firebase_testlab/"$@"/"$GIT_REVISION"/"$CIRRUS_BUILD_ID"/walleye-26-en-portrait/logcat /tmp/logcat
+  ! grep "E/flutter" /tmp/logcat || false
+  grep "I/flutter" /tmp/logcat
+  popd
 }
 
 for test in ${tests[*]}; do
