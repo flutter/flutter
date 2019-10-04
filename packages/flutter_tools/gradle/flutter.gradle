@@ -350,9 +350,8 @@ class FlutterPlugin implements Plugin<Project> {
                 buildType.name,
                 "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion",
                 {
-                    // We only need to expose io.flutter.plugin.*
-                    // No need for the embedding transitive dependencies.
-                    transitive = false
+                    // Include the embedding transitive dependencies since plugins may depend on them.
+                    transitive = true
                 }
             )
         }
