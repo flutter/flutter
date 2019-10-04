@@ -1,5 +1,35 @@
 package {{androidIdentifier}}
 
+{{#useNewAndroidEmbedding}}
+{{#androidX}}
+import androidx.annotation.NonNull;
+{{/androidX}}
+{{^androidX}}
+import android.support.annotation.NonNull;
+{{/androidX}}
+import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import io.flutter.plugin.common.MethodChannel.Result
+
+/** {{pluginClass}} */
+public class {{pluginClass}}: FlutterPlugin, MethodCallHandler {
+  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPluginBinding) {
+    val channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "{{projectName}}")
+    channel.setMethodCallHandler({{pluginClass}}());
+  }
+
+  override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+    if (call.method == "getPlatformVersion") {
+      result.success("Android ${android.os.Build.VERSION.RELEASE}")
+    } else {
+      result.notImplemented()
+    }
+  }
+}
+{{/useNewAndroidEmbedding}}
+{{^useNewAndroidEmbedding}}
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -23,3 +53,4 @@ class {{pluginClass}}: MethodCallHandler {
     }
   }
 }
+{{/useNewAndroidEmbedding}}

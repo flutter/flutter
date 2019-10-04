@@ -623,6 +623,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidX': androidX,
+      'useNewAndroidEmbedding': featureFlags.isNewAndroidEmbeddingEnabled,
       'androidMinApiLevel': android.minApiLevel,
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
       'androidFlutterJar': '$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar',
