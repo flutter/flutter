@@ -212,7 +212,7 @@ void main() {
           createMockProcess(
             exitCode: 1,
             stdout: r8StdoutWarning,
-          )
+          ),
         );
       });
 
@@ -247,9 +247,9 @@ void main() {
 }
 
 Future<BuildAppBundleCommand> runBuildAppBundleCommand(
-  String target,
-  { List<String> arguments }
-) async {
+  String target, {
+  List<String> arguments,
+}) async {
   final BuildAppBundleCommand command = BuildAppBundleCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[

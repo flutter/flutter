@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
   test('light scheme matches the spec', () {
     // Colors should match the The Material Design baseline default theme:
     // https://material.io/design/color/dark-theme.html#ui-application
@@ -44,5 +43,4 @@ void main() {
     expect(scheme.onError, const Color(0xff000000));
     expect(scheme.brightness, Brightness.dark);
   });
-
 }

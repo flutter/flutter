@@ -84,7 +84,7 @@ Future<int> runTests(
       <Runtime>[Runtime.chrome],
       () {
         return FlutterWebPlatform.start(flutterProject.directory.path);
-      }
+      },
     );
     await test.main(testArgs);
     return exitCode;

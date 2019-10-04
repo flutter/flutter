@@ -138,7 +138,7 @@ void main() {
           segmentedControlRect.topLeft.translate(
             effectivePadding.topLeft.dx,
             effectivePadding.topLeft.dy,
-          )
+          ),
       );
       expect(
         tester.getBottomLeft(find.byWidget(children[0])),
@@ -171,7 +171,7 @@ void main() {
             children: children,
             onValueChanged: (int newValue) { },
           ),
-        )
+        ),
     );
 
     // Default padding works.
@@ -191,7 +191,7 @@ void main() {
             children: children,
             onValueChanged: (int newValue) { },
           ),
-        )
+        ),
     );
 
     // Custom padding works.
@@ -335,7 +335,7 @@ void main() {
       IconThemeData iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
       expect(textStyle.style.color, CupertinoColors.black);
-      expect(iconTheme.color, CupertinoColors.activeOrange);
+      expect(iconTheme.color.value, CupertinoColors.activeOrange.darkColor.value);
 
       await tester.tap(find.byIcon(const IconData(1)));
       await tester.pump();
@@ -344,7 +344,7 @@ void main() {
       textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
       iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
-      expect(textStyle.style.color, CupertinoColors.activeOrange);
+      expect(textStyle.style.color.value, CupertinoColors.activeOrange.darkColor.value);
       expect(iconTheme.color, CupertinoColors.black);
     },
   );
@@ -494,22 +494,24 @@ void main() {
   });
 
   testWidgets(
-      'Background color of child should change on selection, '
-      'and should not change when tapped again', (WidgetTester tester) async {
-    await tester.pumpWidget(setupSimpleSegmentedControl());
+    'Background color of child should change on selection, '
+    'and should not change when tapped again',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    expect(getBackgroundColor(tester, 1), CupertinoColors.white);
+      expect(getBackgroundColor(tester, 1), CupertinoColors.white);
 
-    await tester.tap(find.text('Child 2'));
-    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+      await tester.tap(find.text('Child 2'));
+      await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
+      expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
 
-    await tester.tap(find.text('Child 2'));
-    await tester.pump();
+      await tester.tap(find.text('Child 2'));
+      await tester.pump();
 
-    expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
-  });
+      expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
+    },
+  );
 
   testWidgets(
     'Children can be non-Text or Icon widgets (in this case, '

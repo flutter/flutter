@@ -582,7 +582,7 @@ void main() {
         overlayColor: Color(0xff000010),
         thumbColor: Color(0xff000011),
         valueIndicatorColor: Color(0xff000012),
-      )
+      ),
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
     double value = 0.45;
@@ -1548,8 +1548,7 @@ void main() {
     expect(renderObject.size.height, 200);
   });
 
-  testWidgets(
-      'Slider implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const Slider(

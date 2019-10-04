@@ -412,7 +412,7 @@ void main() {
     expect(
       find.byType(CupertinoSlider),
       // First line it paints is blue.
-      paints..rrect(color: CupertinoColors.activeBlue),
+      paints..rrect(color: CupertinoColors.systemBlue.color),
     );
 
     await tester.pumpWidget(
@@ -426,9 +426,11 @@ void main() {
         ),
       ),
     );
+
+    const CupertinoDynamicColor orange = CupertinoColors.activeOrange;
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: CupertinoColors.activeOrange),
+      paints..rrect(color: orange.darkColor),
     );
   });
 
@@ -447,7 +449,7 @@ void main() {
     );
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: CupertinoColors.activeGreen),
+      paints..rrect(color: CupertinoColors.systemGreen.darkColor),
     );
   });
 

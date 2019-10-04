@@ -24,7 +24,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     );
     argParser.addFlag('profile',
       negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.'
+      help: 'Build a version of your app specialized for performance profiling.',
     );
     argParser.addFlag('release',
       negatable: false,

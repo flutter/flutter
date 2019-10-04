@@ -100,7 +100,7 @@ Future<void> main() async {
           border: Border.all(width: 10.0, color: const Color(0x80FF00FF)),
           color: Colors.teal[600],
         ),
-      )
+      ),
     );
   });
 
@@ -116,7 +116,7 @@ Future<void> main() async {
             height: 25.0,
           ),
         ),
-      )
+      ),
     );
     expect(tester.getSize(find.byKey(key)), equals(const Size(45.0, 45.0)));
   });

@@ -66,7 +66,7 @@ void main() {
         '══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞══════════════════════\n'
         'The following assertion was thrown during performLayout():\n'
         'TestThrowingRenderObject does not support performLayout.\n'
-      )
+      ),
     );
 
     expect(

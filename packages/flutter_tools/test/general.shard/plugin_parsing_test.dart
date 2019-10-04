@@ -36,16 +36,20 @@ void main() {
 
     test('Multi-platform Format', () {
       const String pluginYamlRaw = 'platforms:\n'
-          ' macos:\n'
-          '  pluginClass: MSamplePlugin\n'
           ' android:\n'
           '  package: com.flutter.dev\n'
           '  pluginClass: ASamplePlugin\n'
           ' ios:\n'
           '  pluginClass: ISamplePlugin\n'
+          ' linux:\n'
+          '  pluginClass: LSamplePlugin\n'
+          ' macos:\n'
+          '  pluginClass: MSamplePlugin\n'
           ' web:\n'
-          '  pluginClass: WSamplePlugin\n'
-          '  fileName: web_plugin.dart\n';
+          '  pluginClass: WebSamplePlugin\n'
+          '  fileName: web_plugin.dart\n'
+          ' windows:\n'
+          '  pluginClass: WinSamplePlugin\n';
 
       final dynamic pluginYaml = loadYaml(pluginYamlRaw);
       final Plugin plugin =
@@ -53,10 +57,14 @@ void main() {
 
       final AndroidPlugin androidPlugin =
           plugin.platforms[AndroidPlugin.kConfigKey];
+      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey];
+      final LinuxPlugin linuxPlugin =
+          plugin.platforms[LinuxPlugin.kConfigKey];
       final MacOSPlugin macOSPlugin =
           plugin.platforms[MacOSPlugin.kConfigKey];
-      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey];
       final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey];
+      final WindowsPlugin windowsPlugin =
+          plugin.platforms[WindowsPlugin.kConfigKey];
       final String androidPluginClass = androidPlugin.pluginClass;
       final String iosPluginClass = iosPlugin.pluginClass;
 
@@ -64,9 +72,11 @@ void main() {
       expect(androidPluginClass, 'ASamplePlugin');
       expect(iosPlugin.classPrefix, '');
       expect(androidPlugin.package, 'com.flutter.dev');
+      expect(linuxPlugin.pluginClass, 'LSamplePlugin');
       expect(macOSPlugin.pluginClass, 'MSamplePlugin');
-      expect(webPlugin.pluginClass, 'WSamplePlugin');
+      expect(webPlugin.pluginClass, 'WebSamplePlugin');
       expect(webPlugin.fileName, 'web_plugin.dart');
+      expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
     });
   });
 }

@@ -173,7 +173,7 @@ class RunCommand extends RunCommandBase {
         negatable: true,
         defaultsTo: true,
         hide: true,
-        help: 'Whether to automatically invoke webOnlyInitializePlatform.'
+        help: 'Whether to automatically invoke webOnlyInitializePlatform.',
       )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
       ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
@@ -306,6 +306,7 @@ class RunCommand extends RunCommandBase {
         initializePlatform: argResults['web-initialize-platform'],
         hostname: featureFlags.isWebEnabled ? argResults['web-hostname'] : '',
         port: featureFlags.isWebEnabled ? argResults['web-port'] : '',
+        browserLaunch: featureFlags.isWebEnabled ? argResults['web-browser-launch'] : null,
       );
     }
   }

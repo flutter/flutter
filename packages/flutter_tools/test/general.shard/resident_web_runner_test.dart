@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -31,12 +32,14 @@ void main() {
   MockDebugConnection mockDebugConnection;
   MockVmService mockVmService;
   MockWebDevice mockWebDevice;
+  MockAppConnection mockAppConnection;
 
   setUp(() {
     mockWebFs = MockFlutterWebFs();
     mockDebugConnection = MockDebugConnection();
     mockVmService = MockVmService();
     mockWebDevice = MockWebDevice();
+    mockAppConnection = MockAppConnection();
     testbed = Testbed(
       setup: () {
         residentWebRunner = ResidentWebRunner(
@@ -47,26 +50,27 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-      WebFsFactory: () => ({
-        @required String target,
-        @required FlutterProject flutterProject,
-        @required BuildInfo buildInfo,
-        @required bool skipDwds,
-        @required bool initializePlatform,
-        @required String hostname,
-        @required String port,
-      }) async {
-        return mockWebFs;
+        WebFsFactory: () => ({
+          @required String target,
+          @required FlutterProject flutterProject,
+          @required BuildInfo buildInfo,
+          @required bool skipDwds,
+          @required bool initializePlatform,
+          @required String hostname,
+          @required String port,
+        }) async {
+          return mockWebFs;
+        },
       },
-    });
+    );
   });
 
-   void _setupMocks() {
+  void _setupMocks() {
     fs.file('pubspec.yaml').createSync();
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
-    when(mockWebFs.runAndDebug()).thenAnswer((Invocation _) async {
-      return mockDebugConnection;
+    when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
+      return ConnectionResult(mockAppConnection, mockDebugConnection);
     });
     when(mockWebFs.recompile()).thenAnswer((Invocation _) {
       return Future<bool>.value(false);
@@ -132,19 +136,44 @@ void main() {
     ));
     final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
 
+    verify(mockAppConnection.runMain()).called(1);
     verify(mockVmService.registerService('reloadSources', 'FlutterTools')).called(1);
     expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
   }));
 
-  test('Can hot reload after attaching', () => testbed.run(() async {
-  _setupMocks();
+  test('Listens to stdout streams before running main', () => testbed.run(() async {
+    _setupMocks();
+    final BufferLogger bufferLogger = logger;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    final StreamController<Event> controller = StreamController<Event>.broadcast();
+    when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
+      return controller.stream;
+    });
+    when(mockAppConnection.runMain()).thenAnswer((Invocation invocation) {
+      controller.add(Event.parse(<String, Object>{
+        'type': 'Event',
+        'kind': 'WriteEvent',
+        'timestamp': 1569473488296,
+        'bytes': base64.encode('THIS MESSAGE IS IMPORTANT'.codeUnits),
+      }));
+    });
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
+
+    expect(bufferLogger.statusText, contains('THIS MESSAGE IS IMPORTANT'));
+  }));
+
+  test('Can hot reload after attaching', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockWebFs.recompile()).thenAnswer((Invocation invocation) async {
       return true;
     });
     when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
@@ -155,8 +184,14 @@ void main() {
     expect(result.code, 0);
 	  // ensure that analytics are sent.
     verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
-      'cd27': 'web-javascript', 'cd28': null, 'cd29': 'false', 'cd30': 'true'
+      'cd27': 'web-javascript',
+      'cd28': null,
+      'cd29': 'false',
+      'cd30': 'true',
     })).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-restart', any)).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-refresh', any)).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -164,11 +199,11 @@ void main() {
   test('Can hot restart after attaching', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
+    when(mockWebFs.recompile()).thenAnswer((Invocation invocation) async {
       return true;
     });
     when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
@@ -179,8 +214,14 @@ void main() {
     expect(result.code, 0);
 	  // ensure that analytics are sent.
     verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
-      'cd27': 'web-javascript', 'cd28': null, 'cd29': 'false', 'cd30': 'true'
+      'cd27': 'web-javascript',
+      'cd28': null,
+      'cd29': 'false',
+      'cd30': 'true',
     })).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-restart', any)).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-refresh', any)).called(1);
+    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -188,7 +229,7 @@ void main() {
   test('Fails on compilation errors in hot restart', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -204,7 +245,7 @@ void main() {
   test('Fails on vmservice response error', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -247,7 +288,7 @@ void main() {
   test('debugDumpApp', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -259,7 +300,7 @@ void main() {
   test('debugDumpLayerTree', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -271,7 +312,7 @@ void main() {
   test('debugDumpRenderTree', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -283,7 +324,7 @@ void main() {
   test('debugDumpSemanticsTreeInTraversalOrder', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -295,7 +336,7 @@ void main() {
   test('debugDumpSemanticsTreeInInverseHitTestOrder', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -307,7 +348,7 @@ void main() {
   test('debugToggleDebugPaintSizeEnabled', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -325,7 +366,7 @@ void main() {
   test('debugTogglePerformanceOverlayOverride', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -343,7 +384,7 @@ void main() {
   test('debugToggleWidgetInspector', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -361,7 +402,7 @@ void main() {
   test('debugToggleProfileWidgetBuilds', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -386,7 +427,7 @@ void main() {
       debugClosed = true;
     });
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -399,7 +440,7 @@ void main() {
     _setupMocks();
     when(mockWebDevice.name).thenReturn('Chromez');
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-     unawaited(residentWebRunner.run(
+    unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
@@ -415,4 +456,5 @@ class MockWebDevice extends Mock implements ChromeDevice {}
 class MockBuildDaemonCreator extends Mock implements BuildDaemonCreator {}
 class MockFlutterWebFs extends Mock implements WebFs {}
 class MockDebugConnection extends Mock implements DebugConnection {}
+class MockAppConnection extends Mock implements AppConnection {}
 class MockVmService extends Mock implements VmService {}

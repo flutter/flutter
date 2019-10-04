@@ -51,7 +51,7 @@ class MDnsObservatoryDiscovery {
   /// it will return that instance's information regardless of what application
   /// the Observatory instance is for.
   Future<MDnsObservatoryDiscoveryResult> query({String applicationId}) async {
-    printStatus('Checking for advertised Dart observatories...');
+    printTrace('Checking for advertised Dart observatories...');
     try {
       await client.start();
       final List<PtrResourceRecord> pointerRecords = await client
@@ -85,14 +85,14 @@ class MDnsObservatoryDiscovery {
         buffer.writeln('There are multiple observatory ports available.');
         buffer.writeln('Rerun this command with one of the following passed in as the appId:');
         buffer.writeln('');
-         for (final String uniqueDomainName in uniqueDomainNames) {
+        for (final String uniqueDomainName in uniqueDomainNames) {
           buffer.writeln('  flutter attach --app-id ${uniqueDomainName.replaceAll('.$dartObservatoryName', '')}');
         }
         throwToolExit(buffer.toString());
       } else {
         domainName = pointerRecords[0].domainName;
       }
-      printStatus('Checking for available port on $domainName');
+      printTrace('Checking for available port on $domainName');
       // Here, if we get more than one, it should just be a duplicate.
       final List<SrvResourceRecord> srv = await client
           .lookup<SrvResourceRecord>(
@@ -106,7 +106,7 @@ class MDnsObservatoryDiscovery {
         printError('Unexpectedly found more than one observatory report for $domainName '
                    '- using first one (${srv.first.port}).');
       }
-      printStatus('Checking for authentication code for $domainName');
+      printTrace('Checking for authentication code for $domainName');
       final List<TxtResourceRecord> txt = await client
         .lookup<TxtResourceRecord>(
             ResourceRecordQuery.text(domainName),

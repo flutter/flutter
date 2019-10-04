@@ -70,7 +70,7 @@ enum OverlayVisibilityMode {
 
 class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _CupertinoTextFieldSelectionGestureDetectorBuilder({
-    @required _CupertinoTextFieldState state
+    @required _CupertinoTextFieldState state,
   }) : _state = state,
        super(delegate: state);
 
@@ -201,7 +201,7 @@ class CupertinoTextField extends StatefulWidget {
     this.placeholder,
     this.placeholderStyle = const TextStyle(
       fontWeight: FontWeight.w300,
-      color: _kInactiveTextColor
+      color: _kInactiveTextColor,
     ),
     this.prefix,
     this.prefixMode = OverlayVisibilityMode.always,

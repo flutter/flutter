@@ -20,7 +20,7 @@ Future<void> main() async {
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
+          ...flutterAssets,
           'classes.dex',
           'assets/flutter_assets/isolate_snapshot_data',
           'assets/flutter_assets/kernel_blob.bin',
@@ -47,7 +47,7 @@ Future<void> main() async {
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
+          ...flutterAssets,
           'classes.dex',
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
@@ -70,7 +70,7 @@ Future<void> main() async {
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
+          ...flutterAssets,
           'classes.dex',
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
@@ -94,7 +94,7 @@ Future<void> main() async {
         final Iterable<String> armApkFiles = await getFilesInApk(pluginProject.releaseArmApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
+          ...flutterAssets,
           'classes.dex',
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
@@ -109,7 +109,7 @@ Future<void> main() async {
         final Iterable<String> arm64ApkFiles = await getFilesInApk(pluginProject.releaseArm64ApkPath);
 
         checkItContains<String>(<String>[
-          'AndroidManifest.xml',
+          ...flutterAssets,
           'classes.dex',
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
@@ -134,13 +134,14 @@ Future<void> main() async {
         ];
         for (final String targetPlatform in targetPlatforms) {
           final String androidArmSnapshotPath = path.join(
-              project.rootPath,
-              'build',
-              'app',
-              'intermediates',
-              'flutter',
-              'release',
-              targetPlatform);
+            project.rootPath,
+            'build',
+            'app',
+            'intermediates',
+            'flutter',
+            'release',
+            targetPlatform,
+          );
 
           final String sharedLibrary = path.join(androidArmSnapshotPath, 'app.so');
           if (!File(sharedLibrary).existsSync()) {

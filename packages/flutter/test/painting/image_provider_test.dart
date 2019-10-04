@@ -175,9 +175,11 @@ void main() {
         }));
 
         final dynamic err = await caughtError.future;
-        expect(err, const TypeMatcher<NetworkImageLoadException>()
+        expect(
+          err,
+          const TypeMatcher<NetworkImageLoadException>()
             .having((NetworkImageLoadException e) => e.statusCode, 'statusCode', errorStatusCode)
-            .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl))
+            .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl)),
         );
       });
 

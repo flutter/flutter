@@ -460,6 +460,26 @@ void main() {
       'textfield',
     );
   });
+
+  testWidgets('SemanticsDebugger label style is used in the painter.', (WidgetTester tester) async {
+    final UniqueKey debugger = UniqueKey();
+    const TextStyle labelStyle = TextStyle(color: Colors.amber);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SemanticsDebugger(
+          key: debugger,
+          labelStyle: labelStyle,
+          child: Semantics(
+            label: 'label',
+            textDirection: TextDirection.ltr,
+          ),
+        ),
+      ),
+    );
+
+    expect(_getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle, labelStyle);
+  });
 }
 
 String _getMessageShownInSemanticsDebugger({
