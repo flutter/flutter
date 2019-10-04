@@ -7,7 +7,7 @@ import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'globals.dart';
+import 'features.dart';
 
 /// Marker interface for all platform specific plugin config impls.
 abstract class PluginPlatform {
@@ -65,21 +65,20 @@ class AndroidPlugin extends PluginPlatform {
       'name': name,
       'package': package,
       'class': pluginClass,
-      'usesNewEmbedding': _usesNewEmbedding,
+      'usesEmbedding2': _embeddingVersion == '2',
     };
   }
 
-  bool _didUseNewEmbedding;
+  String _cachedEmbeddingVersion;
 
-  /// Returns [true] if the plugin is using the new Android embedding.
-  bool get _usesNewEmbedding => _didUseNewEmbedding ??= _checkIfPluginUsesNewEmbedding();
+  /// Returns the version of the Android embedding.
+  String get _embeddingVersion => _cachedEmbeddingVersion ??= _getEmbeddingVersion();
 
-  // Checks if the plugin uses the new embedding by checking if the plugin class contains
-  // a reference to `io.flutter.embedding.engine.plugins.FlutterPlugin`.
-  bool _checkIfPluginUsesNewEmbedding() {
-    if (pluginPath == null) {
-      return false;
+  String _getEmbeddingVersion() {
+    if (!featureFlags.isNewAndroidEmbeddingEnabled) {
+      return '1';
     }
+    assert(pluginPath != null);
     final String baseMainPath = fs.path.join(
       pluginPath,
       'android',
@@ -106,10 +105,7 @@ class AndroidPlugin extends PluginPlatform {
         )
       );
     }
-    if (!mainPluginClass.existsSync()) {
-      printTrace('File $mainPluginClass doesn\'t exist');
-      return false;
-    }
+    assert(mainPluginClass.existsSync());
     String mainClassContent;
     try {
       mainClassContent = mainPluginClass.readAsStringSync();
@@ -119,10 +115,11 @@ class AndroidPlugin extends PluginPlatform {
         'Please verify that this file has read permission and try again.'
       );
     }
-    final bool usesNewEmbedding = mainClassContent
-        .contains('io.flutter.embedding.engine.plugins.FlutterPlugin');
-    printTrace('$mainPluginClass uses new embedding: $usesNewEmbedding');
-    return usesNewEmbedding;
+    if (mainClassContent
+        .contains('io.flutter.embedding.engine.plugins.FlutterPlugin')) {
+      return '2';
+    }
+    return '1';
   }
 }
 

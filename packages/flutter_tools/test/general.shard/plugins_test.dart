@@ -115,6 +115,22 @@ flutter:
     MockFeatureFlags featureFlags;
     MockXcodeProjectInterpreter xcodeProjectInterpreter;
 
+    const String kAndroidManifestUsingOldEmbedding = '''
+<manifest>
+    <application>
+    </application>
+</manifest>
+''';
+    const String kAndroidManifestUsingNewEmbedding = '''
+<manifest>
+    <application>
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+</manifest>
+''';
+
     setUp(() {
       featureFlags = MockFeatureFlags();
       when(featureFlags.isLinuxEnabled).thenReturn(false);
@@ -152,7 +168,7 @@ flutter:
         .childDirectory('android')
         .childFile('AndroidManifest.xml')
         ..createSync(recursive: true)
-        ..writeAsStringSync('usesNewEmbedding:true');
+        ..writeAsStringSync(kAndroidManifestUsingNewEmbedding);
       when(androidProject.appManifestFile).thenReturn(androidManifest);
 
       await injectPlugins(flutterProject);
@@ -177,7 +193,7 @@ flutter:
         .childDirectory('android')
         .childFile('AndroidManifest.xml')
         ..createSync(recursive: true)
-        ..writeAsStringSync('usesNewEmbedding:true');
+        ..writeAsStringSync(kAndroidManifestUsingNewEmbedding);
       when(androidProject.appManifestFile).thenReturn(androidManifest);
 
       final Directory pluginUsingJavaAndNewEmbeddingDir =
@@ -236,7 +252,7 @@ flutter:
         .childDirectory('main')
         .childDirectory('java')
         .childDirectory('plugin3')
-        .childFile('UseNewEmbedding.java')
+        .childFile('UseOldEmbedding.java')
         ..createSync(recursive: true);
 
       flutterProject.directory
@@ -273,7 +289,8 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       final File androidManifest = flutterProject.directory
         .childDirectory('android')
         .childFile('AndroidManifest.xml')
-        ..createSync(recursive: true);
+        ..createSync(recursive: true)
+        ..writeAsStringSync(kAndroidManifestUsingOldEmbedding);
       when(androidProject.appManifestFile).thenReturn(androidManifest);
 
       await injectPlugins(flutterProject);
@@ -316,7 +333,7 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
         .childDirectory('android')
         .childFile('AndroidManifest.xml')
         ..createSync(recursive: true)
-        ..writeAsStringSync('usesNewEmbedding:true');
+        ..writeAsStringSync(kAndroidManifestUsingNewEmbedding);
       when(androidProject.appManifestFile).thenReturn(androidManifest);
 
       await injectPlugins(flutterProject);
@@ -340,7 +357,8 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
       final File androidManifest = flutterProject.directory
         .childDirectory('android')
         .childFile('AndroidManifest.xml')
-        ..createSync(recursive: true);
+        ..createSync(recursive: true)
+        ..writeAsStringSync(kAndroidManifestUsingOldEmbedding);
       when(androidProject.appManifestFile).thenReturn(androidManifest);
 
       await injectPlugins(flutterProject);

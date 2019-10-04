@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:mustache/mustache.dart' as mustache;
+import 'package:xml/xml.dart' as xml;
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
@@ -319,9 +320,9 @@ import androidx.annotation.NonNull;
 import android.support.annotation.NonNull;
 {{/androidX}}
 import io.flutter.embedding.engine.FlutterEngine;
-{{#hasPluginUsingOldEmbedding}}
+{{#needsShim}}
 import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
-{{/hasPluginUsingOldEmbedding}}
+{{/needsShim}}
 
 /**
  * Generated file. Do not edit.
@@ -330,16 +331,16 @@ import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
  */
 public final class GeneratedPluginRegistrant {
   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
-{{#hasPluginUsingOldEmbedding}}
+{{#needsShim}}
     ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
-{{/hasPluginUsingOldEmbedding}}
+{{/needsShim}}
 {{#plugins}}
-  {{#usesNewEmbedding}}
+  {{#usesEmbedding2}}
     flutterEngine.getPlugins().add(new {{package}}.{{class}}());
-  {{/usesNewEmbedding}}
-  {{^usesNewEmbedding}}
+  {{/usesEmbedding2}}
+  {{^usesEmbedding2}}
     {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
-  {{/usesNewEmbedding}}
+  {{/usesEmbedding2}}
 {{/plugins}}
   }
 }
@@ -356,53 +357,90 @@ List<Map<String, dynamic>> _extractPlatformMaps(List<Plugin> plugins, String typ
   return pluginConfigs;
 }
 
+/// Returns the version of the Android embedding that the current
+/// [project] is using.
+String _getAndroidEmbeddingVersion(FlutterProject project) {
+  if (!featureFlags.isNewAndroidEmbeddingEnabled) {
+    return '1';
+  }
+  assert(project.android != null);
+  final File androidManifest = project.android.appManifestFile;
+  assert(androidManifest.existsSync());
+  xml.XmlDocument document;
+  try {
+    document = xml.parse(androidManifest.readAsStringSync());
+  } on xml.XmlParserException {
+    throwToolExit('Error parsing ${project.android.appManifestFile} '
+                  'Please ensure that the android manifest is a valid XML document and try again.');
+  } on FileSystemException {
+    throwToolExit('Error reading ${project.android.appManifestFile} even though it exists. '
+                  'Please ensure that you have read permission to this file and try again.');
+  }
+  for (xml.XmlElement metaData in document.findAllElements('meta-data')) {
+    final String name = metaData.getAttribute('android:name');
+    if (name == 'flutterEmbedding') {
+      return metaData.getAttribute('android:value');
+    }
+  }
+  return '1';
+}
+
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> androidPlugins =
     _extractPlatformMaps(plugins, AndroidPlugin.kConfigKey);
 
-  final Map<String, dynamic> context = <String, dynamic>{
-    'hasPluginUsingOldEmbedding': false,
+  final Map<String, dynamic> templateContext = <String, dynamic>{
     'plugins': androidPlugins,
     'androidX': isAppUsingAndroidX(project.android.hostAppGradleRoot),
   };
-  for (Map<String, dynamic> plugin in androidPlugins) {
-    if (!plugin['usesNewEmbedding']) {
-      context['hasPluginUsingOldEmbedding'] = true;
-      break;
-    }
-  }
   final String javaSourcePath = fs.path.join(
     project.android.pluginRegistrantHost.path,
     'src',
     'main',
     'java',
   );
-  bool canUseNewEmbedding = false;
-  if (featureFlags.isNewAndroidEmbeddingEnabled) {
-    assert(project.android != null);
-    final File androidManifest = project.android.appManifestFile;
-    assert(androidManifest.existsSync());
-    final String manifestContent = androidManifest.readAsStringSync();
-    if (!manifestContent.contains('usesNewEmbedding:true')) {
-      canUseNewEmbedding = false;
-      printTrace('AndroidManifest.xml doesn\'t contain usesNewEmbedding:true');
-    } else {
-      canUseNewEmbedding = true;
-    }
+
+  String registryPath;
+  String templateContent;
+
+  final String appEmbeddingVersion = _getAndroidEmbeddingVersion(project);
+  switch (appEmbeddingVersion) {
+    case '2':
+      templateContext['needsShim'] = false;
+      // If a plugin is using an embedding version older than 2.0 and the app is using 2.0,
+      // then add  shim for the old plugins.
+      for (Map<String, dynamic> plugin in androidPlugins) {
+        if (!plugin['usesEmbedding2']) {
+          templateContext['needsShim'] = true;
+          break;
+        }
+      }
+      registryPath = fs.path.join(
+        javaSourcePath,
+        'dev',
+        'flutter',
+        'plugins',
+        'GeneratedPluginRegistrant.java',
+      );
+      templateContent = _androidPluginRegistryTemplateNewEmbedding;
+    break;
+    case '1':
+      registryPath = fs.path.join(
+        javaSourcePath,
+        'io',
+        'flutter',
+        'plugins',
+        'GeneratedPluginRegistrant.java',
+      );
+      templateContent = _androidPluginRegistryTemplateOldEmbedding;
+    break;
+    default:
+      throwToolExit('Unsupported Android embedding');
   }
-  final String registryPath = fs.path.join(
-    javaSourcePath,
-    canUseNewEmbedding ? 'dev' : 'io',
-    'flutter',
-    'plugins',
-    'GeneratedPluginRegistrant.java',
-  );
   printTrace('Generating $registryPath');
   _renderTemplateToFile(
-    canUseNewEmbedding ?
-      _androidPluginRegistryTemplateNewEmbedding :
-      _androidPluginRegistryTemplateOldEmbedding,
-    context,
+    templateContent,
+    templateContext,
     registryPath,
   );
 }
