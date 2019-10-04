@@ -41,6 +41,9 @@ class OutputPreferences {
        _overrideWrapColumn = wrapColumn,
        showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
 
+  /// A version of this class for use in tests.
+  OutputPreferences.test() : wrapText = false, _overrideWrapColumn = null, showColor = false;
+
   /// If [wrapText] is true, then any text sent to the context's [Logger]
   /// instance (e.g. from the [printError] or [printStatus] functions) will be
   /// wrapped (newlines added between words) to be no longer than the
