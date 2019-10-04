@@ -36,6 +36,12 @@ namespace flutter_runner {
 class AccessibilityBridge
     : public fuchsia::accessibility::semantics::SemanticListener {
  public:
+  // A delegate to call when semantics are enabled or disabled.
+  class Delegate {
+   public:
+    virtual void SetSemanticsEnabled(bool enabled) = 0;
+  };
+
   // TODO(MI4-2531, FIDL-718): Remove this. We shouldn't be worried about
   // batching messages at this level.
   // FIDL may encode a C++ struct as larger than the sizeof the C++ struct.
@@ -55,7 +61,8 @@ class AccessibilityBridge
       "flutter::SemanticsNode::id and "
       "fuchsia::accessibility::semantics::Node::node_id differ in size.");
 
-  AccessibilityBridge(const std::shared_ptr<sys::ServiceDirectory> services,
+  AccessibilityBridge(Delegate& delegate,
+                      const std::shared_ptr<sys::ServiceDirectory> services,
                       fuchsia::ui::views::ViewRef view_ref);
 
   // Returns true if accessible navigation is enabled.
@@ -75,6 +82,8 @@ class AccessibilityBridge
   zx_status_t OnHoverMove(double x, double y);
 
  private:
+  AccessibilityBridge::Delegate& delegate_;
+
   static constexpr int32_t kRootNodeId = 0;
   fidl::Binding<fuchsia::accessibility::semantics::SemanticListener> binding_;
   fuchsia::accessibility::semantics::SemanticsManagerPtr
@@ -128,9 +137,8 @@ class AccessibilityBridge
           callback) override;
 
   // |fuchsia::accessibility::semantics::SemanticListener|
-  void OnSemanticsModeChanged(
-      bool enabled,
-      OnSemanticsModeChangedCallback callback) override {}
+  void OnSemanticsModeChanged(bool enabled,
+                              OnSemanticsModeChangedCallback callback) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridge);
 };
