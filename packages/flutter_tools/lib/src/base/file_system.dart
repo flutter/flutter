@@ -71,12 +71,10 @@ void ensureDirectoryExists(String filePath) {
 /// Skips files if [shouldCopyFile] returns `false`.
 void copyDirectorySync(
   Directory srcDir,
-  Directory destDir,
-  {
-    bool shouldCopyFile(File srcFile, File destFile),
-    void onFileCopied(File srcFile, File destFile),
-  }
-) {
+  Directory destDir, {
+  bool shouldCopyFile(File srcFile, File destFile),
+  void onFileCopied(File srcFile, File destFile),
+}) {
   if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
   }

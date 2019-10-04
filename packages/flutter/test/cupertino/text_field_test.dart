@@ -83,8 +83,8 @@ class PathBoundsMatcher extends Matcher {
 
 class PathPointsMatcher extends Matcher {
   const PathPointsMatcher({
-      this.includes = const <Offset>[],
-      this.excludes = const <Offset>[],
+    this.includes = const <Offset>[],
+    this.excludes = const <Offset>[],
   }) : super();
 
   final Iterable<Offset> includes;

@@ -157,8 +157,13 @@ class MDnsObservatoryDiscoveryResult {
   final String authCode;
 }
 
-Future<Uri> buildObservatoryUri(Device device,
-    String host, int devicePort, [int observatoryPort, String authCode]) async {
+Future<Uri> buildObservatoryUri(
+  Device device,
+  String host,
+  int devicePort, [
+  int observatoryPort,
+  String authCode,
+]) async {
   String path = '/';
   if (authCode != null) {
     path = authCode;
