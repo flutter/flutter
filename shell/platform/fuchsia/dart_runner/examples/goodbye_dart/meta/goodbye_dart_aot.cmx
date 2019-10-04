@@ -1,13 +1,13 @@
 {
-    "program": {
-        "data": "data/goodbye_dart_aot"
-    },
-    "sandbox": {
-        "features": [
-            "deprecated-ambient-replace-as-executable"
-        ],
-        "services": [
-            "fuchsia.sys.Environment"
-        ]
-    }
+  "program": {
+    "data": "data/goodbye_dart_aot"
+  },
+  "sandbox": {
+    "features": [
+      "deprecated-ambient-replace-as-executable"
+    ],
+    "services": [
+      "fuchsia.sys.Environment"
+    ]
+  }
 }
