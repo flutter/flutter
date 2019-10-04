@@ -1339,20 +1339,4 @@ void main() {
 
     expect(key.currentState.focusNode.canRequestFocus, isFalse);
   });
-  testWidgets('Setting skipTraversal on focus node causes update.', (WidgetTester tester) async {
-    final GlobalKey<TestFocusState> key = GlobalKey();
-
-    final TestFocus testFocus = TestFocus(key: key, name: 'a');
-    await tester.pumpWidget(
-      testFocus,
-    );
-
-    await tester.pump();
-    key.currentState.built = false;
-    key.currentState.focusNode.skipTraversal = true;
-    await tester.pump();
-    key.currentState.built = true;
-
-    expect(key.currentState.focusNode.skipTraversal, isTrue);
-  });
 }

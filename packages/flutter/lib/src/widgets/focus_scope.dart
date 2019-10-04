@@ -325,7 +325,6 @@ class _FocusState extends State<Focus> {
   bool _hasFocus;
   bool _hasPrimaryFocus;
   bool _canRequestFocus;
-  bool _skipTraversal;
   bool _didAutofocus = false;
   FocusAttachment _focusAttachment;
 
@@ -346,7 +345,6 @@ class _FocusState extends State<Focus> {
     focusNode.skipTraversal = widget.skipTraversal ?? focusNode.skipTraversal;
     focusNode.canRequestFocus = widget.canRequestFocus ?? focusNode.canRequestFocus;
     _hasFocus = focusNode.hasFocus;
-    _skipTraversal = focusNode.skipTraversal;
     _canRequestFocus = focusNode.canRequestFocus;
     _hasPrimaryFocus = focusNode.hasPrimaryFocus;
 
@@ -440,11 +438,6 @@ class _FocusState extends State<Focus> {
     if (_canRequestFocus != focusNode.canRequestFocus) {
       setState(() {
         _canRequestFocus = focusNode.canRequestFocus;
-      });
-    }
-    if (_skipTraversal != focusNode.skipTraversal) {
-      setState(() {
-        _skipTraversal = focusNode.skipTraversal;
       });
     }
   }
