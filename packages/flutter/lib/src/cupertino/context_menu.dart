@@ -38,7 +38,44 @@ enum _ContextMenuOrientation {
   right,
 }
 
-// TODO(justinmc): Dartpad example here.
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// This sample shows a very simple ContextMenu for an empty Container. To open
+/// it, long press on the red square.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     key: scaffoldKey,
+///     body: Center(
+///       child: Container(
+///         width: 100,
+///         height: 100,
+///         child: ContextMenu(
+///           child: Container(
+///             color: Colors.red,
+///           ),
+///           actions: <ContextMenuSheetAction>[
+///             ContextMenuSheetAction(
+///               child: const Text('Action one'),
+///               onPressed: () {
+///                 Navigator.pop(context);
+///               },
+///             ),
+///             ContextMenuSheetAction(
+///               child: const Text('Action two'),
+///               onPressed: () {
+///                 Navigator.pop(context);
+///               },
+///             ),
+///           ],
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 /// A full-screen overlay menu that opens when the child is long-pressed or 3d
 /// touched.
 ///
@@ -86,6 +123,48 @@ class ContextMenu extends StatefulWidget {
   /// but it can also show a slight variation of the child. As a simple example,
   /// the child could be given rounded corners in the preview but have sharp
   /// corners when in the page.
+  ///
+  /// {@tool sample}
+  ///
+  /// Below is an example of using `preview` to create a square image tile very
+  /// similar to iOS iPhoto app's context menu. When opened, the child animates
+  /// to show its full aspect ratio and has rounded corners.
+  ///
+  /// ```dart
+  /// GridView.count(
+  ///   crossAxisCount: 3,
+  ///   children: <Widget>[
+  ///     ContextMenu(
+  ///       child: FittedBox(
+  ///         fit: BoxFit.cover,
+  ///         child: Image.asset(asset),
+  ///       ),
+  ///       // The FittedBox in the preview here allows the image to animate its
+  ///       // aspect ratio when the ContextMenu is animating open and closed.
+  ///       preview: FittedBox(
+  ///         fit: BoxFit.cover,
+  ///         // This ClipRRect rounds the corners of the image when the
+  ///         // ContextMenu is open, even though it's not rounded when it's
+  ///         // closed.
+  ///         child: ClipRRect(
+  ///           borderRadius: new BorderRadius.circular(64.0),
+  ///           child: Image.asset(asset),
+  ///         ),
+  ///       ),
+  ///       actions: <ContextMenuSheetAction>[
+  ///         ContextMenuSheetAction(
+  ///           child: const Text('Action one'),
+  ///           onPressed: () {
+  ///             Navigator.pop(context);
+  ///           },
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   ],
+  /// );
+  /// ```
+  ///
+  /// {@end-tool}
   final Widget preview;
 
   @override
@@ -668,10 +747,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
               Positioned.fromRect(
                 key: _childGlobalKey,
                 rect: rect,
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: _builder(context),
-                ),
+                child: _builder(context),
               ),
             ],
           );
@@ -895,10 +971,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
           child: AnimatedBuilder(
             animation: _moveController,
             builder: _buildChildAnimation,
-            child: FittedBox(
-              fit: BoxFit.cover,
-              child: widget.child,
-            ),
+            child: widget.child,
           ),
         ),
       ),
