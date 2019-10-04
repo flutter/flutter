@@ -38,6 +38,13 @@ class PlatformViewsRegistry {
   /// Typically a platform view identifier is passed to a [PlatformView] widget
   /// which creates the platform view and manages its lifecycle.
   int getNextPlatformViewId() => _nextPlatformViewId++;
+  
+  /// Register [viewTypeId] as being creating by the given [factory].
+  /// Works only on Flutter Web
+  /// On other platforms always returns false
+  bool registerViewFactory(String viewTypeId, dynamic Function(int viewId) factory) {
+    return false;
+  }
 }
 
 /// Callback signature for when a platform view was created.
