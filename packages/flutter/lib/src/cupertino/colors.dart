@@ -543,9 +543,8 @@ class CupertinoColors {
 /// If it has never been resolved, the light, normal contrast, base elevation variant
 /// [CupertinoDynamicColor.color] will be the default effective color.
 ///
-/// The Cupertino Library provides built-in support for [CupertinoDynamicColor],
-/// there are a few scenarios where you can skip writing the [CupertinoDynamicColor.resolve]
-/// boilerplate.
+/// Sometimes manually resolving a [CupertinoDynamicColor] is not necessary, because
+/// the Cupertino Library provides built-in support for it.
 ///
 /// ### Using a [CupertinoDynamicColor] in a Cupertino widget
 ///
@@ -612,7 +611,7 @@ class CupertinoColors {
 /// {@tool sample}
 ///
 /// The following snippet demostrates two cases where you have to manually resolve
-/// a [CupertinoDynamicColor]: [CupertinoColors.systemBlue].
+/// a [CupertinoDynamicColor].
 ///
 /// ```dart
 /// Builder(builder: (BuildContext context) {
