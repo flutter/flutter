@@ -2,10 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Creates a package dir that we will them use pm to package.
-#
-# This currently ignores the CMX files and does minimal validation.
-template("package_dir") {
+# Creates a Fuchsia archive (.far) file using PM from the Fuchsia SDK.
+template("fuchsia_archive") {
   assert(defined(invoker.binary), "package must define binary")
   assert(defined(invoker.meta_dir), "package must define meta_dir")
 
@@ -67,12 +65,42 @@ template("package_dir") {
     ]
   }
 
-  action(target_name) {
+  write_file("${far_base_dir}/meta/package",
+             {
+               name = pkg.package_name
+               version = pkg.package_version
+             },
+             "json")
+
+  pkg_dir_deps = pkg.deps + [ ":$cmx_target" ]
+
+  action("${target_name}_dir") {
     script = "$flutter_root/tools/fuchsia/copy_path.py"
     response_file_contents = rebase_path(copy_sources + copy_outputs)
-    deps = pkg.deps + [ ":$cmx_target" ]
+    deps = pkg_dir_deps
     args = [ "--file-list={{response_file_name}}" ]
     outputs = copy_outputs
+    testonly = pkg_testonly
+  }
+
+  action(target_name) {
+    script = "$flutter_root/tools/fuchsia/gen_package.py"
+    deps = pkg_dir_deps + [ ":${target_name}_dir" ]
+    sources = copy_outputs
+    args = [
+      "--pm-bin",
+      rebase_path("//fuchsia/sdk/$host_os/tools/pm"),
+      "--package-dir",
+      rebase_path(far_base_dir),
+      "--signing-key",
+      rebase_path("//flutter/tools/fuchsia/development.key"),
+      "--far-name",
+      target_name,
+    ]
+    outputs = [
+      "${far_base_dir}.manifest",
+      "$root_out_dir/${target_name}.far",
+    ]
     testonly = pkg_testonly
   }
 }
