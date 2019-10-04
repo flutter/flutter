@@ -19,8 +19,8 @@ import 'test_platform.dart';
 import 'environment.dart';
 import 'utils.dart';
 
-class TestsCommand extends Command<bool> {
-  TestsCommand() {
+class TestCommand extends Command<bool> {
+  TestCommand() {
     argParser
       ..addMultiOption(
         'target',
@@ -32,6 +32,13 @@ class TestsCommand extends Command<bool> {
         help: 'Pauses the browser before running a test, giving you an '
             'opportunity to add breakpoints or inspect loaded code before '
             'running the code.',
+      )
+      ..addFlag(
+        'update-screenshot-goldens',
+        defaultsTo: false,
+        help: 'When running screenshot tests writes them to the file system into '
+            '.dart_tool/goldens. Use this option to bulk-update all screenshots, '
+            'for example, when a new browser version affects pixels.',
       );
 
     addChromeVersionOption(argParser);
@@ -47,7 +54,7 @@ class TestsCommand extends Command<bool> {
   Future<bool> run() async {
     Chrome.version = chromeVersion;
 
-    _copyAhemFontIntoWebUi();
+    _copyTestFontsIntoWebUi();
     await _buildHostPage();
 
     final List<FilePath> targets =
@@ -72,6 +79,10 @@ class TestsCommand extends Command<bool> {
 
   /// See [ChromeInstallerCommand.chromeVersion].
   String get chromeVersion => argResults['chrome-version'];
+
+  /// When running screenshot tests writes them to the file system into
+  /// ".dart_tool/goldens".
+  bool get doUpdateScreenshotGoldens => argResults['update-screenshot-goldens'];
 
   Future<void> _runTargetTests(List<FilePath> targets) async {
     await _runTestBatch(targets, concurrency: 1, expectFailure: false);
@@ -234,7 +245,11 @@ class TestsCommand extends Command<bool> {
       ...testFiles.map((f) => f.relativeToWebUi).toList(),
     ];
     hack.registerPlatformPlugin(<Runtime>[Runtime.chrome], () {
-      return BrowserPlatform.start(root: io.Directory.current.path);
+      return BrowserPlatform.start(
+        root: io.Directory.current.path,
+        // It doesn't make sense to update a screenshot for a test that is expected to fail.
+        doUpdateScreenshotGoldens: !expectFailure && doUpdateScreenshotGoldens,
+      );
     });
 
     // We want to run tests with `web_ui` as a working directory.
@@ -257,15 +272,20 @@ class TestsCommand extends Command<bool> {
   }
 }
 
-void _copyAhemFontIntoWebUi() {
-  final io.File sourceAhemTtf = io.File(path.join(
-      environment.flutterDirectory.path,
-      'third_party',
-      'txt',
-      'third_party',
-      'fonts',
-      'ahem.ttf'));
-  final String destinationAhemTtfPath =
-      path.join(environment.webUiRootDir.path, 'lib', 'assets', 'ahem.ttf');
-  sourceAhemTtf.copySync(destinationAhemTtfPath);
+const List<String> _kTestFonts = <String>['ahem.ttf', 'Roboto-Regular.ttf'];
+
+void _copyTestFontsIntoWebUi() {
+  final String fontsPath = path.join(
+    environment.flutterDirectory.path,
+    'third_party',
+    'txt',
+    'third_party',
+    'fonts',
+  );
+
+  for (String fontFile in _kTestFonts) {
+    final io.File sourceTtf = io.File(path.join(fontsPath, fontFile));
+    final String destinationTtfPath = path.join(environment.webUiRootDir.path, 'lib', 'assets', fontFile);
+    sourceTtf.copySync(destinationTtfPath);
+  }
 }

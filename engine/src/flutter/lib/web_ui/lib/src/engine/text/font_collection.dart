@@ -4,8 +4,10 @@
 
 part of engine;
 
-const String _testFontFamily = 'Ahem';
-const String _testFontUrl = 'packages/ui/assets/ahem.ttf';
+const String _ahemFontFamily = 'Ahem';
+const String _ahemFontUrl = 'packages/ui/assets/ahem.ttf';
+const String _robotoFontFamily = 'Roboto';
+const String _robotoFontUrl = 'packages/ui/assets/Roboto-Regular.ttf';
 
 /// This class is responsible for registering and loading fonts.
 ///
@@ -75,7 +77,9 @@ class FontCollection {
   void debugRegisterTestFonts() {
     _testFontManager = _FontManager();
     _testFontManager.registerAsset(
-        _testFontFamily, 'url($_testFontUrl)', const <String, String>{});
+        _ahemFontFamily, 'url($_ahemFontUrl)', const <String, String>{});
+    _testFontManager.registerAsset(
+        _robotoFontFamily, 'url($_robotoFontUrl)', const <String, String>{});
   }
 
   /// Returns a [Future] that completes when the registered fonts are loaded
