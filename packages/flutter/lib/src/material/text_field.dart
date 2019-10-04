@@ -346,7 +346,7 @@ class TextField extends StatefulWidget {
        ),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       toolbarOptions = toolbarOptions ?? obscureText ?
+       toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(
            selectAll: true,
            paste: true,
@@ -356,7 +356,7 @@ class TextField extends StatefulWidget {
            cut: true,
            selectAll: true,
            paste: true,
-         ),
+         )),
        super(key: key);
 
   /// Controls the text being edited.
