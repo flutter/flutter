@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../build_info.dart';
-import '../globals.dart';
 import '../project.dart';
 
 import 'android_sdk.dart';
