@@ -20,7 +20,13 @@ copy("generate_dart_ui") {
 }
 
 compiled_action("generate_snapshot_bin") {
-  tool = "//third_party/dart/runtime/bin:gen_snapshot"
+  # By default Dart will create a 32-bit gen_snapshot host binary if the target
+  # platform is 32-bit.  Override this to create a 64-bit gen_snapshot for x86
+  # targets because some host platforms may not support 32-bit binaries.
+  tool = "//third_party/dart/runtime/bin:gen_snapshot_host_targeting_host"
+  if (target_cpu == "x86") {
+    toolchain = "//build/toolchain/$host_os:clang_x64"
+  }
 
   if ((is_fuchsia || is_fuchsia_host) && !using_fuchsia_sdk) {
     platform_kernel =
