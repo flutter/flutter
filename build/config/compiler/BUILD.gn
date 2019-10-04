@@ -127,13 +127,8 @@ config("compiler") {
       ldflags += [ "-fsanitize=thread" ]
     }
     if (is_msan) {
-      msan_blacklist_path =
-          rebase_path("//tools/msan/blacklist.txt", root_build_dir)
-      cflags += [
-        "-fsanitize=memory",
-        "-fsanitize-memory-track-origins=$msan_track_origins",
-        "-fsanitize-blacklist=$msan_blacklist_path",
-      ]
+      cflags += [ "-fsanitize=memory" ]
+      ldflags += [ "-fsanitize=memory" ]
     }
 
     if (use_custom_libcxx) {

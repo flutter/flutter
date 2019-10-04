@@ -280,6 +280,10 @@ if (!is_clang && (is_asan || is_lsan || is_tsan || is_msan)) {
   is_clang = true
 }
 
+if (is_msan && !is_linux) {
+  assert(false, "Memory sanitizer is only available on Linux.")
+}
+
 # =============================================================================
 # TARGET DEFAULTS
 # =============================================================================
