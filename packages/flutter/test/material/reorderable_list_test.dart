@@ -655,51 +655,6 @@ void main() {
         expect(findState(const Key('A')).checked, true);
       });
 
-      testWidgets('Preserves children states across reorder when keys are not identical', (WidgetTester tester) async {
-        _StatefulState findState(Key key) {
-          return find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
-              .evaluate()
-              .first
-              .ancestorStateOfType(const TypeMatcher<_StatefulState>());
-        }
-        await tester.pumpWidget(MaterialApp(
-          home: ReorderableListView(
-            children: <Widget>[
-              _Stateful(key: const ObjectKey('A')),
-              _Stateful(key: const ObjectKey('B')),
-              _Stateful(key: const ObjectKey('C')),
-            ],
-            onReorder: (int oldIndex, int newIndex) { },
-            scrollDirection: Axis.horizontal,
-          ),
-        ));
-        await tester.tap(find.byKey(const ObjectKey('A')));
-        await tester.pumpAndSettle();
-        // Only the 'A' widget should be checked.
-        expect(findState(const ObjectKey('A')).checked, true);
-        expect(findState(const ObjectKey('B')).checked, false);
-        expect(findState(const ObjectKey('C')).checked, false);
-
-        // Rebuild with distinct key objects.
-        await tester.pumpWidget(MaterialApp(
-          home: ReorderableListView(
-            children: <Widget>[
-              // Deliberately avoid the const constructor below to ensure keys are
-              // distinct objects.
-              _Stateful(key: ObjectKey('B')), // ignore:prefer_const_constructors
-              _Stateful(key: ObjectKey('C')), // ignore:prefer_const_constructors
-              _Stateful(key: ObjectKey('A')), // ignore:prefer_const_constructors
-            ],
-            onReorder: (int oldIndex, int newIndex) { },
-            scrollDirection: Axis.horizontal,
-          ),
-        ));
-        // Only the 'A' widget should be checked.
-        expect(findState(const ObjectKey('B')).checked, false);
-        expect(findState(const ObjectKey('C')).checked, false);
-        expect(findState(const ObjectKey('A')).checked, true);
-      });
-
       group('Accessibility (a11y/Semantics)', () {
         Map<CustomSemanticsAction, VoidCallback> getSemanticsActions(int index) {
           final Semantics semantics = find.ancestor(
