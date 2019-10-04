@@ -22,12 +22,27 @@ class SemanticsDebugger extends StatefulWidget {
   /// Creates a widget that visualizes the semantics for the child.
   ///
   /// The [child] argument must not be null.
-  const SemanticsDebugger({ Key key, this.child }) : super(key: key);
+  ///
+  /// [labelStyle] dictates the [TextStyle] used for the semantics labels.
+  const SemanticsDebugger({
+    Key key,
+    @required this.child,
+    this.labelStyle = const TextStyle(
+      color: Color(0xFF000000),
+      fontSize: 10.0,
+      height: 0.8,
+    ),
+  }) : assert(child != null),
+       assert(labelStyle != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
   final Widget child;
+
+  /// The [TextStyle] to use when rendering semantics labels.
+  final TextStyle labelStyle;
 
   @override
   _SemanticsDebuggerState createState() => _SemanticsDebuggerState();
@@ -150,6 +165,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         _client.generation,
         _lastPointerDownLocation, // in physical pixels
         WidgetsBinding.instance.window.devicePixelRatio,
+        widget.labelStyle,
       ),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -195,12 +211,13 @@ class _SemanticsClient extends ChangeNotifier {
 }
 
 class _SemanticsDebuggerPainter extends CustomPainter {
-  const _SemanticsDebuggerPainter(this.owner, this.generation, this.pointerPosition, this.devicePixelRatio);
+  const _SemanticsDebuggerPainter(this.owner, this.generation, this.pointerPosition, this.devicePixelRatio, this.labelStyle);
 
   final PipelineOwner owner;
   final int generation;
   final Offset pointerPosition; // in physical pixels
   final double devicePixelRatio;
+  final TextStyle labelStyle;
 
   SemanticsNode get _rootSemanticsNode {
     return owner.semanticsOwner?.rootSemanticsNode;
@@ -306,11 +323,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     canvas.clipRect(rect);
     final TextPainter textPainter = TextPainter()
       ..text = TextSpan(
-        style: const TextStyle(
-          color: Color(0xFF000000),
-          fontSize: 10.0,
-          height: 0.8,
-        ),
+        style: labelStyle,
         text: message,
       )
       ..textDirection = TextDirection.ltr // _getMessage always returns LTR text, even if node.label is RTL
