@@ -508,20 +508,19 @@ class _SizeAwareCacheKey {
 }
 
 /// [CustomCacheSizeImage] instructs Flutter to decode the image at the specified
-/// dimensions instead of at native resolution.
+/// dimensions instead of at native size.
 ///
 /// This allows finer control of the size of the image in [ImageCache] and is
 /// generally used to reduce the memory footprint of [ImageCache].
 ///
-/// The decoded image may still be displayed at resolutions other than the
-/// cached resolution provided here.
+/// The decoded image may still be displayed at sizes other than the
+/// cached size provided here.
 class CustomCacheSizeImage extends ImageProvider<_SizeAwareCacheKey> {
   /// Creates an ImageProvider that decodes the image to the specified size.
   ///
   /// The cached image will be directly decoded and stored at the resolution
   /// defined by `width` and `height`. The image will lose detail and
-  /// use less memory if resized to a resolution smaller than the native
-  /// resolution.
+  /// use less memory if resized to a size smaller than the native size.
   const CustomCacheSizeImage(
     this.imageProvider, {
     this.width,
