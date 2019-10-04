@@ -6,10 +6,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
-import 'package:vm_service/vm_service.dart';
-import 'package:vm_service/vm_service_io.dart';
+import 'package:vm_service_client/vm_service_client.dart';
+
+import 'package:flutter_devicelab/framework/utils.dart';
 
 /// Runs a task in a separate Dart VM and collects the result using the VM
 /// service protocol.
@@ -44,16 +44,16 @@ Future<Map<String, dynamic>> runTask(
     runnerFinished = true;
   });
 
-  final Completer<Uri> uriCompleter = Completer<Uri>();
+  final Completer<Uri> uri = Completer<Uri>();
 
   final StreamSubscription<String> stdoutSub = runner.stdout
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
       .listen((String line) {
-    if (!uriCompleter.isCompleted) {
+    if (!uri.isCompleted) {
       final Uri serviceUri = parseServiceUri(line, prefix: 'Observatory listening on ');
       if (serviceUri != null)
-        uriCompleter.complete(serviceUri);
+        uri.complete(serviceUri);
     }
     if (!silent) {
       stdout.writeln('[$taskName] [STDOUT] $line');
@@ -68,12 +68,8 @@ Future<Map<String, dynamic>> runTask(
   });
 
   try {
-    final VmService client = await _connectToRunner(await uriCompleter.future);
-    final VM vm = await client.getVM();
-    final IsolateRef isolateRef = vm.isolates.single;
-    final Response response = await client.callServiceExtension(
-      'ext.cocoonRunTask', isolateId: isolateRef.id);
-    final Map<String, dynamic> taskResult = response.json;
+    final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future);
+    final Map<String, dynamic> taskResult = await isolate.invokeExtension('ext.cocoonRunTask');
     await runner.exitCode;
     return taskResult;
   } finally {
@@ -85,7 +81,7 @@ Future<Map<String, dynamic>> runTask(
   }
 }
 
-Future<VmService> _connectToRunner(Uri vmServiceUri) async {
+Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
   final List<String> pathSegments = <String>[
     // Add authentication code.
     if (vmServiceUri.pathSegments.isNotEmpty) vmServiceUri.pathSegments[0],
@@ -101,14 +97,13 @@ Future<VmService> _connectToRunner(Uri vmServiceUri) async {
       await (await WebSocket.connect(url)).close();
 
       // Look up the isolate.
-      final VmService client = await vmServiceConnectUri(url);
+      final VMServiceClient client = VMServiceClient.connect(url);
       final VM vm = await client.getVM();
-      final IsolateRef isolateRef = vm.isolates.single;
-      final Response response = await client.callServiceExtension(
-        'ext.cocoonRunnerReady', isolateId: isolateRef.id);
-      if (response.json['result'] != 'ready')
+      final VMIsolateRef isolate = vm.isolates.single;
+      final String response = await isolate.invokeExtension('ext.cocoonRunnerReady');
+      if (response != 'ready')
         throw 'not ready yet';
-      return client;
+      return isolate;
     } catch (error) {
       if (stopwatch.elapsed > const Duration(seconds: 10))
         print('VM service still not ready after ${stopwatch.elapsed}: $error\nContinuing to retry...');
