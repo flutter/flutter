@@ -6,23 +6,20 @@ import("//build/fuchsia/sdk.gni")
 import("$flutter_root/common/config.gni")
 
 if (using_fuchsia_sdk) {
-  testonly = true
-
   product_suffix = ""
 
   if (flutter_runtime_mode == "release") {
     product_suffix = "product_"
   }
 
+  flutter_runner_target = "flutter_jit_${product_suffix}runner"
   dart_runner_target = "dart_jit_${product_suffix}runner"
 
   group("fuchsia") {
     deps = [
       "dart:kernel_compiler",
       "dart_runner:$dart_runner_target",
-      "flutter:flutter_aot_${product_suffix}runner",
-      "flutter:flutter_jit_${product_suffix}runner",
-      "flutter:flutter_runner_tests",
+      "flutter:$flutter_runner_target",
     ]
   }
 }

@@ -9,7 +9,7 @@ import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/gpu/gpu.gni")
 import("$flutter_root/tools/fuchsia/common_libs.gni")
 import("$flutter_root/tools/fuchsia/dart.gni")
-import("$flutter_root/tools/fuchsia/fuchsia_archive.gni")
+import("$flutter_root/tools/fuchsia/package_dir.gni")
 import("engine_flutter_runner.gni")
 
 shell_gpu_configuration("fuchsia_gpu_configuration") {
@@ -89,7 +89,7 @@ template("jit_runner") {
     product_suffix = "_product"
   }
 
-  fuchsia_archive(target_name) {
+  package_dir(target_name) {
     snapshot_label = "kernel:kernel_core_snapshot${product_suffix}"
     snapshot_gen_dir = get_label_info(snapshot_label, "target_gen_dir")
 
@@ -174,7 +174,7 @@ template("aot_runner") {
     product_suffix = "_product"
   }
 
-  fuchsia_archive(target_name) {
+  package_dir(target_name) {
     deps = [
       ":aot${product_suffix}",
     ]
@@ -258,7 +258,7 @@ executable("flutter_runner_unittests") {
   ]
 }
 
-fuchsia_archive("flutter_runner_tests") {
+package_dir("flutter_runner_tests") {
   testonly = true
 
   deps = [
@@ -273,7 +273,7 @@ fuchsia_archive("flutter_runner_tests") {
 
   meta = [
     {
-      path = rebase_path("meta/$target_name.cmx")
+      path = "meta/$target_name.cmx"
       dest = "$target_name.cmx"
     },
   ]
