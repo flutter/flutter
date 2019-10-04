@@ -534,10 +534,11 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///
 /// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
-/// This sample shows a `DropdownButton` with a customized icon, text style,
-/// and underline and whose value is one of "One", "Two", "Free", or "Four".
+/// This sample shows a `DropdownButton` with a large arrow icon,
+/// purple text style, and bold purple underline, whose value is one of "One",
+/// "Two", "Free", or "Four".
 ///
-/// ![A screenshot of the dropdown button](https://flutter.github.io/assets-for-api-docs/assets/material/dropdown_button.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/dropdown_button.png)
 ///
 /// ```dart
 /// String dropdownValue = 'One';
@@ -708,6 +709,51 @@ class DropdownButton<T> extends StatefulWidget {
 
   /// The text style to use for text in the dropdown button and the dropdown
   /// menu that appears when you tap the button.
+  ///
+  /// To use a separate text style for selected item when it's displayed within
+  /// the dropdown button,, consider using [selectedItemBuilder].
+  ///
+  /// {@tool snippet --template=stateful_widget_scaffold}
+  ///
+  /// This sample shows a `DropdownButton` with a dropdown button text style
+  /// that is different than its menu items.
+  ///
+  /// ```dart
+  /// List<String> options = <String>['One', 'Two', 'Free', 'Four'];
+  /// String dropdownValue = 'One';
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Container(
+  ///     alignment: Alignment.center,
+  ///     color: Colors.blue,
+  ///     child: DropdownButton<String>(
+  ///       value: dropdownValue,
+  ///       onChanged: (String newValue) {
+  ///         setState(() {
+  ///           dropdownValue = newValue;
+  ///         });
+  ///       },
+  ///       style: TextStyle(color: Colors.blue),
+  ///       selectedItemBuilder: (BuildContext context) {
+  ///         return options.map((String value) {
+  ///           return Text(
+  ///             dropdownValue,
+  ///             style: TextStyle(color: Colors.white),
+  ///           );
+  ///         }).toList();
+  ///       },
+  ///       items: options.map<DropdownMenuItem<String>>((String value) {
+  ///         return DropdownMenuItem<String>(
+  ///           value: value,
+  ///           child: Text(value),
+  ///         );
+  ///       }).toList(),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   ///
   /// Defaults to the [TextTheme.subhead] value of the current
   /// [ThemeData.textTheme] of the current [Theme].
@@ -897,12 +943,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       items = widget.selectedItemBuilder == null
         ? List<Widget>.from(widget.items)
         : widget.selectedItemBuilder(context).map((Widget item) {
-          return Container(
-            height: _kMenuItemHeight,
-            alignment: AlignmentDirectional.centerStart,
-            child: item,
-          );
-        }).toList();
+            return Container(
+              height: _kMenuItemHeight,
+              alignment: AlignmentDirectional.centerStart,
+              child: item,
+            );
+          }).toList();
     } else {
       items = <Widget>[];
     }
@@ -951,9 +997,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            widget.isExpanded
-              ? Expanded(child: innerItemsWidget)
-              : innerItemsWidget,
+            if (widget.isExpanded)
+              Expanded(child: innerItemsWidget)
+            else
+              innerItemsWidget,
             IconTheme(
               data: IconThemeData(
                 color: _iconColor,
@@ -1064,7 +1111,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                ),
              ),
            );
-         }
+         },
        );
 
   /// {@macro flutter.material.dropdownButton.onChanged}

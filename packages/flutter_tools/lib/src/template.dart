@@ -101,6 +101,11 @@ class Template {
       if (relativeDestinationPath.contains('web') && !web) {
         return null;
       }
+      // Only build a macOS project if explicitly asked.
+      final bool macOS = context['macos'];
+      if (relativeDestinationPath.startsWith('macos.tmpl') && !macOS) {
+        return null;
+      }
       final String projectName = context['projectName'];
       final String androidIdentifier = context['androidIdentifier'];
       final String pluginClass = context['pluginClass'];

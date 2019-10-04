@@ -35,12 +35,10 @@ const String brokenCocoaPodsConsequence = '''
   This can usually be fixed by re-installing CocoaPods. For more info, see https://github.com/flutter/flutter/issues/14293.''';
 
 const String cocoaPodsInstallInstructions = '''
-  sudo gem install cocoapods
-  pod setup''';
+  sudo gem install cocoapods''';
 
 const String cocoaPodsUpgradeInstructions = '''
-  sudo gem install cocoapods
-  pod setup''';
+  sudo gem install cocoapods''';
 
 CocoaPods get cocoaPods => context.get<CocoaPods>();
 
@@ -105,12 +103,20 @@ class CocoaPods {
   /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are
   /// cloned.
   ///
+  /// Versions >= 1.8.0 do not require 'pod setup' and default to a CDN instead
+  /// of a locally cloned repository.
+  /// See http://blog.cocoapods.org/CocoaPods-1.8.0-beta/
+  ///
   /// A user can override the default location via the CP_REPOS_DIR environment
   /// variable.
   ///
   /// See https://github.com/CocoaPods/CocoaPods/blob/master/lib/cocoapods/config.rb#L138
   /// for details of this variable.
-  Future<bool> get isCocoaPodsInitialized {
+  Future<bool> get isCocoaPodsInitialized async {
+    final Version installedVersion = Version.parse(await cocoaPodsVersionText);
+    if (installedVersion != null && installedVersion >= Version.parse('1.8.0')) {
+      return true;
+    }
     final String cocoapodsReposDir = platform.environment['CP_REPOS_DIR'] ?? fs.path.join(homeDirPath, '.cocoapods', 'repos');
     return fs.isDirectory(fs.path.join(cocoapodsReposDir, 'master'));
   }

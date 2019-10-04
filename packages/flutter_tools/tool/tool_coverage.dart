@@ -39,7 +39,18 @@ Future<void> main(List<String> arguments) async {
       <Runtime>[Runtime.vm],
       () => vmPlatform,
     );
-    await test.main(<String>['-x', 'no_coverage', '--no-color', '-r', 'compact', '-j', '1', ...arguments]);
+    if (arguments.isEmpty) {
+      arguments = <String>[
+        path.join('test', 'general.shard'),
+        path.join('test', 'commands.shard', 'hermetic'),
+      ];
+    }
+    await test.main(<String>[
+      '--no-color',
+      '-r', 'compact',
+      '-j', '1',
+      ...arguments
+    ]);
     exit(exitCode);
   });
 }
@@ -75,22 +86,25 @@ class VMPlatform extends PlatformPlugin {
     }));
     final ServiceProtocolInfo info = await Service.controlWebServer(enable: true);
     final dynamic channel = IsolateChannel<Object>.connectReceive(receivePort)
-        .transformStream(StreamTransformer<Object, Object>.fromHandlers(handleDone: (EventSink<Object> sink) async {
-      try {
-        // this will throw if collection fails.
-        await coverageCollector.collectCoverageIsolate(info.serverUri);
-      } finally {
-        isolate.kill(priority: Isolate.immediate);
-        isolate = null;
-        sink.close();
-        completer.complete();
-      }
-    }, handleError: (dynamic error, StackTrace stackTrace, EventSink<Object> sink) {
-      isolate.kill(priority: Isolate.immediate);
-      isolate = null;
-      sink.close();
-      completer.complete();
-    }));
+      .transformStream(StreamTransformer<Object, Object>.fromHandlers(
+        handleDone: (EventSink<Object> sink) async {
+          try {
+            // this will throw if collection fails.
+            await coverageCollector.collectCoverageIsolate(info.serverUri);
+          } finally {
+            isolate.kill(priority: Isolate.immediate);
+            isolate = null;
+            sink.close();
+            completer.complete();
+          }
+        },
+        handleError: (dynamic error, StackTrace stackTrace, EventSink<Object> sink) {
+          isolate.kill(priority: Isolate.immediate);
+          isolate = null;
+          sink.close();
+          completer.complete();
+        },
+      ));
 
     VMEnvironment environment;
     final RunnerSuiteController controller = deserializeSuite(
@@ -138,8 +152,7 @@ class VMPlatform extends PlatformPlugin {
     final String result = await coverageCollector.finalizeCoverage(
       formatter: formatter,
     );
-    final String prefix = Platform.environment['SUBSHARD'] ?? '';
-    final String outputLcovPath = path.join('coverage', '$prefix.lcov.info');
+    final String outputLcovPath = path.join('coverage', 'lcov.info');
     File(outputLcovPath)
       ..createSync(recursive: true)
       ..writeAsStringSync(result);

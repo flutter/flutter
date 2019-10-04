@@ -2,19 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-void sendFakeKeyEvent(Map<String, dynamic> data) {
-  ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-    SystemChannels.keyEvent.name,
-    SystemChannels.keyEvent.codec.encodeMessage(data),
-    (ByteData data) {},
-  );
-}
 
 void main() {
   testWidgets('Can dispose without keyboard', (WidgetTester tester) async {
@@ -40,21 +30,15 @@ void main() {
     focusNode.requestFocus();
     await tester.idle();
 
-    sendFakeKeyEvent(<String, dynamic>{
-      'type': 'keydown',
-      'keymap': 'fuchsia',
-      'hidUsage': 0x04,
-      'codePoint': 0x64,
-      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
-    });
+    await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
     await tester.idle();
 
-    expect(events.length, 1);
+    expect(events.length, 2);
     expect(events[0].runtimeType, equals(RawKeyDownEvent));
     expect(events[0].data.runtimeType, equals(RawKeyEventDataFuchsia));
     final RawKeyEventDataFuchsia typedData = events[0].data;
-    expect(typedData.hidUsage, 0x04);
-    expect(typedData.codePoint, 0x64);
+    expect(typedData.hidUsage, 0x700e3);
+    expect(typedData.codePoint, 0x0);
     expect(typedData.modifiers, RawKeyEventDataFuchsia.modifierLeftMeta);
     expect(typedData.isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.left), isTrue);
 
@@ -78,27 +62,15 @@ void main() {
     focusNode.requestFocus();
     await tester.idle();
 
-    sendFakeKeyEvent(<String, dynamic>{
-      'type': 'keydown',
-      'keymap': 'fuchsia',
-      'hidUsage': 0x04,
-      'codePoint': 0x64,
-      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
-    });
+    await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
     await tester.idle();
 
-    expect(events.length, 1);
+    expect(events.length, 2);
     events.clear();
 
     await tester.pumpWidget(Container());
 
-    sendFakeKeyEvent(<String, dynamic>{
-      'type': 'keydown',
-      'keymap': 'fuchsia',
-      'hidUsage': 0x04,
-      'codePoint': 0x64,
-      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
-    });
+    await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
 
     await tester.idle();
 

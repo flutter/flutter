@@ -275,7 +275,7 @@ void showLicensePage({
       applicationVersion: applicationVersion,
       applicationIcon: applicationIcon,
       applicationLegalese: applicationLegalese,
-    )
+    ),
   ));
 }
 
@@ -580,7 +580,7 @@ class _LicensePageState extends State<LicensePage> {
                       child: Center(
                         child: CircularProgressIndicator(),
                       ),
-                    )
+                    ),
                 ],
               ),
             ),

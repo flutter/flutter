@@ -1037,7 +1037,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
                           Flexible(child: picker),
-                          actions
+                          actions,
                         ],
                       ),
                     ),

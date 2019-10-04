@@ -610,7 +610,7 @@ void main() {
               SemanticsFlag.isEnabled,
             ],
           ),
-        ]
+        ],
       ),
       ignoreId: true,
     ));

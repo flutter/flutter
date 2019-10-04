@@ -142,11 +142,11 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   List<File> _which(String execName, { bool all = false }) {
-    final List<String> command = <String>['which'];
-    if (all) {
-      command.add('-a');
-    }
-    command.add(execName);
+    final List<String> command = <String>[
+      'which',
+      if (all) '-a',
+      execName,
+    ];
     final ProcessResult result = processManager.runSync(command);
     if (result.exitCode != 0) {
       return const <File>[];

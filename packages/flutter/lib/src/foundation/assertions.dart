@@ -547,9 +547,9 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
             '(one line) summary description of the problem that was '
             'detected.'
           ),
+          DiagnosticsProperty<FlutterError>('Malformed', this, expandableValue: true, showSeparator: false, style: DiagnosticsTreeStyle.whitespace),
+          ErrorDescription('\nThe malformed error has ${summaries.length} summaries.'),
         ];
-        message.add(DiagnosticsProperty<FlutterError>('Malformed', this, expandableValue: true, showSeparator: false, style: DiagnosticsTreeStyle.whitespace));
-        message.add(ErrorDescription('\nThe malformed error has ${summaries.length} summaries.'));
         int i = 1;
         for (DiagnosticsNode summary in summaries) {
           message.add(DiagnosticsProperty<DiagnosticsNode>('Summary $i', summary, expandableValue : true));
@@ -644,7 +644,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           wrapWidth: wrapWidth,
           wrapWidthProperties: wrapWidth,
           maxDescendentsTruncatableNode: 5,
-        ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight()
+        ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight(),
       );
     } else {
       debugPrint('Another exception was thrown: ${details.summary}');

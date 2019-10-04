@@ -642,8 +642,11 @@ abstract class TextInputClient {
 ///  * [TextInput.attach]
 class TextInputConnection {
   TextInputConnection._(this._client)
-    : assert(_client != null),
-      _id = _nextId++;
+      : assert(_client != null),
+        _id = _nextId++;
+
+  Size _cachedSize;
+  Matrix4 _cachedTransform;
 
   static int _nextId = 1;
   final int _id;
@@ -678,14 +681,18 @@ class TextInputConnection {
   /// 2. [transform]: a matrix that maps the local paint coordinate system
   ///                 to the [PipelineOwner.rootNode].
   void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
-    SystemChannels.textInput.invokeMethod<void>(
-      'TextInput.setEditableSizeAndTransform',
-      <String, dynamic>{
-        'width': editableBoxSize.width,
-        'height': editableBoxSize.height,
-        'transform': transform.storage,
-      },
-    );
+    if (editableBoxSize != _cachedSize || transform != _cachedTransform) {
+      _cachedSize = editableBoxSize;
+      _cachedTransform = transform;
+      SystemChannels.textInput.invokeMethod<void>(
+        'TextInput.setEditableSizeAndTransform',
+        <String, dynamic>{
+          'width': editableBoxSize.width,
+          'height': editableBoxSize.height,
+          'transform': transform.storage,
+        },
+      );
+    }
   }
 
   /// Send text styling information.

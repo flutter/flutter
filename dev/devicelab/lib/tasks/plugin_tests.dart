@@ -105,7 +105,7 @@ class _FlutterProject {
           '--org',
           'io.flutter.devicelab',
           ...options,
-          name
+          name,
         ],
       );
     });

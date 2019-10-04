@@ -35,7 +35,7 @@ const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
 final List<String> kWindowsPrefixes = <String>[
   platform.environment['LOCALAPPDATA'],
   platform.environment['PROGRAMFILES'],
-  platform.environment['PROGRAMFILES(X86)']
+  platform.environment['PROGRAMFILES(X86)'],
 ];
 
 /// Find the chrome executable on the current platform.
@@ -70,6 +70,16 @@ class ChromeLauncher {
   const ChromeLauncher();
 
   static final Completer<Chrome> _currentCompleter = Completer<Chrome>();
+
+  /// Whether we can locate the chrome executable.
+  bool canFindChrome() {
+    final String chrome = findChromeExecutable();
+    try {
+      return processManager.canRun(chrome);
+    } on ArgumentError {
+      return false;
+    }
+  }
 
   /// Launch the chrome browser to a particular `host` page.
   ///

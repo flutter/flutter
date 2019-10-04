@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
@@ -47,11 +48,11 @@ class IOSDeploy {
       bundlePath,
       '--no-wifi',
       '--justlaunch',
+      if (launchArguments.isNotEmpty) ...<String>[
+        '--args',
+        '${launchArguments.join(" ")}',
+      ],
     ];
-    if (launchArguments.isNotEmpty) {
-      launchCommand.add('--args');
-      launchCommand.add('${launchArguments.join(" ")}');
-    }
 
     // Push /usr/bin to the front of PATH to pick up default system python, package 'six'.
     //
@@ -132,7 +133,7 @@ class IOSDevice extends Device {
     );
     _iproxyPath = artifacts.getArtifactPath(
       Artifact.iproxy,
-      platform: TargetPlatform.ios
+      platform: TargetPlatform.ios,
     );
   }
 
@@ -303,59 +304,29 @@ class IOSDevice extends Device {
     }
 
     // Step 3: Attempt to install the application on the device.
-    final List<String> launchArguments = <String>['--enable-dart-profiling'];
-
-    if (debuggingOptions.startPaused) {
-      launchArguments.add('--start-paused');
-    }
-
-    if (debuggingOptions.disableServiceAuthCodes) {
-      launchArguments.add('--disable-service-auth-codes');
-    }
-
-    if (debuggingOptions.dartFlags.isNotEmpty) {
-      final String dartFlags = debuggingOptions.dartFlags;
-      launchArguments.add('--dart-flags="$dartFlags"');
-    }
-
-    if (debuggingOptions.useTestFonts) {
-      launchArguments.add('--use-test-fonts');
-    }
-
-    // "--enable-checked-mode" and "--verify-entry-points" should always be
-    // passed when we launch debug build via "ios-deploy". However, we don't
-    // pass them if a certain environment variable is set to enable the
-    // "system_debug_ios" integration test in the CI, which simulates a
-    // home-screen launch.
-    if (debuggingOptions.debuggingEnabled &&
-        platform.environment['FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE'] != 'true') {
-      launchArguments.add('--enable-checked-mode');
-      launchArguments.add('--verify-entry-points');
-    }
-
-    if (debuggingOptions.enableSoftwareRendering) {
-      launchArguments.add('--enable-software-rendering');
-    }
-
-    if (debuggingOptions.skiaDeterministicRendering) {
-      launchArguments.add('--skia-deterministic-rendering');
-    }
-
-    if (debuggingOptions.traceSkia) {
-      launchArguments.add('--trace-skia');
-    }
-
-    if (debuggingOptions.dumpSkpOnShaderCompilation) {
-      launchArguments.add('--dump-skp-on-shader-compilation');
-    }
-
-    if (debuggingOptions.verboseSystemLogs) {
-      launchArguments.add('--verbose-logging');
-    }
-
-    if (platformArgs['trace-startup'] ?? false) {
-      launchArguments.add('--trace-startup');
-    }
+    final List<String> launchArguments = <String>[
+      '--enable-dart-profiling',
+      if (debuggingOptions.startPaused) '--start-paused',
+      if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
+      if (debuggingOptions.dartFlags.isNotEmpty) '--dart-flags="${debuggingOptions.dartFlags}"',
+      if (debuggingOptions.useTestFonts) '--use-test-fonts',
+      // "--enable-checked-mode" and "--verify-entry-points" should always be
+      // passed when we launch debug build via "ios-deploy". However, we don't
+      // pass them if a certain environment variable is set to enable the
+      // "system_debug_ios" integration test in the CI, which simulates a
+      // home-screen launch.
+      if (debuggingOptions.debuggingEnabled &&
+          platform.environment['FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE'] != 'true') ...<String>[
+        '--enable-checked-mode',
+        '--verify-entry-points',
+      ],
+      if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
+      if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
+      if (debuggingOptions.traceSkia) '--trace-skia',
+      if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
+      if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
+      if (platformArgs['trace-startup'] ?? false) '--trace-startup',
+    ];
 
     final Status installStatus = logger.startProgress(
         'Installing and launching...',
@@ -375,7 +346,6 @@ class IOSDevice extends Device {
           ipv6: ipv6,
         );
       }
-
       final int installationResult = await IOSDeploy.instance.runApp(
         deviceId: id,
         bundlePath: bundle.path,
@@ -393,16 +363,40 @@ class IOSDevice extends Device {
         return LaunchResult.succeeded();
       }
 
+      Uri localUri;
       try {
         printTrace('Application launched on the device. Waiting for observatory port.');
-        final Uri localUri = await observatoryDiscovery.uri;
-        return LaunchResult.succeeded(observatoryUri: localUri);
+        localUri = await MDnsObservatoryDiscovery.instance.getObservatoryUri(
+          package.id,
+          this,
+          ipv6,
+          debuggingOptions.observatoryPort,
+        );
+        if (localUri != null) {
+          UsageEvent('ios-mdns', 'success').send();
+          return LaunchResult.succeeded(observatoryUri: localUri);
+        }
       } catch (error) {
-        printError('Failed to establish a debug connection with $id: $error');
-        return LaunchResult.failed();
+        printError('Failed to establish a debug connection with $id using mdns: $error');
+      }
+
+      // Fallback to manual protocol discovery.
+      UsageEvent('ios-mdns', 'failure').send();
+      printTrace('mDNS lookup failed, attempting fallback to reading device log.');
+      try {
+        printTrace('Waiting for observatory port.');
+        localUri = await observatoryDiscovery.uri;
+        if (localUri != null) {
+          UsageEvent('ios-mdns', 'fallback-success').send();
+          return LaunchResult.succeeded(observatoryUri: localUri);
+        }
+      } catch (error) {
+        printError('Failed to establish a debug connection with $id using logs: $error');
       } finally {
         await observatoryDiscovery?.cancel();
       }
+      UsageEvent('ios-mdns', 'fallback-failure').send();
+      return LaunchResult.failed();
     } finally {
       installStatus.stop();
     }
