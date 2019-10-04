@@ -291,6 +291,7 @@ class SemanticsFlag {
   static const int _kIsMultilineIndex = 1 << 19;
   static const int _kIsReadOnlyIndex = 1 << 20;
   static const int _kIsFocusableIndex = 1 << 21;
+  static const int _kIsLinkIndex = 1 << 22;
 
   const SemanticsFlag._(this.index);
 
@@ -333,7 +334,7 @@ class SemanticsFlag {
 
   /// Whether the semantic node represents a button.
   ///
-  /// Platforms has special handling for buttons, for example Android's TalkBack
+  /// Platforms have special handling for buttons, for example Android's TalkBack
   /// and iOS's VoiceOver provides an additional hint when the focused object is
   /// a button.
   static const SemanticsFlag isButton = SemanticsFlag._(_kIsButtonIndex);
@@ -348,6 +349,13 @@ class SemanticsFlag {
   ///
   /// Only applicable when [isTextField] is true.
   static const SemanticsFlag isReadOnly = SemanticsFlag._(_kIsReadOnlyIndex);
+
+  /// Whether the semantic node is an interactive link.
+  ///
+  /// Platforms have special handling for links, for example iOS's VoiceOver
+  /// provides an additional hint when the focused object is a link, as well as
+  /// the ability to parse the links through another navigation menu.
+  static const SemanticsFlag isLink = SemanticsFlag._(_kIsLinkIndex);
 
   /// Whether the semantic node is able to hold the user's focus.
   ///
@@ -528,6 +536,7 @@ class SemanticsFlag {
     _kHasImplicitScrollingIndex: hasImplicitScrolling,
     _kIsMultilineIndex: isMultiline,
     _kIsReadOnlyIndex: isReadOnly,
+    _kIsLinkIndex: isLink,
   };
 
   @override
@@ -575,6 +584,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.isMultiline';
       case _kIsReadOnlyIndex:
         return 'SemanticsFlag.isReadOnly';
+      case _kIsLinkIndex:
+        return 'SemanticsFlag.isLink';
     }
     return null;
   }

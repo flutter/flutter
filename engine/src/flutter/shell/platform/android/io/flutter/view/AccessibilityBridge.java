@@ -591,7 +591,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             }
         }
 
-        if (semanticsNode.hasFlag(Flag.IS_BUTTON)) {
+        if (semanticsNode.hasFlag(Flag.IS_BUTTON) || semanticsNode.hasFlag(Flag.IS_LINK)) {
             result.setClassName("android.widget.Button");
         }
         if (semanticsNode.hasFlag(Flag.IS_IMAGE)) {
@@ -1648,7 +1648,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         // The Dart API defines the following flag but it isn't used in Android.
         // IS_MULTILINE(1 << 19);
         IS_READ_ONLY(1 << 20),
-        IS_FOCUSABLE(1 << 21);
+        IS_FOCUSABLE(1 << 21),
+        IS_LINK(1 << 22);
 
         final int value;
 
