@@ -1,13 +1,13 @@
 {
-    "program": {
-        "data": "data/hello_dart_jit_product"
-    },
-    "sandbox": {
-        "features": [
-            "deprecated-ambient-replace-as-executable"
-        ],
-        "services": [
-            "fuchsia.sys.Environment"
-        ]
-    }
+  "program": {
+    "data": "data/hello_dart_jit_product"
+  },
+  "sandbox": {
+    "features": [
+      "deprecated-ambient-replace-as-executable"
+    ],
+    "services": [
+      "fuchsia.sys.Environment"
+    ]
+  }
 }

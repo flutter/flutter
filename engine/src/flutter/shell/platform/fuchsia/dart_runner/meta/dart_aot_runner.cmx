@@ -1,20 +1,20 @@
 {
-    "program": {
-        "data": "data"
-    },
-    "sandbox": {
-        "features": [
-            "deprecated-ambient-replace-as-executable",
-            "root-ssl-certificates"
-        ],
-        "services": [
-            "fuchsia.feedback.CrashReporter",
-            "fuchsia.logger.LogSink",
-            "fuchsia.net.NameLookup",
-            "fuchsia.netstack.Netstack",
-            "fuchsia.posix.socket.Provider",
-            "fuchsia.timezone.Timezone",
-            "fuchsia.tracing.provider.Registry"
-        ]
-    }
+  "program": {
+    "data": "data"
+  },
+  "sandbox": {
+    "features": [
+      "deprecated-ambient-replace-as-executable",
+      "root-ssl-certificates"
+    ],
+    "services": [
+      "fuchsia.feedback.CrashReporter",
+      "fuchsia.logger.LogSink",
+      "fuchsia.net.NameLookup",
+      "fuchsia.netstack.Netstack",
+      "fuchsia.posix.socket.Provider",
+      "fuchsia.timezone.Timezone",
+      "fuchsia.tracing.provider.Registry"
+    ]
+  }
 }

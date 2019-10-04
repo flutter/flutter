@@ -1,14 +1,14 @@
 {
-    "program": {
-        "data": "data/dart_zircon_test"
-    },
-    "sandbox": {
-        "features": [
-            "deprecated-ambient-replace-as-executable",
-            "root-ssl-certificates"
-        ],
-        "services": [
-            "fuchsia.sys.Environment"
-        ]
-    }
+  "program": {
+    "data": "data/dart_zircon_test"
+  },
+  "sandbox": {
+    "features": [
+      "deprecated-ambient-replace-as-executable",
+      "root-ssl-certificates"
+    ],
+    "services": [
+      "fuchsia.sys.Environment"
+    ]
+  }
 }
