@@ -81,17 +81,18 @@ if (is_fuchsia_host || is_fuchsia) {
     inputs = frontend_server_files
 
     outputs = [
-      "$root_build_dir/dist/packages/frontend_server/pubspec.yaml",
-      "$root_build_dir/dist/packages/vm/pubspec.yaml",
-      "$root_build_dir/dist/packages/build_integration/pubspec.yaml",
-
-      "$root_build_dir/dist/packages/front_end/pubspec.yaml",
-      "$root_build_dir/dist/packages/kernel/pubspec.yaml",
+      "$root_gen_dir/dart-pkg/frontend_server/pubspec.yaml",
+      "$root_gen_dir/dart-pkg/vm/pubspec.yaml",
+      "$root_gen_dir/dart-pkg/build_integration/pubspec.yaml",
+      "$root_gen_dir/dart-pkg/front_end/pubspec.yaml",
+      "$root_gen_dir/dart-pkg/kernel/pubspec.yaml",
+      "$root_gen_dir/dart-pkg/dev_compiler/pubspec.yaml",
     ]
 
     args = [
       "--input-root=" + rebase_path("//third_party/dart/pkg"),
       "--output-root=" + rebase_path("$root_gen_dir/dart-pkg"),
+      "--frontend-server=" + rebase_path("$flutter_root"),
     ]
   }
 }

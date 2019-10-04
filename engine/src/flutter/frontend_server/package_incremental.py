@@ -10,7 +10,12 @@ import sys
 
 # The list of packages copied from the Dart SDK.
 PACKAGES = [
-  "vm", "build_integration", "kernel", "front_end", "frontend_server",
+  "vm",
+  "build_integration",
+  "kernel",
+  "front_end",
+  "dev_compiler",
+  "frontend_server",
 ]
 
 VM_PUBSPEC = r'''name: vm
@@ -19,6 +24,7 @@ environment:
   sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
+  dev_compiler: any
   front_end: any
   kernel: any
   meta: any
@@ -66,22 +72,40 @@ dependencies:
   meta: any
 '''
 
+DEV_COMPILER_PUBSPEC = r'''name: dev_compiler
+version: 0.0.1
+environment:
+  sdk: '>=2.2.2 <3.0.0'
+dependencies:
+  analyzer: any
+  bazel_worker: any
+  build_integration: any
+  cli_util: any
+  source_maps: any
+'''
+
 PUBSPECS = {
   'vm': VM_PUBSPEC,
   'build_integration': BUILD_INTEGRATION_PUBSPEC,
   'frontend_server': FRONTEND_SERVER_PUBSPEC,
   'kernel': KERNEL_PUBSPEC,
   'front_end': FRONT_END_PUBSPEC,
+  'dev_compiler': DEV_COMPILER_PUBSPEC,
 }
 
 def main():
   parser = argparse.ArgumentParser()
+  parser.add_argument('--frontend-server', type=str, dest='frontend', action='store')
   parser.add_argument('--input-root', type=str, dest='input', action='store')
   parser.add_argument('--output-root', type=str, dest='output', action='store')
 
   args = parser.parse_args()
   for package in PACKAGES:
-    package_root = os.path.join(args.input, package)
+    base = args.input
+    # Handle different path for frontend_server
+    if package == 'frontend_server':
+      base = args.frontend
+    package_root = os.path.join(base, package)
     for root, directories, files in os.walk(package_root):
       # We only care about actual source files, not generated code or tests.
       for skip_dir in ['.git', 'gen', 'test']:
@@ -101,10 +125,10 @@ def main():
             os.makedirs(parent_path)
           shutil.copyfile(os.path.join(root, filename), destination_file)
 
-          # Write the overriden pubspec for each package.
-          pubspec_file = os.path.join(args.output, package, 'pubspec.yaml')
-          with open(pubspec_file, 'w+') as output_file:
-            output_file.write(PUBSPECS[package])
+    # Write the overriden pubspec for each package.
+    pubspec_file = os.path.join(args.output, package, 'pubspec.yaml')
+    with open(pubspec_file, 'w+') as output_file:
+      output_file.write(PUBSPECS[package])
 
 if __name__ == '__main__':
   sys.exit(main())
