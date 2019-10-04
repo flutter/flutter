@@ -200,6 +200,7 @@ void main() {
             TestSemantics(
               label: 'Clickable',
               actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
               textDirection: TextDirection.ltr,
             ),
           ],
@@ -238,9 +239,8 @@ void main() {
             TestSemantics(
               label: 'world',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
               label: ' this is a cat-astrophe',
@@ -284,6 +284,7 @@ void main() {
               label: 'world',
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
           ],
         ),
@@ -321,9 +322,8 @@ void main() {
             TestSemantics(
               label: 'world',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
               label: ' this is a regrettable event',
@@ -372,9 +372,8 @@ void main() {
               rect: const Rect.fromLTRB(150.0, -4.0, 200.0, 18.0),
               label: 'RIS',
               textDirection: TextDirection.rtl,  // in the last string we switched to RTL using RLE.
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
               rect: const Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
@@ -426,12 +425,8 @@ void main() {
             TestSemantics(
               label: 'click me',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isLink,
-              ]
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink]
             ),
           ],
         ),
@@ -486,9 +481,8 @@ void main() {
             TestSemantics(
               label: 'pebble',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
             ),
             TestSemantics(
               label: ' in the ',
@@ -553,9 +547,8 @@ void main() {
             TestSemantics(
               label: 'pebble',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              flags: <SemanticsFlag>[SemanticsFlag.isLink],
               rect: const Rect.fromLTRB(52.0, 48.0, 228.0, 84.0),
             ),
             TestSemantics(
