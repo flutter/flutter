@@ -629,8 +629,14 @@ void verifyOutputDirectories(List<File> outputs, Environment environment, Target
 
 /// A node in the build graph.
 class Node {
-  Node(this.target, this.inputs, this.outputs, this.dependencies,
-      Environment environment, this.missingDepfile) {
+  Node(
+    this.target,
+    this.inputs,
+    this.outputs,
+    this.dependencies,
+    Environment environment,
+    this.missingDepfile,
+  ) {
     final File stamp = target._findStampFile(environment);
 
     // If the stamp file doesn't exist, we haven't run this step before and
