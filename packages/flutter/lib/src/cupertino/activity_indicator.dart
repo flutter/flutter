@@ -105,11 +105,11 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     double radius,
   }) : tickFundamentalRRect = RRect.fromLTRBXY(
          -radius,
-         1.0 * radius / _kDefaultIndicatorRadius,
+         radius / _kDefaultIndicatorRadius,
          -radius / 2.0,
-         -1.0 * radius / _kDefaultIndicatorRadius,
-         1.0,
-         1.0,
+         -radius / _kDefaultIndicatorRadius,
+         radius / _kDefaultIndicatorRadius,
+         radius / _kDefaultIndicatorRadius,
        ),
        super(repaint: position);
 

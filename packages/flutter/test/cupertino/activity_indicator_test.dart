@@ -45,6 +45,18 @@ void main() {
 
     expect(find.byType(CupertinoActivityIndicator), paints..rrect(color: const Color(0x99EBEBF5)));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/41345.
+  testWidgets('has the correct corner radius', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoActivityIndicator(animating: false, radius: 100),
+    );
+
+    expect(
+      find.byType(CupertinoActivityIndicator),
+      paints..rrect(rrect: const RRect.fromLTRBXY(-100, 10, -50, -10, 10, 10)),
+    );
+  });
 }
 
 Widget buildCupertinoActivityIndicator([ bool animating ]) {
