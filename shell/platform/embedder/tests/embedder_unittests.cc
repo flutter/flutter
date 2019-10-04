@@ -50,7 +50,8 @@ TEST_F(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
   engine.reset();
 }
 
-TEST_F(EmbedderTest, CanLaunchAndShutdownMultipleTimes) {
+// TODO(41999): Disabled because flaky.
+TEST_F(EmbedderTest, DISABLED_CanLaunchAndShutdownMultipleTimes) {
   EmbedderConfigBuilder builder(GetEmbedderContext());
   builder.SetSoftwareRendererConfig();
   for (size_t i = 0; i < 3; ++i) {
