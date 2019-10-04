@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -119,7 +120,7 @@ void main() {
     group('AndroidSdk', () {
       testUsingContext('validateSdkWellFormed() not called, sdk reinitialized', () async {
         final Directory gradleCacheDir = memoryFileSystem.directory('/flutter_root/bin/cache/artifacts/gradle_wrapper')..createSync(recursive: true);
-        gradleCacheDir.childFile('gradlew').createSync();
+        gradleCacheDir.childFile(platform.isWindows ? 'gradlew.bat' : 'gradlew').createSync();
 
         tempDir.childFile('pubspec.yaml')
             ..createSync(recursive: true)

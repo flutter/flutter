@@ -138,7 +138,7 @@ void main() {
 
       testUsingContext('validateSdkWellFormed() not called, sdk reinitialized', () async {
         final Directory gradleCacheDir = memoryFileSystem.directory('/flutter_root/bin/cache/artifacts/gradle_wrapper')..createSync(recursive: true);
-        gradleCacheDir.childFile('gradlew').createSync();
+        gradleCacheDir.childFile(platform.isWindows ? 'gradlew.bat' : 'gradlew').createSync();
 
         tempDir.childFile('pubspec.yaml')
             ..createSync(recursive: true)
