@@ -306,7 +306,7 @@ void main() {
     expect(rawImageSize, const Size(1, 1));
 
     const Size resizeDims = Size(14, 7);
-    final CustomCacheSizeImage resizedImage = CustomCacheSizeImage(MemoryImage(bytes), resizeDims.width.round(), resizeDims.height.round());
+    final CustomCacheSizeImage resizedImage = CustomCacheSizeImage(MemoryImage(bytes), width: resizeDims.width.round(), height: resizeDims.height.round());
     const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
     final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
     expect(resizedImageSize, resizeDims);

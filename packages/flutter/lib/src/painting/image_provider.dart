@@ -523,10 +523,10 @@ class CustomCacheSizeImage extends ImageProvider<_SizeAwareCacheKey> {
   /// use less memory if resized to a resolution smaller than the native
   /// resolution.
   const CustomCacheSizeImage(
-    this.imageProvider,
+    this.imageProvider, {
     this.width,
-    this.height
-  ) : assert (width != null || height != null);
+    this.height,
+  }) : assert(width != null || height != null);
 
   /// The [ImageProvider] that this class wraps.
   final ImageProvider imageProvider;
