@@ -13,7 +13,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
-            title: const Text('RenderFlex OverFlow 2'),
+            title: const Text('RenderFlex OverFlow'),
           ),
           body: Container(
             width: 400.0,

@@ -2798,15 +2798,15 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
     ];
   }
   final List<DiagnosticsNode> nodes = <DiagnosticsNode>[];
-  bool processElement(Element currentElement) {
+  bool processElement(Element target) {
     // TODO(chunhtai): should print out all the widgets that are about to cross
     // package boundaries.
-    if (_isLocalCreationLocation(currentElement)) {
+    if (_isLocalCreationLocation(target)) {
       nodes.add(
         DiagnosticsBlock(
-          name: 'User-created ancestor of the error-causing widget was',
+          name: 'The relevant error-causing widget was',
           children: <DiagnosticsNode>[
-            ErrorDescription('${currentElement.widget.toStringShort()} ${_describeCreationLocation(currentElement)}'),
+            ErrorDescription('${target.widget.toStringShort()} ${_describeCreationLocation(target)}'),
           ],
         ),
       );
