@@ -97,8 +97,14 @@ template("compiled_action") {
     }
     outputs = invoker.outputs
 
+    if (defined(invoker.toolchain)) {
+      toolchain = invoker.toolchain
+    } else {
+      toolchain = host_toolchain
+    }
+
     # Constuct the host toolchain version of the tool.
-    host_tool = invoker.tool + "($host_toolchain)"
+    host_tool = invoker.tool + "($toolchain)"
 
     # Get the path to the executable. Currently, this assumes that the tool
     # does not specify output_name so that the target name is the name to use.
