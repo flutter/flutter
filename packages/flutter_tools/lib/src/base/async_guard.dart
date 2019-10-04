@@ -79,9 +79,10 @@ import 'dart:async';
 /// [onError] must have type `FutureOr<T> Function(Object error)` or
 /// `FutureOr<T> Function(Object error, StackTrace stackTrace)` otherwise an
 /// [ArgumentError] will be thrown synchronously.
-Future<T> asyncGuard<T>(Future<T> Function() fn, {
-    Function onError,
-  }) {
+Future<T> asyncGuard<T>(
+  Future<T> Function() fn, {
+  Function onError,
+}) {
   if (onError != null &&
       onError is! _UnaryOnError<T> &&
       onError is! _BinaryOnError<T>) {

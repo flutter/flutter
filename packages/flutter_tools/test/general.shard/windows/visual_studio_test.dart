@@ -67,10 +67,11 @@ void main() {
   // Sets up the mock environment so that searching for Visual Studio with
   // exactly the given required components will provide a result. By default it
   // return a preset installation, but the response can be overridden.
-  void setMockVswhereResponse(
-      [List<String> requiredComponents,
-      List<String> additionalArguments,
-      Map<String, dynamic> response]) {
+  void setMockVswhereResponse([
+    List<String> requiredComponents,
+    List<String> additionalArguments,
+    Map<String, dynamic> response,
+  ]) {
     fs.file(vswherePath).createSync(recursive: true);
     fs.file(vcvarsPath).createSync(recursive: true);
 

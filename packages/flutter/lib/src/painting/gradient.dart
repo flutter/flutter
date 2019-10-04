@@ -37,11 +37,11 @@ Color _sample(List<Color> colors, List<double> stops, double t) {
 }
 
 _ColorsAndStops _interpolateColorsAndStops(
-    List<Color> aColors,
-    List<double> aStops,
-    List<Color> bColors,
-    List<double> bStops,
-    double t,
+  List<Color> aColors,
+  List<double> aStops,
+  List<Color> bColors,
+  List<double> bStops,
+  double t,
 ) {
   assert(aColors.length >= 2);
   assert(bColors.length >= 2);

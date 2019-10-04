@@ -180,8 +180,7 @@ class MockFuchsiaPM extends Mock implements FuchsiaPM {
   }
 
   @override
-  Future<bool> build(
-      String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> build(String buildPath, String keyPath, String manifestPath) async {
     if (!fs.file(fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
         !fs.file(keyPath).existsSync() ||
         !fs.file(manifestPath).existsSync()) {
@@ -192,8 +191,7 @@ class MockFuchsiaPM extends Mock implements FuchsiaPM {
   }
 
   @override
-  Future<bool> archive(
-      String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> archive(String buildPath, String keyPath, String manifestPath) async {
     if (!fs.file(fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
         !fs.file(keyPath).existsSync() ||
         !fs.file(manifestPath).existsSync()) {

@@ -104,30 +104,55 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   }
 
   @override
-  ClipRectLayer pushClipRect(bool needsCompositing, Offset offset, Rect clipRect,
-      PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge, ClipRectLayer oldLayer }) {
+  ClipRectLayer pushClipRect(
+    bool needsCompositing,
+    Offset offset,
+    Rect clipRect,
+    PaintingContextCallback painter, {
+    Clip clipBehavior = Clip.hardEdge,
+    ClipRectLayer oldLayer,
+  }) {
     clipRectAndPaint(clipRect.shift(offset), clipBehavior, clipRect.shift(offset), () => painter(this, offset));
     return null;
   }
 
   @override
-  ClipRRectLayer pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect,
-      PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipRRectLayer oldLayer }) {
+  ClipRRectLayer pushClipRRect(
+    bool needsCompositing,
+    Offset offset,
+    Rect bounds,
+    RRect clipRRect,
+    PaintingContextCallback painter, {
+    Clip clipBehavior = Clip.antiAlias,
+    ClipRRectLayer oldLayer,
+  }) {
     assert(clipBehavior != null);
     clipRRectAndPaint(clipRRect.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
     return null;
   }
 
   @override
-  ClipPathLayer pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath,
-      PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipPathLayer oldLayer }) {
+  ClipPathLayer pushClipPath(
+    bool needsCompositing,
+    Offset offset,
+    Rect bounds,
+    Path clipPath,
+    PaintingContextCallback painter, {
+    Clip clipBehavior = Clip.antiAlias,
+    ClipPathLayer oldLayer,
+  }) {
     clipPathAndPaint(clipPath.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
     return null;
   }
 
   @override
-  TransformLayer pushTransform(bool needsCompositing, Offset offset, Matrix4 transform,
-      PaintingContextCallback painter, { TransformLayer oldLayer }) {
+  TransformLayer pushTransform(
+    bool needsCompositing,
+    Offset offset,
+    Matrix4 transform,
+    PaintingContextCallback painter, {
+    TransformLayer oldLayer,
+  }) {
     canvas.save();
     canvas.transform(transform.storage);
     painter(this, offset);

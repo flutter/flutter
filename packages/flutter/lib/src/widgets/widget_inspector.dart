@@ -1625,17 +1625,17 @@ mixin WidgetInspectorService {
   ///  * [getChildrenDetailsSubtree], a method to get children of a node
   ///    in the details subtree.
   String getDetailsSubtree(
-      String id,
-      String groupName, {
-      int subtreeDepth = 2,
-    }) {
+    String id,
+    String groupName, {
+    int subtreeDepth = 2,
+  }) {
     return _safeJsonEncode(_getDetailsSubtree( id, groupName, subtreeDepth));
   }
 
   Map<String, Object> _getDetailsSubtree(
-      String id,
-      String groupName,
-      int subtreeDepth,
+    String id,
+    String groupName,
+    int subtreeDepth,
   ) {
     final DiagnosticsNode root = toObject(id);
     if (root == null) {
