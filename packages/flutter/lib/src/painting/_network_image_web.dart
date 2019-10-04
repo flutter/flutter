@@ -35,8 +35,16 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
   @override
   ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
+    // This uses a unique web call that should replace the typical `instantiateImageCodec` call.
+    image_provider.DecoderCallback decoderCallback = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+      final Uri resolved = Uri.base.resolve(key.url);
+      // This API only exists in the web engine implementation and is not
+      // contained in the analyzer summary for Flutter.
+      // TODO: Web engine does not yet support sizable image caches.
+      return ui.webOnlyInstantiateImageCodecFromUrl(resolved);
+    }
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decode),
+      codec: _loadAsync(key, decoderCallback),
       scale: key.scale,
       informationCollector: () {
         return <DiagnosticsNode>[
@@ -47,14 +55,9 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     );
   }
 
-  // TODO(garyq): Handle DecoderCallback on web.
   Future<ui.Codec> _loadAsync(NetworkImage key, image_provider.DecoderCallback decode) async {
     assert(key == this);
-
-    final Uri resolved = Uri.base.resolve(key.url);
-    // This API only exists in the web engine implementation and is not
-    // contained in the analyzer summary for Flutter.
-    return ui.webOnlyInstantiateImageCodecFromUrl(resolved); // ignore: undefined_function
+    return decode(resolved); // ignore: undefined_function
   }
 
   @override

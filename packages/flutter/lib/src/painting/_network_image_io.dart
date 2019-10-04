@@ -75,7 +75,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
     StreamController<ImageChunkEvent> chunkEvents,
-    image_provider.DecoderCallback decode) async {
+    image_provider.DecoderCallback decode,
+  ) async {
     try {
       assert(key == this);
 
