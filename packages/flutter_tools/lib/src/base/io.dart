@@ -26,7 +26,8 @@
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
-import 'dart:io' as io show exit, IOSink, Process, ProcessInfo, ProcessSignal, stderr, stdin, Stdout, stdout;
+import 'dart:io' as io show exit, IOSink, Process, ProcessInfo, ProcessSignal,
+    stderr, stdin, Stdout, stdout;
 
 import 'package:meta/meta.dart';
 
@@ -38,10 +39,10 @@ export 'dart:io'
     show
         BytesBuilder,
         CompressionOptions,
-        // Directory         NO! Use `file_system.dart`
+        // Directory,         NO! Use `file_system.dart`
         exitCode,
-        // File              NO! Use `file_system.dart`
-        // FileSystemEntity  NO! Use `file_system.dart`
+        // File,              NO! Use `file_system.dart`
+        // FileSystemEntity,  NO! Use `file_system.dart`
         gzip,
         HandshakeException,
         HttpClient,

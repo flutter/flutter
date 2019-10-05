@@ -210,7 +210,7 @@ void main() {
             image: imageProvider,
           ),
         ),
-      )
+      ),
     );
 
     expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
@@ -237,7 +237,7 @@ void main() {
             image: imageProvider,
           ),
         ),
-      )
+      ),
     );
 
     expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 10.0);
@@ -276,7 +276,7 @@ void main() {
             child: Container(width: 100.0),
           ),
         ],
-      )
+      ),
     );
 
     expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
@@ -306,7 +306,7 @@ void main() {
             ),
           ),
         ],
-      )
+      ),
     );
 
     expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 10.0);
@@ -597,7 +597,7 @@ void main() {
         image: TestImageProvider(),
         color: const Color(0xFF00FF00),
         colorBlendMode: BlendMode.clear,
-      )
+      ),
     );
     final RenderImage renderer = tester.renderObject<RenderImage>(find.byType(Image));
     expect(renderer.color, const Color(0xFF00FF00));
@@ -792,7 +792,7 @@ void main() {
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[SemanticsFlag.isImage],
         ),
-      ]
+      ],
     ), ignoreTransform: true));
     semantics.dispose();
   });

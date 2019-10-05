@@ -224,10 +224,11 @@ class AndroidDevice extends Device {
   }
 
   String runAdbCheckedSync(
-      List<String> params, {
-        String workingDirectory,
-        bool allowReentrantFlutter = false,
-        Map<String, String> environment}) {
+    List<String> params, {
+    String workingDirectory,
+    bool allowReentrantFlutter = false,
+    Map<String, String> environment,
+  }) {
     return processUtils.runSync(
       adbCommandForDevice(params),
       throwOnError: true,
@@ -239,10 +240,10 @@ class AndroidDevice extends Device {
   }
 
   Future<RunResult> runAdbCheckedAsync(
-      List<String> params, {
-        String workingDirectory,
-        bool allowReentrantFlutter = false,
-      }) async {
+    List<String> params, {
+    String workingDirectory,
+    bool allowReentrantFlutter = false,
+  }) async {
     return processUtils.run(
       adbCommandForDevice(params),
       throwOnError: true,

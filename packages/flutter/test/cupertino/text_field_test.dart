@@ -83,8 +83,8 @@ class PathBoundsMatcher extends Matcher {
 
 class PathPointsMatcher extends Matcher {
   const PathPointsMatcher({
-      this.includes = const <Offset>[],
-      this.excludes = const <Offset>[],
+    this.includes = const <Offset>[],
+    this.excludes = const <Offset>[],
   }) : super();
 
   final Iterable<Offset> includes;
@@ -1290,6 +1290,49 @@ void main() {
     expect(text.style.fontWeight, FontWeight.w400);
   });
 
+
+  testWidgets('text field toolbar options correctly changes options', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+              toolbarOptions: const ToolbarOptions(copy: true),
+            ),
+          ],
+        ),
+      ),
+    );
+
+      // Long press to put the cursor after the "w".
+      const int index = 3;
+      await tester.longPressAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: index),
+      );
+
+      // Double tap on the same location to select the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      // Selected text shows 'Copy'.
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Select All'), findsNothing);
+  });
   testWidgets('Read only text field', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'readonly');
 
@@ -2926,10 +2969,10 @@ void main() {
                 controller: TextEditingController(text: 'lorem'),
                 enabled: false,
               ),
-            )
+            ),
           ),
-        )
-      )
+        ),
+      ),
     );
 
     await expectLater(
@@ -3275,6 +3318,55 @@ void main() {
 
       tester.binding.window.physicalSizeTestValue = null;
       tester.binding.window.devicePixelRatioTestValue = null;
+    });
+
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/37046.
+    testWidgets('No exceptions when showing selection menu inside of nested Navigators', (WidgetTester tester) async {
+      const String testValue = '123456';
+      final TextEditingController controller = TextEditingController(
+        text: testValue,
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: 100,
+                    color: CupertinoColors.activeOrange,
+                  ),
+                  Expanded(
+                    child: Navigator(
+                      onGenerateRoute: (_) =>
+                        CupertinoPageRoute<void>(builder: (_) => Container(
+                          child: CupertinoTextField(
+                            controller: controller,
+                          ),
+                        )),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // No text selection toolbar.
+      expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
+
+      // Double tap on the text in the input.
+      await tester.pumpAndSettle();
+      await tester.tapAt(textOffsetToPosition(tester, testValue.length ~/ 2));
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tapAt(textOffsetToPosition(tester, testValue.length ~/ 2));
+      await tester.pumpAndSettle();
+
+      // Now the text selection toolbar is showing and there were no exceptions.
+      expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
+      expect(tester.takeException(), null);
     });
   });
 

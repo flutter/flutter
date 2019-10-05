@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -90,6 +91,7 @@ void testUsingContext(
           FileSystem: () => const LocalFileSystemBlockingSetCurrentDirectory(),
           TimeoutConfiguration: () => const TimeoutConfiguration(),
           PlistParser: () => FakePlistParser(),
+          Signals: () => FakeSignals(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -301,7 +303,7 @@ class FakeUsage implements Usage {
   void sendCommand(String command, { Map<String, String> parameters }) { }
 
   @override
-  void sendEvent(String category, String parameter, { Map<String, String> parameters }) { }
+  void sendEvent(String category, String parameter, { String label, Map<String, String> parameters }) { }
 
   @override
   void sendTiming(String category, String variableName, Duration duration, { String label }) { }
@@ -391,4 +393,19 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
           'Consider using a MemoryFileSystem for testing if possible or refactor '
           'code to not require setting fs.currentDirectory.';
   }
+}
+
+class FakeSignals implements Signals {
+  @override
+  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+    return null;
+  }
+
+  @override
+  Future<bool> removeHandler(ProcessSignal signal, Object token) async {
+    return true;
+  }
+
+  @override
+  Stream<Object> get errors => const Stream<Object>.empty();
 }

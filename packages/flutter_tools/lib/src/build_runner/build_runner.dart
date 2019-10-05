@@ -26,8 +26,8 @@ import '../globals.dart';
 import '../project.dart';
 
 /// The minimum version of build_runner we can support in the flutter tool.
-const String kMinimumBuildRunnerVersion = '1.6.5';
-const String kSupportedBuildDaemonVersion = '2.0.0';
+const String kMinimumBuildRunnerVersion = '1.7.1';
+const String kSupportedBuildDaemonVersion = '2.1.0';
 
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
