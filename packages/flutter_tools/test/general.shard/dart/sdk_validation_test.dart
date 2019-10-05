@@ -21,8 +21,7 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
-      tempDir =
-          fs.systemTempDirectory.createTempSync('sdk_validation_test').absolute;
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_sdk_validation_test.').absolute;
     });
 
     tearDownAll(() {
