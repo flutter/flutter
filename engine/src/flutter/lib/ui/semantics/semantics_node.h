@@ -73,7 +73,6 @@ enum class SemanticsFlags : int32_t {
   // kIsMultiline = 1 << 19,
   kIsReadOnly = 1 << 20,
   kIsFocusable = 1 << 21,
-  kIsLink = 1 << 22,
 };
 
 const int kScrollableSemanticsFlags =

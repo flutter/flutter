@@ -407,9 +407,6 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   if ([self node].HasFlag(flutter::SemanticsFlags::kIsLiveRegion)) {
     traits |= UIAccessibilityTraitUpdatesFrequently;
   }
-  if ([self node].HasFlag(flutter::SemanticsFlags::kIsLink)) {
-    traits |= UIAccessibilityTraitLink;
-  }
   return traits;
 }
 
