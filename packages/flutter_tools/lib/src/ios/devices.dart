@@ -140,6 +140,7 @@ class IOSDevice extends Device {
   String _installerPath;
   String _iproxyPath;
   Process _iproxyProcess;
+  Process _idevicesyslogProcess;
 
   final String _sdkVersion;
 
@@ -454,9 +455,11 @@ class IOSDevice extends Device {
   @override
   void killSubProcesses() {
     // We only unset `iproxyProcess` if we successfully killed it
-    final bool result = _iproxyProcess?.kill() ?? false;
-    if (result) {
+    if (_iproxyProcess?.kill() == true) {
       _iproxyProcess = null;
+    }
+    if (_idevicesyslogProcess?.kill() == true) {
+      _idevicesyslogProcess = null;
     }
   }
 }
@@ -548,7 +551,6 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   RegExp _anyLineRegex;
 
   StreamController<String> _linesController;
-  Process _process;
 
   @override
   Stream<String> get logLines => _linesController.stream;
@@ -558,14 +560,14 @@ class _IOSDeviceLogReader extends DeviceLogReader {
 
   void _start() {
     iMobileDevice.startLogger(device.id).then<void>((Process process) {
-      _process = process;
-      _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
-      _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
-      _process.exitCode.whenComplete(() {
+      process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
+      process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
+      process.exitCode.whenComplete(() {
         if (_linesController.hasListener) {
           _linesController.close();
         }
       });
+      device._idevicesyslogProcess = process;
     });
   }
 
@@ -601,7 +603,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   }
 
   void _stop() {
-    _process?.kill();
+    device._idevicesyslogProcess?.kill();
   }
 }
 
