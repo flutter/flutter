@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'icon_theme_data.dart';
 import 'text_theme.dart';
 
 export 'package:flutter/services.dart' show Brightness;
@@ -90,7 +91,7 @@ class CupertinoTheme extends StatelessWidget {
     return  _InheritedCupertinoTheme(
       theme: this,
       child: IconTheme(
-        data: IconThemeData(color: data.primaryColor),
+        data: CupertinoIconThemeData(color: data.primaryColor),
         child: child,
       ),
     );

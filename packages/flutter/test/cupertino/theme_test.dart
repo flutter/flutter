@@ -137,12 +137,20 @@ void main() {
   );
 
   testWidgets("Theme has default IconThemeData, which is derived from the theme's primary color", (WidgetTester tester) async {
-    const Color primaryColor = CupertinoColors.destructiveRed;
+    const CupertinoDynamicColor primaryColor = CupertinoColors.destructiveRed;
     const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
 
     final IconThemeData resultingIconTheme = await testIconTheme(tester, themeData);
 
     expect(resultingIconTheme.color, themeData.primaryColor);
+
+    // Works in dark mode if primaryColor is a CupertinoDynamicColor.
+    final Color darkColor = (await testIconTheme(
+      tester,
+      themeData.copyWith(brightness: Brightness.dark),
+    )).color;
+
+    expect(darkColor, isSameColorAs(primaryColor.darkColor));
   });
 
   testWidgets('IconTheme.of creates a dependency on iconTheme', (WidgetTester tester) async {
