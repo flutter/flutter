@@ -107,6 +107,7 @@ class SliverConstraints extends Constraints {
     @required this.viewportMainAxisExtent,
     @required this.remainingCacheExtent,
     @required this.cacheOrigin,
+    this.flexExtent,
   }) : assert(axisDirection != null),
        assert(growthDirection != null),
        assert(userScrollDirection != null),
@@ -135,6 +136,7 @@ class SliverConstraints extends Constraints {
     double viewportMainAxisExtent,
     double remainingCacheExtent,
     double cacheOrigin,
+    double flexExtent,
   }) {
     return SliverConstraints(
       axisDirection: axisDirection ?? this.axisDirection,
@@ -149,8 +151,11 @@ class SliverConstraints extends Constraints {
       viewportMainAxisExtent: viewportMainAxisExtent ?? this.viewportMainAxisExtent,
       remainingCacheExtent: remainingCacheExtent ?? this.remainingCacheExtent,
       cacheOrigin: cacheOrigin ?? this.cacheOrigin,
+      flexExtent: flexExtent ?? this.flexExtent,
     );
   }
+
+  final double flexExtent;
 
   /// The direction in which the [scrollOffset] and [remainingPaintExtent]
   /// increase.
@@ -1796,7 +1801,18 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
       geometry = SliverGeometry.zero;
       return;
     }
-    child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
+
+    print('flexExtent: ${constraints.flexExtent}');
+
+    if(constraints.flexExtent != null) {
+      print('expanding');
+      child.layout(constraints.asBoxConstraints(
+        minExtent: constraints.flexExtent,
+        maxExtent: constraints.flexExtent,
+      ));
+    } else {
+      child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
+    }
     double childExtent;
     switch (constraints.axis) {
       case Axis.horizontal:
