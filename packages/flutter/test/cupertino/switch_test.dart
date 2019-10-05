@@ -605,7 +605,7 @@ void main() {
     await expectLater(
       find.byKey(switchKey),
       matchesGoldenFile(
-        'switch.tap.off.dark.png',
+        'switch.tap.off.light.png',
         version: 0,
       ),
     );
