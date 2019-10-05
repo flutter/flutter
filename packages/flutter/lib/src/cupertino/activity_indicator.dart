@@ -10,13 +10,11 @@ import 'colors.dart';
 
 const double _kDefaultIndicatorRadius = 10.0;
 
-// Inspected on iOS 13.2 Beta.
+// Extracted from iOS 13.2 Beta.
 const Color _kActiveTickColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFF3C3C44),
   darkColor: Color(0xFFEBEBF5),
 );
-
-/// [147, 131, 114, 97, 81, 64, 47, 47, 47, 47, 47, 47, ]
 
 /// An iOS-style activity indicator that spins clockwise.
 ///
