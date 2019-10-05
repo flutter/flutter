@@ -24,11 +24,16 @@ import '../../src/context.dart';
 import '../../src/mocks.dart' as mocks;
 
 void main() {
+  print('1. MAIN');
   setUpAll(() {
+  print('2. setUpAll');
     Cache.flutterRoot = getFlutterRoot();
+  print('3. setUpAll');
   });
+  print('4. MAIN');
 
   testUsingContext('pub get 69', () async {
+  print('5. pub get 69');
     String error;
 
     final MockProcessManager processMock = context.get<ProcessManager>();
@@ -97,6 +102,7 @@ void main() {
   });
 
   testUsingContext('pub cache in root is used', () async {
+  print('6. pub cache in root is used');
     String error;
 
     final MockProcessManager processMock = context.get<ProcessManager>() as MockProcessManager;
@@ -124,6 +130,7 @@ void main() {
   });
 
   testUsingContext('pub cache in environment is used', () async {
+  print('7. pub cache in environment is used');
     String error;
 
     final MockProcessManager processMock = context.get<ProcessManager>();
@@ -152,6 +159,7 @@ void main() {
   });
 
   testUsingContext('analytics sent on success', () async {
+  print('8. analytics sent on success');
     MockDirectory.findCache = true;
     await pubGet(context: PubContext.flutterTests, checkLastModified: false);
     verify(flutterUsage.sendEvent('pub', 'flutter-tests', label: 'success')).called(1);
@@ -167,6 +175,7 @@ void main() {
   });
 
   testUsingContext('analytics sent on failure', () async {
+  print('9. analytics sent on failure');
     MockDirectory.findCache = true;
     try {
       await pubGet(context: PubContext.flutterTests, checkLastModified: false);
@@ -186,6 +195,7 @@ void main() {
   });
 
   testUsingContext('analytics sent on failed version solve', () async {
+  print('10. analytics sent on failed version solve');
     MockDirectory.findCache = true;
     try {
       await pubGet(context: PubContext.flutterTests, checkLastModified: false);
@@ -206,6 +216,7 @@ void main() {
     ),
     Usage: () => MockUsage(),
   });
+  print('11. MAIN END');
 }
 
 typedef StartCallback = void Function(List<dynamic> command);
