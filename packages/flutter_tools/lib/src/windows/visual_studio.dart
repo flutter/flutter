@@ -188,6 +188,7 @@ class VisualStudio {
     try {
       final List<String> defaultArguments = <String>[
         '-format', 'json',
+        '-products', '*',
         '-utf8',
         '-latest',
       ];
