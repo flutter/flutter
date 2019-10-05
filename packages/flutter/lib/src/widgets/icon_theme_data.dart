@@ -54,6 +54,25 @@ class IconThemeData extends Diagnosticable {
     );
   }
 
+  /// Called by [IconTheme.of] to convert this instance to an [IconThemeData]
+  /// that fits the given [BuildContext].
+  ///
+  /// This method gives the ambient [IconThemeData] a chance to update itself,
+  /// after retrieved by [IconTheme.of], and before being returned as the final
+  /// result. For instance, [CupertinoIconThemeData] overrides this method to
+  /// resolve [color], in case [color] is a [CupertinoDynamicColor] and needs to
+  /// be resolved against the given [BuildContext] before it can be used as a
+  /// regular [Color].
+  ///
+  /// The default implementation returns this [IconThemeData] as-is.
+  ///
+  /// See also:
+  ///
+  /// * [CupertinoIconThemeData.resolve] an implementation that resolves
+  ///   [CupertinoIconThemeData.color] before returning.
+  @protected
+  IconThemeData resolve(BuildContext context) => this;
+
   /// Whether all the properties of this object are non-null.
   bool get isConcrete => color != null && opacity != null && size != null;
 
