@@ -8,9 +8,27 @@ tests=(
   "dev/integration_tests/abstract_method_smoke_test"
 )
 
+# The devices where the tests are run.
+#
+# To get the full list of devices available, run:
+#     gcloud firebase test android models list
+devices=(
+  # Pixel 3
+  "model=blueline,version=28"
+  "model=blueline,version=Q-beta-3"
+
+  # Moto Z XT1650
+  "model=griffin,version=24"
+)
+
 set -e
 
 GIT_REVISION=$(git rev-parse HEAD)
+
+DEVICE_FLAG=""
+for device in ${devices[*]}; do
+  DEVICE_FLAG+="--device $device "
+done
 
 # New contributors will not have permissions to run this test - they won't be
 # able to access the service account information. We should just mark the test
@@ -36,17 +54,16 @@ function test_app_bundle() {
   if [ ! -f "$aab" ]; then
     exit 1
   fi
-  # Firebase Test Lab tests are currently known to be failing with
-  # "Firebase Test Lab infrastructure failure: Error during preprocessing"
-  # Remove "|| exit 0" once the failures are resolved
-  # https://github.com/flutter/flutter/issues/36501
 
   # Run the test.
-  gcloud firebase test android run --type robo \
+  gcloud firebase test android run \
+    --type robo \
     --app "$aab" \
     --timeout 2m \
+    "$DEVICE_FLAG" \
     --results-bucket=gs://flutter_firebase_testlab \
-    --results-dir="$@"/"$GIT_REVISION"/"$CIRRUS_BUILD_ID" || exit 0
+    --results-dir="$@"/"$GIT_REVISION"/"$CIRRUS_BUILD_ID"
+
 
   # Check logcat for "E/flutter" - if it's there, something's wrong.
   gsutil cp gs://flutter_firebase_testlab/"$@"/"$GIT_REVISION"/"$CIRRUS_BUILD_ID"/walleye-26-en-portrait/logcat /tmp/logcat
