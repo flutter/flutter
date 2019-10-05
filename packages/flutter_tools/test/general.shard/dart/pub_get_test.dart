@@ -24,7 +24,9 @@ import '../../src/context.dart';
 import '../../src/mocks.dart' as mocks;
 
 void main() {
-  Cache.flutterRoot = getFlutterRoot();
+  setUpAll(() {
+    Cache.flutterRoot = getFlutterRoot();
+  });
 
   testUsingContext('pub get 69', () async {
     String error;
