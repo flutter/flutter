@@ -98,7 +98,7 @@ void main() {
       final int errorCount = await analyze(server);
       expect(errorCount, 0);
     });
-  });
+  }, skip: true);
 }
 
 void createSampleProject(Directory directory, {@required String dartSource}) {
