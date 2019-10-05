@@ -257,6 +257,18 @@ def to_gn_args(args):
 
     gn_args['stripped_symbols'] = args.stripped
 
+    if args.msan:
+      gn_args['is_msan'] = True
+
+    if args.asan:
+      gn_args['is_asan'] = True
+
+    if args.tsan:
+      gn_args['is_tsan'] = True
+
+    if args.lsan:
+      gn_args['is_lsan'] = True
+
     return gn_args
 
 def parse_args(args):
@@ -329,6 +341,12 @@ def parse_args(args):
   parser.add_argument('--stripped', default=True, action='store_true',
                       help='Strip debug symbols from the output. This defaults to true and has no effect on iOS.')
   parser.add_argument('--no-stripped', dest='stripped', action='store_false')
+
+  # Sanitizers.
+  parser.add_argument('--asan', default=False, action='store_true')
+  parser.add_argument('--lsan', default=False, action='store_true')
+  parser.add_argument('--msan', default=False, action='store_true')
+  parser.add_argument('--tsan', default=False, action='store_true')
 
   return parser.parse_args(args)
 
