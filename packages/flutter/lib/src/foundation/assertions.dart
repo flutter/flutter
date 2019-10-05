@@ -25,18 +25,18 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   /// interactive display of errors.
   _ErrorDiagnostic(
     String message, {
-      DiagnosticsTreeStyle style = DiagnosticsTreeStyle.flat,
-      DiagnosticLevel level = DiagnosticLevel.info,
-    }) : assert(message != null),
-         super(
-           null,
-           <Object>[message],
-           showName: false,
-           showSeparator: false,
-           defaultValue: null,
-           style: style,
-           level: level,
-         );
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.flat,
+    DiagnosticLevel level = DiagnosticLevel.info,
+  }) : assert(message != null),
+       super(
+         null,
+         <Object>[message],
+         showName: false,
+         showSeparator: false,
+         defaultValue: null,
+         style: style,
+         level: level,
+       );
 
   /// In debug builds, a kernel transformer rewrites calls to the default
   /// constructors for [ErrorSummary], [ErrorDetails], and [ErrorHint] to use
