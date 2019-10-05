@@ -190,6 +190,17 @@ class MouseTracker extends ChangeNotifier {
     _trackedAnnotations.remove(annotation);
   }
 
+  // Returns the mouse state of a device. If it doesn't exist, create one using
+  // `mostRecentEvent`.
+  //
+  // The returned value is never null.
+  _MouseState _findMouseState(int device, PointerEvent mostRecentEvent) {
+    return _mouseStates.putIfAbsent(device, () {
+      _addMouseDevice(device, mostRecentEvent);
+      return _mouseStates[device];
+    });
+  }
+
   bool _scheduledPostFramePositionCheck = false;
   // Schedules a position check at the end of this frame for those annotations
   // that have been added.
@@ -230,8 +241,7 @@ class MouseTracker extends ChangeNotifier {
       // exit any annotations that were active.
       sendMouseNotifications(<int>{deviceId});
     } else if (event is PointerHoverEvent) {
-      final _MouseState mouseState = _mouseStates[deviceId];
-      assert(mouseState != null);
+      final _MouseState mouseState = _findMouseState(deviceId, event);
       final PointerEvent previousEvent = mouseState.mostRecentEvent;
       mouseState.mostRecentEvent = event;
       if (previousEvent is PointerAddedEvent || previousEvent.position != event.position) {
@@ -333,7 +343,6 @@ class MouseTracker extends ChangeNotifier {
   void _addMouseDevice(int deviceId, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
     final _MouseState mouseState = _mouseStates[deviceId];
-    assert(event is PointerAddedEvent);
     if (mouseState == null) {
       _mouseStates[deviceId] = _MouseState(mostRecentEvent: event);
     } else {
@@ -354,7 +363,6 @@ class MouseTracker extends ChangeNotifier {
     assert(_mouseStates.containsKey(deviceId),
       'Unexpected request to remove device $deviceId, which has not been '
       'added yet.');
-    assert(event is PointerRemovedEvent);
     _setPendingRemoval(deviceId, true);
     _mouseStates[deviceId].mostRecentEvent = event;
     if (mouseIsConnected != wasConnected) {
