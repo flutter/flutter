@@ -55,9 +55,9 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
   );
 }
 
-ImageProvider<dynamic> _resizeCacheIfNeeded(int cacheWidth, int cacheHeight, ImageProvider<dynamic> provider) {
+ImageProvider<dynamic> _resizeIfNeeded(int cacheWidth, int cacheHeight, ImageProvider<dynamic> provider) {
   if (cacheWidth != null || cacheHeight != null) {
-    return CustomCacheSizeImage(provider, width: cacheWidth, height: cacheHeight);
+    return ResizeImage(provider, width: cacheWidth, height: cacheHeight);
   }
   return provider;
 }
@@ -239,6 +239,11 @@ typedef ImageLoadingBuilder = Widget Function(
 /// ```
 /// {@end-tool}
 ///
+/// In the case where a network image is used on the web platform, the
+/// [cacheWidth] and [cacheHeight] parameters are ignored as the web engine
+/// delegates image decoding to the web which does not support custom decode
+/// sizes.
+///
 /// See also:
 ///
 ///  * [Icon], which shows an image from a font.
@@ -314,10 +319,14 @@ class Image extends StatefulWidget {
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
   /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
-  /// engine that the image must be decoded at the specified size. The image
+  /// engine that the image should be decoded at the specified size. The image
   /// will be rendered to the constraints of the layout or [width] and [height]
   /// regardless of these parameters. These parameters are primarily intended
   /// to reduce the memory usage of [ImageCache].
+  ///
+  /// In the case where the network image is on the web platform, the [cacheWidth]
+  /// and [cacheHeight] parameters are ignored as the web engine delegates
+  /// image decoding to the web which does not support custom decode sizes.
   Image.network(
     String src, {
     Key key,
@@ -340,7 +349,7 @@ class Image extends StatefulWidget {
     Map<String, String> headers,
     int cacheWidth,
     int cacheHeight,
-  }) : image = _resizeCacheIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
+  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -392,7 +401,7 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
     int cacheHeight,
-  }) : image = _resizeCacheIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
+  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
@@ -555,7 +564,7 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
     int cacheHeight,
-  }) : image = _resizeCacheIfNeeded(cacheWidth, cacheHeight, scale != null
+  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, scale != null
          ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
          : AssetImage(name, bundle: bundle, package: package)
        ),
@@ -612,7 +621,7 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
     int cacheHeight,
-  }) : image = _resizeCacheIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
+  }) : image = _resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
