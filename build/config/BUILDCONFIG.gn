@@ -155,6 +155,9 @@ declare_args() {
   # Compile for Thread Sanitizer to find threading bugs.
   is_tsan = false
 
+  # Compile for Undefined Behavior Sanitizer.
+  is_ubsan = false
+
   if (current_os == "chromeos") {
     # Allows the target toolchain to be injected as arguments. This is needed
     # to support the CrOS build system which supports per-build-configuration

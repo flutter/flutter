@@ -130,6 +130,10 @@ config("compiler") {
       cflags += [ "-fsanitize=memory" ]
       ldflags += [ "-fsanitize=memory" ]
     }
+    if (is_ubsan) {
+      cflags += [ "-fsanitize=undefined" ]
+      ldflags += [ "-fsanitize=undefined" ]
+    }
 
     if (use_custom_libcxx) {
       cflags_cc += [ "-nostdinc++" ]
