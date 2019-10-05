@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 void main() {
   setUp(() {
@@ -1191,4 +1192,45 @@ void main() {
     final Material material = tester.widget<Material>(rawButtonMaterial);
     expect(material.color, const Color(0xff00ff00));
   });
+
+  group('feedback', () {
+    FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback?.dispose();
+    });
+
+    testWidgets('MaterialButton with disabled feedback', (WidgetTester tester) async {
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          onPressed: () {},
+          enableFeedback: false,
+        ),
+      ));
+      await tester.tap(find.byType(MaterialButton), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('MaterialButton with enabled feedback', (WidgetTester tester) async {
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          onPressed: () {},
+        ),
+      ));
+      await tester.tap(find.byType(MaterialButton), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+  });
+
+
 }
