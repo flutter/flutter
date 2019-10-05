@@ -123,6 +123,9 @@ class MouseTracker extends ChangeNotifier {
   /// by each device.
   final MouseDetectorAnnotationFinder annotationFinder;
 
+  // The collection of annotations that are currently being tracked.
+  final Set<MouseTrackerAnnotation> _trackedAnnotations = <MouseTrackerAnnotation>{};
+
   // Tracks the state of each mouse device. See [_MouseState] for the
   // information it provides.
   //
@@ -131,18 +134,13 @@ class MouseTracker extends ChangeNotifier {
   // as the next position check.
   final Map<int, _MouseState> _mouseStates = <int, _MouseState>{};
 
-  // The number of attached annotations. When it's 0, [_sendMouseNotifications]
-  // is disabled.
-  int _annotationCount = 0;
-  bool get _hasAttachedAnnotations => _annotationCount > 0;
-
   // The number of mouse devices that have pended removal.
   int _pendingRemovalCount = 0;
 
   /// Whether or not a mouse is connected and has produced events.
   bool get mouseIsConnected => _mouseStates.length > _pendingRemovalCount;
 
-  bool isAnnotationAttached(MouseTrackerAnnotation tracker) => false;
+  bool get _hasAttachedAnnotations => _trackedAnnotations.isNotEmpty;
 
   /// Notify [MouseTracker] that a new mouse tracker annotation has started to
   /// take effect.
@@ -160,7 +158,7 @@ class MouseTracker extends ChangeNotifier {
     // Schedule a check so that we test this new annotation to see if any mouse
     // is currently inside its region. It has to happen after the frame is
     // complete so that the annotation layer has been added before the check.
-    _annotationCount++;
+    _trackedAnnotations.add(annotation);
     if (mouseIsConnected) {
       _scheduleMousePositionCheck();
     }
@@ -189,7 +187,7 @@ class MouseTracker extends ChangeNotifier {
         mouseState.lastAnnotations.remove(annotation);
       }
     });
-    _annotationCount--;
+    _trackedAnnotations.remove(annotation);
   }
 
   bool _scheduledPostFramePositionCheck = false;
@@ -242,6 +240,16 @@ class MouseTracker extends ChangeNotifier {
         sendMouseNotifications(<int>{deviceId});
       }
     }
+  }
+
+  /// Checks if the given [MouseTrackerAnnotation] is attached to this
+  /// [MouseTracker].
+  ///
+  /// This function is only public to allow for proper testing of the
+  /// MouseTracker. Do not call in other contexts.
+  @visibleForTesting
+  bool isAnnotationAttached(MouseTrackerAnnotation annotation) {
+    return _trackedAnnotations.contains(annotation);
   }
 
   /// Collect the latest states of the given mouse devices, and notify those
