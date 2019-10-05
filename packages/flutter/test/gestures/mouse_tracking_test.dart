@@ -385,6 +385,120 @@ void main() {
     ]));
     expect(finderCalled, 0);
   });
+
+  test('should trigger callbacks between parents and children in correctly order', () {
+    // This test simulates the scenario of a layer being the child of another.
+    //
+    //   ———————————
+    //   |A        |
+    //   |  —————— |
+    //   |  |B   | |
+    //   |  —————— |
+    //   ———————————
+
+    bool isInB;
+    final List<String> logs = <String>[];
+    final MouseTrackerAnnotation annotationA = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) => logs.add('enterA'),
+      onExit: (PointerExitEvent event) => logs.add('exitA'),
+      onHover: (PointerHoverEvent event) => logs.add('hoverA'),
+    );
+    final MouseTrackerAnnotation annotationB = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) => logs.add('enterB'),
+      onExit: (PointerExitEvent event) => logs.add('exitB'),
+      onHover: (PointerHoverEvent event) => logs.add('hoverB'),
+    );
+    final MouseTracker mouseTracker = _setUpMouseAnnotationFinder((Offset position) sync* {
+      // Children's annotations come before parents'
+      if (isInB) {
+        yield annotationB;
+        yield annotationA;
+      }
+    });
+    mouseTracker.attachAnnotation(annotationA);
+    mouseTracker.attachAnnotation(annotationB);
+
+    // Starts out of A
+    isInB = false;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(0.0, 1.0)),
+    ]));
+    expect(logs, <String>[]);
+
+    // Moves into B within one frame
+    isInB = true;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(0.0, 10.0)),
+    ]));
+    expect(logs, <String>['enterA', 'enterB', 'hoverA', 'hoverB']);
+    logs.clear();
+
+    // Moves out of A within one frame
+    isInB = false;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(0.0, 20.0)),
+    ]));
+    expect(logs, <String>['exitB', 'exitA']);
+  });
+
+  test('should trigger callbacks between disjoint siblings in correctly order', () {
+    // This test simulates the scenario of 2 sibling layers that do not overlap
+    // with each other.
+    //
+    //   ————————  ————————
+    //   |A     |  |B     |
+    //   |      |  |      |
+    //   ————————  ————————
+
+    bool isInA;
+    bool isInB;
+    final List<String> logs = <String>[];
+    final MouseTrackerAnnotation annotationA = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) => logs.add('enterA'),
+      onExit: (PointerExitEvent event) => logs.add('exitA'),
+      onHover: (PointerHoverEvent event) => logs.add('hoverA'),
+    );
+    final MouseTrackerAnnotation annotationB = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) => logs.add('enterB'),
+      onExit: (PointerExitEvent event) => logs.add('exitB'),
+      onHover: (PointerHoverEvent event) => logs.add('hoverB'),
+    );
+    final MouseTracker mouseTracker = _setUpMouseAnnotationFinder((Offset position) sync* {
+      if (isInA) {
+        yield annotationA;
+      } else if (isInB) {
+        yield annotationB;
+      }
+    });
+    mouseTracker.attachAnnotation(annotationA);
+    mouseTracker.attachAnnotation(annotationB);
+
+    // Starts within A
+    isInA = true;
+    isInB = false;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(0.0, 1.0)),
+    ]));
+    expect(logs, <String>['enterA', 'hoverA']);
+    logs.clear();
+
+    // Moves into B within one frame
+    isInA = false;
+    isInB = true;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(0.0, 10.0)),
+    ]));
+    expect(logs, <String>['exitA', 'enterB', 'hoverB']);
+    logs.clear();
+
+    // Moves into A within one frame
+    isInA = true;
+    isInB = false;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(0.0, 1.0)),
+    ]));
+    expect(logs, <String>['exitB', 'enterA', 'hoverA']);
+  });
 }
 
 ui.PointerData _pointerData(

@@ -269,7 +269,8 @@ class MouseTracker extends ChangeNotifier {
       // Order is important for mouse event callbacks. The `findAnnotations`
       // returns annotations in the visual order from front to back. We call
       // it the "visual order", and the opposite one "reverse visual order".
-      // The algorithm here is explained in https://github.com/flutter/flutter/issues/41420
+      // The algorithm here is explained in
+      // https://github.com/flutter/flutter/issues/41420
 
       // The annotations that contains this device in the coming frame in
       // visual order.
@@ -293,7 +294,7 @@ class MouseTracker extends ChangeNotifier {
 
       // Send enter events in reverse visual order.
       final Iterable<MouseTrackerAnnotation> enteringAnnotations = nextAnnotations
-        .difference(lastAnnotations).toList().reversed.toList();
+        .difference(lastAnnotations).toList().reversed;
       for (final MouseTrackerAnnotation annotation in enteringAnnotations) {
         if (annotation.onEnter != null) {
           annotation.onEnter(PointerEnterEvent.fromMouseEvent(mostRecentEvent));
@@ -301,8 +302,12 @@ class MouseTracker extends ChangeNotifier {
       }
 
       // Send hover events in reverse visual order.
+      // No solid reasons have been brough up on the order between the hover
+      // events, except for keeping it aligned with enter events for simplicity.
       if (mostRecentEvent is PointerHoverEvent) {
-        for (final MouseTrackerAnnotation annotation in nextAnnotations) {
+        final Iterable<MouseTrackerAnnotation> hoveringAnnotations = nextAnnotations
+          .toList().reversed;
+        for (final MouseTrackerAnnotation annotation in hoveringAnnotations) {
           if (annotation.onHover != null) {
             annotation.onHover(mostRecentEvent);
           }
