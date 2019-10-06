@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -62,6 +63,14 @@ class FakeDesktopDevice extends DesktopDevice {
   @override
   String executablePathForDevice(ApplicationPackage package, BuildMode buildMode) {
     return buildMode == null ? 'null' : getNameForBuildMode(buildMode);
+  }
+}
+
+/// A desktop device that returns a null executable path, for failure testing.
+class NullExecutableDesktopDevice extends FakeDesktopDevice {
+  @override
+  String executablePathForDevice(ApplicationPackage package, BuildMode buildMode) {
+    return null;
   }
 }
 
@@ -155,6 +164,15 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => mockFileSystem,
       ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('Null executable path fails gracefully', () async {
+      final NullExecutableDesktopDevice device = NullExecutableDesktopDevice();
+      final MockAppplicationPackage package = MockAppplicationPackage();
+      final LaunchResult result = await device.startApp(package, prebuiltApplication: true);
+      expect(result.started, false);
+      final BufferLogger logger = context.get<Logger>();
+      expect(logger.errorText, contains('Unable to find executable to run'));
     });
 
     testUsingContext('stopApp kills process started by startApp', () async {
