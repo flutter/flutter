@@ -219,15 +219,13 @@ class ButtonTheme extends InheritedTheme {
   static ButtonThemeData of(BuildContext context) {
     final ButtonTheme inheritedButtonTheme = context.inheritFromWidgetOfExactType(ButtonTheme);
     ButtonThemeData buttonTheme = inheritedButtonTheme?.data;
-    if (buttonTheme?.colorScheme == null) { // if buttonTheme or buttonTheme.colorScheme is null
+    if (buttonTheme == null) { // if buttonTheme is null
       final ThemeData theme = Theme.of(context);
       buttonTheme ??= theme.buttonTheme;
-      if (buttonTheme.colorScheme == null) {
-        buttonTheme = buttonTheme.copyWith(
-          colorScheme: theme.buttonTheme.colorScheme ?? const ColorScheme.light(),
-        );
-        assert(buttonTheme.colorScheme != null);
-      }
+      buttonTheme = buttonTheme.copyWith(
+        colorScheme: theme.buttonTheme.colorScheme ?? const ColorScheme.light(),
+      );
+      assert(buttonTheme.colorScheme != null);
     }
     return buttonTheme;
   }
