@@ -60,10 +60,9 @@ function test_app_bundle() {
     --type robo \
     --app "$aab" \
     --timeout 2m \
-    "$DEVICE_FLAG" \
     --results-bucket=gs://flutter_firebase_testlab \
-    --results-dir="$@"/"$GIT_REVISION"/"$CIRRUS_BUILD_ID"
-
+    --results-dir="$@"/"$GIT_REVISION"/"$CIRRUS_BUILD_ID" \
+    $DEVICE_FLAG
 
   # Check logcat for "E/flutter" - if it's there, something's wrong.
   gsutil cp gs://flutter_firebase_testlab/"$@"/"$GIT_REVISION"/"$CIRRUS_BUILD_ID"/walleye-26-en-portrait/logcat /tmp/logcat
