@@ -82,7 +82,7 @@ void testUsingContext(
             when(mock.getAttachedDevices()).thenAnswer((Invocation _) async => <IOSSimulator>[]);
             return mock;
           },
-          OutputPreferences: () => OutputPreferences(showColor: false),
+          OutputPreferences: () => OutputPreferences.test(),
           Logger: () => BufferLogger(),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           SimControl: () => MockSimControl(),
