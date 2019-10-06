@@ -888,7 +888,7 @@ void main() {
           find.descendant(
               of: find.byType(AndroidView),
               matching: find.byType(Focus),
-          )
+          ),
       );
       final Element containerElement = tester.element(find.byKey(containerKey));
       final FocusNode androidViewFocusNode = androidViewFocusWidget.focusNode;
@@ -1579,7 +1579,7 @@ void main() {
               height: 100,
             ),
           ],
-        )
+        ),
       );
 
       // First frame is before the platform view was created so the render object
@@ -1914,7 +1914,8 @@ void main() {
             Factory<OneSequenceGestureRecognizer>(
                   constructRecognizer,
             ),
-          })
+          },
+        ),
       );
 
       await tester.pumpWidget(
@@ -1925,7 +1926,8 @@ void main() {
             Factory<OneSequenceGestureRecognizer>(
                   constructRecognizer,
             ),
-          })
+          },
+        ),
       );
       expect(factoryInvocationCount, 1);
     });
@@ -2160,7 +2162,7 @@ void main() {
           find.descendant(
               of: find.byType(PlatformViewLink),
               matching: find.byType(Focus),
-          )
+          ),
       );
       final FocusNode platformViewFocusNode = platformViewFocusWidget.focusNode;
       final Element containerElement = tester.element(find.byKey(containerKey));

@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
@@ -35,6 +36,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger to avoid color codes.
   Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
   FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
+  Signals: () => FakeSignals(),  // prevent registering actual signal handlers.
 };
 
 /// Manages interaction with the tool injection and runner system.
@@ -160,7 +162,7 @@ class NoOpUsage implements Usage {
   void sendCommand(String command, {Map<String, String> parameters}) {}
 
   @override
-  void sendEvent(String category, String parameter,{ Map<String, String> parameters }) {}
+  void sendEvent(String category, String parameter, { String label, Map<String, String> parameters }) {}
 
   @override
   void sendException(dynamic exception) {}
@@ -186,25 +188,19 @@ class FakeHttpClient implements HttpClient {
   String userAgent;
 
   @override
-  void addCredentials(
-      Uri url, String realm, HttpClientCredentials credentials) {}
+  void addCredentials(Uri url, String realm, HttpClientCredentials credentials) {}
 
   @override
-  void addProxyCredentials(
-      String host, int port, String realm, HttpClientCredentials credentials) {}
+  void addProxyCredentials(String host, int port, String realm, HttpClientCredentials credentials) {}
 
   @override
-  set authenticate(
-      Future<bool> Function(Uri url, String scheme, String realm) f) {}
+  set authenticate(Future<bool> Function(Uri url, String scheme, String realm) f) {}
 
   @override
-  set authenticateProxy(
-      Future<bool> Function(String host, int port, String scheme, String realm)
-          f) {}
+  set authenticateProxy(Future<bool> Function(String host, int port, String scheme, String realm) f) {}
 
   @override
-  set badCertificateCallback(
-      bool Function(X509Certificate cert, String host, int port) callback) {}
+  set badCertificateCallback(bool Function(X509Certificate cert, String host, int port) callback) {}
 
   @override
   void close({bool force = false}) {}
@@ -693,6 +689,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
+    this.isNewAndroidEmbeddingEnabled = false,
 });
 
   @override
@@ -706,4 +703,7 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isWindowsEnabled;
+
+  @override
+  final bool isNewAndroidEmbeddingEnabled;
 }

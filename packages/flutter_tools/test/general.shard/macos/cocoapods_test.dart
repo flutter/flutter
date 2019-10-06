@@ -160,6 +160,16 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
+
+    testUsingContext('detects initialized over 1.8.0', () async {
+      pretendPodIsInstalled();
+      pretendPodVersionIs('1.8.0');
+      expect(await cocoaPodsUnderTest.isCocoaPodsInitialized, isTrue);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Platform: () => FakePlatform(),
+      FileSystem: () => fs,
+    });
   });
 
   group('Setup Podfile', () {

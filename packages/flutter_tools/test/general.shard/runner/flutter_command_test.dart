@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:io' as io;
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -128,6 +132,54 @@ void main() {
         verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
         verify(usage.sendEvent(captureAny, 'fail', parameters: captureAnyNamed('parameters')));
       }
+    });
+
+    group('signals tests', () {
+      MockIoProcessSignal mockSignal;
+      ProcessSignal signalUnderTest;
+      StreamController<io.ProcessSignal> signalController;
+
+      setUp(() {
+        mockSignal = MockIoProcessSignal();
+        signalUnderTest = ProcessSignal(mockSignal);
+        signalController = StreamController<io.ProcessSignal>();
+        when(mockSignal.watch()).thenAnswer((Invocation invocation) => signalController.stream);
+      });
+
+      testUsingContext('reports command that is killed', () async {
+        // Crash if called a third time which is unexpected.
+        mockTimes = <int>[1000, 2000];
+
+        final Completer<void> completer = Completer<void>();
+        setExitFunctionForTests((int exitCode) {
+          expect(exitCode, 0);
+          restoreExitFunction();
+          completer.complete();
+        });
+
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+          commandFunction: () async {
+            final Completer<void> c = Completer<void>();
+            await c.future;
+            return null; // unreachable
+          }
+        );
+
+        unawaited(flutterCommand.run());
+        signalController.add(mockSignal);
+        await completer.future;
+
+        verify(usage.sendCommand(any, parameters: anyNamed('parameters')));
+        verify(usage.sendEvent(any, 'killed', parameters: anyNamed('parameters')));
+      }, overrides: <Type, Generator>{
+        ProcessInfo: () => mockProcessInfo,
+        Signals: () => FakeSignals(
+          subForSigTerm: signalUnderTest,
+          exitSignals: <ProcessSignal>[signalUnderTest],
+        ),
+        SystemClock: () => clock,
+        Usage: () => usage,
+      });
     });
 
     testUsingCommandContext('reports maxRss', () async {
@@ -264,3 +316,29 @@ class FakeCommand extends FlutterCommand {
 
 class MockVersion extends Mock implements FlutterVersion {}
 class MockProcessInfo extends Mock implements ProcessInfo {}
+class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
+
+class FakeSignals implements Signals {
+  FakeSignals({
+    this.subForSigTerm,
+    List<ProcessSignal> exitSignals,
+  }) : delegate = Signals(exitSignals: exitSignals);
+
+  final ProcessSignal subForSigTerm;
+  final Signals delegate;
+
+  @override
+  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+    if (signal == ProcessSignal.SIGTERM) {
+      return delegate.addHandler(subForSigTerm, handler);
+    }
+    return delegate.addHandler(signal, handler);
+  }
+
+  @override
+  Future<bool> removeHandler(ProcessSignal signal, Object token) =>
+    delegate.removeHandler(signal, token);
+
+  @override
+  Stream<Object> get errors => delegate.errors;
+}

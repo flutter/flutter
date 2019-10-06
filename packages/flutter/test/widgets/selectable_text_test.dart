@@ -78,7 +78,7 @@ Widget overlayWithEntry(OverlayEntry entry) {
         data: const MediaQueryData(size: Size(800.0, 600.0)),
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            entry
+            entry,
           ],
         ),
       ),
@@ -117,7 +117,7 @@ double getOpacity(WidgetTester tester, Finder finder) {
       find.ancestor(
         of: finder,
         matching: find.byType(FadeTransition),
-      )
+      ),
   ).opacity.value;
 }
 
@@ -239,7 +239,7 @@ void main() {
                     ),
                   ),
                 ],
-              )
+              ),
           ),
         ),
       ),
@@ -277,7 +277,7 @@ void main() {
                                 child: Text('Hello World!')
                             )
                         ),
-                      )
+                      ),
                   ),
                   TextSpan(
                     text: 'Third line!\n',
@@ -287,7 +287,7 @@ void main() {
                     ),
                   ),
                 ],
-              )
+              ),
           ),
         ),
       ),
@@ -299,7 +299,7 @@ void main() {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('selectable text'),
-        )
+        ),
     );
     await tester.tap(find.byType(SelectableText));
     await tester.idle();
@@ -310,7 +310,7 @@ void main() {
     await tester.pumpWidget(
         boilerplate(
           child: const SelectableText('s'),
-        )
+        ),
     );
 
     RenderBox findSelectableTextBox() => tester.renderObject(find.byType(SelectableText));
@@ -321,7 +321,7 @@ void main() {
     await tester.pumpWidget(
         boilerplate(
           child: const SelectableText('very very long'),
-        )
+        ),
     );
 
     final RenderBox longtextBox = findSelectableTextBox();
@@ -337,7 +337,7 @@ void main() {
           text,
           textWidthBasis: TextWidthBasis.parent,
         ),
-      )
+      ),
     );
     RenderBox textBox = findTextBox();
     expect(textBox.size, const Size(800.0, 28.0));
@@ -348,7 +348,7 @@ void main() {
           text,
           textWidthBasis: TextWidthBasis.longestLine,
         ),
-      )
+      ),
     );
     textBox = findTextBox();
     expect(textBox.size, const Size(633.0, 28.0));
@@ -417,7 +417,7 @@ void main() {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
-        )
+        ),
     );
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.controller.selection.baseOffset, -1);
@@ -440,7 +440,7 @@ void main() {
             'abc def ghi',
             enableInteractiveSelection: false,
           ),
-        )
+        ),
     );
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.controller.selection.baseOffset, -1);
@@ -463,7 +463,7 @@ void main() {
             'abc def ghi',
             enableInteractiveSelection: false,
           ),
-        )
+        ),
     );
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.controller.selection.baseOffset, -1);
@@ -485,7 +485,7 @@ void main() {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
-        )
+        ),
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -514,7 +514,7 @@ void main() {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
-        )
+        ),
     );
     // Long press the 'e' to select 'def', but don't release the gesture.
     final Offset ePos = textOffsetToPosition(tester, 5);
@@ -541,7 +541,7 @@ void main() {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
-        )
+        ),
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -564,7 +564,7 @@ void main() {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('selectable'),
-        )
+        ),
     );
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText));
     // selectable text cannot open keyboard.
@@ -602,7 +602,7 @@ void main() {
             selectAll: true,
           ),
         ),
-      )
+      ),
     );
     const int dIndex = 5;
     final Offset dPos = textOffsetToPosition(tester, dIndex);
@@ -1240,7 +1240,7 @@ void main() {
           SemanticsFlag.isTextField,
           SemanticsFlag.isReadOnly,
           SemanticsFlag.isMultiline,
-        ]
+        ],
       ),
     );
 
@@ -1635,7 +1635,7 @@ void main() {
             'x',
             maxLines: null,
           ),
-        )
+        ),
     );
 
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
@@ -2242,7 +2242,7 @@ void main() {
                 style: style,
               ),
             ),
-          )
+          ),
         ),
       );
     }

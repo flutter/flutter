@@ -70,7 +70,7 @@ enum OverlayVisibilityMode {
 
 class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _CupertinoTextFieldSelectionGestureDetectorBuilder({
-    @required _CupertinoTextFieldState state
+    @required _CupertinoTextFieldState state,
   }) : _state = state,
        super(delegate: state);
 
@@ -265,7 +265,7 @@ class CupertinoTextField extends StatefulWidget {
        assert(prefixMode != null),
        assert(suffixMode != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       toolbarOptions = toolbarOptions ?? obscureText ?
+       toolbarOptions = toolbarOptions ?? (obscureText ?
          const ToolbarOptions(
            selectAll: true,
            paste: true,
@@ -275,7 +275,7 @@ class CupertinoTextField extends StatefulWidget {
            cut: true,
            selectAll: true,
            paste: true,
-         ),
+         )),
        super(key: key);
 
   /// Controls the text being edited.

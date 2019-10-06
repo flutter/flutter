@@ -179,7 +179,7 @@ class DeviceManager {
         for (Device device in devices)
           if (await device.targetPlatform != TargetPlatform.fuchsia &&
               await device.targetPlatform != TargetPlatform.web_javascript)
-            device
+            device,
       ];
     }
 
@@ -190,7 +190,7 @@ class DeviceManager {
       devices = <Device>[
         for (Device device in devices)
           if (isDeviceSupportedForProject(device, flutterProject))
-            device
+            device,
       ];
     } else if (devices.length == 1 &&
              !hasSpecifiedDeviceId &&
