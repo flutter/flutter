@@ -61,7 +61,11 @@ class MacOSDevice extends DesktopDevice {
     // the launch process for 'open' to foreground it.
     processManager.run(<String>[
       'open', package.applicationBundle(buildMode),
-    ]);
+    ]).then((ProcessResult result) {
+      if (result.exitCode != 0) {
+        print('Failed to foreground app; open returned ${result.exitCode}');
+      }
+    });
   }
 }
 
