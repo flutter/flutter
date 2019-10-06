@@ -269,6 +269,9 @@ def to_gn_args(args):
     if args.lsan:
       gn_args['is_lsan'] = True
 
+    if args.ubsan:
+      gn_args['is_ubsan'] = True
+
     return gn_args
 
 def parse_args(args):
@@ -347,6 +350,7 @@ def parse_args(args):
   parser.add_argument('--lsan', default=False, action='store_true')
   parser.add_argument('--msan', default=False, action='store_true')
   parser.add_argument('--tsan', default=False, action='store_true')
+  parser.add_argument('--ubsan', default=False, action='store_true')
 
   return parser.parse_args(args)
 
