@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mockito/mockito.dart';
 
 class StateMarker extends StatefulWidget {
   const StateMarker({ Key key, this.child }) : super(key: key);
@@ -393,27 +395,64 @@ void main() {
   });
 
   testWidgets("WidgetsApp don't rebuild routes when MediaQuery updates", (WidgetTester tester) async {
-    int buildCount = 0;
+    // Regression test for https://github.com/flutter/flutter/issues/37878
+    int routeBuildCount = 0;
+    int dependentBuildCount = 0;
 
     await tester.pumpWidget(WidgetsApp(
       color: const Color.fromARGB(255, 255, 255, 255),
       onGenerateRoute: (_) {
         return PageRouteBuilder<void>(pageBuilder: (_, __, ___) {
-          buildCount++;
-          return Container();
+          routeBuildCount++;
+          return Builder(
+            builder: (BuildContext context) {
+              dependentBuildCount++;
+              MediaQuery.of(context);
+              return Container();
+            },
+          );
         });
       },
     ));
 
-    final TestWidgetsFlutterBinding binding = tester.binding;
-    await binding.setSurfaceSize(const Size(42, 42));
-    // we have to reset the screen size, otherwise it may cause other tests
-    // to fail due to an overflow exception.
-    addTearDown(() => binding.setSurfaceSize(null));
+    expect(routeBuildCount, equals(1));
+    expect(dependentBuildCount, equals(1));
+
+    // didChangeMetrics
+    tester.binding.window.physicalSizeTestValue = const Size(42, 42);
+    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
     await tester.pump();
 
-    expect(buildCount, equals(1));
+    expect(routeBuildCount, equals(1));
+    expect(dependentBuildCount, equals(2));
+
+    // didChangeTextScaleFactor
+    tester.binding.window.textScaleFactorTestValue = 42;
+    addTearDown(tester.binding.window.clearTextScaleFactorTestValue);
+
+    await tester.pump();
+
+    expect(routeBuildCount, equals(1));
+    expect(dependentBuildCount, equals(3));
+
+    // didChangePlatformBrightness
+    tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+    addTearDown(tester.binding.window.clearPlatformBrightnessTestValue);
+
+    await tester.pump();
+
+    expect(routeBuildCount, equals(1));
+    expect(dependentBuildCount, equals(4));
+
+    // didChangeAccessibilityFeatures
+    tester.binding.window.accessibilityFeaturesTestValue = MockAccessibilityFeature();
+    addTearDown(tester.binding.window.clearAccessibilityFeaturesTestValue);
+
+    await tester.pump();
+
+    expect(routeBuildCount, equals(1));
+    expect(dependentBuildCount, equals(5));
   });
 
   testWidgets('Can get text scale from media query', (WidgetTester tester) async {
@@ -750,3 +789,5 @@ void main() {
     expect(themeAfterBrightnessChange.brightness, Brightness.dark);
   });
 }
+
+class MockAccessibilityFeature extends Mock implements AccessibilityFeatures {}

@@ -730,13 +730,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) { }
-
-  @override
-  void didHaveMemoryPressure() { }
-
-
   // NAVIGATOR
 
   GlobalKey<NavigatorState> _navigator;
@@ -994,16 +987,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     yield DefaultWidgetsLocalizations.delegate;
   }
 
-  // ACCESSIBILITY
-
-  @override
-  void didChangeAccessibilityFeatures() {
-    setState(() {
-      // The properties of window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
-  }
-
   // BUILDER
 
   bool _debugCheckLocalizations(Locale appLocale) {
@@ -1170,7 +1153,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       },
       child: DefaultFocusTraversal(
         policy: ReadingOrderTraversalPolicy(),
-        child: _MediaQueryFromWindows(
+        child: _MediaQueryFromWindow(
           child: Localizations(
             locale: appLocale,
             delegates: _localizationsDelegates.toList(),
@@ -1182,20 +1165,34 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 }
 
-class _MediaQueryFromWindows extends StatefulWidget {
-  const _MediaQueryFromWindows({Key key, this.child}) : super(key: key);
+/// Builds [MediaQuery] from `window` by listening to [WidgetsBinding].
+///
+/// It is performed in a standalone widget to rebuild **only** [MediaQuery] and
+/// its dependents when `window` changes, instead of rebuilding the entire widget tree.
+class _MediaQueryFromWindow extends StatefulWidget {
+  const _MediaQueryFromWindow({Key key, this.child}) : super(key: key);
 
   final Widget child;
 
   @override
-  __MediaQueryFromWindowsState createState() => __MediaQueryFromWindowsState();
+  _MediaQueryFromWindowsState createState() => _MediaQueryFromWindowsState();
 }
 
-class __MediaQueryFromWindowsState extends State<_MediaQueryFromWindows> with WidgetsBindingObserver {
+class _MediaQueryFromWindowsState extends State<_MediaQueryFromWindow> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  // ACCESSIBILITY
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    setState(() {
+      // The properties of window have changed. We use them in our build
+      // function, so we need setState(), but we don't cache anything locally.
+    });
   }
 
   // METRICS
