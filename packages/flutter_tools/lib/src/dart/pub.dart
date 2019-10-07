@@ -162,8 +162,13 @@ Future<void> pub(
 }) async {
   showTraceForErrors ??= isRunningOnBot;
 
+  final StringBuffer messageBuffer = StringBuffer();
+  String lastPubMessage = 'no message';
+
   bool versionSolvingFailed = false;
   String filterWrapper(String line) {
+    messageBuffer.write(line);
+    lastPubMessage = line;
     if (line.contains('version solving failed')) {
       versionSolvingFailed = true;
     }
@@ -204,6 +209,7 @@ Future<void> pub(
     result = 'version-solving-failed';
   } else if (code != 0) {
     result = 'failure';
+    printTrace('pub output:\n$messageBuffer');
   }
   PubResultEvent(
     context: context.toAnalyticsString(),
@@ -211,7 +217,7 @@ Future<void> pub(
   ).send();
 
   if (code != 0) {
-    throwToolExit('$failureMessage ($code)', exitCode: code);
+    throwToolExit('$failureMessage ($code; $lastPubMessage)', exitCode: code);
   }
 }
 
