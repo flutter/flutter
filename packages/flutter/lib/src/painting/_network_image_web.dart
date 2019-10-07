@@ -51,7 +51,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
   // Web does not support decoding network images to a specified size. The decode parameter
   // here is ignored and the web-only `ui.webOnlyInstantiateImageCodecFromUrl` will be used
-  // directle in place of the typical `instantiateImageCodec` method.
+  // directly in place of the typical `instantiateImageCodec` method.
   Future<ui.Codec> _loadAsync(NetworkImage key, image_provider.DecoderCallback decode) async {
     assert(key == this);
 
