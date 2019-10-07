@@ -13,7 +13,6 @@ class _StockSymbolView extends StatelessWidget {
   final Stock stock;
   final Widget arrow;
 
-  @override
   Widget build(BuildContext context) {
     assert(stock != null);
     final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
@@ -69,7 +68,6 @@ class StockSymbolPage extends StatelessWidget {
   final String symbol;
   final StockData stocks;
 
-  @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: stocks,
@@ -116,7 +114,6 @@ class StockSymbolBottomSheet extends StatelessWidget {
 
   final Stock stock;
 
-  @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(10.0),

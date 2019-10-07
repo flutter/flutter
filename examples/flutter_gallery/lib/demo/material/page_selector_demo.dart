@@ -17,7 +17,6 @@ class _PageSelector extends StatelessWidget {
       controller.animateTo((controller.index + delta).clamp(0, icons.length - 1));
   }
 
-  @override
   Widget build(BuildContext context) {
     final TabController controller = DefaultTabController.of(context);
     final Color color = Theme.of(context).accentColor;
@@ -84,7 +83,6 @@ class PageSelectorDemo extends StatelessWidget {
     const Icon(Icons.language, semanticLabel: 'Language'),
   ];
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

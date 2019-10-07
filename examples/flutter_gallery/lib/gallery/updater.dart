@@ -18,12 +18,10 @@ class Updater extends StatefulWidget {
   final UpdateUrlFetcher updateUrlFetcher;
   final Widget child;
 
-  @override
   State createState() => UpdaterState();
 }
 
 class UpdaterState extends State<Updater> {
-  @override
   void initState() {
     super.initState();
     _checkForUpdates();
@@ -70,6 +68,5 @@ class UpdaterState extends State<Updater> {
     );
   }
 
-  @override
   Widget build(BuildContext context) => widget.child;
 }

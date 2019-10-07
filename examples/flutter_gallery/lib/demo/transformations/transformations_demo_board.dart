@@ -54,7 +54,6 @@ class Board extends Object with IterableMixin<BoardPoint> {
   final BoardPoint selected;
   final List<BoardPoint> _boardPoints = <BoardPoint>[];
 
-  @override
   Iterator<BoardPoint> get iterator => _BoardIterator(_boardPoints);
 
   // For a given q axial coordinate, get the range of possible r values
@@ -202,10 +201,8 @@ class _BoardIterator extends Iterator<BoardPoint> {
   final List<BoardPoint> boardPoints;
   int currentIndex;
 
-  @override
   BoardPoint current;
 
-  @override
   bool moveNext() {
     if (currentIndex == null) {
       currentIndex = 0;
@@ -255,13 +252,11 @@ class BoardPoint {
   final int r;
   final Color color;
 
-  @override
   String toString() {
     return 'BoardPoint($q, $r, $color)';
   }
 
   // Only compares by location.
-  @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) {
       return false;
@@ -270,7 +265,6 @@ class BoardPoint {
     return boardPoint.q == q && boardPoint.r == r;
   }
 
-  @override
   int get hashCode => hashValues(q, r);
 
   BoardPoint copyWithColor(Color nextColor) => BoardPoint(q, r, color: nextColor);

@@ -57,7 +57,6 @@ class ColorItem extends StatelessWidget {
 
   String colorString() => "#${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}";
 
-  @override
   Widget build(BuildContext context) {
     return Semantics(
       container: true,
@@ -94,7 +93,6 @@ class PaletteTabView extends StatelessWidget {
   static const List<int> primaryKeys = <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
   static const List<int> accentKeys = <int>[100, 200, 400, 700];
 
-  @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle whiteTextStyle = textTheme.body1.copyWith(color: Colors.white);
@@ -125,7 +123,6 @@ class PaletteTabView extends StatelessWidget {
 class ColorsDemo extends StatelessWidget {
   static const String routeName = '/colors';
 
-  @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: allPalettes.length,

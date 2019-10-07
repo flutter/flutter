@@ -9,7 +9,6 @@ import '../../gallery/demo.dart';
 class SearchDemo extends StatefulWidget {
   static const String routeName = '/material/search';
 
-  @override
   _SearchDemoState createState() => _SearchDemoState();
 }
 
@@ -19,7 +18,6 @@ class _SearchDemoState extends State<SearchDemo> {
 
   int _lastIntegerSelected;
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
@@ -137,7 +135,6 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
   final List<int> _data = List<int>.generate(100001, (int i) => i).reversed.toList();
   final List<int> _history = <int>[42607, 85604, 66374, 44, 174];
 
-  @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
       tooltip: 'Back',
@@ -151,7 +148,6 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
     );
   }
 
-  @override
   Widget buildSuggestions(BuildContext context) {
 
     final Iterable<int> suggestions = query.isEmpty
@@ -168,7 +164,6 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
     );
   }
 
-  @override
   Widget buildResults(BuildContext context) {
     final int searched = int.tryParse(query);
     if (searched == null || !_data.contains(searched)) {
@@ -201,7 +196,6 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
     );
   }
 
-  @override
   List<Widget> buildActions(BuildContext context) {
     return <Widget>[
       if (query.isEmpty)
@@ -232,7 +226,6 @@ class _ResultCard extends StatelessWidget {
   final String title;
   final SearchDelegate<int> searchDelegate;
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return GestureDetector(
@@ -264,7 +257,6 @@ class _SuggestionList extends StatelessWidget {
   final String query;
   final ValueChanged<String> onSelected;
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return ListView.builder(

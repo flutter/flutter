@@ -14,7 +14,6 @@ const Color _kAmbientShadowOpacity = Color(0x1F000000); // alpha = 0.12
 class CupertinoSegmentedControlDemo extends StatefulWidget {
   static const String routeName = 'cupertino/segmented_control';
 
-  @override
   _CupertinoSegmentedControlDemoState createState() => _CupertinoSegmentedControlDemoState();
 }
 
@@ -48,7 +47,6 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
 
   int sharedValue = 0;
 
-  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(

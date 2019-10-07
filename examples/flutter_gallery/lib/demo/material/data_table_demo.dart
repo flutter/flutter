@@ -95,7 +95,6 @@ class DessertDataSource extends DataTableSource {
 
   int _selectedCount = 0;
 
-  @override
   DataRow getRow(int index) {
     assert(index >= 0);
     if (index >= _desserts.length)
@@ -125,13 +124,10 @@ class DessertDataSource extends DataTableSource {
     );
   }
 
-  @override
   int get rowCount => _desserts.length;
 
-  @override
   bool get isRowCountApproximate => false;
 
-  @override
   int get selectedRowCount => _selectedCount;
 
   void _selectAll(bool checked) {
@@ -145,7 +141,6 @@ class DessertDataSource extends DataTableSource {
 class DataTableDemo extends StatefulWidget {
   static const String routeName = '/material/data-table';
 
-  @override
   _DataTableDemoState createState() => _DataTableDemoState();
 }
 
@@ -163,7 +158,6 @@ class _DataTableDemoState extends State<DataTableDemo> {
     });
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

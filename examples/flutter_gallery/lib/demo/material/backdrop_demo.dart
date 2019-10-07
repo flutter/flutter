@@ -14,7 +14,6 @@ class Category {
   const Category({ this.title, this.assets });
   final String title;
   final List<String> assets;
-  @override
   String toString() => '$runtimeType("$title")';
 }
 
@@ -99,7 +98,6 @@ class CategoryView extends StatelessWidget {
 
   final Category category;
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scrollbar(
@@ -163,7 +161,6 @@ class BackdropPanel extends StatelessWidget {
   final Widget title;
   final Widget child;
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Material(
@@ -208,7 +205,6 @@ class BackdropTitle extends AnimatedWidget {
     Listenable listenable,
   }) : super(key: key, listenable: listenable);
 
-  @override
   Widget build(BuildContext context) {
     final Animation<double> animation = listenable;
     return DefaultTextStyle(
@@ -241,7 +237,6 @@ class BackdropTitle extends AnimatedWidget {
 class BackdropDemo extends StatefulWidget {
   static const String routeName = '/material/backdrop';
 
-  @override
   _BackdropDemoState createState() => _BackdropDemoState();
 }
 
@@ -250,7 +245,6 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   AnimationController _controller;
   Category _category = allCategories[0];
 
-  @override
   void initState() {
     super.initState();
     _controller = AnimationController(
@@ -260,7 +254,6 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     );
   }
 
-  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -384,7 +377,6 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     );
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

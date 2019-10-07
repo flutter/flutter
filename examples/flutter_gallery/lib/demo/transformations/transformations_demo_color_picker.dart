@@ -14,7 +14,6 @@ class ColorPicker extends StatelessWidget {
   final Color selectedColor;
   final ValueChanged<Color> onColorSelection;
 
-  @override
   Widget build (BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -47,7 +46,6 @@ class _ColorPickerSwatch extends StatelessWidget {
   final bool selected;
   final Function onTap;
 
-  @override
   Widget build (BuildContext context) {
     return Container(
       width: 60.0,

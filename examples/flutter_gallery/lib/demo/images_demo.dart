@@ -5,7 +5,6 @@ import '../gallery/demo.dart';
 class ImagesDemo extends StatelessWidget {
   static const String routeName = '/images';
 
-  @override
   Widget build(BuildContext context) {
     return TabbedComponentDemoScaffold(
       title: 'Animated images',

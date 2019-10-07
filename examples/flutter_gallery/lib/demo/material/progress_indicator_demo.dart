@@ -9,7 +9,6 @@ import '../../gallery/demo.dart';
 class ProgressIndicatorDemo extends StatefulWidget {
   static const String routeName = '/material/progress-indicator';
 
-  @override
   _ProgressIndicatorDemoState createState() => _ProgressIndicatorDemoState();
 }
 
@@ -17,7 +16,6 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
   AnimationController _controller;
   Animation<double> _animation;
 
-  @override
   void initState() {
     super.initState();
     _controller = AnimationController(
@@ -38,7 +36,6 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     });
   }
 
-  @override
   void dispose() {
     _controller.stop();
     super.dispose();
@@ -99,7 +96,6 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     );
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

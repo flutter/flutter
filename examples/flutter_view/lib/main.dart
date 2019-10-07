@@ -12,7 +12,6 @@ void main() {
 
 class FlutterView extends StatelessWidget {
 
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter View',
@@ -25,7 +24,6 @@ class FlutterView extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
@@ -38,7 +36,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   int _counter = 0;
 
-  @override
   void initState() {
     super.initState();
     platform.setMessageHandler(_handlePlatformIncrement);
@@ -55,7 +52,6 @@ class _MyHomePageState extends State<MyHomePage> {
     platform.send(_pong);
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(

@@ -17,7 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gallery/demo/shrine/colors.dart';
 
 class LoginPage extends StatefulWidget {
-  @override
   _LoginPageState createState() => _LoginPageState();
 }
 
@@ -31,7 +30,6 @@ class _LoginPageState extends State<LoginPage> {
     ),
   );
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -134,7 +132,6 @@ class PrimaryColorOverride extends StatelessWidget {
   final Color color;
   final Widget child;
 
-  @override
   Widget build(BuildContext context) {
     return Theme(
       child: child,

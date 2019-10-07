@@ -21,7 +21,6 @@ const Duration _kFrontLayerSwitchDuration = Duration(milliseconds: 300);
 class _FlutterLogo extends StatelessWidget {
   const _FlutterLogo({ Key key }) : super(key: key);
 
-  @override
   Widget build(BuildContext context) {
     return Center(
       child: Container(
@@ -50,7 +49,6 @@ class _CategoryItem extends StatelessWidget {
   final GalleryDemoCategory category;
   final VoidCallback onTap;
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
@@ -106,7 +104,6 @@ class _CategoriesPage extends StatelessWidget {
   final Iterable<GalleryDemoCategory> categories;
   final ValueChanged<GalleryDemoCategory> onCategoryTap;
 
-  @override
   Widget build(BuildContext context) {
     const double aspectRatio = 160.0 / 180.0;
     final List<GalleryDemoCategory> categoriesList = categories.toList();
@@ -179,7 +176,6 @@ class _DemoItem extends StatelessWidget {
     }
   }
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
@@ -239,7 +235,6 @@ class _DemosPage extends StatelessWidget {
 
   final GalleryDemoCategory category;
 
-  @override
   Widget build(BuildContext context) {
     // When overriding ListView.padding, it is necessary to manually handle
     // safe areas.
@@ -278,7 +273,6 @@ class GalleryHome extends StatefulWidget {
   // Otherwise show the "preview" banner.
   static bool showPreviewBanner = true;
 
-  @override
   _GalleryHomeState createState() => _GalleryHomeState();
 }
 
@@ -299,7 +293,6 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
 
   static const AnimatedSwitcherLayoutBuilder _centerHomeLayout = AnimatedSwitcher.defaultLayoutBuilder;
 
-  @override
   void initState() {
     super.initState();
     _controller = AnimationController(
@@ -309,13 +302,11 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
     )..forward();
   }
 
-  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;

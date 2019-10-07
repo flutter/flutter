@@ -46,7 +46,6 @@ class CupertinoNavigationDemo extends StatelessWidget {
   final List<Color> colorItems;
   final List<String> colorNameItems;
 
-  @override
   Widget build(BuildContext context) {
     return WillPopScope(
       // Prevent swipe popping of this page. Use explicit exit buttons only.
@@ -108,7 +107,6 @@ class CupertinoNavigationDemo extends StatelessWidget {
 class ExitButton extends StatelessWidget {
   const ExitButton();
 
-  @override
   Widget build(BuildContext context) {
     return CupertinoButton(
       padding: EdgeInsets.zero,
@@ -140,7 +138,6 @@ class CupertinoDemoTab1 extends StatelessWidget {
   final List<Color> colorItems;
   final List<String> colorNameItems;
 
-  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       child: CustomScrollView(
@@ -185,7 +182,6 @@ class Tab1RowItem extends StatelessWidget {
   final Color color;
   final String colorName;
 
-  @override
   Widget build(BuildContext context) {
     final Widget row = GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -277,12 +273,10 @@ class Tab1ItemPage extends StatefulWidget {
   final String colorName;
   final int index;
 
-  @override
   State<StatefulWidget> createState() => Tab1ItemPageState();
 }
 
 class Tab1ItemPageState extends State<Tab1ItemPage> {
-  @override
   void initState() {
     super.initState();
     relatedColors = List<Color>.generate(10, (int index) {
@@ -298,7 +292,6 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
 
   List<Color> relatedColors;
 
-  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
@@ -424,7 +417,6 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
 }
 
 class CupertinoDemoTab2 extends StatelessWidget {
-  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
@@ -443,7 +435,6 @@ class CupertinoDemoTab2 extends StatelessWidget {
 }
 
 class Tab2Header extends StatelessWidget {
-  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -574,7 +565,6 @@ class Tab2ConversationBubble extends StatelessWidget {
   final String text;
   final Tab2ConversationBubbleColor color;
 
-  @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
@@ -606,7 +596,6 @@ class Tab2ConversationAvatar extends StatelessWidget {
   final String text;
   final Color color;
 
-  @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
@@ -645,7 +634,6 @@ class Tab2ConversationRow extends StatelessWidget {
   final Tab2ConversationAvatar avatar;
   final String text;
 
-  @override
   Widget build(BuildContext context) {
     final bool isSelf = avatar == null;
     return SafeArea(
@@ -706,7 +694,6 @@ List<Widget> buildTab2Conversation() {
 }
 
 class CupertinoDemoTab3 extends StatelessWidget {
-  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
@@ -764,7 +751,6 @@ class CupertinoDemoTab3 extends StatelessWidget {
 }
 
 class Tab3Dialog extends StatelessWidget {
-  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(

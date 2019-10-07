@@ -12,7 +12,6 @@ class StockArrowPainter extends CustomPainter {
   final Color color;
   final double percentChange;
 
-  @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()..color = color;
     paint.strokeWidth = 1.0;
@@ -45,7 +44,6 @@ class StockArrowPainter extends CustomPainter {
     canvas.drawCircle(Offset(centerX, centerY), r, paint);
   }
 
-  @override
   bool shouldRepaint(StockArrowPainter oldDelegate) {
     return oldDelegate.color != color
         || oldDelegate.percentChange != percentChange;
@@ -69,7 +67,6 @@ class StockArrow extends StatelessWidget {
     return Colors.red[_colorIndexForPercentChange(percentChange)];
   }
 
-  @override
   Widget build(BuildContext context) {
     return Container(
       width: 40.0,

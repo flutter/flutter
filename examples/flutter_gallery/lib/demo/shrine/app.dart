@@ -23,7 +23,6 @@ import 'package:flutter_gallery/demo/shrine/login.dart';
 import 'package:flutter_gallery/demo/shrine/supplemental/cut_corners_border.dart';
 
 class ShrineApp extends StatefulWidget {
-  @override
   _ShrineAppState createState() => _ShrineAppState();
 }
 
@@ -32,7 +31,6 @@ class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMix
   // of expanding bottom sheet
   AnimationController _controller;
 
-  @override
   void initState() {
     super.initState();
     _controller = AnimationController(
@@ -42,7 +40,6 @@ class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMix
     );
   }
 
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Shrine',

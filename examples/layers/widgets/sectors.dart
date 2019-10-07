@@ -17,7 +17,6 @@ RenderBox initCircle() {
 }
 
 class SectorApp extends StatefulWidget {
-  @override
   SectorAppState createState() => SectorAppState();
 }
 
@@ -148,7 +147,6 @@ class SectorAppState extends State<SectorApp> {
     );
   }
 
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.light(),

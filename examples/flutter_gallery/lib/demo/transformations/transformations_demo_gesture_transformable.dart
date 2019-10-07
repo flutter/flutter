@@ -183,7 +183,6 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
     return renderObject.localToGlobal(Offset.zero);
   }
 
-  @override
   void initState() {
     super.initState();
     _boundaryRect = widget.boundaryRect ?? Offset.zero & widget.size;
@@ -199,7 +198,6 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
     }
   }
 
-  @override
   void didUpdateWidget(GestureTransformable oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.reset && !oldWidget.reset && _animationReset == null) {
@@ -209,7 +207,6 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
     }
   }
 
-  @override
   Widget build(BuildContext context) {
     // A GestureDetector allows the detection of panning and zooming gestures on
     // its child, which is the CustomPaint.
@@ -562,7 +559,6 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
     widget.onResetEnd();
   }
 
-  @override
   void dispose() {
     _controller.dispose();
     _controllerReset.dispose();

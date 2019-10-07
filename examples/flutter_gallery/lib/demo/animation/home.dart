@@ -62,7 +62,6 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
     markNeedsLayout();
   }
 
-  @override
   void performLayout() {
     final double height = (maxHeight - constraints.scrollOffset / scrollFactor).clamp(0.0, maxHeight);
     geometry = SliverGeometry(
@@ -85,7 +84,6 @@ class _StatusBarPaddingSliver extends SingleChildRenderObjectWidget {
   final double maxHeight;
   final double scrollFactor;
 
-  @override
   _RenderStatusBarPaddingSliver createRenderObject(BuildContext context) {
     return _RenderStatusBarPaddingSliver(
       maxHeight: maxHeight,
@@ -93,14 +91,12 @@ class _StatusBarPaddingSliver extends SingleChildRenderObjectWidget {
     );
   }
 
-  @override
   void updateRenderObject(BuildContext context, _RenderStatusBarPaddingSliver renderObject) {
     renderObject
       ..maxHeight = maxHeight
       ..scrollFactor = scrollFactor;
   }
 
-  @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(DoubleProperty('maxHeight', maxHeight));
@@ -119,24 +115,19 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final double maxHeight;
   final Widget child;
 
-  @override
   double get minExtent => minHeight;
-  @override
   double get maxExtent => math.max(maxHeight, minHeight);
 
-  @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return SizedBox.expand(child: child);
   }
 
-  @override
   bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
     return maxHeight != oldDelegate.maxHeight
         || minHeight != oldDelegate.minHeight
         || child != oldDelegate.child;
   }
 
-  @override
   String toString() => '_SliverAppBarDelegate';
 }
 
@@ -184,7 +175,6 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
     return Offset.lerp(begin, end, tColumnToRow);
   }
 
-  @override
   void performLayout(Size size) {
     final double columnCardX = size.width / 5.0;
     final double columnCardWidth = size.width - columnCardX;
@@ -250,7 +240,6 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
     }
   }
 
-  @override
   bool shouldRelayout(_AllSectionsLayout oldDelegate) {
     return tColumnToRow != oldDelegate.tColumnToRow
       || cardCount != oldDelegate.cardCount
@@ -353,7 +342,6 @@ class _AllSectionsView extends AnimatedWidget {
     );
   }
 
-  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: _build);
   }
@@ -371,7 +359,6 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
 
   final double midScrollOffset;
 
-  @override
   _SnappingScrollPhysics applyTo(ScrollPhysics ancestor) {
     return _SnappingScrollPhysics(parent: buildParent(ancestor), midScrollOffset: midScrollOffset);
   }
@@ -386,7 +373,6 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
     return ScrollSpringSimulation(spring, offset, 0.0, velocity, tolerance: tolerance);
   }
 
-  @override
   Simulation createBallisticSimulation(ScrollMetrics position, double dragVelocity) {
     final Simulation simulation = super.createBallisticSimulation(position, dragVelocity);
     final double offset = position.pixels;
@@ -423,7 +409,6 @@ class AnimationDemoHome extends StatefulWidget {
 
   static const String routeName = '/animation';
 
-  @override
   _AnimationDemoHomeState createState() => _AnimationDemoHomeState();
 }
 
@@ -434,7 +419,6 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   ScrollPhysics _headingScrollPhysics = const NeverScrollableScrollPhysics();
   ValueNotifier<double> selectedIndex = ValueNotifier<double>(0.0);
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _kAppBackgroundColor,

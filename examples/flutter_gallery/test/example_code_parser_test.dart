@@ -40,21 +40,17 @@ test 1 1
 ''';
 
 class TestAssetBundle extends AssetBundle {
-  @override
   Future<ByteData> load(String key) async => null;
 
-  @override
   Future<String> loadString(String key, { bool cache = true }) async {
     if (key == 'lib/gallery/example_code.dart')
       return testCodeFile;
     return null;
   }
 
-  @override
   Future<T> loadStructuredData<T>(String key, Future<T> parser(String value)) async {
     return parser(await loadString(key));
   }
 
-  @override
   String toString() => '$runtimeType@$hashCode()';
 }

@@ -21,7 +21,6 @@ class Rectangle extends StatelessWidget {
 
   final Color color;
 
-  @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(

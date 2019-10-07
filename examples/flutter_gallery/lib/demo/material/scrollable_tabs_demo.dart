@@ -38,7 +38,6 @@ const List<_Page> _allPages = <_Page>[
 class ScrollableTabsDemo extends StatefulWidget {
   static const String routeName = '/material/scrollable-tabs';
 
-  @override
   ScrollableTabsDemoState createState() => ScrollableTabsDemoState();
 }
 
@@ -47,13 +46,11 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
   TabsDemoStyle _demoStyle = TabsDemoStyle.iconsAndText;
   bool _customIndicator = false;
 
-  @override
   void initState() {
     super.initState();
     _controller = TabController(vsync: this, length: _allPages.length);
   }
 
-  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -120,7 +117,6 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
     return null;
   }
 
-  @override
   Widget build(BuildContext context) {
     final Color iconColor = Theme.of(context).accentColor;
     return Scaffold(

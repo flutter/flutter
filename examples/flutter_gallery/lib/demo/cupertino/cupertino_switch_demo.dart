@@ -9,7 +9,6 @@ import '../../gallery/demo.dart';
 class CupertinoSwitchDemo extends StatefulWidget {
   static const String routeName = '/cupertino/switch';
 
-  @override
   _CupertinoSwitchDemoState createState() => _CupertinoSwitchDemoState();
 }
 
@@ -17,7 +16,6 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
 
   bool _switchValue = false;
 
-  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(

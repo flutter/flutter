@@ -9,12 +9,10 @@ class RenderDots extends RenderConstrainedBox {
   RenderDots() : super(additionalConstraints: const BoxConstraints.expand());
 
   // Makes this render box hittable so that we'll get pointer events.
-  @override
   bool hitTestSelf(Offset position) => true;
 
   final Map<int, Offset> _dots = <int, Offset>{};
 
-  @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is PointerDownEvent || event is PointerMoveEvent) {
       _dots[event.pointer] = event.position;
@@ -25,7 +23,6 @@ class RenderDots extends RenderConstrainedBox {
     }
   }
 
-  @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
     canvas.drawRect(offset & size, Paint()..color = const Color(0xFF0000FF));
@@ -41,7 +38,6 @@ class RenderDots extends RenderConstrainedBox {
 class Dots extends SingleChildRenderObjectWidget {
   const Dots({ Key key, Widget child }) : super(key: key, child: child);
 
-  @override
   RenderDots createRenderObject(BuildContext context) => RenderDots();
 }
 

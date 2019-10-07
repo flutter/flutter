@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 // This app is a stateful, it tracks the user's current choice.
 class BasicAppBarSample extends StatefulWidget {
-  @override
   _BasicAppBarSampleState createState() => _BasicAppBarSampleState();
 }
 
@@ -19,7 +18,6 @@ class _BasicAppBarSampleState extends State<BasicAppBarSample> {
     });
   }
 
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
@@ -76,7 +74,6 @@ class ChoiceCard extends StatelessWidget {
 
   final Choice choice;
 
-  @override
   Widget build(BuildContext context) {
     final TextStyle textStyle = Theme.of(context).textTheme.display1;
     return Card(

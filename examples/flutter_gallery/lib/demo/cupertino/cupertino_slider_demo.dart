@@ -9,7 +9,6 @@ import '../../gallery/demo.dart';
 class CupertinoSliderDemo extends StatefulWidget {
   static const String routeName = '/cupertino/slider';
 
-  @override
   _CupertinoSliderDemoState createState() => _CupertinoSliderDemoState();
 }
 
@@ -17,7 +16,6 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
   double _value = 25.0;
   double _discreteValue = 20.0;
 
-  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(

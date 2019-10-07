@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class PlatformChannel extends StatefulWidget {
-  @override
   _PlatformChannelState createState() => _PlatformChannelState();
 }
 
@@ -34,7 +33,6 @@ class _PlatformChannelState extends State<PlatformChannel> {
     });
   }
 
-  @override
   void initState() {
     super.initState();
     eventChannel.receiveBroadcastStream().listen(_onEvent, onError: _onError);
@@ -53,7 +51,6 @@ class _PlatformChannelState extends State<PlatformChannel> {
     });
   }
 
-  @override
   Widget build(BuildContext context) {
     return Material(
       child: Column(

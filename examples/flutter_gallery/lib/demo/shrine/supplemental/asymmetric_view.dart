@@ -83,7 +83,6 @@ class AsymmetricView extends StatelessWidget {
       : (totalItems / 3).ceil() * 2 - 1;
   }
 
-  @override
   Widget build(BuildContext context) {
     return ListView(
       scrollDirection: Axis.horizontal,

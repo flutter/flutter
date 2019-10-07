@@ -9,7 +9,6 @@ import '../../gallery/demo.dart';
 class ExpansionTileListDemo extends StatelessWidget {
   static const String routeName = '/material/expansion-tile-list';
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

@@ -11,7 +11,6 @@ import '../../gallery/demo.dart';
 class SliderDemo extends StatefulWidget {
   static const String routeName = '/material/slider';
 
-  @override
   _SliderDemoState createState() => _SliderDemoState();
 }
 
@@ -47,7 +46,6 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
   static const double _thumbSize = 4.0;
   static const double _disabledThumbSize = 3.0;
 
-  @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
     return isEnabled ? const Size.fromRadius(_thumbSize) : const Size.fromRadius(_disabledThumbSize);
   }
@@ -57,7 +55,6 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
     end: _thumbSize,
   );
 
-  @override
   void paint(
     PaintingContext context,
     Offset center, {
@@ -108,7 +105,6 @@ class _CustomThumbShape extends SliderComponentShape {
   static const double _thumbSize = 4.0;
   static const double _disabledThumbSize = 3.0;
 
-  @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
     return isEnabled ? const Size.fromRadius(_thumbSize) : const Size.fromRadius(_disabledThumbSize);
   }
@@ -118,7 +114,6 @@ class _CustomThumbShape extends SliderComponentShape {
     end: _thumbSize,
   );
 
-  @override
   void paint(
     PaintingContext context,
     Offset thumbCenter, {
@@ -147,7 +142,6 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
   static const double _disabledIndicatorSize = 3.0;
   static const double _slideUpHeight = 40.0;
 
-  @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
     return Size.fromRadius(isEnabled ? _indicatorSize : _disabledIndicatorSize);
   }
@@ -157,7 +151,6 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
     end: _indicatorSize,
   );
 
-  @override
   void paint(
     PaintingContext context,
     Offset thumbCenter, {
@@ -199,7 +192,6 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
 }
 
 class _SliderDemoState extends State<SliderDemo> {
-  @override
   Widget build(BuildContext context) {
     final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       ComponentDemoTabData(
@@ -226,7 +218,6 @@ class _SliderDemoState extends State<SliderDemo> {
 }
 
 class _Sliders extends StatefulWidget {
-  @override
   _SlidersState createState() => _SlidersState();
 }
 
@@ -235,7 +226,6 @@ class _SlidersState extends State<_Sliders> {
   double _discreteValue = 20.0;
   double _discreteCustomValue = 25.0;
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Padding(
@@ -346,7 +336,6 @@ class _SlidersState extends State<_Sliders> {
 }
 
 class _RangeSliders extends StatefulWidget {
-  @override
   _RangeSlidersState createState() => _RangeSlidersState();
 }
 
@@ -355,7 +344,6 @@ class _RangeSlidersState extends State<_RangeSliders> {
   RangeValues _discreteValues = const RangeValues(40.0, 120.0);
   RangeValues _discreteCustomValues = const RangeValues(40.0, 160.0);
 
-  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40.0),

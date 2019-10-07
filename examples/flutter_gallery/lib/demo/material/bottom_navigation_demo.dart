@@ -74,7 +74,6 @@ class NavigationIconView {
 }
 
 class CustomIcon extends StatelessWidget {
-  @override
   Widget build(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
     return Container(
@@ -87,7 +86,6 @@ class CustomIcon extends StatelessWidget {
 }
 
 class CustomInactiveIcon extends StatelessWidget {
-  @override
   Widget build(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
     return Container(
@@ -104,7 +102,6 @@ class CustomInactiveIcon extends StatelessWidget {
 class BottomNavigationDemo extends StatefulWidget {
   static const String routeName = '/material/bottom_navigation';
 
-  @override
   _BottomNavigationDemoState createState() => _BottomNavigationDemoState();
 }
 
@@ -114,7 +111,6 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   BottomNavigationBarType _type = BottomNavigationBarType.shifting;
   List<NavigationIconView> _navigationViews;
 
-  @override
   void initState() {
     super.initState();
     _navigationViews = <NavigationIconView>[
@@ -156,7 +152,6 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
     _navigationViews[_currentIndex].controller.value = 1.0;
   }
 
-  @override
   void dispose() {
     for (NavigationIconView view in _navigationViews)
       view.controller.dispose();
@@ -180,7 +175,6 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
     return Stack(children: transitions);
   }
 
-  @override
   Widget build(BuildContext context) {
     final BottomNavigationBar botNavBar = BottomNavigationBar(
       items: _navigationViews

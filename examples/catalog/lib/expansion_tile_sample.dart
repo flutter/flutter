@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 
 class ExpansionTileSample extends StatelessWidget {
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
@@ -82,7 +81,6 @@ class EntryItem extends StatelessWidget {
     );
   }
 
-  @override
   Widget build(BuildContext context) {
     return _buildTiles(entry);
   }

@@ -10,7 +10,6 @@ class PestoDemo extends StatelessWidget {
 
   static const String routeName = '/pesto';
 
-  @override
   Widget build(BuildContext context) => PestoHome();
 }
 
@@ -30,14 +29,12 @@ final ThemeData _kTheme = ThemeData(
 );
 
 class PestoHome extends StatelessWidget {
-  @override
   Widget build(BuildContext context) {
     return const RecipeGridPage(recipes: kPestoRecipes);
   }
 }
 
 class PestoFavorites extends StatelessWidget {
-  @override
   Widget build(BuildContext context) {
     return RecipeGridPage(recipes: _favoriteRecipes.toList());
   }
@@ -68,14 +65,12 @@ class RecipeGridPage extends StatefulWidget {
 
   final List<Recipe> recipes;
 
-  @override
   _RecipeGridPageState createState() => _RecipeGridPageState();
 }
 
 class _RecipeGridPageState extends State<RecipeGridPage> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return Theme(
@@ -193,7 +188,6 @@ class PestoLogo extends StatefulWidget {
   final double height;
   final double t;
 
-  @override
   _PestoLogoState createState() => _PestoLogoState();
 }
 
@@ -214,7 +208,6 @@ class _PestoLogoState extends State<PestoLogo> {
     end: const Rect.fromLTWH(0.0, 0.0, kLogoWidth, kImageHeight),
   );
 
-  @override
   Widget build(BuildContext context) {
     return Semantics(
       namesRoute: true,
@@ -259,7 +252,6 @@ class RecipeCard extends StatelessWidget {
   TextStyle get titleStyle => const PestoStyle(fontSize: 24.0, fontWeight: FontWeight.w600);
   TextStyle get authorStyle => const PestoStyle(fontWeight: FontWeight.w500, color: Colors.black54);
 
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
@@ -317,7 +309,6 @@ class RecipePage extends StatefulWidget {
 
   final Recipe recipe;
 
-  @override
   _RecipePageState createState() => _RecipePageState();
 }
 
@@ -327,7 +318,6 @@ class _RecipePageState extends State<RecipePage> {
 
   double _getAppBarHeight(BuildContext context) => MediaQuery.of(context).size.height * 0.3;
 
-  @override
   Widget build(BuildContext context) {
     // The full page content with the recipe's image behind it. This
     // adjusts based on the size of the screen. If the recipe sheet touches
@@ -443,7 +433,6 @@ class RecipeSheet extends StatelessWidget {
 
   final Recipe recipe;
 
-  @override
   Widget build(BuildContext context) {
     return Material(
       child: SafeArea(

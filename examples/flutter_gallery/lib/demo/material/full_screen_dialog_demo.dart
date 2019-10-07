@@ -27,7 +27,6 @@ class DateTimeItem extends StatelessWidget {
   final TimeOfDay time;
   final ValueChanged<DateTime> onChanged;
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
@@ -96,7 +95,6 @@ class DateTimeItem extends StatelessWidget {
 }
 
 class FullScreenDialogDemo extends StatefulWidget {
-  @override
   FullScreenDialogDemoState createState() => FullScreenDialogDemoState();
 }
 
@@ -144,7 +142,6 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     ) ?? false;
   }
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 

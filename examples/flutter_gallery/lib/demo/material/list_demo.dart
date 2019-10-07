@@ -25,7 +25,6 @@ class ListDemo extends StatefulWidget {
 
   static const String routeName = '/material/list';
 
-  @override
   _ListDemoState createState() => _ListDemoState();
 }
 
@@ -192,7 +191,6 @@ class _ListDemoState extends State<ListDemo> {
     );
   }
 
-  @override
   Widget build(BuildContext context) {
     final String layoutText = _dense ? ' \u2013 Dense' : '';
     String itemTypeText;

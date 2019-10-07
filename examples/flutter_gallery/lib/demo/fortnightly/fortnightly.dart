@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 class FortnightlyDemo extends StatelessWidget {
   static const String routeName = '/fortnightly';
 
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Fortnightly Demo',
@@ -35,7 +34,6 @@ class ShortAppBar extends StatelessWidget {
 
   final VoidCallback onBackPressed;
 
-  @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 96,
@@ -82,7 +80,6 @@ class FruitPage extends StatelessWidget {
  over water meant for the whole central valley of California? The story will shock you.
 '''.replaceAll('\n', '');
 
-  @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).primaryTextTheme;
 

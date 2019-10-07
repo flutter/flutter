@@ -20,7 +20,6 @@ Future<void> endOfAnimation() async {
 int iteration = 0;
 
 class LifecycleObserver extends WidgetsBindingObserver {
-  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     debugPrint('==== MEMORY BENCHMARK ==== $state ====');
     debugPrint('This was lifecycle event number $iteration in this instance');

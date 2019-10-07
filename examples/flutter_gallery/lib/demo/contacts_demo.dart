@@ -11,7 +11,6 @@ class _ContactCategory extends StatelessWidget {
   final IconData icon;
   final List<Widget> children;
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     return Container(
@@ -51,7 +50,6 @@ class _ContactItem extends StatelessWidget {
   final String tooltip;
   final VoidCallback onPressed;
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     return MergeSemantics(
@@ -88,7 +86,6 @@ class _ContactItem extends StatelessWidget {
 class ContactsDemo extends StatefulWidget {
   static const String routeName = '/contacts';
 
-  @override
   ContactsDemoState createState() => ContactsDemoState();
 }
 
@@ -100,7 +97,6 @@ class ContactsDemoState extends State<ContactsDemo> {
 
   AppBarBehavior _appBarBehavior = AppBarBehavior.pinned;
 
-  @override
   Widget build(BuildContext context) {
     return Theme(
       data: ThemeData(

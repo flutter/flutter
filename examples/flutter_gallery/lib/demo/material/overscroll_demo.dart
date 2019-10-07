@@ -15,7 +15,6 @@ class OverscrollDemo extends StatefulWidget {
 
   static const String routeName = '/material/overscroll';
 
-  @override
   OverscrollDemoState createState() => OverscrollDemoState();
 }
 
@@ -42,7 +41,6 @@ class OverscrollDemoState extends State<OverscrollDemo> {
     });
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,

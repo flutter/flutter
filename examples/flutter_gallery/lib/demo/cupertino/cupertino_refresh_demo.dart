@@ -11,14 +11,12 @@ import '../../gallery/demo.dart';
 class CupertinoRefreshControlDemo extends StatefulWidget {
   static const String routeName = '/cupertino/refresh';
 
-  @override
   _CupertinoRefreshControlDemoState createState() => _CupertinoRefreshControlDemoState();
 }
 
 class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDemo> {
   List<List<String>> randomizedContacts;
 
-  @override
   void initState() {
     super.initState();
     repopulateList();
@@ -36,7 +34,6 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
     );
   }
 
-  @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: CupertinoTheme.of(context).textTheme.textStyle,
@@ -160,7 +157,6 @@ class _ListItem extends StatelessWidget {
   final String date;
   final bool called;
 
-  @override
   Widget build(BuildContext context) {
     return Container(
       color: CupertinoTheme.of(context).scaffoldBackgroundColor,

@@ -48,14 +48,12 @@ const String _actionCode = 'buttons_action';
 class ButtonsDemo extends StatefulWidget {
   static const String routeName = '/material/buttons';
 
-  @override
   _ButtonsDemoState createState() => _ButtonsDemoState();
 }
 
 class _ButtonsDemoState extends State<ButtonsDemo> {
   ShapeBorder _buttonShape;
 
-  @override
   Widget build(BuildContext context) {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context).copyWith(
       shape: _buttonShape

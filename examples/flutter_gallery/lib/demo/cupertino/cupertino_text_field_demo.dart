@@ -7,7 +7,6 @@ import 'package:flutter/cupertino.dart';
 class CupertinoTextFieldDemo extends StatefulWidget {
   static const String routeName = '/cupertino/text_fields';
 
-  @override
   _CupertinoTextFieldDemoState createState() {
     return _CupertinoTextFieldDemoState();
   }
@@ -17,7 +16,6 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
   TextEditingController _chatTextController;
   TextEditingController _locationTextController;
 
-  @override
   void initState() {
     super.initState();
     _chatTextController = TextEditingController();
@@ -149,7 +147,6 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
     );
   }
 
-  @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
       style: const TextStyle(

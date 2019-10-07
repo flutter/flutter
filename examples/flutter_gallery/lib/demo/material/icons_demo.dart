@@ -9,7 +9,6 @@ import '../../gallery/demo.dart';
 class IconsDemo extends StatefulWidget {
   static const String routeName = '/material/icons';
 
-  @override
   IconsDemoState createState() => IconsDemoState();
 }
 
@@ -46,7 +45,6 @@ class IconsDemoState extends State<IconsDemo> {
     });
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -106,7 +104,6 @@ class _IconsDemoCard extends StatelessWidget {
     );
   }
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle textStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);

@@ -25,7 +25,6 @@ class _InputDropdown extends StatelessWidget {
   final VoidCallback onPressed;
   final Widget child;
 
-  @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onPressed,
@@ -85,7 +84,6 @@ class _DateTimePicker extends StatelessWidget {
       selectTime(picked);
   }
 
-  @override
   Widget build(BuildContext context) {
     final TextStyle valueStyle = Theme.of(context).textTheme.title;
     return Row(
@@ -117,7 +115,6 @@ class _DateTimePicker extends StatelessWidget {
 class DateAndTimePickerDemo extends StatefulWidget {
   static const String routeName = '/material/date-and-time-pickers';
 
-  @override
   _DateAndTimePickerDemoState createState() => _DateAndTimePickerDemoState();
 }
 
@@ -129,7 +126,6 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
   final List<String> _allActivities = <String>['hiking', 'swimming', 'boating', 'fishing'];
   String _activity = 'fishing';
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

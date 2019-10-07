@@ -42,7 +42,6 @@ class GridPhotoViewer extends StatefulWidget {
 
   final Photo photo;
 
-  @override
   _GridPhotoViewerState createState() => _GridPhotoViewerState();
 }
 
@@ -51,7 +50,6 @@ class _GridTitleText extends StatelessWidget {
 
   final String text;
 
-  @override
   Widget build(BuildContext context) {
     return FittedBox(
       fit: BoxFit.scaleDown,
@@ -69,14 +67,12 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
   Offset _normalizedOffset;
   double _previousScale;
 
-  @override
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this)
       ..addListener(_handleFlingAnimation);
   }
 
-  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -128,7 +124,6 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
       ..fling(velocity: magnitude / 1000.0);
   }
 
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onScaleStart: _handleOnScaleStart,
@@ -183,7 +178,6 @@ class GridDemoPhotoItem extends StatelessWidget {
     ));
   }
 
-  @override
   Widget build(BuildContext context) {
     final Widget image = GestureDetector(
       onTap: () { showPhoto(context); },
@@ -247,7 +241,6 @@ class GridListDemo extends StatefulWidget {
 
   static const String routeName = '/material/grid-list';
 
-  @override
   GridListDemoState createState() => GridListDemoState();
 }
 
@@ -335,7 +328,6 @@ class GridListDemoState extends State<GridListDemo> {
     });
   }
 
-  @override
   Widget build(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
     return Scaffold(

@@ -9,7 +9,6 @@ import '../../gallery/demo.dart';
 class CupertinoProgressIndicatorDemo extends StatelessWidget {
   static const String routeName = '/cupertino/progress_indicator';
 
-  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(

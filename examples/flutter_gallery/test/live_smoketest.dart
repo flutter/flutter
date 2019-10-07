@@ -132,7 +132,6 @@ class _LiveWidgetController extends LiveWidgetController {
     return finder;
   }
 
-  @override
   Future<void> tap(Finder finder, { int pointer, int buttons = kPrimaryButton }) async {
     await super.tap(await _waitForElement(finder), pointer: pointer, buttons: buttons);
   }

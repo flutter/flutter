@@ -26,7 +26,6 @@ class ProductPage extends StatelessWidget {
 
   final Category category;
 
-  @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<AppStateModel>(
       builder: (BuildContext context, Widget child, AppStateModel model) {
@@ -45,7 +44,6 @@ class HomePage extends StatelessWidget {
   final ExpandingBottomSheet expandingBottomSheet;
   final Backdrop backdrop;
 
-  @override
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[

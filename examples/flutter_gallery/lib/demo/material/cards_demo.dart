@@ -79,7 +79,6 @@ class TravelDestinationItem extends StatelessWidget {
   final TravelDestination destination;
   final ShapeBorder shape;
 
-  @override
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
@@ -115,7 +114,6 @@ class TappableTravelDestinationItem extends StatelessWidget {
   final TravelDestination destination;
   final ShapeBorder shape;
 
-  @override
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
@@ -158,7 +156,6 @@ class SelectableTravelDestinationItem extends StatefulWidget {
   final TravelDestination destination;
   final ShapeBorder shape;
 
-  @override
   _SelectableTravelDestinationItemState createState() => _SelectableTravelDestinationItemState();
 }
 
@@ -168,7 +165,6 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
   static const double height = 298.0;
   bool _isSelected = false;
 
-  @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
@@ -237,7 +233,6 @@ class SectionTitle extends StatelessWidget {
 
   final String title;
 
-  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 12.0),
@@ -256,7 +251,6 @@ class TravelDestinationContent extends StatelessWidget {
 
   final TravelDestination destination;
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
@@ -346,14 +340,12 @@ class TravelDestinationContent extends StatelessWidget {
 class CardsDemo extends StatefulWidget {
   static const String routeName = '/material/cards';
 
-  @override
   _CardsDemoState createState() => _CardsDemoState();
 }
 
 class _CardsDemoState extends State<CardsDemo> {
   ShapeBorder _shape;
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

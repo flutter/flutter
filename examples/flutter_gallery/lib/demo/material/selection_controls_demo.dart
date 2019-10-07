@@ -30,12 +30,10 @@ const String _switchCode = 'selectioncontrols_switch';
 class SelectionControlsDemo extends StatefulWidget {
   static const String routeName = '/material/selection-controls';
 
-  @override
   _SelectionControlsDemoState createState() => _SelectionControlsDemoState();
 }
 
 class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
-  @override
   Widget build(BuildContext context) {
     final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       ComponentDemoTabData(

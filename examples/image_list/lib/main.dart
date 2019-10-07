@@ -73,7 +73,6 @@ mhBKvYQc85gja0s1c+1VXA==
 ''';
 
 class MyHttpOverrides extends HttpOverrides {
-  @override
   HttpClient createHttpClient(SecurityContext context) {
     return super.createHttpClient(
         (context ?? SecurityContext())..setTrustedCertificatesBytes(certificate.codeUnits)
@@ -121,7 +120,6 @@ class MyApp extends StatelessWidget {
 
   final int port;
 
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
@@ -138,7 +136,6 @@ class MyHomePage extends StatefulWidget {
   final String title;
   final int port;
 
-  @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
@@ -168,7 +165,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
   }
 
-  @override
   Widget build(BuildContext context) {
     final List<AnimationController> controllers = List<AnimationController>(IMAGES);
     for (int i = 0; i < IMAGES; i++) {

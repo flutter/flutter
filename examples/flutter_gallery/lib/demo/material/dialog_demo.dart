@@ -28,7 +28,6 @@ class DialogDemoItem extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
 
-  @override
   Widget build(BuildContext context) {
     return SimpleDialogOption(
       onPressed: onPressed,
@@ -50,7 +49,6 @@ class DialogDemoItem extends StatelessWidget {
 class DialogDemo extends StatefulWidget {
   static const String routeName = '/material/dialog';
 
-  @override
   DialogDemoState createState() => DialogDemoState();
 }
 
@@ -59,7 +57,6 @@ class DialogDemoState extends State<DialogDemo> {
 
   TimeOfDay _selectedTime;
 
-  @override
   void initState() {
     super.initState();
     final DateTime now = DateTime.now();
@@ -80,7 +77,6 @@ class DialogDemoState extends State<DialogDemo> {
     });
   }
 
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);

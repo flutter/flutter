@@ -15,7 +15,6 @@ class _Page {
   _Page({ this.label });
   final String label;
   String get id => label[0];
-  @override
   String toString() => '$runtimeType("$label")';
 }
 
@@ -100,7 +99,6 @@ class _CardDataItem extends StatelessWidget {
   final _Page page;
   final _CardData data;
 
-  @override
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
@@ -140,7 +138,6 @@ class _CardDataItem extends StatelessWidget {
 class TabsDemo extends StatelessWidget {
   static const String routeName = '/material/tabs';
 
-  @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: _allPages.length,

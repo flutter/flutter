@@ -28,7 +28,6 @@ class AdjustableDropdownListTile extends StatelessWidget {
   final List<String> items;
   final ValueChanged<String> onChanged;
 
-  @override
   Widget build(BuildContext context) {
     final int indexOfValue = items.indexOf(value);
     assert(indexOfValue != -1);
@@ -80,7 +79,6 @@ class AdjustableDropdownListTile extends StatelessWidget {
 }
 
 class AdjustableDropdownExample extends StatefulWidget {
-  @override
   AdjustableDropdownExampleState createState() => AdjustableDropdownExampleState();
 }
 
@@ -95,7 +93,6 @@ class AdjustableDropdownExampleState extends State<AdjustableDropdownExample> {
   ];
   String timeout;
 
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(

@@ -13,7 +13,6 @@ import 'package:flutter/scheduler.dart';
 
 class NonStopVSync implements TickerProvider {
   const NonStopVSync();
-  @override
   Ticker createTicker(TickerCallback onTick) => Ticker(onTick);
 }
 
