@@ -3,6 +3,8 @@
 # The tests to run on Firebase Test Lab.
 # Currently, the test consists on building an Android App Bundle and ensuring
 # that the app doesn't crash upon startup.
+#
+# When adding a test, ensure that there's at least a `print()` statement under lib/*.dart.
 tests=(
   "dev/integration_tests/release_smoke_test"
   "dev/integration_tests/abstract_method_smoke_test"
@@ -64,9 +66,11 @@ function test_app_bundle() {
     --results-dir="$@"/"$GIT_REVISION"/"$CIRRUS_BUILD_ID" \
     $DEVICE_FLAG
 
-  # Check logcat for "E/flutter" - if it's there, something's wrong.
+  rm -f /tmp/logcat
   gsutil cat gs://flutter_firebase_testlab/"$@"/"$GIT_REVISION"/"$CIRRUS_BUILD_ID"/*/logcat > /tmp/logcat
+  # Check logcat for "E/flutter" - if it's there, something's wrong.
   ! grep "E/flutter" /tmp/logcat || false
+  # Check logcat for "I/flutter" - This is in the log if there's a print statement under lib/*.dart.
   grep "I/flutter" /tmp/logcat
   popd
 }
