@@ -475,6 +475,9 @@ abstract class Device {
     await descriptions(devices).forEach(printStatus);
   }
 
+  /// Clean up resources allocated by device
+  ///
+  /// For example log readers or port forwarders.
   void dispose() {}
 }
 
