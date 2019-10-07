@@ -20,8 +20,7 @@ import 'package:flutter_gallery/demo/rally/colors.dart';
 import 'package:flutter_gallery/demo/rally/data.dart';
 
 class RallyLineChart extends StatelessWidget {
-  const RallyLineChart({this.events = const <DetailedEventData>[]})
-      : assert(events != null);
+  const RallyLineChart({ this.events = const <DetailedEventData>[] })  : assert(events != null);
 
   final List<DetailedEventData> events;
 
@@ -84,9 +83,7 @@ class RallyLineChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
-  }
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 
   void _drawLine(Canvas canvas, Rect rect) {
     final Paint linePaint = Paint()
@@ -108,13 +105,12 @@ class RallyLineChartPainter extends CustomPainter {
     ];
     for (int i = 0; i < numDays + smoothing; i++) {
       final int endMillis = startMillis + millisInDay * 1;
-      final List<DetailedEventData> filteredEvents =
-          events.where((DetailedEventData e) {
-        return startMillis <= e.date.millisecondsSinceEpoch &&
-            e.date.millisecondsSinceEpoch <= endMillis;
-      }).toList();
-      lastAmount += filteredEvents.fold<num>(
-          0.0, (num sum, DetailedEventData e) => sum + e.amount);
+      final List<DetailedEventData> filteredEvents = events.where(
+        (DetailedEventData e) {
+          return startMillis <= e.date.millisecondsSinceEpoch && e.date.millisecondsSinceEpoch <= endMillis;
+        },
+      ).toList();
+      lastAmount += filteredEvents.fold<num>(0.0, (num sum, DetailedEventData e) => sum + e.amount);
       final double x = i / numDays * rect.width;
       final double y = (maxAmount - lastAmount) / maxAmount * rect.height;
       points.add(Offset(x, y));
@@ -153,21 +149,16 @@ class RallyLineChartPainter extends CustomPainter {
 
   /// Set X-axis labels under the X-axis increment markers.
   void _drawXAxisLabels(Canvas canvas, Rect rect) {
-    final TextStyle selectedLabelStyle =
-        Theme.of(context).textTheme.body1.copyWith(
-              fontWeight: FontWeight.w700,
-            );
-    final TextStyle unselectedLabelStyle =
-        Theme.of(context).textTheme.body1.copyWith(
-              fontWeight: FontWeight.w700,
-              color: RallyColors.gray25,
-            );
+    final TextStyle selectedLabelStyle = Theme.of(context).textTheme.body1.copyWith(
+      fontWeight: FontWeight.w700,
+    );
+    final TextStyle unselectedLabelStyle = Theme.of(context).textTheme.body1.copyWith(
+      fontWeight: FontWeight.w700,
+      color: RallyColors.gray25,
+    );
 
     final TextPainter leftLabel = TextPainter(
-      text: TextSpan(
-        text: 'AUGUST 2019',
-        style: unselectedLabelStyle,
-      ),
+      text: TextSpan(text: 'AUGUST 2019', style: unselectedLabelStyle),
       textDirection: TextDirection.ltr,
     );
     leftLabel.layout();
@@ -183,10 +174,7 @@ class RallyLineChartPainter extends CustomPainter {
     centerLabel.paint(canvas, Offset(x, y));
 
     final TextPainter rightLabel = TextPainter(
-      text: TextSpan(
-        text: 'OCTOBER 2019',
-        style: unselectedLabelStyle,
-      ),
+      text: TextSpan(text: 'OCTOBER 2019', style: unselectedLabelStyle),
       textDirection: TextDirection.ltr,
     );
     rightLabel.layout();

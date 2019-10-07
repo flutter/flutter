@@ -90,9 +90,7 @@ class _AlertsView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               const Expanded(
-                child: Text(
-                    'Heads up, you’ve used up 90% of your Shopping budget for '
-                    'this month.'),
+                child: Text('Heads up, you’ve used up 90% of your Shopping budget for this month.'),
               ),
               SizedBox(
                 width: 100,

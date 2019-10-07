@@ -40,10 +40,8 @@ class _HomePageState extends State<HomePage>
     super.initState();
 
     _tabController.addListener(() {
-      if (_tabController.indexIsChanging &&
-          _tabController.previousIndex != _tabController.index) {
-        setState(() {});
-      }
+      if (_tabController.indexIsChanging && _tabController.previousIndex != _tabController.index)
+        setState(() { });
     });
   }
 
@@ -129,8 +127,7 @@ class _HomePageState extends State<HomePage>
 }
 
 class _RallyTab extends StatefulWidget {
-  _RallyTab(this.style, this.icon, String title, this.isExpanded)
-      : titleText = Text(title, style: style);
+  _RallyTab(this.style, this.icon, String title, this.isExpanded) : titleText = Text(title, style: style);
 
   final TextStyle style;
   final Text titleText;

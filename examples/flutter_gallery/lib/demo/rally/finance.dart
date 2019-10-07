@@ -87,8 +87,7 @@ class FinancialEntityCategoryView extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute<FinancialEntityCategoryDetailsPage>(
-            builder: (BuildContext context) =>
-                FinancialEntityCategoryDetailsPage(),
+            builder: (BuildContext context) => FinancialEntityCategoryDetailsPage(),
           ),
         );
       },
@@ -112,27 +111,18 @@ class FinancialEntityCategoryView extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         title,
-                        style: Theme.of(context)
-                            .textTheme
-                            .body1
-                            .copyWith(fontSize: 16.0),
+                        style: Theme.of(context).textTheme.body1.copyWith(fontSize: 16.0),
                       ),
                       Text(
                         subtitle,
-                        style: Theme.of(context)
-                            .textTheme
-                            .body1
-                            .copyWith(color: RallyColors.gray60),
+                        style: Theme.of(context).textTheme.body1.copyWith(color: RallyColors.gray60),
                       ),
                     ],
                   ),
                   const Spacer(),
                   Text(
                     '\$ ' + usdFormat.format(amount),
-                    style: Theme.of(context)
-                        .textTheme
-                        .body2
-                        .copyWith(fontSize: 20.0, color: RallyColors.gray),
+                    style: Theme.of(context).textTheme.body2.copyWith(fontSize: 20.0, color: RallyColors.gray),
                   ),
                   SizedBox(width: 32.0, child: suffix),
                 ],
@@ -203,16 +193,16 @@ FinancialEntityCategoryView buildFinancialEntityFromBudgetData(
   int i,
   BuildContext context,
 ) {
+  final String amountUsed = usdWithSignFormat.format(item.amountUsed);
+  final String primaryAmount = usdWithSignFormat.format(item.primaryAmount);
+
   return FinancialEntityCategoryView(
-    suffix: Text(' LEFT',
-        style: Theme.of(context)
-            .textTheme
-            .body1
-            .copyWith(color: RallyColors.gray60, fontSize: 10.0)),
+    suffix: Text(
+      ' LEFT',
+      style: Theme.of(context).textTheme.body1.copyWith(color: RallyColors.gray60, fontSize: 10.0),
+    ),
     title: item.name,
-    subtitle: usdWithSignFormat.format(item.amountUsed) +
-        ' / ' +
-        usdWithSignFormat.format(item.primaryAmount),
+    subtitle: amountUsed + ' / ' + primaryAmount,
     indicatorColor: RallyColors.budgetColor(i),
     indicatorFraction: item.amountUsed / item.primaryAmount,
     amount: item.primaryAmount - item.amountUsed,
@@ -222,12 +212,16 @@ FinancialEntityCategoryView buildFinancialEntityFromBudgetData(
 List<FinancialEntityCategoryView> buildAccountDataListViews(
     List<AccountData> items) {
   return List<FinancialEntityCategoryView>.generate(
-      items.length, (int i) => buildFinancialEntityFromAccountData(items[i], i));
+    items.length,
+    (int i) => buildFinancialEntityFromAccountData(items[i], i),
+  );
 }
 
 List<FinancialEntityCategoryView> buildBillDataListViews(List<BillData> items) {
   return List<FinancialEntityCategoryView>.generate(
-      items.length, (int i) => buildFinancialEntityFromBillData(items[i], i));
+    items.length,
+    (int i) => buildFinancialEntityFromBillData(items[i], i),
+  );
 }
 
 List<FinancialEntityCategoryView> buildBudgetDataListViews(
@@ -239,18 +233,17 @@ List<FinancialEntityCategoryView> buildBudgetDataListViews(
 }
 
 class FinancialEntityCategoryDetailsPage extends StatelessWidget {
-  final List<DetailedEventData> items =
-      DummyDataService.getDetailedEventItems();
+  final List<DetailedEventData> items = DummyDataService.getDetailedEventItems();
 
   @override
   Widget build(BuildContext context) {
     final List<_DetailedEventCard> cards = items
-        .map((DetailedEventData i) => _DetailedEventCard(
-              title: i.title,
-              subtitle: dateFormat.format(i.date),
-              amount: i.amount,
-            ))
-        .toList();
+      .map((DetailedEventData i) => _DetailedEventCard(
+        title: i.title,
+        subtitle: dateFormat.format(i.date),
+        amount: i.amount,
+      ))
+      .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -264,9 +257,10 @@ class FinancialEntityCategoryDetailsPage extends StatelessWidget {
       body: Column(
         children: <Widget>[
           SizedBox(
-              height: 200.0,
-              width: double.infinity,
-              child: RallyLineChart(events: items)),
+            height: 200.0,
+            width: double.infinity,
+            child: RallyLineChart(events: items),
+          ),
           Flexible(
             child: ListView(shrinkWrap: true, children: cards),
           ),
@@ -305,27 +299,18 @@ class _DetailedEventCard extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         title,
-                        style: Theme.of(context)
-                            .textTheme
-                            .body1
-                            .copyWith(fontSize: 16.0),
+                        style: Theme.of(context).textTheme.body1.copyWith(fontSize: 16.0),
                       ),
                       Text(
                         subtitle,
-                        style: Theme.of(context)
-                            .textTheme
-                            .body1
-                            .copyWith(color: RallyColors.gray60),
+                        style: Theme.of(context).textTheme.body1.copyWith(color: RallyColors.gray60),
                       )
                     ],
                   ),
                   const Spacer(),
                   Text(
                     '\$${usdFormat.format(amount)}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .body2
-                        .copyWith(fontSize: 20.0, color: RallyColors.gray),
+                    style: Theme.of(context).textTheme.body2.copyWith(fontSize: 20.0, color: RallyColors.gray),
                   ),
                 ],
               ),
