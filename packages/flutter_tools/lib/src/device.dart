@@ -571,6 +571,7 @@ class ForwardedPort {
   @override
   String toString() => 'ForwardedPort HOST:$hostPort to DEVICE:$devicePort';
 
+  /// Kill subprocess (if present) used in forwarding.
   bool killProcess() {
     final Process process = context;
 
