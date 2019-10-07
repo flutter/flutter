@@ -74,11 +74,16 @@ class MouseTrackerAnnotation {
 
   @override
   String toString() {
-    final String none = (onEnter == null && onExit == null && onHover == null) ? ' <none>' : '';
-    return '[$runtimeType${hashCode.toRadixString(16)}$none'
-        '${onEnter == null ? '' : ' onEnter'}'
-        '${onHover == null ? '' : ' onHover'}'
-        '${onExit == null ? '' : ' onExit'}]';
+    final List<String> callbacks = <String>[];
+    if (onEnter != null)
+      callbacks.add('enter');
+    if (onHover != null)
+      callbacks.add('hover');
+    if (onExit != null)
+      callbacks.add('exit');
+    final String describeCallbacks = callbacks.isEmpty ? '<none>' :
+      callbacks.join(' ');
+    return '${describeIdentity(this)}(callbacks: $describeCallbacks)';
   }
 }
 

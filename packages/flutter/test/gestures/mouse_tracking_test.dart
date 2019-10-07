@@ -85,6 +85,22 @@ void main() {
     PointerEventConverter.clearPointers();
   });
 
+  test('MouseTrackerAnnotation has correct toString', () {
+    final MouseTrackerAnnotation annotation1 =
+      MouseTrackerAnnotation(onEnter: (_) {}, onExit: (_) {}, onHover: (_) {});
+    expect(
+      annotation1.toString(),
+      equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: enter hover exit)'),
+    );
+
+    const MouseTrackerAnnotation annotation2 =
+      MouseTrackerAnnotation();
+    expect(
+      annotation2.toString(),
+      equals('MouseTrackerAnnotation#${shortHash(annotation2)}(callbacks: <none>)'),
+    );
+  });
+
   test('should detect enter, hover, and exit from Added, Hover, and Removed events', () {
     final List<PointerEvent> events = <PointerEvent>[];
     _setUpWithOneAnnotation(logEvents: events);
