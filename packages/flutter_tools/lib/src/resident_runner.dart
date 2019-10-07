@@ -42,6 +42,7 @@ class FlutterDevice {
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+         enableAsserts: buildMode == BuildMode.debug,
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots,
          fileSystemScheme: fileSystemScheme,
