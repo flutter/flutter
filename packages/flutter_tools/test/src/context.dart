@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -81,7 +82,7 @@ void testUsingContext(
             when(mock.getAttachedDevices()).thenAnswer((Invocation _) async => <IOSSimulator>[]);
             return mock;
           },
-          OutputPreferences: () => OutputPreferences(showColor: false),
+          OutputPreferences: () => OutputPreferences.test(),
           Logger: () => BufferLogger(),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           SimControl: () => MockSimControl(),
@@ -90,6 +91,7 @@ void testUsingContext(
           FileSystem: () => const LocalFileSystemBlockingSetCurrentDirectory(),
           TimeoutConfiguration: () => const TimeoutConfiguration(),
           PlistParser: () => FakePlistParser(),
+          Signals: () => FakeSignals(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -129,8 +131,9 @@ void testUsingContext(
 void _printBufferedErrors(AppContext testContext) {
   if (testContext.get<Logger>() is BufferLogger) {
     final BufferLogger bufferLogger = testContext.get<Logger>();
-    if (bufferLogger.errorText.isNotEmpty)
+    if (bufferLogger.errorText.isNotEmpty) {
       print(bufferLogger.errorText);
+    }
     bufferLogger.clear();
   }
 }
@@ -142,8 +145,9 @@ class FakeDeviceManager implements DeviceManager {
 
   @override
   String get specifiedDeviceId {
-    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all')
+    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all') {
       return null;
+    }
     return _specifiedDeviceId;
   }
 
@@ -299,7 +303,7 @@ class FakeUsage implements Usage {
   void sendCommand(String command, { Map<String, String> parameters }) { }
 
   @override
-  void sendEvent(String category, String parameter, { Map<String, String> parameters }) { }
+  void sendEvent(String category, String parameter, { String label, Map<String, String> parameters }) { }
 
   @override
   void sendTiming(String category, String variableName, Duration duration, { String label }) { }
@@ -331,12 +335,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   int get minorVersion => 2;
 
   @override
-  Map<String, String> getBuildSettings(String projectPath, String target) {
-    return <String, String>{};
-  }
-
-  @override
-  Future<Map<String, String>> getBuildSettingsAsync(
+  Future<Map<String, String>> getBuildSettings(
     String projectPath,
     String target, {
     Duration timeout = const Duration(minutes: 1),
@@ -349,7 +348,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],
@@ -389,4 +388,19 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
           'Consider using a MemoryFileSystem for testing if possible or refactor '
           'code to not require setting fs.currentDirectory.';
   }
+}
+
+class FakeSignals implements Signals {
+  @override
+  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+    return null;
+  }
+
+  @override
+  Future<bool> removeHandler(ProcessSignal signal, Object token) async {
+    return true;
+  }
+
+  @override
+  Stream<Object> get errors => const Stream<Object>.empty();
 }

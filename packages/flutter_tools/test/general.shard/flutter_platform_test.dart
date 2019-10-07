@@ -88,14 +88,14 @@ void main() {
       expect(() => installHook(
         shellPath: 'abc',
         enableObservatory: false,
-        startPaused: true
+        startPaused: true,
       ), throwsA(isA<AssertionError>()));
 
       expect(() => installHook(
         shellPath: 'abc',
         enableObservatory: false,
         startPaused: false,
-        observatoryPort: 123
+        observatoryPort: 123,
       ), throwsA(isA<AssertionError>()));
 
       FlutterPlatform capturedPlatform;
@@ -109,6 +109,7 @@ void main() {
         port: 100,
         precompiledDillPath: 'def',
         precompiledDillFiles: expectedPrecompiledDillFiles,
+        enableAsserts: true,
         trackWidgetCreation: true,
         updateGoldens: true,
         buildTestAssets: true,
@@ -130,6 +131,7 @@ void main() {
       expect(flutterPlatform.explicitObservatoryPort, equals(200));
       expect(flutterPlatform.precompiledDillPath, equals('def'));
       expect(flutterPlatform.precompiledDillFiles, expectedPrecompiledDillFiles);
+      expect(flutterPlatform.enableAsserts, equals(true));
       expect(flutterPlatform.trackWidgetCreation, equals(true));
       expect(flutterPlatform.updateGoldens, equals(true));
       expect(flutterPlatform.buildTestAssets, equals(true));

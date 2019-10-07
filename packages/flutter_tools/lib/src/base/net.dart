@@ -21,8 +21,9 @@ Future<List<int>> fetchUrl(Uri url, {int maxAttempts}) async {
   while (true) {
     attempts += 1;
     final List<int> result = await _attempt(url);
-    if (result != null)
+    if (result != null) {
       return result;
+    }
     if (maxAttempts != null && attempts >= maxAttempts) {
       printStatus('Download failed -- retry $attempts');
       return null;
@@ -30,8 +31,9 @@ Future<List<int>> fetchUrl(Uri url, {int maxAttempts}) async {
     printStatus('Download failed -- attempting retry $attempts in '
         '$durationSeconds second${ durationSeconds == 1 ? "" : "s"}...');
     await Future<void>.delayed(Duration(seconds: durationSeconds));
-    if (durationSeconds < 64)
+    if (durationSeconds < 64) {
       durationSeconds *= 2;
+    }
   }
 }
 

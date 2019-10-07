@@ -657,10 +657,9 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
       return topmost;
     }
 
-    final List<_SortData> data = <_SortData>[];
-    for (FocusNode node in nodes) {
-      data.add(_SortData(node));
-    }
+    final List<_SortData> data = <_SortData>[
+      for (FocusNode node in nodes) _SortData(node),
+    ];
 
     // Pick the initial widget as the one that is leftmost in the band of the
     // topmost, or the topmost, if there are no others in its band.

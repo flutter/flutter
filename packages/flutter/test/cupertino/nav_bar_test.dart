@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 int count = 0;
@@ -50,16 +51,35 @@ void main() {
     expect(tester.getCenter(find.text('Page 2')).dx, 400.0);
   });
 
-  testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
+  testWidgets('Opaque background does not add blur effects, non-opaque background adds blur effects', (WidgetTester tester) async {
+    const CupertinoDynamicColor background = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFFE5E5E5),
+      darkColor: Color(0xF3E5E5E5),
+    );
+
     await tester.pumpWidget(
       const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.light),
         home: CupertinoNavigationBar(
           middle: Text('Title'),
-          backgroundColor: Color(0xFFE5E5E5),
+          backgroundColor: background,
         ),
       ),
     );
     expect(find.byType(BackdropFilter), findsNothing);
+    expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.color));
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoNavigationBar(
+          middle: Text('Title'),
+          backgroundColor: background,
+        ),
+      ),
+    );
+    expect(find.byType(BackdropFilter), findsOneWidget);
+    expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.darkColor));
   });
 
   testWidgets('Non-opaque background adds blur effects', (WidgetTester tester) async {
@@ -168,18 +188,19 @@ void main() {
 
   testWidgets('Nav bar respects themes', (WidgetTester tester) async {
     count = 0x000000;
+    const CupertinoDynamicColor orange = CupertinoColors.activeOrange;
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
             onPressed: () { },
-            child: const _ExpectStyles(color: CupertinoColors.activeOrange, index: 0x000001),
+            child: _ExpectStyles(color: orange.darkColor, index: 0x000001),
           ),
           middle: const _ExpectStyles(color: CupertinoColors.white, index: 0x000100),
           trailing: CupertinoButton(
             onPressed: () { },
-            child: const _ExpectStyles(color: CupertinoColors.activeOrange, index: 0x010000),
+            child: _ExpectStyles(color: orange.darkColor, index: 0x010000),
           ),
         ),
       ),
@@ -313,8 +334,8 @@ void main() {
     });
 
     expect(opacities, <double> [
-        0.0, // Initially the smaller font title is invisible.
-        1.0, // The larger font title is visible.
+      0.0, // Initially the smaller font title is invisible.
+      1.0, // The larger font title is visible.
     ]);
 
     expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
@@ -338,8 +359,8 @@ void main() {
     });
 
     expect(opacities, <double> [
-        1.0, // Smaller font title now visible
-        0.0, // Larger font title invisible.
+      1.0, // Smaller font title now visible
+      0.0, // Larger font title invisible.
     ]);
 
     // The persistent toolbar doesn't move or change size.
@@ -801,7 +822,7 @@ void main() {
         find.byType(RepaintBoundary).last,
         matchesGoldenFile(
           'nav_bar_test.standard_title.png',
-          version: 1,
+          version: 2,
         ),
       );
     },
@@ -835,7 +856,7 @@ void main() {
         find.byType(RepaintBoundary).last,
         matchesGoldenFile(
           'nav_bar_test.large_title.png',
-          version: 1,
+          version: 2,
         ),
       );
     },
@@ -942,7 +963,7 @@ void main() {
               child: Placeholder(),
             );
           },
-        )
+        ),
       );
 
       await tester.pump();
@@ -954,14 +975,14 @@ void main() {
           builder: (BuildContext context) {
             return const CupertinoNavigationBarBackButton();
           },
-        )
+        ),
       );
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.widgetWithText(CupertinoButton, 'An iPod'), findsOneWidget);
-    }
+    },
   );
 
   testWidgets(
@@ -983,7 +1004,7 @@ void main() {
               child: Placeholder(),
             );
           },
-        )
+        ),
       );
 
       await tester.pump();
@@ -1002,7 +1023,7 @@ void main() {
               child: const Placeholder(),
             );
           },
-        )
+        ),
       );
 
       await tester.pump();
@@ -1016,7 +1037,7 @@ void main() {
       expect(find.text('A Phone'), findsOneWidget);
       // Custom onPressed called.
       expect(backPressed, true);
-    }
+    },
   );
 
   testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
@@ -1114,7 +1135,7 @@ class _ExpectStyles extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextStyle style = DefaultTextStyle.of(context).style;
-    expect(style.color, color);
+    expect(style.color.value, color.value);
     expect(style.fontFamily, '.SF Pro Text');
     expect(style.fontSize, 17.0);
     expect(style.letterSpacing, -0.41);

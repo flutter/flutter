@@ -18,7 +18,7 @@ void main() {
             child: const Text('GO'),
           ),
         ),
-      )
+      ),
     );
     await tester.tap(find.text('GO'));
     expect(find.text('Done'), findsOneWidget);

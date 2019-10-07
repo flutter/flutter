@@ -46,7 +46,7 @@ class _TextSpanEditingController extends TextEditingController {
 
 class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _SelectableTextSelectionGestureDetectorBuilder({
-    @required _SelectableTextState state
+    @required _SelectableTextState state,
   }) : _state = state,
       super(delegate: state);
 
@@ -374,7 +374,7 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.edtiableText.scrollPhysics}
   final ScrollPhysics scrollPhysics;
 
-  /// {@macro flutter.dart:ui.text.TextWidthBasis}
+  /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
   @override
@@ -440,7 +440,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       );
     }
     if (_effectiveFocusNode.hasFocus && _controller.selection.isCollapsed) {
-        _showSelectionHandles = false;
+      _showSelectionHandles = false;
     }
   }
 

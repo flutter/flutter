@@ -17,11 +17,9 @@ import '../reporting/reporting.dart';
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
-  final String buildFlag = buildInfo?.isDebug == true ? 'debug' : 'release';
   final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.
 export FLUTTER_ROOT=${Cache.flutterRoot}
-export BUILD=$buildFlag
 export TRACK_WIDGET_CREATION=${buildInfo?.trackWidgetCreation == true}
 export FLUTTER_TARGET=$target
 export PROJECT_DIR=${linuxProject.project.directory.path}
@@ -34,7 +32,7 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   }
 
   /// Cache flutter configuration files in the linux directory.
-  linuxProject.cacheDirectory.childFile('generated_config')
+  linuxProject.generatedMakeConfigFile
     ..createSync(recursive: true)
     ..writeAsStringSync(buffer.toString());
 
@@ -48,12 +46,14 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   }
 
   // Invoke make.
+  final String buildFlag = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
   final Stopwatch sw = Stopwatch()..start();
   final Process process = await processManager.start(<String>[
     'make',
     '-C',
-    linuxProject.editableHostAppDirectory.path,
-  ], runInShell: true);
+    linuxProject.makeFile.parent.path,
+    'BUILD=$buildFlag'
+  ]);
   final Status status = logger.startProgress(
     'Building Linux application...',
     timeout: null,

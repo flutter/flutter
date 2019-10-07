@@ -36,8 +36,8 @@ class FeatureFlags {
   /// Whether flutter desktop for Windows is enabled.
   bool get isWindowsEnabled => _isEnabled(flutterWindowsDesktopFeature);
 
-  /// Whether plugins are built as AARs in app projects.
-  bool get isPluginAsAarEnabled => _isEnabled(flutterBuildPluginAsAarFeature);
+  /// Whether the new Android embedding is enabled.
+  bool get isNewAndroidEmbeddingEnabled => _isEnabled(flutterNewAndroidEmbeddingFeature);
 
   // Calculate whether a particular feature is enabled for the current channel.
   static bool _isEnabled(Feature feature) {
@@ -69,6 +69,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
   flutterBuildPluginAsAarFeature,
+  flutterNewAndroidEmbeddingFeature,
 ];
 
 /// The [Feature] for flutter web.
@@ -123,6 +124,16 @@ const Feature flutterWindowsDesktopFeature = Feature(
 const Feature flutterBuildPluginAsAarFeature = Feature(
   name: 'Build plugins independently as AARs in app projects',
   configSetting: 'enable-build-plugin-as-aar',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+);
+
+/// The [Feature] for generating projects using the new Android embedding.
+const Feature flutterNewAndroidEmbeddingFeature = Feature(
+  name: 'flutter create generates projects using the new Android embedding',
+  configSetting: 'enable-new-android-embedding',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,

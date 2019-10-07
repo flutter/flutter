@@ -56,7 +56,7 @@ void main() {
 
     testUsingContext('isWorking returns false if libimobiledevice is not installed', () async {
       when(mockProcessManager.runSync(
-        <String>[ideviceIdPath, '-h'], environment: anyNamed('environment')
+        <String>[ideviceIdPath, '-h'], environment: anyNamed('environment'),
       )).thenReturn(ProcessResult(123, 1, '', ''));
       expect(await iMobileDevice.isWorking, false);
     }, overrides: <Type, Generator>{

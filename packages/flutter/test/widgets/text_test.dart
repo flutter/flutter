@@ -283,7 +283,7 @@ void main() {
             TestSemantics(
               label: 'world',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[SemanticsAction.tap]
+              actions: <SemanticsAction>[SemanticsAction.tap],
             ),
           ],
         ),
@@ -354,7 +354,7 @@ void main() {
           ],
         ),
         textDirection: TextDirection.ltr,
-      )
+      ),
     );
     // The expected visual order of the text is:
     //   hello world RIS OD you OD WOH YOB good bye

@@ -7,11 +7,59 @@ import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:pool/pool.dart';
 
 import '../base/file_system.dart';
+import '../convert.dart';
 import '../globals.dart';
 import 'build_system.dart';
-import 'filecache.pb.dart' as pb;
+
+/// An encoded representation of all file hashes.
+class FileStorage {
+  FileStorage(this.version, this.files);
+
+  factory FileStorage.fromBuffer(Uint8List buffer) {
+    final Map<String, Object> json = jsonDecode(utf8.decode(buffer));
+    final int version = json['version'];
+    final List<Object> rawCachedFiles = json['files'];
+    final List<FileHash> cachedFiles = <FileHash>[
+      for (Map<String, Object> rawFile in rawCachedFiles) FileHash.fromJson(rawFile),
+    ];
+    return FileStorage(version, cachedFiles);
+  }
+
+  final int version;
+  final List<FileHash> files;
+
+  List<int> toBuffer() {
+    final Map<String, Object> json = <String, Object>{
+      'version': version,
+      'files': <Object>[
+        for (FileHash file in files) file.toJson(),
+      ],
+    };
+    return utf8.encode(jsonEncode(json));
+  }
+}
+
+/// A stored file hash and path.
+class FileHash {
+  FileHash(this.path, this.hash);
+
+  factory FileHash.fromJson(Map<String, Object> json) {
+    return FileHash(json['path'], json['hash']);
+  }
+
+  final String path;
+  final String hash;
+
+  Object toJson() {
+    return <String, Object>{
+      'path': path,
+      'hash': hash,
+    };
+  }
+}
 
 /// A globally accessible cache of file hashes.
 ///
@@ -22,13 +70,6 @@ import 'filecache.pb.dart' as pb;
 ///
 /// The format of the file store is subject to change and not part of its API.
 ///
-/// To regenerate the protobuf entries used to construct the cache:
-///   1. If not already installed, https://developers.google.com/protocol-buffers/docs/downloads
-///   2. pub global active `protoc-gen-dart`
-///   3. protoc -I=lib/src/build_system/  --dart_out=lib/src/build_system/  lib/src/build_system/filecache.proto
-///   4. Add licenses headers to the newly generated file and check-in.
-///
-/// See also: https://developers.google.com/protocol-buffers/docs/darttutorial
 // TODO(jonahwilliams): find a better way to clear out old entries, perhaps
 // track the last access or modification date?
 class FileHashStore {
@@ -42,7 +83,7 @@ class FileHashStore {
   static const String _kFileCache = '.filecache';
 
   // The current version of the file cache storage format.
-  static const int _kVersion = 1;
+  static const int _kVersion = 2;
 
   /// Read file hashes from disk.
   void initialize() {
@@ -51,12 +92,19 @@ class FileHashStore {
       return;
     }
     final List<int> data = _cacheFile.readAsBytesSync();
-    final pb.FileStorage fileStorage = pb.FileStorage.fromBuffer(data);
+    FileStorage fileStorage;
+    try {
+      fileStorage = FileStorage.fromBuffer(data);
+    } catch (err) {
+      printTrace('Filestorage format changed');
+      _cacheFile.deleteSync();
+      return;
+    }
     if (fileStorage.version != _kVersion) {
       _cacheFile.deleteSync();
       return;
     }
-    for (pb.FileHash fileHash in fileStorage.files) {
+    for (FileHash fileHash in fileStorage.files) {
       previousHashes[fileHash.path] = fileHash.hash;
     }
     printTrace('Done initializing file store');
@@ -65,46 +113,50 @@ class FileHashStore {
   /// Persist file hashes to disk.
   void persist() {
     printTrace('Persisting file store');
-    final pb.FileStorage fileStorage = pb.FileStorage();
-    fileStorage.version = _kVersion;
     final File file = _cacheFile;
     if (!file.existsSync()) {
-      file.createSync();
+      file.createSync(recursive: true);
     }
+    final List<FileHash> fileHashes = <FileHash>[];
     for (MapEntry<String, String> entry in currentHashes.entries) {
       previousHashes[entry.key] = entry.value;
     }
     for (MapEntry<String, String> entry in previousHashes.entries) {
-      final pb.FileHash fileHash = pb.FileHash();
-      fileHash.path = entry.key;
-      fileHash.hash = entry.value;
-      fileStorage.files.add(fileHash);
+      fileHashes.add(FileHash(entry.key, entry.value));
     }
-    final Uint8List buffer = fileStorage.writeToBuffer();
+    final FileStorage fileStorage = FileStorage(
+      _kVersion,
+      fileHashes,
+    );
+    final Uint8List buffer = fileStorage.toBuffer();
     file.writeAsBytesSync(buffer);
     printTrace('Done persisting file store');
   }
 
   /// Computes a hash of the provided files and returns a list of entities
   /// that were dirty.
-  // TODO(jonahwilliams): compare hash performance with md5 tool on macOS and
-  // linux and certutil on Windows, as well as dividing up computation across
-  // isolates. This also related to the current performance issue with checking
-  // APKs before installing them on device.
   Future<List<File>> hashFiles(List<File> files) async {
     final List<File> dirty = <File>[];
-    for (File file in files) {
-      final String absolutePath = file.resolveSymbolicLinksSync();
-      final String previousHash = previousHashes[absolutePath];
-      final List<int> bytes = file.readAsBytesSync();
-      final String currentHash = md5.convert(bytes).toString();
+    final Pool openFiles = Pool(kMaxOpenFiles);
+    await Future.wait(<Future<void>>[
+      for (File file in files) _hashFile(file, dirty, openFiles)]);
+    return dirty;
+  }
 
+  Future<void> _hashFile(File file, List<File> dirty, Pool pool) async {
+    final PoolResource resource = await pool.request();
+    try {
+      final String absolutePath = file.path;
+      final String previousHash = previousHashes[absolutePath];
+      final Digest digest = md5.convert(await file.readAsBytes());
+      final String currentHash = digest.toString();
       if (currentHash != previousHash) {
         dirty.add(file);
       }
       currentHashes[absolutePath] = currentHash;
+    } finally {
+      resource.release();
     }
-    return dirty;
   }
 
   File get _cacheFile => environment.buildDir.childFile(_kFileCache);

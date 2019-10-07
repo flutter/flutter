@@ -29,6 +29,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
   /// [ToggleButtons].
   const ToggleButtonsThemeData({
     this.textStyle,
+    this.constraints,
     this.color,
     this.selectedColor,
     this.disabledColor,
@@ -50,6 +51,11 @@ class ToggleButtonsThemeData extends Diagnosticable {
   /// [selectedColor] or [disabledColor] depending on whether the buttons
   /// are active, selected, or disabled.
   final TextStyle textStyle;
+
+  /// Defines the button's size.
+  ///
+  /// Typically used to constrain the button's minimum size.
+  final BoxConstraints constraints;
 
   /// The color for descendant [Text] and [Icon] widgets if the toggle button
   /// is enabled.
@@ -104,6 +110,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
   /// new values.
   ToggleButtonsThemeData copyWith({
     TextStyle textStyle,
+    BoxConstraints constraints,
     Color color,
     Color selectedColor,
     Color disabledColor,
@@ -120,6 +127,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
   }) {
     return ToggleButtonsThemeData(
       textStyle: textStyle ?? this.textStyle,
+      constraints: constraints ?? this.constraints,
       color: color ?? this.color,
       selectedColor: selectedColor ?? this.selectedColor,
       disabledColor: disabledColor ?? this.disabledColor,
@@ -143,6 +151,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
       return null;
     return ToggleButtonsThemeData(
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
+      constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
       color: Color.lerp(a?.color, b?.color, t),
       selectedColor: Color.lerp(a?.selectedColor, b?.selectedColor, t),
       disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
@@ -163,6 +172,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
   int get hashCode {
     return hashValues(
       textStyle,
+      constraints,
       color,
       selectedColor,
       disabledColor,
@@ -187,6 +197,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
       return false;
     final ToggleButtonsThemeData typedOther = other;
     return typedOther.textStyle == textStyle
+        && typedOther.constraints == constraints
         && typedOther.color == color
         && typedOther.selectedColor == selectedColor
         && typedOther.disabledColor == disabledColor
@@ -206,6 +217,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
+    properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));

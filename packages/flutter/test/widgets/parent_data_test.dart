@@ -308,7 +308,7 @@ void main() {
         'Positioned(no depth, left: 7.0, top: 6.0, dirty) has no Stack ancestor at all.\n'
         'The ownership chain for the parent of the offending Positioned was:\n'
         '  Row ← Container ← [root]'
-      )
+      ),
     );
 
     await tester.pumpWidget(
