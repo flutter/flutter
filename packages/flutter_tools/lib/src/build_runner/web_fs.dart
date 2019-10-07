@@ -413,7 +413,7 @@ class DebugAssetServer extends AssetServer {
         ));
         if (dart2jsArchive.existsSync()) {
           final Archive archive = TarDecoder().decodeBytes(dart2jsArchive.readAsBytesSync());
-          partFiles = fs.systemTempDirectory.createTempSync('_flutter_tool')
+          partFiles = fs.systemTempDirectory.createTempSync('flutter_tool.')
             ..createSync();
           for (ArchiveFile file in archive) {
             partFiles.childFile(file.name).writeAsBytesSync(file.content);
