@@ -5,6 +5,7 @@ flutter_application_path = 'flutterapp/'
 load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
 
 target 'ios_add2app' do
+  use_modular_headers!
   install_all_flutter_pods(flutter_application_path)
 end
 

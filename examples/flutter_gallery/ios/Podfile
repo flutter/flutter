@@ -27,6 +27,8 @@ def parse_KV_file(file,separator='=')
 end
 
 target 'Runner' do
+  use_modular_headers!
+  
   # Flutter Pods
   pod 'Flutter', :path => ENV['FLUTTER_FRAMEWORK_DIR']
   
