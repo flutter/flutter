@@ -17,6 +17,7 @@ Future<void> main(List<String> arguments) async {
   final String flutterEngine = Platform.environment['FLUTTER_ENGINE'];
   final String localEngine = Platform.environment['LOCAL_ENGINE'];
   final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
+
   Directory.current = projectDirectory;
 
   if (localEngine != null && !localEngine.contains(buildMode)) {
@@ -32,34 +33,22 @@ or
 ''');
     exit(1);
   }
-  final String flutterExecutable = path.join(
-    flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 
-  if (targetPlatform == 'linux-x64') {
-    // TODO(jonahwilliams): currently all builds are debug builds. Remove the
-    // hardcoded mode when profile and release support is added.
-    final ProcessResult unpackResult = await Process.run(
-        flutterExecutable,
-        <String>[
-          '--suppress-analytics',
-          '--verbose',
-          if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
-          if (localEngine != null) '--local-engine=$localEngine',
-          'assemble',
-          '-dTargetPlatform=$targetPlatform',
-          '-dBuildMode=debug',
-          '-dTargetFile=$flutterTarget',
-          '--output=build',
-          'debug_bundle_linux_assets',
-        ]);
-    if (unpackResult.exitCode != 0) {
-      stderr.write(unpackResult.stderr);
+  String cacheDirectory;
+  switch (targetPlatform) {
+    case 'linux-x64':
+      cacheDirectory = 'linux/flutter/ephemeral';
+      break;
+    case 'windows-x64':
+      cacheDirectory = 'windows/flutter/ephemeral';
+      break;
+    default:
+      stderr.write('Unsupported target platform $targetPlatform');
       exit(1);
-    }
-    return;
   }
 
-  const String cacheDirectory = 'windows/flutter/ephemeral';
+  final String flutterExecutable = path.join(
+      flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
   final ProcessResult unpackResult = await Process.run(
     flutterExecutable,
     <String>[
