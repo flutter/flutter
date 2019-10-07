@@ -25,32 +25,6 @@ typedef PointerExitEventListener = void Function(PointerExitEvent event);
 /// Used by [MouseTrackerAnnotation], [Listener] and [RenderPointerListener].
 typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 
-class _MouseState {
-  _MouseState({
-    @required PointerEvent mostRecentEvent ,
-  }) : assert(mostRecentEvent != null),
-       _mostRecentEvent = mostRecentEvent ;
-
-  // The list of annotations that contains this device during the last frame.
-  Set<MouseTrackerAnnotation> lastAnnotations = <MouseTrackerAnnotation>{};
-
-  // The most recent mouse event observed for this device observed.
-  //
-  // The [mostRecentEvent] is never null.
-  PointerEvent get mostRecentEvent {
-    assert(_mostRecentEvent != null);
-    return _mostRecentEvent;
-  }
-  set mostRecentEvent(PointerEvent value) {
-    assert(value != null);
-    _mostRecentEvent = value;
-  }
-  PointerEvent _mostRecentEvent;
-
-  // Whether this device should be removed the next time it's updated.
-  bool pendingRemoval = false;
-}
-
 /// The annotation object used to annotate layers that are interested in mouse
 /// movements.
 ///
@@ -87,23 +61,53 @@ class MouseTrackerAnnotation {
   }
 }
 
-/// Describes a function that finds an annotation given an offset in logical
-/// coordinates.
+/// Signature for searching for [MouseTrackerAnnotation]s from the given offset.
 ///
 /// It is used by the [MouseTracker] to fetch annotations for the mouse
 /// position.
 typedef MouseDetectorAnnotationFinder = Iterable<MouseTrackerAnnotation> Function(Offset offset);
 
-/// Keeps state about which objects are interested in tracking mouse positions
-/// and notifies them when a mouse pointer enters, moves, or leaves an annotated
-/// region that they are interested in.
+class _MouseState {
+  _MouseState({
+    @required PointerEvent mostRecentEvent ,
+  }) : assert(mostRecentEvent != null),
+       _mostRecentEvent = mostRecentEvent ;
+
+  // The list of annotations that contains this device during the last frame.
+  Set<MouseTrackerAnnotation> lastAnnotations = <MouseTrackerAnnotation>{};
+
+  // The most recent mouse event observed from this device.
+  //
+  // The [mostRecentEvent] is never null.
+  PointerEvent get mostRecentEvent => _mostRecentEvent;
+  set mostRecentEvent(PointerEvent value) {
+    assert(value != null);
+    _mostRecentEvent = value;
+  }
+  PointerEvent _mostRecentEvent;
+
+  // Whether this device should be removed the next time it's updated.
+  bool pendingRemoval = false;
+}
+
+/// Maintains the relationship between mouse devices and
+/// [MouseTrackerAnnotation]s, and notifies interested callbacks of the changes
+/// thereof.
 ///
 /// This class is a [ChangeNotifier] that notifies its listeners if the value of
 /// [mouseIsConnected] changes.
 ///
-/// Owned by the [RendererBinding] class.
+/// This class is a global singleton and owned by the [RendererBinding] class.
 class MouseTracker extends ChangeNotifier {
   /// Creates a mouse tracker to keep track of mouse locations.
+  ///
+  /// The first parameter is a pointer router, which [MouseTracker] will
+  /// subscribe to and receive events from. Usually it is global singleton
+  /// instance [GestureBinding.pointerRouter].
+  ///
+  /// The second parameter is a function with which the [MouseTracker] can
+  /// search for [MouseTrackerAnnotation]s that contains a given position.
+  /// Usually it is [Layer.findAll] of the root layer.
   ///
   /// All of the parameters must not be null.
   MouseTracker(this._router, this.annotationFinder)
@@ -118,14 +122,14 @@ class MouseTracker extends ChangeNotifier {
     _router.removeGlobalRoute(_handleEvent);
   }
 
-  /// Find annotations at a given logical coordinate.
+  /// Find annotations at a given offset in global logical coordinate space.
   ///
   /// [MouseTracker] uses this callback to know which annotations are affected
   /// by each device.
   final MouseDetectorAnnotationFinder annotationFinder;
 
-  // The pointer router that the mouse tracker listens to for events.
-  // The router notifies [MouseTracker] of new mouse events.
+  // The pointer router that the mouse tracker listens to, and receives new
+  // mouse events from.
   final PointerRouter _router;
 
   // Tracks the state of each mouse device. See [_MouseState] for the
@@ -137,6 +141,7 @@ class MouseTracker extends ChangeNotifier {
   final Map<int, _MouseState> _mouseStates = <int, _MouseState>{};
 
   // The collection of annotations that are currently being tracked.
+  // It is operated by [attachAnnotation] and [detachAnnotation].
   final Set<MouseTrackerAnnotation> _trackedAnnotations = <MouseTrackerAnnotation>{};
   bool get _hasAttachedAnnotations => _trackedAnnotations.isNotEmpty;
 
@@ -247,14 +252,18 @@ class MouseTracker extends ChangeNotifier {
     return _trackedAnnotations.contains(annotation);
   }
 
-  /// Collect the latest states of the given mouse devices, and notify those
-  /// who are interested of the state changes if applicable.
+  /// Collect the latest states of the given mouse devices, and call interested
+  /// callbacks.
   ///
   /// Only those devices of [deviceIds] are updated. If [deviceIds] is null,
-  /// then all devices are updated.
+  /// then all devices are updated. For each of device, the enter or exit events
+  /// are called for annotations that the pointer enters or leaves, while hover
+  /// events are always called for each annotations that the pointer stays in,
+  /// even if the pointer has not moved since the last call. Therefore it's
+  /// caller's responsibility to check if the pointer has moved.
   ///
-  /// This is called synchronously in most cases, except for when a new annotation
-  /// is attached, which is called in a post frame callback.
+  /// This is called synchronously in most cases, except for when a new
+  /// annotation is attached, which is called in a post frame callback.
   ///
   /// This function is only public to allow for proper testing of the
   /// MouseTracker. Do not call in other contexts.
@@ -331,15 +340,15 @@ class MouseTracker extends ChangeNotifier {
   /// Notify [MouseTracker] that a new mouse tracker annotation has started to
   /// take effect.
   ///
+  /// This should be called as soon as the layer that owns this annotation is
+  /// added to the layer tree.
+  ///
   /// This triggers [MouseTracker] to schedule a mouse position check during the
   /// post frame to see if this new annotation might trigger enter events.
   ///
   /// The [MouseTracker] also uses this to track the number of attached
   /// annotations, and will skip mouse position checks if there is no
   /// annotations attached.
-  ///
-  /// This is typically called when the [AnnotatedRegion] containing this
-  /// annotation has been added to the layer tree.
   void attachAnnotation(MouseTrackerAnnotation annotation) {
     // Schedule a check so that we test this new annotation to see if any mouse
     // is currently inside its region. It has to happen after the frame is
@@ -353,15 +362,15 @@ class MouseTracker extends ChangeNotifier {
   /// Notify [MouseTracker] that a mouse tracker annotation that was previously
   /// attached has stopped taking effect.
   ///
+  /// This should be called as soon as the layer that owns this annotation is
+  /// removed from the layer tree.
+  ///
   /// This triggers [MouseTracker] to perform a mouse position check immediately
-  /// to see if this annotation removal might trigger exit events.
+  /// to see if this annotation removal triggers any exit events.
   ///
   /// The [MouseTracker] also uses this to track the number of attached
   /// annotations, and will skip mouse position checks if there is no
   /// annotations attached.
-  ///
-  /// This is typically called when the [AnnotatedRegion] containing this
-  /// annotation has been removed from the layer tree.
   void detachAnnotation(MouseTrackerAnnotation annotation) {
     _mouseStates.forEach((int device, _MouseState mouseState) {
       if (mouseState.lastAnnotations.contains(annotation)) {
