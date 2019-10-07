@@ -14,7 +14,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -139,8 +138,6 @@ class IOSDevice extends Device {
 
   String _installerPath;
   String _iproxyPath;
-  Process _iproxyProcess;
-  Process _idevicesyslogProcess;
 
   final String _sdkVersion;
 
@@ -453,14 +450,11 @@ class IOSDevice extends Device {
   }
 
   @override
-  void killSubProcesses() {
-    // We only unset `iproxyProcess` if we successfully killed it
-    if (_iproxyProcess?.kill() == true) {
-      _iproxyProcess = null;
-    }
-    if (_idevicesyslogProcess?.kill() == true) {
-      _idevicesyslogProcess = null;
-    }
+  void dispose() {
+    _logReaders.forEach((ApplicationPackage application, DeviceLogReader logReader) {
+      logReader.dispose();
+    });
+    _portForwarder?.dispose();
   }
 }
 
@@ -528,7 +522,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   _IOSDeviceLogReader(this.device, ApplicationPackage app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
-      onCancel: _stop,
+      onCancel: dispose,
     );
 
     // Match for lines for the runner in syslog.
@@ -567,9 +561,11 @@ class _IOSDeviceLogReader extends DeviceLogReader {
           _linesController.close();
         }
       });
-      device._idevicesyslogProcess = process;
+      assert(_idevicesyslogProcess == null);
+      _idevicesyslogProcess = process;
     });
   }
+  Process _idevicesyslogProcess;
 
   // Returns a stateful line handler to properly capture multi-line output.
   //
@@ -602,8 +598,9 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     };
   }
 
-  void _stop() {
-    device._idevicesyslogProcess?.kill();
+  @override
+  void dispose() {
+    _idevicesyslogProcess?.kill();
   }
 }
 
@@ -659,7 +656,6 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     }
     assert(connected);
     assert(process != null);
-    device._iproxyProcess = process;
 
     final ForwardedPort forwardedPort = ForwardedPort.withContext(
       hostPort, devicePort, process,
@@ -677,13 +673,13 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     }
 
     printTrace('Unforwarding port $forwardedPort');
+    forwardedPort.killProcess();
+  }
 
-    final Process process = forwardedPort.context;
-
-    if (process != null) {
-      processManager.killPid(process.pid);
-    } else {
-      printError('Forwarded port did not have a valid process');
+  @override
+  Future<void> dispose() async {
+    for (ForwardedPort forwardedPort in _forwardedPorts) {
+      forwardedPort.killProcess();
     }
   }
 }
