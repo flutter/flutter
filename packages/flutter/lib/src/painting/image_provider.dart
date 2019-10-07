@@ -529,9 +529,7 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
     this.imageProvider, {
     this.width,
     this.height,
-  }) : assert(width != null || height != null); // ResizeImage cannot be composed with
-                                                // another ImageProvider that applies
-                                                // cacheWidth or cacheHeight.
+  }) : assert(width != null || height != null);
 
   /// The [ImageProvider] that this class wraps.
   final ImageProvider imageProvider;
@@ -548,6 +546,8 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
       return imageProvider.load(key.providerCacheKey, decode);
     } else {
       final DecoderCallback decodeResize = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
+        // ResizeImage cannot be composed with another ImageProvider that
+        // applies cacheWidth or cacheHeight.
         assert(cacheWidth == null && cacheHeight == null);
         return decode(bytes, cacheWidth: width, cacheHeight: height);
       };
