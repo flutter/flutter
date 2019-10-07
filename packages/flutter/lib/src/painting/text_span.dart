@@ -337,8 +337,10 @@ class TextSpan extends InlineSpan {
 
   @override
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
-    if (recognizer != null &&
-      (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer)) {
+    if (
+      recognizer != null &&
+      (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer)
+    ) {
       final int length = semanticsLabel?.length ?? text.length;
       semanticsOffsets.add(offset.value);
       semanticsOffsets.add(offset.value + length);
@@ -438,12 +440,14 @@ class TextSpan extends InlineSpan {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
 
-    properties.add(StringProperty(
-      'text',
-      text,
-      showName: false,
-      defaultValue: null,
-    ));
+    properties.add(
+      StringProperty(
+        'text',
+        text,
+        showName: false,
+        defaultValue: null,
+      )
+    );
     if (style == null && text == null && children == null)
       properties.add(DiagnosticsNode.message('(empty)'));
 
