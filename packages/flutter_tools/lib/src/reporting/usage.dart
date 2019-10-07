@@ -125,6 +125,7 @@ abstract class Usage {
     String category,
     String parameter, {
     String label,
+    int value,
     Map<String, String> parameters,
   });
 
@@ -264,6 +265,7 @@ class _DefaultUsage implements Usage {
     String category,
     String parameter, {
     String label,
+    int value,
     Map<String, String> parameters,
   }) {
     if (suppressAnalytics) {
@@ -279,6 +281,7 @@ class _DefaultUsage implements Usage {
       category,
       parameter,
       label: label,
+      value: value,
       parameters: paramsWithLocalTime,
     );
   }
