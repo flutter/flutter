@@ -156,6 +156,10 @@ class ImageConfiguration {
 ///
 /// This callback allows decoupling of the `cacheWidth` and `cacheHeight`
 /// parameters from implementations of [ImageProvider] that do not use them.
+///
+/// See also:
+///
+///  * [ResizeImage], which uses this to override the `cacheWidth` and `cacheHeight` parameters.
 typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int cacheWidth, int cacheHeight});
 
 /// Identifies an image without committing to the precise final asset. This
@@ -394,7 +398,7 @@ abstract class ImageProvider<T> {
   ///
   /// See also:
   ///
-  ///   * [ResizedImage] for modifying the key to account for cache dimensions.
+  ///   * [ResizeImage], for modifying the key to account for cache dimensions.
   @protected
   ImageStreamCompleter load(T key, DecoderCallback decode);
 
@@ -507,8 +511,8 @@ class _SizeAwareCacheKey {
   int get hashCode => hashValues(providerCacheKey, width, height);
 }
 
-/// [ResizeImage] instructs Flutter to decode the image at the specified
-/// dimensions instead of at native size.
+/// Instructs Flutter to decode the image at the specified dimensions
+/// instead of at its native size.
 ///
 /// This allows finer control of the size of the image in [ImageCache] and is
 /// generally used to reduce the memory footprint of [ImageCache].
@@ -525,7 +529,9 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
     this.imageProvider, {
     this.width,
     this.height,
-  }) : assert(width != null || height != null);
+  }) : assert(width != null || height != null); // ResizeImage cannot be composed with
+                                                // another ImageProvider that applies
+                                                // cacheWidth or cacheHeight.
 
   /// The [ImageProvider] that this class wraps.
   final ImageProvider imageProvider;
@@ -559,6 +565,11 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
 /// The image will be cached regardless of cache headers from the server.
+///
+/// When a network image is used on the Web platform, the [cacheWidth] and
+/// [cacheHeight] parameters of the [DecoderCallback] are ignored as the Web
+/// engine delegates image decoding of network images to the Web, which does
+/// not support custom decode sizes.
 ///
 /// See also:
 ///

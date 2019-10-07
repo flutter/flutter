@@ -239,10 +239,16 @@ typedef ImageLoadingBuilder = Widget Function(
 /// ```
 /// {@end-tool}
 ///
-/// In the case where a network image is used on the web platform, the
-/// [cacheWidth] and [cacheHeight] parameters are ignored as the web engine
-/// delegates image decoding to the web which does not support custom decode
-/// sizes.
+/// The [Image.asset], [Image.network], [Image.file], and [Image.memory]
+/// constructors allow a custom decode size to be specified through
+/// [cacheWidth] and [cacheHeight] parameters. The engine will decode the
+/// image to the specified size, which is primarily intended to reduce the
+/// memory usage of [ImageCache].
+///
+/// In the case where a network image is used on the Web platform, the
+/// [cacheWidth] and [cacheHeight] parameters are ignored as the Web engine
+/// delegates image decoding of network images to the Web, which does not support
+/// custom decode sizes.
 ///
 /// See also:
 ///
@@ -324,7 +330,7 @@ class Image extends StatefulWidget {
   /// regardless of these parameters. These parameters are primarily intended
   /// to reduce the memory usage of [ImageCache].
   ///
-  /// In the case where the network image is on the web platform, the [cacheWidth]
+  /// In the case where the network image is on the Web platform, the [cacheWidth]
   /// and [cacheHeight] parameters are ignored as the web engine delegates
   /// image decoding to the web which does not support custom decode sizes.
   Image.network(
