@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
+import 'layout_builder.dart';
 import 'notification_listener.dart';
 import 'page_storage.dart';
 import 'scroll_context.dart';
@@ -563,6 +564,7 @@ class PageView extends StatefulWidget {
     this.onPageChanged,
     List<Widget> children = const <Widget>[],
     this.dragStartBehavior = DragStartBehavior.start,
+    this.extents = 0,
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildListDelegate(children),
        super(key: key);
@@ -594,6 +596,7 @@ class PageView extends StatefulWidget {
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.extents = 0,
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
        super(key: key);
@@ -688,6 +691,7 @@ class PageView extends StatefulWidget {
     this.onPageChanged,
     @required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.extents = 0,
   }) : assert(childrenDelegate != null),
        controller = controller ?? _defaultPageController,
        super(key: key);
@@ -743,6 +747,15 @@ class PageView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// The number of pages to build off screen.
+  ///
+  /// For example, a value of `1` builds one page ahead and one page behind,
+  /// for a total of three built pages.
+  ///
+  /// This is especially useful for making sure heavyweight widgets have a chance
+  /// to load off-screen before the user pulls it into the viewport.
+  final int extents;
+
   @override
   _PageViewState createState() => _PageViewState();
 }
@@ -794,16 +807,33 @@ class _PageViewState extends State<PageView> {
         controller: widget.controller,
         physics: physics,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
-          return Viewport(
-            cacheExtent: 0.0,
-            axisDirection: axisDirection,
-            offset: position,
-            slivers: <Widget>[
-              SliverFillViewport(
-                viewportFraction: widget.controller.viewportFraction,
-                delegate: widget.childrenDelegate,
-              ),
-            ],
+          return LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints){
+              double cacheExtent;
+
+              switch (widget.scrollDirection) {
+                case Axis.vertical:
+                  cacheExtent = constraints.maxHeight * widget.extents;
+                  break;
+
+                case Axis.horizontal:
+                default:
+                  cacheExtent = constraints.maxWidth * widget.extents;
+                  break;
+              }
+
+              return Viewport(
+                cacheExtent: cacheExtent,
+                axisDirection: axisDirection,
+                offset: position,
+                slivers: <Widget>[
+                  SliverFillViewport(
+                    viewportFraction: widget.controller.viewportFraction,
+                    delegate: widget.childrenDelegate,
+                  ),
+                ],
+              );
+            }
           );
         },
       ),
