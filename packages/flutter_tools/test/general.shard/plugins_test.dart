@@ -197,7 +197,7 @@ flutter:
       when(androidProject.appManifestFile).thenReturn(androidManifest);
 
       final Directory pluginUsingJavaAndNewEmbeddingDir =
-        fs.systemTempDirectory.createTempSync('pluginUsingJavaAndNewEmbeddingDir.');
+        fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
       pluginUsingJavaAndNewEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -217,7 +217,7 @@ flutter:
         ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin;');
 
       final Directory pluginUsingKotlinAndNewEmbeddingDir =
-        fs.systemTempDirectory.createTempSync('pluginUsingKotlinAndNewEmbeddingDir.');
+        fs.systemTempDirectory.createTempSync('flutter_plugin_using_kotlin_and_new_embedding_dir.');
       pluginUsingKotlinAndNewEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -237,7 +237,7 @@ flutter:
         ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin');
 
       final Directory pluginUsingOldEmbeddingDir =
-        fs.systemTempDirectory.createTempSync('pluginUsingOldEmbeddingDir.');
+        fs.systemTempDirectory.createTempSync('flutter_plugin_using_old_embedding_dir.');
       pluginUsingOldEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''

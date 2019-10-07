@@ -15,8 +15,9 @@ import '../src/common.dart';
 /// underlying path to avoid issues with breakpoints/hot reload.
 /// https://github.com/flutter/flutter/pull/21741
 Directory createResolvedTempDirectorySync(String prefix) {
-  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_$prefix');
-  return fs.directory(tempDir.resolveSymbolicLinksSync());
+  assert(prefix.endsWith('.'));
+  final Directory tempDirectory = fs.systemTempDirectory.createTempSync('flutter_$prefix');
+  return fs.directory(tempDirectory.resolveSymbolicLinksSync());
 }
 
 void writeFile(String path, String content) {

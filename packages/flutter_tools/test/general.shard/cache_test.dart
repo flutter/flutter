@@ -234,8 +234,8 @@ void main() {
     });
 
     testUsingContext('makes binary dirs readable and executable by all', () async {
-      final Directory artifactDir = fs.systemTempDirectory.createTempSync('artifact.');
-      final Directory downloadDir = fs.systemTempDirectory.createTempSync('download.');
+      final Directory artifactDir = fs.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
+      final Directory downloadDir = fs.systemTempDirectory.createTempSync('flutter_cache_test_download.');
       when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
       when(mockCache.getDownloadDir()).thenReturn(downloadDir);
       final FakeCachedArtifact artifact = FakeCachedArtifact(
@@ -282,7 +282,7 @@ void main() {
       final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts();
       expect(mavenArtifacts.isUpToDate(), isFalse);
 
-      final Directory gradleWrapperDir = fs.systemTempDirectory.createTempSync('gradle_wrapper.');
+      final Directory gradleWrapperDir = fs.systemTempDirectory.createTempSync('flutter_cache_test_gradle_wrapper.');
       when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
 
       fs.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))

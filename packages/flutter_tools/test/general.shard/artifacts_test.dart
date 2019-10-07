@@ -19,7 +19,7 @@ void main() {
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem();
-      tempDir = memoryFileSystem.systemTempDirectory.createTempSync('artifacts_test.');
+      tempDir = memoryFileSystem.systemTempDirectory.createTempSync('flutter_artifacts_test.');
     });
 
     tearDown(() {
