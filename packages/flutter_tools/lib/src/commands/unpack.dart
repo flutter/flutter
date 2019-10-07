@@ -5,7 +5,6 @@
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
@@ -13,26 +12,12 @@ import '../runner/flutter_command.dart';
 
 /// The directory in the Flutter cache for each platform's artifacts.
 const Map<TargetPlatform, String> flutterArtifactPlatformDirectory = <TargetPlatform, String>{
-  TargetPlatform.linux_x64: 'linux-x64',
-  TargetPlatform.darwin_x64: 'darwin-x64',
   TargetPlatform.windows_x64: 'windows-x64',
 };
 
 // TODO(jonahwilliams): this should come from a configuration in each build
 // directory.
 const Map<TargetPlatform, List<String>> artifactFilesByPlatform = <TargetPlatform, List<String>>{
-  TargetPlatform.linux_x64: <String>[
-    'libflutter_linux_glfw.so',
-    'flutter_export.h',
-    'flutter_messenger.h',
-    'flutter_plugin_registrar.h',
-    'flutter_glfw.h',
-    'icudtl.dat',
-    'cpp_client_wrapper_glfw/',
-  ],
-  TargetPlatform.darwin_x64: <String>[
-    'FlutterMacOS.framework',
-  ],
   TargetPlatform.windows_x64: <String>[
     'flutter_windows.dll',
     'flutter_windows.dll.exp',
@@ -52,7 +37,7 @@ class UnpackCommand extends FlutterCommand {
   UnpackCommand() {
     argParser.addOption(
       'target-platform',
-      allowed: <String>['darwin-x64', 'linux-x64', 'windows-x64'],
+      allowed: <String>['windows-x64'],
     );
     argParser.addOption('cache-dir',
         help: 'Location to output platform specific artifacts.');
@@ -74,14 +59,8 @@ class UnpackCommand extends FlutterCommand {
     };
     final TargetPlatform targetPlatform = getTargetPlatformForName(argResults['target-platform']);
     switch (targetPlatform) {
-      case TargetPlatform.darwin_x64:
-        result.add(DevelopmentArtifact.macOS);
-        break;
       case TargetPlatform.windows_x64:
         result.add(DevelopmentArtifact.windows);
-        break;
-      case TargetPlatform.linux_x64:
-        result.add(DevelopmentArtifact.linux);
         break;
       default:
     }
@@ -134,14 +113,8 @@ class ArtifactUnpacker {
   bool copyCachedArtifacts(String targetDirectory) {
     String cacheStamp;
     switch (platform) {
-      case TargetPlatform.linux_x64:
-        cacheStamp = 'linux-sdk';
-        break;
       case TargetPlatform.windows_x64:
         cacheStamp = 'windows-sdk';
-        break;
-      case TargetPlatform.darwin_x64:
-        cacheStamp = 'macos-sdk';
         break;
       default:
         throwToolExit('Unsupported target platform: $platform');
@@ -208,27 +181,17 @@ class ArtifactUnpacker {
 
     try {
       fs.directory(targetDirectory).createSync(recursive: true);
-
-      // On macOS, delete the existing framework if any before copying in the
-      // new one, since it's a directory. On the other platforms, where files
-      // are just individual files, this isn't necessary since copying over
-      // existing files will do the right thing.
-      if (platform == TargetPlatform.darwin_x64) {
-        _copyMacOSFramework(
-            fs.path.join(sourceDirectory, artifactFiles[0]), targetDirectory);
-      } else {
-        for (final String entityName in artifactFiles) {
-          final String sourcePath = fs.path.join(sourceDirectory, entityName);
-          final String targetPath = fs.path.join(targetDirectory, entityName);
-          if (entityName.endsWith('/')) {
-            copyDirectorySync(
-              fs.directory(sourcePath),
-              fs.directory(targetPath),
-            );
-          } else {
-            fs.file(sourcePath)
-              .copySync(fs.path.join(targetDirectory, entityName));
-          }
+      for (final String entityName in artifactFiles) {
+        final String sourcePath = fs.path.join(sourceDirectory, entityName);
+        final String targetPath = fs.path.join(targetDirectory, entityName);
+        if (entityName.endsWith('/')) {
+          copyDirectorySync(
+            fs.directory(sourcePath),
+            fs.directory(targetPath),
+          );
+        } else {
+          fs.file(sourcePath)
+            .copySync(fs.path.join(targetDirectory, entityName));
         }
       }
 
@@ -268,43 +231,6 @@ class ArtifactUnpacker {
   /// in [directory].
   void _setLastCopiedHash(String directory, String hash) {
     _lastCopiedHashFile(directory).writeAsStringSync(hash);
-  }
-
-  /// Copies the framework at [frameworkPath] to [targetDirectory]
-  /// by invoking 'cp -R'.
-  ///
-  /// The shelling out is done to avoid complications with preserving special
-  /// files (e.g., symbolic links) in the framework structure.
-  ///
-  /// Removes any previous version of the framework that already exists in the
-  /// target directory.
-  void _copyMacOSFramework(String frameworkPath, String targetDirectory) {
-    _deleteFrameworkIfPresent(
-        fs.path.join(targetDirectory, fs.path.basename(frameworkPath)));
-
-    final RunResult result = processUtils
-        .runSync(<String>['cp', '-R', frameworkPath, targetDirectory]);
-    if (result.exitCode != 0) {
-      throw Exception(
-        'Failed to copy framework (exit ${result.exitCode}:\n'
-        '${result.stdout}\n---\n${result.stderr}',
-      );
-    }
-  }
-
-  /// Recursively deletes the framework at [frameworkPath], if it exists.
-  void _deleteFrameworkIfPresent(String frameworkPath) {
-    // Ensure that the path is a framework, to minimize the potential for
-    // catastrophic deletion bugs with bad arguments.
-    if (fs.path.extension(frameworkPath) != '.framework') {
-      throw Exception(
-          'Attempted to delete a non-framework directory: $frameworkPath');
-    }
-
-    final Directory directory = fs.directory(frameworkPath);
-    if (directory.existsSync()) {
-      directory.deleteSync(recursive: true);
-    }
   }
 
   /// Returns the engine hash from [file] as a String, or null.
