@@ -920,24 +920,30 @@ class RenderParagraph extends RenderBox
     super.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
-    properties.add(FlagProperty(
-      'softWrap',
-      value: softWrap,
-      ifTrue: 'wrapping at box width',
-      ifFalse: 'no wrapping except at line break characters',
-      showName: true,
-    ));
+    properties.add(
+      FlagProperty(
+        'softWrap',
+        value: softWrap,
+        ifTrue: 'wrapping at box width',
+        ifFalse: 'no wrapping except at line break characters',
+        showName: true,
+      )
+    );
     properties.add(EnumProperty<TextOverflow>('overflow', overflow));
-    properties.add(DoubleProperty(
-      'textScaleFactor',
-      textScaleFactor,
-      defaultValue: 1.0,
-    ));
-    properties.add(DiagnosticsProperty<Locale>(
-      'locale',
-      locale,
-      defaultValue: null,
-    ));
+    properties.add(
+      DoubleProperty(
+        'textScaleFactor',
+        textScaleFactor,
+        defaultValue: 1.0,
+      )
+    );
+    properties.add(
+      DiagnosticsProperty<Locale>(
+        'locale',
+        locale,
+        defaultValue: null,
+      )
+    );
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
   }
 }
