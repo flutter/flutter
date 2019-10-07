@@ -56,7 +56,7 @@ void main() {
       tryToDelete(projectDirectory);
       Cache.enableLocking();
     }
-  });
+  }, skip: true);
 }
 
 Future<int> analyze(AnalysisServer server) async {
