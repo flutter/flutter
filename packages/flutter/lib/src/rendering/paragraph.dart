@@ -321,11 +321,11 @@ class RenderParagraph extends RenderBox
     assert(constraints.debugAssertIsValid());
     _layoutTextWithConstraints(constraints);
     // TODO(garyq): Since our metric for ideographic baseline is currently
-    //  inaccurate and the non-alphabetic baselines are based off of the
-    //  alphabetic baseline, we use the alphabetic for now to produce correct
-    //  layouts. We should eventually change this back to pass the `baseline`
-    //  property when the ideographic baseline is properly implemented
-    //  (https://github.com/flutter/flutter/issues/22625).
+    // inaccurate and the non-alphabetic baselines are based off of the
+    // alphabetic baseline, we use the alphabetic for now to produce correct
+    // layouts. We should eventually change this back to pass the `baseline`
+    // property when the ideographic baseline is properly implemented
+    // (https://github.com/flutter/flutter/issues/22625).
     return _textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }
 
@@ -419,12 +419,11 @@ class RenderParagraph extends RenderBox
         textParentData.offset.dx,
         textParentData.offset.dy,
         0.0,
-      )
-        ..scale(
-          textParentData.scale,
-          textParentData.scale,
-          textParentData.scale,
-        );
+      )..scale(
+        textParentData.scale,
+        textParentData.scale,
+        textParentData.scale,
+      );
       final bool isHit = result.addWithPaintTransform(
         transform: transform,
         position: position,

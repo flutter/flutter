@@ -256,7 +256,7 @@ class TextSpan extends InlineSpan {
       for (InlineSpan child in children) {
         assert(
           child is TextSpan,
-        'visitTextSpan is deprecated. Use visitChildren to support InlineSpans',
+          'visitTextSpan is deprecated. Use visitChildren to support InlineSpans',
         );
         final TextSpan textSpanChild = child;
         if (!textSpanChild.visitTextSpan(visitor))
