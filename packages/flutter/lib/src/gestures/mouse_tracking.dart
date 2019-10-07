@@ -131,8 +131,8 @@ class MouseTracker extends ChangeNotifier {
   /// Stops tracking an annotation, indicating that it has been removed from the
   /// layer tree.
   ///
-  /// If the associated layer is not removed, and receives a hit, then
-  /// [_sendMouseNotifications] will assert the next time it is called.
+  /// If the associated layer is not removed, then an assertion error will be
+  /// thrown, an assertion error will be thrown the next time it receives a hit.
   void detachAnnotation(MouseTrackerAnnotation annotation) {
     final _TrackedAnnotation trackedAnnotation = _findAnnotation(annotation);
     for (int deviceId in trackedAnnotation.activeDevices) {
