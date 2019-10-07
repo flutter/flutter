@@ -260,6 +260,7 @@ abstract class RawKeyEvent extends Diagnosticable {
           eventSource: message['source'] ?? 0,
           vendorId: message['vendorId'] ?? 0,
           productId: message['productId'] ?? 0,
+          deviceId: message['deviceId'] ?? 0,
         );
         break;
       case 'fuchsia':

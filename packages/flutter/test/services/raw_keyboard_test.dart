@@ -40,6 +40,7 @@ void main() {
           'scanCode': 0x20,
           'metaState': modifier,
           'source': 0x101, // Keyboard source.
+          'deviceId': 1,
         });
         final RawKeyEventDataAndroid data = event.data;
         for (ModifierKey key in ModifierKey.values) {
@@ -75,6 +76,7 @@ void main() {
           'scanCode': 0x20,
           'metaState': modifier | RawKeyEventDataAndroid.modifierFunction,
           'source': 0x101, // Keyboard source.
+          'deviceId': 1,
         });
         final RawKeyEventDataAndroid data = event.data;
         for (ModifierKey key in ModifierKey.values) {
@@ -112,6 +114,7 @@ void main() {
         'scanCode': 30,
         'metaState': 0x0,
         'source': 0x101, // Keyboard source.
+        'deviceId': 1,
       });
       final RawKeyEventDataAndroid data = keyAEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
@@ -128,6 +131,7 @@ void main() {
         'scanCode': 1,
         'metaState': 0x0,
         'source': 0x101, // Keyboard source.
+        'deviceId': 1,
       });
       final RawKeyEventDataAndroid data = escapeKeyEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
@@ -145,6 +149,7 @@ void main() {
         'scanCode': 42,
         'metaState': RawKeyEventDataAndroid.modifierLeftShift,
         'source': 0x101, // Keyboard source.
+        'deviceId': 1,
       });
       final RawKeyEventDataAndroid data = shiftLeftKeyEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
@@ -162,6 +167,7 @@ void main() {
         'scanCode': 0,
         'metaState': 0,
         'source': 0x1000010, // Joystick source.
+        'deviceId': 1,
       });
       final RawKeyEventDataAndroid data = joystickDpadDown.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
@@ -196,6 +202,7 @@ void main() {
         'scanCode': 317,  // Left side thumb joystick center click button.
         'metaState': 0,
         'source': 0x501, // Gamepad and keyboard source.
+        'deviceId': 1,
       });
       final RawKeyEventDataAndroid data = joystickDpadCenter.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.gameButtonThumbLeft));
