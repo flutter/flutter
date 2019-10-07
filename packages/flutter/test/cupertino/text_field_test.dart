@@ -327,7 +327,7 @@ void main() {
         ),
       );
 
-      final BoxDecoration decoration = tester.widget<DecoratedBox>(
+      BoxDecoration decoration = tester.widget<DecoratedBox>(
         find.descendant(
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
@@ -336,11 +336,37 @@ void main() {
 
       expect(
         decoration.borderRadius,
-        BorderRadius.circular(4.0),
+        BorderRadius.circular(5),
       );
       expect(
-        decoration.border.bottom.color,
-        CupertinoColors.lightBackgroundGray,
+        decoration.border.bottom.color.value,
+        0x33000000,
+      );
+
+      // Dark mode.
+      await tester.pumpWidget(
+        const CupertinoApp(
+          theme: CupertinoThemeData(brightness: Brightness.dark),
+          home: Center(
+            child: CupertinoTextField(),
+          ),
+        ),
+      );
+
+      decoration = tester.widget<DecoratedBox>(
+        find.descendant(
+          of: find.byType(CupertinoTextField),
+          matching: find.byType(DecoratedBox),
+        ),
+      ).decoration;
+
+      expect(
+        decoration.borderRadius,
+        BorderRadius.circular(5),
+      );
+      expect(
+        decoration.border.bottom.color.value,
+        0x33FFFFFF,
       );
     },
   );
@@ -479,7 +505,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile(
         'text_field_cursor_test.cupertino.0.png',
-        version: 2,
+        version: 3,
       ),
     );
   });
@@ -512,7 +538,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile(
         'text_field_cursor_test.cupertino.1.png',
-        version: 2,
+        version: 3,
       ),
     );
   });
@@ -569,6 +595,23 @@ void main() {
     },
   );
 
+  testWidgets('placeholder dark mode', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoTextField(
+            placeholder: 'placeholder',
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    );
+
+    final Text placeholder = tester.widget(find.text('placeholder'));
+    expect(placeholder.style.color.value, CupertinoColors.placeholderText.darkColor.value);
+  });
+
   testWidgets(
     'placeholders are lightly colored and disappears once typing starts',
     (WidgetTester tester) async {
@@ -583,7 +626,7 @@ void main() {
       );
 
       final Text placeholder = tester.widget(find.text('placeholder'));
-      expect(placeholder.style.color, const Color(0xFFC2C2C2));
+      expect(placeholder.style.color.value, CupertinoColors.placeholderText.color.value);
 
       await tester.enterText(find.byType(CupertinoTextField), 'input');
       await tester.pump();
@@ -2701,8 +2744,8 @@ void main() {
       ).decoration;
 
       expect(
-        decoration.border.bottom.color,
-        CupertinoColors.lightBackgroundGray, // Border color is the same regardless.
+        decoration.border.bottom.color.value,
+        0x33FFFFFF,
       );
 
       await tester.enterText(find.byType(CupertinoTextField), 'smoked meat');
@@ -2878,19 +2921,38 @@ void main() {
   });
 
   testWidgets('cursor can override color from theme', (WidgetTester tester) async {
+    const CupertinoDynamicColor cursorColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0x12345678),
+      darkColor: Color(0x87654321),
+    );
+
     await tester.pumpWidget(
       const CupertinoApp(
         theme: CupertinoThemeData(),
         home: Center(
           child: CupertinoTextField(
-            cursorColor: Color(0xFFF44336),
+            cursorColor: cursorColor,
           ),
         ),
       ),
     );
 
-    final EditableText editableText = tester.firstWidget(find.byType(EditableText));
-    expect(editableText.cursorColor, const Color(0xFFF44336));
+    EditableText editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.cursorColor.value, 0x12345678);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoTextField(
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.cursorColor.value, 0x87654321);
   });
 
   testWidgets('iOS shows selection handles', (WidgetTester tester) async {
@@ -2965,9 +3027,12 @@ void main() {
             child: SizedBox(
               width: 200,
               height: 200,
-              child: CupertinoTextField(
-                controller: TextEditingController(text: 'lorem'),
-                enabled: false,
+              child: RepaintBoundary(
+                key: const ValueKey<int>(1),
+                child: CupertinoTextField(
+                  controller: TextEditingController(text: 'lorem'),
+                  enabled: false,
+                ),
               ),
             ),
           ),
@@ -2976,10 +3041,10 @@ void main() {
     );
 
     await expectLater(
-      find.byType(CupertinoTextField),
+      find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile(
         'text_field_test.disabled.png',
-        version: 0,
+        version: 1,
       ),
     );
   });
