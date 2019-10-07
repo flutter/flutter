@@ -484,8 +484,12 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// For example, the command path (e.g. `build/apk`) and the result,
   /// as well as the time spent running it.
-  void _sendPostUsage(String commandPath, FlutterCommandResult commandResult,
-                      DateTime startTime, DateTime endTime) {
+  void _sendPostUsage(
+    String commandPath,
+    FlutterCommandResult commandResult,
+    DateTime startTime,
+    DateTime endTime,
+  ) {
     if (commandPath == null) {
       return;
     }

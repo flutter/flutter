@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
@@ -120,6 +121,64 @@ void main() {
 
     tearDown(() {
       tryToDelete(tempDir);
+    });
+
+    group('AndroidSdk', () {
+      FileSystem memoryFileSystem;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem();
+
+        tempDir = memoryFileSystem.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+        memoryFileSystem.currentDirectory = tempDir;
+
+        gradlew = memoryFileSystem.path.join(tempDir.path, 'flutter_project', 'android',
+            platform.isWindows ? 'gradlew.bat' : 'gradlew');
+      });
+
+      testUsingContext('validateSdkWellFormed() not called, sdk reinitialized', () async {
+        final Directory gradleCacheDir = memoryFileSystem.directory('/flutter_root/bin/cache/artifacts/gradle_wrapper')..createSync(recursive: true);
+        gradleCacheDir.childFile(platform.isWindows ? 'gradlew.bat' : 'gradlew').createSync();
+
+        tempDir.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''name: test
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+''');
+        tempDir.childFile('.packages').createSync(recursive: true);
+        final Directory androidDir = tempDir.childDirectory('android');
+        androidDir.childFile('build.gradle').createSync(recursive: true);
+        androidDir.childFile('gradle.properties').createSync(recursive: true);
+        androidDir.childDirectory('gradle').childDirectory('wrapper').childFile('gradle-wrapper.properties').createSync(recursive: true);
+        tempDir.childDirectory('build').childDirectory('outputs').childDirectory('repo').createSync(recursive: true);
+        tempDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+        when(mockProcessManager.run(any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')))
+        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(0, 0, 'any', '')));
+
+        await expectLater(
+          runBuildAppBundleCommand(tempDir.path, arguments: <String>['--no-pub', '--flutter-root=/flutter_root']),
+          throwsToolExit(message: 'Gradle build failed: 1'),
+        );
+
+        verifyNever(mockAndroidSdk.validateSdkWellFormed());
+        verify(mockAndroidSdk.reinitialize()).called(1);
+      },
+      overrides: <Type, Generator>{
+        AndroidSdk: () => mockAndroidSdk,
+        GradleUtils: () => GradleUtils(),
+        ProcessManager: () => mockProcessManager,
+        FileSystem: () => memoryFileSystem,
+      });
     });
 
     testUsingContext('shrinking is enabled by default on release mode', () async {

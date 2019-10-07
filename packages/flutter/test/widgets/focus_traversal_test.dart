@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -916,112 +914,5 @@ void main() {
       expect(focusCenter.hasFocus, isFalse);
       expect(focusTop.hasFocus, isTrue);
     });
-    testWidgets('Focus traversal actions are invoked when shortcuts are used.', (WidgetTester tester) async {
-      final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
-      final GlobalKey upperRightKey = GlobalKey(debugLabel: 'upperRightKey');
-      final GlobalKey lowerLeftKey = GlobalKey(debugLabel: 'lowerLeftKey');
-      final GlobalKey lowerRightKey = GlobalKey(debugLabel: 'lowerRightKey');
-
-      await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xFFFFFFFF),
-          onGenerateRoute: (RouteSettings settings) {
-            return TestRoute(
-              child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: FocusScope(
-                  debugLabel: 'scope',
-                  child: Column(
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Focus(
-                            autofocus: true,
-                            debugLabel: 'upperLeft',
-                            child: Container(width: 100, height: 100, key: upperLeftKey),
-                          ),
-                          Focus(
-                            debugLabel: 'upperRight',
-                            child: Container(width: 100, height: 100, key: upperRightKey),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: <Widget>[
-                          Focus(
-                            debugLabel: 'lowerLeft',
-                            child: Container(width: 100, height: 100, key: lowerLeftKey),
-                          ),
-                          Focus(
-                            debugLabel: 'lowerRight',
-                            child: Container(width: 100, height: 100, key: lowerRightKey),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      );
-
-      // Initial focus happens.
-      expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      expect(Focus.of(upperRightKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      expect(Focus.of(lowerLeftKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      expect(Focus.of(lowerRightKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
-
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
-      expect(Focus.of(lowerRightKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
-      expect(Focus.of(lowerLeftKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
-      expect(Focus.of(upperRightKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
-      expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
-
-      // Traverse in a direction
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-      expect(Focus.of(upperRightKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-      expect(Focus.of(lowerRightKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-      expect(Focus.of(lowerLeftKey.currentContext).hasPrimaryFocus, isTrue);
-      // Initial focus happens.
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-      expect(Focus.of(upperLeftKey.currentContext).hasPrimaryFocus, isTrue);
-    });
   });
-}
-
-class TestRoute extends PageRouteBuilder<void> {
-  TestRoute({Widget child})
-      : super(
-          pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) {
-            return child;
-          },
-        );
 }
