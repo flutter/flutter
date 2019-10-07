@@ -201,6 +201,49 @@ void main() {
         Usage: () => mockUsage,
       });
 
+      // By default, the .forward() method will try every port between 1024
+      // and 65535; this test verifies we are killing iproxy processes when
+      // we timeout on a port
+      testUsingContext(' succeeds via mDNS the second time, kills first process', () async {
+        final IOSDevice device = IOSDevice('123');
+        device.portForwarder = mockPortForwarder;
+        device.setLogReader(mockApp, mockLogReader);
+        final Uri uri = Uri(
+          scheme: 'http',
+          host: '127.0.0.1',
+          port: 1234,
+          path: 'observatory',
+        );
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any, 1233))
+          .thenAnswer((Invocation invocation) {
+            print('yolo!');
+            return Future<Uri>.value(null);
+          });
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any, 1234))
+          .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
+
+        final LaunchResult launchResult = await device.startApp(mockApp,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.enabled(
+            const BuildInfo(BuildMode.debug, null),
+            observatoryPort: 1233,
+          ),
+          platformArgs: <String, dynamic>{},
+        );
+        verify(mockUsage.sendEvent('ios-mdns', 'success')).called(1);
+        expect(launchResult.started, isTrue);
+        expect(launchResult.hasObservatory, isTrue);
+        expect(await device.stopApp(mockApp), isFalse);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => mockArtifacts,
+        Cache: () => mockCache,
+        FileSystem: () => mockFileSystem,
+        MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
+        Platform: () => macPlatform,
+        ProcessManager: () => mockProcessManager,
+        Usage: () => mockUsage,
+      });
+
       testUsingContext(' succeeds in debug mode when mDNS fails by falling back to manual protocol discovery', () async {
         final IOSDevice device = IOSDevice('123');
         device.portForwarder = mockPortForwarder;
