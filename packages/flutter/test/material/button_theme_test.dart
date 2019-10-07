@@ -405,4 +405,86 @@ void main() {
   },
     semanticsEnabled: true,
   );
+
+  testWidgets('default button theme accent color for RaisedButton', (WidgetTester tester) async { 
+    const Color defaultColor = Color(0xff2196f3);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RaisedButton(
+              child: const Text('RaisedButton'),
+              onPressed: () {},
+              textTheme: ButtonTextTheme.accent,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Color textColor() {
+      return tester.renderObject<RenderParagraph>(find.text('RaisedButton')).text.style.color;
+    }
+
+    // Default, not disabled.
+    expect(textColor(), equals(defaultColor));
+  },
+    semanticsEnabled: true,
+  );
+
+  testWidgets('default button theme primary color for RaisedButton', (WidgetTester tester) async { 
+    const Color defaultColor = Color(0xff000000);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RaisedButton(
+              child: const Text('RaisedButton'),
+              onPressed: () {},
+              textTheme: ButtonTextTheme.primary,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Color textColor() {
+      return tester.renderObject<RenderParagraph>(find.text('RaisedButton')).text.style.color;
+    }
+
+    // Default, not disabled.
+    expect(textColor(), equals(defaultColor));
+  },
+    semanticsEnabled: true,
+  );
+
+  testWidgets('default button theme normal color for RaisedButton', (WidgetTester tester) async { 
+    const Color defaultColor = Color(0xffffffff);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: Scaffold(
+          body: Center(
+            child: RaisedButton(
+              child: const Text('RaisedButton'),
+              onPressed: () {},
+              textTheme: ButtonTextTheme.normal
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Color textColor() {
+      return tester.renderObject<RenderParagraph>(find.text('RaisedButton')).text.style.color;
+    }
+
+    // Default, not disabled.
+    expect(textColor(), equals(defaultColor));
+  },
+    semanticsEnabled: true,
+  );
 }
