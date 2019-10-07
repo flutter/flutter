@@ -65,7 +65,7 @@ function test_app_bundle() {
     $DEVICE_FLAG
 
   # Check logcat for "E/flutter" - if it's there, something's wrong.
-  gsutil cp gs://flutter_firebase_testlab/"$@"/"$GIT_REVISION"/"$CIRRUS_BUILD_ID"/walleye-26-en-portrait/logcat /tmp/logcat
+  gsutil cat gs://flutter_firebase_testlab/"$@"/"$GIT_REVISION"/"$CIRRUS_BUILD_ID"/*/logcat > /tmp/logcat
   ! grep "E/flutter" /tmp/logcat || false
   grep "I/flutter" /tmp/logcat
   popd
