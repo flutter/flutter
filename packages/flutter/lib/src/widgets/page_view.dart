@@ -564,7 +564,7 @@ class PageView extends StatefulWidget {
     this.onPageChanged,
     List<Widget> children = const <Widget>[],
     this.dragStartBehavior = DragStartBehavior.start,
-    this.cacheExtent = 0,
+    this.cachePageExtent = 0,
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildListDelegate(children),
        super(key: key);
@@ -596,7 +596,7 @@ class PageView extends StatefulWidget {
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.cacheExtent = 0,
+    this.cachePageExtent = 0,
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
        super(key: key);
@@ -691,7 +691,7 @@ class PageView extends StatefulWidget {
     this.onPageChanged,
     @required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.cacheExtent = 0,
+    this.cachePageExtent = 0,
   }) : assert(childrenDelegate != null),
        controller = controller ?? _defaultPageController,
        super(key: key);
@@ -749,12 +749,14 @@ class PageView extends StatefulWidget {
 
   /// The number of pages to build off screen.
   ///
-  /// For example, a value of `1` builds one page ahead and one page behind,
+  /// For example, a value of 1 builds one page ahead and one page behind,
   /// for a total of three built pages.
   ///
   /// This is especially useful for making sure heavyweight widgets have a chance
   /// to load off-screen before the user pulls it into the viewport.
-  final int cacheExtent;
+  /// 
+  /// Defaults to no cached off-screen pages.
+  final int cachePageExtent;
 
   @override
   _PageViewState createState() => _PageViewState();
@@ -813,12 +815,11 @@ class _PageViewState extends State<PageView> {
 
               switch (widget.scrollDirection) {
                 case Axis.vertical:
-                  cacheExtent = constraints.maxHeight * widget.cacheExtent;
+                  cacheExtent = constraints.maxHeight * widget.cachePageExtent;
                   break;
 
                 case Axis.horizontal:
-                default:
-                  cacheExtent = constraints.maxWidth * widget.cacheExtent;
+                  cacheExtent = constraints.maxWidth * widget.cachePageExtent;
                   break;
               }
 
