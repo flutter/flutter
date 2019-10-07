@@ -562,8 +562,8 @@ class ThemeData extends Diagnosticable {
   ///
   /// If [colorScheme.brightness] is [Brightness.dark] then
   /// [ThemeData.applyElevationOverlayColor] will be set to true to support
-  /// the Material dark theme method for indicating elevation by overlaying
-  /// a semi-transparent white color on top of the surface color.
+  /// the Material dark theme method for indicating elevation by applying
+  /// a semi-transparent onSurface color on top of the surface color.
   ///
   /// This is the recommended method to theme your application. As we move
   /// forward we will be converting all the widget implementations to only use
@@ -866,19 +866,19 @@ class ThemeData extends Diagnosticable {
   /// Configures the hit test size of certain Material widgets.
   final MaterialTapTargetSize materialTapTargetSize;
 
-  /// Apply a semi-transparent white overlay on Material surfaces to indicate
+  /// Apply a semi-transparent overlay color on Material surfaces to indicate
   /// elevation for dark themes.
   ///
   /// Material drop shadows can be difficult to see in a dark theme, so the
   /// elevation of a surface should be portrayed with an "overlay" in addition
-  /// to the shadow. As the elevation of the component increases, the white
+  /// to the shadow. As the elevation of the component increases, the
   /// overlay increases in opacity. [applyElevationOverlayColor] turns the
   /// application of this overlay on or off.
   ///
-  /// If [true] a semi-transparent white overlay will be applied to the color
-  /// of [Material] widgets when their [Material.color] is [colorScheme.surface].
-  /// The level of transparency is based on [Material.elevation] as per the
-  /// Material Dark theme specification.
+  /// If [true] a semi-transparent version of [colorScheme.onSurface] will be
+  /// applied on top of the color of [Material] widgets when their [Material.color]
+  /// is [colorScheme.surface]. The level of transparency is based on
+  /// [Material.elevation] as per the Material Dark theme specification.
   ///
   /// If [false] the surface color will be used unmodified.
   ///
