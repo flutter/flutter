@@ -42,6 +42,7 @@ class MockFileSystem extends Mock implements FileSystem {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockIOSDeploy extends Mock implements IOSDeploy {}
 class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
+class MockMDnsObservatoryDiscoveryResult extends Mock implements MDnsObservatoryDiscoveryResult {}
 class MockXcode extends Mock implements Xcode {}
 class MockFile extends Mock implements File {}
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
@@ -95,6 +96,7 @@ void main() {
       const int hostPort = 42;
       const String installerPath = '/path/to/ideviceinstaller';
       const String iosDeployPath = '/path/to/iosdeploy';
+      const String iproxyPath = '/path/to/iproxy';
       // const String appId = '789';
       const MapEntry<String, String> libraryEntry = MapEntry<String, String>(
           'DYLD_LIBRARY_PATH',
@@ -136,6 +138,13 @@ void main() {
                 platform: anyNamed('platform'),
             ),
         ).thenReturn(iosDeployPath);
+
+        when(
+            mockArtifacts.getArtifactPath(
+                Artifact.iproxy,
+                platform: anyNamed('platform'),
+            ),
+        ).thenReturn(iproxyPath);
 
         when(mockPortForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
           .thenAnswer((_) async => hostPort);
@@ -204,41 +213,37 @@ void main() {
       // By default, the .forward() method will try every port between 1024
       // and 65535; this test verifies we are killing iproxy processes when
       // we timeout on a port
-      testUsingContext(' succeeds via mDNS the second time, kills first process', () async {
-        final IOSDevice device = IOSDevice('123');
-        device.portForwarder = mockPortForwarder;
-        device.setLogReader(mockApp, mockLogReader);
-        final Uri uri = Uri(
-          scheme: 'http',
-          host: '127.0.0.1',
-          port: 1234,
-          path: 'observatory',
+      testUsingContext(' .forward() will kill iproxy processes before invoking a second', () async {
+        const String deviceId = '123';
+        const int devicePort = 456; 
+        final IOSDevice device = IOSDevice(deviceId);
+        final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(device);
+        bool firstRun = true;
+        final MockProcess successProcess = MockProcess(
+          exitCode: Future<int>.value(0),
+          stdout: Stream<List<int>>.fromIterable(<List<int>>['Hello'.codeUnits]),
         );
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any, 1233))
-          .thenAnswer((Invocation invocation) {
-            print('yolo!');
-            return Future<Uri>.value(null);
-          });
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any, 1234))
-          .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
+        final MockProcess failProcess = MockProcess(
+          exitCode: Future<int>.value(1),
+          stdout: const Stream<List<int>>.empty(),
+        );
 
-        final LaunchResult launchResult = await device.startApp(mockApp,
-          prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.enabled(
-            const BuildInfo(BuildMode.debug, null),
-            observatoryPort: 1233,
-          ),
-          platformArgs: <String, dynamic>{},
-        );
-        verify(mockUsage.sendEvent('ios-mdns', 'success')).called(1);
-        expect(launchResult.started, isTrue);
-        expect(launchResult.hasObservatory, isTrue);
-        expect(await device.stopApp(mockApp), isFalse);
+        final ProcessFactory factory = (List<String> command) {
+          if (!firstRun) {
+            return successProcess;
+          }
+          firstRun = false;
+          return failProcess;
+        };
+        mockProcessManager.processFactory = factory;
+        final int hostPort = await portForwarder.forward(devicePort);
+        // First port tried (1024) should fail, then succeed on the next
+        expect(hostPort, 1024 + 1);
+        verifyNever(successProcess.kill());
+        verify(failProcess.kill());
       }, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
         Cache: () => mockCache,
-        FileSystem: () => mockFileSystem,
-        MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
         Platform: () => macPlatform,
         ProcessManager: () => mockProcessManager,
         Usage: () => mockUsage,

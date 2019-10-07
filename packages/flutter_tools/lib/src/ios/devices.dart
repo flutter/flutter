@@ -365,7 +365,6 @@ class IOSDevice extends Device {
       Uri localUri;
       try {
         printTrace('Application launched on the device. Waiting for observatory port.');
-        print('using mDNS on port ${debuggingOptions.observatoryPort}...');
         localUri = await MDnsObservatoryDiscovery.instance.getObservatoryUri(
           package.id,
           this,
@@ -376,7 +375,6 @@ class IOSDevice extends Device {
           UsageEvent('ios-mdns', 'success').send();
           return LaunchResult.succeeded(observatoryUri: localUri);
         }
-        print('did not succeed');
       } catch (error) {
         printError('Failed to establish a debug connection with $id using mdns: $error');
       }
@@ -428,7 +426,7 @@ class IOSDevice extends Device {
   }
 
   @override
-  DevicePortForwarder get portForwarder => _portForwarder ??= _IOSDevicePortForwarder(this);
+  DevicePortForwarder get portForwarder => _portForwarder ??= IOSDevicePortForwarder(this);
 
   @visibleForTesting
   set portForwarder(DevicePortForwarder forwarder) {
@@ -606,8 +604,9 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   }
 }
 
-class _IOSDevicePortForwarder extends DevicePortForwarder {
-  _IOSDevicePortForwarder(this.device) : _forwardedPorts = <ForwardedPort>[];
+@visibleForTesting
+class IOSDevicePortForwarder extends DevicePortForwarder {
+  IOSDevicePortForwarder(this.device) : _forwardedPorts = <ForwardedPort>[];
 
   final IOSDevice device;
 
