@@ -831,14 +831,14 @@ void main() {
     expect(pageController.page, 1);
   });
 
-  testWidgets('Page extents 0', (WidgetTester tester) async {
+  testWidgets('cacheExtent 0', (WidgetTester tester) async {
     final PageController pageController = PageController();
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageView(
         controller: pageController,
-        extents: 0,
+        cacheExtent: 0,
         children: List<Widget>.generate(10, (int i) {
           return Semantics(
             child: Text('Page #$i'),
@@ -883,14 +883,14 @@ void main() {
     expect(find.text('Page #6', skipOffstage: false), findsNothing);
   });
 
-  testWidgets('Page extents 1', (WidgetTester tester) async {
+  testWidgets('cacheExtent 1', (WidgetTester tester) async {
     final PageController pageController = PageController();
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageView(
         controller: pageController,
-        extents: 1,
+        cacheExtent: 1,
         children: List<Widget>.generate(10, (int i) {
           return Semantics(
             child: Text('Page #$i'),
@@ -935,14 +935,14 @@ void main() {
     expect(find.text('Page #6', skipOffstage: false), findsNothing);
   });
 
-  testWidgets('Page extents 2', (WidgetTester tester) async {
+  testWidgets('cacheExtent 2', (WidgetTester tester) async {
     final PageController pageController = PageController();
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageView(
         controller: pageController,
-        extents: 2,
+        cacheExtent: 2,
         children: List<Widget>.generate(10, (int i) {
           return Semantics(
             child: Text('Page #$i'),

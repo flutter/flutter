@@ -564,7 +564,7 @@ class PageView extends StatefulWidget {
     this.onPageChanged,
     List<Widget> children = const <Widget>[],
     this.dragStartBehavior = DragStartBehavior.start,
-    this.extents = 0,
+    this.cacheExtent = 0,
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildListDelegate(children),
        super(key: key);
@@ -596,7 +596,7 @@ class PageView extends StatefulWidget {
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.extents = 0,
+    this.cacheExtent = 0,
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
        super(key: key);
@@ -691,7 +691,7 @@ class PageView extends StatefulWidget {
     this.onPageChanged,
     @required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.extents = 0,
+    this.cacheExtent = 0,
   }) : assert(childrenDelegate != null),
        controller = controller ?? _defaultPageController,
        super(key: key);
@@ -754,7 +754,7 @@ class PageView extends StatefulWidget {
   ///
   /// This is especially useful for making sure heavyweight widgets have a chance
   /// to load off-screen before the user pulls it into the viewport.
-  final int extents;
+  final int cacheExtent;
 
   @override
   _PageViewState createState() => _PageViewState();
@@ -813,12 +813,12 @@ class _PageViewState extends State<PageView> {
 
               switch (widget.scrollDirection) {
                 case Axis.vertical:
-                  cacheExtent = constraints.maxHeight * widget.extents;
+                  cacheExtent = constraints.maxHeight * widget.cacheExtent;
                   break;
 
                 case Axis.horizontal:
                 default:
-                  cacheExtent = constraints.maxWidth * widget.extents;
+                  cacheExtent = constraints.maxWidth * widget.cacheExtent;
                   break;
               }
 
