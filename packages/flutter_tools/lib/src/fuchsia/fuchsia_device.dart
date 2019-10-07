@@ -498,9 +498,9 @@ class FuchsiaDevice extends Device {
     return null;
   }
 
-  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(
-          String isolateName) =>
-      FuchsiaIsolateDiscoveryProtocol(this, isolateName);
+  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(String isolateName) {
+    return FuchsiaIsolateDiscoveryProtocol(this, isolateName);
+  }
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
