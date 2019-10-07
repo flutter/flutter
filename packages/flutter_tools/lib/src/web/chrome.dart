@@ -154,10 +154,6 @@ class ChromeLauncher {
     return chrome;
   }
 
-  /// Connects to an instance of Chrome with an open debug port.
-  static Future<Chrome> fromExisting(int port) async =>
-      _connect(Chrome._(port, ChromeConnection('localhost', port)), false);
-
   static Future<Chrome> get connectedInstance => _currentCompleter.future;
 
   /// Returns the full URL of the Chrome remote debugger for the main page.
