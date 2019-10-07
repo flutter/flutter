@@ -158,6 +158,7 @@ S
 
   test('LicenseEntryWithLineBreaks - leading and trailing whitespace', () {
     expect(const LicenseEntryWithLineBreaks(null, '    \n\n    ').paragraphs.toList(), isEmpty);
+    expect(const LicenseEntryWithLineBreaks(null, '    \r\n\r\n    ').paragraphs.toList(), isEmpty);
 
     List<LicenseParagraph> paragraphs;
 

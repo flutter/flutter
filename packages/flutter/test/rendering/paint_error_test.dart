@@ -98,7 +98,7 @@ void main() {
     );
     expect(
       flutterError.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
-      'This usually indicates an error in the Flutter framework itself.'
+      'This usually indicates an error in the Flutter framework itself.',
     );
   });
 }

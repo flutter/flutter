@@ -294,7 +294,7 @@ void main() {
 
   testWidgets('popAndPushNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.popAndPushNamed(context, '/B'); }),
       '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () { Navigator.pop(context); }),
     };
@@ -321,7 +321,7 @@ void main() {
 
   testWidgets('Push and pop should trigger the observers', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
     };
     bool isPushed = false;
@@ -381,7 +381,7 @@ void main() {
 
   testWidgets('Add and remove an observer should work', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
     };
     bool isPushed = false;
@@ -428,7 +428,7 @@ void main() {
 
   testWidgets('replaceNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushReplacementNamed(context, '/A'); }),
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushReplacementNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pushReplacementNamed(context, '/B'); }),
       '/B': (BuildContext context) => const OnTapPage(id: 'B'),
     };
@@ -452,7 +452,7 @@ void main() {
     Future<String> value;
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { value = Navigator.pushReplacementNamed(context, '/B', result: 'B'); }),
       '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () { Navigator.pop(context, 'B'); }),
     };
@@ -499,7 +499,7 @@ void main() {
 
   testWidgets('removeRoute', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
-       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pushNamed(context, '/B'); }),
       '/B': (BuildContext context) => const OnTapPage(id: 'B'),
     };
@@ -683,7 +683,7 @@ void main() {
 
   testWidgets('didStartUserGesture observable', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-       '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
     };
 
@@ -972,5 +972,65 @@ void main() {
     expect(find.text('/D'), findsOneWidget);
     expect(arguments.single, 'pushReplacementNamed');
     arguments.clear();
+  });
+
+  testWidgets('Initial route can have gaps', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> keyNav = GlobalKey<NavigatorState>();
+    const Key keyRoot = Key('Root');
+    const Key keyA = Key('A');
+    const Key keyABC = Key('ABC');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: keyNav,
+        initialRoute: '/A/B/C',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => Container(key: keyRoot),
+          '/A': (BuildContext context) => Container(key: keyA),
+          // The route /A/B is intentionally left out.
+          '/A/B/C': (BuildContext context) => Container(key: keyABC),
+        },
+      ),
+    );
+
+    // The initial route /A/B/C should've been pushed successfully.
+    expect(find.byKey(keyRoot), findsOneWidget);
+    expect(find.byKey(keyA), findsOneWidget);
+    expect(find.byKey(keyABC), findsOneWidget);
+
+    keyNav.currentState.pop();
+    await tester.pumpAndSettle();
+    expect(find.byKey(keyRoot), findsOneWidget);
+    expect(find.byKey(keyA), findsOneWidget);
+    expect(find.byKey(keyABC), findsNothing);
+  });
+
+  testWidgets('The full initial route has to be matched', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> keyNav = GlobalKey<NavigatorState>();
+    const Key keyRoot = Key('Root');
+    const Key keyA = Key('A');
+    const Key keyAB = Key('AB');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: keyNav,
+        initialRoute: '/A/B/C',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => Container(key: keyRoot),
+          '/A': (BuildContext context) => Container(key: keyA),
+          '/A/B': (BuildContext context) => Container(key: keyAB),
+          // The route /A/B/C is intentionally left out.
+        },
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception is String, isTrue);
+    expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
+
+    // Only the root route should've been pushed.
+    expect(find.byKey(keyRoot), findsOneWidget);
+    expect(find.byKey(keyA), findsNothing);
+    expect(find.byKey(keyAB), findsNothing);
   });
 }

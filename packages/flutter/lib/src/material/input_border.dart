@@ -478,16 +478,15 @@ class OutlineInputBorder extends InputBorder {
     } else {
       final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage);
       switch (textDirection) {
-        case TextDirection.rtl: {
+        case TextDirection.rtl:
           final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart + gapPadding - extent), extent);
           canvas.drawPath(path, paint);
           break;
-        }
-        case TextDirection.ltr: {
+
+        case TextDirection.ltr:
           final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart - gapPadding), extent);
           canvas.drawPath(path, paint);
           break;
-        }
       }
     }
   }

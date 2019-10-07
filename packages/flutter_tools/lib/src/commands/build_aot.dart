@@ -9,6 +9,7 @@ import '../base/build.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/version.dart';
@@ -73,8 +74,9 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
   Future<FlutterCommandResult> runCommand() async {
     final String targetPlatform = argResults['target-platform'];
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
-    if (platform == null)
+    if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
+    }
 
     final bool bitcode = argResults['bitcode'];
     final BuildMode buildMode = getBuildMode();
@@ -120,8 +122,9 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         // Determine which iOS architectures to build for.
         final Iterable<DarwinArch> buildArchs = argResults['ios-arch'].map<DarwinArch>(getIOSArchForName);
         final Map<DarwinArch, String> iosBuilds = <DarwinArch, String>{};
-        for (DarwinArch arch in buildArchs)
+        for (DarwinArch arch in buildArchs) {
           iosBuilds[arch] = fs.path.join(outputPath, getNameForDarwinArch(arch));
+        }
 
         // Generate AOT snapshot and compile to arch-specific App.framework.
         final Map<DarwinArch, Future<int>> exitCodes = <DarwinArch, Future<int>>{};
@@ -142,14 +145,18 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
 
         // Merge arch-specific App.frameworks into a multi-arch App.framework.
         if ((await Future.wait<int>(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
-          final Iterable<String> dylibs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
+          final Iterable<String> dylibs = iosBuilds.values.map<String>(
+              (String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
           fs.directory(fs.path.join(outputPath, 'App.framework'))..createSync();
-          await runCheckedAsync(<String>[
-            'lipo',
-            ...dylibs,
-            '-create',
-            '-output', fs.path.join(outputPath, 'App.framework', 'App'),
-          ]);
+          await processUtils.run(
+            <String>[
+              'lipo',
+              ...dylibs,
+              '-create',
+              '-output', fs.path.join(outputPath, 'App.framework', 'App'),
+            ],
+            throwOnError: true,
+          );
         } else {
           status?.cancel();
           exitCodes.forEach((DarwinArch iosArch, Future<int> exitCodeFuture) async {
@@ -173,16 +180,17 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
           throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');
         }
       }
-    } on String catch (error) {
-      // Catch the String exceptions thrown from the `runCheckedSync` methods below.
+    } on ProcessException catch (error) {
+      // Catch the String exceptions thrown from the `runSync` methods below.
       status?.cancel();
-      printError(error);
+      printError(error.toString());
       return null;
     }
     status?.stop();
 
-    if (outputPath == null)
+    if (outputPath == null) {
       throwToolExit(null);
+    }
 
     final String builtMessage = 'Built to $outputPath${fs.path.separator}.';
     if (argResults['quiet']) {

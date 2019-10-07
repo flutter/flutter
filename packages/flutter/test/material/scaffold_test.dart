@@ -103,8 +103,8 @@ void main() {
       ),
       child: Scaffold(
         body: Container(key: bodyKey),
-      ))
-    ));
+      ),
+    )));
 
     final RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 0.0)));
@@ -219,7 +219,7 @@ void main() {
           padding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
-      )
+      ),
     );
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
     // Consume bottom padding - as if by the keyboard opening
@@ -275,7 +275,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
@@ -398,7 +398,7 @@ void main() {
           padding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
-      )
+      ),
     );
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
     // Consume bottom padding - as if by the keyboard opening
@@ -487,7 +487,7 @@ void main() {
           padding: EdgeInsets.only(bottom: 20.0),
         ),
         child: child,
-      )
+      ),
     );
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
     // Consume bottom padding - as if by the keyboard opening
@@ -546,7 +546,7 @@ void main() {
         MaterialApp(
           theme: ThemeData(platform: platform),
           home: Scaffold(appBar: AppBar(), body: const Text('Page 1')),
-        )
+        ),
       );
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(routeBuilder());
@@ -562,6 +562,15 @@ void main() {
     PageRoute<void> materialRouteBuilder() {
       return MaterialPageRoute<void>(
         builder: (BuildContext context) {
+          return Scaffold(appBar: AppBar(), body: const Text('Page 2'));
+        },
+        fullscreenDialog: true,
+      );
+    }
+
+    PageRoute<void> pageRouteBuilder() {
+      return PageRouteBuilder<void>(
+        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
           return Scaffold(appBar: AppBar(), body: const Text('Page 2'));
         },
         fullscreenDialog: true,
@@ -587,6 +596,18 @@ void main() {
 
     testWidgets('Close button shows correctly on iOS', (WidgetTester tester) async {
       await expectCloseIcon(tester, TargetPlatform.iOS, Icons.close, materialRouteBuilder);
+    });
+
+    testWidgets('Close button shows correctly with PageRouteBuilder on Android', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.android, Icons.close, pageRouteBuilder);
+    });
+
+    testWidgets('Close button shows correctly with PageRouteBuilder on Fuchsia', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.fuchsia, Icons.close, pageRouteBuilder);
+    });
+
+    testWidgets('Close button shows correctly with PageRouteBuilder on iOS', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.iOS, Icons.close, pageRouteBuilder);
     });
 
     testWidgets('Close button shows correctly with custom page route on Android', (WidgetTester tester) async {
@@ -1133,8 +1154,8 @@ void main() {
               BottomNavigationBarItem(
                 icon: Icon(Icons.add),
                 title: Text('test'),
-              )
-            ]
+              ),
+            ],
           ),
         ),
       );
@@ -1559,51 +1580,51 @@ void main() {
     });
   });
 
-    testWidgets('Drawer opens correctly with custom edgeDragWidth', (WidgetTester tester) async {
-      // The default edge drag width is 20.0.
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            drawer: const Drawer(
-              child: Text('Drawer'),
-            ),
-            body: const Text('Scaffold body'),
-            appBar: AppBar(
-              centerTitle: true,
-              title: const Text('Title'),
-            ),
+  testWidgets('Drawer opens correctly with custom edgeDragWidth', (WidgetTester tester) async {
+    // The default edge drag width is 20.0.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: const Drawer(
+            child: Text('Drawer'),
+          ),
+          body: const Text('Scaffold body'),
+          appBar: AppBar(
+            centerTitle: true,
+            title: const Text('Title'),
           ),
         ),
-      );
-      ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
-      expect(scaffoldState.isDrawerOpen, false);
+      ),
+    );
+    ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isDrawerOpen, false);
 
-      await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
-      await tester.pumpAndSettle();
-      expect(scaffoldState.isDrawerOpen, false);
+    await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            drawer: const Drawer(
-              child: Text('Drawer'),
-            ),
-            drawerEdgeDragWidth: 40.0,
-            body: const Text('Scaffold Body'),
-            appBar: AppBar(
-              centerTitle: true,
-              title: const Text('Title'),
-            ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: const Drawer(
+            child: Text('Drawer'),
+          ),
+          drawerEdgeDragWidth: 40.0,
+          body: const Text('Scaffold Body'),
+          appBar: AppBar(
+            centerTitle: true,
+            title: const Text('Title'),
           ),
         ),
-      );
-      scaffoldState = tester.state(find.byType(Scaffold));
-      expect(scaffoldState.isDrawerOpen, false);
+      ),
+    );
+    scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isDrawerOpen, false);
 
-      await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
-      await tester.pumpAndSettle();
-      expect(scaffoldState.isDrawerOpen, true);
-    });
+    await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, true);
+  });
 
   testWidgets('Nested scaffold body insets', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/20295

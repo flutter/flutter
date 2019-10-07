@@ -622,8 +622,7 @@ void main() {
       );
     });
 
-    testWidgets(
-        'Android view can claim gesture after all pointers are up', (WidgetTester tester) async {
+    testWidgets('Android view can claim gesture after all pointers are up', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -888,8 +887,8 @@ void main() {
       tester.widget(
           find.descendant(
               of: find.byType(AndroidView),
-              matching: find.byType(Focus)
-          )
+              matching: find.byType(Focus),
+          ),
       );
       final Element containerElement = tester.element(find.byKey(containerKey));
       final FocusNode androidViewFocusNode = androidViewFocusWidget.focusNode;
@@ -1580,7 +1579,7 @@ void main() {
               height: 100,
             ),
           ],
-        )
+        ),
       );
 
       // First frame is before the platform view was created so the render object
@@ -1762,8 +1761,7 @@ void main() {
 
     });
 
-    testWidgets(
-        'PlatformViewSurface can claim gesture after all pointers are up', (WidgetTester tester) async {
+    testWidgets('PlatformViewSurface can claim gesture after all pointers are up', (WidgetTester tester) async {
       bool verticalDragAcceptedByParent = false;
       // The long press recognizer rejects the gesture after the PlatformViewSurface gets the pointer up event.
       // This test makes sure that the PlatformViewSurface can win the gesture after it got the pointer up event.
@@ -1916,7 +1914,8 @@ void main() {
             Factory<OneSequenceGestureRecognizer>(
                   constructRecognizer,
             ),
-          })
+          },
+        ),
       );
 
       await tester.pumpWidget(
@@ -1927,7 +1926,8 @@ void main() {
             Factory<OneSequenceGestureRecognizer>(
                   constructRecognizer,
             ),
-          })
+          },
+        ),
       );
       expect(factoryInvocationCount, 1);
     });
@@ -2161,8 +2161,8 @@ void main() {
       tester.widget(
           find.descendant(
               of: find.byType(PlatformViewLink),
-              matching: find.byType(Focus)
-          )
+              matching: find.byType(Focus),
+          ),
       );
       final FocusNode platformViewFocusNode = platformViewFocusWidget.focusNode;
       final Element containerElement = tester.element(find.byKey(containerKey));

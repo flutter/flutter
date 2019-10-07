@@ -533,15 +533,12 @@ class Border extends BoxBorder {
   String toString() {
     if (isUniform)
       return '$runtimeType.all($top)';
-    final List<String> arguments = <String>[];
-    if (top != BorderSide.none)
-      arguments.add('top: $top');
-    if (right != BorderSide.none)
-      arguments.add('right: $right');
-    if (bottom != BorderSide.none)
-      arguments.add('bottom: $bottom');
-    if (left != BorderSide.none)
-      arguments.add('left: $left');
+    final List<String> arguments = <String>[
+      if (top != BorderSide.none) 'top: $top',
+      if (right != BorderSide.none) 'right: $right',
+      if (bottom != BorderSide.none) 'bottom: $bottom',
+      if (left != BorderSide.none) 'left: $left',
+    ];
     return '$runtimeType(${arguments.join(", ")})';
   }
 }
@@ -838,15 +835,12 @@ class BorderDirectional extends BoxBorder {
 
   @override
   String toString() {
-    final List<String> arguments = <String>[];
-    if (top != BorderSide.none)
-      arguments.add('top: $top');
-    if (start != BorderSide.none)
-      arguments.add('start: $start');
-    if (end != BorderSide.none)
-      arguments.add('end: $end');
-    if (bottom != BorderSide.none)
-      arguments.add('bottom: $bottom');
+    final List<String> arguments = <String>[
+      if (top != BorderSide.none) 'top: $top',
+      if (start != BorderSide.none) 'start: $start',
+      if (end != BorderSide.none) 'end: $end',
+      if (bottom != BorderSide.none) 'bottom: $bottom',
+    ];
     return '$runtimeType(${arguments.join(", ")})';
   }
 }

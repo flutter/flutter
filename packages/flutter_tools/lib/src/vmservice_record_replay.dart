@@ -225,8 +225,9 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
   }
 
   void send(_Request request) {
-    if (!_transactions.containsKey(request.id))
+    if (!_transactions.containsKey(request.id)) {
       throw ArgumentError('No matching invocation found');
+    }
     final _Transaction transaction = _transactions.remove(request.id);
     // TODO(tvolkert): validate that `transaction.request` matches `request`
     if (transaction.response == null) {
@@ -237,8 +238,9 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
       exit(0);
     } else {
       _controller.add(json.encoder.convert(transaction.response.data));
-      if (_transactions.isEmpty)
+      if (_transactions.isEmpty) {
         _controller.close();
+      }
     }
   }
 
@@ -266,8 +268,9 @@ class _ReplaySink implements StreamSink<String> {
 
   @override
   void add(String data) {
-    if (_completer.isCompleted)
+    if (_completer.isCompleted) {
       throw StateError('Sink already closed');
+    }
     channel.send(_Request.fromString(data));
   }
 

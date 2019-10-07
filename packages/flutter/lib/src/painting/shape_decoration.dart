@@ -141,7 +141,13 @@ class ShapeDecoration extends Decoration {
   /// The image is drawn over the [color] or [gradient].
   final DecorationImage image;
 
-  /// A list of shadows cast by this shape behind the shape.
+  /// A list of shadows cast by the [shape].
+  ///
+  /// See also:
+  ///
+  ///  * [kElevationToShadow], for some predefined shadows used in Material
+  ///    Design.
+  ///  * [PhysicalModel], a widget for showing shadows.
   final List<BoxShadow> shadows;
 
   /// The shape to fill the [color], [gradient], and [image] into and to cast as
@@ -172,7 +178,7 @@ class ShapeDecoration extends Decoration {
   ///
   /// This value may be misleading. See the discussion at [ShapeBorder.dimensions].
   @override
-  EdgeInsets get padding => shape.dimensions;
+  EdgeInsetsGeometry get padding => shape.dimensions;
 
   @override
   bool get isComplex => shadows != null;

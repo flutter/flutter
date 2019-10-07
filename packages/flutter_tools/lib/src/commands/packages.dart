@@ -100,20 +100,19 @@ class PackagesGetCommand extends FlutterCommand {
         checkLastModified: false,
       );
       pubGetTimer.stop();
-      PubGetEvent(success: true).send();
-      flutterUsage.sendTiming('packages-pub-get', 'success', pubGetTimer.elapsed);
+      flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
     } catch (_) {
       pubGetTimer.stop();
-      PubGetEvent(success: false).send();
-      flutterUsage.sendTiming('packages-pub-get', 'failure', pubGetTimer.elapsed);
+      flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'failure');
       rethrow;
     }
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults.rest.length > 1)
+    if (argResults.rest.length > 1) {
       throwToolExit('Too many arguments.\n$usage');
+    }
 
     final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
     final String target = findProjectRoot(workingDirectory);

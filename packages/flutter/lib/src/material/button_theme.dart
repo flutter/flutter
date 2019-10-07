@@ -621,7 +621,7 @@ class ButtonThemeData extends Diagnosticable {
       case ButtonTextTheme.accent:
         return colorScheme.secondary;
 
-      case ButtonTextTheme.primary: {
+      case ButtonTextTheme.primary:
         final Color fillColor = getFillColor(button);
         final bool fillIsDark = fillColor != null
           ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
@@ -631,7 +631,6 @@ class ButtonThemeData extends Diagnosticable {
         if (button is FlatButton || button is OutlineButton)
           return colorScheme.primary;
         return Colors.black;
-      }
     }
 
     assert(false);
