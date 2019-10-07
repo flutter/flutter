@@ -86,6 +86,7 @@ FlutterPlatform installHook({
   int port = 0,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
+  bool enableAsserts = false,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   bool buildTestAssets = false,
@@ -94,7 +95,7 @@ FlutterPlatform installHook({
   Uri projectRootDirectory,
   FlutterProject flutterProject,
   String icudtlPath,
-  PlatformPluginRegistration platformPluginRegistration
+  PlatformPluginRegistration platformPluginRegistration,
 }) {
   assert(enableObservatory || (!startPaused && observatoryPort == null));
 
@@ -102,9 +103,9 @@ FlutterPlatform installHook({
   platformPluginRegistration ??= (FlutterPlatform platform) {
     hack.registerPlatformPlugin(
       <Runtime>[Runtime.vm],
-        () {
+      () {
         return platform;
-      }
+      },
     );
   };
   final FlutterPlatform platform = FlutterPlatform(
@@ -119,6 +120,7 @@ FlutterPlatform installHook({
     port: port,
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
+    enableAsserts: enableAsserts,
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
     buildTestAssets: buildTestAssets,
@@ -258,6 +260,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.port,
     this.precompiledDillPath,
     this.precompiledDillFiles,
+    this.enableAsserts,
     this.trackWidgetCreation,
     this.updateGoldens,
     this.buildTestAssets,
@@ -277,6 +280,7 @@ class FlutterPlatform extends PlatformPlugin {
   final int port;
   final String precompiledDillPath;
   final Map<String, String> precompiledDillFiles;
+  final bool enableAsserts;
   final bool trackWidgetCreation;
   final bool updateGoldens;
   final bool buildTestAssets;
@@ -417,9 +421,11 @@ class FlutterPlatform extends PlatformPlugin {
         await server.close(force: true);
       });
       final Completer<WebSocket> webSocket = Completer<WebSocket>();
-      server.listen((HttpRequest request) {
-        if (!webSocket.isCompleted)
-          webSocket.complete(WebSocketTransformer.upgrade(request));
+      server.listen(
+        (HttpRequest request) {
+          if (!webSocket.isCompleted) {
+            webSocket.complete(WebSocketTransformer.upgrade(request));
+          }
         },
         onError: (dynamic error, dynamic stack) {
           // If you reach here, it's unlikely we're going to be able to really handle this well.
@@ -449,7 +455,7 @@ class FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(trackWidgetCreation, flutterProject);
+        compiler ??= TestCompiler(enableAsserts, trackWidgetCreation, flutterProject);
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {
@@ -812,37 +818,26 @@ class FlutterPlatform extends PlatformPlugin {
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
     assert(!startPaused || enableObservatory);
-    final List<String> command = <String>[executable];
-    if (enableObservatory) {
-      // Some systems drive the _FlutterPlatform class in an unusual way, where
-      // only one test file is processed at a time, and the operating
-      // environment hands out specific ports ahead of time in a cooperative
-      // manner, where we're only allowed to open ports that were given to us in
-      // advance like this. For those esoteric systems, we have this feature
-      // whereby you can create _FlutterPlatform with a pair of ports.
-      //
-      // I mention this only so that you won't be tempted, as I was, to apply
-      // the obvious simplification to this code and remove this entire feature.
-      if (observatoryPort != null)
-        command.add('--observatory-port=$observatoryPort');
-      if (startPaused) {
-        command.add('--start-paused');
-      }
-      if (disableServiceAuthCodes) {
-        command.add('--disable-service-auth-codes');
-      }
-    } else {
-      command.add('--disable-observatory');
-    }
-    if (host.type == InternetAddressType.IPv6) {
-      command.add('--ipv6');
-    }
-
-    if (icudtlPath != null) {
-      command.add('--icu-data-file-path=$icudtlPath');
-    }
-
-    command.addAll(<String>[
+    final List<String> command = <String>[
+      executable,
+      if (enableObservatory) ...<String>[
+        // Some systems drive the _FlutterPlatform class in an unusual way, where
+        // only one test file is processed at a time, and the operating
+        // environment hands out specific ports ahead of time in a cooperative
+        // manner, where we're only allowed to open ports that were given to us in
+        // advance like this. For those esoteric systems, we have this feature
+        // whereby you can create _FlutterPlatform with a pair of ports.
+        //
+        // I mention this only so that you won't be tempted, as I was, to apply
+        // the obvious simplification to this code and remove this entire feature.
+        if (observatoryPort != null) '--observatory-port=$observatoryPort',
+        if (startPaused) '--start-paused',
+        if (disableServiceAuthCodes) '--disable-service-auth-codes',
+      ]
+      else
+        '--disable-observatory',
+      if (host.type == InternetAddressType.IPv6) '--ipv6',
+      if (icudtlPath != null) '--icu-data-file-path=$icudtlPath',
       '--enable-checked-mode',
       '--verify-entry-points',
       '--enable-software-rendering',
@@ -852,7 +847,8 @@ class FlutterPlatform extends PlatformPlugin {
       '--use-test-fonts',
       '--packages=$packages',
       testPath,
-    ]);
+    ];
+
     printTrace(command.join(' '));
     // If the FLUTTER_TEST environment variable has been set, then pass it on
     // for package:flutter_test to handle the value.
@@ -867,11 +863,9 @@ class FlutterPlatform extends PlatformPlugin {
       'FONTCONFIG_FILE': _fontConfigFile.path,
       'SERVER_PORT': serverPort.toString(),
       'APP_NAME': flutterProject?.manifest?.appName ?? '',
+      if (buildTestAssets)
+        'UNIT_TEST_ASSETS': fs.path.join(flutterProject?.directory?.path ?? '', 'build', 'unit_test_assets'),
     };
-    if (buildTestAssets) {
-      environment['UNIT_TEST_ASSETS'] = fs.path.join(
-        flutterProject?.directory?.path ?? '', 'build', 'unit_test_assets');
-    }
     return processManager.start(command, environment: environment);
   }
 

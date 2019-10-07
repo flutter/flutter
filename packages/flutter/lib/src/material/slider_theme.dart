@@ -1626,16 +1626,16 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 
   @override
   void paint(
-      PaintingContext context,
-      Offset offset, {
-      @required RenderBox parentBox,
-      @required SliderThemeData sliderTheme,
-      @required Animation<double> enableAnimation,
-      @required TextDirection textDirection,
-      @required Offset thumbCenter,
-      bool isDiscrete = false,
-      bool isEnabled = false,
-    }) {
+    PaintingContext context,
+    Offset offset, {
+    @required RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    @required Animation<double> enableAnimation,
+    @required TextDirection textDirection,
+    @required Offset thumbCenter,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+  }) {
     assert(context != null);
     assert(offset != null);
     assert(parentBox != null);
@@ -2767,23 +2767,22 @@ class _PaddleSliderTrackShapePathPainter {
     final double stretch = (neckStretchBaseline * t).clamp(0.0, 10.0 * neckStretchBaseline);
     final Offset neckStretch = Offset(0.0, neckStretchBaseline - stretch);
 
-    assert(!_debuggingLabelLocation ||
-        () {
-          final Offset leftCenter = _topLobeCenter - Offset(leftWidthNeeded, 0.0) + neckStretch;
-          final Offset rightCenter = _topLobeCenter + Offset(rightWidthNeeded, 0.0) + neckStretch;
-          final Rect valueRect = Rect.fromLTRB(
-            leftCenter.dx - _topLobeRadius,
-            leftCenter.dy - _topLobeRadius,
-            rightCenter.dx + _topLobeRadius,
-            rightCenter.dy + _topLobeRadius,
-          );
-          final Paint outlinePaint = Paint()
-            ..color = const Color(0xffff0000)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.0;
-          canvas.drawRect(valueRect, outlinePaint);
-          return true;
-        }());
+    assert(!_debuggingLabelLocation || () {
+      final Offset leftCenter = _topLobeCenter - Offset(leftWidthNeeded, 0.0) + neckStretch;
+      final Offset rightCenter = _topLobeCenter + Offset(rightWidthNeeded, 0.0) + neckStretch;
+      final Rect valueRect = Rect.fromLTRB(
+        leftCenter.dx - _topLobeRadius,
+        leftCenter.dy - _topLobeRadius,
+        rightCenter.dx + _topLobeRadius,
+        rightCenter.dy + _topLobeRadius,
+      );
+      final Paint outlinePaint = Paint()
+        ..color = const Color(0xffff0000)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0;
+      canvas.drawRect(valueRect, outlinePaint);
+      return true;
+    }());
 
     _addArc(
       path,
@@ -2849,13 +2848,13 @@ typedef RangeSemanticFormatterCallback = String Function(RangeValues values);
 ///
 /// Override [RangeSlider.thumbSelector] for custom thumb selection.
 typedef RangeThumbSelector = Thumb Function(
-    TextDirection textDirection,
-    RangeValues values,
-    double tapValue,
-    Size thumbSize,
-    Size trackSize,
-    double dx
-    );
+  TextDirection textDirection,
+  RangeValues values,
+  double tapValue,
+  Size thumbSize,
+  Size trackSize,
+  double dx,
+);
 
 /// Object for representing range slider thumb values.
 ///

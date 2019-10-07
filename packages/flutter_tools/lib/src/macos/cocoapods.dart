@@ -35,12 +35,10 @@ const String brokenCocoaPodsConsequence = '''
   This can usually be fixed by re-installing CocoaPods. For more info, see https://github.com/flutter/flutter/issues/14293.''';
 
 const String cocoaPodsInstallInstructions = '''
-  sudo gem install cocoapods
-  pod setup''';
+  sudo gem install cocoapods''';
 
 const String cocoaPodsUpgradeInstructions = '''
-  sudo gem install cocoapods
-  pod setup''';
+  sudo gem install cocoapods''';
 
 CocoaPods get cocoaPods => context.get<CocoaPods>();
 
@@ -67,10 +65,11 @@ class CocoaPods {
   String get cocoaPodsMinimumVersion => '1.6.0';
   String get cocoaPodsRecommendedVersion => '1.6.0';
 
-  Future<bool> get isInstalled => exitsHappyAsync(<String>['which', 'pod']);
+  Future<bool> get isInstalled =>
+      processUtils.exitsHappy(<String>['which', 'pod']);
 
   Future<String> get cocoaPodsVersionText {
-    _versionText ??= runAsync(<String>['pod', '--version']).then<String>((RunResult result) {
+    _versionText ??= processUtils.run(<String>['pod', '--version']).then<String>((RunResult result) {
       return result.exitCode == 0 ? result.stdout.trim() : null;
     }, onError: (dynamic _) => null);
     return _versionText;
@@ -86,14 +85,16 @@ class CocoaPods {
     }
     try {
       final Version installedVersion = Version.parse(versionText);
-      if (installedVersion == null)
+      if (installedVersion == null) {
         return CocoaPodsStatus.unknownVersion;
-      if (installedVersion < Version.parse(cocoaPodsMinimumVersion))
+      }
+      if (installedVersion < Version.parse(cocoaPodsMinimumVersion)) {
         return CocoaPodsStatus.belowMinimumVersion;
-      else if (installedVersion < Version.parse(cocoaPodsRecommendedVersion))
+      }
+      if (installedVersion < Version.parse(cocoaPodsRecommendedVersion)) {
         return CocoaPodsStatus.belowRecommendedVersion;
-      else
-        return CocoaPodsStatus.recommended;
+      }
+      return CocoaPodsStatus.recommended;
     } on FormatException {
       return CocoaPodsStatus.notInstalled;
     }
@@ -102,12 +103,20 @@ class CocoaPods {
   /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are
   /// cloned.
   ///
+  /// Versions >= 1.8.0 do not require 'pod setup' and default to a CDN instead
+  /// of a locally cloned repository.
+  /// See http://blog.cocoapods.org/CocoaPods-1.8.0-beta/
+  ///
   /// A user can override the default location via the CP_REPOS_DIR environment
   /// variable.
   ///
   /// See https://github.com/CocoaPods/CocoaPods/blob/master/lib/cocoapods/config.rb#L138
   /// for details of this variable.
-  Future<bool> get isCocoaPodsInitialized {
+  Future<bool> get isCocoaPodsInitialized async {
+    final Version installedVersion = Version.parse(await cocoaPodsVersionText);
+    if (installedVersion != null && installedVersion >= Version.parse('1.8.0')) {
+      return true;
+    }
     final String cocoapodsReposDir = platform.environment['CP_REPOS_DIR'] ?? fs.path.join(homeDirPath, '.cocoapods', 'repos');
     return fs.isDirectory(fs.path.join(cocoapodsReposDir, 'master'));
   }
@@ -210,7 +219,7 @@ class CocoaPods {
     if (xcodeProject is MacOSProject) {
       podfileTemplateName = 'Podfile-macos';
     } else {
-      final bool isSwift = (await xcodeProjectInterpreter.getBuildSettingsAsync(
+      final bool isSwift = (await xcodeProjectInterpreter.getBuildSettings(
         runnerProject.path,
         'Runner',
       )).containsKey('SWIFT_VERSION');
@@ -241,8 +250,9 @@ class CocoaPods {
       final String content = file.readAsStringSync();
       final String include = '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
           .toLowerCase()}.xcconfig"';
-      if (!content.contains(include))
+      if (!content.contains(include)) {
         file.writeAsStringSync('$include\n$content', flush: true);
+      }
     }
   }
 
@@ -261,8 +271,9 @@ class CocoaPods {
   // 3. Pods/Manifest.lock doesn't exist (It is deleted when plugins change)
   // 4. Podfile.lock doesn't match Pods/Manifest.lock.
   bool _shouldRunPodInstall(XcodeBasedProject xcodeProject, bool dependenciesChanged) {
-    if (dependenciesChanged)
+    if (dependenciesChanged) {
       return true;
+    }
 
     final File podfileFile = xcodeProject.podfile;
     final File podfileLockFile = xcodeProject.podfileLock;

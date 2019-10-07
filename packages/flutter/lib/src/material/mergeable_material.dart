@@ -118,6 +118,9 @@ class MergeableMaterial extends StatefulWidget {
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   ///
   /// Defaults to 2, the appropriate elevation for cards.
+  ///
+  /// This uses [kElevationToShadow] to simulate shadows, it does not use
+  /// [Material]'s arbitrary elevation feature.
   final int elevation;
 
   /// Whether connected pieces of [MaterialSlice] have dividers between them.
@@ -534,7 +537,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               mainAxis: widget.mainAxis,
               children: slices,
             ),
-          )
+          ),
         );
         slices = <Widget>[];
 
@@ -542,7 +545,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           SizedBox(
             width: widget.mainAxis == Axis.horizontal ? _getGapSize(i) : null,
             height: widget.mainAxis == Axis.vertical ? _getGapSize(i) : null,
-          )
+          ),
         );
       } else {
         final MaterialSlice slice = _children[i];
@@ -588,7 +591,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           Material(
             type: MaterialType.transparency,
             child: child,
-          )
+          ),
         );
       }
     }
@@ -605,7 +608,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
             mainAxis: widget.mainAxis,
             children: slices,
           ),
-        )
+        ),
       );
       slices = <Widget>[];
     }

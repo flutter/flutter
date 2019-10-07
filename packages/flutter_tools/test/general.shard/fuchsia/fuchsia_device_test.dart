@@ -336,8 +336,7 @@ void main() {
   });
 
   group(FuchsiaIsolateDiscoveryProtocol, () {
-    Future<Uri> findUri(
-        List<MockFlutterView> views, String expectedIsolateName) {
+    Future<Uri> findUri(List<MockFlutterView> views, String expectedIsolateName) {
       final MockPortForwarder portForwarder = MockPortForwarder();
       final MockVMService vmService = MockVMService();
       final MockVM vm = MockVM();
@@ -368,8 +367,7 @@ void main() {
       return discoveryProtocol.uri;
     }
 
-    testUsingContext('can find flutter view with matching isolate name',
-        () async {
+    testUsingContext('can find flutter view with matching isolate name', () async {
       const String expectedIsolateName = 'foobar';
       final Uri uri = await findUri(<MockFlutterView>[
         MockFlutterView(null), // no ui isolate.
@@ -380,8 +378,7 @@ void main() {
           uri.toString(), 'http://${InternetAddress.loopbackIPv4.address}:0/');
     });
 
-    testUsingContext('can handle flutter view without matching isolate name',
-        () async {
+    testUsingContext('can handle flutter view without matching isolate name', () async {
       const String expectedIsolateName = 'foobar';
       final Future<Uri> uri = findUri(<MockFlutterView>[
         MockFlutterView(null), // no ui isolate.
@@ -643,11 +640,11 @@ class MockFile extends Mock implements File {}
 class MockProcess extends Mock implements Process {}
 
 Process _createMockProcess({
-    int exitCode = 0,
-    String stdout = '',
-    String stderr = '',
-    bool persistent = false,
-  }) {
+  int exitCode = 0,
+  String stdout = '',
+  String stderr = '',
+  bool persistent = false,
+}) {
   final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[
     utf8.encode(stdout),
   ]);
@@ -719,9 +716,9 @@ class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
   FuchsiaDeviceWithFakeDiscovery(String id, {String name}) : super(id, name: name);
 
   @override
-  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(
-        String isolateName) =>
-    FakeFuchsiaIsolateDiscoveryProtocol();
+  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(String isolateName) {
+    return FakeFuchsiaIsolateDiscoveryProtocol();
+  }
 }
 
 class FakeFuchsiaIsolateDiscoveryProtocol implements FuchsiaIsolateDiscoveryProtocol {
@@ -754,8 +751,7 @@ class FakeFuchsiaAmberCtl implements FuchsiaAmberCtl {
   }
 
   @override
-  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server,
-                             String packageName) async {
+  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server, String packageName) async {
     return true;
   }
 
@@ -787,8 +783,7 @@ class FailingAmberCtl implements FuchsiaAmberCtl {
   }
 
   @override
-  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server,
-                             String packageName) async {
+  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server, String packageName) async {
     return false;
   }
 
@@ -912,8 +907,7 @@ class FakeFuchsiaPM implements FuchsiaPM {
   }
 
   @override
-  Future<bool> build(
-      String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> build(String buildPath, String keyPath, String manifestPath) async {
     if (!fs.file(fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
         !fs.file(keyPath).existsSync() ||
         !fs.file(manifestPath).existsSync()) {
@@ -924,8 +918,7 @@ class FakeFuchsiaPM implements FuchsiaPM {
   }
 
   @override
-  Future<bool> archive(
-      String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> archive(String buildPath, String keyPath, String manifestPath) async {
     if (!fs.file(fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
         !fs.file(keyPath).existsSync() ||
         !fs.file(manifestPath).existsSync()) {
@@ -977,14 +970,12 @@ class FailingPM implements FuchsiaPM {
   }
 
   @override
-  Future<bool> build(
-      String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> build(String buildPath, String keyPath, String manifestPath) async {
     return false;
   }
 
   @override
-  Future<bool> archive(
-      String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> archive(String buildPath, String keyPath, String manifestPath) async {
     return false;
   }
 

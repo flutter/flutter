@@ -208,8 +208,8 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       final dynamic expectedFontsDescriptor = <dynamic>[
-          {'fonts': [{'asset': 'a/bar'}, {'style': 'italic', 'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}, // ignore: always_specify_types
-          {'fonts': [{'asset': 'a/baz'}, {'style': 'italic', 'weight': 400, 'asset': 'a/baz'}], 'family': 'bar'}, // ignore: always_specify_types
+        {'fonts': [{'asset': 'a/bar'}, {'style': 'italic', 'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}, // ignore: always_specify_types
+        {'fonts': [{'asset': 'a/baz'}, {'style': 'italic', 'weight': 400, 'asset': 'a/baz'}], 'family': 'bar'}, // ignore: always_specify_types
       ];
       expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
@@ -571,6 +571,26 @@ flutter:
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest, null);
       expect(logger.errorText, contains('Expected a map.'));
+    });
+
+    testUsingContext('Does not crash on empty entry', () async {
+      final BufferLogger logger = context.get<Logger>();
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - lib/gallery/example_code.dart
+    -
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      final List<Uri> assets = flutterManifest.assets;
+
+      expect(logger.errorText, contains('Asset manifest contains a null or empty uri.'));
+      expect(assets.length, 1);
     });
   });
 

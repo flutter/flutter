@@ -10,7 +10,7 @@ import '../build_info.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
+import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
@@ -21,11 +21,12 @@ class BuildApkCommand extends BuildSubCommand {
     usesPubOption();
     usesBuildNumberOption();
     usesBuildNameOption();
+    addShrinkingFlag();
 
     argParser
       ..addFlag('split-per-abi',
         negatable: false,
-        help: 'Whether to split the APKs per ABIs.'
+        help: 'Whether to split the APKs per ABIs. '
               'To learn more, see: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',
       )
       ..addMultiOption('target-platform',
@@ -69,17 +70,13 @@ class BuildApkCommand extends BuildSubCommand {
   }
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-    DevelopmentArtifact.android,
-  };
-
-  @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = getBuildInfo();
-    final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(buildInfo,
+    final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(
+      buildInfo,
       splitPerAbi: argResults['split-per-abi'],
-      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName)
+      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName),
+      shrink: argResults['shrink'],
     );
 
     if (buildInfo.isRelease && !androidBuildInfo.splitPerAbi && androidBuildInfo.targetArchs.length > 1) {

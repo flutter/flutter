@@ -36,6 +36,7 @@ Future<int> runTests(
   bool machine = false,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
+  bool enableAsserts = false,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   TestWatcher watcher,
@@ -69,6 +70,8 @@ Future<int> runTests(
     final bool result = await webCompilationProxy.initialize(
       projectDirectory: flutterProject.directory,
       testOutputDir: tempBuildDir,
+      projectName: flutterProject.manifest.appName,
+      initializePlatform: true,
     );
     if (!result) {
       throwToolExit('Failed to compile tests');
@@ -82,7 +85,7 @@ Future<int> runTests(
       <Runtime>[Runtime.chrome],
       () {
         return FlutterWebPlatform.start(flutterProject.directory.path);
-      }
+      },
     );
     await test.main(testArgs);
     return exitCode;
@@ -94,8 +97,9 @@ Future<int> runTests(
 
   // Configure package:test to use the Flutter engine for child processes.
   final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
-  if (!processManager.canRun(shellPath))
+  if (!processManager.canRun(shellPath)) {
     throwToolExit('Cannot find Flutter shell at $shellPath');
+  }
 
   final InternetAddressType serverType =
       ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
@@ -110,6 +114,7 @@ Future<int> runTests(
     serverType: serverType,
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
+    enableAsserts: enableAsserts,
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
     buildTestAssets: buildTestAssets,

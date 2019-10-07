@@ -44,12 +44,11 @@ class TextParentData extends ContainerBoxParentData<RenderBox> {
 
   @override
   String toString() {
-    final List<String> values = <String>[];
-    if (offset != null)
-      values.add('offset=$offset');
-    if (scale != null)
-      values.add('scale=$scale');
-    values.add(super.toString());
+    final List<String> values = <String>[
+      if (offset != null) 'offset=$offset',
+      if (scale != null) 'scale=$scale',
+      super.toString(),
+    ];
     return values.join('; ');
   }
 }
@@ -57,7 +56,8 @@ class TextParentData extends ContainerBoxParentData<RenderBox> {
 /// A render object that displays a paragraph of text.
 class RenderParagraph extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, TextParentData>,
-             RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
+             RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
+                  RelayoutWhenSystemFontsChangeMixin {
   /// Creates a paragraph render object.
   ///
   /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
@@ -442,8 +442,14 @@ class RenderParagraph extends RenderBox
     _layoutTextWithConstraints(constraints);
     final Offset offset = entry.localPosition;
     final TextPosition position = _textPainter.getPositionForOffset(offset);
-    final TextSpan span = _textPainter.text.getSpanForPosition(position);
-    span?.recognizer?.addPointer(event);
+    final InlineSpan span = _textPainter.text.getSpanForPosition(position);
+    if (span == null) {
+      return;
+    }
+    if (span is TextSpan) {
+      final TextSpan textSpan = span;
+      textSpan.recognizer?.addPointer(event);
+    }
   }
 
   bool _needsClipping = false;
@@ -459,6 +465,12 @@ class RenderParagraph extends RenderBox
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
     _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.infinity);
+  }
+
+  @override
+  void systemFontsDidChange() {
+    super.systemFontsDidChange();
+    _textPainter.markNeedsLayout();
   }
 
   void _layoutTextWithConstraints(BoxConstraints constraints) {
@@ -483,7 +495,7 @@ class RenderParagraph extends RenderBox
         BoxConstraints(
           maxWidth: constraints.maxWidth,
         ),
-        parentUsesSize: true
+        parentUsesSize: true,
       );
       double baselineOffset;
       switch (_placeholderSpans[childIndex].alignment) {
@@ -517,7 +529,7 @@ class RenderParagraph extends RenderBox
       final TextParentData textParentData = child.parentData;
       textParentData.offset = Offset(
         _textPainter.inlinePlaceholderBoxes[childIndex].left,
-        _textPainter.inlinePlaceholderBoxes[childIndex].top
+        _textPainter.inlinePlaceholderBoxes[childIndex].top,
       );
       textParentData.scale = _textPainter.inlinePlaceholderScales[childIndex];
       child = childAfter(child);

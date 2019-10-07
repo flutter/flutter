@@ -81,8 +81,9 @@ class DeviceManager {
 
   /// A user-specified device ID.
   String get specifiedDeviceId {
-    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all')
+    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all') {
       return null;
+    }
     return _specifiedDeviceId;
   }
 
@@ -115,8 +116,9 @@ class DeviceManager {
     }
 
     // Match on a id or name starting with [deviceId].
-    for (Device device in devices.where(startsWithDeviceId))
+    for (Device device in devices.where(startsWithDeviceId)) {
       yield device;
+    }
   }
 
   /// Return the list of connected devices, filtered by any user-specified device id.
@@ -177,7 +179,7 @@ class DeviceManager {
         for (Device device in devices)
           if (await device.targetPlatform != TargetPlatform.fuchsia &&
               await device.targetPlatform != TargetPlatform.web_javascript)
-            device
+            device,
       ];
     }
 
@@ -188,7 +190,7 @@ class DeviceManager {
       devices = <Device>[
         for (Device device in devices)
           if (isDeviceSupportedForProject(device, flutterProject))
-            device
+            device,
       ];
     } else if (devices.length == 1 &&
              !hasSpecifiedDeviceId &&
@@ -421,10 +423,12 @@ abstract class Device {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other is! Device)
+    }
+    if (other is! Device) {
       return false;
+    }
     return id == other.id;
   }
 
@@ -432,8 +436,9 @@ abstract class Device {
   String toString() => name;
 
   static Stream<String> descriptions(List<Device> devices) async* {
-    if (devices.isEmpty)
+    if (devices.isEmpty) {
       return;
+    }
 
     // Extract device information
     final List<List<String>> table = <List<String>>[];
@@ -484,9 +489,13 @@ class DebuggingOptions {
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
     this.observatoryPort,
+    this.initializePlatform = true,
+    this.hostname,
+    this.port,
+    this.browserLaunch = true,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo)
+  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname })
     : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -498,7 +507,8 @@ class DebuggingOptions {
       traceSystrace = false,
       dumpSkpOnShaderCompilation = false,
       verboseSystemLogs = false,
-      observatoryPort = null;
+      observatoryPort = null,
+      browserLaunch = true;
 
   final bool debuggingEnabled;
 
@@ -513,7 +523,12 @@ class DebuggingOptions {
   final bool dumpSkpOnShaderCompilation;
   final bool useTestFonts;
   final bool verboseSystemLogs;
+  /// Whether to invoke webOnlyInitializePlatform in Flutter for web.
+  final bool initializePlatform;
   final int observatoryPort;
+  final String port;
+  final String hostname;
+  final bool browserLaunch;
 
   bool get hasObservatoryPort => observatoryPort != null;
 }
@@ -532,8 +547,9 @@ class LaunchResult {
   @override
   String toString() {
     final StringBuffer buf = StringBuffer('started=$started');
-    if (observatoryUri != null)
+    if (observatoryUri != null) {
       buf.write(', observatory=$observatoryUri');
+    }
     return buf.toString();
   }
 }

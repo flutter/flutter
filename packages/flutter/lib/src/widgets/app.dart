@@ -8,6 +8,7 @@ import 'dart:collection' show HashMap;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import 'actions.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
@@ -361,10 +362,12 @@ class WidgetsApp extends StatefulWidget {
   /// also. For example, if the route was `/a/b/c`, then the app would start
   /// with the three routes `/a`, `/a/b`, and `/a/b/c` loaded, in that order.
   ///
-  /// If any part of this process fails to generate routes, then the
-  /// [initialRoute] is ignored and [Navigator.defaultRouteName] is used instead
-  /// (`/`). This can happen if the app is started with an intent that specifies
-  /// a non-existent route.
+  /// Intermediate routes aren't required to exist. In the example above, `/a`
+  /// and `/a/b` could be skipped if they have no matching route. But `/a/b/c` is
+  /// required to have a route, else [initialRoute] is ignored and
+  /// [Navigator.defaultRouteName] is used instead (`/`). This can happen if the
+  /// app is started with an intent that specifies a non-existent route.
+  ///
   /// The [Navigator] is only built if routes are provided (either via [home],
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
   /// [initialRoute] must be null and [builder] must not be null.
@@ -1192,14 +1195,19 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
     assert(_debugCheckLocalizations(appLocale));
 
-    return DefaultFocusTraversal(
-      policy: ReadingOrderTraversalPolicy(),
-      child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
-        child: Localizations(
-          locale: appLocale,
-          delegates: _localizationsDelegates.toList(),
-          child: title,
+    return Actions(
+      actions: <LocalKey, ActionFactory>{
+        DoNothingAction.key: () => const DoNothingAction(),
+      },
+      child: DefaultFocusTraversal(
+        policy: ReadingOrderTraversalPolicy(),
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+          child: Localizations(
+            locale: appLocale,
+            delegates: _localizationsDelegates.toList(),
+            child: title,
+          ),
         ),
       ),
     );

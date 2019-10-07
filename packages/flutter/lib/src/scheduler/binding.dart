@@ -194,18 +194,20 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    window.onBeginFrame = _handleBeginFrame;
-    window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     readInitialLifecycleStateFromNativeWindow();
 
     if (!kReleaseMode) {
       int frameNumber = 0;
 
-      window.frameTimings.listen((FrameTiming frameTiming) {
-        frameNumber += 1;
-        _profileFramePostEvent(frameNumber, frameTiming);
-      });
+      // use frameTimings. https://github.com/flutter/flutter/issues/38838
+      // ignore: deprecated_member_use
+      window.onReportTimings = (List<FrameTiming> timings) {
+        for (FrameTiming frameTiming in timings) {
+          frameNumber += 1;
+          _profileFramePostEvent(frameNumber, frameTiming);
+        }
+      };
     }
   }
 
@@ -502,7 +504,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         FlutterError.reportError(FlutterErrorDetails(
           exception: reason,
           library: 'scheduler library',
-            informationCollector: () sync* {
+          informationCollector: () sync* {
             if (count == 1) {
               // TODO(jacobr): I have added an extra line break in this case.
               yield ErrorDescription(
@@ -652,6 +654,12 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
       scheduleFrame();
   }
 
+  @protected
+  void ensureFrameCallbacksRegistered() {
+    window.onBeginFrame ??= _handleBeginFrame;
+    window.onDrawFrame ??= _handleDrawFrame;
+  }
+
   /// Schedules a new frame using [scheduleFrame] if this object is not
   /// currently producing a frame.
   ///
@@ -713,6 +721,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         debugPrintStack(label: 'scheduleFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
+    ensureFrameCallbacksRegistered();
     window.scheduleFrame();
     _hasScheduledFrame = true;
   }
@@ -1026,7 +1035,10 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void _invokeFrameCallback(FrameCallback callback, Duration timeStamp, [ StackTrace callbackStack ]) {
     assert(callback != null);
     assert(_FrameCallbackEntry.debugCurrentCallbackStack == null);
-    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = callbackStack; return true; }());
+    assert(() {
+      _FrameCallbackEntry.debugCurrentCallbackStack = callbackStack;
+      return true;
+    }());
     try {
       callback(timeStamp);
     } catch (exception, exceptionStack) {
@@ -1045,7 +1057,10 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         },
       ));
     }
-    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = null; return true; }());
+    assert(() {
+      _FrameCallbackEntry.debugCurrentCallbackStack = null;
+      return true;
+    }());
   }
 }
 

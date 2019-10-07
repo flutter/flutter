@@ -1,6 +1,7 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
+  if (Platform.isMacOS) {
+    // TODO(gspencergoog): Update this when TargetPlatform includes macOS. https://github.com/flutter/flutter/issues/31366
+    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
+
   runApp(const MaterialApp(
     title: 'Actions Demo',
     home: FocusDemo(),
@@ -228,9 +235,9 @@ abstract class UndoableAction extends Action {
 
   @override
   @mustCallSuper
-  void invoke(FocusNode node, Intent tag) {
+  void invoke(FocusNode node, Intent intent) {
     invocationNode = node;
-    invocationIntent = tag;
+    invocationIntent = intent;
   }
 
   @override
@@ -246,8 +253,8 @@ class SetFocusActionBase extends UndoableAction {
   FocusNode _previousFocus;
 
   @override
-  void invoke(FocusNode node, Intent tag) {
-    super.invoke(node, tag);
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
     _previousFocus = WidgetsBinding.instance.focusManager.primaryFocus;
     node.requestFocus();
   }
@@ -285,8 +292,8 @@ class SetFocusAction extends SetFocusActionBase {
   static const LocalKey key = ValueKey<Type>(SetFocusAction);
 
   @override
-  void invoke(FocusNode node, Intent tag) {
-    super.invoke(node, tag);
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
     node.requestFocus();
   }
 }
@@ -298,8 +305,8 @@ class NextFocusAction extends SetFocusActionBase {
   static const LocalKey key = ValueKey<Type>(NextFocusAction);
 
   @override
-  void invoke(FocusNode node, Intent tag) {
-    super.invoke(node, tag);
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
     node.nextFocus();
   }
 }
@@ -310,8 +317,8 @@ class PreviousFocusAction extends SetFocusActionBase {
   static const LocalKey key = ValueKey<Type>(PreviousFocusAction);
 
   @override
-  void invoke(FocusNode node, Intent tag) {
-    super.invoke(node, tag);
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
     node.previousFocus();
   }
 }
@@ -330,9 +337,9 @@ class DirectionalFocusAction extends SetFocusActionBase {
   TraversalDirection direction;
 
   @override
-  void invoke(FocusNode node, DirectionalFocusIntent tag) {
-    super.invoke(node, tag);
-    final DirectionalFocusIntent args = tag;
+  void invoke(FocusNode node, DirectionalFocusIntent intent) {
+    super.invoke(node, intent);
+    final DirectionalFocusIntent args = intent;
     node.focusInDirection(args.direction);
   }
 }

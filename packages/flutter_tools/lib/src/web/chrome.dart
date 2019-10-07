@@ -35,7 +35,7 @@ const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
 final List<String> kWindowsPrefixes = <String>[
   platform.environment['LOCALAPPDATA'],
   platform.environment['PROGRAMFILES'],
-  platform.environment['PROGRAMFILES(X86)']
+  platform.environment['PROGRAMFILES(X86)'],
 ];
 
 /// Find the chrome executable on the current platform.
@@ -71,6 +71,16 @@ class ChromeLauncher {
 
   static final Completer<Chrome> _currentCompleter = Completer<Chrome>();
 
+  /// Whether we can locate the chrome executable.
+  bool canFindChrome() {
+    final String chrome = findChromeExecutable();
+    try {
+      return processManager.canRun(chrome);
+    } on ArgumentError {
+      return false;
+    }
+  }
+
   /// Launch the chrome browser to a particular `host` page.
   ///
   /// `headless` defaults to false, and controls whether we open a headless or
@@ -79,11 +89,7 @@ class ChromeLauncher {
   /// `skipCheck` does not attempt to make a devtools connection before returning.
   Future<Chrome> launch(String url, { bool headless = false, bool skipCheck = false }) async {
     final String chromeExecutable = findChromeExecutable();
-    final Directory dataDir = fs.directory('.dart_tool')
-      .childDirectory('chrome_profile');
-    if (!dataDir.existsSync()) {
-      dataDir.createSync(recursive: true);
-    }
+    final Directory dataDir = fs.systemTempDirectory.createTempSync('flutter_tool_');
     final int port = await os.findFreePort();
     final List<String> args = <String>[
       chromeExecutable,
@@ -140,7 +146,6 @@ class ChromeLauncher {
         await chrome.chromeConnection.getTabs();
       } catch (e) {
         await chrome.close();
-        print('here');
         throwToolExit(
             'Unable to connect to Chrome debug port: ${chrome.debugPort}\n $e');
       }
@@ -156,24 +161,23 @@ class ChromeLauncher {
   static Future<Chrome> get connectedInstance => _currentCompleter.future;
 
   /// Returns the full URL of the Chrome remote debugger for the main page.
-///
-/// This takes the [base] remote debugger URL (which points to a browser-wide
-/// page) and uses its JSON API to find the resolved URL for debugging the host
-/// page.
-Future<Uri> _getRemoteDebuggerUrl(Uri base) async {
-  try {
-    final HttpClient client = HttpClient();
-    final HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
-    final HttpClientResponse response = await request.close();
-    final List<dynamic> jsonObject = await json.fuse(utf8).decoder.bind(response).single;
-    return base.resolve(jsonObject.first['devtoolsFrontendUrl']);
-  } catch (_) {
-    // If we fail to talk to the remote debugger protocol, give up and return
-    // the raw URL rather than crashing.
-    return base;
+  ///
+  /// This takes the [base] remote debugger URL (which points to a browser-wide
+  /// page) and uses its JSON API to find the resolved URL for debugging the host
+  /// page.
+  Future<Uri> _getRemoteDebuggerUrl(Uri base) async {
+    try {
+      final HttpClient client = HttpClient();
+      final HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
+      final HttpClientResponse response = await request.close();
+      final List<dynamic> jsonObject = await json.fuse(utf8).decoder.bind(response).single;
+      return base.resolve(jsonObject.first['devtoolsFrontendUrl']);
+    } catch (_) {
+      // If we fail to talk to the remote debugger protocol, give up and return
+      // the raw URL rather than crashing.
+      return base;
+    }
   }
-}
-
 }
 
 /// A class for managing an instance of Chrome.

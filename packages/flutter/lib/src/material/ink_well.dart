@@ -433,17 +433,13 @@ class InkResponse extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> gestures = <String>[];
-    if (onTap != null)
-      gestures.add('tap');
-    if (onDoubleTap != null)
-      gestures.add('double tap');
-    if (onLongPress != null)
-      gestures.add('long press');
-    if (onTapDown != null)
-      gestures.add('tap down');
-    if (onTapCancel != null)
-      gestures.add('tap cancel');
+    final List<String> gestures = <String>[
+      if (onTap != null) 'tap',
+      if (onDoubleTap != null) 'double tap',
+      if (onLongPress != null) 'long press',
+      if (onTapDown != null) 'tap down',
+      if (onTapCancel != null) 'tap cancel',
+    ];
     properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
     properties.add(DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
     properties.add(DiagnosticsProperty<BoxShape>(
@@ -473,6 +469,12 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   bool get highlightsExist => _highlights.values.where((InkHighlight highlight) => highlight != null).isNotEmpty;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _focusNode?.removeListener(_handleFocusUpdate);
@@ -491,6 +493,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   @override
   void dispose() {
+    WidgetsBinding.instance.focusManager.removeHighlightModeListener(_handleFocusHighlightModeChange);
     _focusNode?.removeListener(_handleFocusUpdate);
     super.dispose();
   }
@@ -608,8 +611,25 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     return splash;
   }
 
+  void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _handleFocusUpdate();
+    });
+  }
+
   void _handleFocusUpdate() {
-    final bool showFocus = enabled && (Focus.of(context, nullOk: true)?.hasPrimaryFocus ?? false);
+    bool showFocus;
+    switch (WidgetsBinding.instance.focusManager.highlightMode) {
+      case FocusHighlightMode.touch:
+        showFocus = false;
+        break;
+      case FocusHighlightMode.traditional:
+        showFocus = enabled && (Focus.of(context, nullOk: true)?.hasPrimaryFocus ?? false);
+        break;
+    }
     updateHighlight(_HighlightType.focus, value: showFocus);
   }
 
@@ -767,7 +787,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 ///
 /// An example of this situation is as follows:
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold_center}
 ///
 /// Tap the container to cause it to grow. Then, tap it again and hold before
 /// the widget reaches its maximum size to observe the clipped ink splash.
@@ -776,21 +796,19 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// double sideLength = 50;
 ///
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: AnimatedContainer(
-///       height: sideLength,
-///       width: sideLength,
-///       duration: Duration(seconds: 2),
-///       curve: Curves.easeIn,
-///       child: Material(
-///         color: Colors.yellow,
-///         child: InkWell(
-///           onTap: () {
-///             setState(() {
-///               sideLength == 50 ? sideLength = 100 : sideLength = 50;
-///             });
-///           },
-///         ),
+///   return AnimatedContainer(
+///     height: sideLength,
+///     width: sideLength,
+///     duration: Duration(seconds: 2),
+///     curve: Curves.easeIn,
+///     child: Material(
+///       color: Colors.yellow,
+///       child: InkWell(
+///         onTap: () {
+///           setState(() {
+///             sideLength == 50 ? sideLength = 100 : sideLength = 50;
+///           });
+///         },
 ///       ),
 ///     ),
 ///   );

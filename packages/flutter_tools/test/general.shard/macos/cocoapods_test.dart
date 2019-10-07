@@ -160,6 +160,16 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
+
+    testUsingContext('detects initialized over 1.8.0', () async {
+      pretendPodIsInstalled();
+      pretendPodVersionIs('1.8.0');
+      expect(await cocoaPodsUnderTest.isCocoaPodsInitialized, isTrue);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Platform: () => FakePlatform(),
+      FileSystem: () => fs,
+    });
   });
 
   group('Setup Podfile', () {
@@ -173,10 +183,10 @@ void main() {
 
     testUsingContext('creates swift Podfile if swift', () async {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.getBuildSettingsAsync(any, any))
-          .thenAnswer((_) async => <String, String>{
-        'SWIFT_VERSION': '4.0',
-      });
+      when(mockXcodeProjectInterpreter.getBuildSettings(any, any))
+        .thenAnswer((_) async => <String, String>{
+          'SWIFT_VERSION': '4.0',
+        });
 
       final FlutterProject project = FlutterProject.fromPath('project');
       await cocoaPodsUnderTest.setupPodfile(project.ios);

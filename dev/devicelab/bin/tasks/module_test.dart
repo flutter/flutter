@@ -190,6 +190,7 @@ Future<void> main() async {
       section('Check files in debug APK');
 
       checkItContains<String>(<String>[
+        ...flutterAssets,
         'AndroidManifest.xml',
         'assets/flutter_assets/isolate_snapshot_data',
         'assets/flutter_assets/kernel_blob.bin',
@@ -246,6 +247,7 @@ Future<void> main() async {
       section('Check files in release APK');
 
       checkItContains<String>(<String>[
+        ...flutterAssets,
         'AndroidManifest.xml',
         'lib/arm64-v8a/libapp.so',
         'lib/arm64-v8a/libflutter.so',

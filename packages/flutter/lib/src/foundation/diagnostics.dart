@@ -866,7 +866,7 @@ class _PrefixedStringBuilder {
   ///
   /// This method wraps a sequence of text where only some spans of text can be
   /// used as wrap boundaries.
-   static Iterable<String> _wordWrapLine(String message, List<int> wrapRanges, int width, { int startOffset = 0, int otherLineOffset = 0}) sync* {
+  static Iterable<String> _wordWrapLine(String message, List<int> wrapRanges, int width, { int startOffset = 0, int otherLineOffset = 0}) sync* {
     if (message.length + startOffset < width) {
       // Nothing to do. The line doesn't wrap.
       yield message;
@@ -1097,8 +1097,8 @@ class TextTreeRenderer {
   /// single line style does not provide any meaningful style for how children
   /// should be connected to their parents.
   TextTreeConfiguration _childTextConfiguration(
-      DiagnosticsNode child,
-      TextTreeConfiguration textStyle,
+    DiagnosticsNode child,
+    TextTreeConfiguration textStyle,
   ) {
     final DiagnosticsTreeStyle childStyle = child?.style;
     return (_isSingleLine(childStyle) || childStyle == DiagnosticsTreeStyle.errorProperty) ? textStyle : child.textTreeConfiguration;
@@ -1290,8 +1290,7 @@ class TextTreeRenderer {
           if (!propertyRender.endsWith('\n'))
             builder.write('\n');
         }
-      } else
-      {
+      } else {
         final String propertyRender = render(property,
           prefixLineOne: '${builder.prefixOtherLines}${propertyStyle.prefixLineOne}',
           prefixOtherLines: '${builder.prefixOtherLines}${propertyStyle.childLinkSpace}${propertyStyle.prefixOtherLines}',
@@ -1589,9 +1588,9 @@ abstract class DiagnosticsNode {
   /// The provided `nodes` may be properties or children of the `parent`
   /// [DiagnosticsNode].
   static List<Map<String, Object>> toJsonList(
-      List<DiagnosticsNode> nodes,
-      DiagnosticsNode parent,
-      DiagnosticsSerializationDelegate delegate,
+    List<DiagnosticsNode> nodes,
+    DiagnosticsNode parent,
+    DiagnosticsSerializationDelegate delegate,
   ) {
     bool truncated = false;
     if (nodes == null)
@@ -2669,7 +2668,11 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     json['defaultLevel'] = describeEnum(_defaultLevel);
     if (value is Diagnosticable || value is DiagnosticsNode)
       json['isDiagnosticableValue'] = true;
-    if (value is num || value is String || value is bool || value == null)
+    if (v is num)
+      // Workaround for https://github.com/flutter/flutter/issues/39937#issuecomment-529558033.
+      // JSON.stringify replaces infinity and NaN with null.
+      json['value'] = v.isFinite ? v :  v.toString();
+    if (value is String || value is bool || value == null)
       json['value'] = value;
     return json;
   }
