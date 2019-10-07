@@ -1,4 +1,4 @@
-Signature: 892c1b3c90bcb828a207255b570ee16f
+Signature: 9e4fdea30431010b0dfde41795f7b5c9
 
 UNUSED LICENSES:
 
@@ -9324,7 +9324,6 @@ FILE: ../../../third_party/dart/runtime/vm/thread_interrupter_android.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_interrupter_linux.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_interrupter_macos.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_interrupter_win.cc
-FILE: ../../../third_party/dart/sdk/lib/_chrome/dart2js/chrome_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/_http/http.dart
 FILE: ../../../third_party/dart/sdk/lib/_http/http_headers.dart
 FILE: ../../../third_party/dart/sdk/lib/_http/http_impl.dart
@@ -9431,7 +9430,6 @@ FILE: ../../../third_party/dart/sdk/lib/vmservice/message_router.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/running_isolate.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/running_isolates.dart
 FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
-FILE: ../../../third_party/dart/sdk_nnbd/lib/_chrome/dart2js/chrome_dart2js.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/http.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/http_headers.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/http_impl.dart
