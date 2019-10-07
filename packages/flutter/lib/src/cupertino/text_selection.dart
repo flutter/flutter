@@ -11,12 +11,13 @@ import 'package:flutter/rendering.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'localizations.dart';
+import 'theme.dart';
 
 // Read off from the output on iOS 12. This color does not vary with the
 // application's theme color.
-const Color _kHandlesColor = Color(0xFF136FE0);
 const double _kSelectionHandleOverlap = 1.5;
-const double _kSelectionHandleRadius = 5.5;
+// Extracted from https://developer.apple.com/design/resources/.
+const double _kSelectionHandleRadius = 6;
 
 // Minimal padding from all edges of the selection toolbar to all edges of the
 // screen.
@@ -31,13 +32,16 @@ const double _kToolbarContentDistance = 8.0;
 // Values derived from https://developer.apple.com/design/resources/.
 // 92% Opacity ~= 0xEB
 
+// Values extracted from https://developer.apple.com/design/resources/.
 // The height of the toolbar, including the arrow.
 const double _kToolbarHeight = 43.0;
+const Size _kToolbarArrowSize = Size(14.0, 7.0);
+const Radius _kToolbarBorderRadius = Radius.circular(8);
+// Colors extracted from https://developer.apple.com/design/resources/.
+// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
 const Color _kToolbarBackgroundColor = Color(0xEB202020);
 const Color _kToolbarDividerColor = Color(0xFF808080);
-const Size _kToolbarArrowSize = Size(14.0, 7.0);
-const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
-const Radius _kToolbarBorderRadius = Radius.circular(8);
+
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
@@ -46,6 +50,9 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   fontWeight: FontWeight.w400,
   color: CupertinoColors.white,
 );
+
+// Eyeballed value.
+const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
 
 /// An iOS-style toolbar that appears in response to text selection.
 ///
@@ -247,12 +254,14 @@ class _ToolbarRenderBox extends RenderShiftedBox {
 
 /// Draws a single text selection handle with a bar and a ball.
 class _TextSelectionHandlePainter extends CustomPainter {
-  const _TextSelectionHandlePainter();
+  const _TextSelectionHandlePainter(this.color);
+
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-        ..color = _kHandlesColor
+        ..color = color
         ..strokeWidth = 2.0;
     canvas.drawCircle(
       const Offset(_kSelectionHandleRadius, _kSelectionHandleRadius),
@@ -274,7 +283,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => false;
+  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => color != oldPainter.color;
 }
 
 class _CupertinoTextSelectionControls extends TextSelectionControls {
@@ -379,8 +388,8 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 
     final Widget handle = SizedBox.fromSize(
       size: desiredSize,
-      child: const CustomPaint(
-        painter: _TextSelectionHandlePainter(),
+      child: CustomPaint(
+        painter: _TextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
       ),
     );
 
