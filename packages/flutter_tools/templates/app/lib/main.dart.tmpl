@@ -50,7 +50,6 @@ void main() {
 {{^withPluginHook}}
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
@@ -85,7 +84,6 @@ class MyHomePage extends StatefulWidget {
 
   final String title;
 
-  @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
@@ -103,7 +101,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
@@ -158,14 +155,12 @@ class _MyHomePageState extends State<MyHomePage> {
 {{/withPluginHook}}
 {{#withPluginHook}}
 class MyApp extends StatefulWidget {
-  @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
 
-  @override
   void initState() {
     super.initState();
     initPlatformState();
@@ -191,7 +186,6 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
