@@ -116,7 +116,7 @@ class ChromeLauncher {
     final Process process = await processManager.start(args);
 
     // Wait until the DevTools are listening before trying to connect.
-    final String devToolsListeningLine = await process.stderr
+    await process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
@@ -126,7 +126,6 @@ class ChromeLauncher {
           throwToolExit('Unable to connect to Chrome DevTools.');
           return null;
         });
-    print('>>> $devToolsListeningLine');
     final Uri remoteDebuggerUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
     return _connect(Chrome._(
       port,
