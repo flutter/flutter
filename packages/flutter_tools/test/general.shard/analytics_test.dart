@@ -55,7 +55,7 @@ void main() {
 
       flutterUsage.enabled = true;
       await createProject(tempDir);
-      expect(count, flutterUsage.isFirstRun ? 0 : 3);
+      expect(count, flutterUsage.isFirstRun ? 0 : 4);
 
       count = 0;
       flutterUsage.enabled = false;

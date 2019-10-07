@@ -298,8 +298,9 @@ flutter:
           contains('To learn more, see: https://developer.android.com/studio/build/shrink-code'));
 
       verify(mockUsage.sendEvent(
-        'build-apk',
-        'r8-failure',
+        'build',
+        'apk',
+        label: 'r8-failure',
         parameters: anyNamed('parameters'),
       )).called(1);
     },
