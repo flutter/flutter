@@ -438,8 +438,6 @@ Future<void> _runWebTests() async {
   final Directory flutterPackageDir = Directory(path.join(flutterRoot, 'packages', 'flutter'));
   final Directory testDir = Directory(path.join(flutterPackageDir.path, 'test'));
 
-  final List<String> directories = <String>[];
-
   // TODO(yjbanov): we're getting rid of this blacklist as part of https://github.com/flutter/flutter/projects/60
   const List<String> kBlacklist = <String>[
     'test/cupertino',
@@ -451,16 +449,12 @@ Future<void> _runWebTests() async {
     'test/widgets',
   ];
 
-  for (Directory subDirectory in testDir.listSync().whereType<Directory>()) {
-    final String relativePath = path.relative(subDirectory.path, from: flutterPackageDir.path);
-
-    if (kBlacklist.contains(relativePath)) {
-      // The test is blacklisted from running on the Web.
-      continue;
-    }
-
-    directories.add(relativePath);
-  }
+  final List<String> directories = testDir
+    .listSync()
+    .whereType<Directory>()
+    .map<String>((Directory dir) => path.relative(dir.path, from: flutterPackageDir.path))
+    .where((String relativePath) => !kBlacklist.contains(relativePath))
+    .toList();
 
   await _runFlutterWebTest(flutterPackageDir.path, tests: directories);
   await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter_web_plugins'), tests: <String>['test']);
