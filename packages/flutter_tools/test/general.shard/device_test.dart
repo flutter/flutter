@@ -6,7 +6,9 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -142,6 +144,23 @@ void main() {
       ]);
     });
   });
+  group('ForwardedPort', () {
+    group('killProcess()', () {
+      testUsingContext('returns false if there was no process available as context', () {
+        final ForwardedPort forwardedPort = ForwardedPort(123, 456);
+        final bool result = forwardedPort.killProcess();
+        expect(result, isFalse);
+      });
+
+      testUsingContext('kills process and returns true if process was available', () {
+        final MockProcess mockProcess = MockProcess();
+        final ForwardedPort forwardedPort = ForwardedPort.withContext(123, 456, mockProcess);
+        final bool result = forwardedPort.killProcess();
+        verify(mockProcess.kill());
+        expect(result, isTrue);
+      });
+    });
+  });
 }
 
 class TestDeviceManager extends DeviceManager {
@@ -186,3 +205,5 @@ class _MockDevice extends Device {
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
 }
+
+class MockProcess extends Mock implements Process {}
