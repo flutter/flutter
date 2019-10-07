@@ -255,9 +255,7 @@ class HotRunner extends ResidentRunner {
 
     firstBuildTime = DateTime.now();
 
-    printTrace('in hot runner');
     for (FlutterDevice device in flutterDevices) {
-      printTrace('about to invoke .runHot() for device ${device.device.toString()}');
       final int result = await device.runHot(
         hotRunner: this,
         route: route,

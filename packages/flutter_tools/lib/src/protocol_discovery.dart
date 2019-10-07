@@ -48,6 +48,9 @@ class ProtocolDiscovery {
   StreamSubscription<String> _deviceLogSubscription;
 
   /// The discovered service URI.
+  ///
+  /// Port forwarding is only attempted when this is invoked, in case we never
+  /// need to port forward.
   Future<Uri> get uri async {
     final Uri rawUri = await _completer.future;
     return await _forwardPort(rawUri);
