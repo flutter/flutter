@@ -274,10 +274,11 @@ class MouseTracker extends ChangeNotifier {
 
     final Iterable<_MouseState> targetDevices = deviceIds != null ?
       deviceIds.map(_findMouseState) :
-      <_MouseState>[
-        ..._mouseStates.values,
-        if (_disconnectedMouseState != null) _disconnectedMouseState,
-      ];
+      () sync* {
+        yield *_mouseStates.values;
+        if (_disconnectedMouseState != null)
+          yield _disconnectedMouseState;
+      }();
 
     for (final _MouseState mouseState in targetDevices) {
       final bool isConnected = mouseState != _disconnectedMouseState;
