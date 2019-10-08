@@ -168,6 +168,8 @@ template("msvc_toolchain") {
       # The use of inputs_newline is to work around a fixed per-line buffer
       # size in the linker.
       rspfile_content = "{{libs}} {{solibs}} {{inputs_newline}} {{ldflags}}"
+
+      restat = true
     }
 
     tool("link") {
@@ -192,6 +194,8 @@ template("msvc_toolchain") {
       # The use of inputs_newline is to work around a fixed per-line buffer
       # size in the linker.
       rspfile_content = "{{inputs_newline}} {{libs}} {{solibs}} {{ldflags}}"
+
+      restat = true
     }
 
     tool("stamp") {
