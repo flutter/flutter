@@ -114,6 +114,7 @@ executable("flow_unittests") {
     "matrix_decomposition_unittests.cc",
     "mutators_stack_unittests.cc",
     "raster_cache_unittests.cc",
+    "texture_unittests.cc",
   ]
 
   deps = [

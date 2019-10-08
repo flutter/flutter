@@ -799,5 +799,79 @@ TEST_F(ShellTest, CanCreateImagefromDecompressedBytes) {
   latch.Wait();
 }
 
+class MockTexture : public Texture {
+ public:
+  MockTexture(int64_t textureId,
+              std::shared_ptr<fml::AutoResetWaitableEvent> latch)
+      : Texture(textureId), latch_(latch) {}
+
+  ~MockTexture() override = default;
+
+  // Called from GPU thread.
+  void Paint(SkCanvas& canvas,
+             const SkRect& bounds,
+             bool freeze,
+             GrContext* context) override {}
+
+  void OnGrContextCreated() override {}
+
+  void OnGrContextDestroyed() override {}
+
+  void MarkNewFrameAvailable() override {
+    frames_available_++;
+    latch_->Signal();
+  }
+
+  void OnTextureUnregistered() override {
+    unregistered_ = true;
+    latch_->Signal();
+  }
+
+  bool unregistered() { return unregistered_; }
+  int frames_available() { return frames_available_; }
+
+ private:
+  bool unregistered_ = false;
+  int frames_available_ = 0;
+  std::shared_ptr<fml::AutoResetWaitableEvent> latch_;
+};
+
+TEST_F(ShellTest, TextureFrameMarkedAvailableAndUnregister) {
+  Settings settings = CreateSettingsForFixture();
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  auto task_runner = CreateNewThread();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+  std::unique_ptr<Shell> shell =
+      CreateShell(std::move(settings), std::move(task_runners));
+
+  ASSERT_TRUE(ValidateShell(shell.get()));
+  PlatformViewNotifyCreated(shell.get());
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  std::shared_ptr<fml::AutoResetWaitableEvent> latch =
+      std::make_shared<fml::AutoResetWaitableEvent>();
+
+  std::shared_ptr<MockTexture> mockTexture =
+      std::make_shared<MockTexture>(0, latch);
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetGPUTaskRunner(), [&]() {
+        shell->GetPlatformView()->RegisterTexture(mockTexture);
+        shell->GetPlatformView()->MarkTextureFrameAvailable(0);
+      });
+  latch->Wait();
+
+  EXPECT_EQ(mockTexture->frames_available(), 1);
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetGPUTaskRunner(),
+      [&]() { shell->GetPlatformView()->UnregisterTexture(0); });
+  latch->Wait();
+
+  EXPECT_EQ(mockTexture->unregistered(), true);
+}
+
 }  // namespace testing
 }  // namespace flutter
