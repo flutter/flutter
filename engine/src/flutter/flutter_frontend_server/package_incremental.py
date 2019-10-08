@@ -15,7 +15,7 @@ PACKAGES = [
   "kernel",
   "front_end",
   "dev_compiler",
-  "frontend_server",
+  "flutter_frontend_server",
 ]
 
 VM_PUBSPEC = r'''name: vm
@@ -41,7 +41,7 @@ dependencies:
   meta: any
 '''
 
-FRONTEND_SERVER_PUBSPEC = r'''name: frontend_server
+FLUTTER_FRONTEND_SERVER_PUBSPEC = r'''name: flutter_frontend_server
 version: 0.0.1
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -87,7 +87,7 @@ dependencies:
 PUBSPECS = {
   'vm': VM_PUBSPEC,
   'build_integration': BUILD_INTEGRATION_PUBSPEC,
-  'frontend_server': FRONTEND_SERVER_PUBSPEC,
+  'flutter_frontend_server': FLUTTER_FRONTEND_SERVER_PUBSPEC,
   'kernel': KERNEL_PUBSPEC,
   'front_end': FRONT_END_PUBSPEC,
   'dev_compiler': DEV_COMPILER_PUBSPEC,
@@ -103,7 +103,7 @@ def main():
   for package in PACKAGES:
     base = args.input
     # Handle different path for frontend_server
-    if package == 'frontend_server':
+    if package == 'flutter_frontend_server':
       base = args.frontend
     package_root = os.path.join(base, package)
     for root, directories, files in os.walk(package_root):

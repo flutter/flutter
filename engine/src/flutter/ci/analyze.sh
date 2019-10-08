@@ -18,11 +18,11 @@ if [ -n "$RESULTS" ]; then
   exit 1;
 fi
 
-echo "Analyzing frontend_server..."
+echo "Analyzing flutter_frontend_server..."
 RESULTS=`dartanalyzer                                                          \
-  --packages=flutter/frontend_server/.packages                                 \
+  --packages=flutter/flutter_frontend_server/.packages                                 \
   --options flutter/analysis_options.yaml                                      \
-  flutter/frontend_server                                                      \
+  flutter/flutter_frontend_server                                                      \
   2>&1                                                                         \
   | grep -Ev "No issues found!"                                                \
   | grep -Ev "Analyzing.+frontend_server"`
