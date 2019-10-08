@@ -67,6 +67,7 @@ class BottomSheet extends StatefulWidget {
        assert(onClosing != null),
        assert(builder != null),
        assert(elevation == null || elevation >= 0.0),
+       assert(!enableDrag || animationController != null),
        super(key: key);
 
   /// The animation controller that controls the bottom sheet's entrance and
@@ -90,7 +91,9 @@ class BottomSheet extends StatefulWidget {
   final WidgetBuilder builder;
 
   /// If true, the bottom sheet can be dragged up and down and dismissed by
-  /// swiping downards.
+  /// swiping downwards.
+  ///
+  /// If true, it requires the [animationController] to be set.
   ///
   /// Default is true.
   final bool enableDrag;
