@@ -107,7 +107,7 @@ void main() {
         .childFile('gradle.properties')
         .writeAsStringSync('irrelevant');
 
-      final Directory gradleWrapperDir = fs.systemTempDirectory.createTempSync('gradle_wrapper.');
+      final Directory gradleWrapperDir = fs.systemTempDirectory.createTempSync('flutter_application_package_test_gradle_wrapper.');
       when(mockCache.getArtifactDirectory('gradle_wrapper')).thenReturn(gradleWrapperDir);
 
       fs.directory(gradleWrapperDir.childDirectory('gradle').childDirectory('wrapper'))

@@ -435,18 +435,28 @@ Future<void> _runTests() async {
 }
 
 Future<void> _runWebTests() async {
-  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
-    'test/foundation/',
-    'test/physics/',
-    'test/services/',
-    // TODO(yjbanov): re-enable when flakiness is resolved
-    // 'test/rendering/',
-    // 'test/painting/',
-    // 'test/scheduler/',
-    // 'test/semantics/',
-    // 'test/widgets/',
-    // 'test/material/',
-  ]);
+  final Directory flutterPackageDir = Directory(path.join(flutterRoot, 'packages', 'flutter'));
+  final Directory testDir = Directory(path.join(flutterPackageDir.path, 'test'));
+
+  // TODO(yjbanov): we're getting rid of this blacklist as part of https://github.com/flutter/flutter/projects/60
+  const List<String> kBlacklist = <String>[
+    'test/cupertino',
+    'test/examples',
+    'test/material',
+    'test/painting',
+    'test/rendering',
+    'test/semantics',
+    'test/widgets',
+  ];
+
+  final List<String> directories = testDir
+    .listSync()
+    .whereType<Directory>()
+    .map<String>((Directory dir) => path.relative(dir.path, from: flutterPackageDir.path))
+    .where((String relativePath) => !kBlacklist.contains(relativePath))
+    .toList();
+
+  await _runFlutterWebTest(flutterPackageDir.path, tests: directories);
   await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter_web_plugins'), tests: <String>['test']);
 }
 

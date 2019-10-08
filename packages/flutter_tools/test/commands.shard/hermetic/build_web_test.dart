@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
+import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -88,7 +89,9 @@ void main() {
   }));
 
   test('Builds a web bundle - end to end', () => testbed.run(() async {
-    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
+    final BuildCommand buildCommand = BuildCommand();
+    applyMocksToCommand(buildCommand);
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     final List<String> dependencies = <String>[
       fs.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'web.dart'),
       fs.path.join('bin', 'cache', 'flutter_web_sdk'),

@@ -444,7 +444,7 @@ someOtherTask
 
     setUp(() {
       mockLogger = BufferLogger();
-      tempDir = fs.systemTempDirectory.createTempSync('settings_aar_test.');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_settings_aar_test.');
 
     });
 
@@ -852,7 +852,7 @@ flutter:
 
     setUp(() {
       fs = MemoryFileSystem();
-      tempDir = fs.systemTempDirectory.createTempSync('artifacts_test.');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_artifacts_test.');
       gradleBinary = platform.isWindows ? 'gradlew.bat' : 'gradlew';
       gradleWrapperDirectory = fs.directory(
         fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper'));
@@ -960,7 +960,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem();
-      tempDir = memoryFileSystem.systemTempDirectory.createTempSync('artifacts_test.');
+      tempDir = memoryFileSystem.systemTempDirectory.createTempSync('flutter_artifacts_test.');
       gradleWrapperDirectory = memoryFileSystem.directory(
           memoryFileSystem.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper'));
       gradleWrapperDirectory.createSync(recursive: true);
@@ -1157,7 +1157,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     });
 
     testUsingContext('returns true when the project is using AndroidX', () async {
-      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('android.');
+      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
 
       androidDirectory
         .childFile('gradle.properties')
@@ -1170,7 +1170,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     });
 
     testUsingContext('returns false when the project is not using AndroidX', () async {
-      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('android.');
+      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
 
       androidDirectory
         .childFile('gradle.properties')
@@ -1183,7 +1183,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
     });
 
     testUsingContext('returns false when gradle.properties does not exist', () async {
-      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('android.');
+      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
 
       expect(isAppUsingAndroidX(androidDirectory), isFalse);
 
@@ -1313,7 +1313,7 @@ plugin2=${plugin2.path}
       mockProcessManager = MockProcessManager();
       android = fakePlatform('android');
 
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('artifacts_test.');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_artifacts_test.');
       cache = Cache(rootOverride: tempDir);
 
       final Directory gradleWrapperDirectory = tempDir

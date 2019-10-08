@@ -162,7 +162,11 @@ class NoOpUsage implements Usage {
   void sendCommand(String command, {Map<String, String> parameters}) {}
 
   @override
-  void sendEvent(String category, String parameter, { String label, Map<String, String> parameters }) {}
+  void sendEvent(String category, String parameter, {
+    String label,
+    int value,
+    Map<String, String> parameters,
+  }) {}
 
   @override
   void sendException(dynamic exception) {}
