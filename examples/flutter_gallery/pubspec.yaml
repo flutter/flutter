@@ -14,7 +14,7 @@ dependencies:
   string_scanner: 1.0.5
   url_launcher: 5.1.4
   cupertino_icons: 0.1.2
-  video_player: 0.10.2+1
+  video_player: 0.10.2+3
   scoped_model: 1.0.1
   shrine_images: 1.1.2
   rally_assets: 1.0.0
@@ -277,4 +277,4 @@ flutter:
         - asset: packages/rally_assets/RobotoCondensed-Bold.ttf
           weight: 700
 
-# PUBSPEC CHECKSUM: 6040
+# PUBSPEC CHECKSUM: 42a5
