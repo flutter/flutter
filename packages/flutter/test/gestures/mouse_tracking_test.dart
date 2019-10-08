@@ -109,6 +109,11 @@ void main() {
     final List<PointerEvent> events = <PointerEvent>[];
     _setUpWithOneAnnotation(logEvents: events);
 
+    final List<bool> listenerLogs = <bool>[];
+    _mouseTracker.addListener(() {
+      listenerLogs.add(_mouseTracker.mouseIsConnected);
+    });
+
     expect(_mouseTracker.mouseIsConnected, isFalse);
 
     // Enter
@@ -119,8 +124,9 @@ void main() {
       const PointerEnterEvent(position: Offset(1.0, 0.0)),
       const PointerHoverEvent(position: Offset(1.0, 0.0)),
     ]));
-    expect(_mouseTracker.mouseIsConnected, isTrue);
+    expect(listenerLogs, <bool>[true]);
     events.clear();
+    listenerLogs.clear();
 
     // Hover
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
@@ -130,6 +136,7 @@ void main() {
       const PointerHoverEvent(position: Offset(1.0, 101.0)),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
+    expect(listenerLogs, <bool>[]);
     events.clear();
 
     // Remove
@@ -140,8 +147,9 @@ void main() {
       const PointerHoverEvent(position: Offset(1.0, 201.0)),
       const PointerExitEvent(position: Offset(1.0, 201.0)),
     ]));
-    expect(_mouseTracker.mouseIsConnected, isFalse);
+    expect(listenerLogs, <bool>[false]);
     events.clear();
+    listenerLogs.clear();
 
     // Add again
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
@@ -151,8 +159,9 @@ void main() {
       const PointerEnterEvent(position: Offset(1.0, 301.0)),
       const PointerHoverEvent(position: Offset(1.0, 301.0)),
     ]));
-    expect(_mouseTracker.mouseIsConnected, isTrue);
+    expect(listenerLogs, <bool>[true]);
     events.clear();
+    listenerLogs.clear();
   });
 
   test('should correctly handle multiple devices', () {
