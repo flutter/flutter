@@ -1223,6 +1223,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MaterialButton(
           onPressed: () {},
+          enableFeedback: true,
         ),
       ));
       await tester.tap(find.byType(MaterialButton), pointer: 1);
@@ -1230,7 +1231,58 @@ void main() {
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
     });
+
+    testWidgets('MaterialButton with enabled feedback by default', (WidgetTester tester) async {
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          onPressed: () {},
+        ),
+      ));
+      await tester.tap(find.byType(MaterialButton), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+    testWidgets('RawMaterialButton with disabled feedback', (WidgetTester tester) async {
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: RawMaterialButton(
+          onPressed: () {},
+          enableFeedback: false,
+        ),
+      ));
+      await tester.tap(find.byType(RawMaterialButton), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('RawMaterialButton with enabled feedback', (WidgetTester tester) async {
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: RawMaterialButton(
+          onPressed: () {},
+          enableFeedback: true,
+        ),
+      ));
+      await tester.tap(find.byType(RawMaterialButton), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('RawMaterialButton with enabled feedback by default', (WidgetTester tester) async {
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: RawMaterialButton(
+          onPressed: () {},
+        ),
+      ));
+      await tester.tap(find.byType(RawMaterialButton), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
   });
-
-
 }

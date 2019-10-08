@@ -399,7 +399,6 @@ void main() {
     expect(focusNode2.hasPrimaryFocus, isFalse);
   });
 
-
   group('feedback', () {
     FeedbackTester feedback;
 
@@ -431,6 +430,25 @@ void main() {
     });
 
     testWidgets('IconButton with enabled feedback', (WidgetTester tester) async {
+      await tester.pumpWidget(Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              enableFeedback: true,
+              icon: const Icon(Icons.link),
+            ),
+          ),
+        ),
+      ));
+      await tester.tap(find.byType(IconButton), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('IconButton with enabled feedback by default', (WidgetTester tester) async {
       await tester.pumpWidget(Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
