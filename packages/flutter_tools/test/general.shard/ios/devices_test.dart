@@ -80,25 +80,54 @@ void main() {
     }
 
     group('.dispose()', () {
-      testUsingContext(' kills all log readers & port forwarders', () async {
-        final IOSDevice device = IOSDevice('123');
-        final MockApplicationPackage applicationPackage1 = MockApplicationPackage();
-        final MockApplicationPackage applicationPackage2 = MockApplicationPackage();
-        when(applicationPackage1.name).thenReturn('flutterApp1');
-        when(applicationPackage2.name).thenReturn('flutterApp2');
-        final IOSDeviceLogReader logReader1 = IOSDeviceLogReader(device, applicationPackage1);
-        final IOSDeviceLogReader logReader2 = IOSDeviceLogReader(device, applicationPackage2);
-        final MockProcess mockProcess1 = MockProcess();
-        final MockProcess mockProcess2 = MockProcess();
-        logReader1.idevicesyslogProcess = mockProcess1;
-        logReader2.idevicesyslogProcess = mockProcess2;
+      IOSDevice device;
+      MockApplicationPackage appPackage1;
+      MockApplicationPackage appPackage2;
+      IOSDeviceLogReader logReader1;
+      IOSDeviceLogReader logReader2;
+      MockProcess mockProcess1;
+      MockProcess mockProcess2;
+      IOSDevicePortForwarder portForwarder;
+      MockForwardedPort mockForwardedPort;
+
+      IOSDevicePortForwarder createPortForwarder(
+          ForwardedPort forwardedPort,
+          IOSDevice device) {
         final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(device);
-        final MockForwardedPort mockForwardedPort = MockForwardedPort();
-        portForwarder.addForwardedPorts(<ForwardedPort>[mockForwardedPort]);
-        device.setLogReader(applicationPackage1, logReader1);
-        device.setLogReader(applicationPackage2, logReader2);
+        portForwarder.addForwardedPorts(<ForwardedPort>[forwardedPort]);
+        return portForwarder;
+      }
+
+      IOSDeviceLogReader createLogReader(
+          IOSDevice device,
+          ApplicationPackage appPackage,
+          Process process) {
+        final IOSDeviceLogReader logReader = IOSDeviceLogReader(device, appPackage);
+        logReader.idevicesyslogProcess = process;
+        return logReader;
+      }
+
+      setUp(() {
+        appPackage1 = MockApplicationPackage();
+        appPackage2 = MockApplicationPackage();
+        when(appPackage1.name).thenReturn('flutterApp1');
+        when(appPackage2.name).thenReturn('flutterApp2');
+        mockProcess1 = MockProcess();
+        mockProcess2 = MockProcess();
+        mockForwardedPort = MockForwardedPort();
+      });
+
+      testUsingContext(' kills all log readers & port forwarders', () async {
+        device = IOSDevice('123');
+        logReader1 = createLogReader(device, appPackage1, mockProcess1);
+        logReader2 = createLogReader(device, appPackage2, mockProcess2);
+        portForwarder = createPortForwarder(mockForwardedPort, device);
+        device.setLogReader(appPackage1, logReader1);
+        device.setLogReader(appPackage2, logReader2);
         device.portForwarder = portForwarder;
+
         device.dispose();
+
         verify(mockProcess1.kill());
         verify(mockProcess2.kill());
         verify(mockForwardedPort.dispose());
