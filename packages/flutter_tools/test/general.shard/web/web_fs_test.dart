@@ -130,10 +130,13 @@ void main() {
     );
     // Since the .packages file is missing in the memory filesystem, this should
     // be called.
-    verify(processUtils.stream(any,
-      workingDirectory: fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
-      mapFunction: anyNamed('mapFunction'),
-      environment: anyNamed('environment'),)).called(1);
+    verify(pub.pubGet(
+      context: PubContext.pubGet,
+      directory: anyNamed('directory'),
+      offline: true,
+      skipPubspecYamlCheck: true,
+      checkLastModified: false,
+    )).called(1);
 
     // The build daemon is told to build once.
     verify(mockBuildDaemonClient.startBuild()).called(1);
