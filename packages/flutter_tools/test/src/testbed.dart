@@ -34,7 +34,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   FileSystem: () => MemoryFileSystem(style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix),
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-  OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger to avoid color codes.
+  OutputPreferences: () => OutputPreferences.test(), // configures BufferLogger to avoid color codes.
   Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
   FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
   Signals: () => FakeSignals(),  // prevent registering actual signal handlers.
@@ -164,7 +164,11 @@ class NoOpUsage implements Usage {
   void sendCommand(String command, {Map<String, String> parameters}) {}
 
   @override
-  void sendEvent(String category, String parameter, { String label, Map<String, String> parameters }) {}
+  void sendEvent(String category, String parameter, {
+    String label,
+    int value,
+    Map<String, String> parameters,
+  }) {}
 
   @override
   void sendException(dynamic exception) {}
