@@ -346,7 +346,7 @@ class SemanticsFlag {
   ///
   /// Platforms have special handling for links, for example, iOS's VoiceOver
   /// provides an additional hint when the focused object is a link.
-  static const SemanticsFlag isLink = SemanticsFlag._(_kIsButtonIndex);
+  static const SemanticsFlag isLink = SemanticsFlag._(_kIsLinkIndex);
 
   /// Whether the semantic node represents a text field.
   ///
