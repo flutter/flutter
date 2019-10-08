@@ -294,6 +294,7 @@ class SemanticsFlag {
   static const int _kIsMultilineIndex = 1 << 19;
   static const int _kIsReadOnlyIndex = 1 << 20;
   static const int _kIsFocusableIndex = 1 << 21;
+  static const int _kIsLinkIndex = 1 << 22;
 
   const SemanticsFlag._(this.index);
 
@@ -340,6 +341,12 @@ class SemanticsFlag {
   /// and iOS's VoiceOver provides an additional hint when the focused object is
   /// a button.
   static const SemanticsFlag isButton = SemanticsFlag._(_kIsButtonIndex);
+
+  /// Whether the semantic node represents a link.
+  ///
+  /// Platforms have special handling for links, for example, iOS's VoiceOver
+  /// provides an additional hint when the focused object is a link.
+  static const SemanticsFlag isLink = SemanticsFlag._(_kIsButtonIndex);
 
   /// Whether the semantic node represents a text field.
   ///
@@ -522,6 +529,7 @@ class SemanticsFlag {
     _kIsCheckedIndex: isChecked,
     _kIsSelectedIndex: isSelected,
     _kIsButtonIndex: isButton,
+    _kIsLinkIndex: isLink,
     _kIsTextFieldIndex: isTextField,
     _kIsFocusableIndex: isFocusable,
     _kIsFocusedIndex: isFocused,
@@ -553,6 +561,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.isSelected';
       case _kIsButtonIndex:
         return 'SemanticsFlag.isButton';
+      case _kIsLinkIndex:
+        return 'SemanticsFlag.isLink';
       case _kIsTextFieldIndex:
         return 'SemanticsFlag.isTextField';
       case _kIsFocusableIndex:
