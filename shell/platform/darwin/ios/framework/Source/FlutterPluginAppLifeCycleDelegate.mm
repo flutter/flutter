@@ -56,6 +56,7 @@ static const SEL selectorsHandledByPlugins[] = {
     [self addObserverFor:UIApplicationWillTerminateNotification
                 selector:@selector(handleWillTerminate:)];
     _delegates = [[NSPointerArray weakObjectsPointerArray] retain];
+    _debugBackgroundTask = UIBackgroundTaskInvalid;
   }
   return self;
 }
@@ -143,7 +144,10 @@ static BOOL isPowerOfTwo(NSUInteger x) {
   _debugBackgroundTask = [application
       beginBackgroundTaskWithName:@"Flutter debug task"
                 expirationHandler:^{
-                  [application endBackgroundTask:_debugBackgroundTask];
+                  if (_debugBackgroundTask != UIBackgroundTaskInvalid) {
+                    [application endBackgroundTask:_debugBackgroundTask];
+                    _debugBackgroundTask = UIBackgroundTaskInvalid;
+                  }
                   FML_LOG(WARNING)
                       << "\nThe OS has terminated the Flutter debug connection for being "
                          "inactive in the background for too long.\n\n"
@@ -164,7 +168,10 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 - (void)handleWillEnterForeground:(NSNotification*)notification {
   UIApplication* application = [UIApplication sharedApplication];
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-  [application endBackgroundTask:_debugBackgroundTask];
+  if (_debugBackgroundTask != UIBackgroundTaskInvalid) {
+    [application endBackgroundTask:_debugBackgroundTask];
+    _debugBackgroundTask = UIBackgroundTaskInvalid;
+  }
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
     if (!delegate) {
