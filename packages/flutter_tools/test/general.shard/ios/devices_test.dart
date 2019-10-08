@@ -87,8 +87,9 @@ void main() {
       IOSDeviceLogReader logReader2;
       MockProcess mockProcess1;
       MockProcess mockProcess2;
+      MockProcess mockProcess3;
       IOSDevicePortForwarder portForwarder;
-      MockForwardedPort mockForwardedPort;
+      ForwardedPort forwardedPort;
 
       IOSDevicePortForwarder createPortForwarder(
           ForwardedPort forwardedPort,
@@ -114,14 +115,15 @@ void main() {
         when(appPackage2.name).thenReturn('flutterApp2');
         mockProcess1 = MockProcess();
         mockProcess2 = MockProcess();
-        mockForwardedPort = MockForwardedPort();
+        mockProcess3 = MockProcess();
+        forwardedPort = ForwardedPort.withContext(123, 456, mockProcess3);
       });
 
       testUsingContext(' kills all log readers & port forwarders', () async {
         device = IOSDevice('123');
         logReader1 = createLogReader(device, appPackage1, mockProcess1);
         logReader2 = createLogReader(device, appPackage2, mockProcess2);
-        portForwarder = createPortForwarder(mockForwardedPort, device);
+        portForwarder = createPortForwarder(forwardedPort, device);
         device.setLogReader(appPackage1, logReader1);
         device.setLogReader(appPackage2, logReader2);
         device.portForwarder = portForwarder;
@@ -130,7 +132,7 @@ void main() {
 
         verify(mockProcess1.kill());
         verify(mockProcess2.kill());
-        verify(mockForwardedPort.dispose());
+        verify(mockProcess3.kill());
       }, overrides: <Type, Generator>{
         Platform: () => macPlatform,
       });
