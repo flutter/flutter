@@ -324,6 +324,7 @@ Future<BuildApkCommand> runBuildApkCommand(
   await runner.run(<String>[
     'apk',
     ...?arguments,
+    '--no-pub',
     fs.path.join(target, 'lib', 'main.dart'),
   ]);
   return command;

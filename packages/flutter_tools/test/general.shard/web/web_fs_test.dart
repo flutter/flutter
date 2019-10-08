@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/build_runner/web_fs.dart';
@@ -89,6 +89,7 @@ void main() {
         fs.file('.packages').createSync();
       },
       overrides: <Type, Generator>{
+        Pub: () => MockPub(),
         OperatingSystemUtils: () => mockOperatingSystemUtils,
         BuildDaemonCreator: () => mockBuildDaemonCreator,
         ChromeLauncher: () => mockChromeLauncher,
@@ -128,10 +129,13 @@ void main() {
     );
     // Since the .packages file is missing in the memory filesystem, this should
     // be called.
-    verify(processUtils.stream(any,
-      workingDirectory: fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
-      mapFunction: anyNamed('mapFunction'),
-      environment: anyNamed('environment'),)).called(1);
+    verify(pub.get(
+      context: PubContext.pubGet,
+      directory: anyNamed('directory'),
+      offline: true,
+      skipPubspecYamlCheck: true,
+      checkLastModified: false,
+    )).called(1);
 
     // The build daemon is told to build once.
     verify(mockBuildDaemonClient.startBuild()).called(1);
@@ -213,3 +217,4 @@ class MockHttpMultiServer extends Mock implements HttpMultiServer {}
 class MockChromeLauncher extends Mock implements ChromeLauncher {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 class MockProcessUtils extends Mock implements ProcessUtils {}
+class MockPub extends Mock implements Pub {}

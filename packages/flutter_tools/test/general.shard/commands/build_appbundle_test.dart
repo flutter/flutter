@@ -315,6 +315,7 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   await runner.run(<String>[
     'appbundle',
     ...?arguments,
+    '--no-pub',
     fs.path.join(target, 'lib', 'main.dart'),
   ]);
   return command;
