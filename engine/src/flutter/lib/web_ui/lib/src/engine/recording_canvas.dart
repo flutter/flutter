@@ -1128,6 +1128,14 @@ abstract class PathCommand {
   PathCommand shifted(ui.Offset offset);
 
   List<dynamic> serializeToCssPaint();
+
+  /// Transform the command and add to targetPath.
+  void transform(Float64List matrix4, ui.Path targetPath);
+
+  /// Helper method for implementing transforms.
+  static ui.Offset _transformOffset(double x, double y, Float64List matrix4) =>
+    ui.Offset((matrix4[0] * x) + (matrix4[4] * y) + matrix4[12],
+    (matrix4[1] * x) + (matrix4[5] * y) + matrix4[13]);
 }
 
 class MoveTo extends PathCommand {
@@ -1144,6 +1152,12 @@ class MoveTo extends PathCommand {
   @override
   List<dynamic> serializeToCssPaint() {
     return <dynamic>[1, x, y];
+  }
+
+  @override
+  void transform(Float64List matrix4, ui.Path targetPath) {
+    final ui.Offset offset = PathCommand._transformOffset(x, y, matrix4);
+    targetPath.moveTo(offset.dx, offset.dy);
   }
 
   @override
@@ -1170,6 +1184,12 @@ class LineTo extends PathCommand {
   @override
   List<dynamic> serializeToCssPaint() {
     return <dynamic>[2, x, y];
+  }
+
+  @override
+  void transform(Float64List matrix4, ui.Path targetPath) {
+    final ui.Offset offset = PathCommand._transformOffset(x, y, matrix4);
+    targetPath.lineTo(offset.dx, offset.dy);
   }
 
   @override
@@ -1218,6 +1238,87 @@ class Ellipse extends PathCommand {
   }
 
   @override
+  void transform(Float64List matrix4, ui.Path targetPath) {
+    final ui.Path bezierPath = ui.Path();
+    _drawArcWithBezier(x, y, radiusX, radiusY, rotation,
+      startAngle,
+        anticlockwise ? startAngle - endAngle : endAngle - startAngle,
+        matrix4, bezierPath);
+    targetPath.addPath(bezierPath, ui.Offset.zero, matrix4: matrix4);
+  }
+
+  void _drawArcWithBezier(double centerX, double centerY,
+      double radiusX, double radiusY, double rotation, double startAngle,
+      double sweep, Float64List matrix4, ui.Path targetPath) {
+    double ratio = sweep.abs() / (math.pi / 2.0);
+    if ((1.0 - ratio).abs() < 0.0000001) {
+      ratio = 1.0;
+    }
+    final int segments = math.max(ratio.ceil(), 1);
+    final double anglePerSegment = sweep / segments;
+    double angle = startAngle;
+    for (int segment = 0; segment < segments; segment++) {
+      _drawArcSegment(targetPath, centerX, centerY, radiusX, radiusY, rotation,
+          angle, anglePerSegment, segment == 0, matrix4);
+      angle += anglePerSegment;
+    }
+  }
+
+  void _drawArcSegment(ui.Path path, double centerX, double centerY,
+      double radiusX, double radiusY, double rotation, double startAngle,
+      double sweep, bool startPath, Float64List matrix4) {
+    final double s = 4 / 3 * math.tan(sweep / 4);
+
+    // Rotate unit vector to startAngle and endAngle to use for computing start
+    // and end points of segment.
+    final double x1 = math.cos(startAngle);
+    final double y1 = math.sin(startAngle);
+    final double endAngle = startAngle + sweep;
+    final double x2 = math.cos(endAngle);
+    final double y2 = math.sin(endAngle);
+
+    // Compute scaled curve control points.
+    final double cpx1 = (x1 - y1 * s) * radiusX;
+    final double cpy1 = (y1 + x1 * s) * radiusY;
+    final double cpx2 = (x2 + y2 * s) * radiusX;
+    final double cpy2 = (y2 - x2 * s) * radiusY;
+
+    final double endPointX = centerX + x2 * radiusX;
+    final double endPointY = centerY + y2 * radiusY;
+
+    final double rotationRad = rotation * math.pi / 180.0;
+    final double cosR = math.cos(rotationRad);
+    final double sinR = math.sin(rotationRad);
+    if (startPath) {
+      final double scaledX1 = x1 * radiusX;
+      final double scaledY1 = y1 * radiusY;
+      if (rotation == 0.0) {
+        path.moveTo(centerX + scaledX1, centerY + scaledY1);
+      } else {
+        final double rotatedStartX = (scaledX1 * cosR) + (scaledY1 * sinR);
+        final double rotatedStartY = (scaledY1 * cosR) - (scaledX1 * sinR);
+        path.moveTo(centerX + rotatedStartX, centerY + rotatedStartY);
+      }
+    }
+    if (rotation == 0.0) {
+      path.cubicTo(centerX + cpx1, centerY + cpy1,
+          centerX + cpx2, centerY + cpy2,
+          endPointX, endPointY);
+    } else {
+      final double rotatedCpx1 = centerX + (cpx1 * cosR) + (cpy1 * sinR);
+      final double rotatedCpy1 = centerY + (cpy1 * cosR) - (cpx1 * sinR);
+      final double rotatedCpx2 = centerX + (cpx2 * cosR) + (cpy2 * sinR);
+      final double rotatedCpy2 = centerY + (cpy2 * cosR) - (cpx2 * sinR);
+      final double rotatedEndX = centerX + ((endPointX - centerX) * cosR)
+          + ((endPointY - centerY) * sinR);
+      final double rotatedEndY = centerY + ((endPointY - centerY) * cosR)
+          - ((endPointX - centerX) * sinR);
+      path.cubicTo(rotatedCpx1, rotatedCpy1, rotatedCpx2, rotatedCpy2,
+          rotatedEndX, rotatedEndY);
+    }
+  }
+
+  @override
   String toString() {
     if (assertionsEnabled) {
       return 'Ellipse($x, $y, $radiusX, $radiusY)';
@@ -1245,6 +1346,22 @@ class QuadraticCurveTo extends PathCommand {
   @override
   List<dynamic> serializeToCssPaint() {
     return <dynamic>[4, x1, y1, x2, y2];
+  }
+
+  @override
+  void transform(Float64List matrix4, ui.Path targetPath) {
+    final double m0 = matrix4[0];
+    final double m1 = matrix4[1];
+    final double m4 = matrix4[4];
+    final double m5 = matrix4[5];
+    final double m12 = matrix4[12];
+    final double m13 = matrix4[13];
+    final double transformedX1 = (m0 * x1) + (m4 * y1) + m12;
+    final double transformedY1 = (m1 * x1) + (m5 * y1) + m13;
+    final double transformedX2 = (m0 * x2) + (m4 * y2) + m12;
+    final double transformedY2 = (m1 * x2) + (m5 * y2) + m13;
+    targetPath.quadraticBezierTo(transformedX1, transformedY1,
+        transformedX2, transformedY2);
   }
 
   @override
@@ -1280,6 +1397,24 @@ class BezierCurveTo extends PathCommand {
   }
 
   @override
+  void transform(Float64List matrix4, ui.Path targetPath) {
+    final double s0 = matrix4[0];
+    final double s1 = matrix4[1];
+    final double s4 = matrix4[4];
+    final double s5 = matrix4[5];
+    final double s12 = matrix4[12];
+    final double s13 = matrix4[13];
+    final double transformedX1 = (s0 * x1) + (s4 * y1) + s12;
+    final double transformedY1 = (s1 * x1) + (s5 * y1) + s13;
+    final double transformedX2 = (s0 * x2) + (s4 * y2) + s12;
+    final double transformedY2 = (s1 * x2) + (s5 * y2) + s13;
+    final double transformedX3 = (s0 * x3) + (s4 * y3) + s12;
+    final double transformedY3 = (s1 * x3) + (s5 * y3) + s13;
+    targetPath.cubicTo(transformedX1, transformedY1,
+        transformedX2, transformedY2, transformedX3, transformedY3);
+  }
+
+  @override
   String toString() {
     if (assertionsEnabled) {
       return 'BezierCurveTo($x1, $y1, $x2, $y2, $x3, $y3)';
@@ -1301,6 +1436,38 @@ class RectCommand extends PathCommand {
   @override
   RectCommand shifted(ui.Offset offset) {
     return RectCommand(x + offset.dx, y + offset.dy, width, height);
+  }
+
+  @override
+  void transform(Float64List matrix4, ui.Path targetPath) {
+    final double s0 = matrix4[0];
+    final double s1 = matrix4[1];
+    final double s4 = matrix4[4];
+    final double s5 = matrix4[5];
+    final double s12 = matrix4[12];
+    final double s13 = matrix4[13];
+    final double transformedX1 = (s0 * x) + (s4 * y) + s12;
+    final double transformedY1 = (s1 * x) + (s5 * y) + s13;
+    final double x2 = x + width;
+    final double y2 = y + height;
+    final double transformedX2 = (s0 * x2) + (s4 * y) + s12;
+    final double transformedY2 = (s1 * x2) + (s5 * y) + s13;
+    final double transformedX3 = (s0 * x2) + (s4 * y2) + s12;
+    final double transformedY3 = (s1 * x2) + (s5 * y2) + s13;
+    final double transformedX4 = (s0 * x) + (s4 * y2) + s12;
+    final double transformedY4 = (s1 * x) + (s5 * y2) + s13;
+    if (transformedY1 == transformedY2 && transformedY3 == transformedY4 &&
+        transformedX1 == transformedX4 && transformedX2 == transformedX3) {
+      // It is still a rectangle.
+      targetPath.addRect(ui.Rect.fromLTRB(transformedX1, transformedY1,
+        transformedX3, transformedY3));
+    } else {
+      targetPath.moveTo(transformedX1, transformedY1);
+      targetPath.lineTo(transformedX2, transformedY2);
+      targetPath.lineTo(transformedX3, transformedY3);
+      targetPath.lineTo(transformedX4, transformedY4);
+      targetPath.close();
+    }
   }
 
   @override
@@ -1334,6 +1501,13 @@ class RRectCommand extends PathCommand {
   }
 
   @override
+  void transform(Float64List matrix4, ui.Path targetPath) {
+    final ui.Path roundRectPath = ui.Path();
+    _RRectToPathRenderer(roundRectPath).render(rrect);
+    targetPath.addPath(roundRectPath, ui.Offset.zero, matrix4: matrix4);
+  }
+
+    @override
   String toString() {
     if (assertionsEnabled) {
       return '$rrect';
@@ -1354,6 +1528,11 @@ class CloseCommand extends PathCommand {
   @override
   List<dynamic> serializeToCssPaint() {
     return <dynamic>[8];
+  }
+
+  @override
+  void transform(Float64List matrix4, ui.Path targetPath) {
+    targetPath.close();
   }
 
   @override

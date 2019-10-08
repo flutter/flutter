@@ -1584,12 +1584,15 @@ class Path {
     if (dx == 0.0 && dy == 0.0) {
       subpaths.addAll(path.subpaths);
     } else {
-      throw UnimplementedError('Cannot add path with non-zero offset');
+      subpaths.addAll(path.transform(
+          engine.Matrix4.translationValues(dx, dy, 0.0).storage).subpaths);
     }
   }
 
   void _addPathWithMatrix(Path path, double dx, double dy, Float64List matrix) {
-    throw UnimplementedError('Cannot add path with transform matrix');
+    final engine.Matrix4 transform = engine.Matrix4.fromFloat64List(matrix);
+    transform.translate(dx, dy);
+    subpaths.addAll(path.transform(transform.storage).subpaths);
   }
 
   /// Adds the given path to this path by extending the current segment of this
@@ -1742,18 +1745,24 @@ class Path {
   /// subpath translated by the given offset.
   Path shift(Offset offset) {
     assert(engine.offsetIsValid(offset));
-    final List<engine.Subpath> shiftedSubpaths = <engine.Subpath>[];
-    for (final engine.Subpath subpath in subpaths) {
-      shiftedSubpaths.add(subpath.shift(offset));
+    final List<engine.Subpath> shiftedSubPaths = <engine.Subpath>[];
+    for (final engine.Subpath subPath in subpaths) {
+      shiftedSubPaths.add(subPath.shift(offset));
     }
-    return Path._clone(shiftedSubpaths, fillType);
+    return Path._clone(shiftedSubPaths, fillType);
   }
 
   /// Returns a copy of the path with all the segments of every
-  /// subpath transformed by the given matrix.
+  /// sub path transformed by the given matrix.
   Path transform(Float64List matrix4) {
     assert(engine.matrix4IsValid(matrix4));
-    throw UnimplementedError();
+    final Path transformedPath = Path();
+    for (final engine.Subpath subPath in subpaths) {
+      for (final engine.PathCommand cmd in subPath.commands) {
+        cmd.transform(matrix4, transformedPath);
+      }
+    }
+    return transformedPath;
   }
 
   /// Computes the bounding rectangle for this path.
