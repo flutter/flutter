@@ -180,7 +180,7 @@ class WebFs {
     // Workaround for https://github.com/flutter/flutter/issues/41681.
     final String toolPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools');
     if (!fs.isFileSync(fs.path.join(toolPath, '.packages'))) {
-      await pubGet(
+      await pub.pubGet(
         context: PubContext.pubGet,
         directory: toolPath,
         offline: true,

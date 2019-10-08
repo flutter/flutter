@@ -93,7 +93,7 @@ class PackagesGetCommand extends FlutterCommand {
   Future<void> _runPubGet(String directory) async {
     final Stopwatch pubGetTimer = Stopwatch()..start();
     try {
-      await pubGet(context: PubContext.pubGet,
+      await pub.pubGet(context: PubContext.pubGet,
         directory: directory,
         upgrade: upgrade ,
         offline: argResults['offline'],
@@ -164,7 +164,7 @@ class PackagesTestCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
-    await pub(<String>['run', 'test', ...argResults.rest], context: PubContext.runTest, retry: false);
+    await pub.pub(<String>['run', 'test', ...argResults.rest], context: PubContext.runTest, retry: false);
     return null;
   }
 }
@@ -205,7 +205,7 @@ class PackagesPublishCommand extends FlutterCommand {
       if (argResults['force']) '--force',
     ];
     Cache.releaseLockEarly();
-    await pubInteractively(<String>['publish', ...args]);
+    await pub.pubInteractively(<String>['publish', ...args]);
     return null;
   }
 }
@@ -236,7 +236,7 @@ class PackagesForwardCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
-    await pubInteractively(<String>[_commandName, ...argResults.rest]);
+    await pub.pubInteractively(<String>[_commandName, ...argResults.rest]);
     return null;
   }
 
@@ -264,7 +264,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
-    await pubInteractively(argResults.rest);
+    await pub.pubInteractively(argResults.rest);
     return null;
   }
 }

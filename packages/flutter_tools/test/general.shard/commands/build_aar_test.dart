@@ -31,6 +31,7 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         'aar',
+        '--no-pub',
         ...?arguments,
         target,
       ]);

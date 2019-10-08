@@ -40,7 +40,7 @@ void main() {
 }
 ''');
 
-      await pubGet(context: PubContext.flutterTests, directory: tempDir.path);
+      await pub.pubGet(context: PubContext.flutterTests, directory: tempDir.path);
 
       server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
@@ -57,7 +57,7 @@ void main() {
 }
 ''');
 
-      await pubGet(context: PubContext.flutterTests, directory: tempDir.path);
+      await pub.pubGet(context: PubContext.flutterTests, directory: tempDir.path);
 
       server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
@@ -74,7 +74,7 @@ void main() {
 }
 ''');
 
-      await pubGet(context: PubContext.flutterTests, directory: tempDir.path);
+      await pub.pubGet(context: PubContext.flutterTests, directory: tempDir.path);
 
       server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
@@ -91,7 +91,7 @@ void main() {
 }
 ''');
 
-      await pubGet(context: PubContext.flutterTests, directory: tempDir.path);
+      await pub.pubGet(context: PubContext.flutterTests, directory: tempDir.path);
 
       server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 

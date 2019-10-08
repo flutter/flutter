@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -43,6 +44,7 @@ void main() {
       Platform: () => mockPlatform,
       FlutterVersion: () => MockFlutterVersion(),
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+      Pub: () => MockPub(),
     });
   });
 
@@ -142,6 +144,13 @@ class UrlLauncherPlugin {}
     when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
       return BuildResult(success: true);
     });
+//    when(pub.pubGet(
+//      context: PubContext.pubGet,
+//      directory: anyNamed('directory'),
+//      offline: true,
+//      skipPubspecYamlCheck: true,
+//      checkLastModified: false,
+//    ));
 
     await runner.run(<String>['build', 'web']);
 
@@ -176,3 +185,4 @@ class MockFlutterVersion extends Mock implements FlutterVersion {
   @override
   bool get isMaster => true;
 }
+class MockPub extends Mock implements Pub {}
