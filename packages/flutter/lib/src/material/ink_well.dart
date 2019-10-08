@@ -485,12 +485,16 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   InteractiveInkFeature _currentSplash;
   bool _hovering = false;
   final Map<_HighlightType, InkHighlight> _highlights = <_HighlightType, InkHighlight>{};
+  Map<LocalKey, ActionFactory> _actionMap;
 
   bool get highlightsExist => _highlights.values.where((InkHighlight highlight) => highlight != null).isNotEmpty;
 
   @override
   void initState() {
     super.initState();
+    _actionMap = <LocalKey, ActionFactory>{
+      ActivateAction.key: _generateAction,
+    };
     WidgetsBinding.instance.focusManager.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
@@ -770,9 +774,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       // Analyzer doesn't like this code for some reason. Some sort of a
       // combination of inline conditionals and LocalKey.
       // ignore: prefer_const_literals_to_create_immutables
-      actions: <LocalKey, ActionFactory>{
-        if (enabled) ActivateAction.key: _generateAction,
-      },
+      actions: _actionMap,
       child: Focus(
         focusNode: widget.focusNode,
         canRequestFocus: widget.canRequestFocus,

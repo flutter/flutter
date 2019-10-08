@@ -200,6 +200,10 @@ class Actions extends InheritedWidget {
 
   /// A map of [Intent] keys to [ActionFactory] factory methods that defines
   /// which actions this widget knows about.
+  ///
+  /// For performance reasons, it is recommended that a pre-built map is
+  /// passed in here (e.g. a final variable from your widget class) instead of
+  /// defining it inline in the build function.
   final Map<LocalKey, ActionFactory> actions;
 
   // Finds the nearest valid ActionDispatcher, or creates a new one if it
@@ -341,7 +345,7 @@ class Actions extends InheritedWidget {
 
   @override
   bool updateShouldNotify(Actions oldWidget) {
-    return oldWidget.dispatcher != dispatcher || oldWidget.actions != actions;
+    return oldWidget.dispatcher != dispatcher || !mapEquals<LocalKey, ActionFactory>(oldWidget.actions, actions);
   }
 
   @override

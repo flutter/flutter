@@ -1038,6 +1038,24 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     return true;
   }
 
+  final Map<LogicalKeySet, Intent> _keyMap = <LogicalKeySet, Intent>{
+    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
+  };
+
+  final Map<LocalKey, ActionFactory> _actionMap = <LocalKey, ActionFactory>{
+    DoNothingAction.key: () => const DoNothingAction(),
+    RequestFocusAction.key: () => RequestFocusAction(),
+    NextFocusAction.key: () => NextFocusAction(),
+    PreviousFocusAction.key: () => PreviousFocusAction(),
+    DirectionalFocusAction.key: () => DirectionalFocusAction(),
+  };
+
   @override
   Widget build(BuildContext context) {
     Widget navigator;
@@ -1150,23 +1168,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(_debugCheckLocalizations(appLocale));
 
     return Shortcuts(
-      shortcuts: <LogicalKeySet, Intent>{
-        LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
-        LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
-        LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-        LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-        LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-        LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
-        LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
-      },
+      shortcuts: _keyMap,
       child: Actions(
-        actions: <LocalKey, ActionFactory>{
-          DoNothingAction.key: () => const DoNothingAction(),
-          RequestFocusAction.key: () => RequestFocusAction(),
-          NextFocusAction.key: () => NextFocusAction(),
-          PreviousFocusAction.key: () => PreviousFocusAction(),
-          DirectionalFocusAction.key: () => DirectionalFocusAction(),
-        },
+        actions: _actionMap,
         child: DefaultFocusTraversal(
           policy: ReadingOrderTraversalPolicy(),
           child: _MediaQueryFromWindow(
