@@ -152,20 +152,9 @@ class MouseTracker extends ChangeNotifier {
 
   void _addMouseDevice(int deviceId, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
-    final _MouseState connectedMouseState = _mouseStates[deviceId];
-    final _MouseState mouseState = connectedMouseState ??
-      _disconnectedMouseStates[deviceId];
-    if (mouseState == null) {
-      _mouseStates[deviceId] = _MouseState(mostRecentEvent: event);
-    } else {
-      assert(connectedMouseState == null,
-        'Unexpected request to add device $deviceId, which is connected and '
-        'has been added.');
-      mouseState.mostRecentEvent = event;
-      // Adding the device again means it's not being removed during this frame.
-      _mouseStates[deviceId] = mouseState;
-      _disconnectedMouseStates.remove(deviceId);
-    }
+    assert(!_mouseStates.containsKey(deviceId));
+    assert(!_disconnectedMouseStates.containsKey(deviceId));
+    _mouseStates[deviceId] = _MouseState(mostRecentEvent: event);
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
     }
@@ -173,10 +162,9 @@ class MouseTracker extends ChangeNotifier {
 
   void _removeMouseDevice(int deviceId, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
+    assert(_mouseStates.containsKey(deviceId));
+    assert(!_disconnectedMouseStates.containsKey(deviceId));
     final _MouseState mouseState = _mouseStates.remove(deviceId);
-    assert(mouseState != null,
-      'Unexpected request to remove device $deviceId, which has not been '
-      'added yet or has been removed.');
     _disconnectedMouseStates[deviceId] = mouseState;
     mouseState.mostRecentEvent = event;
     if (mouseIsConnected != wasConnected) {
@@ -222,13 +210,13 @@ class MouseTracker extends ChangeNotifier {
   }
 
   bool _scheduledPostFramePositionCheck = false;
-  // Schedules a position check at the end of this frame for those annotations
-  // that have been added.
+  // Schedules a position check at the end of this frame.
+  // It is only called during a frame during which annotations have been added.
   void _scheduleMousePositionCheck() {
     // If we're not tracking anything, then there is no point in registering a
     // frame callback or scheduling a frame. By definition there are no active
     // annotations that need exiting, either.
-    if (_hasAttachedAnnotations && !_scheduledPostFramePositionCheck) {
+    if (!_scheduledPostFramePositionCheck) {
       _scheduledPostFramePositionCheck = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
         sendMouseNotifications(null);
