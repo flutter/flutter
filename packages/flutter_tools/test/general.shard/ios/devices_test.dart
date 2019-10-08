@@ -128,7 +128,6 @@ void main() {
       const String installerPath = '/path/to/ideviceinstaller';
       const String iosDeployPath = '/path/to/iosdeploy';
       const String iproxyPath = '/path/to/iproxy';
-      // const String appId = '789';
       const MapEntry<String, String> libraryEntry = MapEntry<String, String>(
           'DYLD_LIBRARY_PATH',
           '/path/to/libraries',
