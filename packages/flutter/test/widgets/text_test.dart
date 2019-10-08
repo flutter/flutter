@@ -46,7 +46,11 @@ void main() {
     expect(baseSize.height, equals(14.0));
 
     await tester.pumpWidget(const Center(
-      child: Text('Hello', textScaleFactor: 1.5, textDirection: TextDirection.ltr),
+      child: Text(
+        'Hello',
+        textScaleFactor: 1.5,
+        textDirection: TextDirection.ltr,
+      ),
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -102,8 +106,14 @@ void main() {
           TextSpan(
             text: 'Hello',
             children: <TextSpan>[
-              TextSpan(text: ' beautiful ', style: TextStyle(fontStyle: FontStyle.italic)),
-              TextSpan(text: 'world', style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                text: ' beautiful ',
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+              TextSpan(
+                text: 'world',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           textDirection: TextDirection.ltr,
@@ -123,7 +133,9 @@ void main() {
       Text.rich(
         TextSpan(
           children: <InlineSpan>[
-            const TextSpan(text: 'a very very very very very very very very very very long line'),
+            const TextSpan(
+              text: 'a very very very very very very very very very very long line',
+            ),
             WidgetSpan(
               child: SizedBox(
                 width: 20,
@@ -150,7 +162,11 @@ void main() {
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      const Text('\$\$', semanticsLabel: 'Double dollars', textDirection: TextDirection.ltr)
+      const Text(
+        '\$\$',
+        semanticsLabel: 'Double dollars',
+        textDirection: TextDirection.ltr,
+      )
     );
     final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -160,7 +176,15 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
 
     await tester.pumpWidget(
       const Directionality(
@@ -168,7 +192,15 @@ void main() {
         child: Text('\$\$', semanticsLabel: 'Double dollars')),
     );
 
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
     semantics.dispose();
   });
 
@@ -206,7 +238,15 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
     semantics.dispose();
   });
 
@@ -218,7 +258,10 @@ void main() {
         TextSpan(
           children: <TextSpan>[
             const TextSpan(text: 'hello '),
-            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
+            TextSpan(
+              text: 'world',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
             const TextSpan(text: ' this is a '),
             const TextSpan(text: 'cat-astrophe'),
           ],
@@ -250,7 +293,15 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
     semantics.dispose();
   });
 
@@ -264,7 +315,10 @@ void main() {
           TextSpan(
             children: <TextSpan>[
               const TextSpan(text: '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'),
-              TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
+              TextSpan(
+                text: 'world',
+                recognizer: TapGestureRecognizer()..onTap = () { },
+              ),
             ],
             style: textStyle,
           ),
@@ -289,7 +343,15 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
     semantics.dispose();
   });
 
@@ -301,9 +363,15 @@ void main() {
         TextSpan(
           children: <TextSpan>[
             const TextSpan(text: 'hello '),
-            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
+            TextSpan(
+              text: 'world',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
             const TextSpan(text: ' this is a '),
-            const TextSpan(text: 'cat-astrophe', semanticsLabel: 'regrettable event'),
+            const TextSpan(
+              text: 'cat-astrophe',
+              semanticsLabel: 'regrettable event',
+            ),
           ],
           style: textStyle,
         ),
@@ -333,7 +401,15 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
     semantics.dispose();
   }, skip: isBrowser);
 
@@ -347,9 +423,15 @@ void main() {
           style: textStyle,
           children: <TextSpan>[
             const TextSpan(text: 'hello world${Unicode.RLE}${Unicode.RLO} '),
-            TextSpan(text: 'BOY', recognizer: LongPressGestureRecognizer()..onLongPress = () { }),
+            TextSpan(
+              text: 'BOY',
+              recognizer: LongPressGestureRecognizer()..onLongPress = () { },
+            ),
             const TextSpan(text: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO '),
-            TextSpan(text: 'SIR', recognizer: TapGestureRecognizer()..onTap = () { }),
+            TextSpan(
+              text: 'SIR',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
             const TextSpan(text: '${Unicode.PDF}${Unicode.PDF} good bye'),
           ],
         ),
@@ -398,7 +480,14 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+      ),
+    );
     semantics.dispose();
   }, skip: true); // TODO(jonahwilliams): correct once https://github.com/flutter/flutter/issues/20891 is resolved.
 
@@ -410,7 +499,10 @@ void main() {
         TextSpan(
           children: <InlineSpan>[
             const TextSpan(text: 'a '),
-            TextSpan(text: 'pebble', recognizer: TapGestureRecognizer()..onTap = () { }),
+            TextSpan(
+              text: 'pebble',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
             const TextSpan(text: ' in the '),
             WidgetSpan(
               child: SizedBox(
@@ -462,7 +554,15 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+        ignoreRect: true,
+      ),
+    );
     semantics.dispose();
   }, skip: isBrowser);
 
@@ -474,7 +574,10 @@ void main() {
         TextSpan(
           children: <InlineSpan>[
             const TextSpan(text: 'a '),
-            TextSpan(text: 'pebble', recognizer: TapGestureRecognizer()..onTap = () { }),
+            TextSpan(
+              text: 'pebble',
+              recognizer: TapGestureRecognizer()..onTap = () { },
+            ),
             const TextSpan(text: ' in the '),
             WidgetSpan(
               child: SizedBox(
@@ -533,7 +636,14 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true,));
+    expect(
+      semantics,
+      hasSemantics(
+        expectedSemantics,
+        ignoreTransform: true,
+        ignoreId: true,
+      ),
+    );
     semantics.dispose();
   }, skip: isBrowser);
 
@@ -554,7 +664,10 @@ void main() {
       text: 'a long long long long text, should be clip',
     );
 
-    expect(find.byType(Text), paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)));
+    expect(
+      find.byType(Text),
+      paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)),
+    );
   }, skip: isBrowser);
 
   testWidgets('Overflow is clipping correctly - short text with overflow: ellipsis', (WidgetTester tester) async {
@@ -574,7 +687,10 @@ void main() {
       text: 'a long long long long text, should be clip',
     );
 
-    expect(find.byType(Text), paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)));
+    expect(
+      find.byType(Text),
+      paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)),
+    );
   });
 
   testWidgets('Overflow is clipping correctly - short text with overflow: fade', (WidgetTester tester) async {
@@ -616,7 +732,9 @@ void main() {
               child: Container(
                 // Each word takes up more than a half of a line. Together they
                 // wrap onto two lines, but leave a lot of extra space.
-                child: Text('twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
+                child: Text(
+                  'twowordsthateachtakeupmorethanhalfof alineoftextsothattheywr'
+                    'apwithlotsofextraspace',
                   textDirection: TextDirection.ltr,
                   textWidthBasis: textWidthBasis,
                 ),
