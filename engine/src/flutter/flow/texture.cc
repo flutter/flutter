@@ -15,6 +15,7 @@ void TextureRegistry::RegisterTexture(std::shared_ptr<Texture> texture) {
 }
 
 void TextureRegistry::UnregisterTexture(int64_t id) {
+  mapping_[id]->OnTextureUnregistered();
   mapping_.erase(id);
 }
 
