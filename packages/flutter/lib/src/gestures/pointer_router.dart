@@ -136,7 +136,7 @@ class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
     library: library,
     context: context,
     informationCollector: informationCollector,
-    silent: silent
+    silent: silent,
   );
 
   /// The pointer router that caught the exception.

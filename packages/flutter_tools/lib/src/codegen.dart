@@ -84,8 +84,6 @@ abstract class CodegenDaemon {
 /// Only a subset of the arguments provided to the [KernelCompiler] are
 /// supported here. Using the build pipeline implies a fixed multiroot
 /// filesystem and requires a pubspec.
-///
-/// This is only safe to use if [experimentalBuildEnabled] is true.
 class CodeGeneratingKernelCompiler implements KernelCompiler {
   const CodeGeneratingKernelCompiler();
 
@@ -97,6 +95,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     String outputFilePath,
     bool linkPlatformKernelIn = false,
     bool aot = false,
+    bool enableAsserts = false,
     bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     bool targetProductVm = false,
@@ -133,6 +132,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       outputFilePath: outputFilePath,
       linkPlatformKernelIn: linkPlatformKernelIn,
       aot: aot,
+      enableAsserts: enableAsserts,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
       targetProductVm: targetProductVm,
@@ -163,6 +163,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   /// codegen mode.
   static Future<ResidentCompiler> create({
     @required FlutterProject flutterProject,
+    bool enableAsserts = false,
     bool trackWidgetCreation = false,
     CompilerMessageConsumer compilerMessageConsumer = printError,
     bool unsafePackageSerialization = false,
@@ -173,6 +174,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     codeGenerator.updatePackages(flutterProject);
     final ResidentCompiler residentCompiler = ResidentCompiler(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      enableAsserts: enableAsserts,
       trackWidgetCreation: trackWidgetCreation,
       packagesPath: PackageMap.globalGeneratedPackagesPath,
       fileSystemRoots: <String>[

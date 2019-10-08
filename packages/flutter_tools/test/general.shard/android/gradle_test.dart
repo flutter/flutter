@@ -25,7 +25,6 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 import '../../src/pubspec_schema.dart';
 
 void main() {
@@ -328,13 +327,12 @@ someOtherTask
       expect(project.apkFilesFor(
         const AndroidBuildInfo(
           BuildInfo.debug,
-            splitPerAbi: true,
-            targetArchs: <AndroidArch>[
-                AndroidArch.armeabi_v7a,
-                AndroidArch.arm64_v8a,
-              ]
-            )
-          ),
+          splitPerAbi: true,
+          targetArchs: <AndroidArch>[
+            AndroidArch.armeabi_v7a,
+            AndroidArch.arm64_v8a,
+          ],
+        )),
         <String>[
           'app-armeabi-v7a-debug.apk',
           'app-arm64-v8a-debug.apk',
@@ -343,13 +341,12 @@ someOtherTask
       expect(project.apkFilesFor(
         const AndroidBuildInfo(
           BuildInfo.release,
-            splitPerAbi: true,
-            targetArchs: <AndroidArch>[
-                AndroidArch.armeabi_v7a,
-                AndroidArch.arm64_v8a,
-              ]
-            )
-          ),
+          splitPerAbi: true,
+          targetArchs: <AndroidArch>[
+            AndroidArch.armeabi_v7a,
+            AndroidArch.arm64_v8a,
+          ],
+        )),
         <String>[
           'app-armeabi-v7a-release.apk',
           'app-arm64-v8a-release.apk',
@@ -358,26 +355,24 @@ someOtherTask
       expect(project.apkFilesFor(
         const AndroidBuildInfo(
           BuildInfo(BuildMode.release, 'unknown'),
-            splitPerAbi: true,
-            targetArchs: <AndroidArch>[
-                AndroidArch.armeabi_v7a,
-                AndroidArch.arm64_v8a,
-              ]
-            )
-          ).isEmpty, isTrue);
+          splitPerAbi: true,
+          targetArchs: <AndroidArch>[
+            AndroidArch.armeabi_v7a,
+            AndroidArch.arm64_v8a,
+          ],
+        )).isEmpty, isTrue);
     });
     test('should provide apks for each ABI and flavored build types', () {
       final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], '/some/dir');
       expect(project.apkFilesFor(
         const AndroidBuildInfo(
           BuildInfo(BuildMode.debug, 'free'),
-            splitPerAbi: true,
-            targetArchs: <AndroidArch>[
-                AndroidArch.armeabi_v7a,
-                AndroidArch.arm64_v8a,
-              ]
-            )
-          ),
+          splitPerAbi: true,
+          targetArchs: <AndroidArch>[
+            AndroidArch.armeabi_v7a,
+            AndroidArch.arm64_v8a,
+          ],
+        )),
         <String>[
           'app-free-armeabi-v7a-debug.apk',
           'app-free-arm64-v8a-debug.apk',
@@ -386,13 +381,12 @@ someOtherTask
       expect(project.apkFilesFor(
         const AndroidBuildInfo(
           BuildInfo(BuildMode.release, 'paid'),
-            splitPerAbi: true,
-            targetArchs: <AndroidArch>[
-                AndroidArch.armeabi_v7a,
-                AndroidArch.arm64_v8a,
-              ]
-            )
-          ),
+          splitPerAbi: true,
+          targetArchs: <AndroidArch>[
+            AndroidArch.armeabi_v7a,
+            AndroidArch.arm64_v8a,
+          ],
+        )),
         <String>[
           'app-paid-armeabi-v7a-release.apk',
           'app-paid-arm64-v8a-release.apk',
@@ -401,13 +395,12 @@ someOtherTask
       expect(project.apkFilesFor(
         const AndroidBuildInfo(
           BuildInfo(BuildMode.release, 'unknown'),
-            splitPerAbi: true,
-            targetArchs: <AndroidArch>[
-                AndroidArch.armeabi_v7a,
-                AndroidArch.arm64_v8a,
-              ]
-            )
-          ).isEmpty, isTrue);
+          splitPerAbi: true,
+          targetArchs: <AndroidArch>[
+            AndroidArch.armeabi_v7a,
+            AndroidArch.arm64_v8a,
+          ],
+        )).isEmpty, isTrue);
     });
     test('should provide assemble task name for default build types', () {
       final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], '/some/dir');
@@ -451,7 +444,7 @@ someOtherTask
 
     setUp(() {
       mockLogger = BufferLogger();
-      tempDir = fs.systemTempDirectory.createTempSync('settings_aar_test.');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_settings_aar_test.');
 
     });
 
@@ -859,7 +852,7 @@ flutter:
 
     setUp(() {
       fs = MemoryFileSystem();
-      tempDir = fs.systemTempDirectory.createTempSync('artifacts_test.');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_artifacts_test.');
       gradleBinary = platform.isWindows ? 'gradlew.bat' : 'gradlew';
       gradleWrapperDirectory = fs.directory(
         fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper'));
@@ -967,7 +960,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem();
-      tempDir = memoryFileSystem.systemTempDirectory.createTempSync('artifacts_test.');
+      tempDir = memoryFileSystem.systemTempDirectory.createTempSync('flutter_artifacts_test.');
       gradleWrapperDirectory = memoryFileSystem.directory(
           memoryFileSystem.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper'));
       gradleWrapperDirectory.createSync(recursive: true);
@@ -1144,14 +1137,162 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       migrateToR8(sampleAppAndroid);
 
       expect(testLogger.traceText, contains('set `android.enableR8=true` in gradle.properties'));
-      expect(sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+      expect(
+        sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
         equals(
           'org.gradle.jvmargs=-Xmx1536M\n'
           'android.enableR8=true\n'
-        )
+        ),
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
+    });
+  });
+
+  group('isAppUsingAndroidX', () {
+    FileSystem fs;
+
+    setUp(() {
+      fs = MemoryFileSystem();
+    });
+
+    testUsingContext('returns true when the project is using AndroidX', () async {
+      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
+
+      androidDirectory
+        .childFile('gradle.properties')
+        .writeAsStringSync('android.useAndroidX=true');
+
+      expect(isAppUsingAndroidX(androidDirectory), isTrue);
+
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
+
+    testUsingContext('returns false when the project is not using AndroidX', () async {
+      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
+
+      androidDirectory
+        .childFile('gradle.properties')
+        .writeAsStringSync('android.useAndroidX=false');
+
+      expect(isAppUsingAndroidX(androidDirectory), isFalse);
+
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
+
+    testUsingContext('returns false when gradle.properties does not exist', () async {
+      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
+
+      expect(isAppUsingAndroidX(androidDirectory), isFalse);
+
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
+  });
+
+  group('buildPluginsAsAar', () {
+    FileSystem fs;
+    MockProcessManager mockProcessManager;
+    MockAndroidSdk mockAndroidSdk;
+
+    setUp(() {
+      fs = MemoryFileSystem();
+
+      mockProcessManager = MockProcessManager();
+      when(mockProcessManager.run(
+        any,
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
+
+      mockAndroidSdk = MockAndroidSdk();
+      when(mockAndroidSdk.directory).thenReturn('irrelevant');
+    });
+
+    testUsingContext('calls gradle', () async {
+      final Directory androidDirectory = fs.directory('android.');
+      androidDirectory.createSync();
+      androidDirectory
+        .childFile('pubspec.yaml')
+        .writeAsStringSync('name: irrelevant');
+
+      final Directory plugin1 = fs.directory('plugin1.');
+      plugin1
+        ..createSync()
+        ..childFile('pubspec.yaml')
+        .writeAsStringSync('''
+name: irrelevant
+flutter:
+  plugin:
+    androidPackage: irrelevant
+''');
+      final Directory plugin2 = fs.directory('plugin2.');
+      plugin2
+        ..createSync()
+        ..childFile('pubspec.yaml')
+        .writeAsStringSync('''
+name: irrelevant
+flutter:
+  plugin:
+    androidPackage: irrelevant
+''');
+
+      androidDirectory
+        .childFile('.flutter-plugins')
+        .writeAsStringSync('''
+plugin1=${plugin1.path}
+plugin2=${plugin2.path}
+''');
+      final Directory buildDirectory = androidDirectory.childDirectory('build');
+      buildDirectory
+        .childDirectory('outputs')
+        .childDirectory('repo')
+        .createSync(recursive: true);
+
+      await buildPluginsAsAar(
+        FlutterProject.fromPath(androidDirectory.path),
+        const AndroidBuildInfo(BuildInfo.release),
+        buildDirectory: buildDirectory.path,
+      );
+
+      final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
+      final String initScript = fs.path.join(flutterRoot, 'packages',
+          'flutter_tools', 'gradle', 'aar_init_script.gradle');
+      verify(mockProcessManager.run(
+        <String>[
+          'gradlew',
+          '-I=$initScript',
+          '-Pflutter-root=$flutterRoot',
+          '-Poutput-dir=${buildDirectory.path}',
+          '-Pis-plugin=true',
+          '-Ptarget-platform=android-arm,android-arm64',
+          'assembleAarRelease',
+        ],
+        environment: anyNamed('environment'),
+        workingDirectory: plugin1.childDirectory('android').path),
+      ).called(1);
+
+      verify(mockProcessManager.run(
+        <String>[
+          'gradlew',
+          '-I=$initScript',
+          '-Pflutter-root=$flutterRoot',
+          '-Poutput-dir=${buildDirectory.path}',
+          '-Pis-plugin=true',
+          '-Ptarget-platform=android-arm,android-arm64',
+          'assembleAarRelease',
+        ],
+        environment: anyNamed('environment'),
+        workingDirectory: plugin2.childDirectory('android').path),
+      ).called(1);
+
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      FileSystem: () => fs,
+      GradleUtils: () => FakeGradleUtils(),
+      ProcessManager: () => mockProcessManager,
     });
   });
 
@@ -1172,7 +1313,7 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       mockProcessManager = MockProcessManager();
       android = fakePlatform('android');
 
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('artifacts_test.');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_artifacts_test.');
       cache = Cache(rootOverride: tempDir);
 
       final Directory gradleWrapperDirectory = tempDir
@@ -1235,37 +1376,39 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
       fs.currentDirectory = 'path/to/project';
 
       // Let any process start. Assert after.
-      when(mockProcessManager.start(
+      when(mockProcessManager.run(
         any,
         environment: anyNamed('environment'),
-        workingDirectory: anyNamed('workingDirectory'))
-      ).thenAnswer((Invocation invocation) => Future<Process>.value(MockProcess()));
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer(
+          (_) async => ProcessResult(1, 0, '', ''),
+      );
       fs.directory('build/outputs/repo').createSync(recursive: true);
 
       await buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
         project: FlutterProject.current(),
         outputDir: 'build/',
-        target: ''
+        target: '',
       );
 
-      final List<String> actualGradlewCall = verify(mockProcessManager.start(
+      final List<String> actualGradlewCall = verify(mockProcessManager.run(
         captureAny,
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory')),
-      ).captured.single;
+      ).captured.last;
 
       expect(actualGradlewCall, contains('/path/to/project/.android/gradlew'));
       expect(actualGradlewCall, contains('-PlocalEngineOut=out/android_arm'));
     }, overrides: <Type, Generator>{
-        AndroidSdk: () => mockAndroidSdk,
-        AndroidStudio: () => mockAndroidStudio,
-        Artifacts: () => mockArtifacts,
-        Cache: () => cache,
-        ProcessManager: () => mockProcessManager,
-        Platform: () => android,
-        FileSystem: () => fs,
-      });
+      AndroidSdk: () => mockAndroidSdk,
+      AndroidStudio: () => mockAndroidStudio,
+      Artifacts: () => mockArtifacts,
+      Cache: () => cache,
+      ProcessManager: () => mockProcessManager,
+      Platform: () => android,
+      FileSystem: () => fs,
+    });
   });
 }
 
@@ -1284,6 +1427,14 @@ Platform fakePlatform(String name) {
   return FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
 }
 
+class FakeGradleUtils extends GradleUtils {
+  @override
+  Future<String> getExecutable(FlutterProject project) async {
+    return 'gradlew';
+  }
+}
+
+class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockAndroidStudio extends Mock implements AndroidStudio {}
 class MockDirectory extends Mock implements Directory {}
 class MockFile extends Mock implements File {}

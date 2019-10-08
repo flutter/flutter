@@ -30,7 +30,7 @@ class FuchsiaDevFinder {
     final List<String> command = <String>[
       fuchsiaArtifacts.devFinder.path,
       'list',
-      '-full'
+      '-full',
     ];
     final RunResult result = await processUtils.run(command);
     if (result.exitCode != 0) {
@@ -55,7 +55,7 @@ class FuchsiaDevFinder {
       'resolve',
       '-local',
       '-device-limit', '1',
-      deviceName
+      deviceName,
     ];
     final RunResult result = await processUtils.run(command);
     if (result.exitCode != 0) {

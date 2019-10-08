@@ -913,9 +913,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     this._borderRadius,
     this._isFirstButton,
     this._isLastButton,
-    this._textDirection,
-    [RenderBox child]
-  ) : super(child);
+    this._textDirection, [
+    RenderBox child,
+  ]) : super(child);
 
   // The width and color of the button's leading side border.
   BorderSide get leadingBorderSide => _leadingBorderSide;

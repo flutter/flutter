@@ -59,7 +59,7 @@ Future<void> updateGeneratedXcodeProperties({
     targetOverride: targetOverride,
     useMacOSConfig: useMacOSConfig,
     setSymroot: setSymroot,
-    buildDirOverride: buildDirOverride
+    buildDirOverride: buildDirOverride,
   );
 
   _updateGeneratedXcodePropertiesFile(
@@ -279,7 +279,8 @@ class XcodeProjectInterpreter {
   /// Asynchronously retrieve xcode build settings. This one is preferred for
   /// new call-sites.
   Future<Map<String, String>> getBuildSettings(
-      String projectPath, String target, {
+    String projectPath,
+    String target, {
     Duration timeout = const Duration(minutes: 1),
   }) async {
     final Status status = Status.withSpinner(
@@ -327,7 +328,7 @@ class XcodeProjectInterpreter {
       '-scheme',
       scheme,
       '-quiet',
-      'clean'
+      'clean',
     ], workingDirectory: fs.currentDirectory.path);
   }
 

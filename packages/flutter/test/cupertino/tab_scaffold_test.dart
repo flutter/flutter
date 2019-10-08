@@ -378,7 +378,7 @@ void main() {
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
     ));
-    expect(tab2.text.style.color, CupertinoColors.destructiveRed);
+    expect(tab2.text.style.color.value, CupertinoColors.systemRed.darkColor.value);
   });
 
   testWidgets('Tab contents are padded when there are view insets', (WidgetTester tester) async {
@@ -443,7 +443,7 @@ void main() {
         tabBuilder: (BuildContext context, int index) {
           return const Placeholder();
         },
-      )
+      ),
     );
 
     await tester.pumpWidget(
@@ -452,7 +452,7 @@ void main() {
           data: const MediaQueryData(
             viewInsets: EdgeInsets.only(bottom: 20.0),
           ),
-          child: child
+          child: child,
         ),
       ),
     );
@@ -554,7 +554,7 @@ void main() {
             return Text('Different page ${index + 1}');
           },
         ),
-      )
+      ),
     );
 
     expect(tabsBuilt, const <int>[0, 1]);
@@ -653,7 +653,7 @@ void main() {
               );
             },
           ),
-        )
+        ),
       );
 
       expect(tabsPainted, const <int> [0]);
@@ -675,7 +675,7 @@ void main() {
               );
             },
           ),
-        )
+        ),
       );
 
       expect(tabsPainted, const <int> [0, 0]);
@@ -739,7 +739,7 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
           ),
           controller: controller,
-          tabBuilder: (BuildContext context, int index) => const Placeholder()
+          tabBuilder: (BuildContext context, int index) => const Placeholder(),
         ),
       ),
     );
@@ -756,7 +756,7 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
           ),
           controller: controller,
-          tabBuilder: (BuildContext context, int index) => const Placeholder()
+          tabBuilder: (BuildContext context, int index) => const Placeholder(),
         ),
       ),
     );
@@ -867,12 +867,12 @@ void main() {
                         onPaint: () => tabsPainted0.add(index)
                       )
                     );
-                  }
+                  },
                 ),
-              ]
-            )
-          )
-        )
+              ],
+            ),
+          ),
+        ),
       );
       expect(tabsPainted0, const <int>[2, 0, 1, 2]);
       expect(tabsPainted1, const <int>[2, 0]);
@@ -892,7 +892,7 @@ void main() {
             controller: controller,
             tabBuilder: (BuildContext context, int index) => Text('Different page ${index + 1}'),
           ),
-        )
+        ),
       );
     } on AssertionError catch (e) {
       expect(e.toString(), contains('controller.index < tabBar.items.length'));
@@ -907,7 +907,7 @@ void main() {
           controller: controller,
           tabBuilder: (BuildContext context, int index) => Text('Different page ${index + 1}'),
         ),
-      )
+      ),
     );
 
     expect(tester.takeException(), null);
@@ -936,7 +936,7 @@ void main() {
               return Container();
             },
           ),
-        )
+        ),
     );
 
     for (int i = 0; i < 3; i++) {
@@ -958,7 +958,7 @@ void main() {
               return Container();
             },
           ),
-        )
+        ),
     );
     for (int i = 0; i < 5; i++) {
       controller.index = i;
@@ -1041,7 +1041,7 @@ void main() {
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
                   10,
-                  (int i) => BottomNavigationBarItem(icon: const ImageIcon(TestImageProvider(24, 23)), title: Text('$i'))
+                  (int i) => BottomNavigationBarItem(icon: const ImageIcon(TestImageProvider(24, 23)), title: Text('$i')),
                 ),
               ),
               tabBuilder: (BuildContext context, int index) => const Text('content'),

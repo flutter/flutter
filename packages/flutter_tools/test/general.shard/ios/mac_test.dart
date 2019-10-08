@@ -56,7 +56,7 @@ void main() {
 
     testUsingContext('isWorking returns false if libimobiledevice is not installed', () async {
       when(mockProcessManager.runSync(
-        <String>[ideviceIdPath, '-h'], environment: anyNamed('environment')
+        <String>[ideviceIdPath, '-h'], environment: anyNamed('environment'),
       )).thenReturn(ProcessResult(123, 1, '', ''));
       expect(await iMobileDevice.isWorking, false);
     }, overrides: <Type, Generator>{
@@ -246,7 +246,9 @@ void main() {
       );
 
       await diagnoseXcodeBuildFailure(buildResult);
-      verify(mockUsage.sendEvent('build', 'xcode-bitcode-failure',
+      verify(mockUsage.sendEvent('build',
+        any,
+        label: 'xcode-bitcode-failure',
         parameters: <String, String>{
           cdKey(CustomDimensions.buildEventCommand): buildCommands.toString(),
           cdKey(CustomDimensions.buildEventSettings): buildSettings.toString(),

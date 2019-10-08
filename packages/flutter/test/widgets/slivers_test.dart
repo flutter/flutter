@@ -34,12 +34,12 @@ Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) 
           SliverFixedExtentList(
             itemExtent: 900,
             delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
+              (BuildContext context, int index) {
                 return Center(
                   key: ValueKey<String>(items[index]),
                   child: KeepAlive(
                     items[index],
-                  )
+                  ),
                 );
               },
               childCount : items.length,
@@ -47,7 +47,7 @@ Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) 
                 final ValueKey<String> valueKey = key;
                 final String data = valueKey.value;
                 return items.indexOf(data);
-              }
+              },
             ),
           ),
         ],
@@ -268,12 +268,14 @@ void main() {
     expect(find.text('4'), findsOneWidget);
   });
 
-  testWidgets('SliverGrid Correctly layout children after rearranging', (WidgetTester tester) async {
+  testWidgets(
+    'SliverGrid Correctly layout children after rearranging',
+    (WidgetTester tester) async {
       await tester.pumpWidget(const TestSliverGrid(
         <Widget>[
           Text('item0', key: Key('0')),
           Text('item1', key: Key('1')),
-        ]
+        ],
       ));
       await tester.pumpWidget(const TestSliverGrid(
         <Widget>[
@@ -281,7 +283,7 @@ void main() {
           Text('item3', key: Key('3')),
           Text('item4', key: Key('4')),
           Text('item1', key: Key('1')),
-        ]
+        ],
       ));
       expect(find.text('item0'), findsOneWidget);
       expect(find.text('item3'), findsOneWidget);
@@ -299,13 +301,15 @@ void main() {
     },
   );
 
-  testWidgets('SliverFixedExtentList Correctly layout children after rearranging', (WidgetTester tester) async {
+  testWidgets(
+    'SliverFixedExtentList Correctly layout children after rearranging',
+    (WidgetTester tester) async {
       await tester.pumpWidget(const TestSliverFixedExtentList(
           <Widget>[
             Text('item0', key: Key('0')),
             Text('item2', key: Key('2')),
             Text('item1', key: Key('1')),
-          ]
+          ],
       ));
       await tester.pumpWidget(const TestSliverFixedExtentList(
           <Widget>[
@@ -314,7 +318,7 @@ void main() {
             Text('item1', key: Key('1')),
             Text('item4', key: Key('4')),
             Text('item2', key: Key('2')),
-          ]
+          ],
       ));
       expect(find.text('item0'), findsOneWidget);
       expect(find.text('item3'), findsOneWidget);
@@ -363,17 +367,17 @@ void main() {
             SliverFixedExtentList(
               itemExtent: 200,
               delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
+                (BuildContext context, int index) {
                   if (index <= 6) {
                     return Center(child: Text('Page $index'));
                   }
                   return null;
                 },
               ),
-            )
+            ),
           ],
         ),
-      )
+      ),
     );
     await tester.drag(find.text('Page 5'), const Offset(0, -1000));
     // Controller will be temporarily over-scrolled.
@@ -395,17 +399,17 @@ void main() {
             SliverFixedExtentList(
               itemExtent: 200,
               delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
+                (BuildContext context, int index) {
                   if (index <= 6) {
                     return Center(child: Text('Page $index'));
                   }
                   return null;
                 },
               ),
-            )
+            ),
           ],
         ),
-      )
+      ),
     );
     await tester.drag(find.text('Page 5'), const Offset(0, -210));
     // Controller will be temporarily over-scrolled.
@@ -441,7 +445,7 @@ class TestSliverGrid extends StatelessWidget {
             ),
           ),
         ],
-      )
+      ),
     );
   }
 }
@@ -464,7 +468,7 @@ class TestSliverFixedExtentList extends StatelessWidget {
               ),
             ),
           ],
-        )
+        ),
     );
   }
 }

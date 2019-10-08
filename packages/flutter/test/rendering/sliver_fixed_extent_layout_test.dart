@@ -13,7 +13,7 @@ void main() {
     final List<RenderBox> children = <RenderBox>[
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
-      RenderSizedBox(const Size(400.0, 100.0))
+      RenderSizedBox(const Size(400.0, 100.0)),
     ];
     final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
@@ -82,12 +82,12 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   @override
   double estimateMaxScrollOffset(
-      SliverConstraints constraints, {
-        int firstIndex,
-        int lastIndex,
-        double leadingScrollOffset,
-        double trailingScrollOffset,
-      }) {
+    SliverConstraints constraints, {
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+  }) {
     assert(lastIndex >= firstIndex);
     return children.length * (trailingScrollOffset - leadingScrollOffset) / (lastIndex - firstIndex + 1);
   }

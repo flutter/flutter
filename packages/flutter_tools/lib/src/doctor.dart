@@ -505,7 +505,7 @@ class ValidationResult {
         return terminal.color(leadingBox, TerminalColor.green);
       case ValidationType.notAvailable:
       case ValidationType.partial:
-       return terminal.color(leadingBox, TerminalColor.yellow);
+        return terminal.color(leadingBox, TerminalColor.yellow);
     }
     return null;
   }
@@ -802,7 +802,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       validators.add(ValidatorWithResult(
           userMessages.intellijMacUnknownResult,
           ValidationResult(ValidationType.missing, <ValidationMessage>[
-              ValidationMessage.error(e.message),
+            ValidationMessage.error(e.message),
           ]),
       ));
     }

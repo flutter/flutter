@@ -13,6 +13,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
+import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -41,6 +42,7 @@ class FlutterDevice {
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+         enableAsserts: buildMode == BuildMode.debug,
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots,
          fileSystemScheme: fileSystemScheme,
@@ -543,7 +545,7 @@ abstract class ResidentRunner {
        packagesFilePath = packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
        _dillOutputPath = dillOutputPath,
        artifactDirectory = dillOutputPath == null
-          ? fs.systemTempDirectory.createTempSync('_fluttter_tool')
+          ? fs.systemTempDirectory.createTempSync('flutter_tool.')
           : fs.file(dillOutputPath).parent,
        assetBundle = AssetBundleFactory.instance.createBundle() {
     if (!artifactDirectory.existsSync()) {
@@ -993,19 +995,13 @@ class TerminalHandler {
 
   void registerSignalHandlers() {
     assert(residentRunner.stayResident);
-    io.ProcessSignal.SIGINT.watch().listen((io.ProcessSignal signal) {
-      _cleanUp(signal);
-      io.exit(0);
-    });
-    io.ProcessSignal.SIGTERM.watch().listen((io.ProcessSignal signal) {
-      _cleanUp(signal);
-      io.exit(0);
-    });
+    signals.addHandler(io.ProcessSignal.SIGINT, _cleanUp);
+    signals.addHandler(io.ProcessSignal.SIGTERM, _cleanUp);
     if (!residentRunner.supportsServiceProtocol || !residentRunner.supportsRestart) {
       return;
     }
-    io.ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
-    io.ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
+    signals.addHandler(io.ProcessSignal.SIGUSR1, _handleSignal);
+    signals.addHandler(io.ProcessSignal.SIGUSR2, _handleSignal);
   }
 
   /// Returns [true] if the input has been handled by this function.

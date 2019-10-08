@@ -36,7 +36,7 @@ void main() {
           rect: TestSemantics.fullScreen,
           flags: SemanticsFlag.isSelected.index,
         ),
-      ]
+      ],
     )));
 
     // control for forking

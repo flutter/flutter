@@ -81,7 +81,7 @@ void main() {
     });
     when(mockFlutterDevice.devFS).thenReturn(mockDevFS);
     when(mockFlutterDevice.views).thenReturn(<FlutterView>[
-      mockFlutterView
+      mockFlutterView,
     ]);
     when(mockFlutterDevice.device).thenReturn(mockDevice);
     when(mockFlutterView.uiIsolate).thenReturn(mockIsolate);
@@ -93,7 +93,7 @@ void main() {
     when(mockFlutterDevice.connect(
       reloadSources: anyNamed('reloadSources'),
       restart: anyNamed('restart'),
-      compileExpression: anyNamed('compileExpression')
+      compileExpression: anyNamed('compileExpression'),
     )).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.setupDevFS(any, any, packagesFilePath: anyNamed('packagesFilePath')))
       .thenAnswer((Invocation invocation) async {
@@ -223,7 +223,7 @@ void main() {
     expect(verify(flutterUsage.sendEvent('hot', 'reload',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
-                   getNameForTargetPlatform(TargetPlatform.android_arm))
+                   getNameForTargetPlatform(TargetPlatform.android_arm)),
     );
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
@@ -253,7 +253,7 @@ void main() {
     expect(verify(flutterUsage.sendEvent('hot', 'restart',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
-                   getNameForTargetPlatform(TargetPlatform.android_arm))
+                   getNameForTargetPlatform(TargetPlatform.android_arm)),
     );
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
@@ -306,7 +306,7 @@ void main() {
   }));
 
   test('ResidentRunner uses temp directory when there is no output dill path', () => testbed.run(() {
-    expect(residentRunner.artifactDirectory.path, contains('_fluttter_tool'));
+    expect(residentRunner.artifactDirectory.path, contains('flutter_tool.'));
 
     final ResidentRunner otherRunner = HotRunner(
       <FlutterDevice>[
@@ -348,10 +348,10 @@ void main() {
   test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockDevice.takeScreenshot(any))
-        .thenAnswer((Invocation invocation) async {
-      final File file = invocation.positionalArguments.first;
-      file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
-    });
+      .thenAnswer((Invocation invocation) async {
+        final File file = invocation.positionalArguments.first;
+        file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
+      });
     final BufferLogger bufferLogger = context.get<Logger>();
 
     await residentRunner.screenshot(mockFlutterDevice);
@@ -410,10 +410,10 @@ void main() {
     );
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockDevice.takeScreenshot(any))
-        .thenAnswer((Invocation invocation) async {
-      final File file = invocation.positionalArguments.first;
-      file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
-    });
+      .thenAnswer((Invocation invocation) async {
+        final File file = invocation.positionalArguments.first;
+        file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
+      });
     final BufferLogger bufferLogger = context.get<Logger>();
 
     await residentRunner.screenshot(mockFlutterDevice);

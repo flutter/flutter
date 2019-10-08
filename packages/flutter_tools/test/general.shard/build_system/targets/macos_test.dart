@@ -73,7 +73,7 @@ void main() {
         defines: <String, String>{
           kBuildMode: 'debug',
           kTargetPlatform: 'darwin-x64',
-        }
+        },
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),

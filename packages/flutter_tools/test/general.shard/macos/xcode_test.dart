@@ -113,7 +113,7 @@ void main() {
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       Platform: () => mockPlatform,
-      ProcessManager: () => mockProcessManager
+      ProcessManager: () => mockProcessManager,
     });
 
     testUsingContext('isInstalledAndMeetsVersionCheck is false when no xcode-select', () {
@@ -130,7 +130,7 @@ void main() {
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       Platform: () => mockPlatform,
-      ProcessManager: () => mockProcessManager
+      ProcessManager: () => mockProcessManager,
     });
 
     testUsingContext('isInstalledAndMeetsVersionCheck is false when version not satisfied', () {
@@ -147,7 +147,7 @@ void main() {
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       Platform: () => mockPlatform,
-      ProcessManager: () => mockProcessManager
+      ProcessManager: () => mockProcessManager,
     });
 
     testUsingContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
@@ -164,7 +164,7 @@ void main() {
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
       Platform: () => mockPlatform,
-      ProcessManager: () => mockProcessManager
+      ProcessManager: () => mockProcessManager,
     });
 
     testUsingContext('eulaSigned is false when clang is not installed', () {

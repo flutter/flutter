@@ -40,7 +40,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
       versionCode: 1,
       launchActivity: 'io.flutter.android.mock.MockActivity',
     ),
-    iOS: BuildableIOSApp(MockIosProject(), MockIosProject.bundleId)
+    iOS: BuildableIOSApp(MockIosProject(), MockIosProject.bundleId),
   );
 }
 
@@ -192,12 +192,12 @@ class MockProcessManager extends Mock implements ProcessManager {
 /// a given number of times before succeeding. The returned processes will
 /// fail after a delay if one is supplied.
 ProcessFactory flakyProcessFactory({
-    int flakes,
-    bool Function(List<String> command) filter,
-    Duration delay,
-    Stream<List<int>> Function() stdout,
-    Stream<List<int>> Function() stderr,
-  }) {
+  int flakes,
+  bool Function(List<String> command) filter,
+  Duration delay,
+  Stream<List<int>> Function() stdout,
+  Stream<List<int>> Function() stderr,
+}) {
   int flakesLeft = flakes;
   stdout ??= () => const Stream<List<int>>.empty();
   stderr ??= () => const Stream<List<int>>.empty();

@@ -19,7 +19,7 @@ void main() {
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem();
-      tempDir = memoryFileSystem.systemTempDirectory.createTempSync('artifacts_test.');
+      tempDir = memoryFileSystem.systemTempDirectory.createTempSync('flutter_artifacts_test.');
     });
 
     tearDown(() {
@@ -109,6 +109,20 @@ void main() {
           artifacts.getEngineType(TargetPlatform.darwin_x64),
           'android_debug_unopt',
         );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => memoryFileSystem,
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
+      });
+
+      testUsingContext('Looks up dart.exe on windows platforms', () async {
+        expect(artifacts.getArtifactPath(Artifact.engineDartBinary), contains('.exe'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => memoryFileSystem,
+        Platform: () => FakePlatform(operatingSystem: 'windows'),
+      });
+
+      testUsingContext('Looks up dart on linux platforms', () async {
+        expect(artifacts.getArtifactPath(Artifact.engineDartBinary), isNot(contains('.exe')));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
         Platform: () => FakePlatform(operatingSystem: 'linux'),

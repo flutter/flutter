@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:io' as io;
+
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -19,16 +24,20 @@ void main() {
     MockitoCache cache;
     MockitoUsage usage;
     MockClock clock;
+    MockProcessInfo mockProcessInfo;
     List<int> mockTimes;
 
     setUp(() {
       cache = MockitoCache();
       usage = MockitoUsage();
       clock = MockClock();
+      mockProcessInfo = MockProcessInfo();
+
       when(usage.isFirstRun).thenReturn(false);
       when(clock.now()).thenAnswer(
         (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
       );
+      when(mockProcessInfo.maxRss).thenReturn(10);
     });
 
     testUsingContext('honors shouldUpdateCache false', () async {
@@ -49,7 +58,15 @@ void main() {
       Cache: () => cache,
     });
 
-    testUsingContext('reports command that results in success', () async {
+    void testUsingCommandContext(String testName, Function testBody) {
+      testUsingContext(testName, testBody, overrides: <Type, Generator>{
+        ProcessInfo: () => mockProcessInfo,
+        SystemClock: () => clock,
+        Usage: () => usage,
+      });
+    }
+
+    testUsingCommandContext('reports command that results in success', () async {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
@@ -60,15 +77,27 @@ void main() {
       );
       await flutterCommand.run();
 
-      verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
-      verify(usage.sendEvent(captureAny, 'success'));
-    },
-    overrides: <Type, Generator>{
-      SystemClock: () => clock,
-      Usage: () => usage,
+      verify(usage.sendCommand(
+        'dummy',
+        parameters: anyNamed('parameters'),
+      ));
+      verify(usage.sendEvent(
+        'tool-command-result',
+        'dummy',
+        label: 'success',
+        parameters: anyNamed('parameters'),
+      ));
+      expect(verify(usage.sendEvent(
+          'tool-command-max-rss',
+          'dummy',
+          label: 'success',
+          value: captureAnyNamed('value'),
+        )).captured[0],
+        10,
+      );
     });
 
-    testUsingContext('reports command that results in warning', () async {
+    testUsingCommandContext('reports command that results in warning', () async {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
@@ -79,15 +108,27 @@ void main() {
       );
       await flutterCommand.run();
 
-      verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
-      verify(usage.sendEvent(captureAny, 'warning'));
-    },
-    overrides: <Type, Generator>{
-      SystemClock: () => clock,
-      Usage: () => usage,
+      verify(usage.sendCommand(
+        'dummy',
+        parameters: anyNamed('parameters'),
+      ));
+      verify(usage.sendEvent(
+        'tool-command-result',
+        'dummy',
+        label: 'warning',
+        parameters: anyNamed('parameters'),
+      ));
+      expect(verify(usage.sendEvent(
+          'tool-command-max-rss',
+          'dummy',
+          label: 'warning',
+          value: captureAnyNamed('value'),
+        )).captured[0],
+        10,
+      );
     });
 
-    testUsingContext('reports command that results in failure', () async {
+    testUsingCommandContext('reports command that results in failure', () async {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
@@ -100,16 +141,28 @@ void main() {
       try {
         await flutterCommand.run();
       } on ToolExit {
-        verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
-        verify(usage.sendEvent(captureAny, 'fail'));
+        verify(usage.sendCommand(
+          'dummy',
+          parameters: anyNamed('parameters'),
+        ));
+        verify(usage.sendEvent(
+          'tool-command-result',
+          'dummy',
+          label: 'fail',
+          parameters: anyNamed('parameters'),
+        ));
+        expect(verify(usage.sendEvent(
+            'tool-command-max-rss',
+            'dummy',
+            label: 'fail',
+            value: captureAnyNamed('value'),
+          )).captured[0],
+          10,
+        );
       }
-    },
-    overrides: <Type, Generator>{
-      SystemClock: () => clock,
-      Usage: () => usage,
     });
 
-    testUsingContext('reports command that results in error', () async {
+    testUsingCommandContext('reports command that results in error', () async {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
@@ -124,16 +177,92 @@ void main() {
         await flutterCommand.run();
         fail('Mock should make this fail');
       } on ToolExit {
-        verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
-        verify(usage.sendEvent(captureAny, 'fail'));
+        verify(usage.sendCommand(
+          'dummy',
+          parameters: anyNamed('parameters'),
+        ));
+        verify(usage.sendEvent(
+          'tool-command-result',
+          'dummy',
+          label: 'fail',
+          parameters: anyNamed('parameters'),
+        ));
+        expect(verify(usage.sendEvent(
+            'tool-command-max-rss',
+            'dummy',
+            label: 'fail',
+            value: captureAnyNamed('value'),
+          )).captured[0],
+          10,
+        );
       }
-    },
-    overrides: <Type, Generator>{
-      SystemClock: () => clock,
-      Usage: () => usage,
     });
 
-    testUsingContext('report execution timing by default', () async {
+    group('signals tests', () {
+      MockIoProcessSignal mockSignal;
+      ProcessSignal signalUnderTest;
+      StreamController<io.ProcessSignal> signalController;
+
+      setUp(() {
+        mockSignal = MockIoProcessSignal();
+        signalUnderTest = ProcessSignal(mockSignal);
+        signalController = StreamController<io.ProcessSignal>();
+        when(mockSignal.watch()).thenAnswer((Invocation invocation) => signalController.stream);
+      });
+
+      testUsingContext('reports command that is killed', () async {
+        // Crash if called a third time which is unexpected.
+        mockTimes = <int>[1000, 2000];
+
+        final Completer<void> completer = Completer<void>();
+        setExitFunctionForTests((int exitCode) {
+          expect(exitCode, 0);
+          restoreExitFunction();
+          completer.complete();
+        });
+
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+          commandFunction: () async {
+            final Completer<void> c = Completer<void>();
+            await c.future;
+            return null; // unreachable
+          }
+        );
+
+        unawaited(flutterCommand.run());
+        signalController.add(mockSignal);
+        await completer.future;
+
+        verify(usage.sendCommand(
+          'dummy',
+          parameters: anyNamed('parameters'),
+        ));
+        verify(usage.sendEvent(
+          'tool-command-result',
+          'dummy',
+          label: 'killed',
+          parameters: anyNamed('parameters'),
+        ));
+        expect(verify(usage.sendEvent(
+            'tool-command-max-rss',
+            'dummy',
+            label: 'killed',
+            value: captureAnyNamed('value'),
+          )).captured[0],
+          10,
+        );
+      }, overrides: <Type, Generator>{
+        ProcessInfo: () => mockProcessInfo,
+        Signals: () => FakeSignals(
+          subForSigTerm: signalUnderTest,
+          exitSignals: <ProcessSignal>[signalUnderTest],
+        ),
+        SystemClock: () => clock,
+        Usage: () => usage,
+      });
+    });
+
+    testUsingCommandContext('report execution timing by default', () async {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
@@ -149,16 +278,12 @@ void main() {
           'flutter',
           'dummy',
           const Duration(milliseconds: 1000),
-          null
+          null,
         ],
       );
-    },
-    overrides: <Type, Generator>{
-      SystemClock: () => clock,
-      Usage: () => usage,
     });
 
-    testUsingContext('no timing report without usagePath', () async {
+    testUsingCommandContext('no timing report without usagePath', () async {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
@@ -169,13 +294,9 @@ void main() {
       verifyNever(usage.sendTiming(
                    any, any, any,
                    label: anyNamed('label')));
-    },
-    overrides: <Type, Generator>{
-      SystemClock: () => clock,
-      Usage: () => usage,
     });
 
-    testUsingContext('report additional FlutterCommandResult data', () async {
+    testUsingCommandContext('report additional FlutterCommandResult data', () async {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
@@ -202,13 +323,9 @@ void main() {
           'success-blah1-blah2-blah3',
         ],
       );
-    },
-    overrides: <Type, Generator>{
-      SystemClock: () => clock,
-      Usage: () => usage,
     });
 
-    testUsingContext('report failed execution timing too', () async {
+    testUsingCommandContext('report failed execution timing too', () async {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
@@ -238,10 +355,6 @@ void main() {
           ],
         );
       }
-    },
-    overrides: <Type, Generator>{
-      SystemClock: () => clock,
-      Usage: () => usage,
     });
   });
 }
@@ -261,3 +374,30 @@ class FakeCommand extends FlutterCommand {
 }
 
 class MockVersion extends Mock implements FlutterVersion {}
+class MockProcessInfo extends Mock implements ProcessInfo {}
+class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
+
+class FakeSignals implements Signals {
+  FakeSignals({
+    this.subForSigTerm,
+    List<ProcessSignal> exitSignals,
+  }) : delegate = Signals(exitSignals: exitSignals);
+
+  final ProcessSignal subForSigTerm;
+  final Signals delegate;
+
+  @override
+  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+    if (signal == ProcessSignal.SIGTERM) {
+      return delegate.addHandler(subForSigTerm, handler);
+    }
+    return delegate.addHandler(signal, handler);
+  }
+
+  @override
+  Future<bool> removeHandler(ProcessSignal signal, Object token) =>
+    delegate.removeHandler(signal, token);
+
+  @override
+  Stream<Object> get errors => delegate.errors;
+}

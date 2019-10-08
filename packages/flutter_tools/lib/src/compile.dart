@@ -101,7 +101,6 @@ class StdoutHandler {
   bool _badState = false;
 
   void handler(String message) {
-    printTrace('-> $message');
     if (_badState) {
       return;
     }
@@ -250,6 +249,7 @@ class KernelCompiler {
     TargetModel targetModel = TargetModel.flutter,
     bool linkPlatformKernelIn = false,
     bool aot = false,
+    bool enableAsserts = false,
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     String packagesPath,
@@ -274,6 +274,11 @@ class KernelCompiler {
     if (packagesPath != null) {
       mainUri = PackageUriMapper.findUri(mainPath, packagesPath, fileSystemScheme, fileSystemRoots);
     }
+    // TODO(jonahwilliams): The output file must already exist, but this seems
+    // unnecessary.
+    if (outputFilePath != null && !fs.isFileSync(outputFilePath)) {
+      fs.file(outputFilePath).createSync(recursive: true);
+    }
     final List<String> command = <String>[
       engineDartPath,
       frontendServer,
@@ -281,6 +286,7 @@ class KernelCompiler {
       sdkRoot,
       '--strong',
       '--target=$targetModel',
+      if (enableAsserts) '--enable-asserts',
       if (trackWidgetCreation) '--track-widget-creation',
       if (!linkPlatformKernelIn) '--no-link-platform',
       if (aot) ...<String>[
@@ -421,6 +427,7 @@ class _RejectRequest extends _CompilationRequest {
 class ResidentCompiler {
   ResidentCompiler(
     this._sdkRoot, {
+    bool enableAsserts = false,
     bool trackWidgetCreation = false,
     String packagesPath,
     List<String> fileSystemRoots,
@@ -431,6 +438,7 @@ class ResidentCompiler {
     bool unsafePackageSerialization,
     List<String> experimentalFlags,
   }) : assert(_sdkRoot != null),
+       _enableAsserts = enableAsserts,
        _trackWidgetCreation = trackWidgetCreation,
        _packagesPath = packagesPath,
        _fileSystemRoots = fileSystemRoots,
@@ -447,6 +455,7 @@ class ResidentCompiler {
     }
   }
 
+  final bool _enableAsserts;
   final bool _trackWidgetCreation;
   final String _packagesPath;
   final TargetModel _targetModel;
@@ -520,7 +529,6 @@ class ResidentCompiler {
     printTrace('<- recompile $mainUri$inputKey');
     for (Uri fileUri in request.invalidatedFiles) {
       _server.stdin.writeln(_mapFileUri(fileUri.toString(), packageUriMapper));
-      printTrace('<- ${_mapFileUri(fileUri.toString(), packageUriMapper)}');
     }
     _server.stdin.writeln(inputKey);
     printTrace('<- $inputKey');
@@ -572,6 +580,7 @@ class ResidentCompiler {
         '--packages',
         _packagesPath,
       ],
+      if (_enableAsserts) '--enable-asserts',
       if (_trackWidgetCreation) '--track-widget-creation',
       if (_fileSystemRoots != null)
         for (String root in _fileSystemRoots) ...<String>[

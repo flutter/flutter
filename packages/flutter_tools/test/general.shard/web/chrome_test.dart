@@ -37,7 +37,7 @@ void main() {
       return 1234;
     });
     when(platform.environment).thenReturn(<String, String>{
-      kChromeEnvironment: 'example_chrome'
+      kChromeEnvironment: 'example_chrome',
     });
     final Directory mockDirectory = MockDirectory();
     when(fs.systemTempDirectory).thenReturn(mockDirectory);
@@ -55,13 +55,13 @@ void main() {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
-      'example_url'
+      'example_url',
     ])).thenAnswer((Invocation invocation) async {
       return FakeProcess(
         exitCode: Completer<int>().future,
         stdout: const Stream<List<int>>.empty(),
         stderr: Stream<List<int>>.fromIterable(<List<int>>[
-          utf8.encode('\n\nDevTools listening\n\n')
+          utf8.encode('\n\nDevTools listening\n\n'),
         ]),
       );
     });

@@ -86,6 +86,7 @@ FlutterPlatform installHook({
   int port = 0,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
+  bool enableAsserts = false,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   bool buildTestAssets = false,
@@ -94,7 +95,7 @@ FlutterPlatform installHook({
   Uri projectRootDirectory,
   FlutterProject flutterProject,
   String icudtlPath,
-  PlatformPluginRegistration platformPluginRegistration
+  PlatformPluginRegistration platformPluginRegistration,
 }) {
   assert(enableObservatory || (!startPaused && observatoryPort == null));
 
@@ -102,9 +103,9 @@ FlutterPlatform installHook({
   platformPluginRegistration ??= (FlutterPlatform platform) {
     hack.registerPlatformPlugin(
       <Runtime>[Runtime.vm],
-        () {
+      () {
         return platform;
-      }
+      },
     );
   };
   final FlutterPlatform platform = FlutterPlatform(
@@ -119,6 +120,7 @@ FlutterPlatform installHook({
     port: port,
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
+    enableAsserts: enableAsserts,
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
     buildTestAssets: buildTestAssets,
@@ -258,6 +260,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.port,
     this.precompiledDillPath,
     this.precompiledDillFiles,
+    this.enableAsserts,
     this.trackWidgetCreation,
     this.updateGoldens,
     this.buildTestAssets,
@@ -277,6 +280,7 @@ class FlutterPlatform extends PlatformPlugin {
   final int port;
   final String precompiledDillPath;
   final Map<String, String> precompiledDillFiles;
+  final bool enableAsserts;
   final bool trackWidgetCreation;
   final bool updateGoldens;
   final bool buildTestAssets;
@@ -417,7 +421,8 @@ class FlutterPlatform extends PlatformPlugin {
         await server.close(force: true);
       });
       final Completer<WebSocket> webSocket = Completer<WebSocket>();
-      server.listen((HttpRequest request) {
+      server.listen(
+        (HttpRequest request) {
           if (!webSocket.isCompleted) {
             webSocket.complete(WebSocketTransformer.upgrade(request));
           }
@@ -450,7 +455,7 @@ class FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(trackWidgetCreation, flutterProject);
+        compiler ??= TestCompiler(enableAsserts, trackWidgetCreation, flutterProject);
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {

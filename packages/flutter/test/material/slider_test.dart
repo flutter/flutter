@@ -27,19 +27,19 @@ class LoggingThumbShape extends SliderComponentShape {
 
   @override
   void paint(
-      PaintingContext context,
-      Offset thumbCenter, {
-      Animation<double> activationAnimation,
-      Animation<double> enableAnimation,
-      bool isEnabled,
-      bool isDiscrete,
-      bool onActiveTrack,
-      TextPainter labelPainter,
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-    }) {
+    PaintingContext context,
+    Offset thumbCenter, {
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isEnabled,
+    bool isDiscrete,
+    bool onActiveTrack,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+  }) {
     log.add(thumbCenter);
     final Paint thumbPaint = Paint()..color = Colors.red;
     context.canvas.drawCircle(thumbCenter, 5.0, thumbPaint);
@@ -54,15 +54,15 @@ class TallSliderTickMarkShape extends SliderTickMarkShape {
 
   @override
   void paint(
-      PaintingContext context,
-      Offset offset, {
-      Offset thumbCenter,
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      Animation<double> enableAnimation,
-      bool isEnabled,
-      TextDirection textDirection,
-    }) {
+    PaintingContext context,
+    Offset offset, {
+    Offset thumbCenter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    Animation<double> enableAnimation,
+    bool isEnabled,
+    TextDirection textDirection,
+  }) {
     final Paint paint = Paint()..color = Colors.red;
     context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, 10.0, 20.0), paint);
   }
@@ -582,7 +582,7 @@ void main() {
         overlayColor: Color(0xff000010),
         thumbColor: Color(0xff000011),
         valueIndicatorColor: Color(0xff000012),
-      )
+      ),
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
     double value = 0.45;
@@ -1548,8 +1548,7 @@ void main() {
     expect(renderObject.size.height, 200);
   });
 
-  testWidgets(
-      'Slider implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const Slider(

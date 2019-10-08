@@ -645,7 +645,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   }
 }
 
-class _RenderSlider extends RenderBox {
+class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   _RenderSlider({
     @required double value,
     int divisions,
@@ -917,6 +917,13 @@ class _RenderSlider extends RenderBox {
     // bidi algorithm might line up the glyphs differently which can result in
     // different ligatures, different shapes, etc. So we always markNeedsLayout.
     markNeedsLayout();
+  }
+
+  @override
+  void systemFontsDidChange() {
+    super.systemFontsDidChange();
+    _labelPainter.markNeedsLayout();
+    _updateLabelPainter();
   }
 
   @override

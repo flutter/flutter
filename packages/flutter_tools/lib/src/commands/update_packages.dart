@@ -1150,7 +1150,7 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
     printStatus('WARNING: the following packages use hard-coded version constraints:');
     final Set<String> allTransitive = <String>{
       for (PubspecDependency dependency in dependencies)
-        dependency.name
+        dependency.name,
     };
     for (String package in _kManuallyPinnedDependencies.keys) {
       // Don't add pinned dependency if it is not in the set of all transitive dependencies.
