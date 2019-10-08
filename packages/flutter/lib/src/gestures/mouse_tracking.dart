@@ -134,7 +134,7 @@ class MouseTracker extends ChangeNotifier {
     <MouseTrackerAnnotation, _TrackedAnnotation>{};
 
   final MouseCursorManager _cursorManager = MouseCursorManager(
-    channel: SystemChannels.mouseCursor,
+    delegate: MouseCursorManagerDefaultDelegate(SystemChannels.mouseCursor),
   );
 
   /// Track an annotation so that if the mouse enters it, we send it events.
@@ -199,7 +199,7 @@ class MouseTracker extends ChangeNotifier {
     }
     if (event is PointerRemovedEvent) {
       _removeMouseEvent(deviceId, event);
-      _cursorManager.onDeviceDisconnected(event.device);
+      _cursorManager.clearDeviceRecord(event.device);
       // If the mouse was removed, then we need to schedule one more check to
       // exit any annotations that were active.
       sendMouseNotifications(<int>{deviceId});
@@ -329,7 +329,7 @@ class MouseTracker extends ChangeNotifier {
           }
         }
         cursorForDevices[deviceId] = firstCursor ?? MouseCursors.basic;
-        _cursorManager.onChangeCursor(cursorForDevices);
+        _cursorManager.setCursors(cursorForDevices);
       }
     } finally {
       _pendingRemovals.clear();

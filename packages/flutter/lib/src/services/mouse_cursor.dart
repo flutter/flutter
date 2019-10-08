@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'platform_channel.dart';
 
 // We ignore this warning because mouse cursor has a lot of enum-like constants,
@@ -95,16 +97,49 @@ class _DeviceCursorState {
 }
 
 /// TODOC
+abstract class MouseCursorManagerDelegate {
+  // This class is only used for implementation.
+  MouseCursorManagerDelegate._();
+
+  // Handles when [MouseCursorManager] requests to set cursors of certain devices.
+  // The returning future resolves true if and only if the entire request is
+  // successful.
+  /// TODOC
+  Future<bool> setCursors(Map<int, int> cursorForDevices);
+}
+
+/// TODOC
+class MouseCursorManagerDefaultDelegate implements MouseCursorManagerDelegate {
+  /// TODOC
+  MouseCursorManagerDefaultDelegate(this.channel);
+
+  /// TODOC
+  final MethodChannel channel;
+
+  @override
+  Future<bool> setCursors(Map<int, int> cursorForDevices) {
+    assert(cursorForDevices.isNotEmpty);
+    assert(!cursorForDevices.values.any((int cursor) {
+      return cursor == MouseCursors.releaseControl ||
+             cursor == MouseCursors.fallThrough;
+    }));
+    return channel.invokeMethod<bool>('setCursors', cursorForDevices);
+  }
+}
+
+/// TODOC
 class MouseCursorManager {
   /// Create a [MouseCursorManager] by providing necessary information.
   ///
   /// The `channel` is the method channel that can talk to the platform.
   /// Typically [SystemChannels.mouseCursor].
   MouseCursorManager({
-    MethodChannel channel,
-  }) : _channel = channel;
+    @required MouseCursorManagerDelegate delegate,
+  }) : assert(delegate != null),
+       _delegate = delegate;
 
-  final MethodChannel _channel;
+  final MouseCursorManagerDelegate _delegate;
+
   // A map from devices to their cursor states.
   final Map<int, _DeviceCursorState> _deviceStates = <int, _DeviceCursorState>{};
 
@@ -115,7 +150,7 @@ class MouseCursorManager {
   ///
   /// Calling this method with the same cursor configuration is cheap, because
   /// [MouseCursorManager] keeps track of the current cursor of each device.
-  Future<void> onChangeCursor(Map<int, int> cursorForDevices) async {
+  Future<void> setCursors(Map<int, int> cursorForDevices) async {
     // Create a state if absent, then find the devices that need changing.
     final Iterable<MapEntry<int, int>> filteredEntries = cursorForDevices.entries.where(
       (MapEntry<int, int> entry) {
@@ -129,23 +164,14 @@ class MouseCursorManager {
     if (filteredEntries.isEmpty) {
       return true;
     }
-    return _requestSetCursors(Map<int, int>.fromEntries(filteredEntries));
+    return _delegate.setCursors(Map<int, int>.fromEntries(filteredEntries));
   }
 
   /// Called when a device is disconnected.
   ///
   /// It only frees the memory of the internal record. Nothing needs to be sent
   /// to the platform, since the pointer should be gone.
-  void onDeviceDisconnected(int device) {
+  void clearDeviceRecord(int device) {
     _deviceStates.remove(device);
-  }
-
-  Future<bool> _requestSetCursors(Map<int, int> cursorForDevices) {
-    assert(cursorForDevices.isNotEmpty);
-    assert(!cursorForDevices.values.any((int cursor) {
-      return cursor == MouseCursors.releaseControl ||
-             cursor == MouseCursors.fallThrough;
-    }));
-    return _channel.invokeMethod<bool>('setCursors', cursorForDevices);
   }
 }
