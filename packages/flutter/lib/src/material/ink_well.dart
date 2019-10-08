@@ -748,6 +748,16 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     }
   }
 
+  Action _generateAction() {
+    return CallbackAction(
+      ActivateAction.key,
+      onInvoke: (FocusNode node, Intent intent) {
+        _startSplash(context: node.context);
+        _handleTap(node.context);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(widget.debugCheckContext(context));
@@ -757,16 +767,11 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
     return Actions(
+      // Analyzer doesn't like this code for some reason. Some sort of a
+      // combination of inline conditionals and LocalKey.
+      // ignore: prefer_const_literals_to_create_immutables
       actions: <LocalKey, ActionFactory>{
-        ActivateAction.key: () {
-          return CallbackAction(
-            ActivateAction.key,
-            onInvoke: (FocusNode node, Intent intent) {
-              _startSplash(context: node.context);
-              _handleTap(node.context);
-            },
-          );
-        },
+        if (enabled) ActivateAction.key: _generateAction,
       },
       child: Focus(
         focusNode: widget.focusNode,
