@@ -137,13 +137,13 @@ class ChannelBuffers {
     }
     final bool didOverflow = queue.push(_StoredMessage(data, callback));
     if (didOverflow) {
-      // TODO(aaclarke): Update this message to include instructions on how to resize
+      // TODO(gaaclarke): Update this message to include instructions on how to resize
       // the buffer once that is available to users and print in all engine builds
       // after we verify that dropping messages isn't part of normal execution.
-      _printDebug('Overflow on channel: $channel.  '
-                  'Messages on this channel are being discarded in FIFO fashion.  '
+      _printDebug('Overflow on channel: $channel. '
+                  'Messages on this channel are being discarded in FIFO fashion. '
                   'The engine may not be running or you need to adjust '
-                  'the buffer size if of the channel.');
+                  'the buffer size of the channel.');
     }
     return didOverflow;
   }
