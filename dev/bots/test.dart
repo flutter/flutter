@@ -720,7 +720,6 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
 
   print(allTests.join('\n'));
   print('${allTests.length} tests total');
-  return;
 
   // Maximum number of tests to run in a single `flutter test`. We found that
   // large batches can get flaky, possibly because we reuse a single instance
