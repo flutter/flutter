@@ -1,4 +1,4 @@
-Signature: 58f6bc26658e5537ce72f5052fdddfd6
+Signature: f95ed97a92394e56753cc31dd4c9a4ef
 
 UNUSED LICENSES:
 
@@ -1711,6 +1711,7 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/pathkit/ready.js
 FILE: ../../../third_party/skia/modules/skparagraph/include/DartTypes.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/FontCollection.h
+FILE: ../../../third_party/skia/modules/skparagraph/include/Metrics.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/Paragraph.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/ParagraphBuilder.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/ParagraphCache.h
