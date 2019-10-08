@@ -34,6 +34,8 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
 
+// mocks.dart already defines MockDeviceLogReader which extends DeviceLogReader
+class EmptyMockDeviceLogReader extends Mock implements DeviceLogReader {}
 class MockIOSApp extends Mock implements IOSApp {}
 class MockApplicationPackage extends Mock implements ApplicationPackage {}
 class MockArtifacts extends Mock implements Artifacts {}
@@ -83,8 +85,8 @@ void main() {
         final IOSDevice device = IOSDevice('123');
         final MockApplicationPackage applicationPackage1 = MockApplicationPackage();
         final MockApplicationPackage applicationPackage2 = MockApplicationPackage();
-        final MockDeviceLogReader mockDeviceLogReader1 = MockDeviceLogReader();
-        final MockDeviceLogReader mockDeviceLogReader2 = MockDeviceLogReader();
+        final EmptyMockDeviceLogReader mockDeviceLogReader1 = EmptyMockDeviceLogReader();
+        final EmptyMockDeviceLogReader mockDeviceLogReader2 = EmptyMockDeviceLogReader();
         final MockDevicePortForwarder mockDevicePortForwarder = MockDevicePortForwarder();
         device.setLogReader(applicationPackage1, mockDeviceLogReader1);
         device.setLogReader(applicationPackage2, mockDeviceLogReader2);
@@ -93,6 +95,8 @@ void main() {
         verify(mockDeviceLogReader1.dispose());
         verify(mockDeviceLogReader2.dispose());
         verify(mockDevicePortForwarder.dispose());
+      }, overrides: <Type, Generator>{
+        Platform: () => macPlatform,
       });
     });
 
