@@ -1,0 +1,42 @@
+# For more information on how to add additional suppressions here go to
+# https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer#suppressions
+
+# The Dart VM has incorrectly annotated false positives that we don't care
+# about.
+leak:dart::*
+
+# Objective-C class definitions are not leaks.
+leak:class_createInstance
+
+# SkSurfaces from Embedder backing stores may not be collected on engine
+# shutdown.
+# https://github.com/flutter/flutter/issues/42172
+leak:MakeSkSurfaceFromBackingStore
+
+# dispatch_once blocks don't cleanup their contents.
+leak:_dispatch_once_callout
+
+# Message loops in TLS slots may not be collected.
+# https://github.com/flutter/flutter/issues/42174
+leak:fml::MessageLoop::EnsureInitializedForCurrentThread
+
+# CFRunLoopSource in MessageLoopDarwin not being collected
+# https://github.com/flutter/flutter/issues/42175
+leak:wrap_dispatch_source_set_event_handler
+
+
+# Dispatched platform message that are not handled due to isolate death are
+# leaked.
+# https://github.com/flutter/flutter/issues/42176
+leak:flutter::PlatformViewEmbedder::HandlePlatformMessage
+
+# Service ID platform message is leaked in case the isolate dies before the
+# message is received by the the same.
+# https://github.com/flutter/flutter/issues/42178
+leak:flutter::Engine::Run(flutter::RunConfiguration)
+
+# Font families on are leaked when launching the shell.
+# https://github.com/flutter/flutter/issues/42179
+leak:txt::FontCollection::CreateMinikinFontFamily
+leak:CGFontCreateFontsWithURL
+leak:txt::GetDefaultFontFamily

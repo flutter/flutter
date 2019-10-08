@@ -72,7 +72,7 @@ class LayerTree {
   }
 
  private:
-  SkISize frame_size_;  // Physical pixels.
+  SkISize frame_size_ = SkISize::MakeEmpty();  // Physical pixels.
   std::shared_ptr<Layer> root_layer_;
   fml::TimePoint build_start_;
   fml::TimePoint build_finish_;
