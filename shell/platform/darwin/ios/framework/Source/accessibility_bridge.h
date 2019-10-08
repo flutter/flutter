@@ -32,7 +32,7 @@ class AccessibilityBridge;
 /**
  * A node in the iOS semantics tree.
  */
-@interface SemanticsObject : NSObject
+@interface SemanticsObject : UIAccessibilityElement
 
 /**
  * The globally unique identifier for this node.
@@ -126,7 +126,7 @@ class AccessibilityBridge;
  * * `SemanticsObject` for the other type of semantics objects.
  * * `FlutterSemanticsObject` for default implementation of `SemanticsObject`.
  */
-@interface FlutterPlatformViewSemanticsContainer : NSObject
+@interface FlutterPlatformViewSemanticsContainer : UIAccessibilityElement
 
 /**
  * The position inside an accessibility container.
