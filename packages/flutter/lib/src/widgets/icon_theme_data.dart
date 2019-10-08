@@ -72,7 +72,6 @@ class IconThemeData extends Diagnosticable {
   ///
   /// * [CupertinoIconThemeData.resolve] an implementation that resolves
   ///   [CupertinoIconThemeData.color] before returning.
-  @protected
   IconThemeData resolve(BuildContext context) => this;
 
   /// Whether all the properties of this object are non-null.
