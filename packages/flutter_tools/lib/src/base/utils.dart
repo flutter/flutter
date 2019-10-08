@@ -307,9 +307,6 @@ class Poller {
 Future<List<T>> waitGroup<T>(Iterable<Future<T>> futures) {
   return Future.wait<T>(futures.where((Future<T> future) => future != null));
 }
-/// The terminal width used by the [wrapText] function if there is no terminal
-/// attached to [io.Stdio], --wrap is on, and --wrap-columns was not specified.
-const int kDefaultTerminalColumns = 100;
 
 /// Smallest column that will be used for text wrapping. If the requested column
 /// width is smaller than this, then this is what will be used.

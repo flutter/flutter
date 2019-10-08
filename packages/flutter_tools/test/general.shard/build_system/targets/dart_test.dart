@@ -128,6 +128,7 @@ flutter_tools:lib/''');
       targetModel: anyNamed('targetModel'),
       linkPlatformKernelIn: anyNamed('linkPlatformKernelIn'),
       aot: anyNamed('aot'),
+      enableAsserts: anyNamed('enableAsserts'),
       trackWidgetCreation: anyNamed('trackWidgetCreation'),
       extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
       packagesPath: anyNamed('packagesPath'),
@@ -152,6 +153,7 @@ flutter_tools:lib/''');
     when(mockKernelCompiler.compile(
       sdkRoot: anyNamed('sdkRoot'),
       aot: anyNamed('aot'),
+      enableAsserts: anyNamed('enableAsserts'),
       trackWidgetCreation: false,
       targetModel: anyNamed('targetModel'),
       targetProductVm: anyNamed('targetProductVm'),
@@ -176,6 +178,7 @@ flutter_tools:lib/''');
     when(mockKernelCompiler.compile(
       sdkRoot: anyNamed('sdkRoot'),
       aot: anyNamed('aot'),
+      enableAsserts: anyNamed('enableAsserts'),
       trackWidgetCreation: true,
       targetModel: anyNamed('targetModel'),
       targetProductVm: anyNamed('targetProductVm'),
@@ -388,6 +391,7 @@ class FakeKernelCompiler implements KernelCompiler {
     TargetModel targetModel = TargetModel.flutter,
     bool linkPlatformKernelIn = false,
     bool aot = false,
+    bool enableAsserts = false,
     bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     String packagesPath,
