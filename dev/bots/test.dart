@@ -686,7 +686,7 @@ class EvalResult {
 }
 
 /// The number of Cirrus jobs that run web tests in parallel.
-/// 
+///
 /// WARNING: if you change this number, also change .cirrus.yml
 /// and make sure it runs _all_ shards.
 const int _kWebShardCount = 3;
