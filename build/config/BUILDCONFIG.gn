@@ -283,6 +283,8 @@ if (!is_clang && (is_asan || is_lsan || is_tsan || is_msan)) {
   is_clang = true
 }
 
+use_flutter_cxx = is_clang && (is_linux || is_android)
+
 if (is_msan && !is_linux) {
   assert(false, "Memory sanitizer is only available on Linux.")
 }
@@ -529,7 +531,7 @@ if (custom_toolchain != "") {
 #
 # Variables
 #   no_default_deps: If true, no standard dependencies will be added.
-if (is_android || (is_linux && current_cpu != "x86")) {
+if (use_flutter_cxx) {
   foreach(_target_type,
           [
             "executable",
