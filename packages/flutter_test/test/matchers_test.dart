@@ -553,6 +553,7 @@ void main() {
          isReadOnly: true,
          hasEnabledState: true,
          isFocused: true,
+         isFocusable: true,
          isEnabled: true,
          isInMutuallyExclusiveGroup: true,
          isHeader: true,
