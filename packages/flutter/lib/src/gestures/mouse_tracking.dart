@@ -281,7 +281,7 @@ class MouseTracker extends ChangeNotifier {
       }();
 
     for (final _MouseState mouseState in targetDevices) {
-      final bool isConnected = mouseState != _disconnectedMouseState;
+      final bool thisDeviceIsConnected = mouseState != _disconnectedMouseState;
       final PointerEvent mostRecentEvent = mouseState.mostRecentEvent;
 
       // Order is important for mouse event callbacks. The `findAnnotations`
@@ -292,7 +292,7 @@ class MouseTracker extends ChangeNotifier {
 
       // The annotations that contains this device in the coming frame in
       // visual order.
-      final Set<MouseTrackerAnnotation> nextAnnotations = isConnected
+      final Set<MouseTrackerAnnotation> nextAnnotations = thisDeviceIsConnected
         ? annotationFinder(mouseState.mostRecentEvent.position).toSet()
         : const <MouseTrackerAnnotation>{};
 
@@ -332,7 +332,7 @@ class MouseTracker extends ChangeNotifier {
       }
 
       mouseState.lastAnnotations = nextAnnotations;
-      if (!isConnected)
+      if (!thisDeviceIsConnected)
         _disconnectedMouseState = null;
     }
   }
