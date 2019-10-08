@@ -245,7 +245,7 @@ void main() {
       // we timeout on a port
       testUsingContext(' .forward() will kill iproxy processes before invoking a second', () async {
         const String deviceId = '123';
-        const int devicePort = 456; 
+        const int devicePort = 456;
         final IOSDevice device = IOSDevice(deviceId);
         final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(device);
         bool firstRun = true;
