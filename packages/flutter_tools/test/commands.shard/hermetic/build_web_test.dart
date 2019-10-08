@@ -144,14 +144,6 @@ class UrlLauncherPlugin {}
     when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
       return BuildResult(success: true);
     });
-//    when(pub.pubGet(
-//      context: PubContext.pubGet,
-//      directory: anyNamed('directory'),
-//      offline: true,
-//      skipPubspecYamlCheck: true,
-//      checkLastModified: false,
-//    ));
-
     await runner.run(<String>['build', 'web']);
 
     expect(fs.file(fs.path.join('lib', 'generated_plugin_registrant.dart')).existsSync(), true);
