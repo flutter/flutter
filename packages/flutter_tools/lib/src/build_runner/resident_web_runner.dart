@@ -4,11 +4,13 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
-import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../application_package.dart';
+import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -162,6 +164,28 @@ class ResidentWebRunner extends ResidentRunner {
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
     printStatus('Launching ${getDisplayPath(target)} on ${device.name} in $modeName mode...');
+
+    return asyncGuard(() => _run(
+      connectionInfoCompleter: connectionInfoCompleter,
+      appStartedCompleter: appStartedCompleter,
+      route: route,
+      package: package,
+    ), onError: (Object error, StackTrace stackTrace) {
+      if (error is WebSocketException) {
+        printError(error.toString(), stackTrace: stackTrace);
+        throwToolExit('Failed to connect to web application.');
+      }
+      // If this is not a known error, rethrow.
+      throw error;
+    });
+  }
+
+  Future<int> _run({
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<void> appStartedCompleter,
+    String route,
+    ApplicationPackage package
+  }) async {
     Status buildStatus;
     try {
       buildStatus = logger.startProgress('Building application for the web...', timeout: null);
@@ -192,7 +216,7 @@ class ResidentWebRunner extends ResidentRunner {
       );
       if (supportsServiceProtocol) {
         _connectionResult = await _webFs.connect(debuggingOptions);
-        unawaited(_connectionResult.debugConnection.onDone.whenComplete(exit));
+        unawaited(_connectionResult.debugConnection.onDone.then(exit));
       }
     } catch (err) {
       throwToolExit('Failed to build application for the web.');
