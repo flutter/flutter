@@ -25,6 +25,16 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
 
+/// Matcher for functions that throw [IOSDeviceLockdownError].
+Matcher throwsDeviceLockdownError({ int lockdownCode }) {
+  Matcher matcher = isInstanceOf<IOSDeviceLockdownError>();
+  if (lockdownCode != null) {
+    matcher = allOf(
+        matcher, (IOSDeviceLockdownError e) => e.lockdownCode.code == lockdownCode);
+  }
+  return throwsA(matcher);
+}
+
 class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
 class MockProcessManager extends Mock implements ProcessManager {}
@@ -113,7 +123,7 @@ void main() {
       Artifacts: () => mockArtifacts,
     });
 
-    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when user has not yet trusted the host', () async {
+    testUsingContext('getInfoForDevice throws IOSDeviceLockdownError with LockdownReturnCode.pairingDialogResponsePending when user has not yet trusted the host', () async {
       when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
       when(mockProcessManager.run(
         <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
@@ -127,7 +137,7 @@ void main() {
         );
         return Future<ProcessResult>.value(result);
       });
-      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsDeviceLockdownError(lockdownCode : LockdownReturnCode.pairingDialogResponsePending.code));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
@@ -155,7 +165,7 @@ void main() {
       Artifacts: () => mockArtifacts,
     });
 
-    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when host trust is revoked', () async {
+    testUsingContext('getInfoForDevice throws IOSDeviceLockdownError with LockdownReturnCode.invalidHostId when host trust is revoked', () async {
       when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
       when(mockProcessManager.run(
         <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
@@ -169,7 +179,28 @@ void main() {
         );
         return Future<ProcessResult>.value(result);
       });
-      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsDeviceLockdownError(lockdownCode : LockdownReturnCode.invalidHostId.code));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Cache: () => mockCache,
+      Artifacts: () => mockArtifacts,
+    });
+
+    testUsingContext('getInfoForDevice throws IOSDeviceLockdownError with LockdownReturnCode.plistError when the response plist had error', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
+      when(mockProcessManager.run(
+        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+      )).thenAnswer((_) {
+        final ProcessResult result = ProcessResult(
+          1,
+          255,
+          '',
+          'ERROR: Could not connect to lockdownd, error code -${LockdownReturnCode.plistError.code}',
+        );
+        return Future<ProcessResult>.value(result);
+      });
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsDeviceLockdownError(lockdownCode : LockdownReturnCode.plistError.code));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,

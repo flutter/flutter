@@ -186,9 +186,12 @@ class IOSDevice extends Device {
       } on IOSDeviceNotFoundError catch (error) {
         // Unable to find device with given udid. Possibly a network device.
         printTrace('Error getting attached iOS device: $error');
-      } on IOSDeviceNotTrustedError catch (error) {
+      } on IOSDeviceLockdownError catch (error) {
         printTrace('Error getting attached iOS device information: $error');
-        UsageEvent('device', 'ios-trust-failure').send();
+        if (LockdownReturnCode.pairingDialogResponsePending.code == error.lockdownCode.code ||
+            LockdownReturnCode.invalidHostId.code == error.lockdownCode.code) {
+          UsageEvent('device', 'ios-trust-failure').send();
+        }
       }
     }
     return devices;
