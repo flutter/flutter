@@ -1802,12 +1802,12 @@ void main() {
                     return DropdownButton<String>(
                       isExpanded: true,
                       elevation: 2,
-                      // Stack with a positioned widget is use to override the
-                      // hard coded 16px margin in the dropdown code, so that
-                      // this hint aligns "properly" with the menu.
                       value: null,
                       hint: LayoutBuilder(
                         builder: (BuildContext context, BoxConstraints constraints) {
+                          // Stack with a positioned widget is used to override the
+                          // hard coded 16px margin in the dropdown code, so that
+                          // this hint aligns "properly" with the menu.
                           return Stack(
                             alignment: Alignment.topCenter,
                             overflow: Overflow.visible,

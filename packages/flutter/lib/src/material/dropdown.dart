@@ -376,7 +376,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   }
 
   // Returns the vertical extent of the menu and the initial scrollOffset
-  // for the ListView that contains he menu items. The vertical center of the
+  // for the ListView that contains the menu items. The vertical center of the
   // selected item is aligned with the button's vertical center, as far as
   // that's possible given availableHeight.
   _MenuLimits getMenuLimits(Rect buttonRect, double availableHeight) {
@@ -457,8 +457,11 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     assert(debugCheckHasDirectionality(context));
 
     // Computing the initialScrollOffset now, before the items have been laid
-    // out, only works if the item heights are fixed. This works out when
-    // the item heights are defined by kMinInteractiveDimension.
+    // out. This only works if the item heights are effectively fixed, i.e. either
+    // DropdownButton.itemHeight is specified or DropdownButton.itemHeight is null
+    // and all of the items' intrinsic heights are less than kMinInteractveDimension.
+    // Otherwise the initialScrollOffset is just an rough approximation based on
+    // treating the items as if their heights were all equal to kMinInteractveDimension.
     if (route.scrollController == null) {
       final _MenuLimits menuLimits = route.getMenuLimits(buttonRect, constraints.maxHeight);
       route.scrollController = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
@@ -886,7 +889,14 @@ class DropdownButton<T> extends StatefulWidget {
   /// If null, then the menu item heights will vary according to each menu item's
   /// intrinsic height.
   ///
-  /// The default value is [kMinInteractiveDimension].
+  /// The default value is [kMinInteractiveDimension], which is also the minimum
+  /// height for menu items.
+  ///
+  /// If this value is null and there isn't enough vertical room for the menu,
+  /// then the menu's initial scroll offset may not align the selected item with
+  /// the dropdown button. That's because, in this case, the initial scroll
+  /// offset is computed as if all of the menu item heights were
+  /// [kMinInteractiveDimension].
   final double itemHeight;
 
   @override
