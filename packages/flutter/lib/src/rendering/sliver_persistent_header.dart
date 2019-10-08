@@ -17,6 +17,28 @@ import 'sliver.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
 
+// TODO(Piinks): Doc
+///
+typedef RefreshCallback = Future<void> Function();
+
+// TODO(Piinks): Doc
+///
+class OverScrollHeaderStretchConfiguration {
+  /// Doc
+  OverScrollHeaderStretchConfiguration({
+    this.triggerRefreshOffset = 100.0,
+    this.onTriggerRefresh,
+  }) : assert(triggerRefreshOffset != null);
+
+  // TODO(Piinks): Doc
+  ///
+  final double triggerRefreshOffset;
+
+  // TODO(Piinks): Doc
+  ///
+  final RefreshCallback onTriggerRefresh;
+}
+
 /// A base class for slivers that have a [RenderBox] child which scrolls
 /// normally, except that when it hits the leading edge (typically the top) of
 /// the viewport, it shrinks to a minimum size ([minExtent]).
@@ -38,8 +60,12 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   /// viewport.
   ///
   /// This is an abstract class; this constructor only initializes the [child].
-  RenderSliverPersistentHeader({ RenderBox child }) {
+  RenderSliverPersistentHeader({
+    RenderBox child,
+    OverScrollHeaderStretchConfiguration stretchConfiguration,
+  }) {
     this.child = child;
+    _stretchConfiguration = stretchConfiguration;
   }
 
   /// The biggest that this render object can become, in the main axis direction.
@@ -75,6 +101,16 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   bool _needsUpdateChild = true;
   double _lastShrinkOffset = 0.0;
   bool _lastOverlapsContent = false;
+
+  // TODO(Piinks): Doc
+  ///
+  OverScrollHeaderStretchConfiguration get stretchConfiguration => _stretchConfiguration;
+  OverScrollHeaderStretchConfiguration _stretchConfiguration;
+  set stretchConfiguration(OverScrollHeaderStretchConfiguration value) {
+    if (value == _stretchConfiguration)
+      return;
+    _stretchConfiguration = value;
+  }
 
   /// Update the child render object if necessary.
   ///
@@ -138,10 +174,27 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
         'The specified minExtent was: ${minExtent.toStringAsFixed(1)}\n'
       );
     }());
+    double stretchOffset = 0.0;
+    if (stretchConfiguration != null && childMainAxisPosition(child) == 0.0)
+      stretchOffset += constraints.overlap.abs();
+
     child?.layout(
-      constraints.asBoxConstraints(maxExtent: math.max(minExtent, maxExtent - shrinkOffset)),
+      constraints.asBoxConstraints(
+        minExtent: math.max(minExtent, maxExtent - shrinkOffset),
+        maxExtent: math.max(minExtent, maxExtent - shrinkOffset) + stretchOffset,
+      ),
       parentUsesSize: true,
     );
+
+    print(stretchConfiguration);
+    print(stretchOffset);
+    print(stretchConfiguration.onTriggerRefresh);
+
+    if (stretchConfiguration != null &&
+      stretchOffset == stretchConfiguration.triggerRefreshOffset &&
+      stretchConfiguration.onTriggerRefresh != null) {
+      stretchConfiguration.onTriggerRefresh();
+    }
   }
 
   /// Returns the distance from the leading _visible_ edge of the sliver to the
@@ -200,6 +253,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
           offset += Offset(childMainAxisPosition(child), 0.0);
           break;
       }
+      //print('paint: $child and $offset');
       context.paintChild(child, offset);
     }
   }
@@ -283,7 +337,8 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
   /// stays pinned there.
   RenderSliverPinnedPersistentHeader({
     RenderBox child,
-  }) : super(child: child);
+    OverScrollHeaderStretchConfiguration stretchConfiguration,
+  }) : super(child: child, stretchConfiguration: stretchConfiguration);
 
   @override
   void performLayout() {
@@ -292,12 +347,15 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
     excludeFromSemanticsScrolling = overlapsContent || (constraints.scrollOffset > maxExtent - minExtent);
     layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: overlapsContent);
     final double layoutExtent = (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent);
+    final double stretchOffset = stretchConfiguration != null ?
+      constraints.overlap.abs() :
+      0.0;
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: constraints.overlap,
       paintExtent: math.min(childExtent, constraints.remainingPaintExtent),
       layoutExtent: layoutExtent,
-      maxPaintExtent: maxExtent,
+      maxPaintExtent: maxExtent + stretchOffset,
       maxScrollObstructionExtent: minExtent,
       cacheExtent: layoutExtent > 0.0 ? -constraints.cacheOrigin + layoutExtent : layoutExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
@@ -355,8 +413,9 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   RenderSliverFloatingPersistentHeader({
     RenderBox child,
     FloatingHeaderSnapConfiguration snapConfiguration,
+    OverScrollHeaderStretchConfiguration stretchConfiguration,
   }) : _snapConfiguration = snapConfiguration,
-       super(child: child);
+       super(child: child, stretchConfiguration: stretchConfiguration);
 
   AnimationController _controller;
   Animation<double> _animation;
@@ -406,6 +465,10 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// This is used by [performLayout].
   @protected
   double updateGeometry() {
+    double stretchOffset = 0.0;
+    if (stretchConfiguration != null && _childPosition == 0.0) {
+      stretchOffset += constraints.overlap.abs();
+    }
     final double maxExtent = this.maxExtent;
     final double paintExtent = maxExtent - _effectiveScrollOffset;
     final double layoutExtent = maxExtent - constraints.scrollOffset;
@@ -414,10 +477,10 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       paintOrigin: math.min(constraints.overlap, 0.0),
       paintExtent: paintExtent.clamp(0.0, constraints.remainingPaintExtent),
       layoutExtent: layoutExtent.clamp(0.0, constraints.remainingPaintExtent),
-      maxPaintExtent: maxExtent,
+      maxPaintExtent: maxExtent + stretchOffset,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
-    return math.min(0.0, paintExtent - childExtent);
+    return stretchOffset > 0 ? 0.0 : math.min(0.0, paintExtent - childExtent);
   }
 
   /// If the header isn't already fully exposed, then scroll it into view.
@@ -458,11 +521,13 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
   @override
   void performLayout() {
+    //print(constraints);
     final double maxExtent = this.maxExtent;
     if (_lastActualScrollOffset != null && // We've laid out at least once to get an initial position, and either
         ((constraints.scrollOffset < _lastActualScrollOffset) || // we are scrolling back, so should reveal, or
          (_effectiveScrollOffset < maxExtent))) { // some part of it is visible, so should shrink or reveal as appropriate.
       double delta = _lastActualScrollOffset - constraints.scrollOffset;
+
       final bool allowFloatingExpansion = constraints.userScrollDirection == ScrollDirection.forward;
       if (allowFloatingExpansion) {
         if (_effectiveScrollOffset > maxExtent) // We're scrolled off-screen, but should reveal, so
@@ -477,7 +542,12 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     }
     excludeFromSemanticsScrolling = _effectiveScrollOffset <= constraints.scrollOffset;
     final bool overlapsContent = _effectiveScrollOffset < constraints.scrollOffset;
-    layoutChild(_effectiveScrollOffset, maxExtent, overlapsContent: overlapsContent);
+
+    layoutChild(
+      _effectiveScrollOffset,
+      maxExtent,
+      overlapsContent: overlapsContent,
+    );
     _childPosition = updateGeometry();
     _lastActualScrollOffset = constraints.scrollOffset;
   }
@@ -510,22 +580,35 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
   RenderSliverFloatingPinnedPersistentHeader({
     RenderBox child,
     FloatingHeaderSnapConfiguration snapConfiguration,
-  }) : super(child: child, snapConfiguration: snapConfiguration);
+    OverScrollHeaderStretchConfiguration stretchConfiguration,
+  }) : super(
+    child: child,
+    snapConfiguration: snapConfiguration,
+    stretchConfiguration: stretchConfiguration,
+  );
 
   @override
   double updateGeometry() {
     final double minExtent = this.minExtent;
-    final double minAllowedExtent = constraints.remainingPaintExtent > minExtent ? minExtent : constraints.remainingPaintExtent;
+    final double minAllowedExtent = constraints.remainingPaintExtent > minExtent ?
+      minExtent :
+      constraints.remainingPaintExtent;
     final double maxExtent = this.maxExtent;
     final double paintExtent = maxExtent - _effectiveScrollOffset;
-    final double clampedPaintExtent = paintExtent.clamp(minAllowedExtent, constraints.remainingPaintExtent);
+    final double clampedPaintExtent = paintExtent.clamp(
+      minAllowedExtent,
+      constraints.remainingPaintExtent,
+    );
     final double layoutExtent = maxExtent - constraints.scrollOffset;
+    final double stretchOffset = stretchConfiguration != null ?
+      constraints.overlap.abs() :
+      0.0;
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: math.min(constraints.overlap, 0.0),
       paintExtent: clampedPaintExtent,
       layoutExtent: layoutExtent.clamp(0.0, clampedPaintExtent),
-      maxPaintExtent: maxExtent,
+      maxPaintExtent: maxExtent + stretchOffset,
       maxScrollObstructionExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );

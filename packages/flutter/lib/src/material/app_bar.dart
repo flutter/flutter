@@ -690,6 +690,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.floating,
     @required this.pinned,
     @required this.snapConfiguration,
+    @required this.stretchConfiguration,
     @required this.shape,
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
@@ -727,6 +728,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   final FloatingHeaderSnapConfiguration snapConfiguration;
+
+  @override
+  final OverScrollHeaderStretchConfiguration stretchConfiguration;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
@@ -800,7 +804,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || topPadding != oldDelegate.topPadding
         || pinned != oldDelegate.pinned
         || floating != oldDelegate.floating
-        || snapConfiguration != oldDelegate.snapConfiguration;
+        || snapConfiguration != oldDelegate.snapConfiguration
+        || stretchConfiguration != oldDelegate.stretchConfiguration;
   }
 
   @override
@@ -914,6 +919,9 @@ class SliverAppBar extends StatefulWidget {
     this.floating = false,
     this.pinned = false,
     this.snap = false,
+    this.stretch = false,
+    this.triggerStretchRefreshOffset = 100.0,
+    this.onTriggerStretchRefresh,
     this.shape,
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
@@ -922,6 +930,7 @@ class SliverAppBar extends StatefulWidget {
        assert(floating != null),
        assert(pinned != null),
        assert(snap != null),
+       assert(stretch != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        super(key: key);
 
@@ -1132,10 +1141,9 @@ class SliverAppBar extends StatefulWidget {
   ///    behavior of the app bar in combination with [floating].
   final bool pinned;
 
-  /// The material's shape as well its shadow.
+  /// The material's shape as well as its shadow.
   ///
-  /// A shadow is only displayed if the [elevation] is greater than
-  /// zero.
+  /// A shadow is only displayed if the [elevation] is greater than zero.
   final ShapeBorder shape;
 
   /// If [snap] and [floating] are true then the floating app bar will "snap"
@@ -1165,6 +1173,18 @@ class SliverAppBar extends StatefulWidget {
   ///    behavior of the app bar in combination with [pinned] and [floating].
   final bool snap;
 
+  // TODO(Piinks): Doc
+  ///
+  final bool stretch;
+
+  // TODO(Piinks): Doc
+  ///
+  final double triggerStretchRefreshOffset;
+
+  // TODO(Piinks): Doc
+  ///
+  final RefreshCallback onTriggerStretchRefresh;
+
   @override
   _SliverAppBarState createState() => _SliverAppBarState();
 }
@@ -1173,6 +1193,7 @@ class SliverAppBar extends StatefulWidget {
 // by the floating appbar snap animation (via FloatingHeaderSnapConfiguration).
 class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMixin {
   FloatingHeaderSnapConfiguration _snapConfiguration;
+  OverScrollHeaderStretchConfiguration _stretchConfiguration;
 
   void _updateSnapConfiguration() {
     if (widget.snap && widget.floating) {
@@ -1186,10 +1207,22 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     }
   }
 
+  void _updateStretchConfiguration() {
+    if (widget.stretch) {
+      _stretchConfiguration = OverScrollHeaderStretchConfiguration(
+        triggerRefreshOffset: widget.triggerStretchRefreshOffset,
+        onTriggerRefresh: widget.onTriggerStretchRefresh,
+      );
+    } else {
+      _stretchConfiguration = null;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _updateSnapConfiguration();
+    _updateStretchConfiguration();
   }
 
   @override
@@ -1197,6 +1230,8 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     super.didUpdateWidget(oldWidget);
     if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating)
       _updateSnapConfiguration();
+    if (widget.stretch != oldWidget.stretch)
+      _updateStretchConfiguration();
   }
 
   @override
@@ -1236,6 +1271,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           pinned: widget.pinned,
           shape: widget.shape,
           snapConfiguration: _snapConfiguration,
+          stretchConfiguration: _stretchConfiguration,
         ),
       ),
     );

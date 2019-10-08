@@ -68,6 +68,10 @@ abstract class SliverPersistentHeaderDelegate {
   /// Defaults to null.
   FloatingHeaderSnapConfiguration get snapConfiguration => null;
 
+  // TODO(Piinks): Doc
+  ///
+  OverScrollHeaderStretchConfiguration get stretchConfiguration => null;
+
   /// Whether this delegate is meaningfully different from the old delegate.
   ///
   /// If this returns false, then the header might not be rebuilt, even though
@@ -294,11 +298,16 @@ class _SliverPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectW
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
-    return _RenderSliverPinnedPersistentHeaderForWidgets();
+    return _RenderSliverPinnedPersistentHeaderForWidgets(stretchConfiguration: delegate.stretchConfiguration);
   }
 }
 
-class _RenderSliverPinnedPersistentHeaderForWidgets extends RenderSliverPinnedPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin { }
+class _RenderSliverPinnedPersistentHeaderForWidgets extends RenderSliverPinnedPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin {
+  _RenderSliverPinnedPersistentHeaderForWidgets({
+    RenderBox child,
+    OverScrollHeaderStretchConfiguration stretchConfiguration,
+  }) : super(child: child, stretchConfiguration: stretchConfiguration);
+}
 
 class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjectWidget {
   const _SliverFloatingPersistentHeader({
@@ -308,12 +317,16 @@ class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjec
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
-    return _RenderSliverFloatingPersistentHeaderForWidgets(snapConfiguration: delegate.snapConfiguration);
+    return _RenderSliverFloatingPersistentHeaderForWidgets(
+      snapConfiguration: delegate.snapConfiguration,
+      stretchConfiguration: delegate.stretchConfiguration,
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderSliverFloatingPersistentHeaderForWidgets renderObject) {
     renderObject.snapConfiguration = delegate.snapConfiguration;
+    renderObject.stretchConfiguration = delegate.stretchConfiguration;
   }
 }
 
@@ -321,7 +334,8 @@ class _RenderSliverFloatingPinnedPersistentHeaderForWidgets extends RenderSliver
   _RenderSliverFloatingPinnedPersistentHeaderForWidgets({
     RenderBox child,
     FloatingHeaderSnapConfiguration snapConfiguration,
-  }) : super(child: child, snapConfiguration: snapConfiguration);
+    OverScrollHeaderStretchConfiguration stretchConfiguration,
+  }) : super(child: child, snapConfiguration: snapConfiguration, stretchConfiguration: stretchConfiguration);
 }
 
 class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectWidget {
@@ -332,12 +346,16 @@ class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRende
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
-    return _RenderSliverFloatingPinnedPersistentHeaderForWidgets(snapConfiguration: delegate.snapConfiguration);
+    return _RenderSliverFloatingPinnedPersistentHeaderForWidgets(
+      snapConfiguration: delegate.snapConfiguration,
+      stretchConfiguration: delegate.stretchConfiguration,
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderSliverFloatingPinnedPersistentHeaderForWidgets renderObject) {
     renderObject.snapConfiguration = delegate.snapConfiguration;
+    renderObject.stretchConfiguration = delegate.stretchConfiguration;
   }
 }
 
@@ -345,5 +363,10 @@ class _RenderSliverFloatingPersistentHeaderForWidgets extends RenderSliverFloati
   _RenderSliverFloatingPersistentHeaderForWidgets({
     RenderBox child,
     FloatingHeaderSnapConfiguration snapConfiguration,
-  }) : super(child: child, snapConfiguration: snapConfiguration);
+    OverScrollHeaderStretchConfiguration stretchConfiguration,
+  }) : super(
+    child: child,
+    snapConfiguration: snapConfiguration,
+    stretchConfiguration: stretchConfiguration,
+  );
 }
