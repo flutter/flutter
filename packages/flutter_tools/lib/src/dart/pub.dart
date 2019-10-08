@@ -86,9 +86,11 @@ abstract class Pub {
   /// Create a default [Pub] instance.
   const factory Pub() = _DefaultPub;
 
+  /// Runs `pub get`.
+  ///
   /// [context] provides extra information to package server requests to
   /// understand usage.
-  Future<void> pubGet({
+  Future<void> get({
     @required PubContext context,
     String directory,
     bool skipIfAbsent = false,
@@ -98,9 +100,11 @@ abstract class Pub {
     bool skipPubspecYamlCheck = false,
   });
 
-  /// Runs pub in 'batch' mode, forwarding complete lines written by pub to its
-  /// stdout/stderr streams to the corresponding stream of this process, optionally
-  /// applying filtering. The pub process will not receive anything on its stdin stream.
+  /// Runs pub in 'batch' mode.
+  ///
+  /// forwarding complete lines written by pub to its stdout/stderr streams to
+  /// the corresponding stream of this process, optionally applying filtering.
+  /// The pub process will not receive anything on its stdin stream.
   ///
   /// The `--trace` argument is passed to `pub` (by mutating the provided
   /// `arguments` list) when `showTraceForErrors` is true, and when `showTraceForErrors`
@@ -108,7 +112,7 @@ abstract class Pub {
   ///
   /// [context] provides extra information to package server requests to
   /// understand usage.
-  Future<void> pub(
+  Future<void> batch(
     List<String> arguments, {
       @required PubContext context,
       String directory,
@@ -119,10 +123,11 @@ abstract class Pub {
     });
 
 
-  /// Runs pub in 'interactive' mode, directly piping the stdin stream of this
-  /// process to that of pub, and the stdout/stderr stream of pub to the corresponding
-  /// streams of this process.
-  Future<void> pubInteractively(
+  /// Runs pub in 'interactive' mode.
+  ///
+  /// directly piping the stdin stream of this process to that of pub, and the
+  /// stdout/stderr stream of pub to the corresponding streams of this process.
+  Future<void> interactively(
     List<String> arguments, {
       String directory,
     });
@@ -132,7 +137,7 @@ class _DefaultPub implements Pub {
   const _DefaultPub();
 
   @override
-  Future<void> pubGet({
+  Future<void> get({
     @required PubContext context,
     String directory,
     bool skipIfAbsent = false,
@@ -166,7 +171,7 @@ class _DefaultPub implements Pub {
         if (offline) '--offline',
       ];
       try {
-        await pub(
+        await batch(
           args,
           context: context,
           directory: directory,
@@ -194,7 +199,7 @@ class _DefaultPub implements Pub {
 
 
   @override
-  Future<void> pub(
+  Future<void> batch(
     List<String> arguments, {
       @required PubContext context,
       String directory,
@@ -259,7 +264,7 @@ class _DefaultPub implements Pub {
   }
 
   @override
-  Future<void> pubInteractively(
+  Future<void> interactively(
     List<String> arguments, {
       String directory,
   }) async {
