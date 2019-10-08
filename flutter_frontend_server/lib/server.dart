@@ -11,7 +11,7 @@ import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:vm/incremental_compiler.dart';
-import 'package:vm/frontend_server.dart' as frontend
+import 'package:frontend_server/frontend_server.dart' as frontend
     show
         FrontendCompiler,
         CompilerInterface,

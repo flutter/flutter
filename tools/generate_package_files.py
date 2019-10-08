@@ -10,7 +10,7 @@ import os
 import shutil
 
 ALL_PACKAGES = {
-  'frontend_server': [],
+  'flutter_frontend_server': [],
 }
 
 SRC_DIR = os.getcwd()

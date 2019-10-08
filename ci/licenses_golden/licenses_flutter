@@ -84,6 +84,8 @@ FILE: ../../../flutter/flow/texture.cc
 FILE: ../../../flutter/flow/texture.h
 FILE: ../../../flutter/flow/view_holder.cc
 FILE: ../../../flutter/flow/view_holder.h
+FILE: ../../../flutter/flutter_frontend_server/bin/starter.dart
+FILE: ../../../flutter/flutter_frontend_server/lib/server.dart
 FILE: ../../../flutter/fml/base32.cc
 FILE: ../../../flutter/fml/base32.h
 FILE: ../../../flutter/fml/base32_unittest.cc
