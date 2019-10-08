@@ -614,20 +614,20 @@ class CupertinoColors {
 /// a [CupertinoDynamicColor].
 ///
 /// ```dart
-/// Builder(builder: (BuildContext context) {
+/// final Widget example1 = Builder(builder: (BuildContext context) {
 ///   final Color resolvedColor = CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context);
 ///   return CupertinoNavigationBar(
 ///     // CupertinoNavigationBar does not know how to resolve colors used in
 ///     // a Border class.
 ///     border: Border(bottom: BorderSide(color: resolvedColor)),
 ///   );
-/// })
+/// });
 ///
-/// Builder(builder: (BuildContext context) {
+/// final Widget example2 = Builder(builder: (BuildContext context) {
 ///   final Color resolvedColor = CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context);
 ///   // Container is not a Cupertino widget.
 ///   return Container(color: resolvedColor);
-/// })
+/// });
 /// ```
 /// {@end-tool}
 ///
