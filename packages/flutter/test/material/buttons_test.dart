@@ -1244,6 +1244,7 @@ void main() {
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
     });
+
     testWidgets('RawMaterialButton with disabled feedback', (WidgetTester tester) async {
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
