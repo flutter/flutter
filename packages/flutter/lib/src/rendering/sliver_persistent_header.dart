@@ -19,24 +19,24 @@ import 'viewport_offset.dart';
 
 // TODO(Piinks): Doc
 ///
-typedef RefreshCallback = Future<void> Function();
+typedef StretchCallback = Future<void> Function();
 
 // TODO(Piinks): Doc
 ///
 class OverScrollHeaderStretchConfiguration {
   /// Doc
   OverScrollHeaderStretchConfiguration({
-    this.triggerRefreshOffset = 100.0,
-    this.onTriggerRefresh,
-  }) : assert(triggerRefreshOffset != null);
+    this.stretchTriggerOffset = 100.0,
+    this.onStretchTrigger,
+  }) : assert(stretchTriggerOffset != null);
 
   // TODO(Piinks): Doc
   ///
-  final double triggerRefreshOffset;
+  final double stretchTriggerOffset;
 
   // TODO(Piinks): Doc
   ///
-  final RefreshCallback onTriggerRefresh;
+  final StretchCallback onStretchTrigger;
 }
 
 /// A base class for slivers that have a [RenderBox] child which scrolls
@@ -189,11 +189,11 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
 
     if (
       stretchConfiguration != null &&
-      stretchConfiguration.onTriggerRefresh != null &&
-      stretchOffset >= stretchConfiguration.triggerRefreshOffset &&
-      _lastStretchOffset <= stretchConfiguration.triggerRefreshOffset
+      stretchConfiguration.onStretchTrigger != null &&
+      stretchOffset >= stretchConfiguration.stretchTriggerOffset &&
+      _lastStretchOffset <= stretchConfiguration.stretchTriggerOffset
     ) {
-      stretchConfiguration.onTriggerRefresh();
+      stretchConfiguration.onStretchTrigger();
     }
     _lastStretchOffset = stretchOffset;
   }

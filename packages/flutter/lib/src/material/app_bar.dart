@@ -920,8 +920,8 @@ class SliverAppBar extends StatefulWidget {
     this.pinned = false,
     this.snap = false,
     this.stretch = false,
-    this.triggerStretchRefreshOffset = 100.0,
-    this.onTriggerStretchRefresh,
+    this.stretchTriggerOffset = 100.0,
+    this.onStretchTrigger,
     this.shape,
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
@@ -1179,11 +1179,11 @@ class SliverAppBar extends StatefulWidget {
 
   // TODO(Piinks): Doc
   ///
-  final double triggerStretchRefreshOffset;
+  final double stretchTriggerOffset;
 
   // TODO(Piinks): Doc
   ///
-  final RefreshCallback onTriggerStretchRefresh;
+  final StretchCallback onStretchTrigger;
 
   @override
   _SliverAppBarState createState() => _SliverAppBarState();
@@ -1210,8 +1210,8 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   void _updateStretchConfiguration() {
     if (widget.stretch) {
       _stretchConfiguration = OverScrollHeaderStretchConfiguration(
-        triggerRefreshOffset: widget.triggerStretchRefreshOffset,
-        onTriggerRefresh: widget.onTriggerStretchRefresh,
+        stretchTriggerOffset: widget.stretchTriggerOffset,
+        onStretchTrigger: widget.onStretchTrigger,
       );
     } else {
       _stretchConfiguration = null;
