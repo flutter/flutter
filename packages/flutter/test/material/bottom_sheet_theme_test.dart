@@ -59,6 +59,7 @@ void main() {
       home: Scaffold(
         body: BottomSheet(
           onClosing: () {},
+          enableDrag: false,
           builder: (BuildContext context) {
             return Container();
           },
@@ -86,6 +87,7 @@ void main() {
       home: Scaffold(
         body: BottomSheet(
           onClosing: () {},
+          enableDrag: false,
           builder: (BuildContext context) {
             return Container();
           },
@@ -122,6 +124,7 @@ void main() {
           shape: shape,
           clipBehavior: Clip.hardEdge,
           onClosing: () {},
+          enableDrag: false,
           builder: (BuildContext context) {
             return Container();
           },
