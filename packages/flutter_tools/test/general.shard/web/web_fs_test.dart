@@ -5,6 +5,7 @@
 import 'package:build_daemon/client.dart';
 import 'package:build_daemon/data/build_status.dart';
 import 'package:built_collection/built_collection.dart';
+import 'package:dwds/asset_handler.dart';
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -61,7 +62,6 @@ void main() {
     )).thenAnswer((Invocation invocation) async {
       final String workingDirectory = invocation.namedArguments[#workingDirectory];
       fs.file(fs.path.join(workingDirectory, '.packages')).createSync(recursive: true);
-      fs.file(fs.path.join(workingDirectory, 'pubspec.yaml')).createSync();
       return 0;
     });
     when(mockBuildDaemonClient.buildResults).thenAnswer((Invocation _) {
@@ -81,6 +81,9 @@ void main() {
     when(mockBuildDaemonCreator.assetServerPort(any)).thenReturn(4321);
     testbed = Testbed(
       setup: () {
+        fs.file(fs.path.join('packages', 'flutter_tools', 'pubspec.yaml'))
+          ..createSync(recursive: true)
+          ..setLastModifiedSync(DateTime(1991, 08, 23));
         // Create an empty .packages file so we can read it when we check for
         // plugins on WebFs.start()
         fs.file('.packages').createSync();
@@ -96,9 +99,7 @@ void main() {
           return mockHttpMultiServer;
         },
         DwdsFactory: () => ({
-          @required int applicationPort,
-          @required int assetServerPort,
-          @required String applicationTarget,
+          @required AssetHandler assetHandler,
           @required Stream<BuildResult> buildResults,
           @required ConnectionProvider chromeConnection,
           String hostname,

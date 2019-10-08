@@ -55,12 +55,16 @@ class WebEntrypointTarget extends Target {
 
     String contents;
     if (hasPlugins) {
+      final String generatedPath = environment.projectDir
+        .childDirectory('lib')
+        .childFile('generated_plugin_registrant.dart')
+        .absolute.uri.toString();
       contents = '''
 import 'dart:ui' as ui;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-import 'generated_plugin_registrant.dart';
+import '$generatedPath';
 import "$import" as entrypoint;
 
 Future<void> main() async {

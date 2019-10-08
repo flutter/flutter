@@ -234,6 +234,7 @@ class TestCommand extends FastFlutterCommand {
       disableServiceAuthCodes: disableServiceAuthCodes,
       ipv6: argResults['ipv6'],
       machine: machine,
+      enableAsserts: true,
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,
