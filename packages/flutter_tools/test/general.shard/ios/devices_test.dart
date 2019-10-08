@@ -35,12 +35,14 @@ import '../../src/context.dart';
 import '../../src/mocks.dart';
 
 class MockIOSApp extends Mock implements IOSApp {}
+class MockApplicationPackage extends Mock implements ApplicationPackage {}
 class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
 class MockDirectory extends Mock implements Directory {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockIOSDeploy extends Mock implements IOSDeploy {}
+class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
 class MockMDnsObservatoryDiscoveryResult extends Mock implements MDnsObservatoryDiscoveryResult {}
 class MockXcode extends Mock implements Xcode {}
@@ -75,6 +77,24 @@ void main() {
         Platform: () => platform,
       });
     }
+
+    group('dispose()', () {
+      testUsingContext('Calling dispose() kills all log readers & port forwarders', () async {
+        IOSDevice device = IOSDevice('123');
+        final MockApplicationPackage applicationPackage1 = MockApplicationPackage();
+        final MockApplicationPackage applicationPackage2 = MockApplicationPackage();
+        final MockDeviceLogReader mockDeviceLogReader1 = MockDeviceLogReader();
+        final MockDeviceLogReader mockDeviceLogReader2 = MockDeviceLogReader();
+        final MockDevicePortForwarder mockDevicePortForwarder = MockDevicePortForwarder();
+        device.setLogReader(applicationPackage1, mockDeviceLogReader1);
+        device.setLogReader(applicationPackage2, mockDeviceLogReader2);
+        device.portForwarder = mockDevicePortForwarder;
+        device.dispose();
+        verify(mockDeviceLogReader1.dispose());
+        verify(mockDeviceLogReader2.dispose());
+        verify(mockDevicePortForwarder.dispose());
+      });
+    });
 
     group('startApp', () {
       MockIOSApp mockApp;
