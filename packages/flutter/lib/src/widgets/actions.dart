@@ -349,20 +349,6 @@ class Actions extends InheritedWidget {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    if (identical(this, other)) {
-      return true;
-    }
-    return !updateShouldNotify(other);
-  }
-
-  @override
-  int get hashCode => hashValues(dispatcher, actions);
-
-  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ActionDispatcher>('dispatcher', dispatcher));

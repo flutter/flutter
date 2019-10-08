@@ -91,7 +91,7 @@ class KeySet<T extends KeyboardKey> extends Diagnosticable {
       return false;
     }
     final KeySet<T> typedOther = other;
-    return _keys.length == typedOther._keys.length && _keys.containsAll(typedOther._keys);
+    return setEquals<T>(_keys, typedOther._keys);
   }
 
   @override
@@ -333,9 +333,7 @@ class _ShortcutsState extends State<Shortcuts> {
         _internalManager ??= ShortcutManager();
       }
     }
-    if (widget.shortcuts != oldWidget.shortcuts) {
-      manager.shortcuts = widget.shortcuts;
-    }
+    manager.shortcuts = widget.shortcuts;
   }
 
   bool _handleOnKey(FocusNode node, RawKeyEvent event) {
@@ -348,7 +346,7 @@ class _ShortcutsState extends State<Shortcuts> {
   @override
   Widget build(BuildContext context) {
     return Focus(
-      debugLabel: describeIdentity(widget),
+      debugLabel: '$Shortcuts',
       canRequestFocus: false,
       onKey: _handleOnKey,
       child: _ShortcutsMarker(
