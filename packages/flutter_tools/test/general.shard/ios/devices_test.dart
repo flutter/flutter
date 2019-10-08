@@ -92,7 +92,6 @@ void main() {
         final MockProcess mockProcess2 = MockProcess();
         logReader1.idevicesyslogProcess = mockProcess1;
         logReader2.idevicesyslogProcess = mockProcess2;
-        //final MockDevicePortForwarder mockDevicePortForwarder = MockDevicePortForwarder();
         final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(device);
         final MockForwardedPort mockForwardedPort = MockForwardedPort();
         portForwarder.addForwardedPorts(<ForwardedPort>[mockForwardedPort]);
