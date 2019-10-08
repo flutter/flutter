@@ -270,7 +270,7 @@ void main() {
     );
     expect(lightMaterial.elevation, lightElevation);
     expect(lightMaterial.color, lightBackgroundColor);
-  
+
     // Simulate the user changing to dark theme
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
     await tester.pumpAndSettle();
