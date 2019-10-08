@@ -117,14 +117,15 @@ class CupertinoTextThemeData extends Diagnosticable {
   /// Create a [CupertinoTextThemeData].
   ///
   /// The [primaryColor] is used to derive TextStyle defaults of other attributes
-  /// such as [textStyle] and [actionTextStyle] etc. The default value of [primaryColor]
-  /// is [CupertinoColors.activeBlue].
+  /// such as [navActionTextStyle] and [actionTextStyle], it must not be null when
+  /// either [navActionTextStyle] or [actionTextStyle] is null. Defaults to
+  /// [CupertinoColors.systemBlue].
   ///
   /// Other [TextStyle] parameters default to default iOS text styles when
   /// unspecified.
   const CupertinoTextThemeData({
     Color primaryColor = CupertinoColors.systemBlue,
-    @deprecated Brightness brightness, //ignore: avoid_unused_constructor_parameters
+    @deprecated Brightness brightness, //ignore: avoid_unused_constructor_parameters , the parameter is deprecated.
     TextStyle textStyle,
     TextStyle actionTextStyle,
     TextStyle tabLabelTextStyle,
@@ -199,7 +200,10 @@ class CupertinoTextThemeData extends Diagnosticable {
   TextStyle get dateTimePickerTextStyle => _dateTimePickerTextStyle ?? _defaults.dateTimePickerTextStyle;
 
   /// Returns a copy of the current [CupertinoTextThemeData] with all the colors
-  /// resolved against the given [BuildContext].
+  /// resolved against the given [BuildContext]. Throws an exception if any of the
+  /// [InheritedWidget]s required to resolve this [CupertinoTextThemeData] is not
+  /// found in [context], unless [nullOk] is set to true, in which case [CupertinoDynamicColor]s
+  /// that fail to resolve will be used as-is.
   CupertinoTextThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
     return CupertinoTextThemeData._raw(
       _defaults?.resolveFrom(context, nullOk),
@@ -219,8 +223,7 @@ class CupertinoTextThemeData extends Diagnosticable {
   /// specified overrides.
   CupertinoTextThemeData copyWith({
     Color primaryColor,
-    @deprecated
-    Brightness brightness,
+    @deprecated Brightness brightness,
     TextStyle textStyle,
     TextStyle actionTextStyle,
     TextStyle tabLabelTextStyle,

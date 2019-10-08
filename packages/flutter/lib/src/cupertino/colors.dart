@@ -537,7 +537,7 @@ class CupertinoColors {
 /// A [Color] subclass that represents a family of colors, and the currect effective
 /// color in the color family.
 ///
-/// When used as a regular color, `CupertinoDynamicColor` is equivalent to the
+/// When used as a regular color, [CupertinoDynamicColor] is equivalent to the
 /// effective color (i.e. [CupertinoDynamicColor.value] will come from the effective
 /// color), which is determined by the [BuildContext] it is last resolved against.
 /// If it has never been resolved, the light, normal contrast, base elevation variant
@@ -548,7 +548,7 @@ class CupertinoColors {
 ///
 /// ### Using a [CupertinoDynamicColor] in a Cupertino widget
 ///
-/// When a Cupertino widget is provided with a `CupertinoDynamicColor`, either
+/// When a Cupertino widget is provided with a [CupertinoDynamicColor], either
 /// directly in its constructor, or from an [InheritedWidget] it depends on (for example,
 /// [DefaultTextStyle]), the widget will automatically resolve the color using
 /// [CupertinoDynamicColor.resolve] against its own [BuildContext], on a best-effort
@@ -599,7 +599,7 @@ class CupertinoColors {
 /// ```
 /// {@end-tool}
 ///
-/// ### Manually Resolving a [CupertinoColor]
+/// ### Manually Resolving a [CupertinoDynamicColor]
 ///
 /// When used outside of a Cupertino component, or wrapped in an object opaque to
 /// the receiving Cupertino component, you may have to manually resolve the color
@@ -622,9 +622,7 @@ class CupertinoColors {
 ///     border: Border(bottom: BorderSide(color: resolvedColor)),
 ///   );
 /// })
-/// ```
 ///
-/// ```dart
 /// Builder(builder: (BuildContext context) {
 ///   final Color resolvedColor = CupertinoDynamicColor.resolve(CupertinoColors.systemBlue, context);
 ///   // Container is not a Cupertino widget.
@@ -636,8 +634,7 @@ class CupertinoColors {
 /// See also:
 ///
 /// * [CupertinoUserInterfaceLevel], an [InheritedWidget] that may affect color
-/// resolution of a `CupertinoDynamicColor`.
-///
+///   resolution of a [CupertinoDynamicColor].
 /// * [CupertinoTheme.of], a static method that retrieves the ambient [CupertinoThemeData],
 ///   and then resolves [CupertinoDynamicColor]s used in the retrieved data.
 @immutable
@@ -740,7 +737,7 @@ class CupertinoDynamicColor extends Color {
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// normal contrast, and base interface elevation.
   ///
-  /// In other words, this color will be the effective color of the `CupertinoDynamicColor`
+  /// In other words, this color will be the effective color of the [CupertinoDynamicColor]
   /// after it is resolved against a [BuildContext] that:
   /// - has a [CupertinoTheme] whose [brightness] is [PlatformBrightness.light],
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.light].
@@ -751,7 +748,7 @@ class CupertinoDynamicColor extends Color {
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// normal contrast, and base interface elevation.
   ///
-  /// In other words, this color will be the effective color of the `CupertinoDynamicColor`
+  /// In other words, this color will be the effective color of the [CupertinoDynamicColor]
   /// after it is resolved against a [BuildContext] that:
   /// - has a [CupertinoTheme] whose [brightness] is [PlatformBrightness.dark],
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.dark].
@@ -762,7 +759,7 @@ class CupertinoDynamicColor extends Color {
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// high contrast, and base interface elevation.
   ///
-  /// In other words, this color will be the effective color of the `CupertinoDynamicColor`
+  /// In other words, this color will be the effective color of the [CupertinoDynamicColor]
   /// after it is resolved against a [BuildContext] that:
   /// - has a [CupertinoTheme] whose [brightness] is [PlatformBrightness.light],
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.light].
@@ -773,7 +770,7 @@ class CupertinoDynamicColor extends Color {
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// high contrast, and base interface elevation.
   ///
-  /// In other words, this color will be the effective color of the `CupertinoDynamicColor`
+  /// In other words, this color will be the effective color of the [CupertinoDynamicColor]
   /// after it is resolved against a [BuildContext] that:
   /// - has a [CupertinoTheme] whose [brightness] is [PlatformBrightness.dark],
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.dark].
@@ -784,7 +781,7 @@ class CupertinoDynamicColor extends Color {
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// normal contrast, and elevated interface elevation.
   ///
-  /// In other words, this color will be the effective color of the `CupertinoDynamicColor`
+  /// In other words, this color will be the effective color of the [CupertinoDynamicColor]
   /// after it is resolved against a [BuildContext] that:
   /// - has a [CupertinoTheme] whose [brightness] is [PlatformBrightness.light],
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.light].
@@ -795,7 +792,7 @@ class CupertinoDynamicColor extends Color {
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// normal contrast, and elevated interface elevation.
   ///
-  /// In other words, this color will be the effective color of the `CupertinoDynamicColor`
+  /// In other words, this color will be the effective color of the [CupertinoDynamicColor]
   /// after it is resolved against a [BuildContext] that:
   /// - has a [CupertinoTheme] whose [brightness] is [PlatformBrightness.dark],
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.dark].
@@ -806,7 +803,7 @@ class CupertinoDynamicColor extends Color {
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// high contrast, and elevated interface elevation.
   ///
-  /// In other words, this color will be the effective color of the `CupertinoDynamicColor`
+  /// In other words, this color will be the effective color of the [CupertinoDynamicColor]
   /// after it is resolved against a [BuildContext] that:
   /// - has a [CupertinoTheme] whose [brightness] is [PlatformBrightness.light],
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.light].
@@ -817,7 +814,7 @@ class CupertinoDynamicColor extends Color {
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// high contrast, and elevated interface elevation.
   ///
-  /// In other words, this color will be the effective color of the `CupertinoDynamicColor`
+  /// In other words, this color will be the effective color of the [CupertinoDynamicColor]
   /// after it is resolved against a [BuildContext] that:
   /// - has a [CupertinoTheme] whose [brightness] is [PlatformBrightness.dark],
   /// or a [MediaQuery] whose [MediaQueryData.platformBrightness] is [PlatformBrightness.dark].
@@ -864,10 +861,10 @@ class CupertinoDynamicColor extends Color {
         || darkHighContrastColor != darkHighContrastElevatedColor;
   }
 
-  /// Resolves this `CupertinoDynamicColor` using the provided [BuildContext].
+  /// Resolves this [CupertinoDynamicColor] using the provided [BuildContext].
   ///
-  /// Calling this method will create a new `CupertinoDynamicColor` that is almost
-  /// identical to this `CupertinoDynamicColor`, except the effective color is
+  /// Calling this method will create a new [CupertinoDynamicColor] that is almost
+  /// identical to this [CupertinoDynamicColor], except the effective color is
   /// changed to adapt to the given [BuildContext].
   ///
   /// For example, if the given [BuildContext] indicates the widgets in the subtree
@@ -876,9 +873,9 @@ class CupertinoDynamicColor extends Color {
   /// with a high accessibility contrast (the surrounding [MediaQuery]'s [MediaQueryData.highContrast]
   /// is `true`), and an elevated interface elevation (the surrounding [CupertinoUserInterfaceLevel]'s
   /// `data` is [CupertinoUserInterfaceLevelData.elevated]), the resolved
-  /// `CupertinoDynamicColor` will be the same as this [CupertinoDynamicColor],
+  /// [CupertinoDynamicColor] will be the same as this [CupertinoDynamicColor],
   /// except its effective color will be the `darkHighContrastElevatedColor` variant
-  /// from the orignal `CupertinoDynamicColor`.
+  /// from the orignal [CupertinoDynamicColor].
   ///
   /// Calling this function may create dependencies on the closest instance of some
   /// [InheritedWidget]s that enclose the given [BuildContext]. E.g., if [darkColor]
