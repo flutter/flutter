@@ -145,19 +145,19 @@ void main() {
     });
   });
   group('ForwardedPort', () {
-    group('killProcess()', () {
-      testUsingContext('returns false if there was no process available as context', () {
+    group('dispose()', () {
+      testUsingContext('does not throw exception if no process is present', () {
         final ForwardedPort forwardedPort = ForwardedPort(123, 456);
-        final bool result = forwardedPort.killProcess();
-        expect(result, isFalse);
+        expect(forwardedPort.context, isNull);
+        forwardedPort.dispose();
       });
 
-      testUsingContext('kills process and returns true if process was available', () {
+      testUsingContext('kills process if process was available', () {
         final MockProcess mockProcess = MockProcess();
         final ForwardedPort forwardedPort = ForwardedPort.withContext(123, 456, mockProcess);
-        final bool result = forwardedPort.killProcess();
+        forwardedPort.dispose();
+        expect(forwardedPort.context, isNotNull);
         verify(mockProcess.kill());
-        expect(result, isTrue);
       });
     });
   });

@@ -34,14 +34,13 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
 
-// mocks.dart already defines MockDeviceLogReader which extends DeviceLogReader
-class EmptyMockDeviceLogReader extends Mock implements DeviceLogReader {}
 class MockIOSApp extends Mock implements IOSApp {}
 class MockApplicationPackage extends Mock implements ApplicationPackage {}
 class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
 class MockDirectory extends Mock implements Directory {}
 class MockFileSystem extends Mock implements FileSystem {}
+class MockForwardedPort extends Mock implements ForwardedPort {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockIOSDeploy extends Mock implements IOSDeploy {}
 class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
@@ -85,16 +84,25 @@ void main() {
         final IOSDevice device = IOSDevice('123');
         final MockApplicationPackage applicationPackage1 = MockApplicationPackage();
         final MockApplicationPackage applicationPackage2 = MockApplicationPackage();
-        final EmptyMockDeviceLogReader mockDeviceLogReader1 = EmptyMockDeviceLogReader();
-        final EmptyMockDeviceLogReader mockDeviceLogReader2 = EmptyMockDeviceLogReader();
-        final MockDevicePortForwarder mockDevicePortForwarder = MockDevicePortForwarder();
-        device.setLogReader(applicationPackage1, mockDeviceLogReader1);
-        device.setLogReader(applicationPackage2, mockDeviceLogReader2);
-        device.portForwarder = mockDevicePortForwarder;
+        when(applicationPackage1.name).thenReturn('flutterApp1');
+        when(applicationPackage2.name).thenReturn('flutterApp2');
+        final IOSDeviceLogReader logReader1 = IOSDeviceLogReader(device, applicationPackage1);
+        final IOSDeviceLogReader logReader2 = IOSDeviceLogReader(device, applicationPackage2);
+        final MockProcess mockProcess1 = MockProcess();
+        final MockProcess mockProcess2 = MockProcess();
+        logReader1.idevicesyslogProcess = mockProcess1;
+        logReader2.idevicesyslogProcess = mockProcess2;
+        //final MockDevicePortForwarder mockDevicePortForwarder = MockDevicePortForwarder();
+        final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(device);
+        final MockForwardedPort mockForwardedPort = MockForwardedPort();
+        portForwarder.addForwardedPorts(<ForwardedPort>[mockForwardedPort]);
+        device.setLogReader(applicationPackage1, logReader1);
+        device.setLogReader(applicationPackage2, logReader2);
+        device.portForwarder = portForwarder;
         device.dispose();
-        verify(mockDeviceLogReader1.dispose());
-        verify(mockDeviceLogReader2.dispose());
-        verify(mockDevicePortForwarder.dispose());
+        verify(mockProcess1.kill());
+        verify(mockProcess2.kill());
+        verify(mockForwardedPort.dispose());
       }, overrides: <Type, Generator>{
         Platform: () => macPlatform,
       });

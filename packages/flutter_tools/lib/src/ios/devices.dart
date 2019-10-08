@@ -416,7 +416,7 @@ class IOSDevice extends Device {
   @override
   DeviceLogReader getLogReader({ ApplicationPackage app }) {
     _logReaders ??= <ApplicationPackage, DeviceLogReader>{};
-    return _logReaders.putIfAbsent(app, () => _IOSDeviceLogReader(this, app));
+    return _logReaders.putIfAbsent(app, () => IOSDeviceLogReader(this, app));
   }
 
   @visibleForTesting
@@ -518,8 +518,9 @@ String decodeSyslog(String line) {
   }
 }
 
-class _IOSDeviceLogReader extends DeviceLogReader {
-  _IOSDeviceLogReader(this.device, ApplicationPackage app) {
+@visibleForTesting
+class IOSDeviceLogReader extends DeviceLogReader {
+  IOSDeviceLogReader(this.device, ApplicationPackage app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
       onCancel: dispose,
@@ -565,6 +566,9 @@ class _IOSDeviceLogReader extends DeviceLogReader {
       _idevicesyslogProcess = process;
     });
   }
+
+  @visibleForTesting
+  set idevicesyslogProcess(Process process) => _idevicesyslogProcess = process;
   Process _idevicesyslogProcess;
 
   // Returns a stateful line handler to properly capture multi-line output.
@@ -614,6 +618,11 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
 
   @override
   List<ForwardedPort> get forwardedPorts => _forwardedPorts;
+
+  @visibleForTesting
+  void addForwardedPorts(List<ForwardedPort> forwardedPorts) {
+    forwardedPorts.forEach(_forwardedPorts.add);
+  }
 
   static const Duration _kiProxyPortForwardTimeout = Duration(seconds: 1);
 
@@ -674,13 +683,13 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     }
 
     printTrace('Unforwarding port $forwardedPort');
-    forwardedPort.killProcess();
+    forwardedPort.dispose();
   }
 
   @override
   Future<void> dispose() async {
     for (ForwardedPort forwardedPort in _forwardedPorts) {
-      forwardedPort.killProcess();
+      forwardedPort.dispose();
     }
   }
 }

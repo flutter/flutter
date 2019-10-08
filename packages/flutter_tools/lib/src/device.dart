@@ -572,16 +572,12 @@ class ForwardedPort {
   String toString() => 'ForwardedPort HOST:$hostPort to DEVICE:$devicePort';
 
   /// Kill subprocess (if present) used in forwarding.
-  bool killProcess() {
+  void dispose() {
     final Process process = context;
 
     if (process != null) {
       process.kill();
-    } else {
-      printError('Forwarded port did not have a valid process');
-      return false;
     }
-    return true;
   }
 }
 
