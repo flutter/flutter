@@ -52,7 +52,7 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
     'make',
     '-C',
     linuxProject.makeFile.parent.path,
-    'BUILD=$buildFlag'
+    'BUILD=$buildFlag',
   ]);
   final Status status = logger.startProgress(
     'Building Linux application...',

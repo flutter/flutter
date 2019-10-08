@@ -306,7 +306,7 @@ void main() {
   }));
 
   test('ResidentRunner uses temp directory when there is no output dill path', () => testbed.run(() {
-    expect(residentRunner.artifactDirectory.path, contains('_fluttter_tool'));
+    expect(residentRunner.artifactDirectory.path, contains('flutter_tool.'));
 
     final ResidentRunner otherRunner = HotRunner(
       <FlutterDevice>[

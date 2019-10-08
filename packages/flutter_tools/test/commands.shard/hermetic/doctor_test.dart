@@ -226,9 +226,9 @@ void main() {
 
       expect(
         verify(mockUsage.sendEvent(
-          'doctorResult.PassingValidator',
-          captureAny,
-          label: anyNamed('label'),
+          'doctor-result',
+          'PassingValidator',
+          label: captureAnyNamed('label'),
         )).captured,
         <dynamic>['installed', 'installed', 'installed'],
       );
@@ -243,25 +243,25 @@ void main() {
 
       expect(
         verify(mockUsage.sendEvent(
-          'doctorResult.PassingValidator',
-          captureAny,
-          label: anyNamed('label'),
+          'doctor-result',
+          'PassingValidator',
+          label: captureAnyNamed('label'),
         )).captured,
         <dynamic>['installed', 'installed'],
       );
       expect(
         verify(mockUsage.sendEvent(
-          'doctorResult.PartialValidatorWithHintsOnly',
-          captureAny,
-          label: anyNamed('label'),
+          'doctor-result',
+          'PartialValidatorWithHintsOnly',
+          label: captureAnyNamed('label'),
         )).captured,
         <dynamic>['partial'],
       );
       expect(
         verify(mockUsage.sendEvent(
-          'doctorResult.PartialValidatorWithErrors',
-          captureAny,
-          label: anyNamed('label'),
+          'doctor-result',
+          'PartialValidatorWithErrors',
+          label: captureAnyNamed('label'),
         )).captured,
         <dynamic>['partial'],
       );
@@ -275,41 +275,41 @@ void main() {
 
       expect(
         verify(mockUsage.sendEvent(
-          'doctorResult.PassingValidator',
-          captureAny,
-          label: anyNamed('label'),
+          'doctor-result',
+          'PassingValidator',
+          label: captureAnyNamed('label'),
         )).captured,
         <dynamic>['installed'],
       );
       expect(
         verify(mockUsage.sendEvent(
-          'doctorResult.MissingValidator',
-          captureAny,
-          label: anyNamed('label'),
+          'doctor-result',
+          'MissingValidator',
+          label: captureAnyNamed('label'),
         )).captured,
         <dynamic>['missing'],
       );
       expect(
         verify(mockUsage.sendEvent(
-          'doctorResult.NotAvailableValidator',
-          captureAny,
-          label: anyNamed('label'),
+          'doctor-result',
+          'NotAvailableValidator',
+          label: captureAnyNamed('label'),
         )).captured,
         <dynamic>['notAvailable'],
       );
       expect(
         verify(mockUsage.sendEvent(
-          'doctorResult.PartialValidatorWithHintsOnly',
-          captureAny,
-          label: anyNamed('label'),
+          'doctor-result',
+          'PartialValidatorWithHintsOnly',
+          label: captureAnyNamed('label'),
         )).captured,
         <dynamic>['partial'],
       );
       expect(
         verify(mockUsage.sendEvent(
-          'doctorResult.PartialValidatorWithErrors',
-          captureAny,
-          label: anyNamed('label'),
+          'doctor-result',
+          'PartialValidatorWithErrors',
+          label: captureAnyNamed('label'),
         )).captured,
         <dynamic>['partial'],
       );
@@ -323,17 +323,17 @@ void main() {
 
       expect(
         verify(mockUsage.sendEvent(
-          'doctorResult.PassingGroupedValidator',
-          captureAny,
-          label: anyNamed('label'),
+          'doctor-result',
+          'PassingGroupedValidator',
+          label: captureAnyNamed('label'),
         )).captured,
         <dynamic>['installed', 'installed', 'installed'],
       );
       expect(
         verify(mockUsage.sendEvent(
-          'doctorResult.MissingGroupedValidator',
-          captureAny,
-          label: anyNamed('label'),
+          'doctor-result',
+          'MissingGroupedValidator',
+          label: captureAnyNamed('label'),
         )).captured,
         <dynamic>['missing'],
       );
