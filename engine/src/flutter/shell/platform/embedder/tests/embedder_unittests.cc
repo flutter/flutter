@@ -2256,5 +2256,122 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
   ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", renderered_scene));
 }
 
+TEST_F(EmbedderTest, VerifyB141980393) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+
+  // The Flutter application is 800 x 600 but rendering on a surface that is 600
+  // x 800 achieved using a root surface transformation.
+  const auto root_surface_transformation =
+      SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
+  const auto flutter_application_rect = SkRect::MakeWH(800, 600);
+  const auto root_surface_rect =
+      root_surface_transformation.mapRect(flutter_application_rect);
+
+  ASSERT_DOUBLE_EQ(root_surface_rect.width(), 600.0);
+  ASSERT_DOUBLE_EQ(root_surface_rect.height(), 800.0);
+
+  // Configure the fixture for the surface transformation.
+  context.SetRootSurfaceTransformation(root_surface_transformation);
+
+  // Configure the Flutter project args for the root surface transformation.
+  builder.SetOpenGLRendererConfig(
+      SkISize::Make(root_surface_rect.width(), root_surface_rect.height()));
+
+  // Use a compositor instead of rendering directly to the surface.
+  builder.SetCompositor();
+
+  builder.SetDartEntrypoint("verify_b141980393");
+
+  fml::AutoResetWaitableEvent latch;
+
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 2u);
+
+        // Layer Root
+        {
+          FlutterLayer layer = {};
+          FlutterBackingStore backing_store = *layers[0]->backing_store;
+          layer.backing_store = &backing_store;
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypeBackingStore;
+
+          // Our root surface has been rotated.
+          layer.size = FlutterSizeMake(600.0, 800.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[0], layer);
+        }
+
+        // Layer 1
+        {
+          FlutterPlatformView platform_view = {};
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 1337;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+
+          // From the Dart side. These dimensions match those specified in Dart
+          // code and are free of root surface transformations.
+          const double unxformed_top_margin = 31.0;
+          const double unxformed_bottom_margin = 37.0;
+          const auto unxformed_platform_view_rect = SkRect::MakeXYWH(
+              0.0,                   // x
+              unxformed_top_margin,  // y (top margin)
+              800,                   // width
+              600 - unxformed_top_margin - unxformed_bottom_margin  // height
+          );
+
+          // The platform views are in the coordinate space of the root surface
+          // with top-left origin. The embedder has specified a transformation
+          // to this surface which it must account for in the coordinates it
+          // receives here.
+          const auto xformed_platform_view_rect =
+              root_surface_transformation.mapRect(unxformed_platform_view_rect);
+
+          // Spell out the value that we are going to be checking below for
+          // clarity.
+          ASSERT_EQ(xformed_platform_view_rect,
+                    SkRect::MakeXYWH(31.0,   // x
+                                     0.0,    // y
+                                     532.0,  // width
+                                     800.0   // height
+                                     ));
+
+          // Verify that the engine is giving us the right size and offset.
+          layer.offset = FlutterPointMake(xformed_platform_view_rect.x(),
+                                          xformed_platform_view_rect.y());
+          layer.size = FlutterSizeMake(xformed_platform_view_rect.width(),
+                                       xformed_platform_view_rect.height());
+
+          ASSERT_EQ(*layers[1], layer);
+        }
+
+        latch.Signal();
+      });
+
+  auto engine = builder.LaunchEngine();
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+
+  // The Flutter application is 800 x 600 rendering on a surface 600 x 800
+  // achieved via a root surface transformation.
+  event.width = flutter_application_rect.width();
+  event.height = flutter_application_rect.height();
+
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter
