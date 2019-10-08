@@ -82,9 +82,19 @@ class _MouseState {
   PointerEvent get mostRecentEvent => _mostRecentEvent;
   set mostRecentEvent(PointerEvent value) {
     assert(value != null);
+    assert(value.device == _mostRecentEvent.device);
     _mostRecentEvent = value;
   }
   PointerEvent _mostRecentEvent;
+
+  int get device => _mostRecentEvent.device;
+
+  @override
+  String toString() {
+    final String describeEvent = '${_mostRecentEvent.runtimeType}(device: ${_mostRecentEvent.device})';
+    final String describeAnnotations = '[list of ${lastAnnotations.length}]';
+    return '${describeIdentity(this)}(event: $describeEvent, annotations: $describeAnnotations)';
+  }
 }
 
 /// Maintains the relationship between mouse devices and
@@ -143,6 +153,24 @@ class MouseTracker extends ChangeNotifier {
   // A device is moved from `_mouseStates` on its disconnecting event, and
   // will be permanantly removed after its exit callback.
   _MouseState _disconnectedMouseState;
+  _MouseState _findMouseState(int device) {
+    assert(device != null);
+    if (device == _disconnectedMouseState?.device)
+      return _disconnectedMouseState;
+    return _mouseStates[device];
+  }
+
+  // Returns the mouse state of a device. If it doesn't exist, create one using
+  // `mostRecentEvent`.
+  //
+  // The returned value is never null.
+  _MouseState _guaranteeMouseState(int device, PointerEvent mostRecentEvent) {
+    final _MouseState result = _findMouseState(device);
+    if (result == null) {
+      _addMouseDevice(device, mostRecentEvent);
+    }
+    return result ?? _mouseStates[device];
+  }
 
   // The collection of annotations that are currently being tracked.
   // It is operated by [attachAnnotation] and [detachAnnotation].
@@ -154,6 +182,8 @@ class MouseTracker extends ChangeNotifier {
     assert(!_mouseStates.containsKey(deviceId));
     assert(_disconnectedMouseState == null);
     _mouseStates[deviceId] = _MouseState(mostRecentEvent: event);
+    // Schedule a check to enter annotations that might contain this pointer.
+    sendMouseNotifications(<int>{deviceId});
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
     }
@@ -166,20 +196,11 @@ class MouseTracker extends ChangeNotifier {
     final _MouseState mouseState = _mouseStates.remove(deviceId);
     _disconnectedMouseState = mouseState;
     mouseState.mostRecentEvent = event;
+    // Schedule a check to exit annotations that used to contain this pointer.
+    sendMouseNotifications(<int>{deviceId});
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
     }
-  }
-
-  // Returns the mouse state of a device. If it doesn't exist, create one using
-  // `mostRecentEvent`.
-  //
-  // The returned value is never null.
-  _MouseState _findMouseState(int device, PointerEvent mostRecentEvent) {
-    return _mouseStates.putIfAbsent(device, () {
-      _addMouseDevice(device, mostRecentEvent);
-      return _mouseStates[device];
-    });
   }
 
   // Handler for events coming from the PointerRouter.
@@ -190,14 +211,10 @@ class MouseTracker extends ChangeNotifier {
     final int deviceId = event.device;
     if (event is PointerAddedEvent) {
       _addMouseDevice(deviceId, event);
-      // Schedule a check to enter annotations that might contain this pointer.
-      sendMouseNotifications(<int>{deviceId});
     } else if (event is PointerRemovedEvent) {
       _removeMouseDevice(deviceId, event);
-      // Schedule a check to exit annotations that used to contain this pointer.
-      sendMouseNotifications(<int>{deviceId});
     } else if (event is PointerHoverEvent) {
-      final _MouseState mouseState = _findMouseState(deviceId, event);
+      final _MouseState mouseState = _guaranteeMouseState(deviceId, event);
       final PointerEvent previousEvent = mouseState.mostRecentEvent;
       mouseState.mostRecentEvent = event;
       if (previousEvent is PointerAddedEvent || previousEvent.position != event.position) {
@@ -255,13 +272,15 @@ class MouseTracker extends ChangeNotifier {
       return;
     }
 
-    for (int deviceId in deviceIds ?? _mouseStates.keys) {
-      final _MouseState connectedMouseState = _mouseStates[deviceId];
-      final _MouseState mouseState = connectedMouseState ??
-        _disconnectedMouseState;
-      assert(mouseState != null);
-      assert(mouseState._mostRecentEvent.device == deviceId);
-      final bool isConnected = connectedMouseState != null;
+    final Iterable<_MouseState> targetDevices = deviceIds != null ?
+      deviceIds.map(_findMouseState) :
+      <_MouseState>[
+        ..._mouseStates.values,
+        if (_disconnectedMouseState != null) _disconnectedMouseState,
+      ];
+
+    for (final _MouseState mouseState in targetDevices) {
+      final bool isConnected = mouseState != _disconnectedMouseState;
       final PointerEvent mostRecentEvent = mouseState.mostRecentEvent;
 
       // Order is important for mouse event callbacks. The `findAnnotations`
