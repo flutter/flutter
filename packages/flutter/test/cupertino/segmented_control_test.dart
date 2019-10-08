@@ -549,7 +549,7 @@ void main() {
   testWidgets('Passed in value is child initially selected', (WidgetTester tester) async {
     await tester.pumpWidget(setupSimpleSegmentedControl());
 
-    expect(getRenderSegmentedControl(tester).selectedIndex, 0);
+    expect(getRenderSegmentedControl(tester).highlightedIndex, 0);
 
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
     expect(getBackgroundColor(tester, 1), CupertinoColors.white);
@@ -580,7 +580,7 @@ void main() {
       ),
     );
 
-    expect(getRenderSegmentedControl(tester).selectedIndex, null);
+    expect(getRenderSegmentedControl(tester).highlightedIndex, null);
 
     expect(getBackgroundColor(tester, 0), CupertinoColors.white);
     expect(getBackgroundColor(tester, 1), CupertinoColors.white);
