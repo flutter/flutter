@@ -146,11 +146,10 @@ class Focus extends StatefulWidget {
     this.onFocusChange,
     this.onKey,
     this.debugLabel,
-    this.canRequestFocus = true,
+    this.canRequestFocus,
     this.skipTraversal,
   })  : assert(child != null),
         assert(autofocus != null),
-        assert(canRequestFocus != null),
         super(key: key);
 
   /// A debug label for this widget.
