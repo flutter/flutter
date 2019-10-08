@@ -23,16 +23,6 @@ class _TestGestureFlutterBinding extends BindingBase with ServicesBinding, Sched
     postFrameCallbacks = <void Function(Duration)>[];
   }
 
-  // HandleEventCallback callback;
-
-  // @override
-  // void handleEvent(PointerEvent event, HitTestEntry entry) {
-  //   super.handleEvent(event, entry);
-  //   if (callback != null) {
-  //     callback(event);
-  //   }
-  // }
-
   List<void Function(Duration)> postFrameCallbacks;
 
   // Proxy post-frame callbacks
