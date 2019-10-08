@@ -50,6 +50,10 @@ class Keyboard {
   static const JSONMessageCodec _messageCodec = JSONMessageCodec();
 
   void _handleHtmlEvent(html.KeyboardEvent event) {
+    if (_shouldPreventDefault(event)) {
+      event.preventDefault();
+    }
+
     final Map<String, dynamic> eventData = <String, dynamic>{
       'type': event.type,
       'keymap': 'web',
@@ -60,6 +64,16 @@ class Keyboard {
 
     ui.window.onPlatformMessage('flutter/keyevent',
         _messageCodec.encodeMessage(eventData), _noopCallback);
+  }
+
+  bool _shouldPreventDefault(html.KeyboardEvent event) {
+    switch (event.key) {
+      case 'Tab':
+        return true;
+
+      default:
+        return false;
+    }
   }
 }
 
