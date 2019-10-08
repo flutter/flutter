@@ -22,7 +22,7 @@ void main() {
     engine.window.locationStrategy = _strategy = null;
   });
 
-  test('Tracks pushed and popped routes', () {
+  test('Tracks pushed, replaced and popped routes', () {
     engine.window.sendPlatformMessage(
       'flutter/navigation',
       codec.encodeMethodCall(const engine.MethodCall(
@@ -62,5 +62,18 @@ void main() {
       emptyCallback,
     );
     expect(_strategy.path, '/bar/baz');
+
+    engine.window.sendPlatformMessage(
+      'flutter/navigation',
+      codec.encodeMethodCall(const engine.MethodCall(
+        'routeReplaced',
+        <String, dynamic>{
+          'previousRouteName': '/bar/baz',
+          'routeName': '/bar/baz2',
+        },
+      )),
+      emptyCallback,
+    );
+    expect(_strategy.path, '/bar/baz2');
   });
 }
