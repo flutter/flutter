@@ -73,8 +73,8 @@ group("flutter") {
 
     if (is_win) {
       public_deps += [
+        "$flutter_root/shell/platform/windows:flutter_windows_unittests",
         "$flutter_root/shell/platform/windows/client_wrapper:client_wrapper_windows_unittests",
-        "$flutter_root/shell/platform/windows:flutter_windows_unittests"
       ]
     }
 

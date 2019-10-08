@@ -109,23 +109,24 @@ executable("flutter_windows_unittests") {
   testonly = true
 
   sources = [
-    "win32_window_unittests.cc",
-    "testing/win32_flutter_window_test.h",
     "testing/win32_flutter_window_test.cc",
+    "testing/win32_flutter_window_test.h",
+    "win32_window_unittests.cc",
   ]
 
   public_configs = [ "$flutter_root:config" ]
 
   deps = [
-    ":flutter_windows_source",
-    ":flutter_windows_headers",
-    "//third_party/rapidjson",
     ":flutter_windows_fixtures",
+    ":flutter_windows_headers",
+    ":flutter_windows_source",
     "$flutter_root/testing",
+
     # TODO(chunhtai): Consider refactoring flutter_root/testing so that there's a testing
     # target that doesn't require a Dart runtime to be linked in.
     # https://github.com/flutter/flutter/issues/41414.
     "//third_party/dart/runtime:libdart_jit",
+    "//third_party/rapidjson",
   ]
 }
 

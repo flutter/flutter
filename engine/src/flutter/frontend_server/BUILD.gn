@@ -19,8 +19,8 @@ if (is_fuchsia_host || is_fuchsia) {
       "//third_party/dart-pkg/pub/path",
       "//third_party/dart-pkg/pub/usage",
       "//third_party/dart/pkg/build_integration",
-      "//third_party/dart/pkg/frontend_server",
       "//third_party/dart/pkg/front_end",
+      "//third_party/dart/pkg/frontend_server",
       "//third_party/dart/pkg/kernel",
       "//third_party/dart/pkg/vm",
     ]
@@ -39,4 +39,3 @@ if (is_fuchsia_host || is_fuchsia) {
     ]
   }
 }
-
