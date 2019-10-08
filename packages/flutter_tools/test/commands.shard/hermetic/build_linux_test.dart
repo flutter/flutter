@@ -117,6 +117,27 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
+  testUsingContext('Handles argument error from missing make', () async {
+    final BuildCommand command = BuildCommand();
+    applyMocksToCommand(command);
+    setUpMockProjectFilesForBuild();
+    when(mockProcessManager.start(<String>[
+      'make',
+      '-C',
+      '/linux',
+      'BUILD=release',
+    ])).thenThrow(ArgumentError());
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['build', 'linux']
+    ), throwsToolExit(message: 'make not found. Run \'flutter doctor\' for more information.'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => mockProcessManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
   testUsingContext('Linux build --debug passes debug mode to make', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
