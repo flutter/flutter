@@ -195,9 +195,9 @@ void main() {
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.macos.managedDirectory.childFile('GeneratedPluginRegistrant.swift'));
       }, overrides: <Type, Generator>{
-          FileSystem: () => MemoryFileSystem(),
-          FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-          FlutterProjectFactory: () => FlutterProjectFactory(),
+        FileSystem: () => MemoryFileSystem(),
+        FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+        FlutterProjectFactory: () => FlutterProjectFactory(),
       });
       testUsingContext('generates Xcode configuration for macOS', () async {
         final FlutterProject project = await someProject();
@@ -205,9 +205,9 @@ void main() {
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.macos.generatedXcodePropertiesFile);
       }, overrides: <Type, Generator>{
-          FileSystem: () => MemoryFileSystem(),
-          FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-          FlutterProjectFactory: () => FlutterProjectFactory(),
+        FileSystem: () => MemoryFileSystem(),
+        FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+        FlutterProjectFactory: () => FlutterProjectFactory(),
       });
       testUsingContext('injects plugins for Linux', () async {
         final FlutterProject project = await someProject();
@@ -216,9 +216,9 @@ void main() {
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.cc'));
       }, overrides: <Type, Generator>{
-          FileSystem: () => MemoryFileSystem(),
-          FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-          FlutterProjectFactory: () => FlutterProjectFactory(),
+        FileSystem: () => MemoryFileSystem(),
+        FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+        FlutterProjectFactory: () => FlutterProjectFactory(),
       });
       testUsingContext('injects plugins for Windows', () async {
         final FlutterProject project = await someProject();
@@ -227,9 +227,9 @@ void main() {
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'));
       }, overrides: <Type, Generator>{
-          FileSystem: () => MemoryFileSystem(),
-          FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-          FlutterProjectFactory: () => FlutterProjectFactory(),
+        FileSystem: () => MemoryFileSystem(),
+        FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+        FlutterProjectFactory: () => FlutterProjectFactory(),
       });
       testInMemory('creates Android library in module', () async {
         final FlutterProject project = await aModuleProject();

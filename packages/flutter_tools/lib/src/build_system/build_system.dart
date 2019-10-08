@@ -204,7 +204,7 @@ abstract class Target {
     return <String, Object>{
       'name': name,
       'dependencies': <String>[
-        for (Target target in dependencies) target.name
+        for (Target target in dependencies) target.name,
       ],
       'inputs': <String>[
         for (File file in resolveInputs(environment).sources) file.path,
