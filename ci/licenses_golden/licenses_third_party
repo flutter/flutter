@@ -1,4 +1,4 @@
-Signature: 9e4fdea30431010b0dfde41795f7b5c9
+Signature: b89d744fc043b99a65199c97e3813e5e
 
 UNUSED LICENSES:
 
@@ -753,7 +753,7 @@ FILE: ../../../third_party/wuffs/internal/cgen/data.go
 FILE: ../../../third_party/wuffs/internal/cgen/expr.go
 FILE: ../../../third_party/wuffs/internal/cgen/func.go
 FILE: ../../../third_party/wuffs/internal/cgen/gen.go
-FILE: ../../../third_party/wuffs/internal/cgen/resume.go
+FILE: ../../../third_party/wuffs/internal/cgen/liveness.go
 FILE: ../../../third_party/wuffs/internal/cgen/statement.go
 FILE: ../../../third_party/wuffs/internal/cgen/var.go
 FILE: ../../../third_party/wuffs/internal/testcut/testcut.go
@@ -780,6 +780,9 @@ FILE: ../../../third_party/wuffs/lang/token/token.go
 FILE: ../../../third_party/wuffs/lang/wuffsroot/wuffsroot.go
 FILE: ../../../third_party/wuffs/lib/base38/base38.go
 FILE: ../../../third_party/wuffs/lib/base38/base38_test.go
+FILE: ../../../third_party/wuffs/lib/cgolz4/cgolz4.go
+FILE: ../../../third_party/wuffs/lib/cgolz4/cgolz4_test.go
+FILE: ../../../third_party/wuffs/lib/cgolz4/notcgo.go
 FILE: ../../../third_party/wuffs/lib/cgozlib/cgozlib.go
 FILE: ../../../third_party/wuffs/lib/cgozlib/cgozlib_test.go
 FILE: ../../../third_party/wuffs/lib/cgozlib/notcgo.go
@@ -801,6 +804,8 @@ FILE: ../../../third_party/wuffs/lib/rac/rac.go
 FILE: ../../../third_party/wuffs/lib/rac/rac_test.go
 FILE: ../../../third_party/wuffs/lib/rac/reader.go
 FILE: ../../../third_party/wuffs/lib/rac/writer.go
+FILE: ../../../third_party/wuffs/lib/raclz4/example_test.go
+FILE: ../../../third_party/wuffs/lib/raclz4/raclz4.go
 FILE: ../../../third_party/wuffs/lib/raczlib/example_test.go
 FILE: ../../../third_party/wuffs/lib/raczlib/make_cgo.go
 FILE: ../../../third_party/wuffs/lib/raczlib/make_notcgo.go
