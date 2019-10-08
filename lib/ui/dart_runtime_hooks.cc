@@ -154,7 +154,7 @@ void DartRuntimeHooks::Install(bool is_ui_isolate,
 }
 
 void Logger_PrintDebugString(Dart_NativeArguments args) {
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+#ifndef NDEBUG
   Logger_PrintString(args);
 #endif
 }
