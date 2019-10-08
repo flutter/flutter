@@ -153,6 +153,7 @@ task:
         cpu: 8
         memory: 24G
     - name: web_tests-linux-shard-0
+      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
       env:
         SHARD: web_tests
         WEB_SHARD: 0
@@ -162,6 +163,7 @@ task:
         cpu: 4
         memory: 12G
     - name: web_tests-linux-shard-1
+      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
       env:
         SHARD: web_tests
         WEB_SHARD: 1
@@ -171,6 +173,7 @@ task:
         cpu: 4
         memory: 12G
     - name: web_tests-linux-shard-2
+      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
       env:
         SHARD: web_tests
         WEB_SHARD: 2
