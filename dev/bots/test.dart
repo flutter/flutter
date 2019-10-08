@@ -685,10 +685,16 @@ class EvalResult {
   final int exitCode;
 }
 
+/// The number of Cirrus jobs that run web tests in parallel.
+/// 
+/// WARNING: if you change this number, also change .cirrus.yml
+/// and make sure it runs _all_ shards.
+const int _kWebShardCount = 3;
+
 Future<void> _runFlutterWebTest(String workingDirectory, {
   List<String> tests,
 }) async {
-  final List<String> allTests = <String>[];
+  List<String> allTests = <String>[];
   for (String testDirPath in tests) {
     final Directory testDir = Directory(path.join(workingDirectory, testDirPath));
     allTests.addAll(
@@ -698,8 +704,23 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
         .map((File file) => path.relative(file.path, from: workingDirectory))
     );
   }
+
+  // If a shard is specified only run tests in that shard.
+  final int webShard = int.tryParse(Platform.environment['WEB_SHARD'] ?? 'n/a');
+  if (webShard != null) {
+    if (webShard >= _kWebShardCount) {
+      throw 'WEB_SHARD must be <= _kWebShardCount, but was $webShard';
+    }
+    final List<String> shard = <String>[];
+    for (int i = webShard; i < allTests.length; i += _kWebShardCount) {
+      shard.add(allTests[i]);
+    }
+    allTests = shard;
+  }
+
   print(allTests.join('\n'));
   print('${allTests.length} tests total');
+  return;
 
   // Maximum number of tests to run in a single `flutter test`. We found that
   // large batches can get flaky, possibly because we reuse a single instance
