@@ -478,9 +478,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
 
   static const double _defaultTrackHeight = 4;
-//  static const double _defaultTrackHeight = 12;
-//  static const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape();
-  static const SliderTrackShape _defaultTrackShape = RectangularSliderTrackShape();
+  static const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape();
   static const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape();
   static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
   static const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape();
@@ -536,6 +534,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       disabledThumbColor: sliderTheme.disabledThumbColor ?? theme.colorScheme.onSurface.withOpacity(0.38),
       overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
       valueIndicatorColor: widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary,
+      surfaceColor: sliderTheme.surfaceColor ?? theme.colorScheme.surface,
       trackShape: sliderTheme.trackShape ?? _defaultTrackShape,
       tickMarkShape: sliderTheme.tickMarkShape ?? _defaultTickMarkShape,
       thumbShape: sliderTheme.thumbShape ?? _defaultThumbShape,
@@ -1172,7 +1171,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _sliderTheme.thumbShape.paint(
       context,
       thumbCenter,
-      activationAnimation: _valueIndicatorAnimation,
+      activationAnimation: _overlayAnimation,
       enableAnimation: _enableAnimation,
       isDiscrete: isDiscrete,
       labelPainter: _labelPainter,

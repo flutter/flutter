@@ -355,6 +355,7 @@ class SliderThemeData extends Diagnosticable {
     this.disabledThumbColor,
     this.overlayColor,
     this.valueIndicatorColor,
+    this.surfaceColor,
     this.overlayShape,
     this.tickMarkShape,
     this.thumbShape,
@@ -489,6 +490,14 @@ class SliderThemeData extends Diagnosticable {
 
   /// The color given to the [valueIndicatorShape] to draw itself with.
   final Color valueIndicatorColor;
+
+  /// The surface color that the slider is resting on.
+  ///
+  /// This is used to clear painting regions for possibly transparent thumbs and
+  /// thumb shadows.
+  ///
+  /// Defaults to [ColorScheme.surface].
+  final Color surfaceColor;
 
   /// The shape that will be used to draw the [Slider]'s overlay.
   ///
@@ -656,6 +665,7 @@ class SliderThemeData extends Diagnosticable {
     Color disabledThumbColor,
     Color overlayColor,
     Color valueIndicatorColor,
+    Color surfaceColor,
     SliderComponentShape overlayShape,
     SliderTickMarkShape tickMarkShape,
     SliderComponentShape thumbShape,
@@ -685,6 +695,7 @@ class SliderThemeData extends Diagnosticable {
       disabledThumbColor: disabledThumbColor ?? this.disabledThumbColor,
       overlayColor: overlayColor ?? this.overlayColor,
       valueIndicatorColor: valueIndicatorColor ?? this.valueIndicatorColor,
+      surfaceColor: surfaceColor ?? this.surfaceColor,
       overlayShape: overlayShape ?? this.overlayShape,
       tickMarkShape: tickMarkShape ?? this.tickMarkShape,
       thumbShape: thumbShape ?? this.thumbShape,
@@ -725,6 +736,7 @@ class SliderThemeData extends Diagnosticable {
       disabledThumbColor: Color.lerp(a.disabledThumbColor, b.disabledThumbColor, t),
       overlayColor: Color.lerp(a.overlayColor, b.overlayColor, t),
       valueIndicatorColor: Color.lerp(a.valueIndicatorColor, b.valueIndicatorColor, t),
+      surfaceColor: Color.lerp(a.surfaceColor, b.surfaceColor, t),
       overlayShape: t < 0.5 ? a.overlayShape : b.overlayShape,
       tickMarkShape: t < 0.5 ? a.tickMarkShape : b.tickMarkShape,
       thumbShape: t < 0.5 ? a.thumbShape : b.thumbShape,
@@ -758,6 +770,7 @@ class SliderThemeData extends Diagnosticable {
       disabledThumbColor,
       overlayColor,
       valueIndicatorColor,
+      surfaceColor,
       overlayShape,
       tickMarkShape,
       thumbShape,
@@ -797,6 +810,7 @@ class SliderThemeData extends Diagnosticable {
       && otherData.disabledThumbColor == disabledThumbColor
       && otherData.overlayColor == overlayColor
       && otherData.valueIndicatorColor == valueIndicatorColor
+      && otherData.surfaceColor == surfaceColor
       && otherData.overlayShape == overlayShape
       && otherData.tickMarkShape == tickMarkShape
       && otherData.thumbShape == thumbShape
@@ -830,6 +844,7 @@ class SliderThemeData extends Diagnosticable {
     properties.add(ColorProperty('disabledThumbColor', disabledThumbColor, defaultValue: defaultData.disabledThumbColor));
     properties.add(ColorProperty('overlayColor', overlayColor, defaultValue: defaultData.overlayColor));
     properties.add(ColorProperty('valueIndicatorColor', valueIndicatorColor, defaultValue: defaultData.valueIndicatorColor));
+    properties.add(ColorProperty('surfaceColor', surfaceColor, defaultValue: defaultData.surfaceColor));
     properties.add(DiagnosticsProperty<SliderComponentShape>('overlayShape', overlayShape, defaultValue: defaultData.overlayShape));
     properties.add(DiagnosticsProperty<SliderTickMarkShape>('tickMarkShape', tickMarkShape, defaultValue: defaultData.tickMarkShape));
     properties.add(DiagnosticsProperty<SliderComponentShape>('thumbShape', thumbShape, defaultValue: defaultData.thumbShape));
@@ -950,17 +965,6 @@ abstract class SliderComponentShape {
 
   /// Returns the preferred size of the shape, based on the given conditions.
   Size getPreferredSize(bool isEnabled, bool isDiscrete);
-
-  /// Clears the path so that shapes with opacity can be drawn correctly.
-  void clearPath({
-    PaintingContext context,
-    Offset center,
-    bool isEnabled,
-    bool isDiscrete,
-  }) {
-    // Override this if the pixels in the way of this path should be cleared
-    // before drawing it.
-  }
 
   /// Paints the shape, taking into account the state passed to it.
   ///
@@ -1599,21 +1603,12 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       isDiscrete: isDiscrete,
     );
 
-    context.canvas.saveLayer(trackRect, Paint());
     final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRect.height / 2, trackRect.top, thumbCenter.dx, trackRect.bottom);
     if (!leftTrackSegment.isEmpty)
       context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
     final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx, trackRect.top, trackRect.right, trackRect.bottom);
     if (!rightTrackSegment.isEmpty)
       context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
-
-    sliderTheme.thumbShape.clearPath(
-      context: context,
-      center: thumbCenter,
-      isEnabled: isEnabled,
-      isDiscrete: isDiscrete,
-    );
-    context.canvas.restore();
   }
 }
 
@@ -1700,30 +1695,30 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       isEnabled: isEnabled,
       isDiscrete: isDiscrete,
     );
+    final Radius trackRadius = Radius.circular(trackRect.height / 2);
 
-    // The arc rects create a semi-circle with radius equal to track height.
-    context.canvas.saveLayer(trackRect, Paint());
-    final Rect leftTrackArcRect = Rect.fromLTWH(trackRect.left, trackRect.top, trackRect.height, trackRect.height);
-    if (!leftTrackArcRect.isEmpty)
-      context.canvas.drawArc(leftTrackArcRect, math.pi / 2, math.pi, false, leftTrackPaint);
-    final Rect rightTrackArcRect = Rect.fromLTWH(trackRect.right - trackRect.height / 2, trackRect.top, trackRect.height, trackRect.height);
-    if (!rightTrackArcRect.isEmpty)
-      context.canvas.drawArc(rightTrackArcRect, -math.pi / 2, math.pi, false, rightTrackPaint);
-
-    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRect.height / 2, trackRect.top, thumbCenter.dx, trackRect.bottom);
-    if (!leftTrackSegment.isEmpty)
-      context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
-    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx, trackRect.top, trackRect.right, trackRect.bottom);
-    if (!rightTrackSegment.isEmpty)
-      context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
-
-    sliderTheme.thumbShape.clearPath(
-      context: context,
-      center: thumbCenter,
-      isEnabled: isEnabled,
-      isDiscrete: isDiscrete,
+    context.canvas.drawRRect(
+      RRect.fromLTRBAndCorners(
+        trackRect.left,
+        trackRect.top,
+        thumbCenter.dx,
+        trackRect.bottom,
+        topLeft: trackRadius,
+        bottomLeft: trackRadius,
+      ),
+      leftTrackPaint,
     );
-    context.canvas.restore();
+    context.canvas.drawRRect(
+      RRect.fromLTRBAndCorners(
+        thumbCenter.dx,
+        trackRect.top,
+        trackRect.right,
+        trackRect.bottom,
+        topRight: trackRadius,
+        bottomRight: trackRadius,
+      ),
+      rightTrackPaint,
+    );
   }
 }
 
@@ -2244,7 +2239,9 @@ class RoundSliderThumbShape extends SliderComponentShape {
   const RoundSliderThumbShape({
     this.enabledThumbRadius = 10.0,
     this.disabledThumbRadius,
-    this.elevation = 1.0,
+    // TODO: change this back to 1
+    this.elevation = 3.0,
+    // TODO: change this back to 6
     this.pressedElevation = 6.0,
   });
 
@@ -2273,23 +2270,6 @@ class RoundSliderThumbShape extends SliderComponentShape {
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
     return Size.fromRadius(isEnabled == true ? enabledThumbRadius : _disabledThumbRadius);
-  }
-
-  void clearPath({
-    PaintingContext context,
-    Offset center,
-    bool isEnabled,
-    bool isDiscrete,
-  }) {
-    if (!isEnabled) {
-      final Size thumbSize = getPreferredSize(isDiscrete, isDiscrete);
-      context.canvas.drawCircle(
-        center,
-        thumbSize.width / 2,
-        Paint()
-          ..blendMode = BlendMode.clear,
-      );
-    }
   }
 
   @override
@@ -2330,6 +2310,13 @@ class RoundSliderThumbShape extends SliderComponentShape {
     final radius = radiusTween.evaluate(enableAnimation);
     Path path = Path()..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
     canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
+
+    // Clear the space of the track and shadow so the thumb can be drawn.
+    context.canvas.drawCircle(
+      center,
+      radius,
+      Paint()..color = sliderTheme.surfaceColor.withOpacity(1)
+    );
 
     canvas.drawCircle(
         center,

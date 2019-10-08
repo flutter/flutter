@@ -1344,7 +1344,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     _sliderTheme.rangeThumbShape.paint(
       context,
       topThumbCenter,
-      activationAnimation: _valueIndicatorAnimation,
+      activationAnimation: _overlayAnimation,
       enableAnimation: _enableAnimation,
       isDiscrete: isDiscrete,
       isOnTop: thumbDelta < sliderTheme.rangeThumbShape.getPreferredSize(isEnabled, isDiscrete).width,
