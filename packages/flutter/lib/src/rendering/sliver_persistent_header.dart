@@ -182,7 +182,6 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
 
     child?.layout(
       constraints.asBoxConstraints(
-        minExtent: math.max(minExtent, maxExtent - shrinkOffset),
         maxExtent: math.max(minExtent, maxExtent - shrinkOffset) + stretchOffset,
       ),
       parentUsesSize: true,
@@ -301,11 +300,37 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
   /// scrolls off.
   RenderSliverScrollingPersistentHeader({
     RenderBox child,
-  }) : super(child: child);
+    OverScrollHeaderStretchConfiguration stretchConfiguration,
+  }) : super(
+    child: child,
+    stretchConfiguration: stretchConfiguration,
+  );
 
   // Distance from our leading edge to the child's leading edge, in the axis
   // direction. Negative if we're scrolled off the top.
   double _childPosition;
+
+  /// Updates [geometry], and returns the new value for [childMainAxisPosition].
+  ///
+  /// This is used by [performLayout].
+  @protected
+  double updateGeometry() {
+    double stretchOffset = 0.0;
+    if (stretchConfiguration != null && _childPosition == 0.0) {
+      stretchOffset += constraints.overlap.abs();
+    }
+    final double maxExtent = this.maxExtent;
+    final double paintExtent = maxExtent - constraints.scrollOffset;
+    geometry = SliverGeometry(
+      scrollExtent: maxExtent,
+      paintOrigin: math.min(constraints.overlap, 0.0),
+      paintExtent: paintExtent.clamp(0.0, constraints.remainingPaintExtent),
+      maxPaintExtent: maxExtent + stretchOffset,
+      hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
+    );
+    return stretchOffset > 0 ? 0.0 : math.min(0.0, paintExtent - childExtent);
+  }
+
 
   @override
   void performLayout() {
@@ -319,7 +344,7 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
       maxPaintExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
-    _childPosition = math.min(0.0, paintExtent - childExtent);
+    _childPosition = updateGeometry();
   }
 
   @override
