@@ -404,3 +404,29 @@ void render_gradient_on_non_root_backing_store() {
   };
   window.scheduleFrame();
 }
+
+@pragma('vm:entry-point')
+void verify_b141980393() {
+  window.onBeginFrame = (Duration duration) {
+    // The platform view in the test case is screen sized but with margins of 31
+    // and 37 points from the top and bottom.
+    double top_margin = 31.0;
+    double bottom_margin = 37.0;
+    Size platform_view_size = Size(800.0, 600.0 - top_margin - bottom_margin);
+
+    SceneBuilder builder = SceneBuilder();
+
+    builder.pushOffset(0.0,       // x
+                       top_margin // y
+      );
+
+    // The web view in example.
+    builder.addPlatformView(1337, width:  platform_view_size.width,
+                                  height: platform_view_size.height);
+
+    builder.pop();
+
+    window.render(builder.build());
+  };
+  window.scheduleFrame();
+}
