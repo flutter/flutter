@@ -27,6 +27,7 @@ import 'base/utils.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'compile.dart';
+import 'dart/pub.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'doctor.dart';
@@ -105,6 +106,7 @@ Future<T> runInContext<T>(
       MacOSWorkflow: () => const MacOSWorkflow(),
       MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
       OperatingSystemUtils: () => OperatingSystemUtils(),
+      Pub: () => const Pub(),
       ProcessInfo: () => ProcessInfo(),
       ProcessUtils: () => ProcessUtils(),
       Signals: () => Signals(),
