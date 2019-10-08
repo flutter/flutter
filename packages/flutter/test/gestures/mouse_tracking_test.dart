@@ -234,6 +234,51 @@ void main() {
     events.clear();
   });
 
+  test('should handle detaching during the callback of exiting', () {
+    bool isInHitRegion;
+    final List<PointerEvent> events = <PointerEvent>[];
+    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) => events.add(event),
+      onHover: (PointerHoverEvent event) => events.add(event),
+      onExit: (PointerExitEvent event) => events.add(event),
+    );
+    final MouseTracker mouseTracker = _setUpMouseAnnotationFinder((Offset position) sync* {
+      if (isInHitRegion) {
+        yield annotation;
+      }
+    });
+
+    isInHitRegion = true;
+    RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
+
+    // Enter
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(1.0, 0.0)),
+    ]));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerEnterEvent(position: Offset(1.0, 0.0)),
+      const PointerHoverEvent(position: Offset(1.0, 0.0)),
+    ]));
+    expect(mouseTracker.mouseIsConnected, isTrue);
+    events.clear();
+
+    // Remove
+    mouseTracker.addListener(() {
+      if (!mouseTracker.mouseIsConnected) {
+        RendererBinding.instance.mouseTracker.detachAnnotation(annotation);
+        isInHitRegion = false;
+      }
+    });
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.remove, const Offset(1.0, 0.0)),
+    ]));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerExitEvent(position: Offset(1.0, 0.0)),
+    ]));
+    expect(mouseTracker.mouseIsConnected, isFalse);
+    events.clear();
+  });
+
   test('should not handle non-hover events', () {
     final List<PointerEvent> events = <PointerEvent>[];
     _setUpWithOneAnnotation(logEvents: events);
