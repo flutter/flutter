@@ -16,7 +16,7 @@ import '../flutter_test_alternative.dart';
 
 typedef HandleEventCallback = void Function(PointerEvent event);
 
-class TestGestureFlutterBinding extends BindingBase with ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, RendererBinding {
+class _TestGestureFlutterBinding extends BindingBase with ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, RendererBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -49,10 +49,10 @@ class TestGestureFlutterBinding extends BindingBase with ServicesBinding, Schedu
   }
 }
 
-TestGestureFlutterBinding _binding = TestGestureFlutterBinding();
+_TestGestureFlutterBinding _binding = _TestGestureFlutterBinding();
 
-void ensureTestGestureBinding() {
-  _binding ??= TestGestureFlutterBinding();
+void _ensureTestGestureBinding() {
+  _binding ??= _TestGestureFlutterBinding();
   assert(GestureBinding.instance != null);
 }
 
@@ -81,7 +81,8 @@ void main() {
   }
 
   setUp(() {
-    ensureTestGestureBinding();
+    _ensureTestGestureBinding();
+    _binding.postFrameCallbacks.clear();
     PointerEventConverter.clearPointers();
   });
 
@@ -282,6 +283,7 @@ void main() {
       const PointerExitEvent(position: Offset(0.0, 100.0)),
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(mouseTracker.mouseIsConnected, isTrue);
   });
 
   test('should correctly stay quiet when annotations are attached or detached not on the pointer', () {
@@ -320,12 +322,14 @@ void main() {
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
+    expect(mouseTracker.mouseIsConnected, isTrue);
 
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(0.0, 100.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
+    expect(mouseTracker.mouseIsConnected, isFalse);
   });
 
   test('should not flip out if not all mouse events are listened to', () {

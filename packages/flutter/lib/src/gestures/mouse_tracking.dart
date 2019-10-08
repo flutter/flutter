@@ -85,9 +85,6 @@ class _MouseState {
     _mostRecentEvent = value;
   }
   PointerEvent _mostRecentEvent;
-
-  // Whether this device should be removed the next time it's updated.
-  bool pendingRemoval = false;
 }
 
 /// Maintains the relationship between mouse devices and
@@ -132,36 +129,42 @@ class MouseTracker extends ChangeNotifier {
   // mouse events from.
   final PointerRouter _router;
 
-  // Tracks the state of each mouse device. See [_MouseState] for the
-  // information it provides.
+  // Tracks the state of connected mouse devices.
   //
-  // It is a source-of-truth for the list of connected mouse devices, except
-  // for the ones whose `pendedRemoval` is true, which will be removed as soon
-  // as the next position check.
+  // It is a source-of-truth for the list of connected mouse devices.
+  //
+  // If a device disconnects, the device will be moved to
+  // `_mouseStatesPendingRemoval`.
   final Map<int, _MouseState> _mouseStates = <int, _MouseState>{};
+
+  // Tracks the state of disconnected mouse devices before their final
+  // callbacks are called.
+  //
+  // Each device is moved from `_mouseStates` on the disconnecting event, and
+  // will be permanantly removed from `_disconnectedMouseStates` the next
+  // time the device is called in `sendMouseNotifications`.
+  final Map<int, _MouseState> _disconnectedMouseStates = <int, _MouseState>{};
 
   // The collection of annotations that are currently being tracked.
   // It is operated by [attachAnnotation] and [detachAnnotation].
   final Set<MouseTrackerAnnotation> _trackedAnnotations = <MouseTrackerAnnotation>{};
   bool get _hasAttachedAnnotations => _trackedAnnotations.isNotEmpty;
 
-  // The number of mouse devices that have pended removal.
-  // The `_MouseState`s that have and have not pended removal are mixed in
-  // `_mosueStates`, therefore we need this counter for quick inquiry.
-  int _pendingRemovalCount = 0;
-
   void _addMouseDevice(int deviceId, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
-    final _MouseState mouseState = _mouseStates[deviceId];
+    final _MouseState connectedMouseState = _mouseStates[deviceId];
+    final _MouseState mouseState = connectedMouseState ??
+      _disconnectedMouseStates[deviceId];
     if (mouseState == null) {
       _mouseStates[deviceId] = _MouseState(mostRecentEvent: event);
     } else {
-      assert(_mouseStates[deviceId].pendingRemoval,
-        'Unexpected request to add device $deviceId, which has already been '
-        'added and is not pending removal.');
+      assert(connectedMouseState == null,
+        'Unexpected request to add device $deviceId, which is connected and '
+        'has been added.');
       mouseState.mostRecentEvent = event;
       // Adding the device again means it's not being removed during this frame.
-      _setPendingRemoval(deviceId, false);
+      _mouseStates[deviceId] = mouseState;
+      _disconnectedMouseStates.remove(deviceId);
     }
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
@@ -170,11 +173,12 @@ class MouseTracker extends ChangeNotifier {
 
   void _removeMouseDevice(int deviceId, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
-    assert(_mouseStates.containsKey(deviceId),
+    final _MouseState mouseState = _mouseStates.remove(deviceId);
+    assert(mouseState != null,
       'Unexpected request to remove device $deviceId, which has not been '
-      'added yet.');
-    _setPendingRemoval(deviceId, true);
-    _mouseStates[deviceId].mostRecentEvent = event;
+      'added yet or has been removed.');
+    _disconnectedMouseStates[deviceId] = mouseState;
+    mouseState.mostRecentEvent = event;
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
     }
@@ -189,15 +193,6 @@ class MouseTracker extends ChangeNotifier {
       _addMouseDevice(device, mostRecentEvent);
       return _mouseStates[device];
     });
-  }
-
-  void _setPendingRemoval(int device, bool value) {
-    final _MouseState mouseState = _mouseStates[device];
-    assert(mouseState != null);
-    if (mouseState.pendingRemoval != value) {
-      mouseState.pendingRemoval = value;
-      _pendingRemovalCount += value ? 1 : -1;
-    }
   }
 
   // Handler for events coming from the PointerRouter.
@@ -274,7 +269,10 @@ class MouseTracker extends ChangeNotifier {
     }
 
     for (int deviceId in deviceIds ?? _mouseStates.keys) {
-      final _MouseState mouseState = _mouseStates[deviceId];
+      final _MouseState connectedMouseState = _mouseStates[deviceId];
+      final _MouseState mouseState = connectedMouseState ??
+        _disconnectedMouseStates[deviceId];
+      final bool isConnected = connectedMouseState != null;
       assert(mouseState != null);
       final PointerEvent mostRecentEvent = mouseState.mostRecentEvent;
 
@@ -286,10 +284,9 @@ class MouseTracker extends ChangeNotifier {
 
       // The annotations that contains this device in the coming frame in
       // visual order.
-      final Set<MouseTrackerAnnotation> nextAnnotations =
-        mouseState.pendingRemoval
-        ? const <MouseTrackerAnnotation>{}
-        : annotationFinder(mouseState.mostRecentEvent.position).toSet();
+      final Set<MouseTrackerAnnotation> nextAnnotations = isConnected
+        ? annotationFinder(mouseState.mostRecentEvent.position).toSet()
+        : const <MouseTrackerAnnotation>{};
 
       // The annotations that contains this device in the previous frame in
       // visual order.
@@ -327,15 +324,14 @@ class MouseTracker extends ChangeNotifier {
       }
 
       mouseState.lastAnnotations = nextAnnotations;
-      if (mouseState.pendingRemoval) {
-        _mouseStates.remove(deviceId);
-        _pendingRemovalCount--;
+      if (!isConnected) {
+        _disconnectedMouseStates.remove(deviceId);
       }
     }
   }
 
   /// Whether or not a mouse is connected and has produced events.
-  bool get mouseIsConnected => _mouseStates.length > _pendingRemovalCount;
+  bool get mouseIsConnected => _mouseStates.isNotEmpty;
 
   /// Notify [MouseTracker] that a new mouse tracker annotation has started to
   /// take effect.
