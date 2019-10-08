@@ -355,6 +355,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.dump_skp_on_shader_compilation =
       command_line.HasOption(FlagForSwitch(Switch::DumpSkpOnShaderCompilation));
 
+  settings.cache_sksl =
+      command_line.HasOption(FlagForSwitch(Switch::CacheSkSL));
+
   return settings;
 }
 

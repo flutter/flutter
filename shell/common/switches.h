@@ -130,6 +130,12 @@ DEF_SWITCH(DumpSkpOnShaderCompilation,
            "Automatically dump the skp that triggers new shader compilations. "
            "This is useful for writing custom ShaderWarmUp to reduce jank. "
            "By default, this is not enabled to reduce the overhead. ")
+DEF_SWITCH(CacheSkSL,
+           "cache-sksl",
+           "Only cache the shader in SkSL instead of binary or GLSL. This "
+           "should only be used during development phases. The generated SkSLs "
+           "can later be used in the release build for shader precompilation "
+           "at launch in order to eliminate the shader-compile jank.")
 DEF_SWITCH(
     TraceSystrace,
     "trace-systrace",

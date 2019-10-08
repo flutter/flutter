@@ -31,6 +31,7 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   static bool gIsReadOnly;
 
   static PersistentCache* GetCacheForProcess();
+  static void ResetCacheForProcess();
 
   static void SetCacheDirectoryPath(std::string path);
 
@@ -49,11 +50,38 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   bool IsDumpingSkp() const { return is_dumping_skp_; }
   void SetIsDumpingSkp(bool value) { is_dumping_skp_ = value; }
 
+  // |GrContextOptions::PersistentCache|
+  sk_sp<SkData> load(const SkData& key) override;
+
+  using SkSLCache = std::pair<sk_sp<SkData>, sk_sp<SkData>>;
+
+  /// Load all the SkSL shader caches in the right directory.
+  std::vector<SkSLCache> LoadSkSLs();
+
+  static bool cache_sksl() { return cache_sksl_; }
+  static void SetCacheSkSL(bool value);
+  static void MarkStrategySet() { strategy_set_ = true; }
+
  private:
   static std::string cache_base_path_;
 
+  static std::mutex instance_mutex_;
+  static std::unique_ptr<PersistentCache> gPersistentCache
+      FML_GUARDED_BY(instance_mutex_);
+
+  // Mutable static switch that can be set before GetCacheForProcess is called
+  // and GrContextOptions.fShaderCacheStrategy is set. If true, it means that
+  // we'll set `GrContextOptions::fShaderCacheStrategy` to `kSkSL`, and all the
+  // persistent cache should be stored and loaded from the "sksl" directory.
+  static std::atomic<bool> cache_sksl_;
+
+  // Guard flag to make sure that cache_sksl_ is not modified after
+  // strategy_set_ becomes true.
+  static std::atomic<bool> strategy_set_;
+
   const bool is_read_only_;
   const std::shared_ptr<fml::UniqueFD> cache_directory_;
+  const std::shared_ptr<fml::UniqueFD> sksl_cache_directory_;
   mutable std::mutex worker_task_runners_mutex_;
   std::multiset<fml::RefPtr<fml::TaskRunner>> worker_task_runners_
       FML_GUARDED_BY(worker_task_runners_mutex_);
@@ -61,12 +89,12 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   bool stored_new_shaders_ = false;
   bool is_dumping_skp_ = false;
 
+  static sk_sp<SkData> LoadFile(const fml::UniqueFD& dir,
+                                const std::string& filen_ame);
+
   bool IsValid() const;
 
   PersistentCache(bool read_only = false);
-
-  // |GrContextOptions::PersistentCache|
-  sk_sp<SkData> load(const SkData& key) override;
 
   // |GrContextOptions::PersistentCache|
   void store(const SkData& key, const SkData& data) override;

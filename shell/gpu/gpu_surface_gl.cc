@@ -4,6 +4,7 @@
 
 #include "gpu_surface_gl.h"
 
+#include "flutter/fml/base32.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/size.h"
 #include "flutter/fml/trace_event.h"
@@ -46,6 +47,11 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate,
 
   GrContextOptions options;
 
+  if (PersistentCache::cache_sksl()) {
+    FML_LOG(INFO) << "Cache SkSL";
+    options.fShaderCacheStrategy = GrContextOptions::ShaderCacheStrategy::kSkSL;
+    PersistentCache::MarkStrategySet();
+  }
   options.fPersistentCache = PersistentCache::GetCacheForProcess();
 
   options.fAvoidStencilBuffers = true;
@@ -69,11 +75,20 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate,
 
   context_->setResourceCacheLimits(kGrCacheMaxCount, kGrCacheMaxByteSize);
 
-  delegate_->GLContextClearCurrent();
-
   context_owner_ = true;
 
   valid_ = true;
+
+  std::vector<PersistentCache::SkSLCache> caches =
+      PersistentCache::GetCacheForProcess()->LoadSkSLs();
+  int compiled_count = 0;
+  for (const auto& cache : caches) {
+    compiled_count += context_->precompileShader(*cache.first, *cache.second);
+  }
+  FML_LOG(INFO) << "Found " << caches.size() << " SkSL shaders; precompiled "
+                << compiled_count;
+
+  delegate_->GLContextClearCurrent();
 }
 
 GPUSurfaceGL::GPUSurfaceGL(sk_sp<GrContext> gr_context,

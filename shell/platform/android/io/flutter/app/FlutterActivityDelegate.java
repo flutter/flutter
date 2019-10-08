@@ -309,6 +309,9 @@ public final class FlutterActivityDelegate
         if (intent.getBooleanExtra("dump-skp-on-shader-compilation", false)) {
             args.add("--dump-skp-on-shader-compilation");
         }
+        if (intent.getBooleanExtra("cache-sksl", false)) {
+            args.add("--cache-sksl");
+        }
         if (intent.getBooleanExtra("verbose-logging", false)) {
             args.add("--verbose-logging");
         }

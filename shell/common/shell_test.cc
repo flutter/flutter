@@ -135,15 +135,18 @@ void ShellTest::VSyncFlush(Shell* shell, bool& will_draw_new_frame) {
   latch.Wait();
 }
 
-void ShellTest::PumpOneFrame(Shell* shell) {
+void ShellTest::PumpOneFrame(Shell* shell,
+                             double width,
+                             double height,
+                             LayerTreeBuilder builder) {
   // Set viewport to nonempty, and call Animator::BeginFrame to make the layer
   // tree pipeline nonempty. Without either of this, the layer tree below
   // won't be rasterized.
   fml::AutoResetWaitableEvent latch;
   shell->GetTaskRunners().GetUITaskRunner()->PostTask(
-      [&latch, engine = shell->weak_engine_]() {
+      [&latch, engine = shell->weak_engine_, width, height]() {
         engine->SetViewportMetrics(
-            {1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+            {1, width, height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
         engine->animator_->BeginFrame(fml::TimePoint::Now(),
                                       fml::TimePoint::Now());
         latch.Signal();
@@ -154,12 +157,15 @@ void ShellTest::PumpOneFrame(Shell* shell) {
   // Call |Render| to rasterize a layer tree and trigger |OnFrameRasterized|
   fml::WeakPtr<RuntimeDelegate> runtime_delegate = shell->weak_engine_;
   shell->GetTaskRunners().GetUITaskRunner()->PostTask(
-      [&latch, runtime_delegate]() {
+      [&latch, runtime_delegate, &builder]() {
         auto layer_tree = std::make_unique<LayerTree>();
         SkMatrix identity;
         identity.setIdentity();
         auto root_layer = std::make_shared<TransformLayer>(identity);
         layer_tree->set_root_layer(root_layer);
+        if (builder) {
+          builder(root_layer);
+        }
         runtime_delegate->Render(std::move(layer_tree));
         latch.Signal();
       });
