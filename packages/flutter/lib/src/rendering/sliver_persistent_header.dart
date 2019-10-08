@@ -68,6 +68,8 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     _stretchConfiguration = stretchConfiguration;
   }
 
+  double _lastStretchOffset;
+
   /// The biggest that this render object can become, in the main axis direction.
   ///
   /// This value should not be based on the child. If it changes, call
@@ -186,15 +188,15 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
       parentUsesSize: true,
     );
 
-    print(stretchConfiguration);
-    print(stretchOffset);
-    print(stretchConfiguration.onTriggerRefresh);
-
-    if (stretchConfiguration != null &&
-      stretchOffset == stretchConfiguration.triggerRefreshOffset &&
-      stretchConfiguration.onTriggerRefresh != null) {
+    if (
+      stretchConfiguration != null &&
+      stretchConfiguration.onTriggerRefresh != null &&
+      stretchOffset >= stretchConfiguration.triggerRefreshOffset &&
+      _lastStretchOffset <= stretchConfiguration.triggerRefreshOffset
+    ) {
       stretchConfiguration.onTriggerRefresh();
     }
+    _lastStretchOffset = stretchOffset;
   }
 
   /// Returns the distance from the leading _visible_ edge of the sliver to the
