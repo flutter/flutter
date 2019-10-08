@@ -209,6 +209,22 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.select));
       expect(data.keyLabel, isNull);
     });
+    test('Device id is read from message', () {
+      final RawKeyEvent joystickDpadCenter = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'keyCode': 23,  // DPAD_CENTER code.
+        'plainCodePoint': 0,
+        'codePoint': 0,
+        'character': null,
+        'scanCode': 317,  // Left side thumb joystick center click button.
+        'metaState': 0,
+        'source': 0x501, // Gamepad and keyboard source.
+        'deviceId': 10,
+      });
+      final RawKeyEventDataAndroid data = joystickDpadCenter.data;
+      expect(data.deviceId, equals(10));
+    });
   });
   group('RawKeyEventDataFuchsia', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
