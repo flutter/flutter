@@ -1,4 +1,4 @@
-Signature: 5b6705be3d560922364844f2a6461957
+Signature: fe891caa898ebe22641e423a2bbcd936
 
 UNUSED LICENSES:
 
@@ -1471,6 +1471,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/infra/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/run/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Build-Debian9-Clang-x86_64-Release-SKNX_NO_SIMD.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Housekeeper-Weekly-RecreateSKPs.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/integer_issue.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/win_test.json
 FILE: ../../../third_party/skia/infra/bots/recipes.isolate
 FILE: ../../../third_party/skia/infra/bots/recipes/android_compile.expected/android_compile_nontrybot.json
@@ -3796,14 +3797,12 @@ FILE: ../../../third_party/skia/modules/canvaskit/fonts/nofonts.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/particles_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/skottie_bindings.cpp
-FILE: ../../../third_party/skia/modules/particles/include/SkCurve.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleBinding.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleData.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleDrawable.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleEffect.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleSerialization.h
 FILE: ../../../third_party/skia/modules/particles/include/SkReflected.h
-FILE: ../../../third_party/skia/modules/particles/src/SkCurve.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleBinding.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleDrawable.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
