@@ -252,6 +252,12 @@ bool IsDirectory(const fml::UniqueFD& directory) {
   return info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
 }
 
+bool IsDirectory(const fml::UniqueFD& base_directory, const char* path) {
+  std::string full_path = GetFullHandlePath(base_directory) + "\\" + path;
+  return ::GetFileAttributes(ConvertToWString(full_path.c_str()).c_str()) &
+         FILE_ATTRIBUTE_DIRECTORY;
+}
+
 bool IsFile(const std::string& path) {
   struct stat buf;
   if (stat(path.c_str(), &buf) != 0)
@@ -390,6 +396,31 @@ bool WriteAtomically(const fml::UniqueFD& base_directory,
     return false;
   }
 
+  return true;
+}
+
+bool VisitFiles(const fml::UniqueFD& directory, FileVisitor visitor) {
+  std::string search_pattern = GetFullHandlePath(directory) + "\\*";
+  WIN32_FIND_DATA find_file_data;
+  HANDLE find_handle = ::FindFirstFile(
+      StringToWideString(search_pattern).c_str(), &find_file_data);
+
+  if (find_handle == INVALID_HANDLE_VALUE) {
+    FML_DLOG(ERROR) << "Can't open the directory. Error: "
+                    << GetLastErrorMessage();
+    return true;  // continue to visit other files
+  }
+
+  do {
+    std::string filename = WideStringToString(find_file_data.cFileName);
+    if (filename != "." && filename != "..") {
+      if (!visitor(directory, filename)) {
+        ::FindClose(find_handle);
+        return false;
+      }
+    }
+  } while (::FindNextFile(find_handle, &find_file_data));
+  ::FindClose(find_handle);
   return true;
 }
 

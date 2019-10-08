@@ -208,6 +208,7 @@ std::unique_ptr<Shell> Shell::Create(
     Shell::CreateCallback<PlatformView> on_create_platform_view,
     Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
   PerformInitializationTasks(settings);
+  PersistentCache::SetCacheSkSL(settings.cache_sksl);
 
   TRACE_EVENT0("flutter", "Shell::Create");
 
@@ -235,6 +236,7 @@ std::unique_ptr<Shell> Shell::Create(
     Shell::CreateCallback<Rasterizer> on_create_rasterizer,
     DartVMRef vm) {
   PerformInitializationTasks(settings);
+  PersistentCache::SetCacheSkSL(settings.cache_sksl);
 
   TRACE_EVENT0("flutter", "Shell::CreateWithSnapshots");
 

@@ -5,6 +5,7 @@
 #include "flutter/fml/file.h"
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/unique_fd.h"
 
 namespace fml {
 
@@ -51,11 +52,44 @@ ScopedTemporaryDirectory::ScopedTemporaryDirectory() {
 }
 
 ScopedTemporaryDirectory::~ScopedTemporaryDirectory() {
+  // Windows has to close UniqueFD first before UnlinkDirectory
+  dir_fd_.reset();
   if (path_ != "") {
     if (!UnlinkDirectory(path_.c_str())) {
       FML_LOG(ERROR) << "Could not remove directory: " << path_;
     }
   }
+}
+
+bool VisitFilesRecursively(const fml::UniqueFD& directory,
+                           FileVisitor visitor) {
+  FileVisitor recursive_visitor = [&recursive_visitor, &visitor](
+                                      const UniqueFD& directory,
+                                      const std::string& filename) {
+    if (!visitor(directory, filename)) {
+      return false;
+    }
+    if (IsDirectory(directory, filename.c_str())) {
+      UniqueFD sub_dir = OpenDirectoryReadOnly(directory, filename.c_str());
+      if (!sub_dir.is_valid()) {
+        FML_LOG(ERROR) << "Can't open sub-directory: " << filename;
+        return true;
+      }
+      return VisitFiles(sub_dir, recursive_visitor);
+    }
+    return true;
+  };
+  return VisitFiles(directory, recursive_visitor);
+}
+
+fml::UniqueFD OpenFileReadOnly(const fml::UniqueFD& base_directory,
+                               const char* path) {
+  return OpenFile(base_directory, path, false, FilePermission::kRead);
+}
+
+fml::UniqueFD OpenDirectoryReadOnly(const fml::UniqueFD& base_directory,
+                                    const char* path) {
+  return OpenDirectory(base_directory, path, false, FilePermission::kRead);
 }
 
 }  // namespace fml

@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "flutter/common/settings.h"
+#include "flutter/flow/layers/container_layer.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/lib/ui/window/platform_message.h"
@@ -50,7 +51,15 @@ class ShellTest : public ThreadTest {
   /// the `will_draw_new_frame` to true.
   static void VSyncFlush(Shell* shell, bool& will_draw_new_frame);
 
-  static void PumpOneFrame(Shell* shell);
+  /// Given the root layer, this callback builds the layer tree to be rasterized
+  /// in PumpOneFrame.
+  using LayerTreeBuilder =
+      std::function<void(std::shared_ptr<ContainerLayer> root)>;
+  static void PumpOneFrame(Shell* shell,
+                           double width = 1,
+                           double height = 1,
+                           LayerTreeBuilder = {});
+
   static void DispatchFakePointerData(Shell* shell);
 
   // Declare |UnreportedTimingsCount|, |GetNeedsReportTimings| and
