@@ -129,7 +129,7 @@ void main() {
     );
     // Since the .packages file is missing in the memory filesystem, this should
     // be called.
-    verify(pub.pubGet(
+    verify(pub.get(
       context: PubContext.pubGet,
       directory: anyNamed('directory'),
       offline: true,

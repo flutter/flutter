@@ -716,7 +716,7 @@ class TestFeatureFlags implements FeatureFlags {
 
 class ThrowingPub implements Pub {
   @override
-  Future<void> pub(List<String> arguments, {
+  Future<void> batch(List<String> arguments, {
     PubContext context,
     String directory,
     MessageFilter filter,
@@ -728,7 +728,7 @@ class ThrowingPub implements Pub {
   }
 
   @override
-  Future<void> pubGet({
+  Future<void> get({
     PubContext context,
     String directory,
     bool skipIfAbsent = false,
@@ -741,7 +741,7 @@ class ThrowingPub implements Pub {
   }
 
   @override
-  Future<void> pubInteractively(List<String> arguments, {String directory}) {
+  Future<void> interactively(List<String> arguments, {String directory}) {
     throw UnsupportedError('Attempted to inovke pub during test.');
   }
 }

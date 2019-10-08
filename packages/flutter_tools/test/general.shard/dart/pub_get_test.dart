@@ -36,7 +36,7 @@ void main() {
     FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironment, isNull);
       expect(testLogger.statusText, '');
-      pub.pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pub.get(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -107,7 +107,7 @@ void main() {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pub.pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pub.get(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -134,7 +134,7 @@ void main() {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pub.pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pub.get(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -156,7 +156,7 @@ void main() {
 
   testUsingContext('analytics sent on success', () async {
     MockDirectory.findCache = true;
-    await pub.pubGet(context: PubContext.flutterTests, checkLastModified: false);
+    await pub.get(context: PubContext.flutterTests, checkLastModified: false);
     verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
   }, overrides: <Type, Generator>{
     ProcessManager: () => MockProcessManager(0),
@@ -173,7 +173,7 @@ void main() {
   testUsingContext('analytics sent on failure', () async {
     MockDirectory.findCache = true;
     try {
-      await pub.pubGet(context: PubContext.flutterTests, checkLastModified: false);
+      await pub.get(context: PubContext.flutterTests, checkLastModified: false);
     } on ToolExit {
       // Ignore.
     }
@@ -193,7 +193,7 @@ void main() {
   testUsingContext('analytics sent on failed version solve', () async {
     MockDirectory.findCache = true;
     try {
-      await pub.pubGet(context: PubContext.flutterTests, checkLastModified: false);
+      await pub.get(context: PubContext.flutterTests, checkLastModified: false);
     } on ToolExit {
       // Ignore.
     }

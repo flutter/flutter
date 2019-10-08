@@ -32,7 +32,7 @@ void main() {
     testUsingContext('AnalysisServer success', () async {
       _createSampleProject(tempDir);
 
-      await pub.pubGet(context: PubContext.flutterTests, directory: tempDir.path);
+      await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
       server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
@@ -53,7 +53,7 @@ void main() {
   testUsingContext('AnalysisServer errors', () async {
     _createSampleProject(tempDir, brokenCode: true);
 
-    await pub.pubGet(context: PubContext.flutterTests, directory: tempDir.path);
+    await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
     server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
