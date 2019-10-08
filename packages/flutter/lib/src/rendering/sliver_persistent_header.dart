@@ -254,7 +254,6 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
           offset += Offset(childMainAxisPosition(child), 0.0);
           break;
       }
-      //print('paint: $child and $offset');
       context.paintChild(child, offset);
     }
   }
@@ -365,7 +364,10 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
   RenderSliverPinnedPersistentHeader({
     RenderBox child,
     OverScrollHeaderStretchConfiguration stretchConfiguration,
-  }) : super(child: child, stretchConfiguration: stretchConfiguration);
+  }) : super(
+    child: child,
+    stretchConfiguration: stretchConfiguration,
+  );
 
   @override
   void performLayout() {
@@ -442,7 +444,10 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     FloatingHeaderSnapConfiguration snapConfiguration,
     OverScrollHeaderStretchConfiguration stretchConfiguration,
   }) : _snapConfiguration = snapConfiguration,
-       super(child: child, stretchConfiguration: stretchConfiguration);
+       super(
+      child: child,
+      stretchConfiguration: stretchConfiguration,
+    );
 
   AnimationController _controller;
   Animation<double> _animation;
@@ -548,7 +553,6 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
   @override
   void performLayout() {
-    //print(constraints);
     final double maxExtent = this.maxExtent;
     if (_lastActualScrollOffset != null && // We've laid out at least once to get an initial position, and either
         ((constraints.scrollOffset < _lastActualScrollOffset) || // we are scrolling back, so should reveal, or
