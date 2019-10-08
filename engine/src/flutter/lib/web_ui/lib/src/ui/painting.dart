@@ -1683,12 +1683,6 @@ enum PixelFormat {
   bgra8888,
 }
 
-/// Indicates that the image should not be resized in this dimension.
-///
-/// Used by [instantiateImageCodec] as a magical value to disable resizing
-/// in the given dimension.
-const int kDoNotResizeDimension = -1;
-
 class _ImageInfo {
   _ImageInfo(this.width, this.height, this.format, this.rowBytes) {
     rowBytes ??= width * 4;
