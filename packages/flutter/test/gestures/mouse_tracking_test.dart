@@ -68,16 +68,19 @@ void main() {
 
   // Set up a trivial test environment that includes one annotation, which adds
   // the enter, hover, and exit events it received to [logEvents].
-  void _setUpWithOneAnnotation({List<PointerEvent> logEvents}) {
+  MouseTracker _setUpWithOneAnnotation({List<PointerEvent> logEvents}) {
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
       onEnter: (PointerEnterEvent event) => logEvents.add(event),
       onHover: (PointerHoverEvent event) => logEvents.add(event),
       onExit: (PointerExitEvent event) => logEvents.add(event),
     );
-    _setUpMouseAnnotationFinder((Offset position) sync* {
-      yield annotation;
-    });
+    final MouseTracker mouseTracker = _setUpMouseAnnotationFinder(
+      (Offset position) sync* {
+        yield annotation;
+      },
+    );
     RendererBinding.instance.mouseTracker.attachAnnotation(annotation);
+    return mouseTracker;
   }
 
   setUp(() {
@@ -104,7 +107,9 @@ void main() {
 
   test('should detect enter, hover, and exit from Added, Hover, and Removed events', () {
     final List<PointerEvent> events = <PointerEvent>[];
-    _setUpWithOneAnnotation(logEvents: events);
+    final MouseTracker mouseTracker = _setUpWithOneAnnotation(logEvents: events);
+
+    expect(mouseTracker.mouseIsConnected, isFalse);
 
     // Enter
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
@@ -114,6 +119,7 @@ void main() {
       const PointerEnterEvent(position: Offset(1.0, 0.0)),
       const PointerHoverEvent(position: Offset(1.0, 0.0)),
     ]));
+    expect(mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
     // Hover
@@ -123,6 +129,7 @@ void main() {
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerHoverEvent(position: Offset(1.0, 101.0)),
     ]));
+    expect(mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
     // Remove
@@ -133,6 +140,7 @@ void main() {
       const PointerHoverEvent(position: Offset(1.0, 201.0)),
       const PointerExitEvent(position: Offset(1.0, 201.0)),
     ]));
+    expect(mouseTracker.mouseIsConnected, isFalse);
     events.clear();
 
     // Add again
@@ -143,12 +151,15 @@ void main() {
       const PointerEnterEvent(position: Offset(1.0, 301.0)),
       const PointerHoverEvent(position: Offset(1.0, 301.0)),
     ]));
+    expect(mouseTracker.mouseIsConnected, isTrue);
     events.clear();
   });
 
   test('should correctly handle multiple devices', () {
     final List<PointerEvent> events = <PointerEvent>[];
-    _setUpWithOneAnnotation(logEvents: events);
+    final MouseTracker mouseTracker = _setUpWithOneAnnotation(logEvents: events);
+
+    expect(mouseTracker.mouseIsConnected, isFalse);
 
     // First mouse
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
@@ -158,6 +169,7 @@ void main() {
       const PointerEnterEvent(position: Offset(0.0, 1.0)),
       const PointerHoverEvent(position: Offset(0.0, 1.0)),
     ]));
+    expect(mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
     // Second mouse
@@ -168,6 +180,7 @@ void main() {
       const PointerEnterEvent(position: Offset(1.0, 401.0), device: 1),
       const PointerHoverEvent(position: Offset(1.0, 401.0), device: 1),
     ]));
+    expect(mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
     // First mouse hover
@@ -177,6 +190,7 @@ void main() {
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerHoverEvent(position: Offset(0.0, 101.0)),
     ]));
+    expect(mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
     // Second mouse hover
@@ -186,6 +200,7 @@ void main() {
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerHoverEvent(position: Offset(1.0, 501.0), device: 1),
     ]));
+    expect(mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
     // First mouse remove
@@ -195,6 +210,7 @@ void main() {
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerExitEvent(position: Offset(0.0, 101.0)),
     ]));
+    expect(mouseTracker.mouseIsConnected, isTrue);
     events.clear();
 
     // Second mouse hover
@@ -204,6 +220,17 @@ void main() {
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerHoverEvent(position: Offset(1.0, 601.0), device: 1),
     ]));
+    expect(mouseTracker.mouseIsConnected, isTrue);
+    events.clear();
+
+    // Second mouse remove
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.remove, const Offset(1.0, 601.0), device: 1),
+    ]));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerExitEvent(position: Offset(1.0, 601.0), device: 1),
+    ]));
+    expect(mouseTracker.mouseIsConnected, isFalse);
     events.clear();
   });
 
@@ -283,7 +310,6 @@ void main() {
       const PointerExitEvent(position: Offset(0.0, 100.0)),
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
-    expect(mouseTracker.mouseIsConnected, isTrue);
   });
 
   test('should correctly stay quiet when annotations are attached or detached not on the pointer', () {
@@ -322,14 +348,12 @@ void main() {
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
-    expect(mouseTracker.mouseIsConnected, isTrue);
 
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, const Offset(0.0, 100.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
-    expect(mouseTracker.mouseIsConnected, isFalse);
   });
 
   test('should not flip out if not all mouse events are listened to', () {
