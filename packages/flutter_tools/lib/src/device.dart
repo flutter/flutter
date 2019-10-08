@@ -595,6 +595,7 @@ abstract class DevicePortForwarder {
   /// Stops forwarding [forwardedPort].
   Future<void> unforward(ForwardedPort forwardedPort);
 
+  /// Cleanup allocated resources, like forwardedPorts
   Future<void> dispose() async { }
 }
 

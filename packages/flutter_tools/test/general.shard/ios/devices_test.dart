@@ -79,8 +79,8 @@ void main() {
       });
     }
 
-    group('dispose()', () {
-      testUsingContext('Calling dispose() kills all log readers & port forwarders', () async {
+    group('.dispose()', () {
+      testUsingContext(' kills all log readers & port forwarders', () async {
         final IOSDevice device = IOSDevice('123');
         final MockApplicationPackage applicationPackage1 = MockApplicationPackage();
         final MockApplicationPackage applicationPackage2 = MockApplicationPackage();
