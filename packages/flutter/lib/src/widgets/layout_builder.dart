@@ -237,7 +237,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return child.computeDistanceToActualBaseline(baseline);
+    return child?.getDistanceToActualBaseline(baseline);
   }
 
   @override
