@@ -165,7 +165,7 @@ FinancialEntityCategoryView buildFinancialEntityFromAccountData(
   int i,
 ) {
   return FinancialEntityCategoryView(
-    suffix: Icon(Icons.chevron_right, color: Colors.grey),
+    suffix: const Icon(Icons.chevron_right, color: Colors.grey),
     title: model.name,
     subtitle: '• • • • • • ${model.accountNumber.substring(6)}',
     indicatorColor: RallyColors.accountColor(i),
@@ -179,7 +179,7 @@ FinancialEntityCategoryView buildFinancialEntityFromBillData(
   int i,
 ) {
   return FinancialEntityCategoryView(
-    suffix: Icon(Icons.chevron_right, color: Colors.grey),
+    suffix: const Icon(Icons.chevron_right, color: Colors.grey),
     title: model.name,
     subtitle: model.dueDate,
     indicatorColor: RallyColors.billColor(i),
