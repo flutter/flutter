@@ -150,6 +150,8 @@ DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 DART="$DART_SDK_PATH/bin/dart"
 PUB="$DART_SDK_PATH/bin/pub"
 
+# If running over git-bash, overrides the default UNIX
+# executables with win32 executables
 case "$(uname -s)" in
   MINGW32*)
     DART="$DART.exe"
