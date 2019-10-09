@@ -275,7 +275,7 @@ void showLicensePage({
       applicationVersion: applicationVersion,
       applicationIcon: applicationIcon,
       applicationLegalese: applicationLegalese,
-    )
+    ),
   ));
 }
 

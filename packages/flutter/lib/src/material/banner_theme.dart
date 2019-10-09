@@ -140,8 +140,8 @@ class MaterialBannerTheme extends InheritedTheme {
   /// MaterialBannerThemeData theme = MaterialBannerTheme.of(context);
   /// ```
   static MaterialBannerThemeData of(BuildContext context) {
-    final MaterialBannerTheme popupMenuTheme = context.inheritFromWidgetOfExactType(MaterialBannerTheme);
-    return popupMenuTheme?.data ?? Theme.of(context).bannerTheme;
+    final MaterialBannerTheme bannerTheme = context.inheritFromWidgetOfExactType(MaterialBannerTheme);
+    return bannerTheme?.data ?? Theme.of(context).bannerTheme;
   }
 
   @override

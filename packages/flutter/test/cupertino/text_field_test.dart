@@ -83,8 +83,8 @@ class PathBoundsMatcher extends Matcher {
 
 class PathPointsMatcher extends Matcher {
   const PathPointsMatcher({
-      this.includes = const <Offset>[],
-      this.excludes = const <Offset>[],
+    this.includes = const <Offset>[],
+    this.excludes = const <Offset>[],
   }) : super();
 
   final Iterable<Offset> includes;
@@ -327,7 +327,7 @@ void main() {
         ),
       );
 
-      final BoxDecoration decoration = tester.widget<DecoratedBox>(
+      BoxDecoration decoration = tester.widget<DecoratedBox>(
         find.descendant(
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
@@ -336,11 +336,37 @@ void main() {
 
       expect(
         decoration.borderRadius,
-        BorderRadius.circular(4.0),
+        BorderRadius.circular(5),
       );
       expect(
-        decoration.border.bottom.color,
-        CupertinoColors.lightBackgroundGray,
+        decoration.border.bottom.color.value,
+        0x33000000,
+      );
+
+      // Dark mode.
+      await tester.pumpWidget(
+        const CupertinoApp(
+          theme: CupertinoThemeData(brightness: Brightness.dark),
+          home: Center(
+            child: CupertinoTextField(),
+          ),
+        ),
+      );
+
+      decoration = tester.widget<DecoratedBox>(
+        find.descendant(
+          of: find.byType(CupertinoTextField),
+          matching: find.byType(DecoratedBox),
+        ),
+      ).decoration;
+
+      expect(
+        decoration.borderRadius,
+        BorderRadius.circular(5),
+      );
+      expect(
+        decoration.border.bottom.color.value,
+        0x33FFFFFF,
       );
     },
   );
@@ -563,6 +589,23 @@ void main() {
     },
   );
 
+  testWidgets('placeholder dark mode', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoTextField(
+            placeholder: 'placeholder',
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    );
+
+    final Text placeholder = tester.widget(find.text('placeholder'));
+    expect(placeholder.style.color.value, CupertinoColors.placeholderText.darkColor.value);
+  });
+
   testWidgets(
     'placeholders are lightly colored and disappears once typing starts',
     (WidgetTester tester) async {
@@ -577,7 +620,7 @@ void main() {
       );
 
       final Text placeholder = tester.widget(find.text('placeholder'));
-      expect(placeholder.style.color, const Color(0xFFC2C2C2));
+      expect(placeholder.style.color.value, CupertinoColors.placeholderText.color.value);
 
       await tester.enterText(find.byType(CupertinoTextField), 'input');
       await tester.pump();
@@ -1284,6 +1327,49 @@ void main() {
     expect(text.style.fontWeight, FontWeight.w400);
   });
 
+
+  testWidgets('text field toolbar options correctly changes options', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+              toolbarOptions: const ToolbarOptions(copy: true),
+            ),
+          ],
+        ),
+      ),
+    );
+
+      // Long press to put the cursor after the "w".
+      const int index = 3;
+      await tester.longPressAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: index),
+      );
+
+      // Double tap on the same location to select the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      // Selected text shows 'Copy'.
+      expect(find.text('Paste'), findsNothing);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Cut'), findsNothing);
+      expect(find.text('Select All'), findsNothing);
+  });
   testWidgets('Read only text field', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'readonly');
 
@@ -2652,8 +2738,8 @@ void main() {
       ).decoration;
 
       expect(
-        decoration.border.bottom.color,
-        CupertinoColors.lightBackgroundGray, // Border color is the same regardless.
+        decoration.border.bottom.color.value,
+        0x33FFFFFF,
       );
 
       await tester.enterText(find.byType(CupertinoTextField), 'smoked meat');
@@ -2801,7 +2887,7 @@ void main() {
     tester.firstState(find.byType(EditableText));
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
-    expect(renderEditable.cursorColor, CupertinoColors.activeBlue);
+    expect(renderEditable.cursorColor, CupertinoColors.activeBlue.color);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -2813,7 +2899,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(renderEditable.cursorColor, CupertinoColors.activeOrange);
+    expect(renderEditable.cursorColor, CupertinoColors.activeOrange.darkColor);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -2829,19 +2915,38 @@ void main() {
   });
 
   testWidgets('cursor can override color from theme', (WidgetTester tester) async {
+    const CupertinoDynamicColor cursorColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0x12345678),
+      darkColor: Color(0x87654321),
+    );
+
     await tester.pumpWidget(
       const CupertinoApp(
         theme: CupertinoThemeData(),
         home: Center(
           child: CupertinoTextField(
-            cursorColor: Color(0xFFF44336),
+            cursorColor: cursorColor,
           ),
         ),
       ),
     );
 
-    final EditableText editableText = tester.firstWidget(find.byType(EditableText));
-    expect(editableText.cursorColor, const Color(0xFFF44336));
+    EditableText editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.cursorColor.value, 0x12345678);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(brightness: Brightness.dark),
+        home: Center(
+          child: CupertinoTextField(
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.cursorColor.value, 0x87654321);
   });
 
   testWidgets('iOS shows selection handles', (WidgetTester tester) async {
@@ -2916,18 +3021,21 @@ void main() {
             child: SizedBox(
               width: 200,
               height: 200,
-              child: CupertinoTextField(
-                controller: TextEditingController(text: 'lorem'),
-                enabled: false,
+              child: RepaintBoundary(
+                key: const ValueKey<int>(1),
+                child: CupertinoTextField(
+                  controller: TextEditingController(text: 'lorem'),
+                  enabled: false,
+                ),
               ),
-            )
+            ),
           ),
-        )
-      )
+        ),
+      ),
     );
 
     await expectLater(
-      find.byType(CupertinoTextField),
+      find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_test.disabled.png'),
     );
   });
@@ -3266,6 +3374,55 @@ void main() {
 
       tester.binding.window.physicalSizeTestValue = null;
       tester.binding.window.devicePixelRatioTestValue = null;
+    });
+
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/37046.
+    testWidgets('No exceptions when showing selection menu inside of nested Navigators', (WidgetTester tester) async {
+      const String testValue = '123456';
+      final TextEditingController controller = TextEditingController(
+        text: testValue,
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: 100,
+                    color: CupertinoColors.activeOrange,
+                  ),
+                  Expanded(
+                    child: Navigator(
+                      onGenerateRoute: (_) =>
+                        CupertinoPageRoute<void>(builder: (_) => Container(
+                          child: CupertinoTextField(
+                            controller: controller,
+                          ),
+                        )),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // No text selection toolbar.
+      expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
+
+      // Double tap on the text in the input.
+      await tester.pumpAndSettle();
+      await tester.tapAt(textOffsetToPosition(tester, testValue.length ~/ 2));
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tapAt(textOffsetToPosition(tester, testValue.length ~/ 2));
+      await tester.pumpAndSettle();
+
+      // Now the text selection toolbar is showing and there were no exceptions.
+      expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
+      expect(tester.takeException(), null);
     });
   });
 

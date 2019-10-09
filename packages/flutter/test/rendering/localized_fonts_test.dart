@@ -44,7 +44,7 @@ void main() {
               );
             },
           ),
-        )
+        ),
       );
 
       await expectLater(
@@ -95,7 +95,7 @@ void main() {
               );
             },
           ),
-        )
+        ),
       );
 
       await expectLater(
@@ -138,7 +138,7 @@ void main() {
               );
             },
           ),
-        )
+        ),
       );
 
       await expectLater(

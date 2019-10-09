@@ -358,8 +358,8 @@ void main() {
                 minuteInterval: 3,
               ),
             ),
-          )
-        )
+          ),
+        ),
       );
 
       // Drag the minute picker to the next slot (03 -> 06).
@@ -889,8 +889,8 @@ void main() {
                 onDateTimeChanged: (_) {},
               ),
             ),
-          )
-        )
+          ),
+        ),
       );
 
       final dynamic exception = tester.takeException();
@@ -916,8 +916,8 @@ void main() {
                 ),
               ),
             ),
-          )
-        )
+          ),
+        ),
       );
 
       await expectLater(

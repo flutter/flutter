@@ -17,11 +17,9 @@ import '../reporting/reporting.dart';
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
-  final String buildFlag = buildInfo?.isDebug == true ? 'debug' : 'release';
   final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.
 export FLUTTER_ROOT=${Cache.flutterRoot}
-export BUILD=$buildFlag
 export TRACK_WIDGET_CREATION=${buildInfo?.trackWidgetCreation == true}
 export FLUTTER_TARGET=$target
 export PROJECT_DIR=${linuxProject.project.directory.path}
@@ -48,18 +46,20 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   }
 
   // Invoke make.
+  final String buildFlag = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
   final Stopwatch sw = Stopwatch()..start();
-  final Process process = await processManager.start(<String>[
-    'make',
-    '-C',
-    linuxProject.makeFile.parent.path,
-  ], runInShell: true);
   final Status status = logger.startProgress(
     'Building Linux application...',
     timeout: null,
   );
   int result;
   try {
+    final Process process = await processManager.start(<String>[
+      'make',
+      '-C',
+      linuxProject.makeFile.parent.path,
+      'BUILD=$buildFlag',
+    ]);
     process.stderr
       .transform(utf8.decoder)
       .transform(const LineSplitter())
@@ -69,6 +69,8 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
       .transform(const LineSplitter())
       .listen(printTrace);
     result = await process.exitCode;
+  } on ArgumentError {
+    throwToolExit('make not found. Run \'flutter doctor\' for more information.');
   } finally {
     status.cancel();
   }

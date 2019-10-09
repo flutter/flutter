@@ -207,10 +207,17 @@ class FlutterProject {
     if ((ios.existsSync() && checkProjects) || !checkProjects) {
       await ios.ensureReadyForPlatformSpecificTooling();
     }
-    // TODO(stuartmorgan): Add checkProjects logic once a create workflow exists
-    // for macOS. For now, always treat checkProjects as true for macOS.
+    // TODO(stuartmorgan): Revisit conditions once there is a plan for handling
+    // non-default platform projects. For now, always treat checkProjects as
+    // true for desktop.
+    if (featureFlags.isLinuxEnabled && linux.existsSync()) {
+      await linux.ensureReadyForPlatformSpecificTooling();
+    }
     if (featureFlags.isMacOSEnabled && macos.existsSync()) {
       await macos.ensureReadyForPlatformSpecificTooling();
+    }
+    if (featureFlags.isWindowsEnabled && windows.existsSync()) {
+      await windows.ensureReadyForPlatformSpecificTooling();
     }
     if (featureFlags.isWebEnabled && web.existsSync()) {
       await web.ensureReadyForPlatformSpecificTooling();
@@ -601,7 +608,11 @@ class AndroidProject {
 
   void _regenerateLibrary() {
     _deleteIfExistsSync(ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'library'), ephemeralDirectory);
+    _overwriteFromTemplate(fs.path.join(
+      'module',
+      'android',
+      featureFlags.isNewAndroidEmbeddingEnabled ? 'library_new_embedding' : 'library',
+    ), ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
     gradle.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
@@ -614,6 +625,7 @@ class AndroidProject {
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,
         'androidX': usesAndroidX,
+        'useNewAndroidEmbedding': featureFlags.isNewAndroidEmbeddingEnabled,
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,
@@ -635,6 +647,9 @@ class WebProject {
 
   /// The 'lib' directory for the application.
   Directory get libDirectory => parent.directory.childDirectory('lib');
+
+  /// The directory containing additional files for the application.
+  Directory get directory => parent.directory.childDirectory('web');
 
   /// The html file used to host the flutter web application.
   File get indexFile => parent.directory
@@ -787,6 +802,8 @@ class WindowsProject {
   ///
   /// Ideally this will be replaced in the future with inspection of the project.
   File get nameFile => ephemeralDirectory.childFile('exe_filename');
+
+  Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
 
 /// The Linux sub project.
@@ -815,6 +832,8 @@ class LinuxProject {
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the build.
   File get generatedMakeConfigFile => ephemeralDirectory.childFile('generated_config.mk');
+
+  Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
 
 /// The Fuchisa sub project

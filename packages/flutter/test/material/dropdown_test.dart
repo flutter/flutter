@@ -1285,9 +1285,7 @@ void main() {
     expect(selectedIndex, 13);
   });
 
-  testWidgets('Dropdown button will accept widgets as its underline', (
-      WidgetTester tester) async {
-
+  testWidgets('Dropdown button will accept widgets as its underline', (WidgetTester tester) async {
     const BoxDecoration decoration = BoxDecoration(
       border: Border(bottom: BorderSide(color: Color(0xFFCCBB00), width: 4.0)),
     );

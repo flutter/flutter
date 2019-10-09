@@ -217,8 +217,8 @@ void main() {
       of: find.text('Tab 2'),
       matching: find.byType(RichText),
     ));
-    expect(actualActive.text.style.color, CupertinoColors.activeOrange);
 
+    expect(actualActive.text.style.color.value, CupertinoColors.activeOrange.darkColor.value);
   });
 
   testWidgets('Use active icon', (WidgetTester tester) async {
