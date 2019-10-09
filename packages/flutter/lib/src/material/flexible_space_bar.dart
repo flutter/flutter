@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
 
@@ -180,7 +181,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        print(constraints.maxHeight);
         final FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(FlexibleSpaceBarSettings);
         assert(
           settings != null,
@@ -195,7 +195,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         // 1.0 -> Collapsed to toolbar
         final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0);
 
-        // Background
+        // background
         if (widget.background != null) {
           final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
           const double fadeEnd = 1.0;
@@ -204,27 +204,11 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           if (opacity > 0.0) {
 
             double height = settings.maxExtent;
-            Widget child = Opacity(
-              opacity: opacity,
-              child: widget.background,
-            );
 
-            // Background Stretch Modes
-            if (constraints.maxHeight > height) {
-              // Zoom
-              if (widget.stretchModes.contains(StretchMode.zoomBackground))
-                height = constraints.maxHeight;
-              // Blur
-              if (widget.stretchModes.contains(StretchMode.blurBackground)) {
-                final double blurAmount = (constraints.maxHeight - settings.maxExtent) / 10;
-                child = BackdropFilter(
-                  child: child,
-                  filter: ui.ImageFilter.blur(
-                    sigmaX: blurAmount,
-                    sigmaY: blurAmount,
-                  )
-                );
-              }
+            // StretchMode.zoomBackground
+            if (widget.stretchModes.contains(StretchMode.zoomBackground) &&
+              constraints.maxHeight > height) {
+              height = constraints.maxHeight;
             }
 
             children.add(Positioned(
@@ -232,12 +216,32 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
               left: 0.0,
               right: 0.0,
               height: height,
-              child: child,
+              child: Opacity(
+                opacity: opacity,
+                child: widget.background,
+              ),
             ));
+
+            // StretchMode.blurBackground
+            if (widget.stretchModes.contains(StretchMode.blurBackground) &&
+              constraints.maxHeight > settings.maxExtent) {
+              final double blurAmount = (constraints.maxHeight - settings.maxExtent) / 10;
+              children.add(Positioned.fill(
+                child: BackdropFilter(
+                  child: Container(
+                    color: Colors.transparent,
+                  ),
+                  filter: ui.ImageFilter.blur(
+                    sigmaX: blurAmount,
+                    sigmaY: blurAmount,
+                  )
+                )
+              ));
+            }
           }
         }
 
-        // Title
+        // title
         if (widget.title != null) {
           final ThemeData theme = Theme.of(context);
 
@@ -252,6 +256,17 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                 namesRoute: true,
                 child: widget.title,
               );
+          }
+
+          // StretchMode.fadeTitle
+          if(widget.stretchModes.contains(StretchMode.fadeTitle) &&
+            constraints.maxHeight > settings.maxExtent) {
+            final double stretchOpacity = 1 -
+              ((constraints.maxHeight - settings.maxExtent) / 100).clamp(0.0, 1.0);
+            title = Opacity(
+              opacity: stretchOpacity,
+              child: title,
+            );
           }
 
           final double opacity = settings.toolbarOpacity;
