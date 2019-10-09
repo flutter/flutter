@@ -887,6 +887,7 @@ class RenderParagraph extends RenderBox
           if (info.recognizer is TapGestureRecognizer) {
             final TapGestureRecognizer recognizer = info.recognizer;
             configuration.onTap = recognizer.onTap;
+            configuration.isLink = true;
           } else if (info.recognizer is LongPressGestureRecognizer) {
             final LongPressGestureRecognizer recognizer = info.recognizer;
             configuration.onLongPress = recognizer.onLongPress;

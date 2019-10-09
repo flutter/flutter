@@ -473,6 +473,7 @@ void main() {
           checked: true,
           selected: true,
           button: true,
+          link: true,
           textField: true,
           readOnly: true,
           focused: true,
