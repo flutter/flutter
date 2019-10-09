@@ -16,7 +16,8 @@ void main() {
 
     Map<String, dynamic> valueInJson;
     messenger.methodHandlers['setCursors'] = (dynamic args) async {
-      valueInJson = args;
+      final List<dynamic> argList = args;
+      valueInJson = argList[0];
       return <dynamic>[true];
     };
 

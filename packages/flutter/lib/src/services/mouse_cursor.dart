@@ -62,7 +62,7 @@ class MouseCursorManagerDefaultDelegate implements MouseCursorManagerDelegate {
         'Mouse cursor ${_cursorToString(cursor)} is not an actual value to be set.');
       translated[device.toString()] = cursor;
     });
-    return channel.invokeMethod<bool>('setCursors', translated);
+    return channel.invokeMethod<bool>('setCursors', <dynamic>[translated]);
   }
 }
 
