@@ -122,9 +122,6 @@ void overrideDefaultPublishConfig(Project project, variant) {
     for (Configuration configuration : flattenConfiguration(variant.runtimeConfiguration)) {
         scopeMappings.addMapping(/* priority = */ 300, configuration, "compile")
     }
-    for (Configuration configuration : flattenConfiguration(variant.compileConfiguration)) {
-        scopeMappings.addMapping(/* priority = */ 300, configuration, "compile")
-    }
 }
 
 Set<Configuration> flattenConfiguration(Configuration configuration) {
@@ -137,13 +134,9 @@ Set<Configuration> flattenConfiguration(Configuration configuration) {
 
 projectsEvaluated {
     if (rootProject.property("is-plugin").toBoolean()) {
-        if (rootProject.hasProperty("output-dir")) {
-            rootProject.buildDir = rootProject.property("output-dir")
-        } else {
-            rootProject.buildDir = "../build";
-        }
+        assert rootProject.hasProperty("output-dir")
         // In plugin projects, the Android library is the root project.
-        configureProject(rootProject, rootProject.buildDir)
+        configureProject(rootProject, rootProject.property("output-dir"))
         return
     }
     // In module projects, the Android library project is the `:flutter` subproject.
