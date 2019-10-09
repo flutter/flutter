@@ -41,7 +41,7 @@ class DevelopmentArtifact {
   static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios');
 
   /// Artifacts required for web development.
-  static const DevelopmentArtifact web = DevelopmentArtifact._('web', unstable: true);
+  static const DevelopmentArtifact web = DevelopmentArtifact._('web');
 
   /// Artifacts required for desktop macOS.
   static const DevelopmentArtifact macOS = DevelopmentArtifact._('macos', unstable: true);
@@ -75,6 +75,9 @@ class DevelopmentArtifact {
     universal,
     flutterRunner,
   ];
+
+  @override
+  String toString() => 'Artifact($name, $unstable)';
 }
 
 /// A wrapper around the `bin/cache/` directory.
