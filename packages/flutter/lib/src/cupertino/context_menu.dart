@@ -38,6 +38,11 @@ enum _ContextMenuOrientation {
   right,
 }
 
+/// A full-screen overlay menu that opens when the child is long-pressed.
+///
+/// The open menu shows the child or the given [preview] with a list of buttons
+/// specified by [actions].
+///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This sample shows a very simple ContextMenu for an empty Container. To open
@@ -76,11 +81,10 @@ enum _ContextMenuOrientation {
 /// }
 /// ```
 /// {@end-tool}
-/// A full-screen overlay menu that opens when the child is long-pressed or 3d
-/// touched.
 ///
-/// The open menu shows the child or the given [preview] with a list of buttons
-/// specified by [actions].
+/// See also:
+///
+///   * [Apple's HIG for Context Menus](https://developer.apple.com/design/human-interface-guidelines/ios/controls/context-menus/)
 class ContextMenu extends StatefulWidget {
   /// Create a context menu.
   ContextMenu({
@@ -93,13 +97,13 @@ class ContextMenu extends StatefulWidget {
        assert(child != null),
        super(key: key);
 
-  /// The widget that can be "opened" with the ContextMenu.
+  /// The widget that can be "opened" with the [ContextMenu].
   ///
-  /// When the context menu is long-pressed or 3d touched the menu will open and
-  /// this widget (or [preview], if provided) will be moved to the overlay and
-  /// sized to be as wide or tall as possible.
+  /// When the [ContextMenu] is long-pressed, the menu will open and this widget
+  /// (or [preview], if provided) will be moved to the overlay and sized to be
+  /// as wide or tall as possible.
   ///
-  /// When the context menu is "closed", this widget acts like a [Container],
+  /// When the [ContextMenu] is "closed", this widget acts like a [Container],
   /// i.e. it does not constrain its child.
   ///
   /// This parameter cannot be null.
@@ -111,24 +115,24 @@ class ContextMenu extends StatefulWidget {
   /// [ContextMenuSheetAction]s.
   final List<ContextMenuSheetAction> actions;
 
-  /// The callback to call when tapping on the child when the ContextMenu is
+  /// The callback to call when tapping on the child when the [ContextMenu] is
   /// open.
   final VoidCallback onTap;
 
-  /// The widget to show when the ContextMenu is open.
+  /// The widget to show when the [ContextMenu] is open.
   ///
   /// If not specified, [child] will be shown.
   ///
-  /// This can be used to shown an entirely different widget than the preview,
-  /// but it can also show a slight variation of the child. As a simple example,
-  /// the child could be given rounded corners in the preview but have sharp
-  /// corners when in the page.
+  /// This can be used to shown an entirely different widget than the child, but
+  /// it can also show a slight variation of the child. As a simple example, the
+  /// child could be given rounded corners in the preview but have sharp corners
+  /// when in the page.
   ///
   /// {@tool sample}
   ///
   /// Below is an example of using `preview` to create a square image tile very
-  /// similar to iOS iPhoto app's context menu. When opened, the child animates
-  /// to show its full aspect ratio and has rounded corners.
+  /// similar to the iOS iPhoto app's context menu. When opened, the child
+  /// animates to show its full aspect ratio and has rounded corners.
   ///
   /// ```dart
   /// GridView.count(
@@ -137,7 +141,7 @@ class ContextMenu extends StatefulWidget {
   ///     ContextMenu(
   ///       child: FittedBox(
   ///         fit: BoxFit.cover,
-  ///         child: Image.asset(asset),
+  ///         child: Image.asset('assets/photo.jpg'),
   ///       ),
   ///       // The FittedBox in the preview here allows the image to animate its
   ///       // aspect ratio when the ContextMenu is animating open and closed.
@@ -147,16 +151,14 @@ class ContextMenu extends StatefulWidget {
   ///         // ContextMenu is open, even though it's not rounded when it's
   ///         // closed.
   ///         child: ClipRRect(
-  ///           borderRadius: new BorderRadius.circular(64.0),
-  ///           child: Image.asset(asset),
+  ///           borderRadius: BorderRadius.circular(64.0),
+  ///           child: Image.asset('assets/photo.jpg'),
   ///         ),
   ///       ),
   ///       actions: <ContextMenuSheetAction>[
   ///         ContextMenuSheetAction(
   ///           child: const Text('Action one'),
-  ///           onPressed: () {
-  ///             Navigator.pop(context);
-  ///           },
+  ///           onPressed: () {},
   ///         ),
   ///       ],
   ///     ),
@@ -173,11 +175,10 @@ class ContextMenu extends StatefulWidget {
 
 class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin {
   final GlobalKey _childGlobalKey = GlobalKey();
+  double _childOpacity = 1.0;
   AnimationController _decoyController;
   Rect _decoyChildEndRect;
-
   OverlayEntry _lastOverlayEntry;
-  double _childOpacity = 1.0;
   _ContextMenuRoute<void> _route;
 
   @override
@@ -267,7 +268,8 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     }
   }
 
-  // Watch for when _ContextMenuRoute is closed.
+  // Watch for when _ContextMenuRoute is closed and return to the state where
+  // the ContextMenu just behaves as a Container.
   void _routeAnimationStatusListener(AnimationStatus status) {
     if (status != AnimationStatus.dismissed) {
       return;
@@ -354,7 +356,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   }
 }
 
-// A floating copy of the child.
+// A floating copy of the ContextMenu's child, used in animations.
 class _DecoyChild extends StatefulWidget {
   const _DecoyChild({
     Key key,
@@ -467,16 +469,16 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
   }
 }
 
-/// The open ContextMenu modal.
+// The open ContextMenu modal.
 class _ContextMenuRoute<T> extends PopupRoute<T> {
-  /// Build a _ContextMenuRoute.
+  // Build a _ContextMenuRoute.
   _ContextMenuRoute({
-    this.barrierLabel,
     @required List<ContextMenuSheetAction> actions,
+    @required _ContextMenuOrientation contextMenuOrientation,
+    this.barrierLabel,
     WidgetBuilder builder,
     ui.ImageFilter filter,
     VoidCallback onTap,
-    @required _ContextMenuOrientation contextMenuOrientation,
     Rect previousChildRect,
     RouteSettings settings,
   }) : assert(actions != null && actions.isNotEmpty),
@@ -491,12 +493,6 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
          settings: settings,
        );
 
-  // The Rect of the child at the moment that the ContextMenu opens.
-  final Rect _previousChildRect;
-
-  final _ContextMenuOrientation _contextMenuOrientation;
-  Orientation _lastOrientation;
-
   // Barrier color for a Cupertino modal barrier.
   static const Color _kModalBarrierColor = Color(0x6604040F);
   // The duration of the transition used when a modal popup is shown. Eyeballed
@@ -505,8 +501,16 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
   final List<ContextMenuSheetAction> _actions;
   final WidgetBuilder _builder;
+  final GlobalKey _childGlobalKey = GlobalKey();
+  final _ContextMenuOrientation _contextMenuOrientation;
+  bool _externalOffstage = false;
+  bool _internalOffstage = false;
+  Orientation _lastOrientation;
   final VoidCallback _onTap;
+  // The Rect of the child at the moment that the ContextMenu opens.
+  final Rect _previousChildRect;
   double _scale = 1.0;
+  final GlobalKey _sheetGlobalKey = GlobalKey();
 
   static final CurveTween _curve = CurveTween(
     curve: Curves.easeOutBack,
@@ -521,10 +525,10 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     _curveReverse,
   );
   static final RectTween _sheetRectTween = RectTween();
-  static final Animatable<Rect> _sheetRectAnimatable = _sheetRectTween.chain(
+  final Animatable<Rect> _sheetRectAnimatable = _sheetRectTween.chain(
     _curve,
   );
-  static final Animatable<Rect> _sheetRectAnimatableReverse = _sheetRectTween.chain(
+  final Animatable<Rect> _sheetRectAnimatableReverse = _sheetRectTween.chain(
     _curveReverse,
   );
   static final Tween<double> _sheetScaleTween = Tween<double>();
@@ -536,12 +540,6 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   );
   final Tween<double> _opacityTween = Tween<double>(begin: 0.0, end: 1.0);
   Animation<double> _sheetOpacity;
-
-  final GlobalKey _childGlobalKey = GlobalKey();
-  final GlobalKey _sheetGlobalKey = GlobalKey();
-
-  bool _externalOffstage = false;
-  bool _internalOffstage = false;
 
   @override
   final String barrierLabel;
@@ -804,6 +802,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   static const double _kSheetScaleThreshold = 0.9;
   static const double _kPadding = 20.0;
   static const double _kDamping = 400.0;
+  static const Duration _kMoveControllerDuration = Duration(milliseconds: 600);
 
   final GlobalKey _childGlobalKey = GlobalKey();
 
@@ -887,9 +886,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
     }
 
     // Reset the duration back to its original value.
-    _moveController.duration = const Duration(
-      milliseconds: 600,
-    );
+    _moveController.duration = _kMoveControllerDuration;
 
     _moveController.removeStatusListener(_flingStatusListener);
     // If it was a fling back to the start, it has reset itself, and it should
@@ -1039,7 +1036,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   void initState() {
     super.initState();
     _moveController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: _kMoveControllerDuration,
       value: 1.0,
       vsync: this,
     );
@@ -1091,7 +1088,8 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
             child: AnimatedBuilder(
               animation: _moveController,
               builder: _buildAnimation,
-              child: widget.orientation == Orientation.portrait ? Column(
+              child: widget.orientation == Orientation.portrait
+                ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: children,
                 )
