@@ -55,9 +55,10 @@ void main() {
           TestSemantics(
             id: 1,
             flags: <SemanticsFlag>[
-              SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isButton,
               SemanticsFlag.isEnabled,
+              SemanticsFlag.isFocusable,
             ],
             actions: <SemanticsAction>[
               SemanticsAction.tap,
