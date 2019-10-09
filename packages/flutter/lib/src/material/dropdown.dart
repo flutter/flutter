@@ -942,7 +942,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (_enabled) {
       items = widget.selectedItemBuilder == null
         ? List<Widget>.from(widget.items)
-        : widget.selectedItemBuilder(context).map((Widget item) {
+        : widget.selectedItemBuilder(context).map<Widget>((Widget item) {
             return Container(
               height: _kMenuItemHeight,
               alignment: AlignmentDirectional.centerStart,
