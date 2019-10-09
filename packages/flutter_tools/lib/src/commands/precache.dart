@@ -66,7 +66,7 @@ class PrecacheCommand extends FlutterCommand {
       if (!FlutterVersion.instance.isMaster && artifact.unstable) {
         continue;
       }
-      if (!featureFlags.isWebEnabled && artifact == DevelopmentArtifact.web) {
+      if (artifact.feature != null && !featureFlags.isEnabled(artifact.feature)) {
         continue;
       }
       if (argResults[artifact.name]) {
