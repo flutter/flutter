@@ -1,4 +1,4 @@
-Signature: cdea1bbd556ea7577323fe5ef947b6b0
+Signature: c2d45db167cd1056ecabe1c705f64eb8
 
 UNUSED LICENSES:
 
@@ -7481,6 +7481,7 @@ FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_type_table.dart
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/gen_api_table.dart
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/gen_type_table.dart
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/gen_util.dart
+FILE: ../../../third_party/dart/runtime/tools/ffi/sdk_lib_ffi_generator.dart
 FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.html
 FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.js
 FILE: ../../../third_party/dart/runtime/tools/run_clang_tidy.dart
