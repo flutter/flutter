@@ -234,36 +234,6 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     _route.animation.addStatusListener(_routeAnimationStatusListener);
   }
 
-  // The OverlayEntry that positions widget.child directly on top of its
-  // original position in this widget.
-  OverlayEntry get _overlayEntry {
-    final Rect childRect = _getRect(_childGlobalKey);
-    _decoyChildEndRect = Rect.fromCenter(
-      center: childRect.center,
-      width: childRect.width * _kOpenScale,
-      height: childRect.height * _kOpenScale,
-    );
-
-    // TODO(justinmc): There is a known inconsistency with native here, due to
-    // doing the bounce animation using a decoy in the top level Overlay. The
-    // decoy will pop on top of the AppBar if the child is partially behind it,
-    // such as a top item in a partially scrolled view. However, if we don't use
-    // an overlay, then the decoy will appear behind its neighboring widget when
-    // it expands. This may be solveable by adding a widget to Scaffold that's
-    // undernearth the AppBar.
-    return OverlayEntry(
-      opaque: false,
-      builder: (BuildContext context) {
-        return _DecoyChild(
-          beginRect: childRect,
-          child: widget.child,
-          controller: _decoyController,
-          endRect: _decoyChildEndRect,
-        );
-      },
-    );
-  }
-
   void _onDecoyAnimationStatusChange(AnimationStatus animationStatus) {
     switch (animationStatus) {
       case AnimationStatus.dismissed:
@@ -331,7 +301,33 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     setState(() {
       _childOpacity = 0.0;
     });
-    _lastOverlayEntry = _overlayEntry;
+
+    final Rect childRect = _getRect(_childGlobalKey);
+    _decoyChildEndRect = Rect.fromCenter(
+      center: childRect.center,
+      width: childRect.width * _kOpenScale,
+      height: childRect.height * _kOpenScale,
+    );
+
+    // Create a decoy child in an overlay directly on top of the original child.
+    // TODO(justinmc): There is a known inconsistency with native here, due to
+    // doing the bounce animation using a decoy in the top level Overlay. The
+    // decoy will pop on top of the AppBar if the child is partially behind it,
+    // such as a top item in a partially scrolled view. However, if we don't use
+    // an overlay, then the decoy will appear behind its neighboring widget when
+    // it expands. This may be solveable by adding a widget to Scaffold that's
+    // undernearth the AppBar.
+    _lastOverlayEntry = OverlayEntry(
+      opaque: false,
+      builder: (BuildContext context) {
+        return _DecoyChild(
+          beginRect: childRect,
+          child: widget.child,
+          controller: _decoyController,
+          endRect: _decoyChildEndRect,
+        );
+      },
+    );
     Overlay.of(context).insert(_lastOverlayEntry);
     _decoyController.forward();
   }
@@ -1070,6 +1066,13 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   }
 
   @override
+  void dispose() {
+    _moveController.dispose();
+    _sheetController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final List<Widget> children = _getChildren(
       widget.orientation,
@@ -1101,13 +1104,6 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _moveController.dispose();
-    _sheetController.dispose();
-    super.dispose();
   }
 }
 
