@@ -60,6 +60,7 @@ class MDnsObservatoryDiscovery {
           )
           .toList();
       if (pointerRecords.isEmpty) {
+        printTrace('No pointer records found.');
         return null;
       }
       // We have no guarantee that we won't get multiple hits from the same
