@@ -9,6 +9,8 @@
 
 #include "FlutterMacros.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * A set of Flutter and Dart assets used by a `FlutterEngine` to initialize execution.
  */
@@ -18,7 +20,7 @@ FLUTTER_EXPORT
 /**
  * Initializes a Flutter Dart project from a bundle.
  */
-- (instancetype)initWithPrecompiledDartBundle:(NSBundle*)bundle NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithPrecompiledDartBundle:(nullable NSBundle*)bundle NS_DESIGNATED_INITIALIZER;
 
 /**
  * Unavailable - use `init` instead.
@@ -44,7 +46,7 @@ FLUTTER_EXPORT
  * @param bundle The `NSBundle` to use for looking up the asset.
  * @return the file name to be used for lookup in the main bundle.
  */
-+ (NSString*)lookupKeyForAsset:(NSString*)asset fromBundle:(NSBundle*)bundle;
++ (NSString*)lookupKeyForAsset:(NSString*)asset fromBundle:(nullable NSBundle*)bundle;
 
 /**
  * Returns the file name for the given asset which originates from the specified package.
@@ -67,7 +69,7 @@ FLUTTER_EXPORT
  */
 + (NSString*)lookupKeyForAsset:(NSString*)asset
                    fromPackage:(NSString*)package
-                    fromBundle:(NSBundle*)bundle;
+                    fromBundle:(nullable NSBundle*)bundle;
 
 /**
  * Returns the default identifier for the bundle where we expect to find the Flutter Dart
@@ -76,5 +78,7 @@ FLUTTER_EXPORT
 + (NSString*)defaultBundleIdentifier;
 
 @end
+
+NS_ASSUME_NONNULL_END
 
 #endif  // FLUTTER_FLUTTERDARTPROJECT_H_
