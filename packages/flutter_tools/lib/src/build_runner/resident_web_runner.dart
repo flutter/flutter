@@ -209,6 +209,8 @@ class ResidentWebRunner extends ResidentRunner {
       return result;
     } on WebSocketException {
       throwToolExit('Failed to connect to WebSocket.');
+    } on Exception catch (err) {
+      throwToolExit(err.toString());
     } finally {
       buildStatus.stop();
     }
