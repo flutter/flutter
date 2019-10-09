@@ -22,6 +22,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_goldens:
+    sdk: flutter
 
   mockito: 4.1.1
 
