@@ -459,8 +459,8 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     // Computing the initialScrollOffset now, before the items have been laid
     // out. This only works if the item heights are effectively fixed, i.e. either
     // DropdownButton.itemHeight is specified or DropdownButton.itemHeight is null
-    // and all of the items' intrinsic heights are less than kMinInteractveDimension.
-    // Otherwise the initialScrollOffset is just an rough approximation based on
+    // and all of the items' intrinsic heights are less than kMinInteractiveDimension.
+    // Otherwise the initialScrollOffset is just a rough approximation based on
     // treating the items as if their heights were all equal to kMinInteractveDimension.
     if (route.scrollController == null) {
       final _MenuLimits menuLimits = route.getMenuLimits(buttonRect, constraints.maxHeight);

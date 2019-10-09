@@ -1744,7 +1744,7 @@ void main() {
     await tester.tap(item30);
     await tester.pumpAndSettle();
 
-    // The Each item appears twice, once in the menu and once
+    // Each item appears twice, once in the menu and once
     // in the dropdown button's IndexedStack.
     expect(item30.evaluate().length, 2);
     expect(item40.evaluate().length, 2);
