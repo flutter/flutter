@@ -80,7 +80,7 @@ Future<void> main() async {
         'flutter_release-1.0.aar',
       ));
 
-      checkFileExists(path.join(
+      final String releasePom = path.join(
         repoPath,
         'io',
         'flutter',
@@ -89,78 +89,40 @@ Future<void> main() async {
         'flutter_release',
         '1.0',
         'flutter_release-1.0.pom',
-      ));
+      );
 
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'deviceinfo',
-        'device_info_release',
-        '1.0',
-        'device_info_release-1.0.aar',
-      ));
+      checkFileExists(releasePom);
 
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'deviceinfo',
-        'device_info_release',
-        '1.0',
-        'device_info_release-1.0.pom',
-      ));
+      section('Check AOT blobs in release POM');
 
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'packageinfo',
-        'package_info_release',
-        '1.0',
-        'package_info_release-1.0.aar',
-      ));
-
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'packageinfo',
-        'package_info_release',
-        '1.0',
-        'package_info_release-1.0.pom',
-      ));
+      checkFileContains(<String>[
+        'flutter_embedding_release',
+        'armeabi_v7a_release',
+        'arm64_v8a_release',
+      ], releasePom);
 
       section('Check assets in release AAR');
 
-      final Iterable<String> releaseAar = await getFilesInAar(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'devicelab',
-        'hello',
-        'flutter_release',
-        '1.0',
-        'flutter_release-1.0.aar',
-      ));
-
-      checkItContains<String>(<String>[
-        'assets/flutter_assets/FontManifest.json',
-        'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',
-      ], releaseAar);
-
-      section('Check AOT blobs in release AAR');
-
-      checkItContains<String>(<String>[
-        'jni/arm64-v8a/libapp.so',
-        'jni/arm64-v8a/libflutter.so',
-        'jni/armeabi-v7a/libapp.so',
-        'jni/armeabi-v7a/libflutter.so',
-      ], releaseAar);
+      checkItContains<String>(
+        <String>[
+          ...flutterAssets,
+          // AOT snapshots
+          'jni/arm64-v8a/libapp.so',
+          'jni/armeabi-v7a/libapp.so',
+        ],
+        await getFilesInAar(
+          path.join(
+            repoPath,
+            'io',
+            'flutter',
+            'devicelab',
+            'hello',
+            'flutter_release',
+            '1.0',
+            'flutter_release-1.0.aar',
+          )
+        )
+      );
 
       section('Build debug AAR');
 
@@ -182,7 +144,7 @@ Future<void> main() async {
         'flutter_debug-1.0.aar',
       ));
 
-      checkFileExists(path.join(
+      final String debugPom = path.join(
         repoPath,
         'io',
         'flutter',
@@ -191,52 +153,19 @@ Future<void> main() async {
         'flutter_debug',
         '1.0',
         'flutter_debug-1.0.pom',
-      ));
+      );
 
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'deviceinfo',
-        'device_info_debug',
-        '1.0',
-        'device_info_debug-1.0.aar',
-      ));
+      checkFileExists(debugPom);
 
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'deviceinfo',
-        'device_info_debug',
-        '1.0',
-        'device_info_debug-1.0.pom',
-      ));
+      section('Check AOT blobs in debug POM');
 
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'packageinfo',
-        'package_info_debug',
-        '1.0',
-        'package_info_debug-1.0.aar',
-      ));
-
-      checkFileExists(path.join(
-        repoPath,
-        'io',
-        'flutter',
-        'plugins',
-        'packageinfo',
-        'package_info_debug',
-        '1.0',
-        'package_info_debug-1.0.pom',
-      ));
-
+      checkFileContains(<String>[
+        'flutter_embedding_debug',
+        'x86_debug',
+        'x86_64_debug',
+        'armeabi_v7a_debug',
+        'arm64_v8a_debug',
+      ], debugPom);
 
       section('Check assets in debug AAR');
 
@@ -252,21 +181,11 @@ Future<void> main() async {
       ));
 
       checkItContains<String>(<String>[
-        'assets/flutter_assets/FontManifest.json',
-        'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',
+        ...flutterAssets,
         // JIT snapshots.
         'assets/flutter_assets/isolate_snapshot_data',
         'assets/flutter_assets/kernel_blob.bin',
         'assets/flutter_assets/vm_snapshot_data',
-      ], debugAar);
-
-      section('Check AOT blobs in debug AAR');
-
-      checkItContains<String>(<String>[
-        'jni/arm64-v8a/libflutter.so',
-        'jni/armeabi-v7a/libflutter.so',
-        'jni/x86/libflutter.so',
-        'jni/x86_64/libflutter.so',
       ], debugAar);
 
       return TaskResult.success(null);
