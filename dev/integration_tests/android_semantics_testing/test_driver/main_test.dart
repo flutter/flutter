@@ -369,9 +369,10 @@ void main() {
                   isEnabled: true,
                   isFocusable: true,
                   actions: <AndroidSemanticsAction>[
-                    if (item == popupItems.first) AndroidSemanticsAction.clearAccessibilityFocus,
-                    if (item != popupItems.first) AndroidSemanticsAction.accessibilityFocus,
-                    AndroidSemanticsAction.click,
+                    // TODO(gspencergoog): This should really be clearAccessibilityFocus,
+                    // but TalkBack doesn't find it for some reason.
+                    // https://github.com/flutter/flutter/issues/40101
+                    AndroidSemanticsAction.accessibilityFocus,
                   ],
                 ),
                 reason: "Popup $item doesn't have the right semantics");
@@ -393,10 +394,10 @@ void main() {
                   isEnabled: true,
                   isFocusable: true,
                   actions: <AndroidSemanticsAction>[
-                    // TODO(gspencergoog): This should really be identical to the first time,
-                    // but TalkBack doesn't find it the second time for some reason.
+                    // TODO(gspencergoog): This should really be clearAccessibilityFocus,
+                    // but TalkBack doesn't find it for some reason.
+                    // https://github.com/flutter/flutter/issues/40101
                     AndroidSemanticsAction.accessibilityFocus,
-                    AndroidSemanticsAction.click,
                   ],
                 ),
                 reason: "Popup $item doesn't have the right semantics the second time");
