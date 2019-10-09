@@ -679,7 +679,7 @@ class DropdownButton<T> extends StatefulWidget {
   ///       value: selectedItem,
   ///       onChanged: (String string) => setState(() => selectedItem = string),
   ///       selectedItemBuilder: (BuildContext context) {
-  ///         return items.map((String item) {
+  ///         return items.map<Widget>((String item) {
   ///           return Text(item);
   ///         }).toList();
   ///       },

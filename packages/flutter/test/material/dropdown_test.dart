@@ -1360,7 +1360,7 @@ void main() {
   });
 
   testWidgets('DropdownButton hint displays properly when selectedItemBuilder is defined', (WidgetTester tester) async {
-    // Test for https://github.com/flutter/flutter/issues/42340
+    // Regression test for https://github.com/flutter/flutter/issues/42340
     final List<String> items = <String>['1', '2', '3'];
     String selectedItem;
 
