@@ -16,7 +16,8 @@ import '../flutter_test_alternative.dart';
 
 typedef HandleEventCallback = void Function(PointerEvent event);
 
-class _TestGestureFlutterBinding extends BindingBase with ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, RendererBinding {
+class _TestGestureFlutterBinding extends BindingBase
+    with ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, RendererBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -80,15 +81,17 @@ void main() {
   });
 
   test('MouseTrackerAnnotation has correct toString', () {
-    final MouseTrackerAnnotation annotation1 =
-      MouseTrackerAnnotation(onEnter: (_) {}, onExit: (_) {}, onHover: (_) {});
+    final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
+      onEnter: (_) {},
+      onExit: (_) {},
+      onHover: (_) {},
+    );
     expect(
       annotation1.toString(),
       equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: enter hover exit)'),
     );
 
-    const MouseTrackerAnnotation annotation2 =
-      MouseTrackerAnnotation();
+    const MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation();
     expect(
       annotation2.toString(),
       equals('MouseTrackerAnnotation#${shortHash(annotation2)}(callbacks: <none>)'),

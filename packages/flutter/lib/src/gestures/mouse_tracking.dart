@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui';
+import 'dart:collection' show LinkedHashSet;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -55,23 +56,28 @@ class MouseTrackerAnnotation {
       callbacks.add('hover');
     if (onExit != null)
       callbacks.add('exit');
-    final String describeCallbacks = callbacks.isEmpty ? '<none>' :
-      callbacks.join(' ');
+    final String describeCallbacks = callbacks.isEmpty
+      ? '<none>'
+      : callbacks.join(' ');
     return '${describeIdentity(this)}(callbacks: $describeCallbacks)';
   }
 }
 
-/// Signature for searching for [MouseTrackerAnnotation]s from the given offset.
+/// Signature for searching for [MouseTrackerAnnotation]s at the given offset.
 ///
 /// It is used by the [MouseTracker] to fetch annotations for the mouse
 /// position.
 typedef MouseDetectorAnnotationFinder = Iterable<MouseTrackerAnnotation> Function(Offset offset);
 
+// Various states of each connected mouse device.
+//
+// It is used by [MouseTracker] to compute which callbacks should be triggered
+// by each event.
 class _MouseState {
   _MouseState({
-    @required PointerEvent mostRecentEvent ,
+    @required PointerEvent mostRecentEvent,
   }) : assert(mostRecentEvent != null),
-       _mostRecentEvent = mostRecentEvent ;
+       _mostRecentEvent = mostRecentEvent;
 
   // The list of annotations that contains this device during the last frame.
   Set<MouseTrackerAnnotation> lastAnnotations = <MouseTrackerAnnotation>{};
@@ -80,12 +86,12 @@ class _MouseState {
   //
   // The [mostRecentEvent] is never null.
   PointerEvent get mostRecentEvent => _mostRecentEvent;
+  PointerEvent _mostRecentEvent;
   set mostRecentEvent(PointerEvent value) {
     assert(value != null);
     assert(value.device == _mostRecentEvent.device);
     _mostRecentEvent = value;
   }
-  PointerEvent _mostRecentEvent;
 
   int get device => _mostRecentEvent.device;
 
@@ -108,12 +114,12 @@ class _MouseState {
 class MouseTracker extends ChangeNotifier {
   /// Creates a mouse tracker to keep track of mouse locations.
   ///
-  /// The first parameter is a pointer router, which [MouseTracker] will
+  /// The first parameter is a [PointerRouter], which [MouseTracker] will
   /// subscribe to and receive events from. Usually it is global singleton
   /// instance [GestureBinding.pointerRouter].
   ///
   /// The second parameter is a function with which the [MouseTracker] can
-  /// search for [MouseTrackerAnnotation]s that contains a given position.
+  /// search for [MouseTrackerAnnotation]s at a given position.
   /// Usually it is [Layer.findAll] of the root layer.
   ///
   /// All of the parameters must not be null.
@@ -129,10 +135,14 @@ class MouseTracker extends ChangeNotifier {
     _router.removeGlobalRoute(_handleEvent);
   }
 
-  /// Find annotations at a given offset in global logical coordinate space.
+  /// Find annotations at a given offset in global logical coordinate space
+  /// in visual order from front to back.
   ///
   /// [MouseTracker] uses this callback to know which annotations are affected
   /// by each device.
+  ///
+  /// The order between the returned annotations is important since it
+  /// determines the order between callbacks.
   final MouseDetectorAnnotationFinder annotationFinder;
 
   // The pointer router that the mouse tracker listens to, and receives new
@@ -141,7 +151,7 @@ class MouseTracker extends ChangeNotifier {
 
   // Tracks the state of connected mouse devices.
   //
-  // It is a source-of-truth for the list of connected mouse devices.
+  // It is the source-of-truth for the list of connected mouse devices.
   //
   // If a device disconnects, the device will be moved to
   // `_disconnectedMouseState`.
@@ -153,10 +163,13 @@ class MouseTracker extends ChangeNotifier {
   // A device is moved from `_mouseStates` on its disconnecting event, and
   // will be permanantly removed after its exit callback.
   _MouseState _disconnectedMouseState;
+
   _MouseState _findMouseState(int device) {
     assert(device != null);
-    if (device == _disconnectedMouseState?.device)
+    if (device == _disconnectedMouseState?.device) {
+      assert(!_mouseStates.containsKey(device));
       return _disconnectedMouseState;
+    }
     return _mouseStates[device];
   }
 
@@ -165,11 +178,13 @@ class MouseTracker extends ChangeNotifier {
   //
   // The returned value is never null.
   _MouseState _guaranteeMouseState(int device, PointerEvent mostRecentEvent) {
-    final _MouseState result = _findMouseState(device);
-    if (result == null) {
+    final _MouseState currentState = _findMouseState(device);
+    if (currentState == null) {
       _addMouseDevice(device, mostRecentEvent);
     }
-    return result ?? _mouseStates[device];
+    final _MouseState result = currentState ?? _mouseStates[device];
+    assert(result != null);
+    return result;
   }
 
   // The collection of annotations that are currently being tracked.
@@ -198,6 +213,7 @@ class MouseTracker extends ChangeNotifier {
     mouseState.mostRecentEvent = event;
     // Schedule a check to exit annotations that used to contain this pointer.
     sendMouseNotifications(<int>{deviceId});
+    assert(_disconnectedMouseState == null);
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
     }
@@ -219,7 +235,7 @@ class MouseTracker extends ChangeNotifier {
       mouseState.mostRecentEvent = event;
       if (previousEvent is PointerAddedEvent || previousEvent.position != event.position) {
         // Only send notifications if we have our first event, or if the
-        // location of the mouse has changed, and only if there are tracked annotations.
+        // location of the mouse has changed
         sendMouseNotifications(<int>{deviceId});
       }
     }
@@ -272,13 +288,13 @@ class MouseTracker extends ChangeNotifier {
       return;
     }
 
-    final Iterable<_MouseState> targetDevices = deviceIds != null ?
-      deviceIds.map(_findMouseState) :
-      () sync* {
-        yield *_mouseStates.values;
-        if (_disconnectedMouseState != null)
-          yield _disconnectedMouseState;
-      }();
+    final Iterable<_MouseState> targetDevices = deviceIds != null
+      ? deviceIds.map(_findMouseState)
+      : () sync* {
+          yield *_mouseStates.values;
+          if (_disconnectedMouseState != null)
+            yield _disconnectedMouseState;
+        }();
 
     for (final _MouseState mouseState in targetDevices) {
       final bool thisDeviceIsConnected = mouseState != _disconnectedMouseState;
@@ -292,8 +308,10 @@ class MouseTracker extends ChangeNotifier {
 
       // The annotations that contains this device in the coming frame in
       // visual order.
-      final Set<MouseTrackerAnnotation> nextAnnotations = thisDeviceIsConnected
-        ? annotationFinder(mouseState.mostRecentEvent.position).toSet()
+      // Order is preserved becuase [Set.from] creates a [LinkedHashSet], which
+      // keeps the order.
+      final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = thisDeviceIsConnected
+        ? LinkedHashSet<MouseTrackerAnnotation>.from(annotationFinder(mouseState.mostRecentEvent.position))
         : const <MouseTrackerAnnotation>{};
 
       // The annotations that contains this device in the previous frame in
@@ -301,8 +319,8 @@ class MouseTracker extends ChangeNotifier {
       final Set<MouseTrackerAnnotation> lastAnnotations = mouseState.lastAnnotations;
 
       // Send exit events in visual order.
-      final Iterable<MouseTrackerAnnotation> exitingAnnotations = lastAnnotations
-        .difference(nextAnnotations);
+      final Iterable<MouseTrackerAnnotation> exitingAnnotations =
+        lastAnnotations.difference(nextAnnotations);
       for (final MouseTrackerAnnotation annotation in exitingAnnotations) {
         if (annotation.onExit != null) {
           annotation.onExit(PointerExitEvent.fromMouseEvent(mostRecentEvent));
@@ -310,8 +328,8 @@ class MouseTracker extends ChangeNotifier {
       }
 
       // Send enter events in reverse visual order.
-      final Iterable<MouseTrackerAnnotation> enteringAnnotations = nextAnnotations
-        .difference(lastAnnotations).toList().reversed;
+      final Iterable<MouseTrackerAnnotation> enteringAnnotations =
+        nextAnnotations.difference(lastAnnotations).toList().reversed;
       for (final MouseTrackerAnnotation annotation in enteringAnnotations) {
         if (annotation.onEnter != null) {
           annotation.onEnter(PointerEnterEvent.fromMouseEvent(mostRecentEvent));
@@ -322,8 +340,8 @@ class MouseTracker extends ChangeNotifier {
       // No solid reasons have been brough up on the order between the hover
       // events, except for keeping it aligned with enter events for simplicity.
       if (mostRecentEvent is PointerHoverEvent) {
-        final Iterable<MouseTrackerAnnotation> hoveringAnnotations = nextAnnotations
-          .toList().reversed;
+        final Iterable<MouseTrackerAnnotation> hoveringAnnotations =
+          nextAnnotations.toList().reversed;
         for (final MouseTrackerAnnotation annotation in hoveringAnnotations) {
           if (annotation.onHover != null) {
             annotation.onHover(mostRecentEvent);
