@@ -1359,6 +1359,50 @@ void main() {
     expect(find.text('Two as an Arabic numeral: 2'), findsOneWidget);
   });
 
+  testWidgets('DropdownButton hint displays properly when selectedItemBuilder is defined', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/42340
+    final List<String> items = <String>['1', '2', '3'];
+    String selectedItem;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            home: Scaffold(
+              body: DropdownButton<String>(
+                hint: const Text('Please select an item'),
+                value: selectedItem,
+                onChanged: (String string) => setState(() {
+                  selectedItem = string;
+                }),
+                selectedItemBuilder: (BuildContext context) {
+                  return items.map((String item) {
+                    return Text('You have selected: $item');
+                  }).toList();
+                },
+                items: items.map((String item) {
+                  return DropdownMenuItem<String>(
+                    child: Text(item),
+                    value: item,
+                  );
+                }).toList(),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    // Initially shows the hint text
+    expect(find.text('Please select an item'), findsOneWidget);
+    await tester.tap(find.text('Please select an item'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('1'));
+    await tester.pumpAndSettle();
+    // Selecting an item should display its corresponding item builder
+    expect(find.text('You have selected: 1'), findsOneWidget);
+  });
+
   testWidgets('Dropdown form field with autovalidation test', (WidgetTester tester) async {
     String value = 'one';
     int _validateCalled = 0;
