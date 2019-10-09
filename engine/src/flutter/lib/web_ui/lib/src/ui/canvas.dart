@@ -888,7 +888,8 @@ class Canvas {
   }
 
   void drawVertices(Vertices vertices, BlendMode blendMode, Paint paint) {
-    assert(vertices != null); // vertices is checked on the engine side
+    if (vertices == null) return;
+    //assert(vertices != null); // vertices is checked on the engine side
     assert(paint != null);
     assert(blendMode != null);
     _canvas.drawVertices(vertices, blendMode, paint);
