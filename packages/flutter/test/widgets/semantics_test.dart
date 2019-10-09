@@ -477,6 +477,7 @@ void main() {
           textField: true,
           readOnly: true,
           focused: true,
+          focusable: true,
           inMutuallyExclusiveGroup: true,
           header: true,
           obscured: true,

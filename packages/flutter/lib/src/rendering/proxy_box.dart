@@ -3489,6 +3489,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool header,
     bool textField,
     bool readOnly,
+    bool focusable,
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
@@ -3541,6 +3542,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _header = header,
        _textField = textField,
        _readOnly = readOnly,
+       _focusable = focusable,
        _focused = focused,
        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _obscured = obscured,
@@ -3717,6 +3719,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (readOnly == value)
       return;
     _readOnly = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isFocusable] semantic to the given value.
+  bool get focusable => _focusable;
+  bool _focusable;
+  set focusable(bool value) {
+    if (focusable == value)
+      return;
+    _focusable = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4380,6 +4392,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isTextField = textField;
     if (readOnly != null)
       config.isReadOnly = readOnly;
+    if (focusable != null)
+      config.isFocusable = focusable;
     if (focused != null)
       config.isFocused = focused;
     if (inMutuallyExclusiveGroup != null)

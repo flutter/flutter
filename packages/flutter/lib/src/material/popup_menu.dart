@@ -723,7 +723,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     } else {
       // For the sake of backwards compatibility. An (unlikely) app that relied
       // on having menus only inherit from the material Theme could set
-      // captureInheritedThemes to false and get the original behvaior.
+      // captureInheritedThemes to false and get the original behavior.
       if (theme != null)
         menu = Theme(data: theme, child: menu);
     }
