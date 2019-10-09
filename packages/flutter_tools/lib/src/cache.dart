@@ -121,6 +121,9 @@ class Cache {
   // artifacts for the current platform.
   bool includeAllPlatforms = false;
 
+  // Whether to cache the unsigned mac binaries. Defaults to caching the signed binaries.
+  bool useUnsignedMacBinaries = false;
+
   static RandomAccessFile _lock;
   static bool _lockEnabled = true;
 
@@ -1094,12 +1097,14 @@ class IosUsbArtifacts extends CachedArtifact {
 
   @override
   Future<void> updateInner() {
-    if (!platform.isMacOS) {
+    if (!platform.isMacOS && !cache.includeAllPlatforms) {
       return Future<void>.value();
     }
-    final Uri archiveUri = Uri.parse('$_storageBaseUrl/flutter_infra/ios-usb-dependencies/$name/$version/$name.zip');
     return _downloadZipArchive('Downloading $name...', archiveUri, location);
   }
+
+  @visibleForTesting
+  Uri get archiveUri => Uri.parse('$_storageBaseUrl/flutter_infra/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
 }
 
 // Many characters are problematic in filenames, especially on Windows.

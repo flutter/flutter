@@ -43,6 +43,8 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache artifacts required for any development platform.');
     argParser.addFlag('flutter_runner', negatable: true, defaultsTo: false,
         help: 'Precache the flutter runner artifacts.', hide: true);
+    argParser.addFlag('use-unsigned-mac-binaries', negatable: true, defaultsTo: false,
+        help: 'Precache the unsigned mac binaries when available.', hide: true);
   }
 
   @override
@@ -58,6 +60,9 @@ class PrecacheCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     if (argResults['all-platforms']) {
       cache.includeAllPlatforms = true;
+    }
+    if (argResults['use-unsigned-mac-binaries']) {
+      cache.useUnsignedMacBinaries = true;
     }
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
