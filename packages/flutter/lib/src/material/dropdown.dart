@@ -760,7 +760,7 @@ class DropdownButton<T> extends StatefulWidget {
   ///       value: selectedItem,
   ///       onChanged: (String string) => setState(() => selectedItem = string),
   ///       selectedItemBuilder: (BuildContext context) {
-  ///         return items.map((String item) {
+  ///         return items.map<Widget>((String item) {
   ///           return Text(item);
   ///         }).toList();
   ///       },
@@ -1047,7 +1047,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (_enabled) {
       items = widget.selectedItemBuilder == null
         ? List<Widget>.from(widget.items)
-        : widget.selectedItemBuilder(context).map((Widget item) {
+        : widget.selectedItemBuilder(context).map<Widget>((Widget item) {
             return Container(
               constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
               alignment: AlignmentDirectional.centerStart,
