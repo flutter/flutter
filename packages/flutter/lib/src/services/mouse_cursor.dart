@@ -21,7 +21,6 @@ class _DeviceCursorState {
   int _cursor;
 
   bool changeCursor(int cursor) {
-    assert(cursor != MouseCursors.fallThrough);
     if (cursor == MouseCursors.releaseControl)
       return false;
     if (cursor != _cursor) {
@@ -41,8 +40,8 @@ abstract class MouseCursorManagerDelegate {
   /// The returning future resolves true if and only if the entire request is
   /// successful.
   ///
-  /// The `cursorForDevices` is a map from device ID to their targer cursors.
-  Future<bool> setCursors(Map<int, int> cursorForDevices);
+  /// The `deviceCursors` is a map from device ID to their targer cursors.
+  Future<bool> setCursors(Map<int, int> deviceCursors);
 }
 
 /// TODOC
@@ -54,17 +53,16 @@ class MouseCursorManagerDefaultDelegate implements MouseCursorManagerDelegate {
   final MethodChannel channel;
 
   @override
-  Future<bool> setCursors(Map<int, int> cursorForDevices) {
-    assert(cursorForDevices.isNotEmpty);
+  Future<bool> setCursors(Map<int, int> deviceCursors) {
+    assert(deviceCursors.isNotEmpty);
     assert(() {
-      cursorForDevices.forEach((int device, int cursor) {
-        assert(cursor != MouseCursors.releaseControl &&
-               cursor != MouseCursors.fallThrough,
+      deviceCursors.forEach((int device, int cursor) {
+        assert(cursor != MouseCursors.releaseControl,
           'Mouse cursor ${_cursorToString(cursor)} is not an actual value to be set.');
       });
       return true;
     }());
-    return channel.invokeMethod<bool>('setCursors', cursorForDevices);
+    return channel.invokeMethod<bool>('setCursors', deviceCursors);
   }
 }
 
@@ -86,17 +84,16 @@ class MouseCursorManager {
 
   /// Called on an event that might cause pointers to change cursors.
   ///
-  /// The values might contain [MouseCursors.releaseControl], but should not
-  /// contain [MouseCursors.fallThrough].
+  /// The values might contain [MouseCursors.releaseControl].
   ///
   /// It resolves to true if all requests are successful, or false if any
   /// request fails.
   ///
   /// Calling this method with the same cursor configuration is cheap, because
   /// [MouseCursorManager] keeps track of the current cursor of each device.
-  Future<void> setCursors(Map<int, int> cursorForDevices) async {
+  Future<void> setCursors(Map<int, int> deviceCursors) async {
     // Create a state if absent, then find the devices that need changing.
-    final Iterable<MapEntry<int, int>> filteredEntries = cursorForDevices.entries.where(
+    final Iterable<MapEntry<int, int>> filteredEntries = deviceCursors.entries.where(
       (MapEntry<int, int> entry) {
         final _DeviceCursorState state = _deviceStates.putIfAbsent(
           entry.key,

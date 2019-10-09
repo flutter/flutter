@@ -326,7 +326,7 @@ class MouseTracker extends ChangeNotifier {
           }
           if (firstCursor == null) {
             final int thisCursor = hitAnnotation.annotation.cursor();
-            if (thisCursor != null && thisCursor != MouseCursors.fallThrough)
+            if (thisCursor != null)
               firstCursor = thisCursor;
           }
         }

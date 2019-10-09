@@ -15,21 +15,6 @@
 /// to pick values, as long as the result does not collide with existing
 /// values and is consistent between platforms and the framework.
 class MouseCursors {
-  /// A special value that tells Flutter to check the value of the layer behind
-  /// it.
-  ///
-  /// A layer with this value will not absorb the search for mouse cursor
-  /// configuration. The search will continue to the regions behind it, and can
-  /// keep going if the next region also chooses to fall through. If all regions
-  /// choose to fall through, then the result will default to
-  /// [MouseCursors.basic].
-  ///
-  /// This constant is the default behavior of a [MouseRegion].
-  ///
-  /// This constant is parsed by [MouseCursorManger] and should not be sent
-  /// to the platforms via the channel.
-  static const int fallThrough = 0xcac463d2;
-
   /// A special value that tells Flutter to release the control of cursors.
   ///
   /// A layer with this value will absorb the search for mouse cursor

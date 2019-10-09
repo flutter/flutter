@@ -263,7 +263,7 @@ class SystemChannels {
   ///    devices. The argument is a `Map<int, int>` that maps from device to
   ///    cursor. See [MouseCursors] for a list of system cursors.
   static const MethodChannel mouseCursor = OptionalMethodChannel(
-    'flutter/mouse_cursor',
+    'flutter/mousecursor',
     JSONMethodCodec(),
   );
 }
