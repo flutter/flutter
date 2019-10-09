@@ -6184,6 +6184,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool selected,
     bool toggled,
     bool button,
+    bool link,
     bool header,
     bool textField,
     bool readOnly,
@@ -6237,6 +6238,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       toggled: toggled,
       selected: selected,
       button: button,
+      link: link,
       header: header,
       textField: textField,
       readOnly: readOnly,
@@ -6349,6 +6351,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       toggled: properties.toggled,
       selected: properties.selected,
       button: properties.button,
+      link: properties.link,
       header: properties.header,
       textField: properties.textField,
       readOnly: properties.readOnly,
@@ -6418,6 +6421,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..toggled = properties.toggled
       ..selected = properties.selected
       ..button = properties.button
+      ..link = properties.link
       ..header = properties.header
       ..textField = properties.textField
       ..readOnly = properties.readOnly
