@@ -380,6 +380,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    final BottomSheetThemeData sheetTheme = theme?.bottomSheetTheme ?? Theme.of(context).bottomSheetTheme;
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
     Widget bottomSheet = MediaQuery.removePadding(
@@ -387,8 +388,8 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
       removeTop: true,
       child: _ModalBottomSheet<T>(
         route: this,
-        backgroundColor: backgroundColor,
-        elevation: elevation,
+        backgroundColor: backgroundColor ?? sheetTheme?.modalBackgroundColor ?? sheetTheme?.backgroundColor,
+        elevation: elevation ?? sheetTheme?.modalElevation ?? sheetTheme?.elevation,
         shape: shape,
         clipBehavior: clipBehavior,
         isScrollControlled: isScrollControlled,
@@ -460,15 +461,13 @@ Future<T> showModalBottomSheet<T>({
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
-  final BottomSheetThemeData theme = Theme.of(context).bottomSheetTheme;
-
   return Navigator.of(context, rootNavigator: useRootNavigator).push(_ModalBottomSheetRoute<T>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     isScrollControlled: isScrollControlled,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    backgroundColor: backgroundColor ?? theme?.modalBackgroundColor ?? theme?.backgroundColor,
-    elevation: elevation ?? theme?.modalElevation ?? theme?.elevation,
+    backgroundColor: backgroundColor,
+    elevation: elevation,
     shape: shape,
     clipBehavior: clipBehavior,
   ));
