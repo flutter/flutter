@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/version.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -30,6 +31,7 @@ void main() {
       expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\n' ''));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('version switch', () async {
@@ -40,6 +42,7 @@ void main() {
       expect(testLogger.statusText, contains('Switching Flutter to version $version'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('switch to not supported version without force', () async {
@@ -50,6 +53,7 @@ void main() {
       expect(testLogger.errorText, contains('Version command is not supported in'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('switch to not supported version with force', () async {
@@ -60,6 +64,7 @@ void main() {
       expect(testLogger.statusText, contains('Switching Flutter to version $version with force'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('tool exit on confusing version', () async {
@@ -70,6 +75,7 @@ void main() {
              throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
+      Pub: () => const Pub(),
     });
 
     testUsingContext('exit tool if can\'t get the tags', () async {

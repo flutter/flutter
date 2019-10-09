@@ -194,6 +194,7 @@ void main() {
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
+      isFocusable: true,
       hasTapAction: true,
     ));
 
@@ -937,6 +938,7 @@ void main() {
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
+      isFocusable: true,
       hasTapAction: true,
       onTapHint: localizations.expandedIconTapHint,
     ));
@@ -960,6 +962,7 @@ void main() {
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
+      isFocusable: true,
       hasTapAction: true,
       onTapHint: localizations.collapsedIconTapHint,
     ));

@@ -36,7 +36,7 @@ void main() {
       final RunCommand command = RunCommand();
       applyMocksToCommand(command);
       try {
-        await createTestCommandRunner(command).run(<String>['run', '-t', 'abc123']);
+        await createTestCommandRunner(command).run(<String>['run', '-t', 'abc123', '--no-pub']);
         fail('Expect exception');
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
@@ -61,6 +61,7 @@ void main() {
           'run',
           '--dart-flags', '"--observe"',
           '--no-hot',
+          '--no-pub',
         ];
       });
 
