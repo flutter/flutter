@@ -14,7 +14,7 @@ class Foo {
   double getDouble() => 1.0;
 }
 
-const Foo foo = const Foo();
+const Foo foo = Foo();
 
 void main() {
   test('PluginUtilities Callback Handles', () {

@@ -21,7 +21,7 @@ void main() {
   });
 
   test('FrameTiming.toString has the correct format', () {
-    FrameTiming timing = FrameTiming(<int>[1000, 8000, 9000, 19500]);
+    final FrameTiming timing = FrameTiming(<int>[1000, 8000, 9000, 19500]);
     expect(timing.toString(), 'FrameTiming(buildDuration: 7.0ms, rasterDuration: 10.5ms, totalSpan: 18.5ms)');
   });
 }

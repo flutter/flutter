@@ -20,9 +20,9 @@ fi
 
 echo "Analyzing flutter_frontend_server..."
 RESULTS=`dartanalyzer                                                          \
-  --packages=flutter/flutter_frontend_server/.packages                                 \
+  --packages=flutter/flutter_frontend_server/.packages                         \
   --options flutter/analysis_options.yaml                                      \
-  flutter/flutter_frontend_server                                                      \
+  flutter/flutter_frontend_server                                              \
   2>&1                                                                         \
   | grep -Ev "No issues found!"                                                \
   | grep -Ev "Analyzing.+frontend_server"`
@@ -41,6 +41,38 @@ RESULTS=`dartanalyzer                                                          \
   2>&1                                                                         \
   | grep -Ev "No issues found!"                                                \
   | grep -Ev "Analyzing.+tools/licenses"`
+echo "$RESULTS"
+if [ -n "$RESULTS" ]; then
+  echo "Failed."
+  exit 1;
+fi
+
+echo "Analyzing testing/dart..."
+flutter/tools/gn --unoptimized
+ninja -C out/host_debug_unopt sky_engine sky_services
+(cd flutter/testing/dart && pub get)
+RESULTS=`dartanalyzer                                                          \
+  --packages=flutter/testing/dart/.packages                                    \
+  --options flutter/analysis_options.yaml                                      \
+  flutter/testing/dart                                                         \
+  2>&1                                                                         \
+  | grep -Ev "No issues found!"                                                \
+  | grep -Ev "Analyzing.+testing/dart"`
+echo "$RESULTS"
+if [ -n "$RESULTS" ]; then
+  echo "Failed."
+  exit 1;
+fi
+
+echo "Analyzing testing/scenario_app..."
+(cd flutter/testing/scenario_app && pub get)
+RESULTS=`dartanalyzer                                                          \
+  --packages=flutter/testing/scenario_app/.packages                            \
+  --options flutter/analysis_options.yaml                                      \
+  flutter/testing/scenario_app                                                 \
+  2>&1                                                                         \
+  | grep -Ev "No issues found!"                                                \
+  | grep -Ev "Analyzing.+testing/scenario_app"`
 echo "$RESULTS"
 if [ -n "$RESULTS" ]; then
   echo "Failed."
