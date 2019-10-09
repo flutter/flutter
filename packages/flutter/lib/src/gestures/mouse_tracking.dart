@@ -213,7 +213,6 @@ class MouseTracker extends ChangeNotifier {
     mouseState.mostRecentEvent = event;
     // Schedule a check to exit annotations that used to contain this pointer.
     sendMouseNotifications(<int>{deviceId});
-    assert(_disconnectedMouseState == null);
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
     }
@@ -310,7 +309,7 @@ class MouseTracker extends ChangeNotifier {
       // visual order.
       // Order is preserved becuase [Set.from] creates a [LinkedHashSet], which
       // keeps the order.
-      final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = thisDeviceIsConnected
+      final Set<MouseTrackerAnnotation> nextAnnotations = thisDeviceIsConnected
         ? LinkedHashSet<MouseTrackerAnnotation>.from(annotationFinder(mouseState.mostRecentEvent.position))
         : const <MouseTrackerAnnotation>{};
 
