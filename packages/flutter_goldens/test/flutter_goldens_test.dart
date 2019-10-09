@@ -380,7 +380,6 @@ void main() {
       setUp(() {
         final Directory basedir = fs.directory('flutter/test/library/')
           ..createSync(recursive: true);
-        mockSkiaClient.expectations = json.decode(expectationsTemplate());
         comparator = FlutterPreSubmitFileComparator(
           basedir.uri,
           mockSkiaClient,
