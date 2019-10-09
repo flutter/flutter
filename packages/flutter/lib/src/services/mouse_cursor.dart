@@ -21,6 +21,7 @@ class _DeviceCursorState {
   int _cursor;
 
   bool changeCursor(int cursor) {
+    assert(cursor != MouseCursors.fallThrough);
     if (cursor == MouseCursors.releaseControl)
       return false;
     if (cursor != _cursor) {
@@ -85,6 +86,9 @@ class MouseCursorManager {
 
   /// Called on an event that might cause pointers to change cursors.
   ///
+  /// The values might contain [MouseCursors.releaseControl], but should not
+  /// contain [MouseCursors.fallThrough].
+  ///
   /// It resolves to true if all requests are successful, or false if any
   /// request fails.
   ///
@@ -111,7 +115,7 @@ class MouseCursorManager {
   ///
   /// It only frees the memory of the internal record. Nothing needs to be sent
   /// to the platform, since the pointer should be gone.
-  void clearDeviceRecord(int device) {
-    _deviceStates.remove(device);
+  void clearDeviceRecords(Iterable<int> devices) {
+    devices.forEach(_deviceStates.remove);
   }
 }
