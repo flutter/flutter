@@ -712,6 +712,23 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isNewAndroidEmbeddingEnabled;
+
+  @override
+  bool isEnabled(Feature feature) {
+    switch (feature) {
+      case flutterWebFeature:
+        return isWebEnabled;
+      case flutterLinuxDesktopFeature:
+        return isLinuxEnabled;
+      case flutterMacOSDesktopFeature:
+        return isMacOSEnabled;
+      case flutterWindowsDesktopFeature:
+        return isWindowsEnabled;
+      case flutterNewAndroidEmbeddingFeature:
+        return isNewAndroidEmbeddingEnabled;
+    }
+    return false;
+  }
 }
 
 class ThrowingPub implements Pub {

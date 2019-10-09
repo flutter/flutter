@@ -209,7 +209,7 @@ void main() {
   });
 
   test('Unstable artifacts', () {
-    expect(DevelopmentArtifact.web.unstable, true);
+    expect(DevelopmentArtifact.web.unstable, false);
     expect(DevelopmentArtifact.linux.unstable, true);
     expect(DevelopmentArtifact.macOS.unstable, true);
     expect(DevelopmentArtifact.windows.unstable, true);
