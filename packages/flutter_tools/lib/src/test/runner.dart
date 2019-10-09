@@ -36,6 +36,7 @@ Future<int> runTests(
   bool machine = false,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
+  bool enableAsserts = false,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   TestWatcher watcher,
@@ -62,7 +63,7 @@ Future<int> runTests(
   ];
   if (web) {
     final String tempBuildDir = fs.systemTempDirectory
-      .createTempSync('_flutter_test')
+      .createTempSync('flutter_test.')
       .absolute
       .uri
       .toFilePath();
@@ -113,6 +114,7 @@ Future<int> runTests(
     serverType: serverType,
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
+    enableAsserts: enableAsserts,
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
     buildTestAssets: buildTestAssets,

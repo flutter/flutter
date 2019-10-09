@@ -820,9 +820,8 @@ Future<void> _buildGradleProjectV2(
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
       environment: gradleEnv,
-      // TODO(mklim): if AndroidX warnings are no longer required, this
-      // mapFunction and all its associated variabled can be replaced with just
-      // `filter: ndkMessagefilter`.
+      // TODO(mklim): if AndroidX warnings are no longer required, we can remove
+      // them from this map function.
       mapFunction: (String line) {
         final bool isAndroidXPluginWarning = androidXPluginWarningRegex.hasMatch(line);
         if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
@@ -940,7 +939,6 @@ Future<void> _buildGradleProjectV2(
 /// Returns [true] if the current app uses AndroidX.
 // TODO(egarciad): https://github.com/flutter/flutter/issues/40800
 // Remove `FlutterManifest.usesAndroidX` and provide a unified `AndroidProject.usesAndroidX`.
-@visibleForTesting
 bool isAppUsingAndroidX(Directory androidDirectory) {
   final File properties = androidDirectory.childFile('gradle.properties');
   if (!properties.existsSync()) {

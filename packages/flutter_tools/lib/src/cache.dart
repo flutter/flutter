@@ -732,12 +732,11 @@ class FlutterSdk extends EngineCachedArtifact {
     return <List<String>>[
       <String>['common', 'flutter_patched_sdk.zip'],
       <String>['common', 'flutter_patched_sdk_product.zip'],
-      if (cache.includeAllPlatforms)
-        ...<List<String>>[
-          <String>['windows-x64', 'windows-x64/artifacts.zip'],
-          <String>['linux-x64', 'linux-x64/artifacts.zip'],
-          <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
-        ]
+      if (cache.includeAllPlatforms) ...<List<String>>[
+        <String>['windows-x64', 'windows-x64/artifacts.zip'],
+        <String>['linux-x64', 'linux-x64/artifacts.zip'],
+        <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
+      ]
       else if (platform.isWindows)
         <String>['windows-x64', 'windows-x64/artifacts.zip']
       else if (platform.isMacOS)
@@ -831,25 +830,17 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
   @override
   List<List<String>> getBinaryDirs() {
     return <List<String>>[
-      if (cache.includeAllPlatforms)
-        ...<List<String>>[
-          ..._osxBinaryDirs,
-          ..._linuxBinaryDirs,
-          ..._windowsBinaryDirs,
-          ..._dartSdks,
-        ]
-      else if (platform.isWindows)
-        ...<List<String>>[
-          ..._windowsBinaryDirs,
-        ]
+      if (cache.includeAllPlatforms) ...<List<String>>[
+        ..._osxBinaryDirs,
+        ..._linuxBinaryDirs,
+        ..._windowsBinaryDirs,
+        ..._dartSdks,
+      ] else if (platform.isWindows)
+        ..._windowsBinaryDirs
       else if (platform.isMacOS)
-        ...<List<String>>[
-          ..._osxBinaryDirs,
-        ]
+        ..._osxBinaryDirs
       else if (platform.isLinux)
-        ...<List<String>>[
-          ..._linuxBinaryDirs,
-        ],
+        ..._linuxBinaryDirs,
     ];
   }
 
@@ -885,7 +876,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
   @override
   Future<void> update() async {
     final Directory tempDir =
-        fs.systemTempDirectory.createTempSync('gradle_wrapper.');
+        fs.systemTempDirectory.createTempSync('flutter_gradle_wrapper.');
     injectGradleWrapperIfNeeded(tempDir);
 
     final Status status = logger.startProgress('Downloading Android Maven dependencies...',

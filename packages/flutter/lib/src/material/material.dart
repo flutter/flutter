@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
 
@@ -228,9 +227,9 @@ class Material extends StatefulWidget {
   /// [MaterialType.transparency].
   ///
   /// To support dark themes, if the surrounding
-  /// [ThemeData.applyElevationOverlayColor] is [true] and
-  /// this color is [ThemeData.colorScheme.surface] then a semi-transparent
-  /// white will be composited on top this color to indicate the elevation.
+  /// [ThemeData.applyElevationOverlayColor] is true then a semi-transparent
+  /// overlay color will be composited on top this color to indicate
+  /// the elevation.
   ///
   /// By default, the color is derived from the [type] of material.
   final Color color;
@@ -318,7 +317,7 @@ class Material extends StatefulWidget {
   static const double defaultSplashRadius = 35.0;
 }
 
-// Apply a semi-transparent white on surface colors to
+// Apply a semi-transparent colorScheme.onSurface to surface colors to
 // indicate the level of elevation.
 Color _elevationOverlayColor(BuildContext context, Color background, double elevation) {
   final ThemeData theme = Theme.of(context);
@@ -330,7 +329,7 @@ Color _elevationOverlayColor(BuildContext context, Color background, double elev
     // This formula matches the values in the spec:
     // https://material.io/design/color/dark-theme.html#properties
     final double opacity = (4.5 * math.log(elevation + 1) + 2) / 100.0;
-    final Color overlay = Colors.white.withOpacity(opacity);
+    final Color overlay = theme.colorScheme.onSurface.withOpacity(opacity);
     return Color.alphaBlend(overlay, background);
   }
   return background;

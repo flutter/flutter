@@ -73,6 +73,7 @@ void main() {
       final List<String> args = <String>[
         'drive',
         '--target=$testApp',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -99,6 +100,7 @@ void main() {
       final List<String> args = <String>[
         'drive',
         '--target=$testApp',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -118,6 +120,7 @@ void main() {
         '--no-wrap',
         'drive',
         '--target=$appFile',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -139,6 +142,7 @@ void main() {
         '--no-wrap',
         'drive',
         '--target=$appFile',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -178,6 +182,7 @@ void main() {
       final List<String> args = <String>[
         'drive',
         '--target=$testApp',
+        '--no-pub',
       ];
       await createTestCommandRunner(command).run(args);
       expect(testLogger.errorText, isEmpty);
@@ -208,6 +213,7 @@ void main() {
       final List<String> args = <String>[
         'drive',
         '--target=$testApp',
+        '--no-pub',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -365,6 +371,7 @@ void main() {
         final List<String> args = <String>[
           'drive',
           '--target=$testApp',
+          '--no-pub',
         ];
         try {
           await createTestCommandRunner(command).run(args);
@@ -391,6 +398,7 @@ void main() {
           'drive',
           '--build',
           '--target=$testApp',
+          '--no-pub',
         ];
         try {
           await createTestCommandRunner(command).run(args);
@@ -417,6 +425,7 @@ void main() {
           'drive',
           '--no-build',
           '--target=$testApp',
+          '--no-pub',
         ];
         try {
           await createTestCommandRunner(command).run(args);

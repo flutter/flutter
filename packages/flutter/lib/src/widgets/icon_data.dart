@@ -75,10 +75,10 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
   IconDataProperty(
     String name,
     IconData value, {
-      String ifNull,
-      bool showName = true,
-      DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-      DiagnosticLevel level = DiagnosticLevel.info,
+    String ifNull,
+    bool showName = true,
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
+    DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(style != null),
        assert(level != null),

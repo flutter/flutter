@@ -20,7 +20,6 @@ import '../runner/flutter_command.dart';
 
 /// All currently implemented targets.
 const List<Target> _kDefaultTargets = <Target>[
-  UnpackLinux(),
   UnpackWindows(),
   CopyAssets(),
   KernelSnapshot(),
@@ -32,6 +31,7 @@ const List<Target> _kDefaultTargets = <Target>[
   DebugMacOSBundleFlutterAssets(),
   ProfileMacOSBundleFlutterAssets(),
   ReleaseMacOSBundleFlutterAssets(),
+  DebugBundleLinuxAssets(),
   WebReleaseBundle(),
 ];
 
@@ -77,7 +77,7 @@ class AssembleCommand extends FlutterCommand {
     final Target result = _kDefaultTargets
         .firstWhere((Target target) => target.name == name, orElse: () => null);
     if (result == null) {
-      throwToolExit('No target named "{target.name} defined."');
+      throwToolExit('No target named "$name" defined.');
     }
     return result;
   }
