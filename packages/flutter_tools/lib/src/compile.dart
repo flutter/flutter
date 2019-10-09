@@ -286,6 +286,7 @@ class KernelCompiler {
       sdkRoot,
       '--strong',
       '--target=$targetModel',
+      '-Ddart.developer.causal_async_stacks=true',
       if (enableAsserts) '--enable-asserts',
       if (trackWidgetCreation) '--track-widget-creation',
       if (!linkPlatformKernelIn) '--no-link-platform',
@@ -569,6 +570,7 @@ class ResidentCompiler {
       '--incremental',
       '--strong',
       '--target=$_targetModel',
+      '-Ddart.developer.causal_async_stacks=true',
       if (outputPath != null) ...<String>[
         '--output-dill',
         outputPath,
