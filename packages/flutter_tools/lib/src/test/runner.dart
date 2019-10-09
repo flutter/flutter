@@ -63,7 +63,7 @@ Future<int> runTests(
   ];
   if (web) {
     final String tempBuildDir = fs.systemTempDirectory
-      .createTempSync('_flutter_test')
+      .createTempSync('flutter_test.')
       .absolute
       .uri
       .toFilePath();

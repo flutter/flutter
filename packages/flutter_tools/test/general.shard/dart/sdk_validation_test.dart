@@ -44,7 +44,7 @@ void main() {
 }
 ''');
 
-      await pubGet(context: PubContext.flutterTests, directory: projectDirectory.path);
+      await pub.get(context: PubContext.flutterTests, directory: projectDirectory.path);
       final AnalysisServer server = AnalysisServer(dartSdkPath, <String>[projectDirectory.path]);
       try {
         final int errorCount = await analyze(server);
@@ -56,7 +56,7 @@ void main() {
       tryToDelete(projectDirectory);
       Cache.enableLocking();
     }
-  });
+  }, skip: true);
 }
 
 Future<int> analyze(AnalysisServer server) async {

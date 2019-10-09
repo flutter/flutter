@@ -240,6 +240,11 @@ void main() {
 
     expect(result.code, 1);
     expect(result.message, contains('Failed to recompile application.'));
+    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
+    verifyNever(Usage.instance.sendTiming('hot', 'web-refresh', any));
+    verifyNever(Usage.instance.sendTiming('hot', 'web-recompile', any));
+  }, overrides: <Type, Generator>{
+    Usage: () => MockFlutterUsage(),
   }));
 
   test('Fails on vmservice response error', () => testbed.run(() async {
@@ -259,6 +264,11 @@ void main() {
 
     expect(result.code, 1);
     expect(result.message, contains('Failed'));
+    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
+    verifyNever(Usage.instance.sendTiming('hot', 'web-refresh', any));
+    verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
+  }, overrides: <Type, Generator>{
+    Usage: () => MockFlutterUsage(),
   }));
 
   test('Fails on vmservice RpcError', () => testbed.run(() async {

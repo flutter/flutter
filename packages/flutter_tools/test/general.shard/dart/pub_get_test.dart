@@ -36,7 +36,7 @@ void main() {
     FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironment, isNull);
       expect(testLogger.statusText, '');
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pub.get(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -94,6 +94,7 @@ void main() {
     Platform: () => FakePlatform(
       environment: UnmodifiableMapView<String, String>(<String, String>{}),
     ),
+    Pub: () => const Pub(),
   });
 
   testUsingContext('pub cache in root is used', () async {
@@ -106,7 +107,7 @@ void main() {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pub.get(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -121,6 +122,7 @@ void main() {
     Platform: () => FakePlatform(
       environment: UnmodifiableMapView<String, String>(<String, String>{}),
     ),
+    Pub: () => const Pub(),
   });
 
   testUsingContext('pub cache in environment is used', () async {
@@ -132,7 +134,7 @@ void main() {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pub.get(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -149,12 +151,13 @@ void main() {
         'PUB_CACHE': 'custom/pub-cache/path',
       }),
     ),
+    Pub: () => const Pub(),
   });
 
   testUsingContext('analytics sent on success', () async {
     MockDirectory.findCache = true;
-    await pubGet(context: PubContext.flutterTests, checkLastModified: false);
-    verify(flutterUsage.sendEvent('pub', 'flutter-tests', label: 'success')).called(1);
+    await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
   }, overrides: <Type, Generator>{
     ProcessManager: () => MockProcessManager(0),
     FileSystem: () => MockFileSystem(),
@@ -164,16 +167,17 @@ void main() {
       }),
     ),
     Usage: () => MockUsage(),
+    Pub: () => const Pub(),
   });
 
   testUsingContext('analytics sent on failure', () async {
     MockDirectory.findCache = true;
     try {
-      await pubGet(context: PubContext.flutterTests, checkLastModified: false);
+      await pub.get(context: PubContext.flutterTests, checkLastModified: false);
     } on ToolExit {
       // Ignore.
     }
-    verify(flutterUsage.sendEvent('pub', 'flutter-tests', label: 'failure')).called(1);
+    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'failure')).called(1);
   }, overrides: <Type, Generator>{
     ProcessManager: () => MockProcessManager(1),
     FileSystem: () => MockFileSystem(),
@@ -183,16 +187,17 @@ void main() {
       }),
     ),
     Usage: () => MockUsage(),
+    Pub: () => const Pub(),
   });
 
   testUsingContext('analytics sent on failed version solve', () async {
     MockDirectory.findCache = true;
     try {
-      await pubGet(context: PubContext.flutterTests, checkLastModified: false);
+      await pub.get(context: PubContext.flutterTests, checkLastModified: false);
     } on ToolExit {
       // Ignore.
     }
-    verify(flutterUsage.sendEvent('pub', 'flutter-tests', label: 'version-solving-failed')).called(1);
+    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'version-solving-failed')).called(1);
   }, overrides: <Type, Generator>{
     ProcessManager: () => MockProcessManager(
       1,
@@ -205,6 +210,7 @@ void main() {
       }),
     ),
     Usage: () => MockUsage(),
+    Pub: () => const Pub(),
   });
 }
 

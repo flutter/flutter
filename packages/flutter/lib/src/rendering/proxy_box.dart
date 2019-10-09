@@ -3485,6 +3485,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool toggled,
     bool selected,
     bool button,
+    bool link,
     bool header,
     bool textField,
     bool readOnly,
@@ -3536,6 +3537,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _toggled = toggled,
        _selected = selected,
        _button = button,
+       _link = link,
        _header = header,
        _textField = textField,
        _readOnly = readOnly,
@@ -3675,6 +3677,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (button == value)
       return;
     _button = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isLink] semantic to the given value.
+  bool get link => _link;
+  bool _link;
+  set link(bool value) {
+    if (link == value)
+      return;
+    _link = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4360,6 +4372,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isSelected = selected;
     if (button != null)
       config.isButton = button;
+    if (link != null)
+      config.isLink = link;
     if (header != null)
       config.isHeader = header;
     if (textField != null)

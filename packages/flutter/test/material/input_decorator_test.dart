@@ -1026,6 +1026,103 @@ void main() {
     expect(tester.getBottomLeft(find.text(kError1)), const Offset(12.0, 76.0));
   });
 
+  testWidgets('InputDecoration helperMaxLines', (WidgetTester tester) async {
+    const String kHelper1 = 'e0';
+    const String kHelper2 = 'e0\ne1';
+    const String kHelper3 = 'e0\ne1\ne2';
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          helperText: kHelper3,
+          helperMaxLines: 3,
+          errorText: null,
+          filled: true,
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 100dps:
+    //
+    //   12 - top padding
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
+    //    4 - floating label / input text gap
+    //   16 - input text (ahem font size 16dps)
+    //   12 - bottom padding
+    //    8 - below the border padding
+    //   36 - helper text (3 lines, ahem font size 12dps)
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 100.0));
+    expect(tester.getTopLeft(find.text(kHelper3)), const Offset(12.0, 64.0));
+    expect(tester.getBottomLeft(find.text(kHelper3)), const Offset(12.0, 100.0));
+
+    // Overall height for this InputDecorator is 12 less than the first
+    // one, 88dps, because helperText only occupies two lines.
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          helperText: kHelper3,
+          helperMaxLines: 2,
+          errorText: null,
+          filled: true,
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 88.0));
+    expect(tester.getTopLeft(find.text(kHelper3)), const Offset(12.0, 64.0));
+    expect(tester.getBottomLeft(find.text(kHelper3)), const Offset(12.0, 88.0));
+
+    // Overall height for this InputDecorator is 12 less than the first
+    // one, 88dps, because helperText only occupies two lines.
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          helperText: kHelper2,
+          helperMaxLines: 3,
+          errorText: null,
+          filled: true,
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 88.0));
+    expect(tester.getTopLeft(find.text(kHelper2)), const Offset(12.0, 64.0));
+    expect(tester.getBottomLeft(find.text(kHelper2)), const Offset(12.0, 88.0));
+
+    // Overall height for this InputDecorator is 24 less than the first
+    // one, 88dps, because helperText only occupies one line.
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          helperText: kHelper1,
+          helperMaxLines: 3,
+          errorText: null,
+          filled: true,
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
+    expect(tester.getTopLeft(find.text(kHelper1)), const Offset(12.0, 64.0));
+    expect(tester.getBottomLeft(find.text(kHelper1)), const Offset(12.0, 76.0));
+  });
+
   testWidgets('InputDecorator prefix/suffix texts', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -2703,6 +2800,7 @@ void main() {
       const InputDecorationTheme(
         labelStyle: themeStyle,
         helperStyle: themeStyle,
+        helperMaxLines: 5,
         hintStyle: themeStyle,
         errorStyle: themeStyle,
         errorMaxLines: 4,
@@ -2721,6 +2819,7 @@ void main() {
 
     expect(decoration.labelStyle, decorationStyle);
     expect(decoration.helperStyle, decorationStyle);
+    expect(decoration.helperMaxLines, 5);
     expect(decoration.hintStyle, decorationStyle);
     expect(decoration.errorStyle, decorationStyle);
     expect(decoration.errorMaxLines, 4);
@@ -3024,6 +3123,7 @@ void main() {
     final String debugString = const InputDecorationTheme(
       labelStyle: TextStyle(height: 1.0),
       helperStyle: TextStyle(height: 2.0),
+      helperMaxLines: 5,
       hintStyle: TextStyle(height: 3.0),
       errorStyle: TextStyle(height: 4.0),
       errorMaxLines: 5,
@@ -3412,6 +3512,7 @@ void main() {
     const InputDecorationTheme(
       labelStyle: TextStyle(),
       helperStyle: TextStyle(),
+      helperMaxLines: 6,
       hintStyle: TextStyle(),
       errorMaxLines: 5,
       hasFloatingPlaceholder: false,
@@ -3436,6 +3537,7 @@ void main() {
     expect(description, <String>[
       'labelStyle: TextStyle(<all styles inherited>)',
       'helperStyle: TextStyle(<all styles inherited>)',
+      'helperMaxLines: 6',
       'hintStyle: TextStyle(<all styles inherited>)',
       'errorMaxLines: 5',
       'hasFloatingPlaceholder: false',
