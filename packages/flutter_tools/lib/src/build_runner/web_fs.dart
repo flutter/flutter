@@ -289,7 +289,7 @@ class WebFs {
             return (await ChromeLauncher.connectedInstance).chromeConnection;
           },
           reloadConfiguration: ReloadConfiguration.none,
-          serveDevTools: true,
+          serveDevTools: false,
           verbose: false,
           enableDebugExtension: true,
           logWriter: (dynamic level, String message) => printTrace(message),

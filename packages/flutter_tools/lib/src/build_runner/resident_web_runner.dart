@@ -274,12 +274,13 @@ class ResidentWebRunner extends ResidentRunner {
         printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
 
         // Send timing analytics for full restart and for refresh.
+        final bool wasSuccessful = reloadResponse.type == 'Success';
+        if (!wasSuccessful) {
+          return OperationResult(1, reloadResponse.toString());
+        }
         flutterUsage.sendTiming('hot', 'web-restart', timer.elapsed);
         flutterUsage.sendTiming('hot', 'web-refresh', timer.elapsed - recompileDuration);
-
-        return reloadResponse.type == 'Success'
-            ? OperationResult.ok
-            : OperationResult(1, reloadResponse.toString());
+        return OperationResult.ok;
       } on vmservice.RPCError {
         return OperationResult(1, 'Page requires refresh.');
       } finally {
