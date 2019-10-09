@@ -27,8 +27,7 @@ List<int> _to64(num value) {
 }
 
 /// A simple platform view.
-class PlatformViewScenario extends Scenario
-    with _BasePlatformViewScenarioMixin {
+class PlatformViewScenario extends Scenario with _BasePlatformViewScenarioMixin {
   /// Creates the PlatformView scenario.
   ///
   /// The [window] parameter must not be null.
@@ -49,8 +48,7 @@ class PlatformViewScenario extends Scenario
 }
 
 /// Platform view with clip rect.
-class PlatformViewClipRectScenario extends Scenario
-    with _BasePlatformViewScenarioMixin {
+class PlatformViewClipRectScenario extends Scenario with _BasePlatformViewScenarioMixin {
   /// Constructs a platform view with clip rect scenario.
   PlatformViewClipRectScenario(Window window, String text, {int id = 0})
       : assert(window != null),
@@ -108,12 +106,12 @@ class PlatformViewClipPathScenario extends PlatformViewScenario {
     // Create a path of rectangle with width of 200 and height of 300, starting from (100, 100).
     //
     // Refer to "../../ios/Scenarios/Scenarios/ScenariosUITests/golden_platform_view_clippath_iPhone SE_simulator.png" for the exact path after clipping.
-    Path path = Path();
-    path.moveTo(100, 100);
-    path.quadraticBezierTo(50, 250, 100, 400);
-    path.lineTo(350, 400);
-    path.cubicTo(400, 300, 300, 200, 350, 100);
-    path.close();
+    final Path path = Path()
+      ..moveTo(100, 100)
+      ..quadraticBezierTo(50, 250, 100, 400)
+      ..lineTo(350, 400)
+      ..cubicTo(400, 300, 300, 200, 350, 100)
+      ..close();
     builder.pushClipPath(path);
 
     finishBuilderByAddingPlatformViewAndPicture(builder, 3);
@@ -234,11 +232,9 @@ mixin _BasePlatformViewScenarioMixin on Scenario {
     if (Platform.isIOS) {
       sceneBuilder.addPlatformView(viewId, width: 500, height: 500);
     } else if (Platform.isAndroid && _textureId != null) {
-      sceneBuilder.addTexture(_textureId,
-          offset: const Offset(150, 300), width: 500, height: 500);
+      sceneBuilder.addTexture(_textureId, offset: const Offset(150, 300), width: 500, height: 500);
     } else {
-      throw UnsupportedError(
-          'Platform ${Platform.operatingSystem} is not supported');
+      throw UnsupportedError('Platform ${Platform.operatingSystem} is not supported');
     }
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);

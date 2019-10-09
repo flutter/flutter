@@ -13,8 +13,8 @@ import 'package:test/test.dart';
 const int _kWidth = 10;
 const int _kRadius = 2;
 
-const Color _kBlack = const Color.fromRGBO(0, 0, 0, 1.0);
-const Color _kGreen = const Color.fromRGBO(0, 255, 0, 1.0);
+const Color _kBlack = Color.fromRGBO(0, 0, 0, 1.0);
+const Color _kGreen = Color.fromRGBO(0, 255, 0, 1.0);
 
 void main() {
   group('Image.toByteData', () {

@@ -10,6 +10,9 @@
 #    private fields, especially on the Window object):
 
 analyzer:
+  # this test pretends to be part of dart:ui and results in lots of false
+  # positives.
+  exclude: [ testing/dart/window_hooks_integration_test.dart ]
   strong-mode:
     implicit-dynamic: false
   errors:

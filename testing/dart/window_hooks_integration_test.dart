@@ -339,13 +339,6 @@ void main() {
     });
 
     test('Window padding/insets/viewPadding/systemGestureInsets', () {
-      final double oldDPR = window.devicePixelRatio;
-      final Size oldSize = window.physicalSize;
-      final double oldPhysicalDepth = window.physicalDepth;
-      final WindowPadding oldPadding = window.viewPadding;
-      final WindowPadding oldInsets = window.viewInsets;
-      final WindowPadding oldSystemGestureInsets = window.systemGestureInsets;
-
       _updateWindowMetrics(
         1.0,   // DPR
         800.0, // width
