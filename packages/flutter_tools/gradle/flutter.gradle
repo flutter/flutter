@@ -220,6 +220,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
         String flutterBuildMode = buildModeFor(buildType)
+        println "flutter dependency"
         // Add the embedding dependency.
         addApiDependencies(project, buildType.name,
                 "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion")
@@ -351,7 +352,7 @@ class FlutterPlugin implements Plugin<Project> {
                 "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion",
                 {
                     // Include the embedding transitive dependencies since plugins may depend on them.
-                    transitive = true
+                    transitive = false
                 }
             )
         }
@@ -652,7 +653,7 @@ class FlutterPlugin implements Plugin<Project> {
             if (!isUsedAsSubproject) {
                 def variantOutput = variant.outputs.first()
                 def processResources = variantOutput.hasProperty("processResourcesProvider") ?
-                    variantOutput.processResourcesProvider.get() : variantOutput.mergeResources
+                    variantOutput.processResourcesProvider.get() : variantOutput.processResources
                 processResources.dependsOn(copyFlutterAssetsTask)
                 return
             }
