@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/features.dart';
 import 'package:meta/meta.dart';
 
 import 'android/gradle.dart';
@@ -17,6 +16,7 @@ import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
+import 'features.dart';
 import 'globals.dart';
 
 /// A tag for a set of development artifacts that need to be cached.
