@@ -220,6 +220,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
         String flutterBuildMode = buildModeFor(buildType)
+        println "flutter dependency"
         // Add the embedding dependency.
         addApiDependencies(project, buildType.name,
                 "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion")
@@ -351,7 +352,7 @@ class FlutterPlugin implements Plugin<Project> {
                 "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion",
                 {
                     // Include the embedding transitive dependencies since plugins may depend on them.
-                    transitive = true
+                    transitive = false
                 }
             )
         }
@@ -619,12 +620,17 @@ class FlutterPlugin implements Plugin<Project> {
             addApiDependencies(project, variant.name, project.files {
                 packFlutterAppAotTask
             })
+            // We build an AAR when this property is defined.
+            boolean isBuildingAar = project.hasProperty('is-plugin')
+            // In add to app scenarios, a Gradle project contains a `:flutter` and `:app` project.
+            // We know that `:flutter` is used as a subproject when these tasks exists and we aren't building an AAR.
             Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
             Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
-            // In add to app scenarios, :flutter is a subproject of another Android app.
-            // We know that :flutter is used as a subproject when these tasks exist.
-            boolean isUsedAsSubproject = packageAssets && cleanPackageAssets
-            Task copyFlutterAssetsTask = project.tasks.create(name: "copyFlutterAssets${variant.name.capitalize()}", type: Copy) {
+            boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
+            Task copyFlutterAssetsTask = project.tasks.create(
+                name: "copyFlutterAssets${variant.name.capitalize()}",
+                type: Copy,
+            ) {
                 dependsOn compileTasks
                 compileTasks.each { flutterTask ->
                     // Add flutter_assets.
@@ -645,9 +651,10 @@ class FlutterPlugin implements Plugin<Project> {
                 into mergeAssets.outputDir
             }
             if (!isUsedAsSubproject) {
-                def mergeResources = variant.hasProperty("mergeResourcesProvider") ?
-                    variant.mergeResourcesProvider.get() : variant.mergeResources
-                mergeResources.dependsOn(copyFlutterAssetsTask)
+                def variantOutput = variant.outputs.first()
+                def processResources = variantOutput.hasProperty("processResourcesProvider") ?
+                    variantOutput.processResourcesProvider.get() : variantOutput.processResources
+                processResources.dependsOn(copyFlutterAssetsTask)
                 return
             }
             // Flutter module included as a subproject in add to app.

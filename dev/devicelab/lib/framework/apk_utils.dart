@@ -84,6 +84,20 @@ void checkItDoesNotContain<T>(Iterable<T> values, Iterable<T> collection) {
   }
 }
 
+///  Checks that [str] contains the specified [Pattern]s, otherwise throws
+/// a [TaskResult].
+void checkFileContains(List<Pattern> patterns, String filePath) {
+  final String fileContent = File(filePath).readAsStringSync();
+  for (Pattern pattern in patterns) {
+    if (!fileContent.contains(pattern)) {
+      throw TaskResult.failure(
+        'Expected to find `$pattern` in `$filePath` '
+        'instead it found:\n$fileContent'
+      );
+    }
+  }
+}
+
 TaskResult failure(String message, ProcessResult result) {
   print('Unexpected process result:');
   print('Exit code: ${result.exitCode}');
