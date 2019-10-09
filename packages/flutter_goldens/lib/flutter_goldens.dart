@@ -70,10 +70,11 @@ Future<void> main(FutureOr<void> testMain()) async {
 ///     output the new image for verification.
 abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// Creates a [FlutterGoldenFileComparator] that will resolve golden file
-  /// URIs relative to the specified [basedir].
+  /// URIs relative to the specified [basedir], and retrieve golden baselines
+  /// using the [skiaClient].
   ///
-  /// The [fs] and [platform] parameters useful in tests, where the default file
-  /// system and platform can be replaced by mock instances.
+  /// The [fs] and [platform] parameters are useful in tests, where the default
+  /// file system and platform can be replaced by mock instances.
   @visibleForTesting
   FlutterGoldenFileComparator(
     this.basedir,
@@ -81,15 +82,16 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
     this.fs = const LocalFileSystem(),
     this.platform = const LocalPlatform(),
   }) : assert(basedir != null),
+       assert(skiaClient != null),
        assert(fs != null),
        assert(platform != null);
 
   /// The directory to which golden file URIs will be resolved in [compare] and
-  /// [update].
+  /// [update], cannot be null.
   final Uri basedir;
 
   /// A client for uploading image tests and making baseline requests to the
-  /// Flutter Gold Dashboard.
+  /// Flutter Gold Dashboard, cannot be null.
   final SkiaGoldClient skiaClient;
 
   /// The file system used to perform file access.
@@ -141,7 +143,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
 
   /// Prepends the golden Uri with the library name that encloses the current
   /// test.
-  Uri addPrefix(Uri golden) {
+  Uri _addPrefix(Uri golden) {
     final String prefix = basedir.pathSegments[basedir.pathSegments.length - 2];
     return Uri.parse(prefix + '.' + golden.toString());
   }
@@ -168,8 +170,8 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
   /// Creates a [FlutterSkiaGoldFileComparator] that will test golden file
   /// images against Skia Gold.
   ///
-  /// The [fs] and [platform] parameters useful in tests, where the default file
-  /// system and platform can be replaced by mock instances.
+  /// The [fs] and [platform] parameters are useful in tests, where the default
+  /// file system and platform can be replaced by mock instances.
   FlutterSkiaGoldFileComparator(
     final Uri basedir,
     final SkiaGoldClient skiaClient, {
@@ -209,7 +211,7 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    golden = addPrefix(golden);
+    golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
@@ -251,8 +253,8 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   /// Creates a [FlutterPreSubmitFileComparator] that will test golden file
   /// images against baselines requested from Flutter Gold.
   ///
-  /// The [fs] and [platform] parameters useful in tests, where the default file
-  /// system and platform can be replaced by mock instances.
+  /// The [fs] and [platform] parameters are useful in tests, where the default
+  /// file system and platform can be replaced by mock instances.
   FlutterPreSubmitFileComparator(
     final Uri basedir,
     final SkiaGoldClient skiaClient, {
@@ -292,7 +294,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    golden = addPrefix(golden);
+    golden = _addPrefix(golden);
     final String testName = skiaClient.cleanTestName(golden.path);
     final Map<String, dynamic> testExpectations = skiaClient.expectations[testName];
 
@@ -354,8 +356,8 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   /// Creates a [FlutterLocalFileComparator] that will test golden file
   /// images against baselines requested from Flutter Gold.
   ///
-  /// The [fs] and [platform] parameters useful in tests, where the default file
-  /// system and platform can be replaced by mock instances.
+  /// The [fs] and [platform] parameters are useful in tests, where the default
+  /// file system and platform can be replaced by mock instances.
   FlutterLocalFileComparator(
     final Uri basedir,
     final SkiaGoldClient skiaClient, {
@@ -395,7 +397,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    golden = addPrefix(golden);
+    golden = _addPrefix(golden);
     final String testName = skiaClient.cleanTestName(golden.path);
     final Map<String, dynamic> testExpectations = skiaClient.expectations[testName];
 
@@ -404,7 +406,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       print('No expectations provided by Skia Gold for test: $golden. '
         'This may be a new test. If this is an unexpected result, check'
         ' https://flutter-gold.skia.org.\n'
-        'Image output found at $basedir'
+        'Validate image output found at $basedir'
       );
       update(golden, imageBytes);
       return true;

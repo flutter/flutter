@@ -511,6 +511,7 @@ task:
       test_script:
         - (cd ./dev/bots && pub run test)
     - name: tests_widgets-macos
+      only_if: $CIRRUS_BRANCH == 'master'
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
@@ -524,6 +525,7 @@ task:
       on_failure:
         print_failure_time_script: date
     - name: tests_framework_other-macos
+      only_if: $CIRRUS_BRANCH == 'master'
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests

@@ -23,13 +23,17 @@ const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
 class SkiaGoldClient {
-  SkiaGoldClient(this.workDirectory, {
+  SkiaGoldClient(
+    this.workDirectory, {
     this.fs = const LocalFileSystem(),
     this.process = const LocalProcessManager(),
     this.platform = const LocalPlatform(),
     io.HttpClient httpClient,
   }) : assert(workDirectory != null),
-      httpClient = httpClient ?? io.HttpClient();
+       assert(fs != null),
+       assert(process != null),
+       assert(platform != null),
+       httpClient = httpClient ?? io.HttpClient();
 
   /// The file system to use for storing the local clone of the repository.
   ///
@@ -67,7 +71,8 @@ class SkiaGoldClient {
   /// This is set and used by the [FlutterLocalFileComparator] and
   /// [FlutterPreSubmitFileComparator] to test against golden masters maintained
   /// in the Flutter Gold dashboard.
-  Map<String, dynamic> expectations;
+  Map<String, dynamic> get expectations => _expectations;
+  Map<String, dynamic> _expectations;
 
   /// The local [Directory] where the Flutter repository is hosted.
   ///
@@ -188,7 +193,7 @@ class SkiaGoldClient {
     return true;
   }
 
-  /// Requests and sets the [expectations] known to Flutter Gold at head.
+  /// Requests and sets the [_expectations] known to Flutter Gold at head.
   Future<void> getExpectations() async {
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForExpectations = Uri.parse(
@@ -200,7 +205,7 @@ class SkiaGoldClient {
         final io.HttpClientResponse response = await request.close();
         rawResponse = await utf8.decodeStream(response);
         final Map<String, dynamic> skiaJson = json.decode(rawResponse);
-        expectations = skiaJson['master'];
+        _expectations = skiaJson['master'];
       } on FormatException catch(_) {
         print('Formatting error detected requesting expectations from Flutter Gold.\n'
           'rawResponse: $rawResponse');

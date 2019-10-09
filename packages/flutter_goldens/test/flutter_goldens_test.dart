@@ -341,11 +341,6 @@ void main() {
       expect(key, Uri.parse('foo.png'));
     });
 
-    test('prefixes golden file names with enclosing library', () {
-      final Uri prefixedTest = comparator.addPrefix(Uri.parse('foo.png'));
-      expect(prefixedTest, Uri.parse('library.foo.png'));
-    });
-
     group('Post-Submit', () {
       final MockSkiaGoldClient mockSkiaClient = MockSkiaGoldClient();
 
