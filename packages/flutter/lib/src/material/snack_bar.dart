@@ -161,7 +161,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///  * [SnackBarThemeData], to configure the default property values for
 ///    [SnackBar] widgets.
 ///  * <https://material.io/design/components/snackbars.html>
-class SnackBar extends StatelessWidget {
+class SnackBar extends StatefulWidget {
   /// Creates a snack bar.
   ///
   /// The [content] argument must be non-null. The [elevation] must be null or
@@ -176,6 +176,7 @@ class SnackBar extends StatelessWidget {
     this.action,
     this.duration = _snackBarDisplayDuration,
     this.animation,
+    this.onVisible,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
        assert(duration != null),
@@ -245,10 +246,57 @@ class SnackBar extends StatelessWidget {
   /// The animation driving the entrance and exit of the snack bar.
   final Animation<double> animation;
 
+  /// Called the first time that the snackbar is visible within a [Scaffold].
+  final VoidCallback onVisible;
+
+  // API for Scaffold.addSnackBar():
+
+  /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
+  static AnimationController createAnimationController({ @required TickerProvider vsync }) {
+    return AnimationController(
+      duration: _snackBarTransitionDuration,
+      debugLabel: 'SnackBar',
+      vsync: vsync,
+    );
+  }
+
+  /// Creates a copy of this snack bar but with the animation replaced with the given animation.
+  ///
+  /// If the original snack bar lacks a key, the newly created snack bar will
+  /// use the given fallback key.
+  SnackBar withAnimation(Animation<double> newAnimation, { Key fallbackKey }) {
+    return SnackBar(
+      key: key ?? fallbackKey,
+      content: content,
+      backgroundColor: backgroundColor,
+      elevation: elevation,
+      shape: shape,
+      behavior: behavior,
+      action: action,
+      duration: duration,
+      animation: newAnimation,
+      onVisible: onVisible,
+    );
+  }
+
+  @override
+  State createState() => _SnackBarState();
+}
+
+
+class _SnackBarState extends State<SnackBar> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.onVisible != null) {
+      widget.onVisible();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
-    assert(animation != null);
+    assert(widget.animation != null);
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
@@ -284,14 +332,14 @@ class SnackBar extends StatelessWidget {
     );
 
     final TextStyle contentTextStyle = snackBarTheme.contentTextStyle ?? inverseTheme.textTheme.subhead;
-    final SnackBarBehavior snackBarBehavior = behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
+    final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double snackBarPadding = isFloatingSnackBar ? 16.0 : 24.0;
 
-    final CurvedAnimation heightAnimation = CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
-    final CurvedAnimation fadeInAnimation = CurvedAnimation(parent: animation, curve: _snackBarFadeInCurve);
+    final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation, curve: _snackBarHeightCurve);
+    final CurvedAnimation fadeInAnimation = CurvedAnimation(parent: widget.animation, curve: _snackBarFadeInCurve);
     final CurvedAnimation fadeOutAnimation = CurvedAnimation(
-      parent: animation,
+      parent: widget.animation,
       curve: _snackBarFadeOutCurve,
       reverseCurve: const Threshold(0.0),
     );
@@ -308,16 +356,16 @@ class SnackBar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding),
               child: DefaultTextStyle(
                 style: contentTextStyle,
-                child: content,
+                child: widget.content,
               ),
             ),
           ),
-          if (action != null)
+          if (widget.action != null)
             ButtonTheme(
               textTheme: ButtonTextTheme.accent,
               minWidth: 64.0,
               padding: EdgeInsets.symmetric(horizontal: snackBarPadding),
-              child: action,
+              child: widget.action,
             )
           else
             SizedBox(width: snackBarPadding),
@@ -325,9 +373,9 @@ class SnackBar extends StatelessWidget {
       ),
     );
 
-    final double elevation = this.elevation ?? snackBarTheme.elevation ?? 6.0;
-    final Color backgroundColor = this.backgroundColor ?? snackBarTheme.backgroundColor ?? inverseTheme.backgroundColor;
-    final ShapeBorder shape = this.shape
+    final double elevation = widget.elevation ?? snackBarTheme.elevation ?? 6.0;
+    final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? inverseTheme.backgroundColor;
+    final ShapeBorder shape = widget.shape
       ?? snackBarTheme.shape
       ?? (isFloatingSnackBar ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)) : null);
 
@@ -393,34 +441,5 @@ class SnackBar extends StatelessWidget {
     }
 
     return ClipRect(child: snackBarTransition);
-  }
-
-  // API for Scaffold.addSnackBar():
-
-  /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
-  static AnimationController createAnimationController({ @required TickerProvider vsync }) {
-    return AnimationController(
-      duration: _snackBarTransitionDuration,
-      debugLabel: 'SnackBar',
-      vsync: vsync,
-    );
-  }
-
-  /// Creates a copy of this snack bar but with the animation replaced with the given animation.
-  ///
-  /// If the original snack bar lacks a key, the newly created snack bar will
-  /// use the given fallback key.
-  SnackBar withAnimation(Animation<double> newAnimation, { Key fallbackKey }) {
-    return SnackBar(
-      key: key ?? fallbackKey,
-      content: content,
-      backgroundColor: backgroundColor,
-      elevation: elevation,
-      shape: shape,
-      behavior: behavior,
-      action: action,
-      duration: duration,
-      animation: newAnimation,
-    );
   }
 }
