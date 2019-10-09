@@ -34,6 +34,9 @@ class SemanticsAction {
   static const int _kDismissIndex = 1 << 18;
   static const int _kMoveCursorForwardByWordIndex = 1 << 19;
   static const int _kMoveCursorBackwardByWordIndex = 1 << 20;
+  // READ THIS: if you add an action here, you MUST update the
+  // numSemanticsActions value in testing/dart/semantics_test.dart, or tests
+  // will fail.
 
   /// The numerical value for this action.
   ///
@@ -292,6 +295,8 @@ class SemanticsFlag {
   static const int _kIsReadOnlyIndex = 1 << 20;
   static const int _kIsFocusableIndex = 1 << 21;
   static const int _kIsLinkIndex = 1 << 22;
+  // READ THIS: if you add a flag here, you MUST update the numSemanticsFlags
+  // value in testing/dart/semantics_test.dart, or tests will fail.
 
   const SemanticsFlag._(this.index);
 
@@ -536,6 +541,7 @@ class SemanticsFlag {
     _kHasImplicitScrollingIndex: hasImplicitScrolling,
     _kIsMultilineIndex: isMultiline,
     _kIsReadOnlyIndex: isReadOnly,
+    _kIsFocusableIndex: isFocusable,
     _kIsLinkIndex: isLink,
   };
 
@@ -584,6 +590,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.isMultiline';
       case _kIsReadOnlyIndex:
         return 'SemanticsFlag.isReadOnly';
+      case _kIsFocusableIndex:
+        return 'SemanticsFlag.isFocusable';
       case _kIsLinkIndex:
         return 'SemanticsFlag.isLink';
     }
