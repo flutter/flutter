@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -20,6 +21,12 @@ enum CollapseMode {
 
   /// The background widget will act as normal with no collapsing effect.
   none,
+}
+
+enum StretchMode {
+  zoomBackground,
+  blurBackground,
+  fadeTitle,
 }
 
 /// The part of a material design [AppBar] that expands and collapses.
@@ -49,6 +56,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.centerTitle,
     this.titlePadding,
     this.collapseMode = CollapseMode.parallax,
+    this.stretchModes = const <StretchMode>[],
   }) : assert(collapseMode != null),
        super(key: key);
 
@@ -72,6 +80,9 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Defaults to [CollapseMode.parallax].
   final CollapseMode collapseMode;
+
+  /// Doc
+  final List<StretchMode> stretchModes;
 
   /// Defines how far the [title] is inset from either the widget's
   /// bottom-left or its center.
@@ -167,87 +178,118 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
   @override
   Widget build(BuildContext context) {
-    final FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(FlexibleSpaceBarSettings);
-    assert(settings != null, 'A FlexibleSpaceBar must be wrapped in the widget returned by FlexibleSpaceBar.createSettings().');
-
-    final List<Widget> children = <Widget>[];
-
-    final double deltaExtent = settings.maxExtent - settings.minExtent;
-
-    // 0.0 -> Expanded
-    // 1.0 -> Collapsed to toolbar
-    final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0);
-
-    // background image
-    if (widget.background != null) {
-      final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
-      const double fadeEnd = 1.0;
-      assert(fadeStart <= fadeEnd);
-      final double opacity = 1.0 - Interval(fadeStart, fadeEnd).transform(t);
-      if (opacity > 0.0) {
-        children.add(Positioned(
-          top: _getCollapsePadding(t, settings),
-          left: 0.0,
-          right: 0.0,
-          height: settings.maxExtent,
-          child: Opacity(
-            opacity: opacity,
-            child: widget.background,
-          ),
-        ));
-      }
-    }
-
-    if (widget.title != null) {
-      final ThemeData theme = Theme.of(context);
-
-      Widget title;
-      switch (theme.platform) {
-        case TargetPlatform.iOS:
-          title = widget.title;
-          break;
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.android:
-          title = Semantics(
-            namesRoute: true,
-            child: widget.title,
-          );
-      }
-
-      final double opacity = settings.toolbarOpacity;
-      if (opacity > 0.0) {
-        TextStyle titleStyle = theme.primaryTextTheme.title;
-        titleStyle = titleStyle.copyWith(
-          color: titleStyle.color.withOpacity(opacity)
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        print(constraints.maxHeight);
+        final FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(FlexibleSpaceBarSettings);
+        assert(
+          settings != null,
+          'A FlexibleSpaceBar must be wrapped in the widget returned by FlexibleSpaceBar.createSettings().',
         );
-        final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
-        final EdgeInsetsGeometry padding = widget.titlePadding ??
-          EdgeInsetsDirectional.only(
-            start: effectiveCenterTitle ? 0.0 : 72.0,
-            bottom: 16.0,
-          );
-        final double scaleValue = Tween<double>(begin: 1.5, end: 1.0).transform(t);
-        final Matrix4 scaleTransform = Matrix4.identity()
-          ..scale(scaleValue, scaleValue, 1.0);
-        final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
-        children.add(Container(
-          padding: padding,
-          child: Transform(
-            alignment: titleAlignment,
-            transform: scaleTransform,
-            child: Align(
-              alignment: titleAlignment,
-              child: DefaultTextStyle(
-                style: titleStyle,
-                child: title,
-              ),
-            ),
-          ),
-        ));
-      }
-    }
 
-    return ClipRect(child: Stack(children: children));
+        final List<Widget> children = <Widget>[];
+
+        final double deltaExtent = settings.maxExtent - settings.minExtent;
+
+        // 0.0 -> Expanded
+        // 1.0 -> Collapsed to toolbar
+        final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0);
+
+        // Background
+        if (widget.background != null) {
+          final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
+          const double fadeEnd = 1.0;
+          assert(fadeStart <= fadeEnd);
+          final double opacity = 1.0 - Interval(fadeStart, fadeEnd).transform(t);
+          if (opacity > 0.0) {
+
+            double height = settings.maxExtent;
+            Widget child = Opacity(
+              opacity: opacity,
+              child: widget.background,
+            );
+
+            // Background Stretch Modes
+            if (constraints.maxHeight > height) {
+              // Zoom
+              if (widget.stretchModes.contains(StretchMode.zoomBackground))
+                height = constraints.maxHeight;
+              // Blur
+              if (widget.stretchModes.contains(StretchMode.blurBackground)) {
+                final double blurAmount = (constraints.maxHeight - settings.maxExtent) / 10;
+                child = BackdropFilter(
+                  child: child,
+                  filter: ui.ImageFilter.blur(
+                    sigmaX: blurAmount,
+                    sigmaY: blurAmount,
+                  )
+                );
+              }
+            }
+
+            children.add(Positioned(
+              top: _getCollapsePadding(t, settings),
+              left: 0.0,
+              right: 0.0,
+              height: height,
+              child: child,
+            ));
+          }
+        }
+
+        // Title
+        if (widget.title != null) {
+          final ThemeData theme = Theme.of(context);
+
+          Widget title;
+          switch (theme.platform) {
+            case TargetPlatform.iOS:
+              title = widget.title;
+              break;
+            case TargetPlatform.fuchsia:
+            case TargetPlatform.android:
+              title = Semantics(
+                namesRoute: true,
+                child: widget.title,
+              );
+          }
+
+          final double opacity = settings.toolbarOpacity;
+          if (opacity > 0.0) {
+            TextStyle titleStyle = theme.primaryTextTheme.title;
+            titleStyle = titleStyle.copyWith(
+              color: titleStyle.color.withOpacity(opacity)
+            );
+            final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
+            final EdgeInsetsGeometry padding = widget.titlePadding ??
+              EdgeInsetsDirectional.only(
+                start: effectiveCenterTitle ? 0.0 : 72.0,
+                bottom: 16.0,
+              );
+            final double scaleValue = Tween<double>(begin: 1.5, end: 1.0).transform(t);
+            final Matrix4 scaleTransform = Matrix4.identity()
+              ..scale(scaleValue, scaleValue, 1.0);
+            final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
+            children.add(Container(
+              padding: padding,
+              child: Transform(
+                alignment: titleAlignment,
+                transform: scaleTransform,
+                child: Align(
+                  alignment: titleAlignment,
+                  child: DefaultTextStyle(
+                    style: titleStyle,
+                    child: title,
+                  ),
+                ),
+              ),
+            ));
+          }
+        }
+
+        return ClipRect(child: Stack(children: children));
+      }
+    );
   }
 }
 
