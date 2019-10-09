@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -37,6 +38,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
   FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
   Signals: () => FakeSignals(),  // prevent registering actual signal handlers.
+  Pub: () => ThrowingPub(), // prevent accidental invocations of pub.
 };
 
 /// Manages interaction with the tool injection and runner system.
@@ -710,4 +712,36 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isNewAndroidEmbeddingEnabled;
+}
+
+class ThrowingPub implements Pub {
+  @override
+  Future<void> batch(List<String> arguments, {
+    PubContext context,
+    String directory,
+    MessageFilter filter,
+    String failureMessage = 'pub failed',
+    bool retry,
+    bool showTraceForErrors,
+  }) {
+    throw UnsupportedError('Attempted to inovke pub during test.');
+  }
+
+  @override
+  Future<void> get({
+    PubContext context,
+    String directory,
+    bool skipIfAbsent = false,
+    bool upgrade = false,
+    bool offline = false,
+    bool checkLastModified = true,
+    bool skipPubspecYamlCheck = false,
+  }) {
+    throw UnsupportedError('Attempted to inovke pub during test.');
+  }
+
+  @override
+  Future<void> interactively(List<String> arguments, {String directory}) {
+    throw UnsupportedError('Attempted to inovke pub during test.');
+  }
 }
