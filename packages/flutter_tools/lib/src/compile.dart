@@ -460,6 +460,7 @@ class ResidentCompiler {
   }
 
   final bool _enableAsserts;
+  final bool _causalAsyncStacks;
   final bool _trackWidgetCreation;
   final String _packagesPath;
   final TargetModel _targetModel;
