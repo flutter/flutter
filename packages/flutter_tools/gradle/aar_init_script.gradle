@@ -133,6 +133,7 @@ Set<Configuration> flattenConfiguration(Configuration configuration) {
 }
 
 projectsEvaluated {
+    assert rootProject.hasProperty("is-plugin")
     if (rootProject.property("is-plugin").toBoolean()) {
         assert rootProject.hasProperty("output-dir")
         // In plugin projects, the Android library is the root project.
