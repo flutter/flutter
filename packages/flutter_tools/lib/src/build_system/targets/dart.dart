@@ -211,7 +211,7 @@ class KernelSnapshot extends Target {
 
     final CompilerOutput output = await compiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
-      aot: buildMode != BuildMode.debug,
+      aot: buildMode == BuildMode.profile || buildMode == BuildMode.release,
       enableAsserts: buildMode == BuildMode.debug,
       trackWidgetCreation: buildMode == BuildMode.debug,
       targetModel: TargetModel.flutter,
