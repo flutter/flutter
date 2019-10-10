@@ -4,6 +4,7 @@
 
 #include "flutter/fml/mapping.h"
 
+#include <algorithm>
 #include <sstream>
 
 namespace fml {
@@ -66,6 +67,9 @@ std::unique_ptr<FileMapping> FileMapping::CreateReadExecute(
 // Data Mapping
 
 DataMapping::DataMapping(std::vector<uint8_t> data) : data_(std::move(data)) {}
+
+DataMapping::DataMapping(const std::string& string)
+    : data_(string.begin(), string.end()) {}
 
 DataMapping::~DataMapping() = default;
 

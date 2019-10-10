@@ -110,3 +110,10 @@ void canCreateImageFromDecompressedData() {
     notifyWidthHeight(image.width, image.height);
   });
 }
+
+@pragma('vm:entry-point')
+void canAccessIsolateLaunchData() {
+  notifyMessage(utf8.decode(window.getPersistentIsolateData().buffer.asUint8List()));
+}
+
+void notifyMessage(String string) native 'NotifyMessage';

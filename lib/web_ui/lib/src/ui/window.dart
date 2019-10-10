@@ -995,6 +995,8 @@ abstract class Window {
   String _initialLifecycleState;
 
   void setIsolateDebugName(String name) {}
+
+  ByteData getPersistentIsolateData() => null;
 }
 
 VoidCallback webOnlyScheduleFrameCallback;
