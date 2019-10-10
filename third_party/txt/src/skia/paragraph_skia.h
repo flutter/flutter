@@ -44,6 +44,8 @@ class ParagraphSkia : public Paragraph {
 
   double GetIdeographicBaseline() override;
 
+  std::vector<LineMetrics>& GetLineMetrics() override;
+
   bool DidExceedMaxLines() override;
 
   void Layout(double width) override;
@@ -65,6 +67,8 @@ class ParagraphSkia : public Paragraph {
 
  private:
   std::unique_ptr<skia::textlayout::Paragraph> paragraph_;
+  std::optional<std::vector<LineMetrics>> line_metrics_;
+  std::vector<TextStyle> line_metrics_styles_;
 };
 
 }  // namespace txt
