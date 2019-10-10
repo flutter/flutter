@@ -127,6 +127,7 @@ if (current_toolchain == host_toolchain) {
       "$flutter_root/testing:skia",
       "//third_party/skia",
       "//third_party/tonic",
+      "//third_party/dart/runtime/bin:elf_loader",
     ]
   }
 }
