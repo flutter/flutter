@@ -16,11 +16,7 @@ import 'feedback_tester.dart';
 void main() {
   group('showDatePicker', () {
     _tests();
-  },
-    // Skip on Windows because this test is quite flaky when run on Windows,
-    // until https://github.com/flutter/flutter/issues/19696 is fixed.
-    skip: isWindows,
-  );
+  });
 }
 
 void _tests() {
@@ -449,6 +445,7 @@ void _tests() {
               TestSemantics(
                 children: <TestSemantics>[
                   TestSemantics(
+                    id: 55,
                     actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight],
                     children: <TestSemantics>[
                       TestSemantics(
@@ -456,7 +453,22 @@ void _tests() {
                           TestSemantics(
                             children: <TestSemantics>[
                               TestSemantics(
+                                id: 11,
+                                flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                                 children: <TestSemantics>[
+                                  // TODO(dnfield): These shouldn't be here. https://github.com/flutter/flutter/issues/34431
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
                                   TestSemantics(
                                     actions: <SemanticsAction>[SemanticsAction.tap],
                                     label: '1, Friday, January 1, 2016',
@@ -624,25 +636,45 @@ void _tests() {
                 ],
               ),
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: 'Previous month December 2015',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: 'Next month February 2016',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: 'CANCEL',
                 textDirection: TextDirection.ltr,
               ),
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.isButton, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.isEnabled,
+                  SemanticsFlag.isFocusable,
+                ],
                 actions: <SemanticsAction>[SemanticsAction.tap],
                 label: 'OK',
                 textDirection: TextDirection.ltr,
@@ -695,7 +727,7 @@ void _tests() {
             );
           },
         ),
-      )
+      ),
     );
 
     final Finder chevronFinder = find.byType(IconButton);

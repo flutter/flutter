@@ -38,7 +38,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.byKey(popupMenuButtonKey));
@@ -108,7 +108,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.byKey(popupMenuButtonKey));
@@ -142,7 +142,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.byKey(dropdownMenuButtonKey));
@@ -176,7 +176,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('SHOW'));
@@ -213,7 +213,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('SHOW'));
@@ -251,7 +251,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     await tester.tap(find.text('SHOW'));
@@ -268,7 +268,7 @@ void main() {
       MaterialApp(
         theme: ThemeData(iconTheme: const IconThemeData(color: Colors.green, size: 10.0)),
         home: const Icon(Icons.computer),
-      )
+      ),
     );
 
     RenderParagraph glyphText = tester.renderObject(find.byType(RichText));
@@ -338,7 +338,7 @@ void main() {
       primaryTextTheme: fallback.primaryTextTheme.copyWith(
         body1: fallback.primaryTextTheme.body1.copyWith(
           fontSize: _kMagicFontSize,
-        )
+        ),
       ),
     );
     expect(customTheme.primaryTextTheme.body1.fontSize, _kMagicFontSize);
@@ -514,7 +514,7 @@ void main() {
 
         await testTheme(tester, ThemeData(
             iconTheme: const IconThemeData(color: materialIconColor),
-            cupertinoOverrideTheme: const CupertinoThemeData(primaryColor: cupertinoIconColor)
+            cupertinoOverrideTheme: const CupertinoThemeData(primaryColor: cupertinoIconColor),
         ));
 
         expect(buildCount, 1);
@@ -719,6 +719,8 @@ class _TextStyleProxy implements TextStyle {
   double get wordSpacing => _delegate.wordSpacing;
   @override
   List<Shadow> get shadows => _delegate.shadows;
+  @override
+  List<ui.FontFeature> get fontFeatures => _delegate.fontFeatures;
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) =>
@@ -781,6 +783,7 @@ class _TextStyleProxy implements TextStyle {
     ui.Paint foreground,
     ui.Paint background,
     List<Shadow> shadows,
+    List<ui.FontFeature> fontFeatures,
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,

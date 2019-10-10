@@ -59,7 +59,14 @@ Try {
 }
 Catch {
     Write-Host "Downloading the Dart SDK using the BITS service failed, retrying with WebRequest..."
+    # Invoke-WebRequest is very slow when the progress bar is visible - a 28
+    # second download can become a 33 minute download. Disable it with
+    # $ProgressPreference and then restore the original value afterwards.
+    # https://github.com/flutter/flutter/issues/37789
+    $OriginalProgressPreference = $ProgressPreference
+    $ProgressPreference = 'SilentlyContinue'
     Invoke-WebRequest -Uri $dartSdkUrl -OutFile $dartSdkZip
+    $ProgressPreference = $OriginalProgressPreference
 }
 
 Write-Host "Unzipping Dart SDK..."

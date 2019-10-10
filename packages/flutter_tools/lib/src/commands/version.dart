@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../base/version.dart';
@@ -34,10 +35,20 @@ class VersionCommand extends FlutterCommand {
   Version minSupportedVersion = Version.parse('1.2.1');
 
   Future<List<String>> getTags() async {
-    final RunResult runResult = await runCheckedAsync(
-      <String>['git', 'tag', '-l', 'v*', '--sort=-creatordate'],
-      workingDirectory: Cache.flutterRoot,
-    );
+    RunResult runResult;
+    try {
+      runResult = await processUtils.run(
+        <String>['git', 'tag', '-l', 'v*', '--sort=-creatordate'],
+        throwOnError: true,
+        workingDirectory: Cache.flutterRoot,
+      );
+    } on ProcessException catch (error) {
+      throwToolExit(
+        'Unable to get the tags. '
+        'This might be due to git not being installed or an internal error'
+        '\nError: $error.'
+      );
+    }
     return runResult.toString().split('\n');
   }
 
@@ -55,6 +66,10 @@ class VersionCommand extends FlutterCommand {
 
     // check min supported version
     final Version targetVersion = Version.parse(version);
+    if (targetVersion == null) {
+      throwToolExit('Failed to parse version "$version"');
+    }
+
     bool withForce = false;
     if (targetVersion < minSupportedVersion) {
       if (!argResults['force']) {
@@ -69,8 +84,9 @@ class VersionCommand extends FlutterCommand {
     }
 
     try {
-      await runCheckedAsync(
+      await processUtils.run(
         <String>['git', 'checkout', 'v$version'],
+        throwOnError: true,
         workingDirectory: Cache.flutterRoot,
       );
     } catch (e) {
@@ -87,7 +103,7 @@ class VersionCommand extends FlutterCommand {
     // if necessary.
     printStatus('');
     printStatus('Downloading engine...');
-    int code = await runCommandAndStreamOutput(<String>[
+    int code = await processUtils.stream(<String>[
       fs.path.join('bin', 'flutter'),
       '--no-color',
       'precache',
@@ -103,7 +119,7 @@ class VersionCommand extends FlutterCommand {
     final String projectRoot = findProjectRoot();
     if (projectRoot != null) {
       printStatus('');
-      await pubGet(
+      await pub.get(
         context: PubContext.pubUpgrade,
         directory: projectRoot,
         upgrade: true,
@@ -114,7 +130,7 @@ class VersionCommand extends FlutterCommand {
     // Run a doctor check in case system requirements have changed.
     printStatus('');
     printStatus('Running flutter doctor...');
-    code = await runCommandAndStreamOutput(
+    code = await processUtils.stream(
       <String>[
         fs.path.join('bin', 'flutter'),
         'doctor',

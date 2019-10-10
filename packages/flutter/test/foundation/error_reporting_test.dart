@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // web has different stack traces
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -58,8 +60,8 @@ Future<void> main() async {
       library: 'error handling test',
       context: ErrorDescription('testing the error handling logic'),
       informationCollector: () sync* {
-       yield ErrorDescription('line 1 of extra information');
-       yield ErrorHint('line 2 of extra information\n');
+        yield ErrorDescription('line 1 of extra information');
+        yield ErrorHint('line 2 of extra information\n');
       },
     ));
     expect(console.join('\n'), matches(
@@ -144,7 +146,7 @@ Future<void> main() async {
       informationCollector: () sync* {
         yield ErrorDescription('line 1 of extra information');
         yield ErrorDescription('line 2 of extra information\n'); // the trailing newlines here are intentional
-      }
+      },
     ));
     expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'

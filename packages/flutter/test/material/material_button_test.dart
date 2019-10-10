@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 
 void main() {
-  testWidgets('Default MaterialButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgets('Default $MaterialButton meets a11y contrast guidelines', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -32,6 +32,39 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     semanticsEnabled: true,
+    skip: isBrowser,
   );
+  testWidgets('$MaterialButton gets focus when autofocus is set.', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'MaterialButton');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: MaterialButton(
+            focusNode: focusNode,
+            onPressed: () {},
+            child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+          ),
+        ),
+      ),
+    );
 
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: MaterialButton(
+            autofocus: true,
+            focusNode: focusNode,
+            onPressed: () {},
+            child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+  });
 }

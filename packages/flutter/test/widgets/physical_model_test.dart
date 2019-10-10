@@ -110,10 +110,12 @@ void main() {
     expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('physical_model_overflow.png'),
-      skip: !isLinux,
+      matchesGoldenFile(
+        'physical_model_overflow.png',
+        version: null,
+      ),
     );
-  });
+  }, skip: isBrowser);
 
   group('PhysicalModelLayer checks elevation', () {
     Future<void> _testStackChildren(
@@ -167,7 +169,7 @@ void main() {
             child: Material(
               elevation: 2.0,
               color: Colors.red,
-            )
+            ),
           ),
         ),
       ];
@@ -270,7 +272,7 @@ void main() {
             child: const Material(
               elevation: 2.0,
               color: Colors.red,
-              shape: CircleBorder()
+              shape: CircleBorder(),
             ),
           ),
         ),
@@ -278,7 +280,7 @@ void main() {
 
       await _testStackChildren(tester, children, expectedErrorCount: 0);
       expect(find.byType(Material), findsNWidgets(2));
-    });
+    }, skip: isBrowser);
 
     // Tests:
     //
@@ -308,7 +310,7 @@ void main() {
             child: const Material(
               elevation: 2.0,
               color: Colors.red,
-              shape: CircleBorder()
+              shape: CircleBorder(),
             ),
           ),
         ),
@@ -346,7 +348,7 @@ void main() {
             child: const Material(
               elevation: 2.0,
               color: Colors.red,
-              shape: CircleBorder()
+              shape: CircleBorder(),
             ),
           ),
         ),
@@ -411,7 +413,7 @@ void main() {
     //         │           │
     // ────────────────────────────
     testWidgets('non-rect partially overlapping, wrong painting order, check disabled', (WidgetTester tester) async {
-       final List<Widget> children = <Widget>[
+      final List<Widget> children = <Widget>[
         Positioned.fromRect(
           rect: const Rect.fromLTWH(150, 150, 150, 150),
           child: Container(
@@ -431,7 +433,7 @@ void main() {
             child: const Material(
               elevation: 2.0,
               color: Colors.red,
-              shape: CircleBorder()
+              shape: CircleBorder(),
             ),
           ),
         ),
@@ -485,7 +487,7 @@ void main() {
 
       await _testStackChildren(tester, children, expectedErrorCount: 0);
       expect(find.byType(Material), findsNWidgets(2));
-    });
+    }, skip: isBrowser);
 
     // Tests:
     //

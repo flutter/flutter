@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -423,5 +424,18 @@ void main() {
     expect(greens1.hashCode, greens2.hashCode);
     expect(greens1['2259 C'], const Color(0xFF027223));
     expect(greens1.value, 0xFF027223);
+  });
+
+  test('ColorDiagnosticsProperty includes valueProperties in JSON', () {
+    ColorProperty property = ColorProperty('foo', const Color.fromARGB(10, 20, 30, 40));
+    final Map<String, Object> valueProperties = property.toJsonMap(const DiagnosticsSerializationDelegate())['valueProperties'];
+    expect(valueProperties['alpha'], 10);
+    expect(valueProperties['red'], 20);
+    expect(valueProperties['green'], 30);
+    expect(valueProperties['blue'], 40);
+
+    property = ColorProperty('foo', null);
+    final Map<String, Object> json = property.toJsonMap(const DiagnosticsSerializationDelegate());
+    expect(json.containsKey('valueProperties'), isFalse);
   });
 }

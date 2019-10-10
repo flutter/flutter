@@ -11,21 +11,19 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process_manager.dart';
+import '../base/process.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
-import '../project.dart';
 import '../vmservice.dart';
 
 import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector({this.flutterProject, this.coverageDirectory});
+  CoverageCollector({this.libraryPredicate});
 
   Map<String, dynamic> _globalHitmap;
-  final Directory coverageDirectory;
-  final FlutterProject flutterProject;
+  bool Function(String) libraryPredicate;
 
   @override
   Future<void> handleFinishedTest(ProcessEvent event) async {
@@ -39,6 +37,26 @@ class CoverageCollector extends TestWatcher {
     } else {
       coverage.mergeHitmaps(hitmap, _globalHitmap);
     }
+  }
+
+  /// Collects coverage for an isolate using the given `port`.
+  ///
+  /// This should be called when the code whose coverage data is being collected
+  /// has been run to completion so that all coverage data has been recorded.
+  ///
+  /// The returned [Future] completes when the coverage is collected.
+  Future<void> collectCoverageIsolate(Uri observatoryUri) async {
+    assert(observatoryUri != null);
+    print('collecting coverage data from $observatoryUri...');
+    final Map<String, dynamic> data = await collect(observatoryUri, libraryPredicate);
+    if (data == null) {
+      throw Exception('Failed to collect coverage.');
+    }
+    assert(data != null);
+
+    print('($observatoryUri): collected coverage data; merging...');
+    _addHitmap(coverage.createHitmap(data['coverage']));
+    print('($observatoryUri): done merging coverage data into global coverage map.');
   }
 
   /// Collects coverage for the given [Process] using the given `port`.
@@ -58,20 +76,11 @@ class CoverageCollector extends TestWatcher {
       .then<void>((int code) {
         throw Exception('Failed to collect coverage, process terminated prematurely with exit code $code.');
       });
-    final Future<void> collectionComplete = collect(observatoryUri, (String libraryName) {
-      // If we have a specified coverage directory or could not find the package name, then
-      // accept all libraries.
-      if (coverageDirectory != null) {
-        return true;
-      }
-      if (flutterProject == null) {
-        return true;
-      }
-      return libraryName.contains(flutterProject.manifest.appName);
-    })
+    final Future<void> collectionComplete = collect(observatoryUri, libraryPredicate)
       .then<void>((Map<String, dynamic> result) {
-        if (result == null)
+        if (result == null) {
           throw Exception('Failed to collect coverage.');
+        }
         data = result;
       });
     await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
@@ -91,7 +100,6 @@ class CoverageCollector extends TestWatcher {
     coverage.Formatter formatter,
     Directory coverageDirectory,
   }) async {
-    printTrace('formating coverage data');
     if (_globalHitmap == null) {
       return null;
     }
@@ -115,8 +123,9 @@ class CoverageCollector extends TestWatcher {
     );
     status.stop();
     printTrace('coverage information collection complete');
-    if (coverageData == null)
+    if (coverageData == null) {
       return false;
+    }
 
     final File coverageFile = fs.file(coveragePath)
       ..createSync(recursive: true)
@@ -132,10 +141,11 @@ class CoverageCollector extends TestWatcher {
 
       if (os.which('lcov') == null) {
         String installMessage = 'Please install lcov.';
-        if (platform.isLinux)
+        if (platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';
-        else if (platform.isMacOS)
+        } else if (platform.isMacOS) {
           installMessage = 'Consider running "brew install lcov".';
+        }
         printError('Missing "lcov" tool. Unable to merge coverage data.\n$installMessage');
         return false;
       }
@@ -143,14 +153,15 @@ class CoverageCollector extends TestWatcher {
       final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_test_coverage.');
       try {
         final File sourceFile = coverageFile.copySync(fs.path.join(tempDir.path, 'lcov.source.info'));
-        final ProcessResult result = processManager.runSync(<String>[
+        final RunResult result = processUtils.runSync(<String>[
           'lcov',
           '--add-tracefile', baseCoverageData,
           '--add-tracefile', sourceFile.path,
           '--output-file', coverageFile.path,
         ]);
-        if (result.exitCode != 0)
+        if (result.exitCode != 0) {
           return false;
+        }
       } finally {
         tempDir.deleteSync(recursive: true);
       }
@@ -159,12 +170,20 @@ class CoverageCollector extends TestWatcher {
   }
 }
 
-Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate) async {
-  final VMService vmService = await VMService.connect(serviceUri, compression: CompressionOptions.compressionOff);
+Future<VMService> _defaultConnect(Uri serviceUri) {
+  return VMService.connect(
+      serviceUri, compression: CompressionOptions.compressionOff);
+}
+
+Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, {
+  bool waitPaused = false,
+  String debugName,
+  Future<VMService> Function(Uri) connector = _defaultConnect,
+}) async {
+  final VMService vmService = await connector(serviceUri);
   await vmService.getVM();
   return _getAllCoverage(vmService, libraryPredicate);
 }
-
 
 Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(String) libraryPredicate) async {
   await service.getVM();
@@ -178,6 +197,13 @@ Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(St
     final Map<String, Map<String, dynamic>> sourceReports = <String, Map<String, dynamic>>{};
     // For each ScriptRef loaded into the VM, load the corresponding Script and
     // SourceReport object.
+
+    // We may receive such objects as
+    // {type: Sentinel, kind: Collected, valueAsString: <collected>}
+    // that need to be skipped.
+    if (scriptList['scripts'] == null) {
+      continue;
+    }
     for (Map<String, dynamic> script in scriptList['scripts']) {
       if (!libraryPredicate(script['uri'])) {
         continue;

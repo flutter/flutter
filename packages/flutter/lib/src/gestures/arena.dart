@@ -33,7 +33,7 @@ abstract class GestureArenaMember {
   void rejectGesture(int pointer);
 }
 
-/// An interface to information to an arena.
+/// An interface to pass information to an arena.
 ///
 /// A given [GestureArenaMember] can have multiple entries in multiple arenas
 /// with different pointer ids.
@@ -59,7 +59,7 @@ class _GestureArena {
   bool isHeld = false;
   bool hasPendingSweep = false;
 
-  /// If a gesture attempts to win while the arena is still open, it becomes the
+  /// If a member attempts to win while the arena is still open, it becomes the
   /// "eager winner". We look for an eager winner when closing the arena to new
   /// participants, and if there is one, we resolve the arena in its favor at
   /// that time.

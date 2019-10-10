@@ -44,7 +44,7 @@ class Title extends StatelessWidget {
       ApplicationSwitcherDescription(
         label: title,
         primaryColor: color.value,
-      )
+      ),
     );
     return child;
   }
@@ -53,6 +53,6 @@ class Title extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title, defaultValue: ''));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
   }
 }

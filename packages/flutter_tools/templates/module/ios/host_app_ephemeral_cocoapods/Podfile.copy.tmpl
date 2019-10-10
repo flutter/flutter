@@ -1,6 +1,26 @@
 platform :ios, '8.0'
 
+flutter_application_path = '../'
+load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
+
+use_frameworks!
+
 target 'Runner' do
-  flutter_application_path = '../'
-  eval(File.read(File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')), binding)
+  install_flutter_engine_pod
+  install_flutter_plugin_pods flutter_application_path
 end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    # Aggregate targets do not have a headers build phase.
+    if target.respond_to?('headers_build_phase')
+      target.headers_build_phase.files.each do |file|
+        # Make headers public so they can be imported by the host application.
+        file.settings = { 'ATTRIBUTES' => ['Public'] }
+      end
+    end
+  end
+end
+
+# Prevent Cocoapods from embedding a second Flutter framework and causing an error with the new Xcode build system.
+install! 'cocoapods', :disable_input_output_paths => true

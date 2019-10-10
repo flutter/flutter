@@ -47,6 +47,13 @@ TaskFunction createPlatformChannelSampleTest() {
   );
 }
 
+TaskFunction createPlatformChannelSwiftSampleTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/examples/platform_channel_swift',
+    'test_driver/button_tap.dart',
+  );
+}
+
 TaskFunction createEmbeddedAndroidViewsIntegrationTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/android_views',
@@ -94,6 +101,13 @@ TaskFunction createFlutterCreateOfflineTest() {
   };
 }
 
+TaskFunction createAndroidSplashScreenKitchenSinkTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink',
+    'test_driver/main.dart',
+  );
+}
+
 class DriverTest {
 
   DriverTest(
@@ -124,8 +138,8 @@ class DriverTest {
         testTarget,
         '-d',
         deviceId,
+        ...extraOptions,
       ];
-      options.addAll(extraOptions);
       await flutter('drive', options: options, environment: Map<String, String>.from(environment));
 
       return TaskResult.success(null);

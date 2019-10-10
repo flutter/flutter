@@ -326,6 +326,7 @@ void main() {
     });
 
     group('matches', () {
+
       testWidgets('if comparator succeeds', (WidgetTester tester) async {
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
@@ -411,6 +412,7 @@ void main() {
         namesRoute: true,
         header: true,
         button: true,
+        link: true,
         onTap: () { },
         onLongPress: () { },
         label: 'foo',
@@ -438,6 +440,7 @@ void main() {
           hasTapAction: true,
           hasLongPressAction: true,
           isButton: true,
+          isLink: true,
           isHeader: true,
           namesRoute: true,
           onTapHint: 'scan',
@@ -459,6 +462,7 @@ void main() {
           hasTapAction: true,
           hasLongPressAction: true,
           isButton: true,
+          isLink: true,
           isHeader: true,
           namesRoute: true,
           onTapHint: 'scan',
@@ -480,6 +484,7 @@ void main() {
           hasTapAction: true,
           hasLongPressAction: true,
           isButton: true,
+          isLink: true,
           isHeader: true,
           namesRoute: true,
           onTapHint: 'scans',
@@ -501,7 +506,9 @@ void main() {
       for (int index in SemanticsAction.values.keys)
         actions |= index;
       for (int index in SemanticsFlag.values.keys)
-        flags |= index;
+        // TODO(mdebbar): Remove this if after https://github.com/flutter/engine/pull/9894
+        if (SemanticsFlag.values[index] != SemanticsFlag.isMultiline)
+          flags |= index;
       final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,
@@ -522,6 +529,8 @@ void main() {
         scrollExtentMin: null,
         platformViewId: 105,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+        currentValueLength: 10,
+        maxValueLength: 15,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode();
       node.data = data;
@@ -532,18 +541,25 @@ void main() {
          elevation: 3.0,
          thickness: 4.0,
          platformViewId: 105,
+         currentValueLength: 10,
+         maxValueLength: 15,
          /* Flags */
          hasCheckedState: true,
          isChecked: true,
          isSelected: true,
          isButton: true,
+         isLink: true,
          isTextField: true,
+         isReadOnly: true,
          hasEnabledState: true,
          isFocused: true,
+         isFocusable: true,
          isEnabled: true,
          isInMutuallyExclusiveGroup: true,
          isHeader: true,
          isObscured: true,
+         // TODO(mdebbar): Uncomment after https://github.com/flutter/engine/pull/9894
+         //isMultiline: true,
          namesRoute: true,
          scopesRoute: true,
          isHidden: true,
@@ -647,6 +663,11 @@ class _FakeComparator implements GoldenFileComparator {
     this.golden = golden;
     this.imageBytes = imageBytes;
     return Future<void>.value();
+  }
+
+  @override
+  Uri getTestUri(Uri key, int version) {
+    return key;
   }
 }
 

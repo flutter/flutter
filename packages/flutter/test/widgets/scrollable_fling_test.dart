@@ -59,14 +59,16 @@ void main() {
 
   testWidgets('fling and tap to stop', (WidgetTester tester) async {
     final List<String> log = <String>[];
-
-    final List<Widget> textWidgets = <Widget>[];
-    for (int i = 0; i < 250; i += 1)
-      textWidgets.add(GestureDetector(onTap: () { log.add('tap $i'); }, child: Text('$i', style: testFont)));
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(children: textWidgets, dragStartBehavior: DragStartBehavior.down),
+        child: ListView(
+          dragStartBehavior: DragStartBehavior.down,
+          children: List<Widget>.generate(250, (int i) => GestureDetector(
+            onTap: () { log.add('tap $i'); },
+            child: Text('$i', style: testFont),
+          )),
+        ),
       ),
     );
 
@@ -83,18 +85,20 @@ void main() {
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 21', 'tap 35']));
-  });
+  }, skip: isBrowser);
 
   testWidgets('fling and wait and tap', (WidgetTester tester) async {
     final List<String> log = <String>[];
-
-    final List<Widget> textWidgets = <Widget>[];
-    for (int i = 0; i < 250; i += 1)
-      textWidgets.add(GestureDetector(onTap: () { log.add('tap $i'); }, child: Text('$i', style: testFont)));
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(children: textWidgets, dragStartBehavior: DragStartBehavior.down),
+        child: ListView(
+          dragStartBehavior: DragStartBehavior.down,
+          children: List<Widget>.generate(250, (int i) => GestureDetector(
+            onTap: () { log.add('tap $i'); },
+            child: Text('$i', style: testFont),
+          )),
+        ),
       ),
     );
 
@@ -110,5 +114,5 @@ void main() {
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 21', 'tap 48']));
-  });
+  }, skip: isBrowser);
 }

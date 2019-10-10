@@ -27,14 +27,23 @@ abstract class OperatingSystemUtils {
   OperatingSystemUtils._private();
 
   /// Make the given file executable. This may be a no-op on some platforms.
-  ProcessResult makeExecutable(File file);
+  void makeExecutable(File file);
+
+  /// Updates the specified file system [entity] to have the file mode
+  /// bits set to the value defined by [mode], which can be specified in octal
+  /// (e.g. `644`) or symbolically (e.g. `u+x`).
+  ///
+  /// On operating systems that do not support file mode bits, this will be a
+  /// no-op.
+  void chmod(FileSystemEntity entity, String mode);
 
   /// Return the path (with symlinks resolved) to the given executable, or null
   /// if `which` was not able to locate the binary.
   File which(String execName) {
     final List<File> result = _which(execName);
-    if (result == null || result.isEmpty)
+    if (result == null || result.isEmpty) {
       return null;
+    }
     return result.first;
   }
 
@@ -111,49 +120,82 @@ class _PosixUtils extends OperatingSystemUtils {
   _PosixUtils() : super._private();
 
   @override
-  ProcessResult makeExecutable(File file) {
-    return processManager.runSync(<String>['chmod', 'a+x', file.path]);
+  void makeExecutable(File file) {
+    chmod(file, 'a+x');
+  }
+
+  @override
+  void chmod(FileSystemEntity entity, String mode) {
+    try {
+      final ProcessResult result = processManager.runSync(<String>['chmod', mode, entity.path]);
+      if (result.exitCode != 0) {
+        printTrace(
+          'Error trying to run chmod on ${entity.absolute.path}'
+          '\nstdout: ${result.stdout}'
+          '\nstderr: ${result.stderr}',
+        );
+      }
+    } on ProcessException catch (error) {
+      printTrace('Error trying to run chmod on ${entity.absolute.path}: $error');
+    }
   }
 
   @override
   List<File> _which(String execName, { bool all = false }) {
-    final List<String> command = <String>['which'];
-    if (all)
-      command.add('-a');
-    command.add(execName);
+    final List<String> command = <String>[
+      'which',
+      if (all) '-a',
+      execName,
+    ];
     final ProcessResult result = processManager.runSync(command);
-    if (result.exitCode != 0)
+    if (result.exitCode != 0) {
       return const <File>[];
+    }
     final String stdout = result.stdout;
     return stdout.trim().split('\n').map<File>((String path) => fs.file(path.trim())).toList();
   }
 
   @override
   void zip(Directory data, File zipFile) {
-    runSync(<String>['zip', '-r', '-q', zipFile.path, '.'], workingDirectory: data.path);
+    processUtils.runSync(
+      <String>['zip', '-r', '-q', zipFile.path, '.'],
+      workingDirectory: data.path,
+      throwOnError: true,
+    );
   }
 
   // unzip -o -q zipfile -d dest
   @override
   void unzip(File file, Directory targetDirectory) {
-    runSync(<String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path]);
+    processUtils.runSync(
+      <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
+      throwOnError: true,
+    );
   }
 
   @override
-  bool verifyZip(File zipFile) => exitsHappy(<String>['zip', '-T', zipFile.path]);
+  bool verifyZip(File zipFile) =>
+      processUtils.exitsHappySync(<String>['zip', '-T', zipFile.path]);
 
   // tar -xzf tarball -C dest
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
-    runSync(<String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path]);
+    processUtils.runSync(
+      <String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path],
+      throwOnError: true,
+    );
   }
 
   @override
-  bool verifyGzip(File gzippedFile) => exitsHappy(<String>['gzip', '-t', gzippedFile.path]);
+  bool verifyGzip(File gzippedFile) =>
+      processUtils.exitsHappySync(<String>['gzip', '-t', gzippedFile.path]);
 
   @override
   File makePipe(String path) {
-    runSync(<String>['mkfifo', path]);
+    processUtils.runSync(
+      <String>['mkfifo', path],
+      throwOnError: true,
+    );
     return fs.file(path);
   }
 
@@ -163,12 +205,12 @@ class _PosixUtils extends OperatingSystemUtils {
   String get name {
     if (_name == null) {
       if (platform.isMacOS) {
-        final List<ProcessResult> results = <ProcessResult>[
-          processManager.runSync(<String>['sw_vers', '-productName']),
-          processManager.runSync(<String>['sw_vers', '-productVersion']),
-          processManager.runSync(<String>['sw_vers', '-buildVersion']),
+        final List<RunResult> results = <RunResult>[
+          processUtils.runSync(<String>['sw_vers', '-productName']),
+          processUtils.runSync(<String>['sw_vers', '-productVersion']),
+          processUtils.runSync(<String>['sw_vers', '-buildVersion']),
         ];
-        if (results.every((ProcessResult result) => result.exitCode == 0)) {
+        if (results.every((RunResult result) => result.exitCode == 0)) {
           _name = '${results[0].stdout.trim()} ${results[1].stdout
               .trim()} ${results[2].stdout.trim()}';
         }
@@ -185,21 +227,23 @@ class _PosixUtils extends OperatingSystemUtils {
 class _WindowsUtils extends OperatingSystemUtils {
   _WindowsUtils() : super._private();
 
-  // This is a no-op.
   @override
-  ProcessResult makeExecutable(File file) {
-    return ProcessResult(0, 0, null, null);
-  }
+  void makeExecutable(File file) {}
+
+  @override
+  void chmod(FileSystemEntity entity, String mode) {}
 
   @override
   List<File> _which(String execName, { bool all = false }) {
     // `where` always returns all matches, not just the first one.
     final ProcessResult result = processManager.runSync(<String>['where', execName]);
-    if (result.exitCode != 0)
+    if (result.exitCode != 0) {
       return const <File>[];
+    }
     final List<String> lines = result.stdout.trim().split('\n');
-    if (all)
+    if (all) {
       return lines.map<File>((String path) => fs.file(path.trim())).toList();
+    }
     return <File>[fs.file(lines.first.trim())];
   }
 
@@ -259,12 +303,14 @@ class _WindowsUtils extends OperatingSystemUtils {
   void _unpackArchive(Archive archive, Directory targetDirectory) {
     for (ArchiveFile archiveFile in archive.files) {
       // The archive package doesn't correctly set isFile.
-      if (!archiveFile.isFile || archiveFile.name.endsWith('/'))
+      if (!archiveFile.isFile || archiveFile.name.endsWith('/')) {
         continue;
+      }
 
       final File destFile = fs.file(fs.path.join(targetDirectory.path, archiveFile.name));
-      if (!destFile.parent.existsSync())
+      if (!destFile.parent.existsSync()) {
         destFile.parent.createSync(recursive: true);
+      }
       destFile.writeAsBytesSync(archiveFile.content);
     }
   }
@@ -281,10 +327,11 @@ class _WindowsUtils extends OperatingSystemUtils {
     if (_name == null) {
       final ProcessResult result = processManager.runSync(
           <String>['ver'], runInShell: true);
-      if (result.exitCode == 0)
+      if (result.exitCode == 0) {
         _name = result.stdout.trim();
-      else
+      } else {
         _name = super.name;
+      }
     }
     return _name;
   }
@@ -301,11 +348,13 @@ String findProjectRoot([ String directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fs.currentDirectory.path;
   while (true) {
-    if (fs.isFileSync(fs.path.join(directory, kProjectRootSentinel)))
+    if (fs.isFileSync(fs.path.join(directory, kProjectRootSentinel))) {
       return directory;
+    }
     final String parent = fs.path.dirname(directory);
-    if (directory == parent)
+    if (directory == parent) {
       return null;
+    }
     directory = parent;
   }
 }

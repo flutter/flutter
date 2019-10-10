@@ -5,7 +5,9 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:test_api/backend.dart';
 import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
+import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -16,7 +18,9 @@ import '../base/terminal.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../web/compile.dart';
 import 'flutter_platform.dart' as loader;
+import 'flutter_web_platform.dart';
 import 'watcher.dart';
 
 /// Runs tests using package:test and the Flutter engine.
@@ -32,6 +36,7 @@ Future<int> runTests(
   bool machine = false,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
+  bool enableAsserts = false,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   TestWatcher watcher,
@@ -40,41 +45,66 @@ Future<int> runTests(
   FlutterProject flutterProject,
   String icudtlPath,
   Directory coverageDirectory,
+  bool web = false,
 }) async {
   // Compute the command-line arguments for package:test.
-  final List<String> testArgs = <String>[];
-  if (!terminal.supportsColor) {
-    testArgs.addAll(<String>['--no-color']);
+  final List<String> testArgs = <String>[
+    if (!terminal.supportsColor)
+      '--no-color',
+    if (machine)
+      ...<String>['-r', 'json']
+    else
+      ...<String>['-r', 'compact'],
+    '--concurrency=$concurrency',
+    for (String name in names)
+      ...<String>['--name', name],
+    for (String plainName in plainNames)
+      ...<String>['--plain-name', plainName],
+  ];
+  if (web) {
+    final String tempBuildDir = fs.systemTempDirectory
+      .createTempSync('flutter_test.')
+      .absolute
+      .uri
+      .toFilePath();
+    final bool result = await webCompilationProxy.initialize(
+      projectDirectory: flutterProject.directory,
+      testOutputDir: tempBuildDir,
+      projectName: flutterProject.manifest.appName,
+      initializePlatform: true,
+    );
+    if (!result) {
+      throwToolExit('Failed to compile tests');
+    }
+    testArgs
+      ..add('--platform=chrome')
+      ..add('--precompiled=$tempBuildDir')
+      ..add('--')
+      ..addAll(testFiles);
+    hack.registerPlatformPlugin(
+      <Runtime>[Runtime.chrome],
+      () {
+        return FlutterWebPlatform.start(flutterProject.directory.path);
+      },
+    );
+    await test.main(testArgs);
+    return exitCode;
   }
 
-  if (machine) {
-    testArgs.addAll(<String>['-r', 'json']);
-  } else {
-    testArgs.addAll(<String>['-r', 'compact']);
-  }
-
-  testArgs.add('--concurrency=$concurrency');
-
-  for (String name in names) {
-    testArgs..add('--name')..add(name);
-  }
-
-  for (String plainName in plainNames) {
-    testArgs..add('--plain-name')..add(plainName);
-  }
-
-  testArgs.add('--');
-  testArgs.addAll(testFiles);
+  testArgs
+    ..add('--')
+    ..addAll(testFiles);
 
   // Configure package:test to use the Flutter engine for child processes.
   final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
-  if (!processManager.canRun(shellPath))
+  if (!processManager.canRun(shellPath)) {
     throwToolExit('Cannot find Flutter shell at $shellPath');
+  }
 
   final InternetAddressType serverType =
       ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
-  loader.installHook(
+  final loader.FlutterPlatform platform = loader.installHook(
     shellPath: shellPath,
     watcher: watcher,
     enableObservatory: enableObservatory,
@@ -84,6 +114,7 @@ Future<int> runTests(
     serverType: serverType,
     precompiledDillPath: precompiledDillPath,
     precompiledDillFiles: precompiledDillFiles,
+    enableAsserts: enableAsserts,
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
     buildTestAssets: buildTestAssets,
@@ -114,5 +145,6 @@ Future<int> runTests(
     return exitCode;
   } finally {
     fs.currentDirectory = saved;
+    await platform.close();
   }
 }

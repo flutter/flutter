@@ -2,10 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
+  if (Platform.isMacOS) {
+    // TODO(gspencergoog): Update this when TargetPlatform includes macOS. https://github.com/flutter/flutter/issues/31366
+    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
+
   runApp(MaterialApp(
     title: 'Hardware Key Demo',
     home: Scaffold(
@@ -36,10 +45,11 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
     super.dispose();
   }
 
-  void _handleKeyEvent(RawKeyEvent event) {
+  bool _handleKeyEvent(FocusNode node, RawKeyEvent event) {
     setState(() {
       _event = event;
     });
+    return false;
   }
 
   String _asHex(int value) => value != null ? '0x${value.toRadixString(16)}' : 'null';
@@ -53,9 +63,10 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    return RawKeyboardListener(
+    return Focus(
       focusNode: _focusNode,
       onKey: _handleKeyEvent,
+      autofocus: true,
       child: AnimatedBuilder(
         animation: _focusNode,
         builder: (BuildContext context, Widget child) {
@@ -87,6 +98,9 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             dataText.add(Text('keyCode: ${data.keyCode} (${_asHex(data.keyCode)})'));
             dataText.add(Text('scanCode: ${data.scanCode} (${_asHex(data.scanCode)})'));
             dataText.add(Text('metaState: ${data.metaState} (${_asHex(data.metaState)})'));
+            dataText.add(Text('source: ${data.eventSource} (${_asHex(data.eventSource)})'));
+            dataText.add(Text('vendorId: ${data.vendorId} (${_asHex(data.vendorId)})'));
+            dataText.add(Text('productId: ${data.productId} (${_asHex(data.productId)})'));
             dataText.add(Text('flags: ${data.flags} (${_asHex(data.flags)})'));
           } else if (data is RawKeyEventDataFuchsia) {
             dataText.add(Text('codePoint: ${data.codePoint} (${_asHex(data.codePoint)})'));
@@ -100,7 +114,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           } else if (data is RawKeyEventDataLinux) {
             dataText.add(Text('keyCode: ${data.keyCode} (${_asHex(data.keyCode)})'));
             dataText.add(Text('scanCode: ${data.scanCode}'));
-            dataText.add(Text('codePoint: ${data.codePoint}'));
+            dataText.add(Text('unicodeScalarValues: ${data.unicodeScalarValues}'));
             dataText.add(Text('modifiers: ${data.modifiers} (${_asHex(data.modifiers)})'));
           }
           dataText.add(Text('logical: ${_event.logicalKey}'));
@@ -118,7 +132,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             }
           }
           return DefaultTextStyle(
-            style: textTheme.headline,
+            style: textTheme.subhead,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: dataText,

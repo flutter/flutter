@@ -197,7 +197,7 @@ class BottomNavigationBar extends StatefulWidget {
        assert(elevation != null && elevation >= 0.0),
        assert(iconSize != null && iconSize >= 0.0),
        assert(
-         selectedItemColor != null ? fixedColor == null : true,
+         selectedItemColor == null || fixedColor == null,
          'Either selectedItemColor or fixedColor can be specified, but not both'
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
@@ -322,8 +322,8 @@ class BottomNavigationBar extends StatefulWidget {
   // [BottomNavigationBarType.fixed] is used for 3 or fewer items, and
   // [BottomNavigationBarType.shifting] is used for 4+ items.
   static BottomNavigationBarType _type(
-      BottomNavigationBarType type,
-      List<BottomNavigationBarItem> items,
+    BottomNavigationBarType type,
+    List<BottomNavigationBarItem> items,
   ) {
     if (type != null) {
       return type;
@@ -473,7 +473,6 @@ class _BottomNavigationTile extends StatelessWidget {
       flex: size,
       child: Semantics(
         container: true,
-        header: true,
         selected: selected,
         child: Focus(
           child: Stack(

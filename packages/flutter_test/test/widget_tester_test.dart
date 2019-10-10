@@ -467,6 +467,7 @@ void main() {
       final StringBuffer buf = StringBuffer('1');
       await tester.runAsync(() async {
         buf.write('2');
+        //ignore: avoid_slow_async_io
         await Directory.current.stat();
         buf.write('3');
       });
@@ -542,7 +543,7 @@ void main() {
 
       expect(() => tester.getSemantics(find.text('hello')),
         throwsA(isInstanceOf<StateError>()));
-    });
+    }, semanticsEnabled: false);
 
     testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();

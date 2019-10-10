@@ -518,6 +518,8 @@ class RenderTable extends RenderBox {
   /// the table, unlike decorations for individual cells, which might not fill
   /// either.
   List<Decoration> get rowDecorations => List<Decoration>.unmodifiable(_rowDecorations ?? const <Decoration>[]);
+  // _rowDecorations and _rowDecorationPainters need to be in sync. They have to
+  // either both be null or have same length.
   List<Decoration> _rowDecorations;
   List<BoxPainter> _rowDecorationPainters;
   set rowDecorations(List<Decoration> value) {
@@ -703,7 +705,7 @@ class RenderTable extends RenderBox {
     if (_rowDecorationPainters != null) {
       for (BoxPainter painter in _rowDecorationPainters)
         painter?.dispose();
-      _rowDecorationPainters = null;
+      _rowDecorationPainters = List<BoxPainter>(_rowDecorations.length);
     }
     for (RenderBox child in _children)
       child?.detach();
@@ -893,7 +895,10 @@ class RenderTable extends RenderBox {
     }
 
     // beyond this point, unflexedTableWidth is no longer valid
-    assert(() { unflexedTableWidth = null; return true; }());
+    assert(() {
+      unflexedTableWidth = null;
+      return true;
+    }());
 
     // 4. apply the maximum width of the table, shrinking columns as
     //    necessary, applying minimum column widths as we go
@@ -916,10 +921,7 @@ class RenderTable extends RenderBox {
       // columns shrinking them proportionally until we have no
       // available columns, then do the same to the non-flexible ones.
       int availableColumns = columns;
-      // Handle double precision errors which causes this loop to become
-      // stuck in certain configurations.
-      const double minimumDeficit = precisionErrorTolerance;
-      while (deficit > minimumDeficit && totalFlex > minimumDeficit) {
+      while (deficit > precisionErrorTolerance && totalFlex > precisionErrorTolerance) {
         double newTotalFlex = 0.0;
         for (int x = 0; x < columns; x += 1) {
           if (flexes[x] != null) {
@@ -941,31 +943,30 @@ class RenderTable extends RenderBox {
         }
         totalFlex = newTotalFlex;
       }
-      if (deficit > 0.0) {
+      while (deficit > precisionErrorTolerance && availableColumns > 0) {
         // Now we have to take out the remaining space from the
         // columns that aren't minimum sized.
         // To make this fair, we repeatedly remove equal amounts from
         // each column, clamped to the minimum width, until we run out
         // of columns that aren't at their minWidth.
-        do {
-          final double delta = deficit / availableColumns;
-          int newAvailableColumns = 0;
-          for (int x = 0; x < columns; x += 1) {
-            final double availableDelta = widths[x] - minWidths[x];
-            if (availableDelta > 0.0) {
-              if (availableDelta <= delta) {
-                // shrank to minimum
-                deficit -= widths[x] - minWidths[x];
-                widths[x] = minWidths[x];
-              } else {
-                deficit -= delta;
-                widths[x] -= delta;
-                newAvailableColumns += 1;
-              }
+        final double delta = deficit / availableColumns;
+        assert(delta != 0);
+        int newAvailableColumns = 0;
+        for (int x = 0; x < columns; x += 1) {
+          final double availableDelta = widths[x] - minWidths[x];
+          if (availableDelta > 0.0) {
+            if (availableDelta <= delta) {
+              // shrank to minimum
+              deficit -= widths[x] - minWidths[x];
+              widths[x] = minWidths[x];
+            } else {
+              deficit -= delta;
+              widths[x] -= delta;
+              newAvailableColumns += 1;
             }
           }
-          availableColumns = newAvailableColumns;
-        } while (deficit > 0.0 && availableColumns > 0);
+        }
+        availableColumns = newAvailableColumns;
       }
     }
     return widths;
@@ -1137,6 +1138,7 @@ class RenderTable extends RenderBox {
     }
     assert(_rowTops.length == rows + 1);
     if (_rowDecorations != null) {
+      assert(_rowDecorations.length == _rowDecorationPainters.length);
       final Canvas canvas = context.canvas;
       for (int y = 0; y < rows; y += 1) {
         if (_rowDecorations.length <= y)

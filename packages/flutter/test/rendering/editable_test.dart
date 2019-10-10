@@ -34,6 +34,8 @@ void main() {
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
         text: '12345',
       ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       locale: const Locale('ja', 'JP'),
@@ -72,7 +74,7 @@ void main() {
         '   ╚═══════════\n'
       ),
     );
-  });
+  }, skip: isBrowser);
 
   // Test that clipping will be used even when the text fits within the visible
   // region if the start position of the text is offset (e.g. during scrolling
@@ -84,11 +86,16 @@ void main() {
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
         text: 'A',
       ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       locale: const Locale('en', 'US'),
       offset: ViewportOffset.fixed(10.0),
       textSelectionDelegate: delegate,
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
     );
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(
@@ -114,6 +121,8 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       selection: const TextSelection.collapsed(
         offset: 4,
         affinity: TextAffinity.upstream,
@@ -168,7 +177,7 @@ void main() {
     pumpFrame();
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  });
+  }, skip: isBrowser);
 
   test('Cursor with ideographic script', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -187,6 +196,8 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       selection: const TextSelection.collapsed(
         offset: 4,
         affinity: TextAffinity.upstream,
@@ -241,7 +252,7 @@ void main() {
     pumpFrame();
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  });
+  }, skip: isBrowser);
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -258,6 +269,8 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       selection: const TextSelection(
         baseOffset: 0,
         extentOffset: 3,
@@ -297,6 +310,8 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       selection: const TextSelection.collapsed(
         offset: 2,
         affinity: TextAffinity.upstream,
@@ -327,7 +342,7 @@ void main() {
         ..paragraph(),
     );
     expect(editable, paintsExactlyCountTimes(#drawRect, 1));
-  });
+  }, skip: isBrowser);
 
   test('selects correct place with offsets', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -345,11 +360,16 @@ void main() {
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
         currentSelection = selection;
       },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       text: const TextSpan(
         text: 'test\ntest',
         style: TextStyle(
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 4,
       ),
     );
 
@@ -407,7 +427,7 @@ void main() {
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 5);
     expect(currentSelection.extentOffset, 9);
-  });
+  }, skip: isBrowser);
 
   test('selects correct place when offsets are flipped', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -429,6 +449,8 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
     );
 
     layout(editable);
@@ -439,7 +461,7 @@ void main() {
     expect(currentSelection.isCollapsed, isFalse);
     expect(currentSelection.baseOffset, 1);
     expect(currentSelection.extentOffset, 3);
-  });
+  }, skip: isBrowser);
 
   test('selection does not flicker as user is dragging', () {
     int selectionChangedCount = 0;
@@ -461,6 +483,8 @@ void main() {
         selectionChangedCount++;
         updatedSelection = selection;
       },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       text: text,
     );
 
@@ -483,6 +507,8 @@ void main() {
         updatedSelection = selection;
       },
       text: text,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
     );
 
     layout(editable2);
@@ -494,7 +520,7 @@ void main() {
     expect(updatedSelection.baseOffset, 3);
     expect(updatedSelection.extentOffset, 5);
     expect(selectionChangedCount, 1);
-  });
+  }, skip: isBrowser);
 
   test('editable hasFocus correctly initialized', () {
     // Regression test for https://github.com/flutter/flutter/issues/21640
@@ -510,10 +536,55 @@ void main() {
       offset: ViewportOffset.zero(),
       textSelectionDelegate: delegate,
       hasFocus: true,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
     );
 
     expect(editable.hasFocus, true);
     editable.hasFocus = false;
     expect(editable.hasFocus, false);
+  });
+
+  test('has correct maxScrollExtent', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    EditableText.debugDeterministicCursor = true;
+
+    final RenderEditable editable = RenderEditable(
+      maxLines: 2,
+      backgroundCursorColor: Colors.grey,
+      textDirection: TextDirection.ltr,
+      cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(
+        text: '撒地方加咖啡哈金凤凰卡号方式剪坏算法发挥福建垃\nasfjafjajfjaslfjaskjflasjfksajf撒分开建安路口附近拉设\n计费可使肌肤撒附近埃里克圾房卡设计费"',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Roboto',
+        ),
+      ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    editable.layout(BoxConstraints.loose(const Size(100.0, 1000.0)));
+    expect(editable.size, equals(const Size(100, 20)));
+    expect(editable.maxLines, equals(2));
+    expect(editable.maxScrollExtent, equals(90));
+
+    editable.layout(BoxConstraints.loose(const Size(150.0, 1000.0)));
+    expect(editable.maxScrollExtent, equals(50));
+
+    editable.layout(BoxConstraints.loose(const Size(200.0, 1000.0)));
+    expect(editable.maxScrollExtent, equals(40));
+
+    editable.layout(BoxConstraints.loose(const Size(500.0, 1000.0)));
+    expect(editable.maxScrollExtent, equals(10));
+
+    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    expect(editable.maxScrollExtent, equals(10));
   });
 }

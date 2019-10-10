@@ -155,7 +155,7 @@ void main() {
             title: const Text('X'),
           ),
         ),
-      )
+      ),
     );
 
     final Finder title = find.text('X');

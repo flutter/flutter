@@ -95,7 +95,7 @@ class Dismissible extends StatefulWidget {
     this.crossAxisEndOffset = 0.0,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(key != null),
-       assert(secondaryBackground != null ? background != null : true),
+       assert(secondaryBackground == null || background != null),
        assert(dragStartBehavior != null),
        super(key: key);
 
@@ -549,22 +549,19 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     );
 
     if (background != null) {
-      final List<Widget> children = <Widget>[];
-
-      if (!_moveAnimation.isDismissed) {
-        children.add(Positioned.fill(
-          child: ClipRect(
-            clipper: _DismissibleClipper(
-              axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
-              moveAnimation: _moveAnimation,
+      content = Stack(children: <Widget>[
+        if (!_moveAnimation.isDismissed)
+          Positioned.fill(
+            child: ClipRect(
+              clipper: _DismissibleClipper(
+                axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
+                moveAnimation: _moveAnimation,
+              ),
+              child: background,
             ),
-            child: background,
           ),
-        ));
-      }
-
-      children.add(content);
-      content = Stack(children: children);
+        content,
+      ]);
     }
     // We are not resizing but we may be being dragging in widget.direction.
     return GestureDetector(

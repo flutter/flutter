@@ -23,18 +23,23 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('shadow.BoxDecoration.disabled.png'),
+      matchesGoldenFile(
+        'shadow.BoxDecoration.disabled.png',
+        version: null,
+      ),
     );
     debugDisableShadows = false;
     tester.binding.reassembleApplication();
     await tester.pump();
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('shadow.BoxDecoration.enabled.png'),
-      skip: !isLinux
-    ); // shadows render differently on different platforms
+      matchesGoldenFile(
+        'shadow.BoxDecoration.enabled.png',
+        version: null,
+      ),
+    );
     debugDisableShadows = true;
-  });
+  }, skip: isBrowser);
 
   testWidgets('Shadows on ShapeDecoration', (WidgetTester tester) async {
     debugDisableShadows = false;
@@ -57,11 +62,14 @@ void main() {
       await tester.pumpWidget(build(elevation));
       await expectLater(
         find.byType(Container),
-        matchesGoldenFile('shadow.ShapeDecoration.$elevation.png'),
+        matchesGoldenFile(
+          'shadow.ShapeDecoration.$elevation.png',
+          version: null,
+        ),
       );
     }
     debugDisableShadows = true;
-  }, skip: !isLinux); // shadows render differently on different platforms
+  });
 
   testWidgets('Shadows with PhysicalLayer', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -84,18 +92,23 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('shadow.PhysicalModel.disabled.png'),
+      matchesGoldenFile(
+        'shadow.PhysicalModel.disabled.png',
+        version: null,
+      ),
     );
     debugDisableShadows = false;
     tester.binding.reassembleApplication();
     await tester.pump();
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('shadow.PhysicalModel.enabled.png'),
-      skip: !isLinux,
-    ); // shadows render differently on different platforms
+      matchesGoldenFile(
+        'shadow.PhysicalModel.enabled.png',
+        version: null,
+      ),
+    );
     debugDisableShadows = true;
-  });
+  }, skip: isBrowser);
 
   testWidgets('Shadows with PhysicalShape', (WidgetTester tester) async {
     debugDisableShadows = false;
@@ -122,9 +135,12 @@ void main() {
       await tester.pumpWidget(build(elevation.toDouble()));
       await expectLater(
         find.byType(Container),
-        matchesGoldenFile('shadow.PhysicalShape.$elevation.1.png'),
+        matchesGoldenFile(
+          'shadow.PhysicalShape.$elevation.png',
+          version: 1,
+        ),
       );
     }
     debugDisableShadows = true;
-  }, skip: !isLinux); // shadows render differently on different platforms
+  });
 }

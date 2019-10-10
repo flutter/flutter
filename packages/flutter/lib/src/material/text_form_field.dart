@@ -29,11 +29,18 @@ import 'theme.dart';
 /// If a [controller] is not specified, [initialValue] can be used to give
 /// the automatically generated controller an initial value.
 ///
+/// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
+/// This will ensure we discard any resources used by the object.
+///
 /// For a documentation about the various parameters, see [TextField].
 ///
 /// {@tool sample}
 ///
 /// Creates a [TextFormField] with an [InputDecoration] and validator function.
+///
+/// ![If the user enters valid text, the TextField appears normally without any warnings to the user](https://flutter.github.io/assets-for-api-docs/assets/material/text_form_field.png)
+///
+/// ![If the user enters invalid text, the error message returned from the validator function is displayed in dark red underneath the input](https://flutter.github.io/assets-for-api-docs/assets/material/text_form_field_error.png)
 ///
 /// ```dart
 /// TextFormField(
@@ -60,6 +67,7 @@ import 'theme.dart';
 ///    integration.
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
   ///
@@ -83,8 +91,10 @@ class TextFormField extends FormField<String> {
     StrutStyle strutStyle,
     TextDirection textDirection,
     TextAlign textAlign = TextAlign.start,
+    TextAlignVertical textAlignVertical,
     bool autofocus = false,
     bool readOnly = false,
+    ToolbarOptions toolbarOptions,
     bool showCursor,
     bool obscureText = false,
     bool autocorrect = true,
@@ -94,6 +104,8 @@ class TextFormField extends FormField<String> {
     int minLines,
     bool expands = false,
     int maxLength,
+    ValueChanged<String> onChanged,
+    GestureTapCallback onTap,
     VoidCallback onEditingComplete,
     ValueChanged<String> onFieldSubmitted,
     FormFieldSetter<String> onSaved,
@@ -140,6 +152,12 @@ class TextFormField extends FormField<String> {
       final _TextFormFieldState state = field;
       final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
         .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+      void onChangedHandler(String value) {
+        if (onChanged != null) {
+          onChanged(value);
+        }
+        field.didChange(value);
+      }
       return TextField(
         controller: state._effectiveController,
         focusNode: focusNode,
@@ -149,9 +167,11 @@ class TextFormField extends FormField<String> {
         style: style,
         strutStyle: strutStyle,
         textAlign: textAlign,
+        textAlignVertical: textAlignVertical,
         textDirection: textDirection,
         textCapitalization: textCapitalization,
         autofocus: autofocus,
+        toolbarOptions: toolbarOptions,
         readOnly: readOnly,
         showCursor: showCursor,
         obscureText: obscureText,
@@ -161,7 +181,8 @@ class TextFormField extends FormField<String> {
         minLines: minLines,
         expands: expands,
         maxLength: maxLength,
-        onChanged: field.didChange,
+        onChanged: onChangedHandler,
+        onTap: onTap,
         onEditingComplete: onEditingComplete,
         onSubmitted: onFieldSubmitted,
         inputFormatters: inputFormatters,

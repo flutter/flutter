@@ -59,6 +59,14 @@ Future<void> main() async {
         ..rect(color: Colors.black)
         ..rect(color: Colors.white),
     );
+  }, skip: isBrowser);
+
+  test('ShapeDecoration with BorderDirectional', () {
+    const ShapeDecoration decoration = ShapeDecoration(
+      shape: BorderDirectional(start: BorderSide(color: Colors.red, width: 3)),
+    );
+
+    expect(decoration.padding, isInstanceOf<EdgeInsetsDirectional>());
   });
 
   testWidgets('TestBorder and Directionality - 1', (WidgetTester tester) async {

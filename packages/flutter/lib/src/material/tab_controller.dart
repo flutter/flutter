@@ -150,7 +150,7 @@ class TabController extends ChangeNotifier {
   void _changeIndex(int value, { Duration duration, Curve curve }) {
     assert(value != null);
     assert(value >= 0 && (value < length || length == 0));
-    assert(duration == null ? curve == null : true);
+    assert(duration != null || curve == null);
     assert(_indexIsChangingCount >= 0);
     if (value == _index || length < 2)
       return;
@@ -313,7 +313,7 @@ class DefaultTabController extends StatefulWidget {
     @required this.child,
   }) : assert(initialIndex != null),
        assert(length >= 0),
-       assert(initialIndex >= 0 && initialIndex < length),
+       assert(length == 0 || (initialIndex >= 0 && initialIndex < length)),
        super(key: key);
 
   /// The total number of tabs.

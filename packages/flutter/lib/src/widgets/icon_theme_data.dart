@@ -6,6 +6,7 @@ import 'dart:ui' show Color, hashValues;
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 
 /// Defines the color, opacity, and size of icons.
 ///
@@ -94,7 +95,7 @@ class IconThemeData extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DoubleProperty('opacity', opacity, defaultValue: null));
     properties.add(DoubleProperty('size', size, defaultValue: null));
   }

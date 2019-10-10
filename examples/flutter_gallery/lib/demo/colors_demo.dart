@@ -99,25 +99,25 @@ class PaletteTabView extends StatelessWidget {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle whiteTextStyle = textTheme.body1.copyWith(color: Colors.white);
     final TextStyle blackTextStyle = textTheme.body1.copyWith(color: Colors.black);
-    final List<Widget> colorItems = primaryKeys.map<Widget>((int index) {
-      return DefaultTextStyle(
-        style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
-        child: ColorItem(index: index, color: colors.primary[index]),
-      );
-    }).toList();
-
-    if (colors.accent != null) {
-      colorItems.addAll(accentKeys.map<Widget>((int index) {
-        return DefaultTextStyle(
-          style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
-          child: ColorItem(index: index, color: colors.accent[index], prefix: 'A'),
-        );
-      }).toList());
-    }
-
-    return ListView(
-      itemExtent: kColorItemHeight,
-      children: colorItems,
+    return Scrollbar(
+      child: ListView(
+        itemExtent: kColorItemHeight,
+        children: <Widget>[
+          ...primaryKeys.map<Widget>((int index) {
+            return DefaultTextStyle(
+              style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
+              child: ColorItem(index: index, color: colors.primary[index]),
+            );
+          }),
+          if (colors.accent != null)
+            ...accentKeys.map<Widget>((int index) {
+              return DefaultTextStyle(
+                style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
+                child: ColorItem(index: index, color: colors.accent[index], prefix: 'A'),
+              );
+            }),
+        ],
+      ),
     );
   }
 }

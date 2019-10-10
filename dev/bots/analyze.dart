@@ -40,9 +40,10 @@ Future<void> main(List<String> args) async {
 
   {
     // Analyze all the Dart code in the repo.
-    final List<String> options = <String>['--flutter-repo'];
-    options.addAll(args);
-    await _runFlutterAnalyze(flutterRoot, options: options);
+    await _runFlutterAnalyze(flutterRoot, options: <String>[
+      '--flutter-repo',
+      ...args,
+    ]);
   }
 
   // Ensure that all package dependencies are in sync.
@@ -59,9 +60,12 @@ Future<void> main(List<String> args) async {
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
   {
-    final List<String> options = <String>['--flutter-repo', '--watch', '--benchmark'];
-    options.addAll(args);
-    await _runFlutterAnalyze(flutterRoot, options: options);
+    await _runFlutterAnalyze(flutterRoot, options: <String>[
+      '--flutter-repo',
+      '--watch',
+      '--benchmark',
+      ...args,
+    ]);
   }
 
   await _checkForTrailingSpaces();
@@ -79,9 +83,11 @@ Future<void> main(List<String> args) async {
       workingDirectory: flutterRoot,
     );
     {
-      final List<String> options = <String>['--watch', '--benchmark'];
-      options.addAll(args);
-      await _runFlutterAnalyze(outDir.path, options: options);
+      await _runFlutterAnalyze(outDir.path, options: <String>[
+        '--watch',
+        '--benchmark',
+        ...args,
+      ]);
     }
   } finally {
     outDir.deleteSync(recursive: true);
@@ -171,7 +177,7 @@ Future<void> _checkForTrailingSpaces() async {
       '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m', '*.yml',
     ];
     final EvalResult changedFilesResult = await _evalCommand(
-      'git', <String>['diff', '-U0', '--no-color', '--name-only', commitRange, '--'] + fileTypes,
+      'git', <String>['diff', '-U0', '--no-color', '--name-only', commitRange, '--', ...fileTypes],
       workingDirectory: flutterRoot,
     );
     if (changedFilesResult.stdout == null || changedFilesResult.stdout.trim().isEmpty) {
@@ -189,9 +195,10 @@ Future<void> _checkForTrailingSpaces() async {
           '--line-number',
           '--extended-regexp',
           r'[[:blank:]]$',
-        ] + changedFiles,
+          ...changedFiles,
+        ],
         workingDirectory: flutterRoot,
-        failureMessage: '${red}Whitespace detected at the end of source code lines.$reset\nPlease remove:',
+        failureMessage: '${red}Detected trailing whitespace in the file[s] listed above.$reset\nPlease remove them from the offending line[s].',
         expectNonZeroExit: true, // Just means a non-zero exit code is expected.
         expectedExitCode: 1, // Indicates that zero lines were found.
       );
@@ -225,7 +232,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   }
   printProgress('RUNNING', relativeWorkingDir, commandDescription);
 
-  final DateTime start = DateTime.now();
+  final Stopwatch time = Stopwatch()..start();
   final Process process = await Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
@@ -240,7 +247,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
     exitCode: exitCode,
   );
 
-  print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
+  print('$clock ELAPSED TIME: $bold${prettyPrintDuration(time.elapsed)}$reset for $commandDescription in $relativeWorkingDir');
 
   if (exitCode != 0 && !allowNonZeroExit) {
     stderr.write(result.stderr);
@@ -260,7 +267,9 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 Future<void> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[],
 }) {
-  return runCommand(flutter, <String>['analyze', '--dartdocs']..addAll(options),
+  return runCommand(
+    flutter,
+    <String>['analyze', '--dartdocs', ...options],
     workingDirectory: workingDirectory,
   );
 }
@@ -456,7 +465,10 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
     final List<T> result = _deepSearch<T>(
       map,
       key,
-      (seen == null ? <T>{start} : Set<T>.from(seen))..add(key),
+      <T>{
+        if (seen == null) start else ...seen,
+        key,
+      },
     );
     if (result != null) {
       result.insert(0, start);
@@ -574,7 +586,7 @@ Future<void> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
     }
     await runCommand(flutter, <String>['inject-plugins'],
       workingDirectory: package,
-      printOutput: false,
+      outputMode: OutputMode.discard,
     );
     for (File registrant in fileToContent.keys) {
       if (registrant.readAsStringSync() != fileToContent[registrant]) {

@@ -17,7 +17,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final Finder title = find.text('X');
@@ -38,7 +38,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     center = tester.getCenter(title);
@@ -154,7 +154,7 @@ void main() {
     await tester.pumpWidget(buildFrame(TargetPlatform.iOS, false));
     expect(getTitleBottomLeft(), const Offset(72.0, 16.0));
 
-  });
+  }, skip: isBrowser);
 
   testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool centerTitle) {
@@ -195,7 +195,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(TargetPlatform.iOS, false));
     expect(getTitleBottomLeft(), Offset.zero);
-  });
+  }, skip: isBrowser);
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {

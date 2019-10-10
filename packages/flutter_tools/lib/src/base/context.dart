@@ -43,7 +43,7 @@ AppContext get context => Zone.current[_Key.key] as AppContext ?? AppContext._ro
 /// scope) is created.
 ///
 /// Child contexts are created and run using zones. To read more about how
-/// zones work, see https://api.dartlang.org/stable/dart-async/Zone-class.html.
+/// zones work, see https://api.dart.dev/stable/dart-async/Zone-class.html.
 class AppContext {
   AppContext._(
     this._parent,
@@ -81,8 +81,9 @@ class AppContext {
   /// If the generator ends up triggering a reentrant call, it signals a
   /// dependency cycle, and a [ContextDependencyCycleException] will be thrown.
   dynamic _generateIfNecessary(Type type, Map<Type, Generator> generators) {
-    if (!generators.containsKey(type))
+    if (!generators.containsKey(type)) {
       return null;
+    }
 
     return _values.putIfAbsent(type, () {
       _reentrantChecks ??= <Type>[];
@@ -99,8 +100,9 @@ class AppContext {
         return _boxNull(generators[type]());
       } finally {
         _reentrantChecks.removeLast();
-        if (_reentrantChecks.isEmpty)
+        if (_reentrantChecks.isEmpty) {
           _reentrantChecks = null;
+        }
       }
     });
   }
@@ -120,8 +122,9 @@ class AppContext {
   @Deprecated('use get<T> instead for type safety.')
   Object operator [](Type type) {
     dynamic value = _generateIfNecessary(type, _overrides);
-    if (value == null && _parent != null)
+    if (value == null && _parent != null) {
       value = _parent[type];
+    }
     return _unboxNull(value ?? _generateIfNecessary(type, _fallbacks));
   }
 
@@ -142,6 +145,7 @@ class AppContext {
     String name,
     Map<Type, Generator> overrides,
     Map<Type, Generator> fallbacks,
+    ZoneSpecification zoneSpecification,
   }) async {
     final AppContext child = AppContext._(
       this,
@@ -152,6 +156,7 @@ class AppContext {
     return await runZoned<Future<V>>(
       () async => await body(),
       zoneValues: <_Key, AppContext>{_Key.key: child},
+      zoneSpecification: zoneSpecification,
     );
   }
 
@@ -162,14 +167,18 @@ class AppContext {
     AppContext ctx = this;
     while (ctx != null) {
       buf.write('AppContext');
-      if (ctx.name != null)
+      if (ctx.name != null) {
         buf.write('[${ctx.name}]');
-      if (ctx._overrides.isNotEmpty)
+      }
+      if (ctx._overrides.isNotEmpty) {
         buf.write('\n$indent  overrides: [${ctx._overrides.keys.join(', ')}]');
-      if (ctx._fallbacks.isNotEmpty)
+      }
+      if (ctx._fallbacks.isNotEmpty) {
         buf.write('\n$indent  fallbacks: [${ctx._fallbacks.keys.join(', ')}]');
-      if (ctx._parent != null)
+      }
+      if (ctx._parent != null) {
         buf.write('\n$indent  parent: ');
+      }
       ctx = ctx._parent;
       indent += '  ';
     }

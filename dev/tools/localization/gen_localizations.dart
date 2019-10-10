@@ -137,7 +137,7 @@ String generateArbBasedLocalizationSubclasses({
     final Map<String, String> languageResources = localeToResources[languageLocale];
     for (String key in allKeys) {
       final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key];
-      output.writeln(generateGetter(key, languageResources[key], attributes));
+      output.writeln(generateGetter(key, languageResources[key], attributes, languageLocale));
     }
     output.writeln('}');
     int countryCodeCount = 0;
@@ -159,7 +159,7 @@ String generateArbBasedLocalizationSubclasses({
           if (languageResources[key] == scriptResources[key])
             continue;
           final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key];
-          output.writeln(generateGetter(key, scriptResources[key], attributes));
+          output.writeln(generateGetter(key, scriptResources[key], attributes, languageLocale));
         }
         output.writeln('}');
 
@@ -184,7 +184,7 @@ String generateArbBasedLocalizationSubclasses({
             if (scriptResources.containsKey(key) ? scriptResources[key] == localeResources[key] : languageResources[key] == localeResources[key])
               continue;
             final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key];
-            output.writeln(generateGetter(key, localeResources[key], attributes));
+            output.writeln(generateGetter(key, localeResources[key], attributes, languageLocale));
           }
          output.writeln('}');
         }
@@ -208,7 +208,7 @@ String generateArbBasedLocalizationSubclasses({
           if (languageResources[key] == localeResources[key])
             continue;
           final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key];
-          output.writeln(generateGetter(key, localeResources[key], attributes));
+          output.writeln(generateGetter(key, localeResources[key], attributes, languageLocale));
         }
        output.writeln('}');
       }
@@ -438,7 +438,7 @@ const Map<String, String> _scriptCategoryToEnum = <String, String>{
 /// it.
 ///
 /// Used by [generateGetter] below.
-String generateValue(String value, Map<String, dynamic> attributes) {
+String generateValue(String value, Map<String, dynamic> attributes, LocaleInfo locale) {
   if (value == null)
     return null;
   // cupertino_en.arb doesn't use x-flutter-type.
@@ -464,15 +464,19 @@ String generateValue(String value, Map<String, dynamic> attributes) {
         return _scriptCategoryToEnum[value];
     }
   }
-  return generateString(value);
+  // Localization strings for the Kannada locale ('kn') are encoded because
+  // some of the localized strings contain characters that can crash Emacs on Linux.
+  // See packages/flutter_localizations/lib/src/l10n/README for more information.
+  return locale.languageCode == 'kn' ? generateEncodedString(value) : generateString(value);
 }
 
 /// Combines [generateType], [generateKey], and [generateValue] to return
 /// the source of getters for the GlobalMaterialLocalizations subclass.
-String generateGetter(String key, String value, Map<String, dynamic> attributes) {
+/// The locale is the locale for which the getter is being generated.
+String generateGetter(String key, String value, Map<String, dynamic> attributes, LocaleInfo locale) {
   final String type = generateType(attributes);
   key = generateKey(key, attributes);
-  value = generateValue(value, attributes);
+  value = generateValue(value, attributes, locale);
       return '''
 
   @override

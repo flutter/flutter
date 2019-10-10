@@ -3,17 +3,31 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
+import 'dart:io' show Platform;
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 Future<void> main() async {
-  test('MotionEvents recomposition', () async {
-    final FlutterDriver driver = await FlutterDriver.connect();
-    final String errorMessage = await driver.requestData('run test');
+  FlutterDriver driver;
 
-    expect(errorMessage, '');
-    driver?.close();
+  setUpAll(() async {
+    driver = await FlutterDriver.connect();
+  });
+
+  tearDownAll(() {
+    driver.close();
+  });
+
+  group('MotionEvents tests ', () {
+    test('recomposition', () async {
+      if (Platform.isAndroid) {
+        final SerializableFinder motionEventsListTile =
+        find.byValueKey('MotionEventsListTile');
+        await driver.tap(motionEventsListTile);
+        await driver.waitFor(find.byValueKey('PlatformView'));
+        final String errorMessage = await driver.requestData('run test');
+        expect(errorMessage, '');
+      }
+    });
   });
 }
-

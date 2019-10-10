@@ -4,81 +4,54 @@
 
 import 'package:meta/meta.dart';
 
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/process_manager.dart';
+import '../base/logger.dart';
 import '../build_info.dart';
-import '../convert.dart';
+import '../build_system/build_system.dart';
+import '../build_system/targets/dart.dart';
+import '../build_system/targets/web.dart';
 import '../globals.dart';
-
-/// The [WebCompiler] instance.
-WebCompiler get webCompiler => context.get<WebCompiler>();
+import '../platform_plugins.dart';
+import '../plugins.dart';
+import '../project.dart';
+import '../reporting/reporting.dart';
 
 /// The [WebCompilationProxy] instance.
-WebCompilationProxy get webCompilationProxy =>
-    context.get<WebCompilationProxy>();
+WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
 
-/// A wrapper around dart tools for web compilation.
-class WebCompiler {
-  const WebCompiler();
-
-  /// Compile `target` using dart2js.
-  ///
-  /// `minify` controls whether minifaction of the source is enabled. Defaults to `true`.
-  /// `enabledAssertions` controls whether assertions are enabled. Defaults to `false`.
-  Future<int> compileDart2js({
-    @required String target,
-    bool minify = true,
-    bool enabledAssertions = false,
-  }) async {
-    final String engineDartPath =
-        artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final String dart2jsPath =
-        artifacts.getArtifactPath(Artifact.dart2jsSnapshot);
-    final String flutterWebSdkPath =
-        artifacts.getArtifactPath(Artifact.flutterWebSdk);
-    final String librariesPath =
-        fs.path.join(flutterWebSdkPath, 'libraries.json');
-    final Directory outputDir = fs.directory(getWebBuildDirectory());
-    if (!outputDir.existsSync()) {
-      outputDir.createSync(recursive: true);
-    }
-    final String outputPath = fs.path.join(outputDir.path, 'main.dart.js');
-    if (!processManager.canRun(engineDartPath)) {
-      throwToolExit('Unable to find Dart binary at $engineDartPath');
-    }
-
-    /// Compile Dart to JavaScript.
-    final List<String> command = <String>[
-      engineDartPath,
-      dart2jsPath,
-      target,
-      '-o',
-      '$outputPath',
-      '-O4',
-      '--libraries-spec=$librariesPath',
-    ];
-    if (minify) {
-      command.add('-m');
-    }
-    if (enabledAssertions) {
-      command.add('--enable-asserts');
-    }
-    printTrace(command.join(' '));
-    final Process result = await processManager.start(command);
-    result.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(printStatus);
-    result.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(printError);
-    return result.exitCode;
+Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo buildInfo, bool initializePlatform) async {
+  if (!flutterProject.web.existsSync()) {
+    throwToolExit('Missing index.html.');
   }
+  final bool hasWebPlugins = findPlugins(flutterProject)
+    .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+  await injectPlugins(flutterProject, checkProjects: true);
+  final Status status = logger.startProgress('Compiling $target for the Web...', timeout: null);
+  final Stopwatch sw = Stopwatch()..start();
+  final BuildResult result = await buildSystem.build(const WebReleaseBundle(), Environment(
+    outputDir: fs.directory(getWebBuildDirectory()),
+    projectDir: fs.currentDirectory,
+    buildDir: flutterProject.directory
+      .childDirectory('.dart_tool')
+      .childDirectory('flutter_build'),
+    defines: <String, String>{
+      kBuildMode: getNameForBuildMode(buildInfo.mode),
+      kTargetFile: target,
+      kInitializePlatform: initializePlatform.toString(),
+      kHasWebPlugins: hasWebPlugins.toString(),
+    },
+  ));
+  if (!result.success) {
+    for (ExceptionMeasurement measurement in result.exceptions.values) {
+      printError(measurement.stackTrace.toString());
+      printError(measurement.exception.toString());
+    }
+    throwToolExit('Failed to compile application for the Web.');
+  }
+  status.stop();
+  flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 /// An indirection on web compilation.
@@ -87,17 +60,19 @@ class WebCompiler {
 class WebCompilationProxy {
   const WebCompilationProxy();
 
-  /// Initialize the web compiler output to `outputDirectory` from a project spawned at
-  /// `projectDirectory`.
-  Future<void> initialize({
+  /// Initialize the web compiler from the `projectDirectory`.
+  ///
+  /// Returns whether or not the build was successful.
+  ///
+  /// `release` controls whether we build the bundle for dartdevc or only
+  /// the entrypoints for dart2js to later take over.
+  Future<bool> initialize({
     @required Directory projectDirectory,
-    @required String target,
+    @required String projectName,
+    String testOutputDir,
+    BuildMode mode,
+    bool initializePlatform,
   }) async {
-    throw UnimplementedError();
-  }
-
-  /// Invalidate the source files in `inputs` and recompile them to JavaScript.
-  Future<void> invalidate({@required List<Uri> inputs}) async {
     throw UnimplementedError();
   }
 }

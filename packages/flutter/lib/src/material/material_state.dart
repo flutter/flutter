@@ -62,8 +62,9 @@ enum MaterialState {
   error,
 }
 
-/// Signature for the function that returns a color based on a given set of states.
-typedef MaterialStateColorResolver = Color Function(Set<MaterialState> states);
+/// Signature for the function that returns a value of type `T` based on a given
+/// set of states.
+typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 
 /// Defines a [Color] whose value depends on a set of [MaterialState]s which
 /// represent the interactive state of a component.
@@ -109,7 +110,7 @@ typedef MaterialStateColorResolver = Color Function(Set<MaterialState> states);
 /// ),
 /// ```
 /// {@end-tool}
-abstract class MaterialStateColor extends Color {
+abstract class MaterialStateColor extends Color implements MaterialStateProperty<Color> {
   /// Creates a [MaterialStateColor].
   ///
   /// If you want a `const` [MaterialStateColor], you'll need to extend
@@ -141,33 +142,24 @@ abstract class MaterialStateColor extends Color {
   /// {@end-tool}
   const MaterialStateColor(int defaultValue) : super(defaultValue);
 
-  /// Creates a [MaterialStateColor] from a [MaterialStateColorResolver] callback function.
+  /// Creates a [MaterialStateColor] from a [MaterialPropertyResolver<Color>]
+  /// callback function.
   ///
   /// If used as a regular color, the color resolved in the default state (the
   /// empty set of states) will be used.
   ///
   /// The given callback parameter must return a non-null color in the default
   /// state.
-  factory MaterialStateColor.resolveWith(MaterialStateColorResolver callback) => _MaterialStateColor(callback);
+  static MaterialStateColor resolveWith(MaterialPropertyResolver<Color> callback) => _MaterialStateColor(callback);
 
   /// Returns a [Color] that's to be used when a Material component is in the
   /// specified state.
+  @override
   Color resolve(Set<MaterialState> states);
-
-  /// Returns the color for the given set of states if `color` is a
-  /// [MaterialStateColor], otherwise returns the color itself.
-  ///
-  /// This is useful for widgets that have parameters which can be [Color] or
-  /// [MaterialStateColor] values.
-  static Color resolveColor(Color color, Set<MaterialState> states) {
-    if (color is MaterialStateColor) {
-      return color.resolve(states);
-    }
-    return color;
-  }
 }
 
-/// A [MaterialStateColor] created from a [MaterialStateColorResolver] callback alone.
+/// A [MaterialStateColor] created from a [MaterialPropertyResolver<Color>]
+/// callback alone.
 ///
 /// If used as a regular color, the color resolved in the default state will
 /// be used.
@@ -176,11 +168,54 @@ abstract class MaterialStateColor extends Color {
 class _MaterialStateColor extends MaterialStateColor {
   _MaterialStateColor(this._resolve) : super(_resolve(_defaultStates).value);
 
-  final MaterialStateColorResolver _resolve;
+  final MaterialPropertyResolver<Color> _resolve;
 
   /// The default state for a Material component, the empty set of interaction states.
   static const Set<MaterialState> _defaultStates = <MaterialState>{};
 
   @override
   Color resolve(Set<MaterialState> states) => _resolve(states);
+}
+
+/// Interface for classes that can return a value of type `T` based on a set of
+/// [MaterialState]s.
+///
+/// For example, [MaterialStateColor] implements `MaterialStateProperty<Color>`
+/// because it has a `resolve` method that returns a different [Color] depending
+/// on the given set of [MaterialState]s.
+abstract class MaterialStateProperty<T> {
+
+  /// Returns a different value of type `T` depending on the given `states`.
+  ///
+  /// Some widgets (such as [RawMaterialButton]) keep track of their set of
+  /// [MaterialState]s, and will call `resolve` with the current states at build
+  /// time for specified properties (such as [RawMaterialButton.textStyle]'s color).
+  T resolve(Set<MaterialState> states);
+
+  /// Returns the value resolved in the given set of states if `value` is a
+  /// [MaterialStateProperty], otherwise returns the value itself.
+  ///
+  /// This is useful for widgets that have parameters which can optionally be a
+  /// [MaterialStateProperty]. For example, [RaisedButton.textColor] can be a
+  /// [Color] or a [MaterialStateProperty<Color>].
+  static T resolveAs<T>(T value, Set<MaterialState> states) {
+    if (value is MaterialStateProperty<T>) {
+      final MaterialStateProperty<T> property = value;
+      return property.resolve(states);
+    }
+    return value;
+  }
+
+  /// Convenience method for creating a [MaterialStateProperty] from a
+  /// [MaterialPropertyResolver] function alone.
+  static MaterialStateProperty<T> resolveWith<T>(MaterialPropertyResolver<T> callback) => _MaterialStateProperty<T>(callback);
+}
+
+class _MaterialStateProperty<T> implements MaterialStateProperty<T> {
+  _MaterialStateProperty(this._resolve);
+
+  final MaterialPropertyResolver<T> _resolve;
+
+  @override
+  T resolve(Set<MaterialState> states) => _resolve(states);
 }

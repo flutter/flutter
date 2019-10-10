@@ -43,7 +43,8 @@ void main() {
            //      0       12345678      9      101234567       18     90123456       27
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
-    expect(painter.text.text.length, 28);
+    TextSpan textSpan = painter.text;
+    expect(textSpan.text.length, 28);
     painter.layout();
 
     // The skips here are because the old rendering code considers the bidi formatting characters
@@ -126,9 +127,11 @@ void main() {
       // The list is currently in the wrong order (so selection boxes will paint in the wrong order).
     );
 
-    final List<List<TextBox>> list = <List<TextBox>>[];
-    for (int index = 0; index < painter.text.text.length; index += 1)
-      list.add(painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)));
+    textSpan = painter.text;
+    final List<List<TextBox>> list = <List<TextBox>>[
+      for (int index = 0; index < textSpan.text.length; index += 1)
+        painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)),
+    ];
     expect(list, const <List<TextBox>>[
       <TextBox>[], // U+202E, non-printing Unicode bidi formatting character
       <TextBox>[TextBox.fromLTRBD(230.0, 0.0, 240.0, 10.0, TextDirection.rtl)],
@@ -172,7 +175,8 @@ void main() {
            //      0       12345678      9      101234567       18     90123456       27
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
-    expect(painter.text.text.length, 28);
+    final TextSpan textSpan = painter.text;
+    expect(textSpan.text.length, 28);
     painter.layout();
 
     final TextRange hebrew1 = painter.getWordBoundary(const TextPosition(offset: 4, affinity: TextAffinity.downstream));
@@ -261,7 +265,8 @@ void main() {
       text: 'A\u05D0', // A, Alef
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
-    expect(painter.text.text.length, 2);
+    final TextSpan textSpan = painter.text;
+    expect(textSpan.text.length, 2);
     painter.layout(maxWidth: 10.0);
 
     for (int index = 0; index <= 2; index += 1) {
@@ -386,10 +391,11 @@ void main() {
       skip: skipExpectsWithKnownBugs, // horizontal offsets are one pixel off in places; vertical offsets are good
     );
 
-    final List<List<TextBox>> list = <List<TextBox>>[];
-    for (int index = 0; index < 5+4+5; index += 1)
-      list.add(painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)));
-    print(list);
+    final List<List<TextBox>> list = <List<TextBox>>[
+      for (int index = 0; index < 5+4+5; index += 1)
+        painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)),
+    ];
+
     expect(list, const <List<TextBox>>[
       <TextBox>[TextBox.fromLTRBD(0.0, 8.0, 10.0, 18.0, TextDirection.ltr)],
       <TextBox>[TextBox.fromLTRBD(10.0, 8.0, 20.0, 18.0, TextDirection.ltr)],

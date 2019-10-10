@@ -69,7 +69,8 @@ class BannerPainter extends CustomPainter {
        assert(textDirection != null),
        assert(location != null),
        assert(color != null),
-       assert(textStyle != null);
+       assert(textStyle != null),
+       super(repaint: PaintingBinding.instance.systemFonts);
 
   /// The message to show in the banner.
   final String message;
@@ -322,7 +323,7 @@ class Banner extends StatelessWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<BannerLocation>('location', location));
     properties.add(EnumProperty<TextDirection>('layoutDirection', layoutDirection, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, showName: false));
+    properties.add(ColorProperty('color', color, showName: false));
     textStyle?.debugFillProperties(properties, prefix: 'text ');
   }
 }

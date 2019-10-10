@@ -311,6 +311,15 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   bool _popPolicyDataIfNeeded(TraversalDirection direction, FocusScopeNode nearestScope, FocusNode focusedChild) {
     final _DirectionalPolicyData policyData = _policyData[nearestScope];
     if (policyData != null && policyData.history.isNotEmpty && policyData.history.first.direction != direction) {
+      if (policyData.history.last.node.parent == null) {
+        // If a node has been removed from the tree, then we should stop
+        // referencing it and reset the scope data so that we don't try and
+        // request focus on it. This can happen in slivers where the rendered node
+        // has been unmounted. This has the side effect that hysteresis might not
+        // be avoided when items that go off screen get unmounted.
+        invalidateScopeData(nearestScope);
+        return false;
+      }
       switch (direction) {
         case TraversalDirection.down:
         case TraversalDirection.up:
@@ -648,10 +657,9 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
       return topmost;
     }
 
-    final List<_SortData> data = <_SortData>[];
-    for (FocusNode node in nodes) {
-      data.add(_SortData(node));
-    }
+    final List<_SortData> data = <_SortData>[
+      for (FocusNode node in nodes) _SortData(node),
+    ];
 
     // Pick the initial widget as the one that is leftmost in the band of the
     // topmost, or the topmost, if there are no others in its band.

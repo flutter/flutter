@@ -430,10 +430,13 @@ class CupertinoDemoTab2 extends StatelessWidget {
       navigationBar: CupertinoNavigationBar(
         trailing: trailingButtons,
       ),
-      child: ListView(
-        children: <Widget>[
-          Tab2Header(),
-        ]..addAll(buildTab2Conversation()),
+      child: CupertinoScrollbar(
+        child: ListView(
+          children: <Widget>[
+            Tab2Header(),
+            ...buildTab2Conversation(),
+          ],
+        ),
       ),
     );
   }
@@ -644,25 +647,21 @@ class Tab2ConversationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[];
-    if (avatar != null)
-      children.add(avatar);
-
     final bool isSelf = avatar == null;
-    children.add(
-      Tab2ConversationBubble(
-        text: text,
-        color: isSelf
-          ? Tab2ConversationBubbleColor.blue
-          : Tab2ConversationBubbleColor.gray,
-      ),
-    );
     return SafeArea(
       child: Row(
         mainAxisAlignment: isSelf ? MainAxisAlignment.end : MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: isSelf ? CrossAxisAlignment.center : CrossAxisAlignment.end,
-        children: children,
+        children: <Widget>[
+          if (avatar != null) avatar,
+          Tab2ConversationBubble(
+            text: text,
+            color: isSelf
+              ? Tab2ConversationBubbleColor.blue
+              : Tab2ConversationBubbleColor.gray,
+          ),
+        ],
       ),
     );
   }

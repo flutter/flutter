@@ -102,6 +102,10 @@ class UserMessages {
       'Android sdkmanager tool not found ($sdkManagerPath).\n'
       'Try re-installing or updating your Android SDK,\n'
       'visit https://flutter.dev/setup/#android-setup for detailed instructions.';
+  String androidCannotRunSdkManager(String sdkManagerPath, String error) =>
+      'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "$error".\n'
+      'Try re-installing or updating your Android SDK,\n'
+      'visit https://flutter.dev/setup/#android-setup for detailed instructions.';
   String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update using sdkmanager, run:\n'
@@ -145,44 +149,6 @@ class UserMessages {
       'Once installed, run:\n'
       '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer';
 
-  // Messages used in IOSValidator
-  String get iOSIMobileDeviceMissing =>
-      'libimobiledevice and ideviceinstaller are not installed. To install with Brew, run:\n'
-      '  brew update\n'
-      '  brew install --HEAD usbmuxd\n'
-      '  brew link usbmuxd\n'
-      '  brew install --HEAD libimobiledevice\n'
-      '  brew install ideviceinstaller';
-  String get iOSIMobileDeviceBroken =>
-      'Verify that all connected devices have been paired with this computer in Xcode.\n'
-      'If all devices have been paired, libimobiledevice and ideviceinstaller may require updating.\n'
-      'To update with Brew, run:\n'
-      '  brew update\n'
-      '  brew uninstall --ignore-dependencies libimobiledevice\n'
-      '  brew uninstall --ignore-dependencies usbmuxd\n'
-      '  brew install --HEAD usbmuxd\n'
-      '  brew unlink usbmuxd\n'
-      '  brew link usbmuxd\n'
-      '  brew install --HEAD libimobiledevice\n'
-      '  brew install ideviceinstaller';
-  String get iOSDeviceInstallerMissing =>
-      'ideviceinstaller is not installed; this is used to discover connected iOS devices.\n'
-      'To install with Brew, run:\n'
-      '  brew install --HEAD usbmuxd\n'
-      '  brew link usbmuxd\n'
-      '  brew install --HEAD libimobiledevice\n'
-      '  brew install ideviceinstaller';
-  String iOSDeployVersion(String version) => 'ios-deploy $version';
-  String iOSDeployOutdated(String minVersion) =>
-      'ios-deploy out of date ($minVersion is required). To upgrade with Brew:\n'
-      '  brew upgrade ios-deploy';
-  String get iOSDeployMissing =>
-      'ios-deploy not installed. To install:\n'
-      '  brew install ios-deploy';
-  String get iOSBrewMissing =>
-      'Brew can be used to install tools for iOS device development.\n'
-      'Download brew at https://brew.sh/.';
-
   // Messages used in CocoaPodsValidator
   String cocoaPodsVersion(String version) => 'CocoaPods version $version';
   String cocoaPodsUninitialized(String consequence) =>
@@ -201,19 +167,39 @@ class UserMessages {
       '$consequence\n'
       'To upgrade:\n'
       '$upgradeInstructions';
-  String cocoaPodsOutdated(String recVersion, String consequence, String upgradeInstructions) =>
-      'CocoaPods out of date ($recVersion is recommended).\n'
+  String cocoaPodsOutdated(String currentVersion, String recVersion, String consequence, String upgradeInstructions) =>
+      'CocoaPods $currentVersion out of date ($recVersion is recommended).\n'
       '$consequence\n'
       'To upgrade:\n'
       '$upgradeInstructions';
-  String get cocoaPodsBrewMissing =>
-      'Brew can be used to install CocoaPods.\n'
-      'Download brew at https://brew.sh/.';
+  String cocoaPodsBrokenInstall(String consequence, String reinstallInstructions) =>
+      'CocoaPods installed but not working.\n'
+      '$consequence\n'
+      'To re-install CocoaPods, run:\n'
+      '$reinstallInstructions';
 
   // Messages used in VsCodeValidator
   String vsCodeVersion(String version) => 'version $version';
   String vsCodeLocation(String location) => 'VS Code at $location';
   String vsCodeFlutterExtensionMissing(String url) => 'Flutter extension not installed; install from\n$url';
+
+  // Messages used in VisualStudioValidator
+  String visualStudioVersion(String name, String version) => '$name version $version';
+  String visualStudioLocation(String location) => 'Visual Studio at $location';
+  String visualStudioMissingComponents(String workload, List<String> components) =>
+      'Visual Studio is missing necessary components. Please re-run the '
+      'Visual Studio installer for the "$workload" workload, and include these components:\n'
+      '  ${components.join('\n  ')}';
+  String visualStudioMissing(String workload, List<String> components) =>
+      'Visual Studio not installed; this is necessary for Windows development.\n'
+      'Download at https://visualstudio.microsoft.com/downloads/.\n'
+      'Please install the "$workload" workload, including following components:\n  ${components.join('\n  ')}';
+  String get visualStudioIsPrerelease => 'The current Visual Studio installation is a pre-release version. It may not be '
+      'supported by Flutter yet.';
+  String get visualStudioNotLaunchable =>
+      'The current Visual Studio installation is not launchable. Please reinstall Visual Studio.';
+  String get visualStudioIsIncomplete => 'The current Visual Studio installation is incomplete. Please reinstall Visual Studio.';
+  String get visualStudioRebootRequired => 'Visual Studio requires a reboot of your system to complete installation.';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';

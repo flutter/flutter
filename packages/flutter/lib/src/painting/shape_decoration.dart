@@ -10,6 +10,7 @@ import 'box_border.dart';
 import 'box_decoration.dart';
 import 'box_shadow.dart';
 import 'circle_border.dart';
+import 'colors.dart';
 import 'decoration.dart';
 import 'decoration_image.dart';
 import 'edge_insets.dart';
@@ -140,7 +141,13 @@ class ShapeDecoration extends Decoration {
   /// The image is drawn over the [color] or [gradient].
   final DecorationImage image;
 
-  /// A list of shadows cast by this shape behind the shape.
+  /// A list of shadows cast by the [shape].
+  ///
+  /// See also:
+  ///
+  ///  * [kElevationToShadow], for some predefined shadows used in Material
+  ///    Design.
+  ///  * [PhysicalModel], a widget for showing shadows.
   final List<BoxShadow> shadows;
 
   /// The shape to fill the [color], [gradient], and [image] into and to cast as
@@ -171,7 +178,7 @@ class ShapeDecoration extends Decoration {
   ///
   /// This value may be misleading. See the discussion at [ShapeBorder.dimensions].
   @override
-  EdgeInsets get padding => shape.dimensions;
+  EdgeInsetsGeometry get padding => shape.dimensions;
 
   @override
   bool get isComplex => shadows != null;
@@ -262,7 +269,7 @@ class ShapeDecoration extends Decoration {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
     properties.add(DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
     properties.add(IterableProperty<BoxShadow>('shadows', shadows, defaultValue: null, style: DiagnosticsTreeStyle.whitespace));
