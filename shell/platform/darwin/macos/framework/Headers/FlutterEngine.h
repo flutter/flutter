@@ -11,6 +11,7 @@
 #include "FlutterDartProject.h"
 #include "FlutterMacros.h"
 #include "FlutterPluginRegistrarMacOS.h"
+#include "FlutterTexture.h"
 
 // TODO: Merge this file with the iOS FlutterEngine.h.
 
@@ -20,7 +21,7 @@
  * Coordinates a single instance of execution of a Flutter engine.
  */
 FLUTTER_EXPORT
-@interface FlutterEngine : NSObject <FlutterPluginRegistry>
+@interface FlutterEngine : NSObject <FlutterTextureRegistry, FlutterPluginRegistry>
 
 /**
  * Initializes an engine with the given viewController.

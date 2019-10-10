@@ -9,6 +9,7 @@
 #import "FlutterBinaryMessenger.h"
 #import "FlutterChannels.h"
 #import "FlutterMacros.h"
+#import "FlutterTexture.h"
 
 // TODO: Merge this file and FlutterPluginMacOS.h with the iOS FlutterPlugin.h, sharing all but
 // the platform-specific methods.
@@ -27,6 +28,12 @@ FLUTTER_EXPORT
  * The binary messenger used for creating channels to communicate with the Flutter engine.
  */
 @property(nonnull, readonly) id<FlutterBinaryMessenger> messenger;
+
+/**
+ * Returns a `FlutterTextureRegistry` for registering textures
+ * provided by the plugin.
+ */
+@property(nonnull, readonly) id<FlutterTextureRegistry> textures;
 
 /**
  * The view displaying Flutter content. May return |nil|, for instance in a headless environment.

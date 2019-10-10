@@ -52,6 +52,8 @@ shared_library("create_flutter_framework_dylib") {
     "framework/Source/FlutterDartProject_Internal.h",
     "framework/Source/FlutterEngine.mm",
     "framework/Source/FlutterEngine_Internal.h",
+    "framework/Source/FlutterExternalTextureGL.h",
+    "framework/Source/FlutterExternalTextureGL.mm",
     "framework/Source/FlutterTextInputModel.h",
     "framework/Source/FlutterTextInputModel.mm",
     "framework/Source/FlutterTextInputPlugin.h",
@@ -75,7 +77,10 @@ shared_library("create_flutter_framework_dylib") {
 
   cflags_objcc = [ "-fobjc-arc" ]
 
-  libs = [ "Cocoa.framework" ]
+  libs = [
+    "Cocoa.framework",
+    "CoreVideo.framework",
+  ]
 }
 
 action("copy_dylib_and_update_framework_install_name") {

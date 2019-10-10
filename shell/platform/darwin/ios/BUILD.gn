@@ -30,7 +30,6 @@ _flutter_framework_headers = [
   "framework/Headers/FlutterPlatformViews.h",
   "framework/Headers/FlutterPlugin.h",
   "framework/Headers/FlutterPluginAppLifeCycleDelegate.h",
-  "framework/Headers/FlutterTexture.h",
   "framework/Headers/FlutterViewController.h",
 ]
 

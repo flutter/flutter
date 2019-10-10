@@ -807,8 +807,16 @@ FlutterEngineResult FlutterEngineRun(size_t version,
         GrGLTextureInfo gr_texture_info = {texture.target, texture.name,
                                            texture.format};
 
-        GrBackendTexture gr_backend_texture(size.width(), size.height(),
-                                            GrMipMapped::kNo, gr_texture_info);
+        size_t width = size.width();
+        size_t height = size.height();
+
+        if (texture.width != 0 && texture.height != 0) {
+          width = texture.width;
+          height = texture.height;
+        }
+
+        GrBackendTexture gr_backend_texture(width, height, GrMipMapped::kNo,
+                                            gr_texture_info);
         SkImage::TextureReleaseProc release_proc = texture.destruction_callback;
         auto image = SkImage::MakeFromTexture(
             context,                   // context

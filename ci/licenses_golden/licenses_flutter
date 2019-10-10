@@ -723,6 +723,7 @@ FILE: ../../../flutter/shell/platform/darwin/common/framework/Headers/FlutterBin
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h
+FILE: ../../../flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterChannels.mm
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterChannelsTest.m
 FILE: ../../../flutter/shell/platform/darwin/common/framework/Source/FlutterCodecs.mm
@@ -740,7 +741,6 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterHeadle
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterTexture.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate.mm
@@ -818,6 +818,8 @@ FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartP
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputModel.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputModel.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPlugin.h
