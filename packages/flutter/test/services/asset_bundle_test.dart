@@ -47,6 +47,13 @@ void main() {
       loadException = e;
     }
     expect(loadException, isFlutterError);
+    
+    try {
+      await bundle.loadStructuredData('foo', (str) => str);
+    } catch (e) {
+      loadException = e;
+    }
+    expect(loadException, isFlutterError);
   });
 
   test('AssetImage.obtainKey succeeds with ImageConfiguration.empty', () async {
