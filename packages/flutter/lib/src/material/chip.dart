@@ -13,6 +13,7 @@ import 'chip_theme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'feedback.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
@@ -1745,7 +1746,13 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       widget.onDeleted,
       GestureDetector(
         key: deleteIconKey,
-        onTap: widget.isEnabled ? widget.onDeleted : null,
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          if (widget.isEnabled) {
+            Feedback.forTap(context);
+            widget.onDeleted();
+          }
+        },
         child: IconTheme(
           data: theme.iconTheme.copyWith(
             color: widget.deleteIconColor ?? chipTheme.deleteIconColor,
