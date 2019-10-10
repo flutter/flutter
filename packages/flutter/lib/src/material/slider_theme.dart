@@ -1964,25 +1964,39 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
       isEnabled: isEnabled,
       isDiscrete: isDiscrete,
     );
-    final double trackRadius = trackRect.height / 2;
+    final Radius trackRadius = Radius.circular(trackRect.height / 2);
 
-    final Rect leftTrackArcRect = Rect.fromLTWH(trackRect.left, trackRect.top, trackRect.height, trackRect.height);
-    if (!leftTrackArcRect.isEmpty)
-      context.canvas.drawArc(leftTrackArcRect, math.pi / 2, math.pi, false, inactivePaint);
-
-    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRadius, trackRect.top, leftThumbOffset.dx - thumbRadius, trackRect.bottom);
-    if (!leftTrackSegment.isEmpty)
-      context.canvas.drawRect(leftTrackSegment, inactivePaint);
-    final Rect middleTrackSegment = Rect.fromLTRB(leftThumbOffset.dx + thumbRadius, trackRect.top, rightThumbOffset.dx - thumbRadius, trackRect.bottom);
-    if (!middleTrackSegment.isEmpty)
-      context.canvas.drawRect(middleTrackSegment, activePaint);
-    final Rect rightTrackSegment = Rect.fromLTRB(rightThumbOffset.dx + thumbRadius, trackRect.top, trackRect.right - trackRadius, trackRect.bottom);
-    if (!rightTrackSegment.isEmpty)
-      context.canvas.drawRect(rightTrackSegment, inactivePaint);
-
-    final Rect rightTrackArcRect = Rect.fromLTWH(trackRect.right - trackRect.height, trackRect.top, trackRect.height, trackRect.height);
-    if (!rightTrackArcRect.isEmpty)
-      context.canvas.drawArc(rightTrackArcRect, -math.pi / 2, math.pi, false, inactivePaint);
+    context.canvas.drawRRect(
+      RRect.fromLTRBAndCorners(
+        trackRect.left,
+        trackRect.top,
+        leftThumbOffset.dx,
+        trackRect.bottom,
+        topLeft: trackRadius,
+        bottomLeft: trackRadius,
+      ),
+      inactivePaint,
+    );
+    context.canvas.drawRect(
+      Rect.fromLTRB(
+        leftThumbOffset.dx,
+        trackRect.top,
+        rightThumbOffset.dx,
+        trackRect.bottom,
+      ),
+      activePaint,
+    );
+    context.canvas.drawRRect(
+      RRect.fromLTRBAndCorners(
+        rightThumbOffset.dx,
+        trackRect.top,
+        trackRect.right,
+        trackRect.bottom,
+        topRight: trackRadius,
+        bottomRight: trackRadius,
+      ),
+      inactivePaint,
+    );
   }
 }
 
@@ -2239,9 +2253,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
   const RoundSliderThumbShape({
     this.enabledThumbRadius = 10.0,
     this.disabledThumbRadius,
-    // TODO: change this back to 1
-    this.elevation = 3.0,
-    // TODO: change this back to 6
+    this.elevation = 1.0,
     this.pressedElevation = 6.0,
   });
 
@@ -2339,6 +2351,8 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
   const RoundRangeSliderThumbShape({
     this.enabledThumbRadius = 10.0,
     this.disabledThumbRadius,
+    this.elevation = 1.0,
+    this.pressedElevation = 6.0,
   }) : assert(enabledThumbRadius != null);
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
@@ -2352,6 +2366,16 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
   /// [enabledThumbRadius].
   final double disabledThumbRadius;
   double get _disabledThumbRadius =>  disabledThumbRadius ?? enabledThumbRadius;
+
+  /// The resting elevation adds shadow to the unpressed thumb.
+  ///
+  /// The default is 1.
+  final double elevation;
+
+  /// The pressed elevation adds shadow to the pressed thumb.
+  ///
+  /// The default is 6.
+  final double pressedElevation;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
@@ -2388,6 +2412,10 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
       end: sliderTheme.thumbColor,
     );
     final double radius = radiusTween.evaluate(enableAnimation);
+    final Tween<double> elevationTween = Tween<double>(
+      begin: elevation,
+      end: pressedElevation,
+    );
 
     // Add a stroke of 1dp around the circle if this thumb would overlap
     // the other thumb.
@@ -2417,10 +2445,21 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
       }
     }
 
+    final double evaluatedElevation = elevationTween.evaluate(activationAnimation);
+    final Path shadowPath = Path()..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
+    canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);
+
+    // Clear the space of the track and shadow so the thumb can be drawn.
     canvas.drawCircle(
       center,
       radius,
-      Paint()..color = colorTween.evaluate(enableAnimation),
+      Paint()..color = sliderTheme.surfaceColor.withOpacity(1)
+    );
+
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()..color = colorTween.evaluate(enableAnimation)
     );
   }
 }
@@ -2491,6 +2530,146 @@ class RoundSliderOverlayShape extends SliderComponentShape {
   }
 }
 
+class RectangularSliderValueIndicatorShape extends SliderComponentShape {
+  /// Create a slider value indicator that resembles a rectangular tooltip.
+  const RectangularSliderValueIndicatorShape();
+
+  static const _pathPainter = _RectangularSliderValueIndicatorPathPainter();
+
+  static const double _labelTextDesignSize = 14.0;
+  static const double _labelPadding = 16.0;
+  static const double _preferredHeight = 32.0;
+  static const double _preferredHalfHeight = _preferredHeight / 2;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete, { @required TextPainter labelPainter }) {
+    assert(labelPainter != null);
+    return _pathPainter.getPreferredSize(isEnabled, isDiscrete, labelPainter);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    @required Animation<double> activationAnimation,
+    @required Animation<double> enableAnimation,
+    bool isDiscrete,
+    @required TextPainter labelPainter,
+    @required RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+  }) {
+    final canvas = context.canvas;
+    final textScaleFactor = labelPainter.height / _labelTextDesignSize;
+    final scale = activationAnimation.value * textScaleFactor;
+    return _pathPainter.paint(parentBox, canvas, center, scale, labelPainter, Colors.grey[600], Colors.white);
+  }
+}
+
+class _RectangularSliderValueIndicatorPathPainter {
+  const _RectangularSliderValueIndicatorPathPainter();
+
+  static const double _labelTextDesignSize = 14.0;
+  static const double _labelPadding = 16.0;
+  static const double _preferredHeight = 32.0;
+  static const double _bottomTipYOffset = 12.0;
+  static const double _preferredHalfHeight = _preferredHeight / 2;
+
+  Size getPreferredSize(
+      bool isEnabled,
+      bool isDiscrete,
+      TextPainter labelPainter,
+      ) {
+    assert(labelPainter != null);
+    final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
+    return Size(labelPainter.width + 2 * _labelPadding * textScaleFactor, _preferredHeight * textScaleFactor);
+  }
+
+  void paint(
+    RenderBox parentBox,
+    Canvas canvas,
+    Offset center,
+    double scale,
+    TextPainter labelPainter,
+    Color backgroundPaintColor,
+    Color strokePaintColor,
+    ) {
+    // To protect against dividing by 0.
+    final double inverseScale = scale != 0 ? 1.0 / scale : 0.0;
+
+    final double rectangleWidth = labelPainter.width + _labelPadding * 2;
+    final double scaledRectangleWidth = rectangleWidth * scale;
+
+    // The rectangle must be shifted towards the center so that it minimizes the
+    // chance of it rendering outside the bounds of the render box. If the shift
+    // is negative, then the lobe is shifted from right to left, and if it is
+    // positive, then the lobe is shifted from left to right.
+    final double localCenterX = parentBox.globalToLocal(center).dx;
+    final double overflowLeft = math.max(0, scaledRectangleWidth / 2 - localCenterX);
+    final double overflowRight = math.max(0, scaledRectangleWidth / 2 - (parentBox.size.width - localCenterX));
+    final rectangleShift = (overflowLeft - overflowRight) * inverseScale;
+    final rect = Rect.fromLTWH(
+      -rectangleWidth / 2 + rectangleShift,
+      0,
+      rectangleWidth,
+      _preferredHeight,
+    );
+
+    // While the top rectangle shifts towards the center, the triangle must stay
+    // pinned to the bottom of the rectangle while still pointing at the thumb.
+    double triangleShift = 0;
+    if (rect.left > -_labelPadding) {
+      triangleShift = rect.left + _labelPadding;
+    }
+    if (rect.right < _labelPadding) {
+      triangleShift = rect.right - _labelPadding;
+    }
+
+    // The triangle hypotenuse is equal to the lobe radius, and since it is
+    // an isosceles right triangle, the ratio of the height to the hypotenuse
+    // is the square root of 2. The half width is equal to the height.
+    final double triangleHeight = _preferredHalfHeight / math.sqrt(2);
+    // The left and right points of the triangle are equidistant to the center,
+    // unless there is a triangle shift.
+    double triangleLeft = -triangleHeight + triangleShift;
+    double triangleRight = triangleHeight + triangleShift;
+
+    final trianglePath = Path()
+      ..lineTo(triangleLeft, -triangleHeight)
+      ..lineTo(triangleRight, -triangleHeight)
+      ..close();
+    final fillPaint = Paint()..color = backgroundPaintColor;
+
+    canvas.save();
+    // Prepare the canvas for the triangle, which is relative to the center of
+    // the thumb.
+    canvas.translate(center.dx, center.dy - _bottomTipYOffset);
+    // Prepare the canvas for scaled drawing which covers both the animation
+    // of the value indicator showing and hiding, and any text scale that is
+    // to be applied.
+    canvas.scale(scale, scale);
+    canvas.drawPath(trianglePath, fillPaint);
+
+    // Prepare the canvas for the lobe by positioning it to the top of the lobe,
+    // so that the lobe can be as close as it can to the triangle without
+    // protruding the sides of the triangle.
+    canvas.translate(0, -triangleHeight * 2 - _preferredHalfHeight);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, Radius.circular(4)),
+      fillPaint,
+    );
+
+    // The label text is centered within the value indicator.
+    final Offset boxCenter = Offset(rectangleShift, _preferredHalfHeight);
+    final Offset halfLabelPainterOffset = Offset(labelPainter.width / 2, labelPainter.height / 2);
+    final Offset labelOffset = boxCenter - halfLabelPainterOffset;
+    labelPainter.paint(canvas, labelOffset);
+
+    canvas.restore();
+  }
+}
+
 /// The default shape of a [Slider]'s value indicator.
 ///
 /// See also:
@@ -2502,7 +2681,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   /// Create a slider value indicator in the shape of an upside-down pear.
   const PaddleSliderValueIndicatorShape();
 
-  static const _PaddleSliderTrackShapePathPainter _pathPainter = _PaddleSliderTrackShapePathPainter();
+  static const _PaddleSliderValueIndicatorPathPainter _pathPainter = _PaddleSliderValueIndicatorPathPainter();
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete, { @required TextPainter labelPainter }) {
@@ -2534,7 +2713,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
     );
-    _pathPainter.drawValueIndicator(
+    _pathPainter.paint(
       parentBox,
       context.canvas,
       center,
@@ -2557,7 +2736,7 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
   /// Create a slider value indicator in the shape of an upside-down pear.
   const PaddleRangeSliderValueIndicatorShape();
 
-  static const _PaddleSliderTrackShapePathPainter _pathPainter = _PaddleSliderTrackShapePathPainter();
+  static const _PaddleSliderValueIndicatorPathPainter _pathPainter = _PaddleSliderValueIndicatorPathPainter();
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete, { @required TextPainter labelPainter }) {
@@ -2607,7 +2786,7 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
       end: sliderTheme.valueIndicatorColor,
     );
     // Add a stroke of 1dp around the top paddle.
-    _pathPainter.drawValueIndicator(
+    _pathPainter.paint(
       parentBox,
       context.canvas,
       center,
@@ -2619,8 +2798,8 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
   }
 }
 
-class _PaddleSliderTrackShapePathPainter {
-  const _PaddleSliderTrackShapePathPainter();
+class _PaddleSliderValueIndicatorPathPainter {
+  const _PaddleSliderValueIndicatorPathPainter();
 
   // These constants define the shape of the default value indicator.
   // The value indicator changes shape based on the size of
@@ -2737,7 +2916,7 @@ class _PaddleSliderTrackShapePathPainter {
     return shift;
   }
 
-  void drawValueIndicator(
+  void paint(
     RenderBox parentBox,
     Canvas canvas,
     Offset center,
