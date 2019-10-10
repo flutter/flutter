@@ -912,8 +912,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   void initState() {
     super.initState();
     _updateSelectedIndex();
-    _lastSize = WidgetsBinding.instance.window.physicalSize;
-    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -923,22 +921,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     super.dispose();
   }
 
-  // Typically called because the device's orientation has changed.
-  // Defined by WidgetsBindingObserver
-  @override
-  void didChangeMetrics() {
-    final Size newSize = WidgetsBinding.instance.window.physicalSize;
-    if (newSize.width != _lastSize.width && newSize.height != _lastSize.height) {
-      // Only remove the dropdown if the orientation changes, not if the
-      // keyboard is shown or hidden.
-      _removeDropdownRoute();
-    }
-    _lastSize = newSize;
-  }
-
   void _removeDropdownRoute() {
     _dropdownRoute?._dismiss();
     _dropdownRoute = null;
+    _lastSize = null;
   }
 
   @override
@@ -1048,6 +1034,16 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
+    final Size newSize = MediaQuery.of(context).size;
+    _lastSize ??= newSize;
+    if (MediaQuery.of(context).size != _lastSize) {
+      if (newSize.width != _lastSize.width && newSize.height != _lastSize.height) {
+        // Only remove the dropdown if the orientation changes, not if the
+        // keyboard is shown or hidden.
+        _removeDropdownRoute();
+      }
+      _lastSize = newSize;
+    }
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
