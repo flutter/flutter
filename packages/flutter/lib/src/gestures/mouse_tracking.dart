@@ -199,7 +199,7 @@ class MouseTracker extends ChangeNotifier {
     assert(_disconnectedMouseState == null);
     _mouseStates[deviceId] = _MouseState(mostRecentEvent: event);
     // Schedule a check to enter annotations that might contain this pointer.
-    sendMouseNotifications(<int>{deviceId});
+    _sendMouseNotifications(<int>{deviceId});
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
     }
@@ -213,7 +213,7 @@ class MouseTracker extends ChangeNotifier {
     _disconnectedMouseState = mouseState;
     mouseState.mostRecentEvent = event;
     // Schedule a check to exit annotations that used to contain this pointer.
-    sendMouseNotifications(<int>{deviceId});
+    _sendMouseNotifications(<int>{deviceId});
     assert(_disconnectedMouseState == null);
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
@@ -237,7 +237,7 @@ class MouseTracker extends ChangeNotifier {
       if (previousEvent is PointerAddedEvent || previousEvent.position != event.position) {
         // Only send notifications if we have our first event, or if the
         // location of the mouse has changed
-        sendMouseNotifications(<int>{deviceId});
+        _sendMouseNotifications(<int>{deviceId});
       }
     }
   }
@@ -252,7 +252,7 @@ class MouseTracker extends ChangeNotifier {
     if (!_scheduledPostFramePositionCheck) {
       _scheduledPostFramePositionCheck = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        sendMouseNotifications(null);
+        _sendMouseNotifications(null);
         _scheduledPostFramePositionCheck = false;
       });
     }
@@ -326,23 +326,19 @@ class MouseTracker extends ChangeNotifier {
     return _trackedAnnotations.contains(annotation);
   }
 
-  /// Collect the latest states of the given mouse devices, and call interested
-  /// callbacks.
-  ///
-  /// Only those devices of [deviceIds] are updated. If [deviceIds] is null,
-  /// then all devices are updated. For each of device, the enter or exit events
-  /// are called for annotations that the pointer enters or leaves, while hover
-  /// events are always called for each annotations that the pointer stays in,
-  /// even if the pointer has not moved since the last call. Therefore it's
-  /// caller's responsibility to check if the pointer has moved.
-  ///
-  /// This is called synchronously in most cases, except for when a new
-  /// annotation is attached, which is called in a post frame callback.
-  ///
-  /// This function is only public to allow for proper testing of the
-  /// MouseTracker. Do not call in other contexts.
-  @visibleForTesting
-  void sendMouseNotifications(Iterable<int> deviceIds) {
+  // Collect the latest states of the given mouse devices, and call interested
+  // callbacks.
+  //
+  // Only those devices of [deviceIds] are updated. If [deviceIds] is null,
+  // then all devices are updated. For each of device, the enter or exit events
+  // are called for annotations that the pointer enters or leaves, while hover
+  // events are always called for each annotations that the pointer stays in,
+  // even if the pointer has not moved since the last call. Therefore it's
+  // caller's responsibility to check if the pointer has moved.
+  //
+  // This is called synchronously in most cases, except for when a new
+  // annotation is attached, which is called in a post frame callback.
+  void _sendMouseNotifications(Iterable<int> deviceIds) {
 
     final Iterable<_MouseState> targetDevices = deviceIds != null
       ? deviceIds.map(_findMouseState)
@@ -397,11 +393,13 @@ class MouseTracker extends ChangeNotifier {
     }
   }
 
+
   /// Notify [MouseTracker] that a mouse tracker annotation that was previously
   /// attached has stopped taking effect.
   ///
   /// This should be called as soon as the layer that owns this annotation is
-  /// removed from the layer tree.
+  /// removed from the layer tree. An assertion error will be thrown if the
+  /// associated layer is not removed and receives another mouse hit.
   ///
   /// This triggers [MouseTracker] to perform a mouse position check immediately
   /// to see if this annotation removal triggers any exit events.
