@@ -35,13 +35,17 @@ import '../../src/context.dart';
 import '../../src/mocks.dart';
 
 class MockIOSApp extends Mock implements IOSApp {}
+class MockApplicationPackage extends Mock implements ApplicationPackage {}
 class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
 class MockDirectory extends Mock implements Directory {}
 class MockFileSystem extends Mock implements FileSystem {}
+class MockForwardedPort extends Mock implements ForwardedPort {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockIOSDeploy extends Mock implements IOSDeploy {}
+class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
+class MockMDnsObservatoryDiscoveryResult extends Mock implements MDnsObservatoryDiscoveryResult {}
 class MockXcode extends Mock implements Xcode {}
 class MockFile extends Mock implements File {}
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
@@ -75,6 +79,65 @@ void main() {
       });
     }
 
+    group('.dispose()', () {
+      IOSDevice device;
+      MockApplicationPackage appPackage1;
+      MockApplicationPackage appPackage2;
+      IOSDeviceLogReader logReader1;
+      IOSDeviceLogReader logReader2;
+      MockProcess mockProcess1;
+      MockProcess mockProcess2;
+      MockProcess mockProcess3;
+      IOSDevicePortForwarder portForwarder;
+      ForwardedPort forwardedPort;
+
+      IOSDevicePortForwarder createPortForwarder(
+          ForwardedPort forwardedPort,
+          IOSDevice device) {
+        final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(device);
+        portForwarder.addForwardedPorts(<ForwardedPort>[forwardedPort]);
+        return portForwarder;
+      }
+
+      IOSDeviceLogReader createLogReader(
+          IOSDevice device,
+          ApplicationPackage appPackage,
+          Process process) {
+        final IOSDeviceLogReader logReader = IOSDeviceLogReader(device, appPackage);
+        logReader.idevicesyslogProcess = process;
+        return logReader;
+      }
+
+      setUp(() {
+        appPackage1 = MockApplicationPackage();
+        appPackage2 = MockApplicationPackage();
+        when(appPackage1.name).thenReturn('flutterApp1');
+        when(appPackage2.name).thenReturn('flutterApp2');
+        mockProcess1 = MockProcess();
+        mockProcess2 = MockProcess();
+        mockProcess3 = MockProcess();
+        forwardedPort = ForwardedPort.withContext(123, 456, mockProcess3);
+      });
+
+      testUsingContext(' kills all log readers & port forwarders', () async {
+        device = IOSDevice('123');
+        logReader1 = createLogReader(device, appPackage1, mockProcess1);
+        logReader2 = createLogReader(device, appPackage2, mockProcess2);
+        portForwarder = createPortForwarder(forwardedPort, device);
+        device.setLogReader(appPackage1, logReader1);
+        device.setLogReader(appPackage2, logReader2);
+        device.portForwarder = portForwarder;
+
+        device.dispose();
+
+        verify(mockProcess1.kill());
+        verify(mockProcess2.kill());
+        verify(mockProcess3.kill());
+      }, overrides: <Type, Generator>{
+        Platform: () => macPlatform,
+      });
+    });
+
     group('startApp', () {
       MockIOSApp mockApp;
       MockArtifacts mockArtifacts;
@@ -95,7 +158,7 @@ void main() {
       const int hostPort = 42;
       const String installerPath = '/path/to/ideviceinstaller';
       const String iosDeployPath = '/path/to/iosdeploy';
-      // const String appId = '789';
+      const String iproxyPath = '/path/to/iproxy';
       const MapEntry<String, String> libraryEntry = MapEntry<String, String>(
           'DYLD_LIBRARY_PATH',
           '/path/to/libraries',
@@ -136,6 +199,13 @@ void main() {
                 platform: anyNamed('platform'),
             ),
         ).thenReturn(iosDeployPath);
+
+        when(
+            mockArtifacts.getArtifactPath(
+                Artifact.iproxy,
+                platform: anyNamed('platform'),
+            ),
+        ).thenReturn(iproxyPath);
 
         when(mockPortForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
           .thenAnswer((_) async => hostPort);
@@ -196,6 +266,45 @@ void main() {
         Cache: () => mockCache,
         FileSystem: () => mockFileSystem,
         MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
+        Platform: () => macPlatform,
+        ProcessManager: () => mockProcessManager,
+        Usage: () => mockUsage,
+      });
+
+      // By default, the .forward() method will try every port between 1024
+      // and 65535; this test verifies we are killing iproxy processes when
+      // we timeout on a port
+      testUsingContext(' .forward() will kill iproxy processes before invoking a second', () async {
+        const String deviceId = '123';
+        const int devicePort = 456;
+        final IOSDevice device = IOSDevice(deviceId);
+        final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(device);
+        bool firstRun = true;
+        final MockProcess successProcess = MockProcess(
+          exitCode: Future<int>.value(0),
+          stdout: Stream<List<int>>.fromIterable(<List<int>>['Hello'.codeUnits]),
+        );
+        final MockProcess failProcess = MockProcess(
+          exitCode: Future<int>.value(1),
+          stdout: const Stream<List<int>>.empty(),
+        );
+
+        final ProcessFactory factory = (List<String> command) {
+          if (!firstRun) {
+            return successProcess;
+          }
+          firstRun = false;
+          return failProcess;
+        };
+        mockProcessManager.processFactory = factory;
+        final int hostPort = await portForwarder.forward(devicePort);
+        // First port tried (1024) should fail, then succeed on the next
+        expect(hostPort, 1024 + 1);
+        verifyNever(successProcess.kill());
+        verify(failProcess.kill());
+      }, overrides: <Type, Generator>{
+        Artifacts: () => mockArtifacts,
+        Cache: () => mockCache,
         Platform: () => macPlatform,
         ProcessManager: () => mockProcessManager,
         Usage: () => mockUsage,

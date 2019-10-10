@@ -198,7 +198,7 @@ Future<void> _checkForTrailingSpaces() async {
           ...changedFiles,
         ],
         workingDirectory: flutterRoot,
-        failureMessage: '${red}Whitespace detected at the end of source code lines.$reset\nPlease remove:',
+        failureMessage: '${red}Detected trailing whitespace in the file[s] listed above.$reset\nPlease remove them from the offending line[s].',
         expectNonZeroExit: true, // Just means a non-zero exit code is expected.
         expectedExitCode: 1, // Indicates that zero lines were found.
       );
