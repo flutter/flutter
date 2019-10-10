@@ -306,8 +306,8 @@ class MouseTracker extends ChangeNotifier {
   // since the last call. Therefore it's caller's responsibility to check if
   // the pointer has moved.
   //
-  // If `disconnectedMouseState` is provided, this state will be used, but this
-  // mouse will be hovering on no annotations.
+  // If `disconnectedMouseState` is provided, this state will be used instead,
+  // but this mouse will be hovering no annotations.
   void _checkDeviceUpdates({
     int device,
     _MouseState disconnectedMouseState,
@@ -318,7 +318,9 @@ class MouseTracker extends ChangeNotifier {
 
     final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations =
       (_hasAttachedAnnotations && thisDeviceIsConnected)
-      ? LinkedHashSet<MouseTrackerAnnotation>.from(annotationFinder(mouseState.mostRecentEvent.position))
+      ? LinkedHashSet<MouseTrackerAnnotation>.from(
+          annotationFinder(mouseState.mostRecentEvent.position)
+        )
       : <MouseTrackerAnnotation>{};
 
     _dispatchDeviceCallbacks(
