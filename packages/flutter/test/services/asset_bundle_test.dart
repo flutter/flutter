@@ -49,7 +49,7 @@ void main() {
     expect(loadException, isFlutterError);
     
     try {
-      await bundle.loadStructuredData<String>('foo', (str) => Future.value(str));
+      await bundle.loadStructuredData<String>('foo', (String str) => Future<String>.value(str));
     } catch (e) {
       loadException = e;
     }
