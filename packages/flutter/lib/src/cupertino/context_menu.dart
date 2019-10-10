@@ -163,7 +163,7 @@ class ContextMenu extends StatefulWidget {
   ///       ],
   ///     ),
   ///   ],
-  /// );
+  /// )
   /// ```
   ///
   /// {@end-tool}
