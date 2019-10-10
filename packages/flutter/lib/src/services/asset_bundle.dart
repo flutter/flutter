@@ -190,7 +190,7 @@ abstract class CachingAssetBundle extends AssetBundle {
         // completer's future is what we returned.
         completer.complete(value);
       }
-    });
+    }).catchError(completer.completeError);
     if (result != null) {
       // The code above ran synchronously, and came up with an answer.
       // Return the SynchronousFuture that we created above.
