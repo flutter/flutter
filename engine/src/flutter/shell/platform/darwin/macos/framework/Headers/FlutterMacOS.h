@@ -11,4 +11,5 @@
 #import "FlutterMacros.h"
 #import "FlutterPluginMacOS.h"
 #import "FlutterPluginRegistrarMacOS.h"
+#import "FlutterTexture.h"
 #import "FlutterViewController.h"

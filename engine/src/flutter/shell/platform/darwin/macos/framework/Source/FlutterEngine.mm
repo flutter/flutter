@@ -8,6 +8,7 @@
 #include <vector>
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterExternalTextureGL.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/embedder/embedder.h"
 
@@ -46,6 +47,12 @@
  */
 - (void)shutDownEngine;
 
+/**
+ * Forwards texture copy request to the corresponding texture via |textureID|.
+ */
+- (BOOL)populateTextureWithIdentifier:(int64_t)textureID
+                        openGLTexture:(FlutterOpenGLTexture*)openGLTexture;
+
 @end
 
 #pragma mark -
@@ -76,6 +83,10 @@
 
 - (id<FlutterBinaryMessenger>)messenger {
   return _flutterEngine.binaryMessenger;
+}
+
+- (id<FlutterTextureRegistry>)textures {
+  return _flutterEngine;
 }
 
 - (NSView*)view {
@@ -119,6 +130,14 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   [engine engineCallbackOnPlatformMessage:message];
 }
 
+static bool OnAcquireExternalTexture(FlutterEngine* engine,
+                                     int64_t texture_identifier,
+                                     size_t width,
+                                     size_t height,
+                                     FlutterOpenGLTexture* open_gl_texture) {
+  return [engine populateTextureWithIdentifier:texture_identifier openGLTexture:open_gl_texture];
+}
+
 #pragma mark -
 
 @implementation FlutterEngine {
@@ -136,6 +155,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
   // Whether the engine can continue running after the view controller is removed.
   BOOL _allowHeadlessExecution;
+
+  // A mapping of textureID to internal FlutterExternalTextureGL adapter.
+  NSMutableDictionary<NSNumber*, FlutterExternalTextureGL*>* _textures;
 }
 
 - (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)project {
@@ -150,6 +172,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
   _project = project ?: [[FlutterDartProject alloc] init];
   _messageHandlers = [[NSMutableDictionary alloc] init];
+  _textures = [[NSMutableDictionary alloc] init];
   _allowHeadlessExecution = allowHeadlessExecution;
 
   return self;
@@ -177,6 +200,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
       .open_gl.present = (BoolCallback)OnPresent,
       .open_gl.fbo_callback = (UIntCallback)OnFBO,
       .open_gl.make_resource_current = (BoolCallback)OnMakeResourceCurrent,
+      .open_gl.gl_external_texture_frame_callback = (TextureFrameCallback)OnAcquireExternalTexture,
   };
 
   // TODO(stuartmorgan): Move internal channel registration from FlutterViewController to here.
@@ -396,6 +420,31 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
 - (id<FlutterPluginRegistrar>)registrarForPlugin:(NSString*)pluginName {
   return [[FlutterEngineRegistrar alloc] initWithPlugin:pluginName flutterEngine:self];
+}
+
+#pragma mark - FlutterTextureRegistrar
+
+- (BOOL)populateTextureWithIdentifier:(int64_t)textureID
+                        openGLTexture:(FlutterOpenGLTexture*)openGLTexture {
+  return [_textures[@(textureID)] populateTexture:openGLTexture];
+}
+
+- (int64_t)registerTexture:(id<FlutterTexture>)texture {
+  FlutterExternalTextureGL* FlutterTexture =
+      [[FlutterExternalTextureGL alloc] initWithFlutterTexture:texture];
+  int64_t textureID = [FlutterTexture textureID];
+  FlutterEngineRegisterExternalTexture(_engine, textureID);
+  _textures[@(textureID)] = FlutterTexture;
+  return textureID;
+}
+
+- (void)textureFrameAvailable:(int64_t)textureID {
+  FlutterEngineMarkExternalTextureFrameAvailable(_engine, textureID);
+}
+
+- (void)unregisterTexture:(int64_t)textureID {
+  FlutterEngineUnregisterExternalTexture(_engine, textureID);
+  [_textures removeObjectForKey:@(textureID)];
 }
 
 @end
