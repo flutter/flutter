@@ -392,6 +392,7 @@ class FakeKernelCompiler implements KernelCompiler {
     bool linkPlatformKernelIn = false,
     bool aot = false,
     bool enableAsserts = false,
+    bool causalAsyncStacks = true,
     bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     String packagesPath,
