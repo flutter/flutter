@@ -386,6 +386,7 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.obscureText = false,
     this.autocorrect = true,
+    this.noSuggestions = false,
     this.actionLabel,
     this.inputAction = TextInputAction.done,
     this.keyboardAppearance = Brightness.light,
@@ -393,6 +394,7 @@ class TextInputConfiguration {
   }) : assert(inputType != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(noSuggestions != null),
        assert(keyboardAppearance != null),
        assert(inputAction != null),
        assert(textCapitalization != null);
@@ -409,6 +411,17 @@ class TextInputConfiguration {
   ///
   /// Defaults to true.
   final bool autocorrect;
+
+  /// {@template flutter.services.textInput.noSuggestions}
+  /// Whether to hide suggestions.
+  ///
+  /// This flag only affects Android. On iOS, suggestions are tied directly to
+  /// [autocorrect], so that suggestions are only shown when [autocorrect] is
+  /// true. On Android autocorrection and suggestion are controlled separately.
+  ///
+  /// Defaults to false. Cannot be null.
+  /// {@endtemplate}
+  final bool noSuggestions;
 
   /// What text to display in the text input control's action button.
   final String actionLabel;
@@ -439,6 +452,7 @@ class TextInputConfiguration {
       'inputType': inputType.toJson(),
       'obscureText': obscureText,
       'autocorrect': autocorrect,
+      'noSuggestions': noSuggestions,
       'actionLabel': actionLabel,
       'inputAction': inputAction.toString(),
       'textCapitalization': textCapitalization.toString(),

@@ -277,8 +277,8 @@ class TextField extends StatefulWidget {
   /// is null (the default) and [readOnly] is true.
   ///
   /// The [textAlign], [autofocus], [obscureText], [readOnly], [autocorrect],
-  /// [maxLengthEnforced], [scrollPadding], [maxLines], and [maxLength]
-  /// arguments must not be null.
+  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength], and
+  /// [noSuggestions] arguments must not be null.
   ///
   /// See also:
   ///
@@ -303,6 +303,7 @@ class TextField extends StatefulWidget {
     this.autofocus = false,
     this.obscureText = false,
     this.autocorrect = true,
+    this.noSuggestions = false,
     this.maxLines = 1,
     this.minLines,
     this.expands = false,
@@ -329,6 +330,7 @@ class TextField extends StatefulWidget {
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(noSuggestions != null),
        assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
@@ -452,6 +454,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
+
+  /// {@macro flutter.services.textInput.noSuggestions}
+  final bool noSuggestions;
 
   /// {@macro flutter.widgets.editableText.maxLines}
   final int maxLines;
@@ -675,6 +680,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('noSuggestions', noSuggestions, defaultValue: false));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
@@ -957,6 +963,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         autofocus: widget.autofocus,
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
+        noSuggestions: widget.noSuggestions,
         maxLines: widget.maxLines,
         minLines: widget.minLines,
         expands: widget.expands,
