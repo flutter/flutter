@@ -1043,6 +1043,12 @@ class _RenderDecoration extends RenderBox {
       ? maxContainerHeight
       : math.min(math.max(contentHeight, kMinInteractiveDimension), maxContainerHeight);
 
+    // Ensure the text is vertically centered in cases where the content is
+    // shorter than kMinInteractiveDimension.
+    final double interactiveAdjustment = expands || contentHeight > kMinInteractiveDimension
+      ? 0.0
+      : (kMinInteractiveDimension - contentHeight) / 2.0;
+
     // Try to consider the prefix/suffix as part of the text when aligning it.
     // If the prefix/suffix overflows however, allow it to extend outside of the
     // input and align the remaining part of the text and prefix/suffix.
@@ -1059,7 +1065,8 @@ class _RenderDecoration extends RenderBox {
     final double topInputBaseline = contentPadding.top
       + topHeight
       + inputInternalBaseline
-      + baselineAdjustment;
+      + baselineAdjustment
+      + interactiveAdjustment;
     final double maxContentHeight = containerHeight
       - contentPadding.top
       - topHeight
