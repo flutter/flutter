@@ -105,11 +105,16 @@ void main() {
     await tester.pump(); // begin transition
     await tester.pump(const Duration(seconds: 1)); // end transition
 
-    // Tap on the barrier to dismiss it
-    await tester.tap(find.byKey(const ValueKey<String>('barrier')));
-    await tester.pump(); // begin transition
-    await tester.pump(const Duration(seconds: 1)); // end transition
+    // Press the barrier; it shouldn't dismiss yet
+    final TestGesture gesture = await tester.press(
+      find.byKey(const ValueKey<String>('barrier')),
+    );
+    await tester.pumpAndSettle(); // begin transition
+    expect(find.byKey(const ValueKey<String>('barrier')), findsOneWidget);
 
+    // Release the pointer; the barrier should be dismissed
+    await gesture.up();
+    await tester.pumpAndSettle(const Duration(seconds: 1)); // end transition
     expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
       reason: 'The route should have been dismissed by tapping the barrier.');
   });
@@ -130,11 +135,17 @@ void main() {
     await tester.pump(); // begin transition
     await tester.pump(const Duration(seconds: 1)); // end transition
 
-    // Press the barrier to dismiss it
-    await tester.tap(find.byKey(const ValueKey<String>('barrier')), buttons: kSecondaryButton);
-    await tester.pump(); // begin transition
-    await tester.pump(const Duration(seconds: 1)); // end transition
+    // Press the barrier; it shouldn't dismiss yet
+    final TestGesture gesture = await tester.press(
+      find.byKey(const ValueKey<String>('barrier')),
+      buttons: kSecondaryButton,
+    );
+    await tester.pumpAndSettle(); // begin transition
+    expect(find.byKey(const ValueKey<String>('barrier')), findsOneWidget);
 
+    // Release the pointer; the barrier should be dismissed
+    await gesture.up();
+    await tester.pumpAndSettle(const Duration(seconds: 1)); // end transition
     expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
       reason: 'The route should have been dismissed by tapping the barrier.');
   });
