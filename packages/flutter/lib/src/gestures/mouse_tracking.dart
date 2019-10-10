@@ -153,33 +153,14 @@ class MouseTracker extends ChangeNotifier {
   // Tracks the state of connected mouse devices.
   //
   // It is the source-of-truth for the list of connected mouse devices.
-  //
-  // If a device disconnects, the device will be moved to
-  // `_disconnectedMouseState`.
   final Map<int, _MouseState> _mouseStates = <int, _MouseState>{};
-
-  // Tracks the state of the disconnected mouse device before its exit callback
-  // is called.
-  //
-  // A device is moved from `_mouseStates` on its disconnecting event, and
-  // will be permanantly removed after its exit callback.
-  _MouseState _disconnectedMouseState;
-
-  _MouseState _findMouseState(int device) {
-    assert(device != null);
-    if (device == _disconnectedMouseState?.device) {
-      assert(!_mouseStates.containsKey(device));
-      return _disconnectedMouseState;
-    }
-    return _mouseStates[device];
-  }
 
   // Returns the mouse state of a device. If it doesn't exist, create one using
   // `mostRecentEvent`.
   //
   // The returned value is never null.
   _MouseState _guaranteeMouseState(int device, PointerEvent mostRecentEvent) {
-    final _MouseState currentState = _findMouseState(device);
+    final _MouseState currentState = _mouseStates[device];
     if (currentState == null) {
       _addMouseDevice(device, mostRecentEvent);
     }
@@ -196,10 +177,9 @@ class MouseTracker extends ChangeNotifier {
   void _addMouseDevice(int deviceId, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
     assert(!_mouseStates.containsKey(deviceId));
-    assert(_disconnectedMouseState == null);
     _mouseStates[deviceId] = _MouseState(mostRecentEvent: event);
     // Schedule a check to enter annotations that might contain this pointer.
-    _sendMouseNotifications(<int>{deviceId});
+    _checkDeviceUpdates(device: deviceId);
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
     }
@@ -208,13 +188,13 @@ class MouseTracker extends ChangeNotifier {
   void _removeMouseDevice(int deviceId, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
     assert(_mouseStates.containsKey(deviceId));
-    assert(_disconnectedMouseState == null);
-    final _MouseState mouseState = _mouseStates.remove(deviceId);
-    _disconnectedMouseState = mouseState;
-    mouseState.mostRecentEvent = event;
+    final _MouseState disconnectedMouseState = _mouseStates.remove(deviceId);
+    disconnectedMouseState.mostRecentEvent = event;
     // Schedule a check to exit annotations that used to contain this pointer.
-    _sendMouseNotifications(<int>{deviceId});
-    assert(_disconnectedMouseState == null);
+    _checkDeviceUpdates(
+      device: deviceId,
+      disconnectedMouseState: disconnectedMouseState,
+    );
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
     }
@@ -237,7 +217,7 @@ class MouseTracker extends ChangeNotifier {
       if (previousEvent is PointerAddedEvent || previousEvent.position != event.position) {
         // Only send notifications if we have our first event, or if the
         // location of the mouse has changed
-        _sendMouseNotifications(<int>{deviceId});
+        _checkDeviceUpdates(device: deviceId);
       }
     }
   }
@@ -252,7 +232,7 @@ class MouseTracker extends ChangeNotifier {
     if (!_scheduledPostFramePositionCheck) {
       _scheduledPostFramePositionCheck = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        _sendMouseNotifications(null);
+        _checkAllDevicesUpdates();
         _scheduledPostFramePositionCheck = false;
       });
     }
@@ -316,6 +296,48 @@ class MouseTracker extends ChangeNotifier {
     }
   }
 
+  // Collect the latest states of the given mouse device `device`, and call
+  // interested callbacks.
+  //
+  // The enter or exit events are called for annotations that the pointer
+  // enters or leaves, while hover events are always called for each
+  // annotations that the pointer stays in, even if the pointer has not moved
+  // since the last call. Therefore it's caller's responsibility to check if
+  // the pointer has moved.
+  //
+  // If `disconnectedMouseState` is provided, this state will be used, but this
+  // mouse will be hovering on no annotations.
+  void _checkDeviceUpdates({
+    int device,
+    _MouseState disconnectedMouseState,
+  }) {
+    final _MouseState mouseState = disconnectedMouseState ?? _mouseStates[device];
+    final bool thisDeviceIsConnected = mouseState != disconnectedMouseState;
+    assert(mouseState != null);
+
+    final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations =
+      (_hasAttachedAnnotations && thisDeviceIsConnected)
+      ? LinkedHashSet<MouseTrackerAnnotation>.from(annotationFinder(mouseState.mostRecentEvent.position))
+      : <MouseTrackerAnnotation>{};
+
+    _dispatchDeviceCallbacks(
+      currentState: mouseState,
+      nextAnnotations: nextAnnotations,
+    );
+
+    mouseState.lastAnnotations = nextAnnotations;
+  }
+
+  // Collect the latest states of all mouse devices, and call interested
+  // callbacks.
+  //
+  // For detailed behaviors, see [_checkDeviceUpdates].
+  void _checkAllDevicesUpdates() {
+    for (final int device in _mouseStates.keys) {
+      _checkDeviceUpdates(device: device);
+    }
+  }
+
   /// Checks if the given [MouseTrackerAnnotation] is attached to this
   /// [MouseTracker].
   ///
@@ -324,48 +346,6 @@ class MouseTracker extends ChangeNotifier {
   @visibleForTesting
   bool isAnnotationAttached(MouseTrackerAnnotation annotation) {
     return _trackedAnnotations.contains(annotation);
-  }
-
-  // Collect the latest states of the given mouse devices, and call interested
-  // callbacks.
-  //
-  // Only those devices of [deviceIds] are updated. If [deviceIds] is null,
-  // then all devices are updated. For each of device, the enter or exit events
-  // are called for annotations that the pointer enters or leaves, while hover
-  // events are always called for each annotations that the pointer stays in,
-  // even if the pointer has not moved since the last call. Therefore it's
-  // caller's responsibility to check if the pointer has moved.
-  //
-  // This is called synchronously in most cases, except for when a new
-  // annotation is attached, which is called in a post frame callback.
-  void _sendMouseNotifications(Iterable<int> deviceIds) {
-
-    final Iterable<_MouseState> targetDevices = deviceIds != null
-      ? deviceIds.map(_findMouseState)
-      : () sync* {
-          yield *_mouseStates.values;
-          if (_disconnectedMouseState != null)
-            yield _disconnectedMouseState;
-        }();
-
-    for (final _MouseState mouseState in targetDevices) {
-      final bool thisDeviceIsConnected = mouseState != _disconnectedMouseState;
-
-      final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations =
-        (_hasAttachedAnnotations && thisDeviceIsConnected)
-        ? LinkedHashSet<MouseTrackerAnnotation>.from(annotationFinder(mouseState.mostRecentEvent.position))
-        : <MouseTrackerAnnotation>{};
-
-      _dispatchDeviceCallbacks(
-        currentState: mouseState,
-        nextAnnotations: nextAnnotations,
-      );
-
-      mouseState.lastAnnotations = nextAnnotations;
-
-      if (!thisDeviceIsConnected)
-        _disconnectedMouseState = null;
-    }
   }
 
   /// Whether or not a mouse is connected and has produced events.
