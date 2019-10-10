@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  const MethodChannel channel = MethodChannel('com.example.abstract_method_smoke_test');
+  await channel.invokeMethod<void>('show_keyboard');
   runApp(MyApp());
   print('Test suceeded');
 }
@@ -48,9 +52,8 @@ class SecondPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-        children: <Widget>[
-          TextFormField(),
-          const Expanded(
+        children: const <Widget>[
+          Expanded(
             child: GoogleMap(
               initialCameraPosition: CameraPosition(
                 target: LatLng(0, 0)
