@@ -135,8 +135,22 @@ abstract class Gradient {
   /// [Canvas] or the [Rect] that the gradient is shading.
   ///
   /// ```dart
+  /// import 'dart:math' as math;
+  ///
   /// void paint(Canvas canvas, Rect rect) {
-  ///   final Matrix4 transform = Matrix4.identity()..rotateZ(0.785398); // 45 degrees.
+  ///   // Calculate 45 degrees (clockwise rotation) as radians.
+  ///   final double radians = 45 * math.pi / 180;
+  ///
+  ///   // Calculate the point to rotate about.
+  ///   final double sinRadians = math.sin(radians);
+  ///   final double oneMinusCosRadians = 1 - math.cos(radians);
+  ///   final Offset center = rect.center;
+  ///   final double originX = sinRadians * center.dy + oneMinusCosRadians * center.dx;
+  ///   final double originY = -sinRadians * center.dy + oneMinusCosRadians * center.dx;
+  ///
+  ///   final Matrix4 transform = Matrix4.identity()
+  ///     ..translate(originX, originY)
+  ///     ..rotateZ(radians);
   ///   final SweepGradient gradient = SweepGradient(colors: [Colors.white, Colors.blue]);
   ///   final Paint paint = Paint()
   ///     ..shader = gradient.createShader(rect, transform: transform)
