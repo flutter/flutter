@@ -2591,9 +2591,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 
 /// Calls callbacks in response to pointer events that are exclusive to mice.
 ///
-/// Simply put, it responds to events that are related to hovering,
-/// i.e. when the mouse enters, exits or moves over a region (with or without
-/// pressing buttons).
+/// It responds to events that are related to hovering, i.e. when the mouse
+/// enters, exits (with or without pressing buttons), or moves over a region
+/// without pressing buttons.
 ///
 /// It does not respond to common events that construct gestures, such as when
 /// the pointer is pressed, moved, then released or canceled. For these events,
@@ -2632,8 +2632,8 @@ class RenderMouseRegion extends RenderProxyBox {
   /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
   /// and [onExit] behave.
   ///
-  /// If [opaque] is true, this object will absorb the mouse pointer, and
-  /// prevents this object's siblings (or any other objects that are not
+  /// If [opaque] is true, this object will absorb the mouse pointer and
+  /// prevent this object's siblings (or any other objects that are not
   /// ancestors or descendants of this object) from detecting the mouse
   /// pointer even when the pointer is within their areas.
   ///
@@ -2659,8 +2659,8 @@ class RenderMouseRegion extends RenderProxyBox {
       _onEnter(event);
   }
 
-  /// Called when a pointer changes position (with or without buttons pressed),
-  /// and the end position is within the region.
+  /// Called when a pointer changes position without buttons pressed and the end
+  /// position is within the region.
   PointerHoverEventListener get onHover => _onHover;
   set onHover(PointerHoverEventListener value) {
     if (_onHover != value) {
@@ -2674,7 +2674,7 @@ class RenderMouseRegion extends RenderProxyBox {
       _onHover(event);
   }
 
-  /// Called when a pointer leaves the region.
+  /// Called when a pointer leaves the region (with or without buttons pressed).
   PointerExitEventListener get onExit => _onExit;
   set onExit(PointerExitEventListener value) {
     if (_onExit != value) {

@@ -301,26 +301,26 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// ## Parameters and return value
   ///
-  /// The [result] parameter is where the method output the resultant
-  /// annotations. New annotations found during the walk is added to the tail.
+  /// The [result] parameter is where the method outputs the resulting
+  /// annotations. New annotations found during the walk are added to the tail.
   ///
   /// The [onlyFirst] parameter indicates that, if true, the search will stop
-  /// when finding the first qualified annotation; otherwise, it will walk the
+  /// when it finds the first qualified annotation; otherwise, it will walk the
   /// entire subtree.
   ///
   /// The return value indicates the opacity of this layer and its subtree at
-  /// this position. If it is true, then this layer's parent should skip the
-  /// children behind this layer. In other words, it is opaque to this type of
-  /// annotation and has absorbed the search so that its siblings behind it are
-  /// not aware of the search. If the return value is false, then the parent
+  /// this position. If it returns true, then this layer's parent should skip
+  /// the children behind this layer. In other words, it is opaque to this type
+  /// of annotation and has absorbed the search so that its siblings behind it
+  /// are not aware of the search. If the return value is false, then the parent
   /// might continue with other siblings.
   ///
   /// The return value does not affect whether the parent adds its own
   /// annotations; in other words, if a layer is supposed to add an annotation,
   /// it will always add it even if its children are opaque to this type of
-  /// annotation, after its children. However, the opacity that the parents
-  /// return might be affected by their children, hence making all of its
-  /// ancestors opaque to this type of annotation.
+  /// annotation. However, the opacity that the parents return might be affected
+  /// by their children, hence making all of its ancestors opaque to this type
+  /// of annotation.
   @protected
   bool findAnnotations<S>(
     AnnotationResult<S> result,
@@ -2246,14 +2246,14 @@ class FollowerLayer extends ContainerLayer {
 /// A composited layer which annotates its children with a value. Pushing this
 /// layer to the tree is the common way of adding an annotation.
 ///
-/// Annotation is an optional object of any type that, when carried with a
+/// An annotation is an optional object of any type that, when attached with a
 /// layer, can be retrieved using [Layer.find] or [Layer.findAll] with a
 /// position. The search process is done recursively, controlled by a concept
-/// of being opaque to a type of annotation, explained at the return value of
+/// of being opaque to a type of annotation, explained in the document of
 /// [Layer.findAnnotations].
 ///
-/// When an annotation search arrives, this layer first defers the same search
-/// to each of this layer's child, respecting their opacity. Then it adds this
+/// When an annotation search arrives, this layer defers the same search to each
+/// of this layer's children, respecting their opacity. Then it adds this
 /// layer's [annotation] if all of the following restrictions are met:
 ///
 /// {@template flutter.rendering.annotatedRegionLayer.restrictions}
@@ -2262,8 +2262,8 @@ class FollowerLayer extends ContainerLayer {
 ///   rectangle formed by [size] and [offset].
 /// {@endtemplate}
 ///
-/// This layer is opaque to a type of annotation if any child is so, or if
-/// [opaque] is true and the layer's annotation is added.
+/// This layer is opaque to a type of annotation if any child is also opaque, or
+/// if [opaque] is true and the layer's annotation is added.
 class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// Creates a new layer that annotates its children with [value].
   ///
@@ -2308,7 +2308,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   ///
   /// If [opaque] is false, or if this layer does not add its annotation,
   /// then the opacity of this layer will be the one returned by the children,
-  /// meaning that it is be opaque if any child is opaque.
+  /// meaning that it will be opaque if any child is opaque.
   ///
   /// The [opaque] defaults to false.
   ///
@@ -2330,15 +2330,15 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   ///
   /// This method always searches its children, and if any child returns `true`,
   /// the remaining children are skipped. Regardless of what the children
-  /// returns, this method then adds this layer's annotation if all of the
+  /// return, this method then adds this layer's annotation if all of the
   /// following restrictions are met:
   ///
   /// {@macro flutter.rendering.annotatedRegionLayer.restrictions}
   ///
   /// This search process respects `onlyFirst`, meaning that when `onlyFirst` is
-  /// true, the search will stop when it finds first annotation from the
+  /// true, the search will stop when it finds the first annotation from the
   /// children, and the layer's own annotation is checked only when none is
-  /// given from the children.
+  /// given by the children.
   ///
   /// The return value is true if any child returns `true`, or if [opaque] is
   /// true and the layer's annotation is added.
