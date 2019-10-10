@@ -863,14 +863,12 @@ class SweepGradient extends Gradient {
   @override
   Shader createShader(Rect rect, { TextDirection textDirection, Matrix4 transform }) {
     final Offset resolvedCenter = center.resolve(textDirection).withinRect(rect);
-
-    print(resolvedCenter);
     return ui.Gradient.sweep(
       resolvedCenter,
       colors, _impliedStops(), tileMode,
       startAngle,
       endAngle,
-      transform == null ? null : (transform..translate(-resolvedCenter.dx, -resolvedCenter.dy)).storage,
+      transform?.storage,
     );
   }
 
