@@ -42,7 +42,7 @@ void main() {
       final BuildAppBundleCommand command = await runBuildAppBundleCommand(projectPath);
 
       expect(await command.usageValues,
-          containsPair(CustomDimensions.commandBuildAppBundleTargetPlatform, 'android-arm,android-arm64'));
+          containsPair(CustomDimensions.commandBuildAppBundleTargetPlatform, 'android-arm,android-arm64,android-x64'));
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
@@ -198,7 +198,7 @@ flutter:
           '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=false',
           '-Pshrink=true',
-          '-Ptarget-platform=android-arm,android-arm64',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'bundleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -232,7 +232,7 @@ flutter:
           '-q',
           '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=false',
-          '-Ptarget-platform=android-arm,android-arm64',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'bundleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -258,7 +258,7 @@ flutter:
           '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=false',
           '-Pshrink=true',
-          '-Ptarget-platform=android-arm,android-arm64',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'bundleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
