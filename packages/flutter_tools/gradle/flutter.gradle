@@ -220,7 +220,6 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
         String flutterBuildMode = buildModeFor(buildType)
-        println "flutter dependency"
         // Add the embedding dependency.
         addApiDependencies(project, buildType.name,
                 "io.flutter:flutter_embedding_$flutterBuildMode:1.0.0-$engineVersion")
