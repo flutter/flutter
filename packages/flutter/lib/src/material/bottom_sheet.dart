@@ -343,6 +343,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.elevation,
     this.shape,
     this.clipBehavior,
+    this.isDismissible,
     @required this.isScrollControlled,
     RouteSettings settings,
   }) : assert(isScrollControlled != null),
@@ -355,12 +356,13 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final double elevation;
   final ShapeBorder shape;
   final Clip clipBehavior;
+  final bool isDismissible;
 
   @override
   Duration get transitionDuration => _bottomSheetDuration;
 
   @override
-  bool get barrierDismissible => true;
+  bool get barrierDismissible => isDismissible ?? true;
 
   @override
   final String barrierLabel;
@@ -453,6 +455,7 @@ Future<T> showModalBottomSheet<T>({
   Clip clipBehavior,
   bool isScrollControlled = false,
   bool useRootNavigator = false,
+  bool isDismissible = true,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -470,6 +473,7 @@ Future<T> showModalBottomSheet<T>({
     elevation: elevation,
     shape: shape,
     clipBehavior: clipBehavior,
+    isDismissible: isDismissible,
   ));
 }
 
