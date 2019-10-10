@@ -240,63 +240,6 @@ class MouseTracker extends ChangeNotifier {
     }
   }
 
-  // Dispatch callbacks related to a device after all necessary information
-  // has been collected.
-  //
-  // This function should not change the provided states, and should not access
-  // information that is not provided in parameters (hence being static).
-  static void _dispatchDeviceCallbacks({
-    @required LinkedHashSet<MouseTrackerAnnotation> nextAnnotations,
-    @required _MouseState currentState,
-  }) {
-    // Order is important for mouse event callbacks. The `findAnnotations`
-    // returns annotations in the visual order from front to back. We call
-    // it the "visual order", and the opposite one "reverse visual order".
-    // The algorithm here is explained in
-    // https://github.com/flutter/flutter/issues/41420
-
-    // The `nextAnnotations` is annotations that contains this device in the
-    // coming frame in visual order.
-    // Order is preserved becuase [Set.from] creates a [LinkedHashSet], which
-    // keeps the order.
-
-    final PointerEvent mostRecentEvent = currentState.mostRecentEvent;
-    // The `lastAnnotations` is annotations that contains this device in the
-    // previous frame in visual order.
-    final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = currentState.lastAnnotations;
-
-    // Send exit events in visual order.
-    final Iterable<MouseTrackerAnnotation> exitingAnnotations =
-      lastAnnotations.difference(nextAnnotations);
-    for (final MouseTrackerAnnotation annotation in exitingAnnotations) {
-      if (annotation.onExit != null) {
-        annotation.onExit(PointerExitEvent.fromMouseEvent(mostRecentEvent));
-      }
-    }
-
-    // Send enter events in reverse visual order.
-    final Iterable<MouseTrackerAnnotation> enteringAnnotations =
-      nextAnnotations.difference(lastAnnotations).toList().reversed;
-    for (final MouseTrackerAnnotation annotation in enteringAnnotations) {
-      if (annotation.onEnter != null) {
-        annotation.onEnter(PointerEnterEvent.fromMouseEvent(mostRecentEvent));
-      }
-    }
-
-    // Send hover events in reverse visual order.
-    // No solid reasons have been brough up on the order between the hover
-    // events, except for keeping it aligned with enter events for simplicity.
-    if (mostRecentEvent is PointerHoverEvent) {
-      final Iterable<MouseTrackerAnnotation> hoveringAnnotations =
-        nextAnnotations.toList().reversed;
-      for (final MouseTrackerAnnotation annotation in hoveringAnnotations) {
-        if (annotation.onHover != null) {
-          annotation.onHover(mostRecentEvent);
-        }
-      }
-    }
-  }
-
   // Collect the latest states of the given mouse device `device`, and call
   // interested callbacks.
   //
@@ -338,6 +281,62 @@ class MouseTracker extends ChangeNotifier {
   void _checkAllDevicesUpdates() {
     for (final int device in _mouseStates.keys) {
       _checkDeviceUpdates(device: device);
+    }
+  }
+
+  // Dispatch callbacks related to a device after all necessary information
+  // has been collected.
+  //
+  // This function should not change the provided states, and should not access
+  // information that is not provided in parameters (hence being static).
+  static void _dispatchDeviceCallbacks({
+    @required LinkedHashSet<MouseTrackerAnnotation> nextAnnotations,
+    @required _MouseState currentState,
+  }) {
+    // Order is important for mouse event callbacks. The `findAnnotations`
+    // returns annotations in the visual order from front to back. We call
+    // it the "visual order", and the opposite one "reverse visual order".
+    // The algorithm here is explained in
+    // https://github.com/flutter/flutter/issues/41420
+
+    // The `nextAnnotations` is annotations that contains this device in the
+    // coming frame in visual order.
+    // Order is preserved with the help of [LinkedHashSet].
+
+    final PointerEvent mostRecentEvent = currentState.mostRecentEvent;
+    // The `lastAnnotations` is annotations that contains this device in the
+    // previous frame in visual order.
+    final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = currentState.lastAnnotations;
+
+    // Send exit events in visual order.
+    final Iterable<MouseTrackerAnnotation> exitingAnnotations =
+      lastAnnotations.difference(nextAnnotations);
+    for (final MouseTrackerAnnotation annotation in exitingAnnotations) {
+      if (annotation.onExit != null) {
+        annotation.onExit(PointerExitEvent.fromMouseEvent(mostRecentEvent));
+      }
+    }
+
+    // Send enter events in reverse visual order.
+    final Iterable<MouseTrackerAnnotation> enteringAnnotations =
+      nextAnnotations.difference(lastAnnotations).toList().reversed;
+    for (final MouseTrackerAnnotation annotation in enteringAnnotations) {
+      if (annotation.onEnter != null) {
+        annotation.onEnter(PointerEnterEvent.fromMouseEvent(mostRecentEvent));
+      }
+    }
+
+    // Send hover events in reverse visual order.
+    // For now the order between the hover events is designed this way for no
+    // solid reasons but to keep it aligned with enter events for simplicity.
+    if (mostRecentEvent is PointerHoverEvent) {
+      final Iterable<MouseTrackerAnnotation> hoveringAnnotations =
+        nextAnnotations.toList().reversed;
+      for (final MouseTrackerAnnotation annotation in hoveringAnnotations) {
+        if (annotation.onHover != null) {
+          annotation.onHover(mostRecentEvent);
+        }
+      }
     }
   }
 
