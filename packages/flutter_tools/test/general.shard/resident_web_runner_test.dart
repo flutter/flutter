@@ -480,7 +480,7 @@ void main() {
     await expectation;
   }));
 
-  test('Successfully turns Exception into ToolExit', () => testbed.run(() async {
+  test('Rethrows Exception type', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
     final Completer<void> unhandledErrorCompleter = Completer<void>();
@@ -493,7 +493,7 @@ void main() {
 
     final Future<void> expectation = expectLater(() => residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsA(isInstanceOf<Exception>()));
 
     unhandledErrorCompleter.complete();
     await expectation;
