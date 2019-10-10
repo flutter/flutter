@@ -152,10 +152,31 @@ task:
       container:
         cpu: 8
         memory: 24G
-    - name: web_tests-linux
-      allow_failures: true
+    - name: web_tests-linux-shard-0
+      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
       env:
         SHARD: web_tests
+        WEB_SHARD: 0
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: web_tests-linux-shard-1
+      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+      env:
+        SHARD: web_tests
+        WEB_SHARD: 1
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: web_tests-linux-shard-2
+      use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+      env:
+        SHARD: web_tests
+        WEB_SHARD: 2
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
